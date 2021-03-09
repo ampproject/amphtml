@@ -1027,7 +1027,7 @@ describes.realWin(
         expect(ret.viewer).to.not.exist;
       });
 
-      it('should install doc services', () => {
+      it('should install doc services', async () => {
         class Service1 {}
         win.AMP.push({
           n: 'amp-ext',
@@ -1049,12 +1049,12 @@ describes.realWin(
 
         win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
 
-        return extensions.waitForExtension(win, 'amp-ext').then(() => {
-          // Factories have been applied.
-          expect(getServiceForDoc(ampdoc, 'service1')).to.be.instanceOf(
-            Service1
-          );
-        });
+        // Extensions-known has been set.
+        await ampdoc.whenExtensionsKnown();
+
+        // Factories have been applied.
+        await extensions.waitForExtension(win, 'amp-ext');
+        expect(getServiceForDoc(ampdoc, 'service1')).to.be.instanceOf(Service1);
       });
 
       it('should pass init parameters to viewer', () => {
@@ -1211,7 +1211,7 @@ describes.realWin(
           .exist;
       });
 
-      it('should import extension element', () => {
+      it('should import extension element', async () => {
         extensionsMock
           .expects('preloadExtension')
           .withExactArgs('amp-ext1', '0.1')
@@ -1234,6 +1234,9 @@ describes.realWin(
         win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
         expect(win.document.querySelector('script[custom-element="amp-ext1"]'))
           .to.not.exist;
+
+        // Extensions-known has been set.
+        await ampdoc.whenExtensionsKnown();
       });
 
       it('should import module/nomodule extension element', () => {
@@ -1452,7 +1455,7 @@ describes.realWin(
           expect(shadowDoc.viewer).to.not.exist;
         });
 
-        it('should install doc services', () => {
+        it('should install doc services', async () => {
           shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
           writer = shadowDoc.writer;
 
@@ -1472,14 +1475,16 @@ describes.realWin(
           );
           writer.write('<body>');
 
-          return ampdoc.waitForBodyOpen().then(() => {
-            return extensions.waitForExtension(win, 'amp-ext').then(() => {
-              // Factories have been applied.
-              expect(getServiceForDoc(ampdoc, 'service1')).to.be.instanceOf(
-                Service1
-              );
-            });
-          });
+          await ampdoc.waitForBodyOpen();
+
+          // Extensions-known has been set.
+          await ampdoc.whenExtensionsKnown();
+
+          // Factories have been applied.
+          await extensions.waitForExtension(win, 'amp-ext');
+          expect(getServiceForDoc(ampdoc, 'service1')).to.be.instanceOf(
+            Service1
+          );
         });
 
         it('should pass init parameters to viewer', () => {
@@ -1628,7 +1633,7 @@ describes.realWin(
           });
         });
 
-        it('should ignore runtime extension', () => {
+        it('should ignore runtime extension', async () => {
           shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
           writer = shadowDoc.writer;
           extensionsMock.expects('preloadExtension').never();
@@ -1636,7 +1641,10 @@ describes.realWin(
             '<script src="https://cdn.ampproject.org/v0.js"></script>'
           );
           writer.write('<body>');
-          return ampdoc.waitForBodyOpen();
+          await ampdoc.waitForBodyOpen();
+
+          // Extensions-known has been set.
+          await ampdoc.whenExtensionsKnown();
         });
 
         it('should ignore unknown script', () => {
@@ -1659,7 +1667,7 @@ describes.realWin(
           });
         });
 
-        it('should import extension element', () => {
+        it('should import extension element', async () => {
           shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
           writer = shadowDoc.writer;
           extensionsMock
@@ -1677,11 +1685,14 @@ describes.realWin(
             '<script custom-element="amp-ext1" src="https://cdn.ampproject.org/v0/amp-ext1-0.1.js"></script>'
           );
           writer.write('<body>');
-          return ampdoc.waitForBodyOpen().then(() => {
-            expect(
-              win.document.querySelector('script[custom-element="amp-ext1"]')
-            ).to.not.exist;
-          });
+          await ampdoc.waitForBodyOpen();
+
+          // Extensions-known has been set.
+          await ampdoc.whenExtensionsKnown();
+
+          expect(
+            win.document.querySelector('script[custom-element="amp-ext1"]')
+          ).to.not.exist;
         });
 
         it('should import extension template', () => {

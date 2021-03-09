@@ -463,6 +463,7 @@ export class MultidocManager {
         }
       }
     }
+    ampdoc.setExtensionsKnown();
   }
 
   /**

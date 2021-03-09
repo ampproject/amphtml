@@ -128,6 +128,32 @@ describes.realWin('CustomElement register', {amp: true}, (env) => {
     expect(getImplSyncForTesting(element2)).to.be.instanceOf(ConcreteElement);
   });
 
+  it('should only set extensionsKnown when body is available', () => {
+    const head = document.createElement('fake-head');
+    const script = document.createElement('script');
+    script.setAttribute('custom-element', 'amp-element2');
+    Object.defineProperty(script, 'src', {
+      value: 'https://cdn.ampproject.org/v0/amp-element2-0.2.js',
+    });
+    head.appendChild(script);
+    env.sandbox.stub(ampdoc, 'getHeadNode').returns(head);
+    env.sandbox.stub(ampdoc, 'setExtensionsKnown');
+    const isBodyAvailableStub = env.sandbox.stub(ampdoc, 'isBodyAvailable');
+
+    // Body is not available.
+    isBodyAvailableStub.returns(false);
+    stubElementsForDoc(ampdoc);
+    expect(ampdoc.declaresExtension('amp-element2')).to.be.true;
+    expect(ampdoc.declaresExtension('amp-element2', '0.2')).to.be.true;
+    expect(ampdoc.setExtensionsKnown).to.not.be.called;
+
+    // Body is not available.
+    isBodyAvailableStub.returns(true);
+    stubElementsForDoc(ampdoc);
+    expect(ampdoc.declaresExtension('amp-element2')).to.be.true;
+    expect(ampdoc.setExtensionsKnown).to.be.calledOnce;
+  });
+
   it('should mark stubbed element as declared', () => {
     expect(ampdoc.declaresExtension('amp-element2')).to.be.false;
 
