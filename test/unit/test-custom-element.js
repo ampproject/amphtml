@@ -147,7 +147,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         win.__AMP_EXTENDED_ELEMENTS[
           'amp-test-with-re-upgrade'
         ] = TestElementWithReUpgrade;
-        ampdoc.declareExtension('amp-stub');
+        ampdoc.declareExtension('amp-stub', '0.1');
 
         testElementPreconnectCallback = env.sandbox.spy();
         testElementBuildCallback = env.sandbox.spy();
@@ -267,7 +267,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         const LegacyElementClass = createAmpElementForTesting(win, ElementStub);
         win.customElements.define('amp-legacy', LegacyElementClass);
         win.__AMP_EXTENDED_ELEMENTS['amp-legacy'] = ElementStub;
-        ampdoc.declareExtension('amp-legacy');
+        ampdoc.declareExtension('amp-legacy', '0.1');
 
         const extensions = Services.extensionsFor(win);
         env.sandbox.stub(extensions, 'installExtensionForDoc');
@@ -1869,7 +1869,7 @@ describes.realWin('CustomElement Service Elements', {amp: true}, (env) => {
     doc = win.document;
     StubElementClass = createAmpElementForTesting(win, ElementStub);
     win.customElements.define('amp-stub2', StubElementClass);
-    env.ampdoc.declareExtension('amp-stub2');
+    env.ampdoc.declareExtension('amp-stub2', '0.1');
     element = new StubElementClass();
   });
 

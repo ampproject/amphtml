@@ -32,6 +32,7 @@ import {registerServiceBuilder, registerServiceBuilderForDoc} from '../service';
 export const LEGACY_ELEMENTS = ['amp-ad', 'amp-embed', 'amp-video'];
 const TAG = 'extensions';
 const DEFAULT_VERSION = '0.1';
+const LATEST_VERSION = 'latest';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
 const LOADER_PROP = '__AMP_EXT_LDR';
 const SCRIPT_LOADED_PROP = '__AMP_SCR_LOADED';
@@ -118,6 +119,12 @@ export class Extensions {
 
     /** @private {?string} */
     this.currentExtensionId_ = null;
+
+    /** @private {?string} */
+    this.currentExtensionVersion_ = null;
+
+    /** @private {?boolean} */
+    this.currentExtensionLatest_ = null;
   }
 
   /**
@@ -126,11 +133,13 @@ export class Extensions {
    * services and document factories. This method is called by the extension's
    * script itself when it's loaded using the regular `AMP.push()` callback.
    * @param {string} extensionId
+   * @param {string} version
+   * @param {boolean} latest
    * @param {function(!Object, !Object)} factory
    * @param {!Object} arg
    * @restricted
    */
-  registerExtension(extensionId, factory, arg) {
+  registerExtension(extensionId, version, latest, factory, arg) {
     const holder = this.getExtensionHolder_(extensionId, /* auto */ true);
     if (holder.loaded) {
       // This extension has already been registered. This could be a
@@ -140,6 +149,8 @@ export class Extensions {
     }
     try {
       this.currentExtensionId_ = extensionId;
+      this.currentExtensionVersion_ = version;
+      this.currentExtensionLatest_ = latest;
       factory(arg, arg['_']);
       if (getMode(this.win).localDev || getMode(this.win).test) {
         if (Object.freeze) {
@@ -160,6 +171,8 @@ export class Extensions {
       throw e;
     } finally {
       this.currentExtensionId_ = null;
+      this.currentExtensionVersion_ = null;
+      this.currentExtensionLatest_ = null;
     }
   }
 
@@ -218,7 +231,7 @@ export class Extensions {
     return (extLoaders[extensionId] = this.preloadExtension(
       extensionId,
       version
-    ).then(() => this.installExtensionInDoc(ampdoc, extensionId)));
+    ).then(() => this.installExtensionInDoc(ampdoc, extensionId, version)));
   }
 
   /**
@@ -409,9 +422,15 @@ export class Extensions {
     if (this.currentExtensionId_ && this.ampdocService_.isSingleDoc()) {
       const ampdoc = this.ampdocService_.getAmpDoc(this.win.document);
       const extensionId = dev().assertString(this.currentExtensionId_);
+      const version = dev().assertString(this.currentExtensionVersion_);
+      const latest = this.currentExtensionLatest_ || false;
       // Note that this won't trigger for FIE extensions that are not present
       // in the parent doc.
-      if (ampdoc.declaresExtension(extensionId) || holder.auto) {
+      if (
+        ampdoc.declaresExtension(extensionId, version) ||
+        (latest && ampdoc.declaresExtension(extensionId, LATEST_VERSION)) ||
+        holder.auto
+      ) {
         factory(ampdoc);
       }
     }
@@ -452,6 +471,7 @@ export class Extensions {
   installExtensionsInDoc(ampdoc, extensionIds) {
     return Promise.all(
       extensionIds.map((extensionId) =>
+        // TODO(#33001): pass the requested version once FIE can provide it.
         this.installExtensionInDoc(ampdoc, extensionId)
       )
     );
@@ -461,12 +481,13 @@ export class Extensions {
    * Installs all ampdoc factories for the specified extension.
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {string} extensionId
+   * @param {string=} version
    * @return {!Promise}
    */
-  installExtensionInDoc(ampdoc, extensionId) {
+  installExtensionInDoc(ampdoc, extensionId, version = DEFAULT_VERSION) {
+    ampdoc.declareExtension(extensionId, version);
     const holder = this.getExtensionHolder_(extensionId, /* auto */ false);
     return this.waitFor_(holder).then(() => {
-      ampdoc.declareExtension(extensionId);
       holder.docFactories.forEach((factory) => {
         try {
           factory(ampdoc);

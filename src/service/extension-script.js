@@ -94,6 +94,9 @@ export function calculateEntryPointScriptUrl(
  * @return {?{extensionId: string, extensionVersion: string}}
  */
 export function parseExtensionUrl(scriptUrl) {
+  if (!scriptUrl) {
+    return null;
+  }
   // Note that the "(\.max)?" group only applies to local dev.
   const matches = scriptUrl.match(
     /^(.*)\/(.*)-([0-9.]+|latest)(\.max)?\.(?:js|mjs)$/i
@@ -207,28 +210,31 @@ export function getExtensionScripts(
 
 /**
  * Get list of all the extension JS files.
- * @param {HTMLHeadElement|Element|ShadowRoot} head
- * @return {!Array<string>}
+ * @param {HTMLHeadElement|Element|ShadowRoot|Document} head
+ * @return {!Array<{extensionId: string, extensionVersion: string}>}
  */
 export function extensionScriptsInNode(head) {
   // ampdoc.getHeadNode() can return null.
   if (!head) {
     return [];
   }
-  const scripts = {};
   // Note: Some extensions don't have [custom-element] or [custom-template]
   // e.g. amp-viewer-integration.
   const list = head.querySelectorAll(
     'script[custom-element],script[custom-template]'
   );
+  const scripts = [];
   for (let i = 0; i < list.length; i++) {
     const script = list[i];
-    const name =
+    const extensionId =
       script.getAttribute('custom-element') ||
       script.getAttribute('custom-template');
-    scripts[name] = true;
+    const urlParts = parseExtensionUrl(script.src);
+    if (extensionId && urlParts) {
+      scripts.push({extensionId, extensionVersion: urlParts.extensionVersion});
+    }
   }
-  return Object.keys(scripts);
+  return scripts;
 }
 
 /**
