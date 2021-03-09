@@ -137,7 +137,6 @@ const renderInlinePageAttachmentUI = (win, pageEl, attachmentEl) => {
   });
 
   if (openImgAttrs.length > 1) {
-    console.log(true);
     const ctaImgEl2 = win.document.createElement('span');
     ctaImgEl2.classList.add('i-amphtml-story-inline-page-attachment-img');
     setImportantStyles(ctaImgEl2, {
