@@ -16,16 +16,13 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const fs = require('fs');
-const globby = require('globby');
 const karmaConfig = require('../../test-configs/karma.conf');
-const path = require('path');
-const tempy = require('tempy');
 const {
   commonIntegrationTestPaths,
   commonUnitTestPaths,
-  fixturesPath,
   integrationTestPaths,
+  karmaHtmlFixturesPath,
+  karmaJsPaths,
   unitTestCrossBrowserPaths,
   unitTestPaths,
 } = require('../../test-configs/config');
@@ -57,12 +54,6 @@ let wrapCounter = 0;
 let transform;
 
 /**
- * Used to consolidate all JS test files into one file that's transformed by
- * karma-esbuild.
- */
-const unifiedJsFile = tempy.file({extension: 'js'});
-
-/**
  * Updates the set of preprocessors to run on HTML and JS files before testing.
  * Notes:
  * - The HTML transform is lazy-required because the server is built at startup.
@@ -83,8 +74,10 @@ function updatePreprocessors(config) {
   config.plugins.push({
     'preprocessor:htmlTransformer': ['factory', createHtmlTransformer],
   });
-  config.preprocessors[fixturesPath] = ['htmlTransformer', 'html2js'];
-  config.preprocessors[unifiedJsFile] = ['esbuild'];
+  config.preprocessors[karmaHtmlFixturesPath] = ['htmlTransformer', 'html2js'];
+  for (const karmaJsPath of karmaJsPaths) {
+    config.preprocessors[karmaJsPath] = ['esbuild'];
+  }
 }
 
 /**
@@ -193,67 +186,39 @@ function updateReporters(config) {
 }
 
 /**
- * Get the appropriate files based off of the test type
- * being run (unit, integration, a4a) and test settings.
- * @param {string} testType
- * @return {!Array<string>}
- */
-function getFiles(testType) {
-  let files;
-
-  switch (testType) {
-    case 'unit':
-      files = commonUnitTestPaths;
-      if (argv.files) {
-        return files.concat(getFilesFromArgv());
-      }
-      if (argv.firefox || argv.safari || argv.edge) {
-        return files.concat(unitTestCrossBrowserPaths);
-      }
-      if (argv.local_changes) {
-        return files.concat(unitTestsToRun());
-      }
-      return files.concat(unitTestPaths);
-
-    case 'integration':
-      files = commonIntegrationTestPaths;
-      if (argv.files) {
-        return files.concat(getFilesFromArgv());
-      }
-      return files.concat(integrationTestPaths);
-
-    default:
-      throw new Error(`Test type ${testType} was not recognized`);
-  }
-}
-
-/**
- * Recomputes the set of files for Karma to load.
- * - Non-JS files are included as they are.
- * - JS files are imported into a unified file for esbuild to transform at once.
- * - The list of all non-JS files plus the unified JS file is returned.
+ * Computes the set of files for Karma to load based on factors like test type,
+ * target browser, and flags.
  * @param {!RuntimeTestConfig} config
  */
 function updateFiles(config) {
-  const fileGlobs = getFiles(config.testType);
+  switch (config.testType) {
+    case 'unit':
+      if (argv.files) {
+        config.files = commonUnitTestPaths.concat(getFilesFromArgv());
+        return;
+      }
+      if (argv.firefox || argv.safari || argv.edge) {
+        config.files = commonUnitTestPaths.concat(unitTestCrossBrowserPaths);
+        return;
+      }
+      if (argv.local_changes) {
+        config.files = commonUnitTestPaths.concat(unitTestsToRun());
+        return;
+      }
+      config.files = commonUnitTestPaths.concat(unitTestPaths);
+      return;
 
-  const isJsGlob = (glob) => typeof glob === 'string' && glob.endsWith('.js');
-  const jsGlobs = fileGlobs.filter(isJsGlob);
+    case 'integration':
+      if (argv.files) {
+        config.files = commonIntegrationTestPaths.concat(getFilesFromArgv());
+        return;
+      }
+      config.files = commonIntegrationTestPaths.concat(integrationTestPaths);
+      return;
 
-  const isNonJsGlob = (glob) => !isJsGlob(glob);
-  const nonJsGlobs = fileGlobs.filter(isNonJsGlob);
-
-  const jsFiles = globby.sync(jsGlobs);
-
-  const getPosixImport = (jsFile) => {
-    const relativePath = path.relative(path.dirname(unifiedJsFile), jsFile);
-    const posixPath = relativePath.split(path.sep).join(path.posix.sep);
-    return `import '${posixPath}';`;
-  };
-  const jsImports = jsFiles.map(getPosixImport);
-
-  fs.writeFileSync(unifiedJsFile, jsImports.join('\n'));
-  config.files = nonJsGlobs.concat([unifiedJsFile]);
+    default:
+      throw new Error(`Test type ${config.testType} was not recognized`);
+  }
 }
 
 /**
