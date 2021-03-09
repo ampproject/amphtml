@@ -631,6 +631,8 @@ const adConfig = jsonConfiguration({
 
   'kargo': {},
 
+  'ketshwa': {},
+
   'kiosked': {
     renderStartImplemented: true,
   },
