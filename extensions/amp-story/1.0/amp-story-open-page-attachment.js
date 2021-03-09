@@ -20,12 +20,22 @@
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
+import {isExperimentOn} from '../../../src/experiments';
+import {getStyle, px, setImportantStyles, toggle} from '../../../src/style';
+
+/**
+ * @enum {string}
+ */
+const AttachmentTheme = {
+  LIGHT: 'light', // default
+  DARK: 'dark',
+};
 
 /**
  * @param {!Element} element
  * @return {!Element}
  */
-export const buildOpenAttachmentElement = (element) =>
+export const buildOpenOutlinkAttachmentElement = (element) =>
   htmlFor(element)`
     <a class="
         i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
@@ -38,13 +48,50 @@ export const buildOpenAttachmentElement = (element) =>
     </a>`;
 
 /**
- * Renders the open attachment UI affordance.
+ * @param {!Element} element
+ * @return {!Element}
+ */
+export const buildOpenInlineAttachmentElement = (element) =>
+  htmlFor(element)`
+    <a class="
+        i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
+        role="button">
+      <span class="i-amphtml-story-page-open-attachment-icon">
+        <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
+        <span class="i-amphtml-story-page-open-attachment-bar-right"></span>
+      </span>
+      <span class="i-amphtml-story-page-open-attachment-label"></span>
+    </a>`;
+
+/**
+ * Determines which open attachment UI to render.
  * @param {!Element} pageEl
  * @param {!Element} attachmentEl
  * @return {!Element}
  */
-export const renderPageAttachmentUI = (pageEl, attachmentEl) => {
-  const openAttachmentEl = buildOpenAttachmentElement(pageEl);
+export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
+  const attachmentHref = attachmentEl.getAttribute('href');
+  if (!attachmentHref && isInlinePageAttachmentV2ExperimentOn(win)) {
+    return renderInlinePageAttachmentUI(
+      pageEl,
+      attachmentEl
+    );
+  } else {
+    return renderOutlinkPageAttachmentUI(
+      pageEl,
+      attachmentEl
+    );
+  }
+};
+
+/**
+ * Renders outlink page attachment UI.
+ * @param {!Element} pageEl
+ * @param {!Element} attachmentEl
+ * @return {!Element}
+ */
+const renderOutlinkPageAttachmentUI = (pageEl, attachmentEl) => {
+  const openAttachmentEl = buildOpenOutlinkAttachmentElement(pageEl);
   // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
   const attachmentHref = attachmentEl.getAttribute('href');
   if (attachmentHref) {
@@ -65,3 +112,20 @@ export const renderPageAttachmentUI = (pageEl, attachmentEl) => {
   textEl.textContent = openLabel;
   return openAttachmentEl;
 };
+
+/**
+ * Renders inline page attachment UI.
+ * @param {!Element} pageEl
+ * @param {!Element} attachmentEl
+ * @return {!Element}
+ */
+const renderInlinePageAttachmentUI = (pageEl, attachmentEl) => {}
+
+/**
+ * Returns true if new inline attachment UI is enabled.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export const isInlinePageAttachmentV2ExperimentOn = (win) => {
+  return isExperimentOn(win, 'amp-story-inline-page-attachment-v2');
+}
