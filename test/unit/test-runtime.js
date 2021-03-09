@@ -77,12 +77,14 @@ describes.fakeWin(
       installAmpdocServices(ampdoc);
     });
 
-    function regularExtension(fn, opt_version) {
+    function regularExtension(fn, opt_rtvVersion) {
       return {
         n: 'amp-test-element' + extensionElementIndex++,
+        ev: '0.1',
+        l: true,
         f: fn,
         // Default version of uncompiled sources.
-        v: opt_version || '$internalRuntimeVersion$',
+        v: opt_rtvVersion || '$internalRuntimeVersion$',
       };
     }
 
@@ -318,6 +320,8 @@ describes.fakeWin(
       });
       win.AMP.push({
         n: 'ext2',
+        ev: '0.1',
+        l: true,
         p: 'high',
         f: (amp) => {
           expect(amp).to.equal(win.AMP);
@@ -345,6 +349,8 @@ describes.fakeWin(
           expect(progress).to.equal('1HIGH');
           win.AMP.push({
             n: 'ext1',
+            ev: '0.1',
+            l: true,
             f: (amp) => {
               expect(amp).to.equal(win.AMP);
               progress += 'A';
@@ -356,129 +362,6 @@ describes.fakeWin(
             expect(progress).to.equal('1HIGHA');
           });
         });
-    });
-
-    it('loads and waits for a single intermediate bundles', () => {
-      // New format: {n:string, f:function(), i: <string|Array<string>}.
-      let progress = '';
-      const queueExtensions = win.AMP;
-
-      win.AMP.push({
-        n: 'ext2',
-        f: (amp) => {
-          expect(amp).to.equal(win.AMP);
-          progress += 'C';
-        },
-        i: 'ext1',
-        v: '$internalRuntimeVersion$',
-      });
-      win.AMP.push({
-        n: 'ext1',
-        f: (amp) => {
-          expect(amp).to.equal(win.AMP);
-          progress += 'A';
-        },
-        i: '_base_ext',
-        v: '$internalRuntimeVersion$',
-      });
-
-      win.AMP.push({
-        n: '_base_ext',
-        f: (amp) => {
-          expect(amp).to.equal(win.AMP);
-          progress += 'B';
-        },
-        v: '$internalRuntimeVersion$',
-      });
-
-      let script = win.document.querySelector('[data-script=_base_ext]');
-      expect(script).to.be.null;
-      const promise = adopt(win);
-      runChunks(win.document);
-
-      const e = Services.extensionsFor(win);
-      expect(queueExtensions).to.have.length(0);
-      expect(progress).to.equal('');
-      script = win.document.querySelector('[data-script=_base_ext]');
-      expect(script).to.be.not.null;
-      return promise.then(() => {
-        // ext1 should not be executed yet and needs to wait on _base_ext
-        expect(progress).to.equal('B');
-        return e.waitForExtension(win, '_base_ext').then(() => {
-          return e.waitForExtension(win, 'ext1').then(() => {
-            expect(progress).to.equal('BA');
-            return e.waitForExtension(win, 'ext2').then(() => {
-              expect(progress).to.equal('BAC');
-            });
-          });
-        });
-      });
-    });
-
-    it('loads and waits for a multiple intermediate bundles', () => {
-      // New format: {n:string, f:function(), i: <string|Array<string>}.
-      let progress = '';
-      const queueExtensions = win.AMP;
-      win.AMP.push({
-        n: 'ext1',
-        f: (amp) => {
-          expect(amp).to.equal(win.AMP);
-          progress += 'A';
-        },
-        i: ['_base_ext1', '_base_ext2'],
-        v: '$internalRuntimeVersion$',
-      });
-
-      win.AMP.push({
-        n: '_base_ext2',
-        f: (amp) => {
-          expect(amp).to.equal(win.AMP);
-          progress += 'B';
-        },
-        i: ['_base_ext1'],
-        v: '$internalRuntimeVersion$',
-      });
-
-      win.AMP.push({
-        n: '_base_ext1',
-        f: (amp) => {
-          expect(amp).to.equal(win.AMP);
-          progress += 'C';
-        },
-        v: '$internalRuntimeVersion$',
-      });
-
-      let script1 = win.document.querySelector('[data-script=_base_ext1]');
-      let script2 = win.document.querySelector('[data-script=_base_ext2]');
-      expect(script1).to.be.null;
-      expect(script2).to.be.null;
-      const promise = adopt(win);
-      runChunks(win.document);
-
-      const e = Services.extensionsFor(win);
-      expect(queueExtensions).to.have.length(0);
-      expect(progress).to.equal('');
-      script1 = win.document.querySelector('[data-script=_base_ext1]');
-      script2 = win.document.querySelector('[data-script=_base_ext2]');
-      expect(script1).to.not.be.null;
-      expect(script2).to.not.be.null;
-
-      return promise.then(() => {
-        // ext1 should not be executed yet and needs to wait on _base_ext
-        // Notice that ext0 executes before A
-        expect(progress).to.equal('C');
-        runChunks(win.document);
-        return e
-          .waitForExtension(win, '_base_ext2')
-          .then(() => {
-            expect(progress).to.equal('CB');
-          })
-          .then(() => {
-            return e.waitForExtension(win, 'ext1').then(() => {
-              expect(progress).to.equal('CBA');
-            });
-          });
-      });
     });
 
     it('should wait for body before processing extensions', function* () {
@@ -545,7 +428,7 @@ describes.fakeWin(
       expect(queueExtensions).to.have.length(0);
     });
 
-    it('should load correct extension version', function* () {
+    it('should load correct extension version', async function () {
       self.__AMP_MODE = {
         rtvVersion: 'test-version',
       };
@@ -599,7 +482,7 @@ describes.fakeWin(
       const promise = adopt(win);
       runChunks(win.document);
 
-      yield waitNext(promise);
+      await waitNext(promise);
       // Extensions are still unprocessed
       expect(progress).to.equal('');
 
@@ -617,7 +500,7 @@ describes.fakeWin(
         }, 'version123')
       );
       // Add legacy element (5) and eagarly ask for its load as ElementStub does.
-      Services.extensionsFor(win).preloadExtension('amp-test-element5', false);
+      Services.extensionsFor(win).preloadExtension('amp-test-element5', '0.1');
       win.AMP.push(
         regularExtension((amp) => {
           expect(amp).to.equal(win.AMP);
@@ -626,14 +509,14 @@ describes.fakeWin(
       );
       runChunks(win.document);
 
-      yield waitNext(promise);
+      await waitNext(promise);
       expect(progress).to.equal('');
 
       // Body is available now.
       bodyResolver();
       runChunks(win.document);
 
-      yield waitNext(promise);
+      await waitNext(promise);
       expect(progress).to.equal('134');
       expect(queueExtensions).to.have.length(0);
       expect(s1.getAttribute('i-amphtml-loaded-new-version')).to.equal(
@@ -714,9 +597,11 @@ describes.fakeWin(
 
         class TemplateType {}
 
-        ampdoc.declareExtension('amp-ext');
+        ampdoc.declareExtension('amp-ext', '0.1');
         win.AMP.push({
           n: 'amp-ext',
+          ev: '0.1',
+          l: true,
           f: (amp) => {
             amp.registerTemplate('amp-ext', TemplateType);
           },
@@ -754,9 +639,11 @@ describes.fakeWin(
           'installStylesForDoc'
         );
 
-        ampdoc.declareExtension('amp-ext');
+        ampdoc.declareExtension('amp-ext', '0.1');
         win.AMP.push({
           n: 'amp-ext',
+          ev: '0.1',
+          l: true,
           f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement);
           },
@@ -798,9 +685,11 @@ describes.fakeWin(
             installStylesCallback = cb;
           });
 
-        ampdoc.declareExtension('amp-ext');
+        ampdoc.declareExtension('amp-ext', '0.1');
         win.AMP.push({
           n: 'amp-ext',
+          ev: '0.1',
+          l: true,
           f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement, 'a{}');
           },
@@ -843,10 +732,12 @@ describes.fakeWin(
       it('should register doc-service as ctor and install imm', function* () {
         class Service1 {}
         const ampdoc = new AmpDocSingle(win);
-        ampdoc.declareExtension('amp-ext');
+        ampdoc.declareExtension('amp-ext', '0.1');
         ampdocServiceMock.expects('getAmpDoc').returns(ampdoc).atLeast(1);
         win.AMP.push({
           n: 'amp-ext',
+          ev: '0.1',
+          l: true,
           f: (amp) => {
             amp.registerServiceForDoc('service1', Service1);
           },
@@ -873,10 +764,12 @@ describes.fakeWin(
           return {str: 'A'};
         }
         const ampdoc = new AmpDocSingle(win);
-        ampdoc.declareExtension('amp-ext');
+        ampdoc.declareExtension('amp-ext', '0.1');
         ampdocServiceMock.expects('getAmpDoc').returns(ampdoc).atLeast(1);
         win.AMP.push({
           n: 'amp-ext',
+          ev: '0.1',
+          l: true,
           f: (amp) => {
             amp.registerServiceForDoc('service1', factory);
           },
@@ -928,6 +821,8 @@ describes.fakeWin(
 
         win.AMP.push({
           n: 'amp-ext',
+          ev: '0.1',
+          l: true,
           f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement);
           },
@@ -976,6 +871,8 @@ describes.fakeWin(
 
         win.AMP.push({
           n: 'amp-ext',
+          ev: '0.1',
+          l: true,
           f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement, 'a{}');
           },
@@ -1027,6 +924,8 @@ describes.fakeWin(
         class Service1 {}
         win.AMP.push({
           n: 'amp-ext',
+          ev: '0.1',
+          l: true,
           f: (amp) => {
             amp.registerServiceForDoc('service1', Service1);
           },
@@ -1132,6 +1031,8 @@ describes.realWin(
         class Service1 {}
         win.AMP.push({
           n: 'amp-ext',
+          ev: '0.1',
+          l: true,
           f: (amp) => {
             amp.registerServiceForDoc('service1', Service1);
           },
@@ -1558,6 +1459,8 @@ describes.realWin(
           class Service1 {}
           win.AMP.push({
             n: 'amp-ext',
+            ev: '0.1',
+            l: true,
             f: (amp) => {
               amp.registerServiceForDoc('service1', Service1);
             },
