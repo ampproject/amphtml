@@ -40,29 +40,10 @@ exports.extension = function (
   latest,
   isModule,
   loadPriority,
-  intermediateDeps,
   opt_splitMarker
 ) {
   opt_splitMarker = opt_splitMarker || '';
 
-  let deps = '';
-  if (intermediateDeps && intermediateDeps.length) {
-    deps = 'i:';
-    /**
-     * Wraps the provided string in quotes.
-     * @param {string} s
-     * @return {string}
-     */
-    function quote(s) {
-      return `"${s}"`;
-    }
-    if (intermediateDeps.length == 1) {
-      deps += quote(intermediateDeps[0]);
-    } else {
-      deps += `[${intermediateDeps.map(quote).join(',')}]`;
-    }
-    deps += ',';
-  }
   let priority = '';
   if (loadPriority) {
     if (loadPriority != 'high') {
@@ -74,7 +55,7 @@ exports.extension = function (
   const m = isModule ? 1 : 0;
   return (
     `(self.AMP=self.AMP||[]).push({n:"${name}",ev:"${version}",l:${latest},` +
-    `${priority}${deps}` +
+    `${priority}` +
     `v:"${VERSION}",m:${m},f:(function(AMP,_){${opt_splitMarker}\n` +
     '<%= contents %>\n})});'
   );
