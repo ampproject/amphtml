@@ -639,7 +639,7 @@ player.addEventListener('storyNavigation', (event) => {
 })
 ```
 
-### noNextStory
+#### noNextStory
 
 Dispatched when there is no next story. Note that this will not be dispatched when using [Circular wrapping](#Circular-wrapping).
 
@@ -649,7 +649,7 @@ player.addEventListener('noNextStory', (event) => {
 });
 ```
 
-### noPreviousStory
+#### noPreviousStory
 
 Dispatched when there is no next story. Note that this will not be dispatched when using [Circular wrapping](#Circular-wrapping).
 
