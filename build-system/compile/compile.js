@@ -178,7 +178,7 @@ function compile(
     'build-system/externs/preact.extern.js',
     'build-system/externs/weakref.extern.js',
   ];
-  const define = [`VERSION=${internalRuntimeVersion}`];
+  const define = [`VERSION=${internalRuntimeVersion}`, 'AMP_MODE=true'];
   if (argv.pseudo_names) {
     define.push('PSEUDO_NAMES=true');
   }
