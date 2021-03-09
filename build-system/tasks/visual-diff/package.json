@@ -4,11 +4,8 @@
   "version": "0.1.0",
   "description": "Gulp visual diff",
   "devDependencies": {
-    "@percy/agent": "0.28.6",
-    "@percy/puppeteer": "1.1.0",
+    "@percy/core": "1.0.0-beta.39",
+    "@percy/puppeteer": "2.0.0",
     "puppeteer": "8.0.0"
-  },
-  "resolutions": {
-    "**/**/minimist": "^1.2.3"
   }
 }
