@@ -261,6 +261,10 @@ export class BitrateManager {
  */
 function onNontrivialWait(video, callback) {
   listen(video, 'waiting', () => {
+    // Do not trigger downgrade if not loaded metadata yet.
+    if (video.readyState < 1) {
+      return;
+    }
     let timer = null;
     const unlisten = listenOnce(video, 'playing', () => {
       clearTimeout(timer);
