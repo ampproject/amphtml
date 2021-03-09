@@ -75,7 +75,7 @@ source documents to know that they are embedded in the AMP context. This fragmen
 not already have a fragment.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>poster (required)</strong></td>
+    <td width="40%"><strong>poster</strong></td>
     <td>Points to an image URL that will be displayed while the video loads.
 </td>
   </tr>
