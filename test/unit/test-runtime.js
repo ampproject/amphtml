@@ -320,6 +320,8 @@ describes.fakeWin(
       });
       win.AMP.push({
         n: 'ext2',
+        ev: '0.1',
+        l: true,
         p: 'high',
         f: (amp) => {
           expect(amp).to.equal(win.AMP);
@@ -347,6 +349,8 @@ describes.fakeWin(
           expect(progress).to.equal('1HIGH');
           win.AMP.push({
             n: 'ext1',
+            ev: '0.1',
+            l: true,
             f: (amp) => {
               expect(amp).to.equal(win.AMP);
               progress += 'A';
@@ -593,9 +597,11 @@ describes.fakeWin(
 
         class TemplateType {}
 
-        ampdoc.declareExtension('amp-ext');
+        ampdoc.declareExtension('amp-ext', '0.1');
         win.AMP.push({
           n: 'amp-ext',
+          ev: '0.1',
+          l: true,
           f: (amp) => {
             amp.registerTemplate('amp-ext', TemplateType);
           },
@@ -633,9 +639,11 @@ describes.fakeWin(
           'installStylesForDoc'
         );
 
-        ampdoc.declareExtension('amp-ext');
+        ampdoc.declareExtension('amp-ext', '0.1');
         win.AMP.push({
           n: 'amp-ext',
+          ev: '0.1',
+          l: true,
           f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement);
           },
@@ -677,9 +685,11 @@ describes.fakeWin(
             installStylesCallback = cb;
           });
 
-        ampdoc.declareExtension('amp-ext');
+        ampdoc.declareExtension('amp-ext', '0.1');
         win.AMP.push({
           n: 'amp-ext',
+          ev: '0.1',
+          l: true,
           f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement, 'a{}');
           },
@@ -722,10 +732,12 @@ describes.fakeWin(
       it('should register doc-service as ctor and install imm', function* () {
         class Service1 {}
         const ampdoc = new AmpDocSingle(win);
-        ampdoc.declareExtension('amp-ext');
+        ampdoc.declareExtension('amp-ext', '0.1');
         ampdocServiceMock.expects('getAmpDoc').returns(ampdoc).atLeast(1);
         win.AMP.push({
           n: 'amp-ext',
+          ev: '0.1',
+          l: true,
           f: (amp) => {
             amp.registerServiceForDoc('service1', Service1);
           },
@@ -752,10 +764,12 @@ describes.fakeWin(
           return {str: 'A'};
         }
         const ampdoc = new AmpDocSingle(win);
-        ampdoc.declareExtension('amp-ext');
+        ampdoc.declareExtension('amp-ext', '0.1');
         ampdocServiceMock.expects('getAmpDoc').returns(ampdoc).atLeast(1);
         win.AMP.push({
           n: 'amp-ext',
+          ev: '0.1',
+          l: true,
           f: (amp) => {
             amp.registerServiceForDoc('service1', factory);
           },
@@ -807,6 +821,8 @@ describes.fakeWin(
 
         win.AMP.push({
           n: 'amp-ext',
+          ev: '0.1',
+          l: true,
           f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement);
           },
@@ -855,6 +871,8 @@ describes.fakeWin(
 
         win.AMP.push({
           n: 'amp-ext',
+          ev: '0.1',
+          l: true,
           f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement, 'a{}');
           },
@@ -906,6 +924,8 @@ describes.fakeWin(
         class Service1 {}
         win.AMP.push({
           n: 'amp-ext',
+          ev: '0.1',
+          l: true,
           f: (amp) => {
             amp.registerServiceForDoc('service1', Service1);
           },
@@ -1011,6 +1031,8 @@ describes.realWin(
         class Service1 {}
         win.AMP.push({
           n: 'amp-ext',
+          ev: '0.1',
+          l: true,
           f: (amp) => {
             amp.registerServiceForDoc('service1', Service1);
           },
@@ -1437,6 +1459,8 @@ describes.realWin(
           class Service1 {}
           win.AMP.push({
             n: 'amp-ext',
+            ev: '0.1',
+            l: true,
             f: (amp) => {
               amp.registerServiceForDoc('service1', Service1);
             },

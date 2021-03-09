@@ -47,7 +47,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
     win.customElements.define('amp-stub', StubElementClass);
     win.__AMP_EXTENDED_ELEMENTS['amp-test'] = TestElement;
     win.__AMP_EXTENDED_ELEMENTS['amp-stub'] = ElementStub;
-    ampdoc.declareExtension('amp-stub');
+    ampdoc.declareExtension('amp-stub', '0.1');
     ElementClass.prototype.inspect = function () {
       return this.tagName;
     };

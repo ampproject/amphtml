@@ -769,7 +769,13 @@ class AmpFixture {
           if (env.ampdoc) {
             env.ampdoc.declareExtension(extensionId, extensionVersion);
           }
-          env.extensions.registerExtension(extensionId, installer, win.AMP);
+          env.extensions.registerExtension(
+            extensionId,
+            extensionVersion,
+            /* latest */ false,
+            installer,
+            win.AMP
+          );
         }
       });
     }
@@ -802,7 +808,13 @@ class AmpFixture {
       if (env.ampdoc) {
         env.ampdoc.declareExtension(extensionId, version);
       }
-      env.extensions.registerExtension(extensionId, installer, win.AMP);
+      env.extensions.registerExtension(
+        extensionId,
+        version,
+        /* latest */ false,
+        installer,
+        win.AMP
+      );
     };
 
     /**

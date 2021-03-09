@@ -61,6 +61,8 @@ describes.sandboxed('Extensions', {}, () => {
       let currentHolder;
       extensions.registerExtension(
         'amp-ext',
+        '0.1',
+        true,
         (arg) => {
           expect(factoryExecuted).to.be.false;
           expect(arg).to.equal(amp);
@@ -93,13 +95,13 @@ describes.sandboxed('Extensions', {}, () => {
     it('should register only once', () => {
       const amp = {};
       const factoryStub = env.sandbox.stub();
-      extensions.registerExtension('amp-ext', factoryStub, amp);
+      extensions.registerExtension('amp-ext', '0.1', true, factoryStub, amp);
       expect(factoryStub).to.be.calledOnce;
       const holder1 = extensions.extensions_['amp-ext'];
       expect(extensions.getExtensionHolder_('amp-ext')).to.equal(holder1);
 
       // Try register again.
-      extensions.registerExtension('amp-ext', factoryStub, amp);
+      extensions.registerExtension('amp-ext', '0.1', true, factoryStub, amp);
       expect(factoryStub).to.be.calledOnce; // no change.
       const holder2 = extensions.extensions_['amp-ext'];
       expect(holder2).to.equal(holder1);
@@ -107,7 +109,7 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should register successfully with promise', () => {
       const promise = extensions.waitForExtension(win, 'amp-ext');
-      extensions.registerExtension('amp-ext', () => {}, {});
+      extensions.registerExtension('amp-ext', '0.1', true, () => {}, {});
       expect(extensions.currentExtensionId_).to.be.null;
 
       const holder = extensions.extensions_['amp-ext'];
@@ -127,6 +129,8 @@ describes.sandboxed('Extensions', {}, () => {
       expect(() => {
         extensions.registerExtension(
           'amp-ext',
+          '0.1',
+          true,
           () => {
             throw new Error('intentional');
           },
@@ -160,6 +164,8 @@ describes.sandboxed('Extensions', {}, () => {
       expect(() => {
         extensions.registerExtension(
           'amp-ext',
+          '0.1',
+          true,
           () => {
             throw new Error('intentional');
           },
@@ -208,6 +214,8 @@ describes.sandboxed('Extensions', {}, () => {
       ctor.requiresShadowDom = () => false;
       extensions.registerExtension(
         'amp-ext',
+        '0.1',
+        true,
         () => {
           extensions.addElement('e1', ctor);
         },
@@ -238,6 +246,8 @@ describes.sandboxed('Extensions', {}, () => {
       const ctor = function () {};
       extensions.registerExtension(
         'amp-ext',
+        '0.1',
+        true,
         () => {
           extensions.addTemplate('e1', ctor);
         },
@@ -270,6 +280,8 @@ describes.sandboxed('Extensions', {}, () => {
       const ctor = function () {};
       extensions.registerExtension(
         'amp-test',
+        '0.1',
+        true,
         () => {
           extensions.addTemplate('amp-test', ctor);
         },
@@ -304,6 +316,8 @@ describes.sandboxed('Extensions', {}, () => {
       // Resolve the promise.
       extensions.registerExtension(
         'amp-test',
+        '0.1',
+        true,
         () => {
           extensions.addElement('amp-test', AmpTest);
           extensions.addElement('amp-test-sub', AmpTestSub);
@@ -333,6 +347,8 @@ describes.sandboxed('Extensions', {}, () => {
       // Resolve the promise.
       extensions.registerExtension(
         'amp-test',
+        '0.1',
+        true,
         () => {
           extensions.addElement('amp-test', AmpTest);
           extensions.addElement('amp-test-sub', AmpTestSub);
@@ -352,7 +368,7 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should install declared elements for single-doc', () => {
       const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
-      ampdoc.declareExtension('amp-test');
+      ampdoc.declareExtension('amp-test', '0.1');
       expect(
         win.__AMP_EXTENDED_ELEMENTS && win.__AMP_EXTENDED_ELEMENTS['amp-test']
       ).to.be.undefined;
@@ -366,6 +382,8 @@ describes.sandboxed('Extensions', {}, () => {
       // Resolve the promise.
       extensions.registerExtension(
         'amp-test',
+        '0.1',
+        true,
         () => {
           extensions.addElement('amp-test', AmpTest);
           extensions.addElement('amp-test-sub', AmpTestSub);
@@ -380,7 +398,7 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should install non-auto declared elements for single-doc', () => {
       const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
-      ampdoc.declareExtension('amp-test');
+      ampdoc.declareExtension('amp-test', '0.1');
       expect(
         win.__AMP_EXTENDED_ELEMENTS && win.__AMP_EXTENDED_ELEMENTS['amp-test']
       ).to.be.undefined;
@@ -396,6 +414,8 @@ describes.sandboxed('Extensions', {}, () => {
       // Resolve the promise.
       extensions.registerExtension(
         'amp-test',
+        '0.1',
+        true,
         () => {
           extensions.addElement('amp-test', AmpTest);
           extensions.addElement('amp-test-sub', AmpTestSub);
@@ -424,6 +444,8 @@ describes.sandboxed('Extensions', {}, () => {
       // Resolve the promise.
       extensions.registerExtension(
         'amp-test',
+        '0.1',
+        true,
         () => {
           extensions.addElement('amp-test', AmpTest);
           extensions.addElement('amp-test-sub', AmpTestSub);
@@ -459,6 +481,8 @@ describes.sandboxed('Extensions', {}, () => {
       const factory = function () {};
       extensions.registerExtension(
         'amp-ext',
+        '0.1',
+        true,
         () => {
           extensions.addDocFactory(factory);
         },
@@ -493,6 +517,8 @@ describes.sandboxed('Extensions', {}, () => {
       const factory3 = env.sandbox.spy();
       extensions.registerExtension(
         'amp-ext',
+        '0.1',
+        true,
         () => {
           extensions.addDocFactory(factory1);
           extensions.addDocFactory(factory2);
@@ -517,6 +543,8 @@ describes.sandboxed('Extensions', {}, () => {
       const factory = function () {};
       extensions.registerExtension(
         'amp-ext',
+        '0.1',
+        true,
         () => {
           extensions.addService('service1', factory);
         },
@@ -561,6 +589,8 @@ describes.sandboxed('Extensions', {}, () => {
       // Resolve the promise.
       extensions.registerExtension(
         'amp-test',
+        '0.1',
+        true,
         () => {
           extensions.addService('service1', factory1);
           extensions.addService('service2', factory2);
@@ -585,6 +615,8 @@ describes.sandboxed('Extensions', {}, () => {
       // Resolve the promise.
       extensions.registerExtension(
         'amp-test',
+        '0.1',
+        true,
         () => {
           extensions.addService('service1', factory1);
           extensions.addService('service2', factory2);
@@ -606,7 +638,7 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should install declared services for single-doc', () => {
       const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
-      ampdoc.declareExtension('amp-test');
+      ampdoc.declareExtension('amp-test', '0.1');
 
       const factory1Spy = env.sandbox.spy();
       const factory2Spy = env.sandbox.spy();
@@ -622,6 +654,8 @@ describes.sandboxed('Extensions', {}, () => {
       // Resolve the promise.
       extensions.registerExtension(
         'amp-test',
+        '0.1',
+        true,
         () => {
           extensions.addService('service1', factory1);
           extensions.addService('service2', factory2);
@@ -648,6 +682,8 @@ describes.sandboxed('Extensions', {}, () => {
       const factory3 = env.sandbox.spy();
       extensions.registerExtension(
         'amp-ext',
+        '0.1',
+        true,
         () => {
           extensions.addService('service1', factory1);
           extensions.addService('service2', factory2);
@@ -675,6 +711,8 @@ describes.sandboxed('Extensions', {}, () => {
       ctor.requiresShadowDom = () => false;
       extensions.registerExtension(
         'amp-ext',
+        '0.1',
+        true,
         () => {
           extensions.addElement('amp-ext', ctor);
         },
@@ -701,7 +739,7 @@ describes.sandboxed('Extensions', {}, () => {
       const reloadPromise = extensions.reloadExtension('amp-ext', '0.1', true);
 
       // Register extension.
-      extensions.registerExtension('amp-ext', () => {}, {});
+      extensions.registerExtension('amp-ext', '0.1', true, () => {}, {});
 
       return reloadPromise.then((reloadedExtension) => {
         expect(reloadedExtension).to.exist;
@@ -1268,13 +1306,34 @@ describes.sandboxed('Extensions', {}, () => {
         expect(loadSpy).to.be.calledOnce;
         expect(loadSpy).to.be.calledWithExactly('amp-test', '0.1');
         expect(
-          doc.head.querySelectorAll('[custom-element="amp-test"]')
+          doc.head.querySelectorAll('[custom-element="amp-test"][src*="-0.1"]')
         ).to.have.length(1);
         expect(
           doc.head
             .querySelector('[custom-element="amp-test"]')
             .getAttribute('src')
         ).to.contain('-0.1');
+        expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+        expect(win.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
+      });
+
+      it('should insert extension script correctly for non-default version', () => {
+        const loadSpy = env.sandbox.spy(extensions, 'preloadExtension');
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(0);
+        expect(extensions.extensions_['amp-test']).to.be.undefined;
+        extensions.installExtensionForDoc(ampdoc, 'amp-test', '0.2');
+        expect(loadSpy).to.be.calledOnce;
+        expect(loadSpy).to.be.calledWithExactly('amp-test', '0.2');
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"][src*="-0.2"]')
+        ).to.have.length(1);
+        expect(
+          doc.head
+            .querySelector('[custom-element="amp-test"]')
+            .getAttribute('src')
+        ).to.contain('-0.2');
         expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
         expect(win.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
       });
@@ -1315,6 +1374,8 @@ describes.sandboxed('Extensions', {}, () => {
         // Resolve the promise.
         extensions.registerExtension(
           'amp-test',
+          '0.1',
+          true,
           (AMP) => {
             // Main extension with CSS.
             AMP.registerElement('amp-test', AmpTest, 'a{}');
@@ -1344,7 +1405,7 @@ describes.sandboxed('Extensions', {}, () => {
         expect(loadSpy).to.be.calledOnce;
 
         // Resolve.
-        extensions.registerExtension('amp-test', () => {}, {});
+        extensions.registerExtension('amp-test', '0.1', true, () => {}, {});
         return promise1.then(() => {
           const promise3 = extensions.installExtensionForDoc(
             ampdoc,
@@ -1389,6 +1450,8 @@ describes.sandboxed('Extensions', {}, () => {
         // Resolve the promise.
         extensions.registerExtension(
           'amp-test',
+          '0.1',
+          true,
           (AMP) => {
             AMP.registerServiceForDoc('service1', factory1);
             AMP.registerServiceForDoc('service2', factory2);
@@ -1429,6 +1492,8 @@ describes.sandboxed('Extensions', {}, () => {
         const promise = extensions.installExtensionForDoc(ampdoc, 'amp-test');
         extensions.registerExtension(
           'amp-test',
+          '0.1',
+          true,
           (AMP) => {
             AMP.registerServiceForDoc('service1', factory1);
             AMP.registerServiceForDoc('service2', factory2);

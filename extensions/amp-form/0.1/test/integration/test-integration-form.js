@@ -37,7 +37,7 @@ describes.realWin(
   },
   (env) => {
     const {testServerPort} = window.ampTestRuntimeConfig;
-    const baseUrl = `http://localhost:${testServerPort}`;
+    const baseUrl = `http://localhost:${testServerPort || '9876'}`;
     let doc;
 
     const realSetTimeout = window.setTimeout;
@@ -52,11 +52,9 @@ describes.realWin(
     beforeEach(() => {
       doc = env.win.document;
 
-      env.sandbox.stub(Services, 'formSubmitForDoc').returns(
-        Promise.resolve(() => {
-          fire: () => {};
-        })
-      );
+      env.sandbox.stub(Services, 'formSubmitForDoc').resolves({
+        fire: () => {},
+      });
 
       const mustache = document.createElement('script');
       mustache.setAttribute('custom-template', 'amp-mustache');
@@ -65,6 +63,9 @@ describes.realWin(
 
       const form = document.createElement('script');
       form.setAttribute('custom-element', 'amp-form');
+      Object.defineProperty(form, 'src', {
+        value: 'https://cdn.ampproject.org/v0/amp-form-0.1.js',
+      });
       doc.head.appendChild(form);
 
       new AmpFormService(env.ampdoc);

@@ -131,9 +131,9 @@ function waitReadyForUpgrade(win, elementClass) {
  */
 export function stubElementsForDoc(ampdoc) {
   const extensions = extensionScriptsInNode(ampdoc.getHeadNode());
-  extensions.forEach((name) => {
-    ampdoc.declareExtension(name);
-    stubElementIfNotKnown(ampdoc.win, name);
+  extensions.forEach(({extensionId, extensionVersion}) => {
+    ampdoc.declareExtension(extensionId, extensionVersion);
+    stubElementIfNotKnown(ampdoc.win, extensionId);
   });
 }
 
