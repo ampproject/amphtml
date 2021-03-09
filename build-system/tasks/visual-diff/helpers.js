@@ -48,7 +48,7 @@ function escapeHtml(html) {
  * Logs a message to the console.
  *
  * @param {string} mode
- * @param {!Array<string>} messages
+ * @param {!Array<*>} messages
  */
 function log(mode, ...messages) {
   switch (mode) {
