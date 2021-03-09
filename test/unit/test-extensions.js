@@ -95,13 +95,13 @@ describes.sandboxed('Extensions', {}, () => {
     it('should register only once', () => {
       const amp = {};
       const factoryStub = env.sandbox.stub();
-      extensions.registerExtension('amp-ext', factoryStub, amp);
+      extensions.registerExtension('amp-ext', '0.1', true, factoryStub, amp);
       expect(factoryStub).to.be.calledOnce;
       const holder1 = extensions.extensions_['amp-ext'];
       expect(extensions.getExtensionHolder_('amp-ext')).to.equal(holder1);
 
       // Try register again.
-      extensions.registerExtension('amp-ext', factoryStub, amp);
+      extensions.registerExtension('amp-ext', '0.1', true, factoryStub, amp);
       expect(factoryStub).to.be.calledOnce; // no change.
       const holder2 = extensions.extensions_['amp-ext'];
       expect(holder2).to.equal(holder1);
@@ -1308,6 +1308,11 @@ describes.sandboxed('Extensions', {}, () => {
         expect(
           doc.head.querySelectorAll('[custom-element="amp-test"][src*="-0.1"]')
         ).to.have.length(1);
+        expect(
+          doc.head
+            .querySelector('[custom-element="amp-test"]')
+            .getAttribute('src')
+        ).to.contain('-0.1');
         expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
         expect(win.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
       });
@@ -1328,7 +1333,7 @@ describes.sandboxed('Extensions', {}, () => {
           doc.head
             .querySelector('[custom-element="amp-test"]')
             .getAttribute('src')
-        ).to.contain('-0.1');
+        ).to.contain('-0.2');
         expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
         expect(win.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
       });
