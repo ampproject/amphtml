@@ -51,6 +51,7 @@ export const buildOpenInlineAttachmentElement = (element) =>
         <span class="i-amphtml-story-inline-page-attachment-chip">
           <span class="i-amphtml-story-inline-page-attachment-content">
             <span class="i-amphtml-story-inline-page-attachment-img"></span>
+            <span class="i-amphtml-story-inline-page-attachment-img-2"></span>
             <span class="i-amphtml-story-inline-page-attachment-arrow"></span>
           </span>
         </span>
@@ -65,14 +66,14 @@ export const buildOpenInlineAttachmentElement = (element) =>
  * @return {!Element}
  */
 export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
-  const openImgAttrs = attachmentEl.getAttribute('cta-img');
+  const openImgAttr = attachmentEl.getAttribute('cta-img');
   const attachmentHref = attachmentEl.getAttribute('href');
   if (
     isInlinePageAttachmentV2ExperimentOn(win) &&
     !attachmentHref &&
-    openImgAttrs
+    openImgAttr
   ) {
-    return renderInlinePageAttachmentUI(win, pageEl, attachmentEl);
+    return renderInlinePageAttachmentUI(pageEl, attachmentEl);
   } else {
     return renderDefaultPageAttachmentUI(pageEl, attachmentEl);
   }
@@ -114,7 +115,7 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
  * @param {!Element} attachmentEl
  * @return {!Element}
  */
-const renderInlinePageAttachmentUI = (win, pageEl, attachmentEl) => {
+const renderInlinePageAttachmentUI = (pageEl, attachmentEl) => {
   const openAttachmentEl = buildOpenInlineAttachmentElement(pageEl);
 
   const textEl = openAttachmentEl.querySelector(
@@ -126,23 +127,27 @@ const renderInlinePageAttachmentUI = (win, pageEl, attachmentEl) => {
 
   textEl.textContent = openLabel;
 
-  const openImgAttrs = attachmentEl.getAttribute('cta-img').split(', ');
+  const openImgAttr = attachmentEl.getAttribute('cta-img');
 
   const ctaImgEl = openAttachmentEl.querySelector(
     '.i-amphtml-story-inline-page-attachment-img'
   );
 
   setImportantStyles(ctaImgEl, {
-    'background-image': 'url(' + openImgAttrs[0] + ')',
+    'background-image': 'url(' + openImgAttr + ')',
   });
 
-  if (openImgAttrs.length > 1) {
-    const ctaImgEl2 = win.document.createElement('span');
-    ctaImgEl2.classList.add('i-amphtml-story-inline-page-attachment-img');
+  const openImgAttr2 = attachmentEl.getAttribute('cta-img-2');
+
+  if (openImgAttr2) {
+    const ctaImgEl2 = openAttachmentEl.querySelector(
+      '.i-amphtml-story-inline-page-attachment-img-2'
+    );
     setImportantStyles(ctaImgEl2, {
-      'background-image': 'url(' + openImgAttrs[1] + ')',
+      'background-image': 'url(' + openImgAttr2 + ')',
+      height: '24px',
+      width: '24px',
     });
-    ctaImgEl.parentNode.insertBefore(ctaImgEl2, ctaImgEl.nextSibling);
   }
 
   return openAttachmentEl;
