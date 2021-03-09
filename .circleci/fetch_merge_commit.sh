@@ -26,7 +26,7 @@ YELLOW() { echo -e "\n\033[0;33m$1\033[0m"; }
 RED() { echo -e "\n\033[0;31m$1\033[0m"; }
 
 GET_MERGE_SHA() {
-  return "$(awk '{print $1}' .git/FETCH_HEAD)"
+  awk '{print $1}' .git/FETCH_HEAD
 }
 
 if [[ -z "$1" ]]; then
