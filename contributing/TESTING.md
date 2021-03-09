@@ -118,7 +118,15 @@ Before running these commands, make sure you have Node.js and Gulp installed. Fo
 | `gulp serve --compiled`                                   | Same as `serve`, but serves minified binaries.                                                                                                                                                                                                         |
 | `gulp serve --cdn`                                        | Same as `serve`, but serves CDN binaries.                                                                                                                                                                                                              |
 | `gulp serve --rtv <rtv_number>`                           | Same as `serve`, but serves binaries with the given 15 digit RTV.                                                                                                                                                                                      |
+<<<<<<< HEAD
+<<<<<<< HEAD
 | `gulp serve --esm`                                        | Same as `serve`, but serves esm (module) binaries. Uses the new Typescript based transforms. _Still under active development._                                                                                                                         |
+=======
+| `gulp serve --esm`                           | Same as `serve`, but serves esm (module) binaries. Also runs the Typescript based transforms. _Still under active development._                                                                                                                     |
+>>>>>>> 50d37c356 (remove concept of new_server and just use --esm flag as basis to do html transformation)
+=======
+| `gulp serve --esm`                                        | Same as `serve`, but serves esm (module) binaries. Also runs the Typescript based transforms. _Still under active development._                                                                                                                        |
+>>>>>>> 421e6cf3f (fix lint issues)
 | `gulp serve --quiet`                                      | Same as `serve`, with logging silenced.                                                                                                                                                                                                                |
 | `gulp serve --port <port>`                                | Same as `serve`, but uses a port number other than the default of 8000.                                                                                                                                                                                |
 | `gulp check-types`                                        | Verifies that there are no errors associated with Closure typing. Run automatically upon push.                                                                                                                                                         |

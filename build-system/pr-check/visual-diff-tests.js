@@ -21,6 +21,7 @@
 
 const atob = require('atob');
 const {
+  downloadModuleOutput,
   downloadNomoduleOutput,
   printSkipMessage,
   timedExecOrDie,
@@ -30,14 +31,20 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'visual-diff-tests.js';
 
+<<<<<<< HEAD
+const baseCommand = 'gulp visual-diff';
+
 /**
  * @return {void}
  */
+=======
+>>>>>>> f47563c26 (apply fixes and recommendations)
 function pushBuildWorkflow() {
+  downloadModuleOutput();
   downloadNomoduleOutput();
   timedExecOrDie('gulp update-packages');
   process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-  timedExecOrDie('gulp visual-diff --nobuild --master');
+  timedExecOrDie(`gulp visual-diff --nobuild --master`);
 }
 
 /**
@@ -46,6 +53,7 @@ function pushBuildWorkflow() {
 function prBuildWorkflow() {
   process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
   if (buildTargetsInclude(Targets.RUNTIME, Targets.VISUAL_DIFF)) {
+    downloadModuleOutput();
     downloadNomoduleOutput();
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp visual-diff --nobuild');

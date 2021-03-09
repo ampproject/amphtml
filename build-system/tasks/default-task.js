@@ -54,7 +54,7 @@ async function defaultTask() {
   } else {
     await runPreBuildSteps(/* watch */ true);
   }
-  await doServe(/* lazyBuild */ true);
+  await doServe({lazyBuild: true});
   log(green('JS and extensions will be lazily built when requested...'));
 }
 

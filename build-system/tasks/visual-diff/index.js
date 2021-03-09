@@ -110,6 +110,13 @@ const SNAPSHOT_ERROR_SNIPPET = fs.readFileSync(
   'utf8'
 );
 
+/**
+ * @typedef {{
+ *   esm: boolean?
+ * }}
+ */
+const VisualDiffOptionsDef = {};
+
 let browser_;
 let percyAgentProcess_;
 
@@ -185,7 +192,7 @@ async function launchWebServer() {
   await startServer(
     {host: HOST, port: PORT},
     {quiet: !argv.webserver_debug},
-    {compiled: true}
+    {compiled: true, esm: argv.esm}
   );
 }
 
@@ -388,6 +395,7 @@ async function generateSnapshots(webpages) {
   // no interactions, and each test that has in interactive tests file should
   // load those tests here.
   for (const webpage of webpages) {
+    webpage.name += argv.esm ? ' (Module)' : ' (Nomodule)';
     webpage.tests_ = {};
     if (!webpage.no_base_test) {
       webpage.tests_[''] = async () => {};
@@ -735,6 +743,7 @@ async function visualDiff() {
     argv.grep = RegExp(argv.grep);
   }
 
+  await performVisualTests({esm: true});
   await performVisualTests();
   await cleanup_();
   exitCtrlcHandler(handlerProcess);
@@ -869,6 +878,7 @@ visualDiff.flags = {
   'webserver_debug': '  Prints debug info from the local gulp webserver',
   'percy_agent_debug': '  Prints debug info from the @percy/agent instance',
   'debug': '  Sets all debugging flags',
+  'esm': '  Run visual diff tests against the module build',
   'verbose': '  Prints verbose log statements',
   'grep': '  Runs tests that match the pattern',
   'percy_token': '  Override the PERCY_TOKEN environment variable',

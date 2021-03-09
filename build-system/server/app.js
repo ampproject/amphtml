@@ -58,9 +58,14 @@ app.use(bodyParser.text());
 
 // Middleware is executed in order, so this must be at the top.
 // TODO(#24333): Migrate all server URL handlers to new-server/router and
+<<<<<<< HEAD
 // deprecate app.js.
 // TODO(erwinmombay, #32865): Make visual diff tests use the new server
 if (!argv._.includes('visual-diff')) {
+=======
+// deprecate this file.
+if (argv.esm) {
+>>>>>>> 50d37c356 (remove concept of new_server and just use --esm flag as basis to do html transformation)
   app.use(require('./new-server/router'));
 }
 

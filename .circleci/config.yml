@@ -249,6 +249,7 @@ workflows:
       - 'Visual Diff Tests':
           <<: *push_and_pr_builds
           requires:
+            - 'Module Build'
             - 'Nomodule Build'
       - 'Unit Tests':
           <<: *push_and_pr_builds
