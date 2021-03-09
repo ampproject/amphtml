@@ -78,6 +78,9 @@ async function closureCompile(
   // Rate limit closure compilation to MAX_PARALLEL_CLOSURE_INVOCATIONS
   // concurrent processes.
   return new Promise(function (resolve, reject) {
+    /**
+     * @return {void}
+     */
     function start() {
       inProgress++;
       compile(
@@ -95,6 +98,9 @@ async function closureCompile(
         (reason) => reject(reason)
       );
     }
+    /**
+     * @return {void}
+     */
     function next() {
       if (!queue.length) {
         return;
@@ -108,6 +114,9 @@ async function closureCompile(
   });
 }
 
+/**
+ * @return {void}
+ */
 function cleanupBuildDir() {
   del.sync('build/fake-module');
   del.sync('build/patched-module');
@@ -169,7 +178,7 @@ function compile(
     'build-system/externs/preact.extern.js',
     'build-system/externs/weakref.extern.js',
   ];
-  const define = [`VERSION=${internalRuntimeVersion}`];
+  const define = [`VERSION=${internalRuntimeVersion}`, 'AMP_MODE=true'];
   if (argv.pseudo_names) {
     define.push('PSEUDO_NAMES=true');
   }
@@ -403,6 +412,9 @@ function compile(
   });
 }
 
+/**
+ * @return {void}
+ */
 function printClosureConcurrency() {
   log(
     green('Using up to'),

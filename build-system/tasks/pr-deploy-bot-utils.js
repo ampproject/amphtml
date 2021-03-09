@@ -25,6 +25,10 @@ const {replaceUrls: replaceUrlsAppUtil} = require('../server/app-utils');
 
 const hostNamePrefix = 'https://storage.googleapis.com/amp-test-website-1';
 
+/**
+ * @param {string} dest
+ * @return {Promise<string[]>}
+ */
 async function walk(dest) {
   const filelist = [];
   const files = await fs.readdir(dest);
@@ -40,10 +44,17 @@ async function walk(dest) {
   return filelist;
 }
 
+/**
+ * @return {string}
+ */
 function getBaseUrl() {
   return `${hostNamePrefix}/amp_nomodule_${ciBuildSha()}`;
 }
 
+/**
+ * @param {string} filePath
+ * @return {Promise<void>}
+ */
 async function replace(filePath) {
   const data = await fs.readFile(filePath, 'utf8');
   const hostName = getBaseUrl();
@@ -60,6 +71,10 @@ async function replace(filePath) {
   await fs.writeFile(filePath, result, 'utf8');
 }
 
+/**
+ * @param {string} dir
+ * @return {Promise<void>}
+ */
 async function replaceUrls(dir) {
   const files = await walk(dir);
   const promises = files
@@ -68,6 +83,10 @@ async function replaceUrls(dir) {
   await Promise.all(promises);
 }
 
+/**
+ * @param {string} result
+ * @return {Promise<void>}
+ */
 async function signalPrDeployUpload(result) {
   const loggingPrefix = getLoggingPrefix();
   logWithoutTimestamp(

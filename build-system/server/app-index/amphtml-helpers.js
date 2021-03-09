@@ -57,6 +57,16 @@ const containsExpr = (haystack, needle, onTrue, onFalse) =>
 
 const ampStateKey = (...keys) => keys.join('.');
 
+/**
+ *
+ * @param {{
+ *  body: string,
+ *  canonical: string,
+ *  css?: string,
+ *  head?: string,
+ * }} param0
+ * @return {string}
+ */
 const AmpDoc = ({body, css, head, canonical}) => {
   assert(canonical);
   return html`
@@ -95,6 +105,14 @@ const componentExtensionNameMapping = {
 const componentExtensionName = (tagName) =>
   componentExtensionNameMapping[tagName] || tagName;
 
+/**
+ *
+ * @param {string} docStr
+ * @param {{
+ *  'amp-mustache': {version: string}
+ * }=} extensionConf
+ * @return {string}
+ */
 const addRequiredExtensionsToHead = (
   docStr,
   extensionConf = {

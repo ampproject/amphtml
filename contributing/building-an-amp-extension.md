@@ -7,6 +7,15 @@ extensions. If you'd like to add an extension to support your company
 video player, rich embed or just a general UI component like a star
 rating viewer, you'd do this by building an extension.
 
+<!--
+  (Do not remove or edit this comment.)
+
+  This table-of-contents is automatically generated. To generate it, run:
+    gulp markdown-toc --fix
+-->
+
+<!-- {"maxdepth": 1} -->
+
 -   [Getting started](#getting-started)
 -   [Naming](#naming)
 -   [Directory structure](#directory-structure)
@@ -659,7 +668,7 @@ And then protecting your code with a check `isExperimentOn(win, 'amp-my-element'
 
 ```javascript
 import {isExperimentOn} from '../../../src/experiments';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const */
 const EXPERIMENT = 'amp-my-element';

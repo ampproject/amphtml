@@ -69,7 +69,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
-    serviceAdapter = new ServiceAdapter(null);
+    serviceAdapter = new ServiceAdapter({});
     const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
     env.sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
     env.sandbox
@@ -209,6 +209,39 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
     expect(fetchStub).to.be.calledWith(
       'https://lipsum.com/login/authorize?rid=reader1'
     );
+  });
+
+  it('should add metering params to url, if metering state is available', async () => {
+    env.sandbox
+      .stub(localSubscriptionPlatform.serviceAdapter_, 'loadMeteringState')
+      .returns({key: 'value'});
+    const fetchStub = env.sandbox
+      .stub(localSubscriptionPlatform.xhr_, 'fetchJson')
+      .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
+
+    await localSubscriptionPlatform.getEntitlements();
+    expect(fetchStub).to.be.calledWith(
+      'https://lipsum.com/login/authorize?rid=reader1&meteringState=eyJrZXkiOiJ2YWx1ZSJ9'
+    );
+  });
+
+  it('should save metering state from response', async () => {
+    const meteringState = {key: 'value'};
+    const responseWithMeteringState = {
+      ...json,
+      metering: {state: meteringState},
+    };
+    env.sandbox.stub(localSubscriptionPlatform.xhr_, 'fetchJson').returns(
+      Promise.resolve({
+        json: () => Promise.resolve(responseWithMeteringState),
+      })
+    );
+    const saveMeteringStateStub = env.sandbox
+      .stub(localSubscriptionPlatform.serviceAdapter_, 'saveMeteringState')
+      .returns(Promise.resolve());
+
+    await localSubscriptionPlatform.getEntitlements();
+    expect(saveMeteringStateStub).to.be.calledWith(meteringState);
   });
 
   describe('validateActionMap', () => {

@@ -40,9 +40,9 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen, listenOncePromise} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {
-  observeDisplay,
-  unobserveDisplay,
-} from '../../../src/utils/display-observer';
+  observeContentSize,
+  unobserveContentSize,
+} from '../../../src/utils/size-observer';
 import {
   propagateObjectFitStyles,
   setImportantStyles,
@@ -62,6 +62,7 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
   'crossorigin',
   'disableremoteplayback',
   'controlsList',
+  'title',
 ];
 
 /** @private {!Map<string, number>} the bitrate in Kb/s of amp_quality for videos in the ampproject cdn */
@@ -171,7 +172,7 @@ export class AmpVideo extends AMP.BaseElement {
     /** @private {?boolean} whether there are sources that will use a BitrateManager */
     this.hasBitrateSources_ = null;
 
-    this.onDisplay_ = this.onDisplay_.bind(this);
+    this.pauseWhenNoSize_ = this.pauseWhenNoSize_.bind(this);
   }
 
   /**
@@ -236,6 +237,7 @@ export class AmpVideo extends AMP.BaseElement {
     this.video_.setAttribute('webkit-playsinline', '');
     // Disable video preload in prerender mode.
     this.video_.setAttribute('preload', 'none');
+    this.checkA11yAttributeText_();
     this.propagateAttributes(
       ATTRS_TO_PROPAGATE_ON_BUILD,
       this.video_,
@@ -267,6 +269,19 @@ export class AmpVideo extends AMP.BaseElement {
     installVideoManagerForDoc(element);
 
     Services.videoManagerForDoc(element).register(this);
+  }
+
+  /**
+   * @private
+   * Overrides aria-label with alt if aria-label or title is not specified.
+   */
+  checkA11yAttributeText_() {
+    const altText = this.element.getAttribute('alt');
+    const hasTitle = this.element.hasAttribute('title');
+    const hasAriaLabel = this.element.hasAttribute('aria-label');
+    if (altText && !hasTitle && !hasAriaLabel) {
+      this.element.setAttribute('aria-label', altText);
+    }
   }
 
   /** @override */
@@ -672,6 +687,13 @@ export class AmpVideo extends AMP.BaseElement {
     dispatchCustomEvent(this.element, VideoEvents.LOAD);
   }
 
+  /** @override */
+  pauseCallback() {
+    if (this.video_) {
+      this.video_.pause();
+    }
+  }
+
   /** @private */
   updateIsPlaying_(isPlaying) {
     if (this.isManagedByPool_()) {
@@ -682,15 +704,19 @@ export class AmpVideo extends AMP.BaseElement {
     }
     this.isPlaying_ = isPlaying;
     if (isPlaying) {
-      observeDisplay(this.element, this.onDisplay_);
+      observeContentSize(this.element, this.pauseWhenNoSize_);
     } else {
-      unobserveDisplay(this.element, this.onDisplay_);
+      unobserveContentSize(this.element, this.pauseWhenNoSize_);
     }
   }
 
-  /** @private */
-  onDisplay_(isDisplayed) {
-    if (!isDisplayed && this.video_) {
+  /**
+   * @param {!../../../src/layout-rect.LayoutSizeDef} size
+   * @private
+   */
+  pauseWhenNoSize_({width, height}) {
+    const hasSize = width > 0 && height > 0;
+    if (!hasSize && this.video_) {
       this.video_.pause();
     }
   }

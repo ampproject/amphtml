@@ -30,11 +30,15 @@ export class AmpGoogleAssistantInlineSuggestionBar extends AMP.BaseElement {
 
     /** @private {?AssistjsConfigService} */
     this.configService_ = null;
+
+    /** @private {?AssistjsFrameService} */
+    this.frameService_ = null;
   }
 
   /** @override */
   buildCallback() {
     this.configService_ = Services.assistjsConfigServiceForDoc(this.element);
+    this.frameService_ = Services.assistjsFrameServiceForDoc(this.element);
   }
 
   /** @override */
@@ -51,6 +55,7 @@ export class AmpGoogleAssistantInlineSuggestionBar extends AMP.BaseElement {
       .then((iframeUrl) => {
         addAttributesToElement(iframe, {
           src: iframeUrl,
+          sandbox: 'allow-scripts',
         });
 
         // applyFillContent so that frame covers the entire component.
@@ -58,6 +63,11 @@ export class AmpGoogleAssistantInlineSuggestionBar extends AMP.BaseElement {
 
         this.element.appendChild(iframe);
       });
+
+    iframe.addEventListener('load', () => {
+      // TODO: create a channel to receive requests from underlying assist.js iframe.
+      this.frameService_.sendTextQuery();
+    });
 
     // Return a load promise for the frame so the runtime knows when the
     // component is ready.
