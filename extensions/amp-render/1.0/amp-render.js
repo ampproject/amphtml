@@ -15,24 +15,38 @@
  */
 
 import {BaseElement} from './base-element';
-import {CSS} from '../../../build/amp-fit-text-1.0.css';
-import {isExperimentOn} from '../../../src/experiments';
-import {userAssert} from '../../../src/log';
+// import {CSS} from '../../../build/amp-fit-text-1.0.css';
+import {batchFetchJsonFor} from '../../../src/batched-json';
+import {dict} from '../../../src/utils/object';
+// import {isExperimentOn} from '../../../src/experiments';
+// import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-render';
 
 class AmpRender extends BaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+  }
+
   /** @override */
   isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'amp-render'),
-      'Experiment "amp-render" is not turned on.'
-    );
+    // userAssert(
+    //   isExperimentOn(this.win, 'amp-render'),
+    //   'Experiment "amp-render" is not turned on.'
+    // );
     return super.isLayoutSupported(layout);
+  }
+
+  /** @override */
+  init() {
+    return dict({
+      'fetchFn': batchFetchJsonFor.bind(null, this.getAmpDoc(), this.element),
+    });
   }
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpRender, CSS);
+  AMP.registerElement(TAG, AmpRender);
 });

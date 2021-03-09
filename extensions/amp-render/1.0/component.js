@@ -16,38 +16,26 @@
 
 import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from '../../../src/preact';
-import {useStyles} from './component.jss';
+import {useEffect, useState} from '../../../src/preact';
+// import {useStyles} from './component.jss';
 
 /**
  * @param {!RenderDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function Render({exampleTagNameProp, ...rest}) {
-  // Examples of state and hooks
-  // DO NOT SUBMIT: This is example code only.
-  const [exampleValue, setExampleValue] = useState(0);
-  const exampleRef = useRef(null);
-  const styles = useStyles();
+export function Render({src, fetchFn, ...rest}) {
+  const [data, setData] = useState({});
 
-  useCallback(() => {/* Do things */}, [])
-  useEffect(() => {/* Do things */}, [])
-  useLayoutEffect(() => {/* Do things */}, [])
-  useMemo(() => {/* Do things */}, [])
+  useEffect(() => {
+    fetchFn(src).then((data) => {
+      setData(data);
+    });
+  }, [src, fetchFn]);
 
   return (
-    <ContainWrapper layout size paint {...rest} >
-      {{exampleTagNameProp}}
-      <div className={`${styles.exampleContentHidden}`}>
-        This is hidden
-      </div>
+    <ContainWrapper layout size paint {...rest}>
+      amp render body
+      {data}
     </ContainWrapper>
   );
 }

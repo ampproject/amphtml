@@ -26,13 +26,14 @@ BaseElement['Component'] = Render;
 /** @override */
 BaseElement['props'] = {
   'src': {attr: 'src'},
-  'credentials': {attr: 'credentials'},
-  'xssi-prefix': {attr: 'xssiPrefix'},
-  'binding': {attr: 'binding'},
+  'fetchFn': {attr: 'fetch-fn'},
+  // 'credentials': {attr: 'credentials'},
+  // 'xssi-prefix': {attr: 'xssiPrefix'},
+  // 'binding': {attr: 'binding'},
 };
 
 /** @override */
-BaseElement['passthrough'] = true;
+// BaseElement['passthrough'] = true;
 // BaseElement['passthroughNonEmpty'] = true;
 // BaseElement['children'] = {};
 
