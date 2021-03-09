@@ -84,8 +84,8 @@ export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
  * @param {!Element} attachmentEl
  * @return {!Element}
  */
-export const renderPageAttachmentUI = (pageEl, attachmentEl) => {
-  const openAttachmentEl = buildOpenAttachmentElement(pageEl);
+const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
+  const openAttachmentEl = buildOpenDefaultAttachmentElement(pageEl);
   // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
   const attachmentHref = attachmentEl.getAttribute('href');
   if (attachmentHref) {
