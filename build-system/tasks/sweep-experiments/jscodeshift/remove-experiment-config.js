@@ -37,22 +37,27 @@
  * @param {*} options
  * @return {*}
  */
-export default function transformer(file, api, options) {
+module.exports = function (file, api, options) {
   const j = api.jscodeshift;
 
   const {experimentId} = options;
 
   return j(file.source)
-    .find(j.ObjectExpression)
-    .filter(
-      (path) =>
-        j(path)
-          .find(j.Property, {
-            key: {type: 'Identifier', name: 'id'},
-            value: {type: 'Literal', value: experimentId},
-          })
-          .size() !== 0
+    .find(j.ObjectExpression, (node) =>
+      node.properties.some(
+        ({key, value}) => key.name === 'id' && value.value === experimentId
+      )
     )
+    .forEach((path) => {
+      const serializable = {};
+      path.value.properties.forEach(({key, value}) => {
+        // Only keep literal properties.
+        if ('name' in key && 'value' in value) {
+          serializable[key.name] = value.value;
+        }
+      });
+      api.report(JSON.stringify(serializable));
+    })
     .remove()
     .toSource();
-}
+};

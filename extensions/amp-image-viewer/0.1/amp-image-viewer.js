@@ -42,6 +42,10 @@ import {
   layoutRectLtwh,
   moveLayoutRect,
 } from '../../../src/layout-rect';
+import {
+  observeContentSize,
+  unobserveContentSize,
+} from '../../../src/utils/size-observer';
 import {setStyles} from '../../../src/style';
 import {srcsetFromElement} from '../../../src/srcset';
 
@@ -122,6 +126,8 @@ export class AmpImageViewer extends AMP.BaseElement {
 
     /** @private {?Promise} */
     this.loadPromise_ = null;
+
+    this.onResize_ = this.onResize_.bind(this);
   }
 
   /** @override */
@@ -146,23 +152,6 @@ export class AmpImageViewer extends AMP.BaseElement {
       this.sourceAmpImage_,
       this.element
     );
-  }
-
-  /** @override */
-  onMeasureChanged() {
-    // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
-    // we have something better.
-    const isScaled = closestAncestorElementBySelector(
-      this.element,
-      '[i-amphtml-scale-animation]'
-    );
-    if (isScaled) {
-      return;
-    }
-
-    if (this.loadPromise_) {
-      this.loadPromise_.then(() => this.resetImageDimensions_());
-    }
   }
 
   /** @override */
@@ -231,6 +220,7 @@ export class AmpImageViewer extends AMP.BaseElement {
   unlayoutCallback() {
     this.cleanupGestures_();
     this.loadPromise_ = null;
+    unobserveContentSize(this.element, this.onResize_);
     return true;
   }
 
@@ -319,6 +309,8 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.setSourceDimensions_(ampImg);
     this.srcset_ = srcsetFromElement(ampImg);
 
+    observeContentSize(this.element, this.onResize_);
+
     return this.mutateElement(() => {
       setStyles(dev().assertElement(this.image_), {
         top: 0,
@@ -332,6 +324,21 @@ export class AmpImageViewer extends AMP.BaseElement {
         ampImg.propagateAttributes(ARIA_ATTRIBUTES, this.image_);
       });
     });
+  }
+
+  /** @private */
+  onResize_() {
+    // TODO(#19259): Tracks a more generic way to do this. Remove once
+    // we have something better.
+    const isScaled = closestAncestorElementBySelector(
+      this.element,
+      '[i-amphtml-scale-animation]'
+    );
+    if (isScaled) {
+      return;
+    }
+
+    this.resetImageDimensions_();
   }
 
   /**

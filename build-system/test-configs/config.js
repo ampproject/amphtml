@@ -15,10 +15,20 @@
  */
 'use strict';
 
+/**
+ * @type
+ * Array<string | {
+ *   pattern: string,
+ *   included: boolean,
+ *   nocache: boolean,
+ *   watched: boolean
+ * }>
+ */
 const initTestsPath = ['test/_init_tests.js'];
 
-const fixturesExamplesPaths = [
-  'test-bin/test/fixtures/*.html',
+const karmaHtmlFixturesPath = 'test/fixtures/*.html';
+
+const fixturesExamplesPaths = [karmaHtmlFixturesPath].concat([
   {
     pattern: 'test/fixtures/served/*.html',
     included: false,
@@ -31,7 +41,7 @@ const fixturesExamplesPaths = [
     nocache: false,
     watched: true,
   },
-];
+]);
 
 const builtRuntimePaths = [
   {
@@ -66,6 +76,13 @@ const builtRuntimePaths = [
   },
 ];
 
+const karmaJsPaths = [
+  'test/**/*.js',
+  'ads/**/test/test-*.js',
+  'extensions/**/test/**/*.js',
+  'testing/**/*.js',
+];
+
 const commonUnitTestPaths = initTestsPath.concat(fixturesExamplesPaths);
 
 const commonIntegrationTestPaths = initTestsPath.concat(
@@ -77,12 +94,6 @@ const testPaths = commonIntegrationTestPaths.concat([
   'test/*/!(e2e)/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
-]);
-
-const a4aTestPaths = initTestsPath.concat([
-  'extensions/amp-a4a/**/test/**/*.js',
-  'extensions/amp-ad-network-*/**/test/**/*.js',
-  'ads/google/a4a/test/*.js',
 ]);
 
 const unitTestPaths = [
@@ -152,19 +163,21 @@ const presubmitGlobs = [
  * 2. Make sure it is listed in .vscode/settings.json (for auto-fix-on-save)
  */
 const prettifyGlobs = [
+  '.circleci/config.yml',
   '.codecov.yml',
   '.lando.yml',
   '.lgtm.yml',
-  '.travis.yml',
   '.prettierrc',
   '.renovaterc.json',
+  '.circleci/config.yml',
   '.vscode/settings.json',
   '.github/workflows/continuous-integration-workflow.yml',
   '**/*.json',
   '**/OWNERS',
   '**/*.md',
+  '!**/package*.json',
   '!.github/ISSUE_TEMPLATE/**',
-  '!**/{node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
+  '!**/{node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
 
 /**
@@ -173,7 +186,7 @@ const prettifyGlobs = [
  */
 const linkCheckGlobs = [
   '**/*.md',
-  '!**/{examples,node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
+  '!**/{examples,node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
 
 /**
@@ -208,7 +221,6 @@ const changelogIgnoreFileTypes = /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/;
 
 /** @const  */
 module.exports = {
-  a4aTestPaths,
   changelogIgnoreFileTypes,
   commonIntegrationTestPaths,
   commonUnitTestPaths,
@@ -216,6 +228,8 @@ module.exports = {
   e2eTestPaths,
   integrationTestPaths,
   jisonPaths,
+  karmaHtmlFixturesPath,
+  karmaJsPaths,
   linkCheckGlobs,
   lintGlobs,
   presubmitGlobs,

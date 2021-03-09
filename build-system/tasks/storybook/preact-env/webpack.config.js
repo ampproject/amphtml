@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 const path = require('path');
-const webpack = require('webpack');
+const {DefinePlugin} = require('webpack');
 
-module.exports = {
-  resolveLoader: {
+module.exports = ({config}) => {
+  config.resolveLoader = {
     modules: [
       path.join(__dirname, '../node_modules'),
       path.join(__dirname, '../../../../node_modules'),
     ],
-  },
-  resolve: {
+  };
+  config.resolve = {
     modules: [
       path.join(__dirname, '../node_modules'),
       path.join(__dirname, '../../../../node_modules'),
@@ -32,8 +32,8 @@ module.exports = {
       'react': 'preact/compat',
       'react-dom': 'preact/compat',
     },
-  },
-  module: {
+  };
+  config.module = {
     rules: [
       {
         test: /\.jsx?$/,
@@ -64,12 +64,9 @@ module.exports = {
         use: ['style-loader', 'css-loader'],
       },
     ],
-  },
-  plugins: [
-    new webpack.DefinePlugin({
-      // Replaced by minify-replace (babel) in the usual build pipeline
-      // build-system/babel-config/helpers.js#getReplacePlugin
-      IS_ESM: false,
-    }),
-  ],
+  };
+  // Replaced by minify-replace (babel) in the usual build pipeline
+  // build-system/babel-config/helpers.js#getReplacePlugin
+  config.plugins.push(new DefinePlugin({IS_ESM: false}));
+  return config;
 };

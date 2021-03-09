@@ -17,10 +17,10 @@
 import {getNextArrow, getPrevArrow, getSlides, sleep} from './helpers';
 
 describes.endtoend(
-  'AMP carousel advancing with multiple visible',
+  'amp-base-carousel - advancing with multiple visible slides',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/multi-visible-single-advance.amp.html',
+    version: '0.1',
+    fixture: 'amp-base-carousel/multi-visible-single-advance.amp.html',
     environments: ['single'],
   },
   async function (env) {
@@ -43,8 +43,8 @@ describes.endtoend(
       const slidesInView = 3;
       const slides = await getSlides(controller);
 
-      // Click `next` more than necessary (3 visible at a time)
-      for (let i = 0; i < slideCount; i++) {
+      // Click `next` to get to the end
+      for (let i = 0; i < slideCount - slidesInView; i++) {
         await controller.click(nextArrow);
         // Need to sleep due to amp-base-carousel buffering clicks
         await sleep(1000);

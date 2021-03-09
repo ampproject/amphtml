@@ -76,28 +76,10 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
   },
   {
-    id: 'amp-action-macro',
-    name: 'AMP extension for defining action macros',
-    spec: 'https://github.com/ampproject/amphtml/issues/19494',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/19495',
-  },
-  {
     id: 'ios-fixed-no-transfer',
     name: 'Remove fixed transfer from iOS 12.2 and up',
     spec: 'https://github.com/ampproject/amphtml/issues/22220',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22220',
-  },
-  {
-    id: 'chunked-amp',
-    name: "Split AMP's loading phase into chunks",
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
-  },
-  {
-    id: 'pump-early-frame',
-    name:
-      'If applicable, let the browser paint the current frame before ' +
-      'executing the callback.',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8237',
   },
   {
     id: 'web-worker',
@@ -129,12 +111,6 @@ export const EXPERIMENTS = [
     name: 'Visual storytelling in AMP (v0.1)',
     spec: 'https://github.com/ampproject/amphtml/issues/11329',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14357',
-  },
-  {
-    id: 'amp-story-responsive-units',
-    name: 'Scale pages in amp-story by rewriting responsive units',
-    spec: 'https://github.com/ampproject/amphtml/issues/15955',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
   },
   {
     id: 'amp-next-page',
@@ -186,12 +162,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24165',
   },
   {
-    id: 'fix-inconsistent-responsive-height-selection',
-    name: 'Fix inconsistent responsive height selection.',
-    spec: 'https://github.com/ampproject/amphtml/issues/24166',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24167',
-  },
-  {
     id: 'intersect-resources',
     name: 'Use IntersectionObserver for resource scheduling.',
     spec: 'https://github.com/ampproject/amphtml/issues/25428',
@@ -208,12 +178,6 @@ export const EXPERIMENTS = [
     name: 'AMP Analytics Visibility Trigger Improvements',
     spec: 'https://github.com/ampproject/amphtml/issues/26823',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26823',
-  },
-  {
-    id: 'analytics-chunks-inabox',
-    name: 'AMP Analytics Break long tasks to chunks (AMP Ads only)',
-    spec: 'https://github.com/ampproject/amphtml/issues/28435',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/28435',
   },
   {
     id: 'a4a-no-signing',
@@ -242,13 +206,18 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/30291',
   },
   {
-    id: 'fie-resources',
-    name: 'Separate FIE resource manager from the main doc',
-    spec: 'https://github.com/ampproject/amphtml/issues/31246',
+    id: 'tcf-post-message-proxy-api',
+    name: 'Proxy for TCF PostMessageAPI to send TCData to 3p iframes',
+    spec: 'https://github.com/ampproject/amphtml/issues/30385',
   },
   {
     id: 'dfp-render-on-idle-cwv-exp',
     name: 'To measure the CWV impact of ads idle rendering',
     spec: 'https://github.com/ampproject/amphtml/issues/31436',
+  },
+  {
+    id: 'amp-consent-granular-consent',
+    name: 'Client-side granular consent',
+    spec: 'https://github.com/ampproject/amphtml/issues/31607',
   },
 ];

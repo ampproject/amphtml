@@ -77,6 +77,12 @@ class AmpMowplayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
+    /**
+     * Prefix to embed URLs. Overridden on tests.
+     * @private @const {string}
+     */
+    this.baseUrl_ = 'https://mowplayer.com/watch/';
   }
 
   /**
@@ -121,7 +127,7 @@ class AmpMowplayer extends AMP.BaseElement {
     }
 
     return (this.videoIframeSrc_ =
-      'https://mowplayer.com/watch/' + this.mediaid_);
+      this.baseUrl_ + encodeURIComponent(this.mediaid_));
   }
 
   /** @override */

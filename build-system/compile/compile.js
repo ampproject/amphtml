@@ -17,7 +17,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 const del = require('del');
 const fs = require('fs-extra');
-const gap = require('gulp-append-prepend');
 const gulp = require('gulp');
 const gulpIf = require('gulp-if');
 const nop = require('gulp-nop');
@@ -32,7 +31,8 @@ const {
 const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {CLOSURE_SRC_GLOBS} = require('./sources');
 const {cpus} = require('os');
-const {isCiBuild} = require('../common/ci');
+const {green, cyan} = require('kleur/colors');
+const {log, logLocalDev} = require('../common/logging');
 const {postClosureBabel} = require('./post-closure-babel');
 const {preClosureBabel, handlePreClosureError} = require('./pre-closure-babel');
 const {sanitize} = require('./sanitize');
@@ -42,14 +42,33 @@ const {writeSourcemaps} = require('./helpers');
 const queue = [];
 let inProgress = 0;
 
-const MAX_PARALLEL_CLOSURE_INVOCATIONS = isCiBuild()
-  ? 10
-  : parseInt(argv.closure_concurrency, 10) || cpus().length;
+const MAX_PARALLEL_CLOSURE_INVOCATIONS =
+  parseInt(argv.closure_concurrency, 10) || cpus().length;
 
-// Compiles AMP with the closure compiler. This is intended only for
-// production use. During development we intend to continue using
-// babel, as it has much faster incremental compilation.
-exports.closureCompile = async function (
+/**
+ * Compiles AMP with the closure compiler. This is intended only for
+ * production use. During development we intend to continue using
+ * babel, as it has much faster incremental compilation.
+ *
+ * @param {string} entryModuleFilename
+ * @param {string} outputDir
+ * @param {string} outputFilename
+ * @param {{
+ *  esmPassCompilation?: string,
+ *  wrapper?: string,
+ *  extraGlobs?: string,
+ *  include3pDirectories?: boolean,
+ *  includePolyfills?: boolean,
+ *  externs?: string[],
+ *  compilationLevel?: string,
+ *  verboseLogging?: boolean,
+ *  typeCheckOnly?: boolean,
+ *  skipUnknownDepsCheck?: boolean,
+ * }} options
+ * @param {{startTime?: number}} timeInfo
+ * @return {Promise<void>}
+ */
+async function closureCompile(
   entryModuleFilename,
   outputDir,
   outputFilename,
@@ -59,6 +78,9 @@ exports.closureCompile = async function (
   // Rate limit closure compilation to MAX_PARALLEL_CLOSURE_INVOCATIONS
   // concurrent processes.
   return new Promise(function (resolve, reject) {
+    /**
+     * @return {void}
+     */
     function start() {
       inProgress++;
       compile(
@@ -76,6 +98,9 @@ exports.closureCompile = async function (
         (reason) => reject(reason)
       );
     }
+    /**
+     * @return {void}
+     */
     function next() {
       if (!queue.length) {
         return;
@@ -87,8 +112,11 @@ exports.closureCompile = async function (
     queue.push(start);
     next();
   });
-};
+}
 
+/**
+ * @return {void}
+ */
 function cleanupBuildDir() {
   del.sync('build/fake-module');
   del.sync('build/patched-module');
@@ -97,8 +125,26 @@ function cleanupBuildDir() {
   fs.mkdirsSync('build/fake-module/src/polyfills/');
   fs.mkdirsSync('build/fake-polyfills/src/polyfills');
 }
-exports.cleanupBuildDir = cleanupBuildDir;
 
+/**
+ * @param {string[]|string} entryModuleFilenames
+ * @param {string} outputDir
+ * @param {string} outputFilename
+ * @param {{
+ *  esmPassCompilation?: string,
+ *  wrapper?: string,
+ *  extraGlobs?: string,
+ *  include3pDirectories?: boolean,
+ *  includePolyfills?: boolean,
+ *  externs?: string[],
+ *  compilationLevel?: string,
+ *  verboseLogging?: boolean,
+ *  typeCheckOnly?: boolean,
+ *  skipUnknownDepsCheck?: boolean,
+ * }} options
+ * @param {{startTime?: number}} timeInfo
+ * @return {Promise<void>}
+ */
 function compile(
   entryModuleFilenames,
   outputDir,
@@ -106,13 +152,6 @@ function compile(
   options,
   timeInfo
 ) {
-  function shouldAppendSourcemappingURLText(file) {
-    // Do not append sourceMappingURL if its a sourcemap
-    return (
-      pathModule.extname(file.path) !== '.map' && options.esmPassCompilation
-    );
-  }
-
   const hideWarningsFor = [
     'third_party/amp-toolbox-cache-url/',
     'third_party/caja/',
@@ -139,7 +178,7 @@ function compile(
     'build-system/externs/preact.extern.js',
     'build-system/externs/weakref.extern.js',
   ];
-  const define = [`VERSION=${internalRuntimeVersion}`];
+  const define = [`VERSION=${internalRuntimeVersion}`, 'AMP_MODE=true'];
   if (argv.pseudo_names) {
     define.push('PSEUDO_NAMES=true');
   }
@@ -171,11 +210,6 @@ function compile(
     }
     if (options.include3pDirectories) {
       srcs.push('3p/**/*.js', 'ads/**/*.js');
-    }
-    // For ESM Builds, exclude ampdoc and ampshared css from inclusion.
-    // These styles are guaranteed to already be present on elgible documents.
-    if (options.esmPassCompilation) {
-      srcs.push('!build/ampdoc.css.js', '!build/ampshared.css.js');
     }
     // Many files include the polyfills, but we only want to deliver them
     // once. Since all files automatically wait for the main binary to load
@@ -217,6 +251,10 @@ function compile(
     }
     externs.push('build-system/externs/amp.multipass.extern.js');
 
+    /**
+     * TODO(#28387) write a type for this.
+     * @type {Object}
+     */
     /* eslint "google-camelcase/google-camelcase": 0*/
     const compilerOptions = {
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
@@ -365,12 +403,6 @@ function compile(
           )
         )
         .on('error', reject)
-        .pipe(
-          gulpIf(
-            shouldAppendSourcemappingURLText,
-            gap.appendText(`\n//# sourceMappingURL=${outputFilename}.map`)
-          )
-        )
         .pipe(postClosureBabel())
         .pipe(sanitize())
         .pipe(writeSourcemaps(options))
@@ -379,3 +411,27 @@ function compile(
     }
   });
 }
+
+/**
+ * @return {void}
+ */
+function printClosureConcurrency() {
+  log(
+    green('Using up to'),
+    cyan(MAX_PARALLEL_CLOSURE_INVOCATIONS.toString()),
+    green('concurrent invocations of closure compiler.')
+  );
+  if (!argv.closure_concurrency) {
+    logLocalDev(
+      green('⤷ Use'),
+      cyan('--closure_concurrency=N'),
+      green('to change this number.')
+    );
+  }
+}
+
+module.exports = {
+  cleanupBuildDir,
+  closureCompile,
+  printClosureConcurrency,
+};

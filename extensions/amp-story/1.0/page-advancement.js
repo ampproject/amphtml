@@ -520,7 +520,7 @@ export class ManualAdvancement extends AdvancementConfig {
 
     if (
       this.isInStoryPageSideEdge_(event, pageRect) ||
-      this.isTooLargeOnPage_(event, target, pageRect)
+      this.isTooLargeOnPage_(event, pageRect)
     ) {
       event.preventDefault();
       return false;
@@ -597,18 +597,18 @@ export class ManualAdvancement extends AdvancementConfig {
    * Checks if click target is too large on the page and preventing navigation.
    * If yes, the link is ignored & logged.
    * @param {!Event} event
-   * @param {!Element} target
    * @param {!ClientRect} pageRect
    * @return {boolean}
    * @private
    */
-  isTooLargeOnPage_(event, target, pageRect) {
+  isTooLargeOnPage_(event, pageRect) {
     // Clicks with coordinates (0,0) are assumed to be from keyboard or Talkback.
     // These clicks should never be overriden for navigation.
     if (event.clientX === 0 && event.clientY === 0) {
       return false;
     }
 
+    const target = dev().assertElement(event.target);
     const targetRect = target./*OK*/ getBoundingClientRect();
     if (
       (targetRect.height * targetRect.width) /
@@ -1007,10 +1007,9 @@ export class MediaBasedAdvancement extends AdvancementConfig {
     super.start();
 
     // Prevents race condition when checking for video interface classname.
-    (this.element_.whenBuilt
-      ? this.element_.whenBuilt()
-      : Promise.resolve()
-    ).then(() => this.startWhenBuilt_());
+    (this.element_.build ? this.element_.build() : Promise.resolve()).then(() =>
+      this.startWhenBuilt_()
+    );
   }
 
   /** @private */

@@ -20,32 +20,35 @@ const {
   RuntimeTestRunner,
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
+const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
 const {compileJison} = require('./compile-jison');
 const {css} = require('./css');
 const {getUnitTestsToRun} = require('./runtime-test/helpers-unit');
 const {maybePrintArgvMessages} = require('./runtime-test/helpers');
-const {vendorConfigs} = require('./vendor-configs');
 
 class Runner extends RuntimeTestRunner {
+  /**
+   *
+   * @param {RuntimeTestConfig} config
+   */
   constructor(config) {
     super(config);
   }
 
   /** @override */
   async maybeBuild() {
-    await vendorConfigs();
-
-    if (!argv.nobuild) {
-      await css();
-      await compileJison();
-    }
+    await analyticsVendorConfigs();
+    await css();
+    await compileJison();
   }
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function unit() {
   maybePrintArgvMessages();
-
-  if (argv.local_changes && !getUnitTestsToRun()) {
+  if (argv.local_changes && !(await getUnitTestsToRun())) {
     return;
   }
 
@@ -74,7 +77,6 @@ unit.flags = {
   'ie': '  Runs tests on IE',
   'local_changes':
     '  Run unit tests directly affected by the files changed in the local branch',
-  'nobuild': '  Skips build step',
   'nohelp': '  Silence help messages that are printed prior to test run',
   'report': '  Write test result report to a local file',
   'safari': '  Runs tests on Safari',

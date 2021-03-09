@@ -22,7 +22,7 @@ import {
   tryDecodeUriComponent,
 } from './url';
 import {urls} from './config';
-import {userAssert} from './log';
+import {pureUserAssert as userAssert} from './core/assert';
 
 const TEST_COOKIE_NAME = '-test-amp-cookie-tmp';
 
@@ -68,7 +68,6 @@ export function getCookie(win, name) {
  * This method should not be inlined to prevent TryCatch deoptimization.
  * @param {!Window} win
  * @return {string}
- * @noinline
  */
 function tryGetDocumentCookie_(win) {
   try {

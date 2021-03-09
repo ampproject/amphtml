@@ -1,4 +1,4 @@
-name: Cross-Browser Tests
+name: GitHub Actions
 on:
   push:
     branches:
@@ -9,22 +9,17 @@ on:
 
 jobs:
   build:
+    if: github.repository == 'ampproject/amphtml'
     strategy:
       matrix:
         platform: [ubuntu-latest, macos-latest, windows-latest]
-        node-version: [12.x]
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Set Up Environment
-        if: ${{ matrix.platform == 'macos-latest' || matrix.platform == 'ubuntu-latest'}}
-        run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
-      - name: Install Gulp CLI
-        run: npm install --global --force gulp-cli
       - name: Install Dependencies
-        run: npm install
+        run: bash ./.github/workflows/install_dependencies.sh
       - name: Build and Test
         run: node build-system/pr-check/cross-browser-tests.js

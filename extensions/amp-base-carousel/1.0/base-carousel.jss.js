@@ -16,6 +16,10 @@
 
 import {createUseStyles} from 'react-jss';
 
+const carousel = {
+  overscrollBehavior: 'contain',
+};
+
 const scrollContainer = {
   position: 'relative',
   boxSizing: 'content-box !important',
@@ -37,6 +41,7 @@ const horizontalScroll = {
   scrollSnapType: 'x mandatory',
   overflowX: 'auto',
   overflowY: 'hidden',
+  touchAction: 'pan-x pinch-zoom',
   // Hide scrollbar.
   '&$hideScrollbar': {
     paddingBottom: '20px',
@@ -48,6 +53,7 @@ const verticalScroll = {
   scrollSnapTypeY: 'mandatory', // Firefox/IE
   scrollSnapType: 'y mandatory',
   overflowX: 'hidden',
+  touchAction: 'pan-y pinch-zoom',
 };
 
 /*
@@ -85,9 +91,18 @@ const slideElement = {
   justifyContent: 'center',
 };
 
+const startAlign = {};
+
+const centerAlign = {};
+
 const enableSnap = {
-  scrollSnapAlign: 'start',
   scrollSnapStop: 'always',
+  '&$startAlign': {
+    scrollSnapAlign: 'start',
+  },
+  '&$centerAlign': {
+    scrollSnapAlign: 'center',
+  },
 };
 
 const disableSnap = {
@@ -248,12 +263,15 @@ const arrowIcon = {
 };
 
 const JSS = {
+  carousel,
   scrollContainer,
   hideScrollbar,
   horizontalScroll,
   verticalScroll,
   slideElement,
   thumbnails,
+  startAlign,
+  centerAlign,
   enableSnap,
   disableSnap,
   slideSizing,

@@ -16,13 +16,13 @@
 'use strict';
 
 const closureCompiler = require('@ampproject/google-closure-compiler');
-const log = require('fancy-log');
 const path = require('path');
 const pumpify = require('pumpify');
 const sourcemaps = require('gulp-sourcemaps');
-const {cyan, red, yellow} = require('ansi-colors');
+const {cyan, red, yellow} = require('kleur/colors');
 const {EventEmitter} = require('events');
 const {highlight} = require('cli-highlight');
+const {log} = require('../common/logging');
 
 let compilerErrors = '';
 
@@ -100,8 +100,8 @@ function logError(message) {
  * file relative to the sourcemap. Since the sourcemap for `src/foo.js` "lives"
  * in `src/`, it ends up resolving to `src/src/foo.js`.
  *
- * @param {!Stream} closureStream
- * @return {!Stream}
+ * @param {!NodeJS.WritableStream} closureStream
+ * @return {!NodeJS.WritableStream}
  */
 function makeSourcemapsRelative(closureStream) {
   const relativeSourceMap = sourcemaps.mapSources((source, file) => {
@@ -114,7 +114,7 @@ function makeSourcemapsRelative(closureStream) {
 
 /**
  * @param {Array<string>} compilerOptions
- * @return {stream.Writable}
+ * @return {NodeJS.WritableStream}
  */
 function gulpClosureCompile(compilerOptions) {
   const pluginOptions = {

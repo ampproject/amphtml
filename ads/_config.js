@@ -24,7 +24,6 @@ import {jsonConfiguration} from '../src/json';
  *   clientIdScope: (string|undefined),
  *   clientIdCookieName: (string|undefined),
  *   consentHandlingOverride: (boolean|undefined),
- *   remoteHTMLDisabled: (boolean|undefined),
  *   fullWidthHeightRatio: (number|undefined),
  * }}
  */
@@ -150,6 +149,11 @@ const adConfig = jsonConfiguration({
     preconnect: ['https://inv-nets.admixer.net', 'https://cdn.admixer.net'],
   },
 
+  'adnuntius': {
+    prefetch: 'https://cdn.adnuntius.com/adn.js',
+    renderStartImplemented: true,
+  },
+
   'adocean': {
     consentHandlingOverride: true,
   },
@@ -168,6 +172,11 @@ const adConfig = jsonConfiguration({
   'adpon': {
     prefetch: 'https://ad.adpon.jp/amp.js',
     clientIdScope: 'AMP_ECID_ADPON',
+  },
+
+  'adpushup': {
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: 'https://cdn.adpushup.com',
   },
 
   'adreactor': {},
@@ -443,11 +452,6 @@ const adConfig = jsonConfiguration({
     ],
   },
 
-  'eas': {
-    prefetch: 'https://amp.emediate.eu/amp.v0.js',
-    renderStartImplemented: true,
-  },
-
   'empower': {
     prefetch: 'https://cdn.empower.net/sdk/amp-ad.min.js',
     renderStartImplemented: true,
@@ -497,6 +501,8 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://t.felmat.net/js/fmamp.js',
     renderStartImplemented: true,
   },
+
+  'finative': {},
 
   'firstimpression': {
     prefetch: 'https://ecdn.firstimpression.io/static/js/fiamp.js',
@@ -772,6 +778,15 @@ const adConfig = jsonConfiguration({
   },
 
   'my6sense': {
+    renderStartImplemented: true,
+  },
+
+  'myfinance': {
+    preconnect: [
+      'https://a.myfidevs.io',
+      'https://static.myfinance.com',
+      'https://www.myfinance.com',
+    ],
     renderStartImplemented: true,
   },
 
@@ -1217,6 +1232,12 @@ const adConfig = jsonConfiguration({
 
   'vdoai': {
     prefetch: 'https://a.vdo.ai/core/dependencies_amp/vdo.min.js',
+    renderStartImplemented: true,
+  },
+
+  'verizonmedia': {
+    prefetch: 'https://jac.yahoosandbox.com/amp/jac.js',
+    preconnect: ['https://jill.fc.yahoo.com'],
     renderStartImplemented: true,
   },
 

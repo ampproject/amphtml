@@ -20,8 +20,7 @@ const pageHeight = 420; // unusually small to force a scrollbar
 describes.endtoend(
   'AMP list load-more=auto',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-list/load-more-auto.amp.html',
+    fixture: 'amp-list/load-more-auto.amp.html',
     initialRect: {width: pageWidth, height: pageHeight},
     // TODO(cathyxz, cvializ): figure out why 'viewer' only shows 'FALLBACK'
     // TODO(cathyxz): figure out why shadow-demo doesn't work

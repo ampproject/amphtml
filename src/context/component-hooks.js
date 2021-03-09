@@ -15,8 +15,8 @@
  */
 
 import {areEqualOrdered} from '../utils/array';
-import {devAssert} from '../log';
-import {protectedNoInline} from './scheduler';
+import {pureDevAssert as devAssert} from '../core/assert';
+import {tryCallback} from './scheduler';
 
 const EMPTY_DEPS = [];
 
@@ -158,7 +158,7 @@ export function useSyncEffect(callback, deps = undefined) {
   if (cleanup) {
     cleanupRef.current = null;
     component.popCleanup(cleanup);
-    protectedNoInline(cleanup);
+    tryCallback(cleanup);
   }
 
   const newCleanup = callback();

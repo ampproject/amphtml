@@ -20,6 +20,13 @@ This document provides details for testing and building your AMP code.
 
 **Contents**
 
+<!--
+  (Do not remove or edit this comment.)
+
+  This table-of-contents is automatically generated. To generate it, run:
+    gulp markdown-toc --fix
+-->
+
 -   [Testing commands](#testing-commands)
 -   [Manual testing](#manual-testing)
     -   [Serve Mode](#serve-mode)
@@ -30,18 +37,24 @@ This document provides details for testing and building your AMP code.
     -   [Chrome extension](#chrome-extension)
 -   [Visual Diff Tests](#visual-diff-tests)
     -   [Failing Tests](#failing-tests)
-    -   [Running Visual Diff Tests Locally](#running-visual-diff-tests-locally)
+    -   [Flaky Tests](#flaky-tests)
+    -   [How Are Tests Executed](#how-are-tests-executed)
+    -   [Adding and Modifying Visual Diff Tests](#adding-and-modifying-visual-diff-tests)
+        -   [One-time Setup](#one-time-setup)
+        -   [Writing the Test](#writing-the-test)
 -   [Isolated Component Testing](#isolated-component-testing)
 -   [Testing on devices](#testing-on-devices)
     -   [Testing with ngrok](#testing-with-ngrok)
     -   [Testing with Firebase](#testing-with-firebase)
--   [End-to-end Tests](#end-to-end-tests)
+        -   [Testing Ads](#testing-ads)
+-   [End-to-End Tests](#end-to-end-tests)
+-   [Performance Testing Node Build Tools](#performance-testing-node-build-tools)
 
 ## Testing commands
 
 Before running these commands, make sure you have Node.js and Gulp installed. For installation instructions, see the [One-time setup](getting-started-quick.md#one-time-setup) section in the Quick Start guide.
 
-**Pro tip:** To see a full listing of `gulp` commands and their flags, run `gulp help`.
+**Pro tip:** To see a full listing of `gulp` commands and their flags, run `gulp --tasks`.
 
 | Command                                                   | Description                                                                                                                                                                                                                                            |
 | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -82,9 +95,9 @@ Before running these commands, make sure you have Node.js and Gulp installed. Fo
 | `gulp clean`                                              | Removes build output.                                                                                                                                                                                                                                  |
 | `gulp css`                                                | Recompiles css to the build directory and builds the embedded css into js files for the AMP library.                                                                                                                                                   |
 | `gulp compile-jison`                                      | Compiles jison parsers for extensions to build directory.                                                                                                                                                                                              |
-| `gulp pr-check`                                           | Runs all the Travis CI checks locally.                                                                                                                                                                                                                 |
-| `gulp pr-check --nobuild`                                 | Runs all the Travis CI checks locally, but skips the `gulp build` step.                                                                                                                                                                                |
-| `gulp pr-check --files=<test-files-path-glob>`            | Runs all the Travis CI checks locally, and restricts tests to the files provided.                                                                                                                                                                      |
+| `gulp pr-check`                                           | Runs all the CircleCI checks locally.                                                                                                                                                                                                                  |
+| `gulp pr-check --nobuild`                                 | Runs all the CircleCI checks locally, but skips the `gulp build` step.                                                                                                                                                                                 |
+| `gulp pr-check --files=<test-files-path-glob>`            | Runs all the CircleCI checks locally, and restricts tests to the files provided.                                                                                                                                                                       |
 | `gulp unit`                                               | Runs the unit tests in Chrome (doesn't require the AMP library to be built).                                                                                                                                                                           |
 | `gulp unit --local_changes`                               | Runs the unit tests directly affected by the files changed in the local branch in Chrome.                                                                                                                                                              |
 | `gulp integration`                                        | Runs the integration tests in Chrome after building the unminified runtime with the `prod` version of `AMP_CONFIG`.                                                                                                                                    |
@@ -92,7 +105,6 @@ Before running these commands, make sure you have Node.js and Gulp installed. Fo
 | `gulp integration --config=<config>`                      | Same as above, but `config` can be `prod` or `canary`. (Defaults to `prod`.)                                                                                                                                                                           |
 | `gulp integration --nobuild`                              | Same as above, but skips building the runtime.                                                                                                                                                                                                         |
 | `gulp [unit\|integration] --verbose`                      | Runs tests in Chrome with logging enabled.                                                                                                                                                                                                             |
-| `gulp [unit\|integration] --nobuild`                      | Runs tests without re-build.                                                                                                                                                                                                                           |
 | `gulp [unit\|integration] --coverage`                     | Runs code coverage tests. After running, the report will be available at test/coverage/index.html                                                                                                                                                      |
 | `gulp [unit\|integration] --watch`                        | Watches for changes in files, runs corresponding test(s) in Chrome.                                                                                                                                                                                    |
 | `gulp [unit\|integration] --watch --verbose`              | Same as `watch`, with logging enabled.                                                                                                                                                                                                                 |
@@ -106,8 +118,7 @@ Before running these commands, make sure you have Node.js and Gulp installed. Fo
 | `gulp serve --compiled`                                   | Same as `serve`, but serves minified binaries.                                                                                                                                                                                                         |
 | `gulp serve --cdn`                                        | Same as `serve`, but serves CDN binaries.                                                                                                                                                                                                              |
 | `gulp serve --rtv <rtv_number>`                           | Same as `serve`, but serves binaries with the given 15 digit RTV.                                                                                                                                                                                      |
-| `gulp serve --new_server`                                 | Same as `serve`, but uses new Typescript based transforms. _Still under active development._                                                                                                                                                           |
-| `gulp serve --new_server --esm`                           | Same as `serve`, but serves esm (module) binaries. Requires the new Typescript based transforms. _Still under active development._                                                                                                                     |
+| `gulp serve --esm`                                        | Same as `serve`, but serves esm (module) binaries. Uses the new Typescript based transforms. _Still under active development._                                                                                                                         |
 | `gulp serve --quiet`                                      | Same as `serve`, with logging silenced.                                                                                                                                                                                                                |
 | `gulp serve --port <port>`                                | Same as `serve`, but uses a port number other than the default of 8000.                                                                                                                                                                                |
 | `gulp check-types`                                        | Verifies that there are no errors associated with Closure typing. Run automatically upon push.                                                                                                                                                         |
@@ -156,7 +167,7 @@ There are 5 serving modes:
 -   COMPILED mode serves minified AMP. This is closer to what is served in production on the stable channel. Serve this mode by running `gulp --compiled`.
 -   CDN mode serves stable channel binaries. Local changes are not served in this mode. Serve CDN mode by running `gulp serve --cdn`.
 -   RTV mode serves the bundle from the given RTV number (a 15 digit number). E.g. `001907161745080`. Serve RTV mode by running `gulp serve --rtv <rtv_number>`
--   ESM mode serves the esm (module) binaries. First run `gulp dist --fortesting --esm` and then serve esm mode by running `gulp serve --new_server --esm`. _This mode is new, and under active development._
+-   ESM mode serves the esm (module) binaries. First run `gulp dist --fortesting --esm` and then serve esm mode by running `gulp serve --esm`. _This mode is new, and under active development._
 
 To switch serving mode during runtime, go to http://localhost:8000/serve_mode=MODE and set `MODE` to one of the following values: `default`, `compiled`, `cdn` or `<RTV_NUMBER>`.
 
@@ -233,7 +244,7 @@ For testing documents on arbitrary URLs with your current local version of the A
 
 ## Visual Diff Tests
 
-In addition to building the AMP runtime and running `gulp [unit|integration]`, the automatic test run on Travis includes a set of visual diff tests to make sure a new commit to `master` does not result in unintended changes to how pages are rendered. The tests load a few well-known pages in a browser and compare the results with known good versions of the same pages.
+In addition to building the AMP runtime and running `gulp [unit|integration]`, the automatic test run on CircleCI includes a set of visual diff tests to make sure a new commit to `master` does not result in unintended changes to how pages are rendered. The tests load a few well-known pages in a browser and compare the results with known good versions of the same pages.
 
 The technology stack used is:
 
@@ -242,7 +253,7 @@ The technology stack used is:
 -   [Percy-Puppeteer](https://github.com/percy/percy-puppeteer), a framework that integrates Puppeteer with Percy
 -   [Headless Chrome](https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md), the Chrome/Chromium browser in headless mode
 
-The [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository on GitHub is linked to the [Percy project](https://percy.io/ampproject/amphtml) of the same name. All PRs will show a check called `percy/amphtml` in addition to the `continuous-integration/travis-ci/pr` check. If your PR results in visual diff(s), clicking on the `details` link will show you the snapshots with the diffs highlighted.
+The [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository on GitHub is linked to the [Percy project](https://percy.io/ampproject/amphtml) of the same name. You will see a check called `percy/amphtml` on your PR. If your PR results in visual diff(s), clicking on the `details` link will show you the snapshots with the diffs highlighted.
 
 ### Failing Tests
 
@@ -250,7 +261,7 @@ When a test run fails due to visual diffs being present, click the `details` lin
 
 ### Flaky Tests
 
-If a Percy test flakes and you would like to trigger a rerun, you can't do that from within Percy. Instead, from your PR on GitHub open up the "Details" for the `continuous-integration/travis-ci/pr` check to load the Travis run for your PR. There you should see a "passed" test shard labeled "Visual Diff Tests". Click the "Restart Job" icon on just that shard to trigger a rerun on Percy.
+If a Percy test flakes and you would like to trigger a rerun, you can't do that from within Percy. Instead, from your PR on GitHub, click on the `details` link next to `CircleCI PR Check` and then click on `Visual Diff Tests` to load the CircleCI run for your PR. On the job page, click the `Rerun workflow from start` button to rerun just that job, which will generate a fresh visual diff build on Percy.
 
 ### How Are Tests Executed
 

@@ -23,6 +23,7 @@ import {dev, devAssert} from '../log';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
+  layoutSizeFromRect,
   moveLayoutRect,
   rectsOverlap,
 } from '../layout-rect';
@@ -136,10 +137,10 @@ export class Resource {
     /** @private {number} */
     this.id_ = id;
 
-    /** @export @const {!AmpElement} */
+    /** @const {!AmpElement} */
     this.element = element;
 
-    /** @export @const {string} */
+    /** @const {string} */
     this.debugid = element.tagName.toLowerCase() + '#' + id;
 
     /** @const {!Window} */
@@ -340,7 +341,7 @@ export class Resource {
       return null;
     }
     this.isBuilding_ = true;
-    return this.element.build().then(
+    return this.element.buildInternal().then(
       () => {
         this.isBuilding_ = false;
         // With IntersectionObserver, measure can happen before build
@@ -377,13 +378,6 @@ export class Resource {
     if (!isBlockedByConsent(reason)) {
       dev().error(TAG, 'failed to build:', this.debugid, reason);
     }
-  }
-
-  /**
-   * Optionally hides or shows the element depending on the media query.
-   */
-  applySizesAndMediaQuery() {
-    this.element.applySizesAndMediaQuery();
   }
 
   /**
@@ -653,6 +647,14 @@ export class Resource {
   }
 
   /**
+   * Returns a previously measured layout size.
+   * @return {!../layout-rect.LayoutSizeDef}
+   */
+  getLayoutSize() {
+    return layoutSizeFromRect(this.layoutBox_);
+  }
+
+  /**
    * Returns a previously measured layout box adjusted to the viewport. This
    * mainly affects fixed-position elements that are adjusted to be always
    * relative to the document position in the viewport.
@@ -672,15 +674,6 @@ export class Resource {
       viewport.getScrollLeft(),
       viewport.getScrollTop()
     );
-  }
-
-  /**
-   * Returns a previously measured layout box relative to the page. The
-   * fixed-position elements are relative to the top of the document.
-   * @return {!../layout-rect.LayoutRectDef}
-   */
-  getPageLayoutBox() {
-    return this.layoutBox_;
   }
 
   /**
@@ -892,9 +885,13 @@ export class Resource {
    * Undoes `layoutScheduled`.
    */
   layoutCanceled() {
-    this.state_ = this.hasBeenMeasured()
-      ? ResourceState.READY_FOR_LAYOUT
-      : ResourceState.NOT_LAID_OUT;
+    if (this.intersect_) {
+      this.state_ = ResourceState.READY_FOR_LAYOUT;
+    } else {
+      this.state_ = this.hasBeenMeasured()
+        ? ResourceState.READY_FOR_LAYOUT
+        : ResourceState.NOT_LAID_OUT;
+    }
   }
 
   /**
@@ -953,12 +950,15 @@ export class Resource {
 
     const promise = new Promise((resolve, reject) => {
       Services.vsyncFor(this.hostWin).mutate(() => {
+        let callbackResult;
         try {
-          resolve(this.element.layoutCallback(signal));
+          callbackResult = this.element.layoutCallback(signal);
         } catch (e) {
           reject(e);
         }
+        Promise.resolve(callbackResult).then(resolve, reject);
       });
+      signal.onabort = () => reject(cancellation());
     }).then(
       () => this.layoutComplete_(true, signal),
       (reason) => this.layoutComplete_(false, signal, reason)
@@ -1020,6 +1020,9 @@ export class Resource {
    * @return {!Promise}
    */
   loadedOnce() {
+    if (this.element.V1()) {
+      return this.element.whenLoaded();
+    }
     return this.loadPromise_;
   }
 

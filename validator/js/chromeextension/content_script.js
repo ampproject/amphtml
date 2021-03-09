@@ -53,13 +53,16 @@ function getAmpCacheHref() {
 
 /**
  * Determine if <link rel="amphtml" href="..."> exists in the page and
- * return the href's value if it does. Otherwise returns empty string.
+ * return the href's value iff it starts with http:// or https://.
+ * Otherwise returns empty string.
  *
  * @return {string}
  * @private
  */
 function getAmpHtmlLinkHref() {
   let ampHtmlLinkHref = '';
+  // URL must begin with http:// or https://
+  const validUrlPrefixRe = /^[\s\xa0]*https?:\/\//;
   const headLinks = document.head.getElementsByTagName('link');
   if (headLinks.length > 0) {
     for (const index in headLinks) {
@@ -67,7 +70,8 @@ function getAmpHtmlLinkHref() {
       if (link instanceof HTMLLinkElement &&
           link.hasAttribute('rel') &&
           globals.amphtmlRegex.test(link.getAttribute('rel')) &&
-          link.hasAttribute('href')) {
+          link.hasAttribute('href') &&
+          validUrlPrefixRe.test(link.getAttribute('href'))) {
         ampHtmlLinkHref = link.getAttribute('href');
         break;
       }

@@ -1076,6 +1076,16 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
         expect(url).to.not.match(/(\?|&)gdpr=(&|$)/);
       }));
 
+    it('should include addtl_consent', () =>
+      impl.getAdUrl({additionalConsent: 'abc123'}).then((url) => {
+        expect(url).to.match(/(\?|&)addtl_consent=abc123(&|$)/);
+      }));
+
+    it('should not include addtl_consent, if additionalConsent is missing', () =>
+      impl.getAdUrl({}).then((url) => {
+        expect(url).to.not.match(/(\?|&)addtl_consent=(&|$)/);
+      }));
+
     it('should include msz/psz/fws if in holdback control', () => {
       env.sandbox
         .stub(impl, 'randomlySelectUnsetExperiments_')
@@ -1098,12 +1108,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       });
     });
 
-    it('does not set ptt parameter by default', () =>
-      expect(impl.getAdUrl()).to.not.eventually.match(/(\?|&)ptt=(&|$)/));
-    it('sets ptt parameter', () => {
-      impl.experimentIds = ['21068094'];
-      return expect(impl.getAdUrl()).to.eventually.match(/(\?|&)ptt=13(&|$)/);
-    });
+    it('sets ptt parameter', () =>
+      expect(impl.getAdUrl()).to.eventually.match(/(\?|&)ptt=13(&|$)/));
   });
 
   describe('#getPageParameters', () => {

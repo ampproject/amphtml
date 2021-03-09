@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Option, Selector} from '../selector';
+import {Option, Selector} from '../component';
 import {select, withKnobs} from '@storybook/addon-knobs';
 import {useState} from '../../../../src/preact';
 import {withA11y} from '@storybook/addon-a11y';
@@ -148,7 +148,12 @@ export const optionItems = () => {
 
 export const multiselect = () => {
   return (
-    <Selector as="ul" multiple aria-label="Multiselect menu">
+    <Selector
+      as="ul"
+      multiple
+      aria-label="Multiselect menu"
+      defaultValue={['2']}
+    >
       <Option as="li" option="1">
         Option 1
       </Option>

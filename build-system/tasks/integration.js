@@ -16,77 +16,30 @@
 'using strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const fs = require('fs-extra');
-const globby = require('globby');
-const log = require('fancy-log');
-const pathModule = require('path');
 const {
   RuntimeTestRunner,
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
-const {buildNewServer} = require('../server/typescript-compile');
 const {buildRuntime} = require('../common/utils');
-const {cyan, yellow} = require('ansi-colors');
 const {maybePrintArgvMessages} = require('./runtime-test/helpers');
 
-const INTEGRATION_FIXTURES = [
-  './test/fixtures/**/*.html',
-  '!./test/fixtures/e2e',
-  '!./test/fixtures/served',
-  '!./test/fixtures/performance',
-];
-
-let htmlTransform;
-
 class Runner extends RuntimeTestRunner {
+  /**
+   * @param {RuntimeTestConfig} config
+   */
   constructor(config) {
     super(config);
   }
 
   /** @override */
   async maybeBuild() {
-    if (argv.nobuild) {
-      return;
+    if (!argv.nobuild) {
+      await buildRuntime();
     }
-    await buildRuntime();
-  }
-}
-
-async function buildTransformedHtml() {
-  const filePaths = await globby(INTEGRATION_FIXTURES);
-  fs.ensureDirSync('./test-bin/');
-  for (const filePath of filePaths) {
-    const normalizedFilePath = pathModule.normalize(filePath);
-    await transformAndWriteToTestFolder(normalizedFilePath);
-  }
-}
-
-async function transformAndWriteToTestFolder(filePath) {
-  try {
-    const html = await htmlTransform(filePath);
-    const fullFilePath = `./test-bin/${filePath}`;
-    const targetDir = pathModule.dirname(fullFilePath);
-    fs.ensureDirSync(targetDir);
-    fs.writeFileSync(fullFilePath, html);
-  } catch (e) {
-    log(
-      yellow('WARNING:'),
-      cyan(
-        `${filePath} could not be transformed by the postHTML ` +
-          'pipeline. Falling back to copying.'
-      ),
-      yellow(`Reason: ${e.message}`)
-    );
-    fs.copySync(filePath, `./test-bin/${filePath}`);
   }
 }
 
 async function integration() {
-  buildNewServer();
-  htmlTransform = require('../server/new-server/transforms/dist/transform')
-    .transform;
-  await buildTransformedHtml();
-
   maybePrintArgvMessages();
 
   const config = new RuntimeTestConfig('integration');
@@ -114,6 +67,9 @@ integration.flags = {
     'works in non headless mode.',
   'edge': '  Runs tests on Edge',
   'esm': '  Runs against module(esm) build',
+  'define_experiment_constant':
+    '  Transforms tests with the EXPERIMENT constant set to true',
+  'experiment': '  Experiment being tested (used for status reporting)',
   'firefox': '  Runs tests on Firefox',
   'files': '  Runs tests for specific files',
   'grep': '  Runs tests that match the pattern',

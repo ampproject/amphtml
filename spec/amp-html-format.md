@@ -572,13 +572,15 @@ All AMP template elements must go through AMP security review before they can be
 
 Currently, the following SVG elements are allowed:
 
--   basics: "g", "glyph", "glyphRef", "image", "marker", "metadata", "path", "solidcolor", "svg", "switch", "view"
--   shapes: "circle", "ellipse", "line", "polygon", "polyline", "rect"
--   text: "text", "textPath", "tref", "tspan"
--   rendering: "clipPath", "filter", "hkern", "linearGradient", "mask", "pattern", "radialGradient", "vkern"
--   special: "defs" (all children above are allowed here), "symbol", "use"
--   filter: "feColorMatrix", "feComposite", "feGaussianBlur", "feMerge", "feMergeNode", "feOffset", "foreignObject"
--   ARIA: "desc", "title"
+-   [container elements](https://svgwg.org/svg2-draft/struct.html#TermContainerElement): "clipPath", "defs", "g", "marker", "mask", "pattern", "svg", "switch", and "symbol".
+-   [structural elements](https://svgwg.org/svg2-draft/struct.html#TermStructuralElement): "defs", "g", "svg", "symbol", and "use".
+-   [graphics elements](https://svgwg.org/svg2-draft/struct.html#TermGraphicsElement): "circle", "ellipse", "foreignObject", "image", "line", "path", "polygon", "polyline", "rect", "text", "textPath", and "tspan".
+-   [text content elements](https://svgwg.org/svg2-draft/text.html#TermTextContentElement): "text", "textPath", and "tspan".
+-   [paint server elements](https://svgwg.org/svg2-draft/painting.html#TermPaintServerElement): "linearGradient", "pattern", and "radialGradient".
+-   [descriptive elements](https://svgwg.org/svg2-draft/struct.html#TermDescriptiveElement): "desc", "metadata", and "title".
+-   [filter primitive elements](https://drafts.fxtf.org/filter-effects/#filter-primitive): "feColorMatrix", "feComposite", "feGaussianBlur", "feMerge", "feMergeNode", and "feOffset".
+-   uncategorized elements: "view", and "filter".
+-   deprecated elements: ["glyph"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/glyph), ["glyphRef"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/glyphRef), ["hkern"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/hkern), ["solidcolor"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/solidcolor), ["tref"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/tref), and ["vkern"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/vkern).
 
 As well as these attributes:
 

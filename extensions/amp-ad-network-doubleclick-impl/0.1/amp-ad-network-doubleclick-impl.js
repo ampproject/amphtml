@@ -21,6 +21,7 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import '../../../src/service/real-time-config/real-time-config-impl';
+import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
 import {
   AmpA4A,
   ConsentTupleDef,
@@ -51,12 +52,10 @@ import {
 } from '../../../ads/google/a4a/utils';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
-import {FIE_RESOURCES_EXP} from '../../../src/experiments/fie-resources-exp';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
 } from './flexible-ad-slot-utils';
-import {INTERSECT_RESOURCES_EXP} from '../../../src/experiments/intersect-resources-exp';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
 import {RTC_VENDORS} from '../../../src/service/real-time-config/callout-vendors';
@@ -64,6 +63,7 @@ import {
   RefreshManager, // eslint-disable-line no-unused-vars
   getRefreshManager,
 } from '../../amp-a4a/0.1/refresh-manager';
+import {STICKY_AD_TRANSITION_EXP} from '../../../ads/google/a4a/sticky-ad-transition-exp';
 import {SafeframeHostApi} from './safeframe-host';
 import {Services} from '../../../src/services';
 import {
@@ -106,8 +106,10 @@ import {
 } from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
+
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 
+import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
 import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isArray} from '../../../src/types';
@@ -147,15 +149,6 @@ const ZINDEX_EXP = 'zIndexExp';
 const ZINDEX_EXP_BRANCHES = {
   NO_ZINDEX: '21065356',
   HOLDBACK: '21065357',
-};
-
-/** @const {string} */
-const PTT_EXP = 'doubleclick-ptt-exp';
-
-/** @const @enum{string} */
-const PTT_EXP_BRANCHES = {
-  CONTROL: '21068093',
-  EXPERIMENT: '21068094',
 };
 
 /** @const {string} */
@@ -483,9 +476,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         branches: Object.values(ZINDEX_EXP_BRANCHES),
       },
       {
-        experimentId: PTT_EXP,
+        experimentId: ADS_INITIAL_INTERSECTION_EXP.id,
         isTrafficEligible: () => true,
-        branches: Object.values(PTT_EXP_BRANCHES),
+        branches: [
+          ADS_INITIAL_INTERSECTION_EXP.control,
+          ADS_INITIAL_INTERSECTION_EXP.experiment,
+        ],
       },
       {
         experimentId: IDLE_CWV_EXP,
@@ -497,6 +493,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         },
         branches: Object.values(IDLE_CWV_EXP_BRANCHES),
       },
+      {
+        experimentId: STICKY_AD_TRANSITION_EXP.id,
+        isTrafficEligible: () => true,
+        branches: [
+          STICKY_AD_TRANSITION_EXP.control,
+          STICKY_AD_TRANSITION_EXP.experiment,
+        ],
+      },
     ]);
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);
     Object.keys(setExps).forEach(
@@ -505,22 +509,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const moduleNomoduleExpId = this.getModuleNomoduleExpIds_();
     if (moduleNomoduleExpId) {
       this.experimentIds.push(moduleNomoduleExpId);
-    }
-
-    const intersectResourcesExpId = getExperimentBranch(
-      this.win,
-      INTERSECT_RESOURCES_EXP.id
-    );
-    if (intersectResourcesExpId) {
-      this.experimentIds.push(intersectResourcesExpId);
-    }
-
-    const fieResourcesExpId = getExperimentBranch(
-      this.win,
-      FIE_RESOURCES_EXP.id
-    );
-    if (fieResourcesExpId) {
-      this.experimentIds.push(fieResourcesExpId);
     }
 
     const ssrExpIds = this.getSsrExpIds_();
@@ -640,12 +628,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getPageParameters(consentTuple, instances) {
     instances = instances || [this];
     const tokens = getPageviewStateTokensForAdRequest(instances);
-    const {consentString, gdprApplies} = consentTuple;
+    const {consentString, gdprApplies, additionalConsent} = consentTuple;
 
     return {
-      'ptt': this.experimentIds.includes(PTT_EXP_BRANCHES.EXPERIMENT)
-        ? 13
-        : null,
+      'ptt': 13,
       'npa':
         consentTuple.consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
         consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN ||
@@ -659,7 +645,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'psts': tokens.length ? tokens : null,
       'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
       'gdpr_consent': consentString,
+      'addtl_consent': additionalConsent,
     };
+  }
+
+  /**
+   * @override
+   */
+  skipClientSideValidation(headers) {
+    return headers && !headers.has(AMP_SIGNATURE_HEADER);
   }
 
   /**
@@ -968,6 +962,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const allowlist = {
       'height': true,
       'width': true,
+      'json': true,
       'data-slot': true,
       'data-multi-size': true,
       'data-multi-size-validation': true,
@@ -994,7 +989,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         ),
       ATTR: (name) => {
         if (!allowlist[name.toLowerCase()]) {
-          dev().warn('TAG', `Invalid attribute ${name}`);
+          dev().warn(TAG, `Invalid attribute ${name}`);
         } else {
           return this.element.getAttribute(name);
         }

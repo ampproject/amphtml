@@ -59,9 +59,9 @@ Example:
     }
   </script>
   <div id="consent-ui">
-    <button on="tap:consent-element.accept" role="button">Accept</button>
-    <button on="tap:consent-element.reject" role="button">Reject</button>
-    <button on="tap:consent-element.dismiss" role="button">Dismiss</button>
+    <button on="tap:consent-element.accept">Accept</button>
+    <button on="tap:consent-element.reject">Reject</button>
+    <button on="tap:consent-element.dismiss">Dismiss</button>
   </div>
 </amp-consent>
 ```
@@ -304,9 +304,9 @@ _Example_: Displays a prompt user interface
     }
   </script>
   <div id="consent-ui">
-    <button on="tap:consent-element.accept" role="button">Accept</button>
-    <button on="tap:consent-element.reject" role="button">Reject</button>
-    <button on="tap:consent-element.dismiss" role="button">Dismiss</button>
+    <button on="tap:consent-element.accept">Accept</button>
+    <button on="tap:consent-element.reject">Reject</button>
+    <button on="tap:consent-element.dismiss">Dismiss</button>
   </div>
 </amp-consent>
 ```
@@ -366,12 +366,8 @@ When defined, the post-prompt UI is shown when all prompt UIs have been hidden, 
 <amp-consent layout="nodisplay" id="consent-element">
   <script type="application/json">
     {
-      "consents": {
-        "consent-foo": {
-          ...
-          "promptUI": "consent-ui"
-        }
-      },
+      "consentInstanceId": "consent-foo",
+      "promptUI": "consent-ui",
       "postPromptUI": "post-consent-ui"
     }
   </script>
@@ -379,7 +375,7 @@ When defined, the post-prompt UI is shown when all prompt UIs have been hidden, 
     ...
   </div>
   <div id="post-consent-ui">
-    <button on="tap:consent-element.dismiss" role="button">Settings</button>
+    <button on="tap:consent-element.dismiss">Settings</button>
   </div>
 </amp-consent>
 ```
@@ -629,9 +625,11 @@ Join in on the discussion where we are discussing [upcoming potential features](
 -   Ogury : [Website](https://www.ogury.com/) - [Documentation](./cmps/ogury.md)
 -   OneTrust: [Website](https://www.onetrust.com/) - [Documentation](./cmps/onetrust.md)
 -   opencmp : [Documentation](./cmps/opencmp.md)
+-   Pubtech : [Website](https://www.pubtech.ai/) - [Documentation](./cmps/pubtech.md)
 -   Quantcast : [Website](https://www.quantcast.com) - [Documentation](https://help.quantcast.com/hc/en-us/categories/360002940873-Quantcast-Choice)
 -   Sirdata : [Website](http://www.sirdata.com/) - [Documentation](https://cmp.sirdata.com/#/docs)
 -   SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](./cmps/sourcepoint.md)
+-   UniConsent : [Website](http://www.uniconsent.com/) - [Documentation](./cmps/uniconsent.md)
 -   Usercentrics : [Website](https://www.usercentrics.com/) - [Documentation](./cmps/usercentrics.md)
 
 -   Your Integrated platform here!

@@ -17,19 +17,26 @@
 const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
 const path = require('path');
-const remapping = require('@ampproject/remapping');
+const Remapping = require('@ampproject/remapping');
 const terser = require('terser');
 const through = require('through2');
 const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
+const {jsBundles} = require('./bundles.config.js');
+
+/** @type {Remapping.default} */
+const remapping = /** @type {*} */ (Remapping);
+
+let mainBundles;
 
 /**
  * Minify passed string.
  *
  * @param {string} code
- * @return {Promise<Object<string, string>>}
+ * @param {string} filename
+ * @return {Promise<Object<string, terser.SourceMapOptions['content']>>}
  */
-async function terserMinify(code) {
-  const minified = await terser.minify(code, {
+async function terserMinify(code, filename) {
+  const options = {
     mangle: false,
     compress: {
       defaults: false,
@@ -40,10 +47,23 @@ async function terserMinify(code) {
       comments: /\/*/,
       // eslint-disable-next-line google-camelcase/google-camelcase
       keep_quoted_props: true,
-      preamble: ';',
     },
     sourceMap: true,
-  });
+  };
+  const basename = path.basename(filename, argv.esm ? '.mjs' : '.js');
+  if (!mainBundles) {
+    mainBundles = Object.keys(jsBundles).map((key) => {
+      const bundle = jsBundles[key];
+      if (bundle.options && bundle.options.minifiedName) {
+        return path.basename(bundle.options.minifiedName, '.js');
+      }
+      return path.basename(key, '.js');
+    });
+  }
+  if (mainBundles.includes(basename)) {
+    options.output.preamble = ';';
+  }
+  const minified = await terser.minify(code, options);
 
   return {
     compressed: minified.code,
@@ -58,7 +78,7 @@ async function terserMinify(code) {
  * @return {!Promise}
  */
 exports.postClosureBabel = function () {
-  return through.obj(async function (file, enc, next) {
+  return through.obj(async function (file, _enc, next) {
     if ((!argv.esm && !argv.sxg) || path.extname(file.path) === '.map') {
       debug(
         CompilationLifecycles['complete'],
@@ -78,9 +98,13 @@ exports.postClosureBabel = function () {
         file.contents,
         file.sourceMap
       );
-      const {code, map: babelMap} = babel.transformSync(file.contents, {
-        caller: {name: 'post-closure'},
-      });
+      const {code, map: babelMap} =
+        babel.transformSync(file.contents, {
+          caller: {name: 'post-closure'},
+        }) || {};
+      if (!code || !babelMap) {
+        throw new Error(`Error transforming contents of ${file.path}`);
+      }
 
       debug(
         CompilationLifecycles['closured-pre-terser'],
@@ -89,8 +113,14 @@ exports.postClosureBabel = function () {
         file.sourceMap
       );
 
-      const {compressed, terserMap} = await terserMinify(code);
-      file.contents = Buffer.from(compressed, 'utf-8');
+      const {compressed, terserMap} = await terserMinify(
+        code,
+        path.basename(file.path)
+      );
+      if (!compressed) {
+        throw new Error(`Error minifying contents of ${file.path}`);
+      }
+      file.contents = Buffer.from(compressed.toString(), 'utf-8');
       file.sourceMap = remapping(
         [terserMap, babelMap, map],
         () => null,

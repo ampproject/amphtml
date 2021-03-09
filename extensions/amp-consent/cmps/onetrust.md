@@ -32,7 +32,7 @@ limitations under the License.
   </script>
   <div id="onetrust-consent-prompt-ui">
     Post Prompt UI
-    <button on="tap:consent.prompt(consent=onetrust)" role="button">
+    <button on="tap:consent.prompt(consent=onetrust)">
       Privacy Settings
     </button>
   </div>

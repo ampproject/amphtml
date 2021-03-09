@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {red} from 'ansi-colors';
-
 /**
  * Replaces isExperimentOn() and toggleExperiment() calls when they match a name
  * specified by --isExperimentOnExperiment
@@ -38,7 +36,7 @@ import {red} from 'ansi-colors';
  * @param {*} options
  * @return {*}
  */
-export default function transformer(file, api, options) {
+module.exports = function (file, api, options) {
   const j = api.jscodeshift;
 
   const missingOptions = [
@@ -49,7 +47,7 @@ export default function transformer(file, api, options) {
   if (missingOptions.length > 0) {
     throw new Error(
       `Missing options for ${options.transform}\n` +
-        red(JSON.stringify(missingOptions))
+        JSON.stringify(missingOptions)
     );
   }
 
@@ -64,7 +62,7 @@ export default function transformer(file, api, options) {
         node.callee.type === 'Identifier' &&
         (node.callee.name === 'isExperimentOn' ||
           node.callee.name === 'toggleExperiment') &&
-        node.arguments[1].type === 'Literal' &&
+        node.arguments[1] &&
         node.arguments[1].value === isExperimentOnExperiment
     )
     .forEach((path) => {
@@ -72,8 +70,9 @@ export default function transformer(file, api, options) {
 
       // remove unused imports
       root
-        .find(j.ImportSpecifier, {imported: {name}})
-        .closest(j.ImportDeclaration)
+        .find(j.ImportDeclaration, ({specifiers}) =>
+          specifiers.some(({imported}) => imported && imported.name === name)
+        )
         .forEach((path) => {
           if (root.find(j.CallExpression, {callee: {name}}).size() > 1) {
             return;
@@ -82,7 +81,7 @@ export default function transformer(file, api, options) {
             path.prune();
           } else {
             path.node.specifiers = path.node.specifiers.filter(
-              (node) => node.imported && node.imported.name !== name
+              ({imported}) => !(imported && imported.name === name)
             );
           }
         });
@@ -110,10 +109,7 @@ export default function transformer(file, api, options) {
             j.unaryExpression('!', isExperimentOnLaunchedLiteral);
       replacement.comments = [
         j.commentBlock(
-          ` ${file.source.substring(
-            path.node.start,
-            path.node.end
-          )} // launched: ${!!isExperimentOnLaunched} `,
+          ` ${j(path).toSource()} // launched: ${!!isExperimentOnLaunched} `,
           /* leading */ true,
           /* trailing */ false
         ),
@@ -121,4 +117,4 @@ export default function transformer(file, api, options) {
       path.replace(replacement);
     })
     .toSource();
-}
+};
