@@ -263,8 +263,8 @@ export class AmpDoc {
     /** @protected {?Object<string, string>} */
     this.meta_ = null;
 
-    /** @private @const {!Array<string>} */
-    this.declaredExtensions_ = [];
+    /** @private @const {!Object<string, string>} */
+    this.declaredExtensions_ = {};
 
     /** @private {?VisibilityState} */
     this.visibilityStateOverride_ =
@@ -422,21 +422,32 @@ export class AmpDoc {
   /**
    * Returns whether the specified extension has been declared on this ampdoc.
    * @param {string} extensionId
+   * @param {string=} opt_version
    * @return {boolean}
    */
-  declaresExtension(extensionId) {
-    return this.declaredExtensions_.indexOf(extensionId) != -1;
+  declaresExtension(extensionId, opt_version) {
+    const declared = this.declaredExtensions_[extensionId];
+    if (!declared) {
+      return false;
+    }
+    return !opt_version || declared === opt_version;
   }
 
   /**
    * Adds a declared extension to an ampdoc.
    * @param {string} extensionId
+   * @param {string} version
    * @restricted
    */
-  declareExtension(extensionId) {
-    if (!this.declaresExtension(extensionId)) {
-      this.declaredExtensions_.push(extensionId);
-    }
+  declareExtension(extensionId, version) {
+    devAssert(version); // QQQ: remove/debugging.
+    devAssert(
+      !this.declaredExtensions_[extensionId] ||
+        this.declaredExtensions_[extensionId] === version,
+      'extension already declared %s',
+      extensionId
+    );
+    this.declaredExtensions_[extensionId] = version;
   }
 
   /**
