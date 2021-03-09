@@ -94,7 +94,7 @@ describes.sandboxed('Lightbox preact component v1.0', {}, () => {
 
     // Render provided children
     const innerDiv = wrapper.find('div[part="lightbox"] > div').getDOMNode();
-    expect(innerDiv.className).to.include('scrollable');
+    expect(innerDiv.className).not.to.include('scrollable');
     expect(wrapper.find('p').text()).to.equal('Hello World');
 
     // Default SR button is present

@@ -19,6 +19,7 @@ import {ContainWrapper, useValueRef} from '../../../src/preact/component';
 import {Keys} from '../../../src/utils/key-codes';
 import {forwardRef} from '../../../src/preact/compat';
 import {setStyle} from '../../../src/style';
+import {toWin} from '../../../src/types';
 import {tryFocus} from '../../../src/dom';
 import {
   useImperativeHandle,
@@ -151,38 +152,64 @@ function LightboxWithRef(
     };
   }, [visible, animationRef, onAfterCloseRef]);
 
+  const measureOverflowRef = useRef(null);
+  const [hasOverflow, setHasOverflow] = useState(scrollable);
+  // useLayoutEffect is used so intermediary font sizes during calculation
+  // are resolved before the component visually updates.
+  useLayoutEffect(() => {
+    const container = lightboxRef.current;
+    const content = measureOverflowRef.current;
+    if (!content || !container) {
+      return;
+    }
+    const win = toWin(content.ownerDocument.defaultView);
+    if (!win) {
+      return undefined;
+    }
+    const observer = new win.ResizeObserver(() => {
+      setHasOverflow(
+        scrollable &&
+          (content.scrollHeight > container.clientHeight ||
+            content.scrollWidth > container.clientWidth)
+      );
+    });
+    observer.observe(content);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [mounted, scrollable, setHasOverflow]);
+
   return (
     mounted && (
-      <>
-        <ContainWrapper
-          ref={(r) => {
-            lightboxRef.current = r;
-          }}
-          size={true}
-          layout={true}
-          paint={true}
-          part="lightbox"
-          contentClassName={objstr({
-            [classes.content]: true,
-            [classes.scrollable]: scrollable,
-          })}
-          wrapperClassName={classes.wrapper}
-          role="dialog"
-          tabindex="0"
-          onKeyDown={(event) => {
-            if (event.key === 'Escape') {
-              setVisible(false);
-            }
-          }}
-          {...rest}
-        >
+      <ContainWrapper
+        ref={lightboxRef}
+        size
+        layout
+        paint
+        part="lightbox"
+        contentClassName={objstr({
+          [classes.content]: true,
+          [classes.scrollable]: scrollable,
+        })}
+        wrapperClassName={classes.wrapper}
+        role="dialog"
+        tabIndex="0"
+        onKeyDown={(event) => {
+          if (event.key === Keys.Escape) {
+            setVisible(false);
+          }
+        }}
+        {...rest}
+      >
+        <div ref={measureOverflowRef}>
           <CloseButton as={closeButtonAs} onClick={() => setVisible(false)} />
           {children}
-        </ContainWrapper>
-        <div className={classes.backdrop}>
-          <div className={classes.backdropOverscrollBlocker}></div>
         </div>
-      </>
+        {!hasOverflow && (
+          <div className={classes.backdrop}>
+            <div className={classes.backdropOverscrollBlocker}></div>
+          </div>
+        )}
+      </ContainWrapper>
     )
   );
 }
