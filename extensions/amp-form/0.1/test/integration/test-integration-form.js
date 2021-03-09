@@ -59,13 +59,17 @@ describes.realWin(
 
       const mustache = document.createElement('script');
       mustache.setAttribute('custom-template', 'amp-mustache');
-      env.sandbox.stub(mustache, 'src').value('https://cdn.ampproject.org/v0/amp-mustache-0.1.js');
+      env.sandbox
+        .stub(mustache, 'src')
+        .value('https://cdn.ampproject.org/v0/amp-mustache-0.1.js');
       doc.body.appendChild(mustache);
       registerExtendedTemplateForDoc(env.ampdoc, 'amp-mustache', AmpMustache);
 
       const form = document.createElement('script');
       form.setAttribute('custom-element', 'amp-form');
-      env.sandbox.stub(form, 'src').value('https://cdn.ampproject.org/v0/amp-form-0.1.js');
+      env.sandbox
+        .stub(form, 'src')
+        .value('https://cdn.ampproject.org/v0/amp-form-0.1.js');
       doc.head.appendChild(form);
 
       stubElementsForDoc(env.ampdoc);
