@@ -23,13 +23,18 @@ goog.require('goog.messaging.PortChannel');
 goog.require('goog.messaging.RespondingChannel');
 
 function createRC(frameWindow, origin, serviceHandlersMap) {
-  const portChannel =
-      goog.messaging.PortChannel.forEmbeddedWindow(frameWindow, origin);
+  const portChannel = goog.messaging.PortChannel.forEmbeddedWindow(
+    frameWindow,
+    origin
+  );
   const respondingChannel = new goog.messaging.RespondingChannel(portChannel);
 
   serviceHandlersMap.forEach((_, serviceName, serviceHandlersMap) => {
     if (serviceName != null && serviceHandlersMap.get(serviceName) != null) {
-      respondingChannel.registerService(serviceName, serviceHandlersMap.get(serviceName));
+      respondingChannel.registerService(
+        serviceName,
+        serviceHandlersMap.get(serviceName)
+      );
     }
   });
 

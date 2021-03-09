@@ -19,10 +19,10 @@
  * suggestion chips that enable 3P site users to interact with Google Assistant.
  */
 
+import * as closure from './closure/closure-bundle';
 import {Services} from '../../../src/services';
 import {addAttributesToElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import * as closure from './closure/closure-bundle'
 
 export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -66,15 +66,13 @@ export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
       this.element.appendChild(iframe);
     });
 
-    let serviceHandlersMap = new Map();
-    serviceHandlersMap.set('RuntimeService.TriggerSendTextQuery',
-      () => {
-        this.frameService_.sendTextQuery();
-      });
-    serviceHandlersMap.set('RuntimeService.TriggerOpenMic',
-      () => {
-        this.frameService_.openMic();
-      });
+    const serviceHandlersMap = new Map();
+    serviceHandlersMap.set('RuntimeService.TriggerSendTextQuery', () => {
+      this.frameService_.sendTextQuery();
+    });
+    serviceHandlersMap.set('RuntimeService.TriggerOpenMic', () => {
+      this.frameService_.openMic();
+    });
 
     iframe.addEventListener('load', () => {
       this.channel_ = closure.createRespondingChannel(
