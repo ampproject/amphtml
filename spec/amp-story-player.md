@@ -393,7 +393,7 @@ The configuration will end up looking like the following:
          "position": "start"
        },
        {
-         "name": "skip-next"
+         "name": "skip-to-next"
        }
      ]
    }
@@ -420,11 +420,11 @@ The “close” control supports the following customizable properties:
 -   `backgroundImageUrl`: string with url or data string (escaped).
     -   Changes the icon image to the provided url or data string (for inline svgs).
 
-### Skip-next
+### Skip-to-next
 
 Skips to the next story inside the player (only available on desktop).
 
-The “skip-next” control supports the following customizable properties:
+The “skip-to-next” control supports the following customizable properties:
 
 -   `position`: “start” or “end”.
     -   Places the icon either on the left or right on LTR languages.
@@ -496,7 +496,7 @@ On desktop, you can now display a button that navigates from the current story t
    {
      "controls": [
        {
-         "name": "skip-next"
+         "name": "skip-to-next"
        }
      ],
    }
