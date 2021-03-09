@@ -52,6 +52,7 @@ export const buildOpenInlineAttachmentElement = (element) =>
           <span class="i-amphtml-story-inline-page-attachment-content">
             <span class="i-amphtml-story-inline-page-attachment-img"></span>
             <span class="i-amphtml-story-inline-page-attachment-img-2"></span>
+            <span class="i-amphtml-story-inline-page-attachment-spacer"></span>
             <span class="i-amphtml-story-inline-page-attachment-arrow"></span>
           </span>
         </span>
@@ -145,8 +146,8 @@ const renderInlinePageAttachmentUI = (pageEl, attachmentEl) => {
     );
     setImportantStyles(ctaImgEl2, {
       'background-image': 'url(' + openImgAttr2 + ')',
-      height: '24px',
-      width: '24px',
+      height: '34px',
+      width: '34px',
     });
   }
 

@@ -171,14 +171,12 @@
 .i-amphtml-story-inline-page-attachment-chip {
   display: table !important;
   position: relative !important;
-  padding: 7px 3px !important;
-  margin: 0 0 10px 0 !important;
+  margin: 0 0 24px 0 !important;
   height: 16px !important;
   max-width: 243px !important;
   border-radius: 30px !important;
-  background-color: rgba(200,200,200, 0.7) !important;
+  background-color: rgba(200,200,200, 1) !important;
   color: black !important;
-  border-spacing: 7px 0px !important;
 }
 
 .i-amphtml-story-inline-page-attachment-content {
@@ -187,24 +185,31 @@
 
 .i-amphtml-story-inline-page-attachment-img,
 .i-amphtml-story-inline-page-attachment-img-2,
+.i-amphtml-story-inline-page-attachment-spacer,
 .i-amphtml-story-inline-page-attachment-arrow {
   display: table-cell !important;
   vertical-align: middle !important;
   background-size: contain !important;
   background-repeat: no-repeat !important;
-  background-position: center !important;
+  background-position-x: 50% !important;
+  background-position-y: right;
 }
 
 .i-amphtml-story-inline-page-attachment-img {
-  height: 24px !important;
-  width: 24px !important;
+  height: 34px !important;
+  width: 34px !important;
+  border-radius: 30px 0 0 30px !important;
+}
+
+.i-amphtml-story-inline-page-attachment-spacer {
+  width: 5px !important;
 }
 
 .i-amphtml-story-inline-page-attachment-arrow {
   height: 24px !important;
   width: 24px !important;
-  border-radius: 50% !important;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 32 32"><path d="M16 32a16 16 0 100-32 16 16 0 000 32z" fill="white"/><path d="M7 19v-2l8-5a1 1 0 112 3l-8 4H7z" fill="black"/><path d="M15 13l2-1 8 5a1 1 0 11-2 2l-8-4v-2z" fill="black"/></svg>') !important;
+  background-position: center;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 40 40"><path d="M16 32a16 16 0 100-32 16 16 0 000 32z" fill="white"/><path d="M7 19v-2l8-5a1 1 0 112 3l-8 4H7z" fill="black"/><path d="M15 13l2-1 8 5a1 1 0 11-2 2l-8-4v-2z" fill="black"/></svg>') !important;
 }
 
 .i-amphtml-story-inline-page-attachment-label {
@@ -219,5 +224,5 @@
   white-space: nowrap !important;
   max-width: 210px !important;
   vertical-align: middle;
-  margin: 5px 0 25px 0 !important;
+  margin: 5px 0 35px 0 !important;
 }
