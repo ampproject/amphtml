@@ -27,7 +27,7 @@ import {setImportantStyles} from '../../../src/style';
  * @param {!Element} element
  * @return {!Element}
  */
-export const buildOpenOutlinkAttachmentElement = (element) =>
+export const buildOpenDefaultAttachmentElement = (element) =>
   htmlFor(element)`
     <a class="
         i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
@@ -65,22 +65,27 @@ export const buildOpenInlineAttachmentElement = (element) =>
  * @return {!Element}
  */
 export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
+  const openImgAttrs = attachmentEl.getAttribute('cta-img');
   const attachmentHref = attachmentEl.getAttribute('href');
-  if (!attachmentHref && isInlinePageAttachmentV2ExperimentOn(win)) {
-    return renderInlinePageAttachmentUI(pageEl, attachmentEl);
+  if (
+    isInlinePageAttachmentV2ExperimentOn(win) &&
+    !attachmentHref &&
+    openImgAttrs
+  ) {
+    return renderInlinePageAttachmentUI(win, pageEl, attachmentEl);
   } else {
-    return renderOutlinkPageAttachmentUI(pageEl, attachmentEl);
+    return renderDefaultPageAttachmentUI(pageEl, attachmentEl);
   }
 };
 
 /**
- * Renders outlink page attachment UI.
+ * Renders default page attachment UI.
  * @param {!Element} pageEl
  * @param {!Element} attachmentEl
  * @return {!Element}
  */
-const renderOutlinkPageAttachmentUI = (pageEl, attachmentEl) => {
-  const openAttachmentEl = buildOpenOutlinkAttachmentElement(pageEl);
+const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
+  const openAttachmentEl = buildOpenDefaultAttachmentElement(pageEl);
   // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
   const attachmentHref = attachmentEl.getAttribute('href');
   if (attachmentHref) {
@@ -104,11 +109,12 @@ const renderOutlinkPageAttachmentUI = (pageEl, attachmentEl) => {
 
 /**
  * Renders inline page attachment UI.
+ * @param {!Window} win
  * @param {!Element} pageEl
  * @param {!Element} attachmentEl
  * @return {!Element}
  */
-const renderInlinePageAttachmentUI = (pageEl, attachmentEl) => {
+const renderInlinePageAttachmentUI = (win, pageEl, attachmentEl) => {
   const openAttachmentEl = buildOpenInlineAttachmentElement(pageEl);
 
   const textEl = openAttachmentEl.querySelector(
@@ -116,25 +122,29 @@ const renderInlinePageAttachmentUI = (pageEl, attachmentEl) => {
   );
 
   const openLabelAttr = attachmentEl.getAttribute('cta-text');
-  const openLabel =
-    (openLabelAttr && openLabelAttr.trim()) ||
-    getLocalizationService(pageEl).getLocalizedString(
-      LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
-    );
+  const openLabel = openLabelAttr && openLabelAttr.trim();
 
   textEl.textContent = openLabel;
+
+  const openImgAttrs = attachmentEl.getAttribute('cta-img').split(', ');
 
   const ctaImgEl = openAttachmentEl.querySelector(
     '.i-amphtml-story-inline-page-attachment-img'
   );
 
-  const openImgAttr = attachmentEl.getAttribute('cta-img');
-
   setImportantStyles(ctaImgEl, {
-    height: '24px',
-    width: '24px',
-    'background-image': 'url(' + openImgAttr + ')',
+    'background-image': 'url(' + openImgAttrs[0] + ')',
   });
+
+  if (openImgAttrs.length > 1) {
+    console.log(true);
+    const ctaImgEl2 = win.document.createElement('span');
+    ctaImgEl2.classList.add('i-amphtml-story-inline-page-attachment-img');
+    setImportantStyles(ctaImgEl2, {
+      'background-image': 'url(' + openImgAttrs[1] + ')',
+    });
+    ctaImgEl.parentNode.insertBefore(ctaImgEl2, ctaImgEl.nextSibling);
+  }
 
   return openAttachmentEl;
 };

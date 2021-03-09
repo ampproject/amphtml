@@ -171,13 +171,14 @@
 .i-amphtml-story-inline-page-attachment-chip {
   display: table !important;
   position: relative !important;
-  padding: 7px 10px !important;
-  margin: 0 0 20px 0 !important;
+  padding: 7px 3px !important;
+  margin: 0 0 10px 0 !important;
   height: 16px !important;
   max-width: 243px !important;
   border-radius: 30px !important;
-  background: white !important;
+  background-color: rgba(200,200,200, 0.7) !important;
   color: black !important;
+  border-spacing: 7px 0px !important;
 }
 
 .i-amphtml-story-inline-page-attachment-content {
@@ -190,9 +191,8 @@
   background-size: contain !important;
   background-repeat: no-repeat !important;
   background-position: center !important;
-  border-radius: 50% !important;
-  height: 24px;
-  width: 24px;
+  height: 24px !important;
+  width: 24px !important;
 }
 
 .i-amphtml-story-inline-page-attachment-arrow {
@@ -219,5 +219,5 @@
   white-space: nowrap !important;
   max-width: 210px !important;
   vertical-align: middle;
-  margin-bottom: 20px;
+  margin: 5px 0 25px 0 !important;
 }
