@@ -141,6 +141,12 @@ export class Extensions {
    */
   registerExtension(extensionId, factory, arg) {
     const holder = this.getExtensionHolder_(extensionId, /* auto */ true);
+    if (holder.loaded) {
+      // This extension has already been registered. This could be a
+      // a "latest" script requested for a previously loaded numeric
+      // version or vice versa.
+      return;
+    }
     try {
       this.currentExtensionId_ = extensionId;
       factory(arg, arg['_']);
@@ -229,7 +235,7 @@ export class Extensions {
    * @param {string} extensionId
    * @param {string} version
    * @param {boolean} latest
-   * @return {?Promise<!ExtensionDef>}
+   * @return {!Promise<!ExtensionDef>}
    */
   reloadExtension(extensionId, version, latest) {
     // Ignore inserted script elements to prevent recursion.
@@ -240,15 +246,6 @@ export class Extensions {
       latest,
       /* includeInserted */ false
     );
-    if (!els.length) {
-      const TAG = 'reloadExtension';
-      dev().expectedError(
-        TAG,
-        'Extension script for "%s" is missing or was already reloaded.',
-        extensionId
-      );
-      return null;
-    }
     // The previously awaited extension loader must not have finished or
     // failed.
     const holder = this.extensions_[extensionId];

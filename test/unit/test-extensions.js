@@ -90,6 +90,21 @@ describes.sandboxed('Extensions', {}, () => {
       });
     });
 
+    it('should register only once', () => {
+      const amp = {};
+      const factoryStub = env.sandbox.stub();
+      extensions.registerExtension('amp-ext', factoryStub, amp);
+      expect(factoryStub).to.be.calledOnce;
+      const holder1 = extensions.extensions_['amp-ext'];
+      expect(extensions.getExtensionHolder_('amp-ext')).to.equal(holder1);
+
+      // Try register again.
+      extensions.registerExtension('amp-ext', factoryStub, amp);
+      expect(factoryStub).to.be.calledOnce; // no change.
+      const holder2 = extensions.extensions_['amp-ext'];
+      expect(holder2).to.equal(holder1);
+    });
+
     it('should register successfully with promise', () => {
       const promise = extensions.waitForExtension(win, 'amp-ext');
       extensions.registerExtension('amp-ext', () => {}, {});
@@ -683,7 +698,7 @@ describes.sandboxed('Extensions', {}, () => {
       const initialPromise = extensions.preloadExtension('amp-ext');
 
       // Reload the extension. E.g. due to the version mismatch.
-      const reloadPromise = extensions.reloadExtension('amp-ext');
+      const reloadPromise = extensions.reloadExtension('amp-ext', '0.1', true);
 
       // Register extension.
       extensions.registerExtension('amp-ext', () => {}, {});
@@ -715,38 +730,6 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     describe('regular scripts', () => {
-      it('should devAssert if script cannot be found', () => {
-        extensions.reloadExtension('amp-list', '0.1', true);
-
-        expect(dev().expectedError).to.be.calledWith(
-          'reloadExtension',
-          'Extension script for "%s" is missing or was already reloaded.',
-          'amp-list'
-        );
-        expect(extensions.preloadExtension).to.not.be.called;
-      });
-
-      it('should ignore inserted scripts', () => {
-        const list = document.createElement('script');
-        list.setAttribute('custom-element', 'amp-list');
-        list.setAttribute(
-          'src',
-          'https://cdn.ampproject.org/v0/amp-list-0.1.js'
-        );
-        list.setAttribute('i-amphtml-inserted', '');
-        win.document.head.appendChild(list);
-
-        extensions.reloadExtension('amp-list', '0.1', true);
-
-        expect(dev().expectedError).to.be.calledWith(
-          'reloadExtension',
-          'Extension script for "%s" is missing or was already reloaded.',
-          'amp-list'
-        );
-        expect(list.hasAttribute('i-amphtml-loaded-new-version')).to.be.false;
-        expect(extensions.preloadExtension).to.not.be.called;
-      });
-
       it('should support [custom-element] script', () => {
         const list = document.createElement('script');
         list.setAttribute('custom-element', 'amp-list');
@@ -851,50 +834,6 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     describe('module/nomdule script pairs', () => {
-      it('should devAssert if script cannot be found', () => {
-        extensions.reloadExtension('amp-list', '0.1', true);
-
-        expect(dev().expectedError).to.be.calledWith(
-          'reloadExtension',
-          'Extension script for "%s" is missing or was already reloaded.',
-          'amp-list'
-        );
-        expect(extensions.preloadExtension).to.not.be.called;
-      });
-
-      it('should ignore inserted scripts', () => {
-        const mod = document.createElement('script');
-        mod.setAttribute('custom-element', 'amp-list');
-        mod.setAttribute(
-          'src',
-          'https://cdn.ampproject.org/v0/amp-list-0.1.mjs'
-        );
-        mod.setAttribute('i-amphtml-inserted', '');
-        mod.setAttribute('type', 'module');
-        win.document.head.appendChild(mod);
-
-        const nomod = document.createElement('script');
-        nomod.setAttribute('custom-element', 'amp-list');
-        nomod.setAttribute(
-          'src',
-          'https://cdn.ampproject.org/v0/amp-list-0.1.js'
-        );
-        nomod.setAttribute('i-amphtml-inserted', '');
-        nomod.setAttribute('nomodule', '');
-        win.document.head.appendChild(nomod);
-
-        extensions.reloadExtension('amp-list', '0.1', true);
-
-        expect(dev().expectedError).to.be.calledWith(
-          'reloadExtension',
-          'Extension script for "%s" is missing or was already reloaded.',
-          'amp-list'
-        );
-        expect(mod.hasAttribute('i-amphtml-loaded-new-version')).to.be.false;
-        expect(nomod.hasAttribute('i-amphtml-loaded-new-version')).to.be.false;
-        expect(extensions.preloadExtension).to.not.be.called;
-      });
-
       it('should support [custom-element] scripts', () => {
         const mod = document.createElement('script');
         mod.setAttribute('custom-element', 'amp-list');
