@@ -886,6 +886,7 @@ class AmpFixture {
         env.extensions.installExtensionsInDoc(ampdoc, extensionIds),
         ampdoc.whenReady(),
       ]);
+      ampdoc.setExtensionsKnown();
       completePromise = completePromise
         ? completePromise.then(() => promise)
         : promise;
