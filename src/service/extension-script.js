@@ -226,9 +226,6 @@ export function extensionScriptsInNode(head) {
   const scripts = [];
   for (let i = 0; i < list.length; i++) {
     const script = list[i];
-    if (script.hasAttribute('i-amphtml-inserted')) {
-      continue;
-    }
     const extensionId =
       script.getAttribute('custom-element') ||
       script.getAttribute('custom-template');
