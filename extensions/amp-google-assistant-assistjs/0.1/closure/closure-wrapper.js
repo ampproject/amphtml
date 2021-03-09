@@ -20,4 +20,4 @@ function createRC(frameWindow, origin, serviceHandlersMap) {
   return respondingChannel;
 }
 
-goog.exportSymbol('createRC', createRC);
+goog.exportSymbol('__AMP_createRC', createRC);

@@ -4,6 +4,8 @@
 # folder
 CLOSURE_LIB=../../../../node_modules/google-closure-library
 
+# TODO: ensure the new up-to-date compiler could generate the same output as the Google's internal one
+# after the PR to update Closure compiler got in(https://github.com/ampproject/amphtml/pull/33153).
 npx google-closure-compiler \
   --jscomp_warning=nonStandardJsDocs \
   --jscomp_warning=checkDebuggerStatement \
