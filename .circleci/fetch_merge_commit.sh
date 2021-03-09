@@ -25,6 +25,10 @@ GREEN() { echo -e "\n\033[0;32m$1\033[0m"; }
 YELLOW() { echo -e "\n\033[0;33m$1\033[0m"; }
 RED() { echo -e "\n\033[0;31m$1\033[0m"; }
 
+GET_MERGE_SHA() {
+  return "$(awk '{print $1}' .git/FETCH_HEAD)"
+}
+
 if [[ -z "$1" ]]; then
   echo "Usage: fetch_merge_commit.sh [fetch | merge]"
 fi
@@ -67,13 +71,15 @@ if [[ "$1" == "fetch" ]]; then
     echo $(RED "Please rebase your PR branch.")
     exit $err
   fi
+
+  echo $(GREEN "Fetched merge SHA $(GET_MERGE_SHA)...")
   exit 0
 fi
 
 # GitHub provides refs/pull/<PR_NUMBER>/merge, an up-to-date merge branch for
 # every PR branch that can be cleanly merged to master. For more details, see:
 # https://discuss.circleci.com/t/show-test-results-for-prospective-merge-of-a-github-pr/1662
-MERGE_SHA="$(awk '{print $1}' .git/FETCH_HEAD)"
+MERGE_SHA="$(GET_MERGE_SHA)"
 echo $(GREEN "Fetching merge commit $MERGE_SHA...")
 (set -x && git pull --ff-only origin "$MERGE_SHA") || err=$?
 
