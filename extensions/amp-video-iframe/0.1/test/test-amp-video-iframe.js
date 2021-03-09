@@ -18,7 +18,6 @@ import '../amp-video-iframe';
 import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import {
-  addAttributesToElement,
   createElementWithAttributes,
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
@@ -69,10 +68,12 @@ describes.realWin(
           };
 
     function createVideoIframe(attrs = {}, opt_size) {
-      const el = createElementWithAttributes(doc, 'amp-video-iframe', attrs);
-      const {src = getIframeSrc(), poster = 'foo.png'} = attrs;
-      addAttributesToElement(el, {src, poster});
-      addAttributesToElement(el, layoutConfigAttrs(opt_size));
+      const {src = getIframeSrc(), ...rest} = attrs;
+      const el = createElementWithAttributes(doc, 'amp-video-iframe', {
+        src,
+        ...rest,
+        ...layoutConfigAttrs(opt_size),
+      });
       doc.body.appendChild(el);
       return el;
     }
@@ -200,24 +201,30 @@ describes.realWin(
     });
 
     describe('#createPlaceholderCallback', () => {
+      it('does not create placeholder without poster attribute', () => {
+        const placeholder = createVideoIframe().createPlaceholder();
+        expect(placeholder).to.be.null;
+      });
+
       it('creates an amp-img with the poster as src', () => {
         const poster = 'foo.bar';
         const placeholder = createVideoIframe({poster}).createPlaceholder();
         expect(placeholder).to.have.attribute('placeholder');
-        expect(placeholder.tagName.toLowerCase()).to.equal('amp-img');
-        expect(placeholder.getAttribute('layout')).to.equal('fill');
+        expect(placeholder.tagName.toLowerCase()).to.equal('img');
+        expect(placeholder).to.have.class('i-amphtml-fill-content');
         expect(placeholder.getAttribute('src')).to.equal(poster);
       });
 
       it("uses data-param-* in the poster's src", () => {
         expect(
           createVideoIframe({
+            poster: 'foo.png',
             'data-param-my-poster-param': 'my param',
             'data-param-another': 'value',
           })
             .createPlaceholder()
             .getAttribute('src')
-        ).to.match(/\?myPosterParam=my%20param&another=value$/);
+        ).to.match(/foo\.png\?myPosterParam=my%20param&another=value$/);
       });
     });
 
