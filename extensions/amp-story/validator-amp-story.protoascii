@@ -838,14 +838,14 @@ tags: {  # <amp-story-page-attachment> with no href
     name: "cta-text"
   }
   attrs: {
-    name: "cta-img"
+    name: "cta-image"
     value_url: {
       protocol: "http"
       protocol: "https"
     }
   }
   attrs: {
-    name: "cta-img-2"
+    name: "cta-image-2"
     value_url: {
       protocol: "http"
       protocol: "https"
