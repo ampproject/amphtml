@@ -19,7 +19,7 @@
  * suggestion chips that enable 3P site users to interact with Google Assistant.
  */
 
-import * as closure from './closure/closure-bundle';
+import * as closure from '../../../third_party/closure-responding-channel/closure-bundle';
 import {Services} from '../../../src/services';
 import {addAttributesToElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -34,9 +34,6 @@ export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
 
     /** @private {?AssistjsFrameService} */
     this.frameService_ = null;
-
-    /** @private */
-    this.channel_ = null;
   }
 
   /** @override */
@@ -75,7 +72,7 @@ export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
     });
 
     iframe.addEventListener('load', () => {
-      this.channel_ = closure.createRespondingChannel(
+      closure.createRespondingChannel(
         iframe.contentWindow,
         this.configService_.getAssistjsServer(),
         serviceHandlersMap

@@ -5,7 +5,8 @@
 CLOSURE_LIB=../../../../node_modules/google-closure-library
 
 # TODO: ensure the new up-to-date compiler could generate the same output as the Google's internal one
-# after the PR to update Closure compiler got in(https://github.com/ampproject/amphtml/pull/33153).
+# after the PR to update Closure compiler got in(https://github.com/ampproject/amphtml/pull/33153). Currently
+# the output of this script is not used.
 npx google-closure-compiler \
   --jscomp_warning=nonStandardJsDocs \
   --jscomp_warning=checkDebuggerStatement \
@@ -36,7 +37,7 @@ npx google-closure-compiler \
   --output_wrapper "
   %output%;
   export function createRespondingChannel(window, origin, serviceHandlersMap) {
-    const rc = createRC(window, origin, serviceHandlersMap);
+    const rc = __AMP_createRC(window, origin, serviceHandlersMap);
     return rc;
   }" \
   --js "$CLOSURE_LIB/closure/goog/base.js" \
