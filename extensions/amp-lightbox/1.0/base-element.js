@@ -69,7 +69,7 @@ BaseElement['Component'] = Lightbox;
 
 /** @override */
 BaseElement['props'] = {
-  'animation': {attr: 'animation'},
+  'animation': {attr: 'animation', media: true, default: 'fade-in'},
   'closeButton': {selector: '[slot="close-button"]', single: true},
   'children': {passthrough: true},
   'id': {attr: 'id'},

@@ -276,6 +276,6 @@ BaseElement['props'] = {
   'multiple': {attr: 'multiple', type: 'boolean'},
   'name': {attr: 'name'},
   'role': {attr: 'role'},
-  'tabindex': {attr: 'tabindex'},
-  'keyboardSelectMode': {attr: 'keyboard-select-mode'},
+  'tabIndex': {attr: 'tabindex'},
+  'keyboardSelectMode': {attr: 'keyboard-select-mode', media: true},
 };

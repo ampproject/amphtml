@@ -261,6 +261,8 @@ Annotates the video as having no audio. This has the following effects:
 
 If the video is visible, the video displays fullscreen after the user rotates their device into landscape mode. For more details, see the [Video in AMP spec](../../spec/amp-video-interface.md#rotate-to-fullscreen).
 
+This attribute can be configured to based on a [media query](./../../spec/amp-html-responsive-attributes.md).
+
 ### common attributes
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.

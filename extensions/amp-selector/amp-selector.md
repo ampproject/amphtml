@@ -248,6 +248,9 @@ The `keyboard-select-mode` attribute dictates the keyboard navigation behavior f
   </li>
 </ul>
 
+This attribute can be configured to use different
+options based on a [media query](./../../spec/amp-html-responsive-attributes.md).
+
 ### Attributes on `<amp-selector>` options
 
 #### option

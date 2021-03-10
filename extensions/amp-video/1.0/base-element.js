@@ -104,8 +104,12 @@ VideoBaseElement['props'] = {
   'title': {attr: 'title'},
 
   // TODO(alanorozco): These props have no internal implementation yet.
-  'dock': {attr: 'dock'},
-  'rotate-to-fullscreen': {attr: 'rotate-to-fullscreen', type: 'boolean'},
+  'dock': {attr: 'dock', media: true},
+  'rotate-to-fullscreen': {
+    attr: 'rotate-to-fullscreen',
+    type: 'boolean',
+    media: true,
+  },
 };
 
 /** @override */
