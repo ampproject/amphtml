@@ -24,5 +24,8 @@ export function isTestingMode(win) {
   win = win || self;
   // The `isLocalDevMode` check here lets this function be DCE'd away during
   // `gulp dist`
-  return isLocalDevMode() && (win.__AMP_TEST || win.__karma__);
+  return (
+    isLocalDevMode() &&
+    (win.AMP_CONFIG?.test || win.__AMP_TEST || win.__karma__)
+  );
 }
