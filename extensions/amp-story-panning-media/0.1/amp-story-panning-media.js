@@ -121,11 +121,12 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @private */
   setAnimateTo_() {
-    const attrX = this.element_.getAttribute('x') || 0;
-    const attrY = this.element_.getAttribute('y') || 0;
+    const x = parseFloat(this.element_.getAttribute('x') || 0);
+    const y = parseFloat(this.element_.getAttribute('y') || 0);
+    const zoom = parseFloat(this.element_.getAttribute('zoom') || 1);
     const lockBounds = this.element_.hasAttribute('lock-bounds');
-    let zoom;
 
+<<<<<<< HEAD
     if (this.element_.hasAttribute('zoom')) {
       const attrZoom = parseFloat(this.element_.getAttribute('zoom'));
       if (lockBounds && attrZoom < 1) {
@@ -159,22 +160,28 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       x = -50 * widthFraction;
     } else if (lockBounds) {
       x = parseFloat(attrX) * widthFraction;
+=======
+    if (!lockBounds) {
+      this.animateTo_ = {x, y, zoom};
+>>>>>>> b6b5a8cb0 (Update example. Only calculate if lock-bounds.)
     } else {
-      x = parseFloat(attrX);
-    }
+      this.animateTo_.zoom = lockBounds && zoom < 1 ? 1 : zoom;
 
-    let y = 0;
-    if (attrY === 'top') {
-      y = 50 * heightFraction;
-    } else if (attrY === 'bottom') {
-      y = -50 * heightFraction;
-    } else if (lockBounds) {
-      y = (parseFloat(attrY) || 0) * heightFraction;
-    } else {
-      y = parseFloat(attrY) || 0;
-    }
+      const containerHeight = this.element.offsetHeight;
+      const containerWidth = this.element.offsetWidth;
+      const ampImgWidth = this.ampImgEl_.getAttribute('width');
+      const ampImgHeight = this.ampImgEl_.getAttribute('height');
+      const percentScaled = containerHeight / ampImgHeight;
+      const scaledImageWidth = percentScaled * ampImgWidth;
+      const scaledImageHeight = percentScaled * ampImgHeight;
+      const widthFraction =
+        1 - containerWidth / (scaledImageWidth * this.animateTo_.zoom);
+      const heightFraction =
+        1 - containerHeight / (scaledImageHeight * this.animateTo_.zoom);
 
-    this.animateTo_ = {x, y, zoom};
+      this.animateTo_.x = lockBounds ? x * widthFraction : x;
+      this.animateTo_.y = lockBounds ? y * heightFraction : y;
+    }
   }
 
   /** @override */
