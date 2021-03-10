@@ -66,12 +66,12 @@ if [[ "$1" == "fetch" ]]; then
   echo $(GREEN "Fetching merge SHA from $MERGE_BRANCH...")
 
   MERGE_SHA="$(git ls-remote https://github.com/ampproject/amphtml.git "$MERGE_BRANCH" | awk '{print $1}')"
-  echo $(GREEN "Fetched merge SHA $(MERGE_SHA)...")
-  echo "$MERGE_SHA" > .circleci/merge_sha
+  echo $(GREEN "Fetched merge SHA $MERGE_SHA...")
+  echo "$MERGE_SHA" > .merge_sha
   exit 0
 fi
 
-MERGE_SHA="$(cat .circleci/merge_sha)"
+MERGE_SHA="$(cat .merge_sha)"
 echo $(GREEN "Fetching merge commit $MERGE_SHA...")
 (set -x && git pull --ff-only origin "$MERGE_SHA") || err=$?
 

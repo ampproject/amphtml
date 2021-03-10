@@ -1,5 +1,6 @@
 .DS_Store
 .g4ignore
+.merge_sha
 build/
 .amp-dep-check
 c

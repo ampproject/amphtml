@@ -37,7 +37,7 @@ commands:
           name: 'Save Merge Commit'
           key: git-{{ .Branch }}-{{ .Revision }}
           paths:
-            - .circleci/merge_sha
+            - .merge_sha
   restore_merge_commit:
     steps:
       - restore_cache:
