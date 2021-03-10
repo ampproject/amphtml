@@ -222,7 +222,8 @@ export const EXPERIMENTS = [
   },
   {
     id: 'flexible-bitrate',
-    name: 'Adaptive bitrate algorithm for videos on documents from the AMPProject CDN',
+    name:
+      'Adaptive bitrate algorithm for videos on documents from the AMPProject CDN',
     spec: 'https://github.com/ampproject/amphtml/projects/111',
-  }
+  },
 ];

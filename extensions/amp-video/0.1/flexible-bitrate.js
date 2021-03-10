@@ -17,9 +17,9 @@
 import {DomBasedWeakRef} from '../../../src/utils/dom-based-weakref';
 import {childElement, childElementsByTag} from '../../../src/dom';
 import {dev, devAssert} from '../../../src/log';
+import {isExperimentOn} from '../../../src/experiments';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {toArray} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 
 const TAG = 'amp-video';
 
