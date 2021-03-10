@@ -33,7 +33,7 @@ executors:
     docker:
       # The official, bare bones Docker Image from CircleCI
       # https://circleci.com/docs/2.0/circleci-images/?section=executors-and-images#circleci-base-image
-      - image: cimg/base:2020.01
+      - image: cimg/base:2020.12
 
 commands:
   save_merge_commit:
