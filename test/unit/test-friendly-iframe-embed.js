@@ -22,6 +22,8 @@ import {FakeWindow} from '../../testing/fake-dom';
 import {
   FriendlyIframeEmbed,
   Installers,
+  extensionsHasId,
+  getExtensionsFromMetadata,
   installFriendlyIframeEmbed,
   mergeHtmlForTesting,
   preloadFriendlyIframeEmbedExtensionIdsDeprecated,
@@ -111,6 +113,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
       url: 'https://acme.org/url1',
       html: '<a href="/url2"></a>',
+      extensions: [],
     });
 
     // Attributes set.
@@ -266,88 +269,6 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       });
   });
 
-  // TODO(#33020): Remove this test once `extensions` format is supported
-  // everywhere.
-  it('should create ampdoc and install extensions with extensionIds', () => {
-    // AmpDoc is created.
-    const ampdocSignals = new Signals();
-    let childWinForAmpDoc;
-    const ampdoc = {
-      get win() {
-        return childWinForAmpDoc;
-      },
-      getParent: () => env.ampdoc,
-      setReady: env.sandbox.spy(),
-      signals: () => ampdocSignals,
-      getHeadNode: () => childWinForAmpDoc.document.head,
-      setExtensionsKnown: env.sandbox.stub(),
-    };
-    ampdocServiceMock
-      .expects('installFieDoc')
-      .withExactArgs(
-        'https://acme.org/url1',
-        env.sandbox.match((arg) => {
-          // Match childWin argument.
-          childWinForAmpDoc = arg;
-          return true;
-        }),
-        env.sandbox.match((arg) => {
-          // Match options with no signals.
-          expect(arg && arg.signals).to.not.be.ok;
-          return true;
-        })
-      )
-      .returns(ampdoc)
-      .once();
-
-    // Extensions preloading have been requested.
-    extensionsMock
-      .expects('preloadExtension')
-      .withExactArgs('amp-test')
-      .returns(Promise.resolve())
-      .once();
-    extensionsMock
-      .expects('preinstallEmbed')
-      .withExactArgs(ampdoc, ['amp-test'])
-      .once();
-    extensionsMock
-      .expects('installExtensionsInDoc')
-      .withExactArgs(ampdoc, ['amp-test'])
-      .returns(Promise.resolve())
-      .once();
-
-    let renderCompleteResolver = null;
-    const renderCompletePromise = new Promise((resolve) => {
-      renderCompleteResolver = resolve;
-    });
-    env.sandbox
-      .stub(FriendlyIframeEmbed.prototype, 'whenRenderComplete')
-      .callsFake(() => renderCompletePromise);
-
-    const embedPromise = installFriendlyIframeEmbed(
-      iframe,
-      document.body,
-      {
-        url: 'https://acme.org/url1',
-        html: '<amp-test></amp-test>',
-        extensionIds: ['amp-test'],
-      },
-      preinstallCallback
-    );
-    return embedPromise
-      .then((embed) => {
-        expect(childWinForAmpDoc).to.equal(embed.win);
-        expect(ampdoc).to.equal(embed.ampdoc);
-        expect(installServicesStub).to.be.calledOnce.calledWith(ampdoc);
-        expect(ampdoc.setReady).to.not.be.called;
-        renderCompleteResolver();
-        return renderCompletePromise;
-      })
-      .then(() => {
-        expect(ampdoc.setReady).to.be.calledOnce;
-      });
-  });
-
   it('should create ampdoc and install extensions with host', () => {
     // host.
     const hostSignals = new Signals();
@@ -418,7 +339,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       {
         url: 'https://acme.org/url1',
         html: '<amp-test></amp-test>',
-        extensionIds: ['amp-test'],
+        extensions: [{extensionId: 'amp-test', extensionVersion: 'latest'}],
         host,
       },
       preinstallCallback
@@ -453,7 +374,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       {
         url: 'https://acme.org/url1',
         html: '<amp-test></amp-test>',
-        extensionIds: ['amp-test'],
+        extensions: [{extensionId: 'amp-test', extensionVersion: 'latest'}],
       },
       preinstallCallback
     );
@@ -473,6 +394,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       {
         url: 'https://acme.org/url1',
         html: '<amp-test></amp-test>',
+        extensions: [],
       },
       (embedWin) => {
         registerServiceBuilderInEmbedWin(embedWin, 'c', function () {
@@ -528,7 +450,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       {
         url: 'https://acme.org/url1',
         html: '',
-        extensionIds: [],
+        extensions: [],
       },
       preinstallCallback
     );
@@ -552,7 +474,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       {
         url: 'https://acme.test/url1',
         html: '<amp-test></amp-test>',
-        extensionIds: ['amp-test'],
+        extensions: [{extensionId: 'amp-test', extensionVersion: 'latest'}],
       },
       preinstallCallback
     );
@@ -567,7 +489,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       {
         url: 'https://acme.test/url1',
         html: '<amp-test></amp-test>',
-        extensionIds: ['amp-test'],
+        extensions: [{extensionId: 'amp-test', extensionVersion: 'latest'}],
         skipHtmlMerge: true,
       },
       preinstallCallback
@@ -632,7 +554,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       {
         url: 'https://acme.org/url1',
         html: '<amp-test></amp-test>',
-        extensionIds: ['amp-test'],
+        extensions: [{extensionId: 'amp-test', extensionVersion: 'latest'}],
       },
       preinstallCallback
     );
@@ -746,6 +668,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
     await installFriendlyIframeEmbed(iframe, document.body, {
       url: 'https://acme.org/url1',
       html: '<a id="a1"></a>',
+      extensions: [],
     });
 
     expect(mutateSpy).to.not.be.called;
@@ -963,6 +886,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
         url: 'https://acme.org/url1',
         html: '<a id="a1"></a>',
+        extensions: [],
       });
       return embedPromise.then(() => {
         expect(iframe.contentDocument.getElementById('a1')).to.be.ok;
@@ -974,6 +898,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
         url: 'https://acme.org/url1',
         html: '<a id="a1"></a>',
+        extensions: [],
       });
       return embedPromise.then(() => {
         expect(iframe.contentDocument.getElementById('a1')).to.be.ok;
@@ -984,6 +909,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
         url: 'https://acme.org/url1',
         html: '<a id="a1"></a>',
+        extensions: [],
       });
       return embedPromise.then((embed) => {
         return embed.whenWindowLoaded();
@@ -995,6 +921,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
         url: 'https://acme.org/url1',
         html: '<a id="a1"></a>',
+        extensions: [],
       });
       return embedPromise.then((embed) => {
         return embed.whenWindowLoaded();
@@ -1458,7 +1385,7 @@ describes.realWin('installExtensionsInEmbed', {amp: true}, (env) => {
       fie,
       extensions,
       ampdoc,
-      ['amp-test'],
+      [{extensionId: 'amp-test', extensionVersion: 'latest'}],
       null,
       installComplete
     );
@@ -1541,7 +1468,7 @@ describes.realWin('installExtensionsInEmbed', {amp: true}, (env) => {
       fie,
       extensions,
       ampdoc,
-      ['amp-test'],
+      [{extensionId: 'amp-test', extensionVersion: 'latest'}],
       null,
       installComplete
     );
@@ -1572,7 +1499,7 @@ describes.realWin('installExtensionsInEmbed', {amp: true}, (env) => {
       fie,
       extensions,
       ampdoc,
-      ['amp-test'],
+      [{extensionId: 'amp-test', extensionVersion: 'latest'}],
       function (winArg, ampdocArg) {
         expect(winArg).to.equal(iframeWin);
         expect(ampdocArg).to.equal(ampdoc);
@@ -1615,5 +1542,54 @@ describes.realWin('installExtensionsInEmbed', {amp: true}, (env) => {
     // Extension elements are stubbed immediately, but registered only
     // after extension is loaded.
     expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(AmpTest);
+  });
+});
+
+describe('extensionsHasId', () => {
+  it('should return true if containing extension', () => {
+    const extensions = [{extensionId: 'amp-cats', extensionVersion: '1.0'}];
+    expect(extensionsHasId(extensions, 'amp-cats')).to.be.true;
+  });
+
+  it('should return false if it does not contain extension', () => {
+    const extensions = [{extensionId: 'amp-cats', extensionVersion: '1.0'}];
+    expect(extensionsHasId(extensions, 'amp-dogs')).to.be.false;
+  });
+
+  it('should return false if empty array', () => {
+    const extensions = [{extensionId: 'amp-cats', extensionVersion: '1.0'}];
+    expect(extensionsHasId(extensions, 'amp-dogs')).to.be.false;
+  });
+});
+
+describe('getExtensionsFromMetadata', () => {
+  it('should return extension name and version', () => {
+    const metadata = {
+      extensions: [
+        {
+          'custom-element': 'amp-analytics',
+          'src': 'https://cdn.ampproject.org/v0/amp-analytics-0.1.js',
+        },
+        {
+          'custom-element': 'amp-mustache',
+          'src': 'https://cdn.ampproject.org/v0/amp-mustache-1.0.js',
+        },
+      ],
+    };
+    const extensions = getExtensionsFromMetadata(metadata);
+    expect(extensions).to.deep.include({
+      extensionId: 'amp-analytics',
+      extensionVersion: '0.1',
+    });
+    expect(extensions).to.deep.include({
+      extensionId: 'amp-mustache',
+      extensionVersion: '1.0',
+    });
+  });
+
+  it('should handle no `extensions` key in metadata', () => {
+    const metadata = {};
+    const extensions = getExtensionsFromMetadata(metadata);
+    expect(extensions).to.eql([]);
   });
 });

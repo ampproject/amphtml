@@ -137,8 +137,12 @@ export function preloadFriendlyIframeEmbedExtensions(win, extensions) {
  * @param {!Window} win
  * @param {!Array<string>} extensionIds
  * TODO(#33020): remove this method in favor `preloadFriendlyIframeEmbedExtensions`.
+ * @visibleForTesting
  */
-function preloadFriendlyIframeEmbedExtensionIdsDeprecated(win, extensionIds) {
+export function preloadFriendlyIframeEmbedExtensionIdsDeprecated(
+  win,
+  extensionIds
+) {
   const extensionsService = Services.extensionsFor(win);
 
   // Load any extensions; do not wait on their promises as this
@@ -166,7 +170,7 @@ export function extensionsHasId(extensions, id) {
 export function getExtensionsFromMetadata(creativeMetadata) {
   const parsedExtensions = [];
   const {extensions} = creativeMetadata;
-  if (!extensions || isArray(extensions)) {
+  if (!extensions || !isArray(extensions)) {
     return parsedExtensions;
   }
 
