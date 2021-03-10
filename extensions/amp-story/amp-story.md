@@ -24,10 +24,10 @@ limitations under the License.
 
 # amp-story
 
-[Web stories](https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/?format=stories) are an immersive, tappable and easily shareable storytelling format. Web stories are built using the AMP Framework. The `amp-story` component provides the AMP story subsect of AMP. It is the base technology for web stories.
+[Web stories](https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/?format=stories) are an immersive, tappable and easily shareable storytelling format. Web stories are built using the AMP Framework. The `amp-story` component provides the AMP story subset of AMP. It is the base technology for web stories.
 
 <figure class="centered-fig">
-  <amp-anim width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story.gif">
+  <amp-anim width="300" height="533" layout="fixed" alt="AMP Story Example" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story.gif">
     <noscript>
     <img alt="AMP Story Example" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story.gif" />
   </noscript>
@@ -49,9 +49,9 @@ As of 2018-07-16, version 0.1 is considered deprecated, and will be deleted on 2
 
 An [AMP story](#story:-amp-story) is a complete AMP HTML document that is comprised of [pages](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story-page.md), within the pages are [layers](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story-grid-layer.md), within the layers are AMP & HTML elements, like media, analytics, text, and so on.
 
-<amp-img alt="AMP story tag hierarchy" layout="responsive" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" width="591" height="358">
+<amp-img alt="An illustration of the nested markup structure of an amp-story: an amp-story element, which contains two amp-story-page blocks, which in turn contain an amp-story-grid-layer, which then contains the actual content elements" layout="responsive" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" width="591" height="358">
   <noscript>
-    <img alt="AMP story tag hierarchy" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" />
+    <img alt="An illustration of the nested markup structure of an amp-story: an amp-story element, which contains two amp-story-page blocks, which in turn contain an amp-story-grid-layer, which then contains the actual content elements" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" />
   </noscript>
 </amp-img>
 
@@ -149,6 +149,7 @@ The following markup is a decent starting point or boilerplate. Copy this and sa
             src="https://example.ampproject.org/helloworld/bg1.jpg"
             width="900"
             height="1600"
+            alt=""
           >
           </amp-img>
         </amp-story-grid-layer>
@@ -162,6 +163,7 @@ The following markup is a decent starting point or boilerplate. Copy this and sa
             src="https://example.ampproject.org/helloworld/bg2.gif"
             width="900"
             height="1600"
+            alt=""
           >
           </amp-img>
         </amp-story-grid-layer>
@@ -306,16 +308,18 @@ If the `supports-landscape` attribute is specified on the `<amp-story>` element,
 -   Allow the story to be seen when a mobile device is held in a landscape orientation.
 -   Change the desktop experience to an immersive full bleed mode, replacing the default three portrait panels experience.
 
+While this is currently opt-in and optional, we strongly recommend making sure that users on mobile devices are able to view stories in whatever orientation best suits their needs - otherwise, they will simply be presented with a "The page is best viewed in portrait mode" message.
+
 Usage: `<amp-story ... supports-landscape>...</amp-story>`
 
 <figure class="centered-fig">
   <span class="special-char">Before:</span>
   <amp-anim alt="Desktop three panels experience" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-three-panels.gif" width="400" height="299">
-  <noscript><img width="400" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-three-panels.gif" /></noscript>
+  <noscript><img width="400" alt="Desktop three panels experience" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-three-panels.gif" /></noscript>
   </amp-anim>
   <span class="special-char">After:</span>
   <amp-anim alt="Desktop full bleed experience" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-full-bleed.gif" width="400" height="299">
-  <noscript><img width="400" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-full-bleed.gif" /></noscript>
+  <noscript><img width="400" alt="Desktop full bleed experience" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-full-bleed.gif" /></noscript>
   </amp-anim>
 </figure>
 
@@ -391,7 +395,7 @@ Example:
 This same image can be used for both mobile portrait and landscape desktop using the `object-position` this way:
 
 ```html
-<amp-img src="cat.jpg" object-position="75% 40%"></amp-img>
+<amp-img src="cat.jpg" alt="..." object-position="75% 40%"></amp-img>
 ```
 
 ##### `data-text-background-color`
@@ -443,7 +447,7 @@ Example:
 <figure class="centered-fig">
   <span class="special-char">Example:</span>
   <amp-anim alt="Embedded component example" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-tooltip.gif" width="300" height="553">
-  <noscript><img width="300" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-tooltip.gif" /></noscript>
+  <noscript><img width="300"  alt="Embedded component example" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-tooltip.gif" /></noscript>
   </amp-anim>
 </figure>
 
@@ -596,6 +600,10 @@ Every element inside an `<amp-story-page>` can have an entrance animation.
 
 You can configure animations by specifying a set of [animation attributes](#animation-attributes) on the element; no additional AMP extensions or configuration is needed.
 
+{% call callout('Note', type='note') %}
+Animations can help make your Web Story more visually exciting and engaging, but use them sparingly. Some users may find long, continuous animations distracting. Other users may have motion sensitivity and be adversely affected by excessive use of motion and parallax effects.
+{% endcall %}
+
 ### Animation effects
 
 The following animation effects are available as presets for AMP stories:
@@ -720,6 +728,7 @@ _Example_: An image zooming-in from 2x to 5x its size over 4 seconds.
   src="https://picsum.photos/720/320?image=1026"
   width="720"
   height="320"
+  alt="..."
 >
 </amp-img>
 ```
@@ -739,6 +748,7 @@ _Example_: An image panning 200px to the left over 10 seconds.
   src="https://picsum.photos/720/320?image=1026"
   width="720"
   height="320"
+  alt="..."
 >
 </amp-img>
 ```
@@ -758,6 +768,7 @@ _Example_: An image panning 50px down over 15 seconds.
   src="https://picsum.photos/720/320?image=1026"
   width="720"
   height="320"
+  alt="..."
 >
 </amp-img>
 ```
@@ -841,7 +852,7 @@ where `page-id` refers to the unique id of an `amp-story-page`. You can also use
 
 ## Localization
 
-To localize your story, include the language code in the `lang` attribute on the `<html>` tag of your story, such as `<html ⚡ lang="en">` for English. The supported language codes are:
+You should always include the language code in the `lang` attribute on the `<html>` tag of your story, such as `<html ⚡ lang="en">` for English content. The supported language codes are:
 
 -   ar (Arabic)
 -   de (German)

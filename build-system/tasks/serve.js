@@ -21,7 +21,7 @@ const globby = require('globby');
 const header = require('connect-header');
 const minimist = require('minimist');
 const morgan = require('morgan');
-const open = require('opn');
+const open = require('open');
 const os = require('os');
 const path = require('path');
 const {
