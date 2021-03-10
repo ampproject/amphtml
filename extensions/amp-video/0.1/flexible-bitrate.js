@@ -95,7 +95,7 @@ export class BitrateManager {
    * @param {!Element} video
    */
   manage(video) {
-    if (!isExperimentOn('flexible-bitrate')) {
+    if (!isExperimentOn(this.win, 'flexible-bitrate')) {
       return;
     }
     // Prevent duplicate listeners if already managing this video.
