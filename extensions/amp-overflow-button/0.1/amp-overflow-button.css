@@ -1,0 +1,60 @@
+/**
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* DO NOT SUBMIT
+ * If you don't require this CSS file, remove {hasCss: true} from
+ * bundles.config.js. Otherwise, remove this comment.
+ */
+
+amp-overflow-button, .i-amphtml-overflow-button-wrapper {
+  width: 100%;
+  height: 100%;
+  top: 0;
+}
+
+.i-amphtml-overflow-button-wrapper {
+  background-color: rgba(255, 255, 255, 0.75);
+  position: absolute !important;
+}
+
+.i-amphtml-overflow-button-container {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
+
+.i-amphtml-overflow-button-preview {
+  flex: 1 1 auto;
+  background-color: transparent;
+}
+
+.i-amphtml-overflow-button-cta-container {
+  flex: 0 1 48px;
+  background-color: #fff;
+  justify-content: center;
+  display: flex;
+}
+
+.i-amphtml-overflow-button-cta-button {
+  background-color: transparent;
+  border-radius: 0.25rem;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: .1rem;
+  padding: 10px 35px;
+  text-align: center;
+  font-family: 'Roboto', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+}
