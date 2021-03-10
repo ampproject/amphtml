@@ -712,6 +712,7 @@ export class ResourcesImpl {
         dict({
           'title': doc.title,
           'sourceUrl': getSourceUrl(this.ampdoc.getUrl()),
+          'isStory': doc.body.firstElementChild?.tagName === 'AMP-STORY',
           'serverLayout': doc.documentElement.hasAttribute('i-amphtml-element'),
           'linkRels': documentInfo.linkRels,
           'metaTags': {'viewport': documentInfo.viewport} /* deprecated */,
