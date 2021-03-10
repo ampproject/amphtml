@@ -27,6 +27,7 @@ RED() { echo -e "\n\033[0;31m$1\033[0m"; }
 
 if [[ -z "$1" ]]; then
   echo "Usage: fetch_merge_commit.sh [fetch | merge]"
+  exit 1
 fi
 
 # Push builds are only run against master and amp-release branches.

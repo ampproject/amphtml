@@ -80,7 +80,8 @@ jobs:
     steps:
       - run:
           name: 'Fetch Merge Commit'
-          command: ./.circleci/fetch_merge_commit.sh fetch
+          # TODO: This needs to be changed to ampproject/amphtml/master after merging #33165
+          command: curl -o- https://raw.githubusercontent.com/jridgewell/amphtml/build-size-base/.circleci/fetch_merge_commit.sh | bash /dev/stdin fetch
       - save_merge_commit
   'Checks':
     executor:
