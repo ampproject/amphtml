@@ -15,27 +15,31 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {ContainWrapper} from '../../../src/preact/component';
+import {ContainWrapper, useRenderer} from '../../../src/preact/component';
 import {useEffect, useState} from '../../../src/preact';
 // import {useStyles} from './component.jss';
+import {useResourcesNotify} from '../../../src/preact/utils';
 
 /**
  * @param {!RenderDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function Render({src, fetchFn, ...rest}) {
+export function Render({src, fetchFn, render, ...rest}) {
   const [data, setData] = useState({});
 
   useEffect(() => {
     fetchFn(src).then((data) => {
+      console.log(data);
       setData(data);
     });
   }, [src, fetchFn]);
 
+  const rendered = useRenderer(render, data);
+
   return (
     <ContainWrapper layout size paint {...rest}>
       amp render body
-      {data}
+      {rendered}
     </ContainWrapper>
   );
 }

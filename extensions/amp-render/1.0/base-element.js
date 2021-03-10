@@ -33,6 +33,9 @@ BaseElement['props'] = {
 };
 
 /** @override */
+BaseElement['usesTemplate'] = true;
+
+/** @override */
 // BaseElement['passthrough'] = true;
 // BaseElement['passthroughNonEmpty'] = true;
 // BaseElement['children'] = {};
