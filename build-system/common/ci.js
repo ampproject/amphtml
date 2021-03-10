@@ -198,7 +198,7 @@ function ciJobUrl() {
  * Returns the merge commits SHA when running a CI Pull Request build.
  * @return {string}
  */
-function ciMergeSha() {
+function circleciPrMergeSha() {
   // CIRCLE_MERGE_SHA is populated by .circleci/fetch_merge_commit.sh.
   return isCircleci ? env('CIRCLE_MERGE_SHA') : '';
 }
@@ -230,7 +230,7 @@ module.exports = {
   ciCommitSha,
   ciJobId,
   ciJobUrl,
-  ciMergeSha,
+  circleciPrMergeSha,
   ciPullRequestBranch,
   ciPullRequestSha,
   ciPushBranch,
