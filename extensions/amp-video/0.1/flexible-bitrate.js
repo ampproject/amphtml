@@ -19,7 +19,7 @@ import {childElement, childElementsByTag} from '../../../src/dom';
 import {dev, devAssert} from '../../../src/log';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {toArray} from '../../../src/types';
-import { isExperimentOn } from '../../../src/experiments';
+import {isExperimentOn} from '../../../src/experiments';
 
 const TAG = 'amp-video';
 
