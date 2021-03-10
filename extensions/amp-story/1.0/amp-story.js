@@ -2643,12 +2643,6 @@ export class AmpStory extends AMP.BaseElement {
   onRewind_() {
     this.signals()
       .whenSignal(CommonSignals.LOAD_END)
-      .then(() => {
-        if (this.pages_.length > 0) {
-          return;
-        }
-        return this.initializePages_();
-      })
       .then(() => this.replay_());
   }
 

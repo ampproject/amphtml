@@ -1304,11 +1304,11 @@ export class AmpStoryPlayer {
   rewind(storyUrl) {
     const story = this.getStoryFromUrl_(storyUrl);
 
-    this.connectedPromise_(story).then(() => {
-      story.messagingPromise.then((messaging) =>
+    this.whenConnected_(story)
+    .then(() => story.messagingPromise)
+    .then((messaging) =>
         messaging.sendRequest('rewind', {})
-      );
-    });
+    );
   }
 
   /**
@@ -1317,7 +1317,7 @@ export class AmpStoryPlayer {
    * @return {!Promise}
    * @private
    */
-  connectedPromise_(story) {
+  whenConnected_(story) {
     if (story.iframe.isConnected) {
       return Promise.resolve();
     }

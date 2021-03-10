@@ -832,7 +832,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       );
     });
 
-    it('rewind() callback should eventually rewind story without iframe', async () => {
+    it('rewind() callback should eventually rewind story when it gets connected', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       attachPlayerWithStories(playerEl, 3);
 
@@ -842,7 +842,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await nextTick();
 
       const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
-      player.rewind('https://example.com/story0.html');
+      player.rewind('https://example.com/story2.html');
 
       await player.go(2);
       await nextTick();
