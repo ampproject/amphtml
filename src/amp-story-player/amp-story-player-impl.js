@@ -628,7 +628,8 @@ export class AmpStoryPlayer {
     if (storyIdx === this.stories_.length - 1) {
       const skipButtonIdx = findIndex(
         this.playerConfig_.controls,
-        (control) => control.name === 'skip-next' || control.name === 'skip-to-next'
+        (control) =>
+          control.name === 'skip-next' || control.name === 'skip-to-next'
       );
 
       if (skipButtonIdx >= 0) {
