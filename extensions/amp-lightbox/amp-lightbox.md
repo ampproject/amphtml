@@ -144,26 +144,20 @@ Fully valid AMP pages use the AMP layout system to infer sizing of elements to c
 
 A unique identifier for the lightbox.
 
-### `layout`
+### `layout` (required)
 
 Must be set to `nodisplay`.
 
-### `animation` (optional)
+### `animation`
 
 Defines the style of animation for opening the lightbox. By default, this will
 be set to `fade-in`. Valid values are `fade-in`, `fly-in-bottom`, and
 `fly-in-top`.
 
-[tip type="important"]
+This attribute can be configured to use different
+options based on a [media query](./../../spec/amp-html-responsive-attributes.md).
 
-The `fly-in-top` and `fly-in-bottom` animation presets modify the `transform`
-property of the `amp-lightbox` element. Do not rely on transforming the
-`amp-lightbox` element directly. If you need to apply a transform, set it on a
-nested element instead.
-
-[/tip]
-
-### `scrollable` (optional)
+### `scrollable`
 
 When the `scrollable` attribute is present, the content of the lightbox can
 scroll when overflowing the height of the lightbox.
