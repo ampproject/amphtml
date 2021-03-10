@@ -135,10 +135,14 @@ describes.realWin('TemplateValidator', realWinConfig, (env) => {
         expect(validatorOutput).to.be.ok;
         expect(validatorOutput.creativeData).to.be.ok;
         const {creativeMetadata} = validatorOutput.creativeData;
-        expect(creativeMetadata.extensions).to.deep.equal([
-          'amp-analytics',
-          'amp-mustache',
-        ]);
+        expect(creativeMetadata.extensions).to.deep.include({
+          'custom-element': 'amp-analytics',
+          'src': 'https://cdn.ampproject.org/v0/amp-analytics-0.1.js',
+        });
+        expect(creativeMetadata.extensions).to.deep.include({
+          'custom-element': 'amp-mustache',
+          'src': 'https://cdn.ampproject.org/v0/amp-mustache-0.1.js',
+        });
       });
     });
   });
