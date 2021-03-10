@@ -135,6 +135,9 @@ export function stubElementsForDoc(ampdoc) {
     ampdoc.declareExtension(extensionId, extensionVersion);
     stubElementIfNotKnown(ampdoc.win, extensionId);
   });
+  if (ampdoc.isBodyAvailable()) {
+    ampdoc.setExtensionsKnown();
+  }
 }
 
 /**
