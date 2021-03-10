@@ -246,11 +246,13 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
       });
   });
 
+  // broke
   it('should perform media operations on fie video when active', (done) => {
     const iframe = win.document.createElement('iframe');
     const fiePromise = installFriendlyIframeEmbed(iframe, gridLayerEl, {
       url: 'https://amp.dev',
       html: '<video src="https://example.com/video.mp3"></video>',
+      extensions: [],
     });
     env.sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
 

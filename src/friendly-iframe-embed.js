@@ -153,13 +153,15 @@ export function preloadFriendlyIframeEmbedExtensionIdsDeprecated(
 }
 
 /**
- * Determine if extensions array contains given extension name.
- * @param {!Array<?{extensionId: string, extensionVersion: string}>} extensions
+ * Determine if parsed extensions metadata object
+ * @param {!Array<{custom-element: string, src: string}>} extensions
  * @param {string} id
  * @return {boolean}
  */
-export function extensionsHasId(extensions, id) {
-  return findIndex(extensions, (entry) => entry.extensionId === id) !== -1;
+export function extensionsHasElement(extensions, id) {
+  return (
+    findIndex(extensions, (entry) => entry['custom-element'] === id) !== -1
+  );
 }
 
 /**

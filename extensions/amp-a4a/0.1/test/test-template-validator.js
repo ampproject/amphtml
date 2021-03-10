@@ -130,12 +130,12 @@ describes.realWin('TemplateValidator', realWinConfig, (env) => {
       });
     });
 
-    it('should have amp-analytics and mustache in customElementExtensions', () => {
+    it('should have amp-analytics and mustache in extensions', () => {
       return validatorPromise.then((validatorOutput) => {
         expect(validatorOutput).to.be.ok;
         expect(validatorOutput.creativeData).to.be.ok;
         const {creativeMetadata} = validatorOutput.creativeData;
-        expect(creativeMetadata.customElementExtensions).to.deep.equal([
+        expect(creativeMetadata.extensions).to.deep.equal([
           'amp-analytics',
           'amp-mustache',
         ]);

@@ -1919,7 +1919,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Convert the iframe to FIE impl and append to DOM.
    * @param {string} html
-   * @param {!Array<?{extensionId: string, extensionVersion: string}>} extensions
+   * @param {!Array<{extensionId: string, extensionVersion: string}>} extensions
    * @param {!Array<string>} fonts
    * @param {boolean} skipHtmlMerge
    * @return {!Promise<!../../../src/friendly-iframe-embed.FriendlyIframeEmbed>}
@@ -2255,6 +2255,9 @@ export class AmpA4A extends AMP.BaseElement {
         }
       } else {
         metaData.customElementExtensions = [];
+      }
+      if (metaDataObj['extensions']) {
+        metaData.extensions = metaDataObj['extensions'];
       }
       if (metaDataObj['customStylesheets']) {
         // Expect array of objects with at least one key being 'href' whose

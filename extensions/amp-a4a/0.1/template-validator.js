@@ -16,7 +16,7 @@
 
 import {AdResponseType, Validator, ValidatorResult} from './amp-ad-type-defs';
 import {
-  extensionsHasId,
+  extensionsHasElement,
   getExtensionsFromMetadata,
   preloadFriendlyIframeEmbedExtensions,
 } from '../../../src/friendly-iframe-embed';
@@ -68,24 +68,26 @@ export class TemplateValidator extends Validator {
       .fetch(parsedResponseBody.templateUrl)
       .then((template) => {
         const creativeMetadata = getAmpAdMetadata(template);
-        const extensions = getExtensionsFromMetadata(creativeMetadata);
+        creativeMetadata['extensions'] = creativeMetadata['extensions'] || [];
+        const extensions = creativeMetadata['extensions'];
         if (
           parsedResponseBody.analytics &&
-          extensionsHasId(extensions, 'amp-analytics')
+          !extensionsHasElement(extensions, 'amp-analytics')
         ) {
           extensions.push({
-            extensionId: 'amp-analytics',
-            extensionVersion: 'latest',
+            'custom-element': 'amp-analytics',
+            src: 'https://cdn.ampproject.org/v0/amp-analytics-0.1.js',
           });
         }
-        if (!extensionsHasId('amp-mustache')) {
+        if (!extensionsHasElement(extensions, 'amp-mustache')) {
           extensions.push({
-            extensionId: 'amp-mustache',
-            extensionVersion: 'latest',
+            'custom-element': 'amp-mustache',
+            src: 'https://cdn.ampproject.org/v0/amp-mustache-0.1.js',
           });
         }
 
-        preloadFriendlyIframeEmbedExtensions(context.win, extensions);
+        const extensionsInfo = getExtensionsFromMetadata(creativeMetadata);
+        preloadFriendlyIframeEmbedExtensions(context.win, extensionsInfo);
 
         // TODO(levitzky) Add preload logic for fonts / images.
         return Promise.resolve(

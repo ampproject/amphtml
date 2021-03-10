@@ -22,7 +22,7 @@ import {FakeWindow} from '../../testing/fake-dom';
 import {
   FriendlyIframeEmbed,
   Installers,
-  extensionsHasId,
+  extensionsHasElement,
   getExtensionsFromMetadata,
   installFriendlyIframeEmbed,
   mergeHtmlForTesting,
@@ -1545,20 +1545,30 @@ describes.realWin('installExtensionsInEmbed', {amp: true}, (env) => {
   });
 });
 
-describe('extensionsHasId', () => {
+describe('extensionsHasElement', () => {
   it('should return true if containing extension', () => {
-    const extensions = [{extensionId: 'amp-cats', extensionVersion: '1.0'}];
-    expect(extensionsHasId(extensions, 'amp-cats')).to.be.true;
+    const extensions = [
+      {
+        'custom-element': 'amp-cats',
+        src: 'https://cdn.ampproject.org/v0/amp-cats-0.1.js',
+      },
+    ];
+    expect(extensionsHasElement(extensions, 'amp-cats')).to.be.true;
   });
 
   it('should return false if it does not contain extension', () => {
-    const extensions = [{extensionId: 'amp-cats', extensionVersion: '1.0'}];
-    expect(extensionsHasId(extensions, 'amp-dogs')).to.be.false;
+    const extensions = [
+      {
+        'custom-element': 'amp-cats',
+        src: 'https://cdn.ampproject.org/v0/amp-cats-0.1.js',
+      },
+    ];
+    expect(extensionsHasElement(extensions, 'amp-dogs')).to.be.false;
   });
 
   it('should return false if empty array', () => {
-    const extensions = [{extensionId: 'amp-cats', extensionVersion: '1.0'}];
-    expect(extensionsHasId(extensions, 'amp-dogs')).to.be.false;
+    const extensions = [];
+    expect(extensionsHasElement(extensions, 'amp-dogs')).to.be.false;
   });
 });
 
