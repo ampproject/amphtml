@@ -60,7 +60,7 @@ function LightboxWithRef(
     closeButtonAs,
     onBeforeOpen,
     onAfterClose,
-    scrollable,
+    scrollable = false,
     ...rest
   },
   ref
