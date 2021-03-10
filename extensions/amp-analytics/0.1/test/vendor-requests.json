@@ -456,12 +456,6 @@
     "event": "https://amp.shinystat.com/cgi-bin/shinyamp.cgi?AMP=1&RM=_random_&USER=!account&PAG=!page&HR=_source_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id(AMP_CID)_&PAGID=_page_view_id_&TITL=_title_&RQC=1&SSXL=1",
     "link": "https://amp.shinystat.com/cgi-bin/shinyamp.cgi?AMP=1&RM=_random_&USER=!account&PAG=!page&HR=_source_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id(AMP_CID)_&PAGID=_page_view_id_&TITL=_title_&RQC=1&LINK=!outboundLink"
   },
-  "simplereach": {
-    "host": "https://edge.simplereach.com",
-    "baseParams": "amp=true&pid=!pid&title=_title_&url=_canonical_url_&date=!published_at&authors=!authors&channels=!categories&tags=!tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id(sr_amp_id)_&domain=_canonical_host_&article_id=!article_id&ignore_metadata=!ignore_metadata",
-    "visible": "https://edge.simplereach.com/n?amp=true&pid=!pid&title=_title_&url=_canonical_url_&date=!published_at&authors=!authors&channels=!categories&tags=!tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id(sr_amp_id)_&domain=_canonical_host_&article_id=!article_id&ignore_metadata=!ignore_metadata",
-    "timer": "https://edge.simplereach.com/t?amp=true&pid=!pid&title=_title_&url=_canonical_url_&date=!published_at&authors=!authors&channels=!categories&tags=!tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id(sr_amp_id)_&domain=_canonical_host_&article_id=!article_id&ignore_metadata=!ignore_metadata&t=5000&e=5000"
-  },
   "snowplow": {
     "aaVersion": "amp-0.3",
     "basePrefix": "https://!collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_code_&aid=!appId&p=web&tv=amp-0.3&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id(_sp_id)_&lang=_browser_language_&refr=_document_referrer_&vp=_viewport_width_x_viewport_height_&ds=_scroll_width_x_scroll_height_",

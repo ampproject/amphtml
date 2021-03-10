@@ -503,12 +503,6 @@ Adds support for Sensors Data. More details for adding Sensors Data support can 
 
 Type attribute value: `shinystat`
 
-### SimpleReach
-
-Type attribute value: `simplereach`
-
-Adds support for SimpleReach. Configuration details can be found at `http://docs.simplereach.com/dev-guide/implementation/google-amp-implementation`.
-
 ### Snowplow Analytics
 
 Type attribute value: `snowplow`, `snowplow_v2`
