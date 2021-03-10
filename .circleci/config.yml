@@ -37,7 +37,7 @@ commands:
           name: 'Save Merge Commit'
           key: git-{{ .Branch }}-{{ .Revision }}
           paths:
-            - .git/FETCH_HEAD
+            - .circleci/merge_sha
   restore_merge_commit:
     steps:
       - restore_cache:
@@ -78,7 +78,6 @@ jobs:
     executor:
       name: amphtml-medium-executor
     steps:
-      - checkout
       - run:
           name: 'Fetch Merge Commit'
           command: ./.circleci/fetch_merge_commit.sh fetch

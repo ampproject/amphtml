@@ -25,10 +25,6 @@ GREEN() { echo -e "\n\033[0;32m$1\033[0m"; }
 YELLOW() { echo -e "\n\033[0;33m$1\033[0m"; }
 RED() { echo -e "\n\033[0;31m$1\033[0m"; }
 
-GET_MERGE_SHA() {
-  awk '{print $1}' .git/FETCH_HEAD
-}
-
 if [[ -z "$1" ]]; then
   echo "Usage: fetch_merge_commit.sh [fetch | merge]"
 fi
@@ -62,24 +58,19 @@ if [[ -z "$PR_NUMBER" ]]; then
 fi
 
 if [[ "$1" == "fetch" ]]; then
+  # GitHub provides refs/pull/<PR_NUMBER>/merge, an up-to-date merge branch for
+  # every PR branch that can be cleanly merged to master. For more details, see:
+  # https://discuss.circleci.com/t/show-test-results-for-prospective-merge-of-a-github-pr/1662
   MERGE_BRANCH="refs/pull/$PR_NUMBER/merge"
   echo $(GREEN "Fetching merge SHA from $MERGE_BRANCH...")
 
-  (set -x && git fetch origin "$MERGE_BRANCH") || err=$?
-  if [[ "$err" -ne "0" ]]; then
-    echo $(RED "Failed to fetch merge commit between $CIRCLE_BRANCH and master.")
-    echo $(RED "Please rebase your PR branch.")
-    exit $err
-  fi
-
-  echo $(GREEN "Fetched merge SHA $(GET_MERGE_SHA)...")
+  MERGE_SHA="$(git ls-remote https://github.com/ampproject/amphtml.git "$MERGE_BRANCH" | awk '{print $1}')"
+  echo $(GREEN "Fetched merge SHA $(MERGE_SHA)...")
+  echo "$MERGE_SHA" > .circleci/merge_sha
   exit 0
 fi
 
-# GitHub provides refs/pull/<PR_NUMBER>/merge, an up-to-date merge branch for
-# every PR branch that can be cleanly merged to master. For more details, see:
-# https://discuss.circleci.com/t/show-test-results-for-prospective-merge-of-a-github-pr/1662
-MERGE_SHA="$(GET_MERGE_SHA)"
+MERGE_SHA="$(cat .circleci/merge_sha)"
 echo $(GREEN "Fetching merge commit $MERGE_SHA...")
 (set -x && git pull --ff-only origin "$MERGE_SHA") || err=$?
 
