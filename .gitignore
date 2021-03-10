@@ -1,6 +1,6 @@
 .DS_Store
 .g4ignore
-.merge_sha
+.CIRCLECI_WORKFLOW_MERGE_COMMIT
 build/
 .amp-dep-check
 c

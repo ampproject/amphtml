@@ -30,7 +30,7 @@ const {
   isPushBuild,
   ciPushBranch,
   ciRepoSlug,
-  ciMergeSha
+  ciMergeSha,
 } = require('../../common/ci');
 const {
   VERSION: internalRuntimeVersion,
