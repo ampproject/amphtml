@@ -15,10 +15,13 @@
  */
 
 import {AdResponseType, Validator, ValidatorResult} from './amp-ad-type-defs';
+import {
+  extensionsHasId,
+  getExtensionsFromMetadata,
+  preloadFriendlyIframeEmbedExtensions,
+} from '../../../src/friendly-iframe-embed';
 import {getAmpAdMetadata} from './amp-ad-utils';
 import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
-import {preloadFriendlyIframeEmbedExtensionIdsDeprecated} from '../../../src/friendly-iframe-embed';
-import {pushIfNotExist} from '../../../src/utils/array';
 import {tryParseJson} from '../../../src/json';
 import {utf8Decode} from '../../../src/utils/bytes';
 
@@ -65,21 +68,24 @@ export class TemplateValidator extends Validator {
       .fetch(parsedResponseBody.templateUrl)
       .then((template) => {
         const creativeMetadata = getAmpAdMetadata(template);
-        const customElementExtensions =
-          creativeMetadata['customElementExtensions'];
-        if (parsedResponseBody.analytics) {
-          pushIfNotExist(customElementExtensions, 'amp-analytics');
+        const extensions = getExtensionsFromMetadata(creativeMetadata);
+        if (
+          parsedResponseBody.analytics &&
+          extensionsHasId(extensions, 'amp-analytics')
+        ) {
+          extensions.push({
+            extensionId: 'amp-analytics',
+            extensionVersion: 'latest',
+          });
         }
-        pushIfNotExist(customElementExtensions, 'amp-mustache');
+        if (!extensionsHasId('amp-mustache')) {
+          extensions.push({
+            extensionId: 'amp-mustache',
+            extensionVersion: 'latest',
+          });
+        }
 
-        // Load any extensions; do not wait on their promises as this
-        // is just to prefetch.
-        // TODO(#33020): switch to `preloadFriendlyIframeEmbedExtensions` with
-        // the format of `[{extensionId, extensionVersion}]`.
-        preloadFriendlyIframeEmbedExtensionIdsDeprecated(
-          context.win,
-          customElementExtensions
-        );
+        preloadFriendlyIframeEmbedExtensions(context.win, extensions);
 
         // TODO(levitzky) Add preload logic for fonts / images.
         return Promise.resolve(

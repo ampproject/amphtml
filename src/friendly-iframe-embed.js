@@ -28,6 +28,7 @@ import {
   setParentWindow,
 } from './service';
 import {escapeHtml} from './dom';
+import {findIndex} from './utils/array';
 import {getMode} from './mode';
 import {install as installAbortController} from './polyfills/abort-controller';
 import {installAmpdocServicesForEmbed} from './service/core-services';
@@ -38,9 +39,11 @@ import {installForChildWin as installIntersectionObserver} from './polyfills/int
 import {installForChildWin as installResizeObserver} from './polyfills/resize-observer';
 import {installStylesForDoc} from './style-installer';
 import {installTimerInEmbedWindow} from './service/timer-impl';
+import {isArray, toWin} from './types';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
 import {loadPromise} from './event-helper';
+import {parseExtensionUrl} from './service/extension-script';
 import {
   px,
   resetStyles,
@@ -48,7 +51,6 @@ import {
   setStyle,
   setStyles,
 } from './style';
-import {toWin} from './types';
 import {urls} from './config';
 import {whenContentIniLoad} from './ini-load';
 
@@ -62,14 +64,12 @@ import {whenContentIniLoad} from './ini-load';
  *   this embed.
  * - fonts: An optional array of fonts used in this embed.
  *
- * TODO(#33020): remove extensionIds once extensions is used everywhere.
  *
  * @typedef {{
  *   host: (?AmpElement|undefined),
  *   url: string,
  *   html: ?string,
  *   extensions: (?Array<{extensionId: string, extensionVersion: string}>|undefined),
- *   extensionIds: (?Array<string>|undefined),
  *   fonts: (?Array<string>|undefined),
  *   skipHtmlMerge: (boolean|undefined),
  * }}
@@ -138,10 +138,7 @@ export function preloadFriendlyIframeEmbedExtensions(win, extensions) {
  * @param {!Array<string>} extensionIds
  * TODO(#33020): remove this method in favor `preloadFriendlyIframeEmbedExtensions`.
  */
-export function preloadFriendlyIframeEmbedExtensionIdsDeprecated(
-  win,
-  extensionIds
-) {
+function preloadFriendlyIframeEmbedExtensionIdsDeprecated(win, extensionIds) {
   const extensionsService = Services.extensionsFor(win);
 
   // Load any extensions; do not wait on their promises as this
@@ -149,6 +146,38 @@ export function preloadFriendlyIframeEmbedExtensionIdsDeprecated(
   extensionIds.forEach((extensionId) =>
     extensionsService.preloadExtension(extensionId)
   );
+}
+
+/**
+ * Determine if extensions array contains given extension name.
+ * @param {!Array<?{extensionId: string, extensionVersion: string}>} extensions
+ * @param {string} id
+ * @return {boolean}
+ */
+export function extensionsHasId(extensions, id) {
+  return findIndex(extensions, (entry) => entry.extensionId === id) !== -1;
+}
+
+/**
+ * Parses extension urls from given metadata to retrieve name and version.
+ * @param {!./amp-ad-type-defs.CreativeMetaDataDef} creativeMetadata
+ * @return {!Array<?{extensionId: string, extensionVersion: string}>}
+ */
+export function getExtensionsFromMetadata(creativeMetadata) {
+  const parsedExtensions = [];
+  const {extensions} = creativeMetadata;
+  if (!extensions || isArray(extensions)) {
+    return parsedExtensions;
+  }
+
+  for (let i = 0; i < extensions.length; i++) {
+    const extension = extensions[i];
+    const extensionData = parseExtensionUrl(extension.src);
+    if (extensionData) {
+      parsedExtensions.push(extensionData);
+    }
+  }
+  return parsedExtensions;
 }
 
 /**
@@ -180,17 +209,8 @@ export function installFriendlyIframeEmbed(
   iframe.setAttribute('marginheight', '0');
   iframe.setAttribute('marginwidth', '0');
 
-  // Compute extensions.
-  const extensionIds =
-    // TODO(#33020): Remove extensionIds format once it's supported everywhere.
-    spec.extensionIds
-      ? spec.extensionIds
-      : spec.extensions
-      ? spec.extensions.map(({extensionId}) => extensionId)
-      : [];
-
   // Pre-load extensions.
-  preloadFriendlyIframeEmbedExtensionIdsDeprecated(win, extensionIds);
+  preloadFriendlyIframeEmbedExtensions(win, spec.extensions || []);
 
   const html = spec.skipHtmlMerge ? spec.html : mergeHtml(spec);
   // Receive the signal when iframe is ready: it's document is formed.
@@ -274,7 +294,7 @@ export function installFriendlyIframeEmbed(
       embed,
       extensionsService,
       ampdoc,
-      extensionIds,
+      spec.extensions,
       opt_preinstallCallback
     ).then(() => {
       if (!childWin.frameElement) {
@@ -746,7 +766,7 @@ export class Installers {
    * @param {!FriendlyIframeEmbed} embed
    * @param {!./service/extensions-impl.Extensions} extensionsService
    * @param {!./service/ampdoc-impl.AmpDocFie} ampdoc
-   * @param {!Array<string>} extensionIds
+   * @param {!Array<{extensionId: string, extensionVersion: string}>} extensions
    * @param {function(!Window, ?./service/ampdoc-impl.AmpDoc=)|undefined} preinstallCallback
    * @param {function(!Promise)=} opt_installComplete
    * @return {!Promise}
@@ -755,7 +775,7 @@ export class Installers {
     embed,
     extensionsService,
     ampdoc,
-    extensionIds,
+    extensions,
     preinstallCallback,
     opt_installComplete
   ) {
@@ -763,6 +783,9 @@ export class Installers {
     const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
     setParentWindow(childWin, parentWin);
     const getDelayPromise = getDelayPromiseProducer();
+    // TODO(#33020): remove this when we pass full extensions object
+    // to installation service
+    const extensionIds = extensions.map(({extensionId}) => extensionId);
 
     return getDelayPromise(undefined)
       .then(() => {
