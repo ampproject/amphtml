@@ -19,6 +19,7 @@ import {childElement, childElementsByTag} from '../../../src/dom';
 import {dev, devAssert} from '../../../src/log';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {toArray} from '../../../src/types';
+import { isExperimentOn } from '../../../src/experiments';
 
 const TAG = 'amp-video';
 
@@ -94,6 +95,9 @@ export class BitrateManager {
    * @param {!Element} video
    */
   manage(video) {
+    if (!isExperimentOn('flexible-bitrate')) {
+      return;
+    }
     // Prevent duplicate listeners if already managing this video.
     if (video.changedSources) {
       return;
