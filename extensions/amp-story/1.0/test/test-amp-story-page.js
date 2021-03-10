@@ -246,7 +246,6 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
       });
   });
 
-  // broke
   it('should perform media operations on fie video when active', (done) => {
     const iframe = win.document.createElement('iframe');
     const fiePromise = installFriendlyIframeEmbed(iframe, gridLayerEl, {
