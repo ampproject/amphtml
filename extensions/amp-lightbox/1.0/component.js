@@ -154,8 +154,8 @@ function LightboxWithRef(
 
   const measureOverflowRef = useRef(null);
   const [hasOverflow, setHasOverflow] = useState(scrollable);
-  // useLayoutEffect is used so intermediary font sizes during calculation
-  // are resolved before the component visually updates.
+  // useLayoutEffect is used so ability to scroll on overflowing
+  // content is resolved before the component visually updates.
   useLayoutEffect(() => {
     const container = lightboxRef.current;
     const content = measureOverflowRef.current;
@@ -169,8 +169,8 @@ function LightboxWithRef(
     const observer = new win.ResizeObserver(() => {
       setHasOverflow(
         scrollable &&
-          (content.scrollHeight > container.clientHeight ||
-            content.scrollWidth > container.clientWidth)
+          (content./* OK */ scrollHeight > container./* OK */ clientHeight ||
+            content./* OK */ scrollWidth > container./* OK */ clientWidth)
       );
     });
     observer.observe(content);
