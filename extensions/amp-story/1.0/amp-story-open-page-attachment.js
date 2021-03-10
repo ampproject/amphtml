@@ -47,7 +47,7 @@ export const buildOpenInlineAttachmentElement = (element) =>
   htmlFor(element)`
     <a class="
         i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
-        role="button" aria-label="Open page attachment">
+        role="button">
       <div class="i-amphtml-story-inline-page-attachment-chip">
         <div class="i-amphtml-story-inline-page-attachment-img"></div>
         <div class="i-amphtml-story-inline-page-attachment-arrow"></div>
@@ -127,6 +127,10 @@ const renderInlinePageAttachmentUI = (win, pageEl, attachmentEl) => {
 
     // Override descriptive text on page-attachment button.
     openAttachmentEl.setAttribute("aria-label", openLabel);
+  } else {
+    openAttachmentEl.setAttribute("aria-label", getLocalizationService(pageEl).getLocalizedString(
+      LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
+    )); 
   }
 
   const openImgAttr = attachmentEl.getAttribute('cta-image');
