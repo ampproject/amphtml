@@ -77,6 +77,7 @@ import {isPrerenderActivePage} from './prerender-active-page';
 import {listen} from '../../../src/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {px, toggle} from '../../../src/style';
+import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
 import {toArray} from '../../../src/types';
 import {upgradeBackgroundAudio} from './audio';
@@ -163,22 +164,6 @@ const buildErrorMessageElement = (element) =>
         <span class="i-amphtml-story-page-error-label"></span>
         <span class='i-amphtml-story-page-error-icon'></span>
       </div>`;
-
-/**
- * @param {!Element} element
- * @return {!Element}
- */
-const buildOpenAttachmentElement = (element) =>
-  htmlFor(element)`
-      <a class="
-          i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
-          role="button">
-        <span class="i-amphtml-story-page-open-attachment-icon">
-          <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
-          <span class="i-amphtml-story-page-open-attachment-bar-right"></span>
-        </span>
-        <span class="i-amphtml-story-page-open-attachment-label"></span>
-      </a>`;
 
 /**
  * amp-story-page states.
@@ -1767,33 +1752,19 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     if (!this.openAttachmentEl_) {
-      this.openAttachmentEl_ = buildOpenAttachmentElement(this.element);
-      // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
-      const attachmentHref = attachmentEl.getAttribute('href');
-      if (attachmentHref) {
-        this.openAttachmentEl_.setAttribute('href', attachmentHref);
-      }
+      this.openAttachmentEl_ = renderPageAttachmentUI(
+        this.element,
+        attachmentEl
+      );
       this.openAttachmentEl_.addEventListener('click', () =>
         this.openAttachment()
       );
-
-      const textEl = this.openAttachmentEl_.querySelector(
-        '.i-amphtml-story-page-open-attachment-label'
-      );
-
-      const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
-      const openLabel =
-        (openLabelAttr && openLabelAttr.trim()) ||
-        getLocalizationService(this.element).getLocalizedString(
-          LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
-        );
 
       const container = this.win.document.createElement('div');
       container.classList.add('i-amphtml-page-attachment-host');
       container.setAttribute('role', 'button');
 
       this.mutateElement(() => {
-        textEl.textContent = openLabel;
         this.element.appendChild(container);
         createShadowRootWithStyle(
           container,

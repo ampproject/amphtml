@@ -127,12 +127,6 @@ ExtensionPayload.prototype.p;
 ExtensionPayload.prototype.v;
 
 /**
- * Dependencies.
- * @type {!Array<string>|string|undefined}
- */
-ExtensionPayload.prototype.i;
-
-/**
  * If the value of "m" is 1 then the current extension is of type "module",
  * else it is of type "nomodule".
  * @type {number}
