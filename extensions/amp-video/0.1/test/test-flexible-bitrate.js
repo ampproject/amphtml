@@ -18,11 +18,13 @@ import '../flexible-bitrate';
 import {BitrateManager} from '../flexible-bitrate';
 import {childElementsByTag} from '../../../../src/dom';
 import {toArray} from '../../../../src/types';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
   let clock;
   beforeEach(() => {
     clock = env.sandbox.useFakeTimers();
+    toggleExperiment(env.win, 'flexible-bitrate', true);
   });
 
   describe('reduce bitrate', () => {

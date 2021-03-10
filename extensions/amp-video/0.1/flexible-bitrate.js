@@ -17,6 +17,7 @@
 import {DomBasedWeakRef} from '../../../src/utils/dom-based-weakref';
 import {childElement, childElementsByTag} from '../../../src/dom';
 import {dev, devAssert} from '../../../src/log';
+import {isExperimentOn} from '../../../src/experiments';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {toArray} from '../../../src/types';
 
@@ -94,6 +95,9 @@ export class BitrateManager {
    * @param {!Element} video
    */
   manage(video) {
+    if (!isExperimentOn(this.win, 'flexible-bitrate')) {
+      return;
+    }
     // Prevent duplicate listeners if already managing this video.
     if (video.changedSources) {
       return;
