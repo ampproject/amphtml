@@ -19,7 +19,8 @@ import {BaseElement} from './base-element';
 import {batchFetchJsonFor} from '../../../src/batched-json';
 import {dict} from '../../../src/utils/object';
 // import {isExperimentOn} from '../../../src/experiments';
-// import {userAssert} from '../../../src/log';
+import {Services} from '../../../src/services';
+import {user, userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-render';
@@ -42,7 +43,8 @@ class AmpRender extends BaseElement {
   /** @override */
   init() {
     return dict({
-      'fetchFn': batchFetchJsonFor.bind(null, this.getAmpDoc(), this.element),
+      // 'fetchFn': batchFetchJsonFor.bind(null, this.getAmpDoc(), this.element),
+      'fetchFn': getAmpStateJson.bind(null, this.element),
     });
   }
 }
@@ -50,3 +52,37 @@ class AmpRender extends BaseElement {
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpRender);
 });
+
+/**
+ * Gets the json that has an "amp-state:" uri. For example,
+ * src="amp-state:json.path".
+ *
+ * @param element
+ * @return {Promise<!JsonObject>}
+ */
+function getAmpStateJson(element) {
+  const src = element.getAttribute('src');
+  return Services.bindForDocOrNull(element)
+    .then((bind) => {
+      userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
+      const ampStatePath = src.slice(
+        /* AMP_STATE_URI_SCHEME.length */ 'amp-state:'.length
+      );
+      return bind.getStateAsync(ampStatePath).catch((err) => {
+        const stateKey = ampStatePath.split('.')[0];
+        user().error(
+          TAG,
+          `'amp-state' element with id '${stateKey}' was not found.`
+        );
+        throw err;
+      });
+    })
+    .then((json) => {
+      userAssert(
+        typeof json !== 'undefined',
+        `[amp-list] No data was found at provided uri: ${src}`
+      );
+      console.log(json);
+      return json;
+    });
+}
