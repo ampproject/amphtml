@@ -21,6 +21,7 @@ import {VideoEvents} from '../../../../src/video-interface';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {dispatchCustomEvent} from '../../../../src/dom';
 import {listenOncePromise} from '../../../../src/event-helper';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
   'amp-video',
@@ -1219,6 +1220,7 @@ describes.realWin(
 
     describe('bitrate manager', () => {
       it('should manage bitrate of replaced video from mediapool', async () => {
+        toggleExperiment(env.win, 'flexible-bitrate', true);
         const v = await getVideo(
           {
             src: 'video.mp4',
