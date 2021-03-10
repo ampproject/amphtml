@@ -110,14 +110,15 @@ src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/a
 
 #### small
 
-The `small` component can be used to link to related articles. This component requires the following fields: `title`, `url`, and optionally an `image`.
+The `small` component can be used to link to related articles. This component requires the following fields: `title`, `url`, and optionally an `image` with `image-alt-text`.
 
 ```json
 {
   "type": "small",
   "title": "This is India an the best places you should go",
   "url": "http://example.com/article.html",
-  "image": "http://placehold.it/256x128"
+  "image": "http://placehold.it/256x128",
+  "image-alt-text": "Example alt text for the image. If alt is not specified it will default to an empty string."
 }
 ```
 
@@ -130,7 +131,7 @@ src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/a
 
 #### landscape
 
-The `landscape` component can be used for alternative formats of content, like videos. This component requires the following fields: `title`, `url`, and `image`. Optionally, you can add a `category` field, which displays a subheading above the title.
+The `landscape` component can be used for alternative formats of content, like videos. This component requires the following fields: `title`, `url`, and `image` with `image-alt-text`. Optionally, you can add a `category` field, which displays a subheading above the title.
 
 ```json
 {
@@ -138,7 +139,8 @@ The `landscape` component can be used for alternative formats of content, like v
   "title": "TRAPPIST-1 Planets May Still Be Wet Enough for Life",
   "url": "http://example.com/article.html",
   "category": "astronomy",
-  "image": "http://placehold.it/256x128"
+  "image": "http://placehold.it/256x128",
+  "image-alt-text": "Example alt text for the image. If alt is not specified it will default to an empty string."
 }
 ```
 
@@ -151,7 +153,7 @@ src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/a
 
 #### portrait
 
-The `portrait` component can be used to link to other stories. This component requires the following fields: `title`, `url`, and `image`. Optionally, you can add a `category` field, which displays a subheading above the title.
+The `portrait` component can be used to link to other stories. This component requires the following fields: `title`, `url`, and `image` with `image-alt-text`. Optionally, you can add a `category` field, which displays a subheading above the title.
 
 ```json
 {
@@ -159,7 +161,8 @@ The `portrait` component can be used to link to other stories. This component re
   "category": "Science",
   "title": "New discovery found",
   "url": "http://example.com/article.html",
-  "image": "http://placehold.it/312x416"
+  "image": "http://placehold.it/312x416",
+  "image-alt-text": "Example alt text for the image. If alt is not specified it will default to an empty string."
 }
 ```
 
