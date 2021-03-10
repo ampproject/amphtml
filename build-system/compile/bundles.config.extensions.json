@@ -240,7 +240,11 @@
       "cssBinaries": ["amp-inline-gallery-pagination"]
     }
   },
-  {"name": "amp-inputmask", "version": "0.1", "latestVersion": "0.1"},
+  {
+    "name": "amp-inputmask",
+    "version": "0.1",
+    "latestVersion": "0.1"
+  },
   {
     "name": "amp-instagram",
     "version": ["0.1", "1.0"],
