@@ -117,20 +117,19 @@ const renderInlinePageAttachmentUI = (win, pageEl, attachmentEl) => {
   const openLabelAttr = attachmentEl.getAttribute('cta-text');
   if (openLabelAttr) {
     const textEl = win.document.createElement('span');
-    textEl.classList.add("i-amphtml-story-inline-page-attachment-label");
+    textEl.classList.add('i-amphtml-story-inline-page-attachment-label');
     const openLabel = openLabelAttr && openLabelAttr.trim();
     textEl.textContent = openLabel;
-    setImportantStyles(textEl, {
-      'display': 'block',
-    });
     openAttachmentEl.appendChild(textEl);
-
     // Override descriptive text on page-attachment button.
-    openAttachmentEl.setAttribute("aria-label", openLabel);
+    openAttachmentEl.setAttribute('aria-label', openLabel);
   } else {
-    openAttachmentEl.setAttribute("aria-label", getLocalizationService(pageEl).getLocalizedString(
-      LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
-    )); 
+    openAttachmentEl.setAttribute(
+      'aria-label',
+      getLocalizationService(pageEl).getLocalizedString(
+        LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
+      )
+    );
   }
 
   const openImgAttr = attachmentEl.getAttribute('cta-image');
@@ -147,9 +146,9 @@ const renderInlinePageAttachmentUI = (win, pageEl, attachmentEl) => {
 
   if (openImgAttr2) {
     const ctaImgEl2 = win.document.createElement('span');
-    ctaImgEl2.classList.add("i-amphtml-story-inline-page-attachment-img");
+    ctaImgEl2.classList.add('i-amphtml-story-inline-page-attachment-img');
     setImportantStyles(ctaImgEl2, {
-      'background-image': 'url(' + openImgAttr2 + ')'
+      'background-image': 'url(' + openImgAttr2 + ')',
     });
     ctaImgEl.parentNode.insertBefore(ctaImgEl2, ctaImgEl.nextSibling);
   }
