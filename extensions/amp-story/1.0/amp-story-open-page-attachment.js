@@ -93,7 +93,7 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
     '.i-amphtml-story-page-open-attachment-label'
   );
 
-  const openLabelAttr = attachmentEl.getAttribute('cta-text');
+  const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
   const openLabel =
     (openLabelAttr && openLabelAttr.trim()) ||
     getLocalizationService(pageEl).getLocalizedString(
@@ -114,7 +114,7 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
 const renderInlinePageAttachmentUI = (win, pageEl, attachmentEl) => {
   const openAttachmentEl = buildOpenInlineAttachmentElement(pageEl);
 
-  const openLabelAttr = attachmentEl.getAttribute('cta-text');
+  const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
   if (openLabelAttr) {
     const textEl = win.document.createElement('span');
     textEl.classList.add('i-amphtml-story-inline-page-attachment-label');

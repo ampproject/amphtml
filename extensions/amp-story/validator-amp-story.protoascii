@@ -835,9 +835,6 @@ tags: {  # <amp-story-page-attachment> with no href
   descendant_tag_list: "amp-story-page-attachment-allowed-descendants"
   mandatory_last_child: true
   attrs: {
-    name: "cta-text"
-  }
-  attrs: {
     name: "cta-image"
     value_url: {
       protocol: "http"
