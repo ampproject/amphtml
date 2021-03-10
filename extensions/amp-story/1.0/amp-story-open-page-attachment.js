@@ -47,10 +47,10 @@ export const buildOpenInlineAttachmentElement = (element) =>
   htmlFor(element)`
     <a class="
         i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
-        role="button">
+        role="button" aria-label="Open page attachment">
       <div class="i-amphtml-story-inline-page-attachment-chip">
-        <div role="img" class="i-amphtml-story-inline-page-attachment-img"></div>
-        <div role="img" aria-label="Upward pointing arrow to indicate scroll up to view page attachment" class="i-amphtml-story-inline-page-attachment-arrow"></div>
+        <div class="i-amphtml-story-inline-page-attachment-img"></div>
+        <div class="i-amphtml-story-inline-page-attachment-arrow"></div>
       </div>
     </a>`;
 
@@ -124,6 +124,9 @@ const renderInlinePageAttachmentUI = (win, pageEl, attachmentEl) => {
       'display': 'block',
     });
     openAttachmentEl.appendChild(textEl);
+
+    // Override descriptive text on page-attachment button.
+    openAttachmentEl.setAttribute("aria-label", openLabel);
   }
 
   const openImgAttr = attachmentEl.getAttribute('cta-img');
@@ -131,11 +134,6 @@ const renderInlinePageAttachmentUI = (win, pageEl, attachmentEl) => {
   const ctaImgEl = openAttachmentEl.querySelector(
     '.i-amphtml-story-inline-page-attachment-img'
   );
-
-  const openImgAttrAlt = attachmentEl.getAttribute('cta-img-alt');
-  if (openImgAttrAlt) {
-    ctaImgEl.setAttribute("aria-label", openImgAttrAlt);
-  }
 
   setImportantStyles(ctaImgEl, {
     'background-image': 'url(' + openImgAttr + ')',
@@ -149,13 +147,6 @@ const renderInlinePageAttachmentUI = (win, pageEl, attachmentEl) => {
     setImportantStyles(ctaImgEl2, {
       'background-image': 'url(' + openImgAttr2 + ')'
     });
-    const openImgAttrAlt2 = attachmentEl.getAttribute('cta-img-2-alt');
-    if (openImgAttrAlt2) {
-      ctaImgEl2.setAttribute("aria-label", openImgAttrAlt2);
-    }
-    const ctaChipEl = openAttachmentEl.querySelector(
-      '.i-amphtml-story-inline-page-attachment-chip'
-    );
     ctaImgEl.parentNode.insertBefore(ctaImgEl2, ctaImgEl.nextSibling);
   }
 

@@ -169,8 +169,7 @@
 
 /** For amp-story-inline-page-attachment-v2 experiment elements. */
 .i-amphtml-story-inline-page-attachment-chip {
-  --cta-chip-bg-color: rgba(255, 255, 255, 0.5);
-  background-color: var(--cta-chip-bg-color) !important;
+  background-color: rgba(255, 255, 255, 0.5) !important;
   display: flex !important;
   border-radius: 24px !important;
   align-items: center !important;
@@ -184,7 +183,6 @@
 
 .i-amphtml-story-inline-page-attachment-img,
 .i-amphtml-story-inline-page-attachment-arrow {
-  vertical-align: middle !important;
   background-size: contain !important;
   background-repeat: no-repeat !important;
 }
