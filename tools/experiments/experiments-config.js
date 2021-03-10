@@ -220,4 +220,10 @@ export const EXPERIMENTS = [
     name: 'Client-side granular consent',
     spec: 'https://github.com/ampproject/amphtml/issues/31607',
   },
+  {
+    id: 'flexible-bitrate',
+    name:
+      'Adaptive bitrate algorithm for videos on documents from the AMPProject CDN',
+    spec: 'https://github.com/ampproject/amphtml/projects/111',
+  },
 ];
