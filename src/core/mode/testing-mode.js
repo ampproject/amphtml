@@ -17,11 +17,12 @@ import {isLocalDevMode} from './local-dev-mode';
 
 /**
  * Returns true during testing.
- * @param {?Window=} opt_win
+ * @param {?Window} win
  * @return {boolean}
  */
-export function isTestingMode(opt_win = window) {
+export function isTestingMode(win) {
+  win = win || self;
   // The `isLocalDevMode` check here lets this function be DCE'd away during
   // `gulp dist`
-  return isLocalDevMode() && (opt_win.__AMP_TEST || opt_win.__karma__);
+  return isLocalDevMode() && (win.__AMP_TEST || win.__karma__);
 }

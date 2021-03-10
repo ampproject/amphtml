@@ -38,9 +38,10 @@ export function isDevQueryParamPresent_(location) {
  * If you're not sure what to use to check "Is this non-production environment?"
  * use this one.
  *
- * @param {?Window=} opt_win
+ * @param {?Window} win
  * @return {boolean}
  */
-export function isDevMode(opt_win = window) {
-  return isTestingMode(opt_win) || isDevQueryParamPresent_(opt_win.location);
+export function isDevMode(win) {
+  win = win || self;
+  return isTestingMode(win) || isDevQueryParamPresent_(win.location);
 }
