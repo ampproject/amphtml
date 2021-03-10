@@ -75,8 +75,8 @@ commands:
 
 jobs:
   'Setup ENV':
-    executor:
-      name: amphtml-medium-executor
+    docker:
+      - image: cimg/base:2020.01
     steps:
       - run:
           name: 'Fetch Merge Commit'
