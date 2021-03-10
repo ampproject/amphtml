@@ -69,6 +69,7 @@ const backdrop = {
   height: '100vh !important',
   overflow: 'hidden scroll !important',
   overscrollBehavior: 'none !important',
+  zIndex: -1,
 };
 
 //TODO(#32400): See PR description.  This is a workaround dependent on a
