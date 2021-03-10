@@ -835,14 +835,14 @@ tags: {  # <amp-story-page-attachment> with no href
   descendant_tag_list: "amp-story-page-attachment-allowed-descendants"
   mandatory_last_child: true
   attrs: {
-    name: "cta-image"
+    name: "data-cta-image"
     value_url: {
       protocol: "http"
       protocol: "https"
     }
   }
   attrs: {
-    name: "cta-image-2"
+    name: "data-cta-image-2"
     value_url: {
       protocol: "http"
       protocol: "https"

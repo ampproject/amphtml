@@ -47,7 +47,7 @@ export const buildOpenInlineAttachmentElement = (element) =>
   htmlFor(element)`
     <a class="
         i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
-        role="button">
+        role="button" aria-label="Swipe up">
       <div class="i-amphtml-story-inline-page-attachment-chip">
         <div class="i-amphtml-story-inline-page-attachment-img"></div>
         <div class="i-amphtml-story-inline-page-attachment-arrow"></div>
@@ -62,7 +62,7 @@ export const buildOpenInlineAttachmentElement = (element) =>
  * @return {!Element}
  */
 export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
-  const openImgAttr = attachmentEl.getAttribute('cta-image');
+  const openImgAttr = attachmentEl.getAttribute('data-cta-image');
   const attachmentHref = attachmentEl.getAttribute('href');
   if (
     isInlinePageAttachmentV2ExperimentOn(win) &&
@@ -123,16 +123,9 @@ const renderInlinePageAttachmentUI = (win, pageEl, attachmentEl) => {
     openAttachmentEl.appendChild(textEl);
     // Override descriptive text on page-attachment button.
     openAttachmentEl.setAttribute('aria-label', openLabel);
-  } else {
-    openAttachmentEl.setAttribute(
-      'aria-label',
-      getLocalizationService(pageEl).getLocalizedString(
-        LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
-      )
-    );
   }
 
-  const openImgAttr = attachmentEl.getAttribute('cta-image');
+  const openImgAttr = attachmentEl.getAttribute('data-cta-image');
 
   const ctaImgEl = openAttachmentEl.querySelector(
     '.i-amphtml-story-inline-page-attachment-img'
@@ -142,7 +135,7 @@ const renderInlinePageAttachmentUI = (win, pageEl, attachmentEl) => {
     'background-image': 'url(' + openImgAttr + ')',
   });
 
-  const openImgAttr2 = attachmentEl.getAttribute('cta-image-2');
+  const openImgAttr2 = attachmentEl.getAttribute('data-cta-image-2');
 
   if (openImgAttr2) {
     const ctaImgEl2 = win.document.createElement('span');
