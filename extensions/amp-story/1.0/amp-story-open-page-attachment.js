@@ -62,7 +62,7 @@ export const buildOpenInlineAttachmentElement = (element) =>
  * @return {!Element}
  */
 export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
-  const openImgAttr = attachmentEl.getAttribute('data-cta-image');
+  const openImgAttr = attachmentEl.getAttribute('cta-image');
   const attachmentHref = attachmentEl.getAttribute('href');
   if (
     isInlinePageAttachmentV2ExperimentOn(win) &&
@@ -125,7 +125,7 @@ const renderInlinePageAttachmentUI = (win, pageEl, attachmentEl) => {
     openAttachmentEl.setAttribute('aria-label', openLabel);
   }
 
-  const openImgAttr = attachmentEl.getAttribute('data-cta-image');
+  const openImgAttr = attachmentEl.getAttribute('cta-image');
 
   const ctaImgEl = openAttachmentEl.querySelector(
     '.i-amphtml-story-inline-page-attachment-img'
@@ -135,7 +135,7 @@ const renderInlinePageAttachmentUI = (win, pageEl, attachmentEl) => {
     'background-image': 'url(' + openImgAttr + ')',
   });
 
-  const openImgAttr2 = attachmentEl.getAttribute('data-cta-image-2');
+  const openImgAttr2 = attachmentEl.getAttribute('cta-image-2');
 
   if (openImgAttr2) {
     const ctaImgEl2 = win.document.createElement('span');
