@@ -53,3 +53,18 @@ var RendererFunctionResponseType;
  * @typedef {function(!JsonObject):(?RendererFunctionResponseType|!Promise<?RendererFunctionResponseType>)}
  */
 var RendererFunctionType;
+
+/**
+ * @typedef {{
+ *   allowFullscreen: (boolean|undefined),
+ *   deserializeMessage: (function(*):(?JsonObject|undefined)|undefined),
+ *   name: (string|undefined),
+ *   onRegisterIframe: (function(number)|undefined),
+ *   requestResize: (function(number)|undefined),
+ *   sandbox: (string|undefined),
+ *   src: (string|undefined),
+ *   title: (string|undefined),
+ *   type: (string|undefined),
+ * }}
+ */
+var IframeProps;

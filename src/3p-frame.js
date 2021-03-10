@@ -46,7 +46,12 @@ const TAG = '3p-frame';
  *     - data-* attributes of the <amp-ad> tag with the "data-" removed.
  *     - A _context object for internal use.
  */
-function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
+export function getFrameAttributes(
+  parentWindow,
+  element,
+  opt_type,
+  opt_context
+) {
   const type = opt_type || element.getAttribute('type');
   userAssert(type, 'Attribute type required for <amp-ad>: %s', element);
   const sentinel = generateSentinel(parentWindow);
@@ -391,6 +396,44 @@ function getCustomBootstrapBaseUrl(
 }
 
 /**
+ * Required flags to apply to the sandbox iframe.
+ * @return {Array<string>}
+ */
+export const getRequiredSandboxFlags = () => [
+  // This only allows navigation when user interacts and thus prevents
+  // ads from auto navigating the user.
+  'allow-top-navigation-by-user-activation',
+  // Crucial because otherwise even target=_blank opened links are
+  // still sandboxed which they may not expect.
+  'allow-popups-to-escape-sandbox',
+];
+
+/**
+ * These flags are not feature detected. Put stuff here where either
+ * they have always been supported or support is not crucial.
+ * @return {Array<string>}
+ */
+export const getOptionalSandboxFlags = () => [
+  'allow-forms',
+  // We should consider turning this off! But since the top navigation
+  // issue is the big one, we'll leave this allowed for now.
+  'allow-modals',
+  // Give access to raw mouse movements.
+  'allow-pointer-lock',
+  // This remains subject to popup blocking, it just makes it supported
+  // at all.
+  'allow-popups',
+  // This applies inside the iframe and is crucial to not break the web.
+  'allow-same-origin',
+  'allow-scripts',
+  // Not allowed
+  // - allow-top-navigation
+  // - allow-orientation-lock
+  // - allow-pointer-lock
+  // - allow-presentation
+];
+
+/**
  * Applies a sandbox to the iframe, if the required flags can be allowed.
  * @param {!Element} iframe
  * @visibleForTesting
@@ -401,35 +444,7 @@ export function applySandbox(iframe) {
   }
   // If these flags are not supported by the UA we don't apply any
   // sandbox.
-  const requiredFlags = [
-    // This only allows navigation when user interacts and thus prevents
-    // ads from auto navigating the user.
-    'allow-top-navigation-by-user-activation',
-    // Crucial because otherwise even target=_blank opened links are
-    // still sandboxed which they may not expect.
-    'allow-popups-to-escape-sandbox',
-  ];
-  // These flags are not feature detected. Put stuff here where either
-  // they have always been supported or support is not crucial.
-  const otherFlags = [
-    'allow-forms',
-    // We should consider turning this off! But since the top navigation
-    // issue is the big one, we'll leave this allowed for now.
-    'allow-modals',
-    // Give access to raw mouse movements.
-    'allow-pointer-lock',
-    // This remains subject to popup blocking, it just makes it supported
-    // at all.
-    'allow-popups',
-    // This applies inside the iframe and is crucial to not break the web.
-    'allow-same-origin',
-    'allow-scripts',
-  ];
-  // Not allowed
-  // - allow-top-navigation
-  // - allow-orientation-lock
-  // - allow-pointer-lock
-  // - allow-presentation
+  const requiredFlags = getRequiredSandboxFlags();
   for (let i = 0; i < requiredFlags.length; i++) {
     const flag = requiredFlags[i];
     if (!iframe.sandbox.supports(flag)) {
@@ -437,7 +452,8 @@ export function applySandbox(iframe) {
       return;
     }
   }
-  iframe.sandbox = requiredFlags.join(' ') + ' ' + otherFlags.join(' ');
+  iframe.sandbox =
+    requiredFlags.join(' ') + ' ' + getOptionalSandboxFlags().join(' ');
 }
 
 /**
