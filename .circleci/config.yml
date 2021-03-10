@@ -29,11 +29,12 @@ executors:
     machine:
       image: ubuntu-2004:202010-01
     resource_class: xlarge
-  amphtml-docker-executor:
+  amphtml-docker-small-executor:
     docker:
       # The official, bare bones Docker Image from CircleCI
       # https://circleci.com/docs/2.0/circleci-images/?section=executors-and-images#circleci-base-image
       - image: cimg/base:2020.12
+    resource_class: small
 
 commands:
   save_merge_commit:
@@ -81,7 +82,7 @@ commands:
 jobs:
   'Compute Merge Commit':
     executor:
-      name: amphtml-docker-executor
+      name: amphtml-docker-small-executor
     steps:
       - run:
           name: 'Fetch Merge Commit'
