@@ -65,15 +65,15 @@ if [[ "$1" == "fetch" ]]; then
   MERGE_BRANCH="refs/pull/$PR_NUMBER/merge"
   echo $(GREEN "Fetching merge SHA from $MERGE_BRANCH...")
 
-  MERGE_SHA="$(git ls-remote https://github.com/ampproject/amphtml.git "$MERGE_BRANCH" | awk '{print $1}')"
-  echo $(GREEN "Fetched merge SHA $MERGE_SHA...")
-  echo "$MERGE_SHA" > .merge_sha
+  CIRCLE_MERGE_SHA="$(git ls-remote https://github.com/ampproject/amphtml.git "$MERGE_BRANCH" | awk '{print $1}')"
+  echo $(GREEN "Fetched merge SHA $CIRCLE_MERGE_SHA...")
+  echo "$CIRCLE_MERGE_SHA" > .merge_sha
   exit 0
 fi
 
-MERGE_SHA="$(cat .merge_sha)"
-echo $(GREEN "Fetching merge commit $MERGE_SHA...")
-(set -x && git pull --ff-only origin "$MERGE_SHA") || err=$?
+export CIRCLE_MERGE_SHA="$(cat .merge_sha)"
+echo $(GREEN "Fetching merge commit $CIRCLE_MERGE_SHA...")
+(set -x && git pull --ff-only origin "$CIRCLE_MERGE_SHA") || err=$?
 
 # If a clean merge is not possible, do not proceed with the build. GitHub's UI
 # will show an error indicating there was a merge conflict.

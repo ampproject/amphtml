@@ -30,6 +30,7 @@ const {
   isPushBuild,
   ciPushBranch,
   ciRepoSlug,
+  ciMergeSha
 } = require('../../common/ci');
 const {
   VERSION: internalRuntimeVersion,
@@ -187,6 +188,7 @@ async function reportBundleSize() {
         json: true,
         body: {
           baseSha,
+          mergeSha: ciMergeSha(),
           bundleSizes: await getBrotliBundleSizes(),
         },
       });
