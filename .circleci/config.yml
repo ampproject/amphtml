@@ -29,10 +29,11 @@ executors:
     machine:
       image: ubuntu-2004:202010-01
     resource_class: xlarge
-  docker:
-    # The official, bare bones Docker Image from CircleCI
-    # https://circleci.com/docs/2.0/circleci-images/?section=executors-and-images#circleci-base-image
-    - image: cimg/base:2020.01
+  amphtml-docker-executor:
+    docker:
+      # The official, bare bones Docker Image from CircleCI
+      # https://circleci.com/docs/2.0/circleci-images/?section=executors-and-images#circleci-base-image
+      - image: cimg/base:2020.01
 
 commands:
   save_merge_commit:
