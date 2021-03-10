@@ -25,13 +25,14 @@ limitations under the License.
   type="fluct"
   data-g="{GROUP-ID}"
   data-u="{UNIT-ID}"
+  data-tagtype="api"
 >
 </amp-ad>
 ```
 
 ## Configuration
 
-For more information, please [contact fluct](https://corp.fluct.jp/en/contact.php).
+For more information, please [contact fluct](https://en.fluct.jp/).
 
 ### Required parameters
 
