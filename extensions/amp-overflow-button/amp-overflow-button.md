@@ -26,9 +26,7 @@ limitations under the License.
 
 ## Usage
 
-This is an overflow wrapper for amp-ad and amp-iframe.  It covers the ad or iframe with a semi-transparent overlay
-and displays a Button with a CTA to encourage user interaction.  The color and text of the button are customizable.  
-
+This is an overflow wrapper for amp-ad and amp-iframe. It covers the ad or iframe with a semi-transparent overlay and displays a Button with a CTA to encourage user interaction. The color and text of the button are customizable.
 [filter formats=“websites”]
 
 ### Default Example

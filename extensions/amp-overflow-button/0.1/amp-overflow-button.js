@@ -59,7 +59,10 @@ export class AmpOverflowButton extends AMP.BaseElement {
     const ctaButton = this.element.ownerDocument.createElement('button');
     ctaButton.classList.add('i-amphtml-overflow-button-cta-button');
     ctaButton.textContent = cta;
-    ctaButton.setAttribute('style', `color: ${color}; border: 2px solid ${color};`);
+    ctaButton.setAttribute(
+      'style',
+      `color: ${color}; border: 2px solid ${color};`
+    );
 
     buttonWrapper.appendChild(ctaButton);
     wrapper.appendChild(buttonWrapper);
@@ -70,7 +73,7 @@ export class AmpOverflowButton extends AMP.BaseElement {
   }
 
   /** @override */
-  isLayoutSupported(layout) {
+  isLayoutSupported() {
     return true;
   }
 }

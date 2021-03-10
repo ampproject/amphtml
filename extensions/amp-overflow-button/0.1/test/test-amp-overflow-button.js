@@ -34,7 +34,11 @@ describes.realWin(
     });
 
     it('should contain "See more" when built without cta attribute', async () => {
-      element = createElementWithAttributes(win.document, 'amp-overflow-button', {});
+      element = createElementWithAttributes(
+        win.document,
+        'amp-overflow-button',
+        {}
+      );
       win.document.body.appendChild(element);
 
       await element.whenBuilt();
@@ -42,7 +46,11 @@ describes.realWin(
     });
 
     it('should have the default color when built without color attribute', async () => {
-      element = createElementWithAttributes(win.document, 'amp-overflow-button', {});
+      element = createElementWithAttributes(
+        win.document,
+        'amp-overflow-button',
+        {}
+      );
       win.document.body.appendChild(element);
 
       await element.whenBuilt();
@@ -51,10 +59,14 @@ describes.realWin(
       );
     });
 
-    it('should contain "Show more" when built with cta attribute set to "Show more"', async() => {
-      element = createElementWithAttributes(win.document, 'amp-overflow-button', {
-        cta: 'Show more'
-      });
+    it('should contain "Show more" when built with cta attribute set to "Show more"', async () => {
+      element = createElementWithAttributes(
+        win.document,
+        'amp-overflow-button',
+        {
+          cta: 'Show more',
+        }
+      );
       win.document.body.appendChild(element);
 
       await element.whenBuilt();
@@ -62,9 +74,13 @@ describes.realWin(
     });
 
     it('should have the color "#B80000" when built with color attribute set to "#B80000"', async () => {
-      element = createElementWithAttributes(win.document, 'amp-overflow-button', {
-        color: '#B80000'
-      });
+      element = createElementWithAttributes(
+        win.document,
+        'amp-overflow-button',
+        {
+          color: '#B80000',
+        }
+      );
       win.document.body.appendChild(element);
 
       await element.whenBuilt();
