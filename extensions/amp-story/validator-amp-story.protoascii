@@ -839,6 +839,7 @@ tags: {  # <amp-story-page-attachment> with no href
     value_url: {
       protocol: "http"
       protocol: "https"
+      allow_relative: false  # TODO(honeybaderdontcare): remove once transformers in prod
     }
   }
   attrs: {
@@ -846,6 +847,7 @@ tags: {  # <amp-story-page-attachment> with no href
     value_url: {
       protocol: "http"
       protocol: "https"
+      allow_relative: false  # TODO(honeybaderdontcare): remove once transformers in prod
     }
   }
   attrs: {
