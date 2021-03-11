@@ -221,9 +221,9 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/31607',
   },
   {
-    id: 'amp-story-inline-page-attachment-v2',
-    name: 'New UI for all inline page attachments in stories format',
-    spec: 'https://github.com/ampproject/amphtml/issues/32770',
+    id: 'amp-story-page-attachment-ui-v2',
+    name: 'New UI for all new page attachments in stories format',
+    spec: 'https://github.com/ampproject/amphtml/projects/123',
   },
   {
     id: 'flexible-bitrate',

@@ -47,7 +47,7 @@ export const buildOpenInlineAttachmentElement = (element) =>
   htmlFor(element)`
     <a class="
         i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
-        role="button" aria-label="Swipe up">
+        role="button">
       <div class="i-amphtml-story-inline-page-attachment-chip">
         <div class="i-amphtml-story-inline-page-attachment-img"></div>
         <div class="i-amphtml-story-inline-page-attachment-arrow"></div>
@@ -65,7 +65,7 @@ export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
   const openImgAttr = attachmentEl.getAttribute('cta-image');
   const attachmentHref = attachmentEl.getAttribute('href');
   if (
-    isInlinePageAttachmentV2ExperimentOn(win) &&
+    isPageAttachmentUiV2ExperimentOn(win) &&
     !attachmentHref &&
     openImgAttr
   ) {
@@ -154,6 +154,6 @@ const renderInlinePageAttachmentUI = (win, pageEl, attachmentEl) => {
  * @param {!Window} win
  * @return {boolean}
  */
-export const isInlinePageAttachmentV2ExperimentOn = (win) => {
-  return isExperimentOn(win, 'amp-story-inline-page-attachment-v2');
+export const isPageAttachmentUiV2ExperimentOn = (win) => {
+  return isExperimentOn(win, 'amp-story-page-attachment-ui-v2');
 };
