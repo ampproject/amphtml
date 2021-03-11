@@ -65,6 +65,9 @@ const UpgradeState = {
  */
 let templateTagSupported;
 
+/** @type {!WeakMap<!./service/ampdoc-impl.AmpDoc, boolean>} */
+const docInitializedMap = new WeakMap();
+
 /** @type {!Array} */
 export const stubbedElements = [];
 
@@ -84,11 +87,13 @@ function isTemplateTagSupported() {
  * Creates a named custom element class.
  *
  * @param {!Window} win The window in which to register the custom element.
+ * @param {function(!./service/ampdoc-impl.AmpDoc)} stubElementsForDoc
  * @return {typeof AmpElement} The custom element class.
  */
-export function createCustomElementClass(win) {
+export function createCustomElementClass(win, stubElementsForDoc) {
   const BaseCustomElement = /** @type {typeof HTMLElement} */ (createBaseCustomElementClass(
-    win
+    win,
+    stubElementsForDoc
   ));
   // It's necessary to create a subclass, because the same "base" class cannot
   // be registered to multiple custom elements.
@@ -100,9 +105,10 @@ export function createCustomElementClass(win) {
  * Creates a base custom element class.
  *
  * @param {!Window} win The window in which to register the custom element.
+ * @param {function(!./service/ampdoc-impl.AmpDoc)} stubElementsForDoc
  * @return {typeof HTMLElement}
  */
-function createBaseCustomElementClass(win) {
+function createBaseCustomElementClass(win, stubElementsForDoc) {
   if (win.__AMP_BASE_CE_CLASS) {
     return win.__AMP_BASE_CE_CLASS;
   }
@@ -963,6 +969,13 @@ function createBaseCustomElementClass(win) {
         const ampdocService = Services.ampdocServiceFor(win);
         const ampdoc = ampdocService.getAmpDoc(this);
         this.ampdoc_ = ampdoc;
+
+        // Make sure that the ampdoc has already been stubbed.
+        if (!docInitializedMap.has(ampdoc)) {
+          docInitializedMap.set(ampdoc);
+          stubElementsForDoc(ampdoc);
+        }
+
         // Load the pre-stubbed extension if needed.
         const extensionId = this.localName;
         if (!this.implClass_ && !ampdoc.declaresExtension(extensionId)) {
@@ -1991,7 +2004,7 @@ function isInternalOrServiceNode(node) {
  * @visibleForTesting
  */
 export function createAmpElementForTesting(win, opt_implementationClass) {
-  const Element = createCustomElementClass(win);
+  const Element = createCustomElementClass(win, () => {});
   if (getMode().test && opt_implementationClass) {
     Element.prototype.implementationClassForTesting = opt_implementationClass;
   }
