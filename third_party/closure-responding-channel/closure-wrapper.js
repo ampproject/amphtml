@@ -21,7 +21,19 @@
 
 goog.require('goog.messaging.PortChannel');
 goog.require('goog.messaging.RespondingChannel');
+goog.require('goog.messaging.DeferredChannel');
 goog.require('goog.messaging.PortOperator');
+goog.require('goog.async.Deferred');
+
+const assistjsChannelDeferred = new goog.async.Deferred();
+
+function createDC() {
+  return new goog.messaging.DeferredChannel(assistjsChannelDeferred);
+}
+
+function resolveDC(channel) {
+  assistjsChannelDeferred.callback(channel);
+}
 
 function createPC(frameWindow, origin) {
   return goog.messaging.PortChannel.forEmbeddedWindow(
@@ -53,6 +65,8 @@ function addPortConnection(portOperator, portName, portChannel) {
   portOperator.addPort(portName, portChannel);
 }
 
+goog.exportSymbol('__AMP_createDC', createDC);
+goog.exportSymbol('__AMP_resolveDC', resolveDC);
 goog.exportSymbol('__AMP_createPC', createPC);
 goog.exportSymbol('__AMP_createRC', createRC);
 goog.exportSymbol('__AMP_createPO', createPO);

@@ -9,6 +9,12 @@ npx google-closure-compiler \
   --compilation_level ADVANCED_OPTIMIZATIONS \
   --output_wrapper "
   %output%;
+  export function createDeferredChannel() {
+    return __AMP_createDC();
+  }
+  export function resolveDeferredChannel(channel) {
+    __AMP_resolveDC(channel);
+  }
   export function createPortChannel(window, origin) {
     return __AMP_createPC(window, origin);
   }
