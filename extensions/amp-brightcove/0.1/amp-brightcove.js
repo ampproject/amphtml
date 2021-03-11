@@ -135,6 +135,16 @@ class AmpBrightcove extends AMP.BaseElement {
       },
       3000
     ));
+
+    if (this.element.hasAttribute('dock')) {
+      this.mutateElement(() => {
+        user().warn(
+          TAG,
+          '`dock` has been disabled on this element. See https://go.amp.dev/issue/32706 for more information.'
+        );
+        this.element.removeAttribute('dock');
+      });
+    }
   }
 
   /**

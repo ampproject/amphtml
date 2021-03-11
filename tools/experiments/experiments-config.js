@@ -225,4 +225,10 @@ export const EXPERIMENTS = [
     name: 'New UI for all inline page attachments in stories format',
     spec: 'https://github.com/ampproject/amphtml/issues/32770',
   },
+  {
+    id: 'flexible-bitrate',
+    name:
+      'Adaptive bitrate algorithm for videos on documents from the AMPProject CDN',
+    spec: 'https://github.com/ampproject/amphtml/projects/111',
+  },
 ];
