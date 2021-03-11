@@ -64,11 +64,7 @@ export const buildOpenInlineAttachmentElement = (element) =>
 export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
   const openImgAttr = attachmentEl.getAttribute('cta-image');
   const attachmentHref = attachmentEl.getAttribute('href');
-  if (
-    isPageAttachmentUiV2ExperimentOn(win) &&
-    !attachmentHref &&
-    openImgAttr
-  ) {
+  if (isPageAttachmentUiV2ExperimentOn(win) && !attachmentHref && openImgAttr) {
     return renderInlinePageAttachmentUI(win, pageEl, attachmentEl);
   } else {
     return renderDefaultPageAttachmentUI(pageEl, attachmentEl);
@@ -115,15 +111,20 @@ const renderInlinePageAttachmentUI = (win, pageEl, attachmentEl) => {
   const openAttachmentEl = buildOpenInlineAttachmentElement(pageEl);
 
   const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
+  let openLabel =
+    (openLabelAttr && openLabelAttr.trim()) ||
+    getLocalizationService(pageEl).getLocalizedString(
+      LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
+    );
   if (openLabelAttr) {
-    const textEl = win.document.createElement('span');
+    const textEl = win.document.createElement('div');
     textEl.classList.add('i-amphtml-story-inline-page-attachment-label');
-    const openLabel = openLabelAttr && openLabelAttr.trim();
+    openLabel = openLabelAttr && openLabelAttr.trim();
     textEl.textContent = openLabel;
     openAttachmentEl.appendChild(textEl);
-    // Override descriptive text on page-attachment button.
-    openAttachmentEl.setAttribute('aria-label', openLabel);
   }
+
+  openAttachmentEl.setAttribute('aria-label', openLabel);
 
   const openImgAttr = attachmentEl.getAttribute('cta-image');
 
