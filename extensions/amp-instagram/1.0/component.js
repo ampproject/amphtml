@@ -54,7 +54,7 @@ export function InstagramWithRef(
 ) {
   const {playable} = useAmpContext();
   const loading = useLoading(loadingProp);
-  const load = loading !== Loading.UNLOAD;
+  const mount = loading !== Loading.UNLOAD;
 
   const loadedRef = useRef(false);
   // The `onReadyStateRef` is passed via a ref to avoid the changed values
@@ -92,10 +92,10 @@ export function InstagramWithRef(
   // A race condition can happen when a `useEffect` would be executed
   // after a future "load" is dispatched.
   useLayoutEffect(() => {
-    if (!load) {
+    if (!mount) {
       setLoaded(false);
     }
-  }, [load, setLoaded]);
+  }, [mount, setLoaded]);
 
   // Pause if the post goes into a "paused" context.
   useEffect(() => {
@@ -109,7 +109,7 @@ export function InstagramWithRef(
   }, [playable]);
 
   useLayoutEffect(() => {
-    if (!iframeRef.current || !load) {
+    if (!iframeRef.current || !mount) {
       return;
     }
     const messageHandler = (event) => {
@@ -139,11 +139,11 @@ export function InstagramWithRef(
     return () => {
       defaultView.removeEventListener('message', messageHandler);
     };
-  }, [load, requestResize, heightStyle]);
+  }, [mount, requestResize, heightStyle]);
 
   return (
     <ContainWrapper {...rest} wrapperStyle={heightStyle} layout size paint>
-      {load && (
+      {mount && (
         <iframe
           ref={iframeRef}
           src={

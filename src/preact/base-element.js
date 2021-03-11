@@ -523,7 +523,7 @@ export class PreactBaseElement extends AMP.BaseElement {
   maybeUpdateReadyState_() {
     const {currentRef_: api} = this;
 
-    const apiReadyState = api && api['readyState'];
+    const apiReadyState = api?.['readyState'];
     if (apiReadyState && apiReadyState !== this.element.readyState) {
       this.onReadyState_(apiReadyState);
     }
@@ -815,10 +815,7 @@ export class PreactBaseElement extends AMP.BaseElement {
       this.resetLoading_ = true;
     } else {
       const {currentRef_: api} = this;
-      const apiPause = api && api['pause'];
-      if (apiPause) {
-        apiPause();
-      }
+      api?.['pause']?.();
     }
   }
 
