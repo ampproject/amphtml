@@ -7,7 +7,6 @@ CLOSURE_LIB=../../node_modules/google-closure-library
 npx google-closure-compiler \
   --define=goog.DEBUG=false \
   --compilation_level ADVANCED_OPTIMIZATIONS \
-  --externs "externs.js" \
   --output_wrapper "
   %output%;
   export function createPortChannel(window, origin) {

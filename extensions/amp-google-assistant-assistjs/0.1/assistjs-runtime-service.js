@@ -33,6 +33,6 @@ export class AssistjsRuntimeService {
    * @param {closure.MessageChannel} portChannel
    */
   addPort(portName, portChannel) {
-    this.portOperator_.addPort(portName, portChannel);
+    closure.addPort(this.portOperator_, portName, portChannel);
   }
 }
