@@ -28,7 +28,6 @@ import {
   setParentWindow,
 } from './service';
 import {escapeHtml} from './dom';
-import {findIndex} from './utils/array';
 import {getMode} from './mode';
 import {install as installAbortController} from './polyfills/abort-controller';
 import {installAmpdocServicesForEmbed} from './service/core-services';
@@ -159,9 +158,7 @@ export function preloadFriendlyIframeEmbedExtensionIdsDeprecated(
  * @return {boolean}
  */
 export function extensionsHasElement(extensions, id) {
-  return (
-    findIndex(extensions, (entry) => entry['custom-element'] === id) !== -1
-  );
+  return extensions.some((entry) => entry['custom-element'] === id);
 }
 
 /**
