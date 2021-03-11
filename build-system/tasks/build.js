@@ -75,9 +75,12 @@ async function doBuild(extraArgs = {}) {
     await compileCoreRuntime(options);
   } else {
     await compileAllJs(options);
-    await buildVendorConfigs(options);
   }
   await buildExtensions(options);
+
+  if (!argv.core_runtime_only) {
+    await buildVendorConfigs(options);
+  }
   if (!argv.watch) {
     exitCtrlcHandler(handlerProcess);
   }

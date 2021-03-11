@@ -406,7 +406,8 @@ function handleBundleError(err, continueOnError, destFilename) {
 }
 
 /**
- * Performs the final steps after a JS file is bundled with esbuild and babel
+ * Performs the final steps after a JS file is bundled and optionally minified
+ * with esbuild and babel.
  * @param {string} srcFilename
  * @param {string} destDir
  * @param {string} destFilename
