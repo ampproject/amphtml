@@ -41,6 +41,7 @@
   color: inherit !important;
   width: 100% !important;
   outline: none !important;
+  text-align: start !important;
 }
 
 .i-amphtml-story-interactive-option:not(:first-child) {
