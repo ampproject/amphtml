@@ -130,8 +130,8 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       const heightFraction =
         1 - containerHeight / (scaledImageHeight * this.animateTo_.zoom);
 
-      this.animateTo_.x = lockBounds ? x * widthFraction : x;
-      this.animateTo_.y = lockBounds ? y * heightFraction : y;
+      this.animateTo_.x = x * widthFraction;
+      this.animateTo_.y = y * heightFraction;
     }
   }
 
