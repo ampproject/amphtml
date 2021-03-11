@@ -1305,10 +1305,8 @@ export class AmpStoryPlayer {
     const story = this.getStoryFromUrl_(storyUrl);
 
     this.whenConnected_(story)
-    .then(() => story.messagingPromise)
-    .then((messaging) =>
-        messaging.sendRequest('rewind', {})
-    );
+      .then(() => story.messagingPromise)
+      .then((messaging) => messaging.sendRequest('rewind', {}));
   }
 
   /**
