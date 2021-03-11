@@ -57,7 +57,10 @@ function insertExtensionBundlesConfig(bundle) {
     })
   );
 
-  execOrThrow(`npx prettier --write ${extensionBundlesJson}`, 'Could not format extension bundle');
+  execOrThrow(
+    `npx prettier --write ${extensionBundlesJson}`,
+    'Could not format extension bundle'
+  );
 }
 
 module.exports = {insertExtensionBundlesConfig};

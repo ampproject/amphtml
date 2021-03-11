@@ -69,7 +69,7 @@ function linesForMetric(metric, results) {
  * @param {string[]} urls
  */
 function printReport(urls) {
-  const results = JSON.parse(fs.readFileSync(RESULTS_PATH).toString());
+  const results = JSON.parse(fs.readFileSync(RESULTS_PATH, 'utf-8'));
 
   urls.forEach((url) => {
     const keys = Object.keys(results[url][CONTROL][0]);
@@ -113,7 +113,7 @@ class PageMetrics {
  * @return {Array<PageMetrics>} report
  */
 function getReport(urls) {
-  const raw = JSON.parse(fs.readFileSync(RESULTS_PATH).toString());
+  const raw = JSON.parse(fs.readFileSync(RESULTS_PATH, 'utf-8'));
   const report = [];
   urls.forEach((url) => {
     const results = raw[url];

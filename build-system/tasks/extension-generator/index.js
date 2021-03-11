@@ -314,8 +314,8 @@ async function makeAmpExtension() {
     // Don't format .html because AMP boilerplate would expand into multiple lines.
     .filter((filename) => !filename.endsWith('.html'));
   execOrThrow(
-    `npx prettier --ignore-unknown --write ${filenames.join('Could not format files')}`,
-    ''
+    `npx prettier --ignore-unknown --write ${filenames.join(' ')}`,
+    'Could not format files'
   );
 
   // Return the resulting extension bundle config.
