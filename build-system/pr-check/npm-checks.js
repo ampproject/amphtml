@@ -23,6 +23,7 @@
 
 const checkDependencies = require('check-dependencies');
 const {cyan, red, yellow} = require('kleur/colors');
+const {exec} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {gitDiffColor, gitDiffNameOnly} = require('../common/git');
 
@@ -65,10 +66,13 @@ function isPackageLockFileInSync() {
 }
 
 /**
- * Makes sure that package-lock.json was properly updated.
+ * Makes sure that package-lock.json was properly updated after running `npm i`,
+ * which will reveal any missing changes. (We do this in a separate step because
+ * the clean-install command `npm ci` doesn't update the lockfile.)
  * @return {boolean}
  */
 function isPackageLockFileProperlyUpdated() {
+  exec('npm install', {'stdio': 'ignore'});
   const filesChanged = gitDiffNameOnly();
   const loggingPrefix = getLoggingPrefix();
 
@@ -81,9 +85,17 @@ function isPackageLockFileProperlyUpdated() {
     );
     logWithoutTimestamp(
       loggingPrefix,
-      yellow('NOTE:'),
+      yellow('NOTE 1:'),
+      'Make sure you are using the version of',
+      cyan('npm'),
+      'that came pre-installed with the latest LTS version of',
+      cyan('node') + '.'
+    );
+    logWithoutTimestamp(
+      loggingPrefix,
+      yellow('NOTE 2:'),
       'To fix this, sync your branch to',
-      cyan('upstream/master') + ', run',
+      cyan('ampproject/amphtml:master') + ', run',
       cyan('gulp update-packages') +
         ', and push a new commit containing the changes.'
     );
