@@ -39,7 +39,7 @@
     "./tasks/runtime-test/*",
     "./tasks/storybook/*",
     "./tasks/sweep-experiments/*",
-    "./tasks/visual-diff/*", // 12 errors due to async imports.
+    // "./tasks/visual-diff/*", // 12 errors due to async imports.
     "./test-configs/**/*"
   ],
   "exclude": [
