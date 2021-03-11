@@ -15,20 +15,24 @@
  */
 
 /**
- * @fileoverview The shared service used by all custom elements to execute runtime tasks like 
+ * @fileoverview The shared service used by all custom elements to execute runtime tasks like
  * adding ports to the PortNetwork.
  */
 
- import * as closure from '../../../third_party/closure-responding-channel/closure-bundle';
+import * as closure from '../../../third_party/closure-responding-channel/closure-bundle';
 
- export class AssistjsRuntimeService {
-   constructor() {
-     /** @private */
-     this.portOperator_ = closure.createPortOperator();
-   }
- 
-   addPort(portName, portChannel) {
+export class AssistjsRuntimeService {
+  /** */
+  constructor() {
+    /** @private */
+    this.portOperator_ = closure.createPortOperator();
+  }
+
+  /**
+   * @param {string} portName
+   * @param {closure.MessageChannel} portChannel
+   */
+  addPort(portName, portChannel) {
     this.portOperator_.addPort(portName, portChannel);
-   }
- }
- 
+  }
+}

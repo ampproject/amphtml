@@ -5,6 +5,11 @@
 
 /**
  * @interface
+ */
+ goog.messaging.MessageChannel = function() {};
+ 
+/**
+ * @interface
  * @suppress {duplicate}
  */
  goog.messaging.PortNetwork = function() {};

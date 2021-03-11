@@ -843,13 +843,13 @@ export class Services {
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!../extensions/amp-google-assistant-assistjs/0.1/assistjs-config-service.AssistjsConfigService}
    */
-   static assistjsConfigServiceForDoc(elementOrAmpDoc) {
+  static assistjsConfigServiceForDoc(elementOrAmpDoc) {
     return /** @type {!../extensions/amp-google-assistant-assistjs/0.1/assistjs-config-service.AssistjsConfigService} */ (getServiceForDoc(
       elementOrAmpDoc,
       'assistjs-config-service'
     ));
   }
-  
+
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!../extensions/amp-google-assistant-assistjs/0.1/assistjs-frame-service.AssistjsFrameService}
@@ -865,7 +865,7 @@ export class Services {
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!../extensions/amp-google-assistant-assistjs/0.1/assistjs-runtime-service.AssistjsRuntimeService}
    */
-   static assistjsRuntimeServiceForDoc(elementOrAmpDoc) {
+  static assistjsRuntimeServiceForDoc(elementOrAmpDoc) {
     return /** @type {!../extensions/amp-google-assistant-assistjs/0.1/assistjs-runtime-service.AssistjsRuntimeService} */ (getServiceForDoc(
       elementOrAmpDoc,
       'assistjs-runtime-service'
