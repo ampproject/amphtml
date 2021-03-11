@@ -165,8 +165,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       this.animateTo_ = {x, y, zoom};
 >>>>>>> b6b5a8cb0 (Update example. Only calculate if lock-bounds.)
     } else {
-      this.animateTo_.zoom = lockBounds && zoom < 1 ? 1 : zoom;
-
+      // Calculations to clamp image to edge of container.
       const containerHeight = this.element.offsetHeight;
       const containerWidth = this.element.offsetWidth;
       const ampImgWidth = this.ampImgEl_.getAttribute('width');
@@ -175,6 +174,9 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       const percentScaled = containerHeight / ampImgHeight;
       const scaledImageWidth = percentScaled * ampImgWidth;
       const scaledImageHeight = percentScaled * ampImgHeight;
+
+      this.animateTo_.zoom = lockBounds && zoom < 1 ? 1 : zoom;
+
       const widthFraction =
         1 - containerWidth / (scaledImageWidth * this.animateTo_.zoom);
       const heightFraction =
