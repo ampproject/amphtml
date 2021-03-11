@@ -287,6 +287,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     } else {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
       // Zoom must be set to calculate maxBounds.
       this.animateTo_.zoom = zoom < 1 ? 1 : zoom;
 
@@ -323,6 +324,9 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       const maxVertical = 50 * heightFraction;
 =======
       // zoom must be set to calculate maxBounds
+=======
+      // Zoom must be set to calculate maxBounds.
+>>>>>>> 252cd5852 (Update comment.)
       this.animateTo_.zoom = zoom < 1 ? 1 : zoom;
 
       this.setMaxBounds_();
