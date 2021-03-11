@@ -241,7 +241,7 @@ export class Performance {
 
     this.ampdoc_.whenFirstVisible().then(() => {
       this.tick(TickLabel.ON_FIRST_VISIBLE);
-      // TODO(rcebulko): remove after data collection
+      // TODO(#33207): Remove after data collection
       this.tick(
         TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_VISIBLE,
         this.aggregateShiftScore_
