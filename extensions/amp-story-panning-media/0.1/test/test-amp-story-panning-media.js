@@ -136,7 +136,7 @@ describes.realWin(
       await panningMedia.layoutCallback();
       await storeService.dispatch(Action.CHANGE_PAGE, {id: 'page1', index: 0});
       await afterRenderPromise();
-      expect(panningMedia.animateTo_.x).to.equal(panningMedia.maxBounds.left);
+      expect(panningMedia.animateTo_.x).to.equal(panningMedia.maxBounds_.left);
     });
 
     it('calculates transform y with lock-bounds', async () => {
@@ -153,7 +153,7 @@ describes.realWin(
       await panningMedia.layoutCallback();
       await storeService.dispatch(Action.CHANGE_PAGE, {id: 'page1', index: 0});
       await afterRenderPromise();
-      expect(panningMedia.animateTo_.y).to.equal(panningMedia.maxBounds.top);
+      expect(panningMedia.animateTo_.y).to.equal(panningMedia.maxBounds_.top);
     });
   }
 );
