@@ -655,7 +655,7 @@ describes.realWin('performance', {amp: true}, (env) => {
             clock.tick(400);
             // TODO(#33207): reduce call counts by 1 after data collection
             expect(tickSpy).to.have.callCount(initialCount + 2);
-            expect(tickSpy.withArgs('cls-vis')).to.be.calledOnce;
+            expect(tickSpy.withArgs('cls-ofv')).to.be.calledOnce;
             whenViewportLayoutCompleteResolve();
             return perf.whenViewportLayoutComplete_().then(() => {
               expect(tickSpy).to.have.callCount(initialCount + 2);
