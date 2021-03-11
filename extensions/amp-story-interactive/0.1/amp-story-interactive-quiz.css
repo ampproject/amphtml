@@ -58,6 +58,7 @@
   z-index: 0 !important;
   border: none !important;
   outline: none !important;
+  text-align: start !important;
 }
 
 [dir='rtl'] .i-amphtml-story-interactive-quiz-option {
