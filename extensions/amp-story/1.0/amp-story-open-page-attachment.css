@@ -194,7 +194,7 @@
 }
 
 .i-amphtml-story-inline-page-attachment-img:nth-child(2) {
-  margin-left: 1px !important;
+  margin-inline-start: 1px !important;
 }
 
 .i-amphtml-story-inline-page-attachment-arrow {

@@ -139,7 +139,7 @@ const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
   const openImgAttr2 = attachmentEl.getAttribute('cta-image-2');
 
   if (openImgAttr2) {
-    const ctaImgEl2 = win.document.createElement('span');
+    const ctaImgEl2 = win.document.createElement('div');
     ctaImgEl2.classList.add('i-amphtml-story-inline-page-attachment-img');
     setImportantStyles(ctaImgEl2, {
       'background-image': 'url(' + openImgAttr2 + ')',
