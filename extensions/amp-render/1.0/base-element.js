@@ -36,6 +36,9 @@ BaseElement['props'] = {
 BaseElement['usesTemplate'] = true;
 
 /** @override */
+BaseElement['lightDomTag'] = 'div';
+
+/** @override */
 // BaseElement['passthrough'] = true;
 // BaseElement['passthroughNonEmpty'] = true;
 // BaseElement['children'] = {};

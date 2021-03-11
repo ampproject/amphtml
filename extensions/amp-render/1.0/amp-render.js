@@ -25,6 +25,9 @@ import {dev, user, userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-render';
 
+const AMP_STATE_URI_SCHEME = 'amp-state:';
+const AMP_SCRIPT_URI_SCHEME = 'amp-script:';
+
 class AmpRender extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -49,10 +52,48 @@ class AmpRender extends BaseElement {
   /** @override */
   init() {
     return dict({
-      'fetchFn': batchFetchJsonFor.bind(null, this.getAmpDoc(), this.element),
-      // 'fetchFn': getAmpStateJson.bind(null, this.element),
-      // 'fetchFn': getAmpScriptJson.bind(null, this.element),
+      'fetchFn': this.getFetchFn_(),
     });
+  }
+
+  /**
+   * Returns true if element's src points to amp-state.
+   *
+   * @param {string} src
+   * @return {boolean}
+   * @private
+   */
+  isAmpStateSrc_(src) {
+    return src.startsWith(AMP_STATE_URI_SCHEME);
+  }
+
+  /**
+   * Returns true if element's src points to an amp-script function.
+   *
+   * @param {string} src
+   * @return {boolean}
+   * @private
+   */
+  isAmpScriptSrc_(src) {
+    return src.startsWith(AMP_SCRIPT_URI_SCHEME);
+  }
+
+  /**
+   * Returns the correct fetch function for amp-state, amp-script or
+   * to fetch remote JSON.
+   *
+   * @return {Function}
+   * @private
+   */
+  getFetchFn_() {
+    const src = this.element.getAttribute('src');
+    if (this.isAmpStateSrc_(src)) {
+      return getAmpStateJson.bind(null, this.element);
+    } else if (this.isAmpScriptSrc_(src)) {
+      return getAmpScriptJson.bind(this.element);
+    } else {
+      batchFetchJsonFor.bind(null, this.getAmpDoc(), this.element);
+    }
   }
 
   /** @override */
@@ -158,7 +199,7 @@ function getAmpScriptJson(element) {
         `[amp-list]: could not find <amp-script> with script set to ${ampScriptId}`
       );
       return ampScriptEl
-        .getImpl(false) // TypeError: ampScriptEl.getImpl is not a function
+        .getImpl() // TypeError: ampScriptEl.getImpl is not a function
         .then((impl) => impl.callFunction(fnIdentifier));
     })
     .then((json) => {
