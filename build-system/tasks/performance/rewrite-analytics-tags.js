@@ -44,9 +44,8 @@ async function getVendorConfig(vendor) {
  * @return {Promise<Object>}
  */
 async function maybeMergeAndRemoveVendorConfig(tag, script) {
-  if (tag.hasAttribute('type')) {
-    /** @type {string} */
-    const vendor = /** @type {*} */ (tag.getAttribute('type'));
+  const vendor = tag.getAttribute('type');
+  if (vendor) {
     tag.removeAttribute('type');
     const vendorConfig = await getVendorConfig(vendor);
     // TODO (micajuineho) replace with analytics/config.js merge objects
