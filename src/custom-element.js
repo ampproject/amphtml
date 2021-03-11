@@ -966,7 +966,6 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         const ampdocService = Services.ampdocServiceFor(win);
         const ampdoc = ampdocService.getAmpDoc(this);
         this.ampdoc_ = ampdoc;
-
         elementConnectedCallback(ampdoc, this, this.implClass_);
       }
       if (!this.resources_) {
@@ -1982,11 +1981,19 @@ function isInternalOrServiceNode(node) {
  *
  * @param {!Window} win The window in which to register the custom element.
  * @param {(typeof ./base-element.BaseElement)=} opt_implementationClass For testing only.
+ * @param {function(!./service/ampdoc-impl.AmpDoc, !AmpElement element, ?(typeof BaseElement))=} opt_elementConnectedCallback
  * @return {!Object} Prototype of element.
  * @visibleForTesting
  */
-export function createAmpElementForTesting(win, opt_implementationClass) {
-  const Element = createCustomElementClass(win, () => {});
+export function createAmpElementForTesting(
+  win,
+  opt_implementationClass,
+  opt_elementConnectedCallback
+) {
+  const Element = createCustomElementClass(
+    win,
+    opt_elementConnectedCallback || (() => {})
+  );
   if (getMode().test && opt_implementationClass) {
     Element.prototype.implementationClassForTesting = opt_implementationClass;
   }
