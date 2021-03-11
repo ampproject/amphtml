@@ -15,18 +15,22 @@
  */
 
 /**
- * @fileoverview Export a custom function to create RespondingChannel. The function is basically a wrapper around the real
+ * @fileoverview Export custom functions for some goog.messaging libraries. The functions are basically wrappers around the real
  * implementation in Closure library.
  */
 
 goog.require('goog.messaging.PortChannel');
 goog.require('goog.messaging.RespondingChannel');
+goog.require('goog.messaging.PortOperator');
 
-function createRC(frameWindow, origin, serviceHandlersMap) {
-  const portChannel = goog.messaging.PortChannel.forEmbeddedWindow(
+function createPC(frameWindow, origin) {
+  return goog.messaging.PortChannel.forEmbeddedWindow(
     frameWindow,
     origin
   );
+}
+
+function createRC(portChannel, serviceHandlersMap) {
   const respondingChannel = new goog.messaging.RespondingChannel(portChannel);
 
   serviceHandlersMap.forEach((_, serviceName, serviceHandlersMap) => {
@@ -41,4 +45,15 @@ function createRC(frameWindow, origin, serviceHandlersMap) {
   return respondingChannel;
 }
 
+function createPO() {
+  return new goog.messaging.PortOperator("RuntimeService");
+}
+
+function addPortConnection(portOperator, portName, portChannel) {
+  portOperator.addPort(portName, portChannel);
+}
+
+goog.exportSymbol('__AMP_createPC', createPC);
 goog.exportSymbol('__AMP_createRC', createRC);
+goog.exportSymbol('__AMP_createPO', createPO);
+goog.exportSymbol('__AMP_addPortConnection', addPortConnection);

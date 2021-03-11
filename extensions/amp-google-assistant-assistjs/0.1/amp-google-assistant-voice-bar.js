@@ -34,12 +34,16 @@ export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
 
     /** @private {?AssistjsFrameService} */
     this.frameService_ = null;
+
+    /** @private {?AssistjsRuntimeService} */
+    this.runtimeService_ = null;
   }
 
   /** @override */
   buildCallback() {
     this.configService_ = Services.assistjsConfigServiceForDoc(this.element);
     this.frameService_ = Services.assistjsFrameServiceForDoc(this.element);
+    this.runtimeService_ = Services.assistjsRuntimeServiceForDoc(this.element);
   }
 
   /** @override */
@@ -72,9 +76,15 @@ export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
     });
 
     iframe.addEventListener('load', () => {
-      closure.createRespondingChannel(
+      const channel = closure.createPortChannel(
         iframe.contentWindow,
         this.configService_.getAssistjsServer(),
+      );
+      this.runtimeService_.addPort("VoiceBar", channel);
+      
+      // TODO: send messages via created RespondingChannel once Protobuf is added.
+      closure.createRespondingChannel(
+        channel,
         serviceHandlersMap
       );
     });

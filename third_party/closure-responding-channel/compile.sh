@@ -2,44 +2,30 @@
 
 # install google closure library:  `npm install google-closure-library` at amphtml
 # folder
-CLOSURE_LIB=../../../../node_modules/google-closure-library
+CLOSURE_LIB=../../node_modules/google-closure-library
 
-# TODO: ensure the new up-to-date compiler could generate the same output as the Google's internal one
-# after the PR to update Closure compiler got in(https://github.com/ampproject/amphtml/pull/33153). Currently
-# the output of this script is not used.
 npx google-closure-compiler \
-  --jscomp_warning=nonStandardJsDocs \
-  --jscomp_warning=checkDebuggerStatement \
-  --jscomp_warning=externsValidation \
-  --jscomp_warning=missingOverride \
-  --jscomp_error=checkRegExp \
-  --jscomp_error=checkTypes \
-  --jscomp_error=const \
-  --jscomp_error=es5Strict \
-  --jscomp_error=globalThis \
-  --jscomp_error=missingProvide \
-  --jscomp_error=missingProperties \
-  --jscomp_error=missingReturn \
-  --jscomp_error=nonStandardJsDocs \
-  --jscomp_error=suspiciousCode \
-  --jscomp_error=tooManyTypeParams \
-  --jscomp_error=unknownDefines \
-  --jscomp_error=uselessCode \
-  --jscomp_error=visibility \
-  --language_out=ECMASCRIPT5_STRICT \
   --define=goog.DEBUG=false \
-  --generate_exports \
-  --use_types_for_optimization \
   --compilation_level ADVANCED_OPTIMIZATIONS \
-  --define=goog.TRANSPILE=never \
-  --define=goog.LOAD_MODULE_USING_EVAL=false \
-  --js_output_file "closure-bundle.js" \
+  --externs "externs.js" \
   --output_wrapper "
   %output%;
+  export function createPortChannel(window, origin) {
+    return __AMP_createPC(window, origin);
+  }
   export function createRespondingChannel(window, origin, serviceHandlersMap) {
-    const rc = __AMP_createRC(window, origin, serviceHandlersMap);
-    return rc;
+    return __AMP_createRC(window, origin, serviceHandlersMap);
+  }
+  export function createPortOperator() {
+    return __AMP_createPO();
+  }
+  export function addPort(portOperator, portName, portChannel) {
+    __AMP_addPortConnection(portOperator, portName, portChannel);
   }" \
+  --js_output_file "closure-bundle.js" \
+  --output_manifest manifest.MF \
+  --entry_point "closure-wrapper.js" \
+  --js "closure-wrapper.js" \
   --js "$CLOSURE_LIB/closure/goog/base.js" \
   --js "$CLOSURE_LIB/closure/goog/promise/resolver.js" \
   --js "$CLOSURE_LIB/closure/goog/dom/nodetype.js" \
@@ -130,7 +116,4 @@ npx google-closure-compiler \
   --js "$CLOSURE_LIB/closure/goog/messaging/portoperator.js" \
   --js "$CLOSURE_LIB/closure/goog/messaging/multichannel.js" \
   --js "$CLOSURE_LIB/closure/goog/messaging/respondingchannel.js" \
-  --js "$CLOSURE_LIB/third_party/closure/goog/mochikit/async/deferred.js" \
-  --output_manifest manifest.MF \
-  --js "closure-wrapper.js" \
-  --entry_point "closure-wrapper.js"
+  --js "$CLOSURE_LIB/third_party/closure/goog/mochikit/async/deferred.js"
