@@ -6,6 +6,15 @@ Bento AMP is a project that allows you to take AMP components and use them in ot
 
 Read this document to learn how to create a new Bento AMP component.
 
+<!--
+  (Do not remove or edit this comment.)
+
+  This table-of-contents is automatically generated. To generate it, run:
+    gulp markdown-toc --fix
+-->
+
+<!-- {"maxdepth": 2} -->
+
 -   [Getting started](#getting-started)
 -   [Naming](#naming)
 -   [Directory structure](#directory-structure)
@@ -20,7 +29,7 @@ Read this document to learn how to create a new Bento AMP component.
 -   [Performance considerations](#performance-considerations)
     -   [Loading external resources](#loading-external-resources)
 -   [Layouts supported in your element](#layouts-supported-in-your-element)
-    -   [What layout should your element support?](#what-layout-should-your-element-support-)
+    -   [What layout should your element support?](#what-layout-should-your-element-support)
 -   [Experiments](#experiments)
     -   [Enabling and removing your experiment](#enabling-and-removing-your-experiment)
 -   [Documenting your extended Bento component](#documenting-your-extended-bento-component)
@@ -146,7 +155,9 @@ export class BaseElement extends PreactBaseElement;
 
 BaseElement['Component'] = MyElement;            // Component definition.
 
-BaseElement['props'] = {  // Map DOM attributes to Preact Component props.
+BaseElement['props'] = {  // Map DOM attributes and children to Preact Component props.
+  'button': {selector: 'button', clone: true} // All <button> children.
+  'children': {passthrough: true} // All remaining children excluding <button>s, which have already been distributed.
   'propName1': {attr: 'attr-name-1'},
   'propName2': {attr: 'attr-name-2', type: 'number'},
 };
@@ -221,7 +232,7 @@ export function MyElement({propName1, propName2, ...rest}) {
 
 -   **Default**: Optional.
 -   **Override**: Almost always.
--   **Usage**: Define the mapping of Preact prop to AmpElement DOM attributes. These will update and re-render the component on DOM mutation.
+-   **Usage**: Define the mapping of Preact prop to AmpElement DOM attributes and children. These will update and re-render the component on DOM mutation.
 -   **Example Usage**: `amp-base-carousel`, `amp-lightbox`
 
 #### PreactBaseElement['staticProps']
@@ -259,6 +270,13 @@ export function MyElement({propName1, propName2, ...rest}) {
 -   **Usage**: Define the CSS for shadow stylesheets.
 -   **Example Usage**: `amp-lightbox`, `amp-sidebar`
 
+#### PreactBaseElement['usesShadowDom']
+
+-   **Default**: Optional.
+-   **Override**: Rarely.
+-   **Usage**: Notify when the element uses the Shadow DOM.
+-   **Example Usage**: `amp-social-share`, `amp-youtube`
+
 #### PreactBaseElement['usesTemplate']
 
 -   **Default**: Optional.
@@ -274,27 +292,6 @@ export function MyElement({propName1, propName2, ...rest}) {
 -   **Override**: Sometimes.
 -   **Usage**: The tag name used when rendering into the light DOM. Used when children contents are overwritten.
 -   **Example Usage**: `amp-date-countdown`, `amp-date-display`
-
-##### PreactBaseElement['passthrough']
-
--   **Default**: Optional.
--   **Override**: Sometimes.
--   **Usage**: Define if requiring user-supplied children to the Preact component, but shape and structure does not matter.
--   **Example Usage**: `amp-fit-text`, `amp-sidebar`
-
-##### PreactBaseElement['passthroughNonEmpty']
-
--   **Default**: Optional.
--   **Override**: Sometimes.
--   **Usage**: Define if user-supplied children are needed **only when present** by the Preact component but their shape and structure does not matter. If no children are given to the component, the component may render something entirely different.
--   **Example Usage**: `amp-social-share`, `amp-timeago`
-
-##### PreactBaseElement['children']
-
--   **Default**: Optional.
--   **Override**: Sometimes.
--   **Usage**: Define if user-supplied children of a certain shape and structure do matter, and targeted for more specified props than `children` alone.
--   **Example Usage**: `amp-base-carousel`
 
 ##### PreactBaseElement['detached']
 
@@ -484,7 +481,7 @@ Then protect your code with a check for the component-specific flag `isExperimen
 ```javascript
 import {CSS} from '../../../build/amp-my-element-0.1.css';
 import {isExperimentOn} from '../../../src/experiments';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const */
 const TAG = 'amp-my-element';

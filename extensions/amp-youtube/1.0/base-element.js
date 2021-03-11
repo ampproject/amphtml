@@ -28,7 +28,10 @@ BaseElement['props'] = {
   'controls': {attr: 'controls', type: 'boolean'},
   'videoid': {attr: 'data-videoid'},
   'liveChannelid': {attr: 'data-live-channelid'},
-  'dock': {attr: 'dock'},
+  'dock': {attr: 'dock', media: true},
   'credentials': {attr: 'credentials'},
   'params': {attrPrefix: 'data-param-'},
 };
+
+/** @override */
+BaseElement['usesShadowDom'] = true;

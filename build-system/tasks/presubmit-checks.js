@@ -240,10 +240,11 @@ const forbiddenTerms = {
       'src/service/storage-impl.js',
     ],
   },
-  'installTemplatesService': {
+  'installTemplatesServiceForDoc': {
     message: privateServiceFactory,
     allowlist: [
       'src/runtime.js',
+      'src/inabox/inabox-services.js',
       'src/service/core-services.js',
       'src/service/template-impl.js',
     ],
@@ -313,6 +314,7 @@ const forbiddenTerms = {
     allowlist: [
       // Do not allowlist additional "extensions/*" paths.
       // TODO(#22414): Remove paths as they are migrated off of sync API.
+      'extensions/amp-a4a/0.1/amp-ad-template-helper.js',
       'extensions/amp-analytics/0.1/instrumentation.js',
       'extensions/amp-analytics/0.1/variables.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
@@ -323,6 +325,7 @@ const forbiddenTerms = {
       'src/service/builder.js',
       'src/service/cid-impl.js',
       'src/service/origin-experiments-impl.js',
+      'src/service/template-impl.js',
       'src/services.js',
       'src/utils/display-observer.js',
       'testing/test-helper.js',
@@ -1021,11 +1024,6 @@ const forbiddenTermsSrcInclusive = {
       'src/extension-analytics.js',
       'src/services.js',
       'extensions/amp-ad/0.1/amp-ad.js',
-      'extensions/amp-a4a/0.1/amp-a4a.js',
-      'extensions/amp-a4a/0.1/head-validation.js',
-      'extensions/amp-a4a/0.1/template-validator.js',
-      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
-      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
       'extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
       'extensions/amp-animation/0.1/install-polyfill.js',
     ],
@@ -1242,6 +1240,7 @@ const forbiddenTermsSrcInclusive = {
     message:
       'Instead of fancy-log, use the logging functions in build-system/common/logging.js.',
     allowlist: [
+      'babel.config.js',
       'build-system/common/logging.js',
       'build-system/tasks/visual-diff/helpers.js',
       'validator/js/gulpjs/index.js',

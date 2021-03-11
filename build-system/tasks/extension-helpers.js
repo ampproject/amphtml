@@ -72,12 +72,12 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
 
 /**
  * @typedef {{
- *   name: ?string,
- *   version: ?string,
- *   hasCss: ?boolean,
- *   loadPriority: ?string,
- *   cssBinaries: ?Array<string>,
- *   extraGlobs: ?Array<string>,
+ *   name?: string,
+ *   version?: string,
+ *   hasCss?: boolean,
+ *   loadPriority?: string,
+ *   cssBinaries?: Array<string>,
+ *   extraGlobs?: Array<string>,
  * }}
  */
 const ExtensionOption = {}; // eslint-disable-line no-unused-vars
@@ -95,7 +95,7 @@ const adVendors = [];
  * @param {string} name
  * @param {string|!Array<string>} version E.g. 0.1 or [0.1, 0.2]
  * @param {string} latestVersion E.g. 0.1
- * @param {!ExtensionOption} options extension options object.
+ * @param {!ExtensionOption|undefined} options extension options object.
  * @param {!Object} extensionsObject
  * @param {boolean} includeLatest
  */
@@ -279,7 +279,7 @@ function parseExtensionFlags(preBuild = false) {
  */
 function getExtensionsFromArg(examples) {
   if (!examples) {
-    return;
+    return [];
   }
 
   const extensions = [];
@@ -523,6 +523,7 @@ function buildExtensionCss(path, name, version, options) {
  */
 async function buildExtensionJs(path, name, version, latestVersion, options) {
   const filename = options.filename || name + '.js';
+  const latest = version === latestVersion;
   await compileJs(
     path + '/',
     filename,
@@ -530,7 +531,7 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
     Object.assign(options, {
       toName: `${name}-${version}.max.js`,
       minifiedName: `${name}-${version}.js`,
-      latestName: version === latestVersion ? `${name}-latest.js` : '',
+      latestName: latest ? `${name}-latest.js` : '',
       // Wrapper that either registers the extension or schedules it for
       // execution after the main binary comes back.
       // The `function` is wrapped in `()` to avoid lazy parsing it,
@@ -538,7 +539,13 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
       // See https://github.com/ampproject/amphtml/issues/3977
       wrapper: options.noWrapper
         ? ''
-        : wrappers.extension(name, argv.esm, options.loadPriority),
+        : wrappers.extension(
+            name,
+            version,
+            latest,
+            argv.esm,
+            options.loadPriority
+          ),
     })
   );
 

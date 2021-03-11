@@ -30,6 +30,7 @@ const {
   isPushBuild,
   ciPushBranch,
   ciRepoSlug,
+  circleciPrMergeSha,
 } = require('../../common/ci');
 const {
   VERSION: internalRuntimeVersion,
@@ -187,6 +188,7 @@ async function reportBundleSize() {
         json: true,
         body: {
           baseSha,
+          mergeSha: circleciPrMergeSha(),
           bundleSizes: await getBrotliBundleSizes(),
         },
       });
@@ -207,6 +209,9 @@ async function reportBundleSize() {
   }
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function getLocalBundleSize() {
   if (globby.sync(fileGlobs).length === 0) {
     log('Could not find runtime files.');
@@ -224,6 +229,9 @@ async function getLocalBundleSize() {
   await getBrotliBundleSizes();
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function bundleSize() {
   if (argv.on_skipped_build) {
     return skipBundleSize();

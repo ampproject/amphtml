@@ -17,9 +17,9 @@
 import {ElementStub} from '../element-stub';
 import {Services} from '../services';
 import {createCustomElementClass, stubbedElements} from '../custom-element';
-import {extensionScriptsInNode} from '../element-service';
+import {extensionScriptsInNode} from './extension-script';
 import {reportError} from '../error';
-import {userAssert} from '../log';
+import {pureUserAssert as userAssert} from '../core/assert';
 
 /**
  * @param {!Window} win
@@ -131,10 +131,13 @@ function waitReadyForUpgrade(win, elementClass) {
  */
 export function stubElementsForDoc(ampdoc) {
   const extensions = extensionScriptsInNode(ampdoc.getHeadNode());
-  extensions.forEach((name) => {
-    ampdoc.declareExtension(name);
-    stubElementIfNotKnown(ampdoc.win, name);
+  extensions.forEach(({extensionId, extensionVersion}) => {
+    ampdoc.declareExtension(extensionId, extensionVersion);
+    stubElementIfNotKnown(ampdoc.win, extensionId);
   });
+  if (ampdoc.isBodyAvailable()) {
+    ampdoc.setExtensionsKnown();
+  }
 }
 
 /**

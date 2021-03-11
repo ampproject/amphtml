@@ -15,6 +15,7 @@
  */
 
 import * as dom from './dom';
+import {extensionScriptsInNode} from './service/extension-script';
 import {
   getAmpdoc,
   getService,
@@ -24,30 +25,7 @@ import {
   getServicePromiseOrNull,
   getServicePromiseOrNullForDoc,
 } from './service';
-import {userAssert} from './log';
-
-/**
- * Returns a promise for a service for the given id and window. Also expects an
- * element that has the actual implementation. The promise resolves when the
- * implementation loaded. Users should typically wrap this as a special purpose
- * function (e.g. Services.viewportForDoc(...)) for type safety and because the
- * factory should not be passed around.
- * @param {!Window} win
- * @param {string} id of the service.
- * @param {string} extension Name of the custom extension that provides the
- *     implementation of this service.
- * @param {boolean=} opt_element Whether this service is provided by an element,
- *     not the extension.
- * @return {!Promise<*>}
- */
-export function getElementService(win, id, extension, opt_element) {
-  return getElementServiceIfAvailable(
-    win,
-    id,
-    extension,
-    opt_element
-  ).then((service) => assertService(service, id, extension));
-}
+import {pureUserAssert as userAssert} from './core/assert';
 
 /**
  * Same as getElementService but produces null if the given element is not
@@ -189,32 +167,6 @@ function assertService(service, id, extension) {
 }
 
 /**
- * Get list of all the extension JS files.
- * @param {HTMLHeadElement|Element|ShadowRoot} head
- * @return {!Array<string>}
- */
-export function extensionScriptsInNode(head) {
-  // ampdoc.getHeadNode() can return null.
-  if (!head) {
-    return [];
-  }
-  const scripts = {};
-  // Note: Some extensions don't have [custom-element] or [custom-template]
-  // e.g. amp-viewer-integration.
-  const list = head.querySelectorAll(
-    'script[custom-element],script[custom-template]'
-  );
-  for (let i = 0; i < list.length; i++) {
-    const script = list[i];
-    const name =
-      script.getAttribute('custom-element') ||
-      script.getAttribute('custom-template');
-    scripts[name] = true;
-  }
-  return Object.keys(scripts);
-}
-
-/**
  * Waits for body to be present then verifies that an extension script is
  * present in head for installation.
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
@@ -231,12 +183,14 @@ export function isExtensionScriptInNode(ampdoc, extensionId) {
  * Verifies that an extension script is present in head for
  * installation.
  * @param {HTMLHeadElement|Element|ShadowRoot} head
- * @param {string} extensionId
+ * @param {string} id
  * @return {boolean}
  * @private
  */
-function extensionScriptInNode(head, extensionId) {
-  return extensionScriptsInNode(head).includes(extensionId);
+function extensionScriptInNode(head, id) {
+  return extensionScriptsInNode(head).some(
+    ({extensionId}) => id == extensionId
+  );
 }
 
 /**

@@ -82,10 +82,18 @@ function preClosureBabel() {
       file.contents,
       file.sourceMap
     );
+    /**
+     * @param {*} d
+     * @return {void}
+     */
     function onData(d) {
       babel.off('error', onError);
       data = d;
     }
+    /**
+     * @param {Error} e
+     * @return {void}
+     */
     function onError(e) {
       babel.off('data', onData);
       err = e;

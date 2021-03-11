@@ -15,7 +15,7 @@
  */
 
 import * as Preact from './index';
-import {Loading, reducer as loadingReducer} from '../loading';
+import {Loading, reducer as loadingReducer} from '../core/loading-instructions';
 import {createContext, useContext, useMemo, useRef} from './index';
 
 /** @type {PreactDef.Context} */
