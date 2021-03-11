@@ -36,12 +36,15 @@ const DURATION_MS = 1000;
 /** @const {number}  */
 const DISTANCE_TO_CENTER_EDGE = 50;
 
+<<<<<<< HEAD
 /**
  * A small number used to calculate zooming out to 0.
  * @const {number}
  */
 const MIN_INTEGER = -100000;
 
+=======
+>>>>>>> 93af7d68b (Const for distance to center edge.)
 /**
  * Position values used to animate between components.
  * x: (optional) Percentage between [-50; 50]
@@ -366,10 +369,10 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       1 - containerHeight / (scaledImageHeight * this.animateTo_.zoom);
 
     this.maxBounds_ = {
-      left: 50 * widthFraction,
-      right: -50 * widthFraction,
-      top: 50 * heightFraction,
-      bottom: -50 * heightFraction,
+      left: DISTANCE_TO_CENTER_EDGE * widthFraction,
+      right: -DISTANCE_TO_CENTER_EDGE * widthFraction,
+      top: DISTANCE_TO_CENTER_EDGE * heightFraction,
+      bottom: -DISTANCE_TO_CENTER_EDGE * heightFraction,
     };
   }
 
