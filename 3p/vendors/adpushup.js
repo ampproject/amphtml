@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-// Required for calcdeps, but does weird things when compiling.
-// goog.provide('__AMP_SHA384_DIGEST');
+// src/polyfills.js must be the first import.
+import '../polyfills';
 
-goog.require('goog.crypt.Sha384');
+import {draw3p, init} from '../integration-lib';
+import {register} from '../3p';
 
-/**
- * @param {!Uint8Array|string} input The value to hash.
- * @return {!Uint8Array} Web safe base64 of the digest of the input string.
- */
-var digest = function(input) {
-  var sha384 = new goog.crypt.Sha384();
-  sha384.update(input);
-  return new Uint8Array(sha384.digest());
-}
+import {adpushup} from '../../ads/vendors/adpushup';
 
-goog.exportSymbol('__AMP_SHA384_DIGEST', digest, window);
+init(window);
+register('adpushup', adpushup);
+
+window.draw3p = draw3p;

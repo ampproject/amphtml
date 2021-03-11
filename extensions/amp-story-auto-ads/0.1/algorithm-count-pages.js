@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
-// Required for calcdeps, but does weird things when compiling.
-// goog.provide('__AMP_SHA384_DIGEST');
-
-goog.require('goog.crypt.Sha384');
-
 /**
- * @param {!Uint8Array|string} input The value to hash.
- * @return {!Uint8Array} Web safe base64 of the digest of the input string.
+ * Original Story Ads placement algorithm. Tries to place ad every seven pages.
+ * Will not place if ad is still loading.
+ * @implements {./algorithm-interface.StoryAdPlacementAlgorithm}
  */
-var digest = function(input) {
-  var sha384 = new goog.crypt.Sha384();
-  sha384.update(input);
-  return new Uint8Array(sha384.digest());
-}
+export class CountPagesAlgorithm {
+  /** @override */
+  constructor(unusedStoreService, unusedPageManager) {}
 
-goog.exportSymbol('__AMP_SHA384_DIGEST', digest, window);
+  /** @override */
+  isStoryEligible() {}
+
+  /** @override */
+  initializePages() {}
+
+  /** @override */
+  onPageChange(unusedPageId) {}
+
+  /** @override */
+  onNewAdView(unusedPageIndex) {}
+}

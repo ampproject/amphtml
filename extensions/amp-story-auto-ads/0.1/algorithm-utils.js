@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-// Required for calcdeps, but does weird things when compiling.
-// goog.provide('__AMP_SHA384_DIGEST');
-
-goog.require('goog.crypt.Sha384');
+import {CountPagesAlgorithm} from './algorithm-count-pages';
 
 /**
- * @param {!Uint8Array|string} input The value to hash.
- * @return {!Uint8Array} Web safe base64 of the digest of the input string.
+ * Choose placement algorithm implementation.
+ * @param {!StoryStoreService} storeService
+ * @param {!StoryAdPageManager} pageManager
+ * @return {!StoryAdPlacementAlgorithm}
  */
-var digest = function(input) {
-  var sha384 = new goog.crypt.Sha384();
-  sha384.update(input);
-  return new Uint8Array(sha384.digest());
+export function getPlacementAlgo(storeService, pageManager) {
+  // TODO(ccordry): Update to use experiment branching.
+  return new CountPagesAlgorithm(storeService, pageManager);
 }
-
-goog.exportSymbol('__AMP_SHA384_DIGEST', digest, window);
