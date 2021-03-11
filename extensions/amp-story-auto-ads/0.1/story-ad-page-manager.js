@@ -84,7 +84,7 @@ export class StoryAdPageManager {
    * @return {boolean}
    */
   hasUnusedAdPage() {
-    return this.adsConsumed_ <= this.createdPageIds_.length;
+    return this.adsConsumed_ < this.createdPageIds_.length;
   }
 
   /**
@@ -166,7 +166,7 @@ export class StoryAdPageManager {
    * @return {number}
    */
   getIndexById(pageId) {
-    return findIndex(this.createdPageIds, (id) => id === pageId);
+    return findIndex(this.createdPageIds_, (id) => id === pageId) + 1;
   }
 
   /**
@@ -177,8 +177,8 @@ export class StoryAdPageManager {
    * @return {!Promise<!InsertionState>}
    */
   maybeInsertPageAfter(pageBeforeAdId, nextAdPage) {
-    const pageBeforeAd = this.ampStory_.getPageById(pageBeforeAdId);
-    const pageAfterAd = this.ampStory_.getNextPage(pageBeforeAd);
+    let pageBeforeAd = this.ampStory_.getPageById(pageBeforeAdId);
+    let pageAfterAd = this.ampStory_.getNextPage(pageBeforeAd);
     if (!pageAfterAd) {
       return Promise.resolve(InsertionState.DELAYED);
     }
@@ -190,6 +190,7 @@ export class StoryAdPageManager {
       pageBeforeAd = pageAfterAd;
       pageAfterAd = this.ampStory_.getNextPage(pageAfterAd);
     }
+
     if (!pageAfterAd) {
       return Promise.resolve(InsertionState.DELAYED);
     }
