@@ -839,7 +839,7 @@ export class AmpStory extends AMP.BaseElement {
     // there is a way to navigate to pages that does not involve using private
     // amp-story methods.
     this.viewer_.onMessage('selectPage', (data) => this.onSelectPage_(data));
-    this.viewer_.onMessage('rewind', () => this.replay_());
+    this.viewer_.onMessage('rewind', () => this.onRewind_());
 
     if (this.viewerMessagingHandler_) {
       this.viewerMessagingHandler_.startListening();
@@ -1005,7 +1005,11 @@ export class AmpStory extends AMP.BaseElement {
           });
         }
       })
-      .then(() => this.switchTo_(initialPageId, NavigationDirection.NEXT))
+      .then(() =>
+        // We need to call this.getInitialPageId_() again because the initial
+        // page could've changed between the start of layoutStory_ and here.
+        this.switchTo_(this.getInitialPageId_(), NavigationDirection.NEXT)
+      )
       .then(() => {
         const shouldReOpenAttachmentForPageId = getHistoryState(
           this.win,
@@ -2630,6 +2634,16 @@ export class AmpStory extends AMP.BaseElement {
       Action.TOGGLE_STORY_HAS_PLAYBACK_UI,
       containsElementsWithPlayback || storyHasBackgroundAudio
     );
+  }
+
+  /**
+   * Handles the rewind viewer event.
+   * @private
+   */
+  onRewind_() {
+    this.signals()
+      .whenSignal(CommonSignals.LOAD_END)
+      .then(() => this.replay_());
   }
 
   /**
