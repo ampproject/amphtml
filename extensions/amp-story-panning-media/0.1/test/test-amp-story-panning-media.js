@@ -136,7 +136,11 @@ describes.realWin(
       await panningMedia.layoutCallback();
       await storeService.dispatch(Action.CHANGE_PAGE, {id: 'page1', index: 0});
       await afterRenderPromise();
+<<<<<<< HEAD
       expect(panningMedia.animateTo_.x).to.equal(panningMedia.maxBounds_.left);
+=======
+      expect(panningMedia.animateTo_.x).to.equal(panningMedia.maxBounds.left);
+>>>>>>> 499b4ad7d (maxbounds method and variable. Tests.)
     });
 
     it('calculates transform y with lock-bounds', async () => {
@@ -153,7 +157,11 @@ describes.realWin(
       await panningMedia.layoutCallback();
       await storeService.dispatch(Action.CHANGE_PAGE, {id: 'page1', index: 0});
       await afterRenderPromise();
+<<<<<<< HEAD
       expect(panningMedia.animateTo_.y).to.equal(panningMedia.maxBounds_.top);
+=======
+      expect(panningMedia.animateTo_.y).to.equal(panningMedia.maxBounds.top);
+>>>>>>> 499b4ad7d (maxbounds method and variable. Tests.)
     });
   }
 );

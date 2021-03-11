@@ -86,10 +86,14 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.animateTo_ = {};
 
     /** @private {?panningMediaMaxBoundsDef} Max distances to keep image in viewport. */
+<<<<<<< HEAD
     this.maxBounds_ = {};
 
     /** @private {?{width: number, height: number}} */
     this.pageSize_ = null;
+=======
+    this.maxBounds = {};
+>>>>>>> 499b4ad7d (maxbounds method and variable. Tests.)
 
     /** @private {?panningMediaPositionDef} Current animation state. */
     this.animationState_ = {};
@@ -251,14 +255,10 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       (panningMediaState) => this.onPanningMediaStateChange_(panningMediaState),
       true /** callToInitialize */
     );
-    this.storeService_.subscribe(
-      StateProperty.PAGE_SIZE,
-      () => {
-        this.setAnimateTo_();
-        this.animate_();
-      },
-      true /* callToInitialize */
-    );
+    this.storeService_.subscribe(StateProperty.PAGE_SIZE, () => {
+      this.setAnimateTo_();
+      this.animate_();
+    });
     // Mutation observer for distance attribute
     const config = {attributes: true, attributeFilter: ['distance']};
     const callback = (mutationsList) => {
@@ -281,6 +281,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     if (!lockBounds) {
       this.animateTo_ = {x, y, zoom};
     } else {
+<<<<<<< HEAD
 <<<<<<< HEAD
       // Zoom must be set to calculate maxBounds.
       this.animateTo_.zoom = zoom < 1 ? 1 : zoom;
@@ -316,13 +317,52 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
       const maxHorizontal = 50 * widthFraction;
       const maxVertical = 50 * heightFraction;
+=======
+      // zoom must be set to calculate maxBounds
+      this.animateTo_.zoom = zoom < 1 ? 1 : zoom;
+
+      this.setMaxBounds_();
+>>>>>>> 499b4ad7d (maxbounds method and variable. Tests.)
 
       this.animateTo_.x =
-        x > 0 ? Math.min(maxHorizontal, x) : Math.max(-maxHorizontal, x);
+        x > 0
+          ? Math.min(this.maxBounds.left, x)
+          : Math.max(this.maxBounds.right, x);
 
       this.animateTo_.y =
-        y > 0 ? Math.min(maxVertical, y) : Math.max(-maxVertical, y);
+        y > 0
+          ? Math.min(this.maxBounds.top, y)
+          : Math.max(-this.maxBounds.bottom, y);
     }
+  }
+
+  /**
+   * Calculates max distances to keep image in viewport.
+   * This is only set if lock-bounds, left, right, top or bottom are specified.
+   * @private
+   */
+  setMaxBounds_() {
+    // Calculations to clamp image to edge of container.
+    const containerHeight = this.element.offsetHeight;
+    const containerWidth = this.element.offsetWidth;
+    const ampImgWidth = this.ampImgEl_.getAttribute('width');
+    const ampImgHeight = this.ampImgEl_.getAttribute('height');
+    // TODO(#31515): When aspect ratio is portrait, containerWidth will be used for this.
+    const percentScaled = containerHeight / ampImgHeight;
+    const scaledImageWidth = percentScaled * ampImgWidth;
+    const scaledImageHeight = percentScaled * ampImgHeight;
+
+    const widthFraction =
+      1 - containerWidth / (scaledImageWidth * this.animateTo_.zoom);
+    const heightFraction =
+      1 - containerHeight / (scaledImageHeight * this.animateTo_.zoom);
+
+    this.maxBounds = {
+      left: 50 * widthFraction,
+      right: -50 * widthFraction,
+      top: 50 * heightFraction,
+      bottom: -50 * heightFraction,
+    };
   }
 
   /** @private */
