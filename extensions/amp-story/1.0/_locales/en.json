@@ -269,7 +269,7 @@
   },
   "94": {
     "string": "Close bookend",
-    "description": "Label for a button that closes a dialog and returns the user to the article."
+    "description": "Label for a button that closes a dialog containing related articles and sharing options and returns the user to the article."
   },
   "95": {
     "string": "Show bookend",
