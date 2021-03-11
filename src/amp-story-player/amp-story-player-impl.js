@@ -626,11 +626,12 @@ export class AmpStoryPlayer {
    * @private
    */
   updateControlsStateForAllStories_(storyIdx) {
-    // Disables skip-next-button when story is the last one in the player.
+    // Disables skip-to-next button when story is the last one in the player.
     if (storyIdx === this.stories_.length - 1) {
       const skipButtonIdx = findIndex(
         this.playerConfig_.controls,
-        (control) => control.name === 'skip-next'
+        (control) =>
+          control.name === 'skip-next' || control.name === 'skip-to-next'
       );
 
       if (skipButtonIdx >= 0) {
@@ -1380,6 +1381,7 @@ export class AmpStoryPlayer {
   onPlayerEvent_(value) {
     switch (value) {
       case 'amp-story-player-skip-next':
+      case 'amp-story-player-skip-to-next':
         this.next_();
         break;
       default:

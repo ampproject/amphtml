@@ -54,7 +54,7 @@ To navigate between stories on desktop, there are a couple of options:
 
 <table>
   <tr>
-    <td>1. Opt-in to the “skip-next-button” using the “controls” API (more on that below on the “Customizing position & visibility of story UI controls” section).</td>
+    <td>1. Opt-in to the “skip-to-next button” using the “controls” API (more on that below on the “Customizing position & visibility of story UI controls” section).</td>
     <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/skip-next-desktop.png?raw=true"></td>
   </tr>
   <tr>
@@ -231,7 +231,7 @@ The configuration will end up looking like the following:
          "position": "start"
        },
        {
-         "name": "skip-next"
+         "name": "skip-to-next"
        }
      ]
    }
@@ -258,11 +258,11 @@ The “close” control supports the following customizable properties:
 -   `backgroundImageUrl`: string with url or data string (escaped).
     -   Changes the icon image to the provided url or data string (for inline svgs).
 
-### Skip-next
+### Skip-to-next
 
 Skips to the next story inside the player (only available on desktop).
 
-The “skip-next” control supports the following customizable properties:
+The “skip-to-next” control supports the following customizable properties:
 
 -   `position`: “start” or “end”.
     -   Places the icon either on the left or right on LTR languages.
@@ -334,7 +334,7 @@ On desktop, you can now display a button that navigates from the current story t
    {
      "controls": [
        {
-         "name": "skip-next"
+         "name": "skip-to-next"
        }
      ],
    }
