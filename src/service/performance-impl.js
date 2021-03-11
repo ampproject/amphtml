@@ -356,7 +356,7 @@ export class Performance {
         this.tickSinceVisible(TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE, value);
         recordedFirstContentfulPaint = true;
 
-        // TODO(rcebulko): remove after data collection
+        // TODO(#33207): remove after data collection
         // On the first contentful paint, report cumulative CLS score
         this.tickDelta(
           TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_FCP,
