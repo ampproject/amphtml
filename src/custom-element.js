@@ -65,9 +65,6 @@ const UpgradeState = {
  */
 let templateTagSupported;
 
-/** @type {!WeakMap<!./service/ampdoc-impl.AmpDoc, boolean>} */
-const docInitializedMap = new WeakMap();
-
 /** @type {!Array} */
 export const stubbedElements = [];
 
@@ -87,13 +84,13 @@ function isTemplateTagSupported() {
  * Creates a named custom element class.
  *
  * @param {!Window} win The window in which to register the custom element.
- * @param {function(!./service/ampdoc-impl.AmpDoc)} stubElementsForDoc
+ * @param {function(!./service/ampdoc-impl.AmpDoc, !AmpElement element, ?(typeof BaseElement))} elementConnectedCallback
  * @return {typeof AmpElement} The custom element class.
  */
-export function createCustomElementClass(win, stubElementsForDoc) {
+export function createCustomElementClass(win, elementConnectedCallback) {
   const BaseCustomElement = /** @type {typeof HTMLElement} */ (createBaseCustomElementClass(
     win,
-    stubElementsForDoc
+    elementConnectedCallback
   ));
   // It's necessary to create a subclass, because the same "base" class cannot
   // be registered to multiple custom elements.
@@ -105,10 +102,10 @@ export function createCustomElementClass(win, stubElementsForDoc) {
  * Creates a base custom element class.
  *
  * @param {!Window} win The window in which to register the custom element.
- * @param {function(!./service/ampdoc-impl.AmpDoc)} stubElementsForDoc
+ * @param {function(!./service/ampdoc-impl.AmpDoc, !AmpElement element, ?(typeof BaseElement))} elementConnectedCallback
  * @return {typeof HTMLElement}
  */
-function createBaseCustomElementClass(win, stubElementsForDoc) {
+function createBaseCustomElementClass(win, elementConnectedCallback) {
   if (win.__AMP_BASE_CE_CLASS) {
     return win.__AMP_BASE_CE_CLASS;
   }
@@ -970,22 +967,7 @@ function createBaseCustomElementClass(win, stubElementsForDoc) {
         const ampdoc = ampdocService.getAmpDoc(this);
         this.ampdoc_ = ampdoc;
 
-        // Make sure that the ampdoc has already been stubbed.
-        if (!docInitializedMap.has(ampdoc)) {
-          docInitializedMap.set(ampdoc);
-          stubElementsForDoc(ampdoc);
-        }
-
-        // Load the pre-stubbed extension if needed.
-        const extensionId = this.localName;
-        if (!this.implClass_ && !ampdoc.declaresExtension(extensionId)) {
-          Services.extensionsFor(win).installExtensionForDoc(
-            ampdoc,
-            extensionId,
-            // The legacy auto-extensions are always 0.1.
-            '0.1'
-          );
-        }
+        elementConnectedCallback(ampdoc, this, this.implClass_);
       }
       if (!this.resources_) {
         // Resources can now be initialized since the ampdoc is now available.
@@ -2020,7 +2002,7 @@ export function resetStubsForTesting() {
 
 /**
  * @param {!AmpElement} element
- * @return {typeof BaseElement}
+ * @return {?(typeof BaseElement)}
  * @visibleForTesting
  */
 export function getImplClassSyncForTesting(element) {
