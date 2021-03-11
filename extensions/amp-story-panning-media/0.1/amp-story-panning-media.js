@@ -87,6 +87,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
     /** @private {?panningMediaMaxBoundsDef} Max distances to keep image in viewport. */
 <<<<<<< HEAD
+<<<<<<< HEAD
     this.maxBounds_ = {};
 
     /** @private {?{width: number, height: number}} */
@@ -94,6 +95,9 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 =======
     this.maxBounds = {};
 >>>>>>> 499b4ad7d (maxbounds method and variable. Tests.)
+=======
+    this.maxBounds_ = {};
+>>>>>>> d96027125 (Private variable)
 
     /** @private {?panningMediaPositionDef} Current animation state. */
     this.animationState_ = {};
@@ -326,13 +330,13 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
       this.animateTo_.x =
         x > 0
-          ? Math.min(this.maxBounds.left, x)
-          : Math.max(this.maxBounds.right, x);
+          ? Math.min(this.maxBounds_.left, x)
+          : Math.max(this.maxBounds_.right, x);
 
       this.animateTo_.y =
         y > 0
-          ? Math.min(this.maxBounds.top, y)
-          : Math.max(-this.maxBounds.bottom, y);
+          ? Math.min(this.maxBounds_.top, y)
+          : Math.max(-this.maxBounds_.bottom, y);
     }
   }
 
@@ -357,7 +361,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     const heightFraction =
       1 - containerHeight / (scaledImageHeight * this.animateTo_.zoom);
 
-    this.maxBounds = {
+    this.maxBounds_ = {
       left: 50 * widthFraction,
       right: -50 * widthFraction,
       top: 50 * heightFraction,
