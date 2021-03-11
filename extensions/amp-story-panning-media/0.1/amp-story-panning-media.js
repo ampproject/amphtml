@@ -194,7 +194,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     if (!lockBounds) {
       this.animateTo_ = {x, y, zoom};
     } else {
-      // zoom must be set to calculate maxBounds
+      // Zoom must be set to calculate maxBounds.
       this.animateTo_.zoom = zoom < 1 ? 1 : zoom;
 
       this.setMaxBounds_();
