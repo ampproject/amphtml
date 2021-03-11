@@ -119,6 +119,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     );
   }
 
+<<<<<<< HEAD
   /** @private */
   setAnimateTo_() {
     const x = parseFloat(this.element_.getAttribute('x') || 0);
@@ -193,6 +194,8 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     }
   }
 
+=======
+>>>>>>> 668644b9d (Handle page resize)
   /** @override */
   layoutCallback() {
     this.ampImgEl_ = dev().assertElement(
@@ -248,6 +251,14 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       (panningMediaState) => this.onPanningMediaStateChange_(panningMediaState),
       true /** callToInitialize */
     );
+    this.storeService_.subscribe(
+      StateProperty.PAGE_SIZE,
+      () => {
+        this.setAnimateTo_();
+        this.animate_();
+      },
+      true /* callToInitialize */
+    );
     // Mutation observer for distance attribute
     const config = {attributes: true, attributeFilter: ['distance']};
     const callback = (mutationsList) => {
@@ -270,6 +281,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     if (!lockBounds) {
       this.animateTo_ = {x, y, zoom};
     } else {
+<<<<<<< HEAD
       // Zoom must be set to calculate maxBounds.
       this.animateTo_.zoom = zoom < 1 ? 1 : zoom;
 
@@ -284,6 +296,40 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
         y > 0
           ? Math.min(this.maxBounds_.top, y)
           : Math.max(-this.maxBounds_.bottom, y);
+=======
+      // Calculations to clamp image to edge of container.
+      const containerHeight = this.element.offsetHeight;
+      const containerWidth = this.element.offsetWidth;
+      const ampImgWidth = this.ampImgEl_.getAttribute('width');
+      const ampImgHeight = this.ampImgEl_.getAttribute('height');
+      // TODO(#31515): When aspect ratio is portrait, containerWidth will be used for this.
+      const percentScaled = containerHeight / ampImgHeight;
+      const scaledImageWidth = percentScaled * ampImgWidth;
+      const scaledImageHeight = percentScaled * ampImgHeight;
+
+      this.animateTo_.zoom = lockBounds && zoom < 1 ? 1 : zoom;
+
+      const widthFraction =
+        1 - containerWidth / (scaledImageWidth * this.animateTo_.zoom);
+      const heightFraction =
+        1 - containerHeight / (scaledImageHeight * this.animateTo_.zoom);
+
+      const maxHorizontal = 50 * widthFraction;
+      const maxVertical = 50 * heightFraction;
+
+      this.animateTo_.x =
+        x > 0 ? Math.min(maxHorizontal, x) : Math.max(-maxHorizontal, x);
+
+      this.animateTo_.y =
+        y > 0 ? Math.min(maxVertical, y) : Math.max(-maxVertical, y);
+    }
+  }
+
+  /** @private */
+  onPageNavigation_() {
+    if (this.isOnActivePage_) {
+      this.animate_();
+>>>>>>> 668644b9d (Handle page resize)
     }
   }
 
