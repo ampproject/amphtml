@@ -82,7 +82,7 @@ export class TemplateValidator extends Validator {
         if (!extensionsHasElement(extensions, 'amp-mustache')) {
           extensions.push({
             'custom-element': 'amp-mustache',
-            src: 'https://cdn.ampproject.org/v0/amp-mustache-0.1.js',
+            src: 'https://cdn.ampproject.org/v0/amp-mustache-latest.js',
           });
         }
 

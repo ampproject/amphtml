@@ -141,7 +141,7 @@ describes.realWin('TemplateValidator', realWinConfig, (env) => {
         });
         expect(creativeMetadata.extensions).to.deep.include({
           'custom-element': 'amp-mustache',
-          'src': 'https://cdn.ampproject.org/v0/amp-mustache-0.1.js',
+          'src': 'https://cdn.ampproject.org/v0/amp-mustache-latest.js',
         });
       });
     });
