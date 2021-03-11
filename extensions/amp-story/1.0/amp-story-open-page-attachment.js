@@ -65,7 +65,7 @@ export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
   const openImgAttr = attachmentEl.getAttribute('cta-image');
   const attachmentHref = attachmentEl.getAttribute('href');
   if (isPageAttachmentUiV2ExperimentOn(win) && !attachmentHref && openImgAttr) {
-    return renderInlinePageAttachmentUI(win, pageEl, attachmentEl);
+    return renderPageAttachmentUiWithImages(win, pageEl, attachmentEl);
   } else {
     return renderDefaultPageAttachmentUI(pageEl, attachmentEl);
   }
@@ -107,7 +107,7 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
  * @param {!Element} attachmentEl
  * @return {!Element}
  */
-const renderInlinePageAttachmentUI = (win, pageEl, attachmentEl) => {
+const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
   const openAttachmentEl = buildOpenInlineAttachmentElement(pageEl);
 
   const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
