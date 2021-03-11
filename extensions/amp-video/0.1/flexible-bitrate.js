@@ -100,9 +100,12 @@ export class BitrateManager {
     }
     onNontrivialWait(video, () => {
       const current = currentSource(video);
-      this.acceptableBitrate_ = current.bitrate_ - 1;
-      this.switchToLowerBitrate_(video, current.bitrate_);
-      this.updateOtherManagedAndPausedVideos_();
+      const newBitrate = current.bitrate_ - 1;
+      if (newBitrate < this.acceptableBitrate_) {
+        this.acceptableBitrate_ = newBitrate;
+        this.switchToLowerBitrate_(video, current.bitrate_);
+        this.updateOtherManagedAndPausedVideos_();
+      }
     });
     video.changedSources = () => {
       this.sortSources_(video);
@@ -146,7 +149,9 @@ export class BitrateManager {
   /**
    * Sorts the sources of the given video element by their bitrates such that
    * the sources closest matching the acceptable bitrate are in front.
+   * Returns true if the sorting changed the order of sources.
    * @param {!Element} video
+   * @return {boolean}
    */
   sortSources_(video) {
     const sources = toArray(childElementsByTag(video, 'source'));
@@ -166,9 +171,16 @@ export class BitrateManager {
         this.getBitrateForComparison_(b) - this.getBitrateForComparison_(a)
       );
     });
-    sources.forEach((source) => {
-      video.appendChild(source);
-    });
+
+    if (!toArray(childElementsByTag(video, 'source')).every(
+      (source, index) => source === sources[index]
+    )) {
+      sources.forEach((source) => {
+        video.appendChild(source);
+      });
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -217,14 +229,15 @@ export class BitrateManager {
     }
     const {currentTime} = video;
     video.pause();
-    this.sortSources_(video);
-    video.load();
-    listenOnce(video, 'loadedmetadata', () => {
-      // Restore currentTime after loading new source.
-      video.currentTime = currentTime;
-      video.play();
-      dev().fine(TAG, 'Playing at lower bitrate %s', video.currentSrc);
-    });
+    if (this.sortSources_(video)) {
+      video.load();
+      listenOnce(video, 'loadedmetadata', () => {
+        // Restore currentTime after loading new source.
+        video.currentTime = currentTime;
+        video.play();
+        dev().fine(TAG, 'Playing at lower bitrate %s', video.currentSrc);
+      });
+    }
   }
 
   /**
