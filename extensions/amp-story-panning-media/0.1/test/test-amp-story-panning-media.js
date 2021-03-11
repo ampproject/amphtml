@@ -121,5 +121,39 @@ describes.realWin(
         }px)`
       );
     });
+
+    it('calculates transform x with lock-bounds', async () => {
+      const attributes = {
+        'group-id': 'group-1',
+        'x': '50%',
+        'zoom': '2',
+        'lock-bounds': '',
+      };
+      await createAmpStoryPanningMedia(
+        '/examples/amp-story/img/conservatory-coords.jpg',
+        attributes
+      );
+      await panningMedia.layoutCallback();
+      await storeService.dispatch(Action.CHANGE_PAGE, {id: 'page1', index: 0});
+      await afterRenderPromise();
+      expect(panningMedia.animateTo_.x).to.equal(panningMedia.maxBounds.left);
+    });
+
+    it('calculates transform y with lock-bounds', async () => {
+      const attributes = {
+        'group-id': 'group-1',
+        'y': '50%',
+        'zoom': '2',
+        'lock-bounds': '',
+      };
+      await createAmpStoryPanningMedia(
+        '/examples/amp-story/img/conservatory-coords.jpg',
+        attributes
+      );
+      await panningMedia.layoutCallback();
+      await storeService.dispatch(Action.CHANGE_PAGE, {id: 'page1', index: 0});
+      await afterRenderPromise();
+      expect(panningMedia.animateTo_.y).to.equal(panningMedia.maxBounds.top);
+    });
   }
 );
