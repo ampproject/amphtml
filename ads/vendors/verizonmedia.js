@@ -21,6 +21,13 @@ import {validateData, writeScript} from '../../3p/3p';
  */
 export function verizonmedia(global, data) {
   validateData(data, ['config']);
+  
+  const publisherUrl = global.context.canonicalUrl || global.context.sourceUrl;
+  data.config = JSON.parse(data.config);
+  data.config.site = data.config.site || {};
+  data.config.site.url = data.config.site.url || publisherUrl;
+  data.config = JSON.stringify(data.config);
+  
   global.jacData = data;
   writeScript(global, 'https://jac.yahoosandbox.com/amp/jac.js');
 }
