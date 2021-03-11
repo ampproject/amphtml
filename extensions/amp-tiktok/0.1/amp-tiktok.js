@@ -23,7 +23,7 @@ import {
 } from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
 import {getData, listen} from '../../../src/event-helper';
-import {resetStyles, setStyle, setStyles} from '../../../src/style';
+import {px, resetStyles, setStyle, setStyles} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 
 export class AmpTiktok extends AMP.BaseElement {
@@ -49,10 +49,11 @@ export class AmpTiktok extends AMP.BaseElement {
           'position',
           'opacity',
           'pointer-events',
+          'class',
         ]);
         this.iframe_.removeAttribute('aria-hidden');
         this.iframe_.setAttribute('aria-title', 'Tiktok');
-        this.applyFillContent(this.iframe_);
+        this.iframe_.setAttribute('class', 'i-amphtml-tiktok-centered');
         this.forceChangeHeight(height);
       },
       1000
@@ -76,8 +77,9 @@ export class AmpTiktok extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const {src} = this.element.dataset;
+    const videIdRegex = /^((.+\/)?)(\d+)\/?$/;
     if (src) {
-      this.videoId_ = src.replace(/^((.+\/)?)(\d+)\/?$/, (_, _1, _2, id) => id);
+      this.videoId_ = src.replace(videoIdRegex, (_, _1, _2, id) => id);
     } else {
       const blockquoteOrNull = childElementByTag(this.element, 'blockquote');
       if (
@@ -98,6 +100,17 @@ export class AmpTiktok extends AMP.BaseElement {
     const src = `https://www.tiktok.com/embed/v2/${encodeURIComponent(
       this.videoId_
     )}?lang=${encodeURIComponent(locale)}`;
+
+    const iframe = createElementWithAttributes('doc',
+    'iframe',
+    {
+      'src': src,
+      'name': '__tt_embedd__v$',
+      'aria-hidden': 'true',
+      'frameborder': '0',
+      'class': 'i-amphtml-tiktok-unresolved'
+    }
+    );
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
@@ -105,18 +118,6 @@ export class AmpTiktok extends AMP.BaseElement {
       'message',
       this.handleTiktokMessages_.bind(this)
     );
-
-    this.iframe_.src = src;
-    this.iframe_.setAttribute('name', '__tt_embed__v$');
-    this.iframe_.setAttribute('aria-hidden', 'true');
-    this.iframe_.setAttribute('frameborder', '0');
-    this.iframe_.setAttribute('class', 'i-amphtml-tiktok-centered');
-    setStyles(this.iframe_, {
-      'position': 'fixed',
-      'opacity': '0',
-      'pointer-events': 'none',
-      'width': '375px',
-    });
 
     this.element.appendChild(iframe);
     return this.loadPromise(iframe);
@@ -134,13 +135,15 @@ export class AmpTiktok extends AMP.BaseElement {
       return;
     }
     const data = tryParseJson(getData(event));
-    if (!data || data === undefined) {
+    if (!data) {
       return;
     }
     if (data['height']) {
       this.resizeOuter_(data['height']);
-      setStyle(this.iframe_, 'width', `${data['width']}px`);
-      setStyle(this.iframe_, 'height', `${data['height']}px`);
+      setStyles(this.iframe_,{
+        'width': px(data['width']),
+        'height': px(data['height']),
+     });
     }
   }
 

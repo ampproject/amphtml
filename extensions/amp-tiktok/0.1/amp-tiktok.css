@@ -1,6 +1,13 @@
-.i-amphtml-tikok-centered {
+.i-amphtml-tiktok-centered {
     height: 100%;
     left: 50%;
     margin-left: -162px;
     position: absolute;
+}
+
+.i-amphtml-tiktok-unresolved {
+    position: fixed;
+    opacity: 0;
+    pointer-events: none;
+    width: 325px;
 }

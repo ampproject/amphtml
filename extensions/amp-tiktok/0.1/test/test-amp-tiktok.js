@@ -36,23 +36,24 @@ describes.realWin(
       clock.tick(0);
     });
 
-    async function getTiktok(videoId, isFullSrcUrl, opt_locale) {
+    async function getTiktok(attrs = {}) {
       const tiktok = createElementWithAttributes(win.document, 'amp-tiktok', {
         layout: 'responsive',
         width: '325px',
         height: '730px',
+        ...attrs,
       });
-      if (isFullSrcUrl) {
-        tiktok.setAttribute(
-          'data-src',
-          `https://www.tiktok.com/@scout2015/video/${videoId}?lang=en-US`
-        );
-      } else if (opt_locale) {
-        tiktok.setAttribute('data-locale', opt_locale);
-        tiktok.setAttribute('data-src', videoId);
-      } else {
-        tiktok.setAttribute('data-src', videoId);
-      }
+      // if (isFullSrcUrl) {
+      //   tiktok.setAttribute(
+      //     'data-src',
+      //     `https://www.tiktok.com/@scout2015/video/${videoId}?lang=en-US`
+      //   );
+      // } else if (opt_locale) {
+      //   tiktok.setAttribute('data-locale', opt_locale);
+      //   tiktok.setAttribute('data-src', videoId);
+      // } else {
+      //   tiktok.setAttribute('data-src', videoId);
+      // }
       doc.body.appendChild(tiktok);
       return tiktok
         .buildInternal()
@@ -64,7 +65,7 @@ describes.realWin(
 
     it('renders with full src url', async () => {
       const videoId = '6718335390845095173';
-      const player = await getTiktok(videoId, true);
+      const player = await getTiktok({src: videoId});
       const iframe = player.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.contain(videoId);
@@ -72,8 +73,8 @@ describes.realWin(
     });
 
     it('renders with videoId', async () => {
-      const videoId = '6718335390845095173';
-      const player = await getTiktok(videoId, false);
+      const videoSrc = 'https://www.tiktok.com/@scout2015/video/6718335390845095173';
+      const player = await getTiktok({src: videoSrc});
       const iframe = player.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.contain(videoId);
@@ -82,7 +83,7 @@ describes.realWin(
 
     it('renders with videoId and locale', async () => {
       const videoId = '6718335390845095173';
-      const player = await getTiktok(videoId, false, 'fr-FR');
+      const player = await getTiktok({src: videoId, locale: 'fr-FR'});
       const iframe = player.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.contain(videoId);
@@ -91,7 +92,7 @@ describes.realWin(
 
     it('removes iframe after unlayoutCallback', async () => {
       const videoId = '6718335390845095173';
-      const player = await getTiktok(videoId, true);
+      const player = await getTiktok({src: videoId});
       const playerIframe = player.querySelector('iframe');
       expect(playerIframe).to.not.be.null;
 
