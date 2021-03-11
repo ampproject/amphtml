@@ -230,7 +230,6 @@
 
 .i-amphtml-story-mute-audio-control,
 .i-amphtml-story-unmute-audio-control,
-.i-amphtml-paused-display,
 .i-amphtml-story-pause-control,
 .i-amphtml-story-play-control,
 .i-amphtml-story-mute-text,
@@ -262,6 +261,18 @@
 .i-amphtml-story-has-playback-ui:not([paused]) .i-amphtml-story-pause-control,
 .i-amphtml-story-has-playback-ui[paused] .i-amphtml-story-play-control {
   display: block !important;
+}
+
+:not([desktop]) .i-amphtml-story-system-layer-buttons .i-amphtml-story-pause-control,
+:not([desktop]) .i-amphtml-story-system-layer-buttons .i-amphtml-story-play-control {
+  width: 0px !important;
+  padding: 0px !important;
+}
+
+:not([desktop]) .i-amphtml-story-system-layer-buttons .i-amphtml-story-pause-control:focus:not([disabled]),
+:not([desktop]) .i-amphtml-story-system-layer-buttons .i-amphtml-story-play-control:focus:not([disabled]) {
+  width: 48px !important;
+  padding: inherit !important;
 }
 
 .i-amphtml-story-has-audio[muted] .i-amphtml-story-mute-text,
