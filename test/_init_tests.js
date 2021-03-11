@@ -81,7 +81,9 @@ global.AMP.extension = function (name, version, installer) {
 };
 
 // Make amp section in karma config readable by tests.
-window.ampTestRuntimeConfig = parent.karma ? parent.karma.config.amp : {};
+window.ampTestRuntimeConfig = parent.__karma__
+  ? parent.__karma__.config.amp
+  : {};
 
 /**
  * Helper class to skip or retry tests under specific environment.
