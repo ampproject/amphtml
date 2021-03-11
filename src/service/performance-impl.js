@@ -241,6 +241,11 @@ export class Performance {
 
     this.ampdoc_.whenFirstVisible().then(() => {
       this.tick(TickLabel.ON_FIRST_VISIBLE);
+      // TODO(#33207): Remove after data collection
+      this.tick(
+        TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_VISIBLE,
+        this.aggregateShiftScore_
+      );
       this.flush();
     });
 
@@ -350,6 +355,13 @@ export class Performance {
         this.tickDelta(TickLabel.FIRST_CONTENTFUL_PAINT, value);
         this.tickSinceVisible(TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE, value);
         recordedFirstContentfulPaint = true;
+
+        // TODO(#33207): remove after data collection
+        // On the first contentful paint, report cumulative CLS score
+        this.tickDelta(
+          TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_FCP,
+          this.aggregateShiftScore_
+        );
       } else if (
         entry.entryType === 'first-input' &&
         !recordedFirstInputDelay

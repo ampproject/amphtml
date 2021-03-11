@@ -36,6 +36,9 @@ export const TickLabel = {
   CONTENT_LAYOUT_DELAY: 'cld',
   CUMULATIVE_LAYOUT_SHIFT: 'cls',
   CUMULATIVE_LAYOUT_SHIFT_2: 'cls-2',
+  // TODO(#33207): Remove after data collection
+  CUMULATIVE_LAYOUT_SHIFT_BEFORE_FCP: 'cls-fcp',
+  CUMULATIVE_LAYOUT_SHIFT_BEFORE_VISIBLE: 'cls-ofv',
   DOCUMENT_READY: 'dr',
   END_INSTALL_STYLES: 'e_is',
   FIRST_CONTENTFUL_PAINT: 'fcp',
