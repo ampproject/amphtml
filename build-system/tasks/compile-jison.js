@@ -19,7 +19,6 @@ const fs = require('fs-extra');
 const globby = require('globby');
 const jison = require('jison');
 const path = require('path');
-const {endBuildStep} = require('./helpers');
 const {jisonPath} = require('../test-configs/config');
 
 // set imports for each parser from directory build/parsers/.
@@ -41,10 +40,9 @@ const imports = new Map([
  * For example, css-expr-impl.jison creates `cssParser`.
  *
  * @param {string} searchDir - directory to compile jison files within.
- * @return {!Promise<void>}
+ * @return {!Promise}
  */
 async function compileJison(searchDir = jisonPath) {
-  const startTime = Date.now();
   fs.mkdirSync('build/parsers', {recursive: true});
 
   const promises = globby.sync(searchDir).map((jisonFile) => {
@@ -54,11 +52,7 @@ async function compileJison(searchDir = jisonPath) {
     const newFilePath = `build/parsers/${jsFile}.js`;
     return compileExpr(jisonFile, parser, newFilePath);
   });
-  await Promise.all(promises);
-
-  if (promises.length > 0) {
-    endBuildStep('Compiled Jison parsers into', 'build/parsers/', startTime);
-  }
+  return Promise.all(promises);
 }
 
 /**
