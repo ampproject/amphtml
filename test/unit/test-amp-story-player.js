@@ -810,6 +810,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
       player.rewind('https://example.com/story0.html');
+
       await nextTick();
 
       expect(sendRequestSpy).to.have.been.calledWith('rewind', {});
@@ -829,6 +830,24 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       ).to.throw(
         'Story URL not found in the player: https://example.com/story6.html'
       );
+    });
+
+    it('rewind() callback should eventually rewind story when it gets connected', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      attachPlayerWithStories(playerEl, 3);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
+      player.rewind('https://example.com/story2.html');
+
+      await player.go(2);
+      await nextTick();
+
+      expect(sendRequestSpy).to.have.been.calledWith('rewind', {});
     });
 
     // TODO(proyectoramirez): delete once add() is implemented.
