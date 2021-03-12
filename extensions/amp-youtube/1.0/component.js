@@ -23,7 +23,7 @@ import {dict} from '../../../src/utils/object';
 import {dispatchCustomEvent} from '../../../src/dom';
 import {forwardRef} from '../../../src/preact/compat';
 import {mutedOrUnmutedEvent, objOrParseJson} from '../../../src/iframe-video';
-import {useImperativeHandle, useState} from '../../../src/preact';
+import {useRef} from '../../../src/preact';
 
 // Correct PlayerStates taken from
 // https://developers.google.com/youtube/iframe_api_reference#Playback_status
@@ -35,7 +35,7 @@ const PlayerStates = {
   '-1': 'unstarted',
   '0': 'ended',
   '1': 'playing',
-  '2': 'paused',
+  '2': 'pause',
   '3': 'buffering',
   '5': 'video_cued',
 };
@@ -126,20 +126,11 @@ function YoutubeWithRef(
 
   src = addParamsToUrl(src, params);
 
-  const [info] = useState(createDefaultInfo);
-
-  useImperativeHandle(
-    ref,
-    () => ({
-      get currentTime() {
-        return info['currentTime'];
-      },
-      get duration() {
-        return info['duration'];
-      },
-    }),
-    [info]
-  );
+  // Player state. Includes `currentTime` and `duration`.
+  const playerStateRef = useRef();
+  if (!playerStateRef.current) {
+    playerStateRef.current = createDefaultInfo();
+  }
 
   const onMessage = ({data, currentTarget}) => {
     const parsedData = objOrParseJson(data);
@@ -158,6 +149,7 @@ function YoutubeWithRef(
       return;
     }
 
+    const info = playerStateRef.current;
     for (const key in info) {
       if (parsedInfo[key] != null) {
         info[key] = parsedInfo[key];
@@ -190,6 +182,7 @@ function YoutubeWithRef(
 
   return (
     <VideoWrapper
+      ref={ref}
       {...rest}
       component={VideoIframe}
       autoplay={autoplay}
@@ -209,6 +202,7 @@ function YoutubeWithRef(
         );
       }}
       sandbox="allow-scripts allow-same-origin allow-presentation"
+      playerStateRef={playerStateRef}
     ></VideoWrapper>
   );
 }

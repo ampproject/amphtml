@@ -59,6 +59,8 @@ const UpgradeState = {
   UPGRADE_IN_PROGRESS: 4,
 };
 
+const NO_BUBBLES = {bubbles: false};
+
 /**
  * Caches whether the template tag is supported to avoid memory allocations.
  * @type {boolean|undefined}
@@ -669,6 +671,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         case ReadyState.LOADING:
           this.signals_.signal(CommonSignals.LOAD_START);
           this.signals_.reset(CommonSignals.UNLOAD);
+          this.signals_.reset(CommonSignals.LOAD_END);
           this.classList.add('i-amphtml-layout');
           // Potentially start the loading indicator.
           this.toggleLoading(true);
@@ -678,7 +681,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           this.signals_.signal(CommonSignals.LOAD_END);
           this.classList.add('i-amphtml-layout');
           this.toggleLoading(false);
-          dom.dispatchCustomEvent(this, 'load');
+          dom.dispatchCustomEvent(this, 'load', null, NO_BUBBLES);
           this.dispatchCustomEventForTesting(AmpEvents.LOAD_END);
           return;
         case ReadyState.ERROR:
@@ -687,7 +690,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
             /** @type {!Error} */ (opt_failure)
           );
           this.toggleLoading(false);
-          dom.dispatchCustomEvent(this, 'error');
+          dom.dispatchCustomEvent(this, 'error', opt_failure, NO_BUBBLES);
           return;
       }
     }

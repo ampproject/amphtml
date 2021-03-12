@@ -46,7 +46,6 @@ VideoWrapperDef.PlayerComponent;
  * @typedef {{
  *   component: (!VideoWrapperDef.PlayerComponent|undefined),
  *   loading: (string|undefined),
- *   unloadOnPause: (boolean|undefined),
  *   src: (string|undefined),
  *   sources: (?PreactDef.Renderable|undefined),
  *   autoplay: (boolean|undefined),
@@ -58,7 +57,7 @@ VideoWrapperDef.PlayerComponent;
  *   artist: (string|undefined),
  *   album: (string|undefined),
  *   artwork: (string|undefined),
- *   onLoad: (function()|undefined),
+ *   onReadyState: (function(string, *=)|undefined),
  * }}
  */
 VideoWrapperDef.Props;
