@@ -84,11 +84,13 @@ function isTemplateTagSupported() {
  * Creates a named custom element class.
  *
  * @param {!Window} win The window in which to register the custom element.
+ * @param {function(!./service/ampdoc-impl.AmpDoc, !AmpElement element, ?(typeof BaseElement))} elementConnectedCallback
  * @return {typeof AmpElement} The custom element class.
  */
-export function createCustomElementClass(win) {
+export function createCustomElementClass(win, elementConnectedCallback) {
   const BaseCustomElement = /** @type {typeof HTMLElement} */ (createBaseCustomElementClass(
-    win
+    win,
+    elementConnectedCallback
   ));
   // It's necessary to create a subclass, because the same "base" class cannot
   // be registered to multiple custom elements.
@@ -100,9 +102,10 @@ export function createCustomElementClass(win) {
  * Creates a base custom element class.
  *
  * @param {!Window} win The window in which to register the custom element.
+ * @param {function(!./service/ampdoc-impl.AmpDoc, !AmpElement element, ?(typeof BaseElement))} elementConnectedCallback
  * @return {typeof HTMLElement}
  */
-function createBaseCustomElementClass(win) {
+function createBaseCustomElementClass(win, elementConnectedCallback) {
   if (win.__AMP_BASE_CE_CLASS) {
     return win.__AMP_BASE_CE_CLASS;
   }
@@ -963,16 +966,7 @@ function createBaseCustomElementClass(win) {
         const ampdocService = Services.ampdocServiceFor(win);
         const ampdoc = ampdocService.getAmpDoc(this);
         this.ampdoc_ = ampdoc;
-        // Load the pre-stubbed extension if needed.
-        const extensionId = this.localName;
-        if (!this.implClass_ && !ampdoc.declaresExtension(extensionId)) {
-          Services.extensionsFor(win).installExtensionForDoc(
-            ampdoc,
-            extensionId,
-            // The legacy auto-extensions are always 0.1.
-            '0.1'
-          );
-        }
+        elementConnectedCallback(ampdoc, this, this.implClass_);
       }
       if (!this.resources_) {
         // Resources can now be initialized since the ampdoc is now available.
@@ -1987,11 +1981,19 @@ function isInternalOrServiceNode(node) {
  *
  * @param {!Window} win The window in which to register the custom element.
  * @param {(typeof ./base-element.BaseElement)=} opt_implementationClass For testing only.
+ * @param {function(!./service/ampdoc-impl.AmpDoc, !AmpElement element, ?(typeof BaseElement))=} opt_elementConnectedCallback
  * @return {!Object} Prototype of element.
  * @visibleForTesting
  */
-export function createAmpElementForTesting(win, opt_implementationClass) {
-  const Element = createCustomElementClass(win);
+export function createAmpElementForTesting(
+  win,
+  opt_implementationClass,
+  opt_elementConnectedCallback
+) {
+  const Element = createCustomElementClass(
+    win,
+    opt_elementConnectedCallback || (() => {})
+  );
   if (getMode().test && opt_implementationClass) {
     Element.prototype.implementationClassForTesting = opt_implementationClass;
   }
@@ -2007,7 +2009,7 @@ export function resetStubsForTesting() {
 
 /**
  * @param {!AmpElement} element
- * @return {typeof BaseElement}
+ * @return {?(typeof BaseElement)}
  * @visibleForTesting
  */
 export function getImplClassSyncForTesting(element) {

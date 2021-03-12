@@ -300,7 +300,7 @@ describes.realWin('performance', {amp: true}, (env) => {
           ]).then(() => {
             expect(flushSpy).to.have.callCount(4);
             expect(perf.isMessagingReady_).to.be.false;
-            const count = 5;
+            const count = 6;
             expect(perf.events_.length).to.equal(count);
           });
         });
@@ -653,13 +653,15 @@ describes.realWin('performance', {amp: true}, (env) => {
           const initialCount = tickSpy.callCount;
           return ampdoc.whenFirstVisible().then(() => {
             clock.tick(400);
-            expect(tickSpy).to.have.callCount(initialCount + 1);
+            // TODO(#33207): reduce call counts by 1 after data collection
+            expect(tickSpy).to.have.callCount(initialCount + 2);
+            expect(tickSpy.withArgs('cls-ofv')).to.be.calledOnce;
             whenViewportLayoutCompleteResolve();
             return perf.whenViewportLayoutComplete_().then(() => {
-              expect(tickSpy).to.have.callCount(initialCount + 1);
+              expect(tickSpy).to.have.callCount(initialCount + 2);
               expect(tickSpy.withArgs('ofv')).to.be.calledOnce;
               return whenFirstVisiblePromise.then(() => {
-                expect(tickSpy).to.have.callCount(initialCount + 2);
+                expect(tickSpy).to.have.callCount(initialCount + 3);
                 expect(tickSpy.withArgs('pc')).to.be.calledOnce;
                 expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(400);
               });
@@ -965,7 +967,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
 
       const perf = Services.performanceFor(env.win);
 
-      expect(perf.events_.length).to.equal(3);
+      expect(perf.events_.length).to.equal(4);
       expect(perf.events_[0]).to.be.jsonEqual(
         {
           label: 'fp',
@@ -977,6 +979,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
         },
         {
           label: 'fcpv',
+          delta: 15,
+        },
+        {
+          label: 'cls-fcp',
           delta: 15,
         }
       );
@@ -1027,7 +1033,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       };
       // Fake a triggering of the first-input event.
       performanceObserver.triggerCallback(list);
-      expect(perf.events_.length).to.equal(3);
+      expect(perf.events_.length).to.equal(4);
       expect(perf.events_[0]).to.be.jsonEqual(
         {
           label: 'fp',
@@ -1039,6 +1045,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
         },
         {
           label: 'fcpv',
+          delta: 15,
+        },
+        {
+          label: 'cls-fcp',
           delta: 15,
         }
       );

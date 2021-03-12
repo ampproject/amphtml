@@ -29,8 +29,8 @@ const {
   isPullRequestBuild,
   isPushBuild,
   ciPushBranch,
+  circleciPrMergeCommit,
   ciRepoSlug,
-  circleciPrMergeSha,
 } = require('../../common/ci');
 const {
   VERSION: internalRuntimeVersion,
@@ -171,24 +171,27 @@ async function skipBundleSize() {
  */
 async function reportBundleSize() {
   if (isPullRequestBuild()) {
+    const headSha = gitCommitHash();
     const baseSha = gitCiMasterBaseline();
-    const commitHash = gitCommitHash();
+    const mergeSha = circleciPrMergeCommit();
     log(
       'Reporting bundle sizes for commit',
-      cyan(shortSha(commitHash)),
+      cyan(shortSha(headSha)),
       'using baseline commit',
-      cyan(shortSha(baseSha)) + '...'
+      cyan(shortSha(baseSha)),
+      'and merge commit',
+      cyan(shortSha(mergeSha)) + '...'
     );
     try {
       const response = await requestPost({
         uri: url.resolve(
           bundleSizeAppBaseUrl,
-          path.join('commit', commitHash, 'report')
+          path.join('commit', headSha, 'report')
         ),
         json: true,
         body: {
           baseSha,
-          mergeSha: circleciPrMergeSha(),
+          mergeSha,
           bundleSizes: await getBrotliBundleSizes(),
         },
       });
