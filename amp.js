@@ -41,6 +41,7 @@ createTask('check-owners', 'checkOwners', 'check-owners');
 createTask('check-renovate-config','checkRenovateConfig','check-renovate-config'); // prettier-ignore
 createTask('check-sourcemaps', 'checkSourcemaps', 'check-sourcemaps');
 createTask('check-types', 'checkTypes', 'check-types');
+createTask('check-types-build-system', 'checkBuildSystemTypes','check-types-build-system'); // prettier-ignore
 createTask('check-video-interface-list', 'checkVideoInterfaceList', 'check-video-interface-list'); // prettier-ignore
 createTask('cherry-pick', 'cherryPick', 'cherry-pick');
 createTask('clean', 'clean', 'clean');
