@@ -17,11 +17,11 @@
 import {AdResponseType, Validator, ValidatorResult} from './amp-ad-type-defs';
 import {
   extensionsHasElement,
+  getAmpAdMetadata,
   getExtensionsFromMetadata,
-  preloadFriendlyIframeEmbedExtensions,
-} from '../../../src/friendly-iframe-embed';
-import {getAmpAdMetadata} from './amp-ad-utils';
+} from './amp-ad-utils';
 import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
+import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
 import {tryParseJson} from '../../../src/json';
 import {utf8Decode} from '../../../src/utils/bytes';
 

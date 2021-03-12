@@ -38,11 +38,9 @@ import {installForChildWin as installIntersectionObserver} from './polyfills/int
 import {installForChildWin as installResizeObserver} from './polyfills/resize-observer';
 import {installStylesForDoc} from './style-installer';
 import {installTimerInEmbedWindow} from './service/timer-impl';
-import {isArray, toWin} from './types';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
 import {loadPromise} from './event-helper';
-import {parseExtensionUrl} from './service/extension-script';
 import {
   px,
   resetStyles,
@@ -50,6 +48,7 @@ import {
   setStyle,
   setStyles,
 } from './style';
+import {toWin} from './types';
 import {urls} from './config';
 import {whenContentIniLoad} from './ini-load';
 
@@ -149,38 +148,6 @@ export function preloadFriendlyIframeEmbedExtensionIdsDeprecated(
   extensionIds.forEach((extensionId) =>
     extensionsService.preloadExtension(extensionId)
   );
-}
-
-/**
- * Determine if parsed extensions metadata object
- * @param {!Array<{custom-element: string, src: string}>} extensions
- * @param {string} id
- * @return {boolean}
- */
-export function extensionsHasElement(extensions, id) {
-  return extensions.some((entry) => entry['custom-element'] === id);
-}
-
-/**
- * Parses extension urls from given metadata to retrieve name and version.
- * @param {!./amp-ad-type-defs.CreativeMetaDataDef} creativeMetadata
- * @return {!Array<?{extensionId: string, extensionVersion: string}>}
- */
-export function getExtensionsFromMetadata(creativeMetadata) {
-  const parsedExtensions = [];
-  const {extensions} = creativeMetadata;
-  if (!extensions || !isArray(extensions)) {
-    return parsedExtensions;
-  }
-
-  for (let i = 0; i < extensions.length; i++) {
-    const extension = extensions[i];
-    const extensionData = parseExtensionUrl(extension.src);
-    if (extensionData) {
-      parsedExtensions.push(extensionData);
-    }
-  }
-  return parsedExtensions;
 }
 
 /**

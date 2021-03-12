@@ -57,14 +57,14 @@ import {
 } from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
+import {getExtensionsFromMetadata} from './amp-ad-utils';
+import {getMode} from '../../../src/mode';
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
-  getExtensionsFromMetadata,
   installFriendlyIframeEmbed,
   isSrcdocSupported,
   preloadFriendlyIframeEmbedExtensions,
 } from '../../../src/friendly-iframe-embed';
-import {getMode} from '../../../src/mode';
-import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {installRealTimeConfigServiceForDoc} from '../../../src/service/real-time-config/real-time-config-impl';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {
