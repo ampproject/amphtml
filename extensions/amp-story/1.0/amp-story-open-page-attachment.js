@@ -118,7 +118,7 @@ const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
       LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
     );
   openAttachmentEl.setAttribute('aria-label', openLabel);
-  
+
   if (openLabel !== 'none') {
     const textEl = win.document.createElement('span');
     textEl.classList.add('i-amphtml-story-inline-page-attachment-label');
