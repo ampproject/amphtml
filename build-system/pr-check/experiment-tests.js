@@ -27,6 +27,7 @@ const {
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {experiment} = require('minimist')(process.argv.slice(2));
+const {reportTestSkipped} = require('../tasks/report-test-status');
 const {runCiJob} = require('./ci-job');
 
 const jobName = `${experiment}-tests.js`;
@@ -51,6 +52,7 @@ function pushBuildWorkflow() {
       jobName,
       `${experiment} is expired, misconfigured, or does not exist`
     );
+    reportTestSkipped();
   }
 }
 
@@ -71,6 +73,7 @@ function prBuildWorkflow() {
       jobName,
       'this PR does not affect the runtime, integration tests, or end-to-end tests'
     );
+    reportTestSkipped();
   }
 }
 
