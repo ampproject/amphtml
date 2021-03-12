@@ -49,7 +49,6 @@ function prependConfig() {
  */
 function pushBuildWorkflow() {
   downloadNomoduleOutput();
-  timedExecOrDie('gulp update-packages');
   prependConfig();
   try {
     timedExecOrThrow(
@@ -71,7 +70,6 @@ function pushBuildWorkflow() {
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     downloadNomoduleOutput();
-    timedExecOrDie('gulp update-packages');
     prependConfig();
     timedExecOrDie(
       `gulp integration --nobuild --compiled --headless --config=${argv.config}`

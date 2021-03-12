@@ -38,7 +38,6 @@ function pushBuildWorkflow() {
   const config = getExperimentConfig(experiment);
   if (config) {
     const defineFlag = `--define_experiment_constant ${config.define_experiment_constant}`;
-    timedExecOrDie('gulp update-packages');
     timedExecOrDie(`gulp dist --fortesting ${defineFlag}`);
     uploadExperimentOutput(experiment);
   } else {

@@ -40,7 +40,6 @@ const jobName = 'nomodule-build.js';
  * @return {void}
  */
 function pushBuildWorkflow() {
-  timedExecOrDie('gulp update-packages');
   timedExecOrDie('gulp dist --fortesting');
   uploadNomoduleOutput();
 }
@@ -58,7 +57,6 @@ async function prBuildWorkflow() {
       Targets.VISUAL_DIFF
     )
   ) {
-    timedExecOrDie('gulp update-packages');
     const process = timedExecWithError('gulp dist --fortesting');
     if (process.status !== 0) {
       const message = process?.error

@@ -35,7 +35,6 @@ const jobName = 'visual-diff-tests.js';
  */
 function pushBuildWorkflow() {
   downloadNomoduleOutput();
-  timedExecOrDie('gulp update-packages');
   process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
   timedExecOrDie('gulp visual-diff --nobuild --master');
 }
@@ -47,7 +46,6 @@ function prBuildWorkflow() {
   process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
   if (buildTargetsInclude(Targets.RUNTIME, Targets.VISUAL_DIFF)) {
     downloadNomoduleOutput();
-    timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp visual-diff --nobuild');
   } else {
     timedExecOrDie('gulp visual-diff --empty');

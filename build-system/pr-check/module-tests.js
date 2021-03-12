@@ -51,7 +51,6 @@ function prependConfig() {
 function pushBuildWorkflow() {
   downloadNomoduleOutput();
   downloadModuleOutput();
-  timedExecOrDie('gulp update-packages');
   prependConfig();
   timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
 }
@@ -63,7 +62,6 @@ function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     downloadNomoduleOutput();
     downloadModuleOutput();
-    timedExecOrDie('gulp update-packages');
     prependConfig();
     timedExecOrDie(
       `gulp integration --nobuild --compiled --headless --esm --config=${argv.config}`

@@ -35,7 +35,6 @@ const jobName = 'unminified-tests.js';
  */
 function pushBuildWorkflow() {
   downloadUnminifiedOutput();
-  timedExecOrDie('gulp update-packages');
 
   try {
     timedExecOrThrow(
@@ -61,7 +60,6 @@ function pushBuildWorkflow() {
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     downloadUnminifiedOutput();
-    timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp integration --nobuild --headless --coverage');
     timedExecOrDie('gulp codecov-upload');
   } else {
