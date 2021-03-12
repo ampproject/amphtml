@@ -1,0 +1,1 @@
+export default frameServicePb = require('./frame-service_pb');

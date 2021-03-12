@@ -24,8 +24,7 @@ import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {addAttributesToElement} from '../../../src/dom';
 import {toggle} from '../../../src/style';
-
-const frameServicePb = require('./proto/frame-service_pb');
+import frameServicePb from '../../../third_party/assistjs-proto/exports';
 
 export class AssistjsFrameService {
   /**
@@ -85,7 +84,10 @@ export class AssistjsFrameService {
 
         // TODO: expose a new endpoint in runtime service for custom elements to register
         // services for the channel with its iframe.
-        const respondingChannel = closure.createRespondingChannel(portChannel, new Map());
+        const respondingChannel = closure.createRespondingChannel(
+          portChannel,
+          new Map()
+        );
         this.respondingChannelDeferred_.resolve(respondingChannel);
       });
     });
@@ -99,7 +101,7 @@ export class AssistjsFrameService {
   }
 
   /**
-   * @param {string}
+   * @param {string} widgetName
    */
   reportWidget(widgetName) {
     const responsePromise = new Promise((resolve) => {
@@ -110,9 +112,10 @@ export class AssistjsFrameService {
           /* payload= */ {
             'payload': new frameServicePb.ReportWidgetRequest()
               .setWidgetName(widgetName)
-              .serializeBinary()
+              .serializeBinary(),
           },
-          resolve);
+          resolve
+        );
       });
     });
 
