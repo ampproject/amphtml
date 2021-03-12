@@ -21,6 +21,7 @@ const {
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
+const {compileJison} = require('./compile-jison');
 const {css} = require('./css');
 const {getUnitTestsToRun} = require('./runtime-test/helpers-unit');
 const {maybePrintArgvMessages} = require('./runtime-test/helpers');
@@ -38,6 +39,7 @@ class Runner extends RuntimeTestRunner {
   async maybeBuild() {
     await analyticsVendorConfigs();
     await css();
+    await compileJison();
   }
 }
 
