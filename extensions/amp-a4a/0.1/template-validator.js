@@ -23,6 +23,7 @@ import {
 import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
 import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
 import {tryParseJson} from '../../../src/json';
+import {urls} from '../../../src/config';
 import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @const {string} */
@@ -76,13 +77,13 @@ export class TemplateValidator extends Validator {
         ) {
           extensions.push({
             'custom-element': 'amp-analytics',
-            src: 'https://cdn.ampproject.org/v0/amp-analytics-0.1.js',
+            src: `${urls.cdn}/v0/amp-analytics-0.1.js`,
           });
         }
         if (!extensionsHasElement(extensions, 'amp-mustache')) {
           extensions.push({
             'custom-element': 'amp-mustache',
-            src: 'https://cdn.ampproject.org/v0/amp-mustache-latest.js',
+            src: `${urls.cdn}/v0/amp-mustache-latest.js`,
           });
         }
 
