@@ -66,9 +66,7 @@ function getExperimentConfig(experiment) {
  * @return {!Array<string>}
  */
 function getValidExperiments() {
-  return ['A', 'B', 'C']
-    .map((exp) => `experiment${exp}`)
-    .filter(getExperimentConfig);
+  return Object.keys(experimentsConfig).filter(getExperimentConfig);
 }
 
 /**
