@@ -29,7 +29,6 @@ const jobName = 'performance-tests.js';
  */
 function pushBuildWorkflow() {
   downloadNomoduleOutput(jobName);
-  timedExecOrDie('gulp update-packages');
   timedExecOrDie('gulp performance --nobuild --quiet --headless');
 }
 

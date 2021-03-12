@@ -30,7 +30,6 @@ const jobName = 'checks.js';
  * @return {void}
  */
 function pushBuildWorkflow() {
-  timedExecOrDie('gulp update-packages');
   timedExecOrDie('gulp presubmit');
   timedExecOrDie('gulp lint');
   timedExecOrDie('gulp prettify');
@@ -56,7 +55,6 @@ function pushBuildWorkflow() {
  */
 async function prBuildWorkflow() {
   await reportAllExpectedTests();
-  timedExecOrDie('gulp update-packages');
 
   if (buildTargetsInclude(Targets.PRESUBMIT)) {
     timedExecOrDie('gulp presubmit');
