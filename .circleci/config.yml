@@ -84,7 +84,7 @@ jobs:
     steps:
       - run:
           name: 'Compute Merge Commit'
-          command: curl -sS https://raw.githubusercontent.com/rsimha/amphtml/2021-03-11-CircleConfigUpdates/.circleci/compute_merge_commit.sh | bash
+          command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/master/.circleci/compute_merge_commit.sh | bash
       - save_merge_commit
   'Checks':
     executor:
