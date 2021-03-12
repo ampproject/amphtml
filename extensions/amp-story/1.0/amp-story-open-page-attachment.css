@@ -205,7 +205,12 @@
   background-position: center !important;
 }
 
+.i-amphtml-story-inline-page-attachment-arrow:only-child {
+  margin: 0 !important;
+}
+
 .i-amphtml-story-inline-page-attachment-label {
+  color: white !important;
   font-family: 'Roboto', sans-serif !important;
   font-size: 16px !important;
   font-weight: 700 !important;

@@ -49,7 +49,6 @@ export const buildOpenInlineAttachmentElement = (element) =>
         i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
         role="button">
       <div class="i-amphtml-story-inline-page-attachment-chip">
-        <div class="i-amphtml-story-inline-page-attachment-img"></div>
         <div class="i-amphtml-story-inline-page-attachment-arrow"></div>
       </div>
     </a>`;
@@ -62,10 +61,9 @@ export const buildOpenInlineAttachmentElement = (element) =>
  * @return {!Element}
  */
 export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
-  const openImgAttr = attachmentEl.getAttribute('cta-image');
-  const attachmentHref = attachmentEl.getAttribute('href');
-  if (isPageAttachmentUiV2ExperimentOn(win) && !attachmentHref && openImgAttr) {
-    return renderPageAttachmentUiWithImages(win, pageEl, attachmentEl);
+  // return renderPageAttachmentExperiment(win, pageEl, attachmentEl);
+  if (isPageAttachmentUiV2ExperimentOn(win)) {
+    return renderPageAttachmentExperiment(win, pageEl, attachmentEl);
   } else {
     return renderDefaultPageAttachmentUI(pageEl, attachmentEl);
   }
@@ -107,44 +105,52 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
  * @param {!Element} attachmentEl
  * @return {!Element}
  */
-const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
+const renderPageAttachmentExperiment = (win, pageEl, attachmentEl) => {
   const openAttachmentEl = buildOpenInlineAttachmentElement(pageEl);
 
+  // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
+  const attachmentHref = attachmentEl.getAttribute('href');
+  if (attachmentHref) {
+    openAttachmentEl.setAttribute('href', attachmentHref);
+  }
+
+  // Append text and aria label.
   const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
-  let openLabel =
+  const openLabel =
     (openLabelAttr && openLabelAttr.trim()) ||
     getLocalizationService(pageEl).getLocalizedString(
       LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
     );
-  if (openLabelAttr) {
+  openAttachmentEl.setAttribute('aria-label', openLabel);
+  if (openLabelAttr !== 'none') {
     const textEl = win.document.createElement('div');
     textEl.classList.add('i-amphtml-story-inline-page-attachment-label');
-    openLabel = openLabelAttr && openLabelAttr.trim();
-    textEl.textContent = openLabel;
     openAttachmentEl.appendChild(textEl);
+    textEl.textContent = openLabel;
   }
 
-  openAttachmentEl.setAttribute('aria-label', openLabel);
-
-  const openImgAttr = attachmentEl.getAttribute('cta-image');
-
-  const ctaImgEl = openAttachmentEl.querySelector(
-    '.i-amphtml-story-inline-page-attachment-img'
-  );
-
-  setImportantStyles(ctaImgEl, {
-    'background-image': 'url(' + openImgAttr + ')',
-  });
-
-  const openImgAttr2 = attachmentEl.getAttribute('cta-image-2');
-
-  if (openImgAttr2) {
-    const ctaImgEl2 = win.document.createElement('div');
-    ctaImgEl2.classList.add('i-amphtml-story-inline-page-attachment-img');
-    setImportantStyles(ctaImgEl2, {
-      'background-image': 'url(' + openImgAttr2 + ')',
+  // Append images if they are defined.
+  const appendImageNode = (imgURL) => {
+    const imgEl = win.document.createElement('div');
+    imgEl.classList.add('i-amphtml-story-inline-page-attachment-img');
+    setImportantStyles(imgEl, {
+      'background-image': 'url(' + imgURL + ')',
     });
-    ctaImgEl.parentNode.insertBefore(ctaImgEl2, ctaImgEl.nextSibling);
+    return imgEl;
+  };
+  const chipNode = openAttachmentEl.querySelector(
+    '.i-amphtml-story-inline-page-attachment-chip'
+  );
+  const arrowNode = openAttachmentEl.querySelector(
+    '.i-amphtml-story-inline-page-attachment-arrow'
+  );
+  const openImgAttr1 = attachmentEl.getAttribute('cta-image');
+  const openImgAttr2 = attachmentEl.getAttribute('cta-image-2');
+  if (openImgAttr1) {
+    chipNode.insertBefore(appendImageNode(openImgAttr1), arrowNode);
+  }
+  if (openImgAttr2) {
+    chipNode.insertBefore(appendImageNode(openImgAttr2), arrowNode);
   }
 
   return openAttachmentEl;
