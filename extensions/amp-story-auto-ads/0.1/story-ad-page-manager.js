@@ -20,12 +20,15 @@ import {
   STORY_AD_ANALYTICS,
 } from './story-ad-analytics';
 import {ButtonTextFitter} from './story-ad-button-text-fitter';
-import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
+import {
+  StateProperty,
+  getStoreService,
+} from '../../amp-story/1.0/amp-story-store-service';
 import {StoryAdLocalization} from './story-ad-localization';
 import {StoryAdPage} from './story-ad-page';
 import {devAssert} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
-import {getServiceForDoc, getServicePromiseForDoc} from '../../../src/service';
+import {getServicePromiseForDoc} from '../../../src/service';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page-manager';
@@ -70,7 +73,7 @@ export class StoryAdPageManager {
     this.pages_ = {};
 
     /** @private {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} **/
-    this.storeService_ = getServiceForDoc(this.ampdoc_, 'story-store');
+    this.storeService_ = getStoreService(this.ampdoc_.win);
 
     /** @private {number} */
     this.adsConsumed_ = 0;
