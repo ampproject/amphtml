@@ -54,7 +54,8 @@ This is an overflow wrapper for amp-ad and amp-iframe. It covers the ad or ifram
 ![alt_text](images/custom_color_cta.png 'image_tooltip')
 
 ## Styling
-The `<amp-overflow-button>` component allows stying of the button through the `amp-overflow-button-cta-button` css class.  The rest of the component features a semi-transparent background.
+
+The `<amp-overflow-button>` component allows stying of the button through the `amp-overflow-button-cta-button` css class. The rest of the component features a semi-transparent background.
 
 [example playground="true" preview="top-frame" orientation="landscape"]
 
