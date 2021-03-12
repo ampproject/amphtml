@@ -34,6 +34,12 @@ const TAG = 'AMP_STORY_PANNING_MEDIA';
 const DURATION_MS = 1000;
 
 /**
+ * A small number used to calculate zooming out to 0.
+ * @const {number}
+ */
+const MIN_INTEGER = -100000;
+
+/**
  * Position values used to animate between components.
  * x: (optional) Percentage between [-50; 50]
  * y: (optional) Percentage between [-50; 50]
@@ -243,7 +249,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    */
   calculateZoom_(zoom) {
     const calculatedZoom = (zoom - 1) / zoom;
-    return isFinite(calculatedZoom) ? calculatedZoom : Number.MIN_SAFE_INTEGER;
+    return isFinite(calculatedZoom) ? calculatedZoom : MIN_INTEGER;
   }
 
   /**
