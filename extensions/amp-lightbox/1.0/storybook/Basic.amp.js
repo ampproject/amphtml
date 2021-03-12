@@ -47,7 +47,9 @@ export const Default = () => {
       <div style="height: 300px;">
         <amp-lightbox id="lightbox" layout="nodisplay" animation={animation}>
           <p>Test</p>
-          <button on="tap:lightbox.close">Close</button>
+          <button slot="close-button" on="tap:lightbox.close">
+            Close
+          </button>
         </amp-lightbox>
         <div class="buttons">
           <button on="tap:lightbox">Open</button>
@@ -212,7 +214,9 @@ export const scrollable = () => {
               </p>
             </>
           )}
-          <button on="tap:lightbox.close">Close</button>
+          <button slot="close-button" on="tap:lightbox.close">
+            Close
+          </button>
         </amp-lightbox>
         <div class="buttons">
           <button on="tap:lightbox">Open</button>

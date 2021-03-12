@@ -176,7 +176,7 @@ const HAS_PASSTHROUGH = (def) => !!(def.passthrough || def.passthroughNonEmpty);
  * @param {Node} node
  * @return {boolean}
  */
-const IS_NONEMPTY_TEXT = (node) =>
+const IS_EMPTY_TEXT_NODE = (node) =>
   node.nodeType === /* TEXT_NODE */ 3 && node.nodeValue.trim().length === 0;
 
 /**
@@ -1079,7 +1079,7 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
       value = [<Slot />];
     } else if (def.passthroughNonEmpty) {
       devAssert(Ctor['usesShadowDom']);
-      value = element.getRealChildNodes().every(IS_NONEMPTY_TEXT)
+      value = element.getRealChildNodes().every(IS_EMPTY_TEXT_NODE)
         ? null
         : [<Slot />];
     } else if (def.attr) {

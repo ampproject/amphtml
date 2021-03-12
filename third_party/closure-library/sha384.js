@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// Required for calcdeps, but does weird things when compiling.
+// goog.provide('__AMP_SHA384_DIGEST');
+
 goog.require('goog.crypt.Sha384');
 
 /**
@@ -26,4 +29,4 @@ var digest = function(input) {
   return new Uint8Array(sha384.digest());
 }
 
-goog.exportSymbol('ampSha384Digest', digest, window);
+goog.exportSymbol('__AMP_SHA384_DIGEST', digest, window);
