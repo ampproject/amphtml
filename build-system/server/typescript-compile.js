@@ -13,46 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const esbuild = require('esbuild');
+const globby = require('globby');
+const path = require('path');
 const pathModule = require('path');
 const {cyan, green} = require('kleur/colors');
-const {exec} = require('../common/exec');
+const {endBuildStep} = require('../tasks/helpers');
 const {log} = require('../common/logging');
 
 const SERVER_TRANSFORM_PATH = 'build-system/server/new-server/transforms';
 
 /**
- * @return {string}
- */
-function getBuildCmd() {
-  switch (process.platform) {
-    case 'win32':
-      return `node .\\node_modules\\typescript\\lib\\tsc.js -p ${SERVER_TRANSFORM_PATH.split(
-        '/'
-      ).join(pathModule.sep)}${pathModule.sep}tsconfig.json`;
-
-    default:
-      return `./node_modules/typescript/bin/tsc -p ${SERVER_TRANSFORM_PATH}/tsconfig.json`;
-  }
-}
-
-/**
  * Builds the new server by converting typescript transforms to JS
- * @return {void}
+ * @return {Promise}
  */
-function buildNewServer() {
+async function buildNewServer() {
   log(
     green('Building'),
     cyan('AMP Server'),
     green('at'),
     cyan(`${SERVER_TRANSFORM_PATH}/dist`) + green('...')
   );
-  const result = exec(getBuildCmd(), {'stdio': ['inherit', 'inherit', 'pipe']});
-  if (result.status != 0) {
-    const err = new Error('Could not build AMP Server');
-    // @ts-ignore
-    err.showStack = false;
-    throw err;
-  }
+  const entryPoints = globby.sync(
+    path.join(SERVER_TRANSFORM_PATH, '**', '*.ts')
+  );
+
+  const startTime = Date.now();
+  return esbuild
+    .build({
+      entryPoints,
+      outdir: pathModule.join(SERVER_TRANSFORM_PATH, 'dist'),
+      bundle: false,
+      tsconfig: path.join(SERVER_TRANSFORM_PATH, 'tsconfig.json'),
+      format: 'cjs',
+    })
+    .then(() => {
+      endBuildStep('Built', 'AMP Server', startTime);
+    });
 }
 
 module.exports = {

@@ -90,7 +90,7 @@ async function startServer(
   serverOptions = {},
   modeOptions = {}
 ) {
-  buildNewServer();
+  await buildNewServer();
   if (serverOptions.lazyBuild) {
     lazyBuild = serverOptions.lazyBuild;
   }
@@ -170,7 +170,7 @@ async function stopServer() {
 async function restartServer() {
   stopServer();
   try {
-    buildNewServer();
+    await buildNewServer();
   } catch {
     log(red('ERROR:'), 'Could not rebuild', cyan('AMP Server'));
     return;
