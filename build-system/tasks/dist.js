@@ -42,11 +42,11 @@ const {
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss, copyCss} = require('./css');
+const {compileJison} = require('./compile-jison');
 const {formatExtractedMessages} = require('../compile/log-messages');
 const {log} = require('../common/logging');
 const {maybeUpdatePackages} = require('./update-packages');
 const {VERSION} = require('../compile/internal-version');
-const { compileJison } = require('./compile-jison');
 
 const {green, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
