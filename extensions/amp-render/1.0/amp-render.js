@@ -91,7 +91,7 @@ class AmpRender extends BaseElement {
       return getAmpStateJson.bind(null, this.element);
     }
     if (this.isAmpScriptSrc_(src)) {
-      return getAmpScriptJson.bind(this.element);
+      return getAmpScriptJson.bind(null, this.element);
     }
     return batchFetchJsonFor.bind(null, this.getAmpDoc(), this.element);
   }
@@ -153,9 +153,7 @@ function getAmpStateJson(element) {
   return Services.bindForDocOrNull(element)
     .then((bind) => {
       userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
-      const ampStatePath = src.slice(
-        /* AMP_STATE_URI_SCHEME.length */ 'amp-state:'.length
-      );
+      const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length.length);
       return bind.getStateAsync(ampStatePath).catch((err) => {
         const stateKey = ampStatePath.split('.')[0];
         user().error(
@@ -184,7 +182,7 @@ function getAmpScriptJson(element) {
   const src = element.getAttribute('src');
   return Promise.resolve()
     .then(() => {
-      const args = src.slice('amp-script:'.length).split('.');
+      const args = src.slice(AMP_SCRIPT_URI_SCHEME.length).split('.');
       userAssert(
         args.length === 2 && args[0].length > 0 && args[1].length > 0,
         '[amp-list]: "amp-script" URIs must be of the format "scriptId.functionIdentifier".'
@@ -193,7 +191,6 @@ function getAmpScriptJson(element) {
       const ampScriptId = args[0];
       const fnIdentifier = args[1];
       const ampScriptEl = element.getAmpDoc().getElementById(ampScriptId);
-      // const ampScriptEl = ampdoc.getElementById(ampScriptId);
       userAssert(
         ampScriptEl && ampScriptEl.tagName === 'AMP-SCRIPT',
         `[amp-list]: could not find <amp-script> with script set to ${ampScriptId}`

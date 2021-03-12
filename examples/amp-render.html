@@ -44,7 +44,12 @@
 
     <amp-render src="/examples/data.json" height="500" width="500">
       <template type="amp-mustache">
-        <a href="{{url}}">{{title}}</p>
+        <a href="{{nested.second.url}}">{{nested.second.title}}</a>
+          <p>
+          {{#list}}
+            {{name}}
+          {{/list}}
+        </p>
       </template>
     </amp-render>
 
@@ -64,17 +69,20 @@
       </template>
     </amp-render> -->
 
-    <!--
-    <amp-script id="dataFunctions" script="local-script" nodom></amp-script>
+<!--
+    <amp-script id="dataFunctions" script="local-script"></amp-script>
     <script id="local-script" type="text/plain" target="amp-script">
       function getRemoteData() {
-        return fetch('/examples/date-picker.json')
+        return fetch('/examples/data.json')
           .then(resp => resp.json())
       }
       exportFunction('getRemoteData', getRemoteData);
     </script>
 
     <amp-render src="amp-script:dataFunctions.getRemoteData">
+      <template type="amp-mustache">
+        <a href="{{nested.second.url}}">{{nested.second.title}}</p>
+      </template>
     </amp-render> -->
   </body>
 </html>
