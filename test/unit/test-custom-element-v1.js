@@ -532,6 +532,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element.toggleLoading).to.be.calledOnce.calledWith(true);
       expect(element.signals().get(CommonSignals.LOAD_START)).to.exist;
       expect(element.signals().get(CommonSignals.UNLOAD)).to.be.null;
+      expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
       expect(element).to.have.class('i-amphtml-layout');
     });
 
@@ -550,6 +551,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element.signals().get(CommonSignals.LOAD_END)).to.exist;
       expect(element).to.have.class('i-amphtml-layout');
       expect(loadEventSpy).to.be.calledOnce;
+      expect(loadEventSpy.firstCall.firstArg.bubbles).to.be.false;
     });
 
     it('should update error state', () => {
@@ -566,6 +568,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element.toggleLoading).to.be.calledOnce.calledWith(false);
       expect(element.signals().get(CommonSignals.LOAD_END)).to.equal(error);
       expect(errorEventSpy).to.be.calledOnce;
+      expect(errorEventSpy.firstCall.firstArg.bubbles).to.be.false;
     });
 
     it('should not duplicate events', () => {
@@ -578,6 +581,16 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       // Repeat.
       element.setReadyStateInternal('complete');
       expect(loadEventSpy).to.be.calledOnce; // no change.
+    });
+
+    it('should return back to loading after complete', () => {
+      element.setReadyStateInternal('complete');
+      expect(element.readyState).equal('complete');
+      expect(element.signals().get(CommonSignals.LOAD_END)).to.exist;
+
+      element.setReadyStateInternal('loading');
+      expect(element.readyState).equal('loading');
+      expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
     });
   });
 
