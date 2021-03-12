@@ -24,7 +24,9 @@ GREEN() { echo -e "\n\033[0;32m$1\033[0m"; }
 
 # Try to determine the PR number.
 curl -sS https://raw.githubusercontent.com/ampproject/amphtml/master/.circleci/get_pr_number.sh | bash
-source $BASH_ENV
+if [[ -f "$BASH_ENV" ]]; then
+  source $BASH_ENV
+fi
 
 # If PR_NUMBER doesn't exist, there is nothing more to do.
 if [[ -z "$PR_NUMBER" ]]; then
