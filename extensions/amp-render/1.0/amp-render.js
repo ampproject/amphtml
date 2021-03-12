@@ -89,11 +89,11 @@ class AmpRender extends BaseElement {
     const src = this.element.getAttribute('src');
     if (this.isAmpStateSrc_(src)) {
       return getAmpStateJson.bind(null, this.element);
-    } else if (this.isAmpScriptSrc_(src)) {
-      return getAmpScriptJson.bind(this.element);
-    } else {
-      batchFetchJsonFor.bind(null, this.getAmpDoc(), this.element);
     }
+    if (this.isAmpScriptSrc_(src)) {
+      return getAmpScriptJson.bind(this.element);
+    }
+    return batchFetchJsonFor.bind(null, this.getAmpDoc(), this.element);
   }
 
   /** @override */

@@ -1,35 +1,54 @@
-<!doctype html>
+<!DOCTYPE html>
 <html ⚡>
   <head>
     <meta charset="utf-8" />
     <title>My AMP Page</title>
     <link rel="canonical" href="self.html" />
     <meta name="viewport" content="width=device-width" />
-    <noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <noscript
+      ><style amp-boilerplate>
+        body {
+          -webkit-animation: none;
+          -moz-animation: none;
+          -ms-animation: none;
+          animation: none;
+        }
+      </style></noscript
+    >
     <style amp-custom>
       h1 {
         margin: 1rem;
       }
     </style>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
-    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
-    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
-    <script async custom-element="amp-render" src="https://cdn.ampproject.org/v0/amp-render-1.0.js"></script>
+    <script
+      async
+      custom-element="amp-bind"
+      src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"
+    ></script>
+    <script
+      async
+      custom-template="amp-mustache"
+      src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-render"
+      src="https://cdn.ampproject.org/v0/amp-render-1.0.js"
+    ></script>
+    <!-- prettier-ignore -->
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style>
   </head>
   <body>
-
     <h1>Hello AMPHTML World!</h1>
 
-    <!-- <amp-render src="/examples/data.json" height="500" width="500">
+    <amp-render src="/examples/data.json" height="500" width="500">
       <template type="amp-mustache">
         <a href="{{url}}">{{title}}</p>
       </template>
-    </amp-render> -->
+    </amp-render>
 
-
-
-    <amp-state id="theFood">
+    <!-- <amp-state id="theFood">
       <script type="application/json">
         {
           "title": "amp-carousel",
@@ -40,12 +59,12 @@
 
     <amp-render src="amp-state:theFood" width="auto" height="140" layout="fixed-height">
       <template type="amp-mustache">
+        <p>some static text in template</p>
         <a href="{{url}}">{{title}}</a>
       </template>
-    </amp-render>
+    </amp-render> -->
 
-
-<!--
+    <!--
     <amp-script id="dataFunctions" script="local-script" nodom></amp-script>
     <script id="local-script" type="text/plain" target="amp-script">
       function getRemoteData() {
@@ -57,6 +76,5 @@
 
     <amp-render src="amp-script:dataFunctions.getRemoteData">
     </amp-render> -->
-
   </body>
 </html>
