@@ -3,7 +3,7 @@ $category@: presentation
 formats:
   - websites
 teaser:
-  text: Displays an overflow for amp-ads and amp-iframes with a customizable button.
+  text: Displays an overflow with a customizable button for amp-ads and amp-iframes.
 ---
 
 <!--
