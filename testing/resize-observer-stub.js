@@ -37,6 +37,16 @@ class ResizeObservers {
     });
   }
 
+  /**
+   * @param {!Element} target
+   * @return {boolean}
+   */
+  isObserved(target) {
+    return Array.from(this.observers).some((observer) =>
+      observer.elements.has(target)
+    );
+  }
+
   notifySync(entryOrEntries) {
     const entries = Array.isArray(entryOrEntries)
       ? entryOrEntries

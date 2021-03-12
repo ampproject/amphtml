@@ -26,6 +26,9 @@ BaseElement['Component'] = Instagram;
 BaseElement['loadable'] = true;
 
 /** @override */
+BaseElement['unloadOnPause'] = true;
+
+/** @override */
 BaseElement['props'] = {
   'captioned': {attr: 'data-captioned'},
   'shortcode': {attr: 'data-shortcode'},

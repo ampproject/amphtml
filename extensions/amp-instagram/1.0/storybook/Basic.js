@@ -48,12 +48,12 @@ export const _default = () => {
 };
 
 export const InsideAccordion = () => {
-  const shortcode = text('shortcode', 'B8QaZW4AQY_');
+  const shortcode = text('shortcode', 'Bp4I3hRhd_v');
   const width = number('width', 500);
   const height = number('height', 600);
   return (
     <Accordion expandSingleSection>
-      <AccordionSection key={1} expanded={false}>
+      <AccordionSection key={1} expanded={true}>
         <AccordionHeader>
           <h2>Post</h2>
         </AccordionHeader>

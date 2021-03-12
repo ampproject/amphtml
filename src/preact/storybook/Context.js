@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../';
-import {WithAmpContext, useAmpContext, useLoad} from '../context';
+import {WithAmpContext, useAmpContext, useLoading} from '../context';
 import {boolean, select, withKnobs} from '@storybook/addon-knobs';
 
 import {withA11y} from '@storybook/addon-a11y';
@@ -68,8 +68,9 @@ function Composite() {
  * @return {PreactDef.Renderable}
  */
 function Info({title, loading: loadingProp, ...rest}) {
-  const {renderable, playable, loading} = useAmpContext();
-  const load = useLoad(loadingProp);
+  const {renderable, playable, loading: loadingContext} = useAmpContext();
+  const loading = useLoading(loadingProp);
+  const load = loading != 'unload';
   const infoStyle = {border: '1px dotted gray', margin: 8};
   const imgStyle = {
     marginLeft: 8,
@@ -83,8 +84,9 @@ function Info({title, loading: loadingProp, ...rest}) {
       <div>
         <div>context.renderable: {String(renderable)}</div>
         <div>context.playable: {String(playable)}</div>
-        <div>context.loading: {String(loading)}</div>
-        <div>useLoad.load: {String(load)}</div>
+        <div>context.loading: {String(loadingContext)}</div>
+        <div>useLoading.loading: {String(loading)}</div>
+        <div>load: {String(load)}</div>
         <div>
           img: {String(load)}
           <img src={load ? IMG_SRC : undefined} style={imgStyle} />
