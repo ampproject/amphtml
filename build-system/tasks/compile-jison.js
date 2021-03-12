@@ -20,7 +20,7 @@ const globby = require('globby');
 const jison = require('jison');
 const path = require('path');
 const {endBuildStep} = require('./helpers');
-const {jisonPaths} = require('../test-configs/config');
+const {jisonPath} = require('../test-configs/config');
 
 // set imports for each parser from directory build/parsers/.
 const imports = new Map([
@@ -39,23 +39,26 @@ const imports = new Map([
  * Builds parsers for extensions with *.jison files.
  * Uses jison file path to name the parser to export.
  * For example, css-expr-impl.jison creates `cssParser`.
+ *
+ * @param {string} searchDir - directory to compile jison files within.
  * @return {!Promise<void>}
  */
-async function compileJison() {
-  fs.mkdirSync('build/parsers', {recursive: true});
+async function compileJison(searchDir = jisonPath) {
   const startTime = Date.now();
-  const promises = [];
-  jisonPaths.forEach((jisonPath) => {
-    globby.sync(jisonPath).forEach((jisonFile) => {
-      const jsFile = path.basename(jisonFile, '.jison');
-      const extension = jsFile.replace('-expr-impl', '');
-      const parser = extension + 'Parser';
-      const newFilePath = `build/parsers/${jsFile}.js`;
-      promises.push(compileExpr(jisonFile, parser, newFilePath));
-    });
+  fs.mkdirSync('build/parsers', {recursive: true});
+
+  const promises = globby.sync(searchDir).map((jisonFile) => {
+    const jsFile = path.basename(jisonFile, '.jison');
+    const extension = jsFile.replace('-expr-impl', '');
+    const parser = extension + 'Parser';
+    const newFilePath = `build/parsers/${jsFile}.js`;
+    return compileExpr(jisonFile, parser, newFilePath);
   });
   await Promise.all(promises);
-  endBuildStep('Compiled Jison parsers into', 'build/parsers/', startTime);
+
+  if (promises.length > 0) {
+    endBuildStep('Compiled Jison parsers into', 'build/parsers/', startTime);
+  }
 }
 
 /**

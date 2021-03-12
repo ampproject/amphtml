@@ -28,7 +28,6 @@ const {
 const {buildExtensions} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss} = require('./css');
-const {compileJison} = require('./compile-jison');
 const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
 
@@ -42,7 +41,6 @@ const argv = require('minimist')(process.argv.slice(2));
  */
 async function runPreBuildSteps(options) {
   await compileCss(options);
-  await compileJison();
   await bootstrapThirdPartyFrames(options);
 }
 
