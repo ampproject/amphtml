@@ -23,7 +23,6 @@ const {
   compileAllJs,
   compileCoreRuntime,
   compileJs,
-  endBuildStep,
   maybeToEsmName,
   printConfigHelp,
   printNobuildHelp,
@@ -42,7 +41,6 @@ const {
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss, copyCss} = require('./css');
-const {compileJison} = require('./compile-jison');
 const {formatExtractedMessages} = require('../compile/log-messages');
 const {log} = require('../common/logging');
 const {maybeUpdatePackages} = require('./update-packages');
@@ -105,8 +103,6 @@ async function runPreDistSteps(options) {
   await prebuild();
   await compileCss(options);
   await copyCss();
-  await compileJison();
-  await copyParsers();
   await bootstrapThirdPartyFrames(options);
   displayLifecycleDebugging();
 }
@@ -227,15 +223,6 @@ async function prebuild() {
   await preBuildExperiments();
   await preBuildLoginDone();
   await preBuildWebPushPublisherFiles();
-}
-
-/**
- * Copies parsers from the build folder to the dist folder
- */
-async function copyParsers() {
-  const startTime = Date.now();
-  await fs.copy('build/parsers', 'dist/v0');
-  endBuildStep('Copied', 'build/parsers/ to dist/v0', startTime);
 }
 
 /**

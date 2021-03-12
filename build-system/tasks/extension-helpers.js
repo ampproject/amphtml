@@ -23,10 +23,11 @@ const {
   extensionAliasBundles,
   extensionBundles,
   verifyExtensionBundles,
+  jsBundles,
 } = require('../compile/bundles.config');
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
 const {compileJison} = require('./compile-jison');
-const {endBuildStep, watchDebounceDelay} = require('./helpers');
+const {endBuildStep, watchDebounceDelay, doBuildJs} = require('./helpers');
 const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
 const {log} = require('../common/logging');
@@ -463,6 +464,9 @@ async function buildExtension(
   }
 
   await compileJison(path.join(extensionPath, '**', '*.jison'));
+  if (name === 'amp-bind') {
+    await doBuildJs(jsBundles, 'ww.max.js', options);
+  }
   if (name === 'amp-analytics') {
     await analyticsVendorConfigs(options);
   }
