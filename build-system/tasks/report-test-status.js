@@ -65,7 +65,7 @@ const TEST_TYPE_BUILD_TARGETS = new Map([
 ]);
 
 /**
- * @return {string|null}
+ * @return {string}
  */
 function inferTestType() {
   // Determine type (early exit if there's no match).
@@ -77,7 +77,7 @@ function inferTestType() {
     ? 'unit'
     : null;
   if (type == null) {
-    return null;
+    throw new Error('No valid test type was inferred');
   }
 
   // Determine subtype (more specific cases come first).
@@ -138,7 +138,7 @@ async function postReport(type, action) {
         // Do not use `json: true` because the response is a string, not JSON.
       });
 
-      log('Reported', cyan(`${type}/${action}`, 'to GitHub'));
+      log('Reported', cyan(`${type}/${action}`), 'to GitHub');
       if (body.length > 0) {
         log('Response was', cyan(body.substr(0, 100)));
       }
@@ -190,7 +190,7 @@ async function reportTestStarted() {
 async function reportAllExpectedTests() {
   const buildTargets = determineBuildTargets();
   for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {
-    const testTypeBuildTargets = TEST_TYPE_BUILD_TARGETS.get(type);
+    const testTypeBuildTargets = TEST_TYPE_BUILD_TARGETS[type];
     const action = testTypeBuildTargets.some((target) =>
       buildTargets.has(target)
     )
