@@ -16,13 +16,17 @@
 const esbuild = require('esbuild');
 const globby = require('globby');
 const path = require('path');
-const pathModule = require('path');
 const {cyan, green} = require('kleur/colors');
 const {endBuildStep} = require('../tasks/helpers');
 const {exec} = require('../common/exec');
 const {log} = require('../common/logging');
 
-const SERVER_TRANSFORM_PATH = 'build-system/server/new-server/transforms';
+const SERVER_TRANSFORM_PATH = path.join(
+  'build-system',
+  'server',
+  'new-server',
+  'transforms'
+);
 
 /**
  * Builds the new server by converting typescript transforms to JS
@@ -43,7 +47,7 @@ async function buildNewServer() {
   return esbuild
     .build({
       entryPoints,
-      outdir: pathModule.join(SERVER_TRANSFORM_PATH, 'dist'),
+      outdir: path.join(SERVER_TRANSFORM_PATH, 'dist'),
       bundle: false,
       tsconfig: path.join(SERVER_TRANSFORM_PATH, 'tsconfig.json'),
       format: 'cjs',
@@ -54,29 +58,15 @@ async function buildNewServer() {
 }
 
 function typecheckNewServer() {
-  const result = exec(getTypeCheckCmd(), {
-    'stdio': ['inherit', 'inherit', 'pipe'],
-  });
+  const configPath = path.join(SERVER_TRANSFORM_PATH, 'tsconfig.json');
+  const cmd = `npx -p typescript tsc --noEmit -p ${configPath}`;
+
+  const result = exec(cmd, {'stdio': ['inherit', 'inherit', 'pipe']});
   if (result.status != 0) {
     const err = new Error('Could not build AMP Server');
     // @ts-ignore
     err.showStack = false;
     throw err;
-  }
-}
-
-/**
- * @return {string}
- */
-function getTypeCheckCmd() {
-  switch (process.platform) {
-    case 'win32':
-      return `node .\\node_modules\\typescript\\lib\\tsc.js --noEmit -p ${SERVER_TRANSFORM_PATH.split(
-        '/'
-      ).join(pathModule.sep)}${pathModule.sep}tsconfig.json`;
-
-    default:
-      return `./node_modules/typescript/bin/tsc --noEmit -p ${SERVER_TRANSFORM_PATH}/tsconfig.json`;
   }
 }
 
