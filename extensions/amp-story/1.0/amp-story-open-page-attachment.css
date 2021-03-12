@@ -166,3 +166,54 @@
   text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
   white-space: nowrap !important;
 }
+
+/** For amp-story-inline-page-attachment-v2 experiment elements. */
+.i-amphtml-story-inline-page-attachment-chip {
+  background-color: rgba(255, 255, 255, 0.5) !important;
+  display: flex !important;
+  border-radius: 24px !important;
+  align-items: center !important;
+  overflow: hidden !important;
+  margin-bottom: 12px !important;
+}
+
+.i-amphtml-story-inline-page-attachment-chip:only-child {
+  margin-bottom: 20px !important;
+}
+
+.i-amphtml-story-inline-page-attachment-img,
+.i-amphtml-story-inline-page-attachment-arrow {
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+}
+
+.i-amphtml-story-inline-page-attachment-img {
+  height: 48px !important;
+  width: 48px !important;
+  background-color: white !important;
+}
+
+.i-amphtml-story-inline-page-attachment-img:nth-child(2) {
+  margin-inline-start: 1px !important;
+}
+
+.i-amphtml-story-inline-page-attachment-arrow {
+  height: 32px !important;
+  width: 32px !important;
+  margin: 8px !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M16 32C24.8366 32 32 24.8366 32 16C32 7.16344 24.8366 0 16 0C7.16344 0 0 7.16344 0 16C0 24.8366 7.16344 32 16 32Z" fill="white"/> <path d="M6.74612 18.796C6.33376 18.0797 6.57889 17.1649 7.29412 16.7508L15.0632 12.2529C15.7808 11.8374 16.6995 12.0835 17.1132 12.8022C17.5256 13.5184 17.2805 14.4333 16.5652 14.8474L8.7962 19.3453C8.07854 19.7608 7.15989 19.5146 6.74612 18.796Z" fill="black"/> <path d="M14.724 12.8022C15.1377 12.0835 16.0564 11.8374 16.774 12.2528L24.5431 16.7508C25.2583 17.1648 25.5034 18.0797 25.0911 18.7959C24.6773 19.5146 23.7587 19.7607 23.041 19.3452L15.272 14.8473C14.5567 14.4332 14.3116 13.5184 14.724 12.8022Z" fill="black"/> </svg>') !important;
+  background-position: center !important;
+}
+
+.i-amphtml-story-inline-page-attachment-label {
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.25px !important;
+  line-height: 16px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  max-width: 210px !important;
+  margin-bottom: 20px !important;
+}

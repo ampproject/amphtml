@@ -58,6 +58,19 @@ PASS
 |        <amp-story-page-attachment layout="nodisplay" href="https://www.google.com">
 |        </amp-story-page-attachment>
 |      </amp-story-page>
+|      <amp-story-page id="cta-button-with-images">
+|        <amp-story-grid-layer template="vertical">
+|          <h1>fill</h1>
+|        </amp-story-grid-layer>
+|        <amp-story-page-attachment
+|          data-title="Page attachment title"
+|          layout="nodisplay"
+|          data-cta-text="Call To Action"
+|          cta-image="https://i.ytimg.com/vi/Wm1fWz-7nLQ/hqdefault_live.jpg"
+|          cta-image-2="https://i.ytimg.com/vi/Wm1fWz-7nLQ/hqdefault_live.jpg"
+|          >
+|        </amp-story-page-attachment>
+|      </amp-story-page>
 |    </amp-story>
 |  </body>
 |  </html>
