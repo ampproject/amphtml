@@ -110,22 +110,23 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
 const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
   const openAttachmentEl = buildOpenInlineAttachmentElement(pageEl);
 
+  // Appending text & aria-label.
   const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
-  let openLabel =
+  const openLabel =
     (openLabelAttr && openLabelAttr.trim()) ||
     getLocalizationService(pageEl).getLocalizedString(
       LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
     );
-  if (openLabelAttr) {
-    const textEl = win.document.createElement('div');
+  openAttachmentEl.setAttribute('aria-label', openLabel);
+  
+  if (openLabel !== 'none') {
+    const textEl = win.document.createElement('span');
     textEl.classList.add('i-amphtml-story-inline-page-attachment-label');
-    openLabel = openLabelAttr && openLabelAttr.trim();
     textEl.textContent = openLabel;
     openAttachmentEl.appendChild(textEl);
   }
 
-  openAttachmentEl.setAttribute('aria-label', openLabel);
-
+  // Adding images.
   const openImgAttr = attachmentEl.getAttribute('cta-image');
 
   const ctaImgEl = openAttachmentEl.querySelector(
