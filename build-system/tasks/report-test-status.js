@@ -25,6 +25,7 @@ const {
 const {ciJobUrl} = require('../common/ci');
 const {cyan, yellow} = require('kleur/colors');
 const {determineBuildTargets, Targets} = require('../pr-check/build-targets');
+const {getValidExperiments} = require('../common/utils');
 const {gitCommitHash} = require('../common/git');
 const {log} = require('../common/logging');
 
@@ -50,13 +51,11 @@ const TEST_TYPE_SUBTYPES = isGithubActionsBuild()
           'nomodule-canary',
           'module-prod',
           'module-canary',
-          'experimentA',
-          'experimentB',
-          'experimentC',
+          ...getValidExperiments(),
         ],
       ],
       ['unit', ['unminified', 'local-changes']],
-      ['e2e', ['nomodule', 'experimentA', 'experimentB', 'experimentC']],
+      ['e2e', ['nomodule', ...getValidExperiments()]],
     ])
   : new Map([]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
