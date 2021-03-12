@@ -397,6 +397,8 @@ tags: {  # <amp-story-bookend>
       protocol: "https"
     }
   }
+  deprecation: "amp-story-social-share"
+  deprecation_url: "https://github.com/ampproject/amphtml/issues/33218"
 }
 descendant_tag_list: {
   name: "amp-story-bookend-allowed-descendants"

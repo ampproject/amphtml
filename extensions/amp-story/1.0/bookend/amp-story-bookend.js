@@ -233,8 +233,6 @@ export class AmpStoryBookend extends DraggableDrawer {
     const handleEl = this.win.document.createElement('div');
     handleEl.classList.add('i-amphtml-story-bookend-handle');
     this.headerEl_.appendChild(handleEl);
-
-    user().warn(TAG, 'Bookend will be deprecated, consider using amp-story-social-share to configure share providers.');
   }
 
   /**

@@ -51,6 +51,8 @@ PASS
 |        </amp-story-grid-layer>
 |      </amp-story-page>
 |      <amp-story-bookend src="http://me.com/bookend-config-src.json" layout="nodisplay"></amp-story-bookend>
+>>     ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-next-page-no-ad.html:52:4 The tag 'amp-story-bookend' is deprecated - use 'amp-story-social-share' instead. (see https://github.com/ampproject/amphtml/issues/33218)
 |    </amp-story>
 |  </body>
 |  </html>

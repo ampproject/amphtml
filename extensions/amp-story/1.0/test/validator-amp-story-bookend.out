@@ -58,6 +58,8 @@ PASS
 |          </amp-story-grid-layer>
 |        </amp-story-page>
 |        <amp-story-bookend src="bookendv1.json" layout=nodisplay>
+>>       ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-bookend.html:59:6 The tag 'amp-story-bookend' is deprecated - use 'amp-story-social-share' instead. (see https://github.com/ampproject/amphtml/issues/33218)
 |        </amp-story-bookend>
 |      </amp-story>
 |    </body>

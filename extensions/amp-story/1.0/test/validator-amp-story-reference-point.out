@@ -39,6 +39,8 @@ amp-story/1.0/test/validator-amp-story-reference-point.html:35:8 The tag 'img' m
 |        </amp-story-grid-layer>
 |      </amp-story-page>
 |      <amp-story-bookend src="./related.json" layout="nodisplay"></amp-story-bookend>
+>>     ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-reference-point.html:38:4 The tag 'amp-story-bookend' is deprecated - use 'amp-story-social-share' instead. (see https://github.com/ampproject/amphtml/issues/33218)
 |    </amp-story>
 |  </body>
 |  </html>
