@@ -52,13 +52,12 @@ amp-overflow-button, .i-amphtml-overflow-button-wrapper {
   background-color: transparent;
   border-width: 2px;
   border-style: solid;
-  border-radius: 0.25rem;
+  border-radius: 5px;
   border-color: #0058FF;
   color: #0058FF;
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: .1rem;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 1px;
   padding: 10px 35px;
-  text-align: center;
-  font-family: 'Roboto', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  font-family: 'Circular Std', 'Roboto', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
 }
