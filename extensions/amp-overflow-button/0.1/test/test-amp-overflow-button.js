@@ -85,7 +85,7 @@ describes.realWin(
 
       await element.whenBuilt();
       expect(element.querySelector('button').getAttribute('style')).to.equal(
-        'color: #B80000; border: 2px solid #B80000;'
+        'color: #B80000;  border-color: #B80000;'
       );
     });
   }

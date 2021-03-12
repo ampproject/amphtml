@@ -48,10 +48,32 @@ This is an overflow wrapper for amp-ad and amp-iframe. It covers the ad or ifram
 ```html
 <amp-ad height="150" type="myfinance" data-ad-type="widget" data-test="true">
   <amp-overflow-button overflow color="#B80000" cta="Show more"> </amp-overflow-button>
-</amp-ad>
+</amp-ad>__
 ```
 
 ![alt_text](images/custom_color_cta.png 'image_tooltip')
+
+## Styling
+The `<amp-overflow-button>` component allows stying of the button through the `amp-overflow-button-cta-button` css class.  The rest of the component features a semi-transparent background.
+
+[example playground="true" preview="top-frame" orientation="landscape"]
+
+```css
+.amp-overflow-button-cta-button {
+  background-color: transparent;
+  border-width: 2px;
+  border-style: solid;
+  border-radius: 0.25rem;
+  border-color: #0058FF;
+  color: #0058FF;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: .1rem;
+  padding: 10px 35px;
+  text-align: center;
+  font-family: 'Roboto', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+}
+```
 
 ## Attributes
 
