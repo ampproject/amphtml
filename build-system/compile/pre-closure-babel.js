@@ -98,29 +98,33 @@ async function preClosureBabel(file, outputFilename, options) {
     await fs.outputFile(transformedFile, Buffer.from(code, 'utf-8'));
     debug(CompilationLifecycles['pre-closure'], transformedFile);
   } catch (err) {
-    handlePreClosureError(err, outputFilename, options);
+    const reason = handlePreClosureError(err, outputFilename, options);
+    if (reason) {
+      throw reason;
+      return;
+    }
   }
   return transformedFile;
 }
 
 /**
- * Handles a pre-closure babel error. Optionally doesn't emit a fatal error when
- * compilation fails and signals the error so subsequent operations can be
- * skipped (used in watch mode).
+ * Handles a pre-closure babel error. Returns an error when transformation fails
+ * except except in watch mode, where we want to print a message and continue.
  *
  * @param {Error} err
  * @param {string} outputFilename
  * @param {?Object=} options
+ * @return {Error|undefined}
  */
 function handlePreClosureError(err, outputFilename, options) {
   log(red('ERROR:'), err.message, '\n');
-  const reasonMessage = `Could not compile ${cyan(outputFilename)}`;
+  const reasonMessage = `Could not transform ${cyan(outputFilename)}`;
   if (options && options.continueOnError) {
     log(red('ERROR:'), reasonMessage);
     options.errored = true;
-  } else {
-    throw new Error(reasonMessage);
+    return;
   }
+  return new Error(reasonMessage);
 }
 
 module.exports = {
