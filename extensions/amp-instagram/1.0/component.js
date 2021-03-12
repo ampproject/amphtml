@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {ContainWrapper, useValueRef} from '../../../src/preact/component';
-import {Loading} from '../../../src/loading';
+import {Loading} from '../../../src/core/loading-instructions';
 import {ReadyState} from '../../../src/ready-state';
 import {dict} from '../../../src/utils/object';
 import {forwardRef} from '../../../src/preact/compat';
