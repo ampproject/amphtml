@@ -19,6 +19,7 @@ const path = require('path');
 const pathModule = require('path');
 const {cyan, green} = require('kleur/colors');
 const {endBuildStep} = require('../tasks/helpers');
+const {exec} = require('../common/exec');
 const {log} = require('../common/logging');
 
 const SERVER_TRANSFORM_PATH = 'build-system/server/new-server/transforms';
@@ -52,7 +53,35 @@ async function buildNewServer() {
     });
 }
 
+function typecheckNewServer() {
+  const result = exec(getTypeCheckCmd(), {
+    'stdio': ['inherit', 'inherit', 'pipe'],
+  });
+  if (result.status != 0) {
+    const err = new Error('Could not build AMP Server');
+    // @ts-ignore
+    err.showStack = false;
+    throw err;
+  }
+}
+
+/**
+ * @return {string}
+ */
+function getTypeCheckCmd() {
+  switch (process.platform) {
+    case 'win32':
+      return `node .\\node_modules\\typescript\\lib\\tsc.js --noEmit -p ${SERVER_TRANSFORM_PATH.split(
+        '/'
+      ).join(pathModule.sep)}${pathModule.sep}tsconfig.json`;
+
+    default:
+      return `./node_modules/typescript/bin/tsc --noEmit -p ${SERVER_TRANSFORM_PATH}/tsconfig.json`;
+  }
+}
+
 module.exports = {
   buildNewServer,
+  typecheckNewServer,
   SERVER_TRANSFORM_PATH,
 };
