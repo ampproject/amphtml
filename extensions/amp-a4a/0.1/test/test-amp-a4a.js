@@ -310,9 +310,6 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
   let getResourceStub;
 
   beforeEach(() => {
-    // TODO(ccordry): remove with no-signing launch or similar.
-    env.sandbox.stub(AmpA4A.prototype, 'isInNoSigningExp').returns(false);
-
     fetchMock = null;
     getSigningServiceNamesMock = env.sandbox.stub(
       AmpA4A.prototype,
