@@ -18,7 +18,7 @@ import * as Preact from '../../../src/preact';
 import {ContainWrapper, useValueRef} from '../../../src/preact/component';
 import {Keys} from '../../../src/utils/key-codes';
 import {Side} from './sidebar-config';
-import {forwardRef} from '../../../src/preact/compat';
+import {forwardRef, createPortal} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
 import {
   useCallback,
@@ -30,6 +30,7 @@ import {
 } from '../../../src/preact';
 import {useSidebarAnimation} from './sidebar-animations-hook';
 import {useStyles} from './component.jss';
+import {debounce} from '../../../src/utils/rate-limit';
 
 /**
  * @param {!SidebarDef.Props} props
@@ -135,8 +136,8 @@ function SidebarWithRef(
   }, [opened, close]);
 
   return (
-    mounted && (
-      <>
+    <>
+      <div className={mounted ? '' : classes.unmounted}>
         <ContainWrapper
           as={Comp}
           ref={sidebarRef}
@@ -166,11 +167,81 @@ function SidebarWithRef(
         >
           <div className={classes.backdropOverscrollBlocker}></div>
         </div>
-      </>
-    )
+      </div>
+    </>
   );
 }
 
 const Sidebar = forwardRef(SidebarWithRef);
 Sidebar.displayName = 'Sidebar'; // Make findable for tests.
 export {Sidebar};
+
+/**
+ * @param {!SidebarDef.SidebarNavToolbar} props
+ * @return {PreactDef.Renderable}
+ */
+export function SidebarNavToolbar({
+  toolbar,
+  'toolbar-target': toolbarTarget,
+  children,
+  ...rest
+}) {
+  const ref = useRef();
+  const [targetEl, setTargetEl] = useState();
+  const [, setReRender] = useState(true);
+
+  // Trigger re-render each time the window is resized
+  useEffect(() => {
+    const navElement = ref.current;
+    if (!navElement) {
+      return;
+    }
+    const document = navElement.ownerDocument;
+    if (!document) {
+      return;
+    }
+    const window = document.defaultView;
+    if (!window) {
+      return;
+    }
+
+    const reRenderFunction = debounce(
+      window,
+      () => setReRender((prev) => !prev),
+      100
+    );
+    window.addEventListener('resize', reRenderFunction);
+    return () => {
+      window.removeEventListener('resize', reRenderFunction);
+    };
+  }, []);
+
+  useEffect(() => {
+    const navElement = ref.current;
+    if (!navElement) {
+      return;
+    }
+    const document = navElement.ownerDocument;
+    if (!document) {
+      return;
+    }
+    const window = document.defaultView;
+    if (!window) {
+      return;
+    }
+
+    const matches = window.matchMedia(toolbar).matches;
+    const selector = `#${CSS.escape(toolbarTarget)}`;
+    const newTargetEl = document.querySelector(selector);
+    setTargetEl(matches && newTargetEl);
+  });
+
+  return (
+    <>
+      <nav ref={ref} toolbar={toolbar} toolbar-target={toolbarTarget} {...rest}>
+        {children}
+      </nav>
+      {targetEl && createPortal(children, targetEl)}
+    </>
+  );
+}
