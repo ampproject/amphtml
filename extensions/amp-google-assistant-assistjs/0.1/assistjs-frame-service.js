@@ -19,6 +19,8 @@
  * endpoints to handle requests from custom elements.
  */
 
+import * as closure from '../../../third_party/closure-responding-channel/closure-bundle';
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {addAttributesToElement} from '../../../src/dom';
 import {toggle} from '../../../src/style';
@@ -34,6 +36,12 @@ export class AssistjsFrameService {
     /** @private {?AssistjsConfigService} */
     this.configService_ = null;
 
+    /** @private {?AssistjsRuntimeService} */
+    this.runtimeService_ = null;
+
+    /** @private {Deferred} */
+    this.initializedDeferred_ = new Deferred();
+
     /** Create Assistant iframe and append it to the main AMP document. */
     this.createAssistantIframe_();
   }
@@ -42,6 +50,16 @@ export class AssistjsFrameService {
   createAssistantIframe_() {
     this.ampDoc_.whenFirstVisible().then(() => {
       this.configService_ = Services.assistjsConfigServiceForDoc(this.ampDoc_);
+      this.runtimeService_ = Services.assistjsRuntimeServiceForDoc(
+        this.ampDoc_
+      );
+
+      // Add a DeferredChannel to FrameService to unblock any widget initialization. It would resolve after the iframe gets
+      // loaded and the channel gets constructed successfully with the iframe.
+      const deferredChannel = closure.createDeferredChannel();
+      this.runtimeService_.addPort('FrameService', deferredChannel);
+      this.initializedDeferred_.resolve();
+
       const iframe = this.ampDoc_.win.document.createElement('iframe');
       this.configService_.getWidgetIframeUrl('frame').then((iframeUrl) => {
         addAttributesToElement(iframe, {
@@ -52,7 +70,22 @@ export class AssistjsFrameService {
         toggle(iframe, false);
         document.body.appendChild(iframe);
       });
+
+      iframe.addEventListener('load', () => {
+        const channel = closure.createPortChannel(
+          iframe.contentWindow,
+          this.configService_.getAssistjsServer()
+        );
+        closure.resolveDeferredChannel(channel);
+      });
     });
+  }
+
+  /**
+   * @return {Deferred}
+   */
+  getInitializedDeferred() {
+    return this.initializedDeferred_;
   }
 
   /**
