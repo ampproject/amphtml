@@ -303,6 +303,13 @@ class AmpLightbox extends AMP.BaseElement {
       this.openerElement_ = openerElement;
     }
 
+    // Set the lightbox as a container for the `Builder`, which would allow
+    // it to track the children of the lightbox on a separate
+    // `IntersectionObserver` with its own root margin. This is the similar as
+    // the `DisplayObserver` work done in https://github.com/ampproject/amphtml/pull/32701
+    // but much simpler.
+    this.getBuilder().setAsContainer(this.element);
+
     const {promise, resolve} = new Deferred();
     this.getViewport()
       .enterLightboxMode(this.element, promise)
@@ -563,6 +570,17 @@ class AmpLightbox extends AMP.BaseElement {
     if (this.isScrollable_) {
       setStyle(this.element, 'webkitOverflowScrolling', '');
     }
+
+    // Remove an additional intersection observer from the builder.
+    this.getBuilder().unsetAsContainer(this.element);
+
+    // Unmount all children when the lightbox is closed. This will free
+    // resources. E.g. the iframes will be unloaded, active listeners/observers
+    // will be removed, etc.
+    // This will also reschedule them for the next time the lightbox is opened
+    // again. This part is optional, and instead we could leave them unscheduled
+    // and simply reschedule them manually when the lightbox is opened again.
+    this.getResources().unmountAllInContainer(this.element);
 
     this.getViewport()
       .leaveLightboxMode(this.element)

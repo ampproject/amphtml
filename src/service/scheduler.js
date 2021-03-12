@@ -72,6 +72,22 @@ export class Scheduler {
   }
 
   /**
+   */
+  setAsContainer(container, opt_rootMargin) {
+    const io = new IntersectionObserver((e) => this.observed_(e), {
+      root: container,
+      rootMargin: opt_rootMargin || ROOT_MARGIN,
+    });
+    this.addObserver(io);
+  }
+
+  /**
+   */
+  unsetAsContainer(container) {
+    // TODO
+  }
+
+  /**
    * @param {!AmpElement} target
    */
   scheduleAsap(target) {

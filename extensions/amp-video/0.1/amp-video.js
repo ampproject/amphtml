@@ -85,6 +85,12 @@ const ATTRS_TO_PROPAGATE = ATTRS_TO_PROPAGATE_ON_BUILD.concat(
  * @implements {../../../src/video-interface.VideoInterface}
  */
 export class AmpVideo extends AMP.BaseElement {
+
+  /** @override @nocollapse */
+  static V1() {
+    return true;
+  }
+
   /**
    * AMP Cache may selectively cache certain video sources (based on various
    * heuristics such as video type, extensions, etc...).
@@ -279,11 +285,6 @@ export class AmpVideo extends AMP.BaseElement {
     }
   }
 
-  /** @override */
-  detachedCallback() {
-    this.updateIsPlaying_(false);
-  }
-
   /** @private */
   configure_() {
     const {element} = this;
@@ -342,7 +343,7 @@ export class AmpVideo extends AMP.BaseElement {
   }
 
   /** @override */
-  layoutCallback() {
+  mountCallback() {
     this.video_ = dev().assertElement(this.video_);
 
     if (!this.isVideoSupported_()) {
@@ -412,6 +413,12 @@ export class AmpVideo extends AMP.BaseElement {
     }
 
     return promise;
+  }
+
+  /** @override */
+  unmountCallback() {
+    this.updateIsPlaying_(false);
+    return true;
   }
 
   /**
