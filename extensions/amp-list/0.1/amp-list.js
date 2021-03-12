@@ -195,9 +195,7 @@ export class AmpList extends AMP.BaseElement {
       const doc = this.element.ownerDocument;
       const isEmail = doc && isAmp4Email(doc);
       const hasPlaceholder =
-        this.getPlaceholder() ||
-        (this.element.hasAttribute('diffable') &&
-          this.queryDiffablePlaceholder_());
+        this.getPlaceholder() || this.element.hasAttribute('diffable');
       if (isEmail) {
         if (!hasPlaceholder) {
           user().warn(
@@ -264,11 +262,7 @@ export class AmpList extends AMP.BaseElement {
       if (this.diffablePlaceholder_) {
         this.container_ = this.diffablePlaceholder_;
       } else {
-        user().warn(
-          TAG,
-          'Could not find child div[role=list] for diffing.',
-          this.element
-        );
+        user().warn(TAG, 'Could not find child div for diffing.', this.element);
       }
     }
     if (!this.container_) {
@@ -326,19 +320,27 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * A "diffable placeholder" is just a div[role=list] child without the
-   * [placeholder] attribute.
-   *
-   * It's used to display pre-fetch (stale) list content that can be
-   * DOM diffed with the fetched (fresh) content later.
+   * A "diffable placeholder" is the child container <div> (which is usually created by the amp-list
+   * to hold the rendered children). It serves the same purpose as a placeholder, except it can be diffed.
+   * 
+   * For example:
+   * <amp-list>
+   *   <div placeholder>I'm displayed before render.</div>
+   * </amp-list>
+   * 
+   * <amp-list diffable>
+   *   <div role=list>I'm displayed before render.</div>
+   * </amp-list>
    *
    * @return {?Element}
    * @private
    */
   queryDiffablePlaceholder_() {
+    const roleSelector = this.element.hasAttribute('single-item') ? '' : '[role=list]'
     return scopedQuerySelector(
       this.element,
-      '> div[role=list]:not([placeholder]):not([fallback]):not([fetch-error])'
+      // Don't select other special <div> children used for placeholders/fallback/etc.
+      `> div${roleSelector}:not([placeholder]):not([fallback]):not([fetch-error])`
     );
   }
 
@@ -1131,7 +1133,7 @@ export class AmpList extends AMP.BaseElement {
     const renderAndResize = () => {
       this.hideFallbackAndPlaceholder_();
 
-      if (this.element.hasAttribute('diffable') && container.hasChildNodes()) {
+      if (this.element.hasAttribute('diffable')) {
         // TODO:(wg-performance)(#28781) Ensure owners_.scheduleUnlayout() is
         // called for diff elements that are removed
         this.diff_(container, elements);
