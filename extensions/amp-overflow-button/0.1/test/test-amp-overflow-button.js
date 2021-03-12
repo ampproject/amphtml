@@ -45,7 +45,7 @@ describes.realWin(
       expect(element.querySelector('button').textContent).to.equal('See more');
     });
 
-    it('should have the default color when built without color attribute', async () => {
+    it('should have not style attribute when built without color attribute', async () => {
       element = createElementWithAttributes(
         win.document,
         'amp-overflow-button',
