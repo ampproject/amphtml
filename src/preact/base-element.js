@@ -539,6 +539,9 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     const Ctor = this.constructor;
     if (Ctor['unloadOnPause']) {
+      // These are typically iframe-based elements where we don't know
+      // whether a media is currently playing. So we have to assume that
+      // it is whenever the element is loaded.
       this.updateIsPlaying_(state == ReadyState.COMPLETE);
     }
 
