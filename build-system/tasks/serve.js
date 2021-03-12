@@ -183,8 +183,7 @@ async function restartServer() {
  * Performs pre-build steps requested via command line args.
  */
 async function performPreBuildSteps() {
-  await preBuildRuntimeFiles();
-  await preBuildExtensions();
+  return Promise.all([preBuildRuntimeFiles(), preBuildExtensions()]);
 }
 
 /**
