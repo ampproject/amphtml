@@ -27,6 +27,7 @@ import {
   createAmpElementForTesting,
   getImplSyncForTesting,
 } from '../../src/custom-element';
+import {elementConnectedCallback} from '../../src/service/custom-element-registry';
 import {toggleExperiment} from '../../src/experiments';
 
 describes.realWin('CustomElement', {amp: true}, (env) => {
@@ -121,6 +122,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         clock = fakeTimers.withGlobal(win).install();
         delete win.requestIdleCallback;
         delete win.cancelIdleCallback;
+        delete win.__AMP_BASE_CE_CLASS;
         resources = Services.resourcesForDoc(doc);
         resources.isBuildOn_ = true;
         resourcesMock = env.sandbox.mock(resources);
@@ -244,7 +246,12 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       });
 
       it('StubElement - should try to install an unregistered legacy extensions', () => {
-        const LegacyElementClass = createAmpElementForTesting(win, ElementStub);
+        delete win.__AMP_BASE_CE_CLASS;
+        const LegacyElementClass = createAmpElementForTesting(
+          win,
+          ElementStub,
+          elementConnectedCallback
+        );
         win.customElements.define('amp-legacy', LegacyElementClass);
         win.__AMP_EXTENDED_ELEMENTS['amp-legacy'] = ElementStub;
 
@@ -264,7 +271,12 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       });
 
       it('StubElement - should not try to install a pre-registered legacy extensions', () => {
-        const LegacyElementClass = createAmpElementForTesting(win, ElementStub);
+        delete win.__AMP_BASE_CE_CLASS;
+        const LegacyElementClass = createAmpElementForTesting(
+          win,
+          ElementStub,
+          elementConnectedCallback
+        );
         win.customElements.define('amp-legacy', LegacyElementClass);
         win.__AMP_EXTENDED_ELEMENTS['amp-legacy'] = ElementStub;
         ampdoc.declareExtension('amp-legacy', '0.1');
