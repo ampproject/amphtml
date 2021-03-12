@@ -46,6 +46,7 @@ const {formatExtractedMessages} = require('../compile/log-messages');
 const {log} = require('../common/logging');
 const {maybeUpdatePackages} = require('./update-packages');
 const {VERSION} = require('../compile/internal-version');
+const { compileJison } = require('./compile-jison');
 
 const {green, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
@@ -104,6 +105,7 @@ async function runPreDistSteps(options) {
   await prebuild();
   await compileCss(options);
   await copyCss();
+  await compileJison();
   await copyParsers();
   await bootstrapThirdPartyFrames(options);
   displayLifecycleDebugging();
