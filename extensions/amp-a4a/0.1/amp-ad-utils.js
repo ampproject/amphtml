@@ -163,7 +163,7 @@ export function getAmpAdMetadata(creative) {
 }
 
 /**
- * Determine if parsed extensions metadata object
+ * Determine if parsed extensions metadata contains given element id.
  * @param {!Array<{custom-element: string, src: string}>} extensions
  * @param {string} id
  * @return {boolean}
