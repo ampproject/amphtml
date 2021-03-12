@@ -65,8 +65,8 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
   'title',
 ];
 
-/** @private {!Map<string, number>} the bitrate in Kb/s of amp_quality for videos in the ampproject cdn */
-const AMP_QUALITY_BITRATES = {
+/** @private {!Map<string, number>} the bitrate in Kb/s of amp_video_quality for videos in the ampproject cdn */
+const AMP_VIDEO_QUALITY_BITRATES = {
   'high': 2000,
   'medium': 720,
   'low': 400,
@@ -496,17 +496,17 @@ export class AmpVideo extends AMP.BaseElement {
     sources.forEach((source) => {
       if (isCachedByCdn(source, this.element)) {
         source.remove();
-        const qualities = Object.keys(AMP_QUALITY_BITRATES);
+        const qualities = Object.keys(AMP_VIDEO_QUALITY_BITRATES);
         const origType = source.getAttribute('type');
         const origSrc = source.getAttribute('amp-orig-src');
         qualities.forEach((quality, index) => {
           const cachedSource = addParamsToUrl(source.src, {
-            'amp_quality': quality,
+            'amp_video_quality': quality,
           });
           const currSource = this.createSourceElement_(
             cachedSource,
             origType,
-            AMP_QUALITY_BITRATES[quality]
+            AMP_VIDEO_QUALITY_BITRATES[quality]
           );
           // Keep src of amp-orig only in last one so it adds the orig source after it.
           if (index === qualities.length - 1) {
