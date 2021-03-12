@@ -17,6 +17,10 @@ push_builds_only: &push_builds_only
         - /^amp-release-.*$/
 
 executors:
+  amphtml-docker-small-executor:
+    docker:
+      - image: cimg/base:2020.12
+    resource_class: small
   amphtml-medium-executor:
     machine:
       image: ubuntu-2004:202010-01
@@ -29,11 +33,6 @@ executors:
     machine:
       image: ubuntu-2004:202010-01
     resource_class: xlarge
-  amphtml-docker-executor:
-    docker:
-      # The official, bare bones Docker Image from CircleCI
-      # https://circleci.com/docs/2.0/circleci-images/?section=executors-and-images#circleci-base-image
-      - image: cimg/base:2020.12
 
 commands:
   save_merge_commit:
@@ -42,7 +41,7 @@ commands:
           name: 'Save Merge Commit'
           key: git-{{ .Branch }}-{{ .Revision }}
           paths:
-            - .CIRCLECI_WORKFLOW_MERGE_COMMIT
+            - .CIRCLECI_MERGE_COMMIT
   restore_merge_commit:
     steps:
       - restore_cache:
@@ -54,7 +53,7 @@ commands:
       - restore_merge_commit
       - run:
           name: 'Fetch Merge Commit'
-          command: ./.circleci/fetch_merge_commit.sh merge
+          command: ./.circleci/fetch_merge_commit.sh
       - run:
           name: 'Check Config'
           command: ./.circleci/check_config.sh
@@ -81,11 +80,11 @@ commands:
 jobs:
   'Compute Merge Commit':
     executor:
-      name: amphtml-docker-executor
+      name: amphtml-docker-small-executor
     steps:
       - run:
-          name: 'Fetch Merge Commit'
-          command: curl -o- https://raw.githubusercontent.com/ampproject/amphtml/master/.circleci/fetch_merge_commit.sh | bash /dev/stdin fetch
+          name: 'Compute Merge Commit'
+          command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/master/.circleci/compute_merge_commit.sh | bash
       - save_merge_commit
   'Checks':
     executor:
