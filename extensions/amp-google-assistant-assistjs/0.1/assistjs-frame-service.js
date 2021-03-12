@@ -25,6 +25,8 @@ import {Services} from '../../../src/services';
 import {addAttributesToElement} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 
+const frameServicePb = require('./proto/frame-service_pb');
+
 export class AssistjsFrameService {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -41,6 +43,9 @@ export class AssistjsFrameService {
 
     /** @private {Deferred} */
     this.initializedDeferred_ = new Deferred();
+
+    /** @private */
+    this.respondingChannelDeferred_ = new Deferred();
 
     /** Create Assistant iframe and append it to the main AMP document. */
     this.createAssistantIframe_();
@@ -72,11 +77,16 @@ export class AssistjsFrameService {
       });
 
       iframe.addEventListener('load', () => {
-        const channel = closure.createPortChannel(
+        const portChannel = closure.createPortChannel(
           iframe.contentWindow,
           this.configService_.getAssistjsServer()
         );
-        closure.resolveDeferredChannel(channel);
+        closure.resolveDeferredChannel(portChannel);
+
+        // TODO: expose a new endpoint in runtime service for custom elements to register
+        // services for the channel with its iframe.
+        const respondingChannel = closure.createRespondingChannel(portChannel, new Map());
+        this.respondingChannelDeferred_.resolve(respondingChannel);
       });
     });
   }
@@ -86,6 +96,33 @@ export class AssistjsFrameService {
    */
   getInitializedDeferred() {
     return this.initializedDeferred_;
+  }
+
+  /**
+   * @param {string}
+   */
+  reportWidget(widgetName) {
+    const responsePromise = new Promise((resolve) => {
+      this.respondingChannelDeferred_.promise.then((channel) => {
+        closure.send(
+          /* channel= */ channel,
+          /* serviceName= */ 'FrameService.ReportWidget',
+          /* payload= */ {
+            'payload': new frameServicePb.ReportWidgetRequest()
+              .setWidgetName(widgetName)
+              .serializeBinary()
+          },
+          resolve);
+      });
+    });
+
+    responsePromise.then((response) => {
+      if (response['error']) {
+        const error = new Error();
+        error.message = response['error'];
+        throw error;
+      }
+    });
   }
 
   /**

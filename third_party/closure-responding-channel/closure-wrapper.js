@@ -65,9 +65,14 @@ function addPortConnection(portOperator, portName, portChannel) {
   portOperator.addPort(portName, portChannel);
 }
 
+function send(channel, serviceName, payload, callback) {
+  channel.send(serviceName, payload, callback);
+}
+
 goog.exportSymbol('__AMP_createDC', createDC);
 goog.exportSymbol('__AMP_resolveDC', resolveDC);
 goog.exportSymbol('__AMP_createPC', createPC);
 goog.exportSymbol('__AMP_createRC', createRC);
 goog.exportSymbol('__AMP_createPO', createPO);
 goog.exportSymbol('__AMP_addPortConnection', addPortConnection);
+goog.exportSymbol('__AMP_send', send);

@@ -80,7 +80,6 @@ export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
       // widget. If the channel is created before FrameService port is added, the widget would try but fail to retrieve the
       // FrameService port and thus no message can be communicated between the widget and the FrameService.
       this.frameService_.getInitializedDeferred().promise.then(() => {
-        console.log('creating channel after FrameService is initialized!');
         const channel = closure.createPortChannel(
           iframe.contentWindow,
           this.configService_.getAssistjsServer()
@@ -89,6 +88,8 @@ export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
 
         // TODO: send messages via created RespondingChannel once Protobuf is added.
         closure.createRespondingChannel(channel, serviceHandlersMap);
+
+        this.frameService_.reportWidget("VoiceBar");
       });
     });
 
