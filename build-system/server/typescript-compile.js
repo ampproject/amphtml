@@ -27,6 +27,7 @@ const SERVER_TRANSFORM_PATH = path.join(
   'new-server',
   'transforms'
 );
+const CONFIG_PATH = path.join(SERVER_TRANSFORM_PATH, 'tsconfig.json');
 
 /**
  * Builds the new server by converting typescript transforms to JS
@@ -49,7 +50,7 @@ async function buildNewServer() {
       entryPoints,
       outdir: path.join(SERVER_TRANSFORM_PATH, 'dist'),
       bundle: false,
-      tsconfig: path.join(SERVER_TRANSFORM_PATH, 'tsconfig.json'),
+      tsconfig: CONFIG_PATH,
       format: 'cjs',
     })
     .then(() => {
@@ -58,10 +59,9 @@ async function buildNewServer() {
 }
 
 function typecheckNewServer() {
-  const configPath = path.join(SERVER_TRANSFORM_PATH, 'tsconfig.json');
-  const cmd = `npx -p typescript tsc --noEmit -p ${configPath}`;
-
+  const cmd = `npx -p typescript tsc --noEmit -p ${CONFIG_PATH}`;
   const result = exec(cmd, {'stdio': ['inherit', 'inherit', 'pipe']});
+
   if (result.status != 0) {
     const err = new Error('Could not build AMP Server');
     // @ts-ignore
