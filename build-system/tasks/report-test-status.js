@@ -190,7 +190,12 @@ async function reportTestStarted() {
 async function reportAllExpectedTests() {
   const buildTargets = determineBuildTargets();
   for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {
-    const testTypeBuildTargets = TEST_TYPE_BUILD_TARGETS[type];
+    const testTypeBuildTargets = TEST_TYPE_BUILD_TARGETS.get(type);
+    if (testTypeBuildTargets === undefined) {
+      throw new Error(
+        `Undefined test type ${type} for build targets ${buildTargets}`
+      );
+    }
     const action = testTypeBuildTargets.some((target) =>
       buildTargets.has(target)
     )
