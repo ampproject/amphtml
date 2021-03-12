@@ -368,7 +368,7 @@ function generateFlags(
   const compilerFlags = [];
   Object.keys(compilerOptions).forEach(function (option) {
     const value = compilerOptions[option];
-    if (value instanceof Array) {
+    if (Array.isArray(value)) {
       value.forEach(function (item) {
         compilerFlags.push('--' + option + '=' + item);
       });
@@ -413,7 +413,7 @@ async function compile(
   if (timeInfo) {
     timeInfo.startTime = Date.now();
   }
-  if (!(entryModuleFilenames instanceof Array)) {
+  if (!Array.isArray(entryModuleFilenames)) {
     entryModuleFilenames = [entryModuleFilenames];
   }
   const destFile = `${outputDir}/${outputFilename}`;
@@ -430,9 +430,9 @@ async function compile(
     options
   );
   const transformedSrcFiles = await Promise.all(
-    globby.sync(srcs).map(async (src) => {
-      return await preClosureBabel(src, outputFilename, options);
-    })
+    globby
+      .sync(srcs)
+      .map((src) => preClosureBabel(src, outputFilename, options))
   );
   const flags = generateFlags(
     options,
