@@ -81,4 +81,11 @@ export class AssistjsConfigService {
       return `${this.assistjsServer_}/assist/${widgetName}?origin=${origin}&projectId=${this.projectId_}&dev=${this.devMode_}&hostUrl=${this.hostUrl_}`;
     });
   }
+
+  /**
+   * @return {string}
+   */
+  getAssistjsServer() {
+    return this.assistjsServer_;
+  }
 }

@@ -33,7 +33,6 @@ const jobName = 'unminified-build.js';
  * @return {void}
  */
 function pushBuildWorkflow() {
-  timedExecOrDie('gulp update-packages');
   timedExecOrDie('gulp build --fortesting');
   uploadUnminifiedOutput();
 }
@@ -43,7 +42,6 @@ function pushBuildWorkflow() {
  */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
-    timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp build --fortesting');
     uploadUnminifiedOutput();
   } else {

@@ -296,6 +296,8 @@ Fully valid AMP pages use the AMP layout system to infer sizing of elements to c
 Include the `animate` attribute in `<amp-accordion>` to add a "roll down"
 animation when the content is expanded and "roll up" animation when collapsed.
 
+This attribute can be configured to based on a [media query](./../../spec/amp-html-responsive-attributes.md).
+
 [example preview="top-frame" playground="true" imports="amp-accordion:1.0"]
 
 ```html

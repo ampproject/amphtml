@@ -35,7 +35,7 @@ The `amp-video` component loads the video resource specified by its `src` attrib
 The `amp-video` component accepts up to four unique types of HTML nodes as children:
 
 -   `source` tags: Just like in the HTML `<video>` tag, you can add `<source>` tag children to specify different source media files to play.
--   `track` tags to enable subtitles in the video. If the track is hosted on a different origin than the document, you must add the `crossorigin` attribute to the `<amp-video>` tag.
+-   `track` tags to enable subtitles in the video. If the track is hosted on a different origin than the document, you must add the `crossorigin` attribute to the `<amp-video>` tag. Whenever the video has narration or important audio information, make sure to include subtitles/captions for users who may not be able to hear it or have their sound turned off.
 -   a placeholder for before the video starts
 -   a fallback if the browser doesn’t support HTML5 video: One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that displays if HTML5 video is not supported on the user’s browser.
 
@@ -260,6 +260,8 @@ Annotates the video as having no audio. This has the following effects:
 ### rotate-to-fullscreen
 
 If the video is visible, the video displays fullscreen after the user rotates their device into landscape mode. For more details, see the [Video in AMP spec](../../spec/amp-video-interface.md#rotate-to-fullscreen).
+
+This attribute can be configured to based on a [media query](./../../spec/amp-html-responsive-attributes.md).
 
 ### common attributes
 
