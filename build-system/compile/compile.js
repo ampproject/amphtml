@@ -380,7 +380,7 @@ function generateFlags(
       }
     }
   });
-  const jsFlags = globby.sync(transformedSrcFiles).map((src) => `--js=${src}`);
+  const jsFlags = transformedSrcFiles.map((src) => `--js=${src}`);
   const entryPointFlags = entryModuleFilenames
     .map((entryFile) =>
       transformedSrcFiles.find((srcFile) => srcFile.endsWith(entryFile))
