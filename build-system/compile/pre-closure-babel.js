@@ -20,7 +20,7 @@ const fs = require('fs-extra');
 const globby = require('globby');
 const path = require('path');
 const tempy = require('tempy');
-const {BABEL_SRC_GLOBS, THIRD_PARTY_TRANSFORM_GLOBS} = require('./sources');
+const {BABEL_SRC_GLOBS} = require('./sources');
 const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
 const {log} = require('../common/logging');
 const {red, cyan} = require('kleur/colors');
@@ -55,7 +55,6 @@ function getBabelCacheDir() {
 function getFilesToTransform() {
   return globby
     .sync([...BABEL_SRC_GLOBS, '!node_modules/', '!third_party/'])
-    .concat(globby.sync(THIRD_PARTY_TRANSFORM_GLOBS))
     .map(path.normalize);
 }
 
