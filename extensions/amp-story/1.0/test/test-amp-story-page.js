@@ -251,6 +251,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     const fiePromise = installFriendlyIframeEmbed(iframe, gridLayerEl, {
       url: 'https://amp.dev',
       html: '<video src="https://example.com/video.mp3"></video>',
+      extensions: [],
     });
     env.sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
 

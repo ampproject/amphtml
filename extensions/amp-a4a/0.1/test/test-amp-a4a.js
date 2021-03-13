@@ -2352,6 +2352,28 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
       expect(actual).to.deep.equal(expected);
     });
 
+    it('should copy over any extensions detail', () => {
+      metaData.extensions = [
+        {
+          'custom-element': 'amp-analytics',
+          'src': 'https://cdn.ampproject.org/v0/amp-analytics-0.1.js',
+        },
+        {
+          'custom-element': 'amp-mustache',
+          'src': 'https://cdn.ampproject.org/v0/amp-mustache-1.0.js',
+        },
+      ];
+      const actual = a4a.getAmpAdMetadata(buildCreativeString(metaData));
+      expect(actual.extensions).to.deep.include({
+        'custom-element': 'amp-analytics',
+        'src': 'https://cdn.ampproject.org/v0/amp-analytics-0.1.js',
+      });
+      expect(actual.extensions).to.deep.include({
+        'custom-element': 'amp-mustache',
+        'src': 'https://cdn.ampproject.org/v0/amp-mustache-1.0.js',
+      });
+    });
+
     // TODO(levitzky) remove the following two tests after metadata bug is
     // fixed.
     it('should parse metadata with wrong opening tag', () => {

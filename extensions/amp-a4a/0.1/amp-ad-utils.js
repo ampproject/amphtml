@@ -17,6 +17,7 @@ import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {isArray, isObject} from '../../../src/types';
 import {isSecureUrlDeprecated} from '../../../src/url';
+import {parseExtensionUrl} from '../../../src/service/extension-script';
 import {parseJson} from '../../../src/json';
 
 const TAG = 'amp-ad-util';
@@ -159,4 +160,36 @@ export function getAmpAdMetadata(creative) {
     );
     return null;
   }
+}
+
+/**
+ * Determine if parsed extensions metadata contains given element id.
+ * @param {!Array<{custom-element: string, src: string}>} extensions
+ * @param {string} id
+ * @return {boolean}
+ */
+export function extensionsHasElement(extensions, id) {
+  return extensions.some((entry) => entry['custom-element'] === id);
+}
+
+/**
+ * Parses extension urls from given metadata to retrieve name and version.
+ * @param {!./amp-ad-type-defs.CreativeMetaDataDef} creativeMetadata
+ * @return {!Array<?{extensionId: string, extensionVersion: string}>}
+ */
+export function getExtensionsFromMetadata(creativeMetadata) {
+  const parsedExtensions = [];
+  const {extensions} = creativeMetadata;
+  if (!extensions || !isArray(extensions)) {
+    return parsedExtensions;
+  }
+
+  for (let i = 0; i < extensions.length; i++) {
+    const extension = extensions[i];
+    const extensionData = parseExtensionUrl(extension.src);
+    if (extensionData) {
+      parsedExtensions.push(extensionData);
+    }
+  }
+  return parsedExtensions;
 }

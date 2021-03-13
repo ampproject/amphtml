@@ -15,11 +15,15 @@
  */
 
 import {AdResponseType, Validator, ValidatorResult} from './amp-ad-type-defs';
-import {getAmpAdMetadata} from './amp-ad-utils';
+import {
+  extensionsHasElement,
+  getAmpAdMetadata,
+  getExtensionsFromMetadata,
+} from './amp-ad-utils';
 import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
-import {preloadFriendlyIframeEmbedExtensionIdsDeprecated} from '../../../src/friendly-iframe-embed';
-import {pushIfNotExist} from '../../../src/utils/array';
+import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
 import {tryParseJson} from '../../../src/json';
+import {urls} from '../../../src/config';
 import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @const {string} */
@@ -65,21 +69,26 @@ export class TemplateValidator extends Validator {
       .fetch(parsedResponseBody.templateUrl)
       .then((template) => {
         const creativeMetadata = getAmpAdMetadata(template);
-        const customElementExtensions =
-          creativeMetadata['customElementExtensions'];
-        if (parsedResponseBody.analytics) {
-          pushIfNotExist(customElementExtensions, 'amp-analytics');
+        creativeMetadata['extensions'] = creativeMetadata['extensions'] || [];
+        const extensions = creativeMetadata['extensions'];
+        if (
+          parsedResponseBody.analytics &&
+          !extensionsHasElement(extensions, 'amp-analytics')
+        ) {
+          extensions.push({
+            'custom-element': 'amp-analytics',
+            src: `${urls.cdn}/v0/amp-analytics-0.1.js`,
+          });
         }
-        pushIfNotExist(customElementExtensions, 'amp-mustache');
+        if (!extensionsHasElement(extensions, 'amp-mustache')) {
+          extensions.push({
+            'custom-element': 'amp-mustache',
+            src: `${urls.cdn}/v0/amp-mustache-latest.js`,
+          });
+        }
 
-        // Load any extensions; do not wait on their promises as this
-        // is just to prefetch.
-        // TODO(#33020): switch to `preloadFriendlyIframeEmbedExtensions` with
-        // the format of `[{extensionId, extensionVersion}]`.
-        preloadFriendlyIframeEmbedExtensionIdsDeprecated(
-          context.win,
-          customElementExtensions
-        );
+        const extensionsInfo = getExtensionsFromMetadata(creativeMetadata);
+        preloadFriendlyIframeEmbedExtensions(context.win, extensionsInfo);
 
         // TODO(levitzky) Add preload logic for fonts / images.
         return Promise.resolve(
