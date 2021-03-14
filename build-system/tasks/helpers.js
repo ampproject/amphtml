@@ -562,6 +562,7 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
       outfile: destFile,
       plugins: [plugin],
       minify: options.minify,
+      target: argv.esm ? 'es6' : 'es5',
       incremental: !!options.watch,
       logLevel: 'silent',
     })
