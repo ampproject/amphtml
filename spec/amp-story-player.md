@@ -137,9 +137,9 @@ Also note that the element must be connected to the DOM before calling `load()`.
 
 ```javascript
 const playerEl = document.createElement('amp-story-player');
-const player = new AmpStoryPlayer(window, playerEl);
+new AmpStoryPlayer(window, playerEl);
 document.body.appendChild(playerEl);
-player.load();
+playerEl.load();
 ```
 
 #### go
