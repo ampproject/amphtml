@@ -310,9 +310,6 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
   let getResourceStub;
 
   beforeEach(() => {
-    // TODO(ccordry): remove with no-signing launch or similar.
-    env.sandbox.stub(AmpA4A.prototype, 'isInNoSigningExp').returns(false);
-
     fetchMock = null;
     getSigningServiceNamesMock = env.sandbox.stub(
       AmpA4A.prototype,
@@ -2353,6 +2350,28 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
       });
       expect(actual).to.deep.equal(expected);
+    });
+
+    it('should copy over any extensions detail', () => {
+      metaData.extensions = [
+        {
+          'custom-element': 'amp-analytics',
+          'src': 'https://cdn.ampproject.org/v0/amp-analytics-0.1.js',
+        },
+        {
+          'custom-element': 'amp-mustache',
+          'src': 'https://cdn.ampproject.org/v0/amp-mustache-1.0.js',
+        },
+      ];
+      const actual = a4a.getAmpAdMetadata(buildCreativeString(metaData));
+      expect(actual.extensions).to.deep.include({
+        'custom-element': 'amp-analytics',
+        'src': 'https://cdn.ampproject.org/v0/amp-analytics-0.1.js',
+      });
+      expect(actual.extensions).to.deep.include({
+        'custom-element': 'amp-mustache',
+        'src': 'https://cdn.ampproject.org/v0/amp-mustache-1.0.js',
+      });
     });
 
     // TODO(levitzky) remove the following two tests after metadata bug is

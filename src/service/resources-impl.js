@@ -712,6 +712,7 @@ export class ResourcesImpl {
         dict({
           'title': doc.title,
           'sourceUrl': getSourceUrl(this.ampdoc.getUrl()),
+          'isStory': doc.body.firstElementChild?.tagName === 'AMP-STORY',
           'serverLayout': doc.documentElement.hasAttribute('i-amphtml-element'),
           'linkRels': documentInfo.linkRels,
           'metaTags': {'viewport': documentInfo.viewport} /* deprecated */,
@@ -1199,7 +1200,7 @@ export class ResourcesImpl {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
         const requested = r.isMeasureRequested();
-        if (r.hasOwner() && !requested) {
+        if ((r.hasOwner() && !requested) || r.element.V1()) {
           continue;
         }
         const premeasured = r.hasBeenPremeasured();

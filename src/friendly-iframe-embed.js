@@ -62,14 +62,12 @@ import {whenContentIniLoad} from './ini-load';
  *   this embed.
  * - fonts: An optional array of fonts used in this embed.
  *
- * TODO(#33020): remove extensionIds once extensions is used everywhere.
  *
  * @typedef {{
  *   host: (?AmpElement|undefined),
  *   url: string,
  *   html: ?string,
  *   extensions: (?Array<{extensionId: string, extensionVersion: string}>|undefined),
- *   extensionIds: (?Array<string>|undefined),
  *   fonts: (?Array<string>|undefined),
  *   skipHtmlMerge: (boolean|undefined),
  * }}
@@ -137,6 +135,7 @@ export function preloadFriendlyIframeEmbedExtensions(win, extensions) {
  * @param {!Window} win
  * @param {!Array<string>} extensionIds
  * TODO(#33020): remove this method in favor `preloadFriendlyIframeEmbedExtensions`.
+ * @visibleForTesting
  */
 export function preloadFriendlyIframeEmbedExtensionIdsDeprecated(
   win,
@@ -180,17 +179,8 @@ export function installFriendlyIframeEmbed(
   iframe.setAttribute('marginheight', '0');
   iframe.setAttribute('marginwidth', '0');
 
-  // Compute extensions.
-  const extensionIds =
-    // TODO(#33020): Remove extensionIds format once it's supported everywhere.
-    spec.extensionIds
-      ? spec.extensionIds
-      : spec.extensions
-      ? spec.extensions.map(({extensionId}) => extensionId)
-      : [];
-
   // Pre-load extensions.
-  preloadFriendlyIframeEmbedExtensionIdsDeprecated(win, extensionIds);
+  preloadFriendlyIframeEmbedExtensions(win, spec.extensions || []);
 
   const html = spec.skipHtmlMerge ? spec.html : mergeHtml(spec);
   // Receive the signal when iframe is ready: it's document is formed.
@@ -274,7 +264,7 @@ export function installFriendlyIframeEmbed(
       embed,
       extensionsService,
       ampdoc,
-      extensionIds,
+      spec.extensions,
       opt_preinstallCallback
     ).then(() => {
       if (!childWin.frameElement) {
@@ -746,7 +736,7 @@ export class Installers {
    * @param {!FriendlyIframeEmbed} embed
    * @param {!./service/extensions-impl.Extensions} extensionsService
    * @param {!./service/ampdoc-impl.AmpDocFie} ampdoc
-   * @param {!Array<string>} extensionIds
+   * @param {!Array<{extensionId: string, extensionVersion: string}>} extensions
    * @param {function(!Window, ?./service/ampdoc-impl.AmpDoc=)|undefined} preinstallCallback
    * @param {function(!Promise)=} opt_installComplete
    * @return {!Promise}
@@ -755,7 +745,7 @@ export class Installers {
     embed,
     extensionsService,
     ampdoc,
-    extensionIds,
+    extensions,
     preinstallCallback,
     opt_installComplete
   ) {
@@ -763,6 +753,9 @@ export class Installers {
     const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
     setParentWindow(childWin, parentWin);
     const getDelayPromise = getDelayPromiseProducer();
+    // TODO(#33020): remove this when we pass full extensions object
+    // to installation service
+    const extensionIds = extensions.map(({extensionId}) => extensionId);
 
     return getDelayPromise(undefined)
       .then(() => {
