@@ -269,8 +269,8 @@
   padding: 0px !important;
 }
 
-:not([desktop]) .i-amphtml-story-system-layer-buttons .i-amphtml-story-pause-control:focus:not([disabled]),
-:not([desktop]) .i-amphtml-story-system-layer-buttons .i-amphtml-story-play-control:focus:not([disabled]) {
+.amp-mode-keyboard-active:not([desktop]) .i-amphtml-story-system-layer-buttons .i-amphtml-story-pause-control:not([disabled]),
+.amp-mode-keyboard-active:not([desktop]) .i-amphtml-story-system-layer-buttons .i-amphtml-story-play-control:not([disabled])  {
   width: 48px !important;
   padding: inherit !important;
 }
