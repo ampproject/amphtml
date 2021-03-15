@@ -15,7 +15,7 @@
  */
 
 import {Services} from './services';
-import {devAssert} from './log';
+import {pureDevAssert as devAssert} from './core/assert';
 import {getServicePromise} from './service';
 
 /**

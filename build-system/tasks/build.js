@@ -26,6 +26,7 @@ const {
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
 const {buildExtensions} = require('./extension-helpers');
+const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {maybeUpdatePackages} = require('./update-packages');
@@ -76,6 +77,10 @@ async function doBuild(extraArgs = {}) {
     await compileAllJs(options);
   }
   await buildExtensions(options);
+
+  if (!argv.core_runtime_only) {
+    await buildVendorConfigs(options);
+  }
   if (!argv.watch) {
     exitCtrlcHandler(handlerProcess);
   }
@@ -100,6 +105,7 @@ build.flags = {
   coverage: '  Adds code coverage instrumentation to JS files using istanbul.',
   version_override: '  Overrides the version written to AMP_CONFIG',
   watch: '  Watches for changes in files, re-builds when detected',
+  esm: '  Do not transpile down to ES5',
   define_experiment_constant:
     '  Builds runtime with the EXPERIMENT constant set to true',
 };

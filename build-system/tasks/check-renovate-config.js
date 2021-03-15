@@ -49,7 +49,7 @@
 
 'use strict';
 
-const {cyan, red, green} = require('ansi-colors');
+const {cyan, red, green} = require('kleur/colors');
 const {getOutput} = require('../common/exec');
 const {log} = require('../common/logging');
 
@@ -61,7 +61,7 @@ const {log} = require('../common/logging');
  */
 async function checkRenovateConfig() {
   const {status, stdout} = getOutput(
-    'node_modules/renovate/dist/config-validator.js'
+    'npx -q -p renovate renovate-config-validator'
   );
   const [configFile] = stdout.match(/(?<=Validating )\S+/);
 

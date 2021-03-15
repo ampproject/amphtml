@@ -26,8 +26,10 @@ const {timedExecOrDie} = require('./utils');
 
 const jobName = 'checks.js';
 
+/**
+ * @return {void}
+ */
 function pushBuildWorkflow() {
-  timedExecOrDie('gulp update-packages');
   timedExecOrDie('gulp presubmit');
   timedExecOrDie('gulp lint');
   timedExecOrDie('gulp prettify');
@@ -42,11 +44,17 @@ function pushBuildWorkflow() {
   timedExecOrDie('gulp check-types');
   timedExecOrDie('gulp check-sourcemaps');
   timedExecOrDie('gulp performance-urls');
+  timedExecOrDie('gulp check-analytics-vendors-list');
+  timedExecOrDie('gulp check-video-interface-list');
+  timedExecOrDie('gulp get-zindex');
+  timedExecOrDie('gulp markdown-toc');
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function prBuildWorkflow() {
   await reportAllExpectedTests();
-  timedExecOrDie('gulp update-packages');
 
   if (buildTargetsInclude(Targets.PRESUBMIT)) {
     timedExecOrDie('gulp presubmit');
@@ -72,9 +80,9 @@ async function prBuildWorkflow() {
     timedExecOrDie('gulp caches-json');
   }
 
-  // Check document links only for PR builds.
   if (buildTargetsInclude(Targets.DOCS)) {
-    timedExecOrDie('gulp check-links --local_changes');
+    timedExecOrDie('gulp check-links --local_changes'); // only for PR builds
+    timedExecOrDie('gulp markdown-toc');
   }
 
   if (buildTargetsInclude(Targets.DEV_DASHBOARD)) {
@@ -103,6 +111,9 @@ async function prBuildWorkflow() {
     timedExecOrDie('gulp check-types');
     timedExecOrDie('gulp check-sourcemaps');
     timedExecOrDie('gulp performance-urls');
+    timedExecOrDie('gulp check-analytics-vendors-list');
+    timedExecOrDie('gulp check-video-interface-list');
+    timedExecOrDie('gulp get-zindex');
   }
 }
 

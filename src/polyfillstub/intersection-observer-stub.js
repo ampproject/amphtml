@@ -195,7 +195,6 @@ export class IntersectionObserverStub {
   }
 
   /**
-   * @export
    * @return {?Element}
    */
   get root() {
@@ -206,7 +205,6 @@ export class IntersectionObserverStub {
   }
 
   /**
-   * @export
    * @return {*}
    */
   get rootMargin() {
@@ -217,7 +215,6 @@ export class IntersectionObserverStub {
   }
 
   /**
-   * @export
    * @return {*}
    */
   get thresholds() {
@@ -228,7 +225,7 @@ export class IntersectionObserverStub {
   }
 
   /**
-   * @export
+   * @return {undefined}
    */
   disconnect() {
     if (this.inst_) {
@@ -239,7 +236,6 @@ export class IntersectionObserverStub {
   }
 
   /**
-   * @export
    * @return {!Array}
    */
   takeRecords() {
@@ -250,7 +246,6 @@ export class IntersectionObserverStub {
   }
 
   /**
-   * @export
    * @param {!Element} target
    */
   observe(target) {
@@ -264,7 +259,6 @@ export class IntersectionObserverStub {
   }
 
   /**
-   * @export
    * @param {!Element} target
    */
   unobserve(target) {

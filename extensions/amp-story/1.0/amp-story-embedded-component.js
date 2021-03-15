@@ -217,10 +217,8 @@ export const EMBED_ID_ATTRIBUTE_NAME = 'i-amphtml-embed-id';
  * @return {!Element}
  */
 const buildExpandedViewOverlay = (element) => htmlFor(element)`
-    <div class="i-amphtml-story-expanded-view-overflow
-        i-amphtml-story-system-reset">
-      <span class="i-amphtml-expanded-view-close-button" role="button">
-      </span>
+    <div class="i-amphtml-story-expanded-view-overflow i-amphtml-story-system-reset">
+      <button class="i-amphtml-expanded-view-close-button" aria-label="close" role="button"></button>
     </div>`;
 
 /**
@@ -284,7 +282,7 @@ function buildDefaultStringStyle(embedData) {
 }
 
 /**
- * Measures syles for a given element in preparation for its expanded animation.
+ * Measures styles for a given element in preparation for its expanded animation.
  * @param {!Element} element
  * @param {!Object} state
  * @param {!DOMRect} pageRect
@@ -678,6 +676,20 @@ export class AmpStoryEmbeddedComponent {
    */
   buildAndAppendExpandedViewOverlay_() {
     this.expandedViewOverlay_ = buildExpandedViewOverlay(this.storyEl_);
+    const closeButton = dev().assertElement(
+      this.expandedViewOverlay_.querySelector(
+        '.i-amphtml-expanded-view-close-button'
+      )
+    );
+    const localizationService = getLocalizationService(
+      devAssert(this.storyEl_)
+    );
+    if (localizationService) {
+      const localizedCloseString = localizationService.getLocalizedString(
+        LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
+      );
+      closeButton.setAttribute('aria-label', localizedCloseString);
+    }
     this.mutator_.mutateElement(dev().assertElement(this.componentPage_), () =>
       this.componentPage_.appendChild(this.expandedViewOverlay_)
     );

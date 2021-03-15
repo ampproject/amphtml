@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 const pathModule = require('path');
-const {cyan, green} = require('ansi-colors');
+const {cyan, green} = require('kleur/colors');
 const {exec} = require('../common/exec');
 const {log} = require('../common/logging');
 
 const SERVER_TRANSFORM_PATH = 'build-system/server/new-server/transforms';
 
+/**
+ * @return {string}
+ */
 function getBuildCmd() {
   switch (process.platform) {
     case 'win32':
@@ -34,17 +37,19 @@ function getBuildCmd() {
 
 /**
  * Builds the new server by converting typescript transforms to JS
+ * @return {void}
  */
 function buildNewServer() {
   log(
     green('Building'),
-    cyan('AMP Dev Server'),
+    cyan('AMP Server'),
     green('at'),
     cyan(`${SERVER_TRANSFORM_PATH}/dist`) + green('...')
   );
   const result = exec(getBuildCmd(), {'stdio': ['inherit', 'inherit', 'pipe']});
   if (result.status != 0) {
-    const err = new Error('Could not build AMP Dev Server');
+    const err = new Error('Could not build AMP Server');
+    // @ts-ignore
     err.showStack = false;
     throw err;
   }

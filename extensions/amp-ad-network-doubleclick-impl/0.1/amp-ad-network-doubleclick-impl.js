@@ -21,6 +21,7 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import '../../../src/service/real-time-config/real-time-config-impl';
+import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
 import {
   AmpA4A,
   ConsentTupleDef,
@@ -55,7 +56,6 @@ import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
 } from './flexible-ad-slot-utils';
-import {INTERSECT_RESOURCES_EXP} from '../../../src/experiments/intersect-resources-exp';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
 import {RTC_VENDORS} from '../../../src/service/real-time-config/callout-vendors';
@@ -476,6 +476,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         branches: Object.values(ZINDEX_EXP_BRANCHES),
       },
       {
+        experimentId: ADS_INITIAL_INTERSECTION_EXP.id,
+        isTrafficEligible: () => true,
+        branches: [
+          ADS_INITIAL_INTERSECTION_EXP.control,
+          ADS_INITIAL_INTERSECTION_EXP.experiment,
+        ],
+      },
+      {
         experimentId: IDLE_CWV_EXP,
         isTrafficEligible: () => {
           return (
@@ -501,14 +509,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const moduleNomoduleExpId = this.getModuleNomoduleExpIds_();
     if (moduleNomoduleExpId) {
       this.experimentIds.push(moduleNomoduleExpId);
-    }
-
-    const intersectResourcesExpId = getExperimentBranch(
-      this.win,
-      INTERSECT_RESOURCES_EXP.id
-    );
-    if (intersectResourcesExpId) {
-      this.experimentIds.push(intersectResourcesExpId);
     }
 
     const ssrExpIds = this.getSsrExpIds_();
@@ -628,7 +628,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getPageParameters(consentTuple, instances) {
     instances = instances || [this];
     const tokens = getPageviewStateTokensForAdRequest(instances);
-    const {consentString, gdprApplies} = consentTuple;
+    const {consentString, gdprApplies, additionalConsent} = consentTuple;
 
     return {
       'ptt': 13,
@@ -645,6 +645,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'psts': tokens.length ? tokens : null,
       'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
       'gdpr_consent': consentString,
+      'addtl_consent': additionalConsent,
     };
   }
 
@@ -961,6 +962,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const allowlist = {
       'height': true,
       'width': true,
+      'json': true,
       'data-slot': true,
       'data-multi-size': true,
       'data-multi-size-validation': true,
@@ -987,7 +989,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         ),
       ATTR: (name) => {
         if (!allowlist[name.toLowerCase()]) {
-          dev().warn('TAG', `Invalid attribute ${name}`);
+          dev().warn(TAG, `Invalid attribute ${name}`);
         } else {
           return this.element.getAttribute(name);
         }

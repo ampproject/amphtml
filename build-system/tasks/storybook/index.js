@@ -18,7 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const path = require('path');
 const {createCtrlcHandler} = require('../../common/ctrlcHandler');
-const {cyan} = require('ansi-colors');
+const {cyan} = require('kleur/colors');
 const {defaultTask: runAmpDevBuildServer} = require('../default-task');
 const {exec, execScriptAsync} = require('../../common/exec');
 const {getBaseUrl} = require('../pr-deploy-bot-utils');
@@ -107,6 +107,9 @@ function buildEnv(env) {
   }
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function storybook() {
   const {'storybook_env': env = 'amp,preact', build = false} = argv;
   const envs = env.split(',');

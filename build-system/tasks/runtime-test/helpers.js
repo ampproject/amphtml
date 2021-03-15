@@ -18,7 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
 const path = require('path');
-const {green, yellow, cyan} = require('ansi-colors');
+const {green, yellow, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
@@ -171,45 +171,35 @@ async function karmaBrowserComplete_(browser) {
 /**
  * @private
  */
-function karmaBrowsersReady_() {
+function karmaBrowserStart_() {
   console./*OK*/ log('\n');
   log(green('Done. Running tests...'));
 }
 
 /**
- * @private
- */
-function karmaRunStart_() {
-  log(green('Running tests locally...'));
-}
-
-/**
  * Creates and starts karma server
- * @param {!Object} configBatch
- * @param {function()} runCompleteFn a function to execute on the
- *     `run_complete` event. It should take two arguments, (browser, results),
- *     and return nothing.
+ * @param {!Object} config
  * @return {!Promise<number>}
  */
-async function createKarmaServer(
-  configBatch,
-  runCompleteFn = reportTestRunComplete
-) {
-  let resolver;
+async function createKarmaServer(config) {
+  let resolver, browsers_, results_;
   const deferred = new Promise((resolverIn) => {
     resolver = resolverIn;
   });
 
-  const karmaServer = new Server(configBatch, (exitCode) => {
+  const karmaServer = new Server(config, async (exitCode) => {
+    await reportTestRunComplete(browsers_, results_);
     maybePrintCoverageMessage('test/coverage/index.html');
     resolver(exitCode);
   });
 
   karmaServer
-    .on('run_start', karmaRunStart_)
-    .on('browsers_ready', karmaBrowsersReady_)
+    .on('browser_start', karmaBrowserStart_)
     .on('browser_complete', karmaBrowserComplete_)
-    .on('run_complete', runCompleteFn);
+    .on('run_complete', (browsers, results) => {
+      browsers_ = browsers;
+      results_ = results;
+    });
 
   karmaServer.start();
 

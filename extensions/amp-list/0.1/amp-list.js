@@ -120,8 +120,8 @@ export class AmpList extends AMP.BaseElement {
     /** @private {?Array} */
     this.renderedItems_ = null;
 
-    /** @const {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(this.win);
+    /** @private {?../../../src/service/template-impl.Templates} */
+    this.templates_ = null;
 
     /**
      * Has layoutCallback() been called yet?
@@ -194,17 +194,29 @@ export class AmpList extends AMP.BaseElement {
   isLayoutSupported(layout) {
     if (layout === Layout.CONTAINER) {
       const doc = this.element.ownerDocument;
+      const isEmail = doc && isAmp4Email(doc);
+      const hasPlaceholder =
+        this.getPlaceholder() ||
+        (this.element.hasAttribute('diffable') &&
+          this.queryDiffablePlaceholder_());
+      if (isEmail) {
+        if (!hasPlaceholder) {
+          user().warn(
+            TAG,
+            'amp-list[layout=container] should have a placeholder to establish an initial size. ' +
+              'See https://go.amp.dev/c/amp-list/#placeholder-and-fallback. %s',
+            this.element
+          );
+        }
+        return (this.enableManagedResizing_ = true);
+      }
       userAssert(
-        (doc && isAmp4Email(doc)) ||
-          isExperimentOn(this.win, 'amp-list-layout-container'),
+        isExperimentOn(this.win, 'amp-list-layout-container'),
         'Experiment "amp-list-layout-container" is not turned on.'
       );
-      const hasDiffablePlaceholder =
-        this.element.hasAttribute('diffable') &&
-        this.queryDiffablePlaceholder_();
       userAssert(
-        this.getPlaceholder() || hasDiffablePlaceholder,
-        'amp-list[layout=container] requires a placeholder to establish an initial size. ' +
+        hasPlaceholder,
+        'amp-list[layout=container] should have a placeholder to establish an initial size. ' +
           'See https://go.amp.dev/c/amp-list/#placeholder-and-fallback. %s',
         this.element
       );
@@ -215,6 +227,7 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.templates_ = Services.templatesForDoc(this.element);
     this.action_ = Services.actionServiceForDoc(this.element);
     this.owners_ = Services.ownersForDoc(this.element);
     /** If the element is in an email document,
@@ -852,7 +865,7 @@ export class AmpList extends AMP.BaseElement {
           userAssert(
             response,
             'Failed fetching JSON data: XHR Failed fetching ' +
-              `(${request.xhrUrl}): received no response.`
+              `(${this.buildElidedUrl_(request)}): received no response.`
           );
           const init = response['init'];
           if (init) {
@@ -860,7 +873,8 @@ export class AmpList extends AMP.BaseElement {
             if (status >= 300) {
               /** HTTP status codes of 300+ mean redirects and errors. */
               throw user().createError(
-                `Failed fetching JSON data (${request.xhrUrl}): HTTP error`,
+                `Failed fetching JSON data (${this.buildElidedUrl_(request)})` +
+                  ': HTTP error',
                 status
               );
             }
@@ -868,8 +882,8 @@ export class AmpList extends AMP.BaseElement {
           userAssert(
             typeof response['html'] === 'string',
             'Failed fetching JSON data: XHR Failed fetching ' +
-              `(${request.xhrUrl}): Expected response with format ` +
-              'html: <string>}. Received: ',
+              `(${this.buildElidedUrl_(request)}): Expected response with ` +
+              'format {html: <string>}. Received: ',
             response
           );
           request.fetchOpt.responseType = 'application/json';
@@ -878,7 +892,7 @@ export class AmpList extends AMP.BaseElement {
         (error) => {
           throw user().createError(
             'Failed fetching JSON data: XHR Failed fetching ' +
-              `(${request.xhrUrl})`,
+              `(${this.buildElidedUrl_(request)})`,
             error
           );
         }
@@ -890,6 +904,17 @@ export class AmpList extends AMP.BaseElement {
         }
         return this.scheduleRender_(data, /* append */ false);
       });
+  }
+
+  /**
+   * Builds an elided, shortened URL suitable for display in error messages from
+   * the given request.
+   * @param {!FetchRequestDef} request
+   * @return {string}
+   */
+  buildElidedUrl_(request) {
+    const url = Services.urlForDoc(this.element).parse(request.xhrUrl);
+    return `${url.origin}/...`;
   }
 
   /**
@@ -1070,21 +1095,19 @@ export class AmpList extends AMP.BaseElement {
 
     // binding=refresh: Only do render-blocking update after initial render.
     if (binding && binding.startsWith('refresh')) {
-      // Bind service must be available after first mutation, so don't
-      // wait on the async service getter.
-      if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
+      // Don't bother using bindForDocOrNull() since the Bind service must be available after first mutate.
+      const afterFirstMutate =
+        this.bind_ && this.bind_.signals().get('FIRST_MUTATE');
+      if (afterFirstMutate) {
         return updateWith(this.bind_);
       } else {
-        // On initial render, do a non-blocking scan and don't update.
-        Services.bindForDocOrNull(this.element).then((bind) => {
-          if (bind) {
-            const evaluate = binding == 'refresh-evaluate';
-            bind.rescan(elements, [], {
-              'fast': true,
-              'update': evaluate ? 'evaluate' : false,
-            });
-          }
-        });
+        // This must be initial render, so do a non-blocking scan for bindings only.
+        // [diffable] is a special case that is handled later in render_(), see comment there.
+        if (!this.element.hasAttribute('diffable')) {
+          this.scanForBindings_(elements, []);
+        }
+
+        // Don't block render and return synchronously.
         return Promise.resolve(elements);
       }
     }
@@ -1095,6 +1118,32 @@ export class AmpList extends AMP.BaseElement {
         return updateWith(bind);
       } else {
         return Promise.resolve(elements);
+      }
+    });
+  }
+
+  /**
+   * Scans for bindings in `addedElements` and removes bindings in `removedElements`.
+   * Unlike updateBindings(), does NOT apply bindings or update DOM.
+   * Should only be used for binding="refresh" or binding="refresh-evaluate".
+   * @param {!Array<!Element>} addedElements
+   * @param {!Array<!Element>} removedElements
+   * @private
+   */
+  scanForBindings_(addedElements, removedElements) {
+    const binding = this.element.getAttribute('binding');
+    if (!binding || !binding.startsWith('refresh')) {
+      return;
+    }
+    Services.bindForDocOrNull(this.element).then((bind) => {
+      if (bind) {
+        // For binding="refresh-evaluate", we scan for bindings, evaluate+cache expressions, but skip DOM update.
+        // For binding="refresh", we only scan for bindings.
+        const update = binding == 'refresh-evaluate' ? 'evaluate' : false;
+        bind.rescan(addedElements, removedElements, {
+          'fast': true,
+          'update': update,
+        });
       }
     });
   }
@@ -1115,6 +1164,14 @@ export class AmpList extends AMP.BaseElement {
         // TODO:(wg-performance)(#28781) Ensure owners_.scheduleUnlayout() is
         // called for diff elements that are removed
         this.diff_(container, elements);
+
+        // For diffable amp-list, we have to wait until DOM diffing is done here to scan for new bindings
+        // (vs. asynchronously in updateBindings()), and scan the entire container (vs. just `elements`).
+        //
+        // This is because instead of replacing the entire DOM subtree, the diffing process removes
+        // select children from `elements` and inserts them into the container. This results in a race
+        // between diff_() and Bind.rescan(), which we avoid by delaying the latter until now.
+        this.scanForBindings_([container], [container]);
       } else {
         if (!opt_append) {
           this.owners_./*OK*/ scheduleUnlayout(this.element, container);

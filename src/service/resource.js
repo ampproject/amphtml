@@ -137,10 +137,10 @@ export class Resource {
     /** @private {number} */
     this.id_ = id;
 
-    /** @export @const {!AmpElement} */
+    /** @const {!AmpElement} */
     this.element = element;
 
-    /** @export @const {string} */
+    /** @const {string} */
     this.debugid = element.tagName.toLowerCase() + '#' + id;
 
     /** @const {!Window} */
@@ -1020,6 +1020,9 @@ export class Resource {
    * @return {!Promise}
    */
   loadedOnce() {
+    if (this.element.V1()) {
+      return this.element.whenLoaded();
+    }
     return this.loadPromise_;
   }
 

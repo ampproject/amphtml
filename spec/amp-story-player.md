@@ -82,7 +82,7 @@ The code snippet below demonstrates an embed of `<amp-story-player>` in a non-AM
     <a
       href="https://preview.amp.dev/documentation/examples/introduction/stories_in_amp/"
     >
-      Stories in AMP - Hello World
+      <img src="https://amp.dev/static/samples/img/story_dog2_portrait.jpg" width="360" height="600" loading="lazy" amp-story-player-poster-img>
     </a>
   </amp-story-player>
 </body>
@@ -112,6 +112,8 @@ If specified, the player will rewrite the URL using the AMP Cache prefix provide
 The `<amp-story-player>` component contains one or more `<a>` tags. Point the href attribute of each to the story URL.
 
 Place the story's title within the `<a>` tag. This provides a better user experience and allows search engines to crawl embedded stories.
+
+Use a poster image as a placeholder to display to users while the story loads. To do this, add an image tag as a child of the `<a>` tag with the following configuration: `<img src= "" loading="lazy" width="360" height="600" data-amp-story-player-poster-img></img>`.
 
 ### Attributes
 
@@ -244,6 +246,33 @@ Here's the JSON configuration for opting out of autoplay:
   ...
 ```
 
+## Page Scrolling
+
+By default, the player will scroll the page it's embedded in so that users don't get stuck when scrolling through the player.
+
+-   Players embedded in a document's content need this enabled so they don't block user scrolling.
+-   Players displayed full screen on a device (eg: lightbox) need this disabled so the page does not scroll in the background.
+
+You can opt-out of the default behavior by using the configuration below. This will prevent the player from scrolling the page.
+
+### JSON Configuration
+
+Here's the JSON configuration for opting out of page scrolling:
+
+```html
+<amp-story-player>
+  <script type="application/json">
+  {
+    "behavior": {
+      "pageScroll": false
+    }
+  }
+</script>
+ <a href="./story1.html"> ... </a>
+ <a href="./story2.html"> ... </a>
+  ...
+```
+
 ## Programmatically fetching more stories
 
 You can create an “infinite scroll” experience by fetching more stories as the user navigates through them in your player. Simply use the new JSON configuration to specify an endpoint, and the player will automatically fetch more stories as it gets closer to the last story in the player.
@@ -364,7 +393,7 @@ The configuration will end up looking like the following:
          "position": "start"
        },
        {
-         "name": "skip-next"
+         "name": "skip-to-next"
        }
      ]
    }
@@ -391,11 +420,11 @@ The “close” control supports the following customizable properties:
 -   `backgroundImageUrl`: string with url or data string (escaped).
     -   Changes the icon image to the provided url or data string (for inline svgs).
 
-### Skip-next
+### Skip-to-next
 
 Skips to the next story inside the player (only available on desktop).
 
-The “skip-next” control supports the following customizable properties:
+The “skip-to-next” control supports the following customizable properties:
 
 -   `position`: “start” or “end”.
     -   Places the icon either on the left or right on LTR languages.
@@ -467,7 +496,7 @@ On desktop, you can now display a button that navigates from the current story t
    {
      "controls": [
        {
-         "name": "skip-next"
+         "name": "skip-to-next"
        }
      ],
    }
@@ -522,6 +551,70 @@ if (player.isReady) {
 }
 ```
 
+#### amp-story-player-touchstart
+
+Fired when the player detects a touchstart event.
+
+```javascript
+player.addEventListener('amp-story-player-touchstart', (event) => {
+  console.log('Coordinates:' event.detail.coordinates);
+})
+```
+
+#### amp-story-player-touchmove
+
+Fired when the player detects a touchmove event.
+
+```javascript
+player.addEventListener('amp-story-player-touchmove', (event) => {
+  console.log('Coordinates:' event.detail.coordinates);
+})
+```
+
+This event also provides a `isNavigationalSwipe` property, which tells if the player is using this touch event for navigation.
+
+```js
+player.addEventListener("amp-story-player-touchmove", (event) => {
+    if (
+      event.detail.isNavigationalSwipe ||
+      event.detail.isNavigationalSwipe === null
+    ) {
+      // Ignore when swiping to next story.
+      return;
+    }
+
+    // Do something else when not navigating.
+
+});
+```
+
+#### amp-story-player-touchend
+
+Fired when the player detects a touchend event.
+
+```javascript
+player.addEventListener('amp-story-player-touchend', () => {
+  console.log('touchend');
+})
+```
+
+This event also provides a `isNavigationalSwipe` property, which tells if the player is using this touch event for navigation.
+
+```js
+player.addEventListener("amp-story-player-touchend", (event) => {
+    if (
+      event.detail.isNavigationalSwipe ||
+      event.detail.isNavigationalSwipe === null
+    ) {
+      // Ignore when swiping to next story.
+      return;
+    }
+
+    // Do something else when not navigating.
+
+});
+```
+
 #### navigation
 
 Fired when the player changes to a new story and provides the `index`, the player's story after changing, and `remaining`, the number of stories left.
@@ -546,7 +639,7 @@ player.addEventListener('storyNavigation', (event) => {
 })
 ```
 
-### noNextStory
+#### noNextStory
 
 Dispatched when there is no next story. Note that this will not be dispatched when using [Circular wrapping](#Circular-wrapping).
 
@@ -556,7 +649,7 @@ player.addEventListener('noNextStory', (event) => {
 });
 ```
 
-### noPreviousStory
+#### noPreviousStory
 
 Dispatched when there is no next story. Note that this will not be dispatched when using [Circular wrapping](#Circular-wrapping).
 

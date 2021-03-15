@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {devAssert} from '../src/log';
+import {pureDevAssert as devAssert} from '../src/core/assert';
 import {getMode} from './mode';
+import {isIframed} from './dom';
 import {toWin} from './types';
 
 /**
@@ -22,12 +23,16 @@ import {toWin} from './types';
  *
  * @param {function(!Array<!IntersectionObserverEntry>)} ioCallback
  * @param {!Window} win
- * @param {(number|!Array<number>)=} threshold
+ * @param {{threshold: (number|!Array<number>)=, needsRootBounds: boolean=}=} opts
  *
  * @return {!IntersectionObserver}
  */
-export function createViewportObserver(ioCallback, win, threshold) {
-  return new win.IntersectionObserver(ioCallback, {threshold});
+export function createViewportObserver(ioCallback, win, opts = {}) {
+  const {threshold, needsRootBounds} = opts;
+  return new win.IntersectionObserver(ioCallback, {
+    threshold,
+    root: isIframed(win) && needsRootBounds ? win.document : undefined,
+  });
 }
 
 /** @type {!WeakMap<!Window, !IntersectionObserver>} */

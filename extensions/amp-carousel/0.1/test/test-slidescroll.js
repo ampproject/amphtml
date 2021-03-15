@@ -22,6 +22,7 @@ import {
   createElementWithAttributes,
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
+import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
 import {user} from '../../../../src/log';
 
 describes.realWin(
@@ -29,18 +30,19 @@ describes.realWin(
   {
     amp: {
       extensions: ['amp-carousel'],
-      runtimeOn: true,
     },
   },
   (env) => {
     const SHOW_CLASS = 'i-amphtml-slide-item-show';
     let win, doc;
+    let resizeObserverStub;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
       env.iframe.width = '1000';
       env.iframe.height = '1000';
+      resizeObserverStub = installResizeObserverStub(env.sandbox, win);
     });
 
     function getAmpSlideScroll(
@@ -88,17 +90,27 @@ describes.realWin(
         return ampSlideScroll
           .buildInternal()
           .then(() => {
-            ampSlideScroll.updateLayoutBox({
-              top: 0,
-              left: 0,
-              width: 400,
-              height: 300,
+            resizeObserverStub.notifySync({
+              target: ampSlideScroll,
+              contentRect: {width: 400, height: 300},
             });
             return ampSlideScroll.layoutCallback();
           })
           .then(() => ampSlideScroll);
       }
       return Promise.resolve(ampSlideScroll);
+    }
+
+    /**
+     * @param {Element} element
+     * @returns {boolean}
+     */
+    function isScreenReaderHidden(element) {
+      const computedStyle = getComputedStyle(element);
+      return (
+        computedStyle.visibility === 'hidden' ||
+        computedStyle.display === 'none'
+      );
     }
 
     it('should create container and wrappers and show initial slides', async () => {
@@ -627,10 +639,10 @@ describes.realWin(
       const ampSlideScroll = await getAmpSlideScroll();
       const impl = await ampSlideScroll.getImpl();
 
-      const offsetWidthStub = env.sandbox.stub(ampSlideScroll, 'offsetWidth');
-
-      offsetWidthStub.value(200);
-      impl.onLayoutMeasure();
+      resizeObserverStub.notifySync({
+        target: ampSlideScroll,
+        contentRect: {width: 200, height: 400},
+      });
       expect(impl.slideWidth_).to.equal(200);
 
       // Show the first slide, make sure the scroll position is correct.
@@ -638,8 +650,10 @@ describes.realWin(
       expect(impl.slidesContainer_./*OK*/ scrollLeft).to.equal(200);
 
       // Now do a layout measure letting the component know it changed size.
-      offsetWidthStub.value(400);
-      impl.onLayoutMeasure();
+      resizeObserverStub.notifySync({
+        target: ampSlideScroll,
+        contentRect: {width: 400, height: 200},
+      });
       expect(impl.slideWidth_).to.equal(400);
       expect(impl.slidesContainer_./*OK*/ scrollLeft).to.equal(200);
 
@@ -891,6 +905,19 @@ describes.realWin(
         expect(impl.loopsMade_).to.equal(2);
         expect(removeAutoplaySpy).to.have.been.called;
         expect(ampSlideScroll.hasAttribute('loop')).to.be.false;
+      });
+
+      it('sets the correct scrollLeft for looping carousel', async () => {
+        const ampSlideScroll = await getAmpSlideScroll(true, 7, false, true);
+        doc.body.appendChild(ampSlideScroll);
+        await ampSlideScroll.buildInternal();
+        const impl = await ampSlideScroll.getImpl();
+        ampSlideScroll.layoutCallback();
+        expect(impl.slideWidth_).to.not.be.null;
+        expect(impl.slideWidth_).to.be.greaterThan(0);
+
+        // I.e. the scrollContainer is centered (not at 0)
+        expect(impl.slidesContainer_.scrollLeft).to.equal(impl.slideWidth_);
       });
 
       // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
@@ -1257,6 +1284,17 @@ describes.realWin(
         expect(showSlideSpy).to.have.been.calledWith(4);
       });
 
+      it('should handle carousel snapping & hiding race', async () => {
+        const ampSlideScroll = await getAmpSlideScroll(true);
+        const impl = await ampSlideScroll.getImpl();
+
+        // simluate carousel hidding
+        impl.slideWidth_ = 0;
+
+        // simulate snapping
+        expect(impl.getNextSlideIndex_(0)).to.equal(0);
+      });
+
       it('should NOT call showSlide_ before layout', async () => {
         const ampSlideScroll = await getAmpSlideScroll(
           true,
@@ -1280,7 +1318,6 @@ describes.realWin(
         impl.mutatedAttributesCallback({slide: 2});
         expect(showSlideSpy).to.not.have.been.called;
 
-        impl.onLayoutMeasure();
         ampSlideScroll.layoutCallback();
 
         // Should show the last slide index requested before layout.
@@ -1304,7 +1341,6 @@ describes.realWin(
         expect(showSlideSpy).to.not.have.been.called;
 
         // Test that showSlide_ is called after layout.
-        impl.onLayoutMeasure();
         ampSlideScroll.layoutCallback();
 
         expect(showSlideSpy).to.have.been.calledWith(1);
@@ -1321,7 +1357,6 @@ describes.realWin(
         expect(showSlideSpy).to.not.have.been.called;
 
         // Test that showSlide_ is called after layout.
-        impl.onLayoutMeasure();
         ampSlideScroll.layoutCallback();
 
         expect(showSlideSpy).to.have.been.calledWith(4);
@@ -1382,7 +1417,18 @@ describes.realWin(
         });
       });
     });
+  }
+);
 
+describes.realWin(
+  'SlideScroll with runtimeOn',
+  {
+    amp: {
+      extensions: ['amp-carousel'],
+      runtimeOn: true,
+    },
+  },
+  (env) => {
     it('should allow default actions in email documents', async () => {
       env.win.document.documentElement.setAttribute('amp4email', '');
       const action = new ActionService(env.ampdoc, env.win.document);
@@ -1441,15 +1487,3 @@ describes.realWin(
     });
   }
 );
-
-/**
- *
- * @param {Element} element
- * @returns {boolean}
- */
-function isScreenReaderHidden(element) {
-  const computedStyle = getComputedStyle(element);
-  return (
-    computedStyle.visibility === 'hidden' || computedStyle.display === 'none'
-  );
-}

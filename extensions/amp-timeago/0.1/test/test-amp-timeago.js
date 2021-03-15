@@ -37,22 +37,22 @@ describes.realWin(
       win.document.body.appendChild(element);
     });
 
-    it('should display 2 days ago when built', () => {
+    it('should display 2 days ago when built', async () => {
       const date = new Date();
       date.setDate(date.getDate() - 2);
       element.setAttribute('datetime', date.toISOString());
       element.textContent = date.toString();
-      element.buildInternal();
+      await element.buildInternal();
       const timeElement = element.querySelector('time');
       expect(timeElement.textContent).to.equal('2 days ago');
     });
 
-    it('should display original date when older than cutoff', () => {
+    it('should display original date when older than cutoff', async () => {
       const date = new Date('2017-01-01');
       element.setAttribute('datetime', date.toISOString());
       element.textContent = 'Sunday 1 January 2017';
       element.setAttribute('cutoff', '8640000');
-      element.buildInternal();
+      await element.buildInternal();
       const timeElement = element.querySelector('time');
       expect(timeElement.textContent).to.equal('Sunday 1 January 2017');
     });
@@ -62,19 +62,19 @@ describes.realWin(
       date.setSeconds(date.getSeconds() - 10);
       element.setAttribute('datetime', date.toISOString());
       element.textContent = date.toString();
-      element.buildInternal();
+      await element.buildInternal();
       await timeout(1000);
       (await element.getImpl(true)).viewportCallback_(true);
       const timeElement = element.querySelector('time');
       expect(timeElement.textContent).to.equal('11 seconds ago');
     });
 
-    it('should update after mutation of datetime attribute', () => {
+    it('should update after mutation of datetime attribute', async () => {
       const date = new Date();
       date.setDate(date.getDate() - 2);
       element.setAttribute('datetime', date.toISOString());
       element.textContent = date.toString();
-      element.buildInternal();
+      await element.buildInternal();
       date.setDate(date.getDate() + 1);
       element.setAttribute('datetime', date.toString());
       element.mutatedAttributesCallback({
@@ -89,7 +89,7 @@ describes.realWin(
       date.setDate(date.getDate() - 2);
       element.setAttribute('datetime', date.toISOString());
       element.textContent = date.toString();
-      element.buildInternal();
+      await element.buildInternal();
       await timeout(1000);
       expect(element.getAttribute('role')).to.equal('text');
     });
@@ -100,7 +100,7 @@ describes.realWin(
       element.setAttribute('datetime', date.toISOString());
       element.textContent = date.toString();
       element.setAttribute('role', 'button');
-      element.buildInternal();
+      await element.buildInternal();
       await timeout(1000);
       expect(element.getAttribute('role')).to.equal('button');
     });
@@ -110,7 +110,7 @@ describes.realWin(
       date.setDate(date.getDate() - 2);
       element.setAttribute('datetime', date.toISOString());
       element.textContent = date.toString();
-      element.buildInternal();
+      await element.buildInternal();
       await timeout(1000);
       expect(element.hasAttribute('title')).to.be.false;
     });

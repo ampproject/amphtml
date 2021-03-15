@@ -34,28 +34,7 @@ exports.mainBinary =
   's.animation="none";' +
   's.WebkitAnimation="none;"},1000);throw e};';
 
-exports.extension = function (
-  name,
-  isModule,
-  loadPriority,
-  intermediateDeps,
-  opt_splitMarker
-) {
-  opt_splitMarker = opt_splitMarker || '';
-
-  let deps = '';
-  if (intermediateDeps && intermediateDeps.length) {
-    deps = 'i:';
-    function quote(s) {
-      return `"${s}"`;
-    }
-    if (intermediateDeps.length == 1) {
-      deps += quote(intermediateDeps[0]);
-    } else {
-      deps += `[${intermediateDeps.map(quote).join(',')}]`;
-    }
-    deps += ',';
-  }
+exports.extension = function (name, version, latest, isModule, loadPriority) {
   let priority = '';
   if (loadPriority) {
     if (loadPriority != 'high') {
@@ -66,8 +45,9 @@ exports.extension = function (
   // Use a numeric value instead of boolean. "m" stands for "module"
   const m = isModule ? 1 : 0;
   return (
-    `(self.AMP=self.AMP||[]).push({n:"${name}",${priority}${deps}` +
-    `v:"${VERSION}",m:${m},f:(function(AMP,_){${opt_splitMarker}\n` +
+    `(self.AMP=self.AMP||[]).push({n:"${name}",ev:"${version}",l:${latest},` +
+    `${priority}` +
+    `v:"${VERSION}",m:${m},f:(function(AMP,_){\n` +
     '<%= contents %>\n})});'
   );
 };

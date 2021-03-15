@@ -25,6 +25,10 @@ module.exports = function (context) {
     (name) => `CallExpression[callee.name=${name}]`
   );
 
+  /**
+   * @param {*} node
+   * @return {Object}
+   */
   function verifyPath(node) {
     for (let n = node; n; n = n.parent) {
       const {parent} = n;

@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
+import {ADS_INITIAL_INTERSECTION_EXP} from '../../src/experiments/ads-initial-intersection-exp';
 import {Services} from '../../src/services';
 import {createCustomEvent} from '../../src/event-helper';
 import {createFixtureIframe, poll} from '../../testing/iframe';
+import {forceExperimentBranch} from '../../src/experiments';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
-import {toggleExperiment} from '../../src/experiments';
 
+const IFRAME_HEIGHT = 3000;
 function createFixture() {
-  return createFixtureIframe('test/fixtures/3p-ad.html', 3000, () => {});
+  return createFixtureIframe(
+    'test/fixtures/3p-ad.html',
+    IFRAME_HEIGHT,
+    () => {}
+  );
 }
 
 describe('amp-ad 3P', () => {
@@ -32,11 +38,15 @@ describe('amp-ad 3P', () => {
     return createFixture().then((f) => {
       fixture = f;
       installPlatformService(fixture.win);
+      forceExperimentBranch(
+        fixture.win,
+        ADS_INITIAL_INTERSECTION_EXP.id,
+        ADS_INITIAL_INTERSECTION_EXP.experiment
+      );
     });
   });
 
   it('create an iframe with APIs', async function () {
-    toggleExperiment(window, 'ads-initialIntersection');
     this.timeout(20000);
     let iframe;
     let lastIO = null;
@@ -97,7 +107,18 @@ describe('amp-ad 3P', () => {
         });
         const {initialIntersection} = context;
         expect(initialIntersection.rootBounds).to.deep.equal(
-          layoutRectLtwh(0, 0, window.innerWidth, window.innerHeight)
+          layoutRectLtwh(
+            0,
+            0,
+            Math.min(
+              iframe.ownerDocument.body.clientWidth,
+              iframe.ownerDocument.defaultView.innerWidth
+            ),
+            Math.min(
+              iframe.ownerDocument.body.clientHeight,
+              iframe.ownerDocument.defaultView.innerHeight
+            )
+          )
         );
 
         expect(initialIntersection.boundingClientRect).to.deep.equal(

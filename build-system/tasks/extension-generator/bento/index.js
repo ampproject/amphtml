@@ -24,7 +24,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs').promises;
 const path = require('path');
-const {cyan, green, red, yellow} = require('ansi-colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {log} = require('../../../common/logging');
 
 const EXTENSIONS_DIR = path.join(__dirname, '../../../../extensions');
@@ -69,6 +69,13 @@ async function* walkDir(dir) {
   }
 }
 
+/**
+ * @return {!{
+ *   name: string,
+ *   version,
+ *   options: {hasCss: true},
+ * }}
+ */
 async function makeBentoExtension() {
   const componentName = (argv.name || '').replace(/^amp-/, '');
   const version = argv.version || '1.0';

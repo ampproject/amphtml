@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 'use strict';
-
-const argv = require('minimist')(process.argv.slice(2));
 const extensionBundles = require('./bundles.config.extensions.json');
 const wrappers = require('./compile-wrappers');
-const {cyan, red} = require('ansi-colors');
+const {cyan, red} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
@@ -177,7 +175,6 @@ exports.jsBundles = {
       minifiedName: 'v0.js',
       includePolyfills: true,
       wrapper: wrappers.mainBinary,
-      esmPassCompilation: argv.esm || argv.sxg,
     },
   },
   'amp-shadow.js': {

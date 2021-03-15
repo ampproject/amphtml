@@ -28,7 +28,7 @@ import {
 } from '../../utils';
 import {getSourceUrl, resolveRelativeUrl} from '../../../../../src/url';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
-import {userAssert} from '../../../../../src/log';
+import {pureUserAssert as userAssert} from '../../../../../src/core/assert';
 
 /**
  * @typedef {{
@@ -38,6 +38,7 @@ import {userAssert} from '../../../../../src/log';
  *   url: string,
  *   domainName: string,
  *   image: string,
+ *   alt: string,
  * }}
  */
 export let LandscapeComponentDef;
@@ -87,6 +88,7 @@ export class LandscapeComponent {
       title: landscapeJson['title'],
       category: landscapeJson['category'],
       image: landscapeJson['image'],
+      alt: landscapeJson['alt'],
     };
 
     if (landscapeJson['amphtml']) {
@@ -147,6 +149,10 @@ export class LandscapeComponent {
       image,
       dict({'src': resolveImgSrc(win, landscapeData.image)})
     );
+
+    addAttributesToElement(image, {
+      'alt': landscapeData.alt ? landscapeData.alt : '',
+    });
 
     meta.textContent = landscapeData.domainName;
 

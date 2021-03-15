@@ -26,7 +26,7 @@ min_validator_revision_required: 475
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 1147
+spec_file_revision: 1159
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed"
@@ -1706,7 +1706,8 @@ tags: {
 
 # 4.7 Embedded Content
 # AMP HTML allows embedded content only via its own tags (e.g. amp-img), with
-# the exception of tags inside of a <noscript> ancestor and transformed amp-img.
+# the exception of tags inside of a <noscript> or <amp-story-player> ancestor
+# and transformed amp-img.
 # 4.7.1 The img element
 tags: {
   html_format: AMP  # Disallowed in AMP4ADS because <noscript> is disallowed.
@@ -3123,110 +3124,106 @@ tags: {
   }
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
 }
-# TODO(b/167681900): update documentation to cover these script release versions
-# TODO(b/173803451): allow module/nomodule tagspecs.
-#tags: {
-#  html_format: AMP
-#  enabled_by: "transformed"
-#  tag_name: "SCRIPT"
-#  spec_name: "amphtml module engine script"
-#  descriptive_name: "amphtml engine script"
-#  mandatory_alternatives: "amphtml engine script"
-#  unique: true
-#  mandatory_parent: "HEAD"
-#  satisfies: "amphtml module engine script"
-#  requires: "amphtml nomodule engine script"
-#  attr_lists: "nonce-attr"
-#  attr_lists: "amphtml-module-engine-attrs"
-#  attrs: {
-#    name: "src"
-#    mandatory: true
-#    value: "https://cdn.ampproject.org/v0.mjs"
-#    dispatch_key: NAME_VALUE_DISPATCH
-#  }
-#  cdata: {
-#    whitespace_only: true
-#  }
-#  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
-#}
-# TODO(b/167681900): update documentation to cover these script release versions
-# TODO(b/173803451): allow module/nomodule tagspecs.
-#tags: {
-#  html_format: AMP
-#  enabled_by: "transformed"
-#  tag_name: "SCRIPT"
-#  spec_name: "amphtml nomodule engine script"
-#  descriptive_name: "amphtml engine script"
-#  mandatory_alternatives: "amphtml engine script"
-#  unique: true
-#  mandatory_parent: "HEAD"
-#  satisfies: "amphtml nomodule engine script"
-#  requires: "amphtml module engine script"
-#  attr_lists: "nonce-attr"
-#  attr_lists: "amphtml-nomodule-engine-attrs"
-#  attrs: {
-#    name: "src"
-#    mandatory: true
-#    value: "https://cdn.ampproject.org/v0.js"
-#    dispatch_key: NAME_VALUE_DISPATCH
-#  }
-#  cdata: {
-#    whitespace_only: true
-#  }
-#  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
-#}
-# TODO(b/167681900): update documentation to cover these script release versions
-# TODO(b/173803451): allow module/nomodule tagspecs.
-#tags: {
-#  html_format: AMP
-#  enabled_by: "transformed"
-#  tag_name: "SCRIPT"
-#  spec_name: "amphtml module LTS engine script"
-#  descriptive_name: "amphtml engine script"
-#  mandatory_alternatives: "amphtml engine script"
-#  unique: true
-#  mandatory_parent: "HEAD"
-#  satisfies: "amphtml module LTS engine script"
-#  requires: "amphtml nomodule LTS engine script"
-#  attr_lists: "nonce-attr"
-#  attr_lists: "amphtml-module-engine-attrs"
-#  attrs: {
-#    name: "src"
-#    mandatory: true
-#    value: "https://cdn.ampproject.org/lts/v0.mjs"
-#    dispatch_key: NAME_VALUE_DISPATCH
-#  }
-#  cdata: {
-#    whitespace_only: true
-#  }
-#  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
-#}
-# TODO(b/167681900): update documentation to cover these script release versions
-# TODO(b/173803451): allow module/nomodule tagspecs.
-#tags: {
-#  html_format: AMP
-#  enabled_by: "transformed"
-#  tag_name: "SCRIPT"
-#  spec_name: "amphtml nomodule LTS engine script"
-#  descriptive_name: "amphtml engine script"
-#  mandatory_alternatives: "amphtml engine script"
-#  unique: true
-#  mandatory_parent: "HEAD"
-#  satisfies: "amphtml nomodule LTS engine script"
-#  requires: "amphtml module LTS engine script"
-#  attr_lists: "nonce-attr"
-#  attr_lists: "amphtml-nomodule-engine-attrs"
-#  attrs: {
-#    name: "src"
-#    mandatory: true
-#    value: "https://cdn.ampproject.org/lts/v0.js"
-#    dispatch_key: NAME_VALUE_DISPATCH
-#  }
-#  cdata: {
-#    whitespace_only: true
-#  }
-#  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
-#}
+tags: {
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "SCRIPT"
+  spec_name: "amphtml module engine script"
+  descriptive_name: "amphtml module engine script"
+  mandatory_alternatives: "amphtml engine script"
+  unique: true
+  mandatory_parent: "HEAD"
+  satisfies: "amphtml module engine script"
+  requires: "amphtml nomodule engine script"
+  attr_lists: "nonce-attr"
+  attr_lists: "amphtml-module-engine-attrs"
+  attrs: {
+    name: "src"
+    mandatory: true
+    value: "https://cdn.ampproject.org/v0.mjs"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  cdata: {
+    whitespace_only: true
+  }
+  # TODO(b/167681900): update spec_url to cover these script release versions
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
+}
+tags: {
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "SCRIPT"
+  spec_name: "amphtml nomodule engine script"
+  descriptive_name: "amphtml nomodule engine script"
+  mandatory_alternatives: "amphtml engine script"
+  unique: true
+  mandatory_parent: "HEAD"
+  satisfies: "amphtml nomodule engine script"
+  requires: "amphtml module engine script"
+  attr_lists: "nonce-attr"
+  attr_lists: "amphtml-nomodule-engine-attrs"
+  attrs: {
+    name: "src"
+    mandatory: true
+    value: "https://cdn.ampproject.org/v0.js"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  cdata: {
+    whitespace_only: true
+  }
+  # TODO(b/167681900): update spec_url to cover these script release versions
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
+}
+tags: {
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "SCRIPT"
+  spec_name: "amphtml module LTS engine script"
+  descriptive_name: "amphtml module LTS engine script"
+  mandatory_alternatives: "amphtml engine script"
+  unique: true
+  mandatory_parent: "HEAD"
+  satisfies: "amphtml module LTS engine script"
+  requires: "amphtml nomodule LTS engine script"
+  attr_lists: "nonce-attr"
+  attr_lists: "amphtml-module-engine-attrs"
+  attrs: {
+    name: "src"
+    mandatory: true
+    value: "https://cdn.ampproject.org/lts/v0.mjs"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  cdata: {
+    whitespace_only: true
+  }
+  # TODO(b/167681900): update spec_url to cover these script release versions
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
+}
+tags: {
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "SCRIPT"
+  spec_name: "amphtml nomodule LTS engine script"
+  descriptive_name: "amphtml nomdule LTS engine script"
+  mandatory_alternatives: "amphtml engine script"
+  unique: true
+  mandatory_parent: "HEAD"
+  satisfies: "amphtml nomodule LTS engine script"
+  requires: "amphtml module LTS engine script"
+  attr_lists: "nonce-attr"
+  attr_lists: "amphtml-nomodule-engine-attrs"
+  attrs: {
+    name: "src"
+    mandatory: true
+    value: "https://cdn.ampproject.org/lts/v0.js"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  cdata: {
+    whitespace_only: true
+  }
+  # TODO(b/167681900): update spec_url to cover these script release versions
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
+}
 tags: {
   html_format: AMP4EMAIL
   tag_name: "SCRIPT"
@@ -3343,6 +3340,25 @@ tags: {
     }
   }
 }
+# Enables early styling on fast failure to load v0.js. See GitHub #22543.
+tags: {
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "script amp-onerror"
+  descriptive_name: "script amp-onerror"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-onerror"
+    value: ""
+    mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  cdata: {
+    mandatory_cdata: "document.querySelector(\"script[src*='/v0.js']\").onerror=function(){document.querySelector('style[amp-boilerplate]').textContent=''}"
+  }
+}
+
 # Specific script tags for custom elements and runtime imports.
 # 4.11.2 The noscript element
 tags: {
@@ -3630,6 +3646,7 @@ tags: {  # <amp-img>
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
@@ -5008,6 +5025,11 @@ attr_lists: {
   attrs: { name: "[class]" }
   attrs: { name: "[hidden]" }
   attrs: { name: "[text]" }
+  attrs: {
+    enabled_by: "transformed"
+    name: "i-amphtml-binding"
+    value: ""
+  }
   # <amp-sidebar>
   attrs: {
     name: "autoscroll"
@@ -5732,4 +5754,10 @@ error_formats {
   code: DEV_MODE_ONLY
   format: "Tag 'html' marked with attribute 'data-ampdevmode'. Validator "
           "will suppress errors regarding any other tag with this attribute."
+}
+error_formats {
+  code: AMP_EMAIL_MISSING_STRICT_CSS_ATTR
+  format: "Tag 'html' marked with attribute 'amp4email' is missing the "
+          "corresponding attribute 'data-css-strict' for enabling strict "
+          "CSS validation. This may become an error in the future."
 }

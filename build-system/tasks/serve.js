@@ -21,7 +21,7 @@ const globby = require('globby');
 const header = require('connect-header');
 const minimist = require('minimist');
 const morgan = require('morgan');
-const open = require('opn');
+const open = require('open');
 const os = require('os');
 const path = require('path');
 const {
@@ -35,11 +35,11 @@ const {
   preBuildExtensions,
 } = require('../server/lazy-build');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
-const {cyan, green, red} = require('ansi-colors');
+const {cyan, green, red} = require('kleur/colors');
 const {logServeMode, setServeMode} = require('../server/app-utils');
 const {log} = require('../common/logging');
 const {watchDebounceDelay} = require('./helpers');
-const {watch} = require('gulp');
+const {watch} = require('chokidar');
 
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
 
@@ -90,6 +90,7 @@ async function startServer(
   serverOptions = {},
   modeOptions = {}
 ) {
+  buildNewServer();
   if (serverOptions.lazyBuild) {
     lazyBuild = serverOptions.lazyBuild;
   }
@@ -116,6 +117,10 @@ async function startServer(
   connect.server(options, started);
   await startedPromise;
 
+  /**
+   * @param {string} host
+   * @return {string}
+   */
   function makeUrl(host) {
     return `http${options.https ? 's' : ''}://${host}:${options.port}`;
   }
@@ -163,13 +168,12 @@ async function stopServer() {
  * Closes the existing server and restarts it
  */
 async function restartServer() {
-  if (argv.new_server) {
-    try {
-      buildNewServer();
-    } catch {
-      log(red('ERROR:'), 'Could not build', cyan('AMP Dev Server'));
-      return;
-    }
+  stopServer();
+  try {
+    buildNewServer();
+  } catch {
+    log(red('ERROR:'), 'Could not rebuild', cyan('AMP Server'));
+    return;
   }
   resetServerFiles();
   startServer();
@@ -200,9 +204,6 @@ async function doServe(lazyBuild = false) {
     await restartServer();
   };
   watch(serverFiles).on('change', debounce(watchFunc, watchDebounceDelay));
-  if (argv.new_server) {
-    buildNewServer();
-  }
   await startServer({}, {lazyBuild}, {});
   if (lazyBuild) {
     await performPreBuildSteps();
@@ -228,9 +229,8 @@ serve.flags = {
   quiet: "  Run in quiet mode and don't log HTTP requests",
   cache: '  Make local resources cacheable by the browser',
   no_caching_extensions: '  Disable caching for extensions',
-  new_server: '  Use new server transforms',
   compiled: '  Serve minified JS',
-  esm: '  Serve ESM JS (requires the use of --new_server)',
+  esm: '  Serve ESM JS (uses the new typescript server transforms)',
   cdn: '  Serve current prod JS',
   rtv: '  Serve JS from the RTV provided',
   coverage:

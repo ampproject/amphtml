@@ -60,11 +60,11 @@ import {
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
+import {createShadowRootWithStyle, setTextBackgroundColor} from './utils';
 import {debounce} from '../../../src/utils/rate-limit';
 import {delegateAutoplay} from '../../../src/video-interface';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
 import {getAmpdoc} from '../../../src/service';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getLocalizationService} from './amp-story-localization-service';
@@ -73,11 +73,12 @@ import {getMediaPerformanceMetricsService} from './media-performance-metrics-ser
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
+import {isPrerenderActivePage} from './prerender-active-page';
 import {listen} from '../../../src/event-helper';
-import {parseQueryString} from '../../../src/url';
+import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {px, toggle} from '../../../src/style';
+import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
-import {setTextBackgroundColor} from './utils';
 import {toArray} from '../../../src/types';
 import {upgradeBackgroundAudio} from './audio';
 
@@ -111,6 +112,7 @@ export const Selectors = {
   ALL_PLAYBACK_MEDIA:
     '> audio, amp-story-grid-layer audio, amp-story-grid-layer video',
   ALL_VIDEO: 'amp-story-grid-layer video',
+  ALL_TABBABLE: 'a',
 };
 
 /** @private @const {string} */
@@ -164,22 +166,6 @@ const buildErrorMessageElement = (element) =>
       </div>`;
 
 /**
- * @param {!Element} element
- * @return {!Element}
- */
-const buildOpenAttachmentElement = (element) =>
-  htmlFor(element)`
-      <a class="
-          i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
-          role="button">
-        <span class="i-amphtml-story-page-open-attachment-icon">
-          <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
-          <span class="i-amphtml-story-page-open-attachment-bar-right"></span>
-        </span>
-        <span class="i-amphtml-story-page-open-attachment-label"></span>
-      </a>`;
-
-/**
  * amp-story-page states.
  * @enum {number}
  */
@@ -227,6 +213,11 @@ function debounceEmbedResize(win, page, mutator) {
  * an <amp-story>.
  */
 export class AmpStoryPage extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed(element) {
+    return isPrerenderActivePage(element);
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -246,9 +237,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?boolean}  */
     this.isLastStoryPage_ = null;
-
-    /** @private {?boolean}  */
-    this.isPrerenderActivePage_ = null;
 
     /** @private {?LoadingSpinner} */
     this.loadingSpinner_ = null;
@@ -362,6 +350,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.setPageDescription_();
     this.element.setAttribute('role', 'region');
     this.initializeImgAltTags_();
+    this.initializeTabbableElements_();
   }
 
   /** @private */
@@ -403,25 +392,6 @@ export class AmpStoryPage extends AMP.BaseElement {
         dict({'auto-advance-after': storyNextUpParam})
       );
     }
-  }
-
-  /**
-   * Returns true if the page should be prerendered (for being an active page or first page)
-   * @return {boolean}
-   */
-  isPrerenderActivePage() {
-    if (this.isPrerenderActivePage_ != null) {
-      return this.isPrerenderActivePage_;
-    }
-    const hashId = parseQueryString(this.win.location.href)['page'];
-    let selector = 'amp-story-page:first-of-type';
-    if (hashId) {
-      selector += `, amp-story-page#${escapeCssSelectorIdent(hashId)}`;
-    }
-    const selectorNodes = this.win.document.querySelectorAll(selector);
-    this.isPrerenderActivePage_ =
-      selectorNodes[selectorNodes.length - 1] === this.element;
-    return this.isPrerenderActivePage_;
   }
 
   /**
@@ -487,6 +457,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     switch (state) {
       case PageState.NOT_ACTIVE:
         this.element.removeAttribute('active');
+        if (this.openAttachmentEl_) {
+          this.openAttachmentEl_.removeAttribute('active');
+        }
         this.pause_();
         this.state_ = state;
         break;
@@ -494,6 +467,9 @@ export class AmpStoryPage extends AMP.BaseElement {
         if (this.state_ === PageState.NOT_ACTIVE) {
           this.element.setAttribute('active', '');
           this.resume_();
+          if (this.openAttachmentEl_) {
+            this.openAttachmentEl_.setAttribute('active', '');
+          }
         }
 
         if (this.state_ === PageState.PAUSED) {
@@ -616,15 +592,13 @@ export class AmpStoryPage extends AMP.BaseElement {
     ]);
   }
 
-  // TODO(26866): switch back to onMeasuredChange and remove the layoutBox
-  // equality checks.
   /** @override */
   onLayoutMeasure() {
     const layoutBox = this.getLayoutSize();
     // Only measures from the first story page, that always gets built because
     // of the prerendering optimizations in place.
     if (
-      !this.isPrerenderActivePage() ||
+      !isPrerenderActivePage(this.element) ||
       (this.layoutBox_ &&
         this.layoutBox_.width === layoutBox.width &&
         this.layoutBox_.height === layoutBox.height)
@@ -873,11 +847,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     });
   }
 
-  /** @override */
-  prerenderAllowed() {
-    return this.isPrerenderActivePage();
-  }
-
   /**
    * Gets all media elements on this page.
    * @return {!Array<?Element>}
@@ -941,7 +910,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /**
    * Applies the specified callback to each media element on the page, after the
    * media element is loaded.
-   * @param {!function(!./media-pool.MediaPool, !Element)} callbackFn The
+   * @param {function(!./media-pool.MediaPool, !Element)} callbackFn The
    *     callback to be applied to each media element.
    * @return {!Promise} Promise that resolves after the callbacks are called.
    * @private
@@ -1065,9 +1034,9 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   preloadAllMedia_() {
-    return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      this.preloadMedia_(mediaPool, mediaEl);
-    });
+    return this.whenAllMediaElements_((mediaPool, mediaEl) =>
+      this.preloadMedia_(mediaPool, mediaEl)
+    );
   }
 
   /**
@@ -1295,6 +1264,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.findAndPrepareEmbeddedComponents_();
       registerAllPromise.then(() => this.preloadAllMedia_());
     }
+    this.toggleTabbableElements_(distance == 0);
   }
 
   /**
@@ -1782,30 +1752,25 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     if (!this.openAttachmentEl_) {
-      this.openAttachmentEl_ = buildOpenAttachmentElement(this.element);
-      // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
-      const attachmentHref = attachmentEl.getAttribute('href');
-      if (attachmentHref) {
-        this.openAttachmentEl_.setAttribute('href', attachmentHref);
-      }
-      this.openAttachmentEl_.addEventListener('click', () =>
-        this.openAttachment()
+      this.openAttachmentEl_ = renderPageAttachmentUI(
+        this.win,
+        this.element,
+        attachmentEl
       );
 
-      const textEl = this.openAttachmentEl_.querySelector(
-        '.i-amphtml-story-page-open-attachment-label'
-      );
+      const container = this.win.document.createElement('div');
+      container.classList.add('i-amphtml-page-attachment-host');
+      container.setAttribute('role', 'button');
 
-      const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
-      const openLabel =
-        (openLabelAttr && openLabelAttr.trim()) ||
-        getLocalizationService(this.element).getLocalizedString(
-          LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
-        );
+      container.addEventListener('click', () => this.openAttachment());
 
       this.mutateElement(() => {
-        textEl.textContent = openLabel;
-        this.element.appendChild(this.openAttachmentEl_);
+        this.element.appendChild(container);
+        createShadowRootWithStyle(
+          container,
+          this.openAttachmentEl_,
+          pageAttachmentCSS
+        );
       });
     }
   }
@@ -1877,7 +1842,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   initializeImgAltTags_() {
     toArray(this.element.querySelectorAll('amp-img')).forEach((ampImgNode) => {
       if (!ampImgNode.getAttribute('alt')) {
-        ampImgNode.setAttribute('alt', ' ');
+        ampImgNode.setAttribute('alt', '');
         // If the child img element is in the dom, propogate the attribute to it.
         const childImgNode = ampImgNode.querySelector('img');
         childImgNode &&
@@ -1894,5 +1859,34 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   isAutoAdvance() {
     return this.advancement_.isAutoAdvance();
+  }
+
+  /**
+   * Set the i-amphtml-orig-tabindex to the default tabindex of tabbable elements
+   */
+  initializeTabbableElements_() {
+    scopedQuerySelectorAll(this.element, Selectors.ALL_TABBABLE).forEach(
+      (el) => {
+        el.setAttribute(
+          'i-amphtml-orig-tabindex',
+          el.getAttribute('tabindex') || 0
+        );
+      }
+    );
+  }
+
+  /**
+   * Toggles the tabbable elements (buttons, links, etc) to only reach them when page is active.
+   * @param {boolean} toggle
+   */
+  toggleTabbableElements_(toggle) {
+    scopedQuerySelectorAll(this.element, Selectors.ALL_TABBABLE).forEach(
+      (el) => {
+        el.setAttribute(
+          'tabindex',
+          toggle ? el.getAttribute('i-amphtml-orig-tabindex') : -1
+        );
+      }
+    );
   }
 }

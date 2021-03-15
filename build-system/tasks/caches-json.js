@@ -15,55 +15,42 @@
  */
 'use strict';
 
-const gulp = require('gulp');
-const through2 = require('through2');
-const {log} = require('../common/logging');
-const {red, yellow} = require('ansi-colors');
+const path = require('path');
+const {log, logLocalDev} = require('../common/logging');
+const {red, green, cyan} = require('kleur/colors');
 
-const expectedCaches = ['google'];
-
-const cachesJsonPath = 'build-system/global-configs/caches.json';
+const expectedCaches = ['google', 'bing'];
+const cachesJsonPath = '../global-configs/caches.json';
 
 /**
- * Fail if build-system/global-configs/caches.json is missing some expected
- * caches.
- * @return {!Promise}
+ * Entry point for gulp caches-jason.
  */
 async function cachesJson() {
-  return gulp.src([cachesJsonPath]).pipe(
-    through2.obj(function (file) {
-      let obj;
-      try {
-        obj = JSON.parse(file.contents.toString());
-      } catch (e) {
-        log(
-          yellow(
-            `Could not parse ${cachesJsonPath}. ` +
-              'This is most likely a fatal error that ' +
-              'will be found by checkValidJson'
-          )
-        );
-        return;
-      }
-      const foundCaches = [];
-      for (const foundCache of obj.caches) {
-        foundCaches.push(foundCache.id);
-      }
-      for (const cache of expectedCaches) {
-        if (!foundCaches.includes(cache)) {
-          log(
-            red('Missing expected cache "' + cache + `" in ${cachesJsonPath}`)
-          );
-          process.exitCode = 1;
-        }
-      }
-    })
-  );
+  const filename = path.basename(cachesJsonPath);
+  let jsonContent;
+  try {
+    jsonContent = require(cachesJsonPath);
+  } catch (e) {
+    log(red('ERROR:'), 'Could not parse', cyan(filename));
+    process.exitCode = 1;
+    return;
+  }
+  const foundCaches = [];
+  for (const foundCache of jsonContent.caches) {
+    foundCaches.push(foundCache.id);
+  }
+  for (const cache of expectedCaches) {
+    if (foundCaches.includes(cache)) {
+      logLocalDev(green('✔'), 'Found', cyan(cache), 'in', cyan(filename));
+    } else {
+      log(red('✖'), 'Missing', cyan(cache), 'in', cyan(filename));
+      process.exitCode = 1;
+    }
+  }
 }
 
 module.exports = {
   cachesJson,
 };
 
-cachesJson.description =
-  'Check that some expected caches are included in caches.json.';
+cachesJson.description = 'Check that caches.json contains all expected caches.';

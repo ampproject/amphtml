@@ -74,14 +74,14 @@ export function FitText({
       size={true}
       layout={true}
       paint={true}
-      ref={containerRef}
-      wrapperClassName={classes.fitTextContentWrapper}
-      contentRef={measurerRef}
-      contentClassName={classes.fitTextContent}
+      contentRef={containerRef}
+      contentClassName={classes.fitTextContentWrapper}
       {...rest}
     >
-      <div ref={heightRef} className={classes.minContentHeight}>
-        {children}
+      <div ref={measurerRef} className={classes.fitTextContent}>
+        <div ref={heightRef} className={classes.minContentHeight}>
+          {children}
+        </div>
       </div>
     </ContainWrapper>
   );
@@ -94,8 +94,9 @@ export function FitText({
  * @param {number} minFontSize
  * @param {number} maxFontSize
  * @return {number}
+ * @visibleForTesting
  */
-function calculateFontSize(
+export function calculateFontSize(
   measurer,
   expectedHeight,
   expectedWidth,
@@ -123,8 +124,9 @@ function calculateFontSize(
  * @param {Element} measurer
  * @param {number} maxHeight
  * @param {number} fontSize
+ * @visibleForTesting
  */
-function setOverflowStyle(measurer, maxHeight, fontSize) {
+export function setOverflowStyle(measurer, maxHeight, fontSize) {
   const overflowed = measurer./*OK*/ scrollHeight > maxHeight;
   const lineHeight = fontSize * LINE_HEIGHT_EM_;
   const numberOfLines = Math.floor(maxHeight / lineHeight);
@@ -134,7 +136,12 @@ function setOverflowStyle(measurer, maxHeight, fontSize) {
       '-webkit-line-clamp': numberOfLines,
       'maxHeight': px(lineHeight * numberOfLines),
     });
+    // Cannot use setInitialDisplay which calls devAssert.
+    // eslint-disable-next-line local/no-style-display
+    resetStyles(measurer, ['display']);
   } else {
+    // eslint-disable-next-line local/no-style-display
+    setStyle(measurer, 'display', 'flex');
     resetStyles(measurer, ['lineClamp', '-webkit-line-clamp', 'maxHeight']);
   }
 }

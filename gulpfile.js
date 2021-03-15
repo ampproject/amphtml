@@ -18,7 +18,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const gulp = require('gulp');
-const {cyan, red} = require('ansi-colors');
+const {cyan, red} = require('kleur/colors');
 const {isCiBuild} = require('./build-system/common/ci');
 const {log} = require('./build-system/common/logging');
 
@@ -124,6 +124,7 @@ createTask('get-zindex', 'getZindex', 'get-zindex');
 createTask('integration', 'integration', 'integration');
 createTask('lint', 'lint', 'lint');
 createTask('make-extension', 'makeExtension', 'extension-generator');
+createTask('markdown-toc', 'markdownToc', 'markdown-toc');
 createTask('performance', 'performance', 'performance');
 createTask('performance-urls', 'performanceUrls', 'performance-urls');
 createTask('pr-check', 'prCheck', 'pr-check');
@@ -140,4 +141,14 @@ createTask('unit', 'unit', 'unit');
 createTask('update-packages', 'updatePackages', 'update-packages');
 createTask('validator', 'validator', 'validator');
 createTask('validator-webui', 'validatorWebui', 'validator');
+createTask(
+  'check-video-interface-list',
+  'checkVideoInterfaceList',
+  'check-video-interface-list'
+);
+createTask(
+  'check-analytics-vendors-list',
+  'checkAnalyticsVendorsList',
+  'check-analytics-vendors-list'
+);
 createTask('visual-diff', 'visualDiff', 'visual-diff');
