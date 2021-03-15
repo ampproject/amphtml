@@ -114,6 +114,18 @@ export class Performance {
      */
     this.aggregateShiftScore_ = 0;
 
+    /**
+     * TODO(#33207): Remove after data collection
+     * @private {number}
+     */
+    this.clsBeforeFCP_ = 0;
+
+    /**
+     * TODO(#33207): Remove after data collection
+     * @private {number}
+     */
+    this.clsBeforeOFV_ = 0;
+
     const supportedEntryTypes =
       (this.win.PerformanceObserver &&
         this.win.PerformanceObserver.supportedEntryTypes) ||
@@ -241,11 +253,7 @@ export class Performance {
 
     this.ampdoc_.whenFirstVisible().then(() => {
       this.tick(TickLabel.ON_FIRST_VISIBLE);
-      // TODO(#33207): Remove after data collection
-      this.tick(
-        TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_VISIBLE,
-        this.aggregateShiftScore_
-      );
+      this.clsBeforeOFV_ = this.aggregateShiftScore_;
       this.flush();
     });
 
@@ -357,11 +365,7 @@ export class Performance {
         recordedFirstContentfulPaint = true;
 
         // TODO(#33207): remove after data collection
-        // On the first contentful paint, report cumulative CLS score
-        this.tickDelta(
-          TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_FCP,
-          this.aggregateShiftScore_
-        );
+        this.clsBeforeFCP_ = this.aggregateShiftScore_;
       } else if (
         entry.entryType === 'first-input' &&
         !recordedFirstInputDelay
@@ -528,6 +532,14 @@ export class Performance {
       this.tickDelta(
         TickLabel.CUMULATIVE_LAYOUT_SHIFT,
         this.aggregateShiftScore_
+      );
+      this.tickDelta(
+        TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_FCP,
+        this.clsBeforeFCP_
+      );
+      this.tick(
+        TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_VISIBLE,
+        this.clsBeforeOFV_
       );
       this.flush();
       this.shiftScoresTicked_ = 1;
