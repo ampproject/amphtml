@@ -21,13 +21,9 @@ var RenderDef = {};
 
 /**
  * @typedef {{
- *   exampleProperty: (string|undefined), (DO NOT SUBMIT)
+ *   src: (!string),
+ *   fetchFn: (!Function)
+ *   render: (?RendererFunctionType|undefined),
  * }}
  */
 RenderDef.Props;
-
-/** @interface */
-RenderDef.RenderApi = class {
-  /** Example: API method to toggle the component */
-  exampleToggle() {} // DO NOT SUBMIT
-};
