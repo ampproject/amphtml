@@ -3,12 +3,12 @@
     "aid": ""
   },
   "requests": {
-    "url": "https://c3.taboola.com/amp/amp-analytics-taboola.html?url=${canonicalUrl}&aid=${aid}"
+    "loadamptrkhtml": "https://c3.taboola.com/amp/amp-analytics-taboola.html?url=${canonicalUrl}&aid=${aid}"
   },
   "triggers": {
     "pageview": {
       "on": "visible",
-      "request": "url"
+      "request": "loadamptrkhtml"
     }
   },
   "transport": {
