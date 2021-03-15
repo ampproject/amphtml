@@ -230,7 +230,7 @@ export class BitrateManager {
     }
     const {currentTime} = video;
     video.pause();
-    const hasChanges = this.sortSources_(video);
+    const hasChanges = this.sortSources_(video); 
     if (!hasChanges) {
       video.play();
       return;
