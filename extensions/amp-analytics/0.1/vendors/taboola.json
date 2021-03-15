@@ -10,5 +10,10 @@
       "on": "visible",
       "request": "url"
     }
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
   }
 }
