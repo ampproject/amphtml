@@ -50,16 +50,16 @@ const isSpecialCannotBeRemoved = (id) =>
   id.startsWith('swg-');
 
 /**
- * @param {string} cmd
- * @param {?Object=} options
- * @return {?string}
- */
+* @param {string} cmd
+* @param {?Object=} options
+* @return {string}
+*/
 function getStdoutThrowOnError(cmd, options) {
   const {stdout, stderr} = getOutput(cmd, options);
   if (!stdout && stderr) {
     throw new Error(`${cmd}\n\n${stderr}`);
   }
-  return stdout && stdout.trim();
+  return !stdout ? '' : stdout.trim();
 }
 
 /**
