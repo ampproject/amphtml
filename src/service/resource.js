@@ -1093,6 +1093,9 @@ export class Resource {
     if (this.element.unlayoutOnPause()) {
       this.unlayout();
     }
+    if (this.element.V1()) {
+      this.element.pause();
+    }
   }
 
   /**
@@ -1115,6 +1118,9 @@ export class Resource {
   unload() {
     this.pause();
     this.unlayout();
+    if (this.element.V1()) {
+      this.element.unmount();
+    }
   }
 
   /**

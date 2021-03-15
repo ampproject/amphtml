@@ -154,6 +154,20 @@ export class BaseElement {
   }
 
   /**
+   * Subclasses can override this method to indicate that an element can load
+   * network resources.
+   *
+   * Such elements can have their `ensureLoaded` method called.
+   *
+   * @param {!AmpElement} unusedElement
+   * @return {boolean}
+   * @nocollapse
+   */
+  static load(unusedElement) {
+    return false;
+  }
+
+  /**
    * Subclasses can override this method to provide a svg logo that will be
    * displayed as the loader.
    *
@@ -511,6 +525,24 @@ export class BaseElement {
    */
   setReadyState(state, opt_failure) {
     this.element.setReadyStateInternal(state, opt_failure);
+  }
+
+  /**
+   * Load heavy elements, perform expensive operations, add global
+   * listeners/observers, etc.
+   *
+   * @param {!AbortSignal=} opt_abortSignal
+   * @return {?Promise|undefined}
+   */
+  mountCallback(opt_abortSignal) {}
+
+  /**
+   * Unload heavy elements, remove global listeners, etc.
+   *
+   * @return {boolean}
+   */
+  unmountCallback() {
+    return false;
   }
 
   /**

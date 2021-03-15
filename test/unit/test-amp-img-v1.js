@@ -61,13 +61,18 @@ describes.realWin('amp-img V1', {amp: true}, (env) => {
     img.onerror = sandbox.spy();
 
     doc.body.appendChild(img);
-    await img.build();
+    await img.mount();
     return img;
   }
 
   it('testElementV1', () => {
     testElementV1(AmpImg, {
-      exceptions: ['Must not use getLayoutSize'],
+      exceptions: [
+        'Must not have preconnectCallback',
+        'Must not have layoutCallback',
+        'Must not have unlayoutCallback',
+        'Must not use getLayoutSize',
+      ],
     });
   });
 
@@ -104,6 +109,27 @@ describes.realWin('amp-img V1', {amp: true}, (env) => {
     expect(ampImg.onerror).to.not.be.called;
     expect(toggleFallbackSpy).to.not.be.called;
     expect(togglePlaceholderSpy).to.be.calledOnce.calledWith(false);
+  });
+
+  it('should set eager loading on ensureLoaded', async () => {
+    const ampImg = await getImg({
+      src: '/examples/img/sample.jpg',
+      width: 300,
+      height: 200,
+      alt: 'An image',
+      title: 'Image title',
+      referrerpolicy: 'origin',
+    });
+
+    const img = ampImg.querySelector('img');
+    expect(img.loading == 'auto' || !img.loading).to.be.true;
+
+    const promise = ampImg.ensureLoaded();
+    await new Promise(setTimeout);
+    expect(img.loading).to.equal('eager');
+
+    dispatchCustomEvent(img, 'load', null, {bubbles: false});
+    await promise;
   });
 
   it('should fail when img fails', async () => {
