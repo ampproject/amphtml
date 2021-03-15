@@ -20,13 +20,13 @@
  */
 
 const {
-  getExperimentConfig,
   printSkipMessage,
   timedExecOrDie,
   uploadExperimentOutput,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {experiment} = require('minimist')(process.argv.slice(2));
+const {getExperimentConfig} = require('../common/utils');
 const {runCiJob} = require('./ci-job');
 
 const jobName = `${experiment}-build.js`;

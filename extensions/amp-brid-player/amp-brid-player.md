@@ -112,7 +112,7 @@ Mutes the video.
 
 Unmutes the video.
 
-### `fullscreencenter`
+### `fullscreenenter`
 
 Takes the video to fullscreen.
 

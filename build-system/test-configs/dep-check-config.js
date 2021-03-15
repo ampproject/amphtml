@@ -329,6 +329,8 @@ exports.rules = [
       // Parsing extension urls.
       'extensions/amp-a4a/0.1/head-validation.js->' +
         'src/service/extension-script.js',
+      'extensions/amp-a4a/0.1/amp-ad-utils.js->' +
+        'src/service/extension-script.js',
       'extensions/amp-live-list/0.1/live-list-manager.js->' +
         'src/service/extension-script.js',
       'extensions/amp-video/0.1/amp-video.js->' +
