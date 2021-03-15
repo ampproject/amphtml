@@ -29,14 +29,15 @@ import {Services} from '../../../src/services';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {htmlFor} from '../../../src/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {
+  dispatchCustomEvent,
   isRTL,
   iterateCursor,
   scopedQuerySelectorAll,
   toggleAttribute,
 } from '../../../src/dom';
+import {htmlFor} from '../../../src/static-template';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {toArray} from '../../../src/types';
 
 /**
@@ -57,6 +58,11 @@ function isSizer(el) {
 }
 
 class AmpCarousel extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -157,11 +163,6 @@ class AmpCarousel extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @override */
@@ -449,7 +450,7 @@ class AmpCarousel extends AMP.BaseElement {
       'goToSlide',
       (actionInvocation) => {
         const {args, trust} = actionInvocation;
-        this.carousel_.goToSlide(args['index'] || -1, {
+        this.carousel_.goToSlide(args['index'] ?? -1, {
           actionSource: this.getActionSource_(trust),
         });
       },
@@ -539,14 +540,17 @@ class AmpCarousel extends AMP.BaseElement {
     const index = this.carousel_.getCurrentIndex();
     const loop = this.carousel_.isLooping();
     const visibleCount = this.carousel_.getVisibleCount();
+    const isAtEnd = this.carousel_.isAtEnd();
+    const isAtStart = this.carousel_.isAtStart();
     // TODO(sparhami) for Shadow DOM, we will need to get the assigned nodes
     // instead.
     iterateCursor(this.prevArrowSlot_.children, (child) => {
-      const disabled = !loop && index === 0;
+      const disabled = (!loop && index === 0) || isAtStart;
       toggleAttribute(child, 'disabled', disabled);
     });
     iterateCursor(this.nextArrowSlot_.children, (child) => {
-      const disabled = !loop && index >= this.slides_.length - visibleCount;
+      const disabled =
+        (!loop && index >= this.slides_.length - visibleCount) || isAtEnd;
       toggleAttribute(child, 'disabled', disabled);
     });
     toggleAttribute(
@@ -639,7 +643,7 @@ class AmpCarousel extends AMP.BaseElement {
 
     const action = createCustomEvent(this.win, `slidescroll.${name}`, data);
     this.action_.trigger(this.element, name, action, trust);
-    this.element.dispatchCustomEvent(name, data);
+    dispatchCustomEvent(this.element, name, data);
     this.hadTouch_ = this.hadTouch_ || actionSource === ActionSource.TOUCH;
     this.updateUi_();
   }

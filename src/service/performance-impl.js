@@ -114,12 +114,6 @@ export class Performance {
      */
     this.aggregateShiftScore_ = 0;
 
-    /**
-     * True if the ratios have already been ticked.
-     * @private {boolean}
-     */
-    this.slowElementRatioTicked_ = false;
-
     const supportedEntryTypes =
       (this.win.PerformanceObserver &&
         this.win.PerformanceObserver.supportedEntryTypes) ||
@@ -247,6 +241,11 @@ export class Performance {
 
     this.ampdoc_.whenFirstVisible().then(() => {
       this.tick(TickLabel.ON_FIRST_VISIBLE);
+      // TODO(#33207): Remove after data collection
+      this.tick(
+        TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_VISIBLE,
+        this.aggregateShiftScore_
+      );
       this.flush();
     });
 
@@ -356,6 +355,13 @@ export class Performance {
         this.tickDelta(TickLabel.FIRST_CONTENTFUL_PAINT, value);
         this.tickSinceVisible(TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE, value);
         recordedFirstContentfulPaint = true;
+
+        // TODO(#33207): remove after data collection
+        // On the first contentful paint, report cumulative CLS score
+        this.tickDelta(
+          TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_FCP,
+          this.aggregateShiftScore_
+        );
       } else if (
         entry.entryType === 'first-input' &&
         !recordedFirstInputDelay
@@ -503,7 +509,6 @@ export class Performance {
     if (this.supportsLargestContentfulPaint_) {
       this.tickLargestContentfulPaint_();
     }
-    this.tickSlowElementRatio_();
   }
 
   /**
@@ -541,26 +546,6 @@ export class Performance {
         {capture: true}
       );
     }
-  }
-
-  /**
-   * Tick the slow element ratio.
-   */
-  tickSlowElementRatio_() {
-    if (this.slowElementRatioTicked_) {
-      return;
-    }
-    if (!this.resources_) {
-      dev().error(TAG, 'Failed to tick ser due to null resources');
-      return;
-    }
-
-    this.slowElementRatioTicked_ = true;
-    this.tickDelta(
-      TickLabel.SLOW_ELEMENT_RATIO,
-      this.resources_.getSlowElementRatio()
-    );
-    this.flush();
   }
 
   /**

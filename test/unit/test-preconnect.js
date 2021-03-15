@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {Services} from '../../src/services';
 import {createIframePromise} from '../../testing/iframe';
 import {
@@ -40,7 +40,7 @@ describes.sandboxed('preconnect', {}, (env) => {
 
   function getPreconnectIframe(detectFeatures = false) {
     return createIframePromise().then((iframe) => {
-      iframeClock = lolex.install({target: iframe.win});
+      iframeClock = fakeTimers.withGlobal(iframe.win).install();
       if (detectFeatures) {
         setPreconnectFeaturesForTesting(null);
       } else {
@@ -53,7 +53,7 @@ describes.sandboxed('preconnect', {}, (env) => {
       const platform = {
         isSafari: () => !!isSafari,
       };
-      iframe.win.__AMP_SERVICES['platform'] = {obj: platform};
+      iframe.win.__AMP_SERVICES['platform'] = {obj: platform, ctor: Object};
       sandbox.stub(Services, 'platformFor').returns(platform);
 
       installPreconnectService(iframe.win);

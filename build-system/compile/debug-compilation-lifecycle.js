@@ -15,11 +15,11 @@
  */
 'use strict';
 const argv = require('minimist')(process.argv.slice(2));
-const colors = require('ansi-colors');
 const fs = require('fs');
-const log = require('fancy-log');
 const path = require('path');
 const tempy = require('tempy');
+const {cyan, red} = require('kleur/colors');
+const {log} = require('../common/logging');
 
 const logFile = path.resolve(process.cwd(), 'dist', 'debug-compilation.log');
 
@@ -63,9 +63,13 @@ function debug(lifecycle, fullpath, content, sourcemap) {
   }
 }
 
+/**
+ * Logs debug information.
+ * @return {void}
+ */
 function displayLifecycleDebugging() {
   if (argv.debug) {
-    log(colors.white('Debug Lifecycles: ') + colors.red(logFile));
+    log(cyan('Debug Lifecycles: ') + red(logFile));
   }
 }
 

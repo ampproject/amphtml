@@ -303,10 +303,6 @@ cc_library(
     hdrs = [
         "testing-utils.h",
     ],
-    data = [
-        "@validator//:testdata_files",
-        "@amphtml-extensions//:testdata_files",
-    ],
     deps = [
         ":error-formatter",
         "@com_google_absl//absl/strings",

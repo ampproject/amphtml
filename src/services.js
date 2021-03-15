@@ -16,11 +16,11 @@
 
 import {
   getAmpdoc,
-  getExistingServiceForDocInEmbedScope,
   getExistingServiceOrNull,
   getService,
   getServiceForDoc,
   getServiceForDocOrNull,
+  getServiceInEmbedWin,
   getServicePromiseForDoc,
 } from './service';
 import {
@@ -97,7 +97,7 @@ export class Services {
    * @return {!./service/action-impl.ActionService}
    */
   static actionServiceForDoc(element) {
-    return /** @type {!./service/action-impl.ActionService} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/action-impl.ActionService} */ (getServiceForDocOrNull(
       element,
       'action'
     ));
@@ -108,7 +108,7 @@ export class Services {
    * @return {!./service/standard-actions-impl.StandardActions}
    */
   static standardActionsForDoc(element) {
-    return /** @type {!./service/standard-actions-impl.StandardActions} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/standard-actions-impl.StandardActions} */ (getServiceForDocOrNull(
       element,
       'standard-actions'
     ));
@@ -315,7 +315,7 @@ export class Services {
    * @return {!./service/hidden-observer-impl.HiddenObserver}
    */
   static hiddenObserverForDoc(element) {
-    return /** @type {!./service/hidden-observer-impl.HiddenObserver} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/hidden-observer-impl.HiddenObserver} */ (getServiceForDocOrNull(
       element,
       'hidden-observer'
     ));
@@ -581,7 +581,7 @@ export class Services {
    * @return {?./service/localization.LocalizationService}
    */
   static localizationForDoc(element) {
-    return /** @type {?./service/localization.LocalizationService} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {?./service/localization.LocalizationService} */ (getServiceForDocOrNull(
       element,
       'localization'
     ));
@@ -622,6 +622,17 @@ export class Services {
   }
 
   /**
+   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!Promise<RealTimeConfigManager>}
+   */
+  static realTimeConfigForDoc(elementOrAmpDoc) {
+    return /** @type {!Promise<RealTimeConfigManager>} */ (getServicePromiseForDoc(
+      elementOrAmpDoc,
+      'real-time-config'
+    ));
+  }
+
+  /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!./service/storage-impl.Storage>}
    */
@@ -633,12 +644,33 @@ export class Services {
   }
 
   /**
-   * @param {!Window} window
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!Promise<!./service/storage-impl.Storage>}
+   * TODO(dmanek): Add tests for this method.
+   */
+  static storageForTopLevelDoc(elementOrAmpDoc) {
+    const thisAmpdoc = Services.ampdoc(elementOrAmpDoc);
+    const ampdocService = Services.ampdocServiceFor(thisAmpdoc.win);
+    const topAmpdoc = ampdocService.isSingleDoc()
+      ? ampdocService.getSingleDoc()
+      : null;
+    // We need to verify that ampdocs are on the same origin, therefore
+    // we compare the windows of both.
+    const ampdoc =
+      topAmpdoc && topAmpdoc.win == thisAmpdoc.win ? topAmpdoc : thisAmpdoc;
+    return /** @type {!Promise<!./service/storage-impl.Storage>} */ (getServicePromiseForDoc(
+      ampdoc,
+      'storage'
+    ));
+  }
+
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/template-impl.Templates}
    */
-  static templatesFor(window) {
-    return /** @type {!./service/template-impl.Templates} */ (getService(
-      window,
+  static templatesForDoc(elementOrAmpDoc) {
+    return /** @type {!./service/template-impl.Templates} */ (getServiceForDoc(
+      elementOrAmpDoc,
       'templates'
     ));
   }
@@ -649,7 +681,7 @@ export class Services {
    */
   static timerFor(window) {
     // TODO(alabiaga): This will always return the top window's Timer service.
-    return /** @type {!./service/timer-impl.Timer} */ (getService(
+    return /** @type {!./service/timer-impl.Timer} */ (getServiceInEmbedWin(
       window,
       'timer'
     ));
@@ -660,7 +692,7 @@ export class Services {
    * @return {!./service/url-replacements-impl.UrlReplacements}
    */
   static urlReplacementsForDoc(element) {
-    return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (getServiceForDocOrNull(
       element,
       'url-replace'
     ));
@@ -720,7 +752,7 @@ export class Services {
    * @return {!./service/url-impl.Url}
    */
   static urlForDoc(element) {
-    return /** @type {!./service/url-impl.Url} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/url-impl.Url} */ (getServiceForDocOrNull(
       element,
       'url'
     ));
@@ -805,5 +837,27 @@ export class Services {
    */
   static xhrFor(window) {
     return /** @type {!./service/xhr-impl.Xhr} */ (getService(window, 'xhr'));
+  }
+
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!../extensions/amp-assistant-assistjs/0.1/assistjs-frame-service.AssistjsFrameService}
+   */
+  static assistjsFrameServiceForDoc(elementOrAmpDoc) {
+    return /** @type {!../extensions/amp-assistant-assistjs/0.1/assistjs-frame-service.AssistjsFrameService} */ (getServiceForDoc(
+      elementOrAmpDoc,
+      'assistjs-frame-service'
+    ));
+  }
+
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!../extensions/amp-assistant-assistjs/0.1/assistjs-config-service.AssistjsConfigService}
+   */
+  static assistjsConfigServiceForDoc(elementOrAmpDoc) {
+    return /** @type {!../extensions/amp-assistant-assistjs/0.1/assistjs-config-service.AssistjsConfigService} */ (getServiceForDoc(
+      elementOrAmpDoc,
+      'assistjs-config-service'
+    ));
   }
 }

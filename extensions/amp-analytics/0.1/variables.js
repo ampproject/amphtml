@@ -25,7 +25,11 @@ import {
   getActiveExperimentBranches,
   getExperimentBranch,
 } from '../../../src/experiments';
-import {getConsentMetadata, getConsentPolicyState} from '../../../src/consent';
+import {
+  getConsentMetadata,
+  getConsentPolicyInfo,
+  getConsentPolicyState,
+} from '../../../src/consent';
 import {
   getServiceForDoc,
   getServicePromiseForDoc,
@@ -278,6 +282,7 @@ export class VariableService {
       'COOKIE': (name) =>
         cookieReader(this.ampdoc_.win, dev().assertElement(element), name),
       'CONSENT_STATE': getConsentStateStr(element),
+      'CONSENT_STRING': getConsentPolicyInfo(element),
       'CONSENT_METADATA': (key) =>
         getConsentMetadataValue(
           element,

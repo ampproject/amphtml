@@ -16,6 +16,9 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const {
+  VERSION: internalRuntimeVersion,
+} = require('../compile/internal-version');
 const {getReplacePlugin} = require('./helpers');
 
 /**
@@ -32,19 +35,27 @@ function getUnminifiedConfig() {
       useSpread: true,
     },
   ];
+
+  const targets =
+    argv.esm || argv.sxg ? {esmodules: true} : {browsers: ['Last 2 versions']};
   const presetEnv = [
     '@babel/preset-env',
     {
       bugfixes: true,
-      modules: 'commonjs',
+      modules: false,
       loose: true,
-      targets: {'browsers': ['Last 2 versions']},
+      targets,
     },
   ];
   const replacePlugin = getReplacePlugin();
   const unminifiedPlugins = [
     argv.coverage ? 'babel-plugin-istanbul' : null,
     replacePlugin,
+    './build-system/babel-plugins/babel-plugin-transform-json-import',
+    [
+      './build-system/babel-plugins/babel-plugin-transform-internal-version',
+      {version: internalRuntimeVersion},
+    ],
     './build-system/babel-plugins/babel-plugin-transform-json-configuration',
     './build-system/babel-plugins/babel-plugin-transform-jss',
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
@@ -58,6 +69,7 @@ function getUnminifiedConfig() {
     compact: false,
     plugins: unminifiedPlugins,
     presets: unminifiedPresets,
+    sourceMaps: 'inline',
   };
 }
 

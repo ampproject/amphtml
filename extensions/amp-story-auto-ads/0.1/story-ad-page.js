@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import {
   A4AVarNames,
+  START_CTA_ANIMATION_ATTR,
   createCta,
   getStoryAdMetadataFromDoc,
   getStoryAdMetadataFromElement,
-  localizeCtaText,
   maybeCreateAttribution,
   validateCtaMetadata,
 } from './story-ad-ui';
@@ -29,10 +28,12 @@ import {
   STORY_AD_ANALYTICS,
 } from './story-ad-analytics';
 import {CommonSignals} from '../../../src/common-signals';
+import {Gestures} from '../../../src/gesture';
 import {
   StateProperty,
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
+import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {
   createElementWithAttributes,
@@ -42,7 +43,8 @@ import {
 } from '../../../src/dom';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
-import {getFrameDoc} from './utils';
+import {getData, listen} from '../../../src/event-helper';
+import {getFrameDoc, localizeCtaText} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';
@@ -105,8 +107,14 @@ export class StoryAdPage {
     /** @private {?Element} */
     this.adElement_ = null;
 
+    /** @private {?HTMLIFrameElement} */
+    this.adFrame_ = null;
+
     /** @private {?Element} */
     this.adChoicesIcon_ = null;
+
+    /** @private {?Element} */
+    this.ctaAnchor_ = null;
 
     /** @private {?Document} */
     this.adDoc_ = null;
@@ -125,6 +133,9 @@ export class StoryAdPage {
 
     /** @private @const {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = storeService;
+
+    /** @private {boolean} */
+    this.is3pAdFrame_ = false;
   }
 
   /** @return {?Document} ad document within FIE */
@@ -173,6 +184,9 @@ export class StoryAdPage {
    */
   toggleVisibility() {
     this.viewed_ = true;
+    this.ctaAnchor_ &&
+      toggleAttribute(this.ctaAnchor_, START_CTA_ANIMATION_ATTR);
+
     // TODO(calebcordry): Properly handle visible attribute for custom ads.
     if (this.adDoc_) {
       toggleAttribute(
@@ -208,12 +222,8 @@ export class StoryAdPage {
     this.pageElement_.appendChild(gridLayer);
     this.pageElement_.appendChild(paneGridLayer);
 
-    // Set up listener for ad-loaded event.
-    this.adElement_
-      .signals()
-      // TODO(ccordry): Investigate using a better signal waiting for video loads.
-      .whenSignal(CommonSignals.INI_LOAD)
-      .then(() => this.onAdLoaded_());
+    this.listenForAdLoadSignals_();
+    this.listenForSwipes_();
 
     this.analyticsEvent_(AnalyticsEvents.AD_REQUESTED, {
       [AnalyticsVars.AD_REQUESTED]: Date.now(),
@@ -229,6 +239,11 @@ export class StoryAdPage {
    */
   maybeCreateCta() {
     return Promise.resolve().then(() => {
+      // Inabox story ads control their own CTA creation.
+      if (this.is3pAdFrame_) {
+        return true;
+      }
+
       const uiMetadata = map();
 
       // Template Ads.
@@ -319,6 +334,64 @@ export class StoryAdPage {
   }
 
   /**
+   * Creates listeners to receive signal that ad is ready to be shown
+   * for both FIE & inabox case.
+   * @private
+   */
+  listenForAdLoadSignals_() {
+    // Friendly frame INI_LOAD.
+    this.adElement_
+      .signals()
+      // TODO(ccordry): Investigate using a better signal waiting for video loads.
+      .whenSignal(CommonSignals.INI_LOAD)
+      .then(() => this.onAdLoaded_());
+
+    // Inabox custom event.
+    const removeListener = listen(this.win_, 'message', (e) => {
+      if (getData(e) !== 'amp-story-ad-load') {
+        return;
+      }
+      if (this.getAdFrame_() && e.source === this.adFrame_.contentWindow) {
+        this.is3pAdFrame_ = true;
+        this.pageElement_.setAttribute('xdomain-ad', '');
+        this.onAdLoaded_();
+        removeListener();
+      }
+    });
+  }
+
+  /**
+   * Listen for any horizontal swipes, and fire an analytics event if it happens.
+   */
+  listenForSwipes_() {
+    const gestures = Gestures.get(
+      this.pageElement_,
+      true /* shouldNotPreventDefault */,
+      false /* shouldStopPropogation */
+    );
+    gestures.onGesture(SwipeXRecognizer, () => {
+      this.analyticsEvent_(AnalyticsEvents.AD_SWIPED, {
+        [AnalyticsVars.AD_SWIPED]: Date.now(),
+      });
+      gestures.cleanup();
+    });
+  }
+
+  /**
+   * Returns the iframe containing the creative if it exists.
+   * @return {?HTMLIFrameElement}
+   */
+  getAdFrame_() {
+    if (this.adFrame_) {
+      return this.adFrame_;
+    }
+    return (this.adFrame_ = /** @type {?HTMLIFrameElement} */ (elementByTag(
+      devAssert(this.pageElement_),
+      'iframe'
+    )));
+  }
+
+  /**
    * Things that need to happen after the created ad is "loaded".
    * @private
    */
@@ -326,6 +399,7 @@ export class StoryAdPage {
     // Ensures the video-manager does not follow the autoplay attribute on
     // amp-video tags, which would play the ad in the background before it is
     // displayed.
+    // TODO(ccordry): do we still need this? Its a pain to always stub in tests.
     this.pageElement_.getImpl().then((impl) => impl.delegateVideoAutoplay());
 
     // Remove loading attribute once loaded so that desktop CSS will position
@@ -336,9 +410,10 @@ export class StoryAdPage {
       [AnalyticsVars.AD_LOADED]: Date.now(),
     });
 
-    const adFrame = elementByTag(this.pageElement_, 'iframe');
-    if (adFrame) {
-      this.adDoc_ = getFrameDoc(/** @type {!HTMLIFrameElement} */ (adFrame));
+    if (this.getAdFrame_() && !this.is3pAdFrame_) {
+      this.adDoc_ = getFrameDoc(
+        /** @type {!HTMLIFrameElement} */ (this.adFrame_)
+      );
     }
 
     this.loaded_ = true;
@@ -359,6 +434,7 @@ export class StoryAdPage {
       uiMetadata
     ).then((anchor) => {
       if (anchor) {
+        this.ctaAnchor_ = anchor;
         // Click listener so that we can fire `story-ad-click` analytics trigger at
         // the appropriate time.
         anchor.addEventListener('click', () => {

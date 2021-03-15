@@ -74,6 +74,13 @@ export function setParent(node, parent) {
 }
 
 /**
+ * @param {!Node} node
+ */
+export function discover(node) {
+  ContextNode.get(node).discover();
+}
+
+/**
  * Designates (or undesignates) the node as a root node. If the node is
  * designated as a root, it will no longer discover itself.
  *

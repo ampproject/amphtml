@@ -115,17 +115,29 @@ export class Renderer {
       stencil: false,
       antialias: false,
       premultipliedAlpha: true,
+      preserveDrawingBuffer: window.__AMP_TEST || false,
     };
-    const gl = this.gl = canvas.getContext('webgl', params) ||
+    this.gl = canvas.getContext('webgl', params) ||
         canvas.getContext('experimental-webgl', params);
 
     this.canvas = canvas;
-    this.resize();
-
+    
     this.rotation = null;
     this.scale = 1;
     this.orientation = null;
 
+    this.vertShader = null;
+    this.fragShaderFast = null;
+    this.fragShaderSlow = null;
+    this.progFast = null;
+    this.progSlow = null;
+    this.vbo = null;
+    this.tex = null;
+  }
+
+  init() {
+    const gl = this.gl;
+    
     this.vertShader = gl.createShader(gl.VERTEX_SHADER);
     this.fragShaderFast = gl.createShader(gl.FRAGMENT_SHADER);
     this.fragShaderSlow = gl.createShader(gl.FRAGMENT_SHADER);
@@ -154,8 +166,10 @@ export class Renderer {
 
     gl.bindTexture(gl.TEXTURE_2D, null);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    
+    this.resize();
   }
-
+          
   setImage(img) {
     const gl = this.gl;
     gl.bindTexture(gl.TEXTURE_2D, this.tex);

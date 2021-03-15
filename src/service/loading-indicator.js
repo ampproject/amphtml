@@ -15,9 +15,10 @@
  */
 
 import {createLoaderElement} from './loader-element';
+import {createViewportObserver} from '../viewport-observer';
 import {htmlFor} from '../static-template';
-import {isIframed, removeElement} from '../dom';
 import {registerServiceBuilderForDoc} from '../service';
+import {removeElement} from '../dom';
 
 const MIN_SIZE = 20;
 
@@ -58,25 +59,8 @@ export class LoadingIndicatorImpl {
       /** @type {!Array<!IntersectionObserverEntry>} */ (records).forEach(
         inViewport
       );
-    const iframed = isIframed(win);
-    const rootMargin = '25%';
-    // Classic IntersectionObserver doesn't support viewport tracking and
-    // rootMargin in x-origin iframes (#25428). As of 1/2020, only Chrome 81+
-    // supports it via {root: document}, which throws on other browsers.
-    const root = /** @type {?Element} */ (iframed
-      ? /** @type {*} */ (win.document)
-      : null);
-    let io;
-    try {
-      io = new win.IntersectionObserver(ioCallback, {
-        root,
-        rootMargin,
-      });
-    } catch (e) {
-      io = new win.IntersectionObserver(ioCallback, {rootMargin});
-    }
     /** @private @const {!IntersectionObserver} */
-    this.io_ = io;
+    this.io_ = createViewportObserver(ioCallback, win);
 
     /** @private @const {!WeakMap<!AmpElement, !LoadingIndicatorStateDef>} */
     this.states_ = new WeakMap();
@@ -150,7 +134,7 @@ export class LoadingIndicatorImpl {
     );
 
     const container = htmlFor(this.ampdoc_.win.document)`
-        <div class="i-amphtml-loading-container i-amphtml-fill-content
+        <div slot="i-amphtml-svc" class="i-amphtml-svc i-amphtml-loading-container i-amphtml-fill-content
             amp-hidden"></div>
       `;
     container.appendChild(loader);

@@ -17,26 +17,27 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const globby = require('globby');
-const log = require('fancy-log');
 const path = require('path');
 const url = require('url');
 const util = require('util');
 const {
   gitCommitHash,
-  gitTravisMasterBaseline,
+  gitCiMasterBaseline,
   shortSha,
 } = require('../../common/git');
 const {
-  isTravisPullRequestBuild,
-  isTravisPushBuild,
-  travisPushBranch,
-  travisRepoSlug,
-} = require('../../common/travis');
+  isPullRequestBuild,
+  isPushBuild,
+  ciPushBranch,
+  circleciPrMergeCommit,
+  ciRepoSlug,
+} = require('../../common/ci');
 const {
   VERSION: internalRuntimeVersion,
 } = require('../../compile/internal-version');
-const {cyan, green, red, yellow} = require('ansi-colors');
-const {report, Report} = require('@ampproject/filesize');
+const {cyan, red, yellow} = require('kleur/colors');
+const {log, logWithoutTimestamp} = require('../../common/logging');
+const {report, NoTTYReport} = require('@ampproject/filesize');
 
 const requestPost = util.promisify(require('request').post);
 
@@ -56,47 +57,56 @@ const replacementExpression = new RegExp(internalRuntimeVersion, 'g');
  */
 async function getBrotliBundleSizes() {
   const bundleSizes = {};
-
-  log(cyan('brotli'), 'bundle sizes are:');
-  await report(
+  const sizes = await report(
     filesizeConfigPath,
     (content) => content.replace(replacementExpression, normalizedRtvNumber),
-    class extends Report {
-      update(context) {
-        const completed = super.getUpdated(context);
-        for (const complete of completed) {
-          const [filePath, sizeMap] = complete;
-          const relativePath = path.relative('.', filePath);
-          const reportedSize = parseFloat((sizeMap[0][0] / 1024).toFixed(2));
-          log(' ', cyan(relativePath) + ':', green(reportedSize + 'KB'));
-          bundleSizes[relativePath] = reportedSize;
-        }
-      }
-    }
+    NoTTYReport,
+    /* silent */ false
   );
-
+  for (const size of sizes) {
+    const [filePath, sizeMap] = size;
+    const relativePath = path.relative('.', filePath);
+    const reportedSize = parseFloat((sizeMap[0][0] / 1024).toFixed(2));
+    bundleSizes[relativePath] = reportedSize;
+  }
   return bundleSizes;
 }
 
 /**
- * Store the bundle size of a commit hash in the build artifacts storage
+ * Checks the response of an operation. Throws if there's an error, and prints
+ * success messages if not.
+ * @param {!Object} response
+ * @param {...string} successMessages
+ */
+function checkResponse(response, ...successMessages) {
+  if (response.statusCode < 200 || response.statusCode >= 300) {
+    throw new Error(
+      `${response.statusCode} ${response.statusMessage}: ` + response.body
+    );
+  } else {
+    log(...successMessages);
+  }
+}
+
+/**
+ * Store the bundle sizes for a commit hash in the build artifacts storage
  * repository to the passed value.
  */
 async function storeBundleSize() {
-  if (!isTravisPushBuild() || travisPushBranch() !== 'master') {
+  if (!isPushBuild() || ciPushBranch() !== 'master') {
     log(
       yellow('Skipping'),
       cyan('--on_push_build') + ':',
-      'this action can only be performed on `master` push builds on Travis'
+      'this action can only be performed on `master` push builds during CI'
     );
     return;
   }
 
-  if (travisRepoSlug() !== expectedGitHubRepoSlug) {
+  if (ciRepoSlug() !== expectedGitHubRepoSlug) {
     log(
       yellow('Skipping'),
       cyan('--on_push_build') + ':',
-      'this action can only be performed on Travis builds on the',
+      'this action can only be performed during CI builds on the',
       cyan(expectedGitHubRepoSlug),
       'repository'
     );
@@ -104,6 +114,7 @@ async function storeBundleSize() {
   }
 
   const commitHash = gitCommitHash();
+  log('Storing bundle sizes for commit', cyan(shortSha(commitHash)) + '...');
   try {
     const response = await requestPost({
       uri: url.resolve(
@@ -116,25 +127,24 @@ async function storeBundleSize() {
         bundleSizes: await getBrotliBundleSizes(),
       },
     });
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw new Error(
-        `${response.statusCode} ${response.statusMessage}: ` + response.body
-      );
-    }
+    checkResponse(response, 'Successfully stored bundle sizes.');
   } catch (error) {
-    log(red('Could not store the bundle size'));
-    log(red(error));
-    process.exitCode = 1;
+    log(yellow('WARNING:'), 'Could not store bundle sizes');
+    logWithoutTimestamp(error);
     return;
   }
 }
 
 /**
- * Mark a pull request on Travis as skipped, via the AMP bundle-size GitHub App.
+ * Mark a pull request as skipped, via the AMP bundle-size GitHub App.
  */
 async function skipBundleSize() {
-  if (isTravisPullRequestBuild()) {
+  if (isPullRequestBuild()) {
     const commitHash = gitCommitHash();
+    log(
+      'Skipping bundle size reporting for commit',
+      cyan(shortSha(commitHash)) + '...'
+    );
     try {
       const response = await requestPost(
         url.resolve(
@@ -142,23 +152,16 @@ async function skipBundleSize() {
           path.join('commit', commitHash, 'skip')
         )
       );
-      if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw new Error(
-          `${response.statusCode} ${response.statusMessage}: ` + response.body
-        );
-      }
+      checkResponse(response, 'Successfully skipped bundle size reporting.');
     } catch (error) {
-      log(red('Could not report a skipped pull request'));
-      log(red(error));
-      process.exitCode = 1;
+      log(yellow('WARNING:'), 'Could not skip bundle size reporting');
+      logWithoutTimestamp(error);
       return;
     }
   } else {
     log(
-      yellow(
-        'Not marking this pull request to skip because that can only be ' +
-          'done on Travis'
-      )
+      yellow('WARNING'),
+      'Pull requests can be marked as skipped only during CI builds'
     );
   }
 }
@@ -167,42 +170,51 @@ async function skipBundleSize() {
  * Report the size to the bundle-size GitHub App, to determine size changes.
  */
 async function reportBundleSize() {
-  if (isTravisPullRequestBuild()) {
-    const baseSha = gitTravisMasterBaseline();
-    const commitHash = gitCommitHash();
+  if (isPullRequestBuild()) {
+    const headSha = gitCommitHash();
+    const baseSha = gitCiMasterBaseline();
+    const mergeSha = circleciPrMergeCommit();
+    log(
+      'Reporting bundle sizes for commit',
+      cyan(shortSha(headSha)),
+      'using baseline commit',
+      cyan(shortSha(baseSha)),
+      'and merge commit',
+      cyan(shortSha(mergeSha)) + '...'
+    );
     try {
       const response = await requestPost({
         uri: url.resolve(
           bundleSizeAppBaseUrl,
-          path.join('commit', commitHash, 'report')
+          path.join('commit', headSha, 'report')
         ),
         json: true,
         body: {
           baseSha,
+          mergeSha,
           bundleSizes: await getBrotliBundleSizes(),
         },
       });
-      if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw new Error(
-          `${response.statusCode} ${response.statusMessage}: ` + response.body
-        );
-      }
+      checkResponse(response, 'Successfully reported bundle sizes.');
     } catch (error) {
-      log(red('Could not report the bundle size of this pull request'));
-      log(red(error));
-      process.exitCode = 1;
+      log(
+        yellow('WARNING:'),
+        'Could not report the bundle sizes for this pull request'
+      );
+      logWithoutTimestamp(error);
       return;
     }
   } else {
     log(
-      yellow(
-        'Not reporting the bundle size of this pull request because ' +
-          'that can only be done on Travis'
-      )
+      yellow('WARNING:'),
+      'Bundle sizes from pull requests can be reported only during CI builds'
     );
   }
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function getLocalBundleSize() {
   if (globby.sync(fileGlobs).length === 0) {
     log('Could not find runtime files.');
@@ -211,7 +223,7 @@ async function getLocalBundleSize() {
     return;
   } else {
     log(
-      'Computing bundle size for version',
+      'Computing bundle sizes for version',
       cyan(internalRuntimeVersion),
       'at commit',
       cyan(shortSha(gitCommitHash())) + '.'
@@ -220,6 +232,9 @@ async function getLocalBundleSize() {
   await getBrotliBundleSizes();
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function bundleSize() {
   if (argv.on_skipped_build) {
     return skipBundleSize();
@@ -243,11 +258,11 @@ bundleSize.description =
   'Checks if the minified AMP binary has exceeded its size cap';
 bundleSize.flags = {
   'on_push_build':
-    '  Store bundle size in AMP build artifacts repo ' +
+    '  Store bundle sizes in the AMP build artifacts repo ' +
     '(also implies --on_pr_build)',
-  'on_pr_build': '  Report the bundle size of this pull request to GitHub',
+  'on_pr_build': '  Report the bundle sizes for this pull request to GitHub',
   'on_skipped_build':
     "  Set the status of this pull request's bundle " +
     'size check in GitHub to `skipped`',
-  'on_local_build': '  Compute the bundle size of the locally built runtime',
+  'on_local_build': '  Compute bundle sizes for the locally built runtime',
 };

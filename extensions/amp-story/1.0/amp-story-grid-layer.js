@@ -29,7 +29,8 @@
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
-import {matches, scopedQuerySelectorAll} from '../../../src/dom';
+import {isPrerenderActivePage} from './prerender-active-page';
+import {scopedQuerySelectorAll} from '../../../src/dom';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
@@ -76,51 +77,90 @@ export const GRID_LAYER_TEMPLATE_CLASS_NAMES = {
 };
 
 /**
+ * The attribute name for grid layer presets.
+ * @private @const {string}
+ */
+const PRESET_ATTRIBUTE_NAME = 'preset';
+
+/**
+ * @typedef {{
+ *  aspect-ratio: string,
+ *  scaling-factor: ?float,
+ * }}
+ */
+export let PresetDetails;
+
+/**
+ * The attributes that will be applied for each preset.
+ * @private @const {!Object<string, !PresetDetails>}
+ */
+const GRID_LAYER_PRESET_DETAILS = {
+  '2021-background': {
+    'aspect-ratio': '69:116',
+    'scaling-factor': 1.142,
+  },
+  '2021-foreground': {
+    'aspect-ratio': '69:116',
+  },
+};
+
+/**
  * Grid layer template templating system.
  */
 export class AmpStoryGridLayer extends AmpStoryBaseLayer {
+  /** @override @nocollapse */
+  static prerenderAllowed(element) {
+    return isPrerenderActivePage(element.parentElement);
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
-    /** @private {?boolean} */
-    this.isFirstPage_ = null;
-
     /** @private {?{horiz: number, vert: number}} */
     this.aspectRatio_ = null;
-  }
 
-  /**
-   * Returns true if a child of the first page.
-   * @return {boolean}
-   */
-  isFirstPage() {
-    if (this.isFirstPage_ === null) {
-      this.isFirstPage_ = matches(
-        this.element,
-        'amp-story-page:first-of-type amp-story-grid-layer'
-      );
-    }
-    return this.isFirstPage_;
+    /** @private {number} */
+    this.scalingFactor_ = 1;
   }
 
   /** @override */
   buildCallback() {
     super.buildCallback();
+    this.applyResponsivenessPresets_();
     this.applyTemplateClassName_();
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();
     this.initializeListeners_();
   }
 
-  /** @override */
-  prerenderAllowed() {
-    return this.isFirstPage();
+  /**
+   * Applies the attributes to the layer from the preset specified in the [preset] attribute.
+   * @private
+   */
+  applyResponsivenessPresets_() {
+    if (!this.element.hasAttribute(PRESET_ATTRIBUTE_NAME)) {
+      return;
+    }
+    const preset = this.element.getAttribute(PRESET_ATTRIBUTE_NAME);
+    const presetDetails = GRID_LAYER_PRESET_DETAILS[preset];
+    if (!presetDetails) {
+      return;
+    }
+    Object.entries(presetDetails).forEach((keyValue) =>
+      this.element.setAttribute(keyValue[0], keyValue[1])
+    );
   }
 
   /** @private */
   initializeListeners_() {
     const aspectRatio = this.element.getAttribute('aspect-ratio');
+    const scalingFactorFloat = parseFloat(
+      this.element.getAttribute('scaling-factor')
+    );
+    if (scalingFactorFloat && scalingFactorFloat > 0) {
+      this.scalingFactor_ = scalingFactorFloat;
+    }
     if (aspectRatio) {
       const aspectRatioSplits = aspectRatio.split(':');
       const horiz = parseInt(aspectRatioSplits[0], 10);
@@ -153,8 +193,8 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
       this.getVsync().mutate(() => {
         this.element.classList.add('i-amphtml-story-grid-template-aspect');
         setStyles(this.element, {
-          '--i-amphtml-story-layer-width': px(width),
-          '--i-amphtml-story-layer-height': px(height),
+          '--i-amphtml-story-layer-width': px(width * this.scalingFactor_),
+          '--i-amphtml-story-layer-height': px(height * this.scalingFactor_),
         });
       });
     }

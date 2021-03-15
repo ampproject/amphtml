@@ -153,36 +153,20 @@ t.run('Viewer Visibility State', () => {
             return whenUpgradedToCustomElement(img);
           })
           .then((img) => {
-            layoutCallback = env.sandbox.stub(
-              img.implementation_,
-              'layoutCallback'
-            );
-            unlayoutCallback = env.sandbox.stub(
-              img.implementation_,
-              'unlayoutCallback'
-            );
-            pauseCallback = env.sandbox.stub(
-              img.implementation_,
-              'pauseCallback'
-            );
-            resumeCallback = env.sandbox.stub(
-              img.implementation_,
-              'resumeCallback'
-            );
-            prerenderAllowed = env.sandbox.stub(
-              img.implementation_,
-              'prerenderAllowed'
-            );
-            env.sandbox
-              .stub(img.implementation_, 'isRelayoutNeeded')
-              .callsFake(() => true);
-            env.sandbox
-              .stub(img.implementation_, 'isLayoutSupported')
-              .callsFake(() => true);
+            prerenderAllowed = env.sandbox.stub(img, 'prerenderAllowed');
+            prerenderAllowed.returns(false);
+            return img.getImpl(false);
+          })
+          .then((impl) => {
+            layoutCallback = env.sandbox.stub(impl, 'layoutCallback');
+            unlayoutCallback = env.sandbox.stub(impl, 'unlayoutCallback');
+            pauseCallback = env.sandbox.stub(impl, 'pauseCallback');
+            resumeCallback = env.sandbox.stub(impl, 'resumeCallback');
+            env.sandbox.stub(impl, 'isRelayoutNeeded').callsFake(() => true);
+            env.sandbox.stub(impl, 'isLayoutSupported').callsFake(() => true);
 
             layoutCallback.returns(Promise.resolve());
             unlayoutCallback.returns(true);
-            prerenderAllowed.returns(false);
           });
       });
 

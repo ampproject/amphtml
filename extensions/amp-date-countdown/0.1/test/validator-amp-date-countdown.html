@@ -160,5 +160,14 @@
   <!-- Should error if the `template` referent is missing. -->
   <amp-date-countdown timestamp-ms="1521880470000" offset-seconds="1521880470" when-ended="stop" locale='zh-tw' height="50" width="360" template="notMyTemplate">
   </amp-date-countdown>
+
+  <!-- Should allow `data-count-up` attribute. -->
+  <amp-date-countdown data-count-up timestamp-seconds="1521880470" offset-seconds="1521880470" when-ended="continue" locale='de' height="50" width="360" template="myTemplate">
+  </amp-date-countdown>
+
+  <!-- Should error if `data-count-up` attribute is given a non-empty value. -->
+  <amp-date-countdown data-count-up="true" timestamp-seconds="1521880470" offset-seconds="1521880470" when-ended="continue" locale='de' height="50" width="360" template="myTemplate">
+  </amp-date-countdown>
+
 </body>
 </html>

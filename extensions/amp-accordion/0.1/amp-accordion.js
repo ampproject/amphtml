@@ -22,11 +22,10 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {clamp} from '../../../src/utils/math';
-import {closest, tryFocus} from '../../../src/dom';
+import {closest, dispatchCustomEvent, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
 import {getStyle, setImportantStyles, setStyles} from '../../../src/style';
 import {isExperimentOn} from '../../../src/experiments';
 import {
@@ -43,14 +42,16 @@ const MIN_TRANSITION_DURATION = 200; // ms
 const EXPAND_CURVE_ = bezierCurve(0.47, 0, 0.745, 0.715);
 const COLLAPSE_CURVE_ = bezierCurve(0.39, 0.575, 0.565, 1);
 
-const isDisplayLockingEnabledForAccordion = (win) => {
-  return (
-    isExperimentOn(win, 'amp-accordion-display-locking') &&
-    (document.body.onbeforematch !== undefined || getMode().test)
-  );
-};
+const isDisplayLockingEnabledForAccordion = (win) =>
+  isExperimentOn(win, 'amp-accordion-display-locking') &&
+  win.document.body.onbeforematch !== undefined;
 
 class AmpAccordion extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -80,11 +81,6 @@ class AmpAccordion extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.CONTAINER;
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @override */
@@ -166,7 +162,9 @@ class AmpAccordion extends AMP.BaseElement {
 
       const isExpanded = section.hasAttribute('expanded');
       header.classList.add('i-amphtml-accordion-header');
-      header.setAttribute('role', 'button');
+      if (!header.hasAttribute('role')) {
+        header.setAttribute('role', 'button');
+      }
       header.setAttribute('aria-controls', contentId);
       header.setAttribute('aria-expanded', String(isExpanded));
       if (!header.hasAttribute('tabindex')) {
@@ -174,7 +172,9 @@ class AmpAccordion extends AMP.BaseElement {
       }
       this.headers_.push(header);
       content.setAttribute('aria-labelledby', headerId);
-      content.setAttribute('role', 'region');
+      if (!content.hasAttribute('role')) {
+        content.setAttribute('role', 'region');
+      }
 
       userAssert(
         this.action_.hasAction(header, 'tap', section) == false,
@@ -298,7 +298,7 @@ class AmpAccordion extends AMP.BaseElement {
     );
     this.action_.trigger(section, name, event, trust);
 
-    this.element.dispatchCustomEvent(name);
+    dispatchCustomEvent(this.element, name);
   }
 
   /**

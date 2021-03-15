@@ -61,9 +61,9 @@ The component observes loading of a font. When the font successfully loads it ex
 
 Use these classes to guard against displaying a font and get the following results:
 
-- get a short (e.g. 3000ms) timeout in Safari similar to other browsers
-- implement FOIT where the page renders with no text before the font comes in
-- make the timeout very short and only use a font if it was already cached.
+-   get a short (e.g. 3000ms) timeout in Safari similar to other browsers
+-   implement FOIT where the page renders with no text before the font comes in
+-   make the timeout very short and only use a font if it was already cached.
 
 ## Attributes
 

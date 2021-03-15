@@ -56,10 +56,6 @@ export class InaboxMutator {
   expandElement(element) {
     const resource = this.resources_.getResourceForElement(element);
     resource.completeExpand();
-    const owner = resource.getOwner();
-    if (owner) {
-      owner.expandedCallback(element);
-    }
     this.resources_./*OK*/ schedulePass();
   }
 

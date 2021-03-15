@@ -25,6 +25,8 @@ import {
   processResultsPercentage,
 } from '../amp-story-interactive-results';
 import {InteractiveType} from '../amp-story-interactive-abstract';
+import {LocalizationService} from '../../../../src/service/localization';
+import {Services} from '../../../../src/services';
 import {addConfigToInteractive} from './test-amp-story-interactive';
 import {registerServiceBuilder} from '../../../../src/service';
 
@@ -63,6 +65,11 @@ describes.realWin(
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
       });
+
+      const localizationService = new LocalizationService(win.document.body);
+      env.sandbox
+        .stub(Services, 'localizationServiceForOrNull')
+        .returns(Promise.resolve(localizationService));
 
       storyEl = win.document.createElement('amp-story');
       const storyPage = win.document.createElement('amp-story-page');

@@ -27,21 +27,23 @@ import {
 } from '../../../src/iframe-video';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
-import {
-  createElementWithAttributes,
-  getDataParamsFromAttributes,
-  isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   disableScrollingOnIframe,
   looksLikeTrackingIframe,
 } from '../../../src/iframe-helper';
+import {
+  dispatchCustomEvent,
+  getDataParamsFromAttributes,
+  isFullscreenElement,
+  removeElement,
+} from '../../../src/dom';
+import {getConsentDataToForward} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {measureIntersection} from '../../../src/utils/intersection';
 import {once} from '../../../src/utils/function';
 
 /** @private @const */
@@ -121,7 +123,7 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     /**
      * @param {!Event} e
-     * @return {*} TODO(#23582): Specify return type
+     * @return {undefined}
      * @private
      */
     this.boundOnMessage_ = (e) => this.onMessage_(e);
@@ -179,10 +181,13 @@ class AmpVideoIframe extends AMP.BaseElement {
    */
   getMetadata_() {
     const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(this.element);
+    const {title, documentElement} = this.getAmpDoc().getRootNode();
 
     return dict({
       'sourceUrl': sourceUrl,
       'canonicalUrl': canonicalUrl,
+      'title': title || null,
+      'lang': documentElement?.lang || null,
     });
   }
 
@@ -190,25 +195,21 @@ class AmpVideoIframe extends AMP.BaseElement {
   onReady_() {
     const {element} = this;
     Services.videoManagerForDoc(element).register(this);
-    element.dispatchCustomEvent(VideoEvents.LOAD);
+    dispatchCustomEvent(element, VideoEvents.LOAD);
   }
 
   /** @override */
   createPlaceholderCallback() {
     const {element} = this;
-    const src = addDataParamsToUrl(
-      user().assertString(element.getAttribute('poster')),
-      element
-    );
-    return createElementWithAttributes(
-      devAssert(element.ownerDocument),
-      'amp-img',
-      dict({
-        'src': src,
-        'layout': 'fill',
-        'placeholder': '',
-      })
-    );
+    const poster = element.getAttribute('poster');
+    if (!poster) {
+      return null;
+    }
+    const img = new Image();
+    img.src = addDataParamsToUrl(poster, element);
+    img.setAttribute('placeholder', '');
+    this.applyFillContent(img);
+    return img;
   }
 
   /** @override */
@@ -271,6 +272,7 @@ class AmpVideoIframe extends AMP.BaseElement {
 
   /**
    * @param {!Event} event
+   * @return {!Promise|undefined}
    * @private
    */
   onMessage_(event) {
@@ -293,12 +295,29 @@ class AmpVideoIframe extends AMP.BaseElement {
       return; // we only process valid json
     }
 
-    const messageId = data['id'];
+    // Expected message format:
+    //
+    // @typedef {{
+    //   id: number,
+    //   method: (undefined|string),
+    //   event: (undefined|string),
+    //   analytics: (undefined|{
+    //     eventType: string,
+    //     vars: Object<string, string>,
+    //   }),
+    // }}
+
     const methodReceived = data['method'];
 
     if (methodReceived) {
+      const messageId = data['id'];
       if (methodReceived == 'getIntersection') {
-        this.postIntersection_(messageId);
+        return measureIntersection(this.element).then((intersection) => {
+          this.postIntersection_(messageId, intersection);
+        });
+      }
+      if (methodReceived === 'getConsentData') {
+        this.postConsentData_(messageId);
         return;
       }
       userAssert(false, 'Unknown method `%s`.', methodReceived);
@@ -327,7 +346,7 @@ class AmpVideoIframe extends AMP.BaseElement {
     }
 
     if (ALLOWED_EVENTS.indexOf(eventReceived) > -1) {
-      this.element.dispatchCustomEvent(eventReceived);
+      dispatchCustomEvent(this.element, eventReceived);
       return;
     }
   }
@@ -345,7 +364,8 @@ class AmpVideoIframe extends AMP.BaseElement {
       ANALYTICS_EVENT_TYPE_PREFIX
     );
 
-    this.element.dispatchCustomEvent(
+    dispatchCustomEvent(
+      this.element,
       VideoEvents.CUSTOM_TICK,
       dict({
         'eventType': eventType,
@@ -356,10 +376,11 @@ class AmpVideoIframe extends AMP.BaseElement {
 
   /**
    * @param {number} messageId
+   * @param {!IntersectionObserverEntry} intersection
    * @private
    */
-  postIntersection_(messageId) {
-    const {time, intersectionRatio} = this.element.getIntersectionChangeEntry();
+  postIntersection_(messageId, intersection) {
+    const {intersectionRatio, time} = intersection;
 
     // Only post ratio > 0 when in autoplay range to prevent internal autoplay
     // implementations that differ from ours.
@@ -380,16 +401,34 @@ class AmpVideoIframe extends AMP.BaseElement {
   }
 
   /**
+   * @param {number} messageId
+   * @private
+   */
+  postConsentData_(messageId) {
+    getConsentDataToForward(this.element, this.getConsentPolicy()).then(
+      (consentData) => {
+        this.postMessage_(dict({'id': messageId, 'args': consentData}));
+      }
+    );
+  }
+
+  /**
    * @param {string} method
    * @private
    */
   method_(method) {
-    this.postMessage_(
-      dict({
-        'event': 'method',
-        'method': method,
-      })
-    );
+    const {promise} = this.readyDeferred_ || {};
+    if (!promise) {
+      return;
+    }
+    promise.then(() => {
+      this.postMessage_(
+        dict({
+          'event': 'method',
+          'method': method,
+        })
+      );
+    });
   }
 
   /**
@@ -397,19 +436,10 @@ class AmpVideoIframe extends AMP.BaseElement {
    * @private
    */
   postMessage_(message) {
-    const promise = this.readyDeferred_ && this.readyDeferred_.promise;
-    if (!promise) {
+    if (!this.iframe_ || !this.iframe_.contentWindow) {
       return;
     }
-    promise.then(() => {
-      if (!this.iframe_ || !this.iframe_.contentWindow) {
-        return;
-      }
-      this.iframe_.contentWindow./*OK*/ postMessage(
-        JSON.stringify(message),
-        '*'
-      );
-    });
+    this.iframe_.contentWindow./*OK*/ postMessage(JSON.stringify(message), '*');
   }
 
   /** @override */

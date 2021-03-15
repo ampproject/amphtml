@@ -27,6 +27,9 @@ const TAG = 'amp-auto-ads';
 const NON_DATA_ATTRIBUTE_ALLOWLIST = {
   'type': true,
   'rtc-config': true,
+  'layout': true,
+  'height': true,
+  'width': true,
 };
 
 /**

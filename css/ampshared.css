@@ -163,7 +163,7 @@ i-amphtml-sizer {
  * borwser and the optimizer.
  */
 @supports (aspect-ratio: 1 / 1) {
-  i-amphtml-sizer.i-amphtml-disable-for-ar {
+  i-amphtml-sizer.i-amphtml-disable-ar {
     display: none !important;
   }
 }
@@ -325,9 +325,12 @@ amp-img:not(.i-amphtml-element)[i-amphtml-ssr] > img.i-amphtml-fill-content
 .i-amphtml-element > [placeholder],
 [layout]:not(.i-amphtml-element) > [placeholder],
 [width][height][sizes]:not([layout]):not(.i-amphtml-element) > [placeholder],
-[width][height][heights]:not([layout]):not(.i-amphtml-element) > [placeholder]
-{
+[width][height][heights]:not([layout]):not(.i-amphtml-element) > [placeholder] {
   display: block;
+  /* line-height:normal overrides line-height:0 from the "hide all children of
+     non-container text node children" rule. This avoids a minor content jump during
+     element build since placeholders should be fully visible. */
+  line-height: normal;
 }
 
 .i-amphtml-element > [placeholder].hidden,
@@ -355,6 +358,14 @@ amp-img:not(.i-amphtml-element)[i-amphtml-ssr] > img.i-amphtml-fill-content
   right: 0 !important;
   bottom: 0 !important;
   z-index: 1;
+}
+
+/* We reset the z-index of blurry image placeholders for images that are
+   rendered by the server and are not (yet) controlled by JS to speed up
+   display of the real image. This conveniently also fixes the display of
+   the image when JS fails to load. */
+amp-img.i-amphtml-ssr:not(.i-amphtml-element) > [placeholder] {
+  z-index: auto;
 }
 
 .i-amphtml-notbuilt > [placeholder] {
@@ -432,6 +443,13 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
      element build since overflows increase the height of their parents. */
   display: initial;
   line-height: normal;
+}
+
+/**
+ * "overflow" element must not contribute space to a size-defined element.
+ */
+.i-amphtml-layout-size-defined > [overflow] {
+  position: absolute;
 }
 
 .i-amphtml-element > [overflow].amp-visible {

@@ -150,7 +150,7 @@ TEST(TypesTest, SingleValue) {
   EXPECT_EQ(j6.ToString(), "null");
 
   JsonArray jarr;
-  EXPECT_EQ(jarr.ToString(), "[\n\n]");
+  EXPECT_EQ(jarr.ToString(), "[]");
   // Bulk append.
   jarr.Append(1, 2, 3, 1.200000, 2.200000, 3.300000, "hello", "world");
   EXPECT_EQ(jarr.ToString(),

@@ -24,12 +24,14 @@ const COMMON_GLOBS = [
   'third_party/amp-toolbox-cache-url/**/*.js',
   'third_party/caja/html-sanitizer.js',
   'third_party/closure-library/sha384-generated.js',
+  'third_party/closure-responding-channel/closure-bundle.js',
   'third_party/css-escape/css-escape.js',
   'third_party/d3/**/*.js',
   'third_party/fuzzysearch/index.js',
   'third_party/inputmask/**/*.js',
   'third_party/mustache/**/*.js',
   'third_party/react-dates/bundle.js',
+  'third_party/resize-observer-polyfill/ResizeObserver.install.js',
   'third_party/set-dom/set-dom.js',
   'third_party/subscriptions-project/*.js',
   'third_party/timeagojs/**/*.js',
@@ -40,9 +42,15 @@ const COMMON_GLOBS = [
   'node_modules/dompurify/dist/purify.es.js',
   'node_modules/intersection-observer/package.json',
   'node_modules/intersection-observer/intersection-observer.install.js',
+  'node_modules/resize-observer-polyfill/package.json',
+  'node_modules/resize-observer-polyfill/ResizeObserver.install.js',
+  'node_modules/obj-str/package.json',
+  'node_modules/obj-str/dist/obj-str.mjs',
   'node_modules/promise-pjs/package.json',
   'node_modules/promise-pjs/promise.mjs',
-  'node_modules/rrule/dist/es5/rrule.min.js',
+  'node_modules/rrule/dist/es5/rrule.js',
+  'node_modules/timeago.js/package.json',
+  'node_modules/timeago.js/**/*.js',
   'node_modules/web-animations-js/package.json',
   'node_modules/web-animations-js/web-animations.install.js',
   'node_modules/web-activities/package.json',
@@ -105,10 +113,17 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-animation/**/*.js',
   // Needed for amp-carousel 0.2, amp-inline-gallery, amp-stream-gallery
   'extensions/amp-base-carousel/**/*.js',
+  // Needed for carousel autolightbox
+  'extensions/amp-lightbox-gallery/1.0/*.js',
+  // Needed for amp-lightbox-gallery using amp-lightbox
+  'extensions/amp-lightbox/1.0/*.js',
   // For amp-bind in the web worker (ww.js).
   'extensions/amp-bind/**/*.js',
   // Needed to access to Variant interface from other extensions
   'extensions/amp-experiment/**/*.js',
+  // TODO(#32523) Remove this when Bento experiment is done.
+  // Needed to access across versions
+  'extensions/amp-fit-text/1.0/*.js',
   // Needed to access form impl from other extensions
   'extensions/amp-form/**/*.js',
   // Needed by amp-facebook-* for the loader logo
@@ -119,10 +134,14 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-access/**/*.js',
   // Needed for AmpStoryVariableService
   'extensions/amp-story/**/*.js',
+  // Needed for story ad inabox
+  'extensions/amp-story-auto-ads/**/*.js',
   // Needed for SubscriptionsService
   'extensions/amp-subscriptions/**/*.js',
   // Needed to access UserNotificationManager from other extensions
   'extensions/amp-user-notification/**/*.js',
+  // Needed for video components in Bento.
+  'extensions/amp-video/1.0/**/*.js',
   // Needed for VideoService
   'extensions/amp-video-service/**/*.js',
   // Needed to access ConsentPolicyManager from other extensions

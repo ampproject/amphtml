@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Timeago} from '../timeago';
+import {Timeago} from '../component';
 import {date, number, select, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
@@ -25,7 +25,17 @@ export default {
   decorators: [withA11y, withKnobs],
 };
 
-const LOCALES = ['en-US', 'en-GB', 'fr', 'ru', 'ar', 'he', 'ja'];
+const LOCALES = [
+  'en-US',
+  'en-GB',
+  'fr',
+  'ru',
+  'ar',
+  'he',
+  'ja',
+  'ZhTw',
+  'zH-Tw',
+];
 
 export const _default = () => {
   const dateTime = date('Date/time', new Date());

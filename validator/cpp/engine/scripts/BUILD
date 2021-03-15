@@ -18,7 +18,7 @@ cc_binary(
         "validator_example.cc",
     ],
     deps = [
-        "@validatorcpp//:validator",
+        "@ampvalidator//:validator",
         "@validator//:validator_cc_proto",
     ],
 )

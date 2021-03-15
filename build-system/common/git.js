@@ -20,38 +20,37 @@
  */
 
 const {
-  isTravisBuild,
-  isTravisPullRequestBuild,
-  travisPullRequestBranch,
-  travisPullRequestSha,
-} = require('./travis');
+  isCiBuild,
+  isPullRequestBuild,
+  ciPullRequestBranch,
+  ciPullRequestSha,
+} = require('./ci');
 const {getStdout} = require('./exec');
 
 /**
- * Returns the commit at which the current branch was forked off of master.
- * On Travis, there is an additional merge commit, so we must pick the first of
+ * Returns the commit at which the current PR branch was forked off of master.
+ * During CI, there is an additional merge commit, so we must pick the first of
  * the boundary commits (prefixed with a -) returned by git rev-list.
  * On local branches, this is merge base of the current branch off of master.
  * @return {string}
  */
 function gitBranchCreationPoint() {
-  if (isTravisBuild()) {
-    const traviPrSha = travisPullRequestSha();
+  if (isPullRequestBuild()) {
+    const prSha = ciPullRequestSha();
     return getStdout(
-      `git rev-list --boundary ${traviPrSha}...master | grep "^-" | head -n 1 | cut -c2-`
+      `git rev-list --boundary ${prSha}...origin/master | grep "^-" | head -n 1 | cut -c2-`
     ).trim();
   }
   return gitMergeBaseLocalMaster();
 }
 
 /**
- * Returns the `master` parent of the merge commit (current HEAD) on Travis.
- * Note: This is not the same as origin/master (a moving target), since new
- * commits can be merged while a Travis build is in progress.
- * See https://travis-ci.community/t/origin-master-moving-forward-between-build-stages/4189/6
+ * Returns the `master` parent of the merge commit (current HEAD) during CI
+ * builds. This is not the same as origin/master (a moving target), since
+ * new commits can be merged while a CI build is in progress.
  * @return {string}
  */
-function gitTravisMasterBaseline() {
+function gitCiMasterBaseline() {
   return getStdout('git merge-base origin/master HEAD').trim();
 }
 
@@ -144,8 +143,8 @@ function gitDiffFileMaster(file) {
  * @return {string}
  */
 function gitBranchName() {
-  return isTravisPullRequestBuild()
-    ? travisPullRequestBranch()
+  return isPullRequestBuild()
+    ? ciPullRequestBranch()
     : getStdout('git rev-parse --abbrev-ref HEAD').trim();
 }
 
@@ -154,8 +153,8 @@ function gitBranchName() {
  * @return {string}
  */
 function gitCommitHash() {
-  if (isTravisPullRequestBuild()) {
-    return travisPullRequestSha();
+  if (isPullRequestBuild()) {
+    return ciPullRequestSha();
   }
   return getStdout('git rev-parse --verify HEAD').trim();
 }
@@ -177,16 +176,11 @@ function gitCommitterEmail() {
  * from <branch> are prefixed with '- ', and those that were not are prefixed
  * with '+ '.
  *
- * @return {!Array<{sha: string, isCherryPick: boolean}>}
+ * @return {!Array<string>}
  */
 function gitCherryMaster() {
-  return getStdout('git cherry master')
-    .trim()
-    .split('\n')
-    .map((line) => ({
-      isCherryPick: line.substring(0, 2) == '- ',
-      sha: line.substring(2),
-    }));
+  const stdout = getStdout('git cherry master').trim();
+  return stdout ? stdout.split('\n') : [];
 }
 
 /**
@@ -204,27 +198,6 @@ function gitCommitFormattedTime(ref = 'HEAD') {
 }
 
 /**
- * Returns the commit message of a given ref.
- * @param {string} ref a Git reference (commit SHA, branch name, etc.) for the
- *   commit to get the time of.
- * @return {string}
- */
-function gitCommitMessage(ref = 'HEAD') {
-  return getStdout(`git log ${ref} -n 1 --pretty="%B"`);
-}
-
-/**
- * Checks if a branch contains a specific ref.
- * @param {string} ref a Git reference (commit SHA, branch name, etc.) for the
- *   commit to get the time of.
- * @param {string} branch the branch to check.
- * @return {boolean}
- */
-function gitBranchContains(ref, branch = 'master') {
-  return Boolean(getStdout(`git branch ${branch} --contains ${ref}`).trim());
-}
-
-/**
  * Returns the merge base of the current branch off of master when running on
  * a local workspace.
  * @return {string}
@@ -238,8 +211,8 @@ function gitMergeBaseLocalMaster() {
  * @return {string}
  */
 function gitMasterBaseline() {
-  if (isTravisBuild()) {
-    return gitTravisMasterBaseline();
+  if (isCiBuild()) {
+    return gitCiMasterBaseline();
   }
   return gitMergeBaseLocalMaster();
 }
@@ -255,13 +228,11 @@ function gitDiffPath(path, commit) {
 }
 
 module.exports = {
-  gitBranchContains,
   gitBranchCreationPoint,
   gitBranchName,
   gitCherryMaster,
   gitCommitFormattedTime,
   gitCommitHash,
-  gitCommitMessage,
   gitCommitterEmail,
   gitDiffAddedNameOnlyMaster,
   gitDiffColor,
@@ -271,6 +242,6 @@ module.exports = {
   gitDiffNameOnlyMaster,
   gitDiffPath,
   gitDiffStatMaster,
-  gitTravisMasterBaseline,
+  gitCiMasterBaseline,
   shortSha,
 };

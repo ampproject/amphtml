@@ -15,8 +15,12 @@
  */
 
 import {CSS as AmpInlineGalleryCSS} from '../../../build/amp-inline-gallery-0.1.css';
+import {AmpInlineGalleryCaptions} from './amp-inline-gallery-captions';
+import {CSS as AmpInlineGalleryCaptionsCSS} from '../../../build/amp-inline-gallery-captions-0.1.css';
 import {AmpInlineGalleryPagination} from './amp-inline-gallery-pagination';
 import {CSS as AmpInlineGalleryPaginationCSS} from '../../../build/amp-inline-gallery-pagination-0.1.css';
+import {AmpInlineGallerySlide} from './amp-inline-gallery-slide';
+import {CSS as AmpInlineGallerySlideCSS} from '../../../build/amp-inline-gallery-slide-0.1.css';
 import {AmpInlineGalleryThumbnails} from './amp-inline-gallery-thumbnails';
 import {CSS as AmpInlineGalleryThumbnailsCSS} from '../../../build/amp-inline-gallery-thumbnails-0.1.css';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
@@ -34,7 +38,8 @@ import {toArray} from '../../../src/types';
  * The selector of children to update the progress on as the gallery's carousel
  * changes position.
  */
-const CHILDREN_FOR_PROGRESS_SELECTOR = 'amp-inline-gallery-pagination';
+const CHILDREN_FOR_PROGRESS_SELECTOR =
+  'amp-inline-gallery-pagination, amp-inline-gallery-captions';
 
 /**
  * The selector for the element to contain the thumbnails.
@@ -48,6 +53,11 @@ const CAROUSEL_SELECTOR =
   '> amp-base-carousel, :not(amp-inline-gallery-thumbnails) > amp-base-carousel';
 
 class AmpInlineGallery extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -86,11 +96,6 @@ class AmpInlineGallery extends AMP.BaseElement {
   }
 
   /** @override */
-  prerenderAllowed() {
-    return true;
-  }
-
-  /** @override */
   isLayoutSupported(layout) {
     return layout === Layout.CONTAINER;
   }
@@ -99,14 +104,15 @@ class AmpInlineGallery extends AMP.BaseElement {
    * @param {number} total
    * @param {number} index
    * @param {number} offset
+   * @param {!Array<!Element>} slides
    * @private
    */
-  updateProgress_(total, index, offset) {
+  updateProgress_(total, index, offset, slides) {
     iterateCursor(
       scopedQuerySelectorAll(this.element, CHILDREN_FOR_PROGRESS_SELECTOR),
       (el) => {
         el.getImpl().then((pagination) => {
-          pagination.updateProgress(total, index, offset);
+          pagination.updateProgress(total, index, offset, slides);
         });
       }
     );
@@ -120,8 +126,9 @@ class AmpInlineGallery extends AMP.BaseElement {
     const detail = getDetail(event);
     const total = detail['total'];
     const index = detail['index'];
+    const slides = detail['slides'];
 
-    this.updateProgress_(total, index, 0);
+    this.updateProgress_(total, index, 0, slides);
   }
 
   /**
@@ -133,8 +140,9 @@ class AmpInlineGallery extends AMP.BaseElement {
     const total = detail['total'];
     const index = detail['index'];
     const offset = detail['offset'];
+    const slides = detail['slides'];
 
-    this.updateProgress_(total, index, offset);
+    this.updateProgress_(total, index, offset, slides);
   }
 
   /**
@@ -158,9 +166,19 @@ class AmpInlineGallery extends AMP.BaseElement {
 
 AMP.extension('amp-inline-gallery', '0.1', (AMP) => {
   AMP.registerElement(
+    'amp-inline-gallery-captions',
+    AmpInlineGalleryCaptions,
+    AmpInlineGalleryCaptionsCSS
+  );
+  AMP.registerElement(
     'amp-inline-gallery-pagination',
     AmpInlineGalleryPagination,
     AmpInlineGalleryPaginationCSS
+  );
+  AMP.registerElement(
+    'amp-inline-gallery-slide',
+    AmpInlineGallerySlide,
+    AmpInlineGallerySlideCSS
   );
   AMP.registerElement(
     'amp-inline-gallery-thumbnails',

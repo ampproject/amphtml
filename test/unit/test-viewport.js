@@ -222,6 +222,35 @@ describes.fakeWin('Viewport', {}, (env) => {
       expect(root).to.have.class('i-amphtml-iframed');
     });
 
+    describe('scroll to in ios-webview', () => {
+      beforeEach(() => {
+        ampdoc.win.scrollTo = env.sandbox.spy();
+        env.sandbox.stub(Services, 'platformFor').returns({
+          isIos: () => {
+            return true;
+          },
+        });
+        // To ensure isIframed() returns true
+        ampdoc.win.parent = {};
+      });
+
+      it('should scroll when in a single doc', async () => {
+        env.sandbox.stub(ampdoc, 'isSingleDoc').returns(true);
+
+        new ViewportImpl(ampdoc, binding, viewer);
+        await ampdoc.whenReady();
+        expect(ampdoc.win.scrollTo).to.have.been.called;
+      });
+
+      it('should *not* scroll when in a shadow doc', async () => {
+        env.sandbox.stub(ampdoc, 'isSingleDoc').returns(false);
+
+        new ViewportImpl(ampdoc, binding, viewer);
+        await ampdoc.whenReady();
+        expect(ampdoc.win.scrollTo).not.to.have.been.called;
+      });
+    });
+
     describe('ios-webview', () => {
       let webviewParam;
       let isIos;
@@ -1081,7 +1110,9 @@ describes.fakeWin('Viewport', {}, (env) => {
       .run('should set pan-y with experiment', () => {
         viewer.isEmbedded = () => true;
         viewport = new ViewportImpl(ampdoc, binding, viewer);
-        expect(win.getComputedStyle(root)['touch-action']).to.equal('pan-y');
+        expect(win.getComputedStyle(root)['touch-action']).to.equal(
+          'pan-y pinch-zoom'
+        );
       });
   });
 

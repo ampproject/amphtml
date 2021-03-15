@@ -22,12 +22,12 @@ import {
 import {CSS} from '../../../build/amp-gwd-animation-0.1.css';
 import {Services} from '../../../src/services';
 import {getDetail} from '../../../src/event-helper';
-import {
-  getExistingServiceForDocInEmbedScope,
-  getParentWindowFrameElement,
-} from '../../../src/service';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
-import {userAssert} from '../../../src/log';
+import {
+  getParentWindowFrameElement,
+  getServiceForDocOrNull,
+} from '../../../src/service';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /**
  * Returns a value at any level in an object structure addressed by dot-notation
@@ -217,7 +217,7 @@ export class GwdAnimation extends AMP.BaseElement {
    */
   executeInvocation_(invocation) {
     const service = userAssert(
-      getExistingServiceForDocInEmbedScope(this.element, GWD_SERVICE_NAME),
+      getServiceForDocOrNull(this.element, GWD_SERVICE_NAME),
       'Cannot execute action because the GWD service is not registered.'
     );
 

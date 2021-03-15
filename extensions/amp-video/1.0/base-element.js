@@ -17,7 +17,6 @@ import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from './autoplay.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {VideoWrapper} from './video-wrapper';
-import {isLayoutSizeDefined} from '../../../src/layout';
 
 /** @extends {PreactBaseElement<VideoWrapperDef.Api>} */
 export class VideoBaseElement extends PreactBaseElement {
@@ -58,15 +57,13 @@ export class VideoBaseElement extends PreactBaseElement {
       minTrust
     );
   }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
-  }
 }
 
 /** @override */
 VideoBaseElement['Component'] = VideoWrapper;
+
+/** @override */
+VideoBaseElement['loadable'] = true;
 
 /** @override */
 VideoBaseElement['layoutSizeDefined'] = true;
@@ -98,23 +95,25 @@ VideoBaseElement['props'] = {
   'loop': {attr: 'loop', type: 'boolean'},
   'noaudio': {attr: 'noaudio', type: 'boolean'},
   'poster': {attr: 'poster'},
+  'sources': {
+    selector: 'source',
+    single: false,
+    clone: true,
+  },
   'src': {attr: 'src'},
   'title': {attr: 'title'},
 
   // TODO(alanorozco): These props have no internal implementation yet.
-  'dock': {attr: 'dock'},
-  'rotate-to-fullscreen': {attr: 'rotate-to-fullscreen', type: 'boolean'},
-};
-
-/** @override */
-VideoBaseElement['children'] = {
-  'sources': {
-    name: 'sources',
-    selector: 'source',
-    single: false,
-    clone: true,
+  'dock': {attr: 'dock', media: true},
+  'rotate-to-fullscreen': {
+    attr: 'rotate-to-fullscreen',
+    type: 'boolean',
+    media: true,
   },
 };
 
 /** @override */
 VideoBaseElement['shadowCss'] = CSS;
+
+/** @override */
+VideoBaseElement['usesShadowDom'] = true;

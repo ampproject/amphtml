@@ -47,6 +47,11 @@ amp-carousel {
   z-index: 10;
 }
 
+.amp-carousel-button:focus {
+  border: 1px black solid;
+  outline: 1px white solid;
+}
+
 amp-carousel[controls] .amp-carousel-button,
 amp-carousel.i-amphtml-carousel-has-controls .amp-carousel-button,
 .amp-mode-mouse .amp-carousel-button {
@@ -87,8 +92,13 @@ amp-carousel.i-amphtml-carousel-has-controls .amp-carousel-button,
 
 amp-carousel .amp-carousel-button.amp-disabled {
   animation: none;
-  opacity: 0;
-  visibility: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
 }
 
 amp-carousel[i-amphtml-carousel-hide-buttons] .amp-carousel-button-prev,

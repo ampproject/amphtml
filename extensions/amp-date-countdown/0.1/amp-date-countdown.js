@@ -73,8 +73,8 @@ export class AmpDateCountdown extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @const {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(this.win);
+    /** @private {?../../../src/service/template-impl.Templates} */
+    this.templates_ = null;
 
     /** @const {function(!Element)} */
     this.boundRendered_ = this.rendered_.bind(this);
@@ -108,10 +108,15 @@ export class AmpDateCountdown extends AMP.BaseElement {
 
     /** @private {?number} */
     this.countDownTimer_ = null;
+
+    /** @private {boolean} */
+    this.countUp_ = false;
   }
 
   /** @override */
   buildCallback() {
+    this.templates_ = Services.templatesForDoc(this.element);
+
     // Store this in buildCallback() because `this.element` sometimes
     // is missing attributes in the constructor.
 
@@ -154,6 +159,9 @@ export class AmpDateCountdown extends AMP.BaseElement {
     /** @private {!Object|null} */
     this.localeWordList_ = this.getLocaleWord_(this.locale_);
 
+    /** @private {boolean} */
+    this.countUp_ = this.element.hasAttribute('data-count-up');
+
     this.getAmpDoc()
       .whenFirstVisible()
       .then(() => {
@@ -195,7 +203,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
    */
   tickCountDown_(differentBetween) {
     const items = /** @type {!JsonObject} */ ({});
-    const DIFF = this.getYDHMSFromMs_(differentBetween) || {};
+    const DIFF = this.getYDHMSFromMs_(differentBetween, this.countUp_) || {};
     if (this.whenEnded_ === 'stop' && differentBetween < 1000) {
       Services.actionServiceForDoc(this.element).trigger(
         this.element,
@@ -260,10 +268,11 @@ export class AmpDateCountdown extends AMP.BaseElement {
 
   /**
    * @param {number} ms
+   * @param {boolean} countUp
    * @return {Object}
    * @private
    */
-  getYDHMSFromMs_(ms) {
+  getYDHMSFromMs_(ms, countUp) {
     /** @enum {number} */
     const TimeUnit = {
       DAYS: 1,
@@ -271,6 +280,14 @@ export class AmpDateCountdown extends AMP.BaseElement {
       MINUTES: 3,
       SECONDS: 4,
     };
+
+    // If user supplies 'count-up' attribute, we return the negative of what
+    // we would originally return since we are counting time-elapsed from a
+    // set time instead of time until that time
+    if (countUp) {
+      ms *= -1;
+    }
+
     //Math.trunc is used instead of Math.floor to support negative past date
     const d =
       TimeUnit[this.biggestUnit_] == TimeUnit.DAYS

@@ -21,7 +21,7 @@ import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Purifier} from '../../../src/purifier/purifier';
 import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
-import {calculateExtensionScriptUrl} from '../../../src/service/extension-location';
+import {calculateExtensionScriptUrl} from '../../../src/service/extension-script';
 import {cancellation} from '../../../src/error';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
@@ -96,6 +96,9 @@ export class AmpScript extends AMP.BaseElement {
     /** @private {boolean} */
     this.layoutCompleted_ = false;
 
+    /** @private {boolean} */
+    this.reportedZeroSize_ = false;
+
     /** @private {Deferred} */
     this.initialize_ = new Deferred();
 
@@ -144,11 +147,12 @@ export class AmpScript extends AMP.BaseElement {
     if (
       this.nodom_ &&
       (this.element.hasAttribute('width') ||
-        this.element.hasAttribute('height'))
+        this.element.hasAttribute('height') ||
+        this.element.hasAttribute('layout'))
     ) {
       user().warn(
         TAG,
-        'Cannot set width or height of a nodom <amp-script>',
+        'Cannot set width, height, or layout of a nodom <amp-script>',
         this.element
       );
     }
@@ -161,13 +165,14 @@ export class AmpScript extends AMP.BaseElement {
   /**
    * @override
    */
-  onMeasureChanged() {
-    if (this.layoutCompleted_) {
+  onLayoutMeasure() {
+    if (this.layoutCompleted_ || this.reportedZeroSize_) {
       return;
     }
 
-    const {width, height} = this.getLayoutBox();
+    const {width, height} = this.getLayoutSize();
     if (width === 0 && height === 0) {
+      this.reportedZeroSize_ = true;
       user().warn(
         TAG,
         'Skipped initializing amp-script due to zero width and height.',

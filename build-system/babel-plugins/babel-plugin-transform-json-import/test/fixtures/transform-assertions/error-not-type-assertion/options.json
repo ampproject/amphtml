@@ -1,0 +1,5 @@
+{
+  "plugins": ["../../../.."],
+  "sourceType": "module",
+  "throws": "The only accepted module attribute is `type` (17:43)"
+}

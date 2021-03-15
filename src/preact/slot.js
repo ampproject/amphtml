@@ -15,8 +15,8 @@
  */
 
 import * as Preact from './index';
-import {CanPlay, CanRender, LoadingProp} from '../contextprops';
-import {dev} from '../log';
+import {CanPlay, CanRender, LoadingProp} from '../core/contextprops';
+import {pureDevAssert as devAssert} from '../core/assert';
 import {rediscoverChildren, removeProp, setProp} from '../context';
 import {useAmpContext} from './context';
 import {useEffect, useLayoutEffect, useRef} from './index';
@@ -39,26 +39,9 @@ export function createSlot(element, name, props) {
  * @return {!PreactDef.VNode}
  */
 export function Slot(props) {
-  const context = useAmpContext();
   const ref = useRef(/** @type {?Element} */ (null));
 
-  useLayoutEffect(() => {
-    const slot = dev().assertElement(ref.current);
-    setProp(slot, CanRender, Slot, context.renderable);
-    setProp(slot, CanPlay, Slot, context.playable);
-    setProp(
-      slot,
-      LoadingProp,
-      Slot,
-      /** @type {!../loading.Loading} */ (context.loading)
-    );
-    return () => {
-      removeProp(slot, CanRender, Slot);
-      removeProp(slot, CanPlay, Slot);
-      removeProp(slot, LoadingProp, Slot);
-      rediscoverChildren(slot);
-    };
-  }, [context]);
+  useSlotContext(ref);
 
   useEffect(() => {
     // Post-rendering cleanup, if any.
@@ -68,4 +51,30 @@ export function Slot(props) {
   });
 
   return <slot {...props} ref={ref} />;
+}
+
+/**
+ * @param {{current:?}} ref
+ */
+export function useSlotContext(ref) {
+  const context = useAmpContext();
+  useLayoutEffect(() => {
+    const slot = ref.current;
+    devAssert(slot?.nodeType == 1, 'Element expected');
+
+    setProp(slot, CanRender, Slot, context.renderable);
+    setProp(slot, CanPlay, Slot, context.playable);
+    setProp(
+      slot,
+      LoadingProp,
+      Slot,
+      /** @type {!./core/loading-instructions.Loading} */ (context.loading)
+    );
+    return () => {
+      removeProp(slot, CanRender, Slot);
+      removeProp(slot, CanPlay, Slot);
+      removeProp(slot, LoadingProp, Slot);
+      rediscoverChildren(slot);
+    };
+  }, [ref, context]);
 }

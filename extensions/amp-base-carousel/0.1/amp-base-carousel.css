@@ -59,8 +59,8 @@ amp-base-carousel[dir="rtl"] .i-amphtml-base-carousel-arrow-next-slot {
   transform: scaleX(-1);
 }
 
-amp-base-carousel[loop="false"] .i-amphtml-base-carousel-arrow-prev-slot > [disabled],
-amp-base-carousel[loop="false"] .i-amphtml-base-carousel-arrow-next-slot > [disabled],
+amp-base-carousel .i-amphtml-carousel-scroll[loop="false"] + .i-amphtml-base-carousel-arrows > .i-amphtml-base-carousel-arrow-prev-slot > [disabled],
+amp-base-carousel .i-amphtml-carousel-scroll[loop="false"] + .i-amphtml-base-carousel-arrows > .i-amphtml-base-carousel-arrow-next-slot > [disabled],
 amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel-arrow-prev-slot > *,
 amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel-arrow-next-slot > * {
   opacity: 0;
