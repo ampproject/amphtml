@@ -41,10 +41,10 @@ class AmpRender extends BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    // userAssert(
-    //   isExperimentOn(this.win, 'amp-render'),
-    //   'Experiment "amp-render" is not turned on.'
-    // );
+    userAssert(
+      isExperimentOn(this.win, 'amp-render'),
+      'Experiment "amp-render" is not turned on.'
+    );
     return super.isLayoutSupported(layout);
   }
 

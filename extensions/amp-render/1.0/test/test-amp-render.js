@@ -22,16 +22,16 @@ describes.realWin(
   'amp-render-v1.0',
   {
     amp: {
-      extensions: ['amp-render:1.0'],
+      extensions: ['amp-mustache:0.2', 'amp-bind:0.1', 'amp-render:1.0'],
     },
   },
   (env) => {
-    let win, doc, element;
+    let win, doc, element, template;
 
     beforeEach(async function () {
       win = env.win;
       doc = win.document;
-      toggleExperiment(win, 'bento-render', true, true);
+      toggleExperiment(win, 'amp-render', true, true);
     });
 
     it('example test renders', async () => {
@@ -40,5 +40,33 @@ describes.realWin(
       await waitFor(() => element.isConnected, 'element connected');
       expect(element.parentNode).to.equal(doc.body);
     });
+
+    // it('render a template from amp-state', async () => {
+    //   const ampStateEl = doc.createElement('amp-state');
+    //   ampStateEl.setAttribute('id', 'okapis');
+
+    //   const ampStateJson = doc.createElement('script');
+    //   ampStateJson.setAttribute('type', 'application/json');
+    //   ampStateJson.innerHTML = JSON.stringify({
+    //     'name': 'Google',
+    //     'url': 'https://google.com',
+    //   });
+    //   ampStateEl.appendChild(ampStateJson);
+    //   doc.body.appendChild(ampStateEl);
+
+    //   template = win.document.createElement('template');
+    //   template.setAttribute('type', 'amp-mustache');
+    //   template.content.textContent = `<a href="{{url}}">{{name}}</a>`;
+
+    //   element = doc.createElement('amp-render');
+    //   element.appendChild(template);
+    //   doc.body.appendChild(element);
+
+    //   await waitFor(() => element.isConnected, 'element connected');
+
+    //   expect(element.innerHTML).to.eq(
+    //     '<a href="https://google.com">Google</a>'
+    //   );
+    // });
   }
 );
