@@ -27,6 +27,8 @@ limitations under the License.
   type="digiteka"
   layout="responsive"
   data-mdtk="01212121"
+  data-zone="1"
+  data-adunit="/accountId/AdUnitCode"
 >
 </amp-ad>
 ```
@@ -37,4 +39,6 @@ For configuration semantics, please [contact Digiteka](http://digiteka.com).
 
 Supported parameters:
 
--   `src`
+-   `mdtk` (required)
+-   `zone` (required)
+-   `adunit` (optionnal)
