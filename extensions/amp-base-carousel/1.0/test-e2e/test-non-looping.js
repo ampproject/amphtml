@@ -51,7 +51,8 @@ describes.endtoend(
       await expect(prop(el, 'scrollWidth')).to.equal(pageWidth * SLIDE_COUNT);
     });
 
-    it('should snap when scrolling', async () => {
+    // TODO(wg-components, #24195): Make this less flaky during CI.
+    it.skip('should snap when scrolling', async () => {
       const el = await getScrollingElement(styles, controller);
       const firstSlide = await getSlide(styles, controller, 0);
 
