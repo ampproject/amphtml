@@ -22,7 +22,13 @@
 goog.require('goog.messaging.PortChannel');
 goog.require('goog.messaging.RespondingChannel');
 goog.require('goog.messaging.PortOperator');
+goog.requireType('goog.messaging.MessageChannel');
 
+/**
+* @param {!Window} frameWindow The window object to communicate with.
+ * @param {string} origin The expected origin of the window. See
+ *     http://dev.w3.org/html5/postmsg/#dom-window-postmessage.
+ *  */
 function createPortChannel(frameWindow, origin) {
   return goog.messaging.PortChannel.forEmbeddedWindow(
     frameWindow,
@@ -30,25 +36,41 @@ function createPortChannel(frameWindow, origin) {
   );
 }
 
+/**
+ * @param {goog.messaging.MessageChannel} portChannel The underlying PortChannel.
+ * @param {Map<string, function(Object)>} serviceHandlersMap A map of services and the corresponding handlers.
+ * @return {goog.messaging.RespondingChannel} The RespondingChannel used to communicate with underlying PortChannel.
+ */
 function createRespondingChannel(portChannel, serviceHandlersMap) {
   const respondingChannel = new goog.messaging.RespondingChannel(portChannel);
 
   serviceHandlersMap.forEach((_, serviceName, serviceHandlersMap) => {
-    if (serviceName != null && serviceHandlersMap.get(serviceName) != null) {
-      respondingChannel.registerService(
-        serviceName,
-        serviceHandlersMap.get(serviceName)
-      );
+    if (serviceName != null) {
+      const serviceHandler = serviceHandlersMap.get(serviceName);
+      if (serviceHandler != null) {
+        respondingChannel.registerService(
+          serviceName,
+          serviceHandler
+        );
+      }
     }
   });
 
   return respondingChannel;
 }
 
+/**
+ * @return {goog.messaging.PortOperator} The PortOperator in runtime that manages the port network.
+ */
 function createPortOperator() {
   return new goog.messaging.PortOperator("RuntimeService");
 }
 
+/**
+ * @param {goog.messaging.PortOperator} portOperator The runtime PortOperator.
+ * @param {string} portName The name of the port to be added to the port network.
+ * @param {!goog.messaging.MessageChannel} portChannel The channel of the port to be added to the port network.
+ */
 function addPort(portOperator, portName, portChannel) {
   portOperator.addPort(portName, portChannel);
 }
