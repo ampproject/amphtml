@@ -31,7 +31,7 @@ const CONFIG_PATH = path.join(SERVER_TRANSFORM_PATH, 'tsconfig.json');
 
 /**
  * Builds the new server by converting typescript transforms to JS
- * @return {Promise}
+ * @return {Promise<void>}
  */
 async function buildNewServer() {
   log(
