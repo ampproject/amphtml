@@ -424,7 +424,7 @@ const adConfig = jsonConfiguration({
   },
 
   'digiteka': {
-    renderStartImplemented: true
+    renderStartImplemented: true,
   },
 
   'directadvert': {

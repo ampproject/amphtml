@@ -21,20 +21,18 @@ import {loadScript, validateData} from '../../3p/3p';
  * @param {!Object} data
  */
 export function digiteka(global, data) {
-
+  /*eslint "google-camelcase/google-camelcase": 0*/
   global._digiteka_amp = {
-    allowed_data: ['mdtk','zone','adunit'],
+    allowed_data: ['mdtk', 'zone', 'adunit'],
+    mandatory_data: ['mdtk', 'zone'],
     data,
   };
 
   validateData(
     data,
+    global._digiteka_amp.mandatory_data,
     global._digiteka_amp.allowed_data
   );
 
-  loadScript(
-    global,
-    'https://ot.digiteka.com/amp.js'
-  );
-
+  loadScript(global, 'https://ot.digiteka.com/amp.js');
 }
