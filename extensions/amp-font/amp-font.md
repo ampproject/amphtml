@@ -79,7 +79,7 @@ The allowed time in millisecond for the custom font to load. Defaults to 3000 wh
 
 ### `on-load-add-class` (optional)
 
-CSS class to add from document root after custom font is available.
+CSS class to add to document root after custom font is available.
 
 ### `on-load-remove-class` (optional)
 
