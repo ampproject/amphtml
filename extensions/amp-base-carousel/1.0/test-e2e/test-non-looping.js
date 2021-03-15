@@ -51,7 +51,8 @@ describes.endtoend(
       await expect(prop(el, 'scrollWidth')).to.equal(pageWidth * SLIDE_COUNT);
     });
 
-    it('should snap when scrolling', async () => {
+    // TODO(wg-bento, #24195): getScrollingElement does not always find element in time.
+    it.skip('should snap when scrolling', async () => {
       const el = await getScrollingElement(styles, controller);
       const firstSlide = await getSlide(styles, controller, 0);
 
