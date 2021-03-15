@@ -183,12 +183,14 @@ export function isExtensionScriptInNode(ampdoc, extensionId) {
  * Verifies that an extension script is present in head for
  * installation.
  * @param {HTMLHeadElement|Element|ShadowRoot} head
- * @param {string} extensionId
+ * @param {string} id
  * @return {boolean}
  * @private
  */
-function extensionScriptInNode(head, extensionId) {
-  return extensionScriptsInNode(head).includes(extensionId);
+function extensionScriptInNode(head, id) {
+  return extensionScriptsInNode(head).some(
+    ({extensionId}) => id == extensionId
+  );
 }
 
 /**
