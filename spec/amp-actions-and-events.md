@@ -673,7 +673,7 @@ The actions below are supported in `amp-video`, `amp-video-iframe` and [3rd part
     <td>Unmutes the video.</td>
   </tr>
   <tr>
-    <td><code>fullscreencenter</code></td>
+    <td><code>fullscreenenter</code></td>
     <td>Takes the video to fullscreen.</td>
   </tr>
 </table>
