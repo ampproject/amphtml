@@ -15,6 +15,7 @@
  */
 'use strict';
 
+const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
 const {log} = require('../common/logging');
 const {red, cyan, yellow} = require('kleur/colors');
@@ -40,7 +41,10 @@ async function checkForUnknownDeps(file) {
     red('Error:'),
     `Unknown dependency ${cyan(match[0])} found in ${cyan(file)}`
   );
-  log(yellow(contents));
+  if (argv.debug) {
+    log(red('Output file contents:'));
+    log(yellow(contents));
+  }
   throw new Error('Compilation failed due to unknown dependency');
 }
 

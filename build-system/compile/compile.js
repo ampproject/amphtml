@@ -18,7 +18,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const del = require('del');
 const fs = require('fs-extra');
 const globby = require('globby');
-const pathModule = require('path');
+const path = require('path');
 const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {CLOSURE_SRC_GLOBS} = require('./sources');
 const {cpus} = require('os');
@@ -138,15 +138,17 @@ function getSrcs(entryModuleFilenames, outputDir, outputFilename, options) {
     'build/fake-module/third_party/babel/custom-babel-helpers.js',
   ];
   const srcs = [...CLOSURE_SRC_GLOBS];
-  // Add needed path for extensions.
-  // Instead of globbing all extensions, this will only add the actual
-  // extension path for much quicker build times.
-  entryModuleFilenames.forEach(function (filename) {
-    if (!pathModule.normalize(filename).startsWith('extensions')) {
-      return;
+  entryModuleFilenames.forEach((filename) => {
+    // For extensions, include all JS files in the extension directory.
+    // Note: The glob added to srcs must be a posix glob on all platforms.
+    if (filename.startsWith('extensions')) {
+      srcs.push(
+        filename
+          .replace(path.basename(filename), path.join('**', '*.js'))
+          .split(path.win32.sep)
+          .join(path.posix.sep)
+      );
     }
-    const path = pathModule.join(pathModule.dirname(filename), '**', '*.js');
-    srcs.push(path);
   });
   if (options.extraGlobs) {
     srcs.push.apply(srcs, options.extraGlobs);
@@ -351,7 +353,6 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
  *
  * @param {!OptionsDef} options
  * @param {!Object} compilerOptions
- * @param {!Array<string>} transformedSrcFiles
  * @param {!Array<string>} entryModuleFilenames
  * @param {string} destFile
  * @param {string} sourcemapFile
@@ -360,7 +361,6 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
 function generateFlags(
   options,
   compilerOptions,
-  transformedSrcFiles,
   entryModuleFilenames,
   destFile,
   sourcemapFile
@@ -380,19 +380,16 @@ function generateFlags(
       }
     }
   });
-  const jsFlags = transformedSrcFiles.map((src) => `--js=${src}`);
-  const entryPointFlags = entryModuleFilenames
-    .map((entryFile) =>
-      transformedSrcFiles.find((srcFile) => srcFile.endsWith(entryFile))
-    )
-    .map((entryPoint) => `--entry_point=${entryPoint}`);
-  const flags = compilerFlags.concat(entryPointFlags, jsFlags);
+  const entryPointFlags = entryModuleFilenames.map(
+    (entryPoint) => `--entry_point=${entryPoint}`
+  );
+  compilerFlags.push(...entryPointFlags);
   if (!options.typeCheckOnly) {
     const outputFileFlag = `--js_output_file=${destFile}`;
     const sourcemapFlag = `--create_source_map=${sourcemapFile}`;
-    flags.push(outputFileFlag, sourcemapFlag);
+    compilerFlags.push(outputFileFlag, sourcemapFlag);
   }
-  return flags;
+  return compilerFlags;
 }
 
 /**
@@ -437,12 +434,11 @@ async function compile(
   const flags = generateFlags(
     options,
     compilerOptions,
-    transformedSrcFiles,
     entryModuleFilenames,
     destFile,
     sourcemapFile
   );
-  await runClosure(outputFilename, options, flags);
+  await runClosure(outputFilename, options, flags, transformedSrcFiles);
   if (!options.typeCheckOnly) {
     if (!argv.pseudo_names && !options.skipUnknownDepsCheck) {
       await checkForUnknownDeps(destFile);

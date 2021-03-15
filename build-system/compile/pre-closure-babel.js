@@ -53,9 +53,7 @@ function getBabelCacheDir() {
  * @return {!Array<string>}
  */
 function getFilesToTransform() {
-  return globby
-    .sync([...BABEL_SRC_GLOBS, '!node_modules/', '!third_party/'])
-    .map(path.normalize);
+  return globby.sync([...BABEL_SRC_GLOBS, '!node_modules/', '!third_party/']);
 }
 
 /**
