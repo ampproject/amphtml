@@ -43,7 +43,7 @@ describes.endtoend(
       await controller.switchToShadowRoot(carousel);
     });
 
-    it('should move forwards', async () => {
+    it.skip('should move forwards', async () => {
       const slides = await getSlides(styles, controller);
 
       await expect(rect(slides[1])).to.include({x: 0});
@@ -51,7 +51,7 @@ describes.endtoend(
       await expect(rect(slides[0])).to.include({x: 0});
     });
 
-    it('should go to start and complete two full iterations only', async () => {
+    it.skip('should go to start and complete two full iterations only', async () => {
       const slides = await getSlides(styles, controller);
 
       // first iteration
