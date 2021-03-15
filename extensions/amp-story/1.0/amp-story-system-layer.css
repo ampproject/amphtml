@@ -230,6 +230,7 @@
 
 .i-amphtml-story-mute-audio-control,
 .i-amphtml-story-unmute-audio-control,
+.i-amphtml-paused-display,
 .i-amphtml-story-pause-control,
 .i-amphtml-story-play-control,
 .i-amphtml-story-mute-text,
@@ -263,16 +264,8 @@
   display: block !important;
 }
 
-:not([desktop]) .i-amphtml-story-system-layer-buttons .i-amphtml-story-pause-control,
-:not([desktop]) .i-amphtml-story-system-layer-buttons .i-amphtml-story-play-control {
-  width: 0px !important;
-  padding: 0px !important;
-}
-
-.amp-mode-keyboard-active:not([desktop]) .i-amphtml-story-system-layer-buttons .i-amphtml-story-pause-control:not([disabled]),
-.amp-mode-keyboard-active:not([desktop]) .i-amphtml-story-system-layer-buttons .i-amphtml-story-play-control:not([disabled])  {
-  width: 48px !important;
-  padding: inherit !important;
+.amp-mode-keyboard-active:not([desktop]) .i-amphtml-paused-display {
+  display: block !important;
 }
 
 .i-amphtml-story-has-audio[muted] .i-amphtml-story-mute-text,
