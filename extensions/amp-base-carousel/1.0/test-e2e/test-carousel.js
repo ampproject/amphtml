@@ -93,9 +93,9 @@ describes.endtoend(
       await expect(prop(el, 'scrollLeft')).to.equal(scrollLeft);
     });
 
-    describe('looping', function () {
-      // TODO(wg-components, #24195): Make this less flaky during CI.
-      it.skip('should show the last slide when looping', async function () {
+    // TODO(wg-bento, #24195): getScrollingElement does not always find element in time.
+    describe.skip('looping', function () {
+      it('should show the last slide when looping', async function () {
         this.timeout(testTimeout);
         const el = await getScrollingElement(styles, controller);
         const lastSlide = await getSlide(styles, controller, SLIDE_COUNT - 1);
