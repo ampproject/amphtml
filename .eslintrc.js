@@ -38,6 +38,7 @@ module.exports = {
   'plugins': [
     'chai-expect',
     'google-camelcase',
+    'import',
     'jsdoc',
     'local',
     'notice',

@@ -27,19 +27,18 @@ import {
 } from '../../../src/iframe-video';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
-import {
-  createElementWithAttributes,
-  dispatchCustomEvent,
-  getDataParamsFromAttributes,
-  isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   disableScrollingOnIframe,
   looksLikeTrackingIframe,
 } from '../../../src/iframe-helper';
+import {
+  dispatchCustomEvent,
+  getDataParamsFromAttributes,
+  isFullscreenElement,
+  removeElement,
+} from '../../../src/dom';
 import {getConsentDataToForward} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
@@ -202,19 +201,15 @@ class AmpVideoIframe extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const {element} = this;
-    const src = addDataParamsToUrl(
-      user().assertString(element.getAttribute('poster')),
-      element
-    );
-    return createElementWithAttributes(
-      devAssert(element.ownerDocument),
-      'amp-img',
-      dict({
-        'src': src,
-        'layout': 'fill',
-        'placeholder': '',
-      })
-    );
+    const poster = element.getAttribute('poster');
+    if (!poster) {
+      return null;
+    }
+    const img = new Image();
+    img.src = addDataParamsToUrl(poster, element);
+    img.setAttribute('placeholder', '');
+    this.applyFillContent(img);
+    return img;
   }
 
   /** @override */

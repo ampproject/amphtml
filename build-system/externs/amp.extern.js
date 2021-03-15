@@ -96,20 +96,35 @@ Element.prototype.dataset;
  */
 function ExtensionPayload() {}
 
-/** @type {string} */
+/**
+ * Extension name.
+ * @type {string}
+ */
 ExtensionPayload.prototype.n;
 
-/** @type {function(!Object,!Object)} */
-ExtensionPayload.prototype.f;
+/**
+ * Extension version.
+ * @type {string}
+ */
+ExtensionPayload.prototype.ev;
 
-/** @type {string|undefined} */
+/**
+ * Whether this extension version is the latest version.
+ * @type {boolean}
+ */
+ExtensionPayload.prototype.l;
+
+/**
+ * Priority.
+ * @type {string|undefined}
+ */
 ExtensionPayload.prototype.p;
 
-/** @type {string} */
+/**
+ * RTV (release) version.
+ * @type {string}
+ */
 ExtensionPayload.prototype.v;
-
-/** @type {!Array<string>|string|undefined} */
-ExtensionPayload.prototype.i;
 
 /**
  * If the value of "m" is 1 then the current extension is of type "module",
@@ -117,6 +132,12 @@ ExtensionPayload.prototype.i;
  * @type {number}
  */
 ExtensionPayload.prototype.m;
+
+/**
+ * Install function.
+ * @type {function(!Object,!Object)}
+ */
+ExtensionPayload.prototype.f;
 
 /**
  * @typedef {?JsonObject|undefined|string|number|!Array<JsonValue>}

@@ -1,5 +1,6 @@
 .DS_Store
 .g4ignore
+.CIRCLECI_MERGE_COMMIT
 build/
 .amp-dep-check
 c
@@ -13,8 +14,6 @@ npm-debug.log
 .idea
 .tm_properties
 .settings
-.karma-cache/
-test-bin/
 typings
 typings.json
 /test/manual/amp-ad.adtech.html
