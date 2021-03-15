@@ -27,9 +27,6 @@ BaseElement['Component'] = Render;
 BaseElement['props'] = {
   'src': {attr: 'src'},
   'fetchFn': {attr: 'fetch-fn'},
-  // 'credentials': {attr: 'credentials'},
-  // 'xssi-prefix': {attr: 'xssiPrefix'},
-  // 'binding': {attr: 'binding'},
 };
 
 /** @override */
@@ -37,11 +34,6 @@ BaseElement['usesTemplate'] = true;
 
 /** @override */
 BaseElement['lightDomTag'] = 'div';
-
-/** @override */
-// BaseElement['passthrough'] = true;
-// BaseElement['passthroughNonEmpty'] = true;
-// BaseElement['children'] = {};
 
 /** @override */
 BaseElement['layoutSizeDefined'] = true;

@@ -15,12 +15,11 @@
  */
 
 import {BaseElement} from './base-element';
-// import {CSS} from '../../../build/amp-fit-text-1.0.css';
-import {batchFetchJsonFor} from '../../../src/batched-json';
-import {dict} from '../../../src/utils/object';
-// import {isExperimentOn} from '../../../src/experiments';
 import {Services} from '../../../src/services';
+import {batchFetchJsonFor} from '../../../src/batched-json';
 import {dev, user, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-render';
@@ -91,7 +90,8 @@ class AmpRender extends BaseElement {
       return this.getAmpStateJson.bind(null, this.element);
     }
     if (this.isAmpScriptSrc_(src)) {
-      return this.getAmpScriptJson.bind(null, this.element);
+      // TODO(dmanek): implement this
+      return;
     }
     return batchFetchJsonFor.bind(null, this.getAmpDoc(), this.element);
   }
@@ -166,111 +166,8 @@ class AmpRender extends BaseElement {
         return json;
       });
   }
-
-  /**
-   * Gets the json from an amp-script uri.
-   *
-   * @param {!AmpElement} element
-   * @return {Promise<!JsonObject>}
-   */
-  getAmpScriptJson(element) {
-    const src = element.getAttribute('src');
-    return Promise.resolve()
-      .then(() => {
-        const args = src.slice(AMP_SCRIPT_URI_SCHEME.length).split('.');
-        userAssert(
-          args.length === 2 && args[0].length > 0 && args[1].length > 0,
-          '[amp-list]: "amp-script" URIs must be of the format "scriptId.functionIdentifier".'
-        );
-
-        const ampScriptId = args[0];
-        const fnIdentifier = args[1];
-        const ampScriptEl = element.getAmpDoc().getElementById(ampScriptId);
-        userAssert(
-          ampScriptEl && ampScriptEl.tagName === 'AMP-SCRIPT',
-          `[amp-list]: could not find <amp-script> with script set to ${ampScriptId}`
-        );
-        return ampScriptEl
-          .getImpl() // TypeError: ampScriptEl.getImpl is not a function
-          .then((impl) => impl.callFunction(fnIdentifier));
-      })
-      .then((json) => {
-        userAssert(
-          typeof json === 'object',
-          `[amp-render] ${src} must return json, but instead returned: ${typeof json}`
-        );
-        return json;
-      });
-  }
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpRender);
 });
-
-// /**
-//  * Gets the json an amp-list that has an "amp-state:" uri. For example,
-//  * src="amp-state:json.path".
-//  *
-//  * @param {!AmpElement} element
-//  * @return {Promise<!JsonObject>}
-//  */
-// function getAmpStateJson(element) {
-//   const src = element.getAttribute('src');
-//   return Services.bindForDocOrNull(element)
-//     .then((bind) => {
-//       userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
-//       const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length.length);
-//       return bind.getStateAsync(ampStatePath).catch((err) => {
-//         const stateKey = ampStatePath.split('.')[0];
-//         user().error(
-//           TAG,
-//           `'amp-state' element with id '${stateKey}' was not found.`
-//         );
-//         throw err;
-//       });
-//     })
-//     .then((json) => {
-//       userAssert(
-//         typeof json !== 'undefined',
-//         `[amp-list] No data was found at provided uri: ${src}`
-//       );
-//       return json;
-//     });
-// }
-
-// /**
-//  * Gets the json from an amp-script uri.
-//  *
-//  * @param {!AmpElement} element
-//  * @return {Promise<!JsonObject>}
-//  */
-// function getAmpScriptJson(element) {
-//   const src = element.getAttribute('src');
-//   return Promise.resolve()
-//     .then(() => {
-//       const args = src.slice(AMP_SCRIPT_URI_SCHEME.length).split('.');
-//       userAssert(
-//         args.length === 2 && args[0].length > 0 && args[1].length > 0,
-//         '[amp-list]: "amp-script" URIs must be of the format "scriptId.functionIdentifier".'
-//       );
-
-//       const ampScriptId = args[0];
-//       const fnIdentifier = args[1];
-//       const ampScriptEl = element.getAmpDoc().getElementById(ampScriptId);
-//       userAssert(
-//         ampScriptEl && ampScriptEl.tagName === 'AMP-SCRIPT',
-//         `[amp-list]: could not find <amp-script> with script set to ${ampScriptId}`
-//       );
-//       return ampScriptEl
-//         .getImpl() // TypeError: ampScriptEl.getImpl is not a function
-//         .then((impl) => impl.callFunction(fnIdentifier));
-//     })
-//     .then((json) => {
-//       userAssert(
-//         typeof json === 'object',
-//         `[amp-list] ${src} must return json, but instead returned: ${typeof json}`
-//       );
-//       return json;
-//     });
-// }

@@ -45,32 +45,48 @@
     <amp-render src="/examples/data.json" height="500" width="500">
       <template type="amp-mustache">
         <a href="{{nested.second.url}}">{{nested.second.title}}</a>
-          <p>
-          {{#list}}
-            {{name}}
-          {{/list}}
-        </p>
+        <p>List of my fav foods:
+          <ul>
+          {{#foods}}
+            <li>{{name}}</li>
+          {{/foods}}
+        </ul>
+      </p>
       </template>
     </amp-render>
 
-    <!-- <amp-state id="theFood">
+    <amp-state id="theFood">
       <script type="application/json">
         {
-          "title": "amp-carousel",
-          "url": "/components/amp-carousel/"
+          "foods": [
+            {
+              "name": "pizza"
+            },
+            {
+              "name": "burger"
+            },
+            {
+              "name": "taco"
+            }
+          ]
         }
       </script>
     </amp-state>
 
     <amp-render src="amp-state:theFood" width="auto" height="140" layout="fixed-height">
       <template type="amp-mustache">
-        <p>some static text in template</p>
-        <a href="{{url}}">{{title}}</a>
+        <p>List of my fav foods from amp-state:
+          <ul>
+          {{#foods}}
+            <li>{{name}}</li>
+          {{/foods}}
+        </ul>
+      </p>
       </template>
-    </amp-render> -->
+    </amp-render>
 
-<!--
-    <amp-script id="dataFunctions" script="local-script"></amp-script>
+
+    <!-- <amp-script id="dataFunctions" script="local-script"></amp-script>
     <script id="local-script" type="text/plain" target="amp-script">
       function getRemoteData() {
         return fetch('/examples/data.json')

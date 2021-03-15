@@ -17,11 +17,7 @@
 import * as Preact from '../../../src/preact';
 import {Wrapper, useRenderer} from '../../../src/preact/component';
 import {useEffect, useState} from '../../../src/preact';
-// import {useStyles} from './component.jss';
 import {useResourcesNotify} from '../../../src/preact/utils';
-
-// const DEFAULT_RENDER = (data) =>
-//   /** @type {string} */ (`${data['title']} --- ${data['url']}`);
 
 /**
  * @param {!RenderDef.Props} props
@@ -38,7 +34,6 @@ export function Render({src, fetchFn, render, ...rest}) {
     });
   }, [src, fetchFn]);
 
-  // const rendered = useRenderer(DEFAULT_RENDER, data);
   const rendered = useRenderer(render, data);
   const isHtml =
     rendered && typeof rendered == 'object' && '__html' in rendered;
