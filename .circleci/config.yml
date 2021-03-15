@@ -336,5 +336,4 @@ workflows:
       # - 'Performance Tests':
       #     <<: *push_builds_only
       #     requires:
-      #       - 'Compute Merge Commit'
       #       - 'Nomodule Build'
