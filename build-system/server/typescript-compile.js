@@ -63,10 +63,7 @@ function typecheckNewServer() {
   const result = exec(cmd, {'stdio': ['inherit', 'inherit', 'pipe']});
 
   if (result.status != 0) {
-    const err = new Error('Could not build AMP Server');
-    // @ts-ignore
-    err.showStack = false;
-    throw err;
+    throw new Error(`Typechecking AMP Server failed.`);
   }
 }
 
