@@ -16,13 +16,23 @@
 
 /** @externs */
 
-/** @typedef {{
+/** @const */
+var InstagramDef = {};
+
+/**
+ * @typedef {{
  *   shortcode: string,
  *   captioned: (boolean|undefined),
  *   title: (string|undefined),
  *   requestResize: (function(number):*|undefined),
  *   loading: (string|undefined),
- *   onLoad: (function(!Event)|undefind),
+ *   onReadyState: (function(string, *=)|undefined),
  * }}
  */
-var InstagramPropsDef;
+InstagramDef.Props;
+
+/** @constructor */
+InstagramDef.Api = function () {};
+
+/** @type {string} */
+InstagramDef.Api.prototype.readyState;
