@@ -174,12 +174,6 @@ export class ResourcesInterface {
    * @param {!Element} element
    * @param {number} newLayoutPriority
    */
-  updateLayoutPriority(element, newLayoutPriority) {}
-
-  /**
-   * https://github.com/ampproject/amphtml/issues/25428
-   * @return {boolean}
-   */
-  isIntersectionExperimentOn() {}
+  updateLayoutPriority(element, newLayoutPriority) {} 
 }
 /* eslint-enable no-unused-vars */

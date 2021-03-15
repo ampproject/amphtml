@@ -91,19 +91,9 @@ t.run('Viewer Visibility State', () => {
 
       function waitForNextPass() {
         return new Promise((resolve) => {
-          notifyPass = resolve;
-
-          if (resources.isIntersectionExperimentOn()) {
-            // Element lifecycle callbacks depend on the observer taking its
-            // initial measurements, so wait for an intersection first.
-            return intersected.then(() => {
-              shouldPass = true;
-              resources.schedulePass();
-            });
-          } else {
-            shouldPass = true;
-            resources.schedulePass();
-          }
+          notifyPass = resolve; 
+          shouldPass = true;
+          resources.schedulePass();
         });
       }
 

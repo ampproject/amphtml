@@ -107,41 +107,6 @@ describes.realWin('Resource', {amp: true}, (env) => {
     });
   });
 
-  describe('intersect-resources', () => {
-    beforeEach(() => {
-      sandbox.stub(resources, 'isIntersectionExperimentOn').returns(true);
-      resource = new Resource(1, element, resources);
-    });
-
-    it('should be ready for layout if measured before build', () => {
-      resource.premeasure({left: 0, top: 0, width: 100, height: 100});
-      resource.measure(/* usePremeasuredRect */ true);
-      elementMock.expects('isUpgraded').returns(true).atLeast(1);
-      elementMock.expects('buildInternal').returns(Promise.resolve()).once();
-      elementMock.expects('onMeasure').withArgs(/* sizeChanged */ true).once();
-      return resource.build().then(() => {
-        expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
-      });
-    });
-
-    it('should remeasure if measured before upgrade and isFixed', () => {
-      // First measure
-      element.isAlwaysFixed = () => false;
-      resource.premeasure({left: 0, top: 0, width: 100, height: 100});
-      resource.measure(/* usePremeasuredRect */ true);
-
-      // Now adjust implementation to be alwaysFixed and call build.
-      element.isUpgraded = () => true;
-      element.isAlwaysFixed = () => true;
-      element.buildInternal = () => Promise.resolve();
-      element.onMeasure = () => {};
-      resource.requestMeasure = env.sandbox.stub();
-      return resource.build().then(() => {
-        expect(resource.requestMeasure).calledOnce;
-      });
-    });
-  });
-
   it('should build if element is currently building', () => {
     elementMock.expects('isBuilt').returns(false).once();
     elementMock.expects('isBuilding').returns(true).once();
