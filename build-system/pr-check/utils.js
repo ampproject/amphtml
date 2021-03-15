@@ -15,7 +15,6 @@
  */
 'use strict';
 
-const experimentsConfig = require('../global-configs/experiments-config.json');
 const {
   gitBranchCreationPoint,
   gitBranchName,
@@ -338,28 +337,12 @@ async function processAndUploadNomoduleOutput() {
   uploadNomoduleOutput();
 }
 
-/**
- * Extracts and validates the config for the given experiment.
- * @param {string} experiment
- * @return {Object|null}
- */
-function getExperimentConfig(experiment) {
-  const config = experimentsConfig[experiment];
-  const valid =
-    config?.name &&
-    config?.define_experiment_constant &&
-    config?.expiration_date_utc &&
-    new Date(config.expiration_date_utc) >= Date.now();
-  return valid ? config : null;
-}
-
 module.exports = {
   abortTimedJob,
   downloadExperimentOutput,
   downloadUnminifiedOutput,
   downloadNomoduleOutput,
   downloadModuleOutput,
-  getExperimentConfig,
   printChangeSummary,
   printSkipMessage,
   processAndUploadNomoduleOutput,
