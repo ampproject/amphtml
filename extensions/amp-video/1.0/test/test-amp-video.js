@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-video';
+import {AmpVideo, isCachedByCdn} from '../amp-video';
 import {dispatchCustomEvent} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -111,6 +111,99 @@ describes.realWin(
           inputSources[i].getAttribute('type')
         );
       }
+    });
+
+    describe('prerenderAllowed', () => {
+      let video;
+
+      beforeEach(() => {
+        video = env.win.document.createElement('amp-video');
+        video.setAttribute('width', '100');
+        video.setAttribute('height', '100');
+        env.win.document.body.appendChild(video);
+      });
+
+      describe('isCachedByCDN', () => {
+        it('cacheable', () => {
+          video.setAttribute('src', 'https://example-com.cdn.ampproject.org/m/s/video.mp4');
+          video.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
+          expect(isCachedByCdn(video)).to.be.true;
+        });
+
+        it('must have amp-orig-src attribute', () => {
+          video.setAttribute('src', 'https://example-com.cdn.ampproject.org/m/s/video.mp4');
+          expect(isCachedByCdn(video)).to.be.false;
+        });
+
+        it('must be CDN url', () => {
+          video.setAttribute('src', 'https://example-com.cdn.FAKEampproject.org/m/s/video.mp4');
+          video.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
+          expect(isCachedByCdn(video)).to.be.false;
+        });
+      });
+
+      describe('should not prerender if no cached sources', () => {
+        it('with just src', () => {
+          video.setAttribute('src', 'video.mp4');
+          expect(AmpVideo.prerenderAllowed(video)).to.be.false;
+        });
+
+        it('with just source', () => {
+          const source = env.win.document.createElement('source');
+          source.setAttribute('src', 'video.mp4');
+          video.appendChild(source);
+          expect(AmpVideo.prerenderAllowed(video)).to.be.false;
+        });
+
+        it('with both src and source', () => {
+          video.setAttribute('src', 'video.mp4');
+          const source = env.win.document.createElement('source');
+          source.setAttribute('src', 'video.mp4');
+          video.appendChild(source);
+          expect(AmpVideo.prerenderAllowed(video)).to.be.false;
+        });
+      });
+
+      describe('should prerender cached sources', () => {
+        it('with just cached src', () => {
+          video.setAttribute(
+            'src',
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          video.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
+          expect(AmpVideo.prerenderAllowed(video)).to.be.true;
+        });
+
+        it('with just cached source', () => {
+          const source = env.win.document.createElement('source');
+          source.setAttribute(
+            'src',
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          source.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
+          video.appendChild(source);
+          expect(AmpVideo.prerenderAllowed(video)).to.be.true;
+        });
+
+        it('with a mix or cached and non-cached', () => {
+          const source = env.win.document.createElement('source');
+          source.setAttribute('src', 'video.mp4');
+          video.appendChild(source);
+
+          const cachedSource = env.win.document.createElement('source');
+          cachedSource.setAttribute(
+            'src',
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          cachedSource.setAttribute(
+            'amp-orig-src',
+            'https://example.com/video.mp4'
+          );
+          video.appendChild(cachedSource);
+
+          expect(AmpVideo.prerenderAllowed(video)).to.be.true;
+        });
+      });
     });
   }
 );
