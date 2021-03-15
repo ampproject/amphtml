@@ -25,6 +25,7 @@ const {
 const {ciJobUrl} = require('../common/ci');
 const {cyan, yellow} = require('kleur/colors');
 const {determineBuildTargets, Targets} = require('../pr-check/build-targets');
+const {getValidExperiments} = require('../common/utils');
 const {gitCommitHash} = require('../common/git');
 const {log} = require('../common/logging');
 
@@ -50,13 +51,11 @@ const TEST_TYPE_SUBTYPES = isGithubActionsBuild()
           'nomodule-canary',
           'module-prod',
           'module-canary',
-          'experimentA',
-          'experimentB',
-          'experimentC',
+          ...getValidExperiments(),
         ],
       ],
       ['unit', ['unminified', 'local-changes']],
-      ['e2e', ['nomodule', 'experimentA', 'experimentB', 'experimentC']],
+      ['e2e', ['nomodule', ...getValidExperiments()]],
     ])
   : new Map([]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
@@ -66,7 +65,7 @@ const TEST_TYPE_BUILD_TARGETS = new Map([
 ]);
 
 /**
- * @return {string|null}
+ * @return {string}
  */
 function inferTestType() {
   // Determine type (early exit if there's no match).
@@ -78,7 +77,7 @@ function inferTestType() {
     ? 'unit'
     : null;
   if (type == null) {
-    return null;
+    throw new Error('No valid test type was inferred');
   }
 
   // Determine subtype (more specific cases come first).
@@ -139,7 +138,7 @@ async function postReport(type, action) {
         // Do not use `json: true` because the response is a string, not JSON.
       });
 
-      log('Reported', cyan(`${type}/${action}`, 'to GitHub'));
+      log('Reported', cyan(`${type}/${action}`), 'to GitHub');
       if (body.length > 0) {
         log('Response was', cyan(body.substr(0, 100)));
       }
@@ -192,6 +191,11 @@ async function reportAllExpectedTests() {
   const buildTargets = determineBuildTargets();
   for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {
     const testTypeBuildTargets = TEST_TYPE_BUILD_TARGETS.get(type);
+    if (testTypeBuildTargets === undefined) {
+      throw new Error(
+        `Undefined test type ${type} for build targets ${buildTargets}`
+      );
+    }
     const action = testTypeBuildTargets.some((target) =>
       buildTargets.has(target)
     )

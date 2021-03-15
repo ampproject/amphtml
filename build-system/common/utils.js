@@ -15,6 +15,7 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
+const experimentsConfig = require('../global-configs/experiments-config.json');
 const fs = require('fs-extra');
 const globby = require('globby');
 const path = require('path');
@@ -43,6 +44,29 @@ async function buildRuntime(opt_compiled = false) {
   } else {
     await doBuild({fortesting: true});
   }
+}
+
+/**
+ * Extracts and validates the config for the given experiment.
+ * @param {string} experiment
+ * @return {Object|null}
+ */
+function getExperimentConfig(experiment) {
+  const config = experimentsConfig[experiment];
+  const valid =
+    config?.name &&
+    config?.define_experiment_constant &&
+    config?.expiration_date_utc &&
+    new Number(new Date(config.expiration_date_utc)) >= Date.now();
+  return valid ? config : null;
+}
+
+/**
+ * Returns the names of all valid experiments.
+ * @return {!Array<string>}
+ */
+function getValidExperiments() {
+  return Object.keys(experimentsConfig).filter(getExperimentConfig);
 }
 
 /**
@@ -159,6 +183,8 @@ function installPackages(dir) {
 
 module.exports = {
   buildRuntime,
+  getExperimentConfig,
+  getValidExperiments,
   getFilesChanged,
   getFilesFromArgv,
   getFilesToCheck,
