@@ -136,39 +136,37 @@ function SidebarWithRef(
   }, [opened, close]);
 
   return (
-    <>
-      <div className={mounted ? '' : classes.unmounted}>
-        <ContainWrapper
-          as={Comp}
-          ref={sidebarRef}
-          size={false}
-          layout={true}
-          paint={true}
-          part="sidebar"
-          wrapperClassName={`${classes.sidebar} ${
-            classes.defaultSidebarStyles
-          } ${side === Side.LEFT ? classes.left : classes.right}`}
-          role="menu"
-          tabindex="-1"
-          hidden={!side}
-          {...rest}
-        >
-          {children}
-        </ContainWrapper>
-        <div
-          ref={backdropRef}
-          onClick={() => close()}
-          part="backdrop"
-          style={backdropStyle}
-          className={`${backdropClassName ?? ''} ${classes.backdrop} ${
-            classes.defaultBackdropStyles
-          }`}
-          hidden={!side}
-        >
-          <div className={classes.backdropOverscrollBlocker}></div>
-        </div>
+    <div className={mounted ? '' : classes.unmounted}>
+      <ContainWrapper
+        as={Comp}
+        ref={sidebarRef}
+        size={false}
+        layout={true}
+        paint={true}
+        part="sidebar"
+        wrapperClassName={`${classes.sidebar} ${classes.defaultSidebarStyles} ${
+          side === Side.LEFT ? classes.left : classes.right
+        }`}
+        role="menu"
+        tabindex="-1"
+        hidden={!side}
+        {...rest}
+      >
+        {children}
+      </ContainWrapper>
+      <div
+        ref={backdropRef}
+        onClick={() => close()}
+        part="backdrop"
+        style={backdropStyle}
+        className={`${backdropClassName ?? ''} ${classes.backdrop} ${
+          classes.defaultBackdropStyles
+        }`}
+        hidden={!side}
+      >
+        <div className={classes.backdropOverscrollBlocker}></div>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -177,10 +175,10 @@ Sidebar.displayName = 'Sidebar'; // Make findable for tests.
 export {Sidebar};
 
 /**
- * @param {!SidebarDef.SidebarNavToolbar} props
+ * @param {!SidebarDef.SidebarToolbar} props
  * @return {PreactDef.Renderable}
  */
-export function SidebarNavToolbar({
+export function SidebarToolbar({
   toolbar,
   'toolbar-target': toolbarTarget,
   children,
