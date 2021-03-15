@@ -23,14 +23,14 @@ goog.require('goog.messaging.PortChannel');
 goog.require('goog.messaging.RespondingChannel');
 goog.require('goog.messaging.PortOperator');
 
-function createPC(frameWindow, origin) {
+function createPortChannel(frameWindow, origin) {
   return goog.messaging.PortChannel.forEmbeddedWindow(
     frameWindow,
     origin
   );
 }
 
-function createRC(portChannel, serviceHandlersMap) {
+function createRespondingChannel(portChannel, serviceHandlersMap) {
   const respondingChannel = new goog.messaging.RespondingChannel(portChannel);
 
   serviceHandlersMap.forEach((_, serviceName, serviceHandlersMap) => {
@@ -45,15 +45,15 @@ function createRC(portChannel, serviceHandlersMap) {
   return respondingChannel;
 }
 
-function createPO() {
+function createPortOperator() {
   return new goog.messaging.PortOperator("RuntimeService");
 }
 
-function addPortConnection(portOperator, portName, portChannel) {
+function addPort(portOperator, portName, portChannel) {
   portOperator.addPort(portName, portChannel);
 }
 
-goog.exportSymbol('__AMP_createPC', createPC);
-goog.exportSymbol('__AMP_createRC', createRC);
-goog.exportSymbol('__AMP_createPO', createPO);
-goog.exportSymbol('__AMP_addPortConnection', addPortConnection);
+goog.exportSymbol('__AMP_createPortChannel', createPortChannel);
+goog.exportSymbol('__AMP_createRespondingChannel', createRespondingChannel);
+goog.exportSymbol('__AMP_createPortOperator', createPortOperator);
+goog.exportSymbol('__AMP_addPort', addPort);
