@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {CSS as COMPONENT_CSS} from './component.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Render} from './component';
 
@@ -37,6 +36,3 @@ BaseElement['lightDomTag'] = 'div';
 
 /** @override */
 BaseElement['layoutSizeDefined'] = true;
-
-/** @override */
-BaseElement['shadowCss'] = COMPONENT_CSS;
