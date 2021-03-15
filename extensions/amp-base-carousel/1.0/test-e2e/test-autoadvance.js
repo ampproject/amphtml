@@ -43,6 +43,7 @@ describes.endtoend(
       await controller.switchToShadowRoot(carousel);
     });
 
+    // TODO(wg-components, #24195): Make this less flaky during CI.
     it.skip('should move forwards', async () => {
       const slides = await getSlides(styles, controller);
 
@@ -51,6 +52,7 @@ describes.endtoend(
       await expect(rect(slides[0])).to.include({x: 0});
     });
 
+    // TODO(wg-components, #24195): Make this less flaky during CI.
     it.skip('should go to start and complete two full iterations only', async () => {
       const slides = await getSlides(styles, controller);
 
