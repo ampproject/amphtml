@@ -44,7 +44,7 @@ describes.endtoend(
     });
 
     // Test mixed lengths with snapping.
-    // TODO(wg-components, #24195): Make this less flaky during CI.
+    // TODO(wg-bento, #24195): getSlide/getScrollingElement do not always find element in time.
     describe.skip('snap', () => {
       const slideWidth = pageWidth * 0.75;
 

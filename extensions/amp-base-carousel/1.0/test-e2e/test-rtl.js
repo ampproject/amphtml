@@ -20,7 +20,7 @@ import {useStyles} from '../base-carousel.jss';
 const pageWidth = 800;
 const pageHeight = 600;
 
-// TODO(wg-components, #24195): Make this less flaky during CI.
+// TODO(wg-bento, #24195): getSlide/getArrow does not always find element in time.
 describes.endtoend(
   'amp-base-carousel - rtl',
   {
