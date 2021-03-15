@@ -3,7 +3,7 @@
     "aid": ""
   },
   "requests": {
-    "url": "https://3p.ampproject.net/custom/amp-analytics-taboola.html?url=${canonicalUrl}&aid=${aid}"
+    "url": "https://c3.taboola.com/amp/amp-analytics-taboola.html?url=${canonicalUrl}&aid=${aid}"
   },
   "triggers": {
     "pageview": {
