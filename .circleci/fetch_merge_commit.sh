@@ -34,6 +34,12 @@ if [[ -z "$PR_NUMBER" ]]; then
   exit 0
 fi
 
+# If PR_NUMBER exists, but the merge commit file doesn't exist, the PR was
+# created after the first stage of CI was run. There is nothing more to do.
+if [[ ! -f .CIRCLECI_MERGE_COMMIT ]]; then
+  exit 0
+fi
+
 # Extract the merge commit for this workflow and make it visible to other steps.
 CIRCLECI_MERGE_COMMIT="$(cat .CIRCLECI_MERGE_COMMIT)"
 echo "export CIRCLECI_MERGE_COMMIT=$CIRCLECI_MERGE_COMMIT" >> $BASH_ENV
