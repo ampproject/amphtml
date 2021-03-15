@@ -164,7 +164,7 @@ function LightboxWithRef(
     }
     const win = toWin(content.ownerDocument.defaultView);
     if (!win) {
-      return undefined;
+      return;
     }
     const observer = new win.ResizeObserver(() => {
       setHasOverflow(
