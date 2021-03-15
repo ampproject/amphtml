@@ -16,8 +16,8 @@
 
 import {
   AmpStoryRequestService,
-  BOOKEND_CONFIG_ATTRIBUTE_NAME,
-  BOOKEND_CREDENTIALS_ATTRIBUTE_NAME,
+  CONFIG_SRC_ATTRIBUTE_NAME,
+  CREDENTIALS_ATTRIBUTE_NAME,
 } from '../amp-story-request-service';
 
 describes.fakeWin('amp-story-store-service', {amp: true}, (env) => {
@@ -46,7 +46,7 @@ describes.fakeWin('amp-story-store-service', {amp: true}, (env) => {
   it('should use the URL provided in the attribute to load the config', async () => {
     const bookendUrl = 'https://publisher.com/bookend';
 
-    bookendElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
+    bookendElement.setAttribute(CONFIG_SRC_ATTRIBUTE_NAME, bookendUrl);
     xhrMock
       .expects('fetchJson')
       .withExactArgs(bookendUrl, {})
@@ -66,7 +66,7 @@ describes.fakeWin('amp-story-store-service', {amp: true}, (env) => {
     const bookendUrl = 'https://publisher.com/bookend';
     const fetchedConfig = 'amazingConfig';
 
-    bookendElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
+    bookendElement.setAttribute(CONFIG_SRC_ATTRIBUTE_NAME, bookendUrl);
     xhrMock
       .expects('fetchJson')
       .resolves({
@@ -85,7 +85,7 @@ describes.fakeWin('amp-story-store-service', {amp: true}, (env) => {
   it('should fetch the bookend config once if called multiple times', async () => {
     const bookendUrl = 'https://publisher.com/bookend';
 
-    bookendElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
+    bookendElement.setAttribute(CONFIG_SRC_ATTRIBUTE_NAME, bookendUrl);
     xhrMock
       .expects('fetchJson')
       .resolves({
@@ -104,8 +104,8 @@ describes.fakeWin('amp-story-store-service', {amp: true}, (env) => {
   it('should fetch the bookend config with credentials', async () => {
     const bookendUrl = 'https://publisher.com/bookend';
 
-    bookendElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
-    bookendElement.setAttribute(BOOKEND_CREDENTIALS_ATTRIBUTE_NAME, 'include');
+    bookendElement.setAttribute(CONFIG_SRC_ATTRIBUTE_NAME, bookendUrl);
+    bookendElement.setAttribute(CREDENTIALS_ATTRIBUTE_NAME, 'include');
     xhrMock
       .expects('fetchJson')
       .withExactArgs(bookendUrl, {
