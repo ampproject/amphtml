@@ -94,6 +94,7 @@
 }
 
 .i-amphtml-carousel-spacer {
+  visibility: hidden;
   z-index: -1;  
 }
 
