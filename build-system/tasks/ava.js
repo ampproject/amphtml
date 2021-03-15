@@ -28,6 +28,7 @@ async function ava() {
     'build-system/tasks/get-zindex/get-zindex.test.js',
     'build-system/tasks/markdown-toc/test/test.js',
     'build-system/tasks/prepend-global/prepend-global.test.js',
+    'build-system/tasks/sweep-experiments/test/test.js',
   ];
   execOrDie(
     [

@@ -51,10 +51,11 @@ const isSpecialCannotBeRemoved = (id) =>
 
 /**
  * @param {string} cmd
+ * @param {?Object=} options
  * @return {?string}
  */
-function getStdoutThrowOnError(cmd) {
-  const {stdout, stderr} = getOutput(cmd);
+function getStdoutThrowOnError(cmd, options) {
+  const {stdout, stderr} = getOutput(cmd, options);
   if (!stdout && stderr) {
     throw new Error(`${cmd}\n\n${stderr}`);
   }
@@ -63,10 +64,11 @@ function getStdoutThrowOnError(cmd) {
 
 /**
  * @param {string} cmd
+ * @param {?Object=} options
  * @return {Array<string>}
  */
-function getStdoutLines(cmd) {
-  const stdout = getStdoutThrowOnError(cmd);
+function getStdoutLines(cmd, options) {
+  const stdout = getStdoutThrowOnError(cmd, options);
   return !stdout ? [] : stdout.split('\n');
 }
 
@@ -230,13 +232,15 @@ const truncateYyyyMmDd = (formattedDate) =>
  * @param {string} configJsonPath
  * @param {string} experiment
  * @param {number} percentage
+ * @param {string=} cwd
  * @return {Array<{hash: string, authorDate: string, subject: string}>}
  */
 const findConfigBitCommits = (
   cutoffDateFormatted,
   configJsonPath,
   experiment,
-  percentage
+  percentage,
+  cwd = '.'
 ) =>
   getStdoutLines(
     [
@@ -250,19 +254,22 @@ const findConfigBitCommits = (
       // %s: subject
       ' --format="%h %aI %s"',
       configJsonPath,
-    ].join(' ')
+    ].join(' '),
+    {cwd}
   ).map((line) => {
-    const tokens = line.split(' ');
-    // PR numbers in subject lines create spammy references when committed,
-    // remove them early on.
-    if (/^\(#[0-9]+\)$/.test(tokens[tokens.length - 1])) {
-      tokens.pop();
-    }
-    return {
-      hash: tokens.shift(),
-      authorDate: tokens.shift(),
-      subject: tokens.join(' '),
-    };
+    const [hash, authorDate, ...subjectParts] = line.split(' ');
+
+    const subject = subjectParts
+      .join(' ')
+      // Issue/PR numbers in subject lines create spammy references when
+      // committed, format them in a away that Github won't link them.
+      .replace(/#(\d+)/g, 'https://go.amp.dev/issue/$1');
+
+    return /** @type {{hash: string, authorDate: string, subject: string}} */ ({
+      hash,
+      authorDate,
+      subject,
+    });
   });
 
 const issueUrlToNumberRe = new RegExp(
@@ -529,6 +536,7 @@ async function sweepExperiments() {
 
 module.exports = {
   sweepExperiments,
+  findConfigBitCommitsForTesting: findConfigBitCommits,
 };
 
 sweepExperiments.description =
