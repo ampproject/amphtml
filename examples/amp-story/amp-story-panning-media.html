@@ -9,32 +9,9 @@
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <script async custom-element="amp-story-panning-media" src="https://cdn.ampproject.org/v0/amp-story-panning-media-0.1.js"></script>
-    <style amp-custom>
-      .text-wrapper {
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-        background: linear-gradient(0, rgba(0deg, 0, 0, 0.6), 10%, transparent);
-=======
-        background: linear-gradient(0, rgba(0,0,0,0.60),10%, transparent);
->>>>>>> b6b5a8cb0 (Update example. Only calculate if lock-bounds.)
-=======
-        background: linear-gradient(0, rgba(0deg, 0, 0, 0.60), 10%, transparent);
->>>>>>> 692b6dcff (css spaces.)
-=======
-        background: linear-gradient(0, rgba(0deg, 0, 0, 0.6), 10%, transparent);
->>>>>>> b1048edde (template css update)
-      }
-      h3 {
-        font-family: 'Poppins', sans-serif;
-        position: absolute;
-        bottom: 40px;
-        left: 40px;
-        color: white;
-      }
-      </style>
   </head>
   <body>
+    <div>
     <amp-story
         standalone
         title="Demo Story"
@@ -42,97 +19,8 @@
         publisher-logo-src="example.com/logo.png"
         poster-portrait-src="example.com/poster.jpg">
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-        <!-- stars example -->
-        <amp-story-page id="stars-1">
-          <amp-story-grid-layer template="fill">
-            <amp-story-panning-media 
-              layout="fill"
-              group-id='stars-group-1'
-              x="10%"
-              y="0%"
-              zoom='1'
-            >
-              <amp-img layout="fill" width="2992" height="2550" src="img/stars.png"></amp-img>
-            </amp-story-panning-media>
-          </amp-story-grid-layer>
-          <amp-story-grid-layer template="fill">
-            <amp-story-panning-media 
-              layout="fill"
-              group-id='stars-group-2'
-              x="0%"
-              y="0%"
-              zoom='1'
-            >
-              <amp-img layout="fill" width="2992" height="2550" src="img/stars.png"></amp-img>
-            </amp-story-panning-media>
-          </amp-story-grid-layer>
-        </amp-story-page>
-
-        <!-- painting and painting zoom in example -->
-        <amp-story-page id="stars-2">
-          <amp-story-grid-layer template="fill">
-            <amp-story-panning-media 
-              layout="fill"
-              group-id='stars-group-1'
-              x="-10%"
-              y="0%"
-              zoom='1'
-            >
-              <amp-img layout="fill" width="2992" height="2550" src="img/stars.png"></amp-img>
-            </amp-story-panning-media>
-          </amp-story-grid-layer>
-          <amp-story-grid-layer template="fill">
-            <amp-story-panning-media 
-              layout="fill"
-              group-id='stars-group-2'
-              x="-15%"
-              y="0%"
-              zoom='1'
-            >
-              <amp-img layout="fill" width="2992" height="2550" src="img/stars.png"></amp-img>
-            </amp-story-panning-media>
-          </amp-story-grid-layer>
-          <amp-story-grid-layer template="fill">
-            <amp-story-panning-media
-              layout="fill"
-              zoom='0'
-            >
-              <amp-img layout="fill" width="4000" height="3059" src="img/conservatory-coords.jpg"></amp-img>
-            </amp-story-panning-media>
-        </amp-story-page>
-
-        <amp-story-page id="stars-3">
-          <amp-story-grid-layer template="fill">
-            <amp-story-panning-media 
-              layout="fill"
-              group-id='stars-group-1'
-              x="-10%"
-              y="0%"
-              zoom='0'
-            >
-              <amp-img layout="fill" width="2992" height="2550" src="img/stars.png"></amp-img>
-            </amp-story-panning-media>
-          </amp-story-grid-layer>
-          <amp-story-grid-layer template="fill">
-            <amp-story-panning-media 
-              layout="fill"
-              group-id='stars-group-2'
-              x="-15%"
-              y="0%"
-              zoom='0'
-            >
-              <amp-img layout="fill" width="2992" height="2550" src="img/stars.png"></amp-img>
-            </amp-story-panning-media>
-          </amp-story-grid-layer>
-
-=======
-=======
->>>>>>> b6b5a8cb0 (Update example. Only calculate if lock-bounds.)
         <!-- coordinates example -->
         <amp-story-page id="painting-1">
->>>>>>> f2cf754be (Update example. Only calculate if lock-bounds.)
           <amp-story-grid-layer template="fill">
             <amp-story-panning-media
               layout="fill"
@@ -149,8 +37,7 @@
           </amp-story-grid-layer>
         </amp-story-page>
 
-        <!-- painting example -->
-        <amp-story-page id="painting-1">
+        <amp-story-page id="painting-2">
           <amp-story-grid-layer template="fill">
             <amp-story-panning-media
               layout="fill"
@@ -169,7 +56,7 @@
           </amp-story-grid-layer>
         </amp-story-page>     
         
-        <amp-story-page id="painting-2">
+        <amp-story-page id="painting-3">
           <amp-story-grid-layer template="fill">
             <amp-story-panning-media
               layout="fill"
@@ -187,7 +74,7 @@
           </amp-story-grid-layer>
         </amp-story-page> 
 
-        <amp-story-page id="painting-3">
+        <amp-story-page id="painting-4">
           <amp-story-grid-layer template="fill">
             <amp-story-panning-media
               layout="fill"
@@ -206,7 +93,7 @@
           </amp-story-grid-layer>
         </amp-story-page>  
 
-        <amp-story-page id="painting-4">
+        <amp-story-page id="painting-5">
           <amp-story-grid-layer template="fill">
             <amp-story-panning-media
               layout="fill"
@@ -224,7 +111,7 @@
           </amp-story-grid-layer>
         </amp-story-page>  
 
-        <amp-story-page id="painting-5">
+        <amp-story-page id="painting-6">
           <amp-story-grid-layer template="fill">
             <amp-story-panning-media
               layout="fill"
@@ -234,12 +121,6 @@
               <amp-img layout="fill" width="4000" height="3059" src="img/conservatory-coords.jpg"></amp-img>
             </amp-story-panning-media>
           </amp-story-grid-layer>
-<<<<<<< HEAD
-<<<<<<< HEAD
-        </amp-story-page>
-=======
-=======
->>>>>>> b6b5a8cb0 (Update example. Only calculate if lock-bounds.)
           <amp-story-grid-layer template="fill">
             <div class="text-wrapper">
               <h3>
@@ -248,9 +129,8 @@
             </div>
           </amp-story-grid-layer>
         </amp-story-page>      
->>>>>>> f2cf754be (Update example. Only calculate if lock-bounds.)
 
-        <amp-story-page id="painting-6">
+        <amp-story-page id="painting-7">
           <amp-story-grid-layer template="fill">
             <amp-story-panning-media
               layout="fill"
@@ -268,7 +148,7 @@
           </amp-story-grid-layer>
         </amp-story-page> 
 
-        <amp-story-page id="painting-7">
+        <amp-story-page id="painting-8">
           <amp-story-grid-layer template="fill">
             <amp-story-panning-media
               layout="fill"
@@ -287,7 +167,7 @@
           </amp-story-grid-layer>
         </amp-story-page>   
 
-        <amp-story-page id="painting-8">
+        <amp-story-page id="painting-9">
           <amp-story-grid-layer template="fill">
             <amp-story-panning-media
               layout="fill"
@@ -306,531 +186,7 @@
           </div>
         </amp-story-grid-layer>
       </amp-story-page>
-
-      <amp-story-page id="painting-10">
-        <amp-story-grid-layer template="fill">
-          <amp-story-panning-media
-            layout="fill"
-<<<<<<< HEAD
-<<<<<<< HEAD
-            lock-bounds
-            x="50%"
-          >
-            <amp-img layout="fill" width="4000" height="3059" src="img/conservatory-coords.jpg"></amp-img>
-          </amp-story-panning-media>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <div class="text-wrapper">
-            <h3>
-              lock-bounds x="50%"
-            </h3>
-          </div>
-        </amp-story-grid-layer>
-      </amp-story-page>  
-
-      <amp-story-page id="painting-11">
-        <amp-story-grid-layer template="fill">
-          <amp-story-panning-media
-            layout="fill"
-            lock-bounds
-            x="-50%"
-          >
-            <amp-img layout="fill" width="4000" height="3059" src="img/conservatory-coords.jpg"></amp-img>
-          </amp-story-panning-media>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <div class="text-wrapper">
-            <h3>
-              lock-bounds x="-50%"
-            </h3>
-          </div>
-        </amp-story-grid-layer>
-      </amp-story-page>  
-
-      <amp-story-page id="painting-12">
-        <amp-story-grid-layer template="fill">
-          <amp-story-panning-media
-            layout="fill"
-            lock-bounds
-            x="50%"
-<<<<<<< HEAD
-            y="50%"
-          >
-            <amp-img layout="fill" width="4000" height="3059" src="img/conservatory-coords.jpg"></amp-img>
-          </amp-story-panning-media>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <div class="text-wrapper">
-            <h3>
-              lock-bounds x="50%" y="50%"
-            </h3>
-          </div>
-        </amp-story-grid-layer>
-      </amp-story-page>  
-
-      <amp-story-page id="painting-13">
-        <amp-story-grid-layer template="fill">
-          <amp-story-panning-media
-            layout="fill"
-            lock-bounds
-            x="-20%"
-            y="50%"
-            zoom="2"
-          >
-            <amp-img layout="fill" width="4000" height="3059" src="img/conservatory-coords.jpg"></amp-img>
-          </amp-story-panning-media>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <div class="text-wrapper">
-            <h3>
-              lock-bounds x="-20%" y="50%" zoom="2"
-            </h3>
-          </div>
-        </amp-story-grid-layer>
-      </amp-story-page> 
-
-      <!-- multiple per page example -->
-      <amp-story-page id="stars-1">
-        <amp-story-grid-layer template="fill">
-          <amp-story-panning-media 
-            layout="fill"
-            group-id='stars-group-1'
-            x="10%"
-            y="0%"
-            zoom='1'
-          >
-            <amp-img layout="fill" width="2992" height="2550" src="img/stars.png"></amp-img>
-          </amp-story-panning-media>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <amp-story-panning-media 
-            layout="fill"
-            group-id='stars-group-2'
-            x="0%"
-            y="0%"
-            zoom='1'
-          >
-            <amp-img layout="fill" width="2992" height="2550" src="img/stars.png"></amp-img>
-          </amp-story-panning-media>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <div class="text-wrapper">
-            <h3>
-              Multiple components per page.
-            </h3>
-          </div>
-        </amp-story-grid-layer>
-      </amp-story-page>
-
-      <amp-story-page id="stars-2">
-        <amp-story-grid-layer template="fill">
-          <amp-story-panning-media 
-            layout="fill"
-            group-id='stars-group-1'
-            x="-10%"
-            y="0%"
-            zoom='1'
-          >
-            <amp-img layout="fill" width="2992" height="2550" src="img/stars.png"></amp-img>
-          </amp-story-panning-media>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <amp-story-panning-media 
-            layout="fill"
-            group-id='stars-group-2'
-            x="-15%"
-            y="0%"
-            zoom='1'
-          >
-            <amp-img layout="fill" width="2992" height="2550" src="img/stars.png"></amp-img>
-          </amp-story-panning-media>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <div class="text-wrapper">
-            <h3>
-              Multiple components per page.
-            </h3>
-          </div>
-        </amp-story-grid-layer>     
-      </amp-story-page>
-
-      <amp-story-page id="stars-3">
-        <amp-story-grid-layer template="fill">
-          <amp-story-panning-media 
-            layout="fill"
-            group-id='stars-group-1'
-            x="-10%"
-            y="0%"
-            zoom='2'
-          >
-            <amp-img layout="fill" width="2992" height="2550" src="img/stars.png"></amp-img>
-          </amp-story-panning-media>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <amp-story-panning-media 
-            layout="fill"
-            group-id='stars-group-2'
-            x="-15%"
-            y="0%"
-            zoom='1.5'
-          >
-            <amp-img layout="fill" width="2992" height="2550" src="img/stars.png"></amp-img>
-          </amp-story-panning-media>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <div class="text-wrapper">
-            <h3>
-              Multiple components per page.
-            </h3>
-          </div>
-        </amp-story-grid-layer>
-      </amp-story-page>      
-=======
-            x="left"
-            y="0%"
-            zoom="1"
-          >
-          <amp-img layout="fill" width="4000" height="3059" src="img/conservatory-coords.jpg"></amp-img>
-        </amp-story-panning-media>
-      </amp-story-grid-layer>
-<<<<<<< HEAD
-    </amp-story-page>      
->>>>>>> c43c508f5 (Implementation sketch.)
-=======
-    </amp-story-page>  
-    
-    <amp-story-page id="painting-11">
-      <amp-story-grid-layer template="fill">
-        <amp-story-panning-media
-          layout="fill"
-          x="left"
-          y="0%"
-          zoom="2"
-        >
-        <amp-img layout="fill" width="4000" height="3059" src="img/conservatory-coords.jpg"></amp-img>
-      </amp-story-panning-media>
-    </amp-story-grid-layer>
-    <amp-story-grid-layer template="fill">
-      left zoom 2
-    </amp-story-grid-layer>
-  </amp-story-page>  
-
-  <amp-story-page id="painting-12">
-    <amp-story-grid-layer template="fill">
-      <amp-story-panning-media
-      layout="fill"
-      x="left"
-      y="0%"
-      zoom="3"
-      >
-      <amp-img layout="fill" width="4000" height="3059" src="img/conservatory-coords.jpg"></amp-img>
-    </amp-story-panning-media>
-  </amp-story-grid-layer>
-  <amp-story-grid-layer template="fill">
-    left zoom 3
-  </amp-story-grid-layer>
-  
-</amp-story-page>  
-<<<<<<< HEAD
->>>>>>> db47f3f94 (Factor in zoom.)
-=======
-
-<amp-story-page id="painting-13">
-  <amp-story-grid-layer template="fill">
-    <amp-story-panning-media
-      lock-bounds
-      layout="fill"
-      x="50%"
-      y="0%"
-      zoom="1"
-    >
-      <amp-img layout="fill" width="4000" height="3059" src="img/conservatory-coords.jpg"></amp-img>
-    </amp-story-panning-media>
-  </amp-story-grid-layer>
-</amp-story-page>  
-
-<amp-story-page id="painting-14">
-  <amp-story-grid-layer template="fill">
-    <amp-story-panning-media
-      lock-bounds
-      layout="fill"
-      x="-50%"
-      y="0%"
-      zoom="1"
-    >
-      <amp-img layout="fill" width="4000" height="3059" src="img/conservatory-coords.jpg"></amp-img>
-    </amp-story-panning-media>
-  </amp-story-grid-layer>
-</amp-story-page>  
-
-<amp-story-page id="painting-15">
-  <amp-story-grid-layer template="fill">
-    <amp-story-panning-media
-      lock-bounds
-      layout="fill"
-      x="40%"
-      y="0%"
-      zoom="1"
-    >
-      <amp-img layout="fill" width="4000" height="3059" src="img/conservatory-coords.jpg"></amp-img>
-    </amp-story-panning-media>
-  </amp-story-grid-layer>
-</amp-story-page>  
-
-<amp-story-page id="painting-16">
-  <amp-story-grid-layer template="fill">
-    <amp-story-panning-media
-      lock-bounds
-      layout="fill"
-      x="-40%"
-      y="0%"
-      zoom="1"
-    >
-      <amp-img layout="fill" width="4000" height="3059" src="img/conservatory-coords.jpg"></amp-img>
-    </amp-story-panning-media>
-  </amp-story-grid-layer>
-</amp-story-page>  
-
-<amp-story-page id="painting-17">
-  <amp-story-grid-layer template="fill">
-    <amp-story-panning-media
-      lock-bounds
-      layout="fill"
-      x="right"
-      y="0%"
-      zoom="2"
-    >
-      <amp-img layout="fill" width="4000" height="3059" src="img/conservatory-coords.jpg"></amp-img>
-    </amp-story-panning-media>
-  </amp-story-grid-layer>
-</amp-story-page>  
-
-<amp-story-page id="painting-right-top-zoom2">
-  <amp-story-grid-layer template="fill">
-    <amp-story-panning-media
-      lock-bounds
-      layout="fill"
-      x="right"
-      y="top"
-      zoom="2"
-    >
-      <amp-img layout="fill" width="4000" height="3059" src="img/conservatory-coords.jpg"></amp-img>
-    </amp-story-panning-media>
-  </amp-story-grid-layer>
-</amp-story-page>  
-=======
-            lock-bounds
-            x="50%"
-          >
-            <amp-img layout="fill" width="4000" height="3059" src="img/conservatory-coords.jpg"></amp-img>
-          </amp-story-panning-media>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <div class="text-wrapper">
-            <h3>
-              lock-bounds x="50%"
-            </h3>
-          </div>
-        </amp-story-grid-layer>
-      </amp-story-page>  
->>>>>>> b6b5a8cb0 (Update example. Only calculate if lock-bounds.)
-
-      <amp-story-page id="painting-11">
-        <amp-story-grid-layer template="fill">
-          <amp-story-panning-media
-            layout="fill"
-            lock-bounds
-            x="-50%"
-          >
-            <amp-img layout="fill" width="4000" height="3059" src="img/conservatory-coords.jpg"></amp-img>
-          </amp-story-panning-media>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <div class="text-wrapper">
-            <h3>
-              lock-bounds x="-50%"
-            </h3>
-          </div>
-        </amp-story-grid-layer>
-      </amp-story-page>  
-
-      <amp-story-page id="painting-12">
-        <amp-story-grid-layer template="fill">
-          <amp-story-panning-media
-            layout="fill"
-            lock-bounds
-            x="30%"
-=======
->>>>>>> 964ebfc67 (Clamp values if lock-bounds.)
-            y="50%"
-          >
-            <amp-img layout="fill" width="4000" height="3059" src="img/conservatory-coords.jpg"></amp-img>
-          </amp-story-panning-media>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <div class="text-wrapper">
-            <h3>
-              lock-bounds x="50%" y="50%"
-            </h3>
-          </div>
-        </amp-story-grid-layer>
-      </amp-story-page>  
-
-      <amp-story-page id="painting-13">
-        <amp-story-grid-layer template="fill">
-          <amp-story-panning-media
-            layout="fill"
-            lock-bounds
-            x="-20%"
-            y="50%"
-            zoom="2"
-          >
-            <amp-img layout="fill" width="4000" height="3059" src="img/conservatory-coords.jpg"></amp-img>
-          </amp-story-panning-media>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <div class="text-wrapper">
-            <h3>
-              lock-bounds x="-20%" y="50%" zoom="2"
-            </h3>
-          </div>
-        </amp-story-grid-layer>
-      </amp-story-page> 
-
-      <!-- multiple per page example -->
-      <amp-story-page id="stars-1">
-        <amp-story-grid-layer template="fill">
-          <amp-story-panning-media 
-            layout="fill"
-            group-id='stars-group-1'
-            x="10%"
-            y="0%"
-            zoom='1'
-          >
-            <amp-img layout="fill" width="2992" height="2550" src="img/stars.png"></amp-img>
-          </amp-story-panning-media>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <amp-story-panning-media 
-            layout="fill"
-            group-id='stars-group-2'
-            x="0%"
-            y="0%"
-            zoom='1'
-          >
-            <amp-img layout="fill" width="2992" height="2550" src="img/stars.png"></amp-img>
-          </amp-story-panning-media>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <div class="text-wrapper">
-            <h3>
-              Multiple components per page.
-            </h3>
-          </div>
-        </amp-story-grid-layer>
-      </amp-story-page>
-
-      <amp-story-page id="stars-2">
-        <amp-story-grid-layer template="fill">
-          <amp-story-panning-media 
-            layout="fill"
-            group-id='stars-group-1'
-            x="-10%"
-            y="0%"
-            zoom='1'
-          >
-            <amp-img layout="fill" width="2992" height="2550" src="img/stars.png"></amp-img>
-          </amp-story-panning-media>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <amp-story-panning-media 
-            layout="fill"
-            group-id='stars-group-2'
-            x="-15%"
-            y="0%"
-            zoom='1'
-          >
-            <amp-img layout="fill" width="2992" height="2550" src="img/stars.png"></amp-img>
-          </amp-story-panning-media>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <div class="text-wrapper">
-            <h3>
-              Multiple components per page.
-            </h3>
-          </div>
-        </amp-story-grid-layer>     
-      </amp-story-page>
-
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 023dbd8e2 (Test with left and right)
-=======
-        <amp-story-page id="stars-3">
-          <amp-story-grid-layer template="fill">
-            <amp-story-panning-media 
-              layout="fill"
-              group-id='stars-group-1'
-              x="-10%"
-              y="0%"
-              zoom='2'
-            >
-              <amp-img layout="fill" width="2992" height="2550" src="img/stars.png"></amp-img>
-            </amp-story-panning-media>
-          </amp-story-grid-layer>
-          <amp-story-grid-layer template="fill">
-            <amp-story-panning-media 
-              layout="fill"
-              group-id='stars-group-2'
-              x="-15%"
-              y="0%"
-              zoom='1.5'
-            >
-              <amp-img layout="fill" width="2992" height="2550" src="img/stars.png"></amp-img>
-            </amp-story-panning-media>
-          </amp-story-grid-layer>
-          <amp-story-grid-layer template="fill">
-            <div class="text-wrapper">
-              <h3>
-                Multiple components per page.
-              </h3>
-            </div>
-          </amp-story-grid-layer>
-        </amp-story-page>      
->>>>>>> b6b5a8cb0 (Update example. Only calculate if lock-bounds.)
-=======
-      <amp-story-page id="stars-3">
-        <amp-story-grid-layer template="fill">
-          <amp-story-panning-media 
-            layout="fill"
-            group-id='stars-group-1'
-            x="-10%"
-            y="0%"
-            zoom='2'
-          >
-            <amp-img layout="fill" width="2992" height="2550" src="img/stars.png"></amp-img>
-          </amp-story-panning-media>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <amp-story-panning-media 
-            layout="fill"
-            group-id='stars-group-2'
-            x="-15%"
-            y="0%"
-            zoom='1.5'
-          >
-            <amp-img layout="fill" width="2992" height="2550" src="img/stars.png"></amp-img>
-          </amp-story-panning-media>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="fill">
-          <div class="text-wrapper">
-            <h3>
-              Multiple components per page.
-            </h3>
-          </div>
-        </amp-story-grid-layer>
-      </amp-story-page>      
->>>>>>> e01cad13b (Tabbing in html template.)
-    </amp-story>
+     
+    </amp-story> 
   </body>
 </html>

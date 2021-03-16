@@ -36,15 +36,12 @@ const DURATION_MS = 1000;
 /** @const {number}  */
 const DISTANCE_TO_CENTER_EDGE = 50;
 
-<<<<<<< HEAD
 /**
  * A small number used to calculate zooming out to 0.
  * @const {number}
  */
 const MIN_INTEGER = -100000;
 
-=======
->>>>>>> 93af7d68b (Const for distance to center edge.)
 /**
  * Position values used to animate between components.
  * x: (optional) Percentage between [-50; 50]
@@ -89,21 +86,10 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.animateTo_ = {};
 
     /** @private {?panningMediaMaxBoundsDef} Max distances to keep image in viewport. */
-<<<<<<< HEAD
-<<<<<<< HEAD
     this.maxBounds_ = {};
 
     /** @private {?{width: number, height: number}} */
     this.pageSize_ = null;
-<<<<<<< HEAD
-=======
-    this.maxBounds = {};
->>>>>>> 499b4ad7d (maxbounds method and variable. Tests.)
-=======
-    this.maxBounds_ = {};
->>>>>>> d96027125 (Private variable)
-=======
->>>>>>> 8b88113d2 (Get page size from store)
 
     /** @private {?panningMediaPositionDef} Current animation state. */
     this.animationState_ = {};
@@ -133,90 +119,12 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     );
   }
 
-<<<<<<< HEAD
-  /** @private */
-  setAnimateTo_() {
-    const x = parseFloat(this.element_.getAttribute('x') || 0);
-    const y = parseFloat(this.element_.getAttribute('y') || 0);
-    const zoom = parseFloat(this.element_.getAttribute('zoom') || 1);
-    const lockBounds = this.element_.hasAttribute('lock-bounds');
-
-<<<<<<< HEAD
-    if (this.element_.hasAttribute('zoom')) {
-      const attrZoom = parseFloat(this.element_.getAttribute('zoom'));
-      if (lockBounds && attrZoom < 1) {
-        zoom = 1;
-      } else {
-        zoom = attrZoom || 1;
-      }
-    } else {
-      zoom = 1;
-    }
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
-    const containerHeight = this.element.offsetHeight;
-    const containerWidth = this.element.offsetWidth;
-    const ampImgWidth = this.ampImgEl_.getAttribute('width');
-    const ampImgHeight = this.ampImgEl_.getAttribute('height');
-    const scaledFraction = containerHeight / ampImgHeight;
-    const scaledImageWidth = scaledFraction * ampImgWidth;
-    const scaledImageHeight = scaledFraction * ampImgHeight;
-    const widthFraction = 1 - containerWidth / (scaledImageWidth * zoom);
-    const heightFraction = 1 - containerHeight / (scaledImageHeight * zoom);
-
->>>>>>> 023dbd8e2 (Test with left and right)
-    let x = 0;
-    if (attrX === 'left') {
-      x = 50 * widthFraction;
-    } else if (attrX === 'right') {
-      x = -50 * widthFraction;
-    } else if (lockBounds) {
-      x = parseFloat(attrX) * widthFraction;
-=======
-    if (!lockBounds) {
-      this.animateTo_ = {x, y, zoom};
->>>>>>> b6b5a8cb0 (Update example. Only calculate if lock-bounds.)
-    } else {
-      // Calculations to clamp image to edge of container.
-      const containerHeight = this.element.offsetHeight;
-      const containerWidth = this.element.offsetWidth;
-      const ampImgWidth = this.ampImgEl_.getAttribute('width');
-      const ampImgHeight = this.ampImgEl_.getAttribute('height');
-      // TODO(#31515): When aspect ratio is portrait, containerWidth will be used for this.
-      const percentScaled = containerHeight / ampImgHeight;
-      const scaledImageWidth = percentScaled * ampImgWidth;
-      const scaledImageHeight = percentScaled * ampImgHeight;
-
-      this.animateTo_.zoom = lockBounds && zoom < 1 ? 1 : zoom;
-
-      const widthFraction =
-        1 - containerWidth / (scaledImageWidth * this.animateTo_.zoom);
-      const heightFraction =
-        1 - containerHeight / (scaledImageHeight * this.animateTo_.zoom);
-
-      const maxHorizontal = 50 * widthFraction;
-      const maxVertical = 50 * heightFraction;
-
-      this.animateTo_.x =
-        x > 0 ? Math.min(maxHorizontal, x) : Math.max(-maxHorizontal, x);
-
-      this.animateTo_.y =
-        y > 0 ? Math.min(maxVertical, y) : Math.max(-maxVertical, y);
-    }
-  }
-
-=======
->>>>>>> 668644b9d (Handle page resize)
   /** @override */
   layoutCallback() {
     this.ampImgEl_ = dev().assertElement(
       this.element_.querySelector('amp-img')
     );
 
->>>>>>> c43c508f5 (Implementation sketch.)
     this.groupId_ =
       this.element_.getAttribute('group-id') ||
       this.ampImgEl_.getAttribute('src');
@@ -285,9 +193,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     if (!lockBounds) {
       this.animateTo_ = {x, y, zoom};
     } else {
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
       // Zoom must be set to calculate maxBounds.
       this.animateTo_.zoom = zoom < 1 ? 1 : zoom;
 
@@ -302,87 +207,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
         y > 0
           ? Math.min(this.maxBounds_.top, y)
           : Math.max(-this.maxBounds_.bottom, y);
-=======
-      // Calculations to clamp image to edge of container.
-      const containerHeight = this.element.offsetHeight;
-      const containerWidth = this.element.offsetWidth;
-      const ampImgWidth = this.ampImgEl_.getAttribute('width');
-      const ampImgHeight = this.ampImgEl_.getAttribute('height');
-      // TODO(#31515): When aspect ratio is portrait, containerWidth will be used for this.
-      const percentScaled = containerHeight / ampImgHeight;
-      const scaledImageWidth = percentScaled * ampImgWidth;
-      const scaledImageHeight = percentScaled * ampImgHeight;
-
-      this.animateTo_.zoom = lockBounds && zoom < 1 ? 1 : zoom;
-
-      const widthFraction =
-        1 - containerWidth / (scaledImageWidth * this.animateTo_.zoom);
-      const heightFraction =
-        1 - containerHeight / (scaledImageHeight * this.animateTo_.zoom);
-
-      const maxHorizontal = 50 * widthFraction;
-      const maxVertical = 50 * heightFraction;
-=======
-      // zoom must be set to calculate maxBounds
-=======
-      // Zoom must be set to calculate maxBounds.
->>>>>>> 252cd5852 (Update comment.)
-      this.animateTo_.zoom = zoom < 1 ? 1 : zoom;
-
-      this.setMaxBounds_();
->>>>>>> 499b4ad7d (maxbounds method and variable. Tests.)
-
-      this.animateTo_.x =
-        x > 0
-          ? Math.min(this.maxBounds_.left, x)
-          : Math.max(this.maxBounds_.right, x);
-
-      this.animateTo_.y =
-        y > 0
-          ? Math.min(this.maxBounds_.top, y)
-          : Math.max(-this.maxBounds_.bottom, y);
     }
-  }
-
-  /**
-   * Calculates max distances to keep image in viewport.
-   * This is only set if lock-bounds, left, right, top or bottom are specified.
-   * @private
-   */
-  setMaxBounds_() {
-    // Calculations to clamp image to edge of container.
-    const {width: containerWidth, height: containerHeight} = this.pageSize_;
-
-    const ampImgWidth = this.ampImgEl_.getAttribute('width');
-    const ampImgHeight = this.ampImgEl_.getAttribute('height');
-    // TODO(#31515): When aspect ratio is portrait, containerWidth will be used for this.
-    const percentScaled = containerHeight / ampImgHeight;
-    const scaledImageWidth = percentScaled * ampImgWidth;
-    const scaledImageHeight = percentScaled * ampImgHeight;
-
-    const widthFraction =
-      1 - containerWidth / (scaledImageWidth * this.animateTo_.zoom);
-    const heightFraction =
-      1 - containerHeight / (scaledImageHeight * this.animateTo_.zoom);
-
-    this.maxBounds_ = {
-      left: DISTANCE_TO_CENTER_EDGE * widthFraction,
-      right: -DISTANCE_TO_CENTER_EDGE * widthFraction,
-      top: DISTANCE_TO_CENTER_EDGE * heightFraction,
-      bottom: -DISTANCE_TO_CENTER_EDGE * heightFraction,
-    };
-  }
-
-  /** @private */
-  onPageNavigation_() {
-<<<<<<< HEAD
-    if (this.isOnActivePage_) {
-      this.animate_();
->>>>>>> 668644b9d (Handle page resize)
-    }
-=======
-    this.animate_();
->>>>>>> 8b88113d2 (Get page size from store)
   }
 
   /**
