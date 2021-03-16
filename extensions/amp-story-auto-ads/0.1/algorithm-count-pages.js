@@ -36,7 +36,7 @@ export class CountPagesAlgorithm {
     this.interval_ = 7;
 
     /** @private {!Object<string, boolean>} */
-    this.uniquePageIds_ = new map();
+    this.uniquePageIds_ = map();
 
     /** @private {number} */
     this.newPagesSinceLastAd_ = 1;
