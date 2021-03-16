@@ -16,10 +16,10 @@
 'use strict';
 const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
+const fs = require('fs-extra');
 const path = require('path');
 const Remapping = require('@ampproject/remapping');
 const terser = require('terser');
-const through = require('through2');
 const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
 const {jsBundles} = require('./bundles.config.js');
 
@@ -74,69 +74,38 @@ async function terserMinify(code, filename) {
 /**
  * Apply Babel Transforms on output from Closure Compuler, then cleanup added
  * space with Terser. Used only in esm mode.
- *
- * @return {!Promise}
+ * @param {string} file
+ * @return {Promise<void>}
  */
-exports.postClosureBabel = function () {
-  return through.obj(async function (file, _enc, next) {
-    if ((!argv.esm && !argv.sxg) || path.extname(file.path) === '.map') {
-      debug(
-        CompilationLifecycles['complete'],
-        file.path,
-        file.contents,
-        file.sourceMap
-      );
-      return next(null, file);
-    }
+async function postClosureBabel(file) {
+  if ((!argv.esm && !argv.sxg) || path.extname(file) === '.map') {
+    debug(CompilationLifecycles['complete'], file);
+    return;
+  }
 
-    const map = file.sourceMap;
+  debug(CompilationLifecycles['closured-pre-babel'], file);
+  const babelOptions = babel.loadOptions({caller: {name: 'post-closure'}});
+  const {code, map: babelMap} =
+    (await babel.transformFileAsync(file, babelOptions)) || {};
+  if (!code || !babelMap) {
+    throw new Error(`Error transforming contents of ${file}`);
+  }
 
-    try {
-      debug(
-        CompilationLifecycles['closured-pre-babel'],
-        file.path,
-        file.contents,
-        file.sourceMap
-      );
-      const {code, map: babelMap} =
-        babel.transformSync(file.contents, {
-          caller: {name: 'post-closure'},
-        }) || {};
-      if (!code || !babelMap) {
-        throw new Error(`Error transforming contents of ${file.path}`);
-      }
+  debug(CompilationLifecycles['closured-pre-terser'], file, code, babelMap);
+  const {compressed, terserMap} = await terserMinify(code, path.basename(file));
+  await fs.outputFile(file, compressed);
 
-      debug(
-        CompilationLifecycles['closured-pre-terser'],
-        file.path,
-        file.contents,
-        file.sourceMap
-      );
+  const closureMap = await fs.readJson(`${file}.map`, 'utf-8');
+  const sourceMap = remapping(
+    [terserMap, babelMap, closureMap],
+    () => null,
+    !argv.full_sourcemaps
+  );
 
-      const {compressed, terserMap} = await terserMinify(
-        code,
-        path.basename(file.path)
-      );
-      if (!compressed) {
-        throw new Error(`Error minifying contents of ${file.path}`);
-      }
-      file.contents = Buffer.from(compressed.toString(), 'utf-8');
-      file.sourceMap = remapping(
-        [terserMap, babelMap, map],
-        () => null,
-        !argv.full_sourcemaps
-      );
-    } catch (e) {
-      return next(e);
-    }
+  debug(CompilationLifecycles['complete'], file, compressed, sourceMap);
+  await fs.writeJson(`${file}.map`, sourceMap);
+}
 
-    debug(
-      CompilationLifecycles['complete'],
-      file.path,
-      file.contents,
-      file.sourceMap
-    );
-
-    return next(null, file);
-  });
+module.exports = {
+  postClosureBabel,
 };

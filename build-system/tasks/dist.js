@@ -398,4 +398,6 @@ dist.flags = {
   sanitize_vars_for_diff:
     '  Sanitize the output to diff build results. Requires --pseudo_names',
   sxg: '  Outputs the compiled code for the SxG build',
+  warning_level:
+    "  Optionally sets closure's warning level to one of [quiet, default, verbose]",
 };
