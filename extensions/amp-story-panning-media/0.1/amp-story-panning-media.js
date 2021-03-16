@@ -83,7 +83,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.pageDistance_ = null;
 
     /** @private {number} Min distance from active page to animate. */
-    this.minPageDistance_ = null;
+    this.minPageDistance_ = 2;
 
     /** @private {?string} */
     this.groupId_ = null;
