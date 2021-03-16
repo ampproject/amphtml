@@ -535,6 +535,12 @@ Type attribute value: `snowplow_v2`
 
 Type attribute value: `subscriptions-propensity`
 
+### Taboola
+
+Type attribute value: `taboola`
+
+Adds support for Taboola. More details for adding Taboola support can be found at [Taboola](https://taboola.com).
+
 ### Tail
 
 Type attribute value: `tail`
