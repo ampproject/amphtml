@@ -5,7 +5,6 @@
     width: 325px;
     /* transform: translateX(-50%); */
     position: absolute;
-    background-color:blue;
     
 }
 
@@ -14,6 +13,4 @@
     opacity: 0;
     pointer-events: none;
     width: 325px;
-
-    background-color:red;
 }
