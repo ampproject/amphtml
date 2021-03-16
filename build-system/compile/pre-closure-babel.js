@@ -48,6 +48,18 @@ function getBabelCacheDir() {
 }
 
 /**
+ * Removes the transformed output of a file or a directory from the babel cache
+ * so it can be retransformed during a watch build.
+ * @param {string} fileOrDir
+ */
+function removeFromBabelCache(fileOrDir) {
+  const cachedPath = path.join(cacheDir, fileOrDir);
+  if (fs.existsSync(cachedPath)) {
+    fs.removeSync(cachedPath);
+  }
+}
+
+/**
  * Computes the set of files on which to run pre-closure babel transforms.
  *
  * @return {!Array<string>}
@@ -126,5 +138,6 @@ function handlePreClosureError(err, outputFilename, options) {
 
 module.exports = {
   getBabelCacheDir,
+  removeFromBabelCache,
   preClosureBabel,
 };
