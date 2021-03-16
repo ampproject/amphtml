@@ -27,9 +27,11 @@ limitations under the License.
 
 # amp-font (deprecated)
 
-Replace with a sentence: "This component has been deprecated and should no longer be used. Instead, use the [`font-display`](https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display) descriptor to specify how to display a font face dependent on whether and when it is ready.
+[tip type="warning"]
+This component is deprecated and should no longer be used. Instead, use the [`font-display`](https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display) descriptor to specify how to display a font face dependent on whether and when it is ready.
+[/tip]
 
-The `amp-font` component was AMP's solution to controlling timeouts on font loading. With the wide browser adoption of font-display, this component is no longer necessary. It is here for legacy users.
+The `amp-font` component was AMP's solution to controlling timeouts on font loading. With the wide browser adoption of font-display, this component is no longer necessary. It is here for legacy users. Instead, use the [`font-display`](https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display) descriptor to specify how to display a font face dependent on whether and when it is ready.
 
 ## Usage
 
@@ -76,6 +78,10 @@ The font family of the custom loaded font.
 The allowed time in millisecond for the custom font to load. Defaults to 3000 when undefined. When set to 0 the component loads font only if the font is in the cache. If set to an invalid value it defaults back to 3000.
 
 ### `on-load-add-class` (optional)
+
+CSS class to add to document root after custom font is available.
+
+### `on-load-remove-class` (optional)
 
 CSS class to remove from document root after custom font is available.
 
