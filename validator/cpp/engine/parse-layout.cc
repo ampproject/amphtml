@@ -63,7 +63,9 @@ CssLength::CssLength()
       is_fluid(false),
       numeral(std::numeric_limits<double>::quiet_NaN()),
       unit(kUnitPx) {}
-CssLength::CssLength(string_view input, bool allow_auto, bool allow_fluid)
+CssLength::CssLength(
+    re2::StringPiece input,
+    bool allow_auto, bool allow_fluid)
     : is_valid(false),
       is_set(false),
       is_auto(false),

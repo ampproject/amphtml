@@ -21,6 +21,7 @@
 
 #include "absl/strings/string_view.h"
 #include "validator.pb.h"
+#include "re2/re2.h"
 
 namespace amp::validator::parse_layout {
 
@@ -50,8 +51,9 @@ struct CssLength {
   // Parses a given |input| value. |allow_auto| determines whether 'auto'
   // is accepted as a value. |allow_fluid| determines whether 'fluid' is
   // accepted as a value.
-  explicit CssLength(absl::string_view input, bool allow_auto,
-                     bool allow_fluid);
+  explicit CssLength(
+      re2::StringPiece input,
+      bool allow_auto, bool allow_fluid);
 };
 
 // Interprets a |layout| string, such as fixed-height, as
