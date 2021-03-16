@@ -86,10 +86,10 @@ export class FirstImpressionIoConfig {
     if (targeting) {
       queryParams['targeting'] = targeting;
     }
-    if (fiReveal) {
+    if (fiReveal !== undefined) {
       queryParams['fi_reveal'] = fiReveal;
     }
-    if (fiDemand) {
+    if (fiDemand !== undefined) {
       queryParams['fi_demand'] = fiDemand;
     }
     if (fiGeo) {
