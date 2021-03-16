@@ -23,10 +23,10 @@ const {
   compileAllJs,
   compileCoreRuntime,
   compileJs,
+  endBuildStep,
   maybeToEsmName,
   printConfigHelp,
   printNobuildHelp,
-  endBuildStep,
 } = require('./helpers');
 const {
   cleanupBuildDir,
@@ -109,15 +109,6 @@ async function runPreDistSteps(options) {
   await copyParsers();
   await bootstrapThirdPartyFrames(options);
   displayLifecycleDebugging();
-}
-
-/**
- * Copies parsers from the build folder to the dist folder
- */
-async function copyParsers() {
-  const startTime = Date.now();
-  await fs.copy('build/parsers', 'dist/v0');
-  endBuildStep('Copied', 'build/parsers/ to dist/v0', startTime);
 }
 
 /**
@@ -236,6 +227,15 @@ async function prebuild() {
   await preBuildExperiments();
   await preBuildLoginDone();
   await preBuildWebPushPublisherFiles();
+}
+
+/**
+ * Copies parsers from the build folder to the dist folder
+ */
+async function copyParsers() {
+  const startTime = Date.now();
+  await fs.copy('build/parsers', 'dist/v0');
+  endBuildStep('Copied', 'build/parsers/ to dist/v0', startTime);
 }
 
 /**

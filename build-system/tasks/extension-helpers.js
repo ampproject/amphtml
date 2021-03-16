@@ -433,21 +433,14 @@ async function buildExtension(
   if (options.compileOnlyCss && !hasCss) {
     return;
   }
-  const extensionPath = 'extensions/' + name + '/' + version;
+  const extDir = 'extensions/' + name + '/' + version;
 
   // Use a separate watcher for extensions to copy / inline CSS and compile JS
   // instead of relying on the watchers used by compileUnminifiedJs and
   // compileMinifiedJs, which only recompile JS.
   if (options.watch) {
     options.watch = false;
-    watchExtension(
-      extensionPath,
-      name,
-      version,
-      latestVersion,
-      hasCss,
-      options
-    );
+    watchExtension(extDir, name, version, latestVersion, hasCss, options);
     // When an ad network extension is being watched, also watch amp-a4a.
     if (name.match(/amp-ad-network-.*-impl/)) {
       const a4aPath = `extensions/amp-a4a/${version}`;
@@ -457,20 +450,20 @@ async function buildExtension(
   if (hasCss) {
     mkdirSync('build');
     mkdirSync('build/css');
-    await buildExtensionCss(extensionPath, name, version, options);
+    await buildExtensionCss(extDir, name, version, options);
     if (options.compileOnlyCss) {
       return;
     }
   }
 
-  await compileJison(path.join(extensionPath, '**', '*.jison'));
+  await compileJison(path.join(extDir, '**', '*.jison'));
   if (name === 'amp-bind') {
     await doBuildJs(jsBundles, 'ww.max.js', options);
   }
   if (name === 'amp-analytics') {
     await analyticsVendorConfigs(options);
   }
-  await buildExtensionJs(extensionPath, name, version, latestVersion, options);
+  await buildExtensionJs(extDir, name, version, latestVersion, options);
 }
 
 /**
