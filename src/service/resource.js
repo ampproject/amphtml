@@ -1089,20 +1089,14 @@ export class Resource {
    * Calls element's pauseCallback callback.
    */
   pause() {
-    this.element.pauseCallback();
-    if (this.element.unlayoutOnPause()) {
-      this.unlayout();
-    }
-    if (this.element.V1()) {
-      this.element.pause();
-    }
+    this.element.pause();
   }
 
   /**
    * Calls element's pauseCallback callback.
    */
   pauseOnRemove() {
-    this.element.pauseCallback();
+    this.element.pause();
   }
 
   /**
@@ -1116,11 +1110,8 @@ export class Resource {
    * Called when a previously visible element is no longer displayed.
    */
   unload() {
-    this.pause();
+    this.element.unmount();
     this.unlayout();
-    if (this.element.V1()) {
-      this.element.unmount();
-    }
   }
 
   /**

@@ -180,9 +180,6 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       /** @private {boolean} */
       this.isFirstLayoutCompleted_ = false;
 
-      /** @private {boolean} */
-      this.paused_ = false;
-
       /** @public {boolean} */
       this.warnOnMissingOverflow = true;
 
@@ -682,22 +679,20 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @final
      */
     unmount() {
-      // Hasn't been mounted yet and hasn't started mounting.
-      if (!this.mountPromise_) {
-        return;
+      if (this.isConnected_) {
+        // Ensure that the element is paused.
+        this.pause();
       }
 
-      devAssert(this.V1());
+      // Hasn't been mounted yet and hasn't started mounting.
+      if (!this.V1() || !this.mountPromise_) {
+        return;
+      }
 
       // Cancel the currently mounting operation.
       if (this.mountAbortController_) {
         this.mountAbortController_.abort();
         this.mountAbortController_ = null;
-      }
-
-      if (this.isConnected_) {
-        // Ensure that the element is paused.
-        this.pause();
       }
 
       // Try to unmount. Not every element can be unmounted or has anything
@@ -789,14 +784,16 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * Pauses the element.
      */
     pause() {
-      if (!this.impl_) {
-        // Not upgraded yet.
+      if (!this.isBuilt()) {
+        // Not built yet.
         return;
       }
-      if (this.V1()) {
-        this.impl_.pauseCallback();
-      } else {
-        this.getResource_().pause();
+
+      this.impl_.pauseCallback();
+
+      // Legacy unlayoutOnPause support.
+      if (!this.V1() && this.impl_.unlayoutOnPause()) {
+        this.getResource_().unlayout();
       }
     }
 
@@ -1610,25 +1607,6 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     }
 
     /**
-     * Requests the resource to stop its activity when the document goes into
-     * inactive state. The scope is up to the actual component. Among other
-     * things the active playback of video or audio content must be stopped.
-     *
-     * @package @final
-     * TODO(#31915): remove once V1 migration is complete.
-     */
-    pauseCallback() {
-      assertNotTemplate(this);
-      if (this.paused_) {
-        return;
-      }
-      this.paused_ = true;
-      if (this.isBuilt()) {
-        this.impl_.pauseCallback();
-      }
-    }
-
-    /**
      * Requests the resource to resume its activity when the document returns
      * from an inactive state. The scope is up to the actual component. Among
      * other things the active playback of video or audio content may be
@@ -1638,11 +1616,6 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * TODO(#31915): remove once V1 migration is complete.
      */
     resumeCallback() {
-      assertNotTemplate(this);
-      if (!this.paused_) {
-        return;
-      }
-      this.paused_ = false;
       if (this.isBuilt()) {
         this.impl_.resumeCallback();
       }
@@ -1680,18 +1653,6 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       this.signals_.reset(CommonSignals.LOAD_START);
       this.signals_.reset(CommonSignals.LOAD_END);
       this.signals_.reset(CommonSignals.INI_LOAD);
-    }
-
-    /**
-     * Whether to call {@link unlayoutCallback} when pausing the element.
-     * Certain elements cannot properly pause (like amp-iframes with unknown
-     * video content), and so we must unlayout to stop playback.
-     *
-     * @return {boolean}
-     * @package @final
-     */
-    unlayoutOnPause() {
-      return this.impl_ ? this.impl_.unlayoutOnPause() : false;
     }
 
     /**
