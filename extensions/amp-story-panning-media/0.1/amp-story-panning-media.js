@@ -88,6 +88,9 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     /** @private {?panningMediaMaxBoundsDef} Max distances to keep image in viewport. */
     this.maxBounds_ = {};
 
+    /** @private {?{width: number, height: number}} */
+    this.pageSize_ = null;
+
     /** @private {?panningMediaPositionDef} Current animation state. */
     this.animationState_ = {};
 
@@ -137,9 +140,8 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       this.element_.getAttribute('group-id') ||
       this.ampImgEl_.getAttribute('src');
 
-    this.setAnimateTo_();
-
     this.initializeListeners_();
+
     return whenUpgradedToCustomElement(this.ampImgEl_)
       .then(() => this.ampImgEl_.signals().whenSignal(CommonSignals.LOAD_END))
       .then(() => {
@@ -159,6 +161,15 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   /** @private */
   initializeListeners_() {
     this.storeService_.subscribe(
+      StateProperty.PAGE_SIZE,
+      (pageSize) => {
+        this.pageSize_ = pageSize;
+        this.setAnimateTo_();
+        this.animate_();
+      },
+      true /** callToInitialize */
+    );
+    this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_ID,
       (currPageId) => {
         this.isOnActivePage_ = currPageId === this.getPageId_();
@@ -171,10 +182,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       (panningMediaState) => this.onPanningMediaStateChange_(panningMediaState),
       true /** callToInitialize */
     );
-    this.storeService_.subscribe(StateProperty.PAGE_SIZE, () => {
-      this.setAnimateTo_();
-      this.animate_();
-    });
     // Mutation observer for distance attribute
     const config = {attributes: true, attributeFilter: ['distance']};
     const callback = (mutationsList) => {
@@ -221,8 +228,8 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    */
   setMaxBounds_() {
     // Calculations to clamp image to edge of container.
-    const containerHeight = this.element.offsetHeight;
-    const containerWidth = this.element.offsetWidth;
+    const containerWidth = this.pageSize_.width;
+    const containerHeight = this.pageSize_.height;
     const ampImgWidth = this.ampImgEl_.getAttribute('width');
     const ampImgHeight = this.ampImgEl_.getAttribute('height');
     // TODO(#31515): When aspect ratio is portrait, containerWidth will be used for this.
@@ -245,9 +252,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @private */
   onPageNavigation_() {
-    if (this.isOnActivePage_) {
-      this.animate_();
-    }
+    this.animate_();
   }
 
   /**
@@ -255,6 +260,9 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    * @private
    */
   animate_() {
+    if (!this.isOnActivePage_) {
+      return;
+    }
     const startPos = this.storeService_.get(StateProperty.PANNING_MEDIA_STATE)[
       this.groupId_
     ];
