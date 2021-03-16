@@ -62,6 +62,7 @@ describes.endtoend(
         });
       });
 
+      // TODO(wg-components, #24195): Flaky during CI.
       it.skip('should scroll freely', async () => {
         const el = await getScrollingElement(styles, controller);
         const slideOne = await getSlide(styles, controller, 0);
