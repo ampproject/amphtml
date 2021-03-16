@@ -26,7 +26,7 @@ describes.realWin(
     },
   },
   (env) => {
-    let win, doc, element, template;
+    let win, doc, element;
 
     beforeEach(async function () {
       win = env.win;
@@ -34,7 +34,7 @@ describes.realWin(
       toggleExperiment(win, 'amp-render', true, true);
     });
 
-    it('example test renders', async () => {
+    it('renders', async () => {
       element = doc.createElement('amp-render');
       doc.body.appendChild(element);
       await waitFor(() => element.isConnected, 'element connected');

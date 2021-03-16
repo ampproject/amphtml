@@ -26,13 +26,9 @@ export default {
 };
 
 export const _default = () => {
-  // DO NOT SUBMIT: This is example code only.
   return (
-    <Render
-      style={{width: 300, height: 200}}
-      example-property="example string property value"
-    >
-      This text is inside.
+    <Render style={{width: 300, height: 200}}>
+      This text is inside amp-render.
     </Render>
   );
 };

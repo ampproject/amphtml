@@ -15,9 +15,9 @@
  */
 
 import * as Preact from '../../../../src/preact';
+import {text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
-import {withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'amp-render-1_0',
@@ -25,28 +25,18 @@ export default {
 
   parameters: {
     extensions: [
-      {
-        name: 'amp-render',
-        version: '1.0',
-      },
+      {name: 'amp-mustache', version: '0.2'},
+      {name: 'amp-bind', version: '0.1'},
+      {name: 'amp-render', version: '1.0'},
     ],
-    experiments: ['bento'],
+    experiments: ['amp-render'],
   },
 };
 
-// DO NOT SUBMIT: This is example code only.
-export const ExampleUseCase = () => {
-  return (
-    <amp-render
-      width="300"
-      height="200"
-      example-property="example string property value"
-    >
-      This text is inside.
-    </amp-render>
-  );
+export const Default = () => {
+  return <amp-render width="300" height="400" layout="fixed"></amp-render>;
 };
 
-ExampleUseCase.story = {
-  name: 'Example use case story',
+Default.story = {
+  name: 'Default amp-render',
 };
