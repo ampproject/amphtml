@@ -15,9 +15,9 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
+import {withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'amp-render-1_0',
