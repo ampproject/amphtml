@@ -49,8 +49,7 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    // TODO(wg-bento, #24195): getScrollingElement does not always find element in time.
-    it.skip('should render correctly', async function () {
+    it('should render correctly', async function () {
       this.timeout(testTimeout);
       const el = await getScrollingElement(controller);
 
@@ -62,8 +61,7 @@ describes.endtoend(
       await waitForCarouselImg(controller, 0);
     });
 
-    // TODO(wg-bento, #24195): getScrollingElement does not always find element in time.
-    it.skip('should layout the two adjacent slides', async function () {
+    it('should layout the two adjacent slides', async function () {
       this.timeout(testTimeout);
       // TODO(sparhami) Verify this is on the right of the 0th slide
       await waitForCarouselImg(controller, 1);
@@ -71,8 +69,7 @@ describes.endtoend(
       await waitForCarouselImg(controller, SLIDE_COUNT - 1);
     });
 
-    // TODO(wg-bento, #24195): getScrollingElement does not always find element in time.
-    it.skip('should snap when scrolling', async function () {
+    it('should snap when scrolling', async function () {
       this.timeout(testTimeout);
       const el = await getScrollingElement(controller);
       const firstSlide = await getSlide(controller, 0);
@@ -92,8 +89,7 @@ describes.endtoend(
       await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
     });
 
-    // TODO(wg-bento, #24195): getScrollingElement does not always find element in time.
-    it.skip('should reset the window after scroll', async function () {
+    it('should reset the window after scroll', async function () {
       this.timeout(testTimeout);
       const el = await getScrollingElement(controller);
       const firstSlide = await getSlide(controller, 0);
