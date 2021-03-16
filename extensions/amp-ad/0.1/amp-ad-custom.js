@@ -25,7 +25,7 @@ import {
   removeChildren,
 } from '../../../src/dom';
 import {hasOwn} from '../../../src/utils/object';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const {string} Tag name for custom ad implementation. */
 export const TAG_AD_CUSTOM = 'amp-ad-custom';
@@ -123,7 +123,7 @@ export class AmpAdCustom extends AMP.BaseElement {
       this.renderStarted();
 
       try {
-        Services.templatesFor(this.win)
+        Services.templatesForDoc(this.element)
           .findAndRenderTemplate(this.element, templateData)
           .then((renderedElement) => {
             // Get here when the template has been rendered Clear out the

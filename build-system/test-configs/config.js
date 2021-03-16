@@ -15,10 +15,20 @@
  */
 'use strict';
 
+/**
+ * @type
+ * Array<string | {
+ *   pattern: string,
+ *   included: boolean,
+ *   nocache: boolean,
+ *   watched: boolean
+ * }>
+ */
 const initTestsPath = ['test/_init_tests.js'];
 
-const fixturesExamplesPaths = [
-  'test-bin/test/fixtures/*.html',
+const karmaHtmlFixturesPath = 'test/fixtures/*.html';
+
+const fixturesExamplesPaths = [karmaHtmlFixturesPath].concat([
   {
     pattern: 'test/fixtures/served/*.html',
     included: false,
@@ -31,7 +41,7 @@ const fixturesExamplesPaths = [
     nocache: false,
     watched: true,
   },
-];
+]);
 
 const builtRuntimePaths = [
   {
@@ -64,6 +74,13 @@ const builtRuntimePaths = [
     nocache: false,
     watched: true,
   },
+];
+
+const karmaJsPaths = [
+  'test/**/*.js',
+  'ads/**/test/test-*.js',
+  'extensions/**/test/**/*.js',
+  'testing/**/*.js',
 ];
 
 const commonUnitTestPaths = initTestsPath.concat(fixturesExamplesPaths);
@@ -160,7 +177,7 @@ const prettifyGlobs = [
   '**/*.md',
   '!**/package*.json',
   '!.github/ISSUE_TEMPLATE/**',
-  '!**/{node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
+  '!**/{node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
 
 /**
@@ -169,7 +186,7 @@ const prettifyGlobs = [
  */
 const linkCheckGlobs = [
   '**/*.md',
-  '!**/{examples,node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
+  '!**/{examples,node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
 
 /**
@@ -211,6 +228,8 @@ module.exports = {
   e2eTestPaths,
   integrationTestPaths,
   jisonPaths,
+  karmaHtmlFixturesPath,
+  karmaJsPaths,
   linkCheckGlobs,
   lintGlobs,
   presubmitGlobs,

@@ -26,10 +26,10 @@
 /**
  * Shorthand to extract an environment variable.
  * @param {string} key
- * @return {string|undefined}
+ * @return {string}
  */
 function env(key) {
-  return process.env[key];
+  return process.env[key] ?? '';
 }
 
 /**
@@ -195,6 +195,15 @@ function ciJobUrl() {
 }
 
 /**
+ * Returns the merge commit for a CircleCI PR build. CIRCLECI_MERGE_COMMIT is
+ * populated by .circleci/fetch_merge_commit.sh.
+ * @return {string}
+ */
+function circleciPrMergeCommit() {
+  return isCircleci ? env('CIRCLECI_MERGE_COMMIT') : '';
+}
+
+/**
  * Returns the repo slug for the ongoing build.
  * @return {string}
  */
@@ -224,6 +233,7 @@ module.exports = {
   ciPullRequestBranch,
   ciPullRequestSha,
   ciPushBranch,
+  circleciPrMergeCommit,
   ciRepoSlug,
   isCiBuild,
   isCircleciBuild,

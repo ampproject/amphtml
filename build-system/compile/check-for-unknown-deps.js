@@ -24,12 +24,12 @@ const {red, cyan, yellow} = require('kleur/colors');
  * reference module imports. If any are found, that means Closure couldn't
  * import the module correctly.
  *
- * @return {!Stream}
+ * @return {!NodeJS.ReadStream}
  */
 exports.checkForUnknownDeps = function () {
   const regex = /[\w$]*module\$[\w$]+/;
 
-  return through.obj(function (file, encoding, cb) {
+  return through.obj(function (file, _encoding, cb) {
     const contents = file.contents.toString();
     if (!contents.includes('module$')) {
       // Fast check, since regexes can backtrack like crazy.
