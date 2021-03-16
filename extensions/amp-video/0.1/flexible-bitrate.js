@@ -173,7 +173,8 @@ export class BitrateManager {
     let hasChanges = false;
     sources.sort((a, b) => {
       // Biggest first, bitrates above threshold to the back
-      const value = this.getBitrateForComparison_(b) - this.getBitrateForComparison_(a);
+      const value =
+        this.getBitrateForComparison_(b) - this.getBitrateForComparison_(a);
       if (value < 0) {
         hasChanges = true;
       }
@@ -234,7 +235,7 @@ export class BitrateManager {
     }
     const {currentTime} = video;
     video.pause();
-    const hasChanges = this.sortSources_(video); 
+    const hasChanges = this.sortSources_(video);
     if (!hasChanges) {
       video.play();
       return;
@@ -268,7 +269,7 @@ export class BitrateManager {
       ) {
         return;
       }
-      const hasChanges = this.sortSources_(video)
+      const hasChanges = this.sortSources_(video);
       if (hasChanges) {
         video.load();
       }

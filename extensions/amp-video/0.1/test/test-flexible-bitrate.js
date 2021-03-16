@@ -227,11 +227,11 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
       ).to.jsonEqual([null, null, null, null, null, null, 'CACHE', null, null]);
     });
 
-    it('should sort sources only when it\'s not already sorted', () => {
+    it("should sort sources only when it's not already sorted", () => {
       const m = getManager('4g');
       const v0 = getVideo([4000, 1000, 3000, 2000]);
       m.manage(v0);
-      
+
       // Sorting once should work, but second time it should be a noop.
       expect(m.sortSources_(v0)).to.be.true;
       expect(m.sortSources_(v0)).to.be.false;
