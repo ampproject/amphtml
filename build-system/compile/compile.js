@@ -431,6 +431,9 @@ async function compile(
       .sync(srcs)
       .map((src) => preClosureBabel(src, outputFilename, options))
   );
+  if (options.errored && options.continueOnError) {
+    return; // Watch build. Bail on transform errors.
+  }
   const flags = generateFlags(
     options,
     compilerOptions,
@@ -439,6 +442,9 @@ async function compile(
     sourcemapFile
   );
   await runClosure(outputFilename, options, flags, transformedSrcFiles);
+  if (options.errored && options.continueOnError) {
+    return; // Watch build. Bail on compilation errors.
+  }
   if (!options.typeCheckOnly) {
     if (!argv.pseudo_names && !options.skipUnknownDepsCheck) {
       await checkForUnknownDeps(destFile);
