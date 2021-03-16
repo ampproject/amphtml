@@ -364,7 +364,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    * @private
    */
   prefersReducedMotion_() {
-    return this.win.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return this.win.matchMedia('(prefers-reduced-motion: reduce)')?.matches;
   }
 
   /** @override */
