@@ -20,17 +20,20 @@
  */
 
 const {
-  getExperimentConfig,
   downloadExperimentOutput,
   printSkipMessage,
   timedExecOrDie,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {experiment} = require('minimist')(process.argv.slice(2));
+const {getExperimentConfig} = require('../common/utils');
 const {runCiJob} = require('./ci-job');
 
 const jobName = `${experiment}-tests.js`;
 
+/**
+ * @return {void}
+ */
 function pushBuildWorkflow() {
   const config = getExperimentConfig(experiment);
   if (config) {
@@ -51,6 +54,9 @@ function pushBuildWorkflow() {
   }
 }
 
+/**
+ * @return {void}
+ */
 function prBuildWorkflow() {
   if (
     buildTargetsInclude(

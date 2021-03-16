@@ -481,7 +481,7 @@ export class Services {
   static storyVariableServiceForOrNull(win) {
     return (
       /** @type {!Promise<?../extensions/amp-story/1.0/variable-service.AmpStoryVariableService>} */
-      (getElementServiceIfAvailable(win, 'story-variable', 'amp-story'))
+      (getElementServiceIfAvailable(win, 'story-variable', 'amp-story', '1.0'))
     );
   }
 
@@ -505,7 +505,7 @@ export class Services {
   static storyStoreServiceForOrNull(win) {
     return (
       /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService>} */
-      (getElementServiceIfAvailable(win, 'story-store', 'amp-story'))
+      (getElementServiceIfAvailable(win, 'story-store', 'amp-story', '1.0'))
     );
   }
 
@@ -539,7 +539,7 @@ export class Services {
   static storyRequestServiceForOrNull(win) {
     return (
       /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService>} */
-      (getElementServiceIfAvailable(win, 'story-request', 'amp-story'))
+      (getElementServiceIfAvailable(win, 'story-request', 'amp-story', '1.0'))
     );
   }
 
@@ -595,7 +595,13 @@ export class Services {
   static storyAnalyticsServiceForOrNull(win) {
     return (
       /** @type {!Promise<?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService>} */
-      (getElementServiceIfAvailable(win, 'story-analytics', 'amp-story', true))
+      (getElementServiceIfAvailable(
+        win,
+        'story-analytics',
+        'amp-story',
+        '1.0',
+        true
+      ))
     );
   }
 
@@ -619,6 +625,17 @@ export class Services {
       /** @type {!Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>} */
       (getElementServiceForDoc(element, 'web-animation', 'amp-animation'))
     );
+  }
+
+  /**
+   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!Promise<RealTimeConfigManager>}
+   */
+  static realTimeConfigForDoc(elementOrAmpDoc) {
+    return /** @type {!Promise<RealTimeConfigManager>} */ (getServicePromiseForDoc(
+      elementOrAmpDoc,
+      'real-time-config'
+    ));
   }
 
   /**
@@ -654,12 +671,12 @@ export class Services {
   }
 
   /**
-   * @param {!Window} window
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/template-impl.Templates}
    */
-  static templatesFor(window) {
-    return /** @type {!./service/template-impl.Templates} */ (getService(
-      window,
+  static templatesForDoc(elementOrAmpDoc) {
+    return /** @type {!./service/template-impl.Templates} */ (getServiceForDoc(
+      elementOrAmpDoc,
       'templates'
     ));
   }

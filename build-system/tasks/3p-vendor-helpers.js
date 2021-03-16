@@ -16,7 +16,7 @@
 
 const debounce = require('debounce');
 const globby = require('globby');
-const {compileJs} = require('./helpers');
+const {compileJsWithEsbuild} = require('./helpers');
 const {endBuildStep} = require('./helpers');
 const {VERSION} = require('../compile/internal-version');
 const {watchDebounceDelay} = require('./helpers');
@@ -84,7 +84,7 @@ async function buildVendorConfigs(options) {
  * @return {!Promise}
  */
 async function buildVendor(name, options) {
-  await compileJs(
+  await compileJsWithEsbuild(
     './3p/vendors/',
     name + '.js',
     './dist.3p/',
@@ -94,7 +94,6 @@ async function buildVendor(name, options) {
       externs: ['./ads/ads.extern.js'],
       toName: `current/vendor/${name}.max.js`,
       minifiedName: `${VERSION}/vendor/${name}.js`,
-      esmPassCompilation: false,
     })
   );
 

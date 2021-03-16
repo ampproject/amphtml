@@ -46,7 +46,7 @@ import {
   resolveRelativeUrl,
 } from '../../../src/url';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
@@ -381,8 +381,12 @@ export class AmpConsent extends AMP.BaseElement {
           ) {
             continue;
           }
-          if (purposeConsents && action !== ACTION_TYPE.DISMISS) {
-            this.validateSetPurposeArgs_(purposeConsents);
+          if (
+            purposeConsents &&
+            Object.keys(purposeConsents).length &&
+            action !== ACTION_TYPE.DISMISS
+          ) {
+            this.validatePurposeConsents_(purposeConsents);
             this.consentStateManager_.updateConsentInstancePurposes(
               purposeConsents
             );
@@ -565,13 +569,17 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    */
   handleSetPurpose_(invocation) {
-    if (!invocation || !invocation['args']) {
+    if (
+      !invocation ||
+      !invocation['args'] ||
+      !Object.keys(invocation['args']).length
+    ) {
       dev().error(TAG, 'Must have arugments for `setPurpose`.');
       return;
     }
     const {args} = invocation;
     if (this.isReadyToHandleAction_()) {
-      this.validateSetPurposeArgs_(args);
+      this.validatePurposeConsents_(args);
       this.consentStateManager_.updateConsentInstancePurposes(args);
     }
   }
@@ -667,7 +675,8 @@ export class AmpConsent extends AMP.BaseElement {
         this.updateCacheIfNotNull_(
           response['consentStateValue'],
           response['consentString'] || undefined,
-          response['consentMetadata'] || undefined
+          response['consentMetadata'],
+          response['purposeConsents']
         );
       }
     });
@@ -676,22 +685,35 @@ export class AmpConsent extends AMP.BaseElement {
   /**
    * Sync with local storage if consentRequired is true.
    *
-   * @param {string=} responseStateValue
-   * @param {string=} responseConsentString
-   * @param {JsonObject=} opt_responseMetadata
+   * @param {?string=} responseStateValue
+   * @param {?string=} responseConsentString
+   * @param {?JsonObject=} responseMetadata
+   * @param {?JsonObject=} responsePurposeConsents
    */
   updateCacheIfNotNull_(
     responseStateValue,
     responseConsentString,
-    opt_responseMetadata
+    responseMetadata,
+    responsePurposeConsents
   ) {
     const consentStateValue = convertEnumValueToState(responseStateValue);
     // consentStateValue and consentString are treated as a pair that will update together
     if (consentStateValue !== null) {
+      if (
+        this.isGranularConsentExperimentOn_ &&
+        responsePurposeConsents &&
+        isObject(responsePurposeConsents) &&
+        Object.keys(responsePurposeConsents).length
+      ) {
+        this.validatePurposeConsents_(responsePurposeConsents);
+        this.consentStateManager_.updateConsentInstancePurposes(
+          responsePurposeConsents
+        );
+      }
       this.consentStateManager_.updateConsentInstanceState(
         consentStateValue,
         responseConsentString,
-        this.validateMetadata_(opt_responseMetadata)
+        this.validateMetadata_(responseMetadata)
       );
     }
   }
@@ -719,6 +741,9 @@ export class AmpConsent extends AMP.BaseElement {
           'isDirty': !!storedInfo['isDirty'],
           'matchedGeoGroup': this.matchedGeoGroup_,
         });
+        if (this.isGranularConsentExperimentOn_) {
+          request['purposeConsents'] = storedInfo['purposeConsents'];
+        }
         if (this.consentConfig_['clientConfig']) {
           request['clientConfig'] = this.consentConfig_['clientConfig'];
         }
@@ -755,20 +780,38 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * TODO (micajuineho): Use our stored info to check if we have the
-   * necessary granular consents.
-   * @param {ConsentInfoDef} unusedConsentInfo
+   * Returns true if we have stored the granular consent values
+   * for the required purposes.
+   * @param {ConsentInfoDef} consentInfo
    * @return {!Promise<boolean>}
    */
-  checkGranularConsentRequired_(unusedConsentInfo) {
+  checkGranularConsentRequired_(consentInfo) {
     if (!this.isGranularConsentExperimentOn_) {
       return Promise.resolve(true);
     }
     return this.getPurposeConsentRequired_().then((purposeConsentRequired) => {
-      if (!purposeConsentRequired) {
+      // True if there are no required purposes
+      if (!purposeConsentRequired?.length) {
+        this.consentStateManager_.hasAllPurposeConsents();
         return true;
       }
-      // TODO: add check here.
+      const storedPurposeConsents = consentInfo['purposeConsents'];
+      // False if there are no stored purposes
+      if (
+        !storedPurposeConsents ||
+        Object.keys(storedPurposeConsents).length <
+          purposeConsentRequired.length
+      ) {
+        return false;
+      }
+      // Check if we have a stored consent for each purpose required
+      for (let i = 0; i < purposeConsentRequired.length; i++) {
+        const purpose = purposeConsentRequired[i];
+        if (!hasOwn(storedPurposeConsents, purpose)) {
+          return false;
+        }
+      }
+      this.consentStateManager_.hasAllPurposeConsents();
       return true;
     });
   }
@@ -804,8 +847,9 @@ export class AmpConsent extends AMP.BaseElement {
    */
   hasRequiredConsents_() {
     return this.consentStateManager_.getConsentInstanceInfo().then((info) => {
-      // Global consent
+      // Check that we have global consent
       if (hasStoredValue(info)) {
+        // Then check granular consent
         return this.checkGranularConsentRequired_(info);
       }
       return Promise.resolve(false);
@@ -897,10 +941,11 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * Ensure setPurpose argument is valid.
+   * Ensure purpose consents to be set are valid.
+   *
    * @param {!Object} purposeObj
    */
-  validateSetPurposeArgs_(purposeObj) {
+  validatePurposeConsents_(purposeObj) {
     const purposeKeys = Object.keys(purposeObj);
     purposeKeys.forEach((purposeKey) => {
       dev().assertBoolean(

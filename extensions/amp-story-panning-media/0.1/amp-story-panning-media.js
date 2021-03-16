@@ -34,6 +34,12 @@ const TAG = 'AMP_STORY_PANNING_MEDIA';
 const DURATION_MS = 1000;
 
 /**
+ * A small number used to calculate zooming out to 0.
+ * @const {number}
+ */
+const MIN_INTEGER = -100000;
+
+/**
  * Position values used to animate between components.
  * x: (optional) Percentage between [-50; 50]
  * y: (optional) Percentage between [-50; 50]
@@ -84,8 +90,11 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.animateTo_ = {
       x: parseFloat(this.element_.getAttribute('x')) || 0,
       y: parseFloat(this.element_.getAttribute('y')) || 0,
-      zoom: parseFloat(this.element_.getAttribute('zoom')) || 1,
+      zoom: this.element_.hasAttribute('zoom')
+        ? parseFloat(this.element_.getAttribute('zoom'))
+        : 1,
     };
+
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => {
         this.storeService_ = storeService;
@@ -227,9 +236,20 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     const {x, y, zoom} = this.animationState_;
     return this.mutateElement(() => {
       setImportantStyles(this.ampImgEl_, {
-        transform: `translate3d(${x}%, ${y}%, ${(zoom - 1) / zoom}px)`,
+        transform: `translate3d(${x}%, ${y}%, ${this.calculateZoom_(zoom)}px)`,
       });
     });
+  }
+
+  /**
+   * Calculates zoom for translate3d and ensures the number is finite.
+   * @private
+   * @param {number} zoom
+   * @return {number}
+   */
+  calculateZoom_(zoom) {
+    const calculatedZoom = (zoom - 1) / zoom;
+    return isFinite(calculatedZoom) ? calculatedZoom : MIN_INTEGER;
   }
 
   /**

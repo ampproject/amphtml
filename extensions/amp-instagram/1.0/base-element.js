@@ -23,17 +23,20 @@ export class BaseElement extends PreactBaseElement {}
 BaseElement['Component'] = Instagram;
 
 /** @override */
-BaseElement['children'] = {};
-
-/** @override */
 BaseElement['loadable'] = true;
 
 /** @override */
+BaseElement['unloadOnPause'] = true;
+
+/** @override */
 BaseElement['props'] = {
-  'shortcode': {attr: 'data-shortcode'},
   'captioned': {attr: 'data-captioned'},
+  'shortcode': {attr: 'data-shortcode'},
   'title': {attr: 'title'},
 };
+
+/** @override */
+BaseElement['usesShadowDom'] = true;
 
 /** @override */
 BaseElement['layoutSizeDefined'] = true;

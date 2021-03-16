@@ -54,8 +54,8 @@ async function expectRenderedInFriendlyIframe(element, srcdoc) {
   expect(element, 'ad element').to.be.ok;
   const child = element.querySelector('iframe[srcdoc]');
   expect(child, 'iframe child').to.be.ok;
-  expect(child.getAttribute('srcdoc')).to.contain.string(srcdoc);
   await loadPromise(child);
+  expect(child.contentDocument.body.innerHTML).to.contain.string(srcdoc);
   const childDocument = child.contentDocument.documentElement;
   expect(childDocument, 'iframe doc').to.be.ok;
   expect(element, 'ad tag').to.be.visible;
@@ -130,11 +130,14 @@ describe('integration test: a4a', () => {
     return expectRenderedInFriendlyIframe(a4aElement, 'Hello, world.');
   });
 
-  it('should fall back to 3p when no signature is present', async () => {
-    delete adResponse.headers[AMP_SIGNATURE_HEADER];
-    await fixture.addElement(a4aElement);
-    return expectRenderedInXDomainIframe(a4aElement, TEST_URL);
-  });
+  // TODO(#27189): remove crypto checks as part of no signing cleanup.
+  if (!NO_SIGNING_RTV) {
+    it('should fall back to 3p when no signature is present', async () => {
+      delete adResponse.headers[AMP_SIGNATURE_HEADER];
+      await fixture.addElement(a4aElement);
+      return expectRenderedInXDomainIframe(a4aElement, TEST_URL);
+    });
+  }
 
   it('should not send request if display none', async () => {
     a4aElement.style.display = 'none';
