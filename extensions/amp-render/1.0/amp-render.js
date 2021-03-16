@@ -27,6 +27,20 @@ const TAG = 'amp-render';
 const AMP_STATE_URI_SCHEME = 'amp-state:';
 const AMP_SCRIPT_URI_SCHEME = 'amp-script:';
 
+/**
+ * Returns true if element's src points to amp-state.
+ * @param {string} src
+ * @return {boolean}
+ */
+const isAmpStateSrc = (src) => src.startsWith(AMP_STATE_URI_SCHEME);
+
+/**
+ * Returns true if element's src points to an amp-script function.
+ * @param {string} src
+ * @return {boolean}
+ */
+const isAmpScriptSrc = (src) => src.startsWith(AMP_SCRIPT_URI_SCHEME);
+
 class AmpRender extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -56,28 +70,6 @@ class AmpRender extends BaseElement {
   }
 
   /**
-   * Returns true if element's src points to amp-state.
-   *
-   * @param {string} src
-   * @return {boolean}
-   * @private
-   */
-  isAmpStateSrc_(src) {
-    return src.startsWith(AMP_STATE_URI_SCHEME);
-  }
-
-  /**
-   * Returns true if element's src points to an amp-script function.
-   *
-   * @param {string} src
-   * @return {boolean}
-   * @private
-   */
-  isAmpScriptSrc_(src) {
-    return src.startsWith(AMP_SCRIPT_URI_SCHEME);
-  }
-
-  /**
    * Returns the correct fetch function for amp-state, amp-script or
    * to fetch remote JSON.
    *
@@ -86,12 +78,12 @@ class AmpRender extends BaseElement {
    */
   getFetchFn_() {
     const src = this.element.getAttribute('src');
-    if (this.isAmpStateSrc_(src)) {
+    if (isAmpStateSrc(src)) {
       return this.getAmpStateJson.bind(null, this.element);
     }
-    if (this.isAmpScriptSrc_(src)) {
+    if (isAmpScriptSrc(src)) {
       // TODO(dmanek): implement this
-      return;
+      return () => {};
     }
     return batchFetchJsonFor.bind(null, this.getAmpDoc(), this.element);
   }
@@ -127,7 +119,11 @@ class AmpRender extends BaseElement {
     }
   }
 
-  /** @override */
+  /**
+   * TODO: this implementation is identical to one in amp-data-display &
+   * amp-date-countdown. Move it to a common file and import it.
+   * @override
+   */
   isReady(props) {
     if (this.template_ && !('render' in props)) {
       // The template is specified, but not available yet.
@@ -139,7 +135,8 @@ class AmpRender extends BaseElement {
   /**
    * Gets the json an amp-list that has an "amp-state:" uri. For example,
    * src="amp-state:json.path".
-   *
+   * TODO: this implementation is identical to one in amp-data-display &
+   * amp-date-countdown. Move it to a common file and import it.
    * @param {!AmpElement} element
    * @return {Promise<!JsonObject>}
    */

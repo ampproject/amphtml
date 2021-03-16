@@ -25,7 +25,6 @@ BaseElement['Component'] = Render;
 /** @override */
 BaseElement['props'] = {
   'src': {attr: 'src'},
-  'fetchFn': {attr: 'fetch-fn'},
 };
 
 /** @override */
