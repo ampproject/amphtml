@@ -406,7 +406,8 @@ function handleBundleError(err, continueOnError, destFilename) {
 }
 
 /**
- * Performs the final steps after a JS file is bundled with esbuild and babel
+ * Performs the final steps after a JS file is bundled and optionally minified
+ * with esbuild and babel.
  * @param {string} srcFilename
  * @param {string} destDir
  * @param {string} destFilename
@@ -426,21 +427,24 @@ async function finishBundle(
     options
   );
 
-  if (options.latestName) {
-    // "amp-foo-latest.js" -> "amp-foo-latest.max.js"
-    const latestMaxName = options.latestName.replace(/\.js$/, '.max.js');
-    // Copy amp-foo-0.1.js to amp-foo-latest.max.js.
+  const logPrefix = options.minify ? 'Minified' : 'Compiled';
+  let {latestName} = options;
+  if (latestName) {
+    if (!options.minify) {
+      latestName = latestName.replace(/\.js$/, '.max.js');
+    }
     fs.copySync(
       path.join(destDir, options.toName),
-      path.join(destDir, latestMaxName)
+      path.join(destDir, latestName)
     );
-    endBuildStep('Compiled', `${destFilename} → ${latestMaxName}`, startTime);
+    endBuildStep(logPrefix, `${destFilename} → ${latestName}`, startTime);
   } else {
-    endBuildStep('Compiled', destFilename, startTime);
+    endBuildStep(logPrefix, destFilename, startTime);
   }
 
+  const targets = options.minify ? MINIFIED_TARGETS : UNMINIFIED_TARGETS;
   const target = path.basename(destFilename, path.extname(destFilename));
-  if (UNMINIFIED_TARGETS.includes(target)) {
+  if (targets.includes(target)) {
     await applyAmpConfig(
       path.join(destDir, destFilename),
       /* localDev */ true,
@@ -494,6 +498,68 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       plugins: [plugin],
       banner,
       footer,
+      incremental: !!options.watch,
+      logLevel: 'silent',
+    })
+    .then((result) => {
+      finishBundle(srcFilename, destDir, destFilename, options, startTime);
+      return result;
+    })
+    .catch((err) => handleBundleError(err, !!options.watch, destFilename));
+
+  if (options.watch) {
+    watchedTargets.set(entryPoint, {
+      rebuild: async () => {
+        const time = Date.now();
+        const buildPromise = buildResult
+          .rebuild()
+          .then(() =>
+            finishBundle(srcFilename, destDir, destFilename, options, time)
+          )
+          .catch((err) =>
+            handleBundleError(err, /* continueOnError */ true, destFilename)
+          );
+        options?.onWatchBuild(buildPromise);
+        await buildPromise;
+      },
+    });
+  }
+}
+
+/**
+ * Transforms a given JavaScript file entry point with esbuild and babel, and
+ * watches it for changes (if required).
+ * Used by 3p iframe vendors.
+ * @param {string} srcDir
+ * @param {string} srcFilename
+ * @param {string} destDir
+ * @param {?Object} options
+ * @return {!Promise}
+ */
+async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
+  const startTime = Date.now();
+  const entryPoint = path.join(srcDir, srcFilename);
+  const destFilename = maybeToEsmName(
+    options.minify ? options.minifiedName : options.toName
+  );
+  const destFile = path.join(destDir, destFilename);
+
+  if (watchedTargets.has(entryPoint)) {
+    return watchedTargets.get(entryPoint).rebuild();
+  }
+
+  const plugin = getEsbuildBabelPlugin(
+    options.minify ? 'minified' : 'unminified',
+    /* enableCache */ true
+  );
+  const buildResult = await esbuild
+    .build({
+      entryPoints: [entryPoint],
+      bundle: true,
+      sourcemap: true,
+      outfile: destFile,
+      plugins: [plugin],
+      minify: options.minify,
       incremental: !!options.watch,
       logLevel: 'silent',
     })
@@ -725,6 +791,7 @@ module.exports = {
   compileAllJs,
   compileCoreRuntime,
   compileJs,
+  compileJsWithEsbuild,
   compileTs,
   doBuildJs,
   endBuildStep,

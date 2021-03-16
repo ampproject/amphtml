@@ -227,6 +227,7 @@ export class Extensions {
     if (extLoaders[extensionId]) {
       return extLoaders[extensionId];
     }
+    ampdoc.declareExtension(extensionId, version);
     stubElementIfNotKnown(ampdoc.win, extensionId);
     return (extLoaders[extensionId] = this.preloadExtension(
       extensionId,

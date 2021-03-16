@@ -237,7 +237,7 @@
 .i-amphtml-story-unmute-sound-text,
 .i-amphtml-story-unmute-no-sound-text,
 .i-amphtml-story-sidebar-control,
-.i-amphtml-story-skip-next  {
+.i-amphtml-story-skip-to-next  {
   display: none !important;
 }
 
@@ -330,11 +330,11 @@
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="32px" height="32px" viewBox="0 0 32 32" fill="#FFFFFF"><path d="M25.3332 8.54663L23.4532 6.66663L15.9998 14.12L8.5465 6.66663L6.6665 8.54663L14.1198 16L6.6665 23.4533L8.5465 25.3333L15.9998 17.88L23.4532 25.3333L25.3332 23.4533L17.8798 16L25.3332 8.54663Z"/></svg>') !important;
 }
 
-.i-amphtml-story-skip-next {
+.i-amphtml-story-skip-to-next {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="32px" height="32px" viewBox="0 0 32 32" fill="#FFFFFF"><path d="M19.3333 16L8 24V8L19.3333 16ZM24 24H21.3333V8H24V24Z"/></svg>') !important;
 }
 
-[desktop] .i-amphtml-story-skip-next {
+[desktop] .i-amphtml-story-skip-to-next {
   display: block !important;
 }
 

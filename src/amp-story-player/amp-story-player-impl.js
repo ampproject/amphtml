@@ -128,7 +128,8 @@ let DocumentStateTypeDef;
  *   messagingPromise: ?Promise,
  *   title: (?string),
  *   posterImage: (?string),
- *   storyContentLoaded: ?boolean
+ *   storyContentLoaded: ?boolean,
+ *   connectedDeferred: !Deferred
  * }}
  */
 let StoryDef;
@@ -283,6 +284,7 @@ export class AmpStoryPlayer {
   initializeAndAddStory_(story) {
     story.idx = this.stories_.length;
     story.distance = story.idx - this.currentIdx_;
+    story.connectedDeferred = new Deferred();
     this.stories_.push(story);
   }
 
@@ -624,11 +626,12 @@ export class AmpStoryPlayer {
    * @private
    */
   updateControlsStateForAllStories_(storyIdx) {
-    // Disables skip-next-button when story is the last one in the player.
+    // Disables skip-to-next button when story is the last one in the player.
     if (storyIdx === this.stories_.length - 1) {
       const skipButtonIdx = findIndex(
         this.playerConfig_.controls,
-        (control) => control.name === 'skip-next'
+        (control) =>
+          control.name === 'skip-next' || control.name === 'skip-to-next'
       );
 
       if (skipButtonIdx >= 0) {
@@ -1095,6 +1098,7 @@ export class AmpStoryPlayer {
   appendToDom_(story) {
     this.rootEl_.appendChild(story.iframe);
     this.setUpMessagingForStory_(story);
+    story.connectedDeferred.resolve();
   }
 
   /**
@@ -1103,6 +1107,7 @@ export class AmpStoryPlayer {
    */
   removeFromDom_(story) {
     story.storyContentLoaded = false;
+    story.connectedDeferred = new Deferred();
     story.iframe.setAttribute('src', '');
     story.iframe.remove();
   }
@@ -1286,8 +1291,7 @@ export class AmpStoryPlayer {
       ? findIndex(this.stories_, ({href}) => href === storyUrl)
       : this.currentIdx_;
 
-    const story = this.stories_[storyIdx];
-    if (!story) {
+    if (!this.stories_[storyIdx]) {
       throw new Error(`Story URL not found in the player: ${storyUrl}`);
     }
 
@@ -1301,9 +1305,22 @@ export class AmpStoryPlayer {
   rewind(storyUrl) {
     const story = this.getStoryFromUrl_(storyUrl);
 
-    story.messagingPromise.then((messaging) =>
-      messaging.sendRequest('rewind', {})
-    );
+    this.whenConnected_(story)
+      .then(() => story.messagingPromise)
+      .then((messaging) => messaging.sendRequest('rewind', {}));
+  }
+
+  /**
+   * Returns a promise that resolves when the story is connected to the DOM.
+   * @param {!StoryDef} story
+   * @return {!Promise}
+   * @private
+   */
+  whenConnected_(story) {
+    if (story.iframe.isConnected) {
+      return Promise.resolve();
+    }
+    return story.connectedDeferred.promise;
   }
 
   /**
@@ -1364,6 +1381,7 @@ export class AmpStoryPlayer {
   onPlayerEvent_(value) {
     switch (value) {
       case 'amp-story-player-skip-next':
+      case 'amp-story-player-skip-to-next':
         this.next_();
         break;
       default:

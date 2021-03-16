@@ -263,9 +263,6 @@ exports.rules = [
       'extensions/amp-youtube/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
       'extensions/amp-youtube/1.0/component.js->extensions/amp-video/1.0/video-wrapper.js',
 
-      // Bento amp-fit-text
-      'extensions/amp-fit-text/0.1/amp-fit-text.js->extensions/amp-fit-text/1.0/base-element.js',
-
       // Amp geo in group enum
       'extensions/amp-a4a/0.1/amp-a4a.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
       'extensions/amp-consent/0.1/consent-config.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
@@ -328,6 +325,8 @@ exports.rules = [
         'src/service/real-time-config/real-time-config-impl.js',
       // Parsing extension urls.
       'extensions/amp-a4a/0.1/head-validation.js->' +
+        'src/service/extension-script.js',
+      'extensions/amp-a4a/0.1/amp-ad-utils.js->' +
         'src/service/extension-script.js',
       'extensions/amp-live-list/0.1/live-list-manager.js->' +
         'src/service/extension-script.js',
