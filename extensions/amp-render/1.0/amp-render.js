@@ -161,7 +161,7 @@ class AmpRender extends BaseElement {
       .then((json) => {
         userAssert(
           typeof json !== 'undefined',
-          `[amp-list] No data was found at provided uri: ${src}`
+          `[amp-render] No data was found at provided uri: ${src}`
         );
         return json;
       });
