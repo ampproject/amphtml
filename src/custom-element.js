@@ -610,7 +610,8 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       if (this.mountPromise_) {
         return this.mountPromise_;
       }
-      this.mountAbortController_ = new AbortController();
+      this.mountAbortController_ =
+        this.mountAbortController_ || new AbortController();
       const {signal} = this.mountAbortController_;
       return (this.mountPromise_ = this.buildInternal()
         .then(() => {
@@ -632,12 +633,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
             throw cancellation();
           }
           this.signals_.signal(CommonSignals.MOUNTED);
-          if (
-            this.implClass_.usesLoading(this) &&
-            this.readyState_ !== ReadyState.COMPLETE
-          ) {
-            this.setReadyStateInternal(ReadyState.LOADING);
-          } else {
+          if (!this.implClass_.usesLoading(this)) {
             this.setReadyStateInternal(ReadyState.COMPLETE);
           }
         })
@@ -665,8 +661,26 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       if (this.mountPromise_) {
         return this.mountPromise_;
       }
-      return this.build().then(() => {
-        devAssert(this.V1());
+
+      // Create the abort controller right away to ensure that we the unmount
+      // will properly cancel this operation.
+      this.mountAbortController_ =
+        this.mountAbortController_ || new AbortController();
+      const {signal} = this.mountAbortController_;
+
+      const readyPromise = this.signals_.whenSignal(
+        CommonSignals.READY_TO_UPGRADE
+      );
+      return readyPromise.then(() => {
+        if (!this.V1()) {
+          return this.whenBuilt();
+        }
+        if (signal.aborted) {
+          throw cancellation();
+        }
+        if (this.mountPromise_) {
+          return this.mountPromise_;
+        }
         const scheduler = getSchedulerForDoc(this.getAmpDoc());
         scheduler.scheduleAsap(this);
         return this.whenMounted();
@@ -679,18 +693,14 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @final
      */
     unmount() {
+      // Ensure that the element is paused.
       if (this.isConnected_) {
-        // Ensure that the element is paused.
         this.pause();
       }
 
+      // Legacy pre-V1 elements simply unload.
       if (!this.V1()) {
         this.getResource_().unlayout();
-        return;
-      }
-
-      // Hasn't been mounted yet and hasn't started mounting.
-      if (!this.mountPromise_) {
         return;
       }
 
@@ -700,27 +710,24 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         this.mountAbortController_ = null;
       }
 
-      // Try to unmount. Not every element can be unmounted or has anything
-      // to unmount.
-      const unmounted = this.impl_.unmountCallback();
-      if (!unmounted) {
+      // Unschedule a currently pending mount request.
+      const scheduler = getSchedulerForDoc(this.getAmpDoc());
+      scheduler.unschedule(this);
+
+      // Try to unmount. Not every element has been mounted, can be unmounted
+      // or has anything to unmount.
+      const reMount = !this.mountPromise_ || this.impl_.unmountCallback();
+      if (!reMount) {
         return;
       }
 
+      // Complete unmount and reset the state.
       this.mountPromise_ = null;
       this.signals_.reset(CommonSignals.MOUNTED);
 
+      // Prepare for the next mount if the element is connected.
       if (this.isConnected_) {
-        // Update the ready state.
-        this.setReadyStateInternal(
-          this.implClass_.usesLoading(this)
-            ? ReadyState.LOADING
-            : ReadyState.MOUNTING
-        );
-
-        // Schedule to mount again when the mounting conditions trigger.
-        const scheduler = getSchedulerForDoc(this.getAmpDoc());
-        scheduler.schedule(this);
+        this.upgradeOrSchedule_();
       }
     }
 
@@ -1207,7 +1214,11 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
       if (this.buildingPromise_) {
         // Already built. Just needs to be mounted.
-        this.setReadyStateInternal(ReadyState.MOUNTING);
+        this.setReadyStateInternal(
+          this.implClass_ && this.implClass_.usesLoading(this)
+            ? ReadyState.LOADING
+            : ReadyState.MOUNTING
+        );
       } else {
         // Not built yet. Execute prebuild steps.
         this.setReadyStateInternal(ReadyState.BUILDING);
