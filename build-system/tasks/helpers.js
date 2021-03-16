@@ -603,14 +603,14 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
  * @param {?Object} options
  * @return {!Promise}
  */
-function minifyWithTerser(destDir, destFilename, options) {
+async function minifyWithTerser(destDir, destFilename, options) {
   if (!options.minify) {
     return Promise.resolve();
   }
 
   const filename = destDir + destFilename;
   const terserOptions = {
-    mangle: false,
+    mangle: true,
     compress: true,
     output: {
       beautify: !!argv.pretty_print,
