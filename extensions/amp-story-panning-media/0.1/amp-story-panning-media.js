@@ -95,12 +95,15 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
     /** @private {?{width: number, height: number}} */
     this.pageSize_ = null;
+<<<<<<< HEAD
 =======
     this.maxBounds = {};
 >>>>>>> 499b4ad7d (maxbounds method and variable. Tests.)
 =======
     this.maxBounds_ = {};
 >>>>>>> d96027125 (Private variable)
+=======
+>>>>>>> 8b88113d2 (Get page size from store)
 
     /** @private {?panningMediaPositionDef} Current animation state. */
     this.animationState_ = {};
@@ -218,8 +221,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       this.element_.getAttribute('group-id') ||
       this.ampImgEl_.getAttribute('src');
 
-    this.setAnimateTo_();
-
     this.initializeListeners_();
 
     return whenUpgradedToCustomElement(this.ampImgEl_)
@@ -262,10 +263,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       (panningMediaState) => this.onPanningMediaStateChange_(panningMediaState),
       true /** callToInitialize */
     );
-    this.storeService_.subscribe(StateProperty.PAGE_SIZE, () => {
-      this.setAnimateTo_();
-      this.animate_();
-    });
     // Mutation observer for distance attribute
     const config = {attributes: true, attributeFilter: ['distance']};
     const callback = (mutationsList) => {
@@ -354,8 +351,8 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    */
   setMaxBounds_() {
     // Calculations to clamp image to edge of container.
-    const containerHeight = this.element.offsetHeight;
-    const containerWidth = this.element.offsetWidth;
+    const containerWidth = this.pageSize_.width;
+    const containerHeight = this.pageSize_.height;
     const ampImgWidth = this.ampImgEl_.getAttribute('width');
     const ampImgHeight = this.ampImgEl_.getAttribute('height');
     // TODO(#31515): When aspect ratio is portrait, containerWidth will be used for this.
@@ -378,10 +375,14 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @private */
   onPageNavigation_() {
+<<<<<<< HEAD
     if (this.isOnActivePage_) {
       this.animate_();
 >>>>>>> 668644b9d (Handle page resize)
     }
+=======
+    this.animate_();
+>>>>>>> 8b88113d2 (Get page size from store)
   }
 
   /**
