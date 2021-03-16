@@ -112,17 +112,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-<<<<<<< HEAD
-    this.animateTo_ = {
-      x: parseFloat(this.element_.getAttribute('x')) || 0,
-      y: parseFloat(this.element_.getAttribute('y')) || 0,
-      zoom: this.element_.hasAttribute('zoom')
-        ? parseFloat(this.element_.getAttribute('zoom'))
-        : 1,
-    };
-
-=======
->>>>>>> 2475f6adc (Implementation sketch.)
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => {
         this.storeService_ = storeService;
