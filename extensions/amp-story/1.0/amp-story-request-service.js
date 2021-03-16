@@ -23,10 +23,10 @@ import {registerServiceBuilder} from '../../../src/service';
 import {user, userAssert} from '../../../src/log';
 
 /** @private @const {string} */
-export const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'src';
+export const CONFIG_SRC_ATTRIBUTE_NAME = 'src';
 
 /** @private const {string} */
-export const BOOKEND_CREDENTIALS_ATTRIBUTE_NAME = 'data-credentials';
+export const CREDENTIALS_ATTRIBUTE_NAME = 'data-credentials';
 
 /** @private @const {string} */
 const TAG = 'amp-story-request-service';
@@ -48,6 +48,9 @@ export class AmpStoryRequestService {
 
     /** @const @type {function():(!Promise<!JsonObject>|!Promise<null>)} */
     this.loadBookendConfig = once(() => this.loadBookendConfigImpl_());
+
+    /** @const @type {function():(!Promise<!JsonObject>|!Promise<null>)} */
+    this.loadShareConfig = once(() => this.loadShareConfigImpl_());
   }
 
   /**
@@ -66,11 +69,9 @@ export class AmpStoryRequestService {
       return Promise.resolve(null);
     }
 
-    if (bookendEl.hasAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME)) {
-      const rawUrl = bookendEl.getAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME);
-      const credentials = bookendEl.getAttribute(
-        BOOKEND_CREDENTIALS_ATTRIBUTE_NAME
-      );
+    if (bookendEl.hasAttribute(CONFIG_SRC_ATTRIBUTE_NAME)) {
+      const rawUrl = bookendEl.getAttribute(CONFIG_SRC_ATTRIBUTE_NAME);
+      const credentials = bookendEl.getAttribute(CREDENTIALS_ATTRIBUTE_NAME);
       return this.executeRequest(rawUrl, credentials ? {credentials} : {});
     }
 
@@ -101,6 +102,37 @@ export class AmpStoryRequestService {
         userAssert(response.ok, 'Invalid HTTP response');
         return response.json();
       });
+  }
+
+  /**
+   * Retrieves the publisher share providers.
+   * Has to be called through `loadShareConfig`.
+   * @return {(!Promise<!JsonObject>|!Promise<null>)}
+   */
+  loadShareConfigImpl_() {
+    const shareConfigEl = childElementByTag(
+      this.storyElement_,
+      'amp-story-social-share'
+    );
+    if (!shareConfigEl) {
+      return this.loadBookendConfig();
+    }
+
+    if (shareConfigEl.hasAttribute(CONFIG_SRC_ATTRIBUTE_NAME)) {
+      const rawUrl = shareConfigEl.getAttribute(CONFIG_SRC_ATTRIBUTE_NAME);
+      const credentials = shareConfigEl.getAttribute(
+        CREDENTIALS_ATTRIBUTE_NAME
+      );
+      return this.executeRequest(rawUrl, credentials ? {credentials} : {});
+    }
+
+    // Fallback. Check for an inline json config.
+    let config = null;
+    try {
+      config = getChildJsonConfig(shareConfigEl);
+    } catch (err) {}
+
+    return Promise.resolve(config);
   }
 }
 
