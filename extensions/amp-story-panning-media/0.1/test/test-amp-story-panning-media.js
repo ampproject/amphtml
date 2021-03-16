@@ -133,8 +133,12 @@ describes.realWin(
         '/examples/amp-story/img/conservatory-coords.jpg',
         attributes
       );
-      await panningMedia.layoutCallback();
+      await storeService.dispatch(Action.SET_PAGE_SIZE, {
+        width: 700,
+        height: 1000,
+      });
       await storeService.dispatch(Action.CHANGE_PAGE, {id: 'page1', index: 0});
+      await panningMedia.layoutCallback();
       await afterRenderPromise();
       expect(panningMedia.animateTo_.x).to.equal(panningMedia.maxBounds_.left);
     });
@@ -150,8 +154,12 @@ describes.realWin(
         '/examples/amp-story/img/conservatory-coords.jpg',
         attributes
       );
-      await panningMedia.layoutCallback();
+      await storeService.dispatch(Action.SET_PAGE_SIZE, {
+        width: 700,
+        height: 1000,
+      });
       await storeService.dispatch(Action.CHANGE_PAGE, {id: 'page1', index: 0});
+      await panningMedia.layoutCallback();
       await afterRenderPromise();
       expect(panningMedia.animateTo_.y).to.equal(panningMedia.maxBounds_.top);
     });
