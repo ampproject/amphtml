@@ -26,6 +26,18 @@
 #include "defer.h"
 #include "strings.h"
 
+// TODO(caoboxiao)
+// The Macro `GLOB_TILDE` is not defined in the WebAssembly environment because
+// WebAssembly does not have the file system, so we have to define this MACRO in
+// order to have this file successfully compiled in WebAssembly. The side
+// effects is minimized because this is a cc file not an h file. In fact, the
+// WebAssembly module never calls the glob function, so it is better to split
+// fileutil.cc into two files, and the WebAssembly module will only depend on
+// the one without glob funcitons.
+#ifndef GLOB_TILDE
+#define GLOB_TILDE (1 << 12)
+#endif
+
 namespace htmlparser {
 
 std::string FileUtil::FileContents(std::string_view filepath) {
