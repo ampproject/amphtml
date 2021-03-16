@@ -358,7 +358,8 @@ export class Performance {
       } else if (entry.entryType === 'layout-shift') {
         // Ignore layout shift that occurs within 500ms of user input, as it is
         // likely in response to the user's action.
-        if (!entry.hadRecentInput) {
+        // 1000 here is a magic number to prevent unbounded growth. We don't expect it to be reached.
+        if (!entry.hadRecentInput && this.layoutShifts_.length < 1000) {
           this.layoutShifts_.push(entry);
         }
       } else if (entry.entryType === 'largest-contentful-paint') {
