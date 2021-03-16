@@ -107,24 +107,10 @@ export class Performance {
     this.shiftScoresTicked_ = 0;
 
     /**
-     * The sum of all layout shift fractions triggered on the page from the
-     * Layout Instability API.
-     *
-     * @private {number}
+     * The collection of layout shift events from the Layout Instability API.
+     * @private {Array<LayoutShift>}
      */
-    this.aggregateShiftScore_ = 0;
-
-    /**
-     * TODO(#33207): Remove after data collection
-     * @private {number}
-     */
-    this.clsBeforeFCP_ = 0;
-
-    /**
-     * TODO(#33207): Remove after data collection
-     * @private {number}
-     */
-    this.clsBeforeOFV_ = 0;
+    this.layoutShifts_ = [];
 
     const supportedEntryTypes =
       (this.win.PerformanceObserver &&
@@ -253,7 +239,6 @@ export class Performance {
 
     this.ampdoc_.whenFirstVisible().then(() => {
       this.tick(TickLabel.ON_FIRST_VISIBLE);
-      this.clsBeforeOFV_ = this.aggregateShiftScore_;
       this.flush();
     });
 
@@ -363,9 +348,6 @@ export class Performance {
         this.tickDelta(TickLabel.FIRST_CONTENTFUL_PAINT, value);
         this.tickSinceVisible(TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE, value);
         recordedFirstContentfulPaint = true;
-
-        // TODO(#33207): remove after data collection
-        this.clsBeforeFCP_ = this.aggregateShiftScore_;
       } else if (
         entry.entryType === 'first-input' &&
         !recordedFirstInputDelay
@@ -377,7 +359,7 @@ export class Performance {
         // Ignore layout shift that occurs within 500ms of user input, as it is
         // likely in response to the user's action.
         if (!entry.hadRecentInput) {
-          this.aggregateShiftScore_ += entry.value;
+          this.layoutShifts_.push(entry);
         }
       } else if (entry.entryType === 'largest-contentful-paint') {
         if (entry.loadTime) {
@@ -528,19 +510,31 @@ export class Performance {
    * amount of visibility into this metric.
    */
   tickLayoutShiftScore_() {
+    const cls = this.layoutShifts_.reduce((sum, entry) => sum + entry.value, 0);
+    const fcp = this.metrics_.get(TickLabel.FIRST_CONTENTFUL_PAINT) ?? Infinity;
+    const ofv = this.metrics_.get(TickLabel.ON_FIRST_VISIBLE) ?? Infinity;
+
+    // TODO(#33207): Remove after data collection
+    const clsBeforeFCP = this.layoutShifts_.reduce((sum, entry) => {
+      if (entry.startTime < fcp) {
+        return sum + entry.value;
+      }
+      return sum;
+    }, 0);
+    const clsBeforeOFV = this.layoutShifts_.reduce((sum, entry) => {
+      if (entry.startTime < ofv) {
+        return sum + entry.value;
+      }
+      return sum;
+    }, 0);
+
     if (this.shiftScoresTicked_ === 0) {
-      this.tickDelta(
-        TickLabel.CUMULATIVE_LAYOUT_SHIFT,
-        this.aggregateShiftScore_
-      );
+      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT, cls);
       this.tickDelta(
         TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_FCP,
-        this.clsBeforeFCP_
+        clsBeforeFCP
       );
-      this.tick(
-        TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_VISIBLE,
-        this.clsBeforeOFV_
-      );
+      this.tick(TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_VISIBLE, clsBeforeOFV);
       this.flush();
       this.shiftScoresTicked_ = 1;
     } else if (this.shiftScoresTicked_ === 1) {
