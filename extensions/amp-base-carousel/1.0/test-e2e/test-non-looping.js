@@ -45,6 +45,7 @@ describes.endtoend(
       await controller.switchToShadowRoot(carousel);
     });
 
+    // TODO(wg-components, #24195): Flaky during CI.
     it.skip('should render correctly', async () => {
       const el = await getScrollingElement(styles, controller);
 
