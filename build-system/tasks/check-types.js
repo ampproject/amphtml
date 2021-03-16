@@ -26,6 +26,7 @@ const {compileCss} = require('./css');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
 const {log} = require('../common/logging');
 const {maybeUpdatePackages} = require('./update-packages');
+const {typecheckNewServer} = require('../server/typescript-compile');
 
 /**
  * Dedicated type check path.
@@ -37,6 +38,9 @@ async function checkTypes() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   maybeInitializeExtensions();
+
+  typecheckNewServer();
+
   const compileSrcs = [
     'src/amp.js',
     'src/amp-shadow.js',

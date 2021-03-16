@@ -198,7 +198,7 @@ async function runTest(inputFile) {
  * Tests for AMP server custom transforms. Entry point for `gulp server-tests`.
  */
 async function serverTests() {
-  buildNewServer();
+  await buildNewServer();
   const inputFiles = globby.sync(inputPaths);
   for (const inputFile of inputFiles) {
     await runTest(inputFile);

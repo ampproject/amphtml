@@ -144,7 +144,7 @@ async function generateMap() {
  */
 async function coverageMap() {
   installPackages(__dirname);
-  buildNewServer();
+  await buildNewServer();
 
   if (!argv.nobuild) {
     await dist();
