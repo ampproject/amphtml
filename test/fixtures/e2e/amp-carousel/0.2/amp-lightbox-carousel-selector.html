@@ -36,19 +36,19 @@
   <body>
   <amp-selector id="selector1" on="select:carousel1.goToSlide(index=event.targetOption), lightbox1">
     <div class="inner">
-        <amp-img id="first" class="image" src="./img/lemonyellowgradient.png" option="0" layout="responsive" width="450" height="300"></amp-img>
-        <amp-img id="second" class="image" src="./img/bluegradient.png" layout="responsive" option="1" width="450" height="300"></amp-img>
-        <amp-img id="third" class="image" src="./img/greengradient.png" layout="responsive" option="2" width="450" height="300"></amp-img>
-        <amp-img id="fourth" class="image" src="./img/orangegradient.png" layout="responsive" option="3" width="450" height="300"></amp-img>
+        <amp-img id="first" class="image" src="../img/lemonyellowgradient.png" option="0" layout="responsive" width="450" height="300"></amp-img>
+        <amp-img id="second" class="image" src="../img/bluegradient.png" layout="responsive" option="1" width="450" height="300"></amp-img>
+        <amp-img id="third" class="image" src="../img/greengradient.png" layout="responsive" option="2" width="450" height="300"></amp-img>
+        <amp-img id="fourth" class="image" src="../img/orangegradient.png" layout="responsive" option="3" width="450" height="300"></amp-img>
     </div>
   </amp-selector>
   <amp-lightbox id="lightbox1" class="lightbox" layout="nodisplay">
     <button class="close-button" on="tap:lightbox1.close">close</button>
     <amp-carousel id="carousel1" width="900" height="600" layout="fill" type="slides" on="slideChange:selector1.toggle(index=event.index, value=true)">
-        <amp-img src="./img/lemonyellowgradient.png" layout="responsive" width="900" height="600"></amp-img>
-        <amp-img src="./img/bluegradient.png" layout="responsive" width="900" height="600"></amp-img>
-        <amp-img src="./img/greengradient.png" layout="responsive" width="900" height="600"></amp-img>
-        <amp-img src="./img/orangegradient.png" layout="responsive" width="900" height="600"></amp-img>
+        <amp-img src="../img/lemonyellowgradient.png" layout="responsive" width="900" height="600"></amp-img>
+        <amp-img src="../img/bluegradient.png" layout="responsive" width="900" height="600"></amp-img>
+        <amp-img src="../img/greengradient.png" layout="responsive" width="900" height="600"></amp-img>
+        <amp-img src="../img/orangegradient.png" layout="responsive" width="900" height="600"></amp-img>
     </amp-carousel>
   </amp-lightbox>
 </body>

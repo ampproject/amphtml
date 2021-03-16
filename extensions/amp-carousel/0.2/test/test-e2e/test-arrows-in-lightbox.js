@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,24 +17,15 @@
 import {sleep} from './helpers';
 
 describes.endtoend(
-  'amp-base-carousel - advance',
+  'amp carousel in lightbox',
   {
-    version: '0.1',
-    fixture: 'amp-base-carousel/amp-lightbox-carousel-selector.html',
+    fixture: 'amp-carousel/0.2/amp-lightbox-carousel-selector.html',
     environments: ['single'],
   },
   async (env) => {
     let controller;
     let nextArrow;
     let prevArrow;
-
-    function css(handle, name) {
-      return controller.getElementCssValue(handle, name);
-    }
-
-    function rect(el) {
-      return controller.getElementRect(el);
-    }
 
     function getPrevArrow() {
       return controller.findElement('.amp-carousel-button.amp-carousel-button-prev');
@@ -58,15 +49,13 @@ describes.endtoend(
       // Both arrows should be showing
       prevArrow = await getPrevArrow(controller);
       nextArrow = await getNextArrow(controller);
-      await expect(controller.getElementProperty(nextArrow, 'aria-disabled')).to.be
-        .false;
-      await expect(controller.getElementProperty(prevArrow, 'aria-disabled')).to.be
-        .false;
+      await expect(await controller.getElementProperty(nextArrow, 'ariaDisabled')).to.equal('false');
+      await expect(await controller.getElementProperty(prevArrow, 'ariaDisabled')).to.equal('false');
     });
     
-    it.skip('should open with one arrow', async () => {
+    it('should open with one arrow', async () => {
       // Click on image 2
-      const secondImage = await controller.findElement('#second');
+      const secondImage = await controller.findElement('#fourth');
       await controller.click(secondImage);
       // Wait for lightbox to load the carousel and image
       await sleep(500);
@@ -74,10 +63,8 @@ describes.endtoend(
       // Both arrows should be showing
       prevArrow = await getPrevArrow(controller);
       nextArrow = await getNextArrow(controller);
-      await expect(controller.getElementProperty(nextArrow, 'aria-disabled')).to.be
-        .true;
-      await expect(controller.getElementProperty(prevArrow, 'aria-disabled')).to.be
-        .false;
+      await expect(await controller.getElementProperty(nextArrow, 'ariaDisabled')).to.equal('true');
+      await expect(await controller.getElementProperty(prevArrow, 'ariaDisabled')).to.equal('false');
     });
   }
 );

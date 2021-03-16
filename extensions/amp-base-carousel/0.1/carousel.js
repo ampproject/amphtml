@@ -975,13 +975,16 @@ export class Carousel {
 
   /**
    * Helper function for duplicate calculation for figuring out
-   * if either the first index (`forStartEdge`) or last index 
+   * if either the first index (`forStartEdge`) or last index
    * is the current index also accounting for RTL.
-   * @param {boolean} forStartEdge 
-   * @returns {boolean}
+   * @param {boolean} forStartEdge
+   * @return {boolean}
    */
   isSingleIndexStartOrEnd_(forStartEdge) {
-    if ((forStartEdge && this.forwards_) || (!forStartEdge && !this.forwards_)) {
+    if (
+      (forStartEdge && this.forwards_) ||
+      (!forStartEdge && !this.forwards_)
+    ) {
       return this.getCurrentIndex() <= 0;
     }
     return this.getCurrentIndex() >= this.slides_.length - 1;
