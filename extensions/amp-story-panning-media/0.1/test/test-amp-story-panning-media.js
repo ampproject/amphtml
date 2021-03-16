@@ -85,6 +85,10 @@ describes.realWin(
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
       });
+      storeService.dispatch(Action.SET_PAGE_SIZE, {
+        width: 700,
+        height: 1000,
+      });
     });
 
     it('should build', async () => {
@@ -133,10 +137,6 @@ describes.realWin(
         '/examples/amp-story/img/conservatory-coords.jpg',
         attributes
       );
-      await storeService.dispatch(Action.SET_PAGE_SIZE, {
-        width: 700,
-        height: 1000,
-      });
       await storeService.dispatch(Action.CHANGE_PAGE, {id: 'page1', index: 0});
       await panningMedia.layoutCallback();
       await afterRenderPromise();
@@ -154,10 +154,6 @@ describes.realWin(
         '/examples/amp-story/img/conservatory-coords.jpg',
         attributes
       );
-      await storeService.dispatch(Action.SET_PAGE_SIZE, {
-        width: 700,
-        height: 1000,
-      });
       await storeService.dispatch(Action.CHANGE_PAGE, {id: 'page1', index: 0});
       await panningMedia.layoutCallback();
       await afterRenderPromise();
