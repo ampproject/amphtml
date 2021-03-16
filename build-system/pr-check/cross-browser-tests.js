@@ -99,8 +99,7 @@ function runUnitTestsForPlatform() {
   }
 }
 
-/**
- */
+
 function pushBuildWorkflow() {
   runUnitTestsForPlatform();
   timedExecOrDie('gulp dist --fortesting');

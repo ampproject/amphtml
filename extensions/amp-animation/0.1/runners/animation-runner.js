@@ -18,8 +18,7 @@ import {
   WebAnimationPlayState, // eslint-disable-line no-unused-vars
 } from '../web-animation-types';
 
-/**
- */
+
 export class AnimationRunner {
   /**
    * @param {!Array<!../web-animation-types.InternalWebAnimationRequestDef>} requests
@@ -51,16 +50,13 @@ export class AnimationRunner {
    */
   start() {}
 
-  /**
-   */
+
   pause() {}
 
-  /**
-   */
+
   resume() {}
 
-  /**
-   */
+
   reverse() {}
 
   /**
@@ -75,11 +71,9 @@ export class AnimationRunner {
    */
   seekToPercent(unusedPercent) {}
 
-  /**
-   */
+
   finish() {}
 
-  /**
-   */
+
   cancel() {}
 }

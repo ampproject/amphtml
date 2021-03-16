@@ -82,8 +82,6 @@ export class ViewerInterface {
    */
   isRuntimeOn() {}
 
-  /**
-   */
   toggleRuntime() {}
 
   /**

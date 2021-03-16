@@ -30,8 +30,7 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'unminified-tests.js';
 
-/**
- */
+
 function pushBuildWorkflow() {
   downloadUnminifiedOutput();
 
@@ -53,8 +52,7 @@ function pushBuildWorkflow() {
   }
 }
 
-/**
- */
+
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     downloadUnminifiedOutput();

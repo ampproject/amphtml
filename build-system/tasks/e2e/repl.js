@@ -65,8 +65,7 @@ function installRepl(global, env) {
     return replPromise;
   };
 
-  /**
-   */
+
   function replContinue() {
     if (!replResolve) {
       return;
@@ -83,8 +82,7 @@ function installRepl(global, env) {
   }
 }
 
-/**
- */
+
 function uninstallRepl() {
   delete global.repl;
 }

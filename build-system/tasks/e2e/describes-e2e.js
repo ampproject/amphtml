@@ -445,8 +445,7 @@ function describeEnv(factory) {
       spec.browsers = ['chrome'];
     }
 
-    /**
-     */
+
     function createBrowserDescribe() {
       const allowedBrowsers = getAllowedBrowsers();
 

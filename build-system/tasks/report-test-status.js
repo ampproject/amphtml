@@ -117,7 +117,7 @@ function maybeAddConfigSubtype() {
 }
 
 /**
- * @param {string|null} type
+ * @param {string} type
  * @param {string} action
  * @return {Promise<void>}
  */

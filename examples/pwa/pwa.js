@@ -129,8 +129,7 @@ class Shell {
     }
   }
 
-  /**
-   */
+
   handlePopState_() {
     const newPage = this.win.location.pathname;
     log('Pop state: ', newPage, this.currentPage_);
@@ -254,8 +253,7 @@ class AmpViewer {
     this.installScript_('/dist/shadow-v0.js', '/dist/amp-shadow.js');
   }
 
-  /**
-   */
+
   clear() {
     if (this.amp_) {
       this.amp_.close();
@@ -375,8 +373,7 @@ class AmpViewer {
     return new URL(relativeUrlString, this.baseUrl_).origin;
   }
 
-  /**
-   */
+
   onMessage_(type, data, rsvp) {}
 }
 

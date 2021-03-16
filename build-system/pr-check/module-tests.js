@@ -32,8 +32,7 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'module-tests.js';
 
-/**
- */
+
 function prependConfig() {
   const targets = MINIFIED_TARGETS.flatMap((target) => [
     `dist/${target}.js`,
@@ -44,8 +43,7 @@ function prependConfig() {
   );
 }
 
-/**
- */
+
 function pushBuildWorkflow() {
   downloadNomoduleOutput();
   downloadModuleOutput();
@@ -53,8 +51,7 @@ function pushBuildWorkflow() {
   timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
 }
 
-/**
- */
+
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     downloadNomoduleOutput();

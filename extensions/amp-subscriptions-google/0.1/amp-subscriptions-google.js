@@ -81,8 +81,7 @@ const AMP_ACTION_TO_SWG_EVENT = {
   },
 };
 
-/**
- */
+
 export class GoogleSubscriptionsPlatformService {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc

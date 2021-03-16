@@ -244,8 +244,6 @@ class AdoBuffer {
     }
   }
 
-  /**
-   */
   _init() {
     const ado = this.global['ado'];
     const gao = this.global['gao'];
@@ -257,8 +255,6 @@ class AdoBuffer {
     }
   }
 
-  /**
-   */
   _execute() {
     const adoElement = new this.global['AdoElement']({
       'id': this.container.id,

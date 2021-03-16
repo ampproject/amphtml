@@ -75,8 +75,6 @@ async function closureCompile(
   // Rate limit closure compilation to MAX_PARALLEL_CLOSURE_INVOCATIONS
   // concurrent processes.
   return new Promise(function (resolve, reject) {
-    /**
-     */
     function start() {
       inProgress++;
       compile(
@@ -94,8 +92,7 @@ async function closureCompile(
         (reason) => reject(reason)
       );
     }
-    /**
-     */
+
     function next() {
       if (!queue.length) {
         return;
@@ -109,8 +106,6 @@ async function closureCompile(
   });
 }
 
-/**
- */
 function cleanupBuildDir() {
   del.sync('build/fake-module');
   del.sync('build/patched-module');
@@ -452,8 +447,6 @@ async function compile(
   }
 }
 
-/**
- */
 function printClosureConcurrency() {
   log(
     green('Using up to'),

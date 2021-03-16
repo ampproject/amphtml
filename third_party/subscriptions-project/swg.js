@@ -5352,8 +5352,7 @@ class Entitlement {
  * limitations under the License.
  */
 
-/**
- */
+
 class UserData {
   /**
    * @param {string} idToken
@@ -5420,8 +5419,7 @@ class UserData {
  * limitations under the License.
  */
 
-/**
- */
+
 class SubscribeResponse {
   /**
    * @param {string} raw
@@ -5507,8 +5505,7 @@ class SubscribeResponse {
   }
 }
 
-/**
- */
+
 class PurchaseData {
   /**
    * @param {string} raw
@@ -5557,8 +5554,7 @@ class PurchaseData {
  * limitations under the License.
  */
 
-/**
- */
+
 class DeferredAccountCreationResponse {
   /**
    * @param {!Entitlements} entitlements
@@ -8254,8 +8250,7 @@ class AnalyticsService {
     this.context_.setReadyToPay(isReadyToPay);
   }
 
-  /**
-   */
+
   close() {
     this.doc_.getBody().removeChild(this.getElement());
   }
@@ -8697,8 +8692,7 @@ class ButtonApi {
     this.configuredRuntimePromise_ = configuredRuntimePromise;
   }
 
-  /**
-   */
+
   init() {
     const head = this.doc_.getHead();
     if (!head) {
@@ -8898,11 +8892,9 @@ const CallbackId = {
   FLOW_CANCELED: 8,
 };
 
-/**
- */
+
 class Callbacks {
-  /**
-   */
+
   constructor() {
     /** @private @const {!Object<CallbackId, function(*)>} */
     this.callbacks_ = {};
@@ -8965,8 +8957,7 @@ class Callbacks {
     return this.trigger_(CallbackId.LINK_PROGRESS, true);
   }
 
-  /**
-   */
+
   resetLinkProgress() {
     this.resetCallback_(CallbackId.LINK_PROGRESS);
   }
@@ -10595,8 +10586,7 @@ class DialogManager {
     }, 100);
   }
 
-  /**
-   */
+
   completeAll() {
     if (this.dialog_) {
       this.close_();
@@ -10631,8 +10621,7 @@ class DialogManager {
     this.popupGraypane_.show();
   }
 
-  /**
-   */
+
   popupClosed() {
     this.popupWin_ = null;
     try {
@@ -11303,8 +11292,7 @@ const TOAST_STORAGE_KEY = 'toast';
 const ENTS_STORAGE_KEY = 'ents';
 const IS_READY_TO_PAY_STORAGE_KEY = 'isreadytopay';
 
-/**
- */
+
 class EntitlementsManager {
   /**
    * @param {!Window} win
@@ -11601,14 +11589,12 @@ class EntitlementsManager {
     this.storage_.set(TOAST_STORAGE_KEY, value ? '1' : '0');
   }
 
-  /**
-   */
+
   blockNextNotification() {
     this.blockNextNotification_ = true;
   }
 
-  /**
-   */
+
   unblockNextNotification() {
     this.blockNextNotification_ = false;
   }
@@ -12442,8 +12428,7 @@ class XhrFetcher {
  * limitations under the License.
  */
 
-/**
- */
+
 class JsError {
   /**
    * @param {!../model/doc.Doc} doc
@@ -15242,7 +15227,7 @@ class PaymentsWebActivityDelegate {
    */
   isVerticalCenterExperimentEnabled_(paymentDataRequest) {
     return (
-      null  
+      null
     );
   }
 
@@ -16343,8 +16328,7 @@ function payUrl() {
   return feCached(PAY_ORIGIN['PRODUCTION'] + '/gp/p/ui/pay');
 }
 
-/**
- */
+
 class PayClient {
   /**
    * @param {!./deps.DepsDef} deps

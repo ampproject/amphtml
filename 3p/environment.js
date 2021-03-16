@@ -202,9 +202,7 @@ function instrumentEntryPoints(win) {
       }
     }
     args[0] = wrapper;
-    /**
-     *
-     */
+
     function next() {
       intervals[id] = win.setTimeout.apply(win, args);
     }
