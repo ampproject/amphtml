@@ -1324,6 +1324,10 @@ describes.sandboxed('Extensions', {}, () => {
         ).to.have.length(0);
         expect(extensions.extensions_['amp-test']).to.be.undefined;
         extensions.installExtensionForDoc(ampdoc, 'amp-test', '0.2');
+
+        // Extension is declared immediately.
+        expect(ampdoc.declaresExtension('amp-test', '0.2')).to.be.true;
+
         expect(loadSpy).to.be.calledOnce;
         expect(loadSpy).to.be.calledWithExactly('amp-test', '0.2');
         expect(
@@ -1364,7 +1368,9 @@ describes.sandboxed('Extensions', {}, () => {
         extHolder.scriptPresent = true;
         expect(ampdoc.declaresExtension('amp-test')).to.be.false;
         const promise = extensions.installExtensionForDoc(ampdoc, 'amp-test');
-        expect(ampdoc.declaresExtension('amp-test')).to.be.false;
+
+        // Extension is declared immediately.
+        expect(ampdoc.declaresExtension('amp-test', '0.1')).to.be.true;
 
         // Stubbed immediately.
         expect(win.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
@@ -1433,7 +1439,9 @@ describes.sandboxed('Extensions', {}, () => {
         extHolder.scriptPresent = true;
         expect(ampdoc.declaresExtension('amp-test')).to.be.false;
         const promise = extensions.installExtensionForDoc(ampdoc, 'amp-test');
-        expect(ampdoc.declaresExtension('amp-test')).to.be.false;
+
+        // Extension is declared immediately.
+        expect(ampdoc.declaresExtension('amp-test', '0.1')).to.be.true;
 
         // Services do not exist yet.
         allowConsoleError(() => {
