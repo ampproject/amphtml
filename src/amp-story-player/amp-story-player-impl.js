@@ -246,6 +246,7 @@ export class AmpStoryPlayer {
   attachCallbacksToElement_() {
     this.element_.buildCallback = this.buildCallback.bind(this);
     this.element_.layoutCallback = this.layoutCallback.bind(this);
+    this.element_.getElement = this.getElement.bind(this);
     this.element_.getStories = this.getStories.bind(this);
     this.element_.load = this.load.bind(this);
     this.element_.show = this.show.bind(this);
