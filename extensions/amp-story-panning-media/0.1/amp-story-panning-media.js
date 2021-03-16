@@ -57,7 +57,6 @@ export let panningMediaPositionDef;
 
 /**
  * Max distances to keep image in viewport.
- * All values are between [-50; 50] but likely much less.
  * left: Percentage between [-50; 50]
  * right: Percentage between [-50; 50]
  * top: Percentage between [-50; 50]
