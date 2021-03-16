@@ -24,6 +24,7 @@ const COMMON_GLOBS = [
   'third_party/amp-toolbox-cache-url/**/*.js',
   'third_party/caja/html-sanitizer.js',
   'third_party/closure-library/sha384-generated.js',
+  'third_party/closure-responding-channel/closure-bundle.js',
   'third_party/css-escape/css-escape.js',
   'third_party/d3/**/*.js',
   'third_party/fuzzysearch/index.js',
@@ -120,9 +121,6 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-bind/**/*.js',
   // Needed to access to Variant interface from other extensions
   'extensions/amp-experiment/**/*.js',
-  // TODO(#32523) Remove this when Bento experiment is done.
-  // Needed to access across versions
-  'extensions/amp-fit-text/1.0/*.js',
   // Needed to access form impl from other extensions
   'extensions/amp-form/**/*.js',
   // Needed by amp-facebook-* for the loader logo

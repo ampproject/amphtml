@@ -21,6 +21,7 @@ import {VisibilityState} from '../../../../src/visibility-state';
 import {dispatchCustomEvent} from '../../../../src/dom';
 import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
 import {listenOncePromise} from '../../../../src/event-helper';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
   'amp-video',
@@ -125,13 +126,13 @@ describes.realWin(
       const sources = video.querySelectorAll('source');
       expect(sources.length).to.equal(4);
       expect(sources[0].getAttribute('src')).to.equal(
-        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_quality=high'
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_video_quality=high'
       );
       expect(sources[1].getAttribute('src')).to.equal(
-        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_quality=medium'
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_video_quality=medium'
       );
       expect(sources[2].getAttribute('src')).to.equal(
-        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_quality=low'
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_video_quality=low'
       );
       expect(sources[3].getAttribute('src')).to.equal(
         'https://example.com/video.mp4'
@@ -1209,6 +1210,7 @@ describes.realWin(
 
     describe('bitrate manager', () => {
       it('should manage bitrate of replaced video from mediapool', async () => {
+        toggleExperiment(env.win, 'flexible-bitrate', true);
         const v = await getVideo(
           {
             src: 'video.mp4',
