@@ -116,6 +116,9 @@
   position: relative;
 }
 
+/* Fill layout requires higher specificity than i-amp-html-notbuilt
+ * so that the correct width/height can be applied before build.
+ */
 .i-amphtml-layout-fill,
 .i-amphtml-layout-fill.i-amphtml-notbuilt,
 [layout=fill]:not(.i-amphtml-layout-fill)
