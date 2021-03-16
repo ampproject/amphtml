@@ -21,13 +21,8 @@ const {endBuildStep} = require('../tasks/helpers');
 const {exec} = require('../common/exec');
 const {log} = require('../common/logging');
 
-const SERVER_TRANSFORM_PATH = path.join(
-  'build-system',
-  'server',
-  'new-server',
-  'transforms'
-);
-const CONFIG_PATH = path.join(SERVER_TRANSFORM_PATH, 'tsconfig.json');
+const SERVER_TRANSFORM_PATH = 'build-system/server/new-server/transforms';
+const CONFIG_PATH = `${SERVER_TRANSFORM_PATH}/tsconfig.json`;
 
 /**
  * Builds the new server by converting typescript transforms to JS
@@ -40,10 +35,7 @@ async function buildNewServer() {
     green('at'),
     cyan(`${SERVER_TRANSFORM_PATH}/dist`) + green('...')
   );
-  const entryPoints = globby.sync(
-    path.join(SERVER_TRANSFORM_PATH, '**', '*.ts')
-  );
-
+  const entryPoints = globby.sync(`${SERVER_TRANSFORM_PATH}/**/*.ts`);
   const startTime = Date.now();
   return esbuild
     .build({
