@@ -511,8 +511,8 @@ export class Performance {
    */
   tickLayoutShiftScore_() {
     const cls = this.layoutShifts_.reduce((sum, entry) => sum + entry.value, 0);
-    const fcp = this.metrics_.get(TickLabel.FIRST_CONTENTFUL_PAINT) ?? Infinity;
-    const ofv = this.metrics_.get(TickLabel.ON_FIRST_VISIBLE) ?? Infinity;
+    const fcp = this.metrics_.get(TickLabel.FIRST_CONTENTFUL_PAINT) ?? 0; // fallback to 0, so that we never overcount.
+    const ofv = this.metrics_.get(TickLabel.ON_FIRST_VISIBLE) ?? 0;
 
     // TODO(#33207): Remove after data collection
     const clsBeforeFCP = this.layoutShifts_.reduce((sum, entry) => {
