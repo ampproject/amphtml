@@ -58,9 +58,6 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.playerReadyResolver_ = null;
-
-    /**@private {?string} */
-    this.consentString_ = null;
   }
 
   /**
@@ -104,7 +101,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
    * @return {string}
    * @private
    */
-  getVideoIframeSrc_() {
+  getVideoIframeSrc_(consentString) {
     const {element: el} = this;
 
     const {
@@ -143,7 +140,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
           'disableAds': disableAds,
           'streamingFilter': streamingFilter,
           'exitMode': exitMode,
-          'consentString': this.consentString_,
+          'consentString': consentString,
         })
       )
     );
@@ -151,23 +148,20 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
   /**
    * Get consent data from consent module
-   * @return {Promise[]}
+   * @return {!Promise<string>}
    */
-  getConsents_() {
-    const consentPolicy = super.getConsentPolicy() || 'default';
-    const consentStringPromise = consentPolicy
-      ? getConsentPolicyInfo(this.element, consentPolicy)
-      : Promise.resolve(null);
-
-    return Promise.all([consentStringPromise]).then((consentData) => {
-      this.consentString_ = consentData;
-    });
+  getConsentPolicyInfo_() {
+    const consentPolicy = this.getConsentPolicy() || 'default';
+    return getConsentPolicyInfo(this.element, consentPolicy);
   }
 
   /** @override */
   layoutCallback() {
-    return this.getConsents_().then(() => {
-      this.iframe_ = createFrameFor(this, this.getVideoIframeSrc_());
+    return this.getConsentPolicyInfo_().then((consentString) => {
+      this.iframe_ = createFrameFor(
+        this,
+        this.getVideoIframeSrc_(consentString)
+      );
       this.unlistenMessage_ = listen(this.win, 'message', (event) => {
         this.handleNexxMessage_(event);
       });
