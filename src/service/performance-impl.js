@@ -529,19 +529,16 @@ export class Performance {
     }, 0);
 
     if (this.shiftScoresTicked_ === 0) {
-      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT, cls);
+      this.tick(TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_VISIBLE, clsBeforeOFV);
       this.tickDelta(
         TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_FCP,
         clsBeforeFCP
       );
-      this.tick(TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_VISIBLE, clsBeforeOFV);
+      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT, cls);
       this.flush();
       this.shiftScoresTicked_ = 1;
     } else if (this.shiftScoresTicked_ === 1) {
-      this.tickDelta(
-        TickLabel.CUMULATIVE_LAYOUT_SHIFT_2,
-        this.aggregateShiftScore_
-      );
+      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_2, cls);
       this.flush();
       this.shiftScoresTicked_ = 2;
 
