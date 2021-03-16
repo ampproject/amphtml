@@ -163,7 +163,7 @@ export class BaseElement {
    * @return {boolean}
    * @nocollapse
    */
-  static load(unusedElement) {
+  static usesLoading(unusedElement) {
     return false;
   }
 
@@ -529,7 +529,9 @@ export class BaseElement {
 
   /**
    * Load heavy elements, perform expensive operations, add global
-   * listeners/observers, etc.
+   * listeners/observers, etc. The mount and unmount can be called multiple
+   * times for resource management. The unmount should reverse the changes
+   * made by the mount. See `unmountCallback` for more info.
    *
    * @param {!AbortSignal=} opt_abortSignal
    * @return {?Promise|undefined}
@@ -539,7 +541,8 @@ export class BaseElement {
   /**
    * Unload heavy elements, remove global listeners, etc.
    *
-   * @return {boolean}
+   * @return {boolean} Return `true` if the element should be remounted
+   * the next time it's displayed.
    */
   unmountCallback() {
     return false;

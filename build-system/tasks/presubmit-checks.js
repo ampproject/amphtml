@@ -157,10 +157,7 @@ const forbiddenTerms = {
   },
   '\\.mountInternal': {
     message: 'can only be called by the framework',
-    allowlist: [
-      'src/service/scheduler.js',
-      'testing/iframe.js',
-    ],
+    allowlist: ['src/service/scheduler.js', 'testing/iframe.js'],
   },
   'getSchedulerForDoc': {
     message: 'can only be used by the runtime',

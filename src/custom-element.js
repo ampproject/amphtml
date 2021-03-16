@@ -623,7 +623,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
             return;
           }
           this.setReadyStateInternal(
-            this.implClass_.load(this)
+            this.implClass_.usesLoading(this)
               ? ReadyState.LOADING
               : ReadyState.MOUNTING
           );
@@ -636,7 +636,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           }
           this.signals_.signal(CommonSignals.MOUNTED);
           if (
-            this.implClass_.load(this) &&
+            this.implClass_.usesLoading(this) &&
             this.readyState_ !== ReadyState.COMPLETE
           ) {
             this.setReadyStateInternal(ReadyState.LOADING);
@@ -682,7 +682,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @final
      */
     unmount() {
-      // Hasn't been mounted yet.
+      // Hasn't been mounted yet and hasn't started mounting.
       if (!this.mountPromise_) {
         return;
       }
@@ -713,7 +713,9 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       if (this.isConnected_) {
         // Update the ready state.
         this.setReadyStateInternal(
-          this.implClass_.load(this) ? ReadyState.LOADING : ReadyState.MOUNTING
+          this.implClass_.usesLoading(this)
+            ? ReadyState.LOADING
+            : ReadyState.MOUNTING
         );
 
         // Schedule to mount again when the mounting conditions trigger.
@@ -749,7 +751,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     ensureLoaded(opt_parentPriority) {
       return this.build().then(() => {
         if (this.V1()) {
-          if (this.implClass_.load(this)) {
+          if (this.implClass_.usesLoading(this)) {
             this.impl_.ensureLoaded();
           }
           return this.whenLoaded();

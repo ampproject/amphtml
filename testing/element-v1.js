@@ -74,7 +74,7 @@ const RULES = [
   {
     name: 'If load==true, must also have ensureLoaded',
     test: (implClass) => {
-      const load = implClass.load();
+      const load = implClass.usesLoading();
       const hasEnsureLoaded =
         implClass.prototype.ensureLoaded !== BaseElement.prototype.ensureLoaded;
       return !load || hasEnsureLoaded;

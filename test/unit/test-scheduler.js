@@ -15,9 +15,9 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {Scheduler} from '../../src/service/scheduler';
 import {LayoutPriority} from '../../src/layout';
 import {READY_SCAN_SIGNAL} from '../../src/service/resources-interface';
+import {Scheduler} from '../../src/service/scheduler';
 import {createElementWithAttributes} from '../../src/dom';
 import {installIntersectionObserverStub} from '../../testing/intersection-observer-stub';
 

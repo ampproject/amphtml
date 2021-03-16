@@ -203,7 +203,7 @@ export class PreactBaseElement extends AMP.BaseElement {
   }
 
   /** @override @nocollapse */
-  static load() {
+  static usesLoading() {
     // eslint-disable-next-line local/no-static-this
     const Ctor = this;
     return Ctor['loadable'];
@@ -213,7 +213,7 @@ export class PreactBaseElement extends AMP.BaseElement {
   static prerenderAllowed() {
     // eslint-disable-next-line local/no-static-this
     const Ctor = this;
-    return !Ctor.load();
+    return !Ctor.usesLoading();
   }
 
   /** @param {!AmpElement} element */
