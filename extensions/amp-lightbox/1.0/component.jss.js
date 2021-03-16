@@ -46,8 +46,6 @@ const wrapper = {
   height: '100%',
   position: 'fixed',
   boxSizing: 'border-box',
-
-  // User overridable styles
   zIndex: 1000,
   backgroundColor: 'rgba(0, 0, 0, 0.9)',
   color: '#fff',
