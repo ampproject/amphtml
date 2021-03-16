@@ -48,7 +48,7 @@ describes.endtoend(
     describe('no snap', () => {
       const slideWidth = pageWidth * 0.75;
 
-      it('should have the correct initial slide positions', async () => {
+      it.skip('should have the correct initial slide positions', async () => {
         const slideOne = await getSlide(styles, controller, 0);
         const slideTwo = await getSlide(styles, controller, 1);
 
@@ -61,7 +61,7 @@ describes.endtoend(
         });
       });
 
-      it('should scroll freely', async () => {
+      it.skip('should scroll freely', async () => {
         const el = await getScrollingElement(styles, controller);
         const slideOne = await getSlide(styles, controller, 0);
 
