@@ -940,6 +940,10 @@ export class Carousel {
    * @private
    */
   isScrollAtEndingEdge_() {
+    // Lightbox and trivial case
+    if (!this.mixedLength_ && this.visibleCount_ === 1) {
+      return this.isSingleIndexStartOrEnd_(false);
+    }
     const el = this.scrollContainer_;
     const vector =
       el./*OK*/ getBoundingClientRect().width * (this.forwards_ ? 1 : -1);
@@ -961,8 +965,26 @@ export class Carousel {
    * @private
    */
   isScrollAtBeginningEdge_() {
+    // Lightbox and trivial case
+    if (!this.mixedLength_ && this.visibleCount_ === 1) {
+      return this.isSingleIndexStartOrEnd_(true);
+    }
     const currentScrollPos = this.scrollContainer_./*OK*/ scrollLeft;
     return this.forwards_ ? currentScrollPos <= 0 : currentScrollPos >= 0;
+  }
+
+  /**
+   * Helper function for duplicate calculation for figuring out
+   * if either the first index (`forStartEdge`) or last index 
+   * is the current index also accounting for RTL.
+   * @param {boolean} forStartEdge 
+   * @returns {boolean}
+   */
+  isSingleIndexStartOrEnd_(forStartEdge) {
+    if ((forStartEdge && this.forwards_) || (!forStartEdge && !this.forwards_)) {
+      return this.getCurrentIndex() <= 0;
+    }
+    return this.getCurrentIndex() >= this.slides_.length - 1;
   }
 
   /**
