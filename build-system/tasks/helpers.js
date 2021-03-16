@@ -36,6 +36,7 @@ const {green, red, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
+const {removeFromBabelCache} = require('../compile/pre-closure-babel');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
 const {watch: fileWatch} = require('chokidar');
@@ -158,22 +159,23 @@ async function bootstrapThirdPartyFrames(options) {
  * @return {Promise<void>}
  */
 async function compileCoreRuntime(options) {
-  /**
-   * @return {Promise<void>}
-   */
-  async function watchFunc() {
-    const bundleComplete = await doBuildJs(jsBundles, 'amp.js', {
-      ...options,
-      watch: false,
-    });
-    if (options.onWatchBuild) {
-      options.onWatchBuild(bundleComplete);
-    }
-  }
-
   if (options.watch) {
-    const debouncedRebuild = debounce(watchFunc, watchDebounceDelay);
-    fileWatch('src/**/*.js').on('change', debouncedRebuild);
+    /** @return {Promise<void>} */
+    async function watchFunc() {
+      removeFromBabelCache('src');
+      const bundleComplete = await doBuildJs(jsBundles, 'amp.js', {
+        ...options,
+        continueOnError: true,
+        watch: false,
+      });
+      if (options.onWatchBuild) {
+        options.onWatchBuild(bundleComplete);
+      }
+    }
+    fileWatch('src/**/*.js').on(
+      'change',
+      debounce(watchFunc, watchDebounceDelay)
+    );
   }
 
   await doBuildJs(jsBundles, 'amp.js', {
@@ -329,6 +331,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
 
   if (options.watch) {
     const watchFunc = async () => {
+      removeFromBabelCache(entryPoint);
       const compileDone = await doCompileMinifiedJs(/* continueOnError */ true);
       if (options.onWatchBuild) {
         options.onWatchBuild(compileDone);
