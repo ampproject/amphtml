@@ -98,6 +98,7 @@ function getPreClosureConfig() {
     plugins: preClosurePlugins,
     presets: preClosurePresets,
     retainLines: true,
+    sourceMaps: true,
   };
   return preClosureConfig;
 }

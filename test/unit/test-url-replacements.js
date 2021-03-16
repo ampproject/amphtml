@@ -170,7 +170,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
             },
           },
           __AMP_SERVICES: {
-            'viewport': {obj: {}},
+            'viewport': {obj: {}, ctor: Object},
             'cid': {
               promise: Promise.resolve({
                 get: (config) =>
@@ -1586,6 +1586,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
             link.setAttribute('rel', 'canonical');
             iframe.doc.head.appendChild(link);
             const {documentElement} = iframe.doc;
+            Services.ampdoc(documentElement).setExtensionsKnown();
             const replacements = Services.urlReplacementsForDoc(
               documentElement
             );
@@ -1660,6 +1661,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
             link.setAttribute('rel', 'canonical');
             iframe.doc.head.appendChild(link);
             const {documentElement} = iframe.doc;
+            Services.ampdoc(documentElement).setExtensionsKnown();
             const replacements = Services.urlReplacementsForDoc(
               documentElement
             );

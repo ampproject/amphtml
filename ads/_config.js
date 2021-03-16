@@ -514,9 +514,10 @@ const adConfig = jsonConfiguration({
   'flite': {},
 
   'fluct': {
+    prefetch: ['https://pdn.adingo.jp/p.js'],
     preconnect: [
       'https://cdn-fluct.sh.adingo.jp',
-      'https://s.sh.adingo.jp',
+      'https://sh.adingo.jp',
       'https://i.adingo.jp',
     ],
   },
@@ -630,6 +631,8 @@ const adConfig = jsonConfiguration({
   'jubna': {},
 
   'kargo': {},
+
+  'ketshwa': {},
 
   'kiosked': {
     renderStartImplemented: true,
@@ -1232,6 +1235,12 @@ const adConfig = jsonConfiguration({
 
   'vdoai': {
     prefetch: 'https://a.vdo.ai/core/dependencies_amp/vdo.min.js',
+    renderStartImplemented: true,
+  },
+
+  'verizonmedia': {
+    prefetch: 'https://jac.yahoosandbox.com/amp/jac.js',
+    preconnect: ['https://jill.fc.yahoo.com'],
     renderStartImplemented: true,
   },
 

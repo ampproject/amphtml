@@ -57,15 +57,17 @@ import {whenContentIniLoad} from './ini-load';
  * - html: The complete content of an AMP embed, which is itself an AMP
  *   document. Can include whatever is normally allowed in an AMP document,
  *   except for AMP `<script>` declarations. Those should be passed as an
- *   array of `extensionIds`.
- * - extensionsIds: An optional array of AMP extension IDs used in this embed.
+ *   array of `extensions`.
+ * - extensions: An optional array of AMP extension IDs/versions used in
+ *   this embed.
  * - fonts: An optional array of fonts used in this embed.
+ *
  *
  * @typedef {{
  *   host: (?AmpElement|undefined),
  *   url: string,
  *   html: ?string,
- *   extensionIds: (?Array<string>|undefined),
+ *   extensions: (?Array<{extensionId: string, extensionVersion: string}>|undefined),
  *   fonts: (?Array<string>|undefined),
  *   skipHtmlMerge: (boolean|undefined),
  * }}
@@ -108,6 +110,47 @@ export function isSrcdocSupported() {
 }
 
 /**
+ * Get trusted urls enabled for polyfills.
+ * @return {string}
+ */
+export function getFieSafeScriptSrcs() {
+  const cdnBase = getMode().localDev ? 'http://localhost:8000/dist' : urls.cdn;
+  return `${cdnBase}/lts/ ${cdnBase}/rtv/ ${cdnBase}/sw/`;
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Array<{extensionId: string, extensionVersion: string}>} extensions
+ */
+export function preloadFriendlyIframeEmbedExtensions(win, extensions) {
+  // TODO(#33020): Use the format directly and preload with the specified
+  // version.
+  preloadFriendlyIframeEmbedExtensionIdsDeprecated(
+    win,
+    extensions.map(({extensionId}) => extensionId)
+  );
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Array<string>} extensionIds
+ * TODO(#33020): remove this method in favor `preloadFriendlyIframeEmbedExtensions`.
+ * @visibleForTesting
+ */
+export function preloadFriendlyIframeEmbedExtensionIdsDeprecated(
+  win,
+  extensionIds
+) {
+  const extensionsService = Services.extensionsFor(win);
+
+  // Load any extensions; do not wait on their promises as this
+  // is just to prefetch.
+  extensionIds.forEach((extensionId) =>
+    extensionsService.preloadExtension(extensionId)
+  );
+}
+
+/**
  * Creates the requested "friendly iframe" embed. Returns the promise that
  * will be resolved as soon as the embed is available. The actual
  * initialization of the embed will start as soon as the `iframe` is added
@@ -127,7 +170,7 @@ export function installFriendlyIframeEmbed(
   /** @const {!Window} */
   const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
   /** @const {!./service/extensions-impl.Extensions} */
-  const extensions = Services.extensionsFor(win);
+  const extensionsService = Services.extensionsFor(win);
   /** @const {!./service/ampdoc-impl.AmpDocService} */
   const ampdocService = Services.ampdocServiceFor(win);
 
@@ -137,11 +180,7 @@ export function installFriendlyIframeEmbed(
   iframe.setAttribute('marginwidth', '0');
 
   // Pre-load extensions.
-  if (spec.extensionIds) {
-    spec.extensionIds.forEach((extensionId) =>
-      extensions.preloadExtension(extensionId)
-    );
-  }
+  preloadFriendlyIframeEmbedExtensions(win, spec.extensions || []);
 
   const html = spec.skipHtmlMerge ? spec.html : mergeHtml(spec);
   // Receive the signal when iframe is ready: it's document is formed.
@@ -221,12 +260,11 @@ export function installFriendlyIframeEmbed(
     }
 
     // Add extensions.
-    const extensionIds = spec.extensionIds || [];
     return Installers.installExtensionsInEmbed(
       embed,
-      extensions,
+      extensionsService,
       ampdoc,
-      extensionIds,
+      spec.extensions,
       opt_preinstallCallback
     ).then(() => {
       if (!childWin.frameElement) {
@@ -300,12 +338,7 @@ function mergeHtml(spec) {
     });
   }
 
-  const cdnBase = getMode().localDev ? 'http://localhost:8000/dist' : urls.cdn;
-  const cspScriptSrc = [
-    `${cdnBase}/lts/`,
-    `${cdnBase}/rtv/`,
-    `${cdnBase}/sw/`,
-  ].join(' ');
+  const cspScriptSrc = getFieSafeScriptSrcs();
 
   // Load CSP
   result.push(
@@ -701,18 +734,18 @@ export class Installers {
    * callback, if specified, is executed after polyfills have been configured
    * but before the first extension is installed.
    * @param {!FriendlyIframeEmbed} embed
-   * @param {!./service/extensions-impl.Extensions} extensions
+   * @param {!./service/extensions-impl.Extensions} extensionsService
    * @param {!./service/ampdoc-impl.AmpDocFie} ampdoc
-   * @param {!Array<string>} extensionIds
+   * @param {!Array<{extensionId: string, extensionVersion: string}>} extensions
    * @param {function(!Window, ?./service/ampdoc-impl.AmpDoc=)|undefined} preinstallCallback
    * @param {function(!Promise)=} opt_installComplete
    * @return {!Promise}
    */
   static installExtensionsInEmbed(
     embed,
-    extensions,
+    extensionsService,
     ampdoc,
-    extensionIds,
+    extensions,
     preinstallCallback,
     opt_installComplete
   ) {
@@ -720,6 +753,9 @@ export class Installers {
     const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
     setParentWindow(childWin, parentWin);
     const getDelayPromise = getDelayPromiseProducer();
+    // TODO(#33020): remove this when we pass full extensions object
+    // to installation service
+    const extensionIds = extensions.map(({extensionId}) => extensionId);
 
     return getDelayPromise(undefined)
       .then(() => {
@@ -773,7 +809,7 @@ export class Installers {
         if (!childWin.frameElement) {
           return;
         }
-        extensions.preinstallEmbed(ampdoc, extensionIds);
+        extensionsService.preinstallEmbed(ampdoc, extensionIds);
       })
       .then(getDelayPromise)
       .then(() => {
@@ -790,7 +826,11 @@ export class Installers {
         }
         // Intentionally do not wait for the full installation to complete.
         // It's enough of initialization done to return the embed.
-        const promise = extensions.installExtensionsInDoc(ampdoc, extensionIds);
+        const promise = extensionsService.installExtensionsInDoc(
+          ampdoc,
+          extensionIds
+        );
+        ampdoc.setExtensionsKnown();
         if (opt_installComplete) {
           opt_installComplete(promise);
         }

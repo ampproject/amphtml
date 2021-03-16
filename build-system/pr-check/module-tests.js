@@ -19,6 +19,7 @@
  * @fileoverview Script that tests the module AMP runtime during CI.
  */
 
+const argv = require('minimist')(process.argv.slice(2));
 const {
   downloadModuleOutput,
   downloadNomoduleOutput,
@@ -31,32 +32,40 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'module-tests.js';
 
+/**
+ * @return {void}
+ */
 function prependConfig() {
-  // TODO(@ampproject/wg-infra): change prepend-global to take multiple target files instead of looping here.
-  for (const target of MINIFIED_TARGETS) {
-    for (const ext of ['js', 'mjs']) {
-      timedExecOrDie(
-        `gulp prepend-global --${process.env.config} --local_dev --fortesting --derandomize --target=dist/${target}.${ext}`
-      );
-    }
-  }
+  const targets = MINIFIED_TARGETS.flatMap((target) => [
+    `dist/${target}.js`,
+    `dist/${target}.mjs`,
+  ]).join(',');
+  timedExecOrDie(
+    `gulp prepend-global --${argv.config} --local_dev --fortesting --derandomize --target=${targets}`
+  );
 }
 
+/**
+ * @return {void}
+ */
 function pushBuildWorkflow() {
   downloadNomoduleOutput();
   downloadModuleOutput();
-  timedExecOrDie('gulp update-packages');
   prependConfig();
   timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
 }
 
+/**
+ * @return {void}
+ */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     downloadNomoduleOutput();
     downloadModuleOutput();
-    timedExecOrDie('gulp update-packages');
     prependConfig();
-    timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
+    timedExecOrDie(
+      `gulp integration --nobuild --compiled --headless --esm --config=${argv.config}`
+    );
   } else {
     printSkipMessage(
       jobName,

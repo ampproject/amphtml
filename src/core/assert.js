@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-/** @fileoverview Dependency-free assertion helpers for use in Preact. */
+import {
+  USER_ERROR_SENTINEL,
+  elementStringOrPassThru,
+} from './error-message-helpers';
+import {isMinifiedMode} from './minified-mode';
 
-/**
- * Triple zero width space.
- *
- * This is added to user error messages, so that we can later identify
- * them, when the only thing that we have is the message. This is the
- * case in many browsers when the global exception handler is invoked.
- *
- * @const {string}
- */
-export const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
+/** @fileoverview Dependency-free assertion helpers for use in Preact. */
 
 /**
  * User error class for use in Preact. Use of sentinel string instead of a
@@ -70,7 +65,7 @@ export class UserError extends Error {
  * @throws {Error} when shouldBeTruthy is not truthy.
  */
 function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
-  if (shouldBeTruthy) {
+  if (isMinifiedMode() || shouldBeTruthy) {
     return shouldBeTruthy;
   }
 
@@ -92,12 +87,15 @@ function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
       firstElement = subValue;
     }
 
-    return subValue;
+    return elementStringOrPassThru(subValue);
   });
 
   const error = new errorCls(message);
   error.messageArray = messageArray;
-  error.associatedElement = firstElement;
+  if (firstElement) {
+    error.associatedElement = firstElement;
+    firstElement.classList.add('i-amphtml-error');
+  }
   throw error;
 }
 

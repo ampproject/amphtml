@@ -40,6 +40,7 @@ const {
   displayLifecycleDebugging,
 } = require('../compile/debug-compilation-lifecycle');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
+const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss, copyCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {formatExtractedMessages} = require('../compile/log-messages');
@@ -148,6 +149,7 @@ async function doDist(extraArgs = {}) {
   await buildExtensions(options);
 
   if (!argv.core_runtime_only) {
+    await buildVendorConfigs(options);
     await formatExtractedMessages();
   }
   if (!argv.watch) {
@@ -218,6 +220,9 @@ async function buildWebPushPublisherFiles() {
   await postBuildWebPushPublisherFilesVersion();
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function prebuild() {
   await preBuildExperiments();
   await preBuildLoginDone();
@@ -393,4 +398,6 @@ dist.flags = {
   sanitize_vars_for_diff:
     '  Sanitize the output to diff build results. Requires --pseudo_names',
   sxg: '  Outputs the compiled code for the SxG build',
+  warning_level:
+    "  Optionally sets closure's warning level to one of [quiet, default, verbose]",
 };

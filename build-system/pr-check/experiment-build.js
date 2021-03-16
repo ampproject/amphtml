@@ -20,22 +20,24 @@
  */
 
 const {
-  getExperimentConfig,
   printSkipMessage,
   timedExecOrDie,
   uploadExperimentOutput,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {experiment} = require('minimist')(process.argv.slice(2));
+const {getExperimentConfig} = require('../common/utils');
 const {runCiJob} = require('./ci-job');
 
 const jobName = `${experiment}-build.js`;
 
+/**
+ * @return {void}
+ */
 function pushBuildWorkflow() {
   const config = getExperimentConfig(experiment);
   if (config) {
     const defineFlag = `--define_experiment_constant ${config.define_experiment_constant}`;
-    timedExecOrDie('gulp update-packages');
     timedExecOrDie(`gulp dist --fortesting ${defineFlag}`);
     uploadExperimentOutput(experiment);
   } else {
@@ -46,6 +48,9 @@ function pushBuildWorkflow() {
   }
 }
 
+/**
+ * @return {void}
+ */
 function prBuildWorkflow() {
   if (
     buildTargetsInclude(

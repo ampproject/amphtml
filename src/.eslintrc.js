@@ -13,9 +13,55 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const {isCiBuild} = require('../build-system/common/ci');
 
 module.exports = {
   'rules': {
     'local/no-global': 2,
+
+    'import/no-restricted-paths': [
+      'error',
+      {
+        'zones': [
+          {
+            // Disallow importing AMP dependencies into core
+            'target': 'src/core',
+            'from': 'src',
+            'except': ['./core'],
+          },
+          {
+            // Disallow importing AMP dependencies into preact/Bento
+            'target': 'src/preact',
+            'from': 'src',
+            'except': ['./core', './context', './preact'],
+          },
+          {
+            // Disallow importing AMP dependencies into context module
+            // TODO(rcebulko): Try to migrate src/context into src/preact
+            'target': 'src/context',
+            'from': 'src',
+            'except': ['./core', './context'],
+          },
+        ],
+      },
+    ],
   },
+  // Exclusions where imports are necessary or have not yet been migrated;
+  // Do not add to this list
+  'overrides': [
+    {
+      'files': [
+        './preact/base-element.js',
+        './core/contextprops.js',
+        './context/component-hooks.js',
+        './context/component-install.js',
+        './context/component.js',
+        './context/node.js',
+        './context/prop.js',
+        './context/scheduler.js',
+        './context/values.js',
+      ],
+      'rules': {'import/no-restricted-paths': isCiBuild() ? 0 : 1},
+    },
+  ],
 };

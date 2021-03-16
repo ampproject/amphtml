@@ -17,9 +17,12 @@
 import {ElementStub} from '../element-stub';
 import {Services} from '../services';
 import {createCustomElementClass, stubbedElements} from '../custom-element';
-import {extensionScriptsInNode} from '../element-service';
+import {extensionScriptsInNode} from './extension-script';
 import {reportError} from '../error';
-import {userAssert} from '../log';
+import {pureUserAssert as userAssert} from '../core/assert';
+
+/** @type {!WeakMap<!./service/ampdoc-impl.AmpDoc, boolean>} */
+const docInitializedMap = new WeakMap();
 
 /**
  * @param {!Window} win
@@ -131,10 +134,13 @@ function waitReadyForUpgrade(win, elementClass) {
  */
 export function stubElementsForDoc(ampdoc) {
   const extensions = extensionScriptsInNode(ampdoc.getHeadNode());
-  extensions.forEach((name) => {
-    ampdoc.declareExtension(name);
-    stubElementIfNotKnown(ampdoc.win, name);
+  extensions.forEach(({extensionId, extensionVersion}) => {
+    ampdoc.declareExtension(extensionId, extensionVersion);
+    stubElementIfNotKnown(ampdoc.win, extensionId);
   });
+  if (ampdoc.isBodyAvailable()) {
+    ampdoc.setExtensionsKnown();
+  }
 }
 
 /**
@@ -171,8 +177,33 @@ export function copyElementToChildWindow(parentWin, childWin, name) {
 export function registerElement(win, name, implementationClass) {
   const knownElements = getExtendedElements(win);
   knownElements[name] = implementationClass;
-  const klass = createCustomElementClass(win);
+  const klass = createCustomElementClass(win, elementConnectedCallback);
   win['customElements'].define(name, klass);
+}
+
+/**
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!AmpElement} element
+ * @param {?(typeof BaseElement)} implementationClass
+ * @visibleForTesting
+ */
+export function elementConnectedCallback(ampdoc, element, implementationClass) {
+  // Make sure that the ampdoc has already been stubbed.
+  if (!docInitializedMap.has(ampdoc)) {
+    docInitializedMap.set(ampdoc, true);
+    stubElementsForDoc(ampdoc);
+  }
+
+  // Load the pre-stubbed legacy extension if needed.
+  const extensionId = element.localName;
+  if (!implementationClass && !ampdoc.declaresExtension(extensionId)) {
+    Services.extensionsFor(ampdoc.win).installExtensionForDoc(
+      ampdoc,
+      extensionId,
+      // The legacy auto-extensions are always 0.1.
+      '0.1'
+    );
+  }
 }
 
 /**

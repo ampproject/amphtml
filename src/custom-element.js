@@ -40,6 +40,7 @@ import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
 import {getBuilderForDoc} from './service/builder';
 import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
 import {getMode} from './mode';
+import {isExperimentOn} from './experiments';
 import {setStyle} from './style';
 import {shouldBlockOnConsentByMeta} from './consent';
 import {startupChunk} from './chunk';
@@ -57,6 +58,8 @@ const UpgradeState = {
   UPGRADE_FAILED: 3,
   UPGRADE_IN_PROGRESS: 4,
 };
+
+const NO_BUBBLES = {bubbles: false};
 
 /**
  * Caches whether the template tag is supported to avoid memory allocations.
@@ -83,11 +86,13 @@ function isTemplateTagSupported() {
  * Creates a named custom element class.
  *
  * @param {!Window} win The window in which to register the custom element.
+ * @param {function(!./service/ampdoc-impl.AmpDoc, !AmpElement element, ?(typeof BaseElement))} elementConnectedCallback
  * @return {typeof AmpElement} The custom element class.
  */
-export function createCustomElementClass(win) {
+export function createCustomElementClass(win, elementConnectedCallback) {
   const BaseCustomElement = /** @type {typeof HTMLElement} */ (createBaseCustomElementClass(
-    win
+    win,
+    elementConnectedCallback
   ));
   // It's necessary to create a subclass, because the same "base" class cannot
   // be registered to multiple custom elements.
@@ -99,9 +104,10 @@ export function createCustomElementClass(win) {
  * Creates a base custom element class.
  *
  * @param {!Window} win The window in which to register the custom element.
+ * @param {function(!./service/ampdoc-impl.AmpDoc, !AmpElement element, ?(typeof BaseElement))} elementConnectedCallback
  * @return {typeof HTMLElement}
  */
-function createBaseCustomElementClass(win) {
+function createBaseCustomElementClass(win, elementConnectedCallback) {
   if (win.__AMP_BASE_CE_CLASS) {
     return win.__AMP_BASE_CE_CLASS;
   }
@@ -481,15 +487,27 @@ function createBaseCustomElementClass(win) {
       // Wait for consent.
       const consentPromise = implPromise.then(() => {
         const policyId = this.getConsentPolicy_();
-        if (!policyId) {
+        const isGranularConsentExperimentOn = isExperimentOn(
+          win,
+          'amp-consent-granular-consent'
+        );
+        const purposeConsents =
+          isGranularConsentExperimentOn && !policyId
+            ? this.getPurposesConsent_()
+            : null;
+
+        if (!policyId && !(isGranularConsentExperimentOn && purposeConsents)) {
           return;
         }
+        // Must have policyId or granularExp w/ purposeConsents
         return Services.consentPolicyServiceForDocOrNull(this)
           .then((policy) => {
             if (!policy) {
               return true;
             }
-            return policy.whenPolicyUnblock(policyId);
+            return policyId
+              ? policy.whenPolicyUnblock(policyId)
+              : policy.whenPurposesUnblock(purposeConsents);
           })
           .then((shouldUnblock) => {
             if (!shouldUnblock) {
@@ -602,26 +620,31 @@ function createBaseCustomElementClass(win) {
           return this.whenLoaded();
         }
 
+        // Very ugly! The "built" signal must be resolved from the Resource
+        // and not the element itself because the Resource has not correctly
+        // set its state for the downstream to process it correctly.
         const resource = this.getResource_();
-        if (resource.getState() == ResourceState.LAYOUT_COMPLETE) {
-          return;
-        }
-        if (
-          resource.getState() != ResourceState.LAYOUT_SCHEDULED ||
-          resource.isMeasureRequested()
-        ) {
-          resource.measure();
-        }
-        if (!resource.isDisplayed()) {
-          return;
-        }
-        this.getResources().scheduleLayoutOrPreload(
-          resource,
-          /* layout */ true,
-          opt_parentPriority,
-          /* forceOutsideViewport */ true
-        );
-        return this.whenLoaded();
+        return resource.whenBuilt().then(() => {
+          if (resource.getState() == ResourceState.LAYOUT_COMPLETE) {
+            return;
+          }
+          if (
+            resource.getState() != ResourceState.LAYOUT_SCHEDULED ||
+            resource.isMeasureRequested()
+          ) {
+            resource.measure();
+          }
+          if (!resource.isDisplayed()) {
+            return;
+          }
+          this.getResources().scheduleLayoutOrPreload(
+            resource,
+            /* layout */ true,
+            opt_parentPriority,
+            /* forceOutsideViewport */ true
+          );
+          return this.whenLoaded();
+        });
       });
     }
 
@@ -648,6 +671,7 @@ function createBaseCustomElementClass(win) {
         case ReadyState.LOADING:
           this.signals_.signal(CommonSignals.LOAD_START);
           this.signals_.reset(CommonSignals.UNLOAD);
+          this.signals_.reset(CommonSignals.LOAD_END);
           this.classList.add('i-amphtml-layout');
           // Potentially start the loading indicator.
           this.toggleLoading(true);
@@ -657,7 +681,7 @@ function createBaseCustomElementClass(win) {
           this.signals_.signal(CommonSignals.LOAD_END);
           this.classList.add('i-amphtml-layout');
           this.toggleLoading(false);
-          dom.dispatchCustomEvent(this, 'load');
+          dom.dispatchCustomEvent(this, 'load', null, NO_BUBBLES);
           this.dispatchCustomEventForTesting(AmpEvents.LOAD_END);
           return;
         case ReadyState.ERROR:
@@ -666,7 +690,7 @@ function createBaseCustomElementClass(win) {
             /** @type {!Error} */ (opt_failure)
           );
           this.toggleLoading(false);
-          dom.dispatchCustomEvent(this, 'error');
+          dom.dispatchCustomEvent(this, 'error', opt_failure, NO_BUBBLES);
           return;
       }
     }
@@ -945,14 +969,7 @@ function createBaseCustomElementClass(win) {
         const ampdocService = Services.ampdocServiceFor(win);
         const ampdoc = ampdocService.getAmpDoc(this);
         this.ampdoc_ = ampdoc;
-        // Load the pre-stubbed extension if needed.
-        const extensionId = this.tagName.toLowerCase();
-        if (!this.implClass_ && !ampdoc.declaresExtension(extensionId)) {
-          Services.extensionsFor(win).installExtensionForDoc(
-            ampdoc,
-            extensionId
-          );
-        }
+        elementConnectedCallback(ampdoc, this, this.implClass_);
       }
       if (!this.resources_) {
         // Resources can now be initialized since the ampdoc is now available.
@@ -1660,6 +1677,15 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Get the purpose consents that should be granted.
+     * @return {?Array<string>}
+     */
+    getPurposesConsent_() {
+      const purposes = this.getAttribute('data-block-on-consent-purposes');
+      return purposes ? purposes.split(',') : null;
+    }
+
+    /**
      * Returns the original nodes of the custom element without any service
      * nodes that could have been added for markup. These nodes can include
      * Text, Comment and other child nodes.
@@ -1958,11 +1984,19 @@ function isInternalOrServiceNode(node) {
  *
  * @param {!Window} win The window in which to register the custom element.
  * @param {(typeof ./base-element.BaseElement)=} opt_implementationClass For testing only.
+ * @param {function(!./service/ampdoc-impl.AmpDoc, !AmpElement element, ?(typeof BaseElement))=} opt_elementConnectedCallback
  * @return {!Object} Prototype of element.
  * @visibleForTesting
  */
-export function createAmpElementForTesting(win, opt_implementationClass) {
-  const Element = createCustomElementClass(win);
+export function createAmpElementForTesting(
+  win,
+  opt_implementationClass,
+  opt_elementConnectedCallback
+) {
+  const Element = createCustomElementClass(
+    win,
+    opt_elementConnectedCallback || (() => {})
+  );
   if (getMode().test && opt_implementationClass) {
     Element.prototype.implementationClassForTesting = opt_implementationClass;
   }
@@ -1978,7 +2012,7 @@ export function resetStubsForTesting() {
 
 /**
  * @param {!AmpElement} element
- * @return {typeof BaseElement}
+ * @return {?(typeof BaseElement)}
  * @visibleForTesting
  */
 export function getImplClassSyncForTesting(element) {

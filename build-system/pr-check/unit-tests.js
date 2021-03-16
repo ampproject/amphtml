@@ -25,8 +25,10 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'unit-tests.js';
 
+/**
+ * @return {void}
+ */
 function pushBuildWorkflow() {
-  timedExecOrDie('gulp update-packages');
   try {
     timedExecOrThrow(
       'gulp unit --headless --coverage --report',
@@ -45,9 +47,11 @@ function pushBuildWorkflow() {
   }
 }
 
+/**
+ * @return {void}
+ */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
-    timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp unit --headless --local_changes');
     timedExecOrDie('gulp unit --headless --coverage');
     timedExecOrDie('gulp codecov-upload');
