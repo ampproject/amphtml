@@ -55,7 +55,7 @@ function fa(a, b) {
 }
 function r(a, b) {
   a = a.split(".");
-  var c = l;
+  var c = window || l;
   a[0] in c || "undefined" == typeof c.execScript || c.execScript("var " + a[0]);
   for (var d; a.length && (d = a.shift());) {
     a.length || void 0 === b ? c[d] && c[d] !== Object.prototype[d] ? c = c[d] : c = c[d] = {} : c[d] = b;
@@ -1451,15 +1451,15 @@ r("__AMP_addPort", function(a, b, c) {
   console.log("finish adding ports to the network via PortOperator! PortName: " + b);
 });
 ;
-  export function createPortChannel(window, origin) {
-    return __AMP_createPortChannel(window, origin);
+  export function createPortChannel(frameWindow, origin) {
+    return window.__AMP_createPortChannel(frameWindow, origin);
   }
-  export function createRespondingChannel(window, origin, serviceHandlersMap) {
-    return __AMP_createRespondingChannel(window, origin, serviceHandlersMap);
+  export function createRespondingChannel(portChannel, serviceHandlersMap) {
+    return window.__AMP_createRespondingChannel(portChannel, serviceHandlersMap);
   }
   export function createPortOperator() {
-    return __AMP_createPortOperator();
+    return window.__AMP_createPortOperator();
   }
   export function addPort(portOperator, portName, portChannel) {
-    __AMP_addPort(portOperator, portName, portChannel);
+    window.__AMP_addPort(portOperator, portName, portChannel);
   }

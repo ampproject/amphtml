@@ -10,17 +10,17 @@ npx google-closure-compiler \
   --formatting=PRETTY_PRINT \
   --output_wrapper "
   %output%;
-  export function createPortChannel(window, origin) {
-    return __AMP_createPortChannel(window, origin);
+  export function createPortChannel(frameWindow, origin) {
+    return window.__AMP_createPortChannel(frameWindow, origin);
   }
-  export function createRespondingChannel(window, origin, serviceHandlersMap) {
-    return __AMP_createRespondingChannel(window, origin, serviceHandlersMap);
+  export function createRespondingChannel(portChannel, serviceHandlersMap) {
+    return window.__AMP_createRespondingChannel(portChannel, serviceHandlersMap);
   }
   export function createPortOperator() {
-    return __AMP_createPortOperator();
+    return window.__AMP_createPortOperator();
   }
   export function addPort(portOperator, portName, portChannel) {
-    __AMP_addPort(portOperator, portName, portChannel);
+    window.__AMP_addPort(portOperator, portName, portChannel);
   }" \
   --js_output_file "closure-bundle.js" \
   --output_manifest manifest.MF \

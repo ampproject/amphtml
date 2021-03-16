@@ -75,7 +75,7 @@ function addPort(portOperator, portName, portChannel) {
   portOperator.addPort(portName, portChannel);
 }
 
-goog.exportSymbol('__AMP_createPortChannel', createPortChannel);
-goog.exportSymbol('__AMP_createRespondingChannel', createRespondingChannel);
-goog.exportSymbol('__AMP_createPortOperator', createPortOperator);
-goog.exportSymbol('__AMP_addPort', addPort);
+goog.exportSymbol('__AMP_createPortChannel', createPortChannel, window);
+goog.exportSymbol('__AMP_createRespondingChannel', createRespondingChannel, window);
+goog.exportSymbol('__AMP_createPortOperator', createPortOperator, window);
+goog.exportSymbol('__AMP_addPort', addPort, window);
