@@ -1111,7 +1111,6 @@ export class Resource {
    */
   unload() {
     this.element.unmount();
-    this.unlayout();
   }
 
   /**

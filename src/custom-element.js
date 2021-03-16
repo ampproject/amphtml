@@ -684,8 +684,13 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         this.pause();
       }
 
+      if (!this.V1()) {
+        this.getResource_().unlayout();
+        return;
+      }
+
       // Hasn't been mounted yet and hasn't started mounting.
-      if (!this.V1() || !this.mountPromise_) {
+      if (!this.mountPromise_) {
         return;
       }
 
