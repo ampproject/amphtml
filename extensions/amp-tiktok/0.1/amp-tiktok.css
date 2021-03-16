@@ -2,7 +2,11 @@
     height: 100%;
     left: 50%;
     margin-left: -162px;
+    width: 325px;
+    /* transform: translateX(-50%); */
     position: absolute;
+    background-color:blue;
+    
 }
 
 .i-amphtml-tiktok-unresolved {
@@ -10,4 +14,6 @@
     opacity: 0;
     pointer-events: none;
     width: 325px;
+
+    background-color:red;
 }
