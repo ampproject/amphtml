@@ -228,8 +228,8 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    */
   setMaxBounds_() {
     // Calculations to clamp image to edge of container.
-    const containerWidth = this.pageSize_.width;
-    const containerHeight = this.pageSize_.height;
+    const {width: containerWidth, height: containerHeight} = this.pageSize_;
+
     const ampImgWidth = this.ampImgEl_.getAttribute('width');
     const ampImgHeight = this.ampImgEl_.getAttribute('height');
     // TODO(#31515): When aspect ratio is portrait, containerWidth will be used for this.
