@@ -716,7 +716,8 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
       // Try to unmount. Not every element has been mounted, can be unmounted
       // or has anything to unmount.
-      const reMount = !this.mountPromise_ || this.impl_.unmountCallback();
+      const reMount =
+        !this.mountPromise_ || !this.impl_ || this.impl_.unmountCallback();
       if (!reMount) {
         return;
       }
@@ -727,7 +728,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
       // Prepare for the next mount if the element is connected.
       if (this.isConnected_) {
-        this.upgradeOrSchedule_();
+        this.upgradeOrSchedule_(/* opt_disablePreload */ true);
       }
     }
 
@@ -1195,9 +1196,10 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
     /**
      * Upgrade or schedule element based on V1.
+     * @param {boolean=} opt_disablePreload
      * @private @final
      */
-    upgradeOrSchedule_() {
+    upgradeOrSchedule_(opt_disablePreload) {
       if (!this.V1()) {
         this.tryUpgrade_();
         return;
@@ -1213,33 +1215,35 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       scheduler.schedule(this);
 
       if (this.buildingPromise_) {
-        // Already built. Just needs to be mounted.
+        // Already built or building: just needs to be mounted.
         this.setReadyStateInternal(
           this.implClass_ && this.implClass_.usesLoading(this)
             ? ReadyState.LOADING
             : ReadyState.MOUNTING
         );
       } else {
-        // Not built yet. Execute prebuild steps.
+        // Not built yet: execute prebuild steps.
         this.setReadyStateInternal(ReadyState.BUILDING);
 
         // Schedule preconnects.
-        const urls = this.implClass_.getPreconnects(this);
-        if (urls && urls.length > 0) {
-          // If we do early preconnects we delay them a bit. This is kind of
-          // an unfortunate trade off, but it seems faster, because the DOM
-          // operations themselves are not free and might delay
-          const ampdoc = this.getAmpDoc();
-          startupChunk(ampdoc, () => {
-            const {win} = ampdoc;
-            if (!win) {
-              return;
-            }
-            const preconnect = Services.preconnectFor(win);
-            urls.forEach((url) =>
-              preconnect.url(ampdoc, url, /* alsoConnecting */ false)
-            );
-          });
+        if (!opt_disablePreload) {
+          const urls = this.implClass_.getPreconnects(this);
+          if (urls && urls.length > 0) {
+            // If we do early preconnects we delay them a bit. This is kind of
+            // an unfortunate trade off, but it seems faster, because the DOM
+            // operations themselves are not free and might delay
+            const ampdoc = this.getAmpDoc();
+            startupChunk(ampdoc, () => {
+              const {win} = ampdoc;
+              if (!win) {
+                return;
+              }
+              const preconnect = Services.preconnectFor(win);
+              urls.forEach((url) =>
+                preconnect.url(ampdoc, url, /* alsoConnecting */ false)
+              );
+            });
+          }
         }
       }
     }
