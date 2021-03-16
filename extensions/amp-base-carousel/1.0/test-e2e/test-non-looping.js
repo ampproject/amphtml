@@ -45,7 +45,7 @@ describes.endtoend(
       await controller.switchToShadowRoot(carousel);
     });
 
-    it('should render correctly', async () => {
+    it.skip('should render correctly', async () => {
       const el = await getScrollingElement(styles, controller);
 
       await expect(prop(el, 'scrollWidth')).to.equal(pageWidth * SLIDE_COUNT);
