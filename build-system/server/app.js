@@ -1561,17 +1561,6 @@ app.get('/dist/diversions', (_req, res) => {
  * End Cache SW LOCALDEV section
  */
 
-/**
- * Web worker binary.
- */
-app.get('/dist/ww(.max)?.(m?js)', (req, res) => {
-  fs.promises.readFile(pc.cwd() + req.path).then((file) => {
-    res.setHeader('Content-Type', 'text/javascript');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.end(file);
-  });
-});
-
 app.get('/mraid.js', (req, _res, next) => {
   req.url = req.url.replace('mraid.js', 'examples/mraid/mraid.js');
   next();

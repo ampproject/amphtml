@@ -134,7 +134,6 @@ async function preBuildRuntimeFiles() {
   await build(jsBundles, 'amp.js', (_bundles, _name, options) =>
     compileCoreRuntime(options)
   );
-  await build(jsBundles, 'ww.max.js', doBuildJs);
 }
 
 /**
