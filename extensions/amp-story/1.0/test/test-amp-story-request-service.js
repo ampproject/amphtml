@@ -16,11 +16,11 @@
 
 import {
   AmpStoryRequestService,
-  BOOKEND_CONFIG_ATTRIBUTE_NAME,
-  BOOKEND_CREDENTIALS_ATTRIBUTE_NAME,
+  CONFIG_SRC_ATTRIBUTE_NAME,
+  CREDENTIALS_ATTRIBUTE_NAME,
 } from '../amp-story-request-service';
 
-describes.fakeWin('amp-story-store-service', {amp: true}, (env) => {
+describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
   let requestService;
   let storyElement;
   let bookendElement;
@@ -46,7 +46,7 @@ describes.fakeWin('amp-story-store-service', {amp: true}, (env) => {
   it('should use the URL provided in the attribute to load the config', async () => {
     const bookendUrl = 'https://publisher.com/bookend';
 
-    bookendElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
+    bookendElement.setAttribute(CONFIG_SRC_ATTRIBUTE_NAME, bookendUrl);
     xhrMock
       .expects('fetchJson')
       .withExactArgs(bookendUrl, {})
@@ -66,7 +66,7 @@ describes.fakeWin('amp-story-store-service', {amp: true}, (env) => {
     const bookendUrl = 'https://publisher.com/bookend';
     const fetchedConfig = 'amazingConfig';
 
-    bookendElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
+    bookendElement.setAttribute(CONFIG_SRC_ATTRIBUTE_NAME, bookendUrl);
     xhrMock
       .expects('fetchJson')
       .resolves({
@@ -85,7 +85,7 @@ describes.fakeWin('amp-story-store-service', {amp: true}, (env) => {
   it('should fetch the bookend config once if called multiple times', async () => {
     const bookendUrl = 'https://publisher.com/bookend';
 
-    bookendElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
+    bookendElement.setAttribute(CONFIG_SRC_ATTRIBUTE_NAME, bookendUrl);
     xhrMock
       .expects('fetchJson')
       .resolves({
@@ -104,8 +104,8 @@ describes.fakeWin('amp-story-store-service', {amp: true}, (env) => {
   it('should fetch the bookend config with credentials', async () => {
     const bookendUrl = 'https://publisher.com/bookend';
 
-    bookendElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
-    bookendElement.setAttribute(BOOKEND_CREDENTIALS_ATTRIBUTE_NAME, 'include');
+    bookendElement.setAttribute(CONFIG_SRC_ATTRIBUTE_NAME, bookendUrl);
+    bookendElement.setAttribute(CREDENTIALS_ATTRIBUTE_NAME, 'include');
     xhrMock
       .expects('fetchJson')
       .withExactArgs(bookendUrl, {
@@ -120,6 +120,51 @@ describes.fakeWin('amp-story-store-service', {amp: true}, (env) => {
       .once();
 
     await requestService.loadBookendConfig();
+    xhrMock.verify();
+  });
+
+  it('should return the expected social share config', async () => {
+    const shareUrl = 'https://publisher.com/bookend';
+    const fetchedConfig = 'amazingConfig';
+
+    const shareElement = env.win.document.createElement(
+      'amp-story-social-share'
+    );
+    storyElement.appendChild(shareElement);
+
+    shareElement.setAttribute(CONFIG_SRC_ATTRIBUTE_NAME, shareUrl);
+    xhrMock
+      .expects('fetchJson')
+      .resolves({
+        ok: true,
+        json() {
+          return Promise.resolve(fetchedConfig);
+        },
+      })
+      .once();
+
+    const config = await requestService.loadShareConfig();
+    expect(config).to.equal(fetchedConfig);
+    xhrMock.verify();
+  });
+
+  it('should return the social share config from the bookend', async () => {
+    const shareUrl = 'https://publisher.com/bookend';
+    const fetchedConfig = 'amazingConfig';
+
+    bookendElement.setAttribute(CONFIG_SRC_ATTRIBUTE_NAME, shareUrl);
+    xhrMock
+      .expects('fetchJson')
+      .resolves({
+        ok: true,
+        json() {
+          return Promise.resolve(fetchedConfig);
+        },
+      })
+      .once();
+
+    const config = await requestService.loadShareConfig();
+    expect(config).to.equal(fetchedConfig);
     xhrMock.verify();
   });
 });
