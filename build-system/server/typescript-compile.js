@@ -37,17 +37,14 @@ async function buildNewServer() {
   );
   const entryPoints = globby.sync(`${SERVER_TRANSFORM_PATH}/**/*.ts`);
   const startTime = Date.now();
-  return esbuild
-    .build({
-      entryPoints,
-      outdir: path.join(SERVER_TRANSFORM_PATH, 'dist'),
-      bundle: false,
-      tsconfig: CONFIG_PATH,
-      format: 'cjs',
-    })
-    .then(() => {
-      endBuildStep('Built', 'AMP Server', startTime);
-    });
+  await esbuild.build({
+    entryPoints,
+    outdir: path.join(SERVER_TRANSFORM_PATH, 'dist'),
+    bundle: false,
+    tsconfig: CONFIG_PATH,
+    format: 'cjs',
+  });
+  endBuildStep('Built', 'AMP Server', startTime);
 }
 
 function typecheckNewServer() {
