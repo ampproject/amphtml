@@ -69,7 +69,9 @@ class BabelTransformCache {
   async set(hash, transformPromise) {
     const key = this.getKey_(hash);
     if (this.map.has(key)) {
-      return;
+      throw new Error(
+        `Read race occured. Attempting to transform a file twice.`
+      );
     }
 
     this.map.set(key, transformPromise);
@@ -92,8 +94,6 @@ const transformCache = new BabelTransformCache();
  */
 const readCache = new Map();
 
-let totalTimeHashing = 0;
-
 /**
  * Creates a babel plugin for esbuild for the given caller. Optionally enables
  * caching to speed up transforms.
@@ -109,34 +109,29 @@ function getEsbuildBabelPlugin(
   preSetup = () => {},
   postLoad = () => {}
 ) {
-  function sha256(contents, options) {
+  function sha256(obj) {
     if (!enableCache) {
       return '';
     }
-    const startTime = Date.now();
-
-    const hash = crypto
+    return crypto
       .createHash('sha256')
-      .update(JSON.stringify({contents, options}))
+      .update(JSON.stringify(obj))
       .digest('hex');
-    totalTimeHashing += Date.now() - startTime;
-    // console.log(`Total time hashing: ${totalTimeHashing}`);
-    return hash;
   }
 
   /**
    * @param {string} path
-   * @param {Object} babelOptions
+   * @param {string} optionsHash
    * @returns {{contents: string, hash: string}}
    */
-  function batchedRead(path, babelOptions) {
+  function batchedRead(path, optionsHash) {
     let read = readCache.get(path);
     if (!read) {
       read = fs.promises
-        .readFile(path)
+        .readFile(path, 'utf8')
         .then((contents) => ({
           contents,
-          hash: sha256(contents, babelOptions),
+          hash: sha256({contents, optionsHash}),
         }))
         .finally(() => {
           readCache.delete(path);
@@ -175,9 +170,11 @@ function getEsbuildBabelPlugin(
 
       const babelOptions =
         babel.loadOptions({caller: {name: callerName}}) || {};
+      const optionsHash = sha256(babelOptions);
+
       build.onLoad({filter: /\.[cm]?js$/, namespace: ''}, async (file) => {
         const filename = file.path;
-        const {contents, hash} = await batchedRead(filename, babelOptions);
+        const {contents, hash} = await batchedRead(filename, optionsHash);
         return transformContents(contents, hash, {
           ...babelOptions,
           filename,
