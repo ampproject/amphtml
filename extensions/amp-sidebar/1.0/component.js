@@ -30,6 +30,7 @@ import {
 } from '../../../src/preact';
 import {useSidebarAnimation} from './sidebar-animations-hook';
 import {useStyles} from './component.jss';
+import objstr from 'obj-str';
 
 /**
  * @param {!SidebarDef.Props} props
@@ -143,9 +144,12 @@ function SidebarWithRef(
         layout={true}
         paint={true}
         part="sidebar"
-        wrapperClassName={`${classes.sidebar} ${classes.defaultSidebarStyles} ${
-          side === Side.LEFT ? classes.left : classes.right
-        }`}
+        wrapperClassName={objstr({
+          [classes.sidebar]: true,
+          [classes.defaultSidebarStyles]: true,
+          [classes.left]: side !== Side.RIGHT,
+          [classes.right]: side === Side.RIGHT,
+        })}
         role="menu"
         tabindex="-1"
         hidden={!side}
@@ -158,9 +162,11 @@ function SidebarWithRef(
         onClick={() => close()}
         part="backdrop"
         style={backdropStyle}
-        className={`${backdropClassName ?? ''} ${classes.backdrop} ${
-          classes.defaultBackdropStyles
-        }`}
+        className={objstr({
+          [backdropClassName]: backdropClassName,
+          [classes.backdrop]: true,
+          [classes.defaultBackdropStyles]: true,
+        })}
         hidden={!side}
       >
         <div className={classes.backdropOverscrollBlocker}></div>
