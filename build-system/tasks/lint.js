@@ -106,7 +106,7 @@ function summarizeResults(results, fixedFiles) {
         yellow('NOTE 1:'),
         'You may be able to automatically fix some of these warnings ' +
           '/ errors by running',
-        cyan('gulp lint --local_changes --fix'),
+        cyan('amp lint --local_changes --fix'),
         'from your local branch.'
       );
       log(

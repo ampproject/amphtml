@@ -110,7 +110,7 @@ const SNAPSHOT_ERROR_SNIPPET = fs.readFileSync(
 let browser_;
 
 /**
- * Override PERCY_* environment variables if passed via gulp task parameters.
+ * Override PERCY_* environment variables if passed via amp task parameters.
  */
 function maybeOverridePercyEnvironmentVariables() {
   ['percy_token', 'percy_branch'].forEach((variable) => {
@@ -788,7 +788,7 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
       log(
         'fatal',
         'The AMP runtime was not built in test mode. Run',
-        cyan('gulp dist --fortesting'),
+        cyan('amp dist --fortesting'),
         'or remove the',
         cyan('--nobuild'),
         'option from this command'
@@ -857,7 +857,7 @@ visualDiff.flags = {
   'config':
     'Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'chrome_debug': 'Prints debug info from Chrome',
-  'webserver_debug': 'Prints debug info from the local gulp webserver',
+  'webserver_debug': 'Prints debug info from the local amp webserver',
   'percy_agent_debug': 'Prints debug info from the @percy/agent instance',
   'debug': 'Sets all debugging flags',
   'verbose': 'Prints verbose log statements',

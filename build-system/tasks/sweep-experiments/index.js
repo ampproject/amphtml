@@ -424,7 +424,7 @@ function collectWork(
 }
 
 /**
- * Entry point to gulp sweep-experiments.
+ * Entry point to amp sweep-experiments.
  * See README.md for usage.
  */
 async function sweepExperiments() {

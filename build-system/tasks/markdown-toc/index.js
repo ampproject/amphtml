@@ -29,7 +29,7 @@ const header = `<!--
   (Do not remove or edit this comment.)
 
   This table-of-contents is automatically generated. To generate it, run:
-    gulp markdown-toc --fix
+    amp markdown-toc --fix
 -->`;
 
 // Case-insensitive, allows multiple newlines and arbitrary indentation.

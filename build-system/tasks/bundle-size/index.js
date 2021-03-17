@@ -219,7 +219,7 @@ async function reportBundleSize() {
 async function getLocalBundleSize() {
   if (globby.sync(fileGlobs).length === 0) {
     log('Could not find runtime files.');
-    log('Run', cyan('gulp dist --noextensions'), 'and re-run this task.');
+    log('Run', cyan('amp dist --noextensions'), 'and re-run this task.');
     process.exitCode = 1;
     return;
   } else {
@@ -246,7 +246,7 @@ async function bundleSize() {
   } else if (argv.on_local_build) {
     return getLocalBundleSize();
   } else {
-    log(red('Called'), cyan('gulp bundle-size'), red('with no task.'));
+    log(red('Called'), cyan('amp bundle-size'), red('with no task.'));
     process.exitCode = 1;
   }
 }

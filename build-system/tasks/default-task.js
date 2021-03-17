@@ -26,10 +26,10 @@ const {runPreBuildSteps} = require('./build');
 const {runPreDistSteps} = require('./dist');
 
 /**
- * Prints a useful help message prior to the default gulp task
+ * Prints a useful help message prior to the default amp task
  */
 function printDefaultTaskHelp() {
-  log(green('Running the default ') + cyan('gulp ') + green('task.'));
+  log(green('Running the default ') + cyan('amp ') + green('task.'));
   log(
     green(
       '⤷ JS and extensions will be lazily built when requested from the server.'
@@ -38,15 +38,15 @@ function printDefaultTaskHelp() {
 }
 
 /**
- * The default task run when `gulp` is executed
+ * The default task run when `amp` is executed
  *
  * @return {!Promise}
  */
 async function defaultTask() {
   maybeUpdatePackages();
-  createCtrlcHandler('gulp');
+  createCtrlcHandler('amp');
   process.env.NODE_ENV = 'development';
-  printConfigHelp('gulp');
+  printConfigHelp('amp');
   printDefaultTaskHelp();
   parseExtensionFlags(/* preBuild */ true);
   if (argv.compiled) {

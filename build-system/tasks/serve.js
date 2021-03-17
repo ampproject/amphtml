@@ -188,7 +188,7 @@ async function performPreBuildSteps() {
 }
 
 /**
- * Entry point of the `gulp serve` task.
+ * Entry point of the `amp serve` task.
  */
 async function serve() {
   await doServe();

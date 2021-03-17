@@ -169,7 +169,7 @@ async function runTests_() {
 
   await reportTestStarted();
 
-  // return promise to gulp that resolves when there's an error.
+  // return promise to amp that resolves when there's an error.
   return new Promise((resolve) => {
     mocha.run(async (failures) => {
       if (argv.coverage) {
@@ -198,7 +198,7 @@ async function runWatch_() {
     mocha.run();
   });
 
-  // return non-resolving promise to gulp.
+  // return non-resolving promise to amp.
   return new Promise(() => {});
 }
 
@@ -224,7 +224,7 @@ e2e.flags = {
   'config':
     'Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'core_runtime_only': 'Builds only the core runtime.',
-  'nobuild': 'Skips building the runtime via `gulp (build|dist) --fortesting`',
+  'nobuild': 'Skips building the runtime via `amp (build|dist) --fortesting`',
   'define_experiment_constant':
     'Transforms tests with the EXPERIMENT constant set to true',
   'experiment': 'Experiment being tested (used for status reporting)',
