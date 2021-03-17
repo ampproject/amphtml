@@ -460,7 +460,10 @@ export class Performance {
    */
   onAmpDocVisibilityChange_() {
     const state = this.ampdoc_.getVisibilityState();
-    if (state === VisibilityState.INACTIVE || VisibilityState.HIDDEN) {
+    if (
+      state === VisibilityState.INACTIVE ||
+      state === VisibilityState.HIDDEN
+    ) {
       this.tickCumulativeMetrics_();
     }
   }
