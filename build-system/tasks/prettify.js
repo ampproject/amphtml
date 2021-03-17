@@ -15,9 +15,9 @@
  */
 
 /**
- * @fileoverview This file implements the `gulp prettify` task, which uses
+ * @fileoverview This file implements the `amp prettify` task, which uses
  * prettier to check (and optionally fix) the formatting in a variety of
- * non-JS files in the repo. (JS files are separately checked by `gulp lint`,
+ * non-JS files in the repo. (JS files are separately checked by `amp lint`,
  * which uses eslint.)
  */
 'use strict';
@@ -96,7 +96,7 @@ function printFixMessages() {
   log(
     yellow('NOTE 2:'),
     'If you are using the git command-line workflow, run',
-    cyan('gulp prettify --local_changes --fix'),
+    cyan('amp prettify --local_changes --fix'),
     'from your local branch.'
   );
   log(

@@ -35,7 +35,7 @@ const argv = require('minimist')(process.argv.slice(2));
 
 /**
  * Perform the prerequisite steps before starting the unminified build.
- * Used by `gulp` and `gulp build`.
+ * Used by `amp` and `amp build`.
  *
  * @param {!Object} options
  * @return {Promise}
@@ -45,7 +45,7 @@ async function runPreBuildSteps(options) {
 }
 
 /**
- * Unminified build. Entry point for `gulp build`.
+ * Unminified build. Entry point for `amp build`.
  */
 async function build() {
   await doBuild();
@@ -66,7 +66,7 @@ async function doBuild(extraArgs = {}) {
     watch: argv.watch,
   };
   printNobuildHelp();
-  printConfigHelp('gulp build');
+  printConfigHelp('amp build');
   parseExtensionFlags();
   await runPreBuildSteps(options);
   if (argv.core_runtime_only) {

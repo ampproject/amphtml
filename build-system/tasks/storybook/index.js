@@ -42,7 +42,7 @@ const repoDir = path.join(__dirname, '../../..');
 const envConfigDir = (env) => path.join(__dirname, `${env}-env`);
 
 /**
- * @param {string} message Message for gulp task (call stack is already in logs)
+ * @param {string} message Message for amp task (call stack is already in logs)
  */
 const throwError = (message) => {
   const err = new Error(message);

@@ -736,7 +736,7 @@ function printNobuildHelp() {
         green('runs, use'),
         cyan('--nobuild'),
         green('with your'),
-        cyan(`gulp ${task}`),
+        cyan(`amp ${task}`),
         green('command.')
       );
       return;
@@ -760,7 +760,7 @@ async function maybePrintCoverageMessage(covPath = '') {
 
 /**
  * Writes AMP_CONFIG to a runtime file. Optionally enables localDev mode and
- * fortesting mode. Called by "gulp build" and "gulp dist" while building
+ * fortesting mode. Called by "amp build" and "amp dist" while building
  * various runtime files.
  *
  * @param {string} targetFile File to which the config is to be written.

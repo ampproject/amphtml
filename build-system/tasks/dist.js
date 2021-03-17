@@ -70,7 +70,7 @@ const WEB_PUSH_PUBLISHER_VERSIONS = ['0.1'];
 const hostname = argv.hostname || 'cdn.ampproject.org';
 
 /**
- * Prints a useful help message prior to the gulp dist task
+ * Prints a useful help message prior to the amp dist task
  *
  * @param {!Object} options
  */
@@ -79,7 +79,7 @@ function printDistHelp(options) {
     throw new Error('--sanitize_vars_for_diff requires --pseudo_names');
   }
 
-  let cmd = 'gulp dist';
+  let cmd = 'amp dist';
   if (options.fortesting) {
     cmd = cmd + ' --fortesting';
   }
@@ -96,7 +96,7 @@ function printDistHelp(options) {
 
 /**
  * Perform the prerequisite steps before starting the minified build.
- * Used by `gulp` and `gulp dist`.
+ * Used by `amp` and `amp dist`.
  *
  * @param {!Object} options
  */
@@ -112,7 +112,7 @@ async function runPreDistSteps(options) {
 }
 
 /**
- * Minified build. Entry point for `gulp dist`.
+ * Minified build. Entry point for `amp dist`.
  */
 async function dist() {
   await doDist();
