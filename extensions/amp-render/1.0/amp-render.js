@@ -91,6 +91,7 @@ class AmpRender extends BaseElement {
   /**
    * TODO: this implementation is identical to one in amp-data-display &
    * amp-date-countdown. Move it to a common file and import it.
+   *
    * @override
    */
   checkPropsPostMutations() {
@@ -126,6 +127,7 @@ class AmpRender extends BaseElement {
   /**
    * TODO: this implementation is identical to one in amp-data-display &
    * amp-date-countdown. Move it to a common file and import it.
+   *
    * @override
    */
   isReady(props) {
@@ -139,8 +141,10 @@ class AmpRender extends BaseElement {
   /**
    * Gets the json an amp-list that has an "amp-state:" uri. For example,
    * src="amp-state:json.path".
+   *
    * TODO: this implementation is identical to one in amp-list. Move it
    * to a common file and import it.
+   *
    * @param {!AmpElement} element
    * @return {Promise<!JsonObject>}
    */

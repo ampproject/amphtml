@@ -30,13 +30,13 @@ describes.sandboxed('Render 1.0 preact component', {}, (env) => {
   });
 
   it('should render as a div by default', () => {
-    const fetchStub = sandbox.stub();
-    fetchStub.resolves(response);
+    const getJsonStub = sandbox.stub();
+    getJsonStub.resolves(response);
 
     const render = (data) => JSON.stringify(data);
 
     const props = {
-      fetchFn: fetchStub,
+      getJson: getJsonStub,
       src: 'https://example.com',
       render,
     };

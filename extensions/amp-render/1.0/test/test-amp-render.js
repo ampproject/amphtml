@@ -17,6 +17,7 @@
 import '../amp-render';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';
+import {whenUpgradedToCustomElement} from '../../../../src/dom';
 
 describes.realWin(
   'amp-render-v1.0',
@@ -26,7 +27,23 @@ describes.realWin(
     },
   },
   (env) => {
-    let win, doc, element;
+    let win, doc, element, ampState, template;
+
+    async function waitRendered() {
+      await whenUpgradedToCustomElement(element);
+      await element.buildInternal();
+      await waitFor(() => {
+        // The rendered container inserts a <div> element.
+        const div = element.querySelector('div');
+        return div && div.textContent;
+      }, 'wrapper div rendered');
+      return element.querySelector('div');
+    }
+
+    async function getRenderedData() {
+      const wrapper = await waitRendered();
+      return JSON.parse(wrapper.textContent);
+    }
 
     beforeEach(async function () {
       win = env.win;
@@ -39,6 +56,34 @@ describes.realWin(
       doc.body.appendChild(element);
       await waitFor(() => element.isConnected, 'element connected');
       expect(element.parentNode).to.equal(doc.body);
+    });
+
+    it.skip('render amp-state json into mustache template', async () => {
+      ampState = doc.createElement('amp-state');
+      ampState.setAttribute('id', 'someData');
+      ampState.innerHTML = `
+      <script type="application/json">
+      {
+          "name": "Google",
+          "url": "https://google.com"
+      }
+      </script>`;
+      doc.body.appendChild(ampState);
+
+      template = document.createElement('template');
+      template.setAttribute('type', 'amp-mustache');
+      template.content.textContent = JSON.stringify({
+        name: '{{name}}',
+        url: '{{url}}',
+      });
+
+      element = doc.createElement('amp-render');
+      element.setAttribute('src', 'amp-state:someData');
+      element.appendChild(template);
+      doc.body.appendChild(element);
+      console.error(element.innerHTML);
+      const divEl = await waitRendered();
+      expect(divEl.textContent).to.contain('Google');
     });
   }
 );
