@@ -143,7 +143,7 @@ async function generateMap() {
  * @return {Promise<void>}
  */
 async function coverageMap() {
-  installPackages(__dirname);
+  await installPackages(__dirname);
   await buildNewServer();
 
   if (!argv.nobuild) {

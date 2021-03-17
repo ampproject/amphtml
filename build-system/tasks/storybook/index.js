@@ -116,7 +116,7 @@ async function storybook() {
   if (!build && envs.includes('amp')) {
     await runAmpDevBuildServer();
   }
-  installPackages(__dirname);
+  await installPackages(__dirname);
   if (!build) {
     createCtrlcHandler('storybook');
   }

@@ -56,7 +56,7 @@ const COV_OUTPUT_HTML = path.resolve(COV_OUTPUT_DIR, 'lcov-report/index.html');
  */
 async function setUpTesting_() {
   // install e2e-specific modules
-  installPackages(__dirname);
+  await installPackages(__dirname);
 
   require('@babel/register')({caller: {name: 'test'}});
   const {describes} = require('./helper');
