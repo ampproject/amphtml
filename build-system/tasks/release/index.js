@@ -460,7 +460,7 @@ module.exports = {
 release.description = 'Generates a release build';
 release.flags = {
   'output_dir':
-    '  Directory path to emplace release files (defaults to "./release")',
+    'Directory path to emplace release files (defaults to "./release")',
   'flavor':
-    '  Limit this release build to a single flavor. Can be used to split the release work between multiple build machines.',
+    'Limit this release build to a single flavor. Can be used to split the release work between multiple build machines.',
 };

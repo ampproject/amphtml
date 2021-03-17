@@ -94,16 +94,16 @@ module.exports = {
 
 build.description = 'Builds the AMP library';
 build.flags = {
-  config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-  fortesting: '  Builds the AMP library for local testing',
-  extensions: '  Builds only the listed extensions.',
-  extensions_from: '  Builds only the extensions from the listed AMP(s).',
-  noextensions: '  Builds with no extensions.',
-  core_runtime_only: '  Builds only the core runtime.',
-  coverage: '  Adds code coverage instrumentation to JS files using istanbul.',
-  version_override: '  Overrides the version written to AMP_CONFIG',
-  watch: '  Watches for changes in files, re-builds when detected',
-  esm: '  Do not transpile down to ES5',
+  config: 'Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+  fortesting: 'Builds the AMP library for local testing',
+  extensions: 'Builds only the listed extensions.',
+  extensions_from: 'Builds only the extensions from the listed AMP(s).',
+  noextensions: 'Builds with no extensions.',
+  core_runtime_only: 'Builds only the core runtime.',
+  coverage: 'Adds code coverage instrumentation to JS files using istanbul.',
+  version_override: 'Overrides the version written to AMP_CONFIG',
+  watch: 'Watches for changes in files, re-builds when detected',
+  esm: 'Do not transpile down to ES5',
   define_experiment_constant:
-    '  Builds runtime with the EXPERIMENT constant set to true',
+    'Builds runtime with the EXPERIMENT constant set to true',
 };

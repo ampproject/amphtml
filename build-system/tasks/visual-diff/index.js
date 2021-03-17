@@ -852,20 +852,20 @@ module.exports = {
 
 visualDiff.description = 'Runs the AMP visual diff tests.';
 visualDiff.flags = {
-  'master': '  Includes a blank snapshot (baseline for skipped builds)',
-  'empty': '  Creates a dummy Percy build with only a blank snapshot',
+  'master': 'Includes a blank snapshot (baseline for skipped builds)',
+  'empty': 'Creates a dummy Percy build with only a blank snapshot',
   'config':
-    '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
-  'chrome_debug': '  Prints debug info from Chrome',
-  'webserver_debug': '  Prints debug info from the local gulp webserver',
-  'percy_agent_debug': '  Prints debug info from the @percy/agent instance',
-  'debug': '  Sets all debugging flags',
-  'verbose': '  Prints verbose log statements',
-  'grep': '  Runs tests that match the pattern',
-  'percy_token': '  Override the PERCY_TOKEN environment variable',
-  'percy_branch': '  Override the PERCY_BRANCH environment variable',
+    'Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
+  'chrome_debug': 'Prints debug info from Chrome',
+  'webserver_debug': 'Prints debug info from the local gulp webserver',
+  'percy_agent_debug': 'Prints debug info from the @percy/agent instance',
+  'debug': 'Sets all debugging flags',
+  'verbose': 'Prints verbose log statements',
+  'grep': 'Runs tests that match the pattern',
+  'percy_token': 'Override the PERCY_TOKEN environment variable',
+  'percy_branch': 'Override the PERCY_BRANCH environment variable',
   'percy_disabled':
-    '  Disables Percy integration (for testing local changes only)',
-  'nobuild': '  Skip build',
-  'noinstall': '  Skip installing npm dependencies',
+    'Disables Percy integration (for testing local changes only)',
+  'nobuild': 'Skip build',
+  'noinstall': 'Skip installing npm dependencies',
 };

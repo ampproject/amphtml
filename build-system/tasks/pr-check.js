@@ -147,5 +147,5 @@ module.exports = {
 
 prCheck.description = 'Runs a subset of the CI checks against local changes.';
 prCheck.flags = {
-  'nobuild': '  Skips building the runtime via `gulp dist`.',
+  'nobuild': 'Skips building the runtime via `gulp dist`.',
 };
