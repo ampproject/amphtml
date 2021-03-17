@@ -16,14 +16,65 @@
 
 const babel = require('@babel/core');
 const crypto = require('crypto');
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
+
+/**
+ * Directory where the babel filecache lives.
+ */
+const CACHE_DIR = path.resolve(__dirname, '..', '..', '.babel-cache');
+
+/**
+ * Cache for storing transformed files on both memory and on disk.
+ */
+class BabelTransformCache {
+  /** @type {Map<string, Promise<{contents: string}>>} */
+  map = new Map();
+
+  getKey_(hash) {
+    return `${hash}.json`;
+  }
+
+  /**
+   * @param {string} hash
+   * @return {Promise<{contents: string}|void>}
+   */
+  async get(hash) {
+    const key = this.getKey_(hash);
+    const cached = this.map.get(key);
+    if (cached) {
+      return cached;
+    }
+    const isInFileCache = await fs.exists(path.join(CACHE_DIR, key));
+    if (isInFileCache) {
+      const transformedPromise = fs.readJson(path.join(CACHE_DIR, key));
+      this.map.set(key, transformedPromise);
+      return transformedPromise;
+    }
+  }
+
+  /**
+   * @param {string} hash
+   * @param {Promise<{contents: string}>} transformPromise
+   * @return {Promise}
+   */
+  async set(hash, transformPromise) {
+    const key = this.getKey_(hash);
+    if (this.map.has(key)) {
+      return;
+    }
+
+    this.map.set(key, transformPromise);
+    const transformed = await transformPromise;
+    await fs.outputFile(path.join(CACHE_DIR, key), JSON.stringify(transformed));
+  }
+}
 
 /**
  * Used to cache babel transforms done by esbuild.
  * @private @const {!Map<string, {hash: string, promise: Promise<{contents: string}>}>}
  */
-const transformCache = new Map();
+const transformCache = new BabelTransformCache();
 
 /**
  * Used to cache file reads done by esbuild, since it can issue multiple
@@ -77,11 +128,11 @@ function getEsbuildBabelPlugin(
     return read;
   }
 
-  function transformContents(filepath, contents, hash) {
+  async function transformContents(filepath, contents, hash) {
     if (enableCache) {
-      const cached = transformCache.get(filepath);
-      if (cached && cached.hash === hash) {
-        return cached.promise;
+      const cached = await transformCache.get(hash);
+      if (cached) {
+        return cached;
       }
     }
 
@@ -98,7 +149,7 @@ function getEsbuildBabelPlugin(
       });
 
     if (enableCache) {
-      transformCache.set(filepath, {hash, promise});
+      transformCache.set(hash, promise);
     }
 
     return promise.finally(postLoad);
