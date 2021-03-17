@@ -18,7 +18,7 @@ import * as Preact from '../../../src/preact';
 import {ContainWrapper, useValueRef} from '../../../src/preact/component';
 import {Keys} from '../../../src/utils/key-codes';
 import {Side} from './sidebar-config';
-import {forwardRef, createPortal} from '../../../src/preact/compat';
+import {createPortal, forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
 import {
   useCallback,
@@ -30,7 +30,6 @@ import {
 } from '../../../src/preact';
 import {useSidebarAnimation} from './sidebar-animations-hook';
 import {useStyles} from './component.jss';
-import {debounce} from '../../../src/utils/rate-limit';
 
 /**
  * @param {!SidebarDef.Props} props
@@ -185,61 +184,39 @@ export function SidebarToolbar({
   ...rest
 }) {
   const ref = useRef();
-  const [targetEl, setTargetEl] = useState();
-  const [, setReRender] = useState(true);
+  const [matches, setMatches] = useState(false);
+  const [targetEl, setTargetEl] = useState(null);
 
-  // Trigger re-render each time the window is resized
   useEffect(() => {
-    const navElement = ref.current;
-    if (!navElement) {
-      return;
-    }
-    const document = navElement.ownerDocument;
-    if (!document) {
-      return;
-    }
-    const window = document.defaultView;
+    const window = ref.current?.ownerDocument?.defaultView;
     if (!window) {
       return;
     }
 
-    const reRenderFunction = debounce(
-      window,
-      () => setReRender((prev) => !prev),
-      100
-    );
-    window.addEventListener('resize', reRenderFunction);
-    return () => {
-      window.removeEventListener('resize', reRenderFunction);
-    };
-  }, []);
+    const mediaQueryList = window.matchMedia(toolbar);
+    const updateMatches = () => setMatches(mediaQueryList.matches);
+    mediaQueryList.addEventListener('change', updateMatches);
+    setMatches(mediaQueryList.matches);
+    return () => mediaQueryList.removeEventListener('change', updateMatches);
+  }, [toolbar]);
 
   useEffect(() => {
-    const navElement = ref.current;
-    if (!navElement) {
-      return;
-    }
-    const document = navElement.ownerDocument;
+    const document = ref.current?.ownerDocument;
     if (!document) {
       return;
     }
-    const window = document.defaultView;
-    if (!window) {
-      return;
-    }
 
-    const matches = window.matchMedia(toolbar).matches;
     const selector = `#${CSS.escape(toolbarTarget)}`;
     const newTargetEl = document.querySelector(selector);
-    setTargetEl(matches && newTargetEl);
-  });
+    setTargetEl(newTargetEl);
+  }, [toolbarTarget]);
 
   return (
     <>
       <nav ref={ref} toolbar={toolbar} toolbar-target={toolbarTarget} {...rest}>
         {children}
       </nav>
-      {targetEl && createPortal(children, targetEl)}
+      {matches && targetEl && createPortal(children, targetEl)}
     </>
   );
 }
