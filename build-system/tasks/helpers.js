@@ -556,21 +556,27 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
     /* enableCache */ true
   );
 
+  let result = null;
+
   /**
    * @param {number} time
    */
   async function build(time) {
-    await esbuild.build({
-      entryPoints: [entryPoint],
-      bundle: true,
-      sourcemap: true,
-      outfile: destFile,
-      plugins: [plugin],
-      minify: options.minify,
-      target: argv.esm ? 'es6' : 'es5',
-      incremental: !!options.watch,
-      logLevel: 'silent',
-    });
+    if (!result) {
+      result = await esbuild.build({
+        entryPoints: [entryPoint],
+        bundle: true,
+        sourcemap: true,
+        outfile: destFile,
+        plugins: [plugin],
+        minify: options.minify,
+        target: argv.esm ? 'es6' : 'es5',
+        incremental: !!options.watch,
+        logLevel: 'silent',
+      });
+    } else {
+      result = await result.rebuild();
+    }
     await minifyWithTerser(destDir, destFilename, options);
     await finishBundle(srcFilename, destDir, destFilename, options, time);
   }
@@ -605,7 +611,7 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
  */
 async function minifyWithTerser(destDir, destFilename, options) {
   if (!options.minify) {
-    return Promise.resolve();
+    return;
   }
 
   const filename = destDir + destFilename;
@@ -620,17 +626,17 @@ async function minifyWithTerser(destDir, destFilename, options) {
     },
     sourceMap: true,
   };
-  return terser
-    .minify(fs.readFileSync(filename, 'utf8'), terserOptions)
-    .then((minified) => {
-      const remapped = remapping(
-        [minified.map, fs.readFileSync(`${filename}.map`, 'utf8')],
-        () => null,
-        !argv.full_sourcemaps
-      );
-      fs.writeFileSync(filename, minified.code);
-      fs.writeFileSync(`${filename}.map`, remapped.toString());
-    });
+  const minified = await terser.minify(
+    fs.readFileSync(filename, 'utf8'),
+    terserOptions
+  );
+  const remapped = remapping(
+    [minified.map, fs.readFileSync(`${filename}.map`, 'utf8')],
+    () => null,
+    !argv.full_sourcemaps
+  );
+  fs.writeFileSync(filename, minified.code);
+  fs.writeFileSync(`${filename}.map`, remapped.toString());
 }
 
 /**
