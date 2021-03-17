@@ -30,9 +30,6 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'e2e-tests.js';
 
-/**
- * @return {void}
- */
 function pushBuildWorkflow() {
   downloadNomoduleOutput();
   try {
@@ -49,9 +46,6 @@ function pushBuildWorkflow() {
   }
 }
 
-/**
- * @return {void}
- */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.E2E_TEST)) {
     downloadNomoduleOutput();

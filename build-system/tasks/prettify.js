@@ -58,7 +58,7 @@ async function prettify() {
 /**
  * Resolves the prettier config for the given file
  * @param {string} file
- * @return {Object}
+ * @return {Promise<Object>}
  */
 async function getOptions(file) {
   const config = await prettier.resolveConfig(file);

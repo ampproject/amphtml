@@ -41,13 +41,13 @@ const REPORTING_API_URL = 'https://amp-test-cases.appspot.com/report';
 /**
  * Parses a test report file and adds build & job info to it.
  * @param {('unit' | 'integration' | 'e2e')} testType The type of the tests whose result we want to report.
- * @return {Object.<string,Object>|null} Object containing the build, job, and test results.
+ * @return {Promise<Object.<string,Object>|null>} Object containing the build, job, and test results.
  */
 async function getReport(testType) {
   try {
-    const report = await fs
-      .readFile(`result-reports/${testType}.json`)
-      .then(JSON.parse);
+    const report = JSON.parse(
+      await fs.readFile(`result-reports/${testType}.json`, 'utf-8')
+    );
 
     return addJobAndBuildInfo(testType, report);
   } catch (e) {

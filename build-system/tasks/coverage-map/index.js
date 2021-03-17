@@ -73,7 +73,7 @@ async function collectCoverage() {
  */
 async function autoScroll(page) {
   await page.evaluate(async () => {
-    await new Promise((resolve, opt_) => {
+    await /** @type {Promise<void>} */ (new Promise((resolve) => {
       let totalHeight = 0;
       const scrollDistance = 100;
       const distance = scrollDistance;
@@ -87,7 +87,7 @@ async function autoScroll(page) {
           resolve();
         }
       }, 100);
-    });
+    }));
   });
 }
 

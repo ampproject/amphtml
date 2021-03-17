@@ -41,7 +41,7 @@ function dashToPascalCase(name) {
 
 /**
  * Create a mutator function from a map of keys/values to replace.
- * @param {Map<string, string>} replaceMap
+ * @param {Object<string, string>} replaceMap
  * @return {function(string): string}
  */
 function makeReplacementFn(replaceMap) {
@@ -70,11 +70,11 @@ async function* walkDir(dir) {
 }
 
 /**
- * @return {!{
+ * @return {Promise<{
  *   name: string,
  *   version,
  *   options: {hasCss: true},
- * }}
+ * }|void>}
  */
 async function makeBentoExtension() {
   const componentName = (argv.name || '').replace(/^amp-/, '');
@@ -85,7 +85,7 @@ async function makeBentoExtension() {
   }
 
   const doReplacements = makeReplacementFn({
-    '__current_year__': new Date().getFullYear(),
+    '__current_year__': `${new Date().getFullYear()}`,
     '__component_version__': version,
     '__component_version_snakecase__': version.replace(/\./g, '_'),
     '__component_name_hyphenated__': componentName,

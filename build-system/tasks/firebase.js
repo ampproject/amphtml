@@ -24,7 +24,7 @@ const {log} = require('../common/logging');
 
 /**
  * @param {string} dest
- * @return {string[]}
+ * @return {Promise<string[]>}
  */
 async function walk(dest) {
   const filelist = [];

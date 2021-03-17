@@ -61,7 +61,7 @@ function getFrontmatter(content) {
 }
 
 /**
- * @param {string} maybeComment
+ * @param {?string} maybeComment
  * @return {?Object}
  */
 function isolateCommentJson(maybeComment) {
@@ -84,12 +84,12 @@ function isolateCommentJson(maybeComment) {
 
 /**
  * @param {string} content
- * @return {string}
+ * @return {Promise<string|null>}
  */
 async function overrideToc(content) {
   const headerMatch = content.match(headerRegexp);
 
-  if (!headerMatch) {
+  if (!headerMatch || !headerMatch.length || headerMatch.index === undefined) {
     return null;
   }
 
@@ -133,7 +133,7 @@ async function overrideToc(content) {
 
 /**
  * @param {string} cwd
- * @return {Object<string, ?string>}
+ * @return {Promise<Object<string, ?string>>}
  */
 async function overrideTocGlob(cwd) {
   const glob = [
@@ -147,6 +147,7 @@ async function overrideTocGlob(cwd) {
     .trim()
     .split('\n');
 
+  /** @type {Object<string, ?string>} */
   const result = {};
 
   for (const filename of filesIncludingString) {

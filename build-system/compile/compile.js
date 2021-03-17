@@ -58,11 +58,11 @@ let OptionsDef;
  * production use. During development we intend to continue using
  * babel, as it has much faster incremental compilation.
  *
- * @param {string} entryModuleFilename
+ * @param {string|string[]} entryModuleFilename
  * @param {string} outputDir
  * @param {string} outputFilename
  * @param {!OptionsDef} options
- * @param {{startTime?: number}} timeInfo
+ * @param {{startTime?: number}=} timeInfo
  * @return {Promise<void>}
  */
 async function closureCompile(
@@ -70,14 +70,11 @@ async function closureCompile(
   outputDir,
   outputFilename,
   options,
-  timeInfo
+  timeInfo = {}
 ) {
   // Rate limit closure compilation to MAX_PARALLEL_CLOSURE_INVOCATIONS
   // concurrent processes.
   return new Promise(function (resolve, reject) {
-    /**
-     * @return {void}
-     */
     function start() {
       inProgress++;
       compile(
@@ -95,9 +92,7 @@ async function closureCompile(
         (reason) => reject(reason)
       );
     }
-    /**
-     * @return {void}
-     */
+
     function next() {
       if (!queue.length) {
         return;
@@ -111,9 +106,6 @@ async function closureCompile(
   });
 }
 
-/**
- * @return {void}
- */
 function cleanupBuildDir() {
   del.sync('build/fake-module');
   del.sync('build/patched-module');
@@ -455,9 +447,6 @@ async function compile(
   }
 }
 
-/**
- * @return {void}
- */
 function printClosureConcurrency() {
   log(
     green('Using up to'),
