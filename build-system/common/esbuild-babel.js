@@ -66,7 +66,7 @@ class BabelTransformCache {
 
     this.map.set(key, transformPromise);
     const transformed = await transformPromise;
-    await fs.outputFile(path.join(CACHE_DIR, key), JSON.stringify(transformed));
+    await fs.outputJson(path.join(CACHE_DIR, key), transformed);
   }
 }
 
