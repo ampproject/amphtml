@@ -32,7 +32,6 @@ import {assertDoesNotContainDisplay, setStyles} from '../../../../src/style';
 import {pureDevAssert as devAssert} from '../../../../src/core/assert';
 import {getTotalDuration} from './utils';
 
-
 export class NativeWebAnimationRunner extends AnimationRunner {
   /**
    * @param {!Array<!../web-animation-types.InternalWebAnimationRequestDef>} requests

@@ -25,7 +25,6 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'unit-tests.js';
 
-
 function pushBuildWorkflow() {
   try {
     timedExecOrThrow(
@@ -44,7 +43,6 @@ function pushBuildWorkflow() {
     timedExecOrDie('gulp test-report-upload');
   }
 }
-
 
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {

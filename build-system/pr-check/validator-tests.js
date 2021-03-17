@@ -25,12 +25,10 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'validator-tests.js';
 
-
 function pushBuildWorkflow() {
   timedExecOrDie('gulp validator');
   timedExecOrDie('gulp validator-webui');
 }
-
 
 function prBuildWorkflow() {
   if (

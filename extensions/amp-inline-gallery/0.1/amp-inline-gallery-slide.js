@@ -66,7 +66,6 @@ export class AmpInlineGallerySlide extends AMP.BaseElement {
     super(element);
   }
 
-
   openLightbox() {
     Services.extensionsFor(this.win)
       .installExtensionForDoc(this.getAmpDoc(), 'amp-lightbox-gallery')

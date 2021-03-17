@@ -27,7 +27,6 @@ import {getTotalDuration} from './utils';
 const moduleName = 'amp-animation-worklet';
 let workletModulePromise;
 
-
 export class ScrollTimelineWorkletRunner extends AnimationRunner {
   /**
    * @param {!Window} win

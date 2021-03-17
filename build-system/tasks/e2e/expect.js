@@ -22,7 +22,6 @@ let installed;
 let lastExpectError;
 let networkLogger;
 
-
 function clearLastExpectError() {
   lastExpectError = null;
 }

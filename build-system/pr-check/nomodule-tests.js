@@ -32,7 +32,6 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'nomodule-tests.js';
 
-
 function prependConfig() {
   const targets = MINIFIED_TARGETS.flatMap((target) => [
     `dist/${target}.js`,
@@ -41,7 +40,6 @@ function prependConfig() {
     `gulp prepend-global --${argv.config} --local_dev --fortesting --derandomize --target=${targets}`
   );
 }
-
 
 function pushBuildWorkflow() {
   downloadNomoduleOutput();
@@ -59,7 +57,6 @@ function pushBuildWorkflow() {
     timedExecOrDie('gulp test-report-upload');
   }
 }
-
 
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
