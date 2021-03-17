@@ -423,7 +423,8 @@ const user = () => userLogger;
  * limitations under the License.
  */
 
-
+/**
+ */
 class PageConfig {
   /**
    * @param {string} productOrPublicationId
@@ -728,7 +729,8 @@ const ALLOWED_TYPES = [
 // RegExp for quickly scanning LD+JSON for allowed types
 const RE_ALLOWED_TYPES = new RegExp(ALLOWED_TYPES.join('|'));
 
-
+/**
+ */
 class PageConfigResolver {
   /**
    * @param {!Window|!Document|!Doc} winOrDoc

@@ -40,6 +40,8 @@ export class LoadMoreService {
     this.loadMoreEndElement_ = null;
   }
 
+  /**
+   */
   initializeLoadMore() {
     this.initializeLoadMoreButton_();
     this.initializeLoadMoreLoadingElement_();

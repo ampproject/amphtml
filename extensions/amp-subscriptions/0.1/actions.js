@@ -23,6 +23,8 @@ import {openLoginDialog} from '../../amp-access/0.1/login-dialog';
 const TAG = 'amp-subscriptions';
 const LOCAL = 'local';
 
+/**
+ */
 export class Actions {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc

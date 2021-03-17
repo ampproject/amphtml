@@ -59,7 +59,8 @@ class WorkletAnimation {
 }
 
 
-
+/**
+ */
 class ScrollTimeline {
   constructor() {
   }
@@ -78,7 +79,8 @@ class CSSSupportsRule {
   }
 }
 
-
+/**
+ */
 CSS.animationWorklet = {
   /** @param {string} module */
   addModule: function(module) {}

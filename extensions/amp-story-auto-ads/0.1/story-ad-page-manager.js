@@ -240,6 +240,9 @@ export class StoryAdPageManager {
     return InsertionState.SUCCESS;
   }
 
+  /**
+   *
+   */
   currentAdInserted_() {
     this.analyticsEvent_(AnalyticsEvents.AD_INSERTED, {
       [AnalyticsVars.AD_INDEX]: this.adsConsumed_,

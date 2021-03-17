@@ -31,6 +31,8 @@ import {urls} from '../config';
 
 const SERVICE = 'url';
 
+/**
+ */
 export class Url {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc

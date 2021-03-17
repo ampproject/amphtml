@@ -34,6 +34,8 @@ const PROP_PROMISE_ = '__AMP_WAIT_';
 /** @private @const {function()} */
 const EMPTY_FUNC = () => {};
 
+/**
+ */
 export class Templates {
   /** @param {!AmpDoc} ampdoc */
   constructor(ampdoc) {

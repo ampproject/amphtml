@@ -99,6 +99,9 @@ export class Pass {
     return false;
   }
 
+  /**
+   *
+   */
   pass_() {
     this.scheduled_ = -1;
     this.nextTime_ = 0;

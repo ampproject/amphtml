@@ -76,6 +76,8 @@ export class AmpAccessIframeApi {
     return this.connectedPromise_;
   }
 
+  /**
+   */
   disconnect() {
     this.messenger_.disconnect();
   }
