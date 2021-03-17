@@ -540,13 +540,8 @@ export class BaseElement {
 
   /**
    * Unload heavy elements, remove global listeners, etc.
-   *
-   * @return {boolean} Return `true` if the element should be remounted
-   * the next time it's displayed.
    */
-  unmountCallback() {
-    return false;
-  }
+  unmountCallback() {}
 
   /**
    * Subclasses can override this method to opt-in into receiving additional

@@ -70,6 +70,15 @@ const RULES = [
       return !hasCallback;
     },
   },
+  {
+    name: 'Must not have resumeCallback',
+    test: (implClass) => {
+      const hasCallback =
+        implClass.prototype.resumeCallback !==
+        BaseElement.prototype.resumeCallback;
+      return !hasCallback;
+    },
+  },
 
   {
     name: 'If load==true, must also have ensureLoaded',

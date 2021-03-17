@@ -714,12 +714,9 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       const scheduler = getSchedulerForDoc(this.getAmpDoc());
       scheduler.unschedule(this);
 
-      // Try to unmount. Not every element has been mounted, can be unmounted
-      // or has anything to unmount.
-      const reMount =
-        !this.mountPromise_ || !this.impl_ || this.impl_.unmountCallback();
-      if (!reMount) {
-        return;
+      // Try to unmount if the element has been built already.
+      if (this.isBuilt()) {
+        this.impl_.unmountCallback();
       }
 
       // Complete unmount and reset the state.
