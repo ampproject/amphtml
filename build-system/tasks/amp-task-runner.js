@@ -16,13 +16,11 @@
 
 /**
  * @fileoverview This is a lightweight task runner with a one-file implentation
- * based on the commander npm package. It behaves like gulp without the overhead
- * of a large set of dependencies.
+ * based on the commander npm package.
  */
 
 const argv = require('minimist')(process.argv.slice(2));
 const commander = require('commander');
-const os = require('os');
 const path = require('path');
 const {cyan, red, green, magenta} = require('kleur/colors');
 const {log} = require('../common/logging');
@@ -43,7 +41,7 @@ function getTime(start) {
   const mins = Math.floor(executionTime / 60000);
   const secs = Math.floor((executionTime % 60000) / 1000);
   const msecs = executionTime % 1000;
-  return mins != 0
+  return mins !== 0
     ? `${mins}m ${secs}s`
     : secs != 0
     ? `${secs}s`
@@ -51,14 +49,14 @@ function getTime(start) {
 }
 
 /**
- * Runs an AMP task with logging and timing.
+ * Runs an AMP task with logging and timing. Always start at the repo root.
  * @param {string} taskName
  * @param {Function()} taskFunc
  * @return {Promise<void>}
  */
 async function runTask(taskName, taskFunc) {
-  const taskFile = '~' + path.sep + path.relative(os.homedir(), 'amp.js');
-  log('Using task file', magenta(taskFile));
+  process.chdir(path.resolve(__dirname, '../../'));
+  log('Using task file', magenta('amphtml/amp.js'));
   const start = Date.now();
   try {
     log(`Starting '${cyan(taskName)}'...`);
@@ -83,7 +81,7 @@ function createTask(taskName, taskFuncName, taskSourceFileName) {
   const taskSourceFilePath = `./${taskSourceFileName}`;
   const isInvokedTask = argv._.includes(taskName); // `amp <task>`
   const isDefaultTask =
-    argv._.length == 0 && taskName == 'default' && !isHelpTask; // `amp`
+    argv._.length === 0 && taskName == 'default' && !isHelpTask; // `amp`
 
   if (isHelpTask) {
     const taskFunc = require(taskSourceFilePath)[taskFuncName];
