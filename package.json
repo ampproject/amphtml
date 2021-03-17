@@ -10,8 +10,13 @@
     "type": "git",
     "url": "https://github.com/ampproject/amphtml.git"
   },
+  "bin": {
+    "amp": "./amp.js",
+    "gulp": "./gulp-deprecated.js"
+  },
   "scripts": {
-    "preinstall": "node build-system/common/check-package-manager.js"
+    "preinstall": "node build-system/common/check-package-manager.js",
+    "postinstall": "npm un -g gulp-cli --ignore-scripts && npm i -g --ignore-scripts"
   },
   "dependencies": {
     "@ampproject/animations": "0.2.2",
@@ -110,7 +115,6 @@
     "fs-extra": "9.1.0",
     "fuse.js": "6.4.6",
     "globby": "11.0.2",
-    "gulp": "4.0.2",
     "gulp-connect": "5.7.0",
     "html-minifier": "4.0.0",
     "istanbul-middleware": "0.2.2",

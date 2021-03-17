@@ -262,6 +262,12 @@ module.exports = {
   },
   'overrides': [
     {
+      'files': ['amp.js', 'gulp-deprecated.js'],
+      'globals': {
+        'require': false,
+      },
+    },
+    {
       'files': [
         'test/**/*.js',
         'extensions/**/test/**/*.js',
