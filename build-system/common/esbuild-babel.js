@@ -64,9 +64,8 @@ class BabelTransformCache {
   /**
    * @param {string} hash
    * @param {Promise<{contents: string}>} transformPromise
-   * @return {Promise}
    */
-  async set(hash, transformPromise) {
+  set(hash, transformPromise) {
     const key = this.getKey_(hash);
     if (this.map.has(key)) {
       throw new Error(
@@ -75,8 +74,9 @@ class BabelTransformCache {
     }
 
     this.map.set(key, transformPromise);
-    const transformed = await transformPromise;
-    await fs.outputJson(path.join(CACHE_DIR, key), transformed);
+    transformPromise.then((contents) => {
+      fs.outputJson(path.join(CACHE_DIR, key), contents);
+    });
   }
 }
 
@@ -128,7 +128,7 @@ function getEsbuildBabelPlugin(
     let read = readCache.get(path);
     if (!read) {
       read = fs.promises
-        .readFile(path, 'utf8')
+        .readFile(path)
         .then((contents) => ({
           contents,
           hash: sha256({contents, optionsHash}),
