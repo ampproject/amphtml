@@ -99,12 +99,12 @@ function getEsbuildBabelPlugin(
   preSetup = () => {},
   postLoad = () => {}
 ) {
-  function sha256(contents) {
+  function sha256(contents, options) {
     if (!enableCache) {
       return '';
     }
     const hash = crypto.createHash('sha256');
-    hash.update(callerName);
+    hash.update(JSON.stringify(options));
     hash.update(contents);
     return hash.digest('hex');
   }
@@ -112,23 +112,16 @@ function getEsbuildBabelPlugin(
   function batchedRead(path) {
     let read = readCache.get(path);
     if (!read) {
-      read = fs.promises
-        .readFile(path)
-        .then((contents) => {
-          return {
-            contents,
-            hash: sha256(contents),
-          };
-        })
-        .finally(() => {
-          readCache.delete(path);
-        });
+      read = fs.promises.readFile(path).finally(() => {
+        readCache.delete(path);
+      });
       readCache.set(path, read);
     }
     return read;
   }
 
-  async function transformContents(filepath, contents, hash) {
+  async function transformContents(contents, babelOptions) {
+    const hash = sha256(contents, babelOptions);
     if (enableCache) {
       const cached = await transformCache.get(hash);
       if (cached) {
@@ -136,12 +129,6 @@ function getEsbuildBabelPlugin(
       }
     }
 
-    const babelOptions =
-      babel.loadOptions({
-        caller: {name: callerName},
-        filename: filepath,
-        sourceFileName: path.basename(filepath),
-      }) || undefined;
     const promise = babel
       .transformAsync(contents, babelOptions)
       .then((result) => {
@@ -161,9 +148,17 @@ function getEsbuildBabelPlugin(
       preSetup();
 
       build.onLoad({filter: /\.[cm]?js$/, namespace: ''}, async (file) => {
-        const {path} = file;
-        const {contents, hash} = await batchedRead(path);
-        return transformContents(path, contents, hash);
+        const filename = file.path;
+        const contents = await batchedRead(filename);
+        // TODO: make this more efficient.
+        // const babelOptions =
+        //   babel.loadOptions({
+        //     caller: {name: callerName},
+        //     filename,
+        //     sourceFileName: path.basename(filename),
+        //   }) || undefined;
+
+        return transformContents(contents, {});
       });
     },
   };
