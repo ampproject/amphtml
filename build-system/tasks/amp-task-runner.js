@@ -65,7 +65,7 @@ async function runTask(taskName, taskFunc) {
   } catch (err) {
     log(cyan(taskName), red('errored after'), magenta(getTime(start)));
     log(err);
-    process.exitCode = 1;
+    process.exit(1);
   }
 }
 
