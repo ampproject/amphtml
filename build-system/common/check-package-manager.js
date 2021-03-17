@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
