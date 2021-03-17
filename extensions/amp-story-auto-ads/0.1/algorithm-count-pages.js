@@ -18,6 +18,9 @@ import {InsertionState} from './story-ad-page-manager';
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 import {hasOwn, map} from '../../../src/utils/object';
 
+/** @const {number} */
+const INTERVAL = 7;
+
 /**
  * Original Story Ads placement algorithm. Tries to place ad every seven pages.
  * Will not place if ad is still loading.
@@ -31,9 +34,6 @@ export class CountPagesAlgorithm {
 
     /** @private {!StoryAdPageManager} */
     this.pageManager_ = pageManager;
-
-    /** @private {number} */
-    this.interval_ = 7;
 
     /** @private {!Object<string, boolean>} */
     this.uniquePageIds_ = map();
@@ -51,7 +51,7 @@ export class CountPagesAlgorithm {
   /** @override */
   isStoryEligible() {
     const numPages = this.storeService_.get(StateProperty.PAGE_IDS).length;
-    return numPages > this.interval_;
+    return numPages > INTERVAL;
   }
 
   /** @override */
@@ -97,7 +97,7 @@ export class CountPagesAlgorithm {
    */
   shouldCreateNextAd_(pageIndex) {
     const numPages = this.storeService_.get(StateProperty.PAGE_IDS).length;
-    return numPages - pageIndex > this.interval_;
+    return numPages - pageIndex > INTERVAL;
   }
 
   /**
@@ -107,7 +107,7 @@ export class CountPagesAlgorithm {
    * @return {boolean}
    */
   readyToPlaceAd_() {
-    return this.newPagesSinceLastAd_ >= this.interval_;
+    return this.newPagesSinceLastAd_ >= INTERVAL;
   }
 
   /**
