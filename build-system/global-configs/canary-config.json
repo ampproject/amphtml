@@ -18,5 +18,6 @@
   "sticky-ad-transition": 0.1,
   "layout-aspect-ratio-css": 1,
   "tcf-post-message-proxy-api": 1,
+  "amp-consent-granular-consent": 1,
   "disable-a4a-non-sd": 1
 }
