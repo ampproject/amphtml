@@ -82,8 +82,8 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     /** @private {?number} Distance from active page. */
     this.pageDistance_ = null;
 
-    /** @private {number} Min distance from active page to animate. */
-    this.minPageDistance_ = 2;
+    /** @private {number} Max distance from active page to animate. Either 0 or 1. */
+    this.maxDistanceToAnimate_ = 1;
 
     /** @private {?string} */
     this.groupId_ = null;
@@ -149,8 +149,9 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     );
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
-      (uiState) =>
-        (this.minPageDistance_ = uiState === UIType.DESKTOP_PANELS ? 1 : 2),
+      (uiState) => {
+        this.maxDistanceToAnimate_ = uiState === UIType.DESKTOP_PANELS ? 0 : 1;
+      },
       true /* callToInitialize */
     );
     // Mutation observer for distance attribute
@@ -227,7 +228,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    */
   onPanningMediaStateChange_(panningMediaState) {
     if (
-      this.pageDistance_ < this.minPageDistance_ &&
+      this.pageDistance_ <= this.maxDistanceToAnimate_ &&
       panningMediaState[this.groupId_] &&
       // Prevent update if value is same as previous value.
       // This happens when 2 or more components are on the same page.
