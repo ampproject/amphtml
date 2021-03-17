@@ -136,7 +136,7 @@ function SidebarWithRef(
   }, [opened, close]);
 
   return (
-    <div className={mounted ? '' : classes.unmounted}>
+    <div className={objstr({[classes.unmounted]: !mounted})}>
       <ContainWrapper
         as={Comp}
         ref={sidebarRef}
