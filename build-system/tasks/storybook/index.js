@@ -131,8 +131,8 @@ storybook.description = 'Isolated testing and development for AMP components.';
 
 storybook.flags = {
   'build':
-    '  Builds a static web application, as described in https://storybook.js.org/docs/react/workflows/publish-storybook',
+    'Builds a static web application, as described in https://storybook.js.org/docs/react/workflows/publish-storybook',
   'storybook_env':
-    "  Set environment(s) to run Storybook, either 'amp', 'preact' or a list as 'amp,preact'",
-  'storybook_port': '  Set port from which to run the Storybook dashboard.',
+    "Set environment(s) to run Storybook, either 'amp', 'preact' or a list as 'amp,preact'",
+  'storybook_port': 'Set port from which to run the Storybook dashboard.',
 };

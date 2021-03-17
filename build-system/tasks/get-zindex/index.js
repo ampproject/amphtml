@@ -257,5 +257,5 @@ getZindex.description =
   'Runs through all css files of project to gather z-index values';
 
 getZindex.flags = {
-  'fix': '  Write to file',
+  'fix': 'Write to file',
 };

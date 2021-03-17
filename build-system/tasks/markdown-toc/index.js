@@ -198,5 +198,5 @@ markdownToc.description =
   'Finds Markdown files that contain table of contents and updates them.';
 
 markdownToc.flags = {
-  'fix': '  Write to file',
+  'fix': 'Write to file',
 };
