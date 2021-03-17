@@ -34,7 +34,7 @@ async function performance() {
     resolver = resolverIn;
   });
 
-  installPackages(__dirname);
+  await installPackages(__dirname);
   const config = new loadConfig();
   const urls = Object.keys(config.urlToHandlers);
   const urlsAndAdsUrls = urls.concat(config.adsUrls || []);

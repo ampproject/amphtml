@@ -806,7 +806,7 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
  */
 async function installDependencies_() {
   if (!argv.noinstall) {
-    installPackages(__dirname);
+    await installPackages(__dirname);
   }
 
   puppeteer = require('puppeteer');

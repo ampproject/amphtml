@@ -22,9 +22,9 @@ const path = require('path');
 const {clean} = require('../tasks/clean');
 const {doBuild} = require('../tasks/build');
 const {doDist} = require('../tasks/dist');
-const {execOrDie} = require('./exec');
+const {getOutput} = require('./process');
 const {gitDiffNameOnlyMaster} = require('./git');
-const {green, cyan, yellow} = require('kleur/colors');
+const {green, cyan, red, yellow} = require('kleur/colors');
 const {log, logLocalDev} = require('./logging');
 
 const ROOT_DIR = path.resolve(__dirname, '../../');
@@ -167,18 +167,23 @@ function usesFilesOrLocalChanges(taskName) {
 }
 
 /**
- * Runs 'npm install' to install packages in a given directory.
+ * Runs 'npm ci' to install packages in a given directory. Some notes:
+ * - Since install scripts can be async, we `await` the process object.
+ * - Since script output is noisy, we capture and print the stderr if needed.
  *
  * @param {string} dir
+ * @return {Promise<void>}
  */
-function installPackages(dir) {
-  log(
-    'Running',
-    cyan('npm install'),
-    'to install packages in',
-    cyan(path.relative(ROOT_DIR, dir)) + '...'
-  );
-  execOrDie(`npm install --prefix ${dir}`, {'stdio': 'ignore'});
+async function installPackages(dir) {
+  const relativeDir = path.relative(ROOT_DIR, dir);
+  log('Running', cyan('npm ci'), 'in', cyan(relativeDir) + '...');
+  const output = await getOutput(`npm ci --prefix ${dir}`);
+  if (output.status === 0) {
+    log('Done running', cyan('npm ci'), 'in', cyan(relativeDir) + '.');
+  } else {
+    log(red('ERROR:'), output.stderr);
+    throw new Error('Installation failed');
+  }
 }
 
 module.exports = {
