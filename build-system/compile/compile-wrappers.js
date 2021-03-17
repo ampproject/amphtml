@@ -45,6 +45,7 @@ exports.extension = function (name, version, latest, isModule, loadPriority) {
   // Use a numeric value instead of boolean. "m" stands for "module"
   const m = isModule ? 1 : 0;
   return (
+    (isModule ? 'export{};' : '') +
     `(self.AMP=self.AMP||[]).push({n:"${name}",ev:"${version}",l:${latest},` +
     `${priority}` +
     `v:"${VERSION}",m:${m},f:(function(AMP,_){\n` +
