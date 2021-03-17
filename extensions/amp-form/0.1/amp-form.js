@@ -46,12 +46,13 @@ import {
   childElementByAttr,
   createElementWithAttributes,
   iterateCursor,
+  matches,
   removeElement,
   tryFocus,
 } from '../../../src/dom';
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent, listen} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
-import {deepMerge, dict} from '../../../src/utils/object';
+import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {
@@ -141,6 +142,12 @@ export class AmpForm {
 
     /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc}  */
     this.ampdoc_ = Services.ampdoc(this.form_);
+        
+    /** @const @private {!Promise<!AmpFormService>} */
+    this.ampFormServicePromise_ = getServicePromiseForDoc(
+      this.ampdoc_,
+      TAG
+    );
 
     /** @private {?Promise} */
     this.dependenciesPromise_ = null;
@@ -242,6 +249,12 @@ export class AmpForm {
     this.formSubmitService_ = null;
     Services.formSubmitForDoc(element).then((service) => {
       this.formSubmitService_ = service;
+    });
+    
+    /** @private {?AmpFormService} */
+    this.ampFormService = null;
+    Services.formSubmitForDoc(element).then((service) => {
+      this.ampFormService = service;
     });
 
     /** @private */
@@ -388,6 +401,9 @@ export class AmpForm {
    * Returns a promise that will be resolved when all dependencies used inside
    * the form tag are loaded and built (e.g. amp-selector) or 2 seconds timeout
    * - whichever is first.
+   *
+   * NOTE: amp-form allows <input>'s that are not descendants of itself, but
+   * not <amp-selector>s
    * @return {!Promise}
    * @private
    */
@@ -415,62 +431,67 @@ export class AmpForm {
       }
     });
 
-    this.form_.addEventListener(
-      'submit',
-      this.handleSubmitEvent_.bind(this),
-      true
-    );
-
-    this.form_.addEventListener(
-      'blur',
-      (e) => {
-        checkUserValidityAfterInteraction_(dev().assertElement(e.target));
-        this.validator_.onBlur(e);
-      },
-      true
-    );
-
-    this.form_.addEventListener(
-      AmpEvents.FORM_VALUE_CHANGE,
-      (e) => {
+    ampFormServicePromise_.then((ampFormService) => {
+      ampFormService.addFormEventListener(
+        this.form_,
+        'submit',
+        this.handleSubmitEvent_.bind(this),
+        true
+      );
+  
+      ampFormService.addFormEventListener(
+        this.form_,
+        'blur',
+        (e) => {
+          checkUserValidityAfterInteraction_(dev().assertElement(e.target));
+          this.validator_.onBlur(e);
+        },
+        true
+      );
+  
+      ampFormService.addFormEventListener(
+        this.form_,
+        AmpEvents.FORM_VALUE_CHANGE,
+        (e) => {
+          checkUserValidityAfterInteraction_(dev().assertElement(e.target));
+          this.validator_.onInput(e);
+        },
+        true
+      );
+  
+      //  Form verification is not supported when SSRing templates is enabled.
+      if (!this.ssrTemplateHelper_.isEnabled()) {
+        ampFormService.addFormEventListener(this.form_, 'change', (e) => {
+          this.verifier_.onCommit().then((updatedErrors) => {
+            const {updatedElements, errors} = updatedErrors;
+            updatedElements.forEach(checkUserValidityAfterInteraction_);
+            // Tell the validation to reveal any input.validationMessage added
+            // by the form verifier.
+            this.validator_.onBlur(e);
+  
+            // Only make the verify XHR if the user hasn't pressed submit.
+            if (this.state_ === FormState.VERIFYING) {
+              if (errors.length) {
+                this.setState_(FormState.VERIFY_ERROR);
+                this.renderTemplate_(dict({'verifyErrors': errors})).then(() => {
+                  this.triggerAction_(
+                    FormEvents.VERIFY_ERROR,
+                    errors,
+                    ActionTrust.DEFAULT // DEFAULT because async after gesture.
+                  );
+                });
+              } else {
+                this.setState_(FormState.INITIAL);
+              }
+            }
+          });
+        });
+      }
+  
+      ampFormService.addFormEventListener(this.form_, 'change', (e) => {
         checkUserValidityAfterInteraction_(dev().assertElement(e.target));
         this.validator_.onInput(e);
-      },
-      true
-    );
-
-    //  Form verification is not supported when SSRing templates is enabled.
-    if (!this.ssrTemplateHelper_.isEnabled()) {
-      this.form_.addEventListener('change', (e) => {
-        this.verifier_.onCommit().then((updatedErrors) => {
-          const {updatedElements, errors} = updatedErrors;
-          updatedElements.forEach(checkUserValidityAfterInteraction_);
-          // Tell the validation to reveal any input.validationMessage added
-          // by the form verifier.
-          this.validator_.onBlur(e);
-
-          // Only make the verify XHR if the user hasn't pressed submit.
-          if (this.state_ === FormState.VERIFYING) {
-            if (errors.length) {
-              this.setState_(FormState.VERIFY_ERROR);
-              this.renderTemplate_(dict({'verifyErrors': errors})).then(() => {
-                this.triggerAction_(
-                  FormEvents.VERIFY_ERROR,
-                  errors,
-                  ActionTrust.DEFAULT // DEFAULT because async after gesture.
-                );
-              });
-            } else {
-              this.setState_(FormState.INITIAL);
-            }
-          }
-        });
       });
-    }
-
-    this.form_.addEventListener('input', (e) => {
-      checkUserValidityAfterInteraction_(dev().assertElement(e.target));
-      this.validator_.onInput(e);
     });
   }
 
@@ -536,7 +557,9 @@ export class AmpForm {
     this.form_.classList.remove('user-valid');
     this.form_.classList.remove('user-invalid');
 
-    const validityElements = this.form_.querySelectorAll(
+    // Edit here
+    const validityElements = formElementsQuerySelectorAll(
+      this.form_,
       '.user-valid, .user-invalid'
     );
     iterateCursor(validityElements, (element) => {
@@ -544,7 +567,8 @@ export class AmpForm {
       element.classList.remove('user-invalid');
     });
 
-    const messageElements = this.form_.querySelectorAll(
+    const messageElements = formElementsQuerySelectorAll(
+      this.form_,
       '.visible[validation-for]'
     );
     iterateCursor(messageElements, (element) => {
@@ -608,10 +632,10 @@ export class AmpForm {
 
     // Get our special fields
     const varSubsFields = this.getVarSubsFields_();
-    const asyncInputs = this.form_.getElementsByClassName(
-      AsyncInputClasses.ASYNC_INPUT
+    const asyncInputs = formElementsQuerySelectorAll(
+      this.form_,
+      `.${AsyncInputClasses.ASYNC_INPUT}`
     );
-
     this.dirtinessHandler_.onSubmitting();
 
     // Do any assertions we may need to do
@@ -910,9 +934,10 @@ export class AmpForm {
       .then((implementation) => implementation.getValue())
       .then((value) => {
         const name = asyncInput.getAttribute(AsyncInputAttributes.NAME);
-        let input = this.form_.querySelector(
+        let input = formElementsQuerySelectorAll(
+          this.form_,
           `input[name=${escapeCssSelectorIdent(name)}]`
-        );
+        )[0];
         if (!input) {
           input = createElementWithAttributes(
             this.win_.document,
@@ -944,7 +969,8 @@ export class AmpForm {
    */
   doVerifyXhr_() {
     const noVerifyFields = toArray(
-      this.form_.querySelectorAll(
+      formElementsQuerySelectorAll(
+        this.form_,
         `[${escapeCssSelectorIdent(FORM_VERIFY_OPTOUT)}]`
       )
     );
@@ -1132,9 +1158,13 @@ export class AmpForm {
    * @private
    */
   assertNoSensitiveFields_() {
-    const fields = this.form_.querySelectorAll(
-      'input[type=password],input[type=file]'
-    );
+    const fields = this.form_.elements.filter((ele) => {
+      return (
+        (ele.tagName.toUpperCase() == 'INPUT' &&
+          ele.getAttribute('type') == 'password') ||
+        ele.getAttribute('type') == 'file'
+      );
+    });
     userAssert(
       fields.length == 0,
       'input[type=password] or input[type=file] ' +
@@ -1450,6 +1480,24 @@ export class AmpForm {
 }
 
 /**
+ * Returns all element who's form attribute is the `form`
+ * that match the selectors.
+ * These elements must be contained by the form or <input>s
+ * that are outside the form.
+ * @param {!HTMLFormElement} form
+ * @param {string} query
+ * @return {!Array<HTMLElement>}
+ */
+export function formElementsQuerySelectorAll(form, query) {
+  return Array.from(form.elements).filter((element) => {
+    return (
+      matches(element, query) &&
+      (form.contains(element) || element.tagName.toUpperCase() === 'INPUT')
+    );
+  });
+}
+
+/**
  * Checks user validity for all inputs, fieldsets and the form.
  * @param {!HTMLFormElement} form
  * @return {boolean} Whether the form is currently valid or not.
@@ -1460,10 +1508,10 @@ function checkUserValidityOnSubmission(form) {
   const elementsToBeChecked = Array.from(elements).filter((ele) => {
     const tagName = ele.tagName.toUpperCase();
     // Only allow allow-listed elements and elements must be direct descendant
-    // of form or an <input> 
-    return formElementTagNames.indexOf(tagName) > -1 && (
-      tagName === 'INPUT' ||
-      form.contains(ele)
+    // of form or an <input>
+    return (
+      formElementTagNames.indexOf(tagName) > -1 &&
+      (tagName === 'INPUT' || form.contains(ele))
     );
   });
   iterateCursor(elementsToBeChecked, (element) => checkUserValidity(element));
@@ -1506,7 +1554,8 @@ function updateInvalidTypesClasses(element) {
 function removeValidityStateClasses(form) {
   const dummyInput = document.createElement('input');
   for (const validityState in dummyInput.validity) {
-    const elements = form.querySelectorAll(
+    const elements = formElementsQuerySelectorAll(
+      form,
       `.${escapeCssSelectorIdent(validityState)}`
     );
     iterateCursor(elements, (element) => {
@@ -1589,6 +1638,7 @@ export function checkUserValidityAfterInteraction_(input) {
 
 /**
  * Bootstraps the amp-form elements
+ * @implements {../../src/service.Disposable}
  */
 export class AmpFormService {
   /**
@@ -1599,6 +1649,12 @@ export class AmpFormService {
     this.whenInitialized_ = this.installStyles_(ampdoc).then(() =>
       this.installHandlers_(ampdoc)
     );
+
+    /** @const @private {!Array<UnlistenDef>} */
+    this.unlisteners_ = [];
+
+    /** @const @private {!Object<string, WeakMap<HTMLFormElement, function(!Event)>>} */
+    this.eventHandlers_ = {};
 
     // Dispatch a test-only event for integration tests.
     if (getMode().test) {
@@ -1677,6 +1733,42 @@ export class AmpFormService {
   installDomUpdateEventListener_(doc) {
     doc.addEventListener(AmpEvents.DOM_UPDATE, () => {
       this.installSubmissionHandlers_(doc.querySelectorAll('form'));
+    });
+  }
+
+  /** @override */
+  dispose() {
+    while (this.unlisteners_.length > 0) {
+      const unlisten = this.unlisteners_.pop();
+      unlisten();
+    }
+  }
+
+  /**
+   * Adds handler for the form for a given type, when the 
+   * rootNode gets the signal.
+   * @param {!HTMLFormElement} form
+   * @param {string} type
+   * @param {function(!Event)} handler
+   * @param {boolean=} opt_options
+   */
+  addFormEventListener(form, type, handler, opt_options) {
+    if (!hasOwn(this.eventHandlers_, type)) { 
+      this.eventHandlers_[type] = new WeakMap();
+      this.unlisteners_.push(
+        listen(this.ampdoc.getRootNode(), type, (e) => {
+          const {form} = e.target;
+
+          // Only call handler if the elemen has a registered form.
+          if (this.eventHandlers_[type].has(form)) {
+            this.eventHandlers_[type].get(form)(e);
+          }
+        }, opt_options)
+      );
+    }
+    this.eventHandlers_[type].set(form, handler);
+    this.unlisteners_.push(() => {
+      this.eventHandlers_[type].delete(form);
     });
   }
 

@@ -15,6 +15,7 @@
  */
 
 import {AmpEvents} from '../../../src/amp-events';
+import {addFormEventListener} from './amp-form';
 import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {dev} from '../../../src/log';
@@ -130,12 +131,13 @@ export class FormDirtiness {
    * @private
    */
   installEventHandlers_() {
-    this.form_.addEventListener('input', this.onInput_.bind(this));
-    this.form_.addEventListener('reset', this.onReset_.bind(this));
+    addFormEventListener(this.form_, 'input', this.onInput_.bind(this));
+    addFormEventListener(this.form_, 'reset', this.onReset_.bind(this));
 
     // `amp-bind` dispatches the custom event `FORM_VALUE_CHANGE` when it
     // mutates the value of a form field (e.g. textarea, input, etc)
-    this.form_.addEventListener(
+    addFormEventListener(
+      this.form_,
       AmpEvents.FORM_VALUE_CHANGE,
       this.onInput_.bind(this)
     );

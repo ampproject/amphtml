@@ -23,6 +23,8 @@ import {
   AmpForm,
   AmpFormService,
   checkUserValidityAfterInteraction_,
+  addFormEventListener,
+  getDocumentEventHandlerForTeting
 } from '../amp-form';
 import {AmpSelector} from '../../../amp-selector/0.1/amp-selector';
 import {
@@ -46,6 +48,7 @@ import {
 } from '../form-validators';
 import {user} from '../../../../src/log';
 import {whenCalled} from '../../../../testing/test-helper.js';
+import {macroTask} from '../../../../testing/yield';
 
 describes.repeated(
   '',
@@ -93,12 +96,20 @@ describes.repeated(
 
         afterEach(() => env.sandbox.restore());
 
-        function getAmpForm(form, canonical = 'https://example.com/amps.html') {
+        function getAmpForm(form, {canonical = 'https://example.com/amps.html', outsideInput = false} = {}) {
           new AmpFormService(env.ampdoc);
           Services.documentInfoForDoc(env.ampdoc).canonicalUrl = canonical;
           const cidService = cidServiceForDocForTesting(env.ampdoc);
           env.sandbox.stub(cidService, 'get').resolves('amp-cid');
           env.ampdoc.getBody().appendChild(form);
+          if (outsideInput) {
+            form.setAttribute('id', 'registration');
+            const nameInput = createElement('input');
+            nameInput.setAttribute('name', 'outsideName');
+            nameInput.setAttribute('value', 'Doe John');
+            nameInput.setAttribute('form', 'registration');
+            env.ampdoc.getBody().appendChild(nameInput);
+          }
           const ampForm = new AmpForm(form, 'amp-form-test-id');
           env.sandbox
             .stub(ampForm.ssrTemplateHelper_, 'isEnabled')
@@ -224,6 +235,80 @@ describes.repeated(
           // Reset supported state for checkValidity and reportValidity.
           setCheckValiditySupportedForTesting(undefined);
           setReportValiditySupportedForTesting(undefined);
+        });
+
+        describe('Module level event handler dispatcher', () => {
+          it('should install handlers for multiple forms on ownerdoc', () => {
+            const form1 = getForm();
+            env.ampdoc.getBody().appendChild(form1);
+            addFormEventListener(form1, "blur", () => {});
+            addFormEventListener(form1, "submit", () => {});
+
+            const form2 = getForm();
+            env.ampdoc.getBody().appendChild(form2);
+            addFormEventListener(form2, "blur", () => {});
+            
+            expect(getDocumentEventHandlerForTeting()['blur'].has(form1)).to.be.true;
+            expect(getDocumentEventHandlerForTeting()['submit'].has(form1)).to.be.true;
+            expect(getDocumentEventHandlerForTeting()['blur'].has(form2)).to.be.true;
+          });
+
+          it.only('should call handler if element has an associated form', async () => {
+            // Create form w/ input
+            const ampForm = await getAmpForm(getForm(), {outsideInput: true});
+            const form = ampForm.form_;
+            const emailInput = createElement('input');
+            emailInput.setAttribute('name', 'email');
+            emailInput.setAttribute('required', '');
+            form.appendChild(emailInput);
+            
+            const outsideInput = createElement('input');
+            outsideInput.setAttribute('name', 'email2');
+            outsideInput.setAttribute('form', 'registration');
+            form.parentElement.appendChild(outsideInput);
+
+            const nonAttachedInput = createElement('input');
+            form.parentElement.appendChild(nonAttachedInput);
+            const handlerSpy = window.sandbox.spy();
+
+            addFormEventListener(form, "blur", handlerSpy);
+            const event = createCustomEvent(
+              env.win,
+              'blur',
+              /* detail */ null,
+              {bubbles: true}
+            );
+
+            emailInput.dispatchEvent(event);
+            await macroTask();
+            expect(handlerSpy).to.be.calledOnce;
+            expect(handlerSpy.args[0][0]['target']).to.deep.equals(emailInput);
+            expect(handlerSpy.args[0][0]['type']).to.equal('blur');
+
+            handlerSpy.resetHistory();
+            outsideInput.dispatchEvent(event);
+            await macroTask();
+            expect(handlerSpy).to.be.calledOnce;
+            expect(handlerSpy.args[0][0]['target']).to.deep.equals(outsideInput);
+            expect(handlerSpy.args[0][0]['type']).to.equal('blur');
+            
+            handlerSpy.resetHistory();
+            nonAttachedInput.dispatchEvent(event);
+            await macroTask();
+            expect(handlerSpy).to.not.be.called;
+          });
+
+          it('should respect opt_option parameter', () => {
+
+          });
+
+          it('should trigger on event for the right form', () => {
+
+          });
+
+          it('should not trigger if the form is not registered', () => {
+
+          });
         });
 
         describe('Server side template rendering', () => {

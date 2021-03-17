@@ -15,6 +15,7 @@
  */
 
 import {LastAddedResolver} from '../../../src/utils/promise';
+import {formElementsQuerySelectorAll} from './amp-form';
 import {isFieldDefault} from '../../../src/form';
 import {iterateCursor} from '../../../src/dom';
 import {user} from '../../../src/log';
@@ -229,7 +230,7 @@ export class AsyncVerifier extends FormVerifier {
       // If multiple elements share the same name, the first should be selected.
       // This matches the behavior of HTML5 validation, e.g. with radio buttons.
       const element = user().assertElement(
-        this.form_./*OK*/ querySelector(`[name="${name}"]`),
+        formElementsQuerySelectorAll(this.form_, `[name="${name}"]`),
         'Verification error name property must match a field name'
       );
 
@@ -247,7 +248,9 @@ export class AsyncVerifier extends FormVerifier {
       errors.every((error) => previousError.name !== error.name);
     const fixedElements = previousErrors
       .filter(isFixed)
-      .map((e) => this.form_./*OK*/ querySelector(`[name="${e.name}"]`));
+      .map(
+        (e) => formElementsQuerySelectorAll(this.form_, `[name="${e.name}"]`)[0]
+      );
 
     return /** @type {!UpdatedErrorsDef} */ ({
       updatedElements: errorElements.concat(fixedElements),
