@@ -669,8 +669,6 @@ export class FakeStorage {
     delete this.values[name];
   }
 
-  /**
-   */
   clear() {
     Object.keys(this.values).forEach((name) => {
       delete this.values[name];

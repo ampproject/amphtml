@@ -40,7 +40,6 @@ module.exports = function (context) {
 /**
  * @param {*} node
  * @param {*} context
- * @return {void}
  */
 function checkNode(node, context) {
   if (node.type === 'ObjectExpression') {

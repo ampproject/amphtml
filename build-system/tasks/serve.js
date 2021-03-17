@@ -129,7 +129,7 @@ async function startServer(
   log(green('Started'), cyan(options.name), green('at:'));
   log('\t', cyan(url));
   for (const device of Object.entries(os.networkInterfaces())) {
-    for (const detail of device[1]) {
+    for (const detail of device[1] ?? []) {
       if (detail.family === 'IPv4') {
         log('\t', cyan(makeUrl(detail.address)));
       }
