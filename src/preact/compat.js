@@ -27,7 +27,7 @@ export function forwardRef(fn) {
 
 /**
  * @param {PreactDef.VNode} vnode
- * @param {Element} container
+ * @param {HTMLElement} container
  * @return {PreactDef.VNode}
  */
 export function createPortal(vnode, container) {
