@@ -95,8 +95,8 @@ export class AmpDateDisplay extends AMP.BaseElement {
     /** @private {string} */
     this.locale_ = '';
 
-    /** @private {?../../../src/service/template-impl.Templates} */
-    this.templates_ = null;
+    /** @private @const {!../../../src/service/template-impl.Templates} */
+    this.templates_ = Services.templatesFor(this.win);
 
     /** @private {?Element} */
     this.container_ = null;
@@ -104,8 +104,6 @@ export class AmpDateDisplay extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.templates_ = Services.templatesForDoc(this.element);
-
     this.container_ = this.element.ownerDocument.createElement('div');
     this.element.appendChild(devAssert(this.container_));
 

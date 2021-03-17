@@ -21,7 +21,7 @@ import {Services} from '../../../../../src/services';
 import {installGlobalSubmitListenerForDoc} from '../../../../../src/document-submit';
 import {listenOncePromise} from '../../../../../src/event-helper';
 import {poll} from '../../../../../testing/iframe';
-import {registerExtendedTemplateForDoc} from '../../../../../src/service/template-impl';
+import {registerExtendedTemplate} from '../../../../../src/service/template-impl';
 import {stubElementsForDoc} from '../../../../../src/service/custom-element-registry';
 
 /** @const {number} */
@@ -63,7 +63,7 @@ describes.realWin(
         .stub(mustache, 'src')
         .value('https://cdn.ampproject.org/v0/amp-mustache-0.1.js');
       doc.body.appendChild(mustache);
-      registerExtendedTemplateForDoc(env.ampdoc, 'amp-mustache', AmpMustache);
+      registerExtendedTemplate(env.win, 'amp-mustache', AmpMustache);
 
       const form = document.createElement('script');
       form.setAttribute('custom-element', 'amp-form');
