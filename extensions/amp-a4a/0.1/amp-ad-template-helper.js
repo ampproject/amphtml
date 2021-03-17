@@ -82,7 +82,7 @@ export class AmpAdTemplateHelper {
    * @return {!Promise<!Element>} Promise which resolves after rendering completes.
    */
   render(templateValues, element) {
-    return Services.templatesForDoc(this.ampdoc_).findAndRenderTemplate(
+    return Services.templatesForDoc(element).findAndRenderTemplate(
       element,
       templateValues
     );
