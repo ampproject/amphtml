@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
+import '../../../amp-mustache/0.2/amp-mustache';
 import {AMP_TEMPLATED_CREATIVE_HEADER_NAME} from '../../../amp-a4a/0.1/template-validator';
 import {AmpAdTemplate} from '../amp-ad-custom';
-import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
 import {data} from '../../../amp-a4a/0.1/test/testdata/valid_css_at_rules_amp.reserialized';
 import {getAmpAdTemplateHelper} from '../../../amp-a4a/0.1/amp-ad-template-helper';
-import {registerExtendedTemplateForDoc} from '../../../../src/service/template-impl';
 import {tryParseJson} from '../../../../src/json';
 import {utf8Encode} from '../../../../src/utils/bytes';
 
@@ -69,7 +68,13 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
       impl.element.style.width = width;
       impl.element.style.height = height;
     };
-    registerExtendedTemplateForDoc(ampdoc, 'amp-mustache', AmpMustache);
+
+    env.installExtension(
+      'amp-mustache',
+      '0.2',
+      /* latest */ true,
+      /* auto */ false
+    );
   });
 
   afterEach(() => {
@@ -117,8 +122,8 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
         const iframe = containerElement.querySelector('iframe');
         expect(iframe).to.be.ok;
         expect(iframe.contentWindow.document.body.innerHTML.trim()).to.equal(
-          '<div>\n      <p>ipsum lorem</p>\n      <a href="https://' +
-            'www.google.com/" target="_top">Click for ad!</a>\n    ' +
+          '<div>\n      <p>ipsum lorem</p>\n      <a target="_top"' +
+            ' href="https://www.google.com/">Click for ad!</a>\n    ' +
             '</div>'
         );
       });
