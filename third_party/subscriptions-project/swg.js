@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.152 */
+/** Version: 0.1.22-1616016609935 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -170,7 +170,7 @@ class AccountCreationRequest {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.complete_, // field 1 - complete
+      this.complete_, // field 1 - complete
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -240,8 +240,8 @@ class AlreadySubscribedResponse {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.subscriberOrMember_, // field 1 - subscriber_or_member
-        this.linkRequested_, // field 2 - link_requested
+      this.subscriberOrMember_, // field 1 - subscriber_or_member
+      this.linkRequested_, // field 2 - link_requested
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -464,17 +464,17 @@ class AnalyticsContext {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.embedderOrigin_, // field 1 - embedder_origin
-        this.transactionId_, // field 2 - transaction_id
-        this.referringOrigin_, // field 3 - referring_origin
-        this.utmSource_, // field 4 - utm_source
-        this.utmCampaign_, // field 5 - utm_campaign
-        this.utmMedium_, // field 6 - utm_medium
-        this.sku_, // field 7 - sku
-        this.readyToPay_, // field 8 - ready_to_pay
-        this.label_, // field 9 - label
-        this.clientVersion_, // field 10 - client_version
-        this.url_, // field 11 - url
+      this.embedderOrigin_, // field 1 - embedder_origin
+      this.transactionId_, // field 2 - transaction_id
+      this.referringOrigin_, // field 3 - referring_origin
+      this.utmSource_, // field 4 - utm_source
+      this.utmCampaign_, // field 5 - utm_campaign
+      this.utmMedium_, // field 6 - utm_medium
+      this.sku_, // field 7 - sku
+      this.readyToPay_, // field 8 - ready_to_pay
+      this.label_, // field 9 - label
+      this.clientVersion_, // field 10 - client_version
+      this.url_, // field 11 - url
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -544,8 +544,8 @@ class AnalyticsEventMeta {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.eventOriginator_, // field 1 - event_originator
-        this.isFromUserAction_, // field 2 - is_from_user_action
+      this.eventOriginator_, // field 1 - event_originator
+      this.isFromUserAction_, // field 2 - is_from_user_action
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -658,10 +658,10 @@ class AnalyticsRequest {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.context_ ? this.context_.toArray(includeLabel) : [], // field 1 - context
-        this.event_, // field 2 - event
-        this.meta_ ? this.meta_.toArray(includeLabel) : [], // field 3 - meta
-        this.params_ ? this.params_.toArray(includeLabel) : [], // field 4 - params
+      this.context_ ? this.context_.toArray(includeLabel) : [], // field 1 - context
+      this.event_, // field 2 - event
+      this.meta_ ? this.meta_.toArray(includeLabel) : [], // field 3 - meta
+      this.params_ ? this.params_.toArray(includeLabel) : [], // field 4 - params
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -731,8 +731,8 @@ class EntitlementJwt {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.jwt_, // field 1 - jwt
-        this.source_, // field 2 - source
+      this.jwt_, // field 1 - jwt
+      this.source_, // field 2 - source
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -859,13 +859,11 @@ class EntitlementsRequest {
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.usedEntitlement_ ? this.usedEntitlement_.toArray(includeLabel) :
-                              [],  // field 1 - used_entitlement
-      this.clientEventTime_ ? this.clientEventTime_.toArray(includeLabel) :
-                              [],  // field 2 - client_event_time
-      this.entitlementSource_,     // field 3 - entitlement_source
-      this.entitlementResult_,     // field 4 - entitlement_result
-      this.nonce_,                 // field 5 - nonce
+      this.usedEntitlement_ ? this.usedEntitlement_.toArray(includeLabel) : [], // field 1 - used_entitlement
+      this.clientEventTime_ ? this.clientEventTime_.toArray(includeLabel) : [], // field 2 - client_event_time
+      this.entitlementSource_, // field 3 - entitlement_source
+      this.entitlementResult_, // field 4 - entitlement_result
+      this.nonce_, // field 5 - nonce
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -918,7 +916,7 @@ class EntitlementsResponse {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.jwt_, // field 1 - jwt
+      this.jwt_, // field 1 - jwt
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1056,12 +1054,12 @@ class EventParams {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.smartboxMessage_, // field 1 - smartbox_message
-        this.gpayTransactionId_, // field 2 - gpay_transaction_id
-        this.hadLogged_, // field 3 - had_logged
-        this.sku_, // field 4 - sku
-        this.oldTransactionId_, // field 5 - old_transaction_id
-        this.isUserRegistered_, // field 6 - is_user_registered
+      this.smartboxMessage_, // field 1 - smartbox_message
+      this.gpayTransactionId_, // field 2 - gpay_transaction_id
+      this.hadLogged_, // field 3 - had_logged
+      this.sku_, // field 4 - sku
+      this.oldTransactionId_, // field 5 - old_transaction_id
+      this.isUserRegistered_, // field 6 - is_user_registered
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1131,8 +1129,8 @@ class FinishedLoggingResponse {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.complete_, // field 1 - complete
-        this.error_, // field 2 - error
+      this.complete_, // field 1 - complete
+      this.error_, // field 2 - error
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1202,8 +1200,8 @@ class LinkSaveTokenRequest {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.authCode_, // field 1 - auth_code
-        this.token_, // field 2 - token
+      this.authCode_, // field 1 - auth_code
+      this.token_, // field 2 - token
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1256,7 +1254,7 @@ class LinkingInfoResponse {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.requested_, // field 1 - requested
+      this.requested_, // field 1 - requested
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1377,11 +1375,11 @@ class SkuSelectedResponse {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.sku_, // field 1 - sku
-        this.oldSku_, // field 2 - old_sku
-        this.oneTime_, // field 3 - one_time
-        this.playOffer_, // field 4 - play_offer
-        this.oldPlayOffer_, // field 5 - old_play_offer
+      this.sku_, // field 1 - sku
+      this.oldSku_, // field 2 - old_sku
+      this.oneTime_, // field 3 - one_time
+      this.playOffer_, // field 4 - play_offer
+      this.oldPlayOffer_, // field 5 - old_play_offer
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1434,7 +1432,7 @@ class SmartBoxMessage {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.isClicked_, // field 1 - is_clicked
+      this.isClicked_, // field 1 - is_clicked
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1487,7 +1485,7 @@ class SubscribeResponse$1 {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.subscribe_, // field 1 - subscribe
+      this.subscribe_, // field 1 - subscribe
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1557,8 +1555,8 @@ class Timestamp {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.seconds_, // field 1 - seconds
-        this.nanos_, // field 2 - nanos
+      this.seconds_, // field 1 - seconds
+      this.nanos_, // field 2 - nanos
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1611,7 +1609,7 @@ class ToastCloseRequest {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.close_, // field 1 - close
+      this.close_, // field 1 - close
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1664,7 +1662,7 @@ class ViewSubscriptionsResponse {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.native_, // field 1 - native
+      this.native_, // field 1 - native
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -2775,8 +2773,8 @@ function isLegacyEdgeBrowser(win) {
  */
 
 const {
-  createAbortError,
-  isAbortError,
+  createAbortError: createAbortError$1,
+  isAbortError: isAbortError$1,
 } = require('web-activities/activity-ports');
 
 /**
@@ -2786,7 +2784,7 @@ const {
  * @return {boolean}
  */
 function isCancelError(error) {
-  return isAbortError(error);
+  return isAbortError$1(error);
 }
 
 /**
@@ -2797,7 +2795,7 @@ function isCancelError(error) {
  * @return {!DOMException}
  */
 function createCancelError(win, message) {
-  return createAbortError(win, message);
+  return createAbortError$1(win, message);
 }
 
 /**
@@ -4181,7 +4179,7 @@ let cache;
  * @param {string} url
  * @return {!LocationDef}
  */
-function parseUrl(url) {
+function parseUrl$1(url) {
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
     cache = self.UrlCache || (self.UrlCache = Object.create(null));
@@ -4259,7 +4257,7 @@ function parseUrlWithA(a, url) {
  * @param {string} query The URL query string.
  * @return {!Object<string, string>}
  */
-function parseQueryString(query) {
+function parseQueryString$1(query) {
   if (!query) {
     return {};
   }
@@ -4322,8 +4320,8 @@ function getCanonicalUrl(doc) {
   return (node && node.href) || '';
 }
 
-const PARSED_URL = parseUrl(self.window.location.href);
-const PARSED_REFERRER = parseUrl(self.document.referrer);
+const PARSED_URL = parseUrl$1(self.window.location.href);
+const PARSED_REFERRER = parseUrl$1(self.document.referrer);
 
 /**
  * True for Google domains
@@ -4389,7 +4387,7 @@ const CACHE_KEYS = {
  * @return {string}
  */
 function feOrigin() {
-  return parseUrl('https://news.google.com').origin;
+  return parseUrl$1('https://news.google.com').origin;
 }
 
 /**
@@ -4418,7 +4416,7 @@ function feUrl(url, prefix = '') {
   url = feCached('https://news.google.com' + prefix + '/swg/_/ui/v1' + url);
 
   // Optionally add jsmode param. This allows us to test against "aggressively" compiled Boq JS.
-  const query = parseQueryString(self.location.hash);
+  const query = parseQueryString$1(self.location.hash);
   const boqJsMode = query['swg.boqjsmode'];
   if (boqJsMode !== undefined) {
     url = addQueryParam(url, 'jsmode', boqJsMode);
@@ -4441,7 +4439,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.152',
+    '_client': 'SwG 0.1.22-1616016609935',
   });
 }
 
@@ -5433,7 +5431,7 @@ class ActivityPortDeprecated {
 /**
  * @implements {ActivityPortDef}
  */
-class ActivityIframePort$1 {
+class ActivityIframePort$2 {
   /**
    * @param {!HTMLIFrameElement} iframe
    * @param {string} url
@@ -5567,7 +5565,7 @@ class ActivityIframePort$1 {
   }
 }
 
-class ActivityPorts$1 {
+class ActivityPorts$2 {
   /**
    * @param {!../runtime/deps.DepsDef} deps
    */
@@ -5593,7 +5591,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.152',
+        '_client': 'SwG 0.1.22-1616016609935',
         'supportsEventManager': true,
       },
       args || {}
@@ -5608,7 +5606,12 @@ class ActivityPorts$1 {
    * @return {!Promise<!ActivityIframePort>}
    */
   openActivityIframePort_(iframe, url, args) {
-    const activityPort = new ActivityIframePort$1(iframe, url, this.deps_, args);
+    const activityPort = new ActivityIframePort$2(
+      iframe,
+      url,
+      this.deps_,
+      args
+    );
     return activityPort.connect().then(() => activityPort);
   }
 
@@ -6067,7 +6070,7 @@ function getExperiments(win) {
     experimentMap = {};
     let combinedExperimentString = experimentsString;
     try {
-      const query = parseQueryString(win.location.hash);
+      const query = parseQueryString$1(win.location.hash);
       const experimentStringFromHash = query['swg.experiments'];
       if (experimentStringFromHash) {
         combinedExperimentString += ',' + experimentStringFromHash;
@@ -6434,11 +6437,11 @@ class AnalyticsService {
     } else {
       context.setTransactionId(getUuid());
     }
-    context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.152');
+    context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
+    context.setClientVersion('SwG 0.1.22-1616016609935');
     context.setUrl(getCanonicalUrl(this.doc_));
 
-    const utmParams = parseQueryString(this.getQueryString_());
+    const utmParams = parseQueryString$1(this.getQueryString_());
     const campaign = utmParams['utm_campaign'];
     const medium = utmParams['utm_medium'];
     const source = utmParams['utm_source'];
@@ -8106,7 +8109,8 @@ class DeferredAccountFlow {
   }
 }
 
-const CSS$1 = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{width:100%!important;display:-ms-flexbox!important;display:flex!important;-ms-flex-align:center!important;align-items:center!important;-ms-flex-pack:center!important;justify-content:center!important;min-height:148px!important;height:100%!important;bottom:0!important;margin-top:5px!important;z-index:2147483647!important}@media (min-height:630px), (min-width:630px){swg-loading-container{width:560px!important;margin-left:35px!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;background-color:#fff!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}swg-loading{z-index:2147483647!important;width:36px;height:36px;overflow:hidden;animation:mspin-rotate 1568.63ms linear infinite}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;width:11664px;height:36px;animation:swg-loading-film 5332ms steps(324) infinite}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/";
+const CSS$1 =
+  'body{padding:0;margin:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{width:100%!important;display:-ms-flexbox!important;display:flex!important;-ms-flex-align:center!important;align-items:center!important;-ms-flex-pack:center!important;justify-content:center!important;min-height:148px!important;height:100%!important;bottom:0!important;margin-top:5px!important;z-index:2147483647!important}@media (min-height:630px), (min-width:630px){swg-loading-container{width:560px!important;margin-left:35px!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;background-color:#fff!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}swg-loading{z-index:2147483647!important;width:36px;height:36px;overflow:hidden;animation:mspin-rotate 1568.63ms linear infinite}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;width:11664px;height:36px;animation:swg-loading-film 5332ms steps(324) infinite}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/';
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -9886,7 +9890,7 @@ function analyticsEventToEntitlementResult(event) {
  * @return {boolean}
  */
 function queryStringHasFreshGaaParams(queryString) {
-  const params = parseQueryString(queryString);
+  const params = parseQueryString$1(queryString);
 
   // Verify GAA params exist.
   if (
@@ -10691,7 +10695,7 @@ class Xhr {
          * We include some helpful text in the message to point the
          * publisher towards the real problem.
          */
-        const targetOrigin = parseUrl(input).origin;
+        const targetOrigin = parseUrl$1(input).origin;
         throw new Error(
           `XHR Failed fetching (${targetOrigin}/...): (Note: a CORS error above may indicate that this domain is not configured for Subscribe with Google)`,
           reason && reason.message
@@ -12002,7 +12006,7 @@ Constants.ButtonType = {
  * @enum {string}
  */
 Constants.ButtonColor = {
-  DEFAULT: 'default',  // Currently defaults to black.
+  DEFAULT: 'default', // Currently defaults to black.
   BLACK: 'black',
   WHITE: 'white',
 };
@@ -12021,16 +12025,14 @@ Constants.STORAGE_KEY_PREFIX = 'google.payments.api.storage';
 
 /** @const {string} */
 Constants.IS_READY_TO_PAY_RESULT_KEY =
-    Constants.STORAGE_KEY_PREFIX + '.isreadytopay.result';
+  Constants.STORAGE_KEY_PREFIX + '.isreadytopay.result';
 
 /** @const {string} */
 Constants.UPI_CAN_MAKE_PAYMENT_CACHE_KEY =
-    Constants.STORAGE_KEY_PREFIX + '.upi.canMakePaymentCache';
-
+  Constants.STORAGE_KEY_PREFIX + '.upi.canMakePaymentCache';
 
 Constants.CLASS_PREFIX = 'google-payments-';
-Constants.IFRAME_ACTIVE_CONTAINER_CLASS =
-    `${Constants.CLASS_PREFIX}activeContainer`;
+Constants.IFRAME_ACTIVE_CONTAINER_CLASS = `${Constants.CLASS_PREFIX}activeContainer`;
 Constants.IFRAME_CONTAINER_CLASS = `${Constants.CLASS_PREFIX}dialogContainer`;
 Constants.IFRAME_STYLE_CENTER_CLASS = `${Constants.CLASS_PREFIX}dialogCenter`;
 Constants.IFRAME_STYLE_CLASS = `${Constants.CLASS_PREFIX}dialog`;
@@ -12110,7 +12112,7 @@ Constants.IFRAME_STYLE_CENTER = `
 `;
 
 Constants.GPAY_BUTTON_WITH_CARD_INFO_IMAGE =
-    'background-image: url(https://pay.google.com/gp/p/generate_gpay_btn_img);';
+  'background-image: url(https://pay.google.com/gp/p/generate_gpay_btn_img);';
 
 Constants.BUTTON_LOCALE_TO_MIN_WIDTH = {
   'en': 152,
@@ -12214,47 +12216,47 @@ Constants.GPAY_BUTTON_WITH_OFFER_ICON_ADDITIONAL_STYLE = 'position: relative;';
 Constants.GPAY_OFFER_ICON_CLASS = 'gpay-offer-icon';
 
 Constants.GPAY_OFFER_ICON_SVG =
-    "<svg width=\"20px\" height=\"20px\" viewBox=\"0 0 20 20\" " +
-    "version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=" +
-    "\"http://www.w3.org/1999/xlink\" class=\"gpay-offer-icon\"><defs><path d=\"M19.41,9.58 L10.41,0.58 " +
-    "C10.05,0.22 9.55,0 9,0 L2,0 C0.9,0 0,0.9 0,2 L0,9 C0,9.55 0.22,10.05 " +
-    "0.59,10.42 L9.59,19.42 C9.95,19.78 10.45,20 11,20 C11.55,20 12.05,19.78 " +
-    "12.41,19.41 L19.41,12.41 C19.78,12.05 20,11.55 20,11 C20,10.45 19.77," +
-    "9.94 19.41,9.58 Z\" id=\"path-1\"></path></defs><g id=\"buttons_10.05\"" +
-    " stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\">" +
-    "<g id=\"Artboard\" transform=\"translate(-40.000000, -43.000000)\">" +
-    "<g id=\"Group-3\" transform=\"translate(40.000000, 43.000000)\">" +
-    "<g id=\"Group-2-Copy-2\"><g id=\"Group-Copy\"><g id=\"ic_loyalty_24px\">" +
-    "<mask id=\"mask-2\" fill=\"white\"><use xlink:href=\"#path-1\"></use>" +
-    "</mask><use id=\"gpay-Shape\" fill=\"#FF6100\" fill-rule=\"nonzero\" " +
-    "xlink:href=\"#path-1\"></use><path d=\"M3.5,5 C2.67,5 2,4.33 2,3.5 C2," +
-    "2.67 2.67,2 3.5,2 C4.33,2 5,2.67 5,3.5 C5,4.33 4.33,5 3.5,5 Z\" " +
-    "id=\"Path\" fill=\"#FFFFFF\" fill-rule=\"nonzero\" mask=\"url(#mask-2)\">" +
-    "</path></g></g></g><g id=\"Group-13-Copy-7\" transform=\"translate" +
-    "(6.000000, 6.000000)\" fill=\"#FFFFFF\" fill-rule=\"nonzero\">" +
-    "<g id=\"Group-13-Copy-2\"><path d=\"M2.15217391,4.55172414 C0.963561082," +
-    "4.55172414 1.99840144e-14,3.53278598 1.99840144e-14,2.27586207 " +
-    "C1.99840144e-14,1.01893816 0.963561082,6.30606678e-14 2.15217391,6." +
-    "30606678e-14 C3.34078674,6.30606678e-14 4.30434783,1.01893816 4.30434783," +
-    "2.27586207 C4.30434783,3.53278598 3.34078674,4.55172414 2.15217391," +
-    "4.55172414 Z M2.15217391,3.31034483 C2.69245247,3.31034483 3.13043478,2." +
-    "84719112 3.13043478,2.27586207 C3.13043478,1.70453302 2.69245247," +
-    "1.24137931 2.15217391,1.24137931 C1.61189535,1.24137931 1.17391304,1" +
-    ".70453302 1.17391304,2.27586207 C1.17391304,2.84719112 1.61189535,3." +
-    "31034483 2.15217391,3.31034483 Z\" id=\"Combined-Shape\"></path>" +
-    "<path d=\"M6.84782609,9 C5.65921326,9 4.69565217,7.98106184 4.69565217," +
-    "6.72413793 C4.69565217,5.46721402 5.65921326,4.44827586 6.84782609," +
-    "4.44827586 C8.03643892,4.44827586 9,5.46721402 9,6.72413793 C9,7.98106184" +
-    " 8.03643892,9 6.84782609,9 Z M6.84782609,7.75862069 C7.38810465," +
-    "7.75862069 7.82608696,7.29546698 7.82608696,6.72413793 C7.82608696" +
-    ",6.15280888 7.38810465,5.68965517 6.84782609,5.68965517 C6.30754753," +
-    "5.68965517 5.86956522,6.15280888 5.86956522,6.72413793 C5.86956522," +
-    "7.29546698 6.30754753,7.75862069 6.84782609,7.75862069 Z\" " +
-    "id=\"Combined-Shape\"></path><polygon id=\"Rectangle\" " +
-    "transform=\"translate(4.497720, 4.541938) rotate(34.000000) " +
-    "translate(-4.497720, -4.541938) \" points=\"3.77901778 -0.202295978 " +
-    "4.9740273 -0.171019161 5.21642263 9.28617278 4.02141311 9.25489596\">" +
-    "</polygon></g></g></g></g></g></svg>";
+  '<svg width="20px" height="20px" viewBox="0 0 20 20" ' +
+  'version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink=' +
+  '"http://www.w3.org/1999/xlink" class="gpay-offer-icon"><defs><path d="M19.41,9.58 L10.41,0.58 ' +
+  'C10.05,0.22 9.55,0 9,0 L2,0 C0.9,0 0,0.9 0,2 L0,9 C0,9.55 0.22,10.05 ' +
+  '0.59,10.42 L9.59,19.42 C9.95,19.78 10.45,20 11,20 C11.55,20 12.05,19.78 ' +
+  '12.41,19.41 L19.41,12.41 C19.78,12.05 20,11.55 20,11 C20,10.45 19.77,' +
+  '9.94 19.41,9.58 Z" id="path-1"></path></defs><g id="buttons_10.05"' +
+  ' stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">' +
+  '<g id="Artboard" transform="translate(-40.000000, -43.000000)">' +
+  '<g id="Group-3" transform="translate(40.000000, 43.000000)">' +
+  '<g id="Group-2-Copy-2"><g id="Group-Copy"><g id="ic_loyalty_24px">' +
+  '<mask id="mask-2" fill="white"><use xlink:href="#path-1"></use>' +
+  '</mask><use id="gpay-Shape" fill="#FF6100" fill-rule="nonzero" ' +
+  'xlink:href="#path-1"></use><path d="M3.5,5 C2.67,5 2,4.33 2,3.5 C2,' +
+  '2.67 2.67,2 3.5,2 C4.33,2 5,2.67 5,3.5 C5,4.33 4.33,5 3.5,5 Z" ' +
+  'id="Path" fill="#FFFFFF" fill-rule="nonzero" mask="url(#mask-2)">' +
+  '</path></g></g></g><g id="Group-13-Copy-7" transform="translate' +
+  '(6.000000, 6.000000)" fill="#FFFFFF" fill-rule="nonzero">' +
+  '<g id="Group-13-Copy-2"><path d="M2.15217391,4.55172414 C0.963561082,' +
+  '4.55172414 1.99840144e-14,3.53278598 1.99840144e-14,2.27586207 ' +
+  'C1.99840144e-14,1.01893816 0.963561082,6.30606678e-14 2.15217391,6.' +
+  '30606678e-14 C3.34078674,6.30606678e-14 4.30434783,1.01893816 4.30434783,' +
+  '2.27586207 C4.30434783,3.53278598 3.34078674,4.55172414 2.15217391,' +
+  '4.55172414 Z M2.15217391,3.31034483 C2.69245247,3.31034483 3.13043478,2.' +
+  '84719112 3.13043478,2.27586207 C3.13043478,1.70453302 2.69245247,' +
+  '1.24137931 2.15217391,1.24137931 C1.61189535,1.24137931 1.17391304,1' +
+  '.70453302 1.17391304,2.27586207 C1.17391304,2.84719112 1.61189535,3.' +
+  '31034483 2.15217391,3.31034483 Z" id="Combined-Shape"></path>' +
+  '<path d="M6.84782609,9 C5.65921326,9 4.69565217,7.98106184 4.69565217,' +
+  '6.72413793 C4.69565217,5.46721402 5.65921326,4.44827586 6.84782609,' +
+  '4.44827586 C8.03643892,4.44827586 9,5.46721402 9,6.72413793 C9,7.98106184' +
+  ' 8.03643892,9 6.84782609,9 Z M6.84782609,7.75862069 C7.38810465,' +
+  '7.75862069 7.82608696,7.29546698 7.82608696,6.72413793 C7.82608696' +
+  ',6.15280888 7.38810465,5.68965517 6.84782609,5.68965517 C6.30754753,' +
+  '5.68965517 5.86956522,6.15280888 5.86956522,6.72413793 C5.86956522,' +
+  '7.29546698 6.30754753,7.75862069 6.84782609,7.75862069 Z" ' +
+  'id="Combined-Shape"></path><polygon id="Rectangle" ' +
+  'transform="translate(4.497720, 4.541938) rotate(34.000000) ' +
+  'translate(-4.497720, -4.541938) " points="3.77901778 -0.202295978 ' +
+  '4.9740273 -0.171019161 5.21642263 9.28617278 4.02141311 9.25489596">' +
+  '</polygon></g></g></g></g></g></svg>';
 
 Constants.GPAY_OFFER_ICON_STYLE = `
 .${Constants.GPAY_OFFER_ICON_CLASS} {
@@ -12329,7 +12331,6 @@ Constants.GPAY_BUTTON_CARD_INFO_BUTTON_STYLE = `
     background-color: #3c4043;
   }
   `;
-
 
 /**
  * Trusted domain for secure context validation
@@ -12493,15 +12494,16 @@ class PayFrameHelper {
       return;
     }
     const initOptions =
-        /** @type {!PaymentOptions} */ (window['gpayInitParams']) || {};
+      /** @type {!PaymentOptions} */ (window['gpayInitParams']) || {};
     environment = initOptions.environment || Constants.Environment.PRODUCTION;
     iframe = document.createElement('iframe');
     // Pass in origin because document.referrer inside iframe is empty in
     // certain cases
     // Can be replaced by iframe.src=... in non Google context.
     iframe.src = PayFrameHelper.getIframeUrl_(
-            window.location.origin,
-            initOptions.merchantInfo && initOptions.merchantInfo.merchantId);
+      window.location.origin,
+      initOptions.merchantInfo && initOptions.merchantInfo.merchantId
+    );
     PayFrameHelper.postMessage({
       'eventType': PostMessageEventType.LOG_PAY_FRAME_REQUESTED,
       'clientLatencyStartMs': Date.now(),
@@ -12510,7 +12512,7 @@ class PayFrameHelper {
     iframe.width = '0';
     iframe.style.display = 'none';
     iframe.style.visibility = 'hidden';
-    iframe.onload = function() {
+    iframe.onload = function () {
       PayFrameHelper.postMessage({
         'eventType': PostMessageEventType.LOG_PAY_FRAME_LOADED_WITH_ALL_JS,
         'clientLatencyStartMs': Date.now(),
@@ -12523,8 +12525,9 @@ class PayFrameHelper {
     if (document.body) {
       PayFrameHelper.initialize_();
     } else {
-      document.addEventListener(
-          'DOMContentLoaded', () => PayFrameHelper.initialize_());
+      document.addEventListener('DOMContentLoaded', () =>
+        PayFrameHelper.initialize_()
+      );
     }
   }
 
@@ -12547,7 +12550,11 @@ class PayFrameHelper {
    * @param {function(!Event)} responseHandler
    */
   static sendAndWaitForResponse(
-      data, eventType, responseType, responseHandler) {
+    data,
+    eventType,
+    responseType,
+    responseHandler
+  ) {
     function callback(event) {
       if (event.data[responseType]) {
         responseHandler(event);
@@ -12594,14 +12601,17 @@ class PayFrameHelper {
       return;
     }
     const postMessageData = Object.assign(
-        {
-          'buyFlowActivityMode': buyFlowActivityMode,
-          'googleTransactionId': googleTransactionId,
-          'originTimeMs': originTimeMs,
-        },
-        data);
+      {
+        'buyFlowActivityMode': buyFlowActivityMode,
+        'googleTransactionId': googleTransactionId,
+        'originTimeMs': originTimeMs,
+      },
+      data
+    );
     postMessageService.postMessage(
-        postMessageData, PayFrameHelper.getIframeOrigin_());
+      postMessageData,
+      PayFrameHelper.getIframeOrigin_()
+    );
   }
 
   /**
@@ -12664,7 +12674,7 @@ class PayFrameHelper {
    */
   static iframeLoaded() {
     iframeLoaded = true;
-    buffer.forEach(function(data) {
+    buffer.forEach(function (data) {
       PayFrameHelper.postMessage(data);
     });
     buffer.length = 0;
@@ -12715,9 +12725,13 @@ class PayFrameHelper {
    */
   static getIframeUrl_(origin, merchantId) {
     // TrustedResourceUrl header needs to start with https or '//'.
-    const iframeUrl = `https://pay${environment == Constants.Environment.PREPROD ?
-             '-preprod.sandbox' :
-             environment == Constants.Environment.SANDBOX ? '.sandbox' : ''}.google.com/gp/p/ui/payframe?origin=${origin}&mid=%{merchantId}`;
+    const iframeUrl = `https://pay${
+      environment == Constants.Environment.PREPROD
+        ? '-preprod.sandbox'
+        : environment == Constants.Environment.SANDBOX
+        ? '.sandbox'
+        : ''
+    }.google.com/gp/p/ui/payframe?origin=${origin}&mid=%{merchantId}`;
     return iframeUrl;
   }
 }
@@ -12765,34 +12779,42 @@ class PaymentsRequestDelegate {
     /** @type{!PaymentRequest} */
     const paymentRequest = this.createPaymentRequest_(isReadyToPayRequest);
     return new Promise((resolve, reject) => {
-      paymentRequest.canMakePayment()
-          .then(result => {
-            window.sessionStorage.setItem(
-                Constants.IS_READY_TO_PAY_RESULT_KEY, result.toString());
-            const response = {'result': result};
-            if (isReadyToPayRequest.apiVersion >= 2 &&
-                isReadyToPayRequest.existingPaymentMethodRequired) {
-              // For apiVersion 2, we always use native to only check for
-              // tokenized cards.
-              // For tokenized cards native always does a presence check so
-              // we can say that if canMakePayment is true for native for
-              // tokenizedCards then the user has a payment method which is
-              // present.
-              response['paymentMethodPresent'] = result;
-            }
-            resolve(response);
-          })
-          .catch(function(err) {
-            if (window.sessionStorage.getItem(
-                    Constants.IS_READY_TO_PAY_RESULT_KEY)) {
-              resolve({
-                'result': window.sessionStorage.getItem(
-                              Constants.IS_READY_TO_PAY_RESULT_KEY) == 'true'
-              });
-            } else {
-              resolve({'result': false});
-            }
-          });
+      paymentRequest
+        .canMakePayment()
+        .then((result) => {
+          window.sessionStorage.setItem(
+            Constants.IS_READY_TO_PAY_RESULT_KEY,
+            result.toString()
+          );
+          const response = {'result': result};
+          if (
+            isReadyToPayRequest.apiVersion >= 2 &&
+            isReadyToPayRequest.existingPaymentMethodRequired
+          ) {
+            // For apiVersion 2, we always use native to only check for
+            // tokenized cards.
+            // For tokenized cards native always does a presence check so
+            // we can say that if canMakePayment is true for native for
+            // tokenizedCards then the user has a payment method which is
+            // present.
+            response['paymentMethodPresent'] = result;
+          }
+          resolve(response);
+        })
+        .catch(function (err) {
+          if (
+            window.sessionStorage.getItem(Constants.IS_READY_TO_PAY_RESULT_KEY)
+          ) {
+            resolve({
+              'result':
+                window.sessionStorage.getItem(
+                  Constants.IS_READY_TO_PAY_RESULT_KEY
+                ) == 'true',
+            });
+          } else {
+            resolve({'result': false});
+          }
+        });
     });
   }
 
@@ -12801,9 +12823,11 @@ class PaymentsRequestDelegate {
     // Creating PaymentRequest instance will call
     // Gcore isReadyToPay internally which will prefetch tempaltes.
     this.createPaymentRequest_(
-        paymentDataRequest, this.environment_,
-        paymentDataRequest.transactionInfo.currencyCode,
-        paymentDataRequest.transactionInfo.totalPrice);
+      paymentDataRequest,
+      this.environment_,
+      paymentDataRequest.transactionInfo.currencyCode,
+      paymentDataRequest.transactionInfo.totalPrice
+    );
   }
 
   /** @override */
@@ -12842,10 +12866,12 @@ class PaymentsRequestDelegate {
       data['environment'] = environment;
     }
 
-    const supportedInstruments = [{
-      'supportedMethods': ['https://google.com/pay'],
-      'data': data,
-    }];
+    const supportedInstruments = [
+      {
+        'supportedMethods': ['https://google.com/pay'],
+        'data': data,
+      },
+    ];
 
     const details = {
       'total': {
@@ -12857,8 +12883,8 @@ class PaymentsRequestDelegate {
           // this requirement.
           'currency': currencyCode || 'USD',
           'value': totalPrice || '0',
-        }
-      }
+        },
+      },
     };
 
     return new PaymentRequest(supportedInstruments, details);
@@ -12870,31 +12896,40 @@ class PaymentsRequestDelegate {
    * @private
    */
   loadPaymentDataThroughPaymentRequest_(paymentDataRequest) {
-    const currencyCode = (paymentDataRequest.transactionInfo &&
-                          paymentDataRequest.transactionInfo.currencyCode) ||
-        undefined;
-    const totalPrice = (paymentDataRequest.transactionInfo &&
-                        paymentDataRequest.transactionInfo.totalPrice) ||
-        undefined;
+    const currencyCode =
+      (paymentDataRequest.transactionInfo &&
+        paymentDataRequest.transactionInfo.currencyCode) ||
+      undefined;
+    const totalPrice =
+      (paymentDataRequest.transactionInfo &&
+        paymentDataRequest.transactionInfo.totalPrice) ||
+      undefined;
     const paymentRequest = this.createPaymentRequest_(
-        paymentDataRequest, this.environment_, currencyCode, totalPrice);
+      paymentDataRequest,
+      this.environment_,
+      currencyCode,
+      totalPrice
+    );
     this.callback_(
-        /** @type{!Promise<!PaymentData>} */
-        (paymentRequest.show()
-             .then(
-                 /**
-                  * @param {!PaymentResponse} paymentResponse
-                  * @return {!PaymentData}
-                  */
-                 (paymentResponse) => {
-                   // Should be called to dismiss any remaining UI
-                   paymentResponse.complete('success');
-                   return paymentResponse.details;
-                 })
-             .catch(function(err) {
-               err['statusCode'] = Constants.ResponseStatus.CANCELED;
-               throw err;
-             })));
+      /** @type{!Promise<!PaymentData>} */
+      (paymentRequest
+        .show()
+        .then(
+          /**
+           * @param {!PaymentResponse} paymentResponse
+           * @return {!PaymentData}
+           */
+          (paymentResponse) => {
+            // Should be called to dismiss any remaining UI
+            paymentResponse.complete('success');
+            return paymentResponse.details;
+          }
+        )
+        .catch(function (err) {
+          err['statusCode'] = Constants.ResponseStatus.CANCELED;
+          throw err;
+        }))
+    );
   }
 }
 
@@ -12917,9 +12952,7 @@ class PaymentsRequestDelegate {
 
 const MAX_Z_INDEX = 2147483647;
 
-
 class Graypane {
-
   /**
    * @param {!Document} doc
    */
@@ -12966,9 +12999,14 @@ class Graypane {
       'display': 'block',
       'opacity': 0,
     });
-    return transition(this.element_, {
-      'opacity': 1,
-    }, 300, 'ease-out');
+    return transition(
+      this.element_,
+      {
+        'opacity': 1,
+      },
+      300,
+      'ease-out'
+    );
   }
 
   /**
@@ -12982,15 +13020,19 @@ class Graypane {
       // This could be possible after redirect.
       return;
     }
-    return transition(this.element_, {
-      'opacity': 0,
-    }, 300, 'ease-out').then(() => {
+    return transition(
+      this.element_,
+      {
+        'opacity': 0,
+      },
+      300,
+      'ease-out'
+    ).then(() => {
       setImportantStyles(this.element_, {'display': 'none'});
       this.doc_.body.removeChild(this.element_);
     });
   }
 }
-
 
 /**
  * Sets the CSS styles of the specified element with !important. The styles
@@ -13008,7 +13050,6 @@ function setImportantStyles(element, styles) {
   }
 }
 
-
 /**
  * Returns a promise which is resolved after the given duration of animation
  * @param {!Element} el - Element to be observed.
@@ -13020,19 +13061,31 @@ function setImportantStyles(element, styles) {
 function transition(el, props, durationMillis, curve) {
   const win = el.ownerDocument.defaultView;
   const previousTransitionValue = el.style.transition || '';
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     win.setTimeout(() => {
       win.setTimeout(resolve, durationMillis);
       const tr = `${durationMillis}ms ${curve}`;
-      setImportantStyles(el, Object.assign({
-        'transition': `transform ${tr}, opacity ${tr}`,
-      }, props));
+      setImportantStyles(
+        el,
+        Object.assign(
+          {
+            'transition': `transform ${tr}, opacity ${tr}`,
+          },
+          props
+        )
+      );
     });
   }).then(() => {
     // Stop transition and make sure that the final properties get set.
-    setImportantStyles(el, Object.assign({
-      'transition': previousTransitionValue,
-    }, props));
+    setImportantStyles(
+      el,
+      Object.assign(
+        {
+          'transition': previousTransitionValue,
+        },
+        props
+      )
+    );
   });
 }
 
@@ -13058,22 +13111,25 @@ function transition(el, props, durationMillis, curve) {
  */
 function chromeSupportsPaymentHandler() {
   // Check if feature is enabled for user
-  if (typeof google == 'undefined' ||
-      !null) {
+  if (typeof google == 'undefined' || !null) {
     return false;
   }
 
   // Payment handler isn't supported on mobile
   const mobilePlatform = window.navigator.userAgent.match(
-      /Android|iPhone|iPad|iPod|BlackBerry|IEMobile/i);
+    /Android|iPhone|iPad|iPod|BlackBerry|IEMobile/i
+  );
   if (mobilePlatform != null) {
     return false;
   }
 
   const chromeVersion = window.navigator.userAgent.match(/Chrome\/([0-9]+)\./i);
-  return 'PaymentRequest' in window && chromeVersion != null &&
-      Number(chromeVersion[1]) >= 68 &&
-      window.navigator.vendor == 'Google Inc.';
+  return (
+    'PaymentRequest' in window &&
+    chromeVersion != null &&
+    Number(chromeVersion[1]) >= 68 &&
+    window.navigator.vendor == 'Google Inc.'
+  );
 }
 
 /**
@@ -13092,11 +13148,15 @@ function chromeSupportsPaymentRequest() {
 
   const androidPlatform = window.navigator.userAgent.match(/Android/i);
   const chromeVersion = window.navigator.userAgent.match(/Chrome\/([0-9]+)\./i);
-  return androidPlatform != null && 'PaymentRequest' in window &&
-      // Make sure skipping PaymentRequest UI when only one PaymentMethod is
-      // supported (starts on Google Chrome 59).
-      window.navigator.vendor == 'Google Inc.' && chromeVersion != null &&
-      Number(chromeVersion[1]) >= 59;
+  return (
+    androidPlatform != null &&
+    'PaymentRequest' in window &&
+    // Make sure skipping PaymentRequest UI when only one PaymentMethod is
+    // supported (starts on Google Chrome 59).
+    window.navigator.vendor == 'Google Inc.' &&
+    chromeVersion != null &&
+    Number(chromeVersion[1]) >= 59
+  );
 }
 
 /**
@@ -13106,16 +13166,22 @@ function chromeSupportsPaymentRequest() {
  */
 function doesMerchantSupportOnlyTokenizedCards(isReadyToPayRequest) {
   if (isReadyToPayRequest.apiVersion >= 2) {
-    const allowedAuthMethods =
-        extractAllowedAuthMethodsForCards_(isReadyToPayRequest);
-    if (allowedAuthMethods && allowedAuthMethods.length == 1 &&
-        allowedAuthMethods[0] == Constants.AuthMethod.CRYPTOGRAM_3DS) {
+    const allowedAuthMethods = extractAllowedAuthMethodsForCards_(
+      isReadyToPayRequest
+    );
+    if (
+      allowedAuthMethods &&
+      allowedAuthMethods.length == 1 &&
+      allowedAuthMethods[0] == Constants.AuthMethod.CRYPTOGRAM_3DS
+    ) {
       return true;
     }
   }
-  return isReadyToPayRequest.allowedPaymentMethods.length == 1 &&
-      isReadyToPayRequest.allowedPaymentMethods[0] ==
-      Constants.PaymentMethod.TOKENIZED_CARD;
+  return (
+    isReadyToPayRequest.allowedPaymentMethods.length == 1 &&
+    isReadyToPayRequest.allowedPaymentMethods[0] ==
+      Constants.PaymentMethod.TOKENIZED_CARD
+  );
 }
 
 /**
@@ -13125,10 +13191,13 @@ function doesMerchantSupportOnlyTokenizedCards(isReadyToPayRequest) {
  * @return {boolean} true if the merchant supports pan cards.
  */
 function apiV2DoesMerchantSupportSpecifiedCardType(
-    isReadyToPayRequest, apiV2AuthMethod) {
+  isReadyToPayRequest,
+  apiV2AuthMethod
+) {
   if (isReadyToPayRequest.apiVersion >= 2) {
-    const allowedAuthMethods =
-        extractAllowedAuthMethodsForCards_(isReadyToPayRequest);
+    const allowedAuthMethods = extractAllowedAuthMethodsForCards_(
+      isReadyToPayRequest
+    );
     if (allowedAuthMethods && allowedAuthMethods.includes(apiV2AuthMethod)) {
       return true;
     }
@@ -13156,9 +13225,9 @@ function validateSecureContext() {
     // for the unsupported browser.
     return null;
   }
-  return window.isSecureContext ?
-      null :
-      'Google Pay APIs should be called in secure context!';
+  return window.isSecureContext
+    ? null
+    : 'Google Pay APIs should be called in secure context!';
 }
 
 /**
@@ -13167,12 +13236,15 @@ function validateSecureContext() {
  * @param {!PaymentOptions} paymentOptions
  */
 function validatePaymentOptions(paymentOptions) {
-  if (paymentOptions.environment &&
-      !Object.values(Constants.Environment)
-           .includes(paymentOptions.environment)) {
+  if (
+    paymentOptions.environment &&
+    !Object.values(Constants.Environment).includes(paymentOptions.environment)
+  ) {
     throw new Error(
-        'Parameter environment in PaymentOptions can optionally be set to ' +
-        'PRODUCTION, otherwise it defaults to TEST. ' + paymentOptions.environment);
+      'Parameter environment in PaymentOptions can optionally be set to ' +
+        'PRODUCTION, otherwise it defaults to TEST. ' +
+        paymentOptions.environment
+    );
   }
 }
 
@@ -13189,9 +13261,11 @@ function validateIsReadyToPayRequest(isReadyToPayRequest) {
     if (!('apiVersionMinor' in isReadyToPayRequest)) {
       return 'apiVersionMinor must be set!';
     }
-    if (!isReadyToPayRequest.allowedPaymentMethods ||
-        !Array.isArray(isReadyToPayRequest.allowedPaymentMethods) ||
-        isReadyToPayRequest.allowedPaymentMethods.length == 0) {
+    if (
+      !isReadyToPayRequest.allowedPaymentMethods ||
+      !Array.isArray(isReadyToPayRequest.allowedPaymentMethods) ||
+      isReadyToPayRequest.allowedPaymentMethods.length == 0
+    ) {
       return 'for v2 allowedPaymentMethods must be set to an array containing a list of accepted payment methods';
     }
     for (var i = 0; i < isReadyToPayRequest.allowedPaymentMethods.length; i++) {
@@ -13201,29 +13275,40 @@ function validateIsReadyToPayRequest(isReadyToPayRequest) {
           return 'Field parameters must be setup in each allowedPaymentMethod';
         }
         var allowedCardNetworks =
-            allowedPaymentMethod['parameters']['allowedCardNetworks'];
-        if (!allowedCardNetworks || !Array.isArray(allowedCardNetworks) ||
-            allowedCardNetworks.length == 0) {
+          allowedPaymentMethod['parameters']['allowedCardNetworks'];
+        if (
+          !allowedCardNetworks ||
+          !Array.isArray(allowedCardNetworks) ||
+          allowedCardNetworks.length == 0
+        ) {
           return 'allowedCardNetworks must be setup in parameters for type CARD';
         }
         var allowedAuthMethods =
-            allowedPaymentMethod['parameters']['allowedAuthMethods'];
-        if (!allowedAuthMethods || !Array.isArray(allowedAuthMethods) ||
-            allowedAuthMethods.length == 0 ||
-            !allowedAuthMethods.every(isAuthMethodValid)) {
-          return 'allowedAuthMethods must be setup in parameters for type \'CARD\' ' +
-              ' and must contain \'CRYPTOGRAM_3DS\' and/or \'PAN_ONLY\'';
+          allowedPaymentMethod['parameters']['allowedAuthMethods'];
+        if (
+          !allowedAuthMethods ||
+          !Array.isArray(allowedAuthMethods) ||
+          allowedAuthMethods.length == 0 ||
+          !allowedAuthMethods.every(isAuthMethodValid)
+        ) {
+          return (
+            "allowedAuthMethods must be setup in parameters for type 'CARD' " +
+            " and must contain 'CRYPTOGRAM_3DS' and/or 'PAN_ONLY'"
+          );
         }
       }
     }
     return null;
   } else if (
-      !isReadyToPayRequest.allowedPaymentMethods ||
-      !Array.isArray(isReadyToPayRequest.allowedPaymentMethods) ||
-      isReadyToPayRequest.allowedPaymentMethods.length == 0 ||
-      !isReadyToPayRequest.allowedPaymentMethods.every(isPaymentMethodValid)) {
-    return 'allowedPaymentMethods must be set to an array containing \'CARD\' ' +
-        'and/or \'TOKENIZED_CARD\'!';
+    !isReadyToPayRequest.allowedPaymentMethods ||
+    !Array.isArray(isReadyToPayRequest.allowedPaymentMethods) ||
+    isReadyToPayRequest.allowedPaymentMethods.length == 0 ||
+    !isReadyToPayRequest.allowedPaymentMethods.every(isPaymentMethodValid)
+  ) {
+    return (
+      "allowedPaymentMethods must be set to an array containing 'CARD' " +
+      "and/or 'TOKENIZED_CARD'!"
+    );
   }
   return null;
 }
@@ -13265,17 +13350,24 @@ function validatePaymentDataRequest(paymentDataRequest) {
   } else if (!paymentDataRequest.transactionInfo.currencyCode) {
     return 'currencyCode in transactionInfo must be set!';
   } else if (
-      !paymentDataRequest.transactionInfo.totalPriceStatus ||
-      !Object.values(Constants.TotalPriceStatus)
-           .includes(paymentDataRequest.transactionInfo.totalPriceStatus)) {
-    return 'totalPriceStatus in transactionInfo must be set to one of' +
-        ' NOT_CURRENTLY_KNOWN, ESTIMATED or FINAL!';
+    !paymentDataRequest.transactionInfo.totalPriceStatus ||
+    !Object.values(Constants.TotalPriceStatus).includes(
+      paymentDataRequest.transactionInfo.totalPriceStatus
+    )
+  ) {
+    return (
+      'totalPriceStatus in transactionInfo must be set to one of' +
+      ' NOT_CURRENTLY_KNOWN, ESTIMATED or FINAL!'
+    );
   } else if (
-      paymentDataRequest.transactionInfo.totalPriceStatus !==
-          'NOT_CURRENTLY_KNOWN' &&
-      !paymentDataRequest.transactionInfo.totalPrice) {
-    return 'totalPrice in transactionInfo must be set when' +
-        ' totalPriceStatus is ESTIMATED or FINAL!';
+    paymentDataRequest.transactionInfo.totalPriceStatus !==
+      'NOT_CURRENTLY_KNOWN' &&
+    !paymentDataRequest.transactionInfo.totalPrice
+  ) {
+    return (
+      'totalPrice in transactionInfo must be set when' +
+      ' totalPriceStatus is ESTIMATED or FINAL!'
+    );
   }
 
   // Validate payment data request for UPI payment method
@@ -13295,14 +13387,17 @@ function validatePaymentDataRequest(paymentDataRequest) {
     } else if (!parameters['mcc']) {
       return 'mcc in allowedPaymentMethod parameters must be set!';
     } else if (!parameters['transactionReferenceId']) {
-      return 'transactionReferenceId in allowedPaymentMethod parameters' +
-          ' must be set!';
+      return (
+        'transactionReferenceId in allowedPaymentMethod parameters' +
+        ' must be set!'
+      );
     }
 
     if (paymentDataRequest['transactionInfo']['currencyCode'] !== 'INR') {
       return 'currencyCode in transactionInfo must be set to INR!';
     } else if (
-        paymentDataRequest['transactionInfo']['totalPriceStatus'] !== 'FINAL') {
+      paymentDataRequest['transactionInfo']['totalPriceStatus'] !== 'FINAL'
+    ) {
       return 'totalPriceStatus in transactionInfo must be set to FINAL!';
     } else if (!paymentDataRequest['transactionInfo']['transactionNote']) {
       return 'transactionNote in transactionInfo must be set!';
@@ -13319,8 +13414,11 @@ function validatePaymentDataRequest(paymentDataRequest) {
  * @return {?Object}
  */
 function getUpiPaymentMethod(request) {
-  if (!chromeSupportsPaymentRequest() || request.apiVersion < 2 ||
-      !request.allowedPaymentMethods) {
+  if (
+    !chromeSupportsPaymentRequest() ||
+    request.apiVersion < 2 ||
+    !request.allowedPaymentMethods
+  ) {
     return null;
   }
   return getAllowedPaymentMethodForType_(request, Constants.PaymentMethod.UPI);
@@ -13352,7 +13450,9 @@ function validatePaymentDataRequestForSwg(swgParameters) {
 function extractAllowedAuthMethodsForCards_(isReadyToPayRequest) {
   if (isReadyToPayRequest.allowedPaymentMethods) {
     const allowedPaymentMethod = getAllowedPaymentMethodForType_(
-        isReadyToPayRequest, Constants.PaymentMethod.CARD);
+      isReadyToPayRequest,
+      Constants.PaymentMethod.CARD
+    );
     if (allowedPaymentMethod && allowedPaymentMethod.parameters) {
       return allowedPaymentMethod.parameters['allowedAuthMethods'];
     }
@@ -13368,7 +13468,9 @@ function extractAllowedAuthMethodsForCards_(isReadyToPayRequest) {
  * @private
  */
 function getAllowedPaymentMethodForType_(
-    isReadyToPayRequest, paymentMethodType) {
+  isReadyToPayRequest,
+  paymentMethodType
+) {
   for (var i = 0; i < isReadyToPayRequest.allowedPaymentMethods.length; i++) {
     const allowedPaymentMethod = isReadyToPayRequest.allowedPaymentMethods[i];
     if (allowedPaymentMethod.type == paymentMethodType) {
@@ -13406,8 +13508,9 @@ function injectIframe(iframeClassName) {
   const iframeContainer = document.createElement('div');
   iframeContainer.classList.add('iframeContainer');
   /** @private @const {!HTMLIFrameElement} */
-  const iframe =
-      /** @type {!HTMLIFrameElement} */ (document.createElement('iframe'));
+  const iframe = /** @type {!HTMLIFrameElement} */ (document.createElement(
+    'iframe'
+  ));
   iframe.classList.add(iframeClassName);
   iframe.setAttribute('frameborder', '0');
   iframe.setAttribute('scrolling', 'no');
@@ -13435,9 +13538,9 @@ function injectIframe(iframeClassName) {
  */
 
 const {
-  ActivityPort,
-  ActivityPorts,
-  ActivityIframePort,
+  ActivityPort: ActivityPort$1,
+  ActivityPorts: ActivityPorts$1,
+  ActivityIframePort: ActivityIframePort$1,
 } = require('web-activities/activity-ports');
 
 const GPAY_ACTIVITY_REQUEST = 'GPAY';
@@ -13482,7 +13585,7 @@ class PaymentsWebActivityDelegate {
     /** @private @const {boolean} */
 
     /** @const {!ActivityPorts} */
-    this.activities = activities || new ActivityPorts(window);
+    this.activities = activities || new ActivityPorts$1(window);
     /** @const @private {!Graypane} */
     this.graypane_ = new Graypane(window.document);
     /** @private {?function(!Promise<!PaymentData>)} */
@@ -13910,9 +14013,7 @@ class PaymentsWebActivityDelegate {
    * @private
    */
   isVerticalCenterExperimentEnabled_(paymentDataRequest) {
-    return (
-      null  
-    );
+    return null;
   }
 
   /**
@@ -14097,17 +14198,19 @@ class UpiHandler {
   loadPaymentData(paymentDataRequest, upiPaymentMethod, onResultCallback) {
     const parameters = upiPaymentMethod['parameters'];
     const transactionInfo = paymentDataRequest['transactionInfo'];
-    const supportedInstruments = [{
-          'supportedMethods': ['https://tez.google.com/pay'],
-          'data': {
-            'pa': parameters['payeeVpa'],
-            'pn': parameters['payeeName'],
-            'tr': parameters['transactionReferenceId'],
-            'url': parameters['referenceUrl'],
-            'mc': parameters['mcc'],
-            'tn': transactionInfo['transactionNote'],
-          },
-        }];
+    const supportedInstruments = [
+      {
+        'supportedMethods': ['https://tez.google.com/pay'],
+        'data': {
+          'pa': parameters['payeeVpa'],
+          'pn': parameters['payeeName'],
+          'tr': parameters['transactionReferenceId'],
+          'url': parameters['referenceUrl'],
+          'mc': parameters['mcc'],
+          'tn': transactionInfo['transactionNote'],
+        },
+      },
+    ];
 
     if (parameters['transactionId']) {
       supportedInstruments[0]['data']['tid'] = parameters['transactionId'];
@@ -14121,34 +14224,40 @@ class UpiHandler {
           'value': transactionInfo['totalPrice'],
         },
       },
-      'displayItems': [{
-        'label': 'Original Amount',
-        'amount': {
-          'currency': transactionInfo['currencyCode'],
-          'value': transactionInfo['totalPrice'],
+      'displayItems': [
+        {
+          'label': 'Original Amount',
+          'amount': {
+            'currency': transactionInfo['currencyCode'],
+            'value': transactionInfo['totalPrice'],
+          },
         },
-      }],
+      ],
     };
 
     let request = new PaymentRequest(supportedInstruments, details);
 
     onResultCallback(
-        this.checkCanMakePayment_(request)
-            .then(result => {
-              if (result) {
-                return this.showUi_(request);
-              } else {
-                return this.redirectToGooglePlay_();
-              }
-            })
-            .then(paymentData => {
-              return this.processData_(
-                  paymentData, paymentDataRequest, upiPaymentMethod);
-            })
-            .catch(error => {
-              error['statusCode'] = Constants.ResponseStatus.CANCELED;
-              return Promise.reject(error);
-            }));
+      this.checkCanMakePayment_(request)
+        .then((result) => {
+          if (result) {
+            return this.showUi_(request);
+          } else {
+            return this.redirectToGooglePlay_();
+          }
+        })
+        .then((paymentData) => {
+          return this.processData_(
+            paymentData,
+            paymentDataRequest,
+            upiPaymentMethod
+          );
+        })
+        .catch((error) => {
+          error['statusCode'] = Constants.ResponseStatus.CANCELED;
+          return Promise.reject(error);
+        })
+    );
   }
 
   /**
@@ -14159,7 +14268,7 @@ class UpiHandler {
    * @return {!Promise<!PaymentData>} A promise containing payment response.
    */
   showUi_(request) {
-    return request.show().then(paymentResponse => {
+    return request.show().then((paymentResponse) => {
       paymentResponse.complete('success');
       return paymentResponse.details;
     });
@@ -14175,8 +14284,9 @@ class UpiHandler {
    */
   checkCanMakePayment_(request) {
     // Checks canMakePayment cache, and use the cache result if it exists.
-    const cacheResult =
-        window.sessionStorage.getItem(Constants.UPI_CAN_MAKE_PAYMENT_CACHE_KEY);
+    const cacheResult = window.sessionStorage.getItem(
+      Constants.UPI_CAN_MAKE_PAYMENT_CACHE_KEY
+    );
     if (cacheResult) {
       return Promise.resolve(cacheResult === 'true');
     }
@@ -14188,14 +14298,16 @@ class UpiHandler {
 
     let canMakePaymentPromise = request.canMakePayment();
 
-    return canMakePaymentPromise.then(result => {
+    return canMakePaymentPromise.then((result) => {
       // Store the result in cache if the result is true to avoid quota error
       // caused by querying multiple times with different data.
       // Doesn't store false because if we do so, user will be redirected to
       // Google Play again after installing Google Pay if Chrome is not closed.
       if (result) {
         window.sessionStorage.setItem(
-            Constants.UPI_CAN_MAKE_PAYMENT_CACHE_KEY, result.toString());
+          Constants.UPI_CAN_MAKE_PAYMENT_CACHE_KEY,
+          result.toString()
+        );
       }
       return result;
     });
@@ -14209,10 +14321,12 @@ class UpiHandler {
    */
   redirectToGooglePlay_() {
     window.location.replace(
-        // NOLINT
-            'https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user');  // NOLINT
-    return Promise.reject(
-        {'errorMessage': 'Cannot redirect to Tez page in Google Play.'});
+      // NOLINT
+      'https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user'
+    ); // NOLINT
+    return Promise.reject({
+      'errorMessage': 'Cannot redirect to Tez page in Google Play.',
+    });
   }
 
   /**
@@ -14236,14 +14350,14 @@ class UpiHandler {
           // payment failure due to invalid MPIN
           error = {
             'errorCode': PublicErrorCode.BUYER_ACCOUNT_ERROR,
-            'errorMessage': 'Payment failure due to invalid MPIN.'
+            'errorMessage': 'Payment failure due to invalid MPIN.',
           };
           break;
         case 'Z9':
           // payment failure due to insufficient funds
           error = {
             'errorCode': PublicErrorCode.BUYER_ACCOUNT_ERROR,
-            'errorMessage': 'Payment failure due to insufficient funds.'
+            'errorMessage': 'Payment failure due to insufficient funds.',
           };
           break;
         case '91':
@@ -14251,8 +14365,8 @@ class UpiHandler {
           error = {
             'errorCode': PublicErrorCode.INTERNAL_ERROR,
             'errorMessage':
-                'Payment failure due to transaction timeout or connection' +
-                ' issue.'
+              'Payment failure due to transaction timeout or connection' +
+              ' issue.',
           };
           break;
         default:
@@ -14267,10 +14381,10 @@ class UpiHandler {
       'payeeVpa': upiPaymentMethod['parameters']['payeeVpa'],
       'status': tezResponse['Status'],
       'transactionReferenceId':
-          upiPaymentMethod['parameters']['transactionReferenceId'],
-      'transactionId': upiPaymentMethod['parameters']['transactionId'] ?
-          upiPaymentMethod['parameters']['transactionId'] :
-          tezResponse['txnId'],
+        upiPaymentMethod['parameters']['transactionReferenceId'],
+      'transactionId': upiPaymentMethod['parameters']['transactionId']
+        ? upiPaymentMethod['parameters']['transactionId']
+        : tezResponse['txnId'],
       'transactionInfo': paymentDataRequest['transactionInfo'],
     };
 
@@ -14286,10 +14400,10 @@ class UpiHandler {
             // TODO: Verify that response comes from tez and
             // add signature and encrypt signed message here
             'signature': '',
-            'signedMessage': signedMessage
-          }
-        }
-      }
+            'signedMessage': signedMessage,
+          },
+        },
+      },
     };
     return Promise.resolve(paymentData);
   }
@@ -14328,63 +14442,71 @@ Dual licensed under the MIT and GPL licenses.
  *   "098F4D35"
  */
 
-class Random_uuid {}  // Private array of chars to use
-  var CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+class Random_uuid {} // Private array of chars to use
+var CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split(
+  ''
+);
 
-  Random_uuid.uuid = function (len, radix) {
-    var chars = CHARS, uuid = [], i;
-    radix = radix || chars.length;
+Random_uuid.uuid = function (len, radix) {
+  var chars = CHARS,
+    uuid = [],
+    i;
+  radix = radix || chars.length;
 
-    if (len) {
-      // Compact form
-      for (i = 0; i < len; i++) uuid[i] = chars[0 | Math.random()*radix];
+  if (len) {
+    // Compact form
+    for (i = 0; i < len; i++) uuid[i] = chars[0 | (Math.random() * radix)];
+  } else {
+    // rfc4122, version 4 form
+    var r;
+
+    // rfc4122 requires these characters
+    uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
+    uuid[14] = '4';
+
+    // Fill in random data.  At i==19 set the high bits of clock sequence as
+    // per rfc4122, sec. 4.1.5
+    for (i = 0; i < 36; i++) {
+      if (!uuid[i]) {
+        r = 0 | (Math.random() * 16);
+        uuid[i] = chars[i == 19 ? (r & 0x3) | 0x8 : r];
+      }
+    }
+  }
+
+  return uuid.join('');
+};
+
+// A more performant, but slightly bulkier, RFC4122v4 solution.  We boost performance
+// by minimizing calls to random()
+Random_uuid.uuidFast = function () {
+  var chars = CHARS,
+    uuid = new Array(36),
+    rnd = 0,
+    r;
+  for (var i = 0; i < 36; i++) {
+    if (i == 8 || i == 13 || i == 18 || i == 23) {
+      uuid[i] = '-';
+    } else if (i == 14) {
+      uuid[i] = '4';
     } else {
-      // rfc4122, version 4 form
-      var r;
-
-      // rfc4122 requires these characters
-      uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
-      uuid[14] = '4';
-
-      // Fill in random data.  At i==19 set the high bits of clock sequence as
-      // per rfc4122, sec. 4.1.5
-      for (i = 0; i < 36; i++) {
-        if (!uuid[i]) {
-          r = 0 | Math.random()*16;
-          uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r];
-        }
-      }
+      if (rnd <= 0x02) rnd = (0x2000000 + Math.random() * 0x1000000) | 0;
+      r = rnd & 0xf;
+      rnd = rnd >> 4;
+      uuid[i] = chars[i == 19 ? (r & 0x3) | 0x8 : r];
     }
+  }
+  return uuid.join('');
+};
 
-    return uuid.join('');
-  };
-
-  // A more performant, but slightly bulkier, RFC4122v4 solution.  We boost performance
-  // by minimizing calls to random()
-  Random_uuid.uuidFast = function() {
-    var chars = CHARS, uuid = new Array(36), rnd=0, r;
-    for (var i = 0; i < 36; i++) {
-      if (i==8 || i==13 ||  i==18 || i==23) {
-        uuid[i] = '-';
-      } else if (i==14) {
-        uuid[i] = '4';
-      } else {
-        if (rnd <= 0x02) rnd = 0x2000000 + (Math.random()*0x1000000)|0;
-        r = rnd & 0xf;
-        rnd = rnd >> 4;
-        uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r];
-      }
-    }
-    return uuid.join('');
-  };
-
-  // A more compact, but less performant, RFC4122v4 solution:
-  Random_uuid.uuidCompact = function() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
-      return v.toString(16);
-    });
-  };
+// A more compact, but less performant, RFC4122v4 solution:
+Random_uuid.uuidCompact = function () {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = (Math.random() * 16) | 0,
+      v = c == 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
 
 /**
  * @license
@@ -15773,7 +15895,8 @@ class Propensity {
   }
 }
 
-const CSS = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
+const CSS =
+  '.swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important}}\n/*# sourceURL=/./src/components/dialog.css*/';
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -16052,7 +16175,7 @@ class ConfiguredRuntime {
     // WARNING: DepsDef ('this') is being progressively defined below.
     // Constructors will crash if they rely on something that doesn't exist yet.
     /** @private @const {!../components/activities.ActivityPorts} */
-    this.activityPorts_ = new ActivityPorts$1(this);
+    this.activityPorts_ = new ActivityPorts$2(this);
 
     /** @private @const {!AnalyticsService} */
     this.analyticsService_ = new AnalyticsService(this, this.fetcher_);
@@ -16534,7 +16657,7 @@ class ConfiguredRuntime {
     if (
       !entitlement ||
       !isSecure(this.win().location) ||
-      !wasReferredByGoogle(parseUrl(this.win().document.referrer)) ||
+      !wasReferredByGoogle(parseUrl$1(this.win().document.referrer)) ||
       !queryStringHasFreshGaaParams(this.win().location.search)
     ) {
       return Promise.resolve();
@@ -16566,4 +16689,1839 @@ class ConfiguredRuntime {
   }
 }
 
-export { AnalyticsEvent, ClientEvent, ClientEventManagerApi, ConfiguredRuntime, DeferredAccountCreationResponse, Entitlement, Entitlements, EventOriginator, Fetcher, FilterResult, PurchaseData, SubscribeResponse, UserData };
+/**
+ * @license
+ * Copyright 2017 The Web Activities Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*eslint no-unused-vars: 0*/
+
+/**
+ * @enum {string}
+ */
+const ActivityMode = {
+  IFRAME: 'iframe',
+  POPUP: 'popup',
+  REDIRECT: 'redirect',
+};
+
+/**
+ * The result code used for `ActivityResult`.
+ * @enum {string}
+ */
+const ActivityResultCode = {
+  OK: 'ok',
+  CANCELED: 'canceled',
+  FAILED: 'failed',
+};
+
+/**
+ * The result of an activity. The activity implementation returns this object
+ * for a successful result, a cancelation or a failure.
+ * @struct
+ */
+class ActivityResult {
+  /**
+   * @param {!ActivityResultCode} code
+   * @param {*} data
+   * @param {!ActivityMode} mode
+   * @param {string} origin
+   * @param {boolean} originVerified
+   * @param {boolean} secureChannel
+   */
+  constructor(code, data, mode, origin, originVerified, secureChannel) {
+    /** @const {!ActivityResultCode} */
+    this.code = code;
+    /** @const {*} */
+    this.data = code == ActivityResultCode.OK ? data : null;
+    /** @const {!ActivityMode} */
+    this.mode = mode;
+    /** @const {string} */
+    this.origin = origin;
+    /** @const {boolean} */
+    this.originVerified = originVerified;
+    /** @const {boolean} */
+    this.secureChannel = secureChannel;
+    /** @const {boolean} */
+    this.ok = code == ActivityResultCode.OK;
+    /** @const {?Error} */
+    this.error =
+      code == ActivityResultCode.FAILED ? new Error(String(data) || '') : null;
+  }
+}
+
+/**
+ * The activity request that different types of hosts can be started with.
+ * @typedef {{
+ *   requestId: string,
+ *   returnUrl: string,
+ *   args: ?Object,
+ *   origin: (string|undefined),
+ *   originVerified: (boolean|undefined),
+ * }}
+ */
+let ActivityRequest;
+
+/**
+ * The activity "open" options used for popups and redirects.
+ *
+ * - returnUrl: override the return URL. By default, the current URL will be
+ *   used.
+ * - skipRequestInUrl: removes the activity request from the URL, in case
+ *   redirect is used. By default, the activity request is appended to the
+ *   activity URL. This option can be used if the activity request is passed
+ *   to the activity by some alternative means.
+ * - disableRedirectFallback: disallows popup fallback to redirect. By default
+ *   the redirect fallback is allowed. This option has to be used very carefully
+ *   because there are many user agents that may fail to open a popup and it
+ *   won't be always possible for the opener window to even be aware of such
+ *   failures.
+ *
+ * @typedef {{
+ *   returnUrl: (string|undefined),
+ *   skipRequestInUrl: (boolean|undefined),
+ *   disableRedirectFallback: (boolean|undefined),
+ *   width: (number|undefined),
+ *   height: (number|undefined),
+ * }}
+ */
+let ActivityOpenOptions;
+
+/**
+ * Activity client-side binding. The port provides limited ways to communicate
+ * with the activity and receive signals and results from it. Not every type
+ * of activity exposes a port.
+ *
+ * @interface
+ */
+class ActivityPort {
+  /**
+   * Returns the mode of the activity: iframe, popup or redirect.
+   * @return {!ActivityMode}
+   */
+  getMode() {}
+
+  /**
+   * Accepts the result when ready. The client should verify the activity's
+   * mode, origin, verification and secure channel flags before deciding
+   * whether or not to trust the result.
+   *
+   * Returns the promise that yields when the activity has been completed and
+   * either a result, a cancelation or a failure has been returned.
+   *
+   * @return {!Promise<!ActivityResult>}
+   */
+  acceptResult() {}
+}
+
+/**
+ * Activity client-side binding for messaging.
+ *
+ * Whether the host can or cannot receive a message depends on the type of
+ * host and its state. Ensure that the code has an alternative path if
+ * messaging is not available.
+ *
+ * @interface
+ */
+class ActivityMessagingPort {
+  /**
+   * Returns the target window where host is loaded. May be unavailable.
+   * @return {?Window}
+   */
+  getTargetWin() {}
+
+  /**
+   * Sends a message to the host.
+   * @param {!Object} payload
+   */
+  message(payload) {}
+
+  /**
+   * Registers a callback to receive messages from the host.
+   * @param {function(!Object)} callback
+   */
+  onMessage(callback) {}
+
+  /**
+   * Creates a new communication channel or returns an existing one.
+   * @param {string=} opt_name
+   * @return {!Promise<!MessagePort>}
+   */
+  messageChannel(opt_name) {}
+}
+
+/** DOMException.ABORT_ERR name */
+const ABORT_ERR_NAME = 'AbortError';
+
+/** DOMException.ABORT_ERR = 20 */
+const ABORT_ERR_CODE = 20;
+
+/** @type {?HTMLAnchorElement} */
+let aResolver;
+
+/**
+ * @param {string} urlString
+ * @return {!HTMLAnchorElement}
+ */
+function parseUrl(urlString) {
+  if (!aResolver) {
+    aResolver = /** @type {!HTMLAnchorElement} */ (document.createElement('a'));
+  }
+  aResolver.href = urlString;
+  return /** @type {!HTMLAnchorElement} */ (aResolver);
+}
+
+/**
+ * @param {!Location|!URL|!HTMLAnchorElement} loc
+ * @return {string}
+ */
+function getOrigin(loc) {
+  if (loc.origin) {
+    return loc.origin;
+  }
+  // Make sure that the origin is normalized. Specifically on IE, host sometimes
+  // includes the default port, which is not per standard.
+  const protocol = loc.protocol;
+  let host = loc.host;
+  if (protocol == 'https:' && host.indexOf(':443') == host.length - 4) {
+    host = host.replace(':443', '');
+  } else if (protocol == 'http:' && host.indexOf(':80') == host.length - 3) {
+    host = host.replace(':80', '');
+  }
+  return protocol + '//' + host;
+}
+
+/**
+ * @param {string} urlString
+ * @return {string}
+ */
+function getOriginFromUrl(urlString) {
+  return getOrigin(parseUrl(urlString));
+}
+
+/**
+ * @param {string} urlString
+ * @return {string}
+ */
+function removeFragment(urlString) {
+  const index = urlString.indexOf('#');
+  if (index == -1) {
+    return urlString;
+  }
+  return urlString.substring(0, index);
+}
+
+/**
+ * Parses and builds Object of URL query string.
+ * @param {string} query The URL query string.
+ * @return {!Object<string, string>}
+ */
+function parseQueryString(query) {
+  if (!query) {
+    return {};
+  }
+  return (/^[?#]/.test(query) ? query.slice(1) : query)
+    .split('&')
+    .reduce((params, param) => {
+      const item = param.split('=');
+      const key = decodeURIComponent(item[0] || '');
+      const value = decodeURIComponent(item[1] || '');
+      if (key) {
+        params[key] = value;
+      }
+      return params;
+    }, {});
+}
+
+/**
+ * @param {string} queryString  A query string in the form of "a=b&c=d". Could
+ *   be optionally prefixed with "?" or "#".
+ * @param {string} param The param to get from the query string.
+ * @return {?string}
+ */
+function getQueryParam(queryString, param) {
+  return parseQueryString(queryString)[param];
+}
+
+/**
+ * Add a query-like parameter to the fragment string.
+ * @param {string} url
+ * @param {string} param
+ * @param {string} value
+ * @return {string}
+ */
+function addFragmentParam(url, param, value) {
+  return (
+    url +
+    (url.indexOf('#') == -1 ? '#' : '&') +
+    encodeURIComponent(param) +
+    '=' +
+    encodeURIComponent(value)
+  );
+}
+
+/**
+ * @param {string} queryString  A query string in the form of "a=b&c=d". Could
+ *   be optionally prefixed with "?" or "#".
+ * @param {string} param The param to remove from the query string.
+ * @return {?string}
+ */
+function removeQueryParam(queryString, param) {
+  if (!queryString) {
+    return queryString;
+  }
+  const search = encodeURIComponent(param) + '=';
+  let index = -1;
+  do {
+    index = queryString.indexOf(search, index);
+    if (index != -1) {
+      const prev = index > 0 ? queryString.substring(index - 1, index) : '';
+      if (prev == '' || prev == '?' || prev == '#' || prev == '&') {
+        let end = queryString.indexOf('&', index + 1);
+        if (end == -1) {
+          end = queryString.length;
+        }
+        queryString =
+          queryString.substring(0, index) + queryString.substring(end + 1);
+      } else {
+        index++;
+      }
+    }
+  } while (index != -1 && index < queryString.length);
+  return queryString;
+}
+
+/**
+ * @param {!ActivityRequest} request
+ * @return {string}
+ */
+function serializeRequest(request) {
+  const map = {
+    'requestId': request.requestId,
+    'returnUrl': request.returnUrl,
+    'args': request.args,
+  };
+  if (request.origin !== undefined) {
+    map['origin'] = request.origin;
+  }
+  if (request.originVerified !== undefined) {
+    map['originVerified'] = request.originVerified;
+  }
+  return JSON.stringify(map);
+}
+
+/**
+ * @param {*} error
+ * @return {boolean}
+ */
+function isAbortError(error) {
+  if (!error || typeof error != 'object') {
+    return false;
+  }
+  return error['name'] === ABORT_ERR_NAME;
+}
+
+/**
+ * Creates or emulates a DOMException of AbortError type.
+ * See https://heycam.github.io/webidl/#aborterror.
+ * @param {!Window} win
+ * @param {string=} opt_message
+ * @return {!DOMException}
+ */
+function createAbortError(win, opt_message) {
+  const message = 'AbortError' + (opt_message ? ': ' + opt_message : '');
+  let error = null;
+  if (typeof win['DOMException'] == 'function') {
+    // TODO(dvoytenko): remove typecast once externs are fixed.
+    const constr = /** @type {function(new:DOMException, string, string)} */ (win[
+      'DOMException'
+    ]);
+    try {
+      error = new constr(message, ABORT_ERR_NAME);
+    } catch (e) {
+      // Ignore. In particular, `new DOMException()` fails in Edge.
+    }
+  }
+  if (!error) {
+    // TODO(dvoytenko): remove typecast once externs are fixed.
+    const constr = /** @type {function(new:DOMException, string)} */ (Error);
+    error = new constr(message);
+    error.name = ABORT_ERR_NAME;
+    error.code = ABORT_ERR_CODE;
+  }
+  return error;
+}
+
+/**
+ * Resolves the activity result as a promise:
+ *  - `OK` result is yielded as the promise's payload;
+ *  - `CANCEL` result is rejected with the `AbortError`;
+ *  - `FAILED` result is rejected with the embedded error.
+ *
+ * @param {!Window} win
+ * @param {!ActivityResult} result
+ * @param {function((!ActivityResult|!Promise))} resolver
+ */
+function resolveResult(win, result, resolver) {
+  if (result.ok) {
+    resolver(result);
+  } else {
+    const error = result.error || createAbortError(win);
+    error.activityResult = result;
+    resolver(Promise.reject(error));
+  }
+}
+
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function isIeBrowser(win) {
+  // MSIE and Trident are typical user agents for IE browsers.
+  const nav = win.navigator;
+  return /Trident|MSIE|IEMobile/i.test(nav && nav.userAgent);
+}
+
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function isEdgeBrowser(win) {
+  const nav = win.navigator;
+  return /Edge/i.test(nav && nav.userAgent);
+}
+
+/**
+ * @param {!Error} e
+ */
+function throwAsync(e) {
+  setTimeout(() => {
+    throw e;
+  });
+}
+
+/**
+ * Polyfill of the `Node.isConnected` API. See
+ * https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected.
+ * @param {!Node} node
+ * @return {boolean}
+ */
+function isNodeConnected(node) {
+  // Ensure that node is attached if specified. This check uses a new and
+  // fast `isConnected` API and thus only checked on platforms that have it.
+  // See https://www.chromestatus.com/feature/5676110549352448.
+  if ('isConnected' in node) {
+    return node['isConnected'];
+  }
+  // Polyfill.
+  const root = node.ownerDocument && node.ownerDocument.documentElement;
+  return (root && root.contains(node)) || false;
+}
+
+const SENTINEL = '__ACTIVITIES__';
+
+/**
+ * The messenger helper for activity's port and host.
+ */
+class Messenger {
+  /**
+   * @param {!Window} win
+   * @param {!Window|function():?Window} targetOrCallback
+   * @param {?string} targetOrigin
+   * @param {boolean} requireTarget
+   */
+  constructor(win, targetOrCallback, targetOrigin, requireTarget) {
+    /** @private @const {!Window} */
+    this.win_ = win;
+
+    /** @private @const {!Window|function():?Window} */
+    this.targetOrCallback_ = targetOrCallback;
+
+    /**
+     * May start as unknown (`null`) until received in the first message.
+     * @private {?string}
+     */
+    this.targetOrigin_ = targetOrigin;
+
+    /** @private @const {boolean} */
+    this.requireTarget_ = requireTarget;
+
+    /** @private {?Window} */
+    this.target_ = null;
+
+    /** @private {boolean} */
+    this.acceptsChannel_ = false;
+
+    /** @private {?MessagePort} */
+    this.port_ = null;
+
+    /** @private {?function(string, ?Object)} */
+    this.onCommand_ = null;
+
+    /** @private {?function(!Object)} */
+    this.onCustomMessage_ = null;
+
+    /**
+     * @private {?Object<string, !ChannelHolder>}
+     */
+    this.channels_ = null;
+
+    /** @private @const */
+    this.boundHandleEvent_ = this.handleEvent_.bind(this);
+  }
+
+  /**
+   * Connect the port to the host or vice versa.
+   * @param {function(string, ?Object)} onCommand
+   */
+  connect(onCommand) {
+    if (this.onCommand_) {
+      throw new Error('already connected');
+    }
+    this.onCommand_ = onCommand;
+    this.win_.addEventListener('message', this.boundHandleEvent_);
+  }
+
+  /**
+   * Disconnect messenger.
+   */
+  disconnect() {
+    if (this.onCommand_) {
+      this.onCommand_ = null;
+      if (this.port_) {
+        closePort(this.port_);
+        this.port_ = null;
+      }
+      this.win_.removeEventListener('message', this.boundHandleEvent_);
+      if (this.channels_) {
+        for (const k in this.channels_) {
+          const channelObj = this.channels_[k];
+          if (channelObj.port1) {
+            closePort(channelObj.port1);
+          }
+          if (channelObj.port2) {
+            closePort(channelObj.port2);
+          }
+        }
+        this.channels_ = null;
+      }
+    }
+  }
+
+  /**
+   * Returns whether the messenger has been connected already.
+   * @return {boolean}
+   */
+  isConnected() {
+    return this.targetOrigin_ != null;
+  }
+
+  /**
+   * Returns the messaging target. Only available when connection has been
+   * establihsed.
+   * @return {!Window}
+   */
+  getTarget() {
+    const target = this.getOptionalTarget_();
+    if (!target) {
+      throw new Error('not connected');
+    }
+    return target;
+  }
+
+  /**
+   * @return {?Window}
+   * @private
+   */
+  getOptionalTarget_() {
+    if (this.onCommand_ && !this.target_) {
+      if (typeof this.targetOrCallback_ == 'function') {
+        this.target_ = this.targetOrCallback_();
+      } else {
+        this.target_ = /** @type {!Window} */ (this.targetOrCallback_);
+      }
+    }
+    return this.target_;
+  }
+
+  /**
+   * Returns the messaging origin. Only available when connection has been
+   * establihsed.
+   * @return {string}
+   */
+  getTargetOrigin() {
+    if (this.targetOrigin_ == null) {
+      throw new Error('not connected');
+    }
+    return this.targetOrigin_;
+  }
+
+  /**
+   * The host sends this message to the client to indicate that it's ready to
+   * start communicating. The client is expected to respond back with the
+   * "start" command. See `sendStartCommand` method.
+   */
+  sendConnectCommand() {
+    // TODO(dvoytenko): MessageChannel is critically necessary for IE/Edge,
+    // since window messaging doesn't always work. It's also preferred as an API
+    // for other browsers: it's newer, cleaner and arguably more secure.
+    // Unfortunately, browsers currently do not propagate user gestures via
+    // MessageChannel, only via window messaging. This should be re-enabled
+    // once browsers fix user gesture propagation.
+    // See:
+    // Safari: https://bugs.webkit.org/show_bug.cgi?id=186593
+    // Chrome: https://bugs.chromium.org/p/chromium/issues/detail?id=851493
+    // Firefox: https://bugzilla.mozilla.org/show_bug.cgi?id=1469422
+    const acceptsChannel = isIeBrowser(this.win_) || isEdgeBrowser(this.win_);
+    this.sendCommand('connect', {'acceptsChannel': acceptsChannel});
+  }
+
+  /**
+   * The client sends this message to the host upon receiving the "connect"
+   * message to start the main communication channel. As a payload, the message
+   * will contain the provided start arguments.
+   * @param {?Object} args
+   */
+  sendStartCommand(args) {
+    let channel = null;
+    if (this.acceptsChannel_ && typeof this.win_.MessageChannel == 'function') {
+      channel = new this.win_.MessageChannel();
+    }
+    if (channel) {
+      this.sendCommand('start', args, [channel.port2]);
+      // It's critical to switch to port messaging only after "start" has been
+      // sent. Otherwise, it won't be delivered.
+      this.switchToChannel_(channel.port1);
+    } else {
+      this.sendCommand('start', args);
+    }
+  }
+
+  /**
+   * Sends the specified command from the port to the host or vice versa.
+   * @param {string} cmd
+   * @param {?Object=} opt_payload
+   * @param {?Array=} opt_transfer
+   */
+  sendCommand(cmd, opt_payload, opt_transfer) {
+    const data = {
+      'sentinel': SENTINEL,
+      'cmd': cmd,
+      'payload': opt_payload || null,
+    };
+    if (this.port_) {
+      this.port_.postMessage(data, opt_transfer || undefined);
+    } else {
+      const target = this.getTarget();
+      // Only "connect" command is allowed to use `targetOrigin == '*'`
+      const targetOrigin =
+        cmd == 'connect'
+          ? this.targetOrigin_ != null
+            ? this.targetOrigin_
+            : '*'
+          : this.getTargetOrigin();
+      target.postMessage(data, targetOrigin, opt_transfer || undefined);
+    }
+  }
+
+  /**
+   * Sends a message to the client.
+   * @param {!Object} payload
+   */
+  customMessage(payload) {
+    this.sendCommand('msg', payload);
+  }
+
+  /**
+   * Registers a callback to receive messages from the client.
+   * @param {function(!Object)} callback
+   */
+  onCustomMessage(callback) {
+    this.onCustomMessage_ = callback;
+  }
+
+  /**
+   * @param {string=} opt_name
+   * @return {!Promise<!MessagePort>}
+   */
+  startChannel(opt_name) {
+    const name = opt_name || '';
+    const channelObj = this.getChannelObj_(name);
+    if (!channelObj.port1) {
+      const channel = new this.win_.MessageChannel();
+      channelObj.port1 = channel.port1;
+      channelObj.port2 = channel.port2;
+      channelObj.resolver(channelObj.port1);
+    }
+    if (channelObj.port2) {
+      // Not yet sent.
+      this.sendCommand('cnset', {'name': name}, [channelObj.port2]);
+      channelObj.port2 = null;
+    }
+    return channelObj.promise;
+  }
+
+  /**
+   * @param {string=} opt_name
+   * @return {!Promise<!MessagePort>}
+   */
+  askChannel(opt_name) {
+    const name = opt_name || '';
+    const channelObj = this.getChannelObj_(name);
+    if (!channelObj.port1) {
+      this.sendCommand('cnget', {'name': name});
+    }
+    return channelObj.promise;
+  }
+
+  /**
+   * @param {string} name
+   * @param {!MessagePort} port
+   * @private
+   */
+  receiveChannel_(name, port) {
+    const channelObj = this.getChannelObj_(name);
+    channelObj.port1 = port;
+    channelObj.resolver(port);
+  }
+
+  /**
+   * @param {string} name
+   * @return {!ChannelHolder}
+   */
+  getChannelObj_(name) {
+    if (!this.channels_) {
+      this.channels_ = {};
+    }
+    let channelObj = this.channels_[name];
+    if (!channelObj) {
+      let resolver;
+      const promise = new Promise((resolve) => {
+        resolver = resolve;
+      });
+      channelObj = {
+        port1: null,
+        port2: null,
+        resolver,
+        promise,
+      };
+      this.channels_[name] = channelObj;
+    }
+    return channelObj;
+  }
+
+  /**
+   * @param {!MessagePort} port
+   * @private
+   */
+  switchToChannel_(port) {
+    if (this.port_) {
+      closePort(this.port_);
+    }
+    this.port_ = port;
+    this.port_.onmessage = (event) => {
+      const data = event.data;
+      const cmd = data && data['cmd'];
+      const payload = (data && data['payload']) || null;
+      if (cmd) {
+        this.handleCommand_(cmd, payload, event);
+      }
+    };
+    // Even though all messaging will switch to ports, the window-based message
+    // listener will be preserved just in case the host is refreshed and needs
+    // another connection.
+  }
+
+  /**
+   * @param {!MessageEvent} event
+   * @private
+   */
+  handleEvent_(event) {
+    if (this.requireTarget_ && this.getOptionalTarget_() != event.source) {
+      // When target is required, confirm it against the event.source. This
+      // is normally only needed for ports where a single window can include
+      // multiple iframes to match the event to a specific iframe. Otherwise,
+      // the origin checks below are sufficient.
+      return;
+    }
+    const data = event.data;
+    if (!data || data['sentinel'] != SENTINEL) {
+      return;
+    }
+    const cmd = data['cmd'];
+    if (this.port_ && cmd != 'connect' && cmd != 'start') {
+      // Messaging channel has already taken over. However, the "connect" and
+      // "start" commands are allowed to proceed in case re-connection is
+      // requested.
+      return;
+    }
+    const origin = /** @type {string} */ (event.origin);
+    const payload = data['payload'] || null;
+    if (this.targetOrigin_ == null && cmd == 'start') {
+      this.targetOrigin_ = origin;
+    }
+    if (this.targetOrigin_ == null && event.source) {
+      if (this.getOptionalTarget_() == event.source) {
+        this.targetOrigin_ = origin;
+      }
+    }
+    // Notice that event.source may differ from the target because of
+    // friendly-iframe intermediaries.
+    if (origin != this.targetOrigin_) {
+      return;
+    }
+    this.handleCommand_(cmd, payload, event);
+  }
+
+  /**
+   * @param {string} cmd
+   * @param {?Object} payload
+   * @param {!MessageEvent} event
+   * @private
+   */
+  handleCommand_(cmd, payload, event) {
+    if (cmd == 'connect') {
+      if (this.port_) {
+        // In case the port has already been open - close it to reopen it
+        // again later.
+        closePort(this.port_);
+        this.port_ = null;
+      }
+      this.acceptsChannel_ = (payload && payload['acceptsChannel']) || false;
+      this.onCommand_(cmd, payload);
+    } else if (cmd == 'start') {
+      const port = event.ports && event.ports[0];
+      if (port) {
+        this.switchToChannel_(port);
+      }
+      this.onCommand_(cmd, payload);
+    } else if (cmd == 'msg') {
+      if (this.onCustomMessage_ != null && payload != null) {
+        this.onCustomMessage_(payload);
+      }
+    } else if (cmd == 'cnget') {
+      const name = payload['name'];
+      this.startChannel(name);
+    } else if (cmd == 'cnset') {
+      const name = payload['name'];
+      const port = event.ports[0];
+      this.receiveChannel_(name, /** @type {!MessagePort} */ (port));
+    } else {
+      this.onCommand_(cmd, payload);
+    }
+  }
+}
+
+/**
+ * @param {!MessagePort} port
+ */
+function closePort(port) {
+  try {
+    port.close();
+  } catch (e) {
+    // Ignore.
+  }
+}
+
+/**
+ * The `ActivityPort` implementation for the iframe case. Unlike other types
+ * of activities, iframe-based activities are always connected and can react
+ * to size requests.
+ *
+ * @implements {ActivityPort}
+ * @implements {ActivityMessagingPort}
+ */
+class ActivityIframePort {
+  /**
+   * @param {!HTMLIFrameElement} iframe
+   * @param {string} url
+   * @param {?Object=} opt_args
+   */
+  constructor(iframe, url, opt_args) {
+    /** @private @const {!HTMLIFrameElement} */
+    this.iframe_ = iframe;
+    /** @private @const {string} */
+    this.url_ = url;
+    /** @private @const {?Object} */
+    this.args_ = opt_args || null;
+
+    /** @private @const {!Window} */
+    this.win_ = /** @type {!Window} */ (this.iframe_.ownerDocument.defaultView);
+
+    /** @private @const {string} */
+    this.targetOrigin_ = getOriginFromUrl(url);
+
+    /** @private {boolean} */
+    this.connected_ = false;
+
+    /** @private {?function()} */
+    this.connectedResolver_ = null;
+
+    /** @private @const {!Promise} */
+    this.connectedPromise_ = new Promise((resolve) => {
+      this.connectedResolver_ = resolve;
+    });
+
+    /** @private {?function()} */
+    this.readyResolver_ = null;
+
+    /** @private @const {!Promise} */
+    this.readyPromise_ = new Promise((resolve) => {
+      this.readyResolver_ = resolve;
+    });
+
+    /** @private {?function((!ActivityResult|!Promise))} */
+    this.resultResolver_ = null;
+
+    /** @private @const {!Promise<!ActivityResult>} */
+    this.resultPromise_ = new Promise((resolve) => {
+      this.resultResolver_ = resolve;
+    });
+
+    /** @private {?function(number)} */
+    this.onResizeRequest_ = null;
+
+    /** @private {?number} */
+    this.requestedHeight_ = null;
+
+    /** @private @const {!Messenger} */
+    this.messenger_ = new Messenger(
+      this.win_,
+      () => this.iframe_.contentWindow,
+      this.targetOrigin_,
+      /* requireTarget */ true
+    );
+  }
+
+  /** @override */
+  getMode() {
+    return ActivityMode.IFRAME;
+  }
+
+  /**
+   * Waits until the activity port is connected to the host.
+   * @return {!Promise}
+   */
+  connect() {
+    if (!isNodeConnected(this.iframe_)) {
+      throw new Error('iframe must be in DOM');
+    }
+    this.messenger_.connect(this.handleCommand_.bind(this));
+    this.iframe_.src = this.url_;
+    return this.connectedPromise_;
+  }
+
+  /**
+   * Disconnect the activity binding and cleanup listeners.
+   */
+  disconnect() {
+    this.connected_ = false;
+    this.messenger_.disconnect();
+  }
+
+  /** @override */
+  acceptResult() {
+    return this.resultPromise_;
+  }
+
+  /** @override */
+  getTargetWin() {
+    return this.iframe_.contentWindow || null;
+  }
+
+  /** @override */
+  message(payload) {
+    this.messenger_.customMessage(payload);
+  }
+
+  /** @override */
+  onMessage(callback) {
+    this.messenger_.onCustomMessage(callback);
+  }
+
+  /** @override */
+  messageChannel(opt_name) {
+    return this.messenger_.askChannel(opt_name);
+  }
+
+  /**
+   * Returns a promise that yields when the iframe is ready to be interacted
+   * with.
+   * @return {!Promise}
+   */
+  whenReady() {
+    return this.readyPromise_;
+  }
+
+  /**
+   * Register a callback to handle resize requests. Once successfully resized,
+   * ensure to call `resized()` method.
+   * @param {function(number)} callback
+   */
+  onResizeRequest(callback) {
+    this.onResizeRequest_ = callback;
+    Promise.resolve().then(() => {
+      if (this.requestedHeight_ != null) {
+        callback(this.requestedHeight_);
+      }
+    });
+  }
+
+  /**
+   * Signals back to the activity implementation that the client has updated
+   * the activity's size.
+   */
+  resized() {
+    if (!this.connected_) {
+      return;
+    }
+    const height = this.iframe_.offsetHeight;
+    this.messenger_.sendCommand('resized', {'height': height});
+  }
+
+  /**
+   * @param {string} cmd
+   * @param {?Object} payload
+   * @private
+   */
+  handleCommand_(cmd, payload) {
+    if (cmd == 'connect') {
+      // First ever message. Indicates that the receiver is listening.
+      this.connected_ = true;
+      this.messenger_.sendStartCommand(this.args_);
+      this.connectedResolver_();
+    } else if (cmd == 'result') {
+      // The last message. Indicates that the result has been received.
+      if (this.resultResolver_) {
+        const code = /** @type {!ActivityResultCode} */ (payload['code']);
+        const data =
+          code == ActivityResultCode.FAILED
+            ? new Error(payload['data'] || '')
+            : payload['data'];
+        const result = new ActivityResult(
+          code,
+          data,
+          ActivityMode.IFRAME,
+          this.messenger_.getTargetOrigin(),
+          /* originVerified */ true,
+          /* secureChannel */ true
+        );
+        resolveResult(this.win_, result, this.resultResolver_);
+        this.resultResolver_ = null;
+        this.messenger_.sendCommand('close');
+        this.disconnect();
+      }
+    } else if (cmd == 'ready') {
+      if (this.readyResolver_) {
+        this.readyResolver_();
+        this.readyResolver_ = null;
+      }
+    } else if (cmd == 'resize') {
+      this.requestedHeight_ = /** @type {number} */ (payload['height']);
+      if (this.onResizeRequest_) {
+        this.onResizeRequest_(this.requestedHeight_);
+      }
+    }
+  }
+}
+
+/**
+ * The `ActivityPort` implementation for the standalone window activity
+ * client executed as a popup.
+ *
+ * @implements {ActivityPort}
+ * @implements {ActivityMessagingPort}
+ */
+class ActivityWindowPort {
+  /**
+   * @param {!Window} win
+   * @param {string} requestId
+   * @param {string} url
+   * @param {string} target
+   * @param {?Object=} opt_args
+   * @param {?ActivityOpenOptions=} opt_options
+   */
+  constructor(win, requestId, url, target, opt_args, opt_options) {
+    const isValidTarget =
+      target && (target == '_blank' || target == '_top' || target[0] != '_');
+    if (!isValidTarget) {
+      throw new Error(
+        'The only allowed targets are "_blank", "_top"' + ' and name targets'
+      );
+    }
+
+    /** @private @const {!Window} */
+    this.win_ = win;
+    /** @private @const {string} */
+    this.requestId_ = requestId;
+    /** @private @const {string} */
+    this.url_ = url;
+    /** @private @const {string} */
+    this.openTarget_ = target;
+    /** @private @const {?Object} */
+    this.args_ = opt_args || null;
+    /** @private @const {!ActivityOpenOptions} */
+    this.options_ = opt_options || {};
+
+    /** @private {?function()} */
+    this.connectedResolver_ = null;
+
+    /** @private @const {!Promise} */
+    this.connectedPromise_ = new Promise((resolve) => {
+      this.connectedResolver_ = resolve;
+    });
+
+    /** @private {?function((!ActivityResult|!Promise))} */
+    this.resultResolver_ = null;
+
+    /** @private @const {!Promise<!ActivityResult>} */
+    this.resultPromise_ = new Promise((resolve) => {
+      this.resultResolver_ = resolve;
+    });
+
+    /** @private {?Window} */
+    this.targetWin_ = null;
+
+    /** @private {?number} */
+    this.heartbeatInterval_ = null;
+
+    /** @private {?Messenger} */
+    this.messenger_ = null;
+  }
+
+  /** @override */
+  getMode() {
+    return this.openTarget_ == '_top'
+      ? ActivityMode.REDIRECT
+      : ActivityMode.POPUP;
+  }
+
+  /**
+   * Opens the activity in a window, either as a popup or via redirect.
+   *
+   * Returns the promise that will yield when the window returns or closed.
+   * Notice, that this promise may never complete if "redirect" mode was used.
+   *
+   * @return {!Promise}
+   */
+  open() {
+    return this.openInternal_();
+  }
+
+  /**
+   * Waits until the activity port is connected to the host.
+   * @return {!Promise}
+   */
+  whenConnected() {
+    return this.connectedPromise_;
+  }
+
+  /**
+   * Disconnect the activity binding and cleanup listeners.
+   */
+  disconnect() {
+    if (this.heartbeatInterval_) {
+      this.win_.clearInterval(this.heartbeatInterval_);
+      this.heartbeatInterval_ = null;
+    }
+    if (this.messenger_) {
+      this.messenger_.disconnect();
+      this.messenger_ = null;
+    }
+    if (this.targetWin_) {
+      // Try to close the popup window. The host will also try to do the same.
+      try {
+        this.targetWin_.close();
+      } catch (e) {
+        // Ignore.
+      }
+      this.targetWin_ = null;
+    }
+    this.resultResolver_ = null;
+  }
+
+  /** @override */
+  getTargetWin() {
+    return this.targetWin_;
+  }
+
+  /** @override */
+  acceptResult() {
+    return this.resultPromise_;
+  }
+
+  /**
+   * Sends a message to the host.
+   * Whether the host can or cannot receive a message depends on the type of
+   * host and its state. Ensure that the code has an alternative path if
+   * messaging is not available.
+   * @override
+   */
+  message(payload) {
+    this.messenger_.customMessage(payload);
+  }
+
+  /**
+   * Registers a callback to receive messages from the host.
+   * Whether the host can or cannot receive a message depends on the type of
+   * host and its state. Ensure that the code has an alternative path if
+   * messaging is not available.
+   * @override
+   */
+  onMessage(callback) {
+    this.messenger_.onCustomMessage(callback);
+  }
+
+  /**
+   * Creates a new communication channel or returns an existing one.
+   * Whether the host can or cannot receive a message depends on the type of
+   * host and its state. Ensure that the code has an alternative path if
+   * messaging is not available.
+   * @override
+   */
+  messageChannel(opt_name) {
+    return this.messenger_.askChannel(opt_name);
+  }
+
+  /**
+   * This method wraps around window's open method. It first tries to execute
+   * `open` call with the provided target and if it fails, it retries the call
+   * with the `_top` target. This is necessary given that in some embedding
+   * scenarios, such as iOS' WKWebView, navigation to `_blank` and other targets
+   * is blocked by default.
+   * @return {!Promise}
+   * @private
+   */
+  openInternal_() {
+    const featuresStr = this.buildFeatures_();
+
+    // Protectively, the URL will contain the request payload, unless explicitly
+    // directed not to via `skipRequestInUrl` option.
+    let url = this.url_;
+    if (!this.options_.skipRequestInUrl) {
+      const returnUrl =
+        this.options_.returnUrl || removeFragment(this.win_.location.href);
+      const requestString = serializeRequest({
+        requestId: this.requestId_,
+        returnUrl,
+        args: this.args_,
+      });
+      url = addFragmentParam(url, '__WA__', requestString);
+    }
+
+    // Open the window.
+    let targetWin;
+    let openTarget = this.openTarget_;
+    // IE does not support CORS popups - the popup has to fallback to redirect
+    // mode.
+    if (openTarget != '_top') {
+      if (isIeBrowser(this.win_)) {
+        openTarget = '_top';
+      }
+    }
+    // Try first with the specified target. If we're inside the WKWebView or
+    // a similar environments, this method is expected to fail by default for
+    // all targets except `_top`.
+    try {
+      targetWin = this.win_.open(url, openTarget, featuresStr);
+    } catch (e) {
+      // Ignore.
+    }
+    // Then try with `_top` target.
+    if (
+      !targetWin &&
+      openTarget != '_top' &&
+      !this.options_.disableRedirectFallback
+    ) {
+      openTarget = '_top';
+      try {
+        targetWin = this.win_.open(url, openTarget);
+      } catch (e) {
+        // Ignore.
+      }
+    }
+
+    // Setup the target window.
+    if (targetWin) {
+      this.targetWin_ = targetWin;
+      if (openTarget != '_top') {
+        this.setupPopup_();
+      }
+    } else {
+      this.disconnectWithError_(new Error('failed to open window'));
+    }
+
+    // Return result promise, even though it may never complete.
+    return this.resultPromise_.catch(() => {
+      // Ignore. Call to the `acceptResult()` should fail if needed.
+    });
+  }
+
+  /**
+   * @return {string}
+   * @private
+   */
+  buildFeatures_() {
+    // The max width and heights are calculated as following:
+    // MaxSize = AvailSize - ControlsSize
+    // ControlsSize = OuterSize - InnerSize
+    const screen = this.win_.screen;
+    const availWidth = screen.availWidth || screen.width;
+    const availHeight = screen.availHeight || screen.height;
+    const isTop = this.isTopWindow_();
+    const isEdge = isEdgeBrowser(this.win_);
+    // Limit controls to 100px width and height. Notice that it's only
+    // possible to calculate controls size in the top window, not in iframes.
+    // Notice that the Edge behavior is somewhat unique. If we can't find the
+    // right width/height, it will launch in the full-screen. Other browsers
+    // deal with such cases more gracefully.
+    const controlsWidth =
+      isTop && this.win_.outerWidth > this.win_.innerWidth
+        ? Math.min(100, this.win_.outerWidth - this.win_.innerWidth)
+        : isEdge
+        ? 100
+        : 0;
+    const controlsHeight =
+      isTop && this.win_.outerHeight > this.win_.innerHeight
+        ? Math.min(100, this.win_.outerHeight - this.win_.innerHeight)
+        : isEdge
+        ? 100
+        : 0;
+    // With all the adjustments, at least 50% of the available width/height
+    // should be made available to a popup.
+    const maxWidth = Math.max(availWidth - controlsWidth, availWidth * 0.5);
+    const maxHeight = Math.max(availHeight - controlsHeight, availHeight * 0.5);
+    let w = Math.floor(Math.min(600, maxWidth * 0.9));
+    let h = Math.floor(Math.min(600, maxHeight * 0.9));
+    if (this.options_.width) {
+      w = Math.min(this.options_.width, maxWidth);
+    }
+    if (this.options_.height) {
+      h = Math.min(this.options_.height, maxHeight);
+    }
+    const x = Math.floor((screen.width - w) / 2);
+    const y = Math.floor((screen.height - h) / 2);
+    const features = {
+      'height': h,
+      'width': w,
+      'resizable': 'yes',
+      'scrollbars': 'yes',
+    };
+    // Do not set left/top in Edge: it fails.
+    if (!isEdge) {
+      features['left'] = x;
+      features['top'] = y;
+    }
+    let featuresStr = '';
+    for (const f in features) {
+      if (featuresStr) {
+        featuresStr += ',';
+      }
+      featuresStr += `${f}=${features[f]}`;
+    }
+    return featuresStr;
+  }
+
+  /**
+   * This method only exists to make iframe/top emulation possible in tests.
+   * Otherwise `window.top` cannot be overridden.
+   * @return {boolean}
+   * @private
+   */
+  isTopWindow_() {
+    return this.win_ == this.win_.top;
+  }
+
+  /** @private */
+  setupPopup_() {
+    // Keep alive to catch the window closing, which would indicate
+    // "cancel" signal.
+    this.heartbeatInterval_ = this.win_.setInterval(() => {
+      this.check_(/* delayCancel */ true);
+    }, 500);
+
+    // Start up messaging. The messaging is explicitly allowed to proceed
+    // without origin check b/c all arguments have already been passed in
+    // the URL and special handling is enforced when result is delivered.
+    this.messenger_ = new Messenger(
+      this.win_,
+      /** @type {!Window} */ (this.targetWin_),
+      /* targetOrigin */ null,
+      /* requireTarget */ true
+    );
+    this.messenger_.connect(this.handleCommand_.bind(this));
+  }
+
+  /**
+   * @param {boolean=} opt_delayCancel
+   * @private
+   */
+  check_(opt_delayCancel) {
+    if (!this.targetWin_ || this.targetWin_.closed) {
+      if (this.heartbeatInterval_) {
+        this.win_.clearInterval(this.heartbeatInterval_);
+        this.heartbeatInterval_ = null;
+      }
+      // Give a chance for the result to arrive, but otherwise consider the
+      // responce to be empty.
+      this.win_.setTimeout(
+        () => {
+          try {
+            this.result_(ActivityResultCode.CANCELED, /* data */ null);
+          } catch (e) {
+            this.disconnectWithError_(e);
+          }
+        },
+        opt_delayCancel ? 3000 : 0
+      );
+    }
+  }
+
+  /**
+   * @param {!Error} reason
+   * @private
+   */
+  disconnectWithError_(reason) {
+    if (this.resultResolver_) {
+      this.resultResolver_(Promise.reject(reason));
+    }
+    this.disconnect();
+  }
+
+  /**
+   * @param {!ActivityResultCode} code
+   * @param {*} data
+   * @private
+   */
+  result_(code, data) {
+    if (this.resultResolver_) {
+      const isConnected = this.messenger_.isConnected();
+      const result = new ActivityResult(
+        code,
+        data,
+        ActivityMode.POPUP,
+        isConnected
+          ? this.messenger_.getTargetOrigin()
+          : getOriginFromUrl(this.url_),
+        /* originVerified */ isConnected,
+        /* secureChannel */ isConnected
+      );
+      resolveResult(this.win_, result, this.resultResolver_);
+      this.resultResolver_ = null;
+    }
+    if (this.messenger_) {
+      this.messenger_.sendCommand('close');
+    }
+    this.disconnect();
+  }
+
+  /**
+   * @param {string} cmd
+   * @param {?Object} payload
+   * @private
+   */
+  handleCommand_(cmd, payload) {
+    if (cmd == 'connect') {
+      // First ever message. Indicates that the receiver is listening.
+      this.messenger_.sendStartCommand(this.args_);
+      this.connectedResolver_();
+    } else if (cmd == 'result') {
+      // The last message. Indicates that the result has been received.
+      const code = /** @type {!ActivityResultCode} */ (payload['code']);
+      const data =
+        code == ActivityResultCode.FAILED
+          ? new Error(payload['data'] || '')
+          : payload['data'];
+      this.result_(code, data);
+    } else if (cmd == 'check') {
+      this.win_.setTimeout(() => this.check_(), 200);
+    }
+  }
+}
+
+/**
+ * @param {!Window} win
+ * @param {string} fragment
+ * @param {string} requestId
+ * @return {?ActivityPort}
+ */
+function discoverRedirectPort(win, fragment, requestId) {
+  // Try to find the result in the fragment.
+  const paramName = '__WA_RES__';
+  const fragmentParam = getQueryParam(fragment, paramName);
+  if (!fragmentParam) {
+    return null;
+  }
+  const response = /** @type {?Object} */ (JSON.parse(fragmentParam));
+  if (!response || response['requestId'] != requestId) {
+    return null;
+  }
+
+  // Remove the found param from the fragment.
+  const cleanFragment = removeQueryParam(win.location.hash, paramName) || '';
+  if (cleanFragment != win.location.hash) {
+    if (win.history && win.history.replaceState) {
+      try {
+        win.history.replaceState(win.history.state, '', cleanFragment);
+      } catch (e) {
+        // Ignore.
+      }
+    }
+  }
+
+  const code = response['code'];
+  const data = response['data'];
+  const origin = response['origin'];
+  const referrerOrigin =
+    win.document.referrer && getOriginFromUrl(win.document.referrer);
+  const originVerified = origin == referrerOrigin;
+  return new ActivityWindowRedirectPort(
+    win,
+    code,
+    data,
+    origin,
+    originVerified
+  );
+}
+
+/**
+ * The `ActivityPort` implementation for the standalone window activity
+ * client executed as a popup.
+ *
+ * @implements {ActivityPort}
+ */
+class ActivityWindowRedirectPort {
+  /**
+   * @param {!Window} win
+   * @param {!ActivityResultCode} code
+   * @param {*} data
+   * @param {string} targetOrigin
+   * @param {boolean} targetOriginVerified
+   */
+  constructor(win, code, data, targetOrigin, targetOriginVerified) {
+    /** @private @const {!Window} */
+    this.win_ = win;
+    /** @private @const {!ActivityResultCode} */
+    this.code_ = code;
+    /** @private @const {*} */
+    this.data_ = data;
+    /** @private {string} */
+    this.targetOrigin_ = targetOrigin;
+    /** @private {boolean} */
+    this.targetOriginVerified_ = targetOriginVerified;
+  }
+
+  /** @override */
+  getMode() {
+    return ActivityMode.REDIRECT;
+  }
+
+  /** @override */
+  acceptResult() {
+    const result = new ActivityResult(
+      this.code_,
+      this.data_,
+      ActivityMode.REDIRECT,
+      this.targetOrigin_,
+      this.targetOriginVerified_,
+      /* secureChannel */ false
+    );
+    return new Promise((resolve) => {
+      resolveResult(this.win_, result, resolve);
+    });
+  }
+}
+
+/**
+ * The page-level activities manager ports. This class is intended to be used
+ * as a singleton. It can start activities of all modes: iframe, popup, and
+ * redirect.
+ */
+class ActivityPorts {
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    /** @const {string} */
+    this.version = '1.24';
+
+    /** @private @const {!Window} */
+    this.win_ = win;
+
+    /** @private @const {string} */
+    this.fragment_ = win.location.hash;
+
+    /**
+     * @private @const {!Object<string, !Array<function(!ActivityPort)>>}
+     */
+    this.requestHandlers_ = {};
+
+    /**
+     * The result buffer is indexed by `requestId`.
+     * @private @const {!Object<string, !ActivityPort>}
+     */
+    this.resultBuffer_ = {};
+
+    /** @private {?function(!Error)} */
+    this.redirectErrorResolver_ = null;
+
+    /** @private {!Promise<!Error>} */
+    this.redirectErrorPromise_ = new Promise((resolve) => {
+      this.redirectErrorResolver_ = resolve;
+    });
+  }
+
+  /**
+   * Start an activity within the specified iframe.
+   * @param {!HTMLIFrameElement} iframe
+   * @param {string} url
+   * @param {?Object=} opt_args
+   * @return {!Promise<!ActivityIframePort>}
+   */
+  openIframe(iframe, url, opt_args) {
+    const port = new ActivityIframePort(iframe, url, opt_args);
+    return port.connect().then(() => port);
+  }
+
+  /**
+   * Start an activity in a separate window. The result will be delivered
+   * to the `onResult` callback.
+   *
+   * The activity can be opened in two modes: "popup" and "redirect". This
+   * depends on the `target` value, but also on the browser/environment.
+   *
+   * The allowed `target` values are `_blank`, `_top` and name targets. The
+   * `_self`, `_parent` and similar targets are not allowed.
+   *
+   * The `_top` target indicates that the activity should be opened as a
+   * "redirect", while other targets indicate that the activity should be
+   * opened as a popup. The activity client will try to honor the requested
+   * target. However, it's not always possible. Some environments do not
+   * allow popups and they either force redirect or fail the window open
+   * request. In this case, the activity will try to fallback to the "redirect"
+   * mode.
+   *
+   * @param {string} requestId
+   * @param {string} url
+   * @param {string} target
+   * @param {?Object=} opt_args
+   * @param {?ActivityOpenOptions=} opt_options
+   * @return {{targetWin: ?Window}}
+   */
+  open(requestId, url, target, opt_args, opt_options) {
+    const port = this.openWin_(requestId, url, target, opt_args, opt_options);
+    return {targetWin: port.getTargetWin()};
+  }
+
+  /**
+   * Start an activity in a separate window and tries to setup messaging with
+   * this window.
+   *
+   * See `open()` method for more details, including `onResult` callback.
+   *
+   * @param {string} requestId
+   * @param {string} url
+   * @param {string} target
+   * @param {?Object=} opt_args
+   * @param {?ActivityOpenOptions=} opt_options
+   * @return {!Promise<!ActivityMessagingPort>}
+   */
+  openWithMessaging(requestId, url, target, opt_args, opt_options) {
+    const port = this.openWin_(requestId, url, target, opt_args, opt_options);
+    return port.whenConnected().then(() => port);
+  }
+
+  /**
+   * Registers the callback for the result of the activity opened with the
+   * specified `requestId` (see the `open()` method). The callback is a
+   * function that takes a single `ActivityPort` argument. The client
+   * can use this object to verify the port using it's origin, verified and
+   * secure channel flags. Then the client can call
+   * `ActivityPort.acceptResult()` method to accept the result.
+   *
+   * The activity result is handled via a separate callback because of a
+   * possible redirect. So use of direct callbacks and/or promises is not
+   * possible in that case.
+   *
+   * A typical implementation would look like:
+   * ```
+   * ports.onResult('request1', function(port) {
+   *   port.acceptResult().then(function(result) {
+   *     // Only verified origins are allowed.
+   *     if (result.origin == expectedOrigin &&
+   *         result.originVerified &&
+   *         result.secureChannel) {
+   *       handleResultForRequest1(result);
+   *     }
+   *   });
+   * })
+   *
+   * ports.open('request1', request1Url, '_blank');
+   * ```
+   *
+   * @param {string} requestId
+   * @param {function(!ActivityPort)} callback
+   */
+  onResult(requestId, callback) {
+    let handlers = this.requestHandlers_[requestId];
+    if (!handlers) {
+      handlers = [];
+      this.requestHandlers_[requestId] = handlers;
+    }
+    handlers.push(callback);
+
+    // Consume available result.
+    const availableResult = this.discoverResult_(requestId);
+    if (availableResult) {
+      this.consumeResult_(availableResult, callback);
+    }
+  }
+
+  /**
+   * @param {function(!Error)} handler
+   */
+  onRedirectError(handler) {
+    this.redirectErrorPromise_.then(handler);
+  }
+
+  /**
+   * @param {string} requestId
+   * @param {string} url
+   * @param {string} target
+   * @param {?Object=} opt_args
+   * @param {?ActivityOpenOptions=} opt_options
+   * @return {!ActivityWindowPort}
+   */
+  openWin_(requestId, url, target, opt_args, opt_options) {
+    const port = new ActivityWindowPort(
+      this.win_,
+      requestId,
+      url,
+      target,
+      opt_args,
+      opt_options
+    );
+    port.open().then(() => {
+      // Await result if possible. Notice that when falling back to "redirect",
+      // the result will never arrive through this port.
+      this.consumeResultAll_(requestId, port);
+    });
+    return port;
+  }
+
+  /**
+   * @param {string} requestId
+   * @return {?ActivityPort}
+   * @private
+   */
+  discoverResult_(requestId) {
+    let port = this.resultBuffer_[requestId];
+    if (!port && this.fragment_) {
+      try {
+        port = discoverRedirectPort(this.win_, this.fragment_, requestId);
+      } catch (e) {
+        throwAsync(e);
+        this.redirectErrorResolver_(e);
+      }
+      if (port) {
+        this.resultBuffer_[requestId] = port;
+      }
+    }
+    return port;
+  }
+
+  /**
+   * @param {!ActivityPort} port
+   * @param {function(!ActivityPort)} callback
+   * @private
+   */
+  consumeResult_(port, callback) {
+    Promise.resolve().then(() => {
+      callback(port);
+    });
+  }
+
+  /**
+   * @param {string} requestId
+   * @param {!ActivityPort} port
+   * @private
+   */
+  consumeResultAll_(requestId, port) {
+    // Find and execute handlers.
+    const handlers = this.requestHandlers_[requestId];
+    if (handlers) {
+      handlers.forEach((handler) => {
+        this.consumeResult_(port, handler);
+      });
+    }
+    // Buffer the result for callbacks that may arrive in the future.
+    this.resultBuffer_[requestId] = port;
+  }
+}
+
+var activityPorts = {
+  ActivityPorts,
+  ActivityIframePort,
+  ActivityMessagingPort,
+  ActivityMode,
+  ActivityOpenOptions,
+  ActivityPort,
+  ActivityRequest,
+  ActivityResult,
+  ActivityResultCode,
+  ActivityWindowPort,
+  createAbortError,
+  isAbortError,
+};
+var activityPorts_1 = activityPorts.ActivityPorts;
+var activityPorts_2 = activityPorts.ActivityIframePort;
+var activityPorts_3 = activityPorts.ActivityMessagingPort;
+var activityPorts_4 = activityPorts.ActivityMode;
+var activityPorts_5 = activityPorts.ActivityOpenOptions;
+var activityPorts_6 = activityPorts.ActivityPort;
+var activityPorts_7 = activityPorts.ActivityRequest;
+var activityPorts_8 = activityPorts.ActivityResult;
+var activityPorts_9 = activityPorts.ActivityResultCode;
+var activityPorts_10 = activityPorts.ActivityWindowPort;
+var activityPorts_11 = activityPorts.createAbortError;
+var activityPorts_12 = activityPorts.isAbortError;
+
+export {
+  activityPorts_2 as ActivityIframePort,
+  activityPorts_3 as ActivityMessagingPort,
+  activityPorts_4 as ActivityMode,
+  activityPorts_5 as ActivityOpenOptions,
+  activityPorts_6 as ActivityPort,
+  activityPorts_1 as ActivityPorts,
+  activityPorts_7 as ActivityRequest,
+  activityPorts_8 as ActivityResult,
+  activityPorts_9 as ActivityResultCode,
+  activityPorts_10 as ActivityWindowPort,
+  AnalyticsEvent,
+  ClientEvent,
+  ClientEventManagerApi,
+  ConfiguredRuntime,
+  DeferredAccountCreationResponse,
+  Entitlement,
+  Entitlements,
+  EventOriginator,
+  Fetcher,
+  FilterResult,
+  PurchaseData,
+  SubscribeResponse,
+  UserData,
+  activityPorts_11 as createAbortError,
+  activityPorts_12 as isAbortError,
+};
