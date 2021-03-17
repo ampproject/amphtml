@@ -147,6 +147,13 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       /** @private {?Promise} */
       this.buildingPromise_ = null;
 
+      /**
+       * Indicates that the `mountCallback()` has been called and it hasn't
+       * been reversed with an `unmountCallback()` call.
+       * @private {boolean}
+       */
+      this.mounted_ = false;
+
       /** @private {?Promise} */
       this.mountPromise_ = null;
 
@@ -625,6 +632,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
               ? ReadyState.LOADING
               : ReadyState.MOUNTING
           );
+          this.mounted_ = true;
           return this.impl_.mountCallback(signal);
         })
         .then(() => {
@@ -715,11 +723,12 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       scheduler.unschedule(this);
 
       // Try to unmount if the element has been built already.
-      if (this.isBuilt()) {
+      if (this.mounted_) {
         this.impl_.unmountCallback();
       }
 
       // Complete unmount and reset the state.
+      this.mounted_ = false;
       this.mountPromise_ = null;
       this.signals_.reset(CommonSignals.MOUNTED);
 
