@@ -4,7 +4,7 @@
   "description": "Gulp storybook tasks",
   "main": "index.js",
   "devDependencies": {
-    "@ampproject/storybook-addon": "1.1.6",
+    "@ampproject/storybook-addon": "1.1.7",
     "@babel/core": "7.13.10",
     "@babel/preset-react": "7.12.13",
     "@babel/runtime-corejs3": "7.13.10",
