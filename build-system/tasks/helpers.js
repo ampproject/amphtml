@@ -27,6 +27,9 @@ const path = require('path');
 const Remapping = require('@ampproject/remapping');
 const wrappers = require('../compile/compile-wrappers');
 const {
+  removeFromBabelCache: removeFromClosureBabelCache,
+} = require('../compile/pre-closure-babel');
+const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
@@ -36,7 +39,6 @@ const {green, red, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
-const {removeFromBabelCache} = require('../compile/pre-closure-babel');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
 const {watch: fileWatch} = require('chokidar');
@@ -162,7 +164,9 @@ async function compileCoreRuntime(options) {
   if (options.watch) {
     /** @return {Promise<void>} */
     async function watchFunc() {
-      removeFromBabelCache('src');
+      if (options.minify) {
+        removeFromClosureBabelCache('src');
+      }
       const bundleComplete = await doBuildJs(jsBundles, 'amp.js', {
         ...options,
         continueOnError: true,
@@ -331,7 +335,9 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
 
   if (options.watch) {
     const watchFunc = async () => {
-      removeFromBabelCache(entryPoint);
+      if (options.minify) {
+        removeFromClosureBabelCache(entryPoint);
+      }
       const compileDone = await doCompileMinifiedJs(/* continueOnError */ true);
       if (options.onWatchBuild) {
         options.onWatchBuild(compileDone);
