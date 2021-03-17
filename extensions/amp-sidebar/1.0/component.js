@@ -33,7 +33,7 @@ import {useStyles} from './component.jss';
 import objstr from 'obj-str';
 
 /**
- * @param {!SidebarDef.Props} props
+ * @param {!SidebarDef.SidebarProps} props
  * @param {{current: (!SidebarDef.SidebarApi|null)}} ref
  * @return {PreactDef.Renderable}
  */
@@ -180,7 +180,7 @@ Sidebar.displayName = 'Sidebar'; // Make findable for tests.
 export {Sidebar};
 
 /**
- * @param {!SidebarDef.SidebarToolbar} props
+ * @param {!SidebarDef.SidebarToolbarProps} props
  * @return {PreactDef.Renderable}
  */
 export function SidebarToolbar({

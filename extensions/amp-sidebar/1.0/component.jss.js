@@ -72,7 +72,7 @@ const backdropOverscrollBlocker = {
 
 const unmounted = {
   display: 'none',
-}
+};
 
 const JSS = {
   sidebar,
