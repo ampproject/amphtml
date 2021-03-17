@@ -15,32 +15,13 @@
  * limitations under the License.
  */
 
-const {cyan, yellow} = require('kleur/colors');
-const {log} = require('./build-system/common/logging');
+const {
+  printGulpDeprecationNotice,
+} = require('./build-system/tasks/amp-task-runner');
 
 /**
- * Prints a deprecation notice for the gulp task runner.
+ * Print a deprecation notice and fall back to the amp task runner.
+ * TODO(amphtml): Remove this script after a month or so.
  */
-function printGulpDeprecationNotice() {
-  log(yellow('=*='.repeat(25)));
-  log(yellow('DEPRECATION NOTICE:'));
-  log(
-    'All',
-    cyan('gulp'),
-    'tasks have been replaced by an identical set of',
-    cyan('amp'),
-    'tasks.'
-  );
-  log('⤷ Run', cyan('amp --help'), 'for a full list of tasks.');
-  log('⤷ Run', cyan('amp <command> --help'), 'for help with a specific task.');
-  log(
-    '⤷ See',
-    cyan('contributing/TESTING.md#testing-commands'),
-    'for more info.'
-  );
-  log(yellow('=*='.repeat(25)));
-}
-
-// Print a deprecation notice and fall back to the amp task runner.
-printGulpDeprecationNotice();
+printGulpDeprecationNotice(/* withTimeStamps */ true);
 require('./amp');

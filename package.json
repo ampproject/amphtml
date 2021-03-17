@@ -11,12 +11,11 @@
     "url": "https://github.com/ampproject/amphtml.git"
   },
   "bin": {
-    "amp": "./amp.js",
-    "gulp": "./gulp-deprecated.js"
+    "amp": "./amp.js"
   },
   "scripts": {
     "preinstall": "node build-system/common/check-package-manager.js",
-    "postinstall": "npm un -g gulp-cli --ignore-scripts && npm i -g --ignore-scripts"
+    "postinstall": "node build-system/common/install-task-runner.js"
   },
   "dependencies": {
     "@ampproject/animations": "0.2.2",

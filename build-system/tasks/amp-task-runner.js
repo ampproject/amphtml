@@ -22,8 +22,8 @@
 const argv = require('minimist')(process.argv.slice(2));
 const commander = require('commander');
 const path = require('path');
-const {cyan, red, green, magenta} = require('kleur/colors');
-const {log} = require('../common/logging');
+const {cyan, red, green, magenta, yellow} = require('kleur/colors');
+const {log, logWithoutTimestamp} = require('../common/logging');
 
 /**
  * Special-case constant that indicates if `amp --help` was invoked.
@@ -145,7 +145,37 @@ function finalizeRunner() {
   commander.parse();
 }
 
+/**
+ * Prints a deprecation notice for the gulp task runner.
+ * @param {boolean} withTimestamps
+ */
+function printGulpDeprecationNotice(withTimestamps) {
+  const logFunc = withTimestamps ? log : logWithoutTimestamp;
+  logFunc(yellow('=*='.repeat(25)));
+  logFunc(yellow('DEPRECATION NOTICE:'));
+  logFunc(
+    'All',
+    cyan('gulp'),
+    'tasks have been replaced by an identical set of',
+    cyan('amp'),
+    'tasks.'
+  );
+  logFunc('⤷ Run', cyan('amp --help'), 'for a full list of tasks.');
+  logFunc(
+    '⤷ Run',
+    cyan('amp <command> --help'),
+    'for help with a specific task.'
+  );
+  logFunc(
+    '⤷ See',
+    cyan('contributing/TESTING.md#testing-commands'),
+    'for more info.'
+  );
+  logFunc(yellow('=*='.repeat(25)));
+}
+
 module.exports = {
   createTask,
   finalizeRunner,
+  printGulpDeprecationNotice,
 };
