@@ -22,7 +22,7 @@ var RenderDef = {};
 /**
  * @typedef {{
  *   src: (!string),
- *   fetchFn: (!Function)
+ *   getJson: (!Function)
  *   render: (?RendererFunctionType|undefined),
  * }}
  */

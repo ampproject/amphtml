@@ -20,19 +20,32 @@ import {useEffect, useState} from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
 /**
+ * @param {!JsonObject} data
+ * @return {string}
+ */
+const DEFAULT_RENDER = (data) => JSON.stringify(data);
+/**
  * @param {!RenderDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function Render({src, fetchFn, render, ...rest}) {
+export function Render({
+  src = '',
+  getJson = window.fetch,
+  render = DEFAULT_RENDER,
+  ...rest
+}) {
   useResourcesNotify();
 
   const [data, setData] = useState({});
 
   useEffect(() => {
-    fetchFn(src).then((data) => {
+    if (!src) {
+      return;
+    }
+    getJson(src).then((data) => {
       setData(data);
     });
-  }, [src, fetchFn]);
+  }, [src, getJson]);
 
   const rendered = useRenderer(render, data);
   const isHtml =

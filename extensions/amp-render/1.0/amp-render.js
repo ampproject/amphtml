@@ -65,7 +65,7 @@ class AmpRender extends BaseElement {
   /** @override */
   init() {
     return dict({
-      'fetchFn': this.getFetchFn_(),
+      'getJson': this.getJsonFn_(),
     });
   }
 
@@ -76,7 +76,7 @@ class AmpRender extends BaseElement {
    * @return {Function}
    * @private
    */
-  getFetchFn_() {
+  getJsonFn_() {
     const src = this.element.getAttribute('src');
     if (isAmpStateSrc(src)) {
       return this.getAmpStateJson.bind(null, this.element);
@@ -88,7 +88,11 @@ class AmpRender extends BaseElement {
     return batchFetchJsonFor.bind(null, this.getAmpDoc(), this.element);
   }
 
-  /** @override */
+  /**
+   * TODO: this implementation is identical to one in amp-data-display &
+   * amp-date-countdown. Move it to a common file and import it.
+   * @override
+   */
   checkPropsPostMutations() {
     const templates =
       this.templates_ ||
@@ -135,8 +139,8 @@ class AmpRender extends BaseElement {
   /**
    * Gets the json an amp-list that has an "amp-state:" uri. For example,
    * src="amp-state:json.path".
-   * TODO: this implementation is identical to one in amp-data-display &
-   * amp-date-countdown. Move it to a common file and import it.
+   * TODO: this implementation is identical to one in amp-list. Move it
+   * to a common file and import it.
    * @param {!AmpElement} element
    * @return {Promise<!JsonObject>}
    */
