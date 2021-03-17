@@ -149,6 +149,11 @@ export class Extensions {
     const holder = this.getExtensionHolder_(
       extensionId,
       version,
+      // Inherit the `auto` (auto-install) flag from the "latest" version
+      // when available. If the "latest" has been added as a non-auto-install
+      // then this registration should not auto-install either. If the numeric
+      // version was independently added to the document, then it's auto-install
+      // will be preserved.
       latestHolder?.auto ?? true
     );
     holder.latest = latest;
