@@ -20,7 +20,6 @@ const cssWhat = require('css-what');
 module.exports = function (context) {
   /**
    * @param {CompilerNode} node
-   * @return {void}
    */
   function callQuerySelector(node) {
     const {callee} = node;
@@ -45,10 +44,11 @@ module.exports = function (context) {
     const selector = getSelector(node, 0);
 
     if (!isValidSelector(selector)) {
-      return context.report({
+      context.report({
         node,
         message: 'Failed to parse CSS Selector `' + selector + '`',
       });
+      return;
     }
 
     // What are we calling querySelector on?
@@ -84,7 +84,6 @@ module.exports = function (context) {
 
   /**
    * @param {CompilerNode} node
-   * @return {void}
    */
   function callScopedQuerySelector(node) {
     const {callee} = node;
@@ -103,10 +102,11 @@ module.exports = function (context) {
     const selector = getSelector(node, 1);
 
     if (!isValidSelector(selector)) {
-      return context.report({
+      context.report({
         node,
         message: 'Failed to parse CSS Selector `' + selector + '`',
       });
+      return;
     }
 
     if (selectorNeedsScope(selector)) {

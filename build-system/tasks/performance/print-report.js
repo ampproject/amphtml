@@ -67,10 +67,9 @@ function linesForMetric(metric, results) {
 /**
  *
  * @param {string[]} urls
- * @return {void}
  */
 function printReport(urls) {
-  const results = JSON.parse(fs.readFileSync(RESULTS_PATH));
+  const results = JSON.parse(fs.readFileSync(RESULTS_PATH, 'utf-8'));
 
   urls.forEach((url) => {
     const keys = Object.keys(results[url][CONTROL][0]);
@@ -99,10 +98,9 @@ class PageMetrics {
 
   /**
    *
-   * @param {string*} metric
+   * @param {string} metric
    * @param {number} experiment
    * @param {number} control
-   * @return {void}
    */
   set(metric, experiment, control) {
     this.metrics.set(metric, {experiment, control});
@@ -115,7 +113,7 @@ class PageMetrics {
  * @return {Array<PageMetrics>} report
  */
 function getReport(urls) {
-  const raw = JSON.parse(fs.readFileSync(RESULTS_PATH));
+  const raw = JSON.parse(fs.readFileSync(RESULTS_PATH, 'utf-8'));
   const report = [];
   urls.forEach((url) => {
     const results = raw[url];

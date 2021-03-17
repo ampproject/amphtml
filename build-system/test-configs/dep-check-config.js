@@ -17,22 +17,6 @@
 
 /*eslint "max-len": 0*/
 
-/**
- * - type - Is assumed to be "forbidden" if not provided.
- * - filesMatching - Is assumed to be all files if not provided.
- * - mustNotDependOn - If type is "forbidden" (default) then the files
- *     matched must not match the glob(s) provided.
- * - allowlist - Skip rule if this particular dependency is found.
- *     Syntax: fileAGlob->fileB where -> reads "depends on"
- * @typedef {{
- *   type: (string|undefined),
- *   filesMatching: (string|!Array<string>|undefined),
- *   mustNotDependOn: (string|!Array<string>|undefined),
- *   allowlist: (string|!Array<string>|undefined),
- * }}
- */
-let RuleConfigDef;
-
 // It is often OK to add things to the allowlist, but make sure to highlight
 // this in review.
 exports.rules = [

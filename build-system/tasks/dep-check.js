@@ -35,7 +35,7 @@ const depCheckDir = '.amp-dep-check';
 /**
  * @typedef {{
  *   name: string,
- *   deps: ?Array<!Object<string, !ModuleDef>
+ *   deps: ?Array<!Object<string, !ModuleDef>>
  * }}
  */
 let ModuleDef;
@@ -49,6 +49,22 @@ let GlobDef;
  * @typedef {!Array<!GlobDef>}
  */
 let GlobsDef;
+
+/**
+ * - type - Is assumed to be "forbidden" if not provided.
+ * - filesMatching - Is assumed to be all files if not provided.
+ * - mustNotDependOn - If type is "forbidden" (default) then the files
+ *     matched must not match the glob(s) provided.
+ * - allowlist - Skip rule if this particular dependency is found.
+ *     Syntax: fileAGlob->fileB where -> reads "depends on"
+ * @typedef {{
+ *  type?: (string|undefined),
+ *  filesMatching?: (string|!Array<string>|undefined),
+ *  mustNotDependOn?: (string|!Array<string>|undefined),
+ *  allowlist?: (string|!Array<string>|undefined),
+ * }}
+ */
+let RuleConfigDef;
 
 /**
  * @constructor @final @struct
@@ -155,7 +171,7 @@ const rules = depCheckConfig.rules.map((config) => new Rule(config));
  * - extensions/{$extension}/{$version}/{$extension}.js
  * - src/amp.js
  * - 3p/integration.js
- * @return {string}
+ * @return {Promise<string>}
  */
 async function getEntryPointModule() {
   const coreBinaries = ['src/amp.js', '3p/integration.js'];
@@ -177,7 +193,7 @@ async function getEntryPointModule() {
 
 /**
  * @param {string} entryPointModule
- * @return {!ModuleDef}
+ * @return {!Promise<ModuleDef>}
  */
 async function getModuleGraph(entryPointModule) {
   const bundleFile = path.join(depCheckDir, 'entry-point-bundle.js');
@@ -227,7 +243,7 @@ function getEntryPoint(extensionFolder) {
  * Flattens the module dependency graph and makes its entries unique. This
  * serves as the input on which all rules are tested.
  *
- * @param {!Array<!ModuleDef>} entryPoints
+ * @param {!ModuleDef} entryPoints
  * @return {!ModuleDef}
  */
 function flattenGraph(entryPoints) {

@@ -29,17 +29,11 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'module-build.js';
 
-/**
- * @return {void}
- */
 function pushBuildWorkflow() {
   timedExecOrDie('gulp dist --esm --fortesting');
   uploadModuleOutput();
 }
 
-/**
- * @return {void}
- */
 function prBuildWorkflow() {
   // TODO(#31102): This list must eventually match the same buildTargets check
   // found in pr-check/nomodule-build.js as we turn on the systems that

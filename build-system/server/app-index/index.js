@@ -66,7 +66,6 @@ async function serveIndex({url}, res, next) {
 
 /**
  * @param {*} app require('express')
- * @return {void}
  */
 function installExpressMiddleware(app) {
   api.installExpressMiddleware(app);

@@ -29,17 +29,11 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'unminified-build.js';
 
-/**
- * @return {void}
- */
 function pushBuildWorkflow() {
   timedExecOrDie('gulp build --fortesting');
   uploadUnminifiedOutput();
 }
 
-/**
- * @return {void}
- */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     timedExecOrDie('gulp build --fortesting');

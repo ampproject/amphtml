@@ -28,7 +28,8 @@ const initTestsPath = ['test/_init_tests.js'];
 
 const karmaHtmlFixturesPath = 'test/fixtures/*.html';
 
-const fixturesExamplesPaths = [karmaHtmlFixturesPath].concat([
+const fixturesExamplesPaths = [
+  karmaHtmlFixturesPath,
   {
     pattern: 'test/fixtures/served/*.html',
     included: false,
@@ -41,7 +42,7 @@ const fixturesExamplesPaths = [karmaHtmlFixturesPath].concat([
     nocache: false,
     watched: true,
   },
-]);
+];
 
 const builtRuntimePaths = [
   {

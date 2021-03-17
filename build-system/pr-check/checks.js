@@ -26,9 +26,6 @@ const {timedExecOrDie} = require('./utils');
 
 const jobName = 'checks.js';
 
-/**
- * @return {void}
- */
 function pushBuildWorkflow() {
   timedExecOrDie('gulp presubmit');
   timedExecOrDie('gulp lint');

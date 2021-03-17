@@ -172,7 +172,7 @@ function getLocalVendorConfig(vendor) {
  * @return {!Promise<string>} Resolves with relative path to file
  */
 async function getFileFromAbsolutePath(filePath) {
-  return fs.readFileSync(filePath);
+  return fs.readFileSync(filePath, 'utf-8');
 }
 
 /**

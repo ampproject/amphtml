@@ -55,7 +55,7 @@ async function checkLinks() {
 /**
  * Reports results after all markdown files have been checked.
  *
- * @param {!Array<string>} results
+ * @param {!Array<{file: string, containsDeadLinks: boolean}>} results
  */
 function reportResults(results) {
   const filesWithDeadLinks = results
@@ -104,7 +104,7 @@ function isLinkToFileIntroducedByPR(link) {
  * Checks a given markdown file for dead links.
  *
  * @param {string} file
- * @return {!Promise}
+ * @return {!Promise<{file: string, containsDeadLinks: boolean}>}
  */
 function checkLinksInFile(file) {
   let markdown = fs.readFileSync(file).toString();

@@ -53,6 +53,7 @@ function isLargeRefactor() {
 function extractCssJsFileMap() {
   execOrDie('gulp css', {'stdio': 'ignore'});
   maybeInitializeExtensions(extensions);
+  /** @type {Object<string, string>} */
   const cssJsFileMap = {};
 
   /**
@@ -61,7 +62,6 @@ function extractCssJsFileMap() {
    * @param {Object} cssData
    * @param {string} cssBinaryName
    * @param {Object} cssJsFileMap
-   * @return {void}
    */
   function addCssJsEntry(cssData, cssBinaryName, cssJsFileMap) {
     const cssFilePath =
@@ -135,7 +135,7 @@ function getJsFilesFor(cssFile, cssJsFileMap) {
 
 /**
  * Computes the list of unit tests to run under difference scenarios
- * @return {Array<string>|undefined}
+ * @return {Promise<Array<string>|void>}
  */
 async function getUnitTestsToRun() {
   log(green('INFO:'), 'Determining which unit tests to run...');

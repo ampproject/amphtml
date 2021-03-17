@@ -30,18 +30,12 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'bundle-size.js';
 
-/**
- * @return {void}
- */
 function pushBuildWorkflow() {
   downloadNomoduleOutput();
   downloadModuleOutput();
   timedExecOrDie('gulp bundle-size --on_push_build');
 }
 
-/**
- * @return {void}
- */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME)) {
     downloadNomoduleOutput();

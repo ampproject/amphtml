@@ -52,10 +52,11 @@ const replacementExpression = new RegExp(internalRuntimeVersion, 'g');
 /**
  * Get the brotli bundle sizes of the current build after normalizing the RTV number.
  *
- * @return {Map<string, number>} the bundle size in KB rounded to 2 decimal
+ * @return {Promise<Object<string, number>>} the bundle size in KB rounded to 2 decimal
  *   points.
  */
 async function getBrotliBundleSizes() {
+  /** @type {Object<string, number>} */
   const bundleSizes = {};
   const sizes = await report(
     filesizeConfigPath,
