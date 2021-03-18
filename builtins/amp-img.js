@@ -57,7 +57,7 @@ export class AmpImg extends BaseElement {
   }
 
   /** @override @nocollapse */
-  static load() {
+  static usesLoading() {
     return true;
   }
 
@@ -336,8 +336,6 @@ export class AmpImg extends BaseElement {
       removeElement(img);
       this.img_ = null;
     }
-
-    return true;
   }
 
   /** @override */

@@ -533,6 +533,9 @@ export class BaseElement {
    * times for resource management. The unmount should reverse the changes
    * made by the mount. See `unmountCallback` for more info.
    *
+   * If this callback returns a promise, the `readyState` becomes "complete"
+   * after the promise is resolved.
+   *
    * @param {!AbortSignal=} opt_abortSignal
    * @return {?Promise|undefined}
    */

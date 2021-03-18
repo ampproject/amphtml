@@ -1103,7 +1103,7 @@ export class Resource {
    * Calls element's resumeCallback callback.
    */
   resume() {
-    this.element.resumeCallback();
+    this.element.resume();
   }
 
   /**

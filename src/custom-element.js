@@ -61,6 +61,7 @@ const UpgradeState = {
 };
 
 const NO_BUBBLES = {bubbles: false};
+const RETURN_TRUE = () => true;
 
 /**
  * Caches whether the template tag is supported to avoid memory allocations.
@@ -541,7 +542,9 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           this.classList.remove('amp-notbuilt');
           this.signals_.signal(CommonSignals.BUILT);
 
-          if (!this.V1()) {
+          if (this.V1()) {
+            this.setReadyStateInternal(ReadyState.MOUNTING);
+          } else {
             this.setReadyStateInternal(ReadyState.LOADING);
             this.preconnect(/* onLayout */ false);
           }
@@ -633,15 +636,19 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
               : ReadyState.MOUNTING
           );
           this.mounted_ = true;
-          return this.impl_.mountCallback(signal);
+          const result = this.impl_.mountCallback(signal);
+          // The promise supports the V0 format for easy migration. If the
+          // `mountCallback` returns a promise, the assumption is that the
+          // element has finished loading when the promise completes.
+          return result ? result.then(RETURN_TRUE) : false;
         })
-        .then(() => {
+        .then((hasLoaded) => {
           this.mountAbortController_ = null;
           if (signal.aborted) {
             throw cancellation();
           }
           this.signals_.signal(CommonSignals.MOUNTED);
-          if (!this.implClass_.usesLoading(this)) {
+          if (!this.implClass_.usesLoading(this) || hasLoaded) {
             this.setReadyStateInternal(ReadyState.COMPLETE);
           }
         })
@@ -685,9 +692,6 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         }
         if (signal.aborted) {
           throw cancellation();
-        }
-        if (this.mountPromise_) {
-          return this.mountPromise_;
         }
         const scheduler = getSchedulerForDoc(this.getAmpDoc());
         scheduler.scheduleAsap(this);
@@ -763,7 +767,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @final
      */
     ensureLoaded(opt_parentPriority) {
-      return this.build().then(() => {
+      return this.mount().then(() => {
         if (this.V1()) {
           if (this.implClass_.usesLoading(this)) {
             this.impl_.ensureLoaded();
@@ -797,23 +801,6 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           return this.whenLoaded();
         });
       });
-    }
-
-    /**
-     * Pauses the element.
-     */
-    pause() {
-      if (!this.isBuilt()) {
-        // Not built yet.
-        return;
-      }
-
-      this.impl_.pauseCallback();
-
-      // Legacy unlayoutOnPause support.
-      if (!this.V1() && this.impl_.unlayoutOnPause()) {
-        this.getResource_().unlayout();
-      }
     }
 
     /**
@@ -1354,8 +1341,6 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         this.impl_.detachedCallback();
       }
       if (this.V1()) {
-        const scheduler = getSchedulerForDoc(this.getAmpDoc());
-        scheduler.unschedule(this);
         this.unmount();
       }
       this.toggleLoading(false);
@@ -1633,18 +1618,37 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     }
 
     /**
+     * Pauses the element.
+     *
+     * @package @final
+     */
+    pause() {
+      if (!this.isBuilt()) {
+        // Not built yet.
+        return;
+      }
+
+      this.impl_.pauseCallback();
+
+      // Legacy unlayoutOnPause support.
+      if (!this.V1() && this.impl_.unlayoutOnPause()) {
+        this.getResource_().unlayout();
+      }
+    }
+
+    /**
      * Requests the resource to resume its activity when the document returns
      * from an inactive state. The scope is up to the actual component. Among
      * other things the active playback of video or audio content may be
      * resumed.
      *
      * @package @final
-     * TODO(#31915): remove once V1 migration is complete.
      */
-    resumeCallback() {
-      if (this.isBuilt()) {
-        this.impl_.resumeCallback();
+    resume() {
+      if (!this.isBuilt()) {
+        return;
       }
+      this.impl_.resumeCallback();
     }
 
     /**
