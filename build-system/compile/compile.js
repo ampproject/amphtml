@@ -130,6 +130,9 @@ function getSrcs(entryModuleFilenames, outputDir, outputFilename, options) {
     'build/fake-module/third_party/babel/custom-babel-helpers.js',
   ];
   const srcs = [...CLOSURE_SRC_GLOBS];
+  if (typeof entryModuleFilenames === 'string') {
+    entryModuleFilenames = [entryModuleFilenames];
+  }
   entryModuleFilenames.forEach((filename) => {
     // For extensions, include all JS files in the extension directory.
     // Note: The glob added to srcs must be a posix glob on all platforms.
