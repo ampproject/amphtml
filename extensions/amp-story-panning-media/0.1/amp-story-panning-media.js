@@ -189,24 +189,20 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     const zoom = parseFloat(this.element_.getAttribute('zoom') || 1);
     const lockBounds = this.element_.hasAttribute('lock-bounds');
 
-    if (!lockBounds) {
-      this.animateTo_ = {x, y, zoom};
-      return
-    }
+    if (lockBounds) {
       // Zoom must be set to calculate maxBounds.
       this.animateTo_.zoom = zoom < 1 ? 1 : zoom;
-
       this.setMaxBounds_();
-
       this.animateTo_.x =
         x > 0
           ? Math.min(this.maxBounds_.left, x)
           : Math.max(this.maxBounds_.right, x);
-
       this.animateTo_.y =
         y > 0
           ? Math.min(this.maxBounds_.top, y)
           : Math.max(-this.maxBounds_.bottom, y);
+    } else {
+      this.animateTo_ = {x, y, zoom};
     }
   }
 
