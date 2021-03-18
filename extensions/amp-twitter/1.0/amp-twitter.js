@@ -44,12 +44,7 @@ class AmpTwitter extends BaseElement {
     this.host_ = null;
   }
 
-  /**
-   * TODO(wg-bento): Copied directly from 0.1.
-   * Does this still make sense to do this way in Bento?
-   *
-   * @override @nocollapse
-   */
+  /** @override @nocollapse */
   static createLoaderLogoCallback(element) {
     const html = htmlFor(element);
     return {
@@ -87,11 +82,6 @@ class AmpTwitter extends BaseElement {
     // All images
     preconnect.url(ampdoc, 'https://pbs.twimg.com');
     preconnect.url(ampdoc, 'https://cdn.syndication.twimg.com');
-  }
-
-  /** @override */
-  firstLayoutCompleted() {
-    // Do not hide the placeholder.
   }
 
   /** @override */
