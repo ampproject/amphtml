@@ -20,7 +20,6 @@ const del = require('del');
 const fs = require('fs-extra');
 const {cyan, green, yellow} = require('kleur/colors');
 const {execOrDie} = require('../common/exec');
-const {isCiBuild} = require('../common/ci');
 const {log, logLocalDev} = require('../common/logging');
 
 /**
@@ -215,7 +214,7 @@ function removeRruleSourcemap() {
 /**
  * Checks if all packages are current, and if not, runs `npm install`.
  */
-function runNpmCheck() {
+function updateDeps() {
   const results = checkDependencies.sync({
     verbose: true,
     log: () => {},
@@ -241,22 +240,12 @@ function runNpmCheck() {
 }
 
 /**
- * Used as a pre-requisite by several amp tasks.
- */
-function maybeUpdatePackages() {
-  if (!isCiBuild()) {
-    updatePackages();
-  }
-}
-
-/**
- * Installs custom lint rules, updates node_modules (for local dev), and patches
- * polyfills if necessary.
+ * Updates `npm` packages and applies various custom patches when necessary.
+ * Work is done only during first time install and soon after a repo sync.
+ * At all other times, this function is a no-op and returns almost instantly.
  */
 async function updatePackages() {
-  if (!isCiBuild()) {
-    runNpmCheck();
-  }
+  updateDeps();
   patchWebAnimations();
   patchIntersectionObserver();
   patchResizeObserver();
@@ -265,9 +254,8 @@ async function updatePackages() {
 }
 
 module.exports = {
-  maybeUpdatePackages,
   updatePackages,
 };
 
 updatePackages.description =
-  'Runs npm install if node_modules is out of date, and applies custom patches';
+  'Updates npm packages if node_modules is out of date, and applies custom patches';

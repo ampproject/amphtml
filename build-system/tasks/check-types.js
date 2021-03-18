@@ -25,7 +25,6 @@ const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
 const {log} = require('../common/logging');
-const {maybeUpdatePackages} = require('./update-packages');
 const {typecheckNewServer} = require('../server/typescript-compile');
 
 /**
@@ -33,7 +32,6 @@ const {typecheckNewServer} = require('../server/typescript-compile');
  * @return {!Promise}
  */
 async function checkTypes() {
-  maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('check-types');
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();

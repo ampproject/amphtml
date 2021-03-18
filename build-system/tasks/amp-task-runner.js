@@ -23,7 +23,9 @@ const argv = require('minimist')(process.argv.slice(2));
 const commander = require('commander');
 const path = require('path');
 const {cyan, red, green, magenta, yellow} = require('kleur/colors');
+const {isCiBuild} = require('../common/ci');
 const {log, logWithoutTimestamp} = require('../common/logging');
+const {updatePackages} = require('./update-packages');
 
 /**
  * Special-case constant that indicates if `amp --help` was invoked.
@@ -138,6 +140,17 @@ function validateUsage(task, taskName, taskFunc) {
 }
 
 /**
+ * Initializes the task runner by running the package updater before any task
+ * code can be loaded. As an optimization, we skip this during CI because it is
+ * already done as a prereqisite step before every CI job.
+ */
+function initializeRunner() {
+  if (!isCiBuild()) {
+    updatePackages();
+  }
+}
+
+/**
  * Finalizes the task runner by doing special-case setup for `amp --help`,
  * parsing the invoked command, and printing an error message if an unknown task
  * was called.
@@ -189,5 +202,6 @@ function printGulpDeprecationNotice(withTimestamps) {
 module.exports = {
   createTask,
   finalizeRunner,
+  initializeRunner,
   printGulpDeprecationNotice,
 };
