@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import '../../../amp-bind/0.1/amp-bind';
+import '../../../amp-mustache/0.2/amp-mustache';
 import '../amp-render';
 import {htmlFor} from '../../../../src/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -28,7 +30,7 @@ describes.realWin(
     },
   },
   (env) => {
-    let win, doc, html, element, ampState, template;
+    let win, doc, html, element;
 
     async function waitRendered() {
       await whenUpgradedToCustomElement(element);
@@ -41,10 +43,10 @@ describes.realWin(
       return element.querySelector('div');
     }
 
-    // async function getRenderedData() {
-    //   const wrapper = await waitRendered();
-    //   return JSON.parse(wrapper.textContent);
-    // }
+    async function getRenderedData() {
+      const wrapper = await waitRendered();
+      return wrapper.textContent;
+    }
 
     beforeEach(async function () {
       win = env.win;
@@ -53,15 +55,8 @@ describes.realWin(
       toggleExperiment(win, 'amp-render', true, true);
     });
 
-    it('renders', async () => {
-      element = doc.createElement('amp-render');
-      doc.body.appendChild(element);
-      await waitFor(() => element.isConnected, 'element connected');
-      expect(element.parentNode).to.equal(doc.body);
-    });
-
-    it.only('renders from amp-state', async () => {
-      ampState = html`
+    it('renders from amp-state', async () => {
+      const ampState = html`
         <amp-state id="theFood">
           <script type="application/json">
             {
@@ -70,6 +65,7 @@ describes.realWin(
           </script>
         </amp-state>
       `;
+      doc.body.appendChild(ampState);
 
       element = html`
         <amp-render
@@ -78,97 +74,16 @@ describes.realWin(
           height="140"
           layout="fixed-height"
         >
-          <template type="amp-mustache"><p>{{name}}</p></template>
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
         </amp-render>
       `;
-      doc.body.appendChild(ampState);
       doc.body.appendChild(element);
 
-      // await waitRendered();
       await whenUpgradedToCustomElement(ampState);
-      await whenUpgradedToCustomElement(element);
       await ampState.buildInternal();
-      await element.buildInternal();
 
-      console.log(element.innerHTML, 'innerhtml');
-      expect(element.innerHTML).to.contain('Bill');
-    });
-
-    it.skip('render json from amp-state', async () => {
-      ampState = doc.createElement('amp-state');
-      ampState.setAttribute('id', 'someData');
-      ampState.innerHTML = `
-      <script type="application/json">
-      {
-          "name": "Google",
-          "url": "https://google.com"
-      }
-      </script>`;
-
-      template = document.createElement('template');
-      template.setAttribute('type', 'amp-mustache');
-      template.content.textContent = JSON.stringify({
-        'name': '{{name}}',
-        'url': '{{url}}',
-      });
-      element = doc.createElement('amp-render');
-      element.setAttribute('src', 'amp-state:someData');
-      element.appendChild(template);
-
-      doc.body.appendChild(ampState);
-      doc.body.appendChild(element);
-
-      await customElements.whenDefined('amp-state');
-      await customElements.whenDefined('amp-render');
-    });
-
-    it.skip('render amp-state json into mustache template 2', async () => {
-      ampState = doc.createElement('amp-state');
-      ampState.setAttribute('id', 'someData');
-      const ampStateInnerHtml = htmlFor(doc)`
-      <script type="application/json">
-        {
-          "foods": [
-            {
-              "name": "pizza"
-            },
-            {
-              "name": "burger"
-            },
-            {
-              "name": "taco"
-            }
-          ]
-        }
-      </script>
-      `;
-      ampState.appendChild(ampStateInnerHtml);
-
-      const template = htmlFor(doc)`
-      <div>
-        <template type="amp-mustache">
-          <ul>
-            {{#foods}}
-              <li>{{name}}</li>
-            {{/foods}}
-          </ul>
-        </template>
-      </div>
-
-      `;
-
-      element = doc.createElement('amp-render');
-      element.setAttribute('src', 'amp-state:someData');
-      element.setAttribute('id', 'amp-render-el');
-      element.setAttribute('width', '200');
-      element.setAttribute('height', '400');
-      element.setAttribute('layout', 'responsive');
-      element.appendChild(template);
-
-      doc.body.appendChild(ampState);
-      doc.body.appendChild(element);
-      await element.buildInternal();
-      expect(element.innerHTML).to.contain('pizza');
+      const text = await getRenderedData();
+      expect(text).to.contain('Hello Bill');
     });
   }
 );
