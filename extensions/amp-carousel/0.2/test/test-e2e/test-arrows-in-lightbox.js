@@ -28,11 +28,15 @@ describes.endtoend(
     let prevArrow;
 
     function getPrevArrow() {
-      return controller.findElement('.amp-carousel-button.amp-carousel-button-prev');
+      return controller.findElement(
+        '.amp-carousel-button.amp-carousel-button-prev'
+      );
     }
 
     function getNextArrow() {
-      return controller.findElement('.amp-carousel-button.amp-carousel-button-next');
+      return controller.findElement(
+        '.amp-carousel-button.amp-carousel-button-next'
+      );
     }
 
     beforeEach(async () => {
@@ -49,10 +53,14 @@ describes.endtoend(
       // Both arrows should be showing
       prevArrow = await getPrevArrow(controller);
       nextArrow = await getNextArrow(controller);
-      await expect(await controller.getElementProperty(nextArrow, 'ariaDisabled')).to.equal('false');
-      await expect(await controller.getElementProperty(prevArrow, 'ariaDisabled')).to.equal('false');
+      await expect(
+        await controller.getElementProperty(nextArrow, 'ariaDisabled')
+      ).to.equal('false');
+      await expect(
+        await controller.getElementProperty(prevArrow, 'ariaDisabled')
+      ).to.equal('false');
     });
-    
+
     it('should open with one arrow', async () => {
       // Click on image 2
       const secondImage = await controller.findElement('#fourth');
@@ -63,8 +71,12 @@ describes.endtoend(
       // Both arrows should be showing
       prevArrow = await getPrevArrow(controller);
       nextArrow = await getNextArrow(controller);
-      await expect(await controller.getElementProperty(nextArrow, 'ariaDisabled')).to.equal('true');
-      await expect(await controller.getElementProperty(prevArrow, 'ariaDisabled')).to.equal('false');
+      await expect(
+        await controller.getElementProperty(nextArrow, 'ariaDisabled')
+      ).to.equal('true');
+      await expect(
+        await controller.getElementProperty(prevArrow, 'ariaDisabled')
+      ).to.equal('false');
     });
   }
 );

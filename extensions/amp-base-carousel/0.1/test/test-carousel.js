@@ -120,7 +120,9 @@ describes.realWin('carousel implementation', {}, (env) => {
         slideCount: 3,
         loop: false,
       });
-      carousel.goToSlide(2, {smoothScroll: false});
+
+      // Fake the scroll to the end
+      carousel.currentIndex_ = 2;
 
       expect(carousel.isAtEnd()).to.be.true;
     });
@@ -158,7 +160,9 @@ describes.realWin('carousel implementation', {}, (env) => {
         loop: false,
         forwards: false,
       });
-      carousel.goToSlide(2, {smoothScroll: false});
+
+      // Fake the scroll
+      carousel.currentIndex_ = 2;
 
       expect(carousel.isAtEnd()).to.be.true;
     });
@@ -172,7 +176,9 @@ describes.realWin('carousel implementation', {}, (env) => {
         loop: false,
         forwards: false,
       });
-      carousel.goToSlide(1, {smoothScroll: false});
+
+      // Fake the scroll
+      carousel.currentIndex_ = 1;
 
       expect(carousel.isAtEnd()).to.be.false;
     });
@@ -198,7 +204,9 @@ describes.realWin('carousel implementation', {}, (env) => {
         slideCount: 3,
         loop: false,
       });
-      carousel.goToSlide(1, {smoothScroll: false});
+
+      // Fake the scroll
+      carousel.currentIndex_ = 1;
 
       expect(carousel.isAtStart()).to.be.false;
     });
@@ -236,7 +244,9 @@ describes.realWin('carousel implementation', {}, (env) => {
         loop: false,
         forwards: false,
       });
-      carousel.goToSlide(1, {smoothScroll: false});
+
+      // Fake the scroll
+      carousel.currentIndex_ = 1;
 
       expect(carousel.isAtStart()).to.be.false;
     });
@@ -298,7 +308,7 @@ describes.realWin('carousel implementation', {}, (env) => {
         slideCount: 3,
         initialIndex: -1,
       });
-      expect(carousel.isAtStart()).to.be.true;
+      expect(carousel.scrollContainer_.scrollLeft).to.equal(0);
     });
 
     it('should start at slide 0 with initialIndex that is greater than number of slides', async () => {
@@ -306,7 +316,7 @@ describes.realWin('carousel implementation', {}, (env) => {
         slideCount: 3,
         initialIndex: 4,
       });
-      expect(carousel.isAtStart()).to.be.true;
+      expect(carousel.scrollContainer_.scrollLeft).to.equal(0);
     });
 
     it('should start at slide 0 with invalid initialIndex', async () => {
@@ -314,7 +324,7 @@ describes.realWin('carousel implementation', {}, (env) => {
         slideCount: 3,
         initialIndex: NaN,
       });
-      expect(carousel.isAtStart()).to.be.true;
+      expect(carousel.scrollContainer_.scrollLeft).to.equal(0);
     });
 
     it('should start at slide 1 with initialIndex set to 1', async () => {
