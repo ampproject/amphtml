@@ -29,7 +29,8 @@ const RULES = [
   },
 
   {
-    name: 'If has getLayoutPriority, must also have getBuildPriority',
+    name: 'Must not have getLayoutPriority',
+    notes: 'Can be replaced with getBuildPriority',
     test: (implClass) => {
       const hasLayoutPriority =
         implClass.prototype.getLayoutPriority !==
@@ -39,28 +40,53 @@ const RULES = [
       return !hasLayoutPriority || hasBuildPriority;
     },
   },
-
   {
-    name: 'If has preconnectCallback, must also have getPreconnects',
+    name: 'Must not have preconnectCallback',
+    notes: 'Can be replaced with getPreconnects',
     test: (implClass) => {
-      const hasPreconnectCallback =
+      const hasCallback =
         implClass.prototype.preconnectCallback !==
         BaseElement.prototype.preconnectCallback;
-      const hasGetPreconnects =
-        implClass.getPreconnects !== BaseElement.getPreconnects;
-      return !hasPreconnectCallback || hasGetPreconnects;
+      return !hasCallback;
+    },
+  },
+  {
+    name: 'Must not have layoutCallback',
+    notes: 'Can be replaced with mountCallback',
+    test: (implClass) => {
+      const hasCallback =
+        implClass.prototype.layoutCallback !==
+        BaseElement.prototype.layoutCallback;
+      return !hasCallback;
+    },
+  },
+  {
+    name: 'Must not have unlayoutCallback',
+    notes: 'Can be replaced with unmountCallback',
+    test: (implClass) => {
+      const hasCallback =
+        implClass.prototype.unlayoutCallback !==
+        BaseElement.prototype.unlayoutCallback;
+      return !hasCallback;
+    },
+  },
+  {
+    name: 'Must not have resumeCallback',
+    test: (implClass) => {
+      const hasCallback =
+        implClass.prototype.resumeCallback !==
+        BaseElement.prototype.resumeCallback;
+      return !hasCallback;
     },
   },
 
   {
-    name: 'If has layoutCallback, must also have ensureLoaded',
+    name: 'If load==true, must also have ensureLoaded',
     test: (implClass) => {
-      const hasLayoutCallback =
-        implClass.prototype.layoutCallback !==
-        BaseElement.prototype.layoutCallback;
+      const load = implClass.usesLoading();
       const hasEnsureLoaded =
         implClass.prototype.ensureLoaded !== BaseElement.prototype.ensureLoaded;
-      return !hasLayoutCallback || hasEnsureLoaded;
+      return !load || hasEnsureLoaded;
     },
   },
 
@@ -114,11 +140,11 @@ const RULES = [
  */
 export function testElementV1(implClass, options = {}) {
   const exceptions = options.exceptions || [];
-  RULES.forEach(({name, test}) => {
+  RULES.forEach(({name, notes, test}) => {
     if (exceptions.includes(name)) {
       expect(test(implClass), 'unused exception: ' + name).to.be.false;
     } else {
-      expect(test(implClass), name).to.be.true;
+      expect(test(implClass), name + (notes ? `. ${notes}` : '')).to.be.true;
     }
   });
 }

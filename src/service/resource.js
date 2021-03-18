@@ -1089,32 +1089,28 @@ export class Resource {
    * Calls element's pauseCallback callback.
    */
   pause() {
-    this.element.pauseCallback();
-    if (this.element.unlayoutOnPause()) {
-      this.unlayout();
-    }
+    this.element.pause();
   }
 
   /**
    * Calls element's pauseCallback callback.
    */
   pauseOnRemove() {
-    this.element.pauseCallback();
+    this.element.pause();
   }
 
   /**
    * Calls element's resumeCallback callback.
    */
   resume() {
-    this.element.resumeCallback();
+    this.element.resume();
   }
 
   /**
    * Called when a previously visible element is no longer displayed.
    */
   unload() {
-    this.pause();
-    this.unlayout();
+    this.element.unmount();
   }
 
   /**

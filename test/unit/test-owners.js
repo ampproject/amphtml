@@ -113,23 +113,13 @@ describes.realWin(
         }).to.not.throw();
       });
 
-      it('should call pauseCallback on custom element', () => {
-        const stub1 = env.sandbox.stub(children[1], 'pauseCallback');
-        const stub2 = env.sandbox.stub(children[2], 'pauseCallback');
+      it('should call pause on custom element', () => {
+        const stub1 = env.sandbox.stub(children[1], 'pause');
+        const stub2 = env.sandbox.stub(children[2], 'pause');
 
         owners.schedulePause(parent, children);
         expect(stub1.calledOnce).to.be.true;
         expect(stub2.calledOnce).to.be.true;
-      });
-
-      it('should call unlayoutCallback when unlayoutOnPause', () => {
-        const stub1 = env.sandbox.stub(children[1], 'unlayoutCallback');
-        const stub2 = env.sandbox.stub(children[2], 'unlayoutCallback');
-        env.sandbox.stub(children[1], 'unlayoutOnPause').returns(true);
-
-        owners.schedulePause(parent, children);
-        expect(stub1.calledOnce).to.be.true;
-        expect(stub2.calledOnce).to.be.false;
       });
     });
 
@@ -158,15 +148,15 @@ describes.realWin(
         }).to.not.throw();
       });
 
-      it('should call resumeCallback on paused custom elements', () => {
-        const stub1 = env.sandbox.stub(children[1], 'resumeCallback');
+      it('should call resume on paused custom elements', () => {
+        const stub1 = env.sandbox.stub(children[1], 'resume');
 
         owners.scheduleResume(parent, children);
         expect(stub1.calledOnce).to.be.true;
       });
 
-      it('should call resumeCallback on non-paused custom elements', () => {
-        const stub2 = env.sandbox.stub(children[2], 'resumeCallback');
+      it('should call resume on non-paused custom elements', () => {
+        const stub2 = env.sandbox.stub(children[2], 'resume');
 
         owners.scheduleResume(parent, children);
         expect(stub2.calledOnce).to.be.true;
