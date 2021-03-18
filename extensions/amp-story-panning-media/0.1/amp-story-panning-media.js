@@ -208,7 +208,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /**
    * Calculates max distances to keep image in viewport.
-   * This is only set if lock-bounds, left, right, top or bottom are specified.
+   * This is only set if lock-bounds.
    * @private
    */
   setMaxBounds_() {
