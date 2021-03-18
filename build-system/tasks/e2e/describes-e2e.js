@@ -22,6 +22,7 @@ const chrome = require('selenium-webdriver/chrome');
 const fetch = require('node-fetch');
 const firefox = require('selenium-webdriver/firefox');
 const puppeteer = require('puppeteer');
+const selenium = require('selenium-webdriver');
 const {
   clearLastExpectError,
   getLastExpectError,
@@ -31,7 +32,6 @@ const {
   SeleniumWebDriverController,
 } = require('./selenium-webdriver-controller');
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
-const selenium = require('selenium-webdriver');
 const {HOST, PORT} = require('../serve');
 const {installRepl, uninstallRepl} = require('./repl');
 const {isCiBuild} = require('../../common/ci');
@@ -424,7 +424,7 @@ function describeEnv(factory) {
    * @param {!Object} spec
    * @param {function(!Object): void} fn
    * @param {function(string, function(): void): void} describeFunc
-   * @return {void}
+
    */
   const templateFunc = function (suiteName, spec, fn, describeFunc) {
     const fixture = factory(spec);
@@ -502,9 +502,10 @@ function describeEnv(factory) {
       }
     }
 
-    return describeFunc(suiteName, function () {
+    describeFunc(suiteName, function () {
       createBrowserDescribe();
     });
+    return;
 
     /**
      *
@@ -597,7 +598,8 @@ function describeEnv(factory) {
    * @param {function(!Object): void} fn
    */
   mainFunc.only = function (name, spec, fn) {
-    templateFunc(name, spec, fn, describe.only);
+    templateFunc(name, spec, fn, describe./*OK*/ only);
+    return;
   };
 
   /**
@@ -692,7 +694,7 @@ class EndToEndFixture {
  * Get the driver for the configured engine.
  * @param {!DescribesConfigDef} describesConfig
  * @param {string} browserName
- * @param {?string} deviceName
+ * @param {string|undefined} deviceName
  * @return {!selenium.WebDriver|Promise<puppeteer.Browser>}
  */
 function getDriver(

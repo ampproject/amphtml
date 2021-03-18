@@ -15,8 +15,9 @@ declare global {
     report: (val: any) => void;
   }
 
-  interface Window extends Window {
-    queryXpath: (xpath: string, root: unknown /** Puppeteer.ElementHandle */) => unknown | null;
+  interface Window {
+    queryXpath: (xpath: string, root: unknown /** Puppeteer.ElementHandle */) => unknown[] | null;
+    AMP: Function[];
   }
 }
 

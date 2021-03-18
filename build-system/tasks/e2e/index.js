@@ -141,7 +141,7 @@ async function fetchCoverage_(outDir) {
           response.pipe(zipFile);
           zipFile.on('finish', () => {
             zipFile.close();
-            resolve(undefined);
+            resolve();
           });
         }
       )

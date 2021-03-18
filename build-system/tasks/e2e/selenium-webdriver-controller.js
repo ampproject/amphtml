@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// @ts-nocheck
 
 const fs = require('fs');
+const selenium = require('selenium-webdriver');
 const {
   DOMRectDef,
   ElementHandle,
   Key,
 } = require('./functional-test-controller');
-const selenium = require('selenium-webdriver');
 const {ControllerPromise} = require('./controller-promise');
 const {expect} = require('chai');
 const {NetworkLogger} = require('./network-logger');
@@ -153,7 +154,7 @@ class SeleniumWebDriverController {
    * until.js#elementsLocated
    * {@link https://github.com/SeleniumHQ/selenium/blob/6a717f20/javascript/node/selenium-webdriver/lib/until.js#L258}   *
    * @param {string} selector
-   * @return {!Promise<!Array<!ElementHandle<!selenium.selenium.WebElement>>>}
+   * @return {!Promise<!Array<!ElementHandle<!selenium.WebElement>>>}
    * @override
    */
   async findElements(selector) {
@@ -680,7 +681,7 @@ class SeleniumWebDriverController {
 
   /**.
    * @param {!ElementHandle<!selenium.WebElement>} handle
-   * @param {!function(): any} getter
+   * @param {function(): any} getter
    * @return {!Promise<void>}
    */
   async switchToShadowInternal_(handle, getter) {

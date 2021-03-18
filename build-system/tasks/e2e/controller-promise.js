@@ -27,7 +27,7 @@
 class ControllerPromise {
   /**
    * @param {!Promise<TYPE>|function(function(?TYPE):void, function(*):void):void} executorOrPromise
-   * @param {function(TYPE,function(TYPE): ?TYPE): !Promise} opt_waitForValue
+   * @param {undefined|function(TYPE,function(TYPE): ?TYPE): Promise<TYPE>} opt_waitForValue
    */
   constructor(executorOrPromise, opt_waitForValue) {
     this.promise_ =
@@ -62,7 +62,6 @@ class ControllerPromise {
 
   /** @override */
   then(opt_onFulfilled, opt_onRejected) {
-    // opt_onFulfilled = opt_onFulfilled || ((x) => x);
     // Allow this and future `then`s to update the wait value.
     let wrappedWait;
     if (this.waitForValue) {
@@ -82,14 +81,14 @@ class ControllerPromise {
  * the inner opt_mutate function.
  * @param {function(TYPE1, function(TYPE1): ?TYPE1): Promise<TYPE3>} wait
  * @param {function(TYPE1): TYPE1} mutate
- * @return {!function(function(TYPE1): ?TYPE1, function(TYPE1): TYPE2): Promise<TYPE3>}
+ * @return {function(function(TYPE1): ?TYPE1, function(TYPE1): TYPE2): Promise<TYPE3>}
  * @template TYPE1
  * @template TYPE2
  * @template TYPE3
  */
 function wrapWait(wait, mutate) {
   return (condition, opt_mutate) => {
-    // opt_mutate = opt_mutate || ((x) => x);
+    opt_mutate = opt_mutate || ((x) => /** @type {*} */ (x));
     return wait(condition, (value) => opt_mutate(mutate(value)));
   };
 }

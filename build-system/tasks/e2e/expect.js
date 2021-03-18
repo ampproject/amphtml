@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// @ts-nocheck
 
 const chai = require('chai');
 chai.use(require('chai-as-promised'));
@@ -37,7 +36,7 @@ function getLastExpectError() {
 /**
  * @param {*} actual
  * @param {string=} opt_message
- * @return {!chai.ExpectStatic}
+ * @return {!ExpectStatic}
  */
 function expect(actual, opt_message) {
   if (!installed) {
@@ -170,8 +169,8 @@ function installWrappers(chai, utils) {
 }
 
 /**
- * @param {chai.ChaiUtils} utils
- * @return {function(_super: chai.AssertionStatic): function(): any}
+ * @param {Chai.ChaiUtils} utils
+ * @return {Function(_super: Chai.AssertionStatic): Function(): any}
  */
 function overwriteAlwaysUseSuper(utils) {
   const {flag} = utils;
@@ -229,8 +228,8 @@ function overwriteAlwaysUseSuper(utils) {
 }
 
 /**
- * @param {chai.AssertionStatic} _super
- * @return {function(): *}
+ * @param {Chai.AssertionStatic} _super
+ * @return {Function(): *}
  */
 function inheritChainingBehavior(_super) {
   return function () {
@@ -239,8 +238,8 @@ function inheritChainingBehavior(_super) {
 }
 
 /**
- * @param {chai.AssertionStatic} _super
- * @return {function(): *}
+ * @param {Chai.AssertionStatic} _super
+ * @return {Function(): *}
  */
 function overwriteUnsupported(_super) {
   return function () {
