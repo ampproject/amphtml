@@ -46,7 +46,7 @@ export class AmpAdTemplateHelper {
    */
   constructor(ampdoc) {
     /** @private @const */
-    this.ampdoc_ = ampdoc;
+    this.parentAmpdoc_ = ampdoc;
 
     /** @private {LruCache} */
     this.cache_ = new LruCache(5);
@@ -59,7 +59,7 @@ export class AmpAdTemplateHelper {
    * @return {!Promise<string>}
    */
   fetch(templateUrl) {
-    const {win} = this.ampdoc_;
+    const {win} = this.parentAmpdoc_;
     const proxyUrl =
       getMode(win).localDev && !isNaN(templateUrl)
         ? `http://ads.localhost:${win.location.port}` +
@@ -82,7 +82,7 @@ export class AmpAdTemplateHelper {
    * @return {!Promise<!Element>} Promise which resolves after rendering completes.
    */
   render(templateValues, element) {
-    return Services.templatesForDoc(this.ampdoc_).findAndRenderTemplate(
+    return Services.templatesForDoc(element).findAndRenderTemplate(
       element,
       templateValues
     );

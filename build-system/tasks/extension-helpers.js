@@ -14,29 +14,27 @@
  * limitations under the License.
  */
 
-const colors = require('kleur/colors');
+const argv = require('minimist')(process.argv.slice(2));
 const debounce = require('debounce');
 const fs = require('fs-extra');
+const path = require('path');
 const wrappers = require('../compile/compile-wrappers');
-const {
-  endBuildStep,
-  watchDebounceDelay,
-  invalidateUnminifiedBabelCache,
-} = require('./helpers');
 const {
   extensionAliasBundles,
   extensionBundles,
   verifyExtensionBundles,
+  jsBundles,
 } = require('../compile/bundles.config');
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
+const {compileJison} = require('./compile-jison');
+const {endBuildStep, watchDebounceDelay, doBuildJs} = require('./helpers');
+const {green, red, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
 const {log} = require('../common/logging');
 const {maybeToEsmName, compileJs, mkdirSync} = require('./helpers');
+const {removeFromBabelCache} = require('../compile/pre-closure-babel');
 const {watch} = require('chokidar');
-
-const {green, red, cyan} = colors;
-const argv = require('minimist')(process.argv.slice(2));
 
 /**
  * Extensions to build when `--extensions=inabox`.
@@ -344,7 +342,7 @@ async function buildExtensions(options) {
     }
   }
   await Promise.all(results);
-  if (!options.compileOnlyCss) {
+  if (!options.compileOnlyCss && results.length > 0) {
     endBuildStep(
       options.minify ? 'Minified all' : 'Compiled all',
       'extensions',
@@ -378,16 +376,16 @@ async function doBuildExtension(extensions, extension, options) {
  * Watches the contents of an extension directory. When a file in the given path
  * changes, the extension is rebuilt.
  *
- * @param {string} path
+ * @param {string} extDir
  * @param {string} name
  * @param {string} version
  * @param {string} latestVersion
  * @param {boolean} hasCss
  * @param {?Object} options
  */
-function watchExtension(path, name, version, latestVersion, hasCss, options) {
-  const watchFunc = function (modifiedFile) {
-    invalidateUnminifiedBabelCache(modifiedFile);
+function watchExtension(extDir, name, version, latestVersion, hasCss, options) {
+  const watchFunc = function () {
+    removeFromBabelCache(extDir);
     const bundleComplete = buildExtension(
       name,
       version,
@@ -399,7 +397,7 @@ function watchExtension(path, name, version, latestVersion, hasCss, options) {
       options.onWatchBuild(bundleComplete);
     }
   };
-  watch(`${path}/**/*`).on('change', debounce(watchFunc, watchDebounceDelay));
+  watch(`${extDir}/**/*`).on('change', debounce(watchFunc, watchDebounceDelay));
 }
 
 /**
@@ -435,14 +433,14 @@ async function buildExtension(
   if (options.compileOnlyCss && !hasCss) {
     return;
   }
-  const path = 'extensions/' + name + '/' + version;
+  const extDir = 'extensions/' + name + '/' + version;
 
   // Use a separate watcher for extensions to copy / inline CSS and compile JS
   // instead of relying on the watchers used by compileUnminifiedJs and
   // compileMinifiedJs, which only recompile JS.
   if (options.watch) {
     options.watch = false;
-    watchExtension(path, name, version, latestVersion, hasCss, options);
+    watchExtension(extDir, name, version, latestVersion, hasCss, options);
     // When an ad network extension is being watched, also watch amp-a4a.
     if (name.match(/amp-ad-network-.*-impl/)) {
       const a4aPath = `extensions/amp-a4a/${version}`;
@@ -452,25 +450,30 @@ async function buildExtension(
   if (hasCss) {
     mkdirSync('build');
     mkdirSync('build/css');
-    await buildExtensionCss(path, name, version, options);
+    await buildExtensionCss(extDir, name, version, options);
     if (options.compileOnlyCss) {
       return;
     }
   }
+
+  await compileJison(path.join(extDir, '**', '*.jison'));
+  if (name === 'amp-bind') {
+    await doBuildJs(jsBundles, 'ww.max.js', options);
+  }
   if (name === 'amp-analytics') {
     await analyticsVendorConfigs(options);
   }
-  await buildExtensionJs(path, name, version, latestVersion, options);
+  await buildExtensionJs(extDir, name, version, latestVersion, options);
 }
 
 /**
- * @param {string} path
+ * @param {string} extDir
  * @param {string} name
  * @param {string} version
  * @param {!Object} options
  * @return {!Promise}
  */
-function buildExtensionCss(path, name, version, options) {
+function buildExtensionCss(extDir, name, version, options) {
   /**
    * Writes CSS binaries
    *
@@ -488,7 +491,7 @@ function buildExtensionCss(path, name, version, options) {
   const isAliased = aliasBundle && aliasBundle.version == version;
 
   const promises = [];
-  const mainCssBinary = jsifyCssAsync(path + '/' + name + '.css').then(
+  const mainCssBinary = jsifyCssAsync(extDir + '/' + name + '.css').then(
     (mainCss) => {
       writeCssBinaries(`${name}-${version}.css`, mainCss);
       if (isAliased) {
@@ -501,7 +504,7 @@ function buildExtensionCss(path, name, version, options) {
     promises.push.apply(
       promises,
       options.cssBinaries.map(function (name) {
-        return jsifyCssAsync(`${path}/${name}.css`).then((css) => {
+        return jsifyCssAsync(`${extDir}/${name}.css`).then((css) => {
           writeCssBinaries(`${name}-${version}.css`, css);
           if (isAliased) {
             writeCssBinaries(`${name}-${aliasBundle.aliasedVersion}.css`, css);
@@ -517,7 +520,7 @@ function buildExtensionCss(path, name, version, options) {
 /**
  * Build the JavaScript for the extension specified
  *
- * @param {string} path Path to the extensions directory
+ * @param {string} extDir Path to the extension's directory
  * @param {string} name Name of the extension. Must be the sub directory in
  *     the extensions directory and the name of the JS and optional CSS file.
  * @param {string} version Version of the extension. Must be identical to
@@ -526,11 +529,11 @@ function buildExtensionCss(path, name, version, options) {
  * @param {!Object} options
  * @return {!Promise}
  */
-async function buildExtensionJs(path, name, version, latestVersion, options) {
+async function buildExtensionJs(extDir, name, version, latestVersion, options) {
   const filename = options.filename || name + '.js';
   const latest = version === latestVersion;
   await compileJs(
-    path + '/',
+    extDir + '/',
     filename,
     './dist/v0',
     Object.assign(options, {

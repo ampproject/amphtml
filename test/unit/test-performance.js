@@ -849,6 +849,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
   let windowEventListeners;
   let performanceObserver;
   let viewerVisibilityState;
+  let whenFirstVisiblePromise;
+  let whenFirstVisibleResolve;
 
   function setupFakesForVisibilityStateManipulation() {
     // Fake window to fake `document.visibilityState`.
@@ -898,12 +900,15 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
     // Install services on fakeWin so some behaviors can be stubbed.
     installRuntimeServices(fakeWin);
 
+    whenFirstVisiblePromise = new Promise((resolve) => {
+      whenFirstVisibleResolve = resolve;
+    });
     const unresolvedPromise = new Promise(() => {});
     const viewportSize = {width: 0, height: 0};
     env.sandbox.stub(Services, 'ampdoc').returns({
       hasBeenVisible: () => {},
       onVisibilityChanged: () => {},
-      whenFirstVisible: () => unresolvedPromise,
+      whenFirstVisible: () => whenFirstVisiblePromise,
       getVisibilityState: () => viewerVisibilityState,
       getFirstVisibleTime: () => 0,
       isSingleDoc: () => true,
@@ -1213,6 +1218,82 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       (windowEventListeners[eventName] || []).forEach((cb) => cb(event));
     }
 
+    // TODO(#33207): Remove after data collection
+    it('Forwards cls-fcp and cls-ofv', async () => {
+      fakeWin.PerformanceObserver.supportedEntryTypes = [
+        'layout-shift',
+        'paint',
+      ];
+      fakeWin.document.visibilityState = 'hidden';
+
+      // Document should be initially hidden.
+      expect(fakeWin.document.visibilityState).to.equal('hidden');
+
+      // visibilitychange/beforeunload listeners are now added.
+      const perf = getPerformance();
+      perf.coreServicesAvailable();
+
+      // Pre-visible and pre-fcp layout shifts
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {
+              entryType: 'layout-shift',
+              value: 0.25,
+              hadRecentInput: false,
+              startTime: 0,
+            },
+            {
+              entryType: 'layout-shift',
+              value: 0.25,
+              hadRecentInput: false,
+              startTime: 50,
+            },
+          ];
+        },
+      });
+
+      whenFirstVisibleResolve();
+      await new Promise(setTimeout);
+      toggleVisibility(fakeWin, true);
+
+      // Post visible, pre-fcp layout-shift
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {
+              entryType: 'layout-shift',
+              value: 0.5,
+              hadRecentInput: false,
+              startTime: 100,
+            },
+            {
+              entryType: 'paint',
+              name: 'first-contentful-paint',
+              startTime: 150,
+              duration: 0,
+            },
+            {
+              entryType: 'layout-shift',
+              value: 0.5,
+              hadRecentInput: false,
+              startTime: 200,
+            },
+          ];
+        },
+      });
+
+      toggleVisibility(fakeWin, false);
+      const clsEvents = perf.events_.filter((event) =>
+        event.label.startsWith('cls')
+      );
+      expect(clsEvents).jsonEqual([
+        {label: 'cls-ofv', delta: 0.5},
+        {label: 'cls-fcp', delta: 1},
+        {label: 'cls', delta: 1.5},
+      ]);
+    });
+
     it('for Chromium 77', () => {
       // Specify an Android Chrome user agent, which supports the
       // visibilitychange event.
@@ -1248,7 +1329,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       toggleVisibility(fakeWin, false);
       let clsEvents = perf.events_.filter((event) => event.label === 'cls');
       expect(clsEvents.length).equal(1);
-      expect(perf.events_[0]).to.be.jsonEqual({
+      expect(perf.events_).deep.includes({
         label: 'cls',
         delta: 0.55,
       });
@@ -1275,7 +1356,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
 
       toggleVisibility(fakeWin, false);
       clsEvents = perf.events_.filter((event) => event.label.startsWith('cls'));
-      expect(clsEvents.length).to.equal(2);
+      expect(clsEvents.length).to.equal(4);
       expect(clsEvents).to.deep.include({
         label: 'cls-2',
         delta: 1.5501,
@@ -1291,7 +1372,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
 
       toggleVisibility(fakeWin, false);
       clsEvents = perf.events_.filter((event) => event.label.startsWith('cls'));
-      expect(clsEvents.length).to.equal(2);
+      expect(clsEvents.length).to.equal(4);
     });
 
     it('when the viewer visibility changes to inactive', () => {
@@ -1326,7 +1407,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       const clsEvents = perf.events_.filter((evt) =>
         evt.label.startsWith('cls')
       );
-      expect(clsEvents.length).to.equal(1);
+      expect(clsEvents.length).to.equal(3);
       expect(perf.events_).deep.include({
         label: 'cls',
         delta: 0.55,

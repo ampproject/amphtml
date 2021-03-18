@@ -17,8 +17,10 @@
 import {
   calculateEntryPointScriptUrl,
   calculateExtensionScriptUrl,
+  getExtensionScripts,
   parseExtensionUrl,
 } from '../../src/service/extension-script';
+import {createElementWithAttributes} from '../../src/dom';
 import {initLogConstructor, resetLogConstructorForTesting} from '../../src/log';
 
 describes.sandboxed('Extension Location', {}, () => {
@@ -332,5 +334,109 @@ describes.sandboxed('Module Extension Location', {}, () => {
       expect(urlParts.extensionId).to.equal('amp-ad');
       expect(urlParts.extensionVersion).to.equal('latest');
     });
+  });
+});
+
+describes.fakeWin('getExtensionScripts', {}, (env) => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+
+    doc.head.appendChild(
+      createElementWithAttributes(doc, 'script', {
+        'id': 'amp-ext1-0_1-new-version',
+        'i-amphtml-loaded-new-version': '',
+        'custom-element': 'amp-ext1',
+        'src': 'https://cdn.ampproject.org/v0/amp-ext1-0.1.js',
+      })
+    );
+    doc.head.appendChild(
+      createElementWithAttributes(doc, 'script', {
+        'id': 'amp-ext1-0_1',
+        'custom-element': 'amp-ext1',
+        'src': 'https://cdn.ampproject.org/v0/amp-ext1-0.1.js',
+      })
+    );
+    doc.head.appendChild(
+      createElementWithAttributes(doc, 'script', {
+        'id': 'amp-ext1-latest',
+        'i-amphtml-inserted': '',
+        'custom-element': 'amp-ext1',
+        'src': 'https://cdn.ampproject.org/v0/amp-ext1-latest.js',
+      })
+    );
+
+    doc.head.appendChild(
+      createElementWithAttributes(doc, 'script', {
+        'id': 'amp-ext1-0_2',
+        'custom-element': 'amp-ext1',
+        'src': 'https://cdn.ampproject.org/v0/amp-ext1-0.2.js',
+      })
+    );
+
+    doc.head.appendChild(
+      createElementWithAttributes(doc, 'script', {
+        'id': 'amp-ext2-latest',
+        'custom-element': 'amp-ext2',
+        'src': 'https://cdn.ampproject.org/v0/amp-ext2-latest.js',
+      })
+    );
+
+    doc.head.appendChild(
+      createElementWithAttributes(doc, 'script', {
+        'id': 'intermediate1',
+        'src': 'https://cdn.ampproject.org/v0/_intermediate-latest.js',
+      })
+    );
+  });
+
+  function ids(array) {
+    return array.map((a) => a.id);
+  }
+
+  it('should find a specific version', () => {
+    expect(
+      ids(getExtensionScripts(win, 'amp-ext1', '0.1', false))
+    ).to.deep.equal(['amp-ext1-0_1']);
+    expect(
+      ids(getExtensionScripts(win, 'amp-ext1', '0.2', false))
+    ).to.deep.equal(['amp-ext1-0_2']);
+    expect(
+      ids(getExtensionScripts(win, 'amp-ext2', '0.1', false))
+    ).to.deep.equal([]);
+  });
+
+  it('should find a specific version with latest', () => {
+    expect(
+      ids(getExtensionScripts(win, 'amp-ext1', '0.1', true))
+    ).to.deep.equal(['amp-ext1-0_1', 'amp-ext1-latest']);
+    expect(
+      ids(getExtensionScripts(win, 'amp-ext1', '0.2', true))
+    ).to.deep.equal(['amp-ext1-latest', 'amp-ext1-0_2']);
+    expect(
+      ids(getExtensionScripts(win, 'amp-ext2', '0.1', true))
+    ).to.deep.equal(['amp-ext2-latest']);
+  });
+
+  it('should find an intermediate extension', () => {
+    expect(
+      ids(getExtensionScripts(win, '_intermediate', '', false))
+    ).to.deep.equal(['intermediate1']);
+  });
+
+  it('should ignore an inserted script', () => {
+    expect(
+      ids(
+        getExtensionScripts(
+          win,
+          'amp-ext1',
+          '0.1',
+          true,
+          /* includeInserted */ false
+        )
+      )
+    ).to.deep.equal(['amp-ext1-0_1']);
   });
 });
