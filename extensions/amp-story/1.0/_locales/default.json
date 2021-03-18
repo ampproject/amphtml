@@ -38,5 +38,6 @@
   "84": {"string": "SCORE:"},
   "85": {"string": "Pause"},
   "86": {"string": "Play"},
-  "89": {"string": "Your response will be sent to"}
+  "89": {"string": "Your response will be sent to"},
+  "96": {"string": "Move device to explore"}
 }
