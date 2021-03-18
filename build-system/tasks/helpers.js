@@ -25,6 +25,7 @@ const magicstring = require('magic-string');
 const open = require('open');
 const path = require('path');
 const Remapping = require('@ampproject/remapping');
+const terser = require('terser');
 const wrappers = require('../compile/compile-wrappers');
 const {
   VERSION: internalRuntimeVersion,
@@ -36,6 +37,7 @@ const {green, red, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
+const {removeFromBabelCache} = require('../compile/pre-closure-babel');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
 const {watch: fileWatch} = require('chokidar');
@@ -158,22 +160,23 @@ async function bootstrapThirdPartyFrames(options) {
  * @return {Promise<void>}
  */
 async function compileCoreRuntime(options) {
-  /**
-   * @return {Promise<void>}
-   */
-  async function watchFunc() {
-    const bundleComplete = await doBuildJs(jsBundles, 'amp.js', {
-      ...options,
-      watch: false,
-    });
-    if (options.onWatchBuild) {
-      options.onWatchBuild(bundleComplete);
-    }
-  }
-
   if (options.watch) {
-    const debouncedRebuild = debounce(watchFunc, watchDebounceDelay);
-    fileWatch('src/**/*.js').on('change', debouncedRebuild);
+    /** @return {Promise<void>} */
+    async function watchFunc() {
+      removeFromBabelCache('src');
+      const bundleComplete = await doBuildJs(jsBundles, 'amp.js', {
+        ...options,
+        continueOnError: true,
+        watch: false,
+      });
+      if (options.onWatchBuild) {
+        options.onWatchBuild(bundleComplete);
+      }
+    }
+    fileWatch('src/**/*.js').on(
+      'change',
+      debounce(watchFunc, watchDebounceDelay)
+    );
   }
 
   await doBuildJs(jsBundles, 'amp.js', {
@@ -202,7 +205,6 @@ async function compileAllJs(options) {
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', options),
     doBuildJs(jsBundles, 'alp.max.js', options),
     doBuildJs(jsBundles, 'examiner.max.js', options),
-    doBuildJs(jsBundles, 'ww.max.js', options),
     doBuildJs(jsBundles, 'integration.js', options),
     doBuildJs(jsBundles, 'ampcontext-lib.js', options),
     doBuildJs(jsBundles, 'iframe-transport-client-lib.js', options),
@@ -330,6 +332,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
 
   if (options.watch) {
     const watchFunc = async () => {
+      removeFromBabelCache(entryPoint);
       const compileDone = await doCompileMinifiedJs(/* continueOnError */ true);
       if (options.onWatchBuild) {
         options.onWatchBuild(compileDone);
@@ -552,40 +555,88 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
     options.minify ? 'minified' : 'unminified',
     /* enableCache */ true
   );
-  const buildResult = await esbuild
-    .build({
-      entryPoints: [entryPoint],
-      bundle: true,
-      sourcemap: true,
-      outfile: destFile,
-      plugins: [plugin],
-      minify: options.minify,
-      incremental: !!options.watch,
-      logLevel: 'silent',
-    })
-    .then((result) => {
-      finishBundle(srcFilename, destDir, destFilename, options, startTime);
-      return result;
-    })
-    .catch((err) => handleBundleError(err, !!options.watch, destFilename));
+
+  let result = null;
+
+  /**
+   * @param {number} time
+   */
+  async function build(time) {
+    if (!result) {
+      result = await esbuild.build({
+        entryPoints: [entryPoint],
+        bundle: true,
+        sourcemap: true,
+        outfile: destFile,
+        plugins: [plugin],
+        minify: options.minify,
+        target: argv.esm ? 'es6' : 'es5',
+        incremental: !!options.watch,
+        logLevel: 'silent',
+      });
+    } else {
+      result = await result.rebuild();
+    }
+    await minifyWithTerser(destDir, destFilename, options);
+    await finishBundle(srcFilename, destDir, destFilename, options, time);
+  }
+
+  await build(startTime).catch((err) =>
+    handleBundleError(err, !!options.watch, destFilename)
+  );
 
   if (options.watch) {
     watchedTargets.set(entryPoint, {
       rebuild: async () => {
         const time = Date.now();
-        const buildPromise = buildResult
-          .rebuild()
-          .then(() =>
-            finishBundle(srcFilename, destDir, destFilename, options, time)
-          )
-          .catch((err) =>
-            handleBundleError(err, /* continueOnError */ true, destFilename)
-          );
-        options?.onWatchBuild(buildPromise);
+        const buildPromise = build(time).catch((err) =>
+          handleBundleError(err, !!options.watch, destFilename)
+        );
+        if (options.onWatchBuild) {
+          options.onWatchBuild(buildPromise);
+        }
         await buildPromise;
       },
     });
   }
+}
+
+/**
+ * Minify the code with Terser. Only used by the ESBuild.
+ *
+ * @param {string} destDir
+ * @param {string} destFilename
+ * @param {?Object} options
+ * @return {!Promise}
+ */
+async function minifyWithTerser(destDir, destFilename, options) {
+  if (!options.minify) {
+    return;
+  }
+
+  const filename = destDir + destFilename;
+  const terserOptions = {
+    mangle: true,
+    compress: true,
+    output: {
+      beautify: !!argv.pretty_print,
+      comments: /\/*/,
+      // eslint-disable-next-line google-camelcase/google-camelcase
+      keep_quoted_props: true,
+    },
+    sourceMap: true,
+  };
+  const minified = await terser.minify(
+    fs.readFileSync(filename, 'utf8'),
+    terserOptions
+  );
+  const remapped = remapping(
+    [minified.map, fs.readFileSync(`${filename}.map`, 'utf8')],
+    () => null,
+    !argv.full_sourcemaps
+  );
+  fs.writeFileSync(filename, minified.code);
+  fs.writeFileSync(`${filename}.map`, remapped.toString());
 }
 
 /**

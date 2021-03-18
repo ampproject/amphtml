@@ -72,14 +72,13 @@ function getMinifiedConfig() {
     {
       bugfixes: true,
       modules: false,
-      targets: {esmodules: true},
+      targets: argv.esm ? {esmodules: true} : {ie: 11, chrome: 41},
     },
   ];
-  const presets = argv.esm ? [presetEnv] : [];
   return {
     compact: false,
     plugins,
-    presets,
+    presets: [presetEnv],
     retainLines: true,
   };
 }

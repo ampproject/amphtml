@@ -41,11 +41,18 @@ const LIFECYCLES = {
  *
  * @param {string} lifecycle
  * @param {string} fullpath
- * @param {Buffer} content
- * @param {Object} sourcemap
+ * @param {string=} content
+ * @param {Object=} sourcemap
  */
 function debug(lifecycle, fullpath, content, sourcemap) {
   if (argv.debug && Object.keys(LIFECYCLES).includes(lifecycle)) {
+    if (!content) {
+      content = fs.readFileSync(fullpath, 'utf-8');
+    }
+    const sourcemapPath = `${fullpath}.map`;
+    if (!sourcemap && fs.existsSync(sourcemapPath)) {
+      sourcemap = fs.readFileSync(sourcemapPath, 'utf-8');
+    }
     const contentsPath = tempy.writeSync(content);
     if (sourcemap) {
       fs.writeFileSync(
@@ -65,7 +72,6 @@ function debug(lifecycle, fullpath, content, sourcemap) {
 
 /**
  * Logs debug information.
- * @return {void}
  */
 function displayLifecycleDebugging() {
   if (argv.debug) {
