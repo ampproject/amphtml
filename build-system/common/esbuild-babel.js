@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
 const crypto = require('crypto');
 const fs = require('fs-extra');
@@ -109,11 +108,18 @@ function getEsbuildBabelPlugin(
   preSetup = () => {},
   postLoad = () => {}
 ) {
-  function md5(obj) {
+  function md5(...args) {
     if (!enableCache) {
       return '';
     }
-    return crypto.createHash('md5').update(JSON.stringify(obj)).digest('hex');
+    console.time('hash');
+    const hash = crypto.createHash('md5');
+    for (const a of args) {
+      hash.update(a);
+    }
+    const ret = hash.digest('hex');
+    console.timeEnd('hash');
+    return ret;
   }
 
   /**
@@ -125,10 +131,10 @@ function getEsbuildBabelPlugin(
     let read = readCache.get(path);
     if (!read) {
       read = fs.promises
-        .readFile(path, 'utf8')
+        .readFile(path)
         .then((contents) => ({
           contents,
-          hash: md5({contents, optionsHash}),
+          hash: md5(contents, optionsHash),
         }))
         .finally(() => {
           readCache.delete(path);
@@ -164,11 +170,17 @@ function getEsbuildBabelPlugin(
     name: 'babel',
 
     async setup(build) {
+      console.trace('presetup');
       preSetup();
 
+      console.time('babelOptions');
       const babelOptions =
         babel.loadOptions({caller: {name: callerName}}) || {};
-      const optionsHash = md5({babelOptions, argv});
+      console.timeEnd('babelOptions');
+      console.log(JSON.stringify(babelOptions));
+      const optionsHash = md5(
+        JSON.stringify({babelOptions, argv: process.argv.slice(2)})
+      );
 
       build.onLoad({filter: /\.[cm]?js$/, namespace: ''}, async (file) => {
         const filename = file.path;
