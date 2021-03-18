@@ -49,13 +49,25 @@ function getTime(start) {
 }
 
 /**
+ * Switches the current directory to the repo root if needed. This is done so
+ * that hard-coded paths within tasks can work predictably.
+ */
+function startAtRepoRoot() {
+  const repoRoot = path.resolve(__dirname, '..', '..');
+  if (repoRoot != process.cwd()) {
+    process.chdir(repoRoot);
+    log('Working directory changed to', magenta('amphtml'));
+  }
+}
+
+/**
  * Runs an AMP task with logging and timing. Always start at the repo root.
  * @param {string} taskName
  * @param {Function()} taskFunc
  * @return {Promise<void>}
  */
 async function runTask(taskName, taskFunc) {
-  process.chdir(path.resolve(__dirname, '../../'));
+  startAtRepoRoot();
   log('Using task file', magenta('amphtml/amp.js'));
   const start = Date.now();
   try {
@@ -78,7 +90,7 @@ async function runTask(taskName, taskFunc) {
  * @param {string} taskSourceFileName
  */
 function createTask(taskName, taskFuncName, taskSourceFileName) {
-  const taskSourceFilePath = `./${taskSourceFileName}`;
+  const taskSourceFilePath = path.join(__dirname, taskSourceFileName);
   const isInvokedTask = argv._.includes(taskName); // `amp <task>`
   const isDefaultTask =
     argv._.length === 0 && taskName == 'default' && !isHelpTask; // `amp`
