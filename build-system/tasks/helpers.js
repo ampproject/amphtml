@@ -332,7 +332,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
   const minifiedName = maybeToEsmName(options.minifiedName);
 
   if (options.watch) {
-    const watchFunc = async () => {
+    async function watchFunc() {
       if (options.minify) {
         removeFromClosureBabelCache(entryPoint);
       }
@@ -340,7 +340,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
       if (options.onWatchBuild) {
         options.onWatchBuild(compileDone);
       }
-    };
+    }
     fileWatch(entryPoint).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 

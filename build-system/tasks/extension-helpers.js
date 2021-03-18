@@ -384,9 +384,9 @@ async function doBuildExtension(extensions, extension, options) {
  * @param {?Object} options
  */
 function watchExtension(extDir, name, version, latestVersion, hasCss, options) {
-  const watchFunc = function (modifiedFile) {
+  function watchFunc() {
     if (options.minify) {
-      removeFromClosureBabelCache(modifiedFile);
+      removeFromClosureBabelCache(extDir);
     }
 
     const bundleComplete = buildExtension(
@@ -399,7 +399,7 @@ function watchExtension(extDir, name, version, latestVersion, hasCss, options) {
     if (options.onWatchBuild) {
       options.onWatchBuild(bundleComplete);
     }
-  };
+  }
   watch(`${extDir}/**/*`).on('change', debounce(watchFunc, watchDebounceDelay));
 }
 
