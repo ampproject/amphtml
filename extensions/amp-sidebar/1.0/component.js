@@ -104,6 +104,7 @@ function SidebarWithRef(
   }, [side, mounted]);
 
   useSidebarAnimation(
+    mounted,
     opened,
     onAfterClose,
     side,
