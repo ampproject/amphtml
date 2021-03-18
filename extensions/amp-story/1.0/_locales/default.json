@@ -39,5 +39,5 @@
   "85": {"string": "Pause"},
   "86": {"string": "Play"},
   "89": {"string": "Your response will be sent to"},
-  "90": {"string": "Move device to explore"}
+  "96": {"string": "Move device to explore"}
 }
