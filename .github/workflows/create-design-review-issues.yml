@@ -1,0 +1,32 @@
+name: Create Design Review Issues
+
+on:
+  schedule:
+    # Every Wednesday at 00:00:00
+    - cron: '0 0 * * 3'
+
+jobs:
+  sweep-experiments:
+    name: Create Design Review Issues
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set Up Node
+        uses: actions/setup-node@v2.1.5
+
+      - name: Generate
+        id: generate
+        run: |
+          issue=$(wget -q -O - https://raw.githubusercontent.com/ampproject/amphtml/master/build-system/tasks/create-design-review-issues/index.js | node)
+          issue="${issue//'%'/'%25'}"
+          issue="${issue//$'\n'/'%0A'}"
+          issue="${issue//$'\r'/'%0D'}"
+          echo "::set-output name=issue::$(echo "$issue")"
+
+      - name: Create Issue
+        uses: nashmaniac/create-issue-action@v1.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: ${{ fromJSON(steps.generate.outputs.issue).title }}
+          labels: ${{ fromJSON(steps.generate.outputs.issue).labels }}
+          body: ${{ fromJSON(steps.generate.outputs.issue).body }}
