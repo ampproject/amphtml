@@ -397,7 +397,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const adIndex = this.adPageManager_.getIndexById(adPageId);
 
     if (!adPage.hasBeenViewed()) {
-      this.pendingAdView_ = false;
       this.placementAlgorithm_.onNewAdView(pageIndex);
     }
 
