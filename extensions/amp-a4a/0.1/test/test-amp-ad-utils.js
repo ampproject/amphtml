@@ -79,7 +79,7 @@ describe('mergeExtensionsMetadata', () => {
     const extensions = [
       {
         'custom-element': 'amp-analytics',
-        'src': 'https://cdn.ampproject.org/v0/amp-0.1.js',
+        'src': 'https://cdn.ampproject.org/v0/amp-analytics-0.1.js',
       },
     ];
     mergeExtensionsMetadata(extensions, customElementExtensions);
