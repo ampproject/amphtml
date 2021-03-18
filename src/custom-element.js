@@ -543,7 +543,11 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           this.signals_.signal(CommonSignals.BUILT);
 
           if (this.V1()) {
-            this.setReadyStateInternal(ReadyState.MOUNTING);
+            this.setReadyStateInternal(
+              this.readyState_ != ReadyState.BUILDING
+                ? this.readyState_
+                : ReadyState.MOUNTING
+            );
           } else {
             this.setReadyStateInternal(ReadyState.LOADING);
             this.preconnect(/* onLayout */ false);
@@ -631,7 +635,9 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
             return;
           }
           this.setReadyStateInternal(
-            this.implClass_.usesLoading(this)
+            this.readyState_ != ReadyState.MOUNTING
+              ? this.readyState_
+              : this.implClass_.usesLoading(this)
               ? ReadyState.LOADING
               : ReadyState.MOUNTING
           );

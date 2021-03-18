@@ -180,11 +180,16 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
 
   describe('buildInternal', () => {
     let buildCallbackStub;
+    let mountCallbackStub;
 
     beforeEach(() => {
       buildCallbackStub = env.sandbox.stub(
         TestElement.prototype,
         'buildCallback'
+      );
+      mountCallbackStub = env.sandbox.stub(
+        TestElement.prototype,
+        'mountCallback'
       );
       builderMock.expects('schedule').atLeast(0);
     });
@@ -344,6 +349,47 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element.readyState).to.equal('loading');
     });
 
+    it('should continue in a state if modified by buildCallback', async () => {
+      buildCallbackStub.callsFake(function () {
+        this.setReadyState('loading');
+      });
+
+      const element = new ElementClass();
+      doc.body.appendChild(element);
+
+      await element.buildInternal();
+      expect(buildCallbackStub).to.be.calledOnce;
+      expect(element.readyState).to.equal('loading');
+    });
+
+    it('should continue in a state if modified by buildCallback with usesLoading', async () => {
+      env.sandbox.stub(TestElement, 'usesLoading').returns(true);
+      buildCallbackStub.callsFake(function () {
+        this.setReadyState('complete');
+      });
+
+      const element = new ElementClass();
+      doc.body.appendChild(element);
+
+      await element.buildInternal();
+      expect(buildCallbackStub).to.be.calledOnce;
+      expect(element.readyState).to.equal('complete');
+    });
+
+    it('should continue in a state if modified by mountCallback with usesLoading', async () => {
+      env.sandbox.stub(TestElement, 'usesLoading').returns(true);
+      mountCallbackStub.callsFake(function () {
+        this.setReadyState('complete');
+      });
+
+      const element = new ElementClass();
+      doc.body.appendChild(element);
+
+      await element.mountInternal();
+      expect(buildCallbackStub).to.be.calledOnce;
+      expect(element.readyState).to.equal('complete');
+    });
+
     it('should set the failing state if buildCallback fails', async () => {
       expectAsyncConsoleError(/intentional/);
       buildCallbackStub.throws(new Error('intentional'));
@@ -378,6 +424,26 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
         expect(e.toString()).to.match(/intentional/);
       }
       expect(element.readyState).to.equal('error');
+    });
+
+    it('should set the failing state if mountCallback fails', async () => {
+      expectAsyncConsoleError(/intentional/);
+      mountCallbackStub.throws(new Error('intentional'));
+
+      const element = new ElementClass();
+      doc.body.appendChild(element);
+
+      try {
+        await element.mountInternal();
+        throw new Error('must have failed');
+      } catch (e) {
+        expect(e.toString()).to.match(/intentional/);
+      }
+      expect(element.readyState).to.equal('error');
+      expect(element.signals().get(CommonSignals.MOUNTED)).to.exist;
+      expect(element.signals().get(CommonSignals.MOUNTED).toString()).to.match(
+        /intentional/
+      );
     });
 
     it('should only execute build once', async () => {
