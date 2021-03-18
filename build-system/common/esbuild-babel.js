@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
 const crypto = require('crypto');
 const fs = require('fs-extra');
@@ -167,7 +168,7 @@ function getEsbuildBabelPlugin(
 
       const babelOptions =
         babel.loadOptions({caller: {name: callerName}}) || {};
-      const optionsHash = md5(babelOptions);
+      const optionsHash = md5({babelOptions, argv});
 
       build.onLoad({filter: /\.[cm]?js$/, namespace: ''}, async (file) => {
         const filename = file.path;
