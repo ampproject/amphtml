@@ -15,8 +15,9 @@
  */
 
 import '../amp-tiktok';
+import * as dom from '../../../../src/dom';
 import {Services} from '../../../../src/services';
-import {createElementWithAttributes, isAmpElement} from '../../../../src/dom';
+import {isAmpElement} from '../../../../src/dom';
 
 describes.realWin(
   'amp-tiktok',
@@ -28,29 +29,37 @@ describes.realWin(
   (env) => {
     let win;
     let doc;
-    let clock;
-    let createElmentWithAttributesStub;
+    let createElementWithAttributes;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      clock.tick(0);
+      createElementWithAttributes = dom.createElementWithAttributes;
+
+      env.sandbox
+        .stub(dom, 'createElementWithAttributes')
+        .callsFake((document, tagName, attributes) => {
+          if (tagName === 'iframe' && attributes.src) {
+            // Serve a blank page, since these tests don't require an actual page.
+            // hash # at the end so path is not affected by param concat
+            attributes.src = `http://localhost:${location.port}/test/fixtures/served/blank.html#${attributes.src}`;
+          }
+          return createElementWithAttributes(document, tagName, attributes);
+        });
     });
 
     async function getTiktok(attrs = {}) {
-      const tiktok = createElementWithAttributes(win.document, 'amp-tiktok', {
-        layout: 'responsive',
-        width: '325px',
-        height: '730px',
-        ...attrs,
-      });
+      const tiktok = dom.createElementWithAttributes(
+        win.document,
+        'amp-tiktok',
+        {
+          layout: 'responsive',
+          width: '325px',
+          height: '730px',
+          ...attrs,
+        }
+      );
       doc.body.appendChild(tiktok);
-      env.sandbox.stub(Services, 'createElementWithAttributes').returns();
-      const impl = await tiktok.getImpl(false);
-      impl.baseURL_ =
-        // Serve a blank page, since these tests don't require an actual page.
-        // hash # at the end so path is not affected by param concat
-        `http://localhost:${location.port}/test/fixtures/served/blank.html#`;
       return tiktok
         .buildInternal()
         .then(() => {

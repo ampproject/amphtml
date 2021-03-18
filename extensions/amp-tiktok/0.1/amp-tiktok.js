@@ -15,6 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-tiktok-0.1.css';
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {
   childElementByTag,
@@ -28,6 +29,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {px, resetStyles, setStyles} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 
+let id = 0;
 export class AmpTiktok extends AMP.BaseElement {
   /** @override @nocollapse */
   static createLoaderLogoCallback(element) {
@@ -65,6 +67,7 @@ export class AmpTiktok extends AMP.BaseElement {
       `,
     };
   }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -77,6 +80,12 @@ export class AmpTiktok extends AMP.BaseElement {
 
     /** @private {?Function}*/
     this.unlistenMessage_ = null;
+
+    /** @private {?Promise} */
+    this.resolveRecievedFirstMessage_ = null;
+
+    /** @private {string} */
+    this.iframeNameString_ = this.getIframeNameString_();
 
     this.resizeOuter_ = debounce(
       this.win,
@@ -92,7 +101,6 @@ export class AmpTiktok extends AMP.BaseElement {
         this.iframe_.setAttribute('aria-label', 'Tiktok');
         this.iframe_.classList.remove('i-amphtml-tiktok-unresolved');
         this.iframe_.classList.add('i-amphtml-tiktok-centered');
-        console.log('HERE');
         this.forceChangeHeight(height);
       },
       1000
@@ -144,11 +152,12 @@ export class AmpTiktok extends AMP.BaseElement {
       'iframe',
       {
         'src': src,
-        'name': '__tt_embedd__v$',
+        'name': this.iframeNameString_,
         'aria-hidden': 'true',
         'frameborder': '0',
       }
     );
+
     iframe.classList.add('i-amphtml-tiktok-unresolved');
     this.iframe_ = iframe;
 
@@ -159,7 +168,23 @@ export class AmpTiktok extends AMP.BaseElement {
     );
 
     this.element.appendChild(iframe);
-    return this.loadPromise(iframe);
+    return this.loadPromise(iframe).then(() => {
+      const {promise, resolve} = new Deferred();
+
+      this.resolveRecievedFirstMessage_ = resolve;
+      Services.timerFor(this.win)
+        .timeoutPromise(1000, promise)
+        .catch(() => {
+          // If no resize messages are recieved the fallback is to
+          // resize to '525px' in height.
+          this.resizeOuter_('525px');
+          setStyles(this.iframe_, {
+            'width': px('325px'),
+            'height': px('525px'),
+          });
+          this.resizeFallback_();
+        });
+    });
   }
 
   /**
@@ -167,7 +192,6 @@ export class AmpTiktok extends AMP.BaseElement {
    * @private
    */
   handleTiktokMessages_(event) {
-    console.log('Here?');
     if (
       event.origin != 'https://www.tiktok.com' ||
       event.source != this.iframe_.contentWindow
@@ -179,6 +203,9 @@ export class AmpTiktok extends AMP.BaseElement {
       return;
     }
     if (data['height']) {
+      if (this.resolveRecievedFirstMessage_) {
+        this.resolveRecievedFirstMessage_();
+      }
       this.resizeOuter_(data['height']);
       setStyles(this.iframe_, {
         'width': px(data['width']),
@@ -202,6 +229,23 @@ export class AmpTiktok extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
+  }
+
+  /**
+   * Return unique name with the appropriate prefix.
+   * This name is defined by tiktok but is not documented on their site.
+   * @private
+   * @return {string}
+   */
+  getIframeNameString_() {
+    const namePrefix = '__tt_embed__v';
+    let idString = (id++).toString();
+    // The id is padded to 17 digits because that is what TikTok requires
+    // in order to recieve messages correctly.
+    while (idString.length < 17) {
+      idString = '0' + idString;
+    }
+    return namePrefix + idString;
   }
 }
 

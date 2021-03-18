@@ -1,9 +1,8 @@
 .i-amphtml-tiktok-centered {
     height: 100%;
     left: 50%;
-    margin-left: -162px;
     width: 325px;
-    /* transform: translateX(-50%); */
+    transform: translateX(-50%);
     position: absolute;
     
 }
@@ -13,4 +12,5 @@
     opacity: 0;
     pointer-events: none;
     width: 325px;
+    height: 500px;
 }
