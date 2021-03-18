@@ -16,14 +16,74 @@
 
 const babel = require('@babel/core');
 const crypto = require('crypto');
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 
 /**
- * Used to cache babel transforms done by esbuild.
- * @private @const {!Map<string, {hash: string, promise: Promise<{contents: string}>}>}
+ * Directory where the babel filecache lives.
  */
-const transformCache = new Map();
+const CACHE_DIR = path.resolve(__dirname, '..', '..', '.babel-cache');
+
+/**
+ * Cache for storing transformed files on both memory and on disk.
+ */
+class BabelTransformCache {
+  constructor() {
+    fs.ensureDirSync(CACHE_DIR);
+
+    /** @type {Map<string, Promise<{contents: string}>>} */
+    this.map = new Map();
+
+    /** @type {Set<string>} */
+    this.fsCache = new Set(fs.readdirSync(CACHE_DIR));
+  }
+
+  getKey_(hash) {
+    return `${hash}.json`;
+  }
+
+  /**
+   * @param {string} hash
+   * @return {null|Promise<{contents: string}>}
+   */
+  get(hash) {
+    const key = this.getKey_(hash);
+    const cached = this.map.get(key);
+    if (cached) {
+      return cached;
+    }
+    if (this.fsCache.has(key)) {
+      const transformedPromise = fs.readJson(path.join(CACHE_DIR, key));
+      this.map.set(key, transformedPromise);
+      return transformedPromise;
+    }
+    return null;
+  }
+
+  /**
+   * @param {string} hash
+   * @param {Promise<{contents: string}>} transformPromise
+   */
+  set(hash, transformPromise) {
+    const key = this.getKey_(hash);
+    if (this.map.has(key)) {
+      throw new Error(
+        `Read race occured. Attempting to transform a file twice.`
+      );
+    }
+
+    this.map.set(key, transformPromise);
+    transformPromise.then((contents) => {
+      fs.outputJson(path.join(CACHE_DIR, key), contents);
+    });
+  }
+}
+
+/**
+ * Used to cache babel transforms done by esbuild.
+ * @const {!BabelTransformCache}
+ */
+const transformCache = new BabelTransformCache();
 
 /**
  * Used to cache file reads done by esbuild, since it can issue multiple
@@ -48,49 +108,44 @@ function getEsbuildBabelPlugin(
   preSetup = () => {},
   postLoad = () => {}
 ) {
-  function sha256(contents) {
+  function md5(obj) {
     if (!enableCache) {
       return '';
     }
-    const hash = crypto.createHash('sha256');
-    hash.update(callerName);
-    hash.update(contents);
-    return hash.digest('hex');
+    return crypto.createHash('md5').update(JSON.stringify(obj)).digest('hex');
   }
 
-  function batchedRead(path) {
+  /**
+   * @param {string} path
+   * @param {string} optionsHash
+   * @return {{contents: string, hash: string}}
+   */
+  function batchedRead(path, optionsHash) {
     let read = readCache.get(path);
     if (!read) {
       read = fs.promises
-        .readFile(path)
-        .then((contents) => {
-          return {
-            contents,
-            hash: sha256(contents),
-          };
-        })
+        .readFile(path, 'utf8')
+        .then((contents) => ({
+          contents,
+          hash: md5({contents, optionsHash}),
+        }))
         .finally(() => {
           readCache.delete(path);
         });
       readCache.set(path, read);
     }
+
     return read;
   }
 
-  function transformContents(filepath, contents, hash) {
+  function transformContents(contents, hash, babelOptions) {
     if (enableCache) {
-      const cached = transformCache.get(filepath);
-      if (cached && cached.hash === hash) {
-        return cached.promise;
+      const cached = transformCache.get(hash);
+      if (cached) {
+        return cached;
       }
     }
 
-    const babelOptions =
-      babel.loadOptions({
-        caller: {name: callerName},
-        filename: filepath,
-        sourceFileName: path.basename(filepath),
-      }) || undefined;
     const promise = babel
       .transformAsync(contents, babelOptions)
       .then((result) => {
@@ -98,7 +153,7 @@ function getEsbuildBabelPlugin(
       });
 
     if (enableCache) {
-      transformCache.set(filepath, {hash, promise});
+      transformCache.set(hash, promise);
     }
 
     return promise.finally(postLoad);
@@ -106,13 +161,22 @@ function getEsbuildBabelPlugin(
 
   return {
     name: 'babel',
+
     async setup(build) {
       preSetup();
 
+      const babelOptions =
+        babel.loadOptions({caller: {name: callerName}}) || {};
+      const optionsHash = md5(babelOptions);
+
       build.onLoad({filter: /\.[cm]?js$/, namespace: ''}, async (file) => {
-        const {path} = file;
-        const {contents, hash} = await batchedRead(path);
-        return transformContents(path, contents, hash);
+        const filename = file.path;
+        const {contents, hash} = await batchedRead(filename, optionsHash);
+        return transformContents(contents, hash, {
+          ...babelOptions,
+          filename,
+          filenameRelative: path.basename(filename),
+        });
       });
     },
   };
