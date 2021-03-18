@@ -1,0 +1,19 @@
+{
+  "vars": {
+    "aid": ""
+  },
+  "requests": {
+    "loadamptrkhtml": "https://c3.taboola.com/amp/amp-analytics-taboola.html?url=${canonicalUrl}&aid=${aid}"
+  },
+  "triggers": {
+    "pageview": {
+      "on": "visible",
+      "request": "loadamptrkhtml"
+    }
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  }
+}

@@ -1611,82 +1611,80 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       describe('pauseCallback', () => {
         it('should not pause unbuilt element', () => {
           const element = new ElementClass();
-          expect(element.isPaused()).to.be.false;
-
-          // Non-built element doesn't receive pauseCallback.
-          element.pauseCallback();
-          expect(element.isPaused()).to.be.true;
+          expect(() => element.pause()).to.not.throw();
           expect(testElementPauseCallback).to.not.be.called;
         });
 
-        it('should pause upgraded element', () => {
+        it('should pause upgraded element', async () => {
           const element = new ElementClass();
           container.appendChild(element);
-          return element.buildingPromise_.then(() => {
-            element.pauseCallback();
-            expect(testElementPauseCallback).to.be.calledOnce;
-            expect(element.isPaused()).to.be.true;
-          });
-        });
-
-        it('should only pause once', () => {
-          const element = new ElementClass();
-          container.appendChild(element);
-          return element.buildingPromise_.then(() => {
-            element.pauseCallback();
-            expect(testElementPauseCallback).to.be.calledOnce;
-            element.pauseCallback();
-            expect(testElementPauseCallback).to.be.calledOnce;
-            expect(element.isPaused()).to.be.true;
-          });
+          await element.buildInternal();
+          element.pause();
+          expect(testElementPauseCallback).to.be.calledOnce;
         });
 
         it('should pause stub element', () => {
           const element = new StubElementClass();
 
           // Unupgraded document doesn't receive pauseCallback.
-          element.pauseCallback();
+          element.pause();
           expect(testElementPauseCallback).to.have.not.been.called;
+        });
+
+        it('should unload when pause with unlayoutOnPause', async () => {
+          const element = new ElementClass();
+          container.appendChild(element);
+          await element.buildInternal();
+          const impl = await element.getImpl();
+          env.sandbox.stub(impl, 'unlayoutOnPause').returns(true);
+          const resourceUnlayoutStub = env.sandbox.stub(
+            element.getResource_(),
+            'unlayout'
+          );
+
+          element.pause();
+          expect(testElementPauseCallback).to.be.calledOnce;
+          expect(resourceUnlayoutStub).to.be.calledOnce;
+        });
+
+        it('should pause and unlayout on unmount', async () => {
+          const element = new ElementClass();
+          container.appendChild(element);
+          await element.buildInternal();
+          const resourceUnlayoutStub = env.sandbox.stub(
+            element.getResource_(),
+            'unlayout'
+          );
+
+          element.unmount();
+          expect(testElementPauseCallback).to.be.calledOnce;
+          expect(resourceUnlayoutStub).to.be.calledOnce;
         });
       });
 
       describe('resumeCallback', () => {
-        it('should resume upgraded element', () => {
+        it('should resume upgraded element', async () => {
           const element = new ElementClass();
-          element.pauseCallback();
+          element.pause();
 
           // Non-built element doesn't receive resumeCallback.
-          element.resumeCallback();
+          element.resume();
           expect(testElementResumeCallback).to.have.not.been.called;
 
           // Built element receives resumeCallback.
           container.appendChild(element);
-          return element.buildingPromise_.then(() => {
-            element.pauseCallback();
-            element.resumeCallback();
-            expect(testElementResumeCallback).to.be.calledOnce;
-          });
-        });
-
-        it('should resume upgraded element only once', () => {
-          const element = new ElementClass();
-          container.appendChild(element);
-          return element.buildingPromise_.then(() => {
-            element.pauseCallback();
-            element.resumeCallback();
-            expect(testElementResumeCallback).to.be.calledOnce;
-            element.resumeCallback();
-            expect(testElementResumeCallback).to.be.calledOnce;
-            expect(element.isPaused()).to.be.false;
-          });
+          await element.buildInternal();
+          element.pause();
+          element.resume();
+          expect(testElementResumeCallback).to.be.calledOnce;
         });
 
         it('should resume stub element', () => {
           const element = new StubElementClass();
 
           // Unupgraded document doesn't receive resumeCallback.
-          element.pauseCallback();
-          element.resumeCallback();
+          element.pause();
+          element.resume();
           expect(testElementResumeCallback).to.have.not.been.called;
         });
       });
@@ -1744,6 +1742,36 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
           const promise = element.ensureLoaded(parentPriority);
           await resource.build();
+          await resource.whenBuilt();
+          await element.layoutCallback();
+
+          await promise;
+          expect(element.isBuilt()).to.be.true;
+        });
+
+        it('should mount and load', async () => {
+          const element = new ElementClass();
+          element.setAttribute('layout', 'fixed');
+          element.setAttribute('width', '10');
+          element.setAttribute('height', '10');
+          container.appendChild(element);
+          const resource = element.getResource_();
+
+          expect(element.isBuilt()).to.be.false;
+
+          const parentPriority = 1;
+          resourcesMock
+            .expects('scheduleLayoutOrPreload')
+            .withExactArgs(
+              resource,
+              /* layout */ true,
+              parentPriority,
+              /* forceOutsideViewport */ true
+            )
+            .once();
+
+          const promise = element.ensureLoaded(parentPriority);
+          await element.mount();
           await resource.whenBuilt();
           await element.layoutCallback();
 

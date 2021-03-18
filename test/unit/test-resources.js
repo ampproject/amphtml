@@ -79,6 +79,8 @@ describes.realWin('Resources', {amp: true}, (env) => {
     element.V1 = () => false;
     element.isBuilt = () => isBuilt;
     element.isBuilding = () => isBuilding;
+    element.pause = () => {};
+    element.unmount = () => {};
 
     const resource = new Resource(id, element, resources);
     env.sandbox.stub(resource, 'getState').returns(state);
@@ -638,9 +640,9 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     element.prerenderAllowed = () => true;
     element.renderOutsideViewport = () => true;
     element.isRelayoutNeeded = () => true;
-    element.pauseCallback = () => {};
+    element.pause = () => {};
+    element.unmount = () => {};
     element.unlayoutCallback = () => true;
-    element.unlayoutOnPause = () => true;
     element.togglePlaceholder = () => sandbox.spy();
     element.fakeComputedStyle = {
       marginTop: '0px',
@@ -906,7 +908,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
 
     // Remove unloaded resources from exec queue.
     resource2.abortController_ = null;
-    resource2.unload();
+    resource2.unlayout();
     resources.cleanupTasks_(resource2);
     expect(resources.exec_.getSize()).to.equal(1);
 
@@ -921,7 +923,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
 
     // Removes them even from scheduling queue.
     resource2.abortController_ = null;
-    resource2.unload();
+    resource2.unlayout();
     resources.cleanupTasks_(resource2, /* opt_removePending */ true);
     expect(resources.queue_.getSize()).to.equal(0);
     expect(resources.pendingBuildResources_.length).to.equal(1);
@@ -1381,8 +1383,9 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       reconstructWhenReparented() {
         return true;
       },
-      pauseCallback() {},
-      resumeCallback() {},
+      pause() {},
+      resume() {},
+      unmount() {},
       updateLayoutBox() {},
       getBoundingClientRect() {
         return layoutRectLtwh(0, 0, 0, 0);

@@ -20,7 +20,6 @@ const TEST_SUITE_PATH = 'build-system/tasks/performance/test-suite.js';
 
 /**
  * @param {function} resolver
- * @return {void}
  */
 function runTests(resolver) {
   const mocha = new Mocha();

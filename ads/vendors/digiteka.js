@@ -13,19 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
-const {transformCss} = require('./jsify-css');
+import {loadScript, validateData} from '../../3p/3p';
 
 /**
- * Wrapper for the asynchronous transformCss that is used by transformCssSync()
- * in build-system/tasks/css/jsify-css-sync.js.
-
- * @return {function(string, !Object=, !Object=): ReturnType<transformCss>}
+ * @param {!Window} global
+ * @param {!Object} data
  */
-function init() {
-  return function (cssStr, opt_cssnano, opt_filename) {
-    return Promise.resolve(transformCss(cssStr, opt_cssnano, opt_filename));
+export function digiteka(global, data) {
+  /*eslint "google-camelcase/google-camelcase": 0*/
+  global._digiteka_amp = {
+    allowed_data: ['mdtk', 'zone', 'adunit'],
+    mandatory_data: ['mdtk', 'zone'],
+    data,
   };
+
+  validateData(
+    data,
+    global._digiteka_amp.mandatory_data,
+    global._digiteka_amp.allowed_data
+  );
+
+  loadScript(global, 'https://ot.digiteka.com/amp.js');
 }
-module.exports = init;
