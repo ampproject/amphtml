@@ -31,7 +31,7 @@ const {
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
-const {getEsbuildBabelPlugin, printStats} = require('../common/esbuild-babel');
+const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {green, red, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
@@ -504,7 +504,6 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       logLevel: 'silent',
     })
     .then((result) => {
-      printStats();
       finishBundle(srcFilename, destDir, destFilename, options, startTime);
       return result;
     })
