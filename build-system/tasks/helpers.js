@@ -37,7 +37,7 @@ const {green, red, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
-const {removeFromBabelCache} = require('../compile/pre-closure-babel');
+const {removeFromClosureBabelCache} = require('../compile/pre-closure-babel');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
 const {watch: fileWatch} = require('chokidar');
@@ -163,7 +163,9 @@ async function compileCoreRuntime(options) {
   if (options.watch) {
     /** @return {Promise<void>} */
     async function watchFunc() {
-      removeFromBabelCache('src');
+      if (options.minify) {
+        removeFromClosureBabelCache('src');
+      }
       const bundleComplete = await doBuildJs(jsBundles, 'amp.js', {
         ...options,
         continueOnError: true,
@@ -331,13 +333,15 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
   const minifiedName = maybeToEsmName(options.minifiedName);
 
   if (options.watch) {
-    const watchFunc = async () => {
-      removeFromBabelCache(entryPoint);
+    async function watchFunc() {
+      if (options.minify) {
+        removeFromClosureBabelCache(entryPoint);
+      }
       const compileDone = await doCompileMinifiedJs(/* continueOnError */ true);
       if (options.onWatchBuild) {
         options.onWatchBuild(compileDone);
       }
-    };
+    }
     fileWatch(entryPoint).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 

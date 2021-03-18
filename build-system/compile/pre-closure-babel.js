@@ -52,7 +52,7 @@ function getBabelCacheDir() {
  * so it can be retransformed during a watch build.
  * @param {string} fileOrDir
  */
-function removeFromBabelCache(fileOrDir) {
+function removeFromClosureBabelCache(fileOrDir) {
   const cachedPath = path.join(cacheDir, fileOrDir);
   if (fs.existsSync(cachedPath)) {
     fs.removeSync(cachedPath);
@@ -138,6 +138,6 @@ function handlePreClosureError(err, outputFilename, options) {
 
 module.exports = {
   getBabelCacheDir,
-  removeFromBabelCache,
+  removeFromClosureBabelCache,
   preClosureBabel,
 };
