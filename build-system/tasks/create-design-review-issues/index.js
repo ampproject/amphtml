@@ -13,6 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// This script runs standalone so it must ONLY require standard node modules
+const https = require('https');
+
 const dayOfWeek = /* wednesday */ 3; // sunday = 0, monday = 1, ...
 
 const sessionDurationHours = 1;
@@ -28,7 +32,7 @@ const timeRotationStartYyyyMmDd = '2021-03-17';
 // All previous weeks have already been handled.
 const generateWeeksFromNow = 3;
 
-const labels = 'Type: Design Review';
+const labels = ['Type: Design Review'];
 
 const createTitle = ({yyyyMmDd, timeUtc, region}) =>
   `Design Review ${yyyyMmDd} ${timeUtc} UTC (${region})`;
@@ -51,12 +55,51 @@ When attending a design review please read through the designs _before_ the desi
 We rotate our design review between times that work better for different parts of the world as described in our [design review documentation](https://github.com/ampproject/amphtml/blob/master/contributing/design-reviews.md), but you are welcome to attend any design review. If you cannot make any of the design reviews but have a design to discuss please let mrjoro@ know on [Slack](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#discussion-channels) and we will find a time that works for you.
 `.trim();
 
-function padleft(str, size) {
-  str = str.toString();
-  while (str.length < size) {
-    str = '0' + str;
-  }
-  return str;
+function postGithub(token, url, data) {
+  return new Promise((resolve, reject) => {
+    const req = https.request(
+      url,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `token ${token}`,
+          'Content-Type': 'application/json',
+          'User-Agent': 'amphtml',
+          'Accept': 'application/vnd.github.v3+json',
+        },
+      },
+      (res) => {
+        const chunks = [];
+        res.on('data', (chunk) => {
+          chunks.push(Buffer.from(chunk));
+        });
+
+        res.on('close', () => {
+          const responseBody = Buffer.concat(chunks).toString('utf-8');
+
+          if (res.statusCode < 200 || res.statusCode > 299) {
+            console.error(responseBody);
+            reject(new Error(res.statusCode));
+            return;
+          }
+
+          resolve(JSON.parse(responseBody));
+        });
+      }
+    );
+
+    req.on('error', (error) => {
+      reject(error);
+    });
+
+    req.write(JSON.stringify(data));
+    req.end();
+  });
+}
+
+function postGithubIssue(token, owner, repo, data) {
+  const url = `https://api.github.com/repos/${owner}/${repo}/issues`;
+  return postGithub(token, url, data);
 }
 
 function nextDayOfWeek(date, dayOfWeek, weeks = 1) {
@@ -84,7 +127,9 @@ function getRotation(date, startYyyyMmDd) {
 }
 
 const timeZ = (yyyy, mm, dd, hours, minutes) =>
-  `${yyyy + mm + dd}T${padleft(hours, 2) + padleft(minutes, 2)}Z`;
+  `${yyyy + mm + dd}T${
+    hours.toString().padStart(2, '0') + minutes.toString().padStart(2, '0')
+  }Z`;
 
 function nextIssue() {
   const today = new Date();
@@ -98,8 +143,8 @@ function nextIssue() {
   const [hours, minutes] = timeUtc.split(':').map(Number);
 
   const yyyy = nextDay.getFullYear();
-  const mm = padleft(nextDay.getMonth() + 1, 2);
-  const dd = padleft(nextDay.getDate(), 2);
+  const mm = (nextDay.getMonth() + 1).toString().padStart(2, '0');
+  const dd = nextDay.getDate().toString().padStart(2, '0');
 
   const timeUrl = `https://www.timeanddate.com/worldclock/meeting.html?year=${yyyy}&month=${mm}&day=${dd}&iv=0`;
 
@@ -122,8 +167,18 @@ function nextIssue() {
 
   const title = createTitle(templateData);
   const body = createBody(templateData);
+
   return {title, labels, body};
 }
 
-// JSON is consumed by .github/workflows/create-design-review-issues.yml
-console.log(JSON.stringify(nextIssue()));
+const {GITHUB_TOKEN} = process.env;
+if (!GITHUB_TOKEN) {
+  throw new Error('no GITHUB_TOKEN');
+}
+
+postGithubIssue(GITHUB_TOKEN, 'ampproject', 'amphtml', nextIssue()).then(
+  ({title, 'html_url': htmlUrl}) => {
+    console.log(title);
+    console.log(htmlUrl);
+  }
+);
