@@ -217,7 +217,7 @@ export function makeBodyVisible(doc) {
         // Force sync measurement to ensure that style recalc is complete
         // before showing body, which would trigger FCP. This should reduce
         // make it less likely that a CLS would be triggered after FCP.
-        doc.body.getBoundingClientRect();
+        doc.body./*OK*/ getBoundingClientRect();
       }
       setBodyVisibleStyles(doc);
       const ampdoc = getAmpdoc(doc);
