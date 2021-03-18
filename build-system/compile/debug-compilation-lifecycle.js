@@ -41,8 +41,8 @@ const LIFECYCLES = {
  *
  * @param {string} lifecycle
  * @param {string} fullpath
- * @param {Buffer} content
- * @param {Object} sourcemap
+ * @param {string=} content
+ * @param {Object=} sourcemap
  */
 function debug(lifecycle, fullpath, content, sourcemap) {
   if (argv.debug && Object.keys(LIFECYCLES).includes(lifecycle)) {
@@ -72,7 +72,6 @@ function debug(lifecycle, fullpath, content, sourcemap) {
 
 /**
  * Logs debug information.
- * @return {void}
  */
 function displayLifecycleDebugging() {
   if (argv.debug) {

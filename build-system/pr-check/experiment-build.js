@@ -31,9 +31,6 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = `${experiment}-build.js`;
 
-/**
- * @return {void}
- */
 function pushBuildWorkflow() {
   const config = getExperimentConfig(experiment);
   if (config) {
@@ -48,9 +45,6 @@ function pushBuildWorkflow() {
   }
 }
 
-/**
- * @return {void}
- */
 function prBuildWorkflow() {
   if (
     buildTargetsInclude(

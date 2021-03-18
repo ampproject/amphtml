@@ -25,9 +25,6 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'unit-tests.js';
 
-/**
- * @return {void}
- */
 function pushBuildWorkflow() {
   try {
     timedExecOrThrow(
@@ -47,9 +44,6 @@ function pushBuildWorkflow() {
   }
 }
 
-/**
- * @return {void}
- */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
     timedExecOrDie('gulp unit --headless --local_changes');

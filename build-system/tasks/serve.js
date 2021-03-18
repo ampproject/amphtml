@@ -90,7 +90,7 @@ async function startServer(
   serverOptions = {},
   modeOptions = {}
 ) {
-  buildNewServer();
+  await buildNewServer();
   if (serverOptions.lazyBuild) {
     lazyBuild = serverOptions.lazyBuild;
   }
@@ -129,7 +129,7 @@ async function startServer(
   log(green('Started'), cyan(options.name), green('at:'));
   log('\t', cyan(url));
   for (const device of Object.entries(os.networkInterfaces())) {
-    for (const detail of device[1]) {
+    for (const detail of device[1] ?? []) {
       if (detail.family === 'IPv4') {
         log('\t', cyan(makeUrl(detail.address)));
       }
@@ -170,7 +170,7 @@ async function stopServer() {
 async function restartServer() {
   stopServer();
   try {
-    buildNewServer();
+    await buildNewServer();
   } catch {
     log(red('ERROR:'), 'Could not rebuild', cyan('AMP Server'));
     return;
