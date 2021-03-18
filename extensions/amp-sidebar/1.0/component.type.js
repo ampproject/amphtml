@@ -35,7 +35,7 @@ SidebarDef.SidebarProps;
 /**
  * @typedef {{
  *   toolbar: (string|undefined),
- *   toolbar-target: (string|undefined),
+ *   toolbarTarget: (string|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */

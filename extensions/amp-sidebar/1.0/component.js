@@ -148,8 +148,8 @@ function SidebarWithRef(
         wrapperClassName={objstr({
           [classes.sidebar]: true,
           [classes.defaultSidebarStyles]: true,
-          [classes.left]: side !== Side.RIGHT,
-          [classes.right]: side === Side.RIGHT,
+          [classes.left]: side === Side.LEFT,
+          [classes.right]: side !== Side.LEFT,
         })}
         role="menu"
         tabindex="-1"
@@ -184,12 +184,7 @@ export {Sidebar};
  * @param {!SidebarDef.SidebarToolbarProps} props
  * @return {PreactDef.Renderable}
  */
-export function SidebarToolbar({
-  toolbar,
-  'toolbar-target': toolbarTarget,
-  children,
-  ...rest
-}) {
+export function SidebarToolbar({toolbar, toolbarTarget, children, ...rest}) {
   const ref = useRef();
   const [matches, setMatches] = useState(false);
   const [targetEl, setTargetEl] = useState(null);

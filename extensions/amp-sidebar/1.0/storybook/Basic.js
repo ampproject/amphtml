@@ -95,7 +95,7 @@ export const toolbar = () => {
         style={{color: foregroundColor, backgroundColor}}
         backdropStyle={{backgroundColor: backdropColor}}
       >
-        <SidebarToolbar toolbar={toolbarMedia} toolbar-target="toolbar-target">
+        <SidebarToolbar toolbar={toolbarMedia} toolbarTarget="toolbar-target">
           <ul>
             <li>Toolbar Item 1</li>
             <li>Toolbar Item 2</li>
