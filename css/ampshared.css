@@ -121,7 +121,8 @@
  */
 .i-amphtml-layout-fill,
 .i-amphtml-layout-fill.i-amphtml-notbuilt,
-[layout=fill]:not(.i-amphtml-layout-fill)
+[layout=fill]:not(.i-amphtml-layout-fill),
+body noscript > *
 {
   display: block;
   overflow: hidden !important;
@@ -130,6 +131,22 @@
   left: 0;
   bottom: 0;
   right: 0;
+}
+
+/* In previous rule and in this one, make sure noscript fallbacks get fill layout as if they are placeholders */
+body noscript > * {
+  position: absolute !important;
+
+  /* Override width/height attributes defined on HTML elements in noscript. */
+  width: 100%;
+  height: 100%;
+
+  /* Supersede sibling [placeholder]/[fallback] z-index:1 */
+  z-index: 2;
+}
+
+body noscript {
+  display: inline !important;
 }
 
 .i-amphtml-layout-flex-item,
