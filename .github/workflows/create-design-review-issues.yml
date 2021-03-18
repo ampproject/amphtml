@@ -14,8 +14,7 @@ jobs:
       - name: Set Up Node
         uses: actions/setup-node@v2.1.5
 
-      - name: Generate
-        id: generate
+      - name: Create Next Issue
         run: |
           wget -q -O - https://raw.githubusercontent.com/ampproject/amphtml/master/build-system/tasks/create-design-review-issues/index.js | node
         env:
