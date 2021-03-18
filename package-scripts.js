@@ -19,7 +19,7 @@
  * @fileoverview
  *
  * - Use this file to store NPM scripts that aid in development but
- *   are not available via AMP's gulp tasks in build-system/tasks/.
+ *   are not available via AMP's amp tasks in build-system/tasks/.
  * - To use these scripts, first install npm-package-scripts by running
  *   "npm install --global nps" (or for short, "npm i -g nps").
  * - Once installed, run any script by calling "nps <scriptname>".

@@ -31,44 +31,29 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
     nvm install --lts
     ```
 
-5. If you have a global install of [Gulp](https://gulpjs.com/), uninstall it. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md). See [this article](https://medium.com/gulpjs/gulp-sips-command-line-interface-e53411d4467) for why.)
+5. Create your own fork of the [amphtml repository](https://github.com/ampproject/amphtml) by clicking "Fork" in the Web UI. During local development, this will be referred to by `git` as `origin`.
 
-    ```shell
-    npm uninstall --global gulp
-    ```
-
-6. Install the [Gulp](https://gulpjs.com/) command line tool, which will automatically use the version of `gulp` packaged with the the amphtml repository. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md))
-
-    ```shell
-    npm install --global gulp-cli
-    ```
-
-    An alternative to installing `gulp-cli` is to invoke each Gulp command in this guide with `npx gulp` during local
-    development. This will also use the version of `gulp` packaged with the amphtml repository.
-
-7. Create your own fork of the [amphtml repository](https://github.com/ampproject/amphtml) by clicking "Fork" in the Web UI. During local development, this will be referred to by `git` as `origin`.
-
-8. Download your fork to a local repository.
+6. Download your fork to a local repository.
 
     ```shell
     git clone git@github.com:<your username>/amphtml.git
     ```
 
-9. Add an alias called `upstream` to refer to the main `ampproject/amphtml` repository. Go to the root directory of the
+7. Add an alias called `upstream` to refer to the main `ampproject/amphtml` repository. Go to the root directory of the
    newly created local repository directory and run:
 
     ```shell
     git remote add upstream git@github.com:ampproject/amphtml.git
     ```
 
-10. Fetch data from the `upstream` remote:
+8. Fetch data from the `upstream` remote:
 
     ```shell
     git fetch upstream master
     ```
 
-11. Set up your local `master` branch to track `upstream/master` instead of `origin/master` (which will rapidly become
-    outdated).
+9. Set up your local `master` branch to track `upstream/master` instead of `origin/master` (which will rapidly become
+   outdated).
 
     ```shell
     git branch -u upstream/master master
@@ -85,18 +70,18 @@ git checkout -b <branch name> master
 ## Build AMP & run a local server
 
 1. Make sure you have the latest packages (after you pull): `npm install`
-1. Start the server: `gulp`
+1. Start the server: `amp`
 1. Access your server at [http://localhost:8000](http://localhost:8000)
 1. Access your sample pages at [http://localhost:8000/examples](http://localhost:8000/examples)
 
 ## Test AMP
 
--   Run the unit tests: `gulp unit` (doesn't build the runtime)
--   Run the integration tests: `gulp integration` (builds the runtime)
--   Run integration tests, but skip building after having done so previously: `gulp integration --nobuild`
--   Run the tests in a specified set of files: `gulp [unit|integration] --files=<test-files-path-glob>`
--   Add the `--watch` flag to `gulp [unit|integration]` to automatically re-run the tests when a file changes
--   To run only a certain set of Mocha tests, change `describe` to `describe.only` for the tests you want to run; combine this with `gulp [unit|integration] --watch` to automatically rerun your test when files are changed (but make sure to run all the tests before sending your change for review)
+-   Run the unit tests: `amp unit` (doesn't build the runtime)
+-   Run the integration tests: `amp integration` (builds the runtime)
+-   Run integration tests, but skip building after having done so previously: `amp integration --nobuild`
+-   Run the tests in a specified set of files: `amp [unit|integration] --files=<test-files-path-glob>`
+-   Add the `--watch` flag to `amp [unit|integration]` to automatically re-run the tests when a file changes
+-   To run only a certain set of Mocha tests, change `describe` to `describe.only` for the tests you want to run; combine this with `amp [unit|integration] --watch` to automatically rerun your test when files are changed (but make sure to run all the tests before sending your change for review)
 
 ## Create commits to contain your changes
 

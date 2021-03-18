@@ -15,7 +15,7 @@
  */
 
 /**
- * @fileoverview This file implements the `gulp test-report-upload` task, which POSTs test result reports
+ * @fileoverview This file implements the `amp test-report-upload` task, which POSTs test result reports
  * to an API endpoint that stores them in the database.
  */
 
@@ -146,12 +146,12 @@ ${green('FINISHED:')} Boilerplate for your new ${cyan(
 
 You can run tests on your new component with the following command:
     ${cyan(
-      `gulp unit --files=extensions/amp-${componentName}/1.0/test/test-amp-${componentName}.js`
+      `amp unit --files=extensions/amp-${componentName}/1.0/test/test-amp-${componentName}.js`
     )}
 If the component was generated successfully, the example test should pass.
 
 You may also view the component during development in storybook:
-    ${cyan(`gulp storybook`)}`);
+    ${cyan(`amp storybook`)}`);
 
   // Return the resulting extension bundle config.
   return {

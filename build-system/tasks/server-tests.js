@@ -195,7 +195,7 @@ async function runTest(inputFile) {
 }
 
 /**
- * Tests for AMP server custom transforms. Entry point for `gulp server-tests`.
+ * Tests for AMP server custom transforms. Entry point for `amp server-tests`.
  */
 async function serverTests() {
   await buildNewServer();

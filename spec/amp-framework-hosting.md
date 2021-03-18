@@ -75,12 +75,12 @@ Important: `build-system/global-configs/custom-config.json` is not part of check
 Build an AMP release with
 
 ```
-gulp dist
+amp dist
 ```
 
 The built framework can be found in directory `dist`. The version assigned to the build is in `dist/version.txt` and a listing of all files included in build is in `dist/files.txt`. The framework is ready to be moved to and served from your host.
 
-If you have advanced hosting capabilities or would like to manually assign a version, `gulp dist` accepts these flags (among others):
+If you have advanced hosting capabilities or would like to manually assign a version, `amp dist` accepts these flags (among others):
 
 -   `--config`: Indicate the release type, production (`prod`) or canary (`canary`). Defaults to `prod`.
 -   `--version_override`: Assign a version to the distribution. The version must consist of 13-digits. Defaults to the latest git commit time of the active branch.

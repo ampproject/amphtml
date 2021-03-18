@@ -35,7 +35,7 @@ function pushBuildWorkflow() {
   const config = getExperimentConfig(experiment);
   if (config) {
     const defineFlag = `--define_experiment_constant ${config.define_experiment_constant}`;
-    timedExecOrDie(`gulp dist --fortesting ${defineFlag}`);
+    timedExecOrDie(`amp dist --fortesting ${defineFlag}`);
     uploadExperimentOutput(experiment);
   } else {
     printSkipMessage(

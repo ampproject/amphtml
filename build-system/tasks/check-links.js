@@ -117,7 +117,7 @@ function checkLinksInFile(file) {
     // Relative links start at the markdown file's path.
     baseUrl: 'file://' + path.dirname(path.resolve(file)),
     ignorePatterns: [
-      // Localhost links don't work unless a `gulp` server is running.
+      // Localhost links don't work unless a `amp` server is running.
       {pattern: /localhost/},
       // codepen returns a 503 for these link checks
       {pattern: /https:\/\/codepen.*/},
@@ -176,6 +176,6 @@ module.exports = {
 
 checkLinks.description = 'Detects dead links in markdown files';
 checkLinks.flags = {
-  'files': '  Checks only the specified files',
-  'local_changes': '  Checks just the files changed in the local branch',
+  'files': 'Checks only the specified files',
+  'local_changes': 'Checks just the files changed in the local branch',
 };

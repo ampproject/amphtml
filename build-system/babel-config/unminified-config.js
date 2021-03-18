@@ -22,7 +22,7 @@ const {
 const {getReplacePlugin} = require('./helpers');
 
 /**
- * Gets the config for babel transforms run during `gulp build`.
+ * Gets the config for babel transforms run during `amp build`.
  *
  * @return {!Object}
  */

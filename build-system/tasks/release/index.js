@@ -34,7 +34,7 @@ const BASE_FLAVOR_CONFIG = {
   name: 'base',
   rtvPrefixes: ['00', '01', '02', '03', '04', '05'],
   // TODO(#28168, erwinmombay): relace with single `--module --nomodule` command.
-  command: 'gulp dist --noconfig --esm && gulp dist --noconfig',
+  command: 'amp dist --noconfig --esm && amp dist --noconfig',
   environment: 'AMP',
 };
 
@@ -122,7 +122,7 @@ async function prepareEnvironment_(outputDir, tempDir) {
   await fs.emptyDir(tempDir);
   logSeparator_();
 
-  execOrDie('gulp update-packages');
+  execOrDie('amp update-packages');
   logSeparator_();
 }
 
@@ -144,7 +144,7 @@ function discoverDistFlavors_() {
       )
       .map(([flavorType, experimentConfig]) => ({
         // TODO(#28168, erwinmombay): relace with single `--module --nomodule` command.
-        command: `gulp dist --noconfig --esm --define_experiment_constant ${experimentConfig.define_experiment_constant} && gulp dist --noconfig --define_experiment_constant ${experimentConfig.define_experiment_constant}`,
+        command: `amp dist --noconfig --esm --define_experiment_constant ${experimentConfig.define_experiment_constant} && amp dist --noconfig --define_experiment_constant ${experimentConfig.define_experiment_constant}`,
         flavorType,
         rtvPrefixes: [
           EXPERIMENTAL_RTV_PREFIXES[experimentConfig.environment][flavorType],
@@ -158,7 +158,7 @@ function discoverDistFlavors_() {
 
   log(
     'The following',
-    cyan('gulp dist'),
+    cyan('amp dist'),
     'commands will be executed to compile each',
     `${green('flavor')}:`
   );
@@ -181,7 +181,7 @@ async function compileDistFlavors_(distFlavors, tempDir) {
   for (const {flavorType, command} of distFlavors) {
     log('Compiling flavor', green(flavorType), 'using', cyan(command));
 
-    execOrDie('gulp clean');
+    execOrDie('amp clean');
     execOrDie(command);
 
     const flavorTempDistDir = path.join(tempDir, flavorType);
@@ -460,7 +460,7 @@ module.exports = {
 release.description = 'Generates a release build';
 release.flags = {
   'output_dir':
-    '  Directory path to emplace release files (defaults to "./release")',
+    'Directory path to emplace release files (defaults to "./release")',
   'flavor':
-    '  Limit this release build to a single flavor. Can be used to split the release work between multiple build machines.',
+    'Limit this release build to a single flavor. Can be used to split the release work between multiple build machines.',
 };

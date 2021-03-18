@@ -31,9 +31,9 @@ const {log} = require('../common/logging');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 
-const IS_GULP_INTEGRATION = argv._[0] === 'integration';
-const IS_GULP_UNIT = argv._[0] === 'unit';
-const IS_GULP_E2E = argv._[0] === 'e2e';
+const IS_AMP_INTEGRATION = argv._[0] === 'integration';
+const IS_AMP_UNIT = argv._[0] === 'unit';
+const IS_AMP_E2E = argv._[0] === 'e2e';
 
 const TEST_TYPE_SUBTYPES = isGithubActionsBuild()
   ? new Map([
@@ -69,11 +69,11 @@ const TEST_TYPE_BUILD_TARGETS = new Map([
  */
 function inferTestType() {
   // Determine type (early exit if there's no match).
-  const type = IS_GULP_E2E
+  const type = IS_AMP_E2E
     ? 'e2e'
-    : IS_GULP_INTEGRATION
+    : IS_AMP_INTEGRATION
     ? 'integration'
-    : IS_GULP_UNIT
+    : IS_AMP_UNIT
     ? 'unit'
     : null;
   if (type == null) {

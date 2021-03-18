@@ -8,7 +8,7 @@ This TOC header has newlines and indentation that doesn't match the lookup strin
       This table-of-contents is automatically generated. To generate it, run:
 
 
-gulp markdown-toc --fix
+amp markdown-toc --fix
 -->
 
 -   [section](#section)

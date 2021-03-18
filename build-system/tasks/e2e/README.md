@@ -5,7 +5,7 @@ AMP contributors embrace testing to maintain confidence that their code is execu
 <!--
   (Do not remove or edit this comment.)
   This table-of-contents is automatically generated. To generate it, run:
-    gulp markdown-toc --fix
+    amp markdown-toc --fix
 -->
 
 <!-- {"maxdepth": 1} -->
@@ -160,7 +160,7 @@ E2E test code runs in `node` and the code under test runs in the browser with th
 ### node inspect
 
 ```sh
-node --inspect-brk $(which gulp) e2e --nobuild --testnames --files=extensions/amp-foo/0.1/test-e2e/test-amp-foo-basic.js
+node --inspect-brk $(which amp) e2e --nobuild --testnames --files=extensions/amp-foo/0.1/test-e2e/test-amp-foo-basic.js
 ```
 
 Open Chrome DevTools and click the Node logo in the top left.
@@ -193,4 +193,4 @@ In the Node debugger, the `repl` global provides a reference to the test control
 
 ### watch mode
 
-Debug tests in `watch` mode with the `--watch` flag. This will allow you to make changes to test files without having to rerun the `gulp e2e` task.
+Debug tests in `watch` mode with the `--watch` flag. This will allow you to make changes to test files without having to rerun the `amp e2e` task.

@@ -72,7 +72,7 @@ const argv = minimist(process.argv.slice(2), {
  *      one day is added.
  *
  * The version number can be manually overridden by passing --version_override
- * to the `gulp build`/`gulp dist` command.
+ * to the `amp build`/`amp dist` command.
  *
  * @return {string} AMP version number (always 13 digits long)
  */

@@ -143,8 +143,8 @@ module.exports = {cherryPick};
 
 cherryPick.description = 'Cherry-picks one or more commits onto a new branch';
 cherryPick.flags = {
-  'commits': '  Comma-delimited list of commit SHAs to cherry-pick',
-  'push': '  If set, will push the created branch to the remote',
-  'remote': '  Remote to refresh tags from (default: origin)',
-  'onto': '  13-digit AMP version to cherry-pick onto',
+  'commits': 'Comma-delimited list of commit SHAs to cherry-pick',
+  'push': 'If set, will push the created branch to the remote',
+  'remote': 'Remote to refresh tags from (default: origin)',
+  'onto': '13-digit AMP version to cherry-pick onto',
 };

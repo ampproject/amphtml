@@ -26,8 +26,8 @@ const {runCiJob} = require('./ci-job');
 const jobName = 'validator-tests.js';
 
 function pushBuildWorkflow() {
-  timedExecOrDie('gulp validator');
-  timedExecOrDie('gulp validator-webui');
+  timedExecOrDie('amp validator');
+  timedExecOrDie('amp validator-webui');
 }
 
 function prBuildWorkflow() {
@@ -46,11 +46,11 @@ function prBuildWorkflow() {
   }
 
   if (buildTargetsInclude(Targets.RUNTIME, Targets.VALIDATOR)) {
-    timedExecOrDie('gulp validator');
+    timedExecOrDie('amp validator');
   }
 
   if (buildTargetsInclude(Targets.VALIDATOR_WEBUI)) {
-    timedExecOrDie('gulp validator-webui');
+    timedExecOrDie('amp validator-webui');
   }
 }
 

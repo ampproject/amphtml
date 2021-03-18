@@ -26,7 +26,7 @@ const {watchDebounceDelay} = require('./helpers');
 const {watch} = require('chokidar');
 
 /**
- * Entry point for 'gulp analytics-vendor-configs'
+ * Entry point for 'amp analytics-vendor-configs'
  * Compile all the vendor configs and drop in the dist folder
  * @param {Object=} opt_options
  * @return {!Promise}

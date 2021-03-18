@@ -83,5 +83,5 @@ module.exports = {
 checkVideoInterfaceList.description = `Checks or updates 3rd party video player list on ${filepath}`;
 
 checkVideoInterfaceList.flags = {
-  'fix': '  Write to file',
+  'fix': 'Write to file',
 };

@@ -46,7 +46,7 @@ During transpiling, babel will replace the experiment flag with a boolean value 
 The experiment flag values are default to `false`. You can use the `--define_experiment_constant` flag to set the value to `true`.
 
 ```
-gulp build --define_experiment_const MY_EXPERIMENT`
+amp build --define_experiment_const MY_EXPERIMENT`
 ```
 
 ### Start an Experiment

@@ -700,7 +700,7 @@ export class Performance {
       data['value'] = this.timeOrigin_ + delta;
     }
 
-    // Emit events. Used by `gulp performance`.
+    // Emit events. Used by `amp performance`.
     this.win.dispatchEvent(
       createCustomEvent(
         this.win,
