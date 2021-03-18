@@ -64,7 +64,7 @@ For larger design topics (e.g. new features, or a significant change), the use o
 -   See the ["Using React/Preact to implement AMP elements" explainer](https://github.com/ampproject/wg-bento/blob/master/react/explainer.md) for an example.
 -   Add this license text to the top of your design doc before sharing it with anyone else in the community (updating the year if necessary):
 
-    ```js
+    ```
     Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
     Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
