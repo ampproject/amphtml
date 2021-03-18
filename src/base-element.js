@@ -154,6 +154,20 @@ export class BaseElement {
   }
 
   /**
+   * Subclasses can override this method to indicate that an element can load
+   * network resources.
+   *
+   * Such elements can have their `ensureLoaded` method called.
+   *
+   * @param {!AmpElement} unusedElement
+   * @return {boolean}
+   * @nocollapse
+   */
+  static usesLoading(unusedElement) {
+    return false;
+  }
+
+  /**
    * Subclasses can override this method to provide a svg logo that will be
    * displayed as the loader.
    *
@@ -512,6 +526,25 @@ export class BaseElement {
   setReadyState(state, opt_failure) {
     this.element.setReadyStateInternal(state, opt_failure);
   }
+
+  /**
+   * Load heavy elements, perform expensive operations, add global
+   * listeners/observers, etc. The mount and unmount can be called multiple
+   * times for resource management. The unmount should reverse the changes
+   * made by the mount. See `unmountCallback` for more info.
+   *
+   * If this callback returns a promise, the `readyState` becomes "complete"
+   * after the promise is resolved.
+   *
+   * @param {!AbortSignal=} opt_abortSignal
+   * @return {?Promise|undefined}
+   */
+  mountCallback(opt_abortSignal) {}
+
+  /**
+   * Unload heavy elements, remove global listeners, etc.
+   */
+  unmountCallback() {}
 
   /**
    * Subclasses can override this method to opt-in into receiving additional

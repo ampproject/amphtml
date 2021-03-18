@@ -35,6 +35,11 @@ export const CommonSignals = {
   BUILT: 'built',
 
   /**
+   * The element has been mounted.
+   */
+  MOUNTED: 'mounted',
+
+  /**
    * The element has started loading.
    * LOAD_START triggers at the start of the layoutCallback.
    */

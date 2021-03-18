@@ -31,6 +31,11 @@ export const ReadyState = {
   BUILDING: 'building',
 
   /**
+   * The element has been built and waiting to be mounted.
+   */
+  MOUNTING: 'mounting',
+
+  /**
    * The element has been built and waiting to be loaded.
    */
   LOADING: 'loading',

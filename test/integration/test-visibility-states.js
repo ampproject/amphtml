@@ -520,7 +520,7 @@ t.run('Viewer Visibility State', () => {
           return waitForNextPass().then(() => {
             expect(layoutCallback).not.to.have.been.called;
             expect(unlayoutCallback).to.have.been.called;
-            expect(pauseCallback).not.to.have.been.called;
+            expect(pauseCallback).to.have.been.called;
             expect(resumeCallback).not.to.have.been.called;
           });
         });
