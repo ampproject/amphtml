@@ -28,7 +28,6 @@ const {
 const {buildExtensions} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss} = require('./css');
-const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
 
 const argv = require('minimist')(process.argv.slice(2));
@@ -57,7 +56,6 @@ async function build() {
  * @param {Object=} extraArgs
  */
 async function doBuild(extraArgs = {}) {
-  maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('build');
   process.env.NODE_ENV = 'development';
   const options = {

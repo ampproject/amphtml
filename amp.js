@@ -18,7 +18,13 @@
 const {
   createTask,
   finalizeRunner,
+  initializeRunner,
 } = require('./build-system/tasks/amp-task-runner');
+
+/**
+ * Initialize the task runner before any task is created.
+ */
+initializeRunner();
 
 /**
  * All the AMP tasks. Keep this list alphabetized.

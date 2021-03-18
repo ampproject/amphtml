@@ -45,7 +45,6 @@ const {compileCss, copyCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {formatExtractedMessages} = require('../compile/log-messages');
 const {log} = require('../common/logging');
-const {maybeUpdatePackages} = require('./update-packages');
 const {VERSION} = require('../compile/internal-version');
 
 const {green, cyan} = colors;
@@ -124,7 +123,6 @@ async function dist() {
  * @param {Object=} extraArgs
  */
 async function doDist(extraArgs = {}) {
-  maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('dist');
   process.env.NODE_ENV = 'production';
   const options = {

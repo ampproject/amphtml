@@ -30,7 +30,6 @@ const {cyan, green, red, yellow} = require('kleur/colors');
 const {ESLint} = require('eslint');
 const {getFilesChanged, getFilesFromArgv} = require('../common/utils');
 const {gitDiffNameOnlyMaster} = require('../common/git');
-const {maybeUpdatePackages} = require('./update-packages');
 
 const rootDir = path.dirname(path.dirname(__dirname));
 
@@ -170,7 +169,6 @@ function getFilesToLint(files) {
  * Run eslint on JS files and log the output
  */
 async function lint() {
-  maybeUpdatePackages();
   let filesToLint = globby.sync(config.lintGlobs, {gitignore: true});
   if (argv.files) {
     filesToLint = getFilesToLint(getFilesFromArgv());

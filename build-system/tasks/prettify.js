@@ -37,7 +37,6 @@ const {
 const {exec} = require('../common/exec');
 const {getFilesToCheck} = require('../common/utils');
 const {green, cyan, red, yellow} = require('kleur/colors');
-const {maybeUpdatePackages} = require('./update-packages');
 const {prettifyGlobs} = require('../test-configs/config');
 
 const rootDir = path.dirname(path.dirname(__dirname));
@@ -47,7 +46,6 @@ const tempDir = tempy.directory();
  * Checks files for formatting (and optionally fixes them) with Prettier.
  */
 async function prettify() {
-  maybeUpdatePackages();
   const filesToCheck = getFilesToCheck(prettifyGlobs, {dot: true});
   if (filesToCheck.length == 0) {
     return;
