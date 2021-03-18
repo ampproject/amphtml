@@ -25,6 +25,7 @@ const magicstring = require('magic-string');
 const open = require('open');
 const path = require('path');
 const Remapping = require('@ampproject/remapping');
+const terser = require('terser');
 const wrappers = require('../compile/compile-wrappers');
 const {
   VERSION: internalRuntimeVersion,
@@ -554,40 +555,88 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
     options.minify ? 'minified' : 'unminified',
     /* enableCache */ true
   );
-  const buildResult = await esbuild
-    .build({
-      entryPoints: [entryPoint],
-      bundle: true,
-      sourcemap: true,
-      outfile: destFile,
-      plugins: [plugin],
-      minify: options.minify,
-      incremental: !!options.watch,
-      logLevel: 'silent',
-    })
-    .then((result) => {
-      finishBundle(srcFilename, destDir, destFilename, options, startTime);
-      return result;
-    })
-    .catch((err) => handleBundleError(err, !!options.watch, destFilename));
+
+  let result = null;
+
+  /**
+   * @param {number} time
+   */
+  async function build(time) {
+    if (!result) {
+      result = await esbuild.build({
+        entryPoints: [entryPoint],
+        bundle: true,
+        sourcemap: true,
+        outfile: destFile,
+        plugins: [plugin],
+        minify: options.minify,
+        target: argv.esm ? 'es6' : 'es5',
+        incremental: !!options.watch,
+        logLevel: 'silent',
+      });
+    } else {
+      result = await result.rebuild();
+    }
+    await minifyWithTerser(destDir, destFilename, options);
+    await finishBundle(srcFilename, destDir, destFilename, options, time);
+  }
+
+  await build(startTime).catch((err) =>
+    handleBundleError(err, !!options.watch, destFilename)
+  );
 
   if (options.watch) {
     watchedTargets.set(entryPoint, {
       rebuild: async () => {
         const time = Date.now();
-        const buildPromise = buildResult
-          .rebuild()
-          .then(() =>
-            finishBundle(srcFilename, destDir, destFilename, options, time)
-          )
-          .catch((err) =>
-            handleBundleError(err, /* continueOnError */ true, destFilename)
-          );
-        options?.onWatchBuild(buildPromise);
+        const buildPromise = build(time).catch((err) =>
+          handleBundleError(err, !!options.watch, destFilename)
+        );
+        if (options.onWatchBuild) {
+          options.onWatchBuild(buildPromise);
+        }
         await buildPromise;
       },
     });
   }
+}
+
+/**
+ * Minify the code with Terser. Only used by the ESBuild.
+ *
+ * @param {string} destDir
+ * @param {string} destFilename
+ * @param {?Object} options
+ * @return {!Promise}
+ */
+async function minifyWithTerser(destDir, destFilename, options) {
+  if (!options.minify) {
+    return;
+  }
+
+  const filename = destDir + destFilename;
+  const terserOptions = {
+    mangle: true,
+    compress: true,
+    output: {
+      beautify: !!argv.pretty_print,
+      comments: /\/*/,
+      // eslint-disable-next-line google-camelcase/google-camelcase
+      keep_quoted_props: true,
+    },
+    sourceMap: true,
+  };
+  const minified = await terser.minify(
+    fs.readFileSync(filename, 'utf8'),
+    terserOptions
+  );
+  const remapped = remapping(
+    [minified.map, fs.readFileSync(`${filename}.map`, 'utf8')],
+    () => null,
+    !argv.full_sourcemaps
+  );
+  fs.writeFileSync(filename, minified.code);
+  fs.writeFileSync(`${filename}.map`, remapped.toString());
 }
 
 /**
