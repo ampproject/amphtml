@@ -33,7 +33,7 @@ const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
 const {log} = require('../common/logging');
 const {maybeToEsmName, compileJs, mkdirSync} = require('./helpers');
-const {removeFromBabelCache} = require('../compile/pre-closure-babel');
+const {removeFromClosureBabelCache} = require('../compile/pre-closure-babel');
 const {watch} = require('chokidar');
 
 /**
@@ -384,8 +384,11 @@ async function doBuildExtension(extensions, extension, options) {
  * @param {?Object} options
  */
 function watchExtension(extDir, name, version, latestVersion, hasCss, options) {
-  const watchFunc = function () {
-    removeFromBabelCache(extDir);
+  function watchFunc() {
+    if (options.minify) {
+      removeFromClosureBabelCache(extDir);
+    }
+
     const bundleComplete = buildExtension(
       name,
       version,
@@ -396,7 +399,7 @@ function watchExtension(extDir, name, version, latestVersion, hasCss, options) {
     if (options.onWatchBuild) {
       options.onWatchBuild(bundleComplete);
     }
-  };
+  }
   watch(`${extDir}/**/*`).on('change', debounce(watchFunc, watchDebounceDelay));
 }
 
