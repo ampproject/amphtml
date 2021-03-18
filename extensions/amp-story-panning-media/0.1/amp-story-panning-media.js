@@ -161,7 +161,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       StateProperty.CURRENT_PAGE_ID,
       (currPageId) => {
         this.isOnActivePage_ = currPageId === this.getPageId_();
-        this.onPageNavigation_();
+        this.animate_();
       },
       true /** callToInitialize */
     );
@@ -233,11 +233,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       top: DISTANCE_TO_CENTER_EDGE_PERCENT * heightFraction,
       bottom: -DISTANCE_TO_CENTER_EDGE_PERCENT * heightFraction,
     };
-  }
-
-  /** @private */
-  onPageNavigation_() {
-    this.animate_();
   }
 
   /**
