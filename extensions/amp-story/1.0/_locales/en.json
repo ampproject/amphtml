@@ -274,5 +274,9 @@
   "95": {
     "string": "Show bookend",
     "description": "Label for a button that displays a dialog with related articles and sharing options."
+  },
+  "96": {
+    "string": "Move device to explore",
+    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
   }
 }

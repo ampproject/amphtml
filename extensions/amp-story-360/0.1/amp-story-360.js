@@ -111,9 +111,7 @@ const buildActivateButtonTemplate = (element) => htmlFor(element)`
 const buildDiscoveryTemplate = (element) => htmlFor(element)`
     <div class="i-amphtml-story-360-discovery" aria-live="polite">
       <div class="i-amphtml-story-360-discovery-animation"></div>
-      <span class="i-amphtml-story-360-discovery-text" aria-hidden="true">
-        Move device to explore
-      </span>
+      <span class="i-amphtml-story-360-discovery-text"></span>
     </div>
   `;
 
@@ -562,6 +560,14 @@ export class AmpStory360 extends AMP.BaseElement {
     ) {
       const page = this.getPage_();
       const discoveryTemplate = page && buildDiscoveryTemplate(page);
+      // Support translation of discovery dialogue text.
+      this.mutateElement(() => {
+        discoveryTemplate.querySelector(
+          '.i-amphtml-story-360-discovery-text'
+        ).textContent = this.localizationService_.getLocalizedString(
+          LocalizedStringId.AMP_STORY_DISCOVERY_DIALOG_TEXT
+        );
+      });
       this.mutateElement(() => page.appendChild(discoveryTemplate));
     }
   }
