@@ -78,7 +78,7 @@ function postGithub(token, url, data) {
           const responseBody = Buffer.concat(chunks).toString('utf-8');
 
           if (res.statusCode < 200 || res.statusCode > 299) {
-            console.error(responseBody);
+            console./*OK*/ error(responseBody);
             reject(new Error(res.statusCode));
             return;
           }
@@ -178,7 +178,7 @@ if (!GITHUB_TOKEN) {
 
 postGithubIssue(GITHUB_TOKEN, 'ampproject', 'amphtml', createNextIssue()).then(
   ({title, 'html_url': htmlUrl}) => {
-    console.log(title);
-    console.log(htmlUrl);
+    console./*OK*/ log(title);
+    console./*OK*/ log(htmlUrl);
   }
 );
