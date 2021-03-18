@@ -102,7 +102,7 @@ function postGithubIssue(token, owner, repo, data) {
   return postGithub(token, url, data);
 }
 
-function nextDayOfWeek(date, dayOfWeek, weeks = 1) {
+function getNextDayOfWeek(date, dayOfWeek, weeks = 1) {
   const resultDate = new Date(date.getTime());
   resultDate.setDate(
     resultDate.getDate() +
@@ -131,14 +131,14 @@ const timeZ = (yyyy, mm, dd, hours, minutes) =>
     hours.toString().padStart(2, '0') + minutes.toString().padStart(2, '0')
   }Z`;
 
-function nextIssue() {
+function createNextIssue() {
   const today = new Date();
 
   // if we run on the same day of week, we need to skip one day to calculate
   // properly
   today.setDate(today.getDate() + 1);
 
-  const nextDay = nextDayOfWeek(today, dayOfWeek, generateWeeksFromNow);
+  const nextDay = getNextDayOfWeek(today, dayOfWeek, generateWeeksFromNow);
   const [region, timeUtc] = getRotation(nextDay, timeRotationStartYyyyMmDd);
   const [hours, minutes] = timeUtc.split(':').map(Number);
 
@@ -176,7 +176,7 @@ if (!GITHUB_TOKEN) {
   throw new Error('no GITHUB_TOKEN');
 }
 
-postGithubIssue(GITHUB_TOKEN, 'ampproject', 'amphtml', nextIssue()).then(
+postGithubIssue(GITHUB_TOKEN, 'ampproject', 'amphtml', createNextIssue()).then(
   ({title, 'html_url': htmlUrl}) => {
     console.log(title);
     console.log(htmlUrl);
