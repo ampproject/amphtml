@@ -27,9 +27,6 @@ const path = require('path');
 const Remapping = require('@ampproject/remapping');
 const wrappers = require('../compile/compile-wrappers');
 const {
-  removeFromBabelCache: removeFromClosureBabelCache,
-} = require('../compile/pre-closure-babel');
-const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
@@ -39,6 +36,7 @@ const {green, red, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
+const {removeFromClosureBabelCache} = require('../compile/pre-closure-babel');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
 const {watch: fileWatch} = require('chokidar');

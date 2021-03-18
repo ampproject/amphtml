@@ -25,9 +25,6 @@ const {
   verifyExtensionBundles,
   jsBundles,
 } = require('../compile/bundles.config');
-const {
-  removeFromBabelCache: removeFromClosureBabelCache,
-} = require('../compile/pre-closure-babel');
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
 const {compileJison} = require('./compile-jison');
 const {endBuildStep, watchDebounceDelay, doBuildJs} = require('./helpers');
@@ -36,6 +33,7 @@ const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
 const {log} = require('../common/logging');
 const {maybeToEsmName, compileJs, mkdirSync} = require('./helpers');
+const {removeFromClosureBabelCache} = require('../compile/pre-closure-babel');
 const {watch} = require('chokidar');
 
 /**
