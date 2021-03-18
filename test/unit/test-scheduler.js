@@ -15,18 +15,18 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {Builder} from '../../src/service/builder';
 import {LayoutPriority} from '../../src/layout';
 import {READY_SCAN_SIGNAL} from '../../src/service/resources-interface';
+import {Scheduler} from '../../src/service/scheduler';
 import {createElementWithAttributes} from '../../src/dom';
 import {installIntersectionObserverStub} from '../../testing/intersection-observer-stub';
 
-describes.realWin('Builder', {amp: true}, (env) => {
+describes.realWin('Scheduler', {amp: true}, (env) => {
   let win, doc, ampdoc;
   let setAmpdocReady;
   let clock;
   let intersectionObserverStub;
-  let builder;
+  let scheduler;
 
   beforeEach(() => {
     win = env.win;
@@ -57,7 +57,7 @@ describes.realWin('Builder', {amp: true}, (env) => {
       win
     );
 
-    builder = new Builder(ampdoc);
+    scheduler = new Scheduler(ampdoc);
   });
 
   afterEach(() => {
@@ -70,29 +70,29 @@ describes.realWin('Builder', {amp: true}, (env) => {
     element.prerenderAllowed = () => options.prerenderAllowed || false;
     element.getBuildPriority = () =>
       options.buildPriority || LayoutPriority.CONTENT;
-    element.buildInternal = env.sandbox.stub();
+    element.mountInternal = env.sandbox.stub();
     return element;
   }
 
   describe('schedule', () => {
     it('should schedule a deferredBuild element', () => {
       const element = createAmpElement({deferredBuild: true});
-      builder.schedule(element);
+      scheduler.schedule(element);
       expect(intersectionObserverStub.isObserved(element)).to.be.true;
 
-      builder.unschedule(element);
+      scheduler.unschedule(element);
       expect(intersectionObserverStub.isObserved(element)).to.be.false;
     });
 
     it('should schedule a non-deferredBuild element', () => {
       const element = createAmpElement({deferredBuild: false});
-      builder.schedule(element);
+      scheduler.schedule(element);
       expect(intersectionObserverStub.isObserved(element)).to.be.false;
     });
 
     it('should unschedule when built', async () => {
       const element = createAmpElement({deferredBuild: true});
-      builder.schedule(element);
+      scheduler.schedule(element);
       expect(intersectionObserverStub.isObserved(element)).to.be.true;
 
       await setAmpdocReady();
@@ -106,7 +106,7 @@ describes.realWin('Builder', {amp: true}, (env) => {
     it('should NOT signal READY_SCAN_SIGNAL until document is ready', async () => {
       ampdoc.signals().reset(READY_SCAN_SIGNAL);
       const element = createAmpElement({deferredBuild: false});
-      builder.schedule(element);
+      scheduler.schedule(element);
       expect(ampdoc.signals().get(READY_SCAN_SIGNAL)).to.be.null;
 
       clock.tick(50);
@@ -125,78 +125,78 @@ describes.realWin('Builder', {amp: true}, (env) => {
     it('should build when document ready', async () => {
       await setAmpdocReady();
       const element = createAmpElement({deferredBuild: false});
-      builder.schedule(element);
+      scheduler.schedule(element);
       clock.tick(1);
-      expect(element.buildInternal).to.be.calledOnce;
+      expect(element.mountInternal).to.be.calledOnce;
     });
 
     it('should build when document becomes ready', async () => {
       const element = createAmpElement({deferredBuild: false});
-      builder.schedule(element);
+      scheduler.schedule(element);
       clock.tick(1);
-      expect(element.buildInternal).to.be.not.called;
+      expect(element.mountInternal).to.be.not.called;
 
       await setAmpdocReady();
       clock.tick(1);
-      expect(element.buildInternal).to.be.calledOnce;
+      expect(element.mountInternal).to.be.calledOnce;
     });
 
     it('should build asap when document ready', async () => {
       await setAmpdocReady();
       const element = createAmpElement({deferredBuild: true});
-      builder.scheduleAsap(element);
+      scheduler.scheduleAsap(element);
       clock.tick(1);
-      expect(element.buildInternal).to.be.calledOnce;
+      expect(element.mountInternal).to.be.calledOnce;
     });
 
     it('should build asap when document becomes ready', async () => {
       const element = createAmpElement({deferredBuild: true});
-      builder.scheduleAsap(element);
+      scheduler.scheduleAsap(element);
       clock.tick(1);
-      expect(element.buildInternal).to.be.not.called;
+      expect(element.mountInternal).to.be.not.called;
 
       await setAmpdocReady();
       clock.tick(1);
-      expect(element.buildInternal).to.be.calledOnce;
+      expect(element.mountInternal).to.be.calledOnce;
     });
 
     it('should build when has next siblings', async () => {
       const element = createAmpElement({deferredBuild: false});
       doc.body.appendChild(element);
-      builder.schedule(element);
+      scheduler.schedule(element);
       clock.tick(1);
-      expect(element.buildInternal).to.not.be.called;
+      expect(element.mountInternal).to.not.be.called;
 
       const element2 = createAmpElement({deferredBuild: false});
       doc.body.appendChild(element2);
-      builder.schedule(element2);
+      scheduler.schedule(element2);
       clock.tick(1);
-      expect(element.buildInternal).to.be.calledOnce;
-      expect(element2.buildInternal).to.not.be.called;
+      expect(element.mountInternal).to.be.calledOnce;
+      expect(element2.mountInternal).to.not.be.called;
     });
 
     it('should build asap when has next siblings', async () => {
       const element = createAmpElement({deferredBuild: false});
       doc.body.appendChild(element);
-      builder.scheduleAsap(element);
+      scheduler.scheduleAsap(element);
       clock.tick(1);
-      expect(element.buildInternal).to.not.be.called;
+      expect(element.mountInternal).to.not.be.called;
 
       const element2 = createAmpElement({deferredBuild: false});
       doc.body.appendChild(element2);
-      builder.scheduleAsap(element2);
+      scheduler.scheduleAsap(element2);
       clock.tick(1);
-      expect(element.buildInternal).to.be.calledOnce;
-      expect(element2.buildInternal).to.not.be.called;
+      expect(element.mountInternal).to.be.calledOnce;
+      expect(element2.mountInternal).to.not.be.called;
     });
 
     it('should wait the deferred even when parsed', async () => {
       await setAmpdocReady();
       const element = createAmpElement({deferredBuild: true});
       doc.body.appendChild(element);
-      builder.schedule(element);
+      scheduler.schedule(element);
       clock.tick(1);
-      expect(element.buildInternal).to.not.be.called;
+      expect(element.mountInternal).to.not.be.called;
     });
   });
 
@@ -211,9 +211,9 @@ describes.realWin('Builder', {amp: true}, (env) => {
         deferredBuild: false,
         prerenderAllowed: true,
       });
-      builder.schedule(element);
+      scheduler.schedule(element);
       clock.tick(1);
-      expect(element.buildInternal).to.be.calledOnce;
+      expect(element.mountInternal).to.be.calledOnce;
     });
 
     it('should build asap if prerenderAllowed', () => {
@@ -221,9 +221,9 @@ describes.realWin('Builder', {amp: true}, (env) => {
         deferredBuild: true,
         prerenderAllowed: true,
       });
-      builder.scheduleAsap(element);
+      scheduler.scheduleAsap(element);
       clock.tick(1);
-      expect(element.buildInternal).to.be.calledOnce;
+      expect(element.mountInternal).to.be.calledOnce;
     });
 
     it('should NOT build if not prerenderAllowed', () => {
@@ -231,9 +231,9 @@ describes.realWin('Builder', {amp: true}, (env) => {
         deferredBuild: false,
         prerenderAllowed: false,
       });
-      builder.schedule(element);
+      scheduler.schedule(element);
       clock.tick(1);
-      expect(element.buildInternal).to.be.not.called;
+      expect(element.mountInternal).to.be.not.called;
     });
 
     it('should NOT build asap if not prerenderAllowed', () => {
@@ -241,72 +241,72 @@ describes.realWin('Builder', {amp: true}, (env) => {
         deferredBuild: true,
         prerenderAllowed: false,
       });
-      builder.scheduleAsap(element);
+      scheduler.scheduleAsap(element);
       clock.tick(1);
-      expect(element.buildInternal).to.be.not.called;
+      expect(element.mountInternal).to.be.not.called;
     });
 
     it('should build when becomes visible', () => {
       const element = createAmpElement({prerenderAllowed: false});
-      builder.schedule(element);
+      scheduler.schedule(element);
       clock.tick(1);
-      expect(element.buildInternal).to.not.be.called;
+      expect(element.mountInternal).to.not.be.called;
 
       ampdoc.overrideVisibilityState('visible');
       clock.tick(1);
-      expect(element.buildInternal).to.be.calledOnce;
+      expect(element.mountInternal).to.be.calledOnce;
     });
 
     it('should build when becomes hidden', () => {
       const element = createAmpElement({prerenderAllowed: false});
-      builder.schedule(element);
+      scheduler.schedule(element);
       clock.tick(1);
-      expect(element.buildInternal).to.not.be.called;
+      expect(element.mountInternal).to.not.be.called;
 
       ampdoc.overrideVisibilityState('hidden');
       clock.tick(1);
-      expect(element.buildInternal).to.be.calledOnce;
+      expect(element.mountInternal).to.be.calledOnce;
     });
 
     it('should NOT build when becomes paused or inactive', () => {
       const element = createAmpElement({prerenderAllowed: false});
-      builder.schedule(element);
+      scheduler.schedule(element);
       clock.tick(1);
-      expect(element.buildInternal).to.not.be.called;
+      expect(element.mountInternal).to.not.be.called;
 
       ampdoc.overrideVisibilityState('paused');
       clock.tick(1);
-      expect(element.buildInternal).to.not.be.called;
+      expect(element.mountInternal).to.not.be.called;
 
       ampdoc.overrideVisibilityState('inactive');
       clock.tick(1);
-      expect(element.buildInternal).to.not.be.called;
+      expect(element.mountInternal).to.not.be.called;
     });
 
     it('should NOT build when scheduled in paused', () => {
       ampdoc.overrideVisibilityState('paused');
 
       const element = createAmpElement({prerenderAllowed: false});
-      builder.schedule(element);
+      scheduler.schedule(element);
       clock.tick(1);
-      expect(element.buildInternal).to.not.be.called;
+      expect(element.mountInternal).to.not.be.called;
 
       ampdoc.overrideVisibilityState('visible');
       clock.tick(1);
-      expect(element.buildInternal).to.be.calledOnce;
+      expect(element.mountInternal).to.be.calledOnce;
     });
 
     it('should NOT build when scheduled in inactive', () => {
       ampdoc.overrideVisibilityState('inactive');
 
       const element = createAmpElement({prerenderAllowed: false});
-      builder.schedule(element);
+      scheduler.schedule(element);
       clock.tick(1);
-      expect(element.buildInternal).to.not.be.called;
+      expect(element.mountInternal).to.not.be.called;
 
       ampdoc.overrideVisibilityState('visible');
       clock.tick(1);
-      expect(element.buildInternal).to.be.calledOnce;
+      expect(element.mountInternal).to.be.calledOnce;
     });
   });
 
@@ -317,40 +317,40 @@ describes.realWin('Builder', {amp: true}, (env) => {
 
     it('should wait for intersection when deferred', () => {
       const element = createAmpElement({deferredBuild: true});
-      builder.schedule(element);
+      scheduler.schedule(element);
       expect(intersectionObserverStub.isObserved(element)).to.be.true;
       clock.tick(1);
-      expect(element.buildInternal).to.not.be.called;
+      expect(element.mountInternal).to.not.be.called;
 
       intersectionObserverStub.notifySync({
         target: element,
         isIntersecting: false,
       });
       clock.tick(1);
-      expect(element.buildInternal).to.not.be.called;
+      expect(element.mountInternal).to.not.be.called;
 
       intersectionObserverStub.notifySync({
         target: element,
         isIntersecting: true,
       });
       clock.tick(1);
-      expect(element.buildInternal).to.be.calledOnce;
+      expect(element.mountInternal).to.be.calledOnce;
     });
 
     it('should not wait for intersection when not deferred', () => {
       const element = createAmpElement({deferredBuild: false});
-      builder.schedule(element);
+      scheduler.schedule(element);
       expect(intersectionObserverStub.isObserved(element)).to.be.false;
       clock.tick(1);
-      expect(element.buildInternal).to.be.calledOnce;
+      expect(element.mountInternal).to.be.calledOnce;
     });
 
     it('should not wait for intersection when asap', () => {
       const element = createAmpElement({deferredBuild: true});
-      builder.scheduleAsap(element);
+      scheduler.scheduleAsap(element);
       expect(intersectionObserverStub.isObserved(element)).to.be.false;
       clock.tick(1);
-      expect(element.buildInternal).to.be.calledOnce;
+      expect(element.mountInternal).to.be.calledOnce;
     });
   });
 
@@ -361,13 +361,13 @@ describes.realWin('Builder', {amp: true}, (env) => {
 
     it('should run deferred CONTENT at high priority', () => {
       const element = createAmpElement({deferredBuild: true});
-      builder.schedule(element);
+      scheduler.schedule(element);
       intersectionObserverStub.notifySync({
         target: element,
         isIntersecting: true,
       });
       clock.tick(1);
-      expect(element.buildInternal).to.be.calledOnce;
+      expect(element.mountInternal).to.be.calledOnce;
     });
 
     it('should run deferred METADATA at low priority', () => {
@@ -375,16 +375,16 @@ describes.realWin('Builder', {amp: true}, (env) => {
         deferredBuild: true,
         buildPriority: LayoutPriority.METADATA,
       });
-      builder.schedule(element);
+      scheduler.schedule(element);
       intersectionObserverStub.notifySync({
         target: element,
         isIntersecting: true,
       });
       clock.tick(1);
-      expect(element.buildInternal).to.not.be.called;
+      expect(element.mountInternal).to.not.be.called;
 
       clock.tick(100);
-      expect(element.buildInternal).to.be.calledOnce;
+      expect(element.mountInternal).to.be.calledOnce;
     });
 
     it('should run non-deferred METADATA at low priority', () => {
@@ -392,12 +392,12 @@ describes.realWin('Builder', {amp: true}, (env) => {
         deferredBuild: false,
         buildPriority: LayoutPriority.METADATA,
       });
-      builder.schedule(element);
+      scheduler.schedule(element);
       clock.tick(1);
-      expect(element.buildInternal).to.not.be.called;
+      expect(element.mountInternal).to.not.be.called;
 
       clock.tick(100);
-      expect(element.buildInternal).to.be.calledOnce;
+      expect(element.mountInternal).to.be.calledOnce;
     });
 
     it('should run asap METADATA at high priority', () => {
@@ -405,9 +405,9 @@ describes.realWin('Builder', {amp: true}, (env) => {
         deferredBuild: false,
         buildPriority: LayoutPriority.METADATA,
       });
-      builder.scheduleAsap(element);
+      scheduler.scheduleAsap(element);
       clock.tick(1);
-      expect(element.buildInternal).to.be.calledOnce;
+      expect(element.mountInternal).to.be.calledOnce;
     });
   });
 });

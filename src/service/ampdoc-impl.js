@@ -442,7 +442,6 @@ export class AmpDoc {
    * @restricted
    */
   declareExtension(extensionId, version) {
-    devAssert(version); // QQQ: remove/debugging.
     devAssert(
       !this.declaredExtensions_[extensionId] ||
         this.declaredExtensions_[extensionId] === version,
@@ -450,6 +449,14 @@ export class AmpDoc {
       extensionId
     );
     this.declaredExtensions_[extensionId] = version;
+  }
+
+  /**
+   * @param {string} extensionId
+   * @return {?string}
+   */
+  getExtensionVersion(extensionId) {
+    return this.declaredExtensions_[extensionId] || null;
   }
 
   /**

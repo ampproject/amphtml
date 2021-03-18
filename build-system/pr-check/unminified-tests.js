@@ -30,12 +30,8 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'unminified-tests.js';
 
-/**
- * @return {void}
- */
 function pushBuildWorkflow() {
   downloadUnminifiedOutput();
-  timedExecOrDie('gulp update-packages');
 
   try {
     timedExecOrThrow(
@@ -55,13 +51,9 @@ function pushBuildWorkflow() {
   }
 }
 
-/**
- * @return {void}
- */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     downloadUnminifiedOutput();
-    timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp integration --nobuild --headless --coverage');
     timedExecOrDie('gulp codecov-upload');
   } else {

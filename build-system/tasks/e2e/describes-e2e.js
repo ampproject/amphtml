@@ -445,9 +445,6 @@ function describeEnv(factory) {
       spec.browsers = ['chrome'];
     }
 
-    /**
-     * @return {void}
-     */
     function createBrowserDescribe() {
       const allowedBrowsers = getAllowedBrowsers();
 
@@ -491,7 +488,6 @@ function describeEnv(factory) {
 
     /**
      * @param {string} browserName
-     * @return {void}
      */
     function createVariantDescribe(browserName) {
       for (const name in variants) {

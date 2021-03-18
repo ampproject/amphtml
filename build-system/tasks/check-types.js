@@ -26,6 +26,7 @@ const {compileCss} = require('./css');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
 const {log} = require('../common/logging');
 const {maybeUpdatePackages} = require('./update-packages');
+const {typecheckNewServer} = require('../server/typescript-compile');
 
 /**
  * Dedicated type check path.
@@ -37,13 +38,16 @@ async function checkTypes() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   maybeInitializeExtensions();
+
+  typecheckNewServer();
+
   const compileSrcs = [
-    './src/amp.js',
-    './src/amp-shadow.js',
-    './src/inabox/amp-inabox.js',
-    './ads/alp/install-alp.js',
-    './ads/inabox/inabox-host.js',
-    './src/web-worker/web-worker.js',
+    'src/amp.js',
+    'src/amp-shadow.js',
+    'src/inabox/amp-inabox.js',
+    'ads/alp/install-alp.js',
+    'ads/inabox/inabox-host.js',
+    'src/web-worker/web-worker.js',
   ];
   const extensionValues = Object.keys(extensions).map(function (key) {
     return extensions[key];
@@ -54,7 +58,7 @@ async function checkTypes() {
     })
     .map(function (extension) {
       return (
-        './extensions/' +
+        'extensions/' +
         extension.name +
         '/' +
         extension.version +
@@ -82,7 +86,7 @@ async function checkTypes() {
         ),
         // Type check 3p/ads code.
         closureCompile(
-          ['./3p/integration.js'],
+          ['3p/integration.js'],
           './dist',
           'integration-check-types.js',
           {
@@ -93,7 +97,7 @@ async function checkTypes() {
           }
         ),
         closureCompile(
-          ['./3p/ampcontext-lib.js'],
+          ['3p/ampcontext-lib.js'],
           './dist',
           'ampcontext-check-types.js',
           {
@@ -104,7 +108,7 @@ async function checkTypes() {
           }
         ),
         closureCompile(
-          ['./3p/iframe-transport-client-lib.js'],
+          ['3p/iframe-transport-client-lib.js'],
           './dist',
           'iframe-transport-client-check-types.js',
           {
@@ -129,4 +133,6 @@ checkTypes.description = 'Check source code for JS type errors';
 checkTypes.flags = {
   closure_concurrency: '  Sets the number of concurrent invocations of closure',
   debug: '  Outputs the file contents during compilation lifecycles',
+  warning_level:
+    "  Optionally sets closure's warning level to one of [quiet, default, verbose]",
 };

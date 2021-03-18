@@ -15,7 +15,6 @@
  */
 'use strict';
 
-const experimentsConfig = require('../global-configs/experiments-config.json');
 const {
   gitBranchCreationPoint,
   gitBranchName,
@@ -135,7 +134,6 @@ function startTimer(jobNameOrCmd) {
  * Stops the timer for the given job / command and prints the execution time.
  * @param {string} jobNameOrCmd
  * @param {DOMHighResTimeStamp} startTime
- * @return {number}
  */
 function stopTimer(jobNameOrCmd, startTime) {
   const endTime = Date.now();
@@ -155,7 +153,7 @@ function stopTimer(jobNameOrCmd, startTime) {
 /**
  * Aborts the process after stopping the timer for a given job
  * @param {string} jobName
- * @param {startTime} startTime
+ * @param {number} startTime
  */
 function abortTimedJob(jobName, startTime) {
   stopTimer(jobName, startTime);
@@ -164,8 +162,8 @@ function abortTimedJob(jobName, startTime) {
 
 /**
  * Wraps an exec helper in a timer. Returns the result of the helper.
- * @param {!Function(string, string=): ?} execFn
- * @return {!Function(string, string=): ?}
+ * @param {function(string, string=): ?} execFn
+ * @return {function(string, string=): ?}
  */
 function timedExecFn(execFn) {
   return (cmd, ...rest) => {
@@ -338,28 +336,12 @@ async function processAndUploadNomoduleOutput() {
   uploadNomoduleOutput();
 }
 
-/**
- * Extracts and validates the config for the given experiment.
- * @param {string} experiment
- * @return {Object|null}
- */
-function getExperimentConfig(experiment) {
-  const config = experimentsConfig[experiment];
-  const valid =
-    config?.name &&
-    config?.define_experiment_constant &&
-    config?.expiration_date_utc &&
-    new Date(config.expiration_date_utc) >= Date.now();
-  return valid ? config : null;
-}
-
 module.exports = {
   abortTimedJob,
   downloadExperimentOutput,
   downloadUnminifiedOutput,
   downloadNomoduleOutput,
   downloadModuleOutput,
-  getExperimentConfig,
   printChangeSummary,
   printSkipMessage,
   processAndUploadNomoduleOutput,

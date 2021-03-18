@@ -100,7 +100,6 @@ function isValidServeMode(serveMode) {
 /**
  *
  * @param {string} serveMode
- * @return {void}
  */
 function setServeMode(serveMode) {
   SERVE_MODE = serveMode;
@@ -502,7 +501,6 @@ app.use('/form/verify-search-json/post', (req, res) => {
  * @param {express.Request} req
  * @param {express.Response} res
  * @param {string} mode
- * @return {void}
  */
 function proxyToAmpProxy(req, res, mode) {
   const url =
@@ -627,7 +625,6 @@ app.use('/examples/live-list-update(-reverse)?.amp.html', (req, res, next) => {
 
 /**
  * @param {Element} item
- * @return {void}
  */
 function liveListReplace(item) {
   item.setAttribute('data-update-time', Date.now().toString());
@@ -639,7 +636,6 @@ function liveListReplace(item) {
 /**
  * @param {Element} liveList
  * @param {Element} node
- * @return {void}
  */
 function liveListInsert(liveList, node) {
   const iterCount = Math.floor(Math.random() * 2) + 1;
@@ -658,7 +654,6 @@ function liveListInsert(liveList, node) {
 
 /**
  * @param {Element} liveList
- * @return {void}
  */
 function liveListTombstone(liveList) {
   const tombstoneId = Math.floor(Math.random() * itemCtr);
@@ -1560,17 +1555,6 @@ app.get('/dist/diversions', (_req, res) => {
 /*
  * End Cache SW LOCALDEV section
  */
-
-/**
- * Web worker binary.
- */
-app.get('/dist/ww(.max)?.(m?js)', (req, res) => {
-  fs.promises.readFile(pc.cwd() + req.path).then((file) => {
-    res.setHeader('Content-Type', 'text/javascript');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.end(file);
-  });
-});
 
 app.get('/mraid.js', (req, _res, next) => {
   req.url = req.url.replace('mraid.js', 'examples/mraid/mraid.js');
