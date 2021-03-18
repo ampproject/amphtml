@@ -30,8 +30,6 @@ const {cyan, green, red, yellow} = require('kleur/colors');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {log, logLocalDev} = require('../common/logging');
 
-const depCheckDir = '.amp-dep-check';
-
 /**
  * @typedef {{
  *   name: string,
@@ -181,14 +179,10 @@ async function getEntryPointModule() {
     .filter((x) => fs.statSync(x).isDirectory())
     .map(getEntryPoint);
   const allEntryPoints = flatten(extensionEntryPoints).concat(coreBinaries);
-  await fs.ensureDir(depCheckDir);
-  const entryPointModule = path.join(depCheckDir, 'entry-point-module.js');
   const entryPointData = allEntryPoints
-    .map((file) => `import '../${file}';`)
+    .map((file) => `import './${file}';`)
     .join('\n');
-  await fs.promises.writeFile(entryPointModule, entryPointData);
-  logLocalDev('Added all entry points to', cyan(entryPointModule));
-  return entryPointModule;
+  return entryPointData;
 }
 
 /**
@@ -196,20 +190,19 @@ async function getEntryPointModule() {
  * @return {!Promise<ModuleDef>}
  */
 async function getModuleGraph(entryPointModule) {
-  const bundleFile = path.join(depCheckDir, 'entry-point-bundle.js');
-  const moduleGraphFile = path.join(depCheckDir, 'module-graph.json');
-  const plugin = getEsbuildBabelPlugin('dep-check', /* enableCache */ false);
-  await esbuild.build({
-    entryPoints: [entryPointModule],
+  const plugin = getEsbuildBabelPlugin('dep-check', /* enableCache */ true);
+  const result = await esbuild.build({
+    stdin: {
+      contents: entryPointModule,
+      resolveDir: '.',
+    },
     bundle: true,
-    outfile: bundleFile,
-    metafile: moduleGraphFile,
+    write: false,
+    metafile: true,
     plugins: [plugin],
   });
-  logLocalDev('Bundled all entry points into', cyan(bundleFile));
 
-  const moduleGraphJson = await fs.readJson(moduleGraphFile);
-  const entryPoints = moduleGraphJson.inputs;
+  const entryPoints = result.metafile.inputs;
   const moduleGraph = Object.create(null);
   moduleGraph.name = entryPointModule;
   moduleGraph.deps = [];
@@ -220,7 +213,7 @@ async function getModuleGraph(entryPointModule) {
       deps: entryPoints[entryPoint].imports.map((dep) => dep.path),
     });
   }
-  logLocalDev('Extracted module graph from', cyan(moduleGraphFile));
+  logLocalDev('Extracted module graph');
   return moduleGraph;
 }
 
