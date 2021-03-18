@@ -19,6 +19,27 @@ const crypto = require('crypto');
 const fs = require('fs-extra');
 const path = require('path');
 
+let totalTimeHashing = 0;
+let totalTimeTransforming = 0;
+let totalTimeReadingFromFsCache = 0;
+let totalTimeReadingFromRAMCache = 0;
+let filesRead = 0;
+let filesReadFromMem = 0;
+let filesReadFromFsCache = 0;
+let timeReading = 0;
+
+function printStats() {
+  console.log(`Hashing: ${totalTimeHashing}ms`);
+  console.log(`Transforming: ${totalTimeTransforming}ms`);
+  console.log(`BatchRead ${filesRead} files in ${timeReading}ms.`);
+  console.log(
+    `Read ${filesReadFromFsCache} files from fs cache: ${totalTimeReadingFromFsCache}ms`
+  );
+  console.log(
+    `Read ${filesReadFromMem} files from mem cache: ${totalTimeReadingFromRAMCache}ms.`
+  );
+}
+
 /**
  * Directory where the babel filecache lives.
  */
@@ -44,20 +65,28 @@ class BabelTransformCache {
 
   /**
    * @param {string} hash
-   * @return {null | Promise<{contents: string}>}
+   * @return {null|Promise<{contents: string}>}
    */
   get(hash) {
+    const start = Date.now();
     const key = this.getKey_(hash);
     const cached = this.map.get(key);
     if (cached) {
+      filesReadFromMem++;
+      cached.finally(() => {
+        totalTimeReadingFromRAMCache += Date.now() - start;
+      });
       return cached;
     }
     if (this.fsCache.has(key)) {
+      filesReadFromFsCache++;
       const transformedPromise = fs.readJson(path.join(CACHE_DIR, key));
       this.map.set(key, transformedPromise);
+      transformedPromise.finally(() => {
+        totalTimeReadingFromFsCache += Date.now() - start;
+      });
       return transformedPromise;
     }
-
     return null;
   }
 
@@ -109,14 +138,14 @@ function getEsbuildBabelPlugin(
   preSetup = () => {},
   postLoad = () => {}
 ) {
-  function sha256(obj) {
+  function md5(obj) {
     if (!enableCache) {
       return '';
     }
-    return crypto
-      .createHash('sha256')
-      .update(JSON.stringify(obj))
-      .digest('hex');
+    const startTime = Date.now();
+    let h = crypto.createHash('md5').update(JSON.stringify(obj)).digest('hex');
+    totalTimeHashing += Date.now() - startTime;
+    return h;
   }
 
   /**
@@ -125,23 +154,29 @@ function getEsbuildBabelPlugin(
    * @returns {{contents: string, hash: string}}
    */
   function batchedRead(path, optionsHash) {
+    const start = Date.now();
     let read = readCache.get(path);
     if (!read) {
+      filesRead++;
       read = fs.promises
-        .readFile(path)
+        .readFile(path, 'utf8')
         .then((contents) => ({
           contents,
-          hash: sha256({contents, optionsHash}),
+          hash: md5({contents, optionsHash}),
         }))
         .finally(() => {
           readCache.delete(path);
         });
       readCache.set(path, read);
     }
+    read.finally(() => {
+      timeReading += Date.now() - start;
+    });
     return read;
   }
 
-  async function transformContents(contents, hash, babelOptions) {
+  function transformContents(contents, hash, babelOptions) {
+    let start = Date.now();
     if (enableCache) {
       const cached = transformCache.get(hash);
       if (cached) {
@@ -158,6 +193,9 @@ function getEsbuildBabelPlugin(
     if (enableCache) {
       transformCache.set(hash, promise);
     }
+    promise.finally(() => {
+      totalTimeTransforming += Date.now() - start;
+    });
 
     return promise.finally(postLoad);
   }
@@ -166,11 +204,12 @@ function getEsbuildBabelPlugin(
     name: 'babel',
 
     async setup(build) {
+      const start = Date.now();
       preSetup();
 
       const babelOptions =
         babel.loadOptions({caller: {name: callerName}}) || {};
-      const optionsHash = sha256(babelOptions);
+      const optionsHash = md5(babelOptions);
 
       build.onLoad({filter: /\.[cm]?js$/, namespace: ''}, async (file) => {
         const filename = file.path;
@@ -181,10 +220,13 @@ function getEsbuildBabelPlugin(
           filenameRelative: path.basename(filename),
         });
       });
+
+      console.log(`Time in setup(): ${Date.now() - start}ms`);
     },
   };
 }
 
 module.exports = {
   getEsbuildBabelPlugin,
+  printStats,
 };
