@@ -457,6 +457,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Sulvo](../../ads/vendors/sulvo.md)
 -   [SunMedia](../../ads/vendors/sunmedia.md)
 -   [Swoop](../../ads/vendors/swoop.md)
+-   [Tail](../../ads/vendors/tail.md)
 -   [TcsEmotion](../../ads/vendors/tcsemotion.md)
 -   [Teads](../../ads/vendors/teads.md)
 -   [torimochi](../../ads/vendors/torimochi.md)
