@@ -188,8 +188,8 @@
     "track": "https://api.ibeat-analytics.com/ping-amp?url=_source_url_&sid=_client_id(_iibeat_session)_&ua=_user_agent_&ref=_document_referrer_&at=_incremental_engaged_time_&tt=!totalTime&pid=_page_view_id_&d=!d&dn=_source_hostname_&ct=!ct&pt=!pt&hid=!hid&au=!au&ag=!ag&aid=!aid&cn=_canonical_url_&pot=!timerStart&rct=1&id=!id&sec=!sec&tgs=!tgs&pc=!pc"
   },
   "infonline": {
-    "pageview": "!url?st=!st&sv=ke&ap=1&co=!co&cp=!cp&ps=!ps&host=_canonical_host_&path=_canonical_path_&type=pageview",
-    "event": "!url?st=!st&ev=!ev&sv=ke&ap=1&co=!co&cp=!cp&ps=!ps&host=_canonical_host_&path=_canonical_path_&type=event"
+    "pageview": "!url?st=!st&sv=ke&ap=1&co=!co&cp=!cp&ps=!ps&act=_consent_string_&acs=_if(_equals(_consent_state_%2Csufficient)_%2C1)__if(_equals(_consent_state_%2Cinsufficient)_%2C0)__if(_equals(_consent_state_%2C)_%2C-1)_&host=_canonical_host_&path=_canonical_path_&type=pageview",
+    "event": "!url?st=!st&ev=!ev&sv=ke&ap=1&co=!co&cp=!cp&ps=!ps&act=_consent_string_&acs=_if(_equals(_consent_state_%2Csufficient)_%2C1)__if(_equals(_consent_state_%2Cinsufficient)_%2C0)__if(_equals(_consent_state_%2C)_%2C-1)_&host=_canonical_host_&path=_canonical_path_&type=event"
   },
   "infonline_anonymous": {
     "pageview": "!url?ap=1&dn=!dn&cn=!cn&st=!st&co=!co&cp=!cp&au=_canonical_url_&ar=_document_referrer_&ash=_screen_height_&asw=_screen_width_&tp=pageview",
