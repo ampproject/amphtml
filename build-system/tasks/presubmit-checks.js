@@ -1066,6 +1066,7 @@ const forbiddenTermsSrcInclusive = {
   '\\.getTime\\(\\)': {
     message: 'Unless you do weird date math (allowlist), use Date.now().',
     allowlist: [
+      'build-system/tasks/create-design-review-issues/index.js',
       'extensions/amp-timeago/0.1/amp-timeago.js',
       'extensions/amp-timeago/1.0/component.js',
       'src/utils/date.js',
