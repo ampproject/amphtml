@@ -205,7 +205,7 @@ export class ResourcesImpl {
      */
     this.intersectionObserverCallbackFired_ = false;
 
-    if (isExperimentOn(this.win, 'bento')) {
+    if (isExperimentOn(this.win, 'intersect-resources')) {
       const iframed = isIframed(this.win);
 
       // Classic IntersectionObserver doesn't support viewport tracking and
