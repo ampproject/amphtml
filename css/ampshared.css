@@ -145,6 +145,10 @@ body noscript > * {
   z-index: 2;
 }
 
+noscript {
+  display: inline !important;
+}
+
 .i-amphtml-layout-flex-item,
 [layout=flex-item]:not(.i-amphtml-layout-flex-item)
 {
@@ -291,10 +295,10 @@ i-amphtml-sizer {
  * [width][height][sizes] and [width][height][heights] imply layout=responsive
  * before the element has resolved.
  */
-.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > :not(noscript),
-[layout]:not([layout=container]):not(.i-amphtml-element) > :not(noscript),
-[width][height][sizes]:not([layout]):not(.i-amphtml-element) > :not(noscript),
-[width][height][heights]:not([layout]):not(.i-amphtml-element) > :not(noscript)
+.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > *,
+[layout]:not([layout=container]):not(.i-amphtml-element) > *,
+[width][height][sizes]:not([layout]):not(.i-amphtml-element) > *,
+[width][height][heights]:not([layout]):not(.i-amphtml-element) > *
 {
   display: none;
 }
