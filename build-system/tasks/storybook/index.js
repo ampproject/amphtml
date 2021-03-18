@@ -42,7 +42,7 @@ const repoDir = path.join(__dirname, '../../..');
 const envConfigDir = (env) => path.join(__dirname, `${env}-env`);
 
 /**
- * @param {string} message Message for gulp task (call stack is already in logs)
+ * @param {string} message Message for amp task (call stack is already in logs)
  */
 const throwError = (message) => {
   const err = new Error(message);
@@ -116,7 +116,7 @@ async function storybook() {
   if (!build && envs.includes('amp')) {
     await runAmpDevBuildServer();
   }
-  installPackages(__dirname);
+  await installPackages(__dirname);
   if (!build) {
     createCtrlcHandler('storybook');
   }
@@ -131,8 +131,8 @@ storybook.description = 'Isolated testing and development for AMP components.';
 
 storybook.flags = {
   'build':
-    '  Builds a static web application, as described in https://storybook.js.org/docs/react/workflows/publish-storybook',
+    'Builds a static web application, as described in https://storybook.js.org/docs/react/workflows/publish-storybook',
   'storybook_env':
-    "  Set environment(s) to run Storybook, either 'amp', 'preact' or a list as 'amp,preact'",
-  'storybook_port': '  Set port from which to run the Storybook dashboard.',
+    "Set environment(s) to run Storybook, either 'amp', 'preact' or a list as 'amp,preact'",
+  'storybook_port': 'Set port from which to run the Storybook dashboard.',
 };

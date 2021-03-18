@@ -33,16 +33,16 @@ const jobName = 'bundle-size.js';
 function pushBuildWorkflow() {
   downloadNomoduleOutput();
   downloadModuleOutput();
-  timedExecOrDie('gulp bundle-size --on_push_build');
+  timedExecOrDie('amp bundle-size --on_push_build');
 }
 
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME)) {
     downloadNomoduleOutput();
     downloadModuleOutput();
-    timedExecOrDie('gulp bundle-size --on_pr_build');
+    timedExecOrDie('amp bundle-size --on_pr_build');
   } else {
-    timedExecOrDie('gulp bundle-size --on_skipped_build');
+    timedExecOrDie('amp bundle-size --on_skipped_build');
     printSkipMessage(
       jobName,
       'this PR does not affect the runtime or flag configs'

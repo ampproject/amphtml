@@ -51,7 +51,7 @@ function isLargeRefactor() {
  * @return {!Object<string, string>}
  */
 function extractCssJsFileMap() {
-  execOrDie('gulp css', {'stdio': 'ignore'});
+  execOrDie('amp css', {'stdio': 'ignore'});
   maybeInitializeExtensions(extensions);
   /** @type {Object<string, string>} */
   const cssJsFileMap = {};

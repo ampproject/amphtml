@@ -32,9 +32,6 @@ fi
 echo $(GREEN "Enabling log coloring...")
 echo "FORCE_COLOR=1" >> $GITHUB_ENV
 
-echo $(GREEN "Installing gulp-cli...")
-npm install --global gulp-cli
-
 echo $(GREEN "Installing dependencies...")
 npm ci
 

@@ -18,7 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 
 /**
- * Gets the config for post-closure babel transforms run during `gulp dist --esm`.
+ * Gets the config for post-closure babel transforms run during `amp dist --esm`.
  *
  * @return {!Object}
  */

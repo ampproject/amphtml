@@ -15,7 +15,7 @@
  */
 
 /**
- * @fileoverview This file implements the `gulp check-owners` task, which checks
+ * @fileoverview This file implements the `amp check-owners` task, which checks
  * all OWNERS files in the repo for correctness, as determined by the parsing
  * API provided by the AMP owners bot.
  */
@@ -37,7 +37,7 @@ const OWNERS_SYNTAX_CHECK_URI =
 
 /**
  * Checks OWNERS files for correctness using the owners bot API.
- * The cumulative result is returned to the `gulp` process via process.exitCode
+ * The cumulative result is returned to the `amp` process via process.exitCode
  * so that all OWNERS files can be checked / fixed.
  */
 async function checkOwners() {
@@ -114,6 +114,6 @@ module.exports = {
 
 checkOwners.description = 'Checks all OWNERS files in the repo for correctness';
 checkOwners.flags = {
-  'files': '  Checks only the specified OWNERS files',
-  'local_changes': '  Checks just the OWNERS files changed in the local branch',
+  'files': 'Checks only the specified OWNERS files',
+  'local_changes': 'Checks just the OWNERS files changed in the local branch',
 };

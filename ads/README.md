@@ -8,7 +8,7 @@ This guide provides details for ad networks to create an `amp-ad` integration fo
   (Do not remove or edit this comment.)
 
   This table-of-contents is automatically generated. To generate it, run:
-    gulp markdown-toc --fix
+    amp markdown-toc --fix
 -->
 
 <!-- {"maxdepth": 2} -->
@@ -352,7 +352,7 @@ If you're adding support for a new third-party ad service, changes to the follow
 
 To verify the examples that you have put in `/examples/ads.amp.html`:
 
-1. Start a local gulp web server by running command `gulp`.
+1. Start a local amp web server by running command `amp`.
 2. Visit `http://localhost:8000/examples/ads.amp.html?type=yournetwork` in your browser to make sure the examples load ads.
 
 Please consider having the example consistently load a fake ad (with ad targeting disabled). Not only will it be a more confident example for publishers to follow, but also allows the AMP team to catch any regression bug during AMP releases.
@@ -366,14 +366,14 @@ Please verify your ad is fully functioning, for example, by clicking on an ad. W
 Please make sure your changes pass the tests:
 
 ```sh
-gulp unit --watch --nobuild --files=test/unit/{test-ads-config.js,test-integration.js}
+amp unit --watch --nobuild --files=test/unit/{test-ads-config.js,test-integration.js}
 ```
 
 If you have non-trivial logic in `/ads/yournetwork.js`, adding a unit test at `/test/unit/ads/test-yournetwork.js` is highly recommended.
 
 ### Lint and type-check
 
-To speed up the review process, please run `gulp lint` and `gulp check-types`, then fix errors, if any, before sending out the PR.
+To speed up the review process, please run `amp lint` and `amp check-types`, then fix errors, if any, before sending out the PR.
 
 ### Other tips
 

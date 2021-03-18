@@ -131,8 +131,8 @@ module.exports = {
 
 checkTypes.description = 'Check source code for JS type errors';
 checkTypes.flags = {
-  closure_concurrency: '  Sets the number of concurrent invocations of closure',
-  debug: '  Outputs the file contents during compilation lifecycles',
+  closure_concurrency: 'Sets the number of concurrent invocations of closure',
+  debug: 'Outputs the file contents during compilation lifecycles',
   warning_level:
-    "  Optionally sets closure's warning level to one of [quiet, default, verbose]",
+    "Optionally sets closure's warning level to one of [quiet, default, verbose]",
 };

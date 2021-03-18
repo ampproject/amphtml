@@ -424,7 +424,7 @@ function collectWork(
 }
 
 /**
- * Entry point to gulp sweep-experiments.
+ * Entry point to amp sweep-experiments.
  * See README.md for usage.
  */
 async function sweepExperiments() {
@@ -539,8 +539,8 @@ sweepExperiments.description =
 
 sweepExperiments.flags = {
   'days_ago':
-    '  How old experiment configuration flips must be for an experiment to be removed. Default is 365 days. This is ignored when using --experiment.',
+    'How old experiment configuration flips must be for an experiment to be removed. Default is 365 days. This is ignored when using --experiment.',
   'dry_run':
-    "  Don't write, but only list the experiments that would be removed by this command.",
-  'experiment': '  Remove a specific experiment id.',
+    "Don't write, but only list the experiments that would be removed by this command.",
+  'experiment': 'Remove a specific experiment id.',
 };

@@ -16,7 +16,7 @@ limitations under the License.
 
 <!--
   Run to insert missing sections:
-    gulp check-analytics-vendors-list --fix
+    amp check-analytics-vendors-list --fix
 
   (Some are intentionally commented-out and should be kept for the CI check.)
 -->

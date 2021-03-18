@@ -143,7 +143,7 @@ async function generateMap() {
  * @return {Promise<void>}
  */
 async function coverageMap() {
-  installPackages(__dirname);
+  await installPackages(__dirname);
   await buildNewServer();
 
   if (!argv.nobuild) {
@@ -164,25 +164,21 @@ async function coverageMap() {
   await stopServer();
 }
 
-module.exports = {coverageMap};
+module.exports = {
+  coverageMap,
+};
 
 coverageMap.description =
-  'Generates a code coverage "heat map" HTML visualization on v0.js based on code traversed during puppeteer test via source map explorer';
+  'Generates a code coverage heat map for v0.js via source map explorer';
 
 coverageMap.flags = {
-  json:
-    '  Customize the name of the JSON output from puppeteer (out.json by default).',
-  inputhtml:
-    '  Set the input HTML for puppeteer testing, by designating the path that leads to the HTML file, starting at "examples/" (everything.amp.html by default).',
-  outputhtml:
-    '  Customize the name of the HTML output from source map explorer (out.html by default).',
-  nobuild: '  Skips dist build.',
-  port:
-    '  Customize the port number of the local AMP server (8000 by default).',
+  json: 'JSON output filename [default: out.json]',
+  inputhtml: 'Input HTML file under "examples/" [default: everything.amp.html]',
+  outputhtml: 'Output HTML file [default: out.html]',
+  nobuild: 'Skips dist build.',
+  port: 'Port number for AMP server [default: 8000]',
   file:
-    '  Designate which JS (or MJS) file to view in coverage map, or *.js for all files (v0.js by default). If the JS file is not in the top level dist directory, you need to indicate the path to the JS file relative to dist.',
-  esm:
-    '  Perform coverage test in ESM environment. This will trigger an additional HTML transformation.',
-  sxg:
-    '  Perform coverage test in SxG environment. This will trigger an additional HTML transformation.',
+    'Output file(s) relative to dist/. Accepts .js, .mjs, and wildcards. [default: v0.js]',
+  esm: 'Generate coverage in ESM mode. Triggers an extra HTML transformation.',
+  sxg: 'Generate in SxG mode. Triggers an extra HTML transformation.',
 };

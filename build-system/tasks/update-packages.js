@@ -241,7 +241,7 @@ function runNpmCheck() {
 }
 
 /**
- * Used as a pre-requisite by several gulp tasks.
+ * Used as a pre-requisite by several amp tasks.
  */
 function maybeUpdatePackages() {
   if (!isCiBuild()) {

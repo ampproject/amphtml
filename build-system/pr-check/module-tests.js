@@ -38,7 +38,7 @@ function prependConfig() {
     `dist/${target}.mjs`,
   ]).join(',');
   timedExecOrDie(
-    `gulp prepend-global --${argv.config} --local_dev --fortesting --derandomize --target=${targets}`
+    `amp prepend-global --${argv.config} --local_dev --fortesting --derandomize --target=${targets}`
   );
 }
 
@@ -46,7 +46,7 @@ function pushBuildWorkflow() {
   downloadNomoduleOutput();
   downloadModuleOutput();
   prependConfig();
-  timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
+  timedExecOrDie('amp integration --nobuild --compiled --headless --esm');
 }
 
 function prBuildWorkflow() {
@@ -55,7 +55,7 @@ function prBuildWorkflow() {
     downloadModuleOutput();
     prependConfig();
     timedExecOrDie(
-      `gulp integration --nobuild --compiled --headless --esm --config=${argv.config}`
+      `amp integration --nobuild --compiled --headless --esm --config=${argv.config}`
     );
   } else {
     printSkipMessage(

@@ -86,7 +86,7 @@ Experiments may be removed by following references to their id. To start off
 by finding those references, run:
 
 ```bash
-gulp sweep-experiments --experiment=my-experiment
+amp sweep-experiments --experiment=my-experiment
 ```
 
 This creates a starter commit history to remove the experiment. [Refer to the guide for this tool](../../build-system/tasks/sweep-experiments/README.md) for details on how to continue removal of the experiment.

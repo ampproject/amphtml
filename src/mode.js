@@ -65,7 +65,7 @@ function getMode_(win) {
 
   // Magic constants that are replaced by closure compiler.
   // IS_MINIFIED is always replaced with true when closure compiler is used
-  // while IS_DEV is only replaced when `gulp dist` is called without the
+  // while IS_DEV is only replaced when `amp dist` is called without the
   // --fortesting flag.
   const IS_DEV = true;
   const IS_MINIFIED = false;
@@ -86,7 +86,7 @@ function getMode_(win) {
   }
 
   // The `minified`, `test` and `localDev` properties are replaced
-  // as boolean literals when we run `gulp dist` without the `--fortesting`
+  // as boolean literals when we run `amp dist` without the `--fortesting`
   // flags. This improved DCE on the production file we deploy as the code
   // paths for localhost/testing/development are eliminated.
   return {

@@ -25,7 +25,7 @@ const killSuffix = process.platform == 'win32' ? '>NUL' : '';
 
 /**
  * Creates an async child process that handles Ctrl + C and immediately cancels
- * the ongoing `gulp` task.
+ * the ongoing `amp` task.
  *
  * @param {string} command
  * @return {number}

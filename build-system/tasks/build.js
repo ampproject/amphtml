@@ -35,7 +35,7 @@ const argv = require('minimist')(process.argv.slice(2));
 
 /**
  * Perform the prerequisite steps before starting the unminified build.
- * Used by `gulp` and `gulp build`.
+ * Used by `amp` and `amp build`.
  *
  * @param {!Object} options
  * @return {Promise}
@@ -45,7 +45,7 @@ async function runPreBuildSteps(options) {
 }
 
 /**
- * Unminified build. Entry point for `gulp build`.
+ * Unminified build. Entry point for `amp build`.
  */
 async function build() {
   await doBuild();
@@ -66,7 +66,7 @@ async function doBuild(extraArgs = {}) {
     watch: argv.watch,
   };
   printNobuildHelp();
-  printConfigHelp('gulp build');
+  printConfigHelp('amp build');
   parseExtensionFlags();
   await runPreBuildSteps(options);
   if (argv.core_runtime_only) {
@@ -94,16 +94,16 @@ module.exports = {
 
 build.description = 'Builds the AMP library';
 build.flags = {
-  config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-  fortesting: '  Builds the AMP library for local testing',
-  extensions: '  Builds only the listed extensions.',
-  extensions_from: '  Builds only the extensions from the listed AMP(s).',
-  noextensions: '  Builds with no extensions.',
-  core_runtime_only: '  Builds only the core runtime.',
-  coverage: '  Adds code coverage instrumentation to JS files using istanbul.',
-  version_override: '  Overrides the version written to AMP_CONFIG',
-  watch: '  Watches for changes in files, re-builds when detected',
-  esm: '  Do not transpile down to ES5',
+  config: 'Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+  fortesting: 'Builds the AMP library for local testing',
+  extensions: 'Builds only the listed extensions.',
+  extensions_from: 'Builds only the extensions from the listed AMP(s).',
+  noextensions: 'Builds with no extensions.',
+  core_runtime_only: 'Builds only the core runtime.',
+  coverage: 'Adds code coverage instrumentation to JS files using istanbul.',
+  version_override: 'Overrides the version written to AMP_CONFIG',
+  watch: 'Watches for changes in files, re-builds when detected',
+  esm: 'Do not transpile down to ES5',
   define_experiment_constant:
-    '  Builds runtime with the EXPERIMENT constant set to true',
+    'Builds runtime with the EXPERIMENT constant set to true',
 };

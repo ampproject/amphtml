@@ -19,7 +19,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const {getReplacePlugin, getReplaceGlobalsPlugin} = require('./helpers');
 
 /**
- * Gets the config for babel transforms run during `gulp [unit|integration|e2e]`.
+ * Gets the config for babel transforms run during `amp [unit|integration|e2e]`.
  *
  * @return {!Object}
  */

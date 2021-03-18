@@ -1,5 +1,6 @@
+#!/usr/bin/env node
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
+
+const {
+  printGulpDeprecationNotice,
+} = require('./build-system/tasks/amp-task-runner');
 
 /**
- * @fileoverview Script that runs the performance tests during CI.
+ * Print a deprecation notice and fall back to the amp task runner.
+ * TODO(amphtml): Remove this script after a month or so.
  */
-
-const {downloadNomoduleOutput, timedExecOrDie} = require('./utils');
-const {runCiJob} = require('./ci-job');
-
-const jobName = 'performance-tests.js';
-
-function pushBuildWorkflow() {
-  downloadNomoduleOutput(jobName);
-  timedExecOrDie('amp performance --nobuild --quiet --headless');
-}
-
-runCiJob(jobName, pushBuildWorkflow, () => {});
+printGulpDeprecationNotice(/* withTimeStamps */ true);
+require('./amp');

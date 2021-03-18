@@ -23,7 +23,7 @@ const expectedCaches = ['google', 'bing'];
 const cachesJsonPath = '../global-configs/caches.json';
 
 /**
- * Entry point for gulp caches-jason.
+ * Entry point for amp caches-jason.
  */
 async function cachesJson() {
   const filename = path.basename(cachesJsonPath);

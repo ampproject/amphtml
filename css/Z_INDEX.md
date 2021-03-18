@@ -1,4 +1,4 @@
-**Run `gulp get-zindex --fix` to generate this file.**
+**Run `amp get-zindex --fix` to generate this file.**
 
 <!-- markdown-link-check-disable -->
 

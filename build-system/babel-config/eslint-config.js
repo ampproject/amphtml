@@ -16,7 +16,7 @@
 'use strict';
 
 /**
- * Gets the config for babel transforms run during `gulp lint`.
+ * Gets the config for babel transforms run during `amp lint`.
  *
  * @return {!Object}
  */

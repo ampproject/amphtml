@@ -308,20 +308,20 @@ module.exports = {
 
 prependGlobal.description = 'Prepends a json config to a target file';
 prependGlobal.flags = {
-  'target': '  Comma separated list of files to prepend the json config to.',
+  'target': 'Comma separated list of files to prepend the json config to.',
   'canary':
-    '  Prepend the default canary config. ' +
+    'Prepend the default canary config. ' +
     'Takes in an optional value for a custom canary config source.',
   'prod':
-    '  Prepend the default prod config. ' +
+    'Prepend the default prod config. ' +
     'Takes in an optional value for a custom prod config source.',
-  'local_dev': '  Enables runtime to be used for local development.',
+  'local_dev': 'Enables runtime to be used for local development.',
   'branch':
-    '  Switch to a git branch to get config source from. ' +
+    'Switch to a git branch to get config source from. ' +
     'Uses master by default.',
   'local_branch':
-    "  Don't switch branches and use the config from the local branch.",
-  'fortesting': '  Force the config to return true for getMode().test',
+    "Don't switch branches and use the config from the local branch.",
+  'fortesting': 'Force the config to return true for getMode().test',
   'derandomize':
-    '  Rounds all experiment percentages to 0 or 1, whichever is closest.',
+    'Rounds all experiment percentages to 0 or 1, whichever is closest.',
 };

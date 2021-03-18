@@ -46,5 +46,5 @@ module.exports = {
 ava.description = "Runs ava tests for AMP's tasks";
 
 ava.flags = {
-  'watch': '  Watches for changes',
+  'watch': 'Watches for changes',
 };

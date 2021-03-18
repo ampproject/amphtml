@@ -122,9 +122,9 @@ module.exports = {
 
 firebase.description = 'Generates firebase folder for deployment';
 firebase.flags = {
-  'file': '  File to deploy to firebase as index.html',
-  'compiled': '  Deploy from minified files',
-  'nobuild': '  Skips the gulp build|dist step.',
+  'file': 'File to deploy to firebase as index.html',
+  'compiled': 'Deploy from minified files',
+  'nobuild': 'Skips the amp build|dist step.',
   'fortesting':
-    '  Expects an env var AMP_TESTING_HOST and writes this to AMP_CONFIG',
+    'Expects an env var AMP_TESTING_HOST and writes this to AMP_CONFIG',
 };
