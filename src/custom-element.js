@@ -833,7 +833,11 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           this.dispatchCustomEventForTesting(AmpEvents.LOAD_START);
           return;
         case ReadyState.COMPLETE:
+          // LOAD_START is set just in case. It won't be overwritten if
+          // it had been set before.
+          this.signals_.signal(CommonSignals.LOAD_START);
           this.signals_.signal(CommonSignals.LOAD_END);
+          this.signals_.reset(CommonSignals.UNLOAD);
           this.classList.add('i-amphtml-layout');
           this.toggleLoading(false);
           dom.dispatchCustomEvent(this, 'load', null, NO_BUBBLES);

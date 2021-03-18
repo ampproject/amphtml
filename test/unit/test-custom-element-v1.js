@@ -867,6 +867,8 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element.readyState).equal('complete');
       expect(element.toggleLoading).to.be.calledOnce.calledWith(false);
       expect(element.signals().get(CommonSignals.LOAD_END)).to.exist;
+      expect(element.signals().get(CommonSignals.LOAD_START)).to.exist;
+      expect(element.signals().get(CommonSignals.UNLOAD)).to.not.exist;
       expect(element).to.have.class('i-amphtml-layout');
       expect(loadEventSpy).to.be.calledOnce;
       expect(loadEventSpy.firstCall.firstArg.bubbles).to.be.false;
@@ -906,9 +908,11 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element.readyState).equal('complete');
       expect(element.signals().get(CommonSignals.LOAD_END)).to.exist;
 
+      element.signals().reset(CommonSignals.LOAD_START);
       element.setReadyStateInternal('loading');
       expect(element.readyState).equal('loading');
       expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
+      expect(element.signals().get(CommonSignals.LOAD_START)).to.exist;
     });
   });
 
