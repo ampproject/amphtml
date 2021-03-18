@@ -276,3 +276,48 @@
 .swg-button-dark:lang(zh-tw):after {
   background-image: url("https://news.google.com/swg/js/v1/i18n/b-zh-tw-dk.svg");
 }
+
+.swg-button-v2-light,
+.swg-button-v2-dark {
+  border: 0;
+  border-radius: 4px;
+  outline: 0;
+  width: 214px;
+  min-width: 214px;
+  height: 40px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);
+  box-sizing: border-box;
+  font-family: 'Google Sans', 'Roboto-Regular', sans-serif, arial;
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: .001em;
+}
+
+.swg-button-v2-light {
+  color: #1A73E8;
+  background-color: #fff;
+}
+
+.swg-button-v2-dark {
+  color: #FFFFFF;
+  background-color: #1967D2;
+}
+
+.swg-button-v2-icon-light,
+.swg-button-v2-icon-dark {
+  width: 18px;
+  height: 18px;
+  margin-left: 12px;
+  margin-right: 8px;
+}
+
+.swg-button-v2-icon-light {
+  content:url("https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg");
+}
+
+.swg-button-v2-icon-dark {
+  content:url("https://fonts.gstatic.com/s/i/googlematerialicons/google/v13/white-24dp/1x/gm_google_white_24dp.png");
+}
