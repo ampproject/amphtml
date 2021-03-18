@@ -107,9 +107,6 @@ const TARGETS_TO_CONFIG = MINIFIED_TARGETS.flatMap((minifiedTarget) => [
   {file: `${minifiedTarget}.mjs`, config: {esm: 1}},
 ]);
 
-/**
- * @return {void}
- */
 function logSeparator_() {
   log('---\n\n');
 }

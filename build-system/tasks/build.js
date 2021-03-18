@@ -28,7 +28,6 @@ const {
 const {buildExtensions} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss} = require('./css');
-const {compileJison} = require('./compile-jison');
 const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
 
@@ -39,11 +38,10 @@ const argv = require('minimist')(process.argv.slice(2));
  * Used by `gulp` and `gulp build`.
  *
  * @param {!Object} options
+ * @return {Promise}
  */
 async function runPreBuildSteps(options) {
-  await compileCss(options);
-  await compileJison();
-  await bootstrapThirdPartyFrames(options);
+  return Promise.all([compileCss(options), bootstrapThirdPartyFrames(options)]);
 }
 
 /**
