@@ -131,7 +131,7 @@ const timeZ = (yyyy, mm, dd, hours, minutes) =>
     hours.toString().padStart(2, '0') + minutes.toString().padStart(2, '0')
   }Z`;
 
-function createNextIssue() {
+function getNextIssueData() {
   const today = new Date();
 
   // if we run on the same day of week, we need to skip one day to calculate
@@ -176,7 +176,7 @@ if (!GITHUB_TOKEN) {
   throw new Error('no GITHUB_TOKEN');
 }
 
-postGithubIssue(GITHUB_TOKEN, 'ampproject', 'amphtml', createNextIssue()).then(
+postGithubIssue(GITHUB_TOKEN, 'ampproject', 'amphtml', getNextIssueData()).then(
   ({title, 'html_url': htmlUrl}) => {
     console./*OK*/ log(title);
     console./*OK*/ log(htmlUrl);
