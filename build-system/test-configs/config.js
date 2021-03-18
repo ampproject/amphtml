@@ -26,9 +26,10 @@
  */
 const initTestsPath = ['test/_init_tests.js'];
 
-const fixturesPath = 'test/fixtures/*.html';
+const karmaHtmlFixturesPath = 'test/fixtures/*.html';
 
-const fixturesExamplesPaths = [fixturesPath].concat([
+const fixturesExamplesPaths = [
+  karmaHtmlFixturesPath,
   {
     pattern: 'test/fixtures/served/*.html',
     included: false,
@@ -41,7 +42,7 @@ const fixturesExamplesPaths = [fixturesPath].concat([
     nocache: false,
     watched: true,
   },
-]);
+];
 
 const builtRuntimePaths = [
   {
@@ -74,6 +75,13 @@ const builtRuntimePaths = [
     nocache: false,
     watched: true,
   },
+];
+
+const karmaJsPaths = [
+  'test/**/*.js',
+  'ads/**/test/test-*.js',
+  'extensions/**/test/**/*.js',
+  'testing/**/*.js',
 ];
 
 const commonUnitTestPaths = initTestsPath.concat(fixturesExamplesPaths);
@@ -109,7 +117,7 @@ const e2eTestPaths = ['test/e2e/*.js', 'extensions/**/test-e2e/*.js'];
 
 const devDashboardTestPaths = ['build-system/server/app-index/test/**/*.js'];
 
-const jisonPaths = ['extensions/**/*.jison'];
+const jisonPath = 'extensions/**/*.jison';
 
 const lintGlobs = [
   '**/*.js',
@@ -220,8 +228,9 @@ module.exports = {
   devDashboardTestPaths,
   e2eTestPaths,
   integrationTestPaths,
-  jisonPaths,
-  fixturesPath,
+  jisonPath,
+  karmaHtmlFixturesPath,
+  karmaJsPaths,
   linkCheckGlobs,
   lintGlobs,
   presubmitGlobs,

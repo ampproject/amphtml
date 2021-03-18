@@ -25,9 +25,11 @@ const COMMON_CHROME_FLAGS = [
   '--disable-extensions',
   // Allows simulating user actions (e.g unmute) which otherwise will be denied.
   '--autoplay-policy=no-user-gesture-required',
-  // Makes debugging easy by auto-opening devtools.
-  argv.debug ? '--auto-open-devtools-for-tabs' : null,
-].filter(Boolean);
+];
+// Makes debugging easy by auto-opening devtools.
+if (argv.debug) {
+  COMMON_CHROME_FLAGS.push('--auto-open-devtools-for-tabs');
+}
 
 /**
  * @param {!Object} config

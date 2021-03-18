@@ -27,28 +27,24 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    // TODO(#32523) Remove this when Bento experiment is done.
-    (BENTO_AUTO_UPGRADE ? it.skip : it)(
-      'should render in correct font-size',
-      async () => {
-        await verifyElementStyles(await selectContentDiv('test1'), {
-          'font-size': '32px',
-        });
+    it('should render in correct font-size', async () => {
+      await verifyElementStyles(await selectContentDiv('test1'), {
+        'font-size': '32px',
+      });
 
-        await verifyElementStyles(await selectContentDiv('test2'), {
-          'font-size': '42px',
-          'overflow': 'hidden',
-        });
+      await verifyElementStyles(await selectContentDiv('test2'), {
+        'font-size': '42px',
+        'overflow': 'hidden',
+      });
 
-        await verifyElementStyles(await selectContentDiv('test3'), {
-          'font-size': '16px',
-        });
+      await verifyElementStyles(await selectContentDiv('test3'), {
+        'font-size': '16px',
+      });
 
-        await verifyElementStyles(await selectContentDiv('test4'), {
-          'font-size': '20px',
-        });
-      }
-    );
+      await verifyElementStyles(await selectContentDiv('test4'), {
+        'font-size': '20px',
+      });
+    });
 
     async function selectContentDiv(id) {
       return await controller.findElement(

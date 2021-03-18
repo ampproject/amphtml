@@ -250,5 +250,33 @@
   "89": {
     "string": "Your response will be sent to",
     "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
+  },
+  "90": {
+    "string": "Next story",
+    "description": "Label for a button that advances to the next element in the carousel."
+  },
+  "91": {
+    "string": "Next page",
+    "description": "Label for a button that advances to the next page of the story."
+  },
+  "92": {
+    "string": "Replay",
+    "description": "Label for a button that replays the story."
+  },
+  "93": {
+    "string": "Previous page",
+    "description": "Label for a button that returns the user to the previous page of the story."
+  },
+  "94": {
+    "string": "Close bookend",
+    "description": "Label for a button that closes a dialog containing related articles and sharing options and returns the user to the article."
+  },
+  "95": {
+    "string": "Show bookend",
+    "description": "Label for a button that displays a dialog with related articles and sharing options."
+  },
+  "96": {
+    "string": "Move device to explore",
+    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
   }
 }

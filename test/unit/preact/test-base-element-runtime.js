@@ -23,16 +23,18 @@ import {
 import {Slot} from '../../../src/preact/slot';
 import {forwardRef} from '../../../src/preact/compat';
 import {htmlFor} from '../../../src/static-template';
+import {installResizeObserverStub} from '../../../testing/resize-observer-stub';
 import {removeElement} from '../../../src/dom';
 import {subscribe} from '../../../src/context';
 import {upgradeOrRegisterElement} from '../../../src/service/custom-element-registry';
-import {useAmpContext, useLoad} from '../../../src/preact/context';
+import {useAmpContext, useLoading} from '../../../src/preact/context';
 import {waitFor} from '../../../testing/test-helper';
 
 describes.realWin('PreactBaseElement', {amp: true}, (env) => {
   let win, doc, html;
-  let Impl, component, lastContext, lastLoad;
+  let Impl, component, lastProps, lastContext, lastLoading;
   let loader;
+  let api;
 
   beforeEach(() => {
     win = env.win;
@@ -45,16 +47,19 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       }
     };
     loader = env.sandbox.stub();
-    component = env.sandbox.stub().callsFake((props) => {
+    api = null;
+    component = env.sandbox.stub().callsFake((props, ref) => {
+      lastProps = props;
       lastContext = useAmpContext();
-      lastLoad = useLoad(props.loading);
-      loader(lastLoad, props);
+      lastLoading = useLoading(props.loading);
+      loader(lastLoading, props);
       if (props.empty) {
         return null;
       }
+      Preact.useImperativeHandle(ref, () => api);
       return <Slot name="slot1" />;
     });
-    Impl['Component'] = component;
+    Impl['Component'] = forwardRef(component);
     Impl['loadable'] = true;
     Impl['props'] = {
       'empty': {attr: 'empty', type: 'boolean'},
@@ -92,9 +97,9 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       expect(lastContext).to.contain({
         renderable: true,
         playable: true,
-        loading: 'lazy',
+        loading: 'auto',
       });
-      expect(lastLoad).to.be.false;
+      expect(lastLoading).to.equal('auto');
       expect(loader).to.not.be.calledWith(true);
     });
 
@@ -133,16 +138,17 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       const errorEventSpy = env.sandbox.spy();
       element.addEventListener('load', loadEventSpy);
       element.addEventListener('error', errorEventSpy);
-      loader.callsFake((load, props) => {
-        if (load) {
-          props.onLoad();
-        }
-      });
 
+      // Build.
       await element.buildInternal();
-      await element.layoutCallback();
-      expect(lastLoad).to.be.true;
-      expect(loader).to.be.calledWith(true);
+      expect(element.readyState).to.equal('loading');
+      expect(loader).to.be.calledWith('auto');
+      expect(lastLoading).to.equal('auto');
+
+      // Complete.
+      const props = loader.firstCall.args[1];
+      props.onReadyState('complete');
+      expect(element.readyState).to.equal('complete');
       expect(loadEventSpy).to.be.calledOnce;
       expect(loadEventSpy.firstCall.firstArg).to.contain({bubbles: false});
       expect(errorEventSpy).to.not.be.called;
@@ -153,19 +159,198 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       const errorEventSpy = env.sandbox.spy();
       element.addEventListener('load', loadEventSpy);
       element.addEventListener('error', errorEventSpy);
-      loader.callsFake((load, props) => {
-        if (load) {
-          props.onLoadError();
-        }
-      });
 
+      // Build.
       await element.buildInternal();
-      await expect(element.layoutCallback()).to.be.eventually.rejected;
-      expect(lastLoad).to.be.true;
-      expect(loader).to.be.calledWith(true);
+      expect(element.readyState).to.equal('loading');
+      expect(loader).to.be.calledWith('auto');
+      expect(lastLoading).to.equal('auto');
+
+      // Complete.
+      const props = loader.firstCall.args[1];
+      props.onReadyState('error', new Error('intentional'));
+      expect(element.readyState).to.equal('error');
       expect(errorEventSpy).to.be.calledOnce;
       expect(errorEventSpy.firstCall.firstArg).to.contain({bubbles: false});
       expect(loadEventSpy).to.not.be.called;
+    });
+
+    it('should update readyState=complete from the component ref API', async () => {
+      const loadEventSpy = env.sandbox.spy();
+      const errorEventSpy = env.sandbox.spy();
+      element.addEventListener('load', loadEventSpy);
+      element.addEventListener('error', errorEventSpy);
+
+      api = {readyState: 'complete'};
+
+      // Build.
+      await element.buildInternal();
+      expect(element.readyState).to.equal('complete');
+      expect(loadEventSpy).to.be.calledOnce;
+      expect(loadEventSpy.firstCall.firstArg).to.contain({bubbles: false});
+      expect(errorEventSpy).to.not.be.called;
+    });
+
+    it('should update readyState=error from the component ref API', async () => {
+      const loadEventSpy = env.sandbox.spy();
+      const errorEventSpy = env.sandbox.spy();
+      element.addEventListener('load', loadEventSpy);
+      element.addEventListener('error', errorEventSpy);
+
+      api = {readyState: 'error'};
+
+      // Build.
+      await element.buildInternal();
+      expect(element.readyState).to.equal('error');
+      expect(errorEventSpy).to.be.calledOnce;
+      expect(errorEventSpy.firstCall.firstArg).to.contain({bubbles: false});
+      expect(loadEventSpy).to.not.be.called;
+    });
+
+    it('should continue as loading from the ref API withouth readyState', async () => {
+      const loadEventSpy = env.sandbox.spy();
+      const errorEventSpy = env.sandbox.spy();
+      element.addEventListener('load', loadEventSpy);
+      element.addEventListener('error', errorEventSpy);
+
+      api = {};
+
+      // Build.
+      await element.buildInternal();
+      expect(element.readyState).to.equal('loading');
+      expect(loadEventSpy).to.not.be.called;
+      expect(errorEventSpy).to.not.be.called;
+    });
+
+    it('should load with loading=auto by default', async () => {
+      await element.buildInternal();
+      expect(lastLoading).to.equal('auto');
+    });
+
+    it('should load with loading=eager on ensureLoaded', async () => {
+      await element.buildInternal();
+      expect(lastLoading).to.equal('auto');
+
+      // Should set loading=eager.
+      component.resetHistory();
+      element.ensureLoaded();
+      await waitFor(() => component.callCount > 0, 'component rerendered');
+      expect(lastLoading).to.equal('eager');
+
+      // Should reset back to loading=auto.
+      component.resetHistory();
+      lastProps.onReadyState('complete');
+      await waitFor(() => component.callCount > 0, 'component rerendered');
+      expect(lastLoading).to.equal('auto');
+    });
+  });
+
+  describe('pause', () => {
+    let element;
+    let resizeObserverStub;
+
+    beforeEach(() => {
+      element = html`
+        <amp-preact layout="fixed" width="100" height="100">
+          <div id="child1" slot="slot1"></div>
+          <div id="child2"></div>
+        </amp-preact>
+      `;
+      doc.body.appendChild(element);
+
+      resizeObserverStub = installResizeObserverStub(env.sandbox, win);
+    });
+
+    it('should call pause API on pauseCallback', async () => {
+      const pauseStub = env.sandbox.stub();
+      api = {pause: pauseStub};
+
+      await element.buildInternal();
+
+      element.pauseCallback();
+      expect(pauseStub).to.be.calledOnce;
+    });
+
+    it('should unload on pauseCallback with unloadOnPause', async () => {
+      Impl['unloadOnPause'] = true;
+
+      await element.buildInternal();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+
+      element.pauseCallback();
+
+      component.resetHistory();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      expect(lastLoading).to.equal('unload');
+
+      // Reset loading after pause.
+      component.resetHistory();
+      lastProps.onReadyState('loading');
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      expect(lastLoading).to.equal('auto');
+    });
+
+    it('should NOT track size until playing', async () => {
+      await element.buildInternal();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+
+      expect(resizeObserverStub.isObserved(element)).to.be.false;
+
+      lastProps.onPlayingState(true);
+      expect(resizeObserverStub.isObserved(element)).to.be.true;
+
+      lastProps.onPlayingState(false);
+      expect(resizeObserverStub.isObserved(element)).to.be.false;
+    });
+
+    it('should track size when unloadOnPause when loaded', async () => {
+      Impl['unloadOnPause'] = true;
+
+      await element.buildInternal();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+
+      expect(resizeObserverStub.isObserved(element)).to.be.false;
+
+      lastProps.onReadyState('complete');
+      expect(resizeObserverStub.isObserved(element)).to.be.true;
+
+      lastProps.onReadyState('loading');
+      expect(resizeObserverStub.isObserved(element)).to.be.false;
+    });
+
+    it('should NOT track size when disconnected', async () => {
+      await element.buildInternal();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      lastProps.onPlayingState(true);
+      expect(resizeObserverStub.isObserved(element)).to.be.true;
+
+      element.parentNode.removeChild(element);
+      expect(resizeObserverStub.isObserved(element)).to.be.false;
+    });
+
+    it('should pause element when size becomes zero', async () => {
+      const pauseStub = env.sandbox.stub();
+      api = {pause: pauseStub};
+
+      await element.buildInternal();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      lastProps.onPlayingState(true);
+      expect(resizeObserverStub.isObserved(element)).to.be.true;
+      expect(pauseStub).to.not.be.called;
+
+      // Non-zero size.
+      resizeObserverStub.notifySync({
+        target: element,
+        contentRect: {width: 10, height: 10},
+      });
+      expect(pauseStub).to.not.be.called;
+
+      // Zero size.
+      resizeObserverStub.notifySync({
+        target: element,
+        contentRect: {width: 0, height: 0},
+      });
+      expect(pauseStub).to.be.calledOnce;
     });
   });
 

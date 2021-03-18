@@ -17,22 +17,6 @@
 
 /*eslint "max-len": 0*/
 
-/**
- * - type - Is assumed to be "forbidden" if not provided.
- * - filesMatching - Is assumed to be all files if not provided.
- * - mustNotDependOn - If type is "forbidden" (default) then the files
- *     matched must not match the glob(s) provided.
- * - allowlist - Skip rule if this particular dependency is found.
- *     Syntax: fileAGlob->fileB where -> reads "depends on"
- * @typedef {{
- *   type: (string|undefined),
- *   filesMatching: (string|!Array<string>|undefined),
- *   mustNotDependOn: (string|!Array<string>|undefined),
- *   allowlist: (string|!Array<string>|undefined),
- * }}
- */
-let RuleConfigDef;
-
 // It is often OK to add things to the allowlist, but make sure to highlight
 // this in review.
 exports.rules = [
@@ -88,6 +72,7 @@ exports.rules = [
       'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/swg-gaa.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/aes_gcm.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/config.js',
+      'extensions/amp-google-assistant-assistjs/**/*.js->third_party/closure-responding-channel/closure-bundle.js',
       'src/css.js->third_party/css-escape/css-escape.js',
       'src/sanitizer.js->third_party/caja/html-sanitizer.js',
       'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
@@ -262,9 +247,6 @@ exports.rules = [
       'extensions/amp-youtube/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
       'extensions/amp-youtube/1.0/component.js->extensions/amp-video/1.0/video-wrapper.js',
 
-      // Bento amp-fit-text
-      'extensions/amp-fit-text/0.1/amp-fit-text.js->extensions/amp-fit-text/1.0/base-element.js',
-
       // Amp geo in group enum
       'extensions/amp-a4a/0.1/amp-a4a.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
       'extensions/amp-consent/0.1/consent-config.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
@@ -327,6 +309,10 @@ exports.rules = [
         'src/service/real-time-config/real-time-config-impl.js',
       // Parsing extension urls.
       'extensions/amp-a4a/0.1/head-validation.js->' +
+        'src/service/extension-script.js',
+      'extensions/amp-a4a/0.1/amp-ad-utils.js->' +
+        'src/service/extension-script.js',
+      'extensions/amp-live-list/0.1/live-list-manager.js->' +
         'src/service/extension-script.js',
       'extensions/amp-video/0.1/amp-video.js->' +
         'src/service/video-manager-impl.js',

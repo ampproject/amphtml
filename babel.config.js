@@ -39,6 +39,7 @@ const babelTransforms = new Map([
   ['pre-closure', 'getPreClosureConfig'],
   ['test', 'getTestConfig'],
   ['unminified', 'getUnminifiedConfig'],
+  ['minified', 'getMinifiedConfig'],
   ['@babel/eslint-parser', 'getEslintConfig'],
 ]);
 

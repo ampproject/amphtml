@@ -21,7 +21,6 @@ let variables;
 /**
  * @param {*} req require('express').Request
  * @param {*} res require('express').Response
- * @return {void}
  */
 function saveVariables(req, res) {
   const requestVariables = {};
@@ -60,7 +59,6 @@ function saveVariables(req, res) {
 /**
  * @param {*} req require('express').Request
  * @param {*} res require('express').Response
- * @return {void}
  */
 function runVariableSubstitution(req, res) {
   variables = variables || {};
@@ -118,7 +116,6 @@ function runVariableSubstitution(req, res) {
 /**
  * @param {*} req require('express').Request
  * @param {*} res require('express').Response
- * @return {void}
  */
 function saveVariableRequest(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -132,7 +129,6 @@ function saveVariableRequest(req, res) {
 /**
  * @param {*} _req require('express').Request
  * @param {*} res require('express').Response
- * @return {void}
  */
 function getVariableRequest(_req, res) {
   res.json({'Results': variableSubstitution, 'URL': url});
