@@ -34,7 +34,7 @@ function pushBuildWorkflow() {
   downloadNomoduleOutput();
   try {
     timedExecOrThrow(
-      'gulp e2e --nobuild --headless --compiled --report',
+      'amp e2e --nobuild --headless --compiled --report',
       'End-to-end tests failed!'
     );
   } catch (e) {
@@ -42,14 +42,14 @@ function pushBuildWorkflow() {
       process.exitCode = e.status;
     }
   } finally {
-    timedExecOrDie('gulp test-report-upload');
+    timedExecOrDie('amp test-report-upload');
   }
 }
 
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.E2E_TEST)) {
     downloadNomoduleOutput();
-    timedExecOrDie('gulp e2e --nobuild --headless --compiled');
+    timedExecOrDie('amp e2e --nobuild --headless --compiled');
   } else {
     printSkipMessage(
       jobName,

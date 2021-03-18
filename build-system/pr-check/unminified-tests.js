@@ -35,11 +35,11 @@ function pushBuildWorkflow() {
 
   try {
     timedExecOrThrow(
-      'gulp integration --nobuild --headless --coverage --report',
+      'amp integration --nobuild --headless --coverage --report',
       'Integration tests failed!'
     );
     timedExecOrThrow(
-      'gulp codecov-upload',
+      'amp codecov-upload',
       'Failed to upload code coverage to Codecov!'
     );
   } catch (e) {
@@ -47,15 +47,15 @@ function pushBuildWorkflow() {
       process.exitCode = e.status;
     }
   } finally {
-    timedExecOrDie('gulp test-report-upload');
+    timedExecOrDie('amp test-report-upload');
   }
 }
 
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     downloadUnminifiedOutput();
-    timedExecOrDie('gulp integration --nobuild --headless --coverage');
-    timedExecOrDie('gulp codecov-upload');
+    timedExecOrDie('amp integration --nobuild --headless --coverage');
+    timedExecOrDie('amp codecov-upload');
   } else {
     printSkipMessage(
       jobName,

@@ -372,7 +372,7 @@ class RuntimeTestRunner {
       port: this.config.client.testServerPort,
       middleware: () => [app],
     });
-    const handlerProcess = createCtrlcHandler(`gulp ${this.config.testType}`);
+    const handlerProcess = createCtrlcHandler(`amp ${this.config.testType}`);
     this.env = new Map().set('handlerProcess', handlerProcess);
   }
 

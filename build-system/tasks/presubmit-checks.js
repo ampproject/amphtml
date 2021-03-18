@@ -1444,7 +1444,7 @@ function isMissingTerms(srcFile) {
 }
 
 /**
- * Entry point for gulp presubmit.
+ * Entry point for amp presubmit.
  */
 async function presubmit() {
   let forbiddenFound = false;

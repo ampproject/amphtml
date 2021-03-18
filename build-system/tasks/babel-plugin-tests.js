@@ -19,7 +19,7 @@ const jest = require('@jest/core');
 const {isCiBuild} = require('../common/ci');
 
 /**
- * Entry point for `gulp babel-plugin-tests`. Runs the jest-based tests for
+ * Entry point for `amp babel-plugin-tests`. Runs the jest-based tests for
  * AMP's custom babel plugins.
  */
 async function babelPluginTests() {

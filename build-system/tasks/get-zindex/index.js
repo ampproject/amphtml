@@ -44,7 +44,7 @@ const tableOptions = {
 };
 
 const preamble = `
-**Run \`gulp get-zindex --fix\` to generate this file.**
+**Run \`amp get-zindex --fix\` to generate this file.**
 
 <!-- markdown-link-check-disable -->
 `.trim();
@@ -194,7 +194,7 @@ function getZindexChainsInJs(glob, cwd = '.') {
 }
 
 /**
- * Entry point for gulp get-zindex
+ * Entry point for amp get-zindex
  */
 async function getZindex() {
   logLocalDev('...');
@@ -257,5 +257,5 @@ getZindex.description =
   'Runs through all css files of project to gather z-index values';
 
 getZindex.flags = {
-  'fix': '  Write to file',
+  'fix': 'Write to file',
 };
