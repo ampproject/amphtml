@@ -16,6 +16,10 @@
 
 import * as Preact from '..';
 import {ContainWrapper} from './contain';
+import {
+  getOptionalSandboxFlags,
+  getRequiredSandboxFlags,
+} from '../../core/3p-frame';
 import {useEffect, useLayoutEffect, useRef, useState} from '..';
 
 /** @type {!Object<string,number>} Number of 3p frames for that type. */
@@ -37,6 +41,13 @@ const BLOCK_SYNC_XHR = "sync-xhr 'none';";
  * @return {*}
  */
 const DEFAULT_DESERIALIZE_MESSAGE = (message) => message;
+
+// TODO(wg-bento): UA check for required flags without iframe element
+const DEFAULT_SANDBOX =
+  getRequiredSandboxFlags().join(' ') +
+  ' ' +
+  getOptionalSandboxFlags().join(' ');
+
 /**
  * Creates the iframe for the embed. Applies correct size and passes the embed
  * attributes to the frame via JSON inside the fragment.
@@ -48,7 +59,7 @@ export function IframeEmbed({
   name,
   onRegisterIframe,
   requestResize,
-  sandbox,
+  sandbox = DEFAULT_SANDBOX,
   src,
   title,
   type,

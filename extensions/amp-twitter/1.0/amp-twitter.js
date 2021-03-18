@@ -22,8 +22,6 @@ import {
   getBootstrapBaseUrl,
   getBootstrapUrl,
   getFrameAttributes,
-  getOptionalSandboxFlags,
-  getRequiredSandboxFlags,
   preloadBootstrap,
 } from '../../../src/3p-frame';
 import {htmlFor} from '../../../src/static-template';
@@ -92,11 +90,6 @@ class AmpTwitter extends BaseElement {
       'requestResize': (height) => {
         this.forceChangeHeight(height);
       },
-      'sandbox':
-        // TODO: UA check for required flags without iframe element
-        getRequiredSandboxFlags().join(' ') +
-        ' ' +
-        getOptionalSandboxFlags().join(' '),
     });
   }
 
