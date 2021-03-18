@@ -14,39 +14,25 @@
  * limitations under the License.
  */
 
+import {loadScript, validateData} from '../../3p/3p';
+
 /**
- * An AMP element's ready state.
- *
- * @enum {string}
+ * @param {!Window} global
+ * @param {!Object} data
  */
-export const ReadyState = {
-  /**
-   * The element has not been upgraded yet.
-   */
-  UPGRADING: 'upgrading',
+export function digiteka(global, data) {
+  /*eslint "google-camelcase/google-camelcase": 0*/
+  global._digiteka_amp = {
+    allowed_data: ['mdtk', 'zone', 'adunit'],
+    mandatory_data: ['mdtk', 'zone'],
+    data,
+  };
 
-  /**
-   * The element has been upgraded and waiting to be built.
-   */
-  BUILDING: 'building',
+  validateData(
+    data,
+    global._digiteka_amp.mandatory_data,
+    global._digiteka_amp.allowed_data
+  );
 
-  /**
-   * The element has been built and waiting to be mounted.
-   */
-  MOUNTING: 'mounting',
-
-  /**
-   * The element has been built and waiting to be loaded.
-   */
-  LOADING: 'loading',
-
-  /**
-   * The element has been built and loaded.
-   */
-  COMPLETE: 'complete',
-
-  /**
-   * The element is in an error state.
-   */
-  ERROR: 'error',
-};
+  loadScript(global, 'https://ot.digiteka.com/amp.js');
+}

@@ -33,7 +33,7 @@ To use RTC, you must meet the following requirements:
 -   Future Plc
 -   IndexExchange
 -   Kargo
--   Local Media Consortium
+-   Newspassid
 -   Lotame
 -   Media.net
 -   OpenX
