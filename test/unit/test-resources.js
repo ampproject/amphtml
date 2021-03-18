@@ -722,7 +722,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     resources.discoverWork_();
 
     expect(resource1.hasBeenMeasured()).to.be.true;
-  }); 
+  });
 
   it('should render two screens when visible', () => {
     resources.visible_ = true;
@@ -913,7 +913,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     resources.work_();
     expect(resource1.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
     expect(resource1.element.layoutScheduleTime).to.be.greaterThan(0);
-  }); 
+  });
 
   it('should not schedule resource execution outside viewport', () => {
     resources.scheduleLayoutOrPreload(resource1, true);

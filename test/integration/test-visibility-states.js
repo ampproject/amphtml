@@ -70,11 +70,7 @@ t.run('Viewer Visibility State', () => {
 
       let shouldPass = false;
       let doPass_;
-      let intersect_;
       let notifyPass = noop;
-
-      let intersected;
-      let notifyIntersected;
 
       function doPass() {
         if (shouldPass) {
@@ -84,14 +80,9 @@ t.run('Viewer Visibility State', () => {
         }
       }
 
-      function intersect() {
-        intersect_.apply(this, arguments);
-        notifyIntersected();
-      }
-
       function waitForNextPass() {
         return new Promise((resolve) => {
-          notifyPass = resolve; 
+          notifyPass = resolve;
           shouldPass = true;
           resources.schedulePass();
         });
@@ -108,9 +99,6 @@ t.run('Viewer Visibility State', () => {
         win = env.win;
         notifyPass = noop;
         shouldPass = false;
-        intersected = new Promise((resolve) => {
-          notifyIntersected = resolve;
-        });
 
         const vsync = Services.vsyncFor(win);
         env.sandbox.stub(vsync, 'mutate').callsFake((mutator) => {
@@ -130,9 +118,7 @@ t.run('Viewer Visibility State', () => {
 
             resources = Services.resourcesForDoc(win.document);
             doPass_ = resources.doPass;
-            intersect_ = resources.intersect;
             env.sandbox.stub(resources, 'doPass').callsFake(doPass);
-            env.sandbox.stub(resources, 'intersect').callsFake(intersect);
 
             const img = win.document.createElement('amp-img');
             img.setAttribute('width', 100);

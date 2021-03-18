@@ -21,7 +21,7 @@ import {Services} from '../services';
 import {areMarginsChanged} from '../layout-rect';
 import {closest} from '../dom';
 import {computedStyle} from '../style';
-import {dev, devAssert} from '../log';
+import {dev} from '../log';
 import {isExperimentOn} from '../experiments';
 import {registerServiceBuilderForDoc} from '../service';
 

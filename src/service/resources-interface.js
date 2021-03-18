@@ -174,6 +174,6 @@ export class ResourcesInterface {
    * @param {!Element} element
    * @param {number} newLayoutPriority
    */
-  updateLayoutPriority(element, newLayoutPriority) {} 
+  updateLayoutPriority(element, newLayoutPriority) {}
 }
 /* eslint-enable no-unused-vars */

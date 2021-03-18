@@ -27,9 +27,8 @@ import {VisibilityState} from '../visibility-state';
 import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
 import {expandLayoutRect} from '../layout-rect';
-import {getMode} from '../mode';
 import {getSourceUrl} from '../url';
-import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
+import {hasNextNodeInDocumentOrder} from '../dom';
 import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
 import {ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error';
@@ -1324,7 +1323,7 @@ export class ResourcesImpl {
       } else {
         const {resource} = task;
 
-        let stillDisplayed = true;
+        const stillDisplayed = true;
         // Remeasure can only update isDisplayed(), not in-viewport state.
         resource.measure();
 
