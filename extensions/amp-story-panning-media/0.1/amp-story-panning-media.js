@@ -210,6 +210,11 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
     const ampImgWidth = this.ampImgEl_.getAttribute('width');
     const ampImgHeight = this.ampImgEl_.getAttribute('height');
+    if (!ampImgWidth || !ampImgHeight) {
+      user().error(
+        '"lock-bounds" requires "width" and "height" to be set on the amp-img child.'
+      );
+    }
     // TODO(#31515): When aspect ratio is portrait, containerWidth will be used for this.
     const percentScaled = containerHeight / ampImgHeight;
     const scaledImageWidth = percentScaled * ampImgWidth;
