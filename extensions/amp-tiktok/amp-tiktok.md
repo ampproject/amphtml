@@ -155,7 +155,7 @@ To use this method copy the blockquote from the TikTok Embed code:
 
 ## Accessibility
 
-If the user provides an `aria-label` then that lbel will be propogated to the `iframe`.
+If the user provides an `aria-label` then that label will be propogated to the `iframe`.
 Otherwise the `aria-label` will default to 'TikTok'.
 
 ## Validation
