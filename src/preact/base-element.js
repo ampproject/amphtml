@@ -203,10 +203,17 @@ export class PreactBaseElement extends AMP.BaseElement {
   }
 
   /** @override @nocollapse */
+  static usesLoading() {
+    // eslint-disable-next-line local/no-static-this
+    const Ctor = this;
+    return Ctor['loadable'];
+  }
+
+  /** @override @nocollapse */
   static prerenderAllowed() {
     // eslint-disable-next-line local/no-static-this
     const Ctor = this;
-    return !Ctor['loadable'];
+    return !Ctor.usesLoading();
   }
 
   /** @param {!AmpElement} element */
