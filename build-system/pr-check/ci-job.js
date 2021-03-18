@@ -36,7 +36,9 @@ const {updatePackages} = require('../tasks/update-packages');
 async function runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow) {
   setLoggingPrefix(jobName);
   const startTime = startTimer(jobName);
+  console.log('updating packages');
   updatePackages();
+  console.log('updated packages');
   if (!runNpmChecks()) {
     abortTimedJob(jobName, startTime);
     return;

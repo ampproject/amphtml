@@ -35,6 +35,7 @@ const shellCmd = process.platform == 'win32' ? 'cmd' : '/bin/bash';
  * @return {!Object}
  */
 function exec(cmd, options = {'stdio': 'inherit'}) {
+  console.log('entered exec to run', cmd);
   return spawnProcess(cmd, options);
 }
 
@@ -46,7 +47,8 @@ function exec(cmd, options = {'stdio': 'inherit'}) {
  * @return {!childProcess.ChildProcessWithoutNullStreams}
  */
 function execScriptAsync(script, options) {
-  return childProcess.spawn(script, {shell: shellCmd, ...options});
+  const scriptToSpawn = script.startsWith('amp ') ? `node ${script}` : script;
+  return childProcess.spawn(scriptToSpawn, {shell: shellCmd, ...options});
 }
 
 /**
@@ -56,6 +58,7 @@ function execScriptAsync(script, options) {
  * @param {?Object=} options
  */
 function execOrDie(cmd, options) {
+  console.log('entered execOrDie to run', cmd);
   const p = exec(cmd, options);
   if (p.status && p.status != 0) {
     process.exit(p.status);

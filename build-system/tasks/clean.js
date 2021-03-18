@@ -27,6 +27,7 @@ const ROOT_DIR = path.resolve(__dirname, '../../');
  * Cleans up various build and test artifacts
  */
 async function clean() {
+  console.log('started clean');
   const pathsToDelete = [
     '.amp-dep-check',
     '.babel-cache',
@@ -53,6 +54,7 @@ async function clean() {
       log('\t' + cyan(path.relative(ROOT_DIR, deletedPath)));
     });
   }
+  console.log('finished clean');
 }
 
 module.exports = {

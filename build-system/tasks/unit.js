@@ -47,6 +47,7 @@ class Runner extends RuntimeTestRunner {
  * @return {Promise<void>}
  */
 async function unit() {
+  console.log('starting unit');
   maybePrintArgvMessages();
   if (argv.local_changes && !(await getUnitTestsToRun())) {
     return;
@@ -58,6 +59,7 @@ async function unit() {
   await runner.setup();
   await runner.run();
   await runner.teardown();
+  console.log('ending unit');
 }
 
 module.exports = {

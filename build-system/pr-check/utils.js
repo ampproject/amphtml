@@ -167,6 +167,7 @@ function abortTimedJob(jobName, startTime) {
  */
 function timedExecFn(execFn) {
   return (cmd, ...rest) => {
+    console.log('entered timedExecFn to run', cmd);
     const startTime = startTimer(cmd);
     const p = execFn(cmd, ...rest);
     stopTimer(cmd, startTime);
