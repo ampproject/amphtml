@@ -112,14 +112,11 @@ function getEsbuildBabelPlugin(
     if (!enableCache) {
       return '';
     }
-    console.time('hash');
     const hash = crypto.createHash('md5');
     for (const a of args) {
       hash.update(a);
     }
-    const ret = hash.digest('hex');
-    console.timeEnd('hash');
-    return ret;
+    return hash.digest('hex');
   }
 
   /**
@@ -170,14 +167,10 @@ function getEsbuildBabelPlugin(
     name: 'babel',
 
     async setup(build) {
-      console.trace('presetup');
       preSetup();
 
-      console.time('babelOptions');
       const babelOptions =
         babel.loadOptions({caller: {name: callerName}}) || {};
-      console.timeEnd('babelOptions');
-      console.log(JSON.stringify(babelOptions));
       const optionsHash = md5(
         JSON.stringify({babelOptions, argv: process.argv.slice(2)})
       );
