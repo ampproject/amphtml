@@ -34,7 +34,7 @@ const TAG = 'AMP_STORY_PANNING_MEDIA';
 const DURATION_MS = 1000;
 
 /** @const {number}  */
-const DISTANCE_TO_CENTER_EDGE = 50;
+const DISTANCE_TO_CENTER_EDGE_PERCENT = 50;
 
 /**
  * A small number used to calculate zooming out to 0.
@@ -68,7 +68,7 @@ export let panningMediaPositionDef;
  *   bottom: float,
  * }}
  */
-export let panningMediaMaxBoundsDef;
+export let panningMediaMaxBoundsPercentDef;
 
 export class AmpStoryPanningMedia extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -84,7 +84,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     /** @private {?panningMediaPositionDef} Position to animate to. */
     this.animateTo_ = {};
 
-    /** @private {?panningMediaMaxBoundsDef} Max distances to keep image in viewport. */
+    /** @private {?panningMediaMaxBoundsPercentDef} Max distances to keep image in viewport. */
     this.maxBounds_ = {};
 
     /** @private {?{width: number, height: number}} */
@@ -231,10 +231,10 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       1 - containerHeight / (scaledImageHeight * this.animateTo_.zoom);
 
     this.maxBounds_ = {
-      left: DISTANCE_TO_CENTER_EDGE * widthFraction,
-      right: -DISTANCE_TO_CENTER_EDGE * widthFraction,
-      top: DISTANCE_TO_CENTER_EDGE * heightFraction,
-      bottom: -DISTANCE_TO_CENTER_EDGE * heightFraction,
+      left: DISTANCE_TO_CENTER_EDGE_PERCENT * widthFraction,
+      right: -DISTANCE_TO_CENTER_EDGE_PERCENT * widthFraction,
+      top: DISTANCE_TO_CENTER_EDGE_PERCENT * heightFraction,
+      bottom: -DISTANCE_TO_CENTER_EDGE_PERCENT * heightFraction,
     };
   }
 
