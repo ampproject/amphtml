@@ -84,9 +84,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     /** @private {?panningMediaPositionDef} Position to animate to. */
     this.animateTo_ = {};
 
-    /** @private {?panningMediaMaxBoundsPercentDef} Max distances to keep image in viewport. */
-    this.maxBounds_ = {};
-
     /** @private {?{width: number, height: number}} */
     this.pageSize_ = null;
 
@@ -192,15 +189,11 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     if (lockBounds) {
       // Zoom must be set to calculate maxBounds.
       this.animateTo_.zoom = zoom < 1 ? 1 : zoom;
-      this.setMaxBounds_();
+      const maxBounds = this.getMaxBounds_();
       this.animateTo_.x =
-        x > 0
-          ? Math.min(this.maxBounds_.left, x)
-          : Math.max(this.maxBounds_.right, x);
+        x > 0 ? Math.min(maxBounds.left, x) : Math.max(maxBounds.right, x);
       this.animateTo_.y =
-        y > 0
-          ? Math.min(this.maxBounds_.top, y)
-          : Math.max(-this.maxBounds_.bottom, y);
+        y > 0 ? Math.min(maxBounds.top, y) : Math.max(-maxBounds.bottom, y);
     } else {
       this.animateTo_ = {x, y, zoom};
     }
@@ -208,10 +201,10 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /**
    * Calculates max distances to keep image in viewport.
-   * This is only set if lock-bounds.
    * @private
+   * @return {panningMediaMaxBoundsPercentDef}
    */
-  setMaxBounds_() {
+  getMaxBounds_() {
     // Calculations to clamp image to edge of container.
     const {width: containerWidth, height: containerHeight} = this.pageSize_;
 
@@ -227,7 +220,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     const heightFraction =
       1 - containerHeight / (scaledImageHeight * this.animateTo_.zoom);
 
-    this.maxBounds_ = {
+    return {
       left: DISTANCE_TO_CENTER_EDGE_PERCENT * widthFraction,
       right: -DISTANCE_TO_CENTER_EDGE_PERCENT * widthFraction,
       top: DISTANCE_TO_CENTER_EDGE_PERCENT * heightFraction,
