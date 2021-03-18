@@ -164,9 +164,9 @@ function SidebarWithRef(
         part="backdrop"
         style={backdropStyle}
         className={objstr({
-          [backdropClassName]: backdropClassName,
           [classes.backdrop]: true,
           [classes.defaultBackdropStyles]: true,
+          [backdropClassName]: backdropClassName,
         })}
         hidden={!side}
       >
