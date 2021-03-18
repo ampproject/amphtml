@@ -145,7 +145,7 @@ body noscript > * {
   z-index: 2;
 }
 
-noscript {
+body noscript {
   display: inline !important;
 }
 
