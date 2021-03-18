@@ -13,45 +13,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const pathModule = require('path');
+const esbuild = require('esbuild');
+const globby = require('globby');
+const path = require('path');
 const {cyan, green} = require('kleur/colors');
+const {endBuildStep} = require('../tasks/helpers');
 const {exec} = require('../common/exec');
 const {log} = require('../common/logging');
 
 const SERVER_TRANSFORM_PATH = 'build-system/server/new-server/transforms';
-
-function getBuildCmd() {
-  switch (process.platform) {
-    case 'win32':
-      return `node .\\node_modules\\typescript\\lib\\tsc.js -p ${SERVER_TRANSFORM_PATH.split(
-        '/'
-      ).join(pathModule.sep)}${pathModule.sep}tsconfig.json`;
-
-    default:
-      return `./node_modules/typescript/bin/tsc -p ${SERVER_TRANSFORM_PATH}/tsconfig.json`;
-  }
-}
+const CONFIG_PATH = `${SERVER_TRANSFORM_PATH}/tsconfig.json`;
 
 /**
  * Builds the new server by converting typescript transforms to JS
+ * @return {Promise<void>}
  */
-function buildNewServer() {
+async function buildNewServer() {
   log(
     green('Building'),
-    cyan('AMP Dev Server'),
+    cyan('AMP Server'),
     green('at'),
     cyan(`${SERVER_TRANSFORM_PATH}/dist`) + green('...')
   );
-  const result = exec(getBuildCmd(), {'stdio': ['inherit', 'inherit', 'pipe']});
+  const entryPoints = globby.sync(`${SERVER_TRANSFORM_PATH}/**/*.ts`);
+  const startTime = Date.now();
+  await esbuild.build({
+    entryPoints,
+    outdir: path.join(SERVER_TRANSFORM_PATH, 'dist'),
+    bundle: false,
+    tsconfig: CONFIG_PATH,
+    format: 'cjs',
+  });
+  endBuildStep('Built', 'AMP Server', startTime);
+}
+
+function typecheckNewServer() {
+  const cmd = `npx -p typescript tsc --noEmit -p ${CONFIG_PATH}`;
+  const result = exec(cmd, {'stdio': ['inherit', 'inherit', 'pipe']});
+
   if (result.status != 0) {
-    const err = new Error('Could not build AMP Dev Server');
-    // @ts-ignore
-    err.showStack = false;
-    throw err;
+    throw new Error(`Typechecking AMP Server failed.`);
   }
 }
 
 module.exports = {
   buildNewServer,
+  typecheckNewServer,
   SERVER_TRANSFORM_PATH,
 };

@@ -26,8 +26,10 @@
  */
 const initTestsPath = ['test/_init_tests.js'];
 
+const karmaHtmlFixturesPath = 'test/fixtures/*.html';
+
 const fixturesExamplesPaths = [
-  'test-bin/test/fixtures/*.html',
+  karmaHtmlFixturesPath,
   {
     pattern: 'test/fixtures/served/*.html',
     included: false,
@@ -75,6 +77,13 @@ const builtRuntimePaths = [
   },
 ];
 
+const karmaJsPaths = [
+  'test/**/*.js',
+  'ads/**/test/test-*.js',
+  'extensions/**/test/**/*.js',
+  'testing/**/*.js',
+];
+
 const commonUnitTestPaths = initTestsPath.concat(fixturesExamplesPaths);
 
 const commonIntegrationTestPaths = initTestsPath.concat(
@@ -108,7 +117,7 @@ const e2eTestPaths = ['test/e2e/*.js', 'extensions/**/test-e2e/*.js'];
 
 const devDashboardTestPaths = ['build-system/server/app-index/test/**/*.js'];
 
-const jisonPaths = ['extensions/**/*.jison'];
+const jisonPath = 'extensions/**/*.jison';
 
 const lintGlobs = [
   '**/*.js',
@@ -169,7 +178,7 @@ const prettifyGlobs = [
   '**/*.md',
   '!**/package*.json',
   '!.github/ISSUE_TEMPLATE/**',
-  '!**/{node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
+  '!**/{node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
 
 /**
@@ -178,7 +187,7 @@ const prettifyGlobs = [
  */
 const linkCheckGlobs = [
   '**/*.md',
-  '!**/{examples,node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
+  '!**/{examples,node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
 
 /**
@@ -219,7 +228,9 @@ module.exports = {
   devDashboardTestPaths,
   e2eTestPaths,
   integrationTestPaths,
-  jisonPaths,
+  jisonPath,
+  karmaHtmlFixturesPath,
+  karmaJsPaths,
   linkCheckGlobs,
   lintGlobs,
   presubmitGlobs,

@@ -29,7 +29,7 @@ import {tryDecodeUriComponent} from '../../src/url';
  * }} data
  */
 export function videonow(global, data) {
-  const mandatoryAttributes = ['pid', 'width', 'height'];
+  const mandatoryAttributes = ['pid'];
   const optionalAttributes = ['kind', 'src'];
 
   let customTag = '';

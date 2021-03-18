@@ -37,11 +37,13 @@ const {signalPrDeployUpload} = require('../tasks/pr-deploy-bot-utils');
 const jobName = 'nomodule-build.js';
 
 function pushBuildWorkflow() {
-  timedExecOrDie('gulp update-packages');
   timedExecOrDie('gulp dist --fortesting');
   uploadNomoduleOutput();
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function prBuildWorkflow() {
   const startTime = startTimer(jobName);
   if (
@@ -52,7 +54,6 @@ async function prBuildWorkflow() {
       Targets.VISUAL_DIFF
     )
   ) {
-    timedExecOrDie('gulp update-packages');
     const process = timedExecWithError('gulp dist --fortesting');
     if (process.status !== 0) {
       const message = process?.error

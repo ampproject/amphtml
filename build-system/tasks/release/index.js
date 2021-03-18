@@ -405,10 +405,10 @@ async function cleanup_(tempDir) {
   logSeparator_();
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function release() {
-  // TODO(#27771, danielrozenberg): fail this release quickly if there are
-  // commits in the tree that are not from the `master` branch.
-
   const outputDir = path.resolve(argv.output_dir || './release');
   const tempDir = path.join(outputDir, 'tmp');
 

@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import {USER_ERROR_SENTINEL} from './assert';
+import {
+  USER_ERROR_SENTINEL,
+  elementStringOrPassThru,
+} from './core/error-message-helpers';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
 import {isArray, isEnumValue} from './types';
 import {once} from './utils/function';
-import {type} from 'os';
 import {urls} from './config';
 
 const noop = () => {};
@@ -123,7 +125,7 @@ const externalMessagesSimpleTableUrl = () =>
  * @return {string}
  */
 const messageArgToEncodedComponent = (arg) =>
-  encodeURIComponent(String(elementStringOrPassthru(arg)));
+  encodeURIComponent(String(elementStringOrPassThru(arg)));
 
 /**
  * Logging class. Use of sentinel string instead of a boolean to check user/dev
@@ -636,22 +638,7 @@ export class Log {
  * @return {string}
  */
 const stringOrElementString = (val) =>
-  /** @type {string} */ (elementStringOrPassthru(val));
-
-/**
- * @param {*} val
- * @return {*}
- */
-function elementStringOrPassthru(val) {
-  // Do check equivalent to `val instanceof Element` without cross-window bug
-  if (val && /** @type {Element} **/ (val).nodeType == 1) {
-    const asElement /** @type {Element} */ = /** @type {Element} **/ (val);
-    return (
-      asElement.localName + (asElement.id ? '#' + asElement.id : '')
-    );
-  }
-  return val;
-}
+  /** @type {string} */ (elementStringOrPassThru(val));
 
 /**
  * @param {!Array} array

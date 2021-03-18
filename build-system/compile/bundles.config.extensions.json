@@ -57,6 +57,11 @@
   },
   {"name": "amp-ad-network-nws-impl", "version": "0.1", "latestVersion": "0.1"},
   {
+    "name": "amp-ad-network-valueimpression-impl",
+    "version": "0.1",
+    "latestVersion": "0.1"
+  },
+  {
     "name": "amp-addthis",
     "version": "0.1",
     "latestVersion": "0.1",
@@ -134,8 +139,7 @@
     "name": "amp-date-picker",
     "version": "0.1",
     "latestVersion": "0.1",
-    "options": {"hasCss": true},
-    "postPrepend": ["third_party/react-dates/bundle.js"]
+    "options": {"hasCss": true}
   },
   {
     "name": "amp-delight-player",
@@ -239,8 +243,7 @@
   {
     "name": "amp-inputmask",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "postPrepend": ["third_party/inputmask/bundle.js"]
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-instagram",
@@ -383,6 +386,12 @@
     "options": {"hasCss": true}
   },
   {
+    "name": "amp-shadow-dom-polyfill",
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {"noWrapper": true}
+  },
+  {
     "name": "amp-sidebar",
     "version": ["0.1", "0.2", "1.0"],
     "latestVersion": "0.1",
@@ -430,6 +439,7 @@
         "amp-story-draggable-drawer-header",
         "amp-story-hint",
         "amp-story-info-dialog",
+        "amp-story-open-page-attachment",
         "amp-story-share",
         "amp-story-share-menu",
         "amp-story-system-layer",
@@ -454,6 +464,7 @@
       "cssBinaries": [
         "amp-story-auto-ads-ad-badge",
         "amp-story-auto-ads-attribution",
+        "amp-story-auto-ads-cta-button",
         "amp-story-auto-ads-inabox",
         "amp-story-auto-ads-shared"
       ]
@@ -570,12 +581,7 @@
     "name": "amp-viz-vega",
     "version": "0.1",
     "latestVersion": "0.1",
-    "options": {"hasCss": true},
-    "postPrepend": [
-      "third_party/d3/d3.js",
-      "third_party/d3-geo-projection/d3-geo-projection.js",
-      "third_party/vega/vega.js"
-    ]
+    "options": {"hasCss": true}
   },
   {"name": "amp-vk", "version": "0.1", "latestVersion": "0.1"},
   {

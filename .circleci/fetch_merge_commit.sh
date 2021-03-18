@@ -16,49 +16,37 @@
 
 # This script fetches the merge commit of a PR branch with master to make sure
 # PRs are tested against all the latest changes on CircleCI.
-# Reference: https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables
 
 set -e
 err=0
 
 GREEN() { echo -e "\n\033[0;32m$1\033[0m"; }
-YELLOW() { echo -e "\n\033[0;33m$1\033[0m"; }
 RED() { echo -e "\n\033[0;31m$1\033[0m"; }
 
-# Push builds are only run against master and amp-release branches.
-if [[ "$CIRCLE_BRANCH" == "master" || "$CIRCLE_BRANCH" =~ ^amp-release-* ]]; then
-  echo $(GREEN "Nothing to do because $CIRCLE_BRANCH is not a PR branch.")
-  # Warn if the build is linked to a PR on a different repo (known CircleCI bug).
-  if [[ -n "$CIRCLE_PULL_REQUEST" && ! "$CIRCLE_PULL_REQUEST" =~ ^https://github.com/ampproject/amphtml* ]]; then
-    echo $(YELLOW "WARNING: Build is incorrectly linked to a PR outside ampproject/amphtml:")
-    echo $(YELLOW "$CIRCLE_PULL_REQUEST")
-  fi
-  exit 0
+# Try to determine the PR number.
+./.circleci/get_pr_number.sh
+if [[ -f "$BASH_ENV" ]]; then
+  source $BASH_ENV
 fi
 
-# CIRCLE_PR_NUMBER is present for PRs originating from forks, but absent for PRs
-# originating from a branch on the main repo. In such cases, extract the PR
-# number from CIRCLE_PULL_REQUEST.
-if [[ "$CIRCLE_PR_NUMBER" ]]; then
-  PR_NUMBER=$CIRCLE_PR_NUMBER
-else
-  PR_NUMBER=${CIRCLE_PULL_REQUEST#"https://github.com/ampproject/amphtml/pull/"}
-fi
-
-# If neither CIRCLE_PR_NUMBER nor CIRCLE_PULL_REQUEST are available, it's
-# possible this is a PR branch that is yet to be associated with a PR. Exit
-# early becaue there is no merge commit to fetch.
+# If PR_NUMBER doesn't exist, there is nothing more to do.
 if [[ -z "$PR_NUMBER" ]]; then
-  echo $(GREEN "Nothing to do because $CIRCLE_BRANCH is not yet linked to a PR.")
   exit 0
 fi
 
-# GitHub provides refs/pull/<PR_NUMBER>/merge, an up-to-date merge branch for
-# every PR branch that can be cleanly merged to master. For more details, see:
-# https://discuss.circleci.com/t/show-test-results-for-prospective-merge-of-a-github-pr/1662
-MERGE_BRANCH="refs/pull/$PR_NUMBER/merge"
-echo $(GREEN "Fetching merge commit from $MERGE_BRANCH...")
-(set -x && git pull --ff-only origin "$MERGE_BRANCH") || err=$?
+# If PR_NUMBER exists, but the merge commit file doesn't exist, the PR was
+# created after the first stage of CI was run. There is nothing more to do.
+if [[ ! -f .CIRCLECI_MERGE_COMMIT ]]; then
+  exit 0
+fi
+
+# Extract the merge commit for this workflow and make it visible to other steps.
+CIRCLECI_MERGE_COMMIT="$(cat .CIRCLECI_MERGE_COMMIT)"
+echo "export CIRCLECI_MERGE_COMMIT=$CIRCLECI_MERGE_COMMIT" >> $BASH_ENV
+
+# Fetch the merge commit. This ensures that all CI stages use the same commit.
+echo $(GREEN "Fetching merge commit $CIRCLECI_MERGE_COMMIT...")
+(set -x && git pull --ff-only origin "$CIRCLECI_MERGE_COMMIT") || err=$?
 
 # If a clean merge is not possible, do not proceed with the build. GitHub's UI
 # will show an error indicating there was a merge conflict.

@@ -66,7 +66,7 @@ describes.repeated(
             findAndRenderTemplate: env.sandbox.stub(),
             findAndRenderTemplateArray: env.sandbox.stub(),
           };
-          env.sandbox.stub(Services, 'templatesFor').returns(templates);
+          env.sandbox.stub(Services, 'templatesForDoc').returns(templates);
           env.sandbox
             .stub(AmpDocService.prototype, 'getAmpDoc')
             .returns(ampdoc);
@@ -1412,50 +1412,6 @@ describes.repeated(
                   fast: true,
                 }
               );
-            });
-
-            describe('rescan vs. diff race', () => {
-              async function rescanVsDiffTest() {
-                env.sandbox.spy(list, 'diff_');
-                env.sandbox.spy(list, 'render_');
-
-                // Diffing is skipped if there's no existing children to diff against.
-                const oldChild = doc.createElement('p');
-                oldChild.textContent = 'foo';
-                list.container_.appendChild(oldChild);
-
-                const newChild = doc.createElement('p');
-                newChild.textContent = 'bar';
-                // New children must have at least one binding to trigger rescan.
-                newChild.setAttribute('i-amphtml-binding', '');
-                const rendered = expectFetchAndRender(DEFAULT_FETCHED_DATA, [
-                  newChild,
-                ]);
-                await list.layoutCallback().then(() => rendered);
-              }
-
-              it('without diffing, should rescan _before_ render', async () => {
-                await rescanVsDiffTest();
-
-                expect(list.diff_).to.not.have.been.called;
-                expect(bind.rescan).to.have.been.calledOnce;
-
-                // Without diffable, rescan should happen before rendering the new children.
-                expect(bind.rescan).calledBefore(list.render_);
-              });
-
-              it('with diffing, should rescan _after_ render/diff', async () => {
-                element.setAttribute('diffable', '');
-
-                await rescanVsDiffTest();
-
-                expect(list.diff_).to.have.been.calledOnce;
-                expect(bind.rescan).to.have.been.calledOnce;
-
-                // With diffable, rescanning must happen after rendering (diffing) the new children.
-                expect(bind.rescan).calledAfter(list.render_);
-                expect(bind.rescan).calledAfter(list.diff_);
-              });
             });
           });
 

@@ -86,6 +86,8 @@ navigation arrow.
     structure of `<amp-carousel>` 0.2 differs from 0.1, effecting CSS selectors
     targeting internal elements such as `amp-carousel > div`. Any selectors using
     the `.amp-class-name` format should still work.
+-   **NOTE**: Support for `amp-carousel-0.1` is limited, with the intent to
+    deprecate in the future.
 
 ### Advancing to a specific slide
 

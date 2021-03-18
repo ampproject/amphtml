@@ -956,6 +956,9 @@ window.vcParam;
 // vdoai.js
 window.vdo_ai_;
 
+// verizonmedia.js
+window.jacData;
+
 // vlyby.js
 window._vlyby_amp;
 

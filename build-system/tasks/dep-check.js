@@ -15,7 +15,6 @@
  */
 'use strict';
 
-const babel = require('@babel/core');
 const depCheckConfig = require('../test-configs/dep-check-config');
 const esbuild = require('esbuild');
 const fs = require('fs-extra');
@@ -28,6 +27,7 @@ const {
 const {compileJison} = require('./compile-jison');
 const {css} = require('./css');
 const {cyan, green, red, yellow} = require('kleur/colors');
+const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {log, logLocalDev} = require('../common/logging');
 
 const depCheckDir = '.amp-dep-check';
@@ -35,7 +35,7 @@ const depCheckDir = '.amp-dep-check';
 /**
  * @typedef {{
  *   name: string,
- *   deps: ?Array<!Object<string, !ModuleDef>
+ *   deps: ?Array<!Object<string, !ModuleDef>>
  * }}
  */
 let ModuleDef;
@@ -49,6 +49,22 @@ let GlobDef;
  * @typedef {!Array<!GlobDef>}
  */
 let GlobsDef;
+
+/**
+ * - type - Is assumed to be "forbidden" if not provided.
+ * - filesMatching - Is assumed to be all files if not provided.
+ * - mustNotDependOn - If type is "forbidden" (default) then the files
+ *     matched must not match the glob(s) provided.
+ * - allowlist - Skip rule if this particular dependency is found.
+ *     Syntax: fileAGlob->fileB where -> reads "depends on"
+ * @typedef {{
+ *  type?: (string|undefined),
+ *  filesMatching?: (string|!Array<string>|undefined),
+ *  mustNotDependOn?: (string|!Array<string>|undefined),
+ *  allowlist?: (string|!Array<string>|undefined),
+ * }}
+ */
+let RuleConfigDef;
 
 /**
  * @constructor @final @struct
@@ -155,7 +171,7 @@ const rules = depCheckConfig.rules.map((config) => new Rule(config));
  * - extensions/{$extension}/{$version}/{$extension}.js
  * - src/amp.js
  * - 3p/integration.js
- * @return {string}
+ * @return {Promise<string>}
  */
 async function getEntryPointModule() {
   const coreBinaries = ['src/amp.js', '3p/integration.js'];
@@ -177,38 +193,18 @@ async function getEntryPointModule() {
 
 /**
  * @param {string} entryPointModule
- * @return {!ModuleDef}
+ * @return {!Promise<ModuleDef>}
  */
 async function getModuleGraph(entryPointModule) {
-  const esbuildBabelPlugin = {
-    name: 'babel',
-    async setup(build) {
-      const transformContents = async ({file, contents}) => {
-        const babelOptions = babel.loadOptions({
-          caller: {name: 'dep-check'},
-          filename: file.path,
-          sourceFileName: path.relative(process.cwd(), file.path),
-        });
-        const result = await babel.transformAsync(contents, babelOptions);
-        return {contents: result.code};
-      };
-
-      build.onLoad({filter: /.*/, namespace: ''}, async (file) => {
-        const contents = await fs.promises.readFile(file.path, 'utf-8');
-        const transformed = await transformContents({file, contents});
-        return transformed;
-      });
-    },
-  };
-
   const bundleFile = path.join(depCheckDir, 'entry-point-bundle.js');
   const moduleGraphFile = path.join(depCheckDir, 'module-graph.json');
+  const plugin = getEsbuildBabelPlugin('dep-check', /* enableCache */ false);
   await esbuild.build({
     entryPoints: [entryPointModule],
     bundle: true,
     outfile: bundleFile,
     metafile: moduleGraphFile,
-    plugins: [esbuildBabelPlugin],
+    plugins: [plugin],
   });
   logLocalDev('Bundled all entry points into', cyan(bundleFile));
 
@@ -247,7 +243,7 @@ function getEntryPoint(extensionFolder) {
  * Flattens the module dependency graph and makes its entries unique. This
  * serves as the input on which all rules are tested.
  *
- * @param {!Array<!ModuleDef>} entryPoints
+ * @param {!ModuleDef} entryPoints
  * @return {!ModuleDef}
  */
 function flattenGraph(entryPoints) {
@@ -287,6 +283,9 @@ function runRules(moduleGraph) {
   return errors.length > 0;
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function depCheck() {
   const handlerProcess = createCtrlcHandler('dep-check');
   await css();

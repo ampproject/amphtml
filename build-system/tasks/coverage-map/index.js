@@ -29,6 +29,9 @@ const inputHtml = argv.inputhtml || 'everything.amp.html';
 let testUrl = `http://localhost:${serverPort}/examples/${inputHtml}`;
 let inputJs = argv.file || 'v0.js';
 
+/**
+ * @return {Promise<void>}
+ */
 async function collectCoverage() {
   const puppeteer = require('puppeteer');
   log('Opening browser and navigating to', cyan(`${testUrl}`) + '...');
@@ -62,10 +65,15 @@ async function collectCoverage() {
   await browser.close();
 }
 
-// Source: https://github.com/chenxiaochun/blog/issues/38s
+/**
+ * Source: https://github.com/chenxiaochun/blog/issues/38s
+ *
+ * @param {puppeteer.Page} page
+ * @return {Promise<void>}
+ */
 async function autoScroll(page) {
   await page.evaluate(async () => {
-    await new Promise((resolve, opt_) => {
+    await /** @type {Promise<void>} */ (new Promise((resolve) => {
       let totalHeight = 0;
       const scrollDistance = 100;
       const distance = scrollDistance;
@@ -79,10 +87,13 @@ async function autoScroll(page) {
           resolve();
         }
       }, 100);
-    });
+    }));
   });
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function htmlTransform() {
   const {
     transform,
@@ -99,6 +110,9 @@ async function htmlTransform() {
   testUrl = `http://localhost:${serverPort}/dist/transformed/${transformedName}`;
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function generateMap() {
   const {explore} = require('source-map-explorer');
 
@@ -125,9 +139,12 @@ async function generateMap() {
   );
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function coverageMap() {
   installPackages(__dirname);
-  buildNewServer();
+  await buildNewServer();
 
   if (!argv.nobuild) {
     await dist();

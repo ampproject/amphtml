@@ -19,6 +19,7 @@
  * suggestion chips that enable 3P site users to interact with Google Assistant.
  */
 
+import * as closure from '../../../third_party/closure-responding-channel/closure-bundle';
 import {Services} from '../../../src/services';
 import {addAttributesToElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -30,11 +31,15 @@ export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
 
     /** @private {?AssistjsConfigService} */
     this.configService_ = null;
+
+    /** @private {?AssistjsFrameService} */
+    this.frameService_ = null;
   }
 
   /** @override */
   buildCallback() {
     this.configService_ = Services.assistjsConfigServiceForDoc(this.element);
+    this.frameService_ = Services.assistjsFrameServiceForDoc(this.element);
   }
 
   /** @override */
@@ -49,12 +54,29 @@ export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
     this.configService_.getWidgetIframeUrl('voicebar').then((iframeUrl) => {
       addAttributesToElement(iframe, {
         src: iframeUrl,
+        sandbox: 'allow-scripts',
       });
 
       // applyFillContent so that frame covers the entire component.
       this.applyFillContent(iframe, /* replacedContent */ true);
 
       this.element.appendChild(iframe);
+    });
+
+    const serviceHandlersMap = new Map();
+    serviceHandlersMap.set('RuntimeService.TriggerSendTextQuery', () => {
+      this.frameService_.sendTextQuery();
+    });
+    serviceHandlersMap.set('RuntimeService.TriggerOpenMic', () => {
+      this.frameService_.openMic();
+    });
+
+    iframe.addEventListener('load', () => {
+      closure.createRespondingChannel(
+        iframe.contentWindow,
+        this.configService_.getAssistjsServer(),
+        serviceHandlersMap
+      );
     });
 
     // Return a load promise for the frame so the runtime knows when the

@@ -16,7 +16,7 @@
 
 import '../amp-date-display';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {toggleExperiment} from '../../../../src/experiments';
+import {Services} from '../../../../src/services';
 
 describes.realWin(
   'amp-date-display',
@@ -37,14 +37,14 @@ describes.realWin(
         now: new Date('2018-01-01T08:00:00Z'),
       });
 
-      toggleExperiment(win, 'amp-date-display', true);
       element = win.document.createElement('amp-date-display');
       element.setAttribute('layout', 'fixed');
       element.setAttribute('width', '300');
       element.setAttribute('height', '100');
       win.document.body.appendChild(element);
       impl = await element.getImpl(false);
-      env.sandbox.stub(impl.templates_, 'findAndRenderTemplate').resolves();
+      const templates = Services.templatesForDoc(env.ampdoc);
+      env.sandbox.stub(templates, 'findAndRenderTemplate').resolves();
       env.sandbox.stub(impl, 'boundRendered_');
     });
 

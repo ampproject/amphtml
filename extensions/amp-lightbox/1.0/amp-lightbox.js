@@ -21,7 +21,7 @@ import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
@@ -56,16 +56,6 @@ class AmpLightbox extends BaseElement {
     );
 
     super.triggerEvent(element, eventName, detail);
-  }
-
-  /** @override */
-  mutationObserverCallback() {
-    const open = this.element.hasAttribute('open');
-    if (open === this.open_) {
-      return;
-    }
-    this.open_ = open;
-    open ? this.api().open() : this.api().close();
   }
 
   /** @override */
