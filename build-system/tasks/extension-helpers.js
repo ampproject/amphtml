@@ -158,7 +158,7 @@ function maybeInitializeExtensions(
 
 /**
  * Set the extensions to build from example documents
- * (for internal use by `gulp performance`)
+ * (for internal use by `amp performance`)
  *
  * @param {Array<string>} examples Path to example documents
  */

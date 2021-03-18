@@ -15,7 +15,7 @@
  */
 
 /**
- * @fileoverview This file implements the `gulp test-report-upload` task, which POSTs test result reports
+ * @fileoverview This file implements the `amp test-report-upload` task, which POSTs test result reports
  * to an API endpoint that stores them in the database.
  */
 

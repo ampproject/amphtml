@@ -37,7 +37,7 @@ function prependConfig() {
     `dist/${target}.js`,
   ]).join(',');
   timedExecOrDie(
-    `gulp prepend-global --${argv.config} --local_dev --fortesting --derandomize --target=${targets}`
+    `amp prepend-global --${argv.config} --local_dev --fortesting --derandomize --target=${targets}`
   );
 }
 
@@ -46,7 +46,7 @@ function pushBuildWorkflow() {
   prependConfig();
   try {
     timedExecOrThrow(
-      `gulp integration --nobuild --headless --compiled --report --config=${argv.config}`,
+      `amp integration --nobuild --headless --compiled --report --config=${argv.config}`,
       'Integration tests failed!'
     );
   } catch (e) {
@@ -54,7 +54,7 @@ function pushBuildWorkflow() {
       process.exitCode = e.status;
     }
   } finally {
-    timedExecOrDie('gulp test-report-upload');
+    timedExecOrDie('amp test-report-upload');
   }
 }
 
@@ -63,7 +63,7 @@ function prBuildWorkflow() {
     downloadNomoduleOutput();
     prependConfig();
     timedExecOrDie(
-      `gulp integration --nobuild --compiled --headless --config=${argv.config}`
+      `amp integration --nobuild --compiled --headless --config=${argv.config}`
     );
   } else {
     printSkipMessage(

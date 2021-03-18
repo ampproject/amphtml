@@ -18,7 +18,7 @@ This update contains guidance on using the Web Story Player to support:
   (Do not remove or edit this comment.)
 
   This table-of-contents is automatically generated. To generate it, run:
-    gulp markdown-toc --fix
+    amp markdown-toc --fix
 -->
 
 <!-- {"maxdepth": 1} -->
