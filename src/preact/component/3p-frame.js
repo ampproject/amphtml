@@ -18,14 +18,18 @@ import * as Preact from '..';
 import {IframeEmbed} from './iframe';
 import {deserializeMessage} from '../../3p-frame-messaging';
 import {dict} from '../../utils/object';
-import {generateSentinel, getBootstrapUrl} from '../../3p-frame';
+import {
+  generateSentinel,
+  getBootstrapUrl,
+  getDefaultBootstrapBaseUrl,
+} from '../../3p-frame';
 import {
   getOptionalSandboxFlags,
   getRequiredSandboxFlags,
 } from '../../core/3p-frame';
 import {parseUrlDeprecated} from '../../url';
 import {sequentialIdGenerator} from '../../utils/id-generator';
-import {useCallback, useEffect, useRef, useState} from '..';
+import {useCallback, useLayoutEffect, useRef, useState} from '..';
 
 /** @type {!Object<string,function>} 3p frames for that type. */
 export const countGenerators = {};
@@ -57,7 +61,7 @@ export function ProxyIframeEmbed({
   name: nameProp,
   options = {},
   sandbox = DEFAULT_SANDBOX,
-  src,
+  src: srcProp,
   type,
   title = type,
   ...rest
@@ -69,13 +73,17 @@ export function ProxyIframeEmbed({
   }
   const [count] = useState(countGenerators[type]);
   const [name, setName] = useState(nameProp);
-  useEffect(() => {
-    if (nameProp) {
-      setName(nameProp);
-      return;
-    }
+  const src = useRef(null);
+  const win = contentRef.current?.ownerDocument?.defaultView;
+  src.current = srcProp ?? (win ? getDefaultBootstrapBaseUrl(win) : null);
+
+  useLayoutEffect(() => {
     const win = contentRef.current?.ownerDocument?.defaultView;
     if (!win) {
+      return;
+    }
+    if (nameProp) {
+      setName(nameProp);
       return;
     }
     const attrs = dict({
@@ -94,7 +102,7 @@ export function ProxyIframeEmbed({
     setName(
       JSON.stringify(
         dict({
-          'host': parseUrlDeprecated(src).hostname,
+          'host': parseUrlDeprecated(src.current).hostname,
           'bootstrap': getBootstrapUrl(),
           'type': type,
           // https://github.com/ampproject/amphtml/pull/2955
@@ -103,7 +111,7 @@ export function ProxyIframeEmbed({
         })
       )
     );
-  }, [count, nameProp, options, src, title, type]);
+  }, [count, nameProp, options, title, type]);
 
   const manageMessageHandler = useCallback((ref, onSuccess) => {
     const iframe = ref.current;
@@ -136,7 +144,7 @@ export function ProxyIframeEmbed({
       ref={ref}
       ready={!!name}
       sandbox={sandbox}
-      src={src}
+      src={src.current}
       title={title}
       {...rest}
     />

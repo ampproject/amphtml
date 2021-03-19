@@ -17,9 +17,9 @@
 import {BaseElement} from './base-element';
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
-import {getBootstrapBaseUrl, preloadBootstrap} from '../../../src/3p-frame';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
+import {preloadBootstrap} from '../../../src/3p-frame';
 import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const {string} */
@@ -75,7 +75,6 @@ class AmpTwitter extends BaseElement {
   init() {
     return dict({
       'requestResize': this.forceChangeHeight.bind(this),
-      'src': getBootstrapBaseUrl(this.win, this.getAmpDoc()),
     });
   }
 
