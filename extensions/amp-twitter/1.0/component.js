@@ -15,23 +15,48 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {ProxyIframeEmbed} from '../../../src/preact/component/3p-frame';
+import {
+  MessageType,
+  ProxyIframeEmbed,
+} from '../../../src/preact/component/3p-frame';
+import {deserializeMessage} from '../../../src/3p-frame-messaging';
+import {dict} from '../../../src/utils/object';
+import {useCallback, useState} from '../../../src/preact';
 
 /** @const {string} */
 const TYPE = 'twitter';
+const NO_HEIGHT_STYLE = dict({'height': '100%'});
 
 /**
  * @param {!IframeProps} props
  * @return {PreactDef.Renderable}
  */
-export function Twitter({title, ...rest}) {
+export function Twitter({requestResize, title, ...rest}) {
+  const [heightStyle, setHeightStyle] = useState(NO_HEIGHT_STYLE);
+  const messageHandler = useCallback(
+    (event) => {
+      const data = deserializeMessage(event.data);
+      if (data['type'] == MessageType.EMBED_SIZE) {
+        const height = data['height'];
+        if (requestResize) {
+          requestResize(height);
+        } else {
+          setHeightStyle(height);
+        }
+      }
+    },
+    [requestResize]
+  );
+
   return (
     <ProxyIframeEmbed
       allowFullscreen
       title={title}
       {...rest}
       // non-overridable prop
+      messageHandler={messageHandler}
       type={TYPE}
+      wrapperStyle={heightStyle}
     />
   );
 }

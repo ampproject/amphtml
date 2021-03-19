@@ -16,7 +16,6 @@
 
 import * as Preact from '../../../src/preact';
 import {IframeEmbed} from './iframe';
-import {deserializeMessage} from '../../3p-frame-messaging';
 import {dict} from '../../utils/object';
 import {
   generateSentinel,
@@ -29,18 +28,13 @@ import {
 } from '../../core/3p-frame';
 import {parseUrlDeprecated} from '../../url';
 import {sequentialIdGenerator} from '../../utils/id-generator';
-import {
-  useCallback,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from '../../../src/preact';
+import {useLayoutEffect, useRef, useState} from '../../../src/preact';
 
 /** @type {!Object<string,function>} 3p frames for that type. */
 export const countGenerators = {};
 
 /** @enum {string} */
-const MessageType = {
+export const MessageType = {
   // TODO(wg-bento): Add more types as they become needed.
   EMBED_SIZE: 'embed-size',
 };
@@ -56,8 +50,6 @@ const DEFAULT_SANDBOX =
   ' ' +
   getOptionalSandboxFlags().join(' ');
 
-const NO_HEIGHT_STYLE = dict({'height': '100%'});
-
 /**
  * Creates the iframe for the embed. Applies correct size and passes the embed
  * attributes to the frame via JSON inside the fragment.
@@ -67,7 +59,7 @@ const NO_HEIGHT_STYLE = dict({'height': '100%'});
 export function ProxyIframeEmbed({
   name: nameProp,
   options = {},
-  requestResize,
+  messageHandler,
   sandbox = DEFAULT_SANDBOX,
   src: srcProp,
   type,
@@ -84,8 +76,6 @@ export function ProxyIframeEmbed({
   const src = useRef(null);
   const win = contentRef.current?.ownerDocument?.defaultView;
   src.current = srcProp ?? (win ? getDefaultBootstrapBaseUrl(win) : null);
-
-  const [heightStyle, setHeightStyle] = useState(NO_HEIGHT_STYLE);
 
   useLayoutEffect(() => {
     const win = contentRef.current?.ownerDocument?.defaultView;
@@ -123,21 +113,6 @@ export function ProxyIframeEmbed({
     );
   }, [count, nameProp, options, title, type]);
 
-  const messageHandler = useCallback(
-    (event) => {
-      const data = deserializeMessage(event.data);
-      if (data['type'] == MessageType.EMBED_SIZE) {
-        const height = data['height'];
-        if (requestResize) {
-          requestResize(height);
-        } else {
-          setHeightStyle(height);
-        }
-      }
-    },
-    [requestResize]
-  );
-
   return (
     <IframeEmbed
       allow={BLOCK_SYNC_XHR}
@@ -149,7 +124,6 @@ export function ProxyIframeEmbed({
       sandbox={sandbox}
       src={src.current}
       title={title}
-      wrapperStyle={heightStyle}
       {...rest}
     />
   );
