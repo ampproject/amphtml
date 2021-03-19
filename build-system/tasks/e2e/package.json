@@ -1,8 +1,8 @@
 {
   "private": true,
-  "name": "gulp-e2e",
+  "name": "amp-e2e",
   "version": "0.1.0",
-  "description": "Gulp e2e",
+  "description": "amp e2e",
   "devDependencies": {
     "@babel/register": "7.13.8",
     "babel-regenerator-runtime": "6.5.0",

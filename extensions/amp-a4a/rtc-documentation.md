@@ -136,6 +136,7 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 -   Freestar
 -   Future Plc
 -   Galaxie Media
+-   Highfivve
 -   IndexExchange
 -   Kargo
 -   NewsPassID

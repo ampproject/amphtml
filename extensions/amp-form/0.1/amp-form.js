@@ -1496,18 +1496,11 @@ export function formElementsQuerySelectorAll(form, query) {
  * @return {boolean} Whether the form is currently valid or not.
  */
 function checkUserValidityOnSubmission(form) {
-  const {elements} = form;
-  const formElementTagNames = ['INPUT', 'SELECT', 'TEXTAREA', 'FIELDSET'];
-  const elementsToBeChecked = Array.from(elements).filter((ele) => {
-    const tagName = ele.tagName.toUpperCase();
-    // Only allow allow-listed elements and elements must be direct descendant
-    // of form or an <input>
-    return (
-      formElementTagNames.indexOf(tagName) > -1 &&
-      (tagName === 'INPUT' || form.contains(ele))
-    );
-  });
-  iterateCursor(elementsToBeChecked, (element) => checkUserValidity(element));
+  const elements = formElementsQuerySelectorAll(
+    form,
+    'input,select,textarea,fieldset'
+  );
+  iterateCursor(elements, (element) => checkUserValidity(element));
   return checkUserValidity(form);
 }
 

@@ -1,7 +1,7 @@
 {
-  "name": "gulp-storybook",
+  "name": "amp-storybook",
   "version": "0.1.0",
-  "description": "Gulp storybook tasks",
+  "description": "amp storybook tasks",
   "main": "index.js",
   "devDependencies": {
     "@ampproject/storybook-addon": "1.1.7",

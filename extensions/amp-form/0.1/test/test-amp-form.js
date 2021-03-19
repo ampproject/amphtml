@@ -72,6 +72,7 @@ describes.repeated(
         let mutateElementStub;
 
         beforeEach(() => {
+          console.log(env.ampdoc);
           document = env.ampdoc.getRootNode();
           timer = Services.timerFor(env.win);
           const ownerDoc = document.ownerDocument || document;
@@ -248,7 +249,7 @@ describes.repeated(
             ampFormService = new AmpFormService(env.ampdoc);
           });
 
-          it('should add handler for different types', () => {
+          it.only('should add handler for different types', () => {
             const form = getForm();
 
             ampFormService.addFormEventListener(form, 'blur', () => {});
