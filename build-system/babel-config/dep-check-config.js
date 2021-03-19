@@ -16,7 +16,7 @@
 'use strict';
 
 /**
- * Gets the config for babel transforms run during `gulp dep-check`.
+ * Gets the config for babel transforms run during `amp dep-check`.
  *
  * @return {!Object}
  */

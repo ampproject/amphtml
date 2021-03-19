@@ -80,7 +80,9 @@ async function checkAnalyticsVendorsList() {
   const anyVendorRegExp = new RegExp(blockRegExp('(.+)').source, 'gm');
   while ((match = anyVendorRegExp.exec(tentative)) !== null) {
     const fullMatch = match[0];
-    const name = match[2]
+    /** @type {string} */
+    const nameMatch = /** @type {*} */ (match[2]);
+    const name = nameMatch
       .split(/[,\s]+/)
       .shift()
       .replace(/[`"']/g, '');
@@ -99,5 +101,5 @@ module.exports = {
 checkAnalyticsVendorsList.description = `Checks or updates list on ${filepath}`;
 
 checkAnalyticsVendorsList.flags = {
-  'fix': '  Write to file',
+  'fix': 'Write to file',
 };

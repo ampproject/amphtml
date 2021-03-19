@@ -40,7 +40,7 @@ module.exports = function () {
 
   /**
    * @param {BabelPath} path
-   * @return {void}
+   * @return {BabelPath|void}
    */
   function deepestMember(path) {
     while (true) {

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
+import '../../../amp-mustache/0.2/amp-mustache';
 import {AmpAdTemplateHelper} from '../amp-ad-template-helper';
-import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
 import {Xhr} from '../../../../src/service/xhr-impl';
-import {registerExtendedTemplateForDoc} from '../../../../src/service/template-impl';
 
 describes.fakeWin('AmpAdTemplateHelper', {amp: true}, (env) => {
   const cdnUrl =
@@ -36,6 +35,13 @@ describes.fakeWin('AmpAdTemplateHelper', {amp: true}, (env) => {
     ampdoc = env.ampdoc;
     fetchTextMock = env.sandbox.stub(Xhr.prototype, 'fetchText');
     ampAdTemplateHelper = new AmpAdTemplateHelper(ampdoc);
+
+    env.installExtension(
+      'amp-mustache',
+      '0.2',
+      /* latest */ true,
+      /* auto */ false
+    );
   });
 
   it('should return a promise resolving to a string template', () => {
@@ -69,7 +75,6 @@ describes.fakeWin('AmpAdTemplateHelper', {amp: true}, (env) => {
   });
 
   it('should render a template with correct values', () => {
-    registerExtendedTemplateForDoc(ampdoc, 'amp-mustache', AmpMustache);
     const parentDiv = doc.createElement('div');
     parentDiv./*OK*/ innerHTML =
       '<template type="amp-mustache"><p>{{foo}}</p></template>';

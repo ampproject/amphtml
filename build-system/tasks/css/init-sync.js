@@ -20,7 +20,8 @@ const {transformCss} = require('./jsify-css');
 /**
  * Wrapper for the asynchronous transformCss that is used by transformCssSync()
  * in build-system/tasks/css/jsify-css-sync.js.
- * @return {!Promise}
+
+ * @return {function(string, !Object=, !Object=): ReturnType<transformCss>}
  */
 function init() {
   return function (cssStr, opt_cssnano, opt_filename) {

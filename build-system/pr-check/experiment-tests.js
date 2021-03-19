@@ -31,9 +31,6 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = `${experiment}-tests.js`;
 
-/**
- * @return {void}
- */
 function pushBuildWorkflow() {
   const config = getExperimentConfig(experiment);
   if (config) {
@@ -41,10 +38,10 @@ function pushBuildWorkflow() {
     const experimentFlag = `--experiment ${experiment}`;
     downloadExperimentOutput(experiment);
     timedExecOrDie(
-      `gulp integration --nobuild --compiled --headless ${experimentFlag} ${defineFlag}`
+      `amp integration --nobuild --compiled --headless ${experimentFlag} ${defineFlag}`
     );
     timedExecOrDie(
-      `gulp e2e --nobuild --compiled --headless ${experimentFlag} ${defineFlag}`
+      `amp e2e --nobuild --compiled --headless ${experimentFlag} ${defineFlag}`
     );
   } else {
     printSkipMessage(
@@ -54,9 +51,6 @@ function pushBuildWorkflow() {
   }
 }
 
-/**
- * @return {void}
- */
 function prBuildWorkflow() {
   if (
     buildTargetsInclude(
