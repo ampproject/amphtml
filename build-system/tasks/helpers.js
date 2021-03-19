@@ -486,8 +486,8 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     const sentinel = '<%= contents %>';
     const start = wrapper.indexOf(sentinel);
     return {
-      banner: {js: wrapper.slice(0, start)},
-      footer: {js: wrapper.slice(start + sentinel.length)},
+      banner: wrapper.slice(0, start),
+      footer: wrapper.slice(start + sentinel.length),
     };
   }
 
