@@ -16,10 +16,15 @@
 
 import * as Preact from '../../../src/preact';
 import {IframeEmbed} from '../../../src/preact/component/iframe';
+import {dict} from '../../../src/utils/object';
 import {forwardRef} from '../../../src/preact/compat';
 import {getData} from '../../../src/event-helper';
 import {parseJson} from '../../../src/json';
-import {useCallback} from '../../../src/preact';
+import {useCallback, useState} from '../../../src/preact';
+
+const NO_HEIGHT_STYLE = dict();
+const MATCHES_MESSAGING_ORIGIN = (origin) =>
+  origin === 'https://www.instagram.com';
 
 /**
  * @param {!InstagramDef.Props} props
@@ -27,46 +32,33 @@ import {useCallback} from '../../../src/preact';
  * @return {PreactDef.Renderable}
  */
 function InstagramWithRef(
-  {captioned, shortcode, title = 'Instagram', ...rest},
+  {captioned, shortcode, requestResize, title = 'Instagram', ...rest},
   ref
 ) {
-  const manageMessageHandler = useCallback((ref, onSuccess) => {
-    const iframe = ref.current;
-    if (!iframe) {
-      return;
-    }
-    const messageHandler = (event) => {
-      const iframe = ref.current;
-      if (!iframe) {
-        return;
-      }
-      if (
-        event.origin != 'https://www.instagram.com' ||
-        event.source != iframe.contentWindow
-      ) {
-        return;
-      }
+  const [heightStyle, setHeightStyle] = useState(NO_HEIGHT_STYLE);
+  const [opacity, setOpacity] = useState(0);
 
+  const messageHandler = useCallback(
+    (event) => {
       const data = parseJson(getData(event));
-
       if (data['type'] == 'MEASURE' && data['details']) {
         const height = data['details']['height'];
-        onSuccess(height);
+        if (requestResize) {
+          requestResize(height);
+        }
+        setHeightStyle(dict({'height': height}));
+        setOpacity(1);
       }
-    };
-    const {defaultView} = iframe.ownerDocument;
-
-    defaultView.addEventListener('message', messageHandler);
-
-    return () => {
-      defaultView.removeEventListener('message', messageHandler);
-    };
-  }, []);
+    },
+    [requestResize]
+  );
 
   return (
     <IframeEmbed
-      allowtransparency
-      manageMessageHandler={manageMessageHandler}
+      allowTransparency
+      iframeStyle={{opacity}}
+      matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
+      messageHandler={messageHandler}
       ref={ref}
       src={
         'https://www.instagram.com/p/' +
@@ -76,6 +68,7 @@ function InstagramWithRef(
         '?cr=1&v=12'
       }
       title={title}
+      wrapperStyle={heightStyle}
       {...rest}
     />
   );

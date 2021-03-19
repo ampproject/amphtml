@@ -56,6 +56,8 @@ const DEFAULT_SANDBOX =
   ' ' +
   getOptionalSandboxFlags().join(' ');
 
+const NO_HEIGHT_STYLE = dict({'height': '100%'});
+
 /**
  * Creates the iframe for the embed. Applies correct size and passes the embed
  * attributes to the frame via JSON inside the fragment.
@@ -65,6 +67,7 @@ const DEFAULT_SANDBOX =
 export function ProxyIframeEmbed({
   name: nameProp,
   options = {},
+  requestResize,
   sandbox = DEFAULT_SANDBOX,
   src: srcProp,
   type,
@@ -81,6 +84,8 @@ export function ProxyIframeEmbed({
   const src = useRef(null);
   const win = contentRef.current?.ownerDocument?.defaultView;
   src.current = srcProp ?? (win ? getDefaultBootstrapBaseUrl(win) : null);
+
+  const [heightStyle, setHeightStyle] = useState(NO_HEIGHT_STYLE);
 
   useLayoutEffect(() => {
     const win = contentRef.current?.ownerDocument?.defaultView;
@@ -118,39 +123,33 @@ export function ProxyIframeEmbed({
     );
   }, [count, nameProp, options, title, type]);
 
-  const manageMessageHandler = useCallback((ref, onSuccess) => {
-    const iframe = ref.current;
-    if (!iframe) {
-      return;
-    }
-    const messageHandler = (event) => {
-      const iframe = ref.current;
-      if (!iframe || event.source != iframe.contentWindow || !event.data) {
-        return;
-      }
-
+  const messageHandler = useCallback(
+    (event) => {
       const data = deserializeMessage(event.data);
       if (data['type'] == MessageType.EMBED_SIZE) {
         const height = data['height'];
-        onSuccess(height);
+        if (requestResize) {
+          requestResize(height);
+        } else {
+          setHeightStyle(height);
+        }
       }
-    };
-    const {defaultView} = iframe.ownerDocument;
-    defaultView.addEventListener('message', messageHandler);
-    return () => defaultView.removeEventListener('message', messageHandler);
-  }, []);
+    },
+    [requestResize]
+  );
 
   return (
     <IframeEmbed
       allow={BLOCK_SYNC_XHR}
       contentRef={contentRef}
-      manageMessageHandler={manageMessageHandler}
+      messageHandler={messageHandler}
       name={name}
       ref={ref}
       ready={!!name}
       sandbox={sandbox}
       src={src.current}
       title={title}
+      wrapperStyle={heightStyle}
       {...rest}
     />
   );

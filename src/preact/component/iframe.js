@@ -18,7 +18,6 @@ import * as Preact from '../../../src/preact';
 import {ContainWrapper, useValueRef} from '../../../src/preact/component';
 import {Loading} from '../../../src/core/loading-instructions';
 import {ReadyState} from '../../../src/ready-state';
-import {dict} from '../../../src/utils/object';
 import {forwardRef} from '../../../src/preact/compat';
 import {useAmpContext, useLoading} from '../../../src/preact/context';
 import {
@@ -27,10 +26,9 @@ import {
   useImperativeHandle,
   useLayoutEffect,
   useRef,
-  useState,
 } from '../../../src/preact';
 
-const NO_HEIGHT_STYLE = dict();
+const DEFAULT_MATCHES_MESSAGING_ORIGIN = () => true;
 
 /**
  * @param {!IframeEmbedDef.Props} props
@@ -42,11 +40,12 @@ export function IframeEmbedWithRef(
     allow,
     allowFullScreen,
     allowTransparency,
+    iframeStyle,
     name,
     title,
-    manageMessageHandler,
+    matchesMessagingOrigin = DEFAULT_MATCHES_MESSAGING_ORIGIN,
+    messageHandler,
     ready = true,
-    requestResize,
     loading: loadingProp,
     onReadyState,
     sandbox,
@@ -75,8 +74,6 @@ export function IframeEmbedWithRef(
   );
 
   const iframeRef = useRef(null);
-  const [heightStyle, setHeightStyle] = useState(NO_HEIGHT_STYLE);
-  const [opacity, setOpacity] = useState(0);
 
   // Component API: IframeEmbedDef.Api.
   useImperativeHandle(
@@ -112,21 +109,30 @@ export function IframeEmbedWithRef(
   }, [playable]);
 
   useLayoutEffect(() => {
-    if (!iframeRef.current || !mount) {
+    const iframe = iframeRef.current;
+    if (!iframe || !mount) {
       return;
     }
-    return manageMessageHandler(iframeRef, (heightOnSuccess) => {
-      if (requestResize) {
-        requestResize(heightOnSuccess);
-      } else {
-        setHeightStyle(dict({'height': heightOnSuccess}));
+
+    const handler = (event) => {
+      const iframe = iframeRef.current;
+      if (
+        !iframe ||
+        event.source != iframe.contentWindow ||
+        !matchesMessagingOrigin(event.origin)
+      ) {
+        return;
       }
-      setOpacity(1);
-    });
-  }, [manageMessageHandler, mount, ready, requestResize, heightStyle]);
+      messageHandler(event);
+    };
+
+    const {defaultView} = iframe.ownerDocument;
+    defaultView.addEventListener('message', handler);
+    return () => defaultView.removeEventListener('message', handler);
+  }, [matchesMessagingOrigin, messageHandler, mount, ready]);
 
   return (
-    <ContainWrapper {...rest} wrapperStyle={heightStyle} layout size paint>
+    <ContainWrapper {...rest} layout size paint>
       {mount && ready && (
         <iframe
           allow={allow}
@@ -142,9 +148,9 @@ export function IframeEmbedWithRef(
           scrolling="no"
           src={src}
           style={{
+            ...iframeStyle,
             width: '100%',
             height: '100%',
-            opacity,
             contentVisibility: 'auto',
           }}
           title={title}
