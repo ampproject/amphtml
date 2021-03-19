@@ -21,6 +21,7 @@ import {
 } from '../../../src/preact/component/3p-frame';
 import {deserializeMessage} from '../../../src/3p-frame-messaging';
 import {dict} from '../../../src/utils/object';
+import {forwardRef} from '../../../src/preact/compat';
 import {useCallback, useState} from '../../../src/preact';
 
 /** @const {string} */
@@ -28,10 +29,11 @@ const TYPE = 'twitter';
 const NO_HEIGHT_STYLE = dict({'height': '100%'});
 
 /**
- * @param {!IframeProps} props
+ * @param {!TwitterDef.Props} props
+ * @param {{current: (!TwitterDef.Api|null)}} ref
  * @return {PreactDef.Renderable}
  */
-export function Twitter({requestResize, title, ...rest}) {
+function TwitterWithRef({requestResize, title, ...rest}, ref) {
   const [heightStyle, setHeightStyle] = useState(NO_HEIGHT_STYLE);
   const messageHandler = useCallback(
     (event) => {
@@ -51,12 +53,17 @@ export function Twitter({requestResize, title, ...rest}) {
   return (
     <ProxyIframeEmbed
       allowFullscreen
+      ref={ref}
       title={title}
       {...rest}
-      // non-overridable prop
+      // non-overridable props
       messageHandler={messageHandler}
       type={TYPE}
       wrapperStyle={heightStyle}
     />
   );
 }
+
+const Twitter = forwardRef(TwitterWithRef);
+Twitter.displayName = 'Twitter'; // Make findable for tests.
+export {Twitter};

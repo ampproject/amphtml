@@ -17,6 +17,7 @@
 import * as Preact from '../../../src/preact';
 import {IframeEmbed} from './iframe';
 import {dict} from '../../utils/object';
+import {forwardRef} from '../compat';
 import {
   generateSentinel,
   getBootstrapUrl,
@@ -54,19 +55,22 @@ const DEFAULT_SANDBOX =
  * Creates the iframe for the embed. Applies correct size and passes the embed
  * attributes to the frame via JSON inside the fragment.
  * @param {!IframeEmbedDef.Props} props
+ * @param {{current: (!IframeEmbedDef.Api|null)}} ref
  * @return {PreactDef.Renderable}
  */
-export function ProxyIframeEmbed({
-  name: nameProp,
-  options = {},
-  messageHandler,
-  sandbox = DEFAULT_SANDBOX,
-  src: srcProp,
-  type,
-  title = type,
-  ...rest
-}) {
-  const ref = useRef(null);
+function ProxyIframeEmbedWithRef(
+  {
+    name: nameProp,
+    options = {},
+    messageHandler,
+    sandbox = DEFAULT_SANDBOX,
+    src: srcProp,
+    type,
+    title = type,
+    ...rest
+  },
+  ref
+) {
   const contentRef = useRef(null);
   if (!countGenerators[type]) {
     countGenerators[type] = sequentialIdGenerator();
@@ -128,3 +132,7 @@ export function ProxyIframeEmbed({
     />
   );
 }
+
+const ProxyIframeEmbed = forwardRef(ProxyIframeEmbedWithRef);
+ProxyIframeEmbed.displayName = 'ProxyIframeEmbed'; // Make findable for tests.
+export {ProxyIframeEmbed};

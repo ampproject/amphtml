@@ -75,7 +75,7 @@ var IframeEmbedDef = {};
  *   type: (string|undefined),
  * }}
  */
-IframeEmbedDef.props;
+IframeEmbedDef.Props;
 
 /** @constructor */
 IframeEmbedDef.Api = function () {};
