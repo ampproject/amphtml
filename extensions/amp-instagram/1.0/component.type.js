@@ -27,3 +27,9 @@ var InstagramDef = {};
  * }}
  */
 InstagramDef.Props;
+
+/** @constructor */
+InstagramDef.Api = function () {};
+
+/** @type {string} */
+InstagramDef.Api.prototype.readyState;
