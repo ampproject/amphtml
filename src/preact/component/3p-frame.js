@@ -59,7 +59,7 @@ const DEFAULT_SANDBOX =
 /**
  * Creates the iframe for the embed. Applies correct size and passes the embed
  * attributes to the frame via JSON inside the fragment.
- * @param {!IframeDef.Props} props
+ * @param {!IframeEmbedDef.Props} props
  * @return {PreactDef.Renderable}
  */
 export function ProxyIframeEmbed({

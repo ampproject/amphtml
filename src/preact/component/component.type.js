@@ -55,13 +55,13 @@ var RendererFunctionResponseType;
 var RendererFunctionType;
 
 /** @const */
-var IframeDef = {};
+var IframeEmbedDef = {};
 
 /**
  * @typedef {{
  *   allow: (string|undefined),
- *   allowFullscreen: (boolean|undefined),
- *   allowtransparency: (boolean|undefined),
+ *   allowFullScreen: (boolean|undefined),
+ *   allowTransparency: (boolean|undefined),
  *   loading: (Loading),
  *   manageMessageHandler: (function({current: ?}, function):function|undefined),
  *   name: (string|undefined),
@@ -75,10 +75,10 @@ var IframeDef = {};
  *   type: (string|undefined),
  * }}
  */
-IframeDef.props;
+IframeEmbedDef.props;
 
 /** @constructor */
-IframeDef.Api = function () {};
+IframeEmbedDef.Api = function () {};
 
 /** @type {string} */
-IframeDef.Api.prototype.readyState;
+IframeEmbedDef.Api.prototype.readyState;

@@ -33,15 +33,15 @@ import {
 const NO_HEIGHT_STYLE = dict();
 
 /**
- * @param {!IframeDef.Props} props
- * @param {{current: (!IframeDef.Api|null)}} ref
+ * @param {!IframeEmbedDef.Props} props
+ * @param {{current: (!IframeEmbedDef.Api|null)}} ref
  * @return {PreactDef.Renderable}
  */
 export function IframeEmbedWithRef(
   {
     allow,
-    allowFullscreen,
-    allowtransparency,
+    allowFullScreen,
+    allowTransparency,
     name,
     title,
     manageMessageHandler,
@@ -130,8 +130,8 @@ export function IframeEmbedWithRef(
       {mount && ready && (
         <iframe
           allow={allow}
-          allowFullscreen={allowFullscreen}
-          allowtransparency={allowtransparency}
+          allowFullScreen={allowFullScreen}
+          allowTransparency={allowTransparency}
           frameborder="0"
           loading={loading}
           name={name}
