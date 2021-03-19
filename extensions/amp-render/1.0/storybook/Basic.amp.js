@@ -15,9 +15,9 @@
  */
 
 import * as Preact from '../../../../src/preact';
+import {text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
-import {withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'amp-render-1_0',
@@ -59,4 +59,21 @@ export const WithAmpState = () => {
 
 WithAmpState.story = {
   name: 'With AMP State',
+};
+
+export const WithRemoteSrc = () => {
+  const srcUrl = text(
+    'src',
+    'http://localhost:9001/examples/amp-render-data.json'
+  );
+
+  return (
+    <amp-render src={srcUrl} width="300" height="400" layout="fixed">
+      <template type="amp-mustache">{`Hi {{name}}!`}</template>
+    </amp-render>
+  );
+};
+
+WithRemoteSrc.story = {
+  name: 'With remote src',
 };
