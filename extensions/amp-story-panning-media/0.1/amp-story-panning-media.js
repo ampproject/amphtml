@@ -223,6 +223,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     const ampImgHeight = this.ampImgEl_.getAttribute('height');
     if (!ampImgWidth || !ampImgHeight) {
       user().error(
+        TAG,
         '"lock-bounds" requires "width" and "height" to be set on the amp-img child.'
       );
     }
