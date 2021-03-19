@@ -138,7 +138,7 @@ jobs:
       - setup_vm
       - run:
           name: 'Install Validator Dependencies'
-          command: sh ./.circleci/install_validator_dependencies.sh
+          command: ./.circleci/install_validator_dependencies.sh
       - run:
           name: 'Validator Tests'
           command: node build-system/pr-check/validator-tests.js
