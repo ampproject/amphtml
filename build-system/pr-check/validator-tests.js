@@ -27,7 +27,7 @@ const jobName = 'validator-tests.js';
 
 function pushBuildWorkflow() {
   timedExecOrDie('amp validator');
-  timedExecOrDie('amp validator-cpp-test');
+  timedExecOrDie('amp validator-cpp');
   timedExecOrDie('amp validator-webui');
 }
 
@@ -48,7 +48,7 @@ function prBuildWorkflow() {
 
   if (buildTargetsInclude(Targets.RUNTIME, Targets.VALIDATOR)) {
     timedExecOrDie('amp validator');
-    timedExecOrDie('amp validator-cpp-test');
+    timedExecOrDie('amp validator-cpp');
   }
 
   if (buildTargetsInclude(Targets.VALIDATOR_WEBUI)) {

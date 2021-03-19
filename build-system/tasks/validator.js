@@ -36,7 +36,7 @@ async function validator() {
 /**
  * Simple wrapper around the C++ validator tests
  */
-async function validatorCppTest() {
+async function validatorCpp() {
   execOrDie('bazel test validator_test', {
     cwd: 'validator/cpp/engine',
   });
@@ -54,7 +54,7 @@ async function validatorWebui() {
 
 module.exports = {
   validator,
-  validatorCppTest,
+  validatorCpp,
   validatorWebui,
 };
 
