@@ -175,7 +175,7 @@ export function mergeExtensionsMetadata(extensions, customElementExtensions) {
     if (!extensionsHasElement(extensions, extensionId)) {
       extensions.push({
         'custom-element': extensionId,
-        src: `${urls.cdn}/v0/${extensionId}-latest.js`,
+        src: `${urls.cdn}/v0/${extensionId}-0.1.js`,
       });
     }
   }

@@ -169,7 +169,7 @@ describes.realWin('TemplateValidator', realWinConfig, (env) => {
     const {creativeMetadata} = validatorOutput.creativeData;
     expect(creativeMetadata.extensions).to.deep.include({
       'custom-element': 'amp-cats',
-      'src': 'https://cdn.ampproject.org/v0/amp-cats-latest.js',
+      'src': 'https://cdn.ampproject.org/v0/amp-cats-0.1.js',
     });
   });
 
