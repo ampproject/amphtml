@@ -24,6 +24,9 @@ var InstagramDef = {};
  *   shortcode: string,
  *   captioned: (boolean|undefined),
  *   title: (string|undefined),
+ *   requestResize: (function(number):*|undefined),
+ *   loading: (string|undefined),
+ *   onReadyState: (function(string, *=)|undefined),
  * }}
  */
 InstagramDef.Props;
