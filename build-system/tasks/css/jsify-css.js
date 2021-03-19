@@ -60,7 +60,7 @@ const cssNanoDefaultOptions = {
  * @return {!Promise<postcss.Result>} that resolves with the css content after
  *    processing
  */
-function transformCss(cssStr, opt_cssnano, opt_filename) {
+async function transformCss(cssStr, opt_cssnano, opt_filename) {
   opt_cssnano = opt_cssnano || Object.create(null);
   // See http://cssnano.co/optimisations/ for full list.
   // We try and turn off any optimization that is marked unsafe.
@@ -70,7 +70,7 @@ function transformCss(cssStr, opt_cssnano, opt_filename) {
     opt_cssnano
   );
   const cssnanoTransformer = cssnano({preset: ['default', cssnanoOptions]});
-  const autoprefixer = require('autoprefixer'); // Lazy-required to speed up task loading.
+  const {default: autoprefixer} = await import('autoprefixer'); // Lazy-imported to speed up task loading.
   const cssprefixer = autoprefixer(browsersList);
   const transformers = [postcssImport, cssprefixer, cssnanoTransformer];
   return postcss.default(transformers).process(cssStr, {

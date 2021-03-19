@@ -37,7 +37,7 @@ const {
 async function useLocalScripts(url) {
   const cachePath = urlToCachePath(url, EXPERIMENT);
   const document = fs.readFileSync(cachePath);
-  const {JSDOM} = require('jsdom'); // Lazy-required to speed up task loading.
+  const {JSDOM} = await import('jsdom'); // Lazy-imported to speed up task loading.
   const dom = new JSDOM(document);
 
   const scripts = Array.from(dom.window.document.querySelectorAll('script'));
@@ -68,7 +68,7 @@ async function useLocalScripts(url) {
 async function useRemoteScripts(url) {
   const cachePath = urlToCachePath(url, CONTROL);
   const document = fs.readFileSync(cachePath);
-  const {JSDOM} = require('jsdom'); // Lazy-required to speed up task loading.
+  const {JSDOM} = await import('jsdom'); // Lazy-imported to speed up task loading.
   const dom = new JSDOM(document);
 
   const scripts = Array.from(dom.window.document.querySelectorAll('script'));

@@ -88,6 +88,17 @@ function checkResponse(response, ...successMessages) {
 }
 
 /**
+ * Helper that lazily imports and promisifies request.post, and invokes it with
+ * the given args.
+ * @param {*} args
+ * @return {function()}
+ */
+async function requestPost(...args) {
+  const {default: request} = await import('request');
+  return util.promisify(request.post)(...args);
+}
+
+/**
  * Store the bundle sizes for a commit hash in the build artifacts storage
  * repository to the passed value.
  */
@@ -115,7 +126,6 @@ async function storeBundleSize() {
   const commitHash = gitCommitHash();
   log('Storing bundle sizes for commit', cyan(shortSha(commitHash)) + '...');
   try {
-    const requestPost = util.promisify(require('request').post); // Lazy-required to speed up task loading.
     const response = await requestPost({
       uri: url.resolve(
         bundleSizeAppBaseUrl,
@@ -146,7 +156,6 @@ async function skipBundleSize() {
       cyan(shortSha(commitHash)) + '...'
     );
     try {
-      const requestPost = util.promisify(require('request').post); // Lazy-required to speed up task loading.
       const response = await requestPost(
         url.resolve(
           bundleSizeAppBaseUrl,
@@ -184,7 +193,6 @@ async function reportBundleSize() {
       cyan(shortSha(mergeSha)) + '...'
     );
     try {
-      const requestPost = util.promisify(require('request').post); // Lazy-required to speed up task loading.
       const response = await requestPost({
         uri: url.resolve(
           bundleSizeAppBaseUrl,
