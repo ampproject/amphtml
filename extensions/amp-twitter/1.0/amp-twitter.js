@@ -16,7 +16,6 @@
 
 import {BaseElement} from './base-element';
 import {Services} from '../../../src/services';
-import {deserializeMessage} from '../../../src/3p-frame-messaging';
 import {dict} from '../../../src/utils/object';
 import {getBootstrapBaseUrl, preloadBootstrap} from '../../../src/3p-frame';
 import {htmlFor} from '../../../src/static-template';
@@ -74,15 +73,9 @@ class AmpTwitter extends BaseElement {
 
   /** @override */
   init() {
-    const ampdoc = this.getAmpDoc();
     return dict({
-      'deserializeMessage': deserializeMessage,
-      'requestResize': (height) => {
-        this.forceChangeHeight(height);
-      },
-      'src': getBootstrapBaseUrl(this.win, ampdoc),
-      'win': this.win,
-      'element': this.element,
+      'requestResize': this.forceChangeHeight.bind(this),
+      'src': getBootstrapBaseUrl(this.win, this.getAmpDoc()),
     });
   }
 

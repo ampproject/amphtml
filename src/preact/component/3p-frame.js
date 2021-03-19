@@ -16,15 +16,16 @@
 
 import * as Preact from '..';
 import {ContainWrapper} from './contain';
+import {deserializeMessage} from '../../3p-frame-messaging';
 import {dict} from '../../utils/object';
-import {getBootstrapUrl, getFrameAttributes} from '../../3p-frame';
+import {generateSentinel, getBootstrapUrl} from '../../3p-frame';
 import {
   getOptionalSandboxFlags,
   getRequiredSandboxFlags,
 } from '../../core/3p-frame';
 import {parseUrlDeprecated} from '../../url';
 import {sequentialIdGenerator} from '../../utils/id-generator';
-import {useLayoutEffect, useRef, useState} from '..';
+import {useEffect, useLayoutEffect, useRef, useState} from '..';
 
 /** @type {!Object<string,function>} 3p frames for that type. */
 export const countGenerators = {};
@@ -40,12 +41,6 @@ const MessageType = {
 // request completes.
 const BLOCK_SYNC_XHR = "sync-xhr 'none';";
 
-/**
- * @param {*} message
- * @return {*}
- */
-const DEFAULT_DESERIALIZE_MESSAGE = (message) => message;
-
 // TODO(wg-bento): UA check for required flags without iframe element
 const DEFAULT_SANDBOX =
   getRequiredSandboxFlags().join(' ') +
@@ -59,18 +54,17 @@ const DEFAULT_SANDBOX =
  * @return {PreactDef.Renderable}
  */
 export function IframeEmbed({
-  deserializeMessage = DEFAULT_DESERIALIZE_MESSAGE,
   name: nameProp,
+  options = {},
   requestResize,
   sandbox = DEFAULT_SANDBOX,
   src,
-  title,
   type,
-  win,
-  element,
+  title = type,
   ...rest
 }) {
   const ref = useRef(null);
+  const containRef = useRef(null);
   const [heightStyle, setHeightStyle] = useState(null);
 
   if (!countGenerators[type]) {
@@ -80,21 +74,41 @@ export function IframeEmbed({
   // TODO: loading/mount/pause similar to Instagram.
 
   const [name, setName] = useState(nameProp);
-  useLayoutEffect(() => {
+  useEffect(() => {
+    if (nameProp) {
+      setName(nameProp);
+      return;
+    }
+    const win = containRef.current?.ownerDocument?.defaultView;
+    if (!win) {
+      return;
+    }
+    const attrs = dict({
+      'title': title,
+      'type': type,
+      '_context': dict({
+        'location': {
+          'href': win.location.href,
+        },
+        'sentinel': generateSentinel(win),
+      }),
+    });
+    for (const key in options) {
+      attrs[key] = options[key];
+    }
     setName(
-      nameProp ??
-        JSON.stringify(
-          dict({
-            'host': parseUrlDeprecated(src).hostname,
-            'bootstrap': getBootstrapUrl(),
-            'type': type,
-            // https://github.com/ampproject/amphtml/pull/2955
-            'count': count,
-            'attributes': getFrameAttributes(win, element, type),
-          })
-        )
+      JSON.stringify(
+        dict({
+          'host': parseUrlDeprecated(src).hostname,
+          'bootstrap': getBootstrapUrl(),
+          'type': type,
+          // https://github.com/ampproject/amphtml/pull/2955
+          'count': count,
+          'attributes': attrs,
+        })
+      )
     );
-  }, [count, nameProp, src, type, win, element]);
+  }, [count, nameProp, options, src, title, type]);
 
   useLayoutEffect(() => {
     const iframe = ref.current;
@@ -118,13 +132,23 @@ export function IframeEmbed({
     const {defaultView} = iframe.ownerDocument;
     defaultView.addEventListener('message', messageHandler);
     return () => defaultView.removeEventListener('message', messageHandler);
-  }, [deserializeMessage, requestResize]);
+  }, [name, requestResize]);
 
   return (
-    <ContainWrapper layout size paint wrapperStyle={heightStyle} {...rest}>
-      {src && name && (
+    <ContainWrapper
+      ref={containRef}
+      layout
+      size
+      paint
+      wrapperStyle={heightStyle}
+      {...rest}
+    >
+      {name && (
         <iframe
+          allow={BLOCK_SYNC_XHR}
           name={name}
+          part="iframe"
+          ref={ref}
           sandbox={sandbox}
           scrolling="no"
           src={src}
@@ -135,10 +159,6 @@ export function IframeEmbed({
             height: '100%',
           }}
           title={title}
-          // non-overridable props
-          allow={BLOCK_SYNC_XHR}
-          part="iframe"
-          ref={ref}
         />
       )}
     </ContainWrapper>

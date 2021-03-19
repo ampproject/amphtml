@@ -24,7 +24,7 @@ const TYPE = 'twitter';
  * @param {!IframeProps} props
  * @return {PreactDef.Renderable}
  */
-export function Twitter({title = 'Twitter', ...rest}) {
+export function Twitter({title, ...rest}) {
   return (
     <IframeEmbed
       allowFullscreen
