@@ -23,10 +23,10 @@ const {execOrDie} = require('../common/exec');
 const {log} = require('../common/logging');
 
 // Compile related constants
-const distWithSourcemapsCmd = 'gulp dist --core_runtime_only --full_sourcemaps';
+const distWithSourcemapsCmd = 'amp dist --core_runtime_only --full_sourcemaps';
 const v0JsMap = 'dist/v0.js.map';
 const distEsmWithSourcemapsCmd =
-  'gulp dist --core_runtime_only --full_sourcemaps --esm';
+  'amp dist --core_runtime_only --full_sourcemaps --esm';
 const v0MjsMap = 'dist/v0.mjs.map';
 
 // Sourcemap URL related constants
@@ -181,7 +181,7 @@ function checkSourceMap(map) {
 
 /**
  * Checks sourcemaps generated during minified compilation for correctness.
- * Entry point for `gulp check-sourcemaps`.
+ * Entry point for `amp check-sourcemaps`.
  */
 async function checkSourcemaps() {
   maybeBuild();
@@ -197,5 +197,5 @@ module.exports = {
 checkSourcemaps.description =
   'Checks sourcemaps generated during minified compilation for correctness.';
 checkSourcemaps.flags = {
-  'nobuild': '  Skips building the runtime (checks previously built code)',
+  'nobuild': 'Skips building the runtime (checks previously built code)',
 };

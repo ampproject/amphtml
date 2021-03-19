@@ -15,9 +15,9 @@
  */
 
 /**
- * @fileoverview This file implements the `gulp prettify` task, which uses
+ * @fileoverview This file implements the `amp prettify` task, which uses
  * prettier to check (and optionally fix) the formatting in a variety of
- * non-JS files in the repo. (JS files are separately checked by `gulp lint`,
+ * non-JS files in the repo. (JS files are separately checked by `amp lint`,
  * which uses eslint.)
  */
 'use strict';
@@ -37,7 +37,6 @@ const {
 const {exec} = require('../common/exec');
 const {getFilesToCheck} = require('../common/utils');
 const {green, cyan, red, yellow} = require('kleur/colors');
-const {maybeUpdatePackages} = require('./update-packages');
 const {prettifyGlobs} = require('../test-configs/config');
 
 const rootDir = path.dirname(path.dirname(__dirname));
@@ -47,7 +46,6 @@ const tempDir = tempy.directory();
  * Checks files for formatting (and optionally fixes them) with Prettier.
  */
 async function prettify() {
-  maybeUpdatePackages();
   const filesToCheck = getFilesToCheck(prettifyGlobs, {dot: true});
   if (filesToCheck.length == 0) {
     return;
@@ -96,7 +94,7 @@ function printFixMessages() {
   log(
     yellow('NOTE 2:'),
     'If you are using the git command-line workflow, run',
-    cyan('gulp prettify --local_changes --fix'),
+    cyan('amp prettify --local_changes --fix'),
     'from your local branch.'
   );
   log(
@@ -159,7 +157,7 @@ module.exports = {
 prettify.description =
   'Checks several non-JS files in the repo for formatting using prettier';
 prettify.flags = {
-  'files': '  Checks only the specified files',
-  'local_changes': '  Checks just the files changed in the local branch',
-  'fix': '  Fixes formatting errors',
+  'files': 'Checks only the specified files',
+  'local_changes': 'Checks just the files changed in the local branch',
+  'fix': 'Fixes formatting errors',
 };

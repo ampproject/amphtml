@@ -30,7 +30,6 @@ const {cyan, green, red, yellow} = require('kleur/colors');
 const {ESLint} = require('eslint');
 const {getFilesChanged, getFilesFromArgv} = require('../common/utils');
 const {gitDiffNameOnlyMaster} = require('../common/git');
-const {maybeUpdatePackages} = require('./update-packages');
 
 const rootDir = path.dirname(path.dirname(__dirname));
 
@@ -106,7 +105,7 @@ function summarizeResults(results, fixedFiles) {
         yellow('NOTE 1:'),
         'You may be able to automatically fix some of these warnings ' +
           '/ errors by running',
-        cyan('gulp lint --local_changes --fix'),
+        cyan('amp lint --local_changes --fix'),
         'from your local branch.'
       );
       log(
@@ -170,7 +169,6 @@ function getFilesToLint(files) {
  * Run eslint on JS files and log the output
  */
 async function lint() {
-  maybeUpdatePackages();
   let filesToLint = globby.sync(config.lintGlobs, {gitignore: true});
   if (argv.files) {
     filesToLint = getFilesToLint(getFilesFromArgv());
@@ -191,7 +189,7 @@ module.exports = {
 
 lint.description = 'Runs eslint checks against JS files';
 lint.flags = {
-  'fix': '  Fixes simple lint errors (spacing etc)',
-  'files': '  Lints just the specified files',
-  'local_changes': '  Lints just the files changed in the local branch',
+  'fix': 'Fixes simple lint errors (spacing etc)',
+  'files': 'Lints just the specified files',
+  'local_changes': 'Lints just the files changed in the local branch',
 };

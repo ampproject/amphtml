@@ -33,7 +33,6 @@ import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
 import {ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error';
-import {isExperimentOn} from '../experiments';
 import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
@@ -205,7 +204,8 @@ export class ResourcesImpl {
      */
     this.intersectionObserverCallbackFired_ = false;
 
-    if (isExperimentOn(this.win, 'bento')) {
+    // TODO(#33262): cleanup intersect-resources experiment.
+    if (false) {
       const iframed = isIframed(this.win);
 
       // Classic IntersectionObserver doesn't support viewport tracking and

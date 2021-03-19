@@ -307,7 +307,13 @@ module.exports = {
       },
     },
     {
-      'files': ['babel.config.js', '**/.eslintrc.js', 'package-scripts.js'],
+      'files': [
+        '**/.eslintrc.js',
+        'amp.js',
+        'babel.config.js',
+        'gulp-deprecated.js',
+        'package-scripts.js',
+      ],
       'globals': {
         'module': false,
         'process': false,
