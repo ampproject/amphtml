@@ -40,7 +40,7 @@ async function performance() {
   const urlsAndAdsUrls = urls.concat(config.adsUrls || []);
   await cacheDocuments(urlsAndAdsUrls);
   await compileScripts(urlsAndAdsUrls);
-  copyLocalImages(urlsAndAdsUrls);
+  await copyLocalImages(urlsAndAdsUrls);
   await rewriteScriptTags(urlsAndAdsUrls);
   await rewriteAnalyticsTags(config.handlers);
   await getMetrics(urls, config);
