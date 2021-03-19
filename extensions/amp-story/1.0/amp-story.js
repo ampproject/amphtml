@@ -862,7 +862,7 @@ export class AmpStory extends AMP.BaseElement {
 
       // Updates presence of the `amp-mode-keyboard-active` class on the store.
       this.storeService_.dispatch(
-        Action.TOGGLE_KEYBOARD,
+        Action.TOGGLE_KEYBOARD_ACTIVE_STATE,
         bodyEl.classList.contains('amp-mode-keyboard-active')
       );
     });

@@ -108,7 +108,7 @@ export let InteractiveReactData;
  *    infoDialogState: boolean,
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
  *    interactiveReactState: !Map<string, !InteractiveReactData>,
- *    keyboardState: boolean,
+ *    keyboardActiveState: boolean,
  *    mutedState: boolean,
  *    pageAudioState: boolean,
  *    pageHasElementsWithPlaybackState: boolean,
@@ -163,7 +163,7 @@ export const StateProperty = {
   INTERACTIVE_COMPONENT_STATE: 'interactiveEmbeddedComponentState',
   // State of interactive components (polls, quizzes) on the story.
   INTERACTIVE_REACT_STATE: 'interactiveReactState',
-  KEYBOARD_STATE: 'keyboardState',
+  KEYBOARD_ACTIVE_STATE: 'keyboardActiveState',
   MUTED_STATE: 'mutedState',
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
   PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE: 'pageHasElementsWithPlaybackState',
@@ -215,7 +215,7 @@ export const Action = {
   TOGGLE_HAS_SIDEBAR: 'toggleHasSidebar',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
   TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
-  TOGGLE_KEYBOARD: 'toggleKeyboard',
+  TOGGLE_KEYBOARD_ACTIVE_STATE: 'toggleKeyboardActiveState',
   TOGGLE_MUTED: 'toggleMuted',
   TOGGLE_PAGE_ATTACHMENT_STATE: 'togglePageAttachmentState',
   TOGGLE_PAGE_HAS_AUDIO: 'togglePageHasAudio',
@@ -415,10 +415,10 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.RTL_STATE]: !!data,
       });
-    case Action.TOGGLE_KEYBOARD:
+    case Action.TOGGLE_KEYBOARD_ACTIVE_STATE:
       return /** @type {!State} */ ({
         ...state,
-        [StateProperty.KEYBOARD_STATE]: !!data,
+        [StateProperty.KEYBOARD_ACTIVE_STATE]: !!data,
       });
     case Action.TOGGLE_SIDEBAR:
       // Don't change the PAUSED_STATE if SIDEBAR_STATE is not changed.
@@ -626,7 +626,7 @@ export class AmpStoryStoreService {
         state: EmbeddedComponentState.HIDDEN,
       },
       [StateProperty.INTERACTIVE_REACT_STATE]: {},
-      [StateProperty.KEYBOARD_STATE]: false,
+      [StateProperty.KEYBOARD_ACTIVE_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.PAGE_ATTACHMENT_STATE]: false,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,

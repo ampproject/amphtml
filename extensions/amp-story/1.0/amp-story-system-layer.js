@@ -563,7 +563,7 @@ export class SystemLayer {
     );
 
     this.storeService_.subscribe(
-      StateProperty.KEYBOARD_STATE,
+      StateProperty.KEYBOARD_ACTIVE_STATE,
       (keyboardState) => {
         this.onKeyboardActiveUpdate_(keyboardState);
       },
