@@ -124,7 +124,8 @@ async function storeBundleSize() {
   const commitHash = gitCommitHash();
   log('Storing bundle sizes for commit', cyan(shortSha(commitHash)) + '...');
   try {
-    const response = await getRequestPost()({
+    const requestPost = await getRequestPost();
+    const response = await requestPost({
       uri: url.resolve(
         bundleSizeAppBaseUrl,
         path.join('commit', commitHash, 'store')
@@ -154,7 +155,8 @@ async function skipBundleSize() {
       cyan(shortSha(commitHash)) + '...'
     );
     try {
-      const response = await getRequestPost()(
+      const requestPost = await getRequestPost();
+      const response = await requestPost(
         url.resolve(
           bundleSizeAppBaseUrl,
           path.join('commit', commitHash, 'skip')
@@ -191,7 +193,8 @@ async function reportBundleSize() {
       cyan(shortSha(mergeSha)) + '...'
     );
     try {
-      const response = await getRequestPost()({
+      const requestPost = await getRequestPost();
+      const response = await requestPost({
         uri: url.resolve(
           bundleSizeAppBaseUrl,
           path.join('commit', headSha, 'report')
