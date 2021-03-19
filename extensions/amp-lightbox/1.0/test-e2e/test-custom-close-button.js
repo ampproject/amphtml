@@ -45,7 +45,11 @@ describes.endtoend(
       ).to.equal(0);
     });
 
+<<<<<<< HEAD
     // TODO(wg-components, #28948): Flaky during CI.
+=======
+    // TODO(wg-components, #24195): Flaky during CI.
+>>>>>>> 1ea0aaae5 (skip flaky amp lightbox test)
     it.skip('should open the lightbox', async () => {
       const open = await controller.findElement('#open');
       await controller.click(open);
