@@ -39,6 +39,7 @@ async function validator() {
 async function validatorCpp() {
   execOrDie('bazel test validator_test', {
     cwd: 'validator/cpp/engine',
+    stdio: 'inherit',
   });
 }
 
