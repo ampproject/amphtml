@@ -16,8 +16,13 @@
 
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 
+/** @const {number} */
 const BEGINNING_OF_STORY_BUFFER = 3;
+
+/** @const {number} */
 const END_OF_STORY_BUFFER = 1;
+
+/** @const {number} */
 const MAX_ADS_PER_STORY = 4;
 
 /**
@@ -51,7 +56,7 @@ export function getAdPositions(storyLength, numberOfAds) {
 export function getNumberOfAds(pageCount, targetInterval) {
   const fullSegments = Math.floor(pageCount / targetInterval);
   const addExtraAd =
-    Math.random() > (pageCount % targetInterval) / targetInterval;
+    Math.random() < (pageCount % targetInterval) / targetInterval;
   const remainderAds = addExtraAd ? 1 : 0;
   return Math.min(fullSegments + remainderAds, MAX_ADS_PER_STORY);
 }
@@ -67,7 +72,7 @@ export class PredeterminedPositionAlgorithm {
     /** @private {!StoryAdPageManager} */
     this.pageManager_ = pageManager;
 
-    // TODO: experimentally set interval at 12
+    // TODO(ccordry): experimentally set interval at 12 based on branch.
     /** @private {number} */
     this.targetInterval_ = 8;
 
@@ -103,7 +108,7 @@ export class PredeterminedPositionAlgorithm {
     const position = this.adPositions_[this.pagesCreated_];
     const adPage = this.pageManager_.createAdPage();
     adPage.registerLoadCallback(() => {
-      // TODO(ccordry): should we try again if insertion fails?
+      // TODO(ccordry): we could maybe try again if insertion fails.
       this.pageManager_.maybeInsertPageAfter(
         this.storyPageIds_[position - 1],
         adPage
