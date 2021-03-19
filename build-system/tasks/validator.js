@@ -64,6 +64,9 @@ validator.flags = {
   'update_tests': 'Updates validation test output files',
 };
 
+validator.description = 'Builds and tests the AMP C++ validator.'
+// TODO(antiphoton): Add the ability to update validation test output files.
+
 validatorWebui.description = 'Builds and tests the AMP validator web UI.';
 validatorWebui.flags = {
   'update_tests': 'Updates validation test output files',
