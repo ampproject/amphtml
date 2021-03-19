@@ -19,13 +19,27 @@ module.exports = {
   meta: {
     fixable: 'code',
   },
-
   create(context) {
+    /**
+     * @type {{
+     *   used: Set,
+     *   declared: Map,
+     * }[]}
+     * */
     const stack = [];
+    /**
+     * @return {{
+     *   used: Set,
+     *   declared: Map,
+     * }}
+     */
     function current() {
       return stack[stack.length - 1];
     }
 
+    /**
+     * @return {boolean}
+     */
     function shouldIgnoreFile() {
       return /\b(test|examples)\b/.test(context.getFilename());
     }
@@ -37,6 +51,10 @@ module.exports = {
       '@override': uncheckableUse,
     };
 
+    /**
+     * @param {CompilerNode} node
+     * @return {Function(): void|void}
+     */
     function checkerForAnnotation(node) {
       const comments = context.getCommentsBefore(node);
 
@@ -53,7 +71,12 @@ module.exports = {
       return unannotatedUse;
     }
 
-    // Restricteds must be used in the file, but not in the class.
+    /**
+     * Restricteds must be used in the file, but not in the class.
+     * @param {CompilerNode} node
+     * @param {string} name
+     * @param {boolean} used
+     */
     function restrictedUse(node, name, used) {
       if (used) {
         const message = [
@@ -105,7 +128,13 @@ module.exports = {
       context.report({node, message});
     }
 
-    // VisibleForTestings must not be used in the class.
+    /**
+     * VisibleForTestings must not be used in the class.
+     *
+     * @param {CompilerNode} node
+     * @param {string} name
+     * @param {boolean} used
+     */
     function visibleForTestingUse(node, name, used) {
       if (!used) {
         return;
@@ -119,12 +148,20 @@ module.exports = {
       context.report({node, message});
     }
 
-    // Protected and Override are uncheckable. Let Closure handle that.
+    /**
+     * Protected and Override are uncheckable. Let Closure handle that.
+     */
     function uncheckableUse() {
       // Noop.
     }
 
-    // Unannotated fields must be used in the class
+    /**
+     * Unannotated fields must be used in the class
+     *
+     * @param {CompilerNode} node
+     * @param {string} name
+     * @param {boolean} used
+     */
     function unannotatedUse(node, name, used) {
       if (used) {
         return;
@@ -141,6 +178,11 @@ module.exports = {
       context.report({node, message});
     }
 
+    /**
+     * @param {CompilerNode} node
+     * @param {boolean=} needsThis
+     * @return {boolean}
+     */
     function shouldCheckMember(node, needsThis = true) {
       const {computed, object, property} = node;
       if (
@@ -154,6 +196,10 @@ module.exports = {
       return isPrivateName(property);
     }
 
+    /**
+     * @param {CompilerNode} node
+     * @return {boolean}
+     */
     function isAssignment(node) {
       const {parent} = node;
       if (!parent) {
@@ -162,6 +208,10 @@ module.exports = {
       return parent.type === 'AssignmentExpression' && parent.left === node;
     }
 
+    /**
+     * @param {CompilerNode} node
+     * @return {boolean}
+     */
     function isPrivateName(node) {
       return node.name.endsWith('_');
     }

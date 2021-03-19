@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+import {
+  USER_ERROR_SENTINEL,
+  elementStringOrPassThru,
+} from './core/error-message-helpers';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
 import {isArray, isEnumValue} from './types';
@@ -22,16 +26,7 @@ import {urls} from './config';
 
 const noop = () => {};
 
-/**
- * Triple zero width space.
- *
- * This is added to user error messages, so that we can later identify
- * them, when the only thing that we have is the message. This is the
- * case in many browsers when the global exception handler is invoked.
- *
- * @const {string}
- */
-export const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
+export {USER_ERROR_SENTINEL};
 
 /**
  * Four zero width space.
@@ -130,7 +125,7 @@ const externalMessagesSimpleTableUrl = () =>
  * @return {string}
  */
 const messageArgToEncodedComponent = (arg) =>
-  encodeURIComponent(String(elementStringOrPassthru(arg)));
+  encodeURIComponent(String(elementStringOrPassThru(arg)));
 
 /**
  * Logging class. Use of sentinel string instead of a boolean to check user/dev
@@ -640,19 +635,7 @@ export class Log {
  * @return {string}
  */
 const stringOrElementString = (val) =>
-  /** @type {string} */ (elementStringOrPassthru(val));
-
-/**
- * @param {*} val
- * @return {*}
- */
-function elementStringOrPassthru(val) {
-  // Do check equivalent to `val instanceof Element` without cross-window bug
-  if (val && val.nodeType == 1) {
-    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
-  }
-  return val;
-}
+  /** @type {string} */ (elementStringOrPassThru(val));
 
 /**
  * @param {!Array} array

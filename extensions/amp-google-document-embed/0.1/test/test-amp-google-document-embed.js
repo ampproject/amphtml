@@ -44,7 +44,7 @@ describes.realWin(
       doc.body.appendChild(element);
 
       return element
-        .build()
+        .buildInternal()
         .then(() => element.layoutCallback())
         .then(() => element);
     }
@@ -69,13 +69,12 @@ describes.realWin(
       });
     });
 
-    it('removes iframe after unlayoutCallback', () => {
-      return getDriveViewer('https://example.com/doc.pdf').then((element) => {
-        const impl = element.implementation_;
-        impl.unlayoutCallback();
-        expect(element.querySelector('iframe')).to.be.null;
-        expect(impl.iframe_).to.be.null;
-      });
+    it('removes iframe after unlayoutCallback', async () => {
+      const element = await getDriveViewer('https://example.com/doc.pdf');
+      const impl = await element.getImpl();
+      impl.unlayoutCallback();
+      expect(element.querySelector('iframe')).to.be.null;
+      expect(impl.iframe_).to.be.null;
     });
   }
 );

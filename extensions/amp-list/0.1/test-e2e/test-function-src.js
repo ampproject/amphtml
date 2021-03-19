@@ -17,8 +17,7 @@
 describes.endtoend(
   'amp-list "amp-script:" uri',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-list/amp-list-function-src.html',
+    fixture: 'amp-list/amp-list-function-src.html',
     environments: ['single'],
   },
   async (env) => {
@@ -42,8 +41,7 @@ describes.endtoend(
 describes.endtoend(
   'amp-list "amp-script:" with load-more',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-list/amp-list-function-load-more.html',
+    fixture: 'amp-list/amp-list-function-load-more.html',
     environments: ['single'],
   },
   async (env) => {

@@ -30,31 +30,31 @@ const {
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {log} = require('../common/logging');
-const {red, yellow} = require('ansi-colors');
+const {red, yellow} = require('kleur/colors');
 const {runCiJob} = require('./ci-job');
 const {signalPrDeployUpload} = require('../tasks/pr-deploy-bot-utils');
 
 const jobName = 'nomodule-build.js';
 
 function pushBuildWorkflow() {
-  timedExecOrDie('gulp update-packages');
-  timedExecOrDie('gulp dist --fortesting');
+  timedExecOrDie('amp dist --fortesting');
   uploadNomoduleOutput();
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function prBuildWorkflow() {
   const startTime = startTimer(jobName);
   if (
     buildTargetsInclude(
       Targets.RUNTIME,
-      Targets.FLAG_CONFIG,
       Targets.INTEGRATION_TEST,
       Targets.E2E_TEST,
       Targets.VISUAL_DIFF
     )
   ) {
-    timedExecOrDie('gulp update-packages');
-    const process = timedExecWithError('gulp dist --fortesting');
+    const process = timedExecWithError('amp dist --fortesting');
     if (process.status !== 0) {
       const message = process?.error
         ? process.error.message
@@ -63,15 +63,14 @@ async function prBuildWorkflow() {
       await signalPrDeployUpload('errored');
       return abortTimedJob(jobName, startTime);
     }
-    timedExecOrDie('gulp storybook --build');
+    timedExecOrDie('amp storybook --build');
     await processAndUploadNomoduleOutput();
     await signalPrDeployUpload('success');
   } else {
     await signalPrDeployUpload('skipped');
     printSkipMessage(
       jobName,
-      'this PR does not affect the runtime, flag configs, integration ' +
-        'tests, end-to-end tests, or visual diff tests'
+      'this PR does not affect the runtime, integration tests, end-to-end tests, or visual diff tests'
     );
   }
 }

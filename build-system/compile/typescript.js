@@ -18,9 +18,10 @@
 const fs = require('fs-extra');
 const path = require('path');
 const ts = require('typescript');
+/** @type {*} */
 const tsickle = require('tsickle');
 const {log} = require('../common/logging');
-const {red} = require('ansi-colors');
+const {red} = require('kleur/colors');
 
 /**
  * Given a file path `foo/bar.js`, transpiles the TypeScript entry point of
@@ -58,6 +59,8 @@ exports.transpileTs = async function (srcDir, srcFilename) {
     }
     return fileName;
   };
+  // TODO(#28387) fix this typing.
+  /** @type {Object} */
   const transformerHost = {
     host: compilerHost,
     options: tsOptions,

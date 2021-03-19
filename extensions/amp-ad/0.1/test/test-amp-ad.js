@@ -208,35 +208,6 @@ describes.realWin('Ad loader', {amp: true}, (env) => {
         });
       });
 
-      it('uses Fast Fetch if remote.html is used but disabled', () => {
-        const meta = doc.createElement('meta');
-        meta.setAttribute('name', 'amp-3p-iframe-src');
-        meta.setAttribute('content', 'https://example.test/remote.html');
-        doc.head.appendChild(meta);
-        adConfig['zort'] = {remoteHTMLDisabled: true};
-        a4aRegistry['zort'] = function () {
-          return true;
-        };
-        ampAdElement.setAttribute('type', 'zort');
-        const zortInstance = {};
-        const zortConstructor = function () {
-          return zortInstance;
-        };
-        const extensions = Services.extensionsFor(win);
-        const extensionsStub = env.sandbox
-          .stub(extensions, 'loadElementClass')
-          .withArgs('amp-ad-network-zort-impl')
-          .returns(Promise.resolve(zortConstructor));
-        ampAd = new AmpAd(ampAdElement);
-        return ampAd.upgradeCallback().then((baseElement) => {
-          expect(extensionsStub).to.be.called;
-          expect(ampAdElement.getAttribute('data-a4a-upgrade-type')).to.equal(
-            'amp-ad-network-zort-impl'
-          );
-          expect(baseElement).to.equal(zortInstance);
-        });
-      });
-
       it('upgrades to registered, A4A type network-specific element', () => {
         a4aRegistry['zort'] = function () {
           return true;
@@ -277,6 +248,8 @@ describes.realWin('Ad loader', {amp: true}, (env) => {
             const extensions = Services.extensionsFor(win);
             extensions.registerExtension(
               'amp-ad-network-zort-impl',
+              '0.1',
+              true,
               () => {
                 extensions.addElement(
                   'amp-ad-network-zort-impl',

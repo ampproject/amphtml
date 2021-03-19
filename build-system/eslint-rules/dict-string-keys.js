@@ -37,20 +37,25 @@ module.exports = function (context) {
   };
 };
 
+/**
+ * @param {*} node
+ * @param {*} context
+ */
 function checkNode(node, context) {
   if (node.type === 'ObjectExpression') {
     node.properties.forEach(function (prop) {
-      if (!prop.key.raw && !prop.computed) {
+      if (!prop.key || (!prop.key.raw && !prop.computed)) {
+        const {name = `[${prop.type}]`} = prop.key || prop.argument || {};
         context.report({
           node: prop,
           message:
-            'Found: ' +
-            prop.key.name +
-            '. The keys of the Object ' +
-            'Literal Expression passed into `dict` must have string keys.',
+            `Found: ${name}.` +
+            'The Object Literal Expression passed into `dict` must only contain string keyed properties.',
         });
       }
-      checkNode(prop.value, context);
+      if (prop.value) {
+        checkNode(prop.value, context);
+      }
     });
   } else if (node.type === 'ArrayExpression') {
     node.elements.forEach(function (elem) {

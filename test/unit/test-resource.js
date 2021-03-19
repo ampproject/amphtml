@@ -50,6 +50,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
       .callsFake(() => {});
     resources = new ResourcesImpl(env.ampdoc);
     resource = new Resource(1, element, resources);
+    element.resources_ = resources;
 
     const vsync = Services.vsyncFor(win);
     env.sandbox.stub(vsync, 'mutate').callsFake((mutator) => {
@@ -89,7 +90,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
 
   it('should not build before upgraded', () => {
     elementMock.expects('isUpgraded').returns(false).atLeast(1);
-    elementMock.expects('build').never();
+    elementMock.expects('buildInternal').never();
     elementMock.expects('updateLayoutBox').never();
 
     expect(resource.build()).to.be.null;
@@ -99,7 +100,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
   it('should build after upgraded', () => {
     const buildPromise = Promise.resolve();
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').returns(buildPromise).once();
+    elementMock.expects('buildInternal').returns(buildPromise).once();
     elementMock.expects('updateLayoutBox').never();
     return resource.build().then(() => {
       expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
@@ -116,7 +117,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
       resource.premeasure({left: 0, top: 0, width: 100, height: 100});
       resource.measure(/* usePremeasuredRect */ true);
       elementMock.expects('isUpgraded').returns(true).atLeast(1);
-      elementMock.expects('build').returns(Promise.resolve()).once();
+      elementMock.expects('buildInternal').returns(Promise.resolve()).once();
       elementMock.expects('onMeasure').withArgs(/* sizeChanged */ true).once();
       return resource.build().then(() => {
         expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
@@ -132,7 +133,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
       // Now adjust implementation to be alwaysFixed and call build.
       element.isUpgraded = () => true;
       element.isAlwaysFixed = () => true;
-      element.build = () => Promise.resolve();
+      element.buildInternal = () => Promise.resolve();
       element.onMeasure = () => {};
       resource.requestMeasure = env.sandbox.stub();
       return resource.build().then(() => {
@@ -145,7 +146,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
     elementMock.expects('isBuilt').returns(false).once();
     elementMock.expects('isBuilding').returns(true).once();
     elementMock.expects('isUpgraded').returns(true).once();
-    elementMock.expects('build').returns(Promise.resolve()).once();
+    elementMock.expects('buildInternal').returns(Promise.resolve()).once();
     const r = new Resource(2, element, resources);
     expect(r.isBuilding()).to.be.true;
   });
@@ -156,7 +157,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
       .callsFake(() => {});
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock
-      .expects('build')
+      .expects('buildInternal')
       .returns(Promise.reject(new Error('intentional')))
       .once();
     elementMock.expects('updateLayoutBox').never();
@@ -176,7 +177,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
   it('should mark as not ready for layout even if already measured', () => {
     const box = layoutRectLtwh(0, 0, 100, 200);
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').returns(Promise.resolve()).once();
+    elementMock.expects('buildInternal').returns(Promise.resolve()).once();
     resource.layoutBox_ = box;
     return resource.build().then(() => {
       expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
@@ -185,7 +186,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
 
   it('should mark as not laid out if not yet measured', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').returns(Promise.resolve()).once();
+    elementMock.expects('buildInternal').returns(Promise.resolve()).once();
     return resource.build().then(() => {
       expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
     });
@@ -193,7 +194,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
 
   it('should track size changes on measure', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').returns(Promise.resolve()).once();
+    elementMock.expects('buildInternal').returns(Promise.resolve()).once();
     return resource.build().then(() => {
       elementMock
         .expects('getBoundingClientRect')
@@ -215,7 +216,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
   it('should track no size changes on measure', () => {
     layoutRectLtwh(0, 0, 0, 0);
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').returns(Promise.resolve()).once();
+    elementMock.expects('buildInternal').returns(Promise.resolve()).once();
     return resource.build().then(() => {
       elementMock
         .expects('getBoundingClientRect')
@@ -261,7 +262,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
 
   it('should measure and update state', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').returns(Promise.resolve()).once();
+    elementMock.expects('buildInternal').returns(Promise.resolve()).once();
     return resource.build().then(() => {
       elementMock
         .expects('getBoundingClientRect')
@@ -288,7 +289,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
 
   it('should update initial box only on first measure', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').returns(Promise.resolve()).once();
+    elementMock.expects('buildInternal').returns(Promise.resolve()).once();
     return resource.build().then(() => {
       element.getBoundingClientRect = () => ({
         left: 11,
@@ -489,7 +490,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
       });
       element.parentElement.__AMP__RESOURCE = {};
       elementMock.expects('isUpgraded').returns(true).atLeast(1);
-      elementMock.expects('build').returns(Promise.resolve()).once();
+      elementMock.expects('buildInternal').returns(Promise.resolve()).once();
       rect = {left: 11, top: 12, width: 111, height: 222};
       resource = new Resource(1, element, resources);
       return resource.build();
@@ -941,58 +942,36 @@ describes.realWin('Resource', {amp: true}, (env) => {
     });
   });
 
-  describe('pauseCallback', () => {
-    it('should call pauseCallback on unbuilt element', () => {
+  describe('pause', () => {
+    it('should call pause on unbuilt element', () => {
       resource.state_ = ResourceState.NOT_BUILT;
-      elementMock.expects('pauseCallback').once();
+      elementMock.expects('pause').once();
       resource.pause();
     });
 
-    it('should call pauseCallback on built element', () => {
+    it('should call pause on built element', () => {
       resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      elementMock.expects('pauseCallback').once();
+      elementMock.expects('pause').once();
       resource.pause();
     });
 
     it('should NOT call unlayoutCallback', () => {
       resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      elementMock.expects('pauseCallback').once();
+      elementMock.expects('pause').once();
       elementMock.expects('unlayoutCallback').never();
       resource.pause();
     });
 
-    describe('when unlayoutOnPause', () => {
-      beforeEach(() => {
-        elementMock.expects('unlayoutOnPause').returns(true).once();
-      });
-
-      it('should call unlayoutCallback and update state', () => {
-        resource.state_ = ResourceState.LAYOUT_COMPLETE;
-        elementMock.expects('pauseCallback').once();
-        elementMock.expects('unlayoutCallback').returns(true).once();
-        resource.pause();
-        expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
-      });
-
-      it('should call unlayoutCallback but NOT update state', () => {
-        resource.state_ = ResourceState.LAYOUT_COMPLETE;
-        elementMock.expects('pauseCallback').once();
-        elementMock.expects('unlayoutCallback').returns(false).once();
-        resource.pause();
-        expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
-      });
-    });
-
     describe('when remove from DOM', () => {
-      it('should call pauseCallback on remove for unbuilt ele', () => {
+      it('should call pause on remove for unbuilt ele', () => {
         resource.state_ = ResourceState.NOT_BUILT;
-        elementMock.expects('pauseCallback').once();
+        elementMock.expects('pause').once();
         resource.pauseOnRemove();
       });
 
-      it('should call pauseCallback on remove for built ele', () => {
+      it('should call pause on remove for built ele', () => {
         resource.state_ = ResourceState.LAYOUT_COMPLETE;
-        elementMock.expects('pauseCallback').once();
+        elementMock.expects('pause').once();
         resource.pauseOnRemove();
       });
     });
@@ -1024,16 +1003,16 @@ describes.realWin('Resource', {amp: true}, (env) => {
     });
   });
 
-  describe('resumeCallback', () => {
-    it('should call resumeCallback on unbuilt element', () => {
+  describe('resume', () => {
+    it('should call resume on unbuilt element', () => {
       resource.state_ = ResourceState.NOT_BUILT;
-      elementMock.expects('resumeCallback').once();
+      elementMock.expects('resume').once();
       resource.resume();
     });
 
-    it('should call resumeCallback on un-paused element', () => {
+    it('should call resume on un-paused element', () => {
       resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      elementMock.expects('resumeCallback').once();
+      elementMock.expects('resume').once();
       resource.resume();
     });
   });
@@ -1066,8 +1045,8 @@ describe('Resource idleRenderOutsideViewport', () => {
       applySize: () => {},
       unlayoutOnPause: () => false,
       unlayoutCallback: () => true,
-      pauseCallback: () => false,
-      resumeCallback: () => false,
+      pause: () => false,
+      resume: () => false,
       getLayoutPriority: () => LayoutPriority.CONTENT,
     };
     resources = new ResourcesImpl(new AmpDocSingle(window));

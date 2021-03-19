@@ -17,12 +17,14 @@
 import {
   Action,
   StateProperty,
+  UIType,
 } from '../../../extensions/amp-story/1.0/amp-story-store-service';
 import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
+import {deepEquals} from '../../../src/json';
 import {dev, user} from '../../../src/log';
 import {setImportantStyles} from '../../../src/style';
 
@@ -31,6 +33,25 @@ const TAG = 'AMP_STORY_PANNING_MEDIA';
 
 /** @const {string}  */
 const DURATION_MS = 1000;
+
+/**
+ * A small number used to calculate zooming out to 0.
+ * @const {number}
+ */
+const MIN_INTEGER = -100000;
+
+/**
+ * Position values used to animate between components.
+ * x: (optional) Percentage between [-50; 50]
+ * y: (optional) Percentage between [-50; 50]
+ * zoom: 0 is not visible. 1 fills the viewport vertically.
+ * @typedef {{
+ *   x: float,
+ *   y: float,
+ *   zoom: float,
+ * }}
+ */
+export let panningMediaPositionDef;
 
 export class AmpStoryPanningMedia extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -43,14 +64,11 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     /** @private {?Element} The element that is transitioned. */
     this.ampImgEl_ = null;
 
-    /** @private {?float} Percentage between [-50; 50] */
-    this.x_ = null;
+    /** @private {?panningMediaPositionDef} Position to animate to. */
+    this.animateTo_ = {};
 
-    /** @private {?float} Percentage between [-50; 50] */
-    this.y_ = null;
-
-    /** @private {?float} 0 is not visible. 1 fills the viewport vertically. */
-    this.zoom_ = null;
+    /** @private {?panningMediaPositionDef} Current animation state. */
+    this.animationState_ = {};
 
     /** @private {?../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
@@ -62,14 +80,24 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.isOnActivePage_ = false;
 
     /** @private {?number} Distance from active page. */
-    this.distance_ = null;
+    this.pageDistance_ = null;
+
+    /** @private {number} Max distance from active page to animate. Either 0 or 1. */
+    this.maxDistanceToAnimate_ = 1;
+
+    /** @private {?string} */
+    this.groupId_ = null;
   }
 
   /** @override */
   buildCallback() {
-    this.x_ = parseFloat(this.element_.getAttribute('x')) || 0;
-    this.y_ = parseFloat(this.element_.getAttribute('y')) || 0;
-    this.zoom_ = parseFloat(this.element_.getAttribute('zoom')) || 1;
+    this.animateTo_ = {
+      x: parseFloat(this.element_.getAttribute('x')) || 0,
+      y: parseFloat(this.element_.getAttribute('y')) || 0,
+      zoom: this.element_.hasAttribute('zoom')
+        ? parseFloat(this.element_.getAttribute('zoom'))
+        : 1,
+    };
 
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => {
@@ -83,6 +111,10 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.ampImgEl_ = dev().assertElement(
       this.element_.querySelector('amp-img')
     );
+    this.groupId_ =
+      this.element_.getAttribute('group-id') ||
+      this.ampImgEl_.getAttribute('src');
+
     this.initializeListeners_();
     return whenUpgradedToCustomElement(this.ampImgEl_)
       .then(() => this.ampImgEl_.signals().whenSignal(CommonSignals.LOAD_END))
@@ -115,10 +147,17 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       (panningMediaState) => this.onPanningMediaStateChange_(panningMediaState),
       true /** callToInitialize */
     );
+    this.storeService_.subscribe(
+      StateProperty.UI_STATE,
+      (uiState) => {
+        this.maxDistanceToAnimate_ = uiState === UIType.DESKTOP_PANELS ? 0 : 1;
+      },
+      true /* callToInitialize */
+    );
     // Mutation observer for distance attribute
     const config = {attributes: true, attributeFilter: ['distance']};
     const callback = (mutationsList) => {
-      this.distance_ = parseInt(
+      this.pageDistance_ = parseInt(
         mutationsList[0].target.getAttribute('distance'),
         10
       );
@@ -130,9 +169,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   /** @private */
   onPageNavigation_() {
     if (this.isOnActivePage_) {
-      // TODO(#31932): A key could be sent here to update elements of the same group.
-      // Note, this will not work when there are 2 or more panning components on the same page.
-      // It might need to dynamic to hold more than 1 set of positions.
       this.animate_();
     }
   }
@@ -142,9 +178,17 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    * @private
    */
   animate_() {
-    const startPos = this.storeService_.get(
-      StateProperty.PANNING_MEDIA_STATE
-    ) || {x: this.x_, y: this.y_, zoom: this.zoom_};
+    const startPos = this.storeService_.get(StateProperty.PANNING_MEDIA_STATE)[
+      this.groupId_
+    ];
+
+    // Don't animate if first instance of group or prefers-reduced-motion.
+    if (!startPos || this.prefersReducedMotion_()) {
+      this.storeService_.dispatch(Action.ADD_PANNING_MEDIA_STATE, {
+        [this.groupId_]: this.animateTo_,
+      });
+      return;
+    }
 
     const easeInOutQuad = (val) =>
       val < 0.5 ? 2 * val * val : 1 - Math.pow(-2 * val + 2, 2) / 2;
@@ -156,21 +200,22 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       }
       const elapsedTime = currTime - startTime;
       if (elapsedTime < DURATION_MS) {
+        const {x, y, zoom} = this.animateTo_;
         const easing = easeInOutQuad(elapsedTime / DURATION_MS);
-        this.storeService_.dispatch(Action.SET_PANNING_MEDIA_STATE, {
-          x: startPos.x + (this.x_ - startPos.x) * easing,
-          y: startPos.y + (this.y_ - startPos.y) * easing,
-          zoom: startPos.zoom + (this.zoom_ - startPos.zoom) * easing,
+        this.storeService_.dispatch(Action.ADD_PANNING_MEDIA_STATE, {
+          [this.groupId_]: {
+            x: startPos.x + (x - startPos.x) * easing,
+            y: startPos.y + (y - startPos.y) * easing,
+            zoom: startPos.zoom + (zoom - startPos.zoom) * easing,
+          },
         });
         // Only call loop again if on active page.
         if (this.isOnActivePage_) {
           requestAnimationFrame(nextFrame);
         }
       } else {
-        this.storeService_.dispatch(Action.SET_PANNING_MEDIA_STATE, {
-          x: this.x_,
-          y: this.y_,
-          zoom: this.zoom_,
+        this.storeService_.dispatch(Action.ADD_PANNING_MEDIA_STATE, {
+          [this.groupId_]: this.animateTo_,
         });
       }
     };
@@ -182,24 +227,40 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    * @param {!Object<string, string>} panningMediaState
    */
   onPanningMediaStateChange_(panningMediaState) {
-    if (panningMediaState && this.distance_ <= 1) {
-      // TODO(#31932): Update siblings that are part of the same group.
-      this.updateTransform_(panningMediaState);
+    if (
+      this.pageDistance_ <= this.maxDistanceToAnimate_ &&
+      panningMediaState[this.groupId_] &&
+      // Prevent update if value is same as previous value.
+      // This happens when 2 or more components are on the same page.
+      !deepEquals(this.animationState_, panningMediaState[this.groupId_])
+    ) {
+      this.animationState_ = panningMediaState[this.groupId_];
+      this.updateTransform_();
     }
   }
 
   /**
    * @private
-   * @param {!Object<string, string>} panningMediaState
    * @return {!Promise}
    */
-  updateTransform_(panningMediaState) {
-    const {x, y, zoom} = panningMediaState;
+  updateTransform_() {
+    const {x, y, zoom} = this.animationState_;
     return this.mutateElement(() => {
       setImportantStyles(this.ampImgEl_, {
-        transform: `scale(${zoom}) translate(${x}%, ${y}%)`,
+        transform: `translate3d(${x}%, ${y}%, ${this.calculateZoom_(zoom)}px)`,
       });
     });
+  }
+
+  /**
+   * Calculates zoom for translate3d and ensures the number is finite.
+   * @private
+   * @param {number} zoom
+   * @return {number}
+   */
+  calculateZoom_(zoom) {
+    const calculatedZoom = (zoom - 1) / zoom;
+    return isFinite(calculatedZoom) ? calculatedZoom : MIN_INTEGER;
   }
 
   /**
@@ -222,6 +283,15 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       dev().assertElement(this.element),
       (el) => el.tagName.toLowerCase() === 'amp-story-page'
     );
+  }
+
+  /**
+   * Whether the device opted in prefers-reduced-motion.
+   * @return {boolean}
+   * @private
+   */
+  prefersReducedMotion_() {
+    return this.win.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
   /** @override */

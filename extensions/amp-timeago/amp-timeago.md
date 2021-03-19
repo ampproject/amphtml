@@ -54,7 +54,7 @@ The `amp-timeago` component requires a placeholder in the text node. The calcula
 
 ### Standalone use outside valid AMP documents
 
-Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide `[Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/)`.
+Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
 
 #### Example
 
@@ -62,7 +62,7 @@ The example below demonstrates `amp-timeago` component in standalone use.
 
 [example preview="top-frame" playground="false"]
 
-```
+```html
 <head>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-timeago-1.0.css">
@@ -101,7 +101,7 @@ The example below demonstrates `amp-timeago` component in standalone use.
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
-```
+```html
 <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-timeago-1.0.css">
 ```
 
@@ -133,40 +133,47 @@ The local default is `en`. Add the `locale` attribute and specify one of the fol
 -   `ar` (Arabic)
 -   `be` (Belarusian)
 -   `bg` (Bulgarian)
+-   `bn-IN` (Bangla)
 -   `ca` (Catalan)
+-   `cs` (Czech)
 -   `da` (Danish)
 -   `de` (German)
 -   `el` (Greek)
 -   `en` (English)
--   `enShort` (English - short)
+-   `en-short` (English - short)
 -   `es` (Spanish)
 -   `eu` (Basque)
+-   `fa` (Persian - Farsi)
 -   `fi` (Finnish)
 -   `fr` (French)
+-   `gl` (Galician)
 -   `he` (Hebrew)
+-   `hi-IN` (Hindi)
 -   `hu` (Hungarian)
--   `inBG` (Bangla)
--   `inHI` (Hindi)
--   `inID` (Malay)
+-   `id-ID` (Malay)
 -   `it` (Italian)
 -   `ja` (Japanese)
+-   `ka` (Georgian)
 -   `ko` (Korean)
 -   `ml` (Malayalam)
--   `nbNO` (Norwegian Bokmål)
+-   `my` (Burmese - Myanmar)
+-   `nb-NO` (Norwegian Bokmål)
 -   `nl` (Dutch)
--   `nnNO` (Norwegian Nynorsk)
+-   `nn-NO` (Norwegian Nynorsk)
 -   `pl` (Polish)
--   `ptBR` (Portuguese)
+-   `pt-BR` (Portuguese)
 -   `ro` (Romanian)
 -   `ru` (Russian)
+-   `sq` (Albanian)
+-   `sr` (Serbian)
 -   `sv` (Swedish)
 -   `ta` (Tamil)
 -   `th` (Thai)
 -   `tr` (Turkish)
 -   `uk` (Ukrainian)
 -   `vi` (Vietnamese)
--   `zhCN` (Chinese)
--   `zhTW` (Taiwanese)
+-   `zh-CN` (Chinese)
+-   `zh-TW` (Taiwanese)
 
 ### `cutoff`
 

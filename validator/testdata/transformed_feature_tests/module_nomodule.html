@@ -17,10 +17,6 @@
   Test Description:
   This test demonstrates that all scripts having a module and nomodule pairing
   are considered valid.
-
-  TODO(b/173803451) some of the test comments below may be incorrect due
-  to module/nomodule not being allowed yet. They will be correct once
-  module/nomodule is allowed.
 -->
 <!doctype html>
 <html ⚡ transformed="google;v=1">
@@ -28,6 +24,7 @@
   <meta charset=utf-8>
   <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
   <meta name=viewport content="width=device-width">
+  <link as=script crossorigin=anonymous href=https://cdn.ampproject.org/rtv/123456789012345/v0.mjs rel=modulepreload>
 
   <!-- Valid: module/nomodule pair for AMP runtime script -->
   <script async crossorigin=anonymous src=https://cdn.ampproject.org/v0.mjs type=module></script>

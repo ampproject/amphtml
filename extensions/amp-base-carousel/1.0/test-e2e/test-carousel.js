@@ -24,10 +24,10 @@ const pageHeight = 800;
 const testTimeout = 40000;
 
 describes.endtoend(
-  'amp-base-carousel:1.0 - basic functionality',
+  'amp-base-carousel - basic functionality',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/1.0/basic.amp.html',
+    version: '1.0',
+    fixture: 'amp-base-carousel/1.0/basic.amp.html',
     experiments: ['bento-carousel'],
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single', 'viewer-demo'],
@@ -49,7 +49,8 @@ describes.endtoend(
       await controller.switchToShadowRoot(carousel);
     });
 
-    it('should render correctly', async function () {
+    // TODO(wg-bento, #24195): getScrollingElement does not always find element in time.
+    it.skip('should render correctly', async function () {
       this.timeout(testTimeout);
       const el = await getScrollingElement(styles, controller);
 
@@ -57,7 +58,8 @@ describes.endtoend(
       await expect(prop(el, 'scrollWidth')).to.equal(pageWidth * SLIDE_COUNT);
     });
 
-    it('should snap when scrolling', async function () {
+    // TODO(wg-bento, #24195): getScrollingElement does not always find element in time.
+    it.skip('should snap when scrolling', async function () {
       this.timeout(testTimeout);
       const el = await getScrollingElement(styles, controller);
       const firstSlide = await getSlide(styles, controller, 0);
@@ -73,7 +75,8 @@ describes.endtoend(
       await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
     });
 
-    it('should reset the window after scroll', async function () {
+    // TODO(wg-bento, #24195): getScrollingElement does not always find element in time.
+    it.skip('should reset the window after scroll', async function () {
       this.timeout(testTimeout);
       const el = await getScrollingElement(styles, controller);
       const firstSlide = await getSlide(styles, controller, 0);
@@ -93,7 +96,8 @@ describes.endtoend(
       await expect(prop(el, 'scrollLeft')).to.equal(scrollLeft);
     });
 
-    describe('looping', function () {
+    // TODO(wg-bento, #24195): getScrollingElement does not always find element in time.
+    describe.skip('looping', function () {
       it('should show the last slide when looping', async function () {
         this.timeout(testTimeout);
         const el = await getScrollingElement(styles, controller);

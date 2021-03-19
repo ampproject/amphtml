@@ -19,7 +19,7 @@ import {
   AccordionContent,
   AccordionHeader,
   AccordionSection,
-} from '../../../amp-accordion/1.0/accordion';
+} from '../../../amp-accordion/1.0/component';
 import {VideoIframe} from '../video-iframe';
 import {VideoWrapper} from '../video-wrapper';
 import {boolean, text, withKnobs} from '@storybook/addon-knobs';
@@ -33,7 +33,7 @@ export default {
   decorators: [withA11y, withKnobs],
 };
 
-const AmpVideoIframeLike = (props) => {
+const AmpVideoIframeLike = ({unloadOnPause, ...rest}) => {
   const onMessage = useCallback((e) => {
     // Expect HTMLMediaElement events from document in `src` as
     // `{event: 'playing'}`
@@ -61,7 +61,8 @@ const AmpVideoIframeLike = (props) => {
 
   return (
     <VideoWrapper
-      {...props}
+      {...rest}
+      unloadOnPause={unloadOnPause}
       component={VideoIframe}
       allow="autoplay" // this is not safe for a generic frame
       onMessage={onMessage}
@@ -94,6 +95,7 @@ export const UsingVideoIframe = () => {
     'src',
     'https://amp.dev/static/samples/files/amp-video-iframe-videojs.html'
   );
+
   return (
     <AmpVideoIframeLike
       ariaLabel={ariaLabel}
@@ -122,6 +124,7 @@ export const InsideAccordion = () => {
     'src',
     'https://amp.dev/static/samples/files/amp-video-iframe-videojs.html'
   );
+  const unloadOnPause = boolean('unloadOnPause', false);
   return (
     <Accordion expandSingleSection>
       <AccordionSection key={1} expanded>
@@ -135,6 +138,7 @@ export const InsideAccordion = () => {
             loop={true}
             style={{width, height}}
             src={src}
+            unloadOnPause={unloadOnPause}
           />
         </AccordionContent>
       </AccordionSection>

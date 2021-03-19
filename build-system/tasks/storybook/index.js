@@ -18,7 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const path = require('path');
 const {createCtrlcHandler} = require('../../common/ctrlcHandler');
-const {cyan} = require('ansi-colors');
+const {cyan} = require('kleur/colors');
 const {defaultTask: runAmpDevBuildServer} = require('../default-task');
 const {exec, execScriptAsync} = require('../../common/exec');
 const {getBaseUrl} = require('../pr-deploy-bot-utils');
@@ -42,7 +42,7 @@ const repoDir = path.join(__dirname, '../../..');
 const envConfigDir = (env) => path.join(__dirname, `${env}-env`);
 
 /**
- * @param {string} message Message for gulp task (call stack is already in logs)
+ * @param {string} message Message for amp task (call stack is already in logs)
  */
 const throwError = (message) => {
   const err = new Error(message);
@@ -107,13 +107,16 @@ function buildEnv(env) {
   }
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function storybook() {
   const {'storybook_env': env = 'amp,preact', build = false} = argv;
   const envs = env.split(',');
   if (!build && envs.includes('amp')) {
     await runAmpDevBuildServer();
   }
-  installPackages(__dirname);
+  await installPackages(__dirname);
   if (!build) {
     createCtrlcHandler('storybook');
   }
@@ -128,8 +131,8 @@ storybook.description = 'Isolated testing and development for AMP components.';
 
 storybook.flags = {
   'build':
-    '  Builds a static web application, as described in https://storybook.js.org/docs/react/workflows/publish-storybook',
+    'Builds a static web application, as described in https://storybook.js.org/docs/react/workflows/publish-storybook',
   'storybook_env':
-    "  Set environment(s) to run Storybook, either 'amp', 'preact' or a list as 'amp,preact'",
-  'storybook_port': '  Set port from which to run the Storybook dashboard.',
+    "Set environment(s) to run Storybook, either 'amp', 'preact' or a list as 'amp,preact'",
+  'storybook_port': 'Set port from which to run the Storybook dashboard.',
 };
