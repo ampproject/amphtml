@@ -17,7 +17,7 @@
 
 /**
  * @fileoverview Creates an http server to handle static
- * files and list directories for use with the gulp live server
+ * files and list directories for use with the amp live server
  */
 const argv = require('minimist')(process.argv.slice(2));
 const bacon = require('baconipsum');

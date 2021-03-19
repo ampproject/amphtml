@@ -19,7 +19,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const {getReplacePlugin} = require('./helpers');
 
 /**
- * Gets the config for pre-closure babel transforms run during `gulp dist`.
+ * Gets the config for pre-closure babel transforms run during `amp dist`.
  *
  * @return {!Object}
  */

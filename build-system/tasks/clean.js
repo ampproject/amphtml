@@ -61,7 +61,7 @@ module.exports = {
 
 clean.description = 'Cleans up various build and test artifacts';
 clean.flags = {
-  'dry_run': '  Does a dry run without actually deleting anything',
+  'dry_run': 'Does a dry run without actually deleting anything',
   'include_subpackages':
-    '  Also cleans up inner node_modules package directories',
+    'Also cleans up inner node_modules package directories',
 };
