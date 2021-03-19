@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '..';
+import * as Preact from '../../../src/preact';
 import {IframeEmbed} from './iframe';
 import {deserializeMessage} from '../../3p-frame-messaging';
 import {dict} from '../../utils/object';
@@ -29,7 +29,12 @@ import {
 } from '../../core/3p-frame';
 import {parseUrlDeprecated} from '../../url';
 import {sequentialIdGenerator} from '../../utils/id-generator';
-import {useCallback, useLayoutEffect, useRef, useState} from '..';
+import {
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from '../../../src/preact';
 
 /** @type {!Object<string,function>} 3p frames for that type. */
 export const countGenerators = {};
