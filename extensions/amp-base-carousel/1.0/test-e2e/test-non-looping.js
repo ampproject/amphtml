@@ -45,7 +45,8 @@ describes.endtoend(
       await controller.switchToShadowRoot(carousel);
     });
 
-    it('should render correctly', async () => {
+    // TODO(wg-components, #24195): Flaky during CI.
+    it.skip('should render correctly', async () => {
       const el = await getScrollingElement(styles, controller);
 
       await expect(prop(el, 'scrollWidth')).to.equal(pageWidth * SLIDE_COUNT);
