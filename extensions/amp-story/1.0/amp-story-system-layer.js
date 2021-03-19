@@ -563,6 +563,14 @@ export class SystemLayer {
     );
 
     this.storeService_.subscribe(
+      StateProperty.KEYBOARD_ACTIVE_STATE,
+      (keyboardState) => {
+        this.onKeyboardActiveUpdate_(keyboardState);
+      },
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
       StateProperty.PAGE_HAS_AUDIO_STATE,
       (audio) => {
         this.onPageHasAudioStateUpdate_(audio);
@@ -880,6 +888,20 @@ export class SystemLayer {
       rtlState
         ? this.getShadowRoot().setAttribute('dir', 'rtl')
         : this.getShadowRoot().removeAttribute('dir');
+    });
+  }
+
+  /**
+   * Reacts to keyboard updates and updates the UI.
+   * @param {boolean} keyboardActive
+   * @private
+   */
+  onKeyboardActiveUpdate_(keyboardActive) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().classList.toggle(
+        'amp-mode-keyboard-active',
+        keyboardActive
+      );
     });
   }
 
