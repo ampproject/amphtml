@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const {cyan, green} = require('kleur/colors');
 const {execOrThrow} = require('../common/exec');
+const {log} = require('../common/logging');
 
 /**
  * Performs type checking on the /build-system directory using TypeScript.
