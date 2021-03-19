@@ -26,28 +26,25 @@ const {timedExecOrDie} = require('./utils');
 
 const jobName = 'checks.js';
 
-/**
- * @return {void}
- */
 function pushBuildWorkflow() {
-  timedExecOrDie('gulp presubmit');
-  timedExecOrDie('gulp lint');
-  timedExecOrDie('gulp prettify');
-  timedExecOrDie('gulp ava');
-  timedExecOrDie('gulp babel-plugin-tests');
-  timedExecOrDie('gulp caches-json');
-  timedExecOrDie('gulp dev-dashboard-tests');
-  timedExecOrDie('gulp check-exact-versions');
-  timedExecOrDie('gulp check-renovate-config');
-  timedExecOrDie('gulp server-tests');
-  timedExecOrDie('gulp dep-check');
-  timedExecOrDie('gulp check-types');
-  timedExecOrDie('gulp check-sourcemaps');
-  timedExecOrDie('gulp performance-urls');
-  timedExecOrDie('gulp check-analytics-vendors-list');
-  timedExecOrDie('gulp check-video-interface-list');
-  timedExecOrDie('gulp get-zindex');
-  timedExecOrDie('gulp markdown-toc');
+  timedExecOrDie('amp presubmit');
+  timedExecOrDie('amp lint');
+  timedExecOrDie('amp prettify');
+  timedExecOrDie('amp ava');
+  timedExecOrDie('amp babel-plugin-tests');
+  timedExecOrDie('amp caches-json');
+  timedExecOrDie('amp dev-dashboard-tests');
+  timedExecOrDie('amp check-exact-versions');
+  timedExecOrDie('amp check-renovate-config');
+  timedExecOrDie('amp server-tests');
+  timedExecOrDie('amp dep-check');
+  timedExecOrDie('amp check-types');
+  timedExecOrDie('amp check-sourcemaps');
+  timedExecOrDie('amp performance-urls');
+  timedExecOrDie('amp check-analytics-vendors-list');
+  timedExecOrDie('amp check-video-interface-list');
+  timedExecOrDie('amp get-zindex');
+  timedExecOrDie('amp markdown-toc');
 }
 
 /**
@@ -57,63 +54,63 @@ async function prBuildWorkflow() {
   await reportAllExpectedTests();
 
   if (buildTargetsInclude(Targets.PRESUBMIT)) {
-    timedExecOrDie('gulp presubmit');
+    timedExecOrDie('amp presubmit');
   }
 
   if (buildTargetsInclude(Targets.LINT)) {
-    timedExecOrDie('gulp lint');
+    timedExecOrDie('amp lint');
   }
 
   if (buildTargetsInclude(Targets.PRETTIFY)) {
-    timedExecOrDie('gulp prettify');
+    timedExecOrDie('amp prettify');
   }
 
   if (buildTargetsInclude(Targets.AVA)) {
-    timedExecOrDie('gulp ava');
+    timedExecOrDie('amp ava');
   }
 
   if (buildTargetsInclude(Targets.BABEL_PLUGIN)) {
-    timedExecOrDie('gulp babel-plugin-tests');
+    timedExecOrDie('amp babel-plugin-tests');
   }
 
   if (buildTargetsInclude(Targets.CACHES_JSON)) {
-    timedExecOrDie('gulp caches-json');
+    timedExecOrDie('amp caches-json');
   }
 
   if (buildTargetsInclude(Targets.DOCS)) {
-    timedExecOrDie('gulp check-links --local_changes'); // only for PR builds
-    timedExecOrDie('gulp markdown-toc');
+    timedExecOrDie('amp check-links --local_changes'); // only for PR builds
+    timedExecOrDie('amp markdown-toc');
   }
 
   if (buildTargetsInclude(Targets.DEV_DASHBOARD)) {
-    timedExecOrDie('gulp dev-dashboard-tests');
+    timedExecOrDie('amp dev-dashboard-tests');
   }
 
   // Validate owners syntax only for PR builds.
   if (buildTargetsInclude(Targets.OWNERS)) {
-    timedExecOrDie('gulp check-owners --local_changes');
+    timedExecOrDie('amp check-owners --local_changes');
   }
 
   if (buildTargetsInclude(Targets.PACKAGE_UPGRADE)) {
-    timedExecOrDie('gulp check-exact-versions');
+    timedExecOrDie('amp check-exact-versions');
   }
 
   if (buildTargetsInclude(Targets.RENOVATE_CONFIG)) {
-    timedExecOrDie('gulp check-renovate-config');
+    timedExecOrDie('amp check-renovate-config');
   }
 
   if (buildTargetsInclude(Targets.SERVER)) {
-    timedExecOrDie('gulp server-tests');
+    timedExecOrDie('amp server-tests');
   }
 
   if (buildTargetsInclude(Targets.RUNTIME)) {
-    timedExecOrDie('gulp dep-check');
-    timedExecOrDie('gulp check-types');
-    timedExecOrDie('gulp check-sourcemaps');
-    timedExecOrDie('gulp performance-urls');
-    timedExecOrDie('gulp check-analytics-vendors-list');
-    timedExecOrDie('gulp check-video-interface-list');
-    timedExecOrDie('gulp get-zindex');
+    timedExecOrDie('amp dep-check');
+    timedExecOrDie('amp check-types');
+    timedExecOrDie('amp check-sourcemaps');
+    timedExecOrDie('amp performance-urls');
+    timedExecOrDie('amp check-analytics-vendors-list');
+    timedExecOrDie('amp check-video-interface-list');
+    timedExecOrDie('amp get-zindex');
   }
 }
 

@@ -140,7 +140,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       element.addEventListener('error', errorEventSpy);
 
       // Build.
-      await element.buildInternal();
+      await element.mountInternal();
       expect(element.readyState).to.equal('loading');
       expect(loader).to.be.calledWith('auto');
       expect(lastLoading).to.equal('auto');
@@ -161,7 +161,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       element.addEventListener('error', errorEventSpy);
 
       // Build.
-      await element.buildInternal();
+      await element.mountInternal();
       expect(element.readyState).to.equal('loading');
       expect(loader).to.be.calledWith('auto');
       expect(lastLoading).to.equal('auto');
@@ -184,7 +184,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       api = {readyState: 'complete'};
 
       // Build.
-      await element.buildInternal();
+      await element.mountInternal();
       expect(element.readyState).to.equal('complete');
       expect(loadEventSpy).to.be.calledOnce;
       expect(loadEventSpy.firstCall.firstArg).to.contain({bubbles: false});
@@ -200,7 +200,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       api = {readyState: 'error'};
 
       // Build.
-      await element.buildInternal();
+      await element.mountInternal();
       expect(element.readyState).to.equal('error');
       expect(errorEventSpy).to.be.calledOnce;
       expect(errorEventSpy.firstCall.firstArg).to.contain({bubbles: false});
@@ -216,19 +216,19 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       api = {};
 
       // Build.
-      await element.buildInternal();
+      await element.mountInternal();
       expect(element.readyState).to.equal('loading');
       expect(loadEventSpy).to.not.be.called;
       expect(errorEventSpy).to.not.be.called;
     });
 
     it('should load with loading=auto by default', async () => {
-      await element.buildInternal();
+      await element.mountInternal();
       expect(lastLoading).to.equal('auto');
     });
 
     it('should load with loading=eager on ensureLoaded', async () => {
-      await element.buildInternal();
+      await element.mountInternal();
       expect(lastLoading).to.equal('auto');
 
       // Should set loading=eager.
@@ -267,7 +267,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
 
       await element.buildInternal();
 
-      element.pauseCallback();
+      element.pause();
       expect(pauseStub).to.be.calledOnce;
     });
 
@@ -277,7 +277,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
 
-      element.pauseCallback();
+      element.pause();
 
       component.resetHistory();
       await waitFor(() => component.callCount > 0, 'component rendered');

@@ -17,6 +17,7 @@
 import {
   Action,
   StateProperty,
+  UIType,
 } from '../../../extensions/amp-story/1.0/amp-story-store-service';
 import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
@@ -79,7 +80,10 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.isOnActivePage_ = false;
 
     /** @private {?number} Distance from active page. */
-    this.distance_ = null;
+    this.pageDistance_ = null;
+
+    /** @private {number} Max distance from active page to animate. Either 0 or 1. */
+    this.maxDistanceToAnimate_ = 1;
 
     /** @private {?string} */
     this.groupId_ = null;
@@ -143,10 +147,17 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       (panningMediaState) => this.onPanningMediaStateChange_(panningMediaState),
       true /** callToInitialize */
     );
+    this.storeService_.subscribe(
+      StateProperty.UI_STATE,
+      (uiState) => {
+        this.maxDistanceToAnimate_ = uiState === UIType.DESKTOP_PANELS ? 0 : 1;
+      },
+      true /* callToInitialize */
+    );
     // Mutation observer for distance attribute
     const config = {attributes: true, attributeFilter: ['distance']};
     const callback = (mutationsList) => {
-      this.distance_ = parseInt(
+      this.pageDistance_ = parseInt(
         mutationsList[0].target.getAttribute('distance'),
         10
       );
@@ -217,7 +228,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    */
   onPanningMediaStateChange_(panningMediaState) {
     if (
-      this.distance_ <= 1 &&
+      this.pageDistance_ <= this.maxDistanceToAnimate_ &&
       panningMediaState[this.groupId_] &&
       // Prevent update if value is same as previous value.
       // This happens when 2 or more components are on the same page.

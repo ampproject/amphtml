@@ -1069,10 +1069,10 @@ describes.realWin(
         width: 100,
         height: 100,
       });
-      await ampIframe.getImpl(false);
+      const impl = await ampIframe.getImpl(false);
       await waitForAmpIframeLayoutPromise(doc, ampIframe);
       expect(ampIframe.querySelector('iframe')).to.exist;
-      expect(ampIframe.unlayoutOnPause()).to.be.true;
+      expect(impl.unlayoutOnPause()).to.be.true;
     });
 
     describe('throwIfCannotNavigate()', () => {

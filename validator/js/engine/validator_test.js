@@ -289,7 +289,7 @@ ValidatorTestCase.prototype.run = function() {
   message += 'expected:\n' + this.expectedOutput + '\nsaw:\n' + observed;
   if (this.expectedOutputFile !== null) {
     message += '\n\nIf validator/' + absolutePathFor(this.expectedOutputFile) +
-        ' is incorrect, please run `gulp validator --update_tests` to ' +
+        ' is incorrect, please run `amp validator --update_tests` to ' +
         'regenerate it based on its corresponding .html file.';
   }
   asserts.fail(message);
