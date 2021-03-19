@@ -100,17 +100,17 @@ The `amp-story-panning-media` component accepts 1 descendant. This descendant mu
 Specifies the horizontal position in percentage.  
 Centered on 0 (default) with positive values moving the image to the right and negative to the left.
 
-### y {string} optional
+### y {string} (optional)
 
 Specifies the vertical position in percentage.
 Centered on 0 (default) with positive values moving the image to the top and negative to the bottom.
 
-### zoom {float} optional
+### zoom {float} (optional)
 
 Specifies the level of zoom.
 The default is 1. This corresponds to the image fitting the viewport with [`layout=fill`](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/?format=stories).
 
-### lock-bounds optional
+### lock-bounds (optional)
 
 Prevents the image from panning beyond the viewport. When using `lock-bounds` `width` and `height` must be specified on the `amp-img` child.
 
