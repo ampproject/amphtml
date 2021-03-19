@@ -1,4 +1,4 @@
-# Executes `gulp sweep-experiments` on a schedule.
+# Executes `amp sweep-experiments` on a schedule.
 # If experiments are swept, a PR is created.
 
 name: Sweep Experiments
@@ -25,9 +25,6 @@ jobs:
       - name: Set Up Environment
         run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
 
-      - name: Install Gulp CLI
-        run: npm install --global --force gulp-cli
-
       - name: Install Dependencies
         run: npm ci
 
@@ -37,7 +34,7 @@ jobs:
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
-          gulp sweep-experiments
+          amp sweep-experiments
 
           title=$(git log -1 --format=%s)
           title="${title//'%'/'%25'}"

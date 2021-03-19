@@ -21,14 +21,12 @@ const path = require('path');
 const {buildExtensions} = require('../extension-helpers');
 const {endBuildStep, watchDebounceDelay} = require('../helpers');
 const {jsifyCssAsync} = require('./jsify-css');
-const {maybeUpdatePackages} = require('../update-packages');
 const {watch} = require('chokidar');
 
 /**
- * Entry point for 'gulp css'
+ * Entry point for 'amp css'
  */
 async function css() {
-  maybeUpdatePackages();
   await compileCss();
 }
 

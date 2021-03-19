@@ -10,7 +10,7 @@ Read this document to learn how to create a new Bento AMP component.
   (Do not remove or edit this comment.)
 
   This table-of-contents is automatically generated. To generate it, run:
-    gulp markdown-toc --fix
+    amp markdown-toc --fix
 -->
 
 <!-- {"maxdepth": 2} -->
@@ -49,7 +49,7 @@ The first step to creating a new Bento AMP component is familiarizing yourself w
 To bootstrap the creation of a new component (or the Bento version of an existing component), the following command will create the directory structure and boilerplate code for you:
 
 ```shell
-$ gulp make-extension --bento --name=amp-my-element
+$ amp make-extension --bento --name=amp-my-element
 ```
 
 ## Naming
@@ -594,7 +594,7 @@ To speed up development and testing of components, we recommend using the Storyb
 To run these environments and explore existing components, run:
 
 ```
-gulp storybook
+amp storybook
 ```
 
 ## Unit tests
@@ -611,7 +611,7 @@ For faster testing during development, consider using --files argument
 to only run your extensions' tests.
 
 ```shell
-$ gulp unit --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
+$ amp unit --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
 ```
 
 Please also reference [Testing in AMP HTML](https://github.com/ampproject/amphtml/blob/master/contributing/TESTING.md) for the full range of testing commands available.
@@ -621,13 +621,13 @@ Please also reference [Testing in AMP HTML](https://github.com/ampproject/amphtm
 Run the following command to validates JS files against the ESLint linter.
 
 ```shell
-$ gulp lint --local_changes
+$ amp lint --local_changes
 ```
 
 Run the following command to validate non-JS files using Prettier.
 
 ```shell
-$ gulp prettify --local_changes
+$ amp prettify --local_changes
 ```
 
 ## Type checking
@@ -657,7 +657,7 @@ var MyElementProps;
 Run the following command to ensure no type violations are introduced by your extension.
 
 ```shell
-$ gulp check-types
+$ amp check-types
 ```
 
 ## Example PRs
