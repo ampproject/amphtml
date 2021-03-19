@@ -116,7 +116,7 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
         expect(getAdPositions(5, 1)).to.eql([3]);
         expect(getAdPositions(6, 1)).to.eql([3]);
         expect(getAdPositions(7, 1)).to.eql([4]);
-        expect(getAdPositions(8, 1)).to.eql([4]); //5?
+        expect(getAdPositions(8, 1)).to.eql([4]);
         expect(getAdPositions(9, 1)).to.eql([5]);
         expect(getAdPositions(10, 1)).to.eql([5]);
         expect(getAdPositions(12, 1)).to.eql([6]);
