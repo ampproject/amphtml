@@ -1,22 +1,4 @@
----
-$category@: social
-formats:
-  - websites
-teaser:
-  text: Displays a TikTok embed.  
-experimental: true
----
-
-<!--
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
+applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS-IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
@@ -35,7 +17,11 @@ limitations under the License.
 The simplest usage of the `amp-tiktok` component has the `width`, `height` and `data-src` attributes. This will display the Tiktok embed inside of an iframe on the page.
 
 ```html
- <amp-tiktok width="325" height="575" data-src="6718335390845095173">
+<amp-tiktok
+  width="325"
+  height="575"
+  data-src="6718335390845095173"
+></amp-tiktok>
 ```
 
 `amp-tiktok` does not support autoplay and requires user interaction to play videos.
@@ -53,7 +39,11 @@ In order to show the entire height of the video, this component will resize its 
 [example preview="inline" playground="true" imports="amp-tiktok"]
 
 ```html
-<amp-tiktok width="325" height="731" data-src="6718335390845095173"></amp-tiktok>
+<amp-tiktok
+  width="325"
+  height="731"
+  data-src="6718335390845095173"
+></amp-tiktok>
 ```
 
 [/example]
@@ -73,7 +63,11 @@ Example with video-id
 [example preview="inline" playground="true" imports="amp-tiktok"]
 
 ```html
-<amp-tiktok width="325" height="575" data-src="6718335390845095173"></amp-tiktok>
+<amp-tiktok
+  width="325"
+  height="575"
+  data-src="6718335390845095173"
+></amp-tiktok>
 ```
 
 [\example]
