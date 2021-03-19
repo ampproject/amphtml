@@ -137,6 +137,9 @@ jobs:
     steps:
       - setup_vm
       - run:
+          name: 'Install Bazel'
+          command: sudo apt-get install bazel
+      - run:
           name: 'Install Protobuf'
           command: pip3 install --user protobuf
       - run:
