@@ -264,6 +264,10 @@
   display: block !important;
 }
 
+.amp-mode-keyboard-active:not([desktop]) .i-amphtml-paused-display {
+  display: block !important;
+}
+
 .i-amphtml-story-has-audio[muted] .i-amphtml-story-mute-text,
 [i-amphtml-current-page-has-audio].i-amphtml-story-has-audio:not([muted]) .i-amphtml-story-unmute-sound-text,
 :not([i-amphtml-current-page-has-audio]).i-amphtml-story-has-audio:not([muted]) .i-amphtml-story-unmute-no-sound-text {
