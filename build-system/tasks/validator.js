@@ -34,6 +34,15 @@ async function validator() {
 }
 
 /**
+ * Simple wrapper around the C++ validator tests
+ */
+async function validatorCppTest() {
+  execOrDie('bazel test validator_test', {
+    cwd: 'validator/cpp/engine',
+  });
+}
+
+/**
  * Simple wrapper around the python based validator webui build.
  */
 async function validatorWebui() {
@@ -45,6 +54,7 @@ async function validatorWebui() {
 
 module.exports = {
   validator,
+  validatorCppTest,
   validatorWebui,
 };
 
