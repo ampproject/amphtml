@@ -45,7 +45,8 @@ describes.endtoend(
       ).to.equal(0);
     });
 
-    it('should open the lightbox', async () => {
+    // TODO(wg-components, #28948): Flaky during CI.
+    it.skip('should open the lightbox', async () => {
       const open = await controller.findElement('#open');
       await controller.click(open);
 
