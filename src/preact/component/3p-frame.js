@@ -16,14 +16,18 @@
 
 import * as Preact from '..';
 import {ContainWrapper} from './contain';
+import {dict} from '../../utils/object';
+import {getBootstrapUrl, getFrameAttributes} from '../../3p-frame';
 import {
   getOptionalSandboxFlags,
   getRequiredSandboxFlags,
 } from '../../core/3p-frame';
-import {useEffect, useLayoutEffect, useRef, useState} from '..';
+import {parseUrlDeprecated} from '../../url';
+import {sequentialIdGenerator} from '../../utils/id-generator';
+import {useLayoutEffect, useRef, useState} from '..';
 
-/** @type {!Object<string,number>} Number of 3p frames for that type. */
-export const count = {};
+/** @type {!Object<string,function>} 3p frames for that type. */
+export const countGenerators = {};
 
 /** @enum {string} */
 const MessageType = {
@@ -56,29 +60,41 @@ const DEFAULT_SANDBOX =
  */
 export function IframeEmbed({
   deserializeMessage = DEFAULT_DESERIALIZE_MESSAGE,
-  name,
-  onRegisterIframe,
+  name: nameProp,
   requestResize,
   sandbox = DEFAULT_SANDBOX,
   src,
   title,
   type,
+  win,
+  element,
   ...rest
 }) {
   const ref = useRef(null);
   const [heightStyle, setHeightStyle] = useState(null);
+
+  if (!countGenerators[type]) {
+    countGenerators[type] = sequentialIdGenerator();
+  }
+  const [count] = useState(countGenerators[type]);
   // TODO: loading/mount/pause similar to Instagram.
 
-  useEffect(() => {
-    if (!count[type]) {
-      count[type] = 0;
-    }
-    count[type] += 1;
-    if (onRegisterIframe) {
-      onRegisterIframe(count[type]);
-    }
-    return () => (count[type] -= 1);
-  }, [type, onRegisterIframe]);
+  const [name, setName] = useState(nameProp);
+  useLayoutEffect(() => {
+    setName(
+      nameProp ??
+        JSON.stringify(
+          dict({
+            'host': parseUrlDeprecated(src).hostname,
+            'bootstrap': getBootstrapUrl(),
+            'type': type,
+            // https://github.com/ampproject/amphtml/pull/2955
+            'count': count,
+            'attributes': getFrameAttributes(win, element, type),
+          })
+        )
+    );
+  }, [count, nameProp, src, type, win, element]);
 
   useLayoutEffect(() => {
     const iframe = ref.current;
@@ -106,23 +122,25 @@ export function IframeEmbed({
 
   return (
     <ContainWrapper layout size paint wrapperStyle={heightStyle} {...rest}>
-      <iframe
-        name={name}
-        sandbox={sandbox}
-        scrolling="no"
-        src={src}
-        style={{
-          border: 'none',
-          contentVisibility: 'auto',
-          width: '100%',
-          height: '100%',
-        }}
-        title={title}
-        // non-overridable props
-        allow={BLOCK_SYNC_XHR}
-        part="iframe"
-        ref={ref}
-      />
+      {src && name && (
+        <iframe
+          name={name}
+          sandbox={sandbox}
+          scrolling="no"
+          src={src}
+          style={{
+            border: 'none',
+            contentVisibility: 'auto',
+            width: '100%',
+            height: '100%',
+          }}
+          title={title}
+          // non-overridable props
+          allow={BLOCK_SYNC_XHR}
+          part="iframe"
+          ref={ref}
+        />
+      )}
     </ContainWrapper>
   );
 }

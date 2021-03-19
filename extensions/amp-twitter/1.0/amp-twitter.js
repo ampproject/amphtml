@@ -84,38 +84,16 @@ class AmpTwitter extends BaseElement {
 
   /** @override */
   init() {
+    const ampdoc = this.getAmpDoc();
     return dict({
       'deserializeMessage': deserializeMessage,
-      'onRegisterIframe': (count) => this.setIframeName.bind(this, count),
       'requestResize': (height) => {
         this.forceChangeHeight(height);
       },
+      'src': getBootstrapBaseUrl(this.win, ampdoc),
+      'win': this.win,
+      'element': this.element,
     });
-  }
-
-  /**
-   * @param {number} count
-   * @return {string}
-   */
-  setIframeName(count) {
-    const ampdoc = this.getAmpDoc();
-    const baseUrl = getBootstrapBaseUrl(this.win, ampdoc);
-    this.host_ = parseUrlDeprecated(baseUrl).hostname;
-    this.mutateProps(
-      dict({
-        'name': JSON.stringify(
-          dict({
-            'host': this.host_,
-            'bootstrap': getBootstrapUrl(),
-            'type': TYPE,
-            // https://github.com/ampproject/amphtml/pull/2955
-            'count': count,
-            'attributes': getFrameAttributes(this.win, this.element, TYPE),
-          })
-        ),
-        'src': baseUrl,
-      })
-    );
   }
 
   /** @override */
