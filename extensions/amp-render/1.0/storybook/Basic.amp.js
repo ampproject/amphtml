@@ -33,10 +33,30 @@ export default {
   },
 };
 
-export const Default = () => {
-  return <amp-render width="300" height="400" layout="fixed"></amp-render>;
+export const WithAmpState = () => {
+  const content = JSON.stringify({'name': 'Bill'});
+
+  return (
+    <>
+      <amp-state id="someData">
+        <script
+          type="application/json"
+          dangerouslySetInnerHTML={{__html: content}}
+        ></script>
+      </amp-state>
+
+      <amp-render
+        src="amp-state:someData"
+        width="300"
+        height="400"
+        layout="fixed"
+      >
+        <template type="amp-mustache">{`Hi {{name}}!`}</template>
+      </amp-render>
+    </>
+  );
 };
 
-Default.story = {
-  name: 'Default amp-render',
+WithAmpState.story = {
+  name: 'With AMP State',
 };
