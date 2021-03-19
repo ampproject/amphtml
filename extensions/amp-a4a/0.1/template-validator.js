@@ -19,6 +19,7 @@ import {
   extensionsHasElement,
   getAmpAdMetadata,
   getExtensionsFromMetadata,
+  mergeExtensionsMetadata,
 } from './amp-ad-utils';
 import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
 import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
@@ -71,6 +72,10 @@ export class TemplateValidator extends Validator {
         const creativeMetadata = getAmpAdMetadata(template);
         creativeMetadata['extensions'] = creativeMetadata['extensions'] || [];
         const extensions = creativeMetadata['extensions'];
+        mergeExtensionsMetadata(
+          extensions,
+          creativeMetadata['customElementExtensions']
+        );
         if (
           parsedResponseBody.analytics &&
           !extensionsHasElement(extensions, 'amp-analytics')
