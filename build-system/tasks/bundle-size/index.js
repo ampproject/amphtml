@@ -39,8 +39,6 @@ const {cyan, red, yellow} = require('kleur/colors');
 const {log, logWithoutTimestamp} = require('../../common/logging');
 const {report, NoTTYReport} = require('@ampproject/filesize');
 
-const requestPost = util.promisify(require('request').post);
-
 const filesizeConfigPath = require.resolve('./filesize.json');
 const fileGlobs = require(filesizeConfigPath).filesize.track;
 const normalizedRtvNumber = '1234567890123';
@@ -117,6 +115,7 @@ async function storeBundleSize() {
   const commitHash = gitCommitHash();
   log('Storing bundle sizes for commit', cyan(shortSha(commitHash)) + '...');
   try {
+    const requestPost = util.promisify(require('request').post); // Lazy-required to speed up task loading.
     const response = await requestPost({
       uri: url.resolve(
         bundleSizeAppBaseUrl,
@@ -147,6 +146,7 @@ async function skipBundleSize() {
       cyan(shortSha(commitHash)) + '...'
     );
     try {
+      const requestPost = util.promisify(require('request').post); // Lazy-required to speed up task loading.
       const response = await requestPost(
         url.resolve(
           bundleSizeAppBaseUrl,
@@ -184,6 +184,7 @@ async function reportBundleSize() {
       cyan(shortSha(mergeSha)) + '...'
     );
     try {
+      const requestPost = util.promisify(require('request').post); // Lazy-required to speed up task loading.
       const response = await requestPost({
         uri: url.resolve(
           bundleSizeAppBaseUrl,

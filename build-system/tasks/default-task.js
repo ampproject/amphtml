@@ -19,7 +19,6 @@ const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green} = require('kleur/colors');
 const {doServe} = require('./serve');
 const {log} = require('../common/logging');
-const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
 const {printConfigHelp} = require('./helpers');
 const {runPreBuildSteps} = require('./build');
@@ -43,7 +42,6 @@ function printDefaultTaskHelp() {
  * @return {!Promise}
  */
 async function defaultTask() {
-  maybeUpdatePackages();
   createCtrlcHandler('amp');
   process.env.NODE_ENV = 'development';
   printConfigHelp('amp');
