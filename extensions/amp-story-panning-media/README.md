@@ -90,7 +90,7 @@ The `amp-story-panning-media` component accepts 1 descendant. This descendant mu
       <amp-img layout="fill" src="assets/world-map.jpg" x="20%" y="30%" zoom="2" width="4000" height="3059" ></amp-img>
     </amp-story-panning-media>
   </amp-story-grid-layer>
-</mp-story-page>
+</amp-story-page>
 ```
 
 ## Attributes
