@@ -18,28 +18,18 @@ import {BaseElement} from './base-element';
 import {Services} from '../../../src/services';
 import {deserializeMessage} from '../../../src/3p-frame-messaging';
 import {dict} from '../../../src/utils/object';
-import {
-  getBootstrapBaseUrl,
-  getBootstrapUrl,
-  getFrameAttributes,
-  preloadBootstrap,
-} from '../../../src/3p-frame';
+import {getBootstrapBaseUrl, preloadBootstrap} from '../../../src/3p-frame';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
-import {parseUrlDeprecated} from '../../../src/url';
 import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const {string} */
 const TAG = 'amp-twitter';
-const TYPE = 'twitter';
 
 class AmpTwitter extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {!Location} */
-    this.host_ = null;
   }
 
   /** @override @nocollapse */
