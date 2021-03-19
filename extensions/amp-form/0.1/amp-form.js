@@ -930,10 +930,9 @@ export class AmpForm {
       .then((implementation) => implementation.getValue())
       .then((value) => {
         const name = asyncInput.getAttribute(AsyncInputAttributes.NAME);
-        let input = formElementsQuerySelectorAll(
-          this.form_,
+        let input = this.form_.querySelector(
           `input[name=${escapeCssSelectorIdent(name)}]`
-        )[0];
+        );
         if (!input) {
           input = createElementWithAttributes(
             this.win_.document,
