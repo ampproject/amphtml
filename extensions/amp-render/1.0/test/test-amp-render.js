@@ -85,5 +85,30 @@ describes.realWin(
       const text = await getRenderedData();
       expect(text).to.contain('Hello Bill');
     });
+
+    it('renders json from src', async () => {
+      element = html`
+        <amp-render
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      const ampRender = await element.getImpl(false);
+
+      const fetchFn = () => {
+        return Promise.resolve({name: 'Joe'});
+      };
+
+      env.sandbox.stub(ampRender, 'getJsonFn_').returns(fetchFn);
+
+      const text = await getRenderedData();
+      expect(text).to.contain('Hello Joe');
+    });
   }
 );
