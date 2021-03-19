@@ -62,6 +62,7 @@ import {
 } from '../../../src/form';
 import {getFormValidator, isCheckValiditySupported} from './form-validators';
 import {getMode} from '../../../src/mode';
+import {getServicePromiseForDoc} from '../../../src/service';
 import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isAmp4Email} from '../../../src/format';
@@ -142,12 +143,9 @@ export class AmpForm {
 
     /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc}  */
     this.ampdoc_ = Services.ampdoc(this.form_);
-        
+
     /** @const @private {!Promise<!AmpFormService>} */
-    this.ampFormServicePromise_ = getServicePromiseForDoc(
-      this.ampdoc_,
-      TAG
-    );
+    this.ampFormServicePromise_ = getServicePromiseForDoc(this.ampdoc_, TAG);
 
     /** @private {?Promise} */
     this.dependenciesPromise_ = null;
@@ -221,7 +219,11 @@ export class AmpForm {
     }
 
     /** @const @private {!./form-dirtiness.FormDirtiness} */
-    this.dirtinessHandler_ = new FormDirtiness(this.form_, this.win_);
+    this.dirtinessHandler_ = new FormDirtiness(
+      this.form_,
+      this.win_,
+      this.ampFormServicePromise_
+    );
 
     /** @const @private {!./form-validators.FormValidator} */
     this.validator_ = getFormValidator(this.form_);
@@ -249,12 +251,6 @@ export class AmpForm {
     this.formSubmitService_ = null;
     Services.formSubmitForDoc(element).then((service) => {
       this.formSubmitService_ = service;
-    });
-    
-    /** @private {?AmpFormService} */
-    this.ampFormService = null;
-    Services.formSubmitForDoc(element).then((service) => {
-      this.ampFormService = service;
     });
 
     /** @private */
@@ -431,14 +427,14 @@ export class AmpForm {
       }
     });
 
-    ampFormServicePromise_.then((ampFormService) => {
+    this.ampFormServicePromise_.then((ampFormService) => {
       ampFormService.addFormEventListener(
         this.form_,
         'submit',
         this.handleSubmitEvent_.bind(this),
         true
       );
-  
+
       ampFormService.addFormEventListener(
         this.form_,
         'blur',
@@ -448,7 +444,7 @@ export class AmpForm {
         },
         true
       );
-  
+
       ampFormService.addFormEventListener(
         this.form_,
         AmpEvents.FORM_VALUE_CHANGE,
@@ -458,7 +454,7 @@ export class AmpForm {
         },
         true
       );
-  
+
       //  Form verification is not supported when SSRing templates is enabled.
       if (!this.ssrTemplateHelper_.isEnabled()) {
         ampFormService.addFormEventListener(this.form_, 'change', (e) => {
@@ -468,18 +464,20 @@ export class AmpForm {
             // Tell the validation to reveal any input.validationMessage added
             // by the form verifier.
             this.validator_.onBlur(e);
-  
+
             // Only make the verify XHR if the user hasn't pressed submit.
             if (this.state_ === FormState.VERIFYING) {
               if (errors.length) {
                 this.setState_(FormState.VERIFY_ERROR);
-                this.renderTemplate_(dict({'verifyErrors': errors})).then(() => {
-                  this.triggerAction_(
-                    FormEvents.VERIFY_ERROR,
-                    errors,
-                    ActionTrust.DEFAULT // DEFAULT because async after gesture.
-                  );
-                });
+                this.renderTemplate_(dict({'verifyErrors': errors})).then(
+                  () => {
+                    this.triggerAction_(
+                      FormEvents.VERIFY_ERROR,
+                      errors,
+                      ActionTrust.DEFAULT // DEFAULT because async after gesture.
+                    );
+                  }
+                );
               } else {
                 this.setState_(FormState.INITIAL);
               }
@@ -487,7 +485,7 @@ export class AmpForm {
           });
         });
       }
-  
+
       ampFormService.addFormEventListener(this.form_, 'change', (e) => {
         checkUserValidityAfterInteraction_(dev().assertElement(e.target));
         this.validator_.onInput(e);
@@ -557,7 +555,6 @@ export class AmpForm {
     this.form_.classList.remove('user-valid');
     this.form_.classList.remove('user-invalid');
 
-    // Edit here
     const validityElements = formElementsQuerySelectorAll(
       this.form_,
       '.user-valid, .user-invalid'
@@ -567,8 +564,7 @@ export class AmpForm {
       element.classList.remove('user-invalid');
     });
 
-    const messageElements = formElementsQuerySelectorAll(
-      this.form_,
+    const messageElements = this.form_.querySelectorAll(
       '.visible[validation-for]'
     );
     iterateCursor(messageElements, (element) => {
@@ -632,10 +628,10 @@ export class AmpForm {
 
     // Get our special fields
     const varSubsFields = this.getVarSubsFields_();
-    const asyncInputs = formElementsQuerySelectorAll(
-      this.form_,
-      `.${AsyncInputClasses.ASYNC_INPUT}`
+    const asyncInputs = this.form_.getElementsByClassName(
+      AsyncInputClasses.ASYNC_INPUT
     );
+
     this.dirtinessHandler_.onSubmitting();
 
     // Do any assertions we may need to do
@@ -1158,13 +1154,10 @@ export class AmpForm {
    * @private
    */
   assertNoSensitiveFields_() {
-    const fields = this.form_.elements.filter((ele) => {
-      return (
-        (ele.tagName.toUpperCase() == 'INPUT' &&
-          ele.getAttribute('type') == 'password') ||
-        ele.getAttribute('type') == 'file'
-      );
-    });
+    const fields = formElementsQuerySelectorAll(
+      this.form_,
+      'input[type=password],input[type=file]'
+    );
     userAssert(
       fields.length == 0,
       'input[type=password] or input[type=file] ' +
@@ -1650,6 +1643,9 @@ export class AmpFormService {
       this.installHandlers_(ampdoc)
     );
 
+    /** @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
+    this.ampdoc_ = ampdoc;
+
     /** @const @private {!Array<UnlistenDef>} */
     this.unlisteners_ = [];
 
@@ -1745,7 +1741,7 @@ export class AmpFormService {
   }
 
   /**
-   * Adds handler for the form for a given type, when the 
+   * Adds handler for the form for a given type, when the
    * rootNode gets the signal.
    * @param {!HTMLFormElement} form
    * @param {string} type
@@ -1753,17 +1749,22 @@ export class AmpFormService {
    * @param {boolean=} opt_options
    */
   addFormEventListener(form, type, handler, opt_options) {
-    if (!hasOwn(this.eventHandlers_, type)) { 
+    if (!hasOwn(this.eventHandlers_, type)) {
       this.eventHandlers_[type] = new WeakMap();
       this.unlisteners_.push(
-        listen(this.ampdoc.getRootNode(), type, (e) => {
-          const {form} = e.target;
+        listen(
+          this.ampdoc_.getRootNode(),
+          type,
+          (e) => {
+            const {form} = e.target;
 
-          // Only call handler if the elemen has a registered form.
-          if (this.eventHandlers_[type].has(form)) {
-            this.eventHandlers_[type].get(form)(e);
-          }
-        }, opt_options)
+            // Only call handler if the elemen has a registered form.
+            if (this.eventHandlers_[type].has(form)) {
+              this.eventHandlers_[type].get(form)(e);
+            }
+          },
+          opt_options
+        )
       );
     }
     this.eventHandlers_[type].set(form, handler);

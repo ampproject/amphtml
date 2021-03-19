@@ -23,8 +23,6 @@ import {
   AmpForm,
   AmpFormService,
   checkUserValidityAfterInteraction_,
-  addFormEventListener,
-  getDocumentEventHandlerForTeting
 } from '../amp-form';
 import {AmpSelector} from '../../../amp-selector/0.1/amp-selector';
 import {
@@ -41,6 +39,7 @@ import {
   isFormDataWrapper,
 } from '../../../../src/form-data-wrapper';
 import {fromIterator} from '../../../../src/utils/array';
+import {macroTask} from '../../../../testing/yield';
 import {parseQueryString} from '../../../../src/url.js';
 import {
   setCheckValiditySupportedForTesting,
@@ -48,7 +47,6 @@ import {
 } from '../form-validators';
 import {user} from '../../../../src/log';
 import {whenCalled} from '../../../../testing/test-helper.js';
-import {macroTask} from '../../../../testing/yield';
 
 describes.repeated(
   '',
@@ -96,7 +94,13 @@ describes.repeated(
 
         afterEach(() => env.sandbox.restore());
 
-        function getAmpForm(form, {canonical = 'https://example.com/amps.html', outsideInput = false} = {}) {
+        function getAmpForm(
+          form,
+          {
+            canonical = 'https://example.com/amps.html',
+            outsideInput = false,
+          } = {}
+        ) {
           new AmpFormService(env.ampdoc);
           Services.documentInfoForDoc(env.ampdoc).canonicalUrl = canonical;
           const cidService = cidServiceForDocForTesting(env.ampdoc);
@@ -237,77 +241,51 @@ describes.repeated(
           setReportValiditySupportedForTesting(undefined);
         });
 
-        describe('Module level event handler dispatcher', () => {
-          it('should install handlers for multiple forms on ownerdoc', () => {
-            const form1 = getForm();
-            env.ampdoc.getBody().appendChild(form1);
-            addFormEventListener(form1, "blur", () => {});
-            addFormEventListener(form1, "submit", () => {});
+        describe('AmpFormService event handler', () => {
+          let ampFormService;
 
-            const form2 = getForm();
-            env.ampdoc.getBody().appendChild(form2);
-            addFormEventListener(form2, "blur", () => {});
-            
-            expect(getDocumentEventHandlerForTeting()['blur'].has(form1)).to.be.true;
-            expect(getDocumentEventHandlerForTeting()['submit'].has(form1)).to.be.true;
-            expect(getDocumentEventHandlerForTeting()['blur'].has(form2)).to.be.true;
+          beforeEach(() => {
+            ampFormService = new AmpFormService(env.ampdoc);
           });
 
-          it.only('should call handler if element has an associated form', async () => {
-            // Create form w/ input
-            const ampForm = await getAmpForm(getForm(), {outsideInput: true});
-            const form = ampForm.form_;
-            const emailInput = createElement('input');
-            emailInput.setAttribute('name', 'email');
-            emailInput.setAttribute('required', '');
-            form.appendChild(emailInput);
-            
-            const outsideInput = createElement('input');
-            outsideInput.setAttribute('name', 'email2');
-            outsideInput.setAttribute('form', 'registration');
-            form.parentElement.appendChild(outsideInput);
+          it('should add handler for different types', () => {
+            const form = getForm();
 
-            const nonAttachedInput = createElement('input');
-            form.parentElement.appendChild(nonAttachedInput);
-            const handlerSpy = window.sandbox.spy();
-
-            addFormEventListener(form, "blur", handlerSpy);
-            const event = createCustomEvent(
-              env.win,
-              'blur',
-              /* detail */ null,
-              {bubbles: true}
+            ampFormService.addFormEventListener(form, 'blur', () => {});
+            ampFormService.addFormEventListener(form, 'submit', () => {});
+            ampFormService.addFormEventListener(form, 'change', () => {});
+            expect(ampFormService.unlisteners_.length).to.equal(6);
+            expect(Object.keys(ampFormService.eventHandlers_).length).to.equal(
+              3
             );
-
-            emailInput.dispatchEvent(event);
-            await macroTask();
-            expect(handlerSpy).to.be.calledOnce;
-            expect(handlerSpy.args[0][0]['target']).to.deep.equals(emailInput);
-            expect(handlerSpy.args[0][0]['type']).to.equal('blur');
-
-            handlerSpy.resetHistory();
-            outsideInput.dispatchEvent(event);
-            await macroTask();
-            expect(handlerSpy).to.be.calledOnce;
-            expect(handlerSpy.args[0][0]['target']).to.deep.equals(outsideInput);
-            expect(handlerSpy.args[0][0]['type']).to.equal('blur');
-            
-            handlerSpy.resetHistory();
-            nonAttachedInput.dispatchEvent(event);
-            await macroTask();
-            expect(handlerSpy).to.not.be.called;
           });
 
-          it('should respect opt_option parameter', () => {
+          it('should add handlers for different forms', () => {
+            const form = getForm();
+            const form2 = getForm();
 
+            ampFormService.addFormEventListener(form, 'blur', () => {});
+            ampFormService.addFormEventListener(form2, 'blur', () => {});
+            ampFormService.addFormEventListener(form, 'submit', () => {});
+            ampFormService.addFormEventListener(form2, 'submit', () => {});
+            expect(ampFormService.unlisteners_.length).to.equal(6);
+            expect(Object.keys(ampFormService.eventHandlers_).length).to.equal(
+              2
+            );
           });
 
-          it('should trigger on event for the right form', () => {
+          it('should dispose of all listeners', () => {
+            const form = getForm();
 
-          });
+            ampFormService.addFormEventListener(form, 'blur', () => {});
+            ampFormService.addFormEventListener(form, 'submit', () => {});
+            ampFormService.addFormEventListener(form, 'change', () => {});
 
-          it('should not trigger if the form is not registered', () => {
-
+            ampFormService.dispose();
+            expect(ampFormService.unlisteners_.length).to.equal(0);
+            Object.keys(ampFormService.eventHandlers_).forEach((key) => {
+              expect(ampFormService.eventHandlers_[key].has(form)).to.be.false;
+            });
           });
         });
 
@@ -698,16 +676,20 @@ describes.repeated(
           document.body.removeChild(form);
         });
 
-        it('should listen to submit, blur and input events', () => {
+        it('should listen to submit, blur and input events', async () => {
           const form = getForm();
           document.body.appendChild(form);
-          form.addEventListener = env.sandbox.spy();
+          const spy = env.sandbox.spy(
+            AmpFormService.prototype,
+            'addFormEventListener'
+          );
           form.setAttribute('action-xhr', 'https://example.com');
           new AmpForm(form);
-          expect(form.addEventListener).to.be.called;
-          expect(form.addEventListener).to.be.calledWith('submit');
-          expect(form.addEventListener).to.be.calledWith('blur');
-          expect(form.addEventListener).to.be.calledWith('input');
+          await macroTask();
+          expect(spy).to.be.called;
+          expect(spy).to.be.calledWith(form, 'submit');
+          expect(spy).to.be.calledWith(form, 'blur');
+          expect(spy).to.be.calledWith(form, 'input');
           expect(form.className).to.contain('i-amphtml-form');
           document.body.removeChild(form);
         });

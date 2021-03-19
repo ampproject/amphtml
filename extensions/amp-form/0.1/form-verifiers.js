@@ -230,7 +230,7 @@ export class AsyncVerifier extends FormVerifier {
       // If multiple elements share the same name, the first should be selected.
       // This matches the behavior of HTML5 validation, e.g. with radio buttons.
       const element = user().assertElement(
-        formElementsQuerySelectorAll(this.form_, `[name="${name}"]`),
+        this.form_./*OK*/ querySelector(`[name="${name}"]`),
         'Verification error name property must match a field name'
       );
 
