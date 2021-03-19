@@ -35,13 +35,13 @@ createTask('build', 'build', 'build');
 createTask('bundle-size', 'bundleSize', 'bundle-size');
 createTask('caches-json', 'cachesJson', 'caches-json');
 createTask('check-analytics-vendors-list', 'checkAnalyticsVendorsList', 'check-analytics-vendors-list'); // prettier-ignore
+createTask('check-build-system', 'checkBuildSystem','check-build-system'); // prettier-ignore
 createTask('check-exact-versions', 'checkExactVersions','check-exact-versions'); // prettier-ignore
 createTask('check-links', 'checkLinks', 'check-links');
 createTask('check-owners', 'checkOwners', 'check-owners');
 createTask('check-renovate-config','checkRenovateConfig','check-renovate-config'); // prettier-ignore
 createTask('check-sourcemaps', 'checkSourcemaps', 'check-sourcemaps');
 createTask('check-types', 'checkTypes', 'check-types');
-createTask('check-build-system', 'checkBuildSystem','check-build-system'); // prettier-ignore
 createTask('check-video-interface-list', 'checkVideoInterfaceList', 'check-video-interface-list'); // prettier-ignore
 createTask('cherry-pick', 'cherryPick', 'cherry-pick');
 createTask('clean', 'clean', 'clean');
