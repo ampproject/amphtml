@@ -23,26 +23,46 @@ const {
   downloadExperimentOutput,
   printSkipMessage,
   timedExecOrDie,
+  timedExecOrThrow,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {experiment} = require('minimist')(process.argv.slice(2));
 const {getExperimentConfig} = require('../common/utils');
+const {isPushBuild} = require('../common/ci');
 const {runCiJob} = require('./ci-job');
 
 const jobName = `${experiment}-tests.js`;
 
+/**
+ * Runs tests for the given configuration and reports results for push builds.
+ * @param {!Object} config
+ */
+function runExperimentTests(config) {
+  try {
+    const defineFlag = `--define_experiment_constant ${config.define_experiment_constant}`;
+    const experimentFlag = `--experiment ${experiment}`;
+    timedExecOrThrow(
+      `amp integration --nobuild --compiled --headless ${experimentFlag} ${defineFlag}`
+    );
+    timedExecOrThrow(
+      `amp e2e --nobuild --compiled --headless ${experimentFlag} ${defineFlag}`
+    );
+  } catch (e) {
+    if (e.status) {
+      process.exitCode = e.status;
+    }
+  } finally {
+    if (isPushBuild()) {
+      timedExecOrDie('amp test-report-upload');
+    }
+  }
+}
+
 function pushBuildWorkflow() {
   const config = getExperimentConfig(experiment);
   if (config) {
-    const defineFlag = `--define_experiment_constant ${config.define_experiment_constant}`;
-    const experimentFlag = `--experiment ${experiment}`;
     downloadExperimentOutput(experiment);
-    timedExecOrDie(
-      `amp integration --nobuild --compiled --headless ${experimentFlag} ${defineFlag}`
-    );
-    timedExecOrDie(
-      `amp e2e --nobuild --compiled --headless ${experimentFlag} ${defineFlag}`
-    );
+    runExperimentTests(config);
   } else {
     printSkipMessage(
       jobName,
