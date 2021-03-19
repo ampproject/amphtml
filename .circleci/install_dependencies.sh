@@ -20,14 +20,6 @@ set -e
 
 GREEN() { echo -e "\033[0;32m$1\033[0m"; }
 
-echo $(GREEN "Installing Bazel...")
-apt-get install -y apt-transport-https curl gnupg
-curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg
-mv bazel.gpg /etc/apt/trusted.gpg.d/
-echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | tee /etc/apt/sources.list.d/bazel.list
-apt-get update
-apt-get install bazel
-
 echo $(GREEN "Installing NVM...")
 curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
 
