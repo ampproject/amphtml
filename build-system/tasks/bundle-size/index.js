@@ -92,8 +92,8 @@ function checkResponse(response, ...successMessages) {
  * @return {function()}
  */
 async function getRequestPost() {
-  const {default: post} = await import('request');
-  return util.promisify(post);
+  const {default: request} = await import('request');
+  return util.promisify(request.post);
 }
 
 /**
