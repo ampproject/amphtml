@@ -175,6 +175,8 @@ export function mergeExtensionsMetadata(extensions, customElementExtensions) {
     if (!extensionsHasElement(extensions, extensionId)) {
       extensions.push({
         'custom-element': extensionId,
+        // The default version is 0.1. To specify a specific version,
+        // use metadata['extensions'] field instead.
         src: `${urls.cdn}/v0/${extensionId}-0.1.js`,
       });
     }
