@@ -95,7 +95,7 @@ The `amp-story-panning-media` component accepts 1 descendant. This descendant mu
 
 ## Attributes
 
-### x {string} optional
+### x {string} (optional)
 
 Specifies the horizontal position in percentage.  
 Centered on 0 (default) with positive values moving the image to the right and negative to the left.
