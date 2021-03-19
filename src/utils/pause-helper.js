@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-import {
-  observeContentSize,
-  unobserveContentSize,
-} from './size-observer';
+import {observeContentSize, unobserveContentSize} from './size-observer';
 
 export class PauseHelper {
-
   /**
    * @param {!AmpElement} element
    */
