@@ -24,13 +24,22 @@ import {useResourcesNotify} from '../../../src/preact/utils';
  * @return {string}
  */
 const DEFAULT_RENDER = (data) => JSON.stringify(data);
+
+/**
+ * @param {string} url
+ * @return {!Promise<!JsonObject>}
+ */
+const DEFAULT_FETCH = (url) => {
+  return fetch(url).then((res) => res.json());
+};
+
 /**
  * @param {!RenderDef.Props} props
  * @return {PreactDef.Renderable}
  */
 export function Render({
   src = '',
-  getJson = window.fetch,
+  getJson = DEFAULT_FETCH,
   render = DEFAULT_RENDER,
   ...rest
 }) {
