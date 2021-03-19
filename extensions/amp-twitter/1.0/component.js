@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {IframeEmbed} from '../../../src/preact/component/3p-frame';
+import {ProxyIframeEmbed} from '../../../src/preact/component/3p-frame';
 
 /** @const {string} */
 const TYPE = 'twitter';
@@ -26,7 +26,7 @@ const TYPE = 'twitter';
  */
 export function Twitter({title, ...rest}) {
   return (
-    <IframeEmbed
+    <ProxyIframeEmbed
       allowFullscreen
       title={title}
       {...rest}

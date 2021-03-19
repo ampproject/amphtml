@@ -54,12 +54,20 @@ var RendererFunctionResponseType;
  */
 var RendererFunctionType;
 
+/** @const */
+var IframeDef = {};
+
 /**
  * @typedef {{
+ *   allow: (string|undefined),
  *   allowFullscreen: (boolean|undefined),
- *   deserializeMessage: (function(*):(?JsonObject|undefined)|undefined),
+ *   allowtransparency: (boolean|undefined),
+ *   loading: (Loading),
+ *   manageMessageHandler: (function({current: ?}, function):function|undefined),
  *   name: (string|undefined),
- *   onRegisterIframe: (function(number)|undefined),
+ *   onReadyState: (function|undefined),
+ *   options: (Object|undefined)
+ *   ready: (boolean|undefined),
  *   requestResize: (function(number)|undefined),
  *   sandbox: (string|undefined),
  *   src: (string|undefined),
@@ -67,4 +75,10 @@ var RendererFunctionType;
  *   type: (string|undefined),
  * }}
  */
-var IframeProps;
+IframeDef.props;
+
+/** @constructor */
+IframeDef.Api = function () {};
+
+/** @type {string} */
+IframeDef.Api.prototype.readyState;

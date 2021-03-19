@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '..';
-import {ContainWrapper} from './contain';
+import {IframeEmbed} from './iframe';
 import {deserializeMessage} from '../../3p-frame-messaging';
 import {dict} from '../../utils/object';
 import {generateSentinel, getBootstrapUrl} from '../../3p-frame';
@@ -25,7 +25,7 @@ import {
 } from '../../core/3p-frame';
 import {parseUrlDeprecated} from '../../url';
 import {sequentialIdGenerator} from '../../utils/id-generator';
-import {useEffect, useLayoutEffect, useRef, useState} from '..';
+import {useCallback, useEffect, useRef, useState} from '..';
 
 /** @type {!Object<string,function>} 3p frames for that type. */
 export const countGenerators = {};
@@ -50,13 +50,12 @@ const DEFAULT_SANDBOX =
 /**
  * Creates the iframe for the embed. Applies correct size and passes the embed
  * attributes to the frame via JSON inside the fragment.
- * @param {!IframeProps} props
+ * @param {!IframeDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function IframeEmbed({
+export function ProxyIframeEmbed({
   name: nameProp,
   options = {},
-  requestResize,
   sandbox = DEFAULT_SANDBOX,
   src,
   type,
@@ -64,22 +63,18 @@ export function IframeEmbed({
   ...rest
 }) {
   const ref = useRef(null);
-  const containRef = useRef(null);
-  const [heightStyle, setHeightStyle] = useState(null);
-
+  const contentRef = useRef(null);
   if (!countGenerators[type]) {
     countGenerators[type] = sequentialIdGenerator();
   }
   const [count] = useState(countGenerators[type]);
-  // TODO: loading/mount/pause similar to Instagram.
-
   const [name, setName] = useState(nameProp);
   useEffect(() => {
     if (nameProp) {
       setName(nameProp);
       return;
     }
-    const win = containRef.current?.ownerDocument?.defaultView;
+    const win = contentRef.current?.ownerDocument?.defaultView;
     if (!win) {
       return;
     }
@@ -110,57 +105,40 @@ export function IframeEmbed({
     );
   }, [count, nameProp, options, src, title, type]);
 
-  useLayoutEffect(() => {
+  const manageMessageHandler = useCallback((ref, onSuccess) => {
     const iframe = ref.current;
     if (!iframe) {
       return;
     }
     const messageHandler = (event) => {
-      if (event.source != iframe.contentWindow || !event.data) {
+      const iframe = ref.current;
+      if (!iframe || event.source != iframe.contentWindow || !event.data) {
         return;
       }
 
       const data = deserializeMessage(event.data);
       if (data['type'] == MessageType.EMBED_SIZE) {
         const height = data['height'];
-        if (requestResize) {
-          requestResize(height);
-        }
-        setHeightStyle(height);
+        onSuccess(height);
       }
     };
     const {defaultView} = iframe.ownerDocument;
     defaultView.addEventListener('message', messageHandler);
     return () => defaultView.removeEventListener('message', messageHandler);
-  }, [name, requestResize]);
+  }, []);
 
   return (
-    <ContainWrapper
-      ref={containRef}
-      layout
-      size
-      paint
-      wrapperStyle={heightStyle}
+    <IframeEmbed
+      allow={BLOCK_SYNC_XHR}
+      contentRef={contentRef}
+      manageMessageHandler={manageMessageHandler}
+      name={name}
+      ref={ref}
+      ready={!!name}
+      sandbox={sandbox}
+      src={src}
+      title={title}
       {...rest}
-    >
-      {name && (
-        <iframe
-          allow={BLOCK_SYNC_XHR}
-          name={name}
-          part="iframe"
-          ref={ref}
-          sandbox={sandbox}
-          scrolling="no"
-          src={src}
-          style={{
-            border: 'none',
-            contentVisibility: 'auto',
-            width: '100%',
-            height: '100%',
-          }}
-          title={title}
-        />
-      )}
-    </ContainWrapper>
+    />
   );
 }
