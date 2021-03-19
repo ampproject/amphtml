@@ -27,8 +27,10 @@ export default {
 
 export const _default = () => {
   return (
-    <Render style={{width: 300, height: 200}}>
-      This text is inside amp-render.
-    </Render>
+    <Render
+      src={'http://example.com'}
+      getJson={() => Promise.resolve({name: 'George'})}
+      render={(data) => `Hi ${data.name}!`}
+    ></Render>
   );
 };
