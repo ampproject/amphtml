@@ -1655,10 +1655,47 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
             element.getResource_(),
             'unlayout'
           );
+          const schedulePassStub = env.sandbox.stub(resources, 'schedulePass');
 
           element.unmount();
           expect(testElementPauseCallback).to.be.calledOnce;
           expect(resourceUnlayoutStub).to.be.calledOnce;
+          expect(schedulePassStub).to.be.calledOnce;
+        });
+
+        it('should pause and unlayout on unmount with unlayoutOnPause', async () => {
+          const element = new ElementClass();
+          container.appendChild(element);
+          await element.buildInternal();
+          element.getResource_().layoutScheduled(Date.now());
+          const impl = await element.getImpl();
+          env.sandbox.stub(impl, 'unlayoutOnPause').returns(true);
+          const schedulePassStub = env.sandbox.stub(resources, 'schedulePass');
+
+          element.unmount();
+          expect(testElementPauseCallback).to.be.calledOnce;
+          expect(testElementUnlayoutCallback).to.be.calledOnce;
+          // `schedulePass` is triggered twice: once for pause and once for
+          // unlayout. However, it's benign because only one pass will be
+          // scheduled as a result.
+          expect(schedulePassStub).to.be.calledTwice;
+        });
+
+        it('should NOT schedule pass on unmount when disconnected', async () => {
+          const element = new ElementClass();
+          container.appendChild(element);
+          await element.buildInternal();
+          const resourceUnlayoutStub = env.sandbox.stub(
+            element.getResource_(),
+            'unlayout'
+          );
+          const schedulePassStub = env.sandbox.stub(resources, 'schedulePass');
+
+          container.removeChild(element);
+          element.unmount();
+          expect(testElementPauseCallback).to.be.calledOnce;
+          expect(resourceUnlayoutStub).to.be.calledOnce;
+          expect(schedulePassStub).to.not.be.called;
         });
       });
 
