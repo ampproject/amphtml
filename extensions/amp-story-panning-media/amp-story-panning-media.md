@@ -13,6 +13,7 @@ tags:
   - zooming
   - animation
   - media
+  - transitions
 author: philipbell
 toc: true
 $title: amp-story-panning-media
@@ -62,7 +63,7 @@ The `amp-story-panning-media` component provides a way to pan and zoom an image 
 
 ## Usage
 
-Use the `amp-story-panning-media` component to render 360 images and video. The component can animate between two points or be explorable via the device's gyroscope sensor. For best results, only use one element per [`amp-story-page`](https://amp.dev/documentation/components/amp-story-page/?format=stories).
+Use the `amp-story-panning-media` to animate an image between pages. The component can animate between two points or be explorable via the device's gyroscope sensor. For best results, only use one element per [`amp-story-page`](https://amp.dev/documentation/components/amp-story-page/?format=stories).
 
 ### Accessibility considerations
 
