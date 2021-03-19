@@ -45,7 +45,7 @@ describes.endtoend(
       ).to.equal(0);
     });
 
-    // TODO(wg-components, #24195): Flaky during CI.
+    // TODO(wg-components, #28948): Flaky during CI.
     it.skip('should open the lightbox', async () => {
       const open = await controller.findElement('#open');
       await controller.click(open);
