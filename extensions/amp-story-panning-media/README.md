@@ -14,7 +14,7 @@ tags:
   - animation
   - media
   - transitions
-author: philipbell
+author: processprocess
 toc: true
 $title: amp-story-panning-media
 version: '0.1'
@@ -49,8 +49,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-[tip type="important"]Change image sources to ampproject/amphtml/master!!![/tip]
-
 <figure class="centered-fig">
   <amp-anim alt="amp-story-panning-media example" width="304" height="548" layout="fixed" src="https://raw.githubusercontent.com/processprocess/amphtml/panning-media-docs/extensions/amp-story-panning-media/img/amp-story-panning-media.gif">
     <noscript>
@@ -69,33 +67,31 @@ Use the `amp-story-panning-media` to transition an image between pages. The comp
 
 Add the following import to your AMP documents:
 
-[sourcecode:html]
-
-<script async custom-element="amp-story-panning-media" src="https://cdn.ampproject.org/v0/amp-story-panning-media-0.1.js"></script>
-
-[/sourcecode]
+```html
+<script async custom-element="amp-story-panning-media" src="https://cdn.ampproject.org/v0/amp-story-panning-media-0.1.js"><script>
+```
 
 ### Configuration
 
 The `amp-story-panning-media` component accepts 1 descendant. This descendant must be an [amp-img](https://amp.dev/documentation/components/amp-img/?format=stories). Components associate with each other when they have a child with the same `src`.
 
-[sourcecode:html]
+```html
 <amp-story-page>
-<amp-story-grid-layer>
-<amp-story-panning-media layout="fill">
-<amp-img layout="fill" src="assets/world-map.jpg" x="-10%" y="-20%" zoom=".8" width="4000" height="3059" ></amp-img>
-</amp-story-panning-media>
-</amp-story-grid-layer>
+  <amp-story-grid-layer>
+    <amp-story-panning-media layout="fill">
+      <amp-img layout="fill" src="assets/world-map.jpg" x="-10%" y="-20%" zoom=".8" width="4000" height="3059" ></amp-img>
+    </amp-story-panning-media>
+  </amp-story-grid-layer>
 </amp-story-page>
 
 <amp-story-page>
-<amp-story-grid-layer>
-<amp-story-panning-media layout="fill">
-<amp-img layout="fill" src="assets/world-map.jpg" x="20%" y="30%" zoom="2" width="4000" height="3059" ></amp-img>
-</amp-story-panning-media>
-</amp-story-grid-layer>
-</amp-story-page>
-[/sourcecode]
+  <amp-story-grid-layer>
+    <amp-story-panning-media layout="fill">
+      <amp-img layout="fill" src="assets/world-map.jpg" x="20%" y="30%" zoom="2" width="4000" height="3059" ></amp-img>
+    </amp-story-panning-media>
+  </amp-story-grid-layer>
+</mp-story-page>
+```
 
 ## Attributes
 
