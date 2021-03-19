@@ -21,7 +21,7 @@
       owners: [{name: '*'}],
     },
     {
-      pattern: '{.*,gulpfile.js}',
+      pattern: '{.*,**/ads/vendors/colombia.js}',
       owners: [{name: 'ampproject/wg-infra'}],
     },
     {
