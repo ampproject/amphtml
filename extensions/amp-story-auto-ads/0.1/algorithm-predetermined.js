@@ -127,6 +127,8 @@ export class PredeterminedPositionAlgorithm {
 
   /** @override */
   onNewAdView(unusedPageIndex) {
-    this.createNextPage_();
+    if (this.pagesCreated_ < this.adPositions_.length) {
+      this.createNextPage_();
+    }
   }
 }
