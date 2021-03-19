@@ -56,6 +56,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			if *validator_js != "https://cdn.ampproject.org/v0/validator.js" {
 				bytes = []byte(strings.Replace(string(bytes),
 					"https://cdn.ampproject.org/v0/validator.js", "/validator.js", -1))
+			} else if r.FormValue("experimental_wasm") == "1" {
+				bytes = []byte(strings.Replace(string(bytes),
+					"https://cdn.ampproject.org/v0/validator.js", "https://cdn.ampproject.org/v0/validator_wasm.js", -1))
 			}
 			w.Write(bytes)
 			return
