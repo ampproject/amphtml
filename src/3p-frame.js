@@ -50,12 +50,7 @@ const TAG = '3p-frame';
  *     - data-* attributes of the <amp-ad> tag with the "data-" removed.
  *     - A _context object for internal use.
  */
-export function getFrameAttributes(
-  parentWindow,
-  element,
-  opt_type,
-  opt_context
-) {
+function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
   const type = opt_type || element.getAttribute('type');
   userAssert(type, 'Attribute type required for <amp-ad>: %s', element);
   const sentinel = generateSentinel(parentWindow);
