@@ -30,21 +30,18 @@ describes.sandboxed('Render 1.0 preact component', {}, (env) => {
   });
 
   it('should render as a div by default', () => {
-    const getJsonStub = sandbox.stub();
-    getJsonStub.resolves(response);
-
-    const render = (data) => JSON.stringify(data);
-
-    const props = {
-      getJson: getJsonStub,
-      src: 'https://example.com',
-      render,
-    };
-    const wrapper = mount(<Render {...props} />);
+    const wrapper = mount(
+      <Render
+        src={'http://example.com'}
+        getJson={() => Promise.resolve({name: 'George'})}
+        render={(data) => `Hi ${data.name}`}
+      ></Render>
+    );
 
     // Generic test for the Wrapper
     // This is actually fairly arbitrary that it should be a "div". But it's
     // checked here to ensure that we can change it controllably when needed.
     expect(wrapper.getDOMNode().tagName).to.equal('DIV');
+    // expect(wrapper.html()).to.contain('Hi George');
   });
 });
