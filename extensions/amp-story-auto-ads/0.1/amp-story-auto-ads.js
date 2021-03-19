@@ -134,6 +134,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
           this.config_
         );
         this.placementAlgorithm_ = getPlacementAlgo(
+          this.win,
           this.storeService_,
           this.adPageManager_
         );
