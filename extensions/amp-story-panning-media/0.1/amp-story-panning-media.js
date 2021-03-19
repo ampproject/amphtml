@@ -58,15 +58,11 @@ export let panningMediaPositionDef;
 
 /**
  * Max distances to keep image in viewport.
- * left: Percentage between [-50; 50]
- * right: Percentage between [-50; 50]
- * top: Percentage between [-50; 50]
- * bottom: Percentage between [-50; 50]
+ * horizontal: Percentage between [-50; 50]
+ * vertical: Percentage between [-50; 50]
  * @typedef {{
- *   left: float,
- *   right: float,
- *   top: float,
- *   bottom: float,
+ *   horizontal: float,
+ *   vertical: float,
  * }}
  */
 export let panningMediaMaxBoundsPercentDef;
@@ -200,11 +196,9 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     if (lockBounds) {
       // Zoom must be set to calculate maxBounds.
       this.animateTo_.zoom = zoom < 1 ? 1 : zoom;
-      const maxBounds = this.getMaxBounds_();
-      this.animateTo_.x =
-        x > 0 ? Math.min(maxBounds.left, x) : Math.max(maxBounds.right, x);
-      this.animateTo_.y =
-        y > 0 ? Math.min(maxBounds.top, y) : Math.max(-maxBounds.bottom, y);
+      const {horizontal, vertical} = this.getMaxBounds_();
+      this.animateTo_.x = Math.max(-horizontal, Math.min(x, horizontal));
+      this.animateTo_.y = Math.max(-vertical, Math.min(y, vertical));
     } else {
       this.animateTo_ = {x, y, zoom};
     }
@@ -238,10 +232,8 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       1 - containerHeight / (scaledImageHeight * this.animateTo_.zoom);
 
     return {
-      left: DISTANCE_TO_CENTER_EDGE_PERCENT * widthFraction,
-      right: -DISTANCE_TO_CENTER_EDGE_PERCENT * widthFraction,
-      top: DISTANCE_TO_CENTER_EDGE_PERCENT * heightFraction,
-      bottom: -DISTANCE_TO_CENTER_EDGE_PERCENT * heightFraction,
+      horizontal: DISTANCE_TO_CENTER_EDGE_PERCENT * widthFraction,
+      vertical: DISTANCE_TO_CENTER_EDGE_PERCENT * heightFraction,
     };
   }
 
