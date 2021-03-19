@@ -16,7 +16,6 @@
 
 const fs = require('fs');
 const {CONTROL, maybeCopyImageToCache, urlToCachePath} = require('./helpers');
-const {JSDOM} = require('jsdom');
 
 /**
  * Lookup URL from cache. Inspect tags that could use images.
@@ -26,6 +25,7 @@ const {JSDOM} = require('jsdom');
 function copyImagesFromTags(url) {
   const cachePath = urlToCachePath(url, CONTROL);
   const document = fs.readFileSync(cachePath);
+  const {JSDOM} = require('jsdom'); // Lazy-required to speed up task loading.
   const dom = new JSDOM(document);
 
   copyImagesFromAmpImg(url, dom);
