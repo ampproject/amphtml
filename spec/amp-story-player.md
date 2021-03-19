@@ -622,8 +622,8 @@ Fired when the player changes to a new story and provides the `index`, the playe
 ```javascript
 player.addEventListener('navigation', (event) => {
   console.log('Navigated from story 0 to story 1 of 3');
-  console.log('Current story:' event.index); // 1
-  console.log('Current story:' event.remaining); // 1
+  console.log('Current story:', event.index); // 1
+  console.log('Current story:', event.remaining); // 1
 })
 ```
 
@@ -634,8 +634,8 @@ Fired when the story inside the player changes to a new page. It provides the `p
 ```javascript
 player.addEventListener('storyNavigation', (event) => {
   console.log('User navigated from one page to the other.');
-  console.log('Current page id:' event.pageId); // page-2
-  console.log('Story progress:' event.progress); // Number from 0 to 1.
+  console.log('Current page id:', event.pageId); // page-2
+  console.log('Story progress:', event.progress); // Number from 0 to 1.
 })
 ```
 
