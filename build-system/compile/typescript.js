@@ -17,9 +17,6 @@
 
 const fs = require('fs-extra');
 const path = require('path');
-const ts = require('typescript');
-/** @type {*} */
-const tsickle = require('tsickle');
 const {log} = require('../common/logging');
 const {red} = require('kleur/colors');
 
@@ -31,7 +28,9 @@ const {red} = require('kleur/colors');
  * @param {string} srcFilename
  * @return {!Promise}
  */
-exports.transpileTs = async function (srcDir, srcFilename) {
+async function transpileTs(srcDir, srcFilename) {
+  const ts = require('typescript'); // Lazy-required to speed up task loading.
+  const tsickle = require('tsickle'); // Lazy-required to speed up task loading.
   const tsEntry = path.join(srcDir, srcFilename).replace(/\.js$/, '.ts');
   const tsConfig = ts.convertCompilerOptionsFromJson(
     {
@@ -86,4 +85,8 @@ exports.transpileTs = async function (srcDir, srcFilename) {
   if (diagnostics.length) {
     log(red('TSickle:'), tsickle.formatDiagnostics(diagnostics));
   }
+}
+
+module.exports = {
+  transpileTs,
 };

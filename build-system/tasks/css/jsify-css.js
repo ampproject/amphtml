@@ -15,7 +15,6 @@
  */
 'use strict';
 
-const autoprefixer = require('autoprefixer');
 const cssnano = require('cssnano');
 const fs = require('fs-extra');
 const postcss = require('postcss');
@@ -24,7 +23,7 @@ const {log} = require('../../common/logging');
 const {red} = require('kleur/colors');
 
 // NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
-const cssprefixer = autoprefixer({
+const browsersList = {
   overrideBrowserslist: [
     'last 5 ChromeAndroid versions',
     'last 5 iOS versions',
@@ -34,7 +33,7 @@ const cssprefixer = autoprefixer({
     'last 2 OperaMobile versions',
     'last 2 OperaMini versions',
   ],
-});
+};
 
 const cssNanoDefaultOptions = {
   autoprefixer: false,
@@ -71,6 +70,8 @@ function transformCss(cssStr, opt_cssnano, opt_filename) {
     opt_cssnano
   );
   const cssnanoTransformer = cssnano({preset: ['default', cssnanoOptions]});
+  const autoprefixer = require('autoprefixer'); // Lazy-required to speed up task loading.
+  const cssprefixer = autoprefixer(browsersList);
   const transformers = [postcssImport, cssprefixer, cssnanoTransformer];
   return postcss.default(transformers).process(cssStr, {
     'from': opt_filename,
