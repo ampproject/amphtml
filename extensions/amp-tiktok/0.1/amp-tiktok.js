@@ -182,7 +182,6 @@ export class AmpTiktok extends AMP.BaseElement {
             'width': px('325px'),
             'height': px('525px'),
           });
-          this.resizeFallback_();
         });
     });
   }
