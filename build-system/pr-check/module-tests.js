@@ -32,41 +32,30 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'module-tests.js';
 
-/**
- * @return {void}
- */
 function prependConfig() {
   const targets = MINIFIED_TARGETS.flatMap((target) => [
     `dist/${target}.js`,
     `dist/${target}.mjs`,
   ]).join(',');
   timedExecOrDie(
-    `gulp prepend-global --${argv.config} --local_dev --fortesting --derandomize --target=${targets}`
+    `amp prepend-global --${argv.config} --local_dev --fortesting --derandomize --target=${targets}`
   );
 }
 
-/**
- * @return {void}
- */
 function pushBuildWorkflow() {
   downloadNomoduleOutput();
   downloadModuleOutput();
-  timedExecOrDie('gulp update-packages');
   prependConfig();
-  timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
+  timedExecOrDie('amp integration --nobuild --compiled --headless --esm');
 }
 
-/**
- * @return {void}
- */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     downloadNomoduleOutput();
     downloadModuleOutput();
-    timedExecOrDie('gulp update-packages');
     prependConfig();
     timedExecOrDie(
-      `gulp integration --nobuild --compiled --headless --esm --config=${argv.config}`
+      `amp integration --nobuild --compiled --headless --esm --config=${argv.config}`
     );
   } else {
     printSkipMessage(

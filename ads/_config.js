@@ -423,6 +423,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'digiteka': {
+    renderStartImplemented: true,
+  },
+
   'directadvert': {
     renderStartImplemented: true,
   },
@@ -514,9 +518,10 @@ const adConfig = jsonConfiguration({
   'flite': {},
 
   'fluct': {
+    prefetch: ['https://pdn.adingo.jp/p.js'],
     preconnect: [
       'https://cdn-fluct.sh.adingo.jp',
-      'https://s.sh.adingo.jp',
+      'https://sh.adingo.jp',
       'https://i.adingo.jp',
     ],
   },
@@ -631,6 +636,8 @@ const adConfig = jsonConfiguration({
 
   'kargo': {},
 
+  'ketshwa': {},
+
   'kiosked': {
     renderStartImplemented: true,
   },
@@ -697,8 +704,20 @@ const adConfig = jsonConfiguration({
   },
 
   'marfeel': {
-    prefetch: 'https://www.googletagservices.com/tag/js/gpt.js',
-    preconnect: 'https://live.mrf.io',
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: [
+      'https://live.mrf.io',
+      'https://tpc.googlesyndication.com',
+      'https://fastlane.rubiconproject.com',
+      'https://htlb.casalemedia.com',
+      'https://prg.smartadserver.com',
+      'https://ib.adnxs.com',
+      'https://bidder.criteo.com',
+      'https://marfeel-d.openx.net',
+      'https://ice.360yield.com',
+      'https://mbid.marfeelrev.com',
+      'https://adservice.google.com',
+    ],
     consentHandlingOverride: true,
   },
 

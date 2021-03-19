@@ -11,7 +11,7 @@ rating viewer, you'd do this by building an extension.
   (Do not remove or edit this comment.)
 
   This table-of-contents is automatically generated. To generate it, run:
-    gulp markdown-toc --fix
+    amp markdown-toc --fix
 -->
 
 <!-- {"maxdepth": 1} -->
@@ -45,7 +45,7 @@ Before diving into the details on creating a new AMP extension, please familiari
 To bootstrap the creation of a new component, the following command will create the directory structure and boilerplate code for you:
 
 ```shell
-$ gulp make-extension --name=amp-my-element
+$ amp make-extension --name=amp-my-element
 ```
 
 ## Naming
@@ -791,7 +791,7 @@ For faster testing during development, consider using --files argument
 to only run your extensions' tests.
 
 ```shell
-$ gulp unit --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
+$ amp unit --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
 ```
 
 ## Type checking
@@ -804,7 +804,7 @@ your code. The following command should be run to ensure no type
 violations are introduced by your extension.
 
 ```shell
-$ gulp check-types
+$ amp check-types
 ```
 
 ## Example PRs

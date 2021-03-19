@@ -35,15 +35,15 @@ function runIntegrationTestsForPlatform() {
   switch (process.platform) {
     case 'linux':
       timedExecOrDie(
-        'gulp integration --nobuild --compiled --headless --firefox'
+        'amp integration --nobuild --compiled --headless --firefox'
       );
       break;
     case 'darwin':
-      timedExecOrDie('gulp integration --nobuild --compiled --safari');
+      timedExecOrDie('amp integration --nobuild --compiled --safari');
       break;
     case 'win32':
-      timedExecOrDie('gulp integration --nobuild --compiled --headless --edge');
-      timedExecOrDie('gulp integration --nobuild --compiled --ie');
+      timedExecOrDie('amp integration --nobuild --compiled --headless --edge');
+      timedExecOrDie('amp integration --nobuild --compiled --ie');
       break;
     default:
       log(
@@ -60,10 +60,10 @@ function runIntegrationTestsForPlatform() {
 function runE2eTestsForPlatform() {
   switch (process.platform) {
     case 'linux':
-      timedExecOrDie('gulp e2e --nobuild --compiled --browsers=firefox');
+      timedExecOrDie('amp e2e --nobuild --compiled --browsers=firefox');
       break;
     case 'darwin':
-      timedExecOrDie('gulp e2e --nobuild --compiled --browsers=safari');
+      timedExecOrDie('amp e2e --nobuild --compiled --browsers=safari');
       break;
     case 'win32':
       break;
@@ -82,13 +82,13 @@ function runE2eTestsForPlatform() {
 function runUnitTestsForPlatform() {
   switch (process.platform) {
     case 'linux':
-      timedExecOrDie('gulp unit --headless --firefox');
+      timedExecOrDie('amp unit --headless --firefox');
       break;
     case 'darwin':
-      timedExecOrDie('gulp unit --safari');
+      timedExecOrDie('amp unit --safari');
       break;
     case 'win32':
-      timedExecOrDie('gulp unit --headless --edge');
+      timedExecOrDie('amp unit --headless --edge');
       break;
     default:
       log(
@@ -99,13 +99,9 @@ function runUnitTestsForPlatform() {
   }
 }
 
-/**
- * @return {void}
- */
 function pushBuildWorkflow() {
-  timedExecOrDie('gulp update-packages');
   runUnitTestsForPlatform();
-  timedExecOrDie('gulp dist --fortesting');
+  timedExecOrDie('amp dist --fortesting');
   runIntegrationTestsForPlatform();
 }
 
@@ -130,7 +126,6 @@ async function prBuildWorkflow() {
     );
     return;
   }
-  timedExecOrDie('gulp update-packages');
   if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
     runUnitTestsForPlatform();
   }
@@ -141,7 +136,7 @@ async function prBuildWorkflow() {
       Targets.E2E_TEST
     )
   ) {
-    timedExecOrDie('gulp dist --fortesting');
+    timedExecOrDie('amp dist --fortesting');
   }
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     runIntegrationTestsForPlatform();

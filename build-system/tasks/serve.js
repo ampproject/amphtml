@@ -21,7 +21,7 @@ const globby = require('globby');
 const header = require('connect-header');
 const minimist = require('minimist');
 const morgan = require('morgan');
-const open = require('opn');
+const open = require('open');
 const os = require('os');
 const path = require('path');
 const {
@@ -90,7 +90,7 @@ async function startServer(
   serverOptions = {},
   modeOptions = {}
 ) {
-  buildNewServer();
+  await buildNewServer();
   if (serverOptions.lazyBuild) {
     lazyBuild = serverOptions.lazyBuild;
   }
@@ -129,7 +129,7 @@ async function startServer(
   log(green('Started'), cyan(options.name), green('at:'));
   log('\t', cyan(url));
   for (const device of Object.entries(os.networkInterfaces())) {
-    for (const detail of device[1]) {
+    for (const detail of device[1] ?? []) {
       if (detail.family === 'IPv4') {
         log('\t', cyan(makeUrl(detail.address)));
       }
@@ -170,7 +170,7 @@ async function stopServer() {
 async function restartServer() {
   stopServer();
   try {
-    buildNewServer();
+    await buildNewServer();
   } catch {
     log(red('ERROR:'), 'Could not rebuild', cyan('AMP Server'));
     return;
@@ -188,7 +188,7 @@ async function performPreBuildSteps() {
 }
 
 /**
- * Entry point of the `gulp serve` task.
+ * Entry point of the `amp serve` task.
  */
 async function serve() {
   await doServe();
@@ -223,17 +223,17 @@ module.exports = {
 
 serve.description = 'Starts a webserver at the project root directory';
 serve.flags = {
-  host: '  Hostname or IP address to bind to (default: localhost)',
-  port: '  Specifies alternative port (default: 8000)',
-  https: '  Use HTTPS server',
-  quiet: "  Run in quiet mode and don't log HTTP requests",
-  cache: '  Make local resources cacheable by the browser',
-  no_caching_extensions: '  Disable caching for extensions',
-  compiled: '  Serve minified JS',
-  esm: '  Serve ESM JS (uses the new typescript server transforms)',
-  cdn: '  Serve current prod JS',
-  rtv: '  Serve JS from the RTV provided',
+  host: 'Hostname or IP address to bind to (default: localhost)',
+  port: 'Specifies alternative port (default: 8000)',
+  https: 'Use HTTPS server',
+  quiet: "Run in quiet mode and don't log HTTP requests",
+  cache: 'Make local resources cacheable by the browser',
+  no_caching_extensions: 'Disable caching for extensions',
+  compiled: 'Serve minified JS',
+  esm: 'Serve ESM JS (uses the new typescript server transforms)',
+  cdn: 'Serve current prod JS',
+  rtv: 'Serve JS from the RTV provided',
   coverage:
-    '  Serve instrumented code to collect coverage info; use ' +
+    'Serve instrumented code to collect coverage info; use ' +
     '--coverage=live to auto-report coverage on page unload',
 };

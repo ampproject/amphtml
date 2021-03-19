@@ -1,8 +1,18 @@
-.i-amphtml-tikok-centered {
+.i-amphtml-tiktok-centered {
     height: 100%;
     left: 50%;
-    margin-left: -162px;
+    width: 325px;
+    transform: translateX(-50%);
     position: absolute;
+    
+}
+
+.i-amphtml-tiktok-unresolved {
+    position: fixed;
+    opacity: 0;
+    pointer-events: none;
+    width: 325px;
+    height: 500px;
 }
 
 .i-amphtml-tiktok-placeholder-image-container{

@@ -15,7 +15,9 @@
  */
 
 import '../amp-tiktok';
-import {createElementWithAttributes, isAmpElement} from '../../../../src/dom';
+import * as dom from '../../../../src/dom';
+import {Services} from '../../../../src/services';
+import {isAmpElement} from '../../../../src/dom';
 
 describes.realWin(
   'amp-tiktok',
@@ -27,32 +29,36 @@ describes.realWin(
   (env) => {
     let win;
     let doc;
-    let clock;
+    let createElementWithAttributes;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      clock = env.sandbox.useFakeTimers();
-      clock.tick(0);
+      createElementWithAttributes = dom.createElementWithAttributes;
+
+      env.sandbox
+        .stub(dom, 'createElementWithAttributes')
+        .callsFake((document, tagName, attributes) => {
+          if (tagName === 'iframe' && attributes.src) {
+            // Serve a blank page, since these tests don't require an actual page.
+            // hash # at the end so path is not affected by param concat
+            attributes.src = `http://localhost:${location.port}/test/fixtures/served/blank.html#${attributes.src}`;
+          }
+          return createElementWithAttributes(document, tagName, attributes);
+        });
     });
 
-    async function getTiktok(videoId, isFullSrcUrl, opt_locale) {
-      const tiktok = createElementWithAttributes(win.document, 'amp-tiktok', {
-        layout: 'responsive',
-        width: '325px',
-        height: '730px',
-      });
-      if (isFullSrcUrl) {
-        tiktok.setAttribute(
-          'data-src',
-          `https://www.tiktok.com/@scout2015/video/${videoId}?lang=en-US`
-        );
-      } else if (opt_locale) {
-        tiktok.setAttribute('data-locale', opt_locale);
-        tiktok.setAttribute('data-src', videoId);
-      } else {
-        tiktok.setAttribute('data-src', videoId);
-      }
+    async function getTiktok(attrs = {}) {
+      const tiktok = dom.createElementWithAttributes(
+        win.document,
+        'amp-tiktok',
+        {
+          layout: 'responsive',
+          width: '325px',
+          height: '730px',
+          ...attrs,
+        }
+      );
       doc.body.appendChild(tiktok);
       return tiktok
         .buildInternal()
@@ -62,36 +68,41 @@ describes.realWin(
         .then(() => tiktok);
     }
 
-    it('renders with full src url', async () => {
+    it('renders with videoId', async () => {
       const videoId = '6718335390845095173';
-      const player = await getTiktok(videoId, true);
+      const player = await getTiktok({'data-src': videoId});
       const iframe = player.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.src).to.contain(videoId);
-      expect(iframe.src).to.contain('en-US');
+      expect(iframe.getAttribute('src')).to.contain(videoId);
+      expect(iframe.getAttribute('src')).to.contain('en-US');
     });
 
     it('renders with videoId', async () => {
       const videoId = '6718335390845095173';
-      const player = await getTiktok(videoId, false);
+      const videoSrc =
+        'https://www.tiktok.com/@scout2015/video/6718335390845095173';
+      const player = await getTiktok({'data-src': videoSrc});
       const iframe = player.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.src).to.contain(videoId);
-      expect(iframe.src).to.contain('en-US');
+      expect(iframe.getAttribute('src')).to.contain(videoId);
+      expect(iframe.getAttribute('src')).to.contain('en-US');
     });
 
     it('renders with videoId and locale', async () => {
       const videoId = '6718335390845095173';
-      const player = await getTiktok(videoId, false, 'fr-FR');
+      const player = await getTiktok({
+        'data-src': videoId,
+        'data-locale': 'fr-FR',
+      });
       const iframe = player.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.src).to.contain(videoId);
-      expect(iframe.src).to.contain('fr-FR');
+      expect(iframe.getAttribute('src')).to.contain(videoId);
+      expect(iframe.getAttribute('src')).to.contain('fr-FR');
     });
 
     it('removes iframe after unlayoutCallback', async () => {
       const videoId = '6718335390845095173';
-      const player = await getTiktok(videoId, true);
+      const player = await getTiktok({'data-src': videoId});
       const playerIframe = player.querySelector('iframe');
       expect(playerIframe).to.not.be.null;
 

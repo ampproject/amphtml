@@ -18,6 +18,7 @@ import {getMode} from '../mode';
 import {urls} from '../config';
 
 const CUSTOM_TEMPLATES = ['amp-mustache'];
+const LATEST_VERSION = 'latest';
 
 /**
  * Calculate the base url for any scripts.
@@ -93,6 +94,9 @@ export function calculateEntryPointScriptUrl(
  * @return {?{extensionId: string, extensionVersion: string}}
  */
 export function parseExtensionUrl(scriptUrl) {
+  if (!scriptUrl) {
+    return null;
+  }
   // Note that the "(\.max)?" group only applies to local dev.
   const matches = scriptUrl.match(
     /^(.*)\/(.*)-([0-9.]+|latest)(\.max)?\.(?:js|mjs)$/i
@@ -159,11 +163,19 @@ export function createExtensionScript(win, extensionId, version) {
  * extension ID, if it exists. Otherwise, returns null.
  * @param {!Window} win
  * @param {string} extensionId
+ * @param {string} version
+ * @param {boolean} latest
  * @param {boolean=} includeInserted If true, includes script elements that
  *   are inserted by the runtime dynamically. Default is true.
  * @return {!Array<!Element>}
  */
-export function getExtensionScripts(win, extensionId, includeInserted = true) {
+export function getExtensionScripts(
+  win,
+  extensionId,
+  version,
+  latest,
+  includeInserted = true
+) {
   // Always ignore <script> elements that have a mismatched RTV.
   const modifier =
     ':not([i-amphtml-loaded-new-version])' +
@@ -171,13 +183,25 @@ export function getExtensionScripts(win, extensionId, includeInserted = true) {
   // We have to match against "src" because a few extensions, such as
   // "amp-viewer-integration", do not have "custom-element" attribute.
   const matches = win.document.head./*OK*/ querySelectorAll(
-    `script[src*="/${extensionId}-"]` + modifier
+    `script[src*="/${extensionId}-"]${modifier}`
   );
   const filtered = [];
   for (let i = 0; i < matches.length; i++) {
     const match = matches[i];
     const urlParts = parseExtensionUrl(match.src);
-    if (urlParts && urlParts.extensionId === extensionId) {
+    if (!urlParts) {
+      continue;
+    }
+    const {
+      extensionId: scriptExtensionId,
+      extensionVersion: scriptExtensionVersion,
+    } = urlParts;
+    if (
+      scriptExtensionId == extensionId &&
+      (isIntermediateExtension(extensionId) ||
+        scriptExtensionVersion == version ||
+        (scriptExtensionVersion == LATEST_VERSION && latest))
+    ) {
       filtered.push(match);
     }
   }
@@ -186,28 +210,31 @@ export function getExtensionScripts(win, extensionId, includeInserted = true) {
 
 /**
  * Get list of all the extension JS files.
- * @param {HTMLHeadElement|Element|ShadowRoot} head
- * @return {!Array<string>}
+ * @param {HTMLHeadElement|Element|ShadowRoot|Document} head
+ * @return {!Array<{extensionId: string, extensionVersion: string}>}
  */
 export function extensionScriptsInNode(head) {
   // ampdoc.getHeadNode() can return null.
   if (!head) {
     return [];
   }
-  const scripts = {};
   // Note: Some extensions don't have [custom-element] or [custom-template]
   // e.g. amp-viewer-integration.
   const list = head.querySelectorAll(
     'script[custom-element],script[custom-template]'
   );
+  const scripts = [];
   for (let i = 0; i < list.length; i++) {
     const script = list[i];
-    const name =
+    const extensionId =
       script.getAttribute('custom-element') ||
       script.getAttribute('custom-template');
-    scripts[name] = true;
+    const urlParts = parseExtensionUrl(script.src);
+    if (extensionId && urlParts) {
+      scripts.push({extensionId, extensionVersion: urlParts.extensionVersion});
+    }
   }
-  return Object.keys(scripts);
+  return scripts;
 }
 
 /**

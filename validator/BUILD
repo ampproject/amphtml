@@ -23,6 +23,7 @@ genrule(
     srcs = [
         "validator-main.protoascii",
         "validator-css.protoascii",
+        "validator-svg.protoascii",
         "@amphtml-extensions//:validator-extensions-protoascii",
     ],
     outs = ["validator.protoascii"],

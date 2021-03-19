@@ -16,6 +16,8 @@
 
 import * as Preact from '../../../../src/preact';
 import {Instagram} from '../component';
+import {WithAmpContext} from '../../../../src/preact/context';
+import {createRef} from '../../../../src/preact';
 import {mount} from 'enzyme';
 import {waitFor} from '../../../../testing/test-helper';
 
@@ -99,6 +101,58 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
     );
 
     expect(wrapper.find('div').at(0).prop('style').height).to.equal(1000);
+  });
+
+  it('load event is dispatched', async () => {
+    const ref = createRef();
+    const onReadyState = env.sandbox.spy();
+    const wrapper = mount(
+      <Instagram
+        ref={ref}
+        shortcode="B8QaZW4AQY_"
+        style={{'width': 500, 'height': 600}}
+        onReadyState={onReadyState}
+      />
+    );
+
+    let api = ref.current;
+    expect(api.readyState).to.equal('loading');
+    expect(onReadyState).to.not.be.called;
+
+    await wrapper.find('iframe').invoke('onLoad')();
+    api = ref.current;
+    expect(api.readyState).to.equal('complete');
+    expect(onReadyState).to.be.calledOnce.calledWith('complete');
+  });
+
+  it('should reset iframe on pause', () => {
+    const ref = createRef();
+    const wrapper = mount(
+      <WithAmpContext playable={true}>
+        <Instagram
+          ref={ref}
+          shortcode="B8QaZW4AQY_"
+          style={{'width': 500, 'height': 600}}
+        />
+      </WithAmpContext>
+    );
+    expect(wrapper.find('iframe')).to.have.lengthOf(1);
+
+    const iframe = wrapper.find('iframe').getDOMNode();
+    let iframeSrc = iframe.src;
+    const iframeSrcSetterSpy = env.sandbox.spy();
+    Object.defineProperty(iframe, 'src', {
+      get() {
+        return iframeSrc;
+      },
+      set(value) {
+        iframeSrc = value;
+        iframeSrcSetterSpy(value);
+      },
+    });
+
+    wrapper.setProps({playable: false});
+    expect(iframeSrcSetterSpy).to.be.calledOnce;
   });
 });
 

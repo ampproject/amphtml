@@ -57,12 +57,13 @@ import {
 } from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
+import {getExtensionsFromMetadata} from './amp-ad-utils';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   installFriendlyIframeEmbed,
   isSrcdocSupported,
-  preloadFriendlyIframeEmbedExtensionIdsDeprecated,
+  preloadFriendlyIframeEmbedExtensions,
 } from '../../../src/friendly-iframe-embed';
 import {installRealTimeConfigServiceForDoc} from '../../../src/service/real-time-config/real-time-config-impl';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
@@ -1122,12 +1123,8 @@ export class AmpA4A extends AMP.BaseElement {
 
           // Load any extensions; do not wait on their promises as this
           // is just to prefetch.
-          // TODO(#33020): switch to `preloadFriendlyIframeEmbedExtensions` with
-          // the format of `[{extensionId, extensionVersion}]`.
-          preloadFriendlyIframeEmbedExtensionIdsDeprecated(
-            this.win,
-            creativeMetaDataDef.customElementExtensions
-          );
+          const extensions = getExtensionsFromMetadata(creativeMetaDataDef);
+          preloadFriendlyIframeEmbedExtensions(this.win, extensions);
 
           // Preload any fonts.
           (creativeMetaDataDef.customStylesheets || []).forEach((font) =>
@@ -1799,7 +1796,14 @@ export class AmpA4A extends AMP.BaseElement {
       height,
       width
     );
-    this.applyFillContent(this.iframe);
+    divertStickyAdTransition(this.win);
+    if (
+      !this.uiHandler.isStickyAd() ||
+      getExperimentBranch(this.win, STICKY_AD_TRANSITION_EXP.id) !==
+        STICKY_AD_TRANSITION_EXP.experiment
+    ) {
+      this.applyFillContent(this.iframe);
+    }
 
     let body = '';
     const transferComplete = new Deferred();
@@ -1825,13 +1829,9 @@ export class AmpA4A extends AMP.BaseElement {
       body
     );
 
-    // TODO(ccordry): FIE does not handle extension versioning, but we have
-    // it accessible here.
-    const extensionIds = extensions.map((extension) => extension.extensionId);
-
     const fieInstallPromise = this.installFriendlyIframeEmbed_(
       secureDoc,
-      extensionIds,
+      extensions,
       fonts,
       true // skipHtmlMerge
     );
@@ -1845,6 +1845,7 @@ export class AmpA4A extends AMP.BaseElement {
       }
     );
 
+    const extensionIds = extensions.map((extension) => extension.extensionId);
     return fieInstallPromise.then((friendlyIframeEmbed) => {
       checkStillCurrent();
       this.makeFieVisible_(
@@ -1891,8 +1892,9 @@ export class AmpA4A extends AMP.BaseElement {
     ));
     divertStickyAdTransition(this.win);
     if (
+      !this.uiHandler.isStickyAd() ||
       getExperimentBranch(this.win, STICKY_AD_TRANSITION_EXP.id) !==
-      STICKY_AD_TRANSITION_EXP.experiment
+        STICKY_AD_TRANSITION_EXP.experiment
     ) {
       this.applyFillContent(this.iframe);
     }
@@ -1906,10 +1908,11 @@ export class AmpA4A extends AMP.BaseElement {
       });
     }
     const checkStillCurrent = this.verifyStillCurrent();
-    const {minifiedCreative, customElementExtensions} = creativeMetaData;
+    const {minifiedCreative} = creativeMetaData;
+    const extensions = getExtensionsFromMetadata(creativeMetaData);
     return this.installFriendlyIframeEmbed_(
       minifiedCreative,
-      customElementExtensions,
+      extensions,
       fontsArray || [],
       false // skipHtmlMerge
     ).then((friendlyIframeEmbed) =>
@@ -1924,12 +1927,12 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Convert the iframe to FIE impl and append to DOM.
    * @param {string} html
-   * @param {!Array<string>} extensionIds
+   * @param {!Array<{extensionId: string, extensionVersion: string}>} extensions
    * @param {!Array<string>} fonts
    * @param {boolean} skipHtmlMerge
    * @return {!Promise<!../../../src/friendly-iframe-embed.FriendlyIframeEmbed>}
    */
-  installFriendlyIframeEmbed_(html, extensionIds, fonts, skipHtmlMerge) {
+  installFriendlyIframeEmbed_(html, extensions, fonts, skipHtmlMerge) {
     return installFriendlyIframeEmbed(
       devAssert(this.iframe),
       this.element,
@@ -1938,9 +1941,7 @@ export class AmpA4A extends AMP.BaseElement {
         // Need to guarantee that this is no longer null
         url: devAssert(this.adUrl_),
         html,
-        // TODO(#33020): provide the `extensions` property instead, in
-        // the format of `[{extensionId, extensionVersion}]`.
-        extensionIds,
+        extensions,
         fonts,
         skipHtmlMerge,
       },
@@ -2262,6 +2263,9 @@ export class AmpA4A extends AMP.BaseElement {
         }
       } else {
         metaData.customElementExtensions = [];
+      }
+      if (metaDataObj['extensions']) {
+        metaData.extensions = metaDataObj['extensions'];
       }
       if (metaDataObj['customStylesheets']) {
         // Expect array of objects with at least one key being 'href' whose

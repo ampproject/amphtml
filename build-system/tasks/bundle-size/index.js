@@ -29,6 +29,7 @@ const {
   isPullRequestBuild,
   isPushBuild,
   ciPushBranch,
+  circleciPrMergeCommit,
   ciRepoSlug,
 } = require('../../common/ci');
 const {
@@ -37,8 +38,6 @@ const {
 const {cyan, red, yellow} = require('kleur/colors');
 const {log, logWithoutTimestamp} = require('../../common/logging');
 const {report, NoTTYReport} = require('@ampproject/filesize');
-
-const requestPost = util.promisify(require('request').post);
 
 const filesizeConfigPath = require.resolve('./filesize.json');
 const fileGlobs = require(filesizeConfigPath).filesize.track;
@@ -51,10 +50,11 @@ const replacementExpression = new RegExp(internalRuntimeVersion, 'g');
 /**
  * Get the brotli bundle sizes of the current build after normalizing the RTV number.
  *
- * @return {Map<string, number>} the bundle size in KB rounded to 2 decimal
+ * @return {Promise<Object<string, number>>} the bundle size in KB rounded to 2 decimal
  *   points.
  */
 async function getBrotliBundleSizes() {
+  /** @type {Object<string, number>} */
   const bundleSizes = {};
   const sizes = await report(
     filesizeConfigPath,
@@ -115,6 +115,7 @@ async function storeBundleSize() {
   const commitHash = gitCommitHash();
   log('Storing bundle sizes for commit', cyan(shortSha(commitHash)) + '...');
   try {
+    const requestPost = util.promisify(require('request').post); // Lazy-required to speed up task loading.
     const response = await requestPost({
       uri: url.resolve(
         bundleSizeAppBaseUrl,
@@ -145,6 +146,7 @@ async function skipBundleSize() {
       cyan(shortSha(commitHash)) + '...'
     );
     try {
+      const requestPost = util.promisify(require('request').post); // Lazy-required to speed up task loading.
       const response = await requestPost(
         url.resolve(
           bundleSizeAppBaseUrl,
@@ -170,23 +172,28 @@ async function skipBundleSize() {
  */
 async function reportBundleSize() {
   if (isPullRequestBuild()) {
+    const headSha = gitCommitHash();
     const baseSha = gitCiMasterBaseline();
-    const commitHash = gitCommitHash();
+    const mergeSha = circleciPrMergeCommit();
     log(
       'Reporting bundle sizes for commit',
-      cyan(shortSha(commitHash)),
+      cyan(shortSha(headSha)),
       'using baseline commit',
-      cyan(shortSha(baseSha)) + '...'
+      cyan(shortSha(baseSha)),
+      'and merge commit',
+      cyan(shortSha(mergeSha)) + '...'
     );
     try {
+      const requestPost = util.promisify(require('request').post); // Lazy-required to speed up task loading.
       const response = await requestPost({
         uri: url.resolve(
           bundleSizeAppBaseUrl,
-          path.join('commit', commitHash, 'report')
+          path.join('commit', headSha, 'report')
         ),
         json: true,
         body: {
           baseSha,
+          mergeSha,
           bundleSizes: await getBrotliBundleSizes(),
         },
       });
@@ -213,7 +220,7 @@ async function reportBundleSize() {
 async function getLocalBundleSize() {
   if (globby.sync(fileGlobs).length === 0) {
     log('Could not find runtime files.');
-    log('Run', cyan('gulp dist --noextensions'), 'and re-run this task.');
+    log('Run', cyan('amp dist --noextensions'), 'and re-run this task.');
     process.exitCode = 1;
     return;
   } else {
@@ -240,7 +247,7 @@ async function bundleSize() {
   } else if (argv.on_local_build) {
     return getLocalBundleSize();
   } else {
-    log(red('Called'), cyan('gulp bundle-size'), red('with no task.'));
+    log(red('Called'), cyan('amp bundle-size'), red('with no task.'));
     process.exitCode = 1;
   }
 }
@@ -253,11 +260,11 @@ bundleSize.description =
   'Checks if the minified AMP binary has exceeded its size cap';
 bundleSize.flags = {
   'on_push_build':
-    '  Store bundle sizes in the AMP build artifacts repo ' +
+    'Store bundle sizes in the AMP build artifacts repo ' +
     '(also implies --on_pr_build)',
-  'on_pr_build': '  Report the bundle sizes for this pull request to GitHub',
+  'on_pr_build': 'Report the bundle sizes for this pull request to GitHub',
   'on_skipped_build':
-    "  Set the status of this pull request's bundle " +
+    "Set the status of this pull request's bundle " +
     'size check in GitHub to `skipped`',
-  'on_local_build': '  Compute bundle sizes for the locally built runtime',
+  'on_local_build': 'Compute bundle sizes for the locally built runtime',
 };

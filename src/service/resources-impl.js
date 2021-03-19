@@ -33,7 +33,6 @@ import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
 import {ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error';
-import {isExperimentOn} from '../experiments';
 import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
@@ -205,7 +204,8 @@ export class ResourcesImpl {
      */
     this.intersectionObserverCallbackFired_ = false;
 
-    if (isExperimentOn(this.win, 'bento')) {
+    // TODO(#33262): cleanup intersect-resources experiment.
+    if (false) {
       const iframed = isIframed(this.win);
 
       // Classic IntersectionObserver doesn't support viewport tracking and
@@ -712,6 +712,7 @@ export class ResourcesImpl {
         dict({
           'title': doc.title,
           'sourceUrl': getSourceUrl(this.ampdoc.getUrl()),
+          'isStory': doc.body.firstElementChild?.tagName === 'AMP-STORY',
           'serverLayout': doc.documentElement.hasAttribute('i-amphtml-element'),
           'linkRels': documentInfo.linkRels,
           'metaTags': {'viewport': documentInfo.viewport} /* deprecated */,
@@ -1199,7 +1200,7 @@ export class ResourcesImpl {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
         const requested = r.isMeasureRequested();
-        if (r.hasOwner() && !requested) {
+        if ((r.hasOwner() && !requested) || r.element.V1()) {
           continue;
         }
         const premeasured = r.hasBeenPremeasured();
