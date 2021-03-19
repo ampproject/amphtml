@@ -20,10 +20,12 @@ const {execOrThrow} = require('../common/exec');
  * Configuration is defined in /build-system/tsconfig.json.
  */
 function checkBuildSystem() {
+  log('Checking types in', cyan('build-system') + '...');
   execOrThrow(
     'npx -p typescript tsc --project ./build-system/tsconfig.json',
-    'TypeScript build failed'
+    'Type checking failed'
   );
+  log(green('SUCCESS:'), 'No type errors in', cyan('build-system') + '.');
 }
 
 checkBuildSystem.description =
