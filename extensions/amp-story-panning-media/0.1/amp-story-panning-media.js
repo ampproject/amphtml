@@ -222,9 +222,9 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       );
     }
     // TODO(#31515): When aspect ratio is portrait, containerWidth will be used for this.
-    const percentScaled = containerHeight / ampImgHeight;
-    const scaledImageWidth = percentScaled * ampImgWidth;
-    const scaledImageHeight = percentScaled * ampImgHeight;
+    const percentScaledToFitViewport = containerHeight / ampImgHeight;
+    const scaledImageWidth = percentScaledToFitViewport * ampImgWidth;
+    const scaledImageHeight = percentScaledToFitViewport * ampImgHeight;
 
     const widthFraction =
       1 - containerWidth / (scaledImageWidth * this.animateTo_.zoom);
