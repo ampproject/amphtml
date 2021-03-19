@@ -41,11 +41,12 @@ function runExperimentTests(config) {
   try {
     const defineFlag = `--define_experiment_constant ${config.define_experiment_constant}`;
     const experimentFlag = `--experiment ${experiment}`;
+    const reportFlag = isPushBuild() ? '--report' : '';
     timedExecOrThrow(
-      `amp integration --nobuild --compiled --headless ${experimentFlag} ${defineFlag}`
+      `amp integration --nobuild --compiled --headless ${experimentFlag} ${defineFlag} ${reportFlag}`
     );
     timedExecOrThrow(
-      `amp e2e --nobuild --compiled --headless ${experimentFlag} ${defineFlag}`
+      `amp e2e --nobuild --compiled --headless ${experimentFlag} ${defineFlag} ${reportFlag}`
     );
   } catch (e) {
     if (e.status) {
