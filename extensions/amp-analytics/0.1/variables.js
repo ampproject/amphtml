@@ -182,6 +182,44 @@ function matchMacro(string, matchPattern, opt_matchingGroupIndexStr) {
 }
 
 /**
+ * This macro function allows arithmetic operations over other analytics variables.
+ *
+ * @param {string} leftOperand
+ * @param {string} rightOperand
+ * @param {string} operation
+ * @return {number}
+ */
+function calcMacro(leftOperand, rightOperand, operation) {
+  const left = Number(leftOperand);
+  const right = Number(rightOperand);
+  userAssert(
+    !isNaN(left),
+    'CALC macro - left operand must be a number found [' + leftOperand + ']'
+  );
+  userAssert(
+    !isNaN(right),
+    'CALC macro - right operand must be a number found [' + rightOperand + ']'
+  );
+  if (operation === 'ADD') {
+    return left + right;
+  }
+  if (operation === 'SUBTRACT') {
+    return left - right;
+  }
+  if (operation === 'MULTIPLY') {
+    return left * right;
+  }
+  if (operation === 'DIVIDE') {
+    return left / right;
+  }
+  user().error(
+    TAG,
+    'Third argument in CALC macro must be one of ( ADD | SUBTRACT | MULTIPLY | DIVIDE )'
+  );
+  return 0;
+}
+
+/**
  * If given an experiment name returns the branch id if a branch is selected.
  * If no branch name given, it returns a comma separated list of active branch
  * experiment ids and their names or an empty string if none exist.
@@ -230,6 +268,7 @@ export class VariableService {
     );
     this.register_('$REPLACE', replaceMacro);
     this.register_('$MATCH', matchMacro);
+    this.register_('$CALC', calcMacro);
     this.register_(
       '$EQUALS',
       (firstValue, secValue) => firstValue === secValue

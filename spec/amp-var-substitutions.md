@@ -291,6 +291,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Replace](#replace)         | N/A               | `$REPLACE`             |
 | [Match](#match)             | N/A               | `$MATCH`               |
 | [Equals](#equals)           | N/A               | `$EQUALS`              |
+| [Simple Calculations](#calc)| N/A               | `$CALC`                |
 
 ### Miscellaneous
 
@@ -1374,3 +1375,16 @@ Find the specified (or first) matched pattern.
 ##### Equals
 
 -   Example: `$EQUALS(${val}, value)` resolves to `'true'` or `'false'`
+
+##### Simple Calculations
+
+This macro allows you to perform basic arithmetics like addition, subtraction, multiplication and division.
+
+Parameters:
+- **leftOperand** : A variable or a literal that resolves to a number or, a number string.
+- **rightOperand** : A variable or a literal that resolves to a number or, a number string.
+- **operation** : A literal. One of ADD, SUBTRACT, MULTIPLY, DIVIDE
+
+All three parameters are mandatory.
+
+-   Example: `$CALC(${cumulativeLayoutShift}, 1000, MULTIPLY)`

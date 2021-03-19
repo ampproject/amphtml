@@ -353,6 +353,26 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
       return check('$BASE64(Hello World!)', 'SGVsbG8gV29ybGQh');
     });
 
+    describe('$CALC', () => {
+      it('calc addition works', () => check('$CALC(1, 2, ADD)', '3'));
+
+      it('calc subtraction works', () => check('$CALC(1, 2, SUBTRACT)', '-1'));
+
+      it('calc multiplication works', () =>
+        check('$CALC(1, 2, MULTIPLY)', '2'));
+
+      it('calc division works', () => check('$CALC(1, 2, DIVIDE)', '0.5'));
+
+      it('calc division by 0 works', () =>
+        check('$CALC(1, 0, DIVIDE)', Infinity.toString()));
+
+      it('calc with nested macro works', () =>
+        check('$CALC($SUBSTR(123456, 2, 5), 10, MULTIPLY)', '34560'));
+
+      it('calc should replace CUMULATIVE_LAYOUT_SHIFT with 1', () =>
+        check('$CALC(CUMULATIVE_LAYOUT_SHIFT, 10, MULTIPLY)', '10'));
+    });
+
     it('if works with true', () =>
       check('$IF(true, truthy, falsey)', 'truthy'));
 
