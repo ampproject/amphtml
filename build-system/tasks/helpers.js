@@ -16,7 +16,6 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const debounce = require('debounce');
-const del = require('del');
 const esbuild = require('esbuild');
 /** @type {Object} */
 const experimentDefines = require('../global-configs/experiments-const.json');
@@ -39,7 +38,6 @@ const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
 const {removeFromClosureBabelCache} = require('../compile/pre-closure-babel');
 const {thirdPartyFrames} = require('../test-configs/config');
-const {transpileTs} = require('../compile/typescript');
 const {watch: fileWatch} = require('chokidar');
 
 /** @type {Remapping.default} */
@@ -488,8 +486,8 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     const sentinel = '<%= contents %>';
     const start = wrapper.indexOf(sentinel);
     return {
-      banner: {js: wrapper.slice(0, start)},
-      footer: {js: wrapper.slice(start + sentinel.length)},
+      banner: wrapper.slice(0, start),
+      footer: wrapper.slice(start + sentinel.length),
     };
   }
 
@@ -641,25 +639,6 @@ async function minifyWithTerser(destDir, destFilename, options) {
   );
   fs.writeFileSync(filename, minified.code);
   fs.writeFileSync(`${filename}.map`, remapped.toString());
-}
-
-/**
- * Transpiles from TypeScript into intermediary files before compilation and
- * deletes them afterwards.
- *
- * @param {string} srcDir Path to the src directory
- * @param {string} srcFilename Name of the JS source file
- * @param {string} destDir Destination folder for output script
- * @param {?Object} options
- * @return {!Promise}
- */
-async function compileTs(srcDir, srcFilename, destDir, options) {
-  options = options || {};
-  const startTime = Date.now();
-  await transpileTs(srcDir, srcFilename);
-  endBuildStep('Transpiled', srcFilename, startTime);
-  await compileJs(srcDir, srcFilename, destDir, options);
-  del.sync(path.join(srcDir, '**/*.js'));
 }
 
 /**
@@ -847,7 +826,6 @@ module.exports = {
   compileCoreRuntime,
   compileJs,
   compileJsWithEsbuild,
-  compileTs,
   doBuildJs,
   endBuildStep,
   maybePrintCoverageMessage,
