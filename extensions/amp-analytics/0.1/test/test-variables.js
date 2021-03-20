@@ -363,6 +363,9 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
 
       it('calc division works', () => check('$CALC(1, 2, DIVIDE)', '0.5'));
 
+      it('calc with unknown operation defaults to zero', () =>
+        check('$CALC(1, 2, SOMETHINGELSE)', '0'));
+
       it('calc division by 0 works', () =>
         check('$CALC(1, 0, DIVIDE)', Infinity.toString()));
 
