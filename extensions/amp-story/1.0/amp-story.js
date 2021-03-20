@@ -832,6 +832,15 @@ export class AmpStory extends AMP.BaseElement {
       );
     });
 
+    // Listen for class mutations on the <body> element.
+    const bodyElObserver = new this.win.MutationObserver((mutations) =>
+      this.onBodyElMutation_(mutations)
+    );
+    bodyElObserver.observe(this.win.document.body, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
     this.installGestureRecognizers_();
 
@@ -844,6 +853,19 @@ export class AmpStory extends AMP.BaseElement {
     if (this.viewerMessagingHandler_) {
       this.viewerMessagingHandler_.startListening();
     }
+  }
+
+  /** @private */
+  onBodyElMutation_(mutations) {
+    mutations.forEach((mutation) => {
+      const bodyEl = dev().assertElement(mutation.target);
+
+      // Updates presence of the `amp-mode-keyboard-active` class on the store.
+      this.storeService_.dispatch(
+        Action.TOGGLE_KEYBOARD_ACTIVE_STATE,
+        bodyEl.classList.contains('amp-mode-keyboard-active')
+      );
+    });
   }
 
   /** @private */
