@@ -187,36 +187,38 @@ function matchMacro(string, matchPattern, opt_matchingGroupIndexStr) {
  * @param {string} leftOperand
  * @param {string} rightOperand
  * @param {string} operation
+ * @param {string} round If this flag is truthy the result will be rounded
  * @return {number}
  */
-function calcMacro(leftOperand, rightOperand, operation) {
+function calcMacro(leftOperand, rightOperand, operation, round) {
   const left = Number(leftOperand);
   const right = Number(rightOperand);
-  userAssert(
-    !isNaN(left),
-    'CALC macro - left operand must be a number found [' + leftOperand + ']'
-  );
+  let result = 0;
+  userAssert(!isNaN(left), 'CALC macro - left operand must be a number found');
   userAssert(
     !isNaN(right),
-    'CALC macro - right operand must be a number found [' + rightOperand + ']'
+    'CALC macro - right operand must be a number found'
   );
-  if (operation === 'ADD') {
-    return left + right;
+  switch (operation) {
+    case 'ADD':
+      result = left + right;
+      break;
+    case 'SUBTRACT':
+      result = left - right;
+      break;
+    case 'MULTIPLY':
+      result = left * right;
+      break;
+    case 'DIVIDE':
+      result = left / right;
+      break;
+    default:
+      user().error(
+        TAG,
+        'Operation in $CALC macro must be one of ADD, SUBTRACT, MULTIPLY, DIVIDE'
+      );
   }
-  if (operation === 'SUBTRACT') {
-    return left - right;
-  }
-  if (operation === 'MULTIPLY') {
-    return left * right;
-  }
-  if (operation === 'DIVIDE') {
-    return left / right;
-  }
-  user().error(
-    TAG,
-    'Third argument in CALC macro must be one of ( ADD | SUBTRACT | MULTIPLY | DIVIDE )'
-  );
-  return 0;
+  return stringToBool(round) ? Math.round(result) : result;
 }
 
 /**
