@@ -36,8 +36,9 @@ export function resolveCachedSources(video) {
  */
 function fetchGoogleCachedVideos(video) {
   const requestUrl = selectVideoSource(video.element);
-  return Services.storyRequestServiceForOrNull(video.win).then(
-    (requestService) =>
+  console.log(requestUrl);
+  return Services.storyRequestServiceForOrNull(video.win)
+    .then((requestService) =>
       requestService.executeRequest(requestUrl).then((response) => {
         response['sources']
           .sort((a, b) => a['bitrate_kbps'] - b['bitrate_kbps'])
@@ -54,7 +55,8 @@ function fetchGoogleCachedVideos(video) {
             video.element.prepend(sourceEl);
           });
       })
-  );
+    )
+    .catch((unusedErr) => {});
 }
 
 /**
@@ -93,15 +95,14 @@ function selectVideoSource(videoEl) {
  */
 function convertToCDN(videoEl, src) {
   const urlService = Services.urlForDoc(videoEl);
-  const fullUrl = urlService.getSourceUrl(src);
+  const mbvUrl = urlService.getCdnUrlOnOrigin(src, 'mvb');
   const originUrl = urlService.getSourceOrigin(src);
   const cdnOrigin =
     'https://' +
     originUrl
       .replace(/\.|-/, (str) => (str === '.' ? '-' : '--'))
       .replace(/https?:\/\//, '') +
-    '.cdn.ampproject.org/mbv/' +
-    fullUrl.replace(/https?:\/\//, (str) => (str.length === 8 ? 's/' : ''));
-  console.log(cdnOrigin);
-  return cdnOrigin;
+    '.';
+
+  return mbvUrl.replace('https://', cdnOrigin);
 }
