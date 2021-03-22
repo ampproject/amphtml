@@ -29,17 +29,17 @@ const AMP_SCRIPT_URI_SCHEME = 'amp-script:';
 
 /**
  * Returns true if element's src points to amp-state.
- * @param {string} src
+ * @param {?string} src
  * @return {boolean}
  */
-const isAmpStateSrc = (src) => src.startsWith(AMP_STATE_URI_SCHEME);
+const isAmpStateSrc = (src) => src && src.startsWith(AMP_STATE_URI_SCHEME);
 
 /**
  * Returns true if element's src points to an amp-script function.
- * @param {string} src
+ * @param {?string} src
  * @return {boolean}
  */
-const isAmpScriptSrc = (src) => src.startsWith(AMP_SCRIPT_URI_SCHEME);
+const isAmpScriptSrc = (src) => src && src.startsWith(AMP_SCRIPT_URI_SCHEME);
 
 /**
  * Gets the json an amp-list that has an "amp-state:" uri. For example,
@@ -149,6 +149,35 @@ class AmpRender extends BaseElement {
   //     mutations
   //   );
   // }
+  /** @override */
+  init() {
+    return dict({
+      'getJson': this.getJsonFn_(),
+    });
+  }
+
+  /**
+   * Returns the correct fetch function for amp-state, amp-script or
+   * to fetch remote JSON.
+   *
+   * @return {Function}
+   * @private
+   */
+  getJsonFn_() {
+    const src = this.element.getAttribute('src');
+    if (!src) {
+      // TODO(dmanek): assert that src is provided instead of silently failing below.
+      return () => {};
+    }
+    if (isAmpStateSrc(src)) {
+      return this.getAmpStateJson.bind(null, this.element);
+    }
+    if (isAmpScriptSrc(src)) {
+      // TODO(dmanek): implement this
+      return () => {};
+    }
+    return batchFetchJsonFor.bind(null, this.getAmpDoc(), this.element);
+  }
 
   /**
    * TODO: this implementation is identical to one in amp-data-display &
