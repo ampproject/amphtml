@@ -309,6 +309,17 @@ data.s;
 // adpicker.js
 data.ph;
 
+// adpushup.js
+window.adpushup = {};
+window.adpushup.initAmp = function (
+  global,
+  width,
+  height,
+  siteid,
+  slotpath,
+  totalampslots
+) {};
+
 // adreactor.js
 data.zid;
 data.pid;
@@ -672,6 +683,9 @@ data.extraParams;
 data.slot.setVisibility;
 data.slot.setTargeting;
 data.slot.setExtraParameters;
+
+// verizonmedia.js
+window.jacData;
 
 // webediads.js
 var wads;

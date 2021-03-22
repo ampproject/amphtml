@@ -67,7 +67,7 @@ describes.realWin(
     async function createStoryWithPages(count, ids = [], autoAdvance = false) {
       element = win.document.createElement('amp-story');
 
-      Array(count)
+      const pageArray = Array(count)
         .fill(undefined)
         .map((unused, i) => {
           const page = win.document.createElement('amp-story-page');
@@ -81,6 +81,8 @@ describes.realWin(
 
       win.document.body.appendChild(element);
       story = await element.getImpl();
+
+      return pageArray;
     }
 
     /**
@@ -247,18 +249,17 @@ describes.realWin(
       await createStoryWithPages();
       const pages = story.element.querySelectorAll('amp-story-page');
 
-      element.build();
+      element.buildInternal();
 
       expect(pages[0].hasAttribute('active')).to.be.true;
       expect(pages[1].hasAttribute('active')).to.be.false;
 
       // Stubbing because we need to assert synchronously
-      env.sandbox
-        .stub(element.implementation_, 'mutateElement')
-        .callsFake((mutator) => {
-          mutator();
-          return Promise.resolve();
-        });
+      const impl = await element.getImpl(false);
+      env.sandbox.stub(impl, 'mutateElement').callsFake((mutator) => {
+        mutator();
+        return Promise.resolve();
+      });
 
       const eventObj = createEvent('keydown');
       eventObj.key = Keys.RIGHT_ARROW;
@@ -1142,6 +1143,40 @@ describes.realWin(
             [MediaType.VIDEO]: 8,
           };
           expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
+        });
+      });
+
+      describe('#getElementDistance', () => {
+        it('should return -1 for elements without a page', async () => {
+          await createStoryWithPages(3);
+          await story.layoutCallback();
+          const elToFind = win.document.createElement('video');
+          const distance = story.getElementDistance(elToFind);
+          expect(distance).to.equal(-1);
+        });
+
+        it('should find elements inside organic pages', async () => {
+          const pageArray = await createStoryWithPages(3);
+          await story.layoutCallback();
+          const elToFind = win.document.createElement('video');
+          const hostPage = pageArray[1];
+          hostPage.setAttribute('distance', '4');
+          hostPage.appendChild(elToFind);
+          const distance = story.getElementDistance(elToFind);
+          expect(distance).to.equal(4);
+        });
+
+        it('should find elements inside ad pages / FIE', async () => {
+          const pageArray = await createStoryWithPages(3);
+          await story.layoutCallback();
+          const elToFind = win.document.createElement('video');
+          const hostPage = pageArray[1];
+          hostPage.setAttribute('distance', '4');
+          const iframe = win.document.createElement('iframe');
+          hostPage.appendChild(iframe);
+          iframe.contentDocument.body.appendChild(elToFind);
+          const distance = story.getElementDistance(elToFind);
+          expect(distance).to.equal(4);
         });
       });
 

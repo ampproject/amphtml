@@ -18,9 +18,8 @@
 const checkDependencies = require('check-dependencies');
 const del = require('del');
 const fs = require('fs-extra');
-const {cyan, green, yellow} = require('ansi-colors');
+const {cyan, green, yellow} = require('kleur/colors');
 const {execOrDie} = require('../common/exec');
-const {isCiBuild} = require('../common/ci');
 const {log, logLocalDev} = require('../common/logging');
 
 /**
@@ -125,6 +124,81 @@ function patchResizeObserver() {
 }
 
 /**
+ * Patches Shadow DOM polyfill by wrapping its body into `install`
+ * function.
+ * This gives us an option to control when and how the polyfill is installed.
+ * The polyfill can only be installed on the root context.
+ */
+function patchShadowDom() {
+  // Copies webcomponents-sd into a new file that has an export.
+  const patchedName =
+    'node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd.install.js';
+
+  let file = '(function() {';
+  // HTMLElement is replaced, but the original needs to be used for the polyfill
+  // since it manipulates "own" properties. See `src/polyfills/custom-element.js`.
+  file += 'var HTMLElementOrig = window.HTMLElementOrig || window.HTMLElement;';
+  file += 'window.HTMLElementOrig = HTMLElementOrig;';
+  file += `
+    (function() {
+      var origContains = document.contains;
+      if (origContains) {
+        Object.defineProperty(document, '__shady_native_contains', {value: origContains});
+      }
+      Object.defineProperty(document, 'contains', {
+        configurable: true,
+        value: function(node) {
+          if (node === this) {
+            return true;
+          }
+          if (this.documentElement) {
+            return this.documentElement.contains(node);
+          }
+          return false;
+        }
+      });
+    })();
+  `;
+
+  /**
+   * @param {string} file
+   * @return {string}
+   */
+  function transformScript(file) {
+    // Use the HTMLElement from above.
+    file = file.replace(/\bHTMLElement\b/g, 'HTMLElementOrig');
+    return file;
+  }
+
+  // Relevant DOM polyfills
+  file += transformScript(
+    fs
+      .readFileSync(
+        'node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-pf_dom.js'
+      )
+      .toString()
+  );
+  file += transformScript(
+    fs
+      .readFileSync(
+        'node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd.js'
+      )
+      .toString()
+  );
+  file += '})();';
+
+  // ESM binaries fail on this expression.
+  file = file.replace(
+    '"undefined"!=typeof window&&window===this?this:"undefined"!=typeof global&&null!=global?global:this',
+    'window'
+  );
+  // Disable any integration with CE.
+  file = file.replace(/window\.customElements/g, 'window.__customElements');
+
+  writeIfUpdated(patchedName, file);
+}
+
+/**
  * Deletes the map file for rrule, which breaks closure compiler.
  * TODO(rsimha): Remove this workaround after a fix is merged for
  * https://github.com/google/closure-compiler/issues/3720.
@@ -140,7 +214,7 @@ function removeRruleSourcemap() {
 /**
  * Checks if all packages are current, and if not, runs `npm install`.
  */
-function runNpmCheck() {
+function updateDeps() {
   const results = checkDependencies.sync({
     verbose: true,
     log: () => {},
@@ -166,32 +240,22 @@ function runNpmCheck() {
 }
 
 /**
- * Used as a pre-requisite by several gulp tasks.
- */
-function maybeUpdatePackages() {
-  if (!isCiBuild()) {
-    updatePackages();
-  }
-}
-
-/**
- * Installs custom lint rules, updates node_modules (for local dev), and patches
- * polyfills if necessary.
+ * Updates `npm` packages and applies various custom patches when necessary.
+ * Work is done only during first time install and soon after a repo sync.
+ * At all other times, this function is a no-op and returns almost instantly.
  */
 async function updatePackages() {
-  if (!isCiBuild()) {
-    runNpmCheck();
-  }
+  updateDeps();
   patchWebAnimations();
   patchIntersectionObserver();
   patchResizeObserver();
+  patchShadowDom();
   removeRruleSourcemap();
 }
 
 module.exports = {
-  maybeUpdatePackages,
   updatePackages,
 };
 
 updatePackages.description =
-  'Runs npm install if node_modules is out of date, and applies custom patches';
+  'Updates npm packages if node_modules is out of date, and applies custom patches';

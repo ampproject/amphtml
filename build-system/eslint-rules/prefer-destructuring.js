@@ -20,7 +20,19 @@ module.exports = {
     fixable: 'code',
   },
 
+  /**
+   * @param {EslintContext} context
+   * @return {{
+   *   VariableDeclarator: {Function(node: CompilerNode): void},
+   *   'BlockStatement, Program': {Function (node: CompilerNode): void},
+   * }}
+   */
   create(context) {
+    /**
+     * @param {CompilerNode} node
+     * @param {boolean=} renamable
+     * @return {boolean}
+     */
     function shouldBeDestructure(node, renamable = false) {
       const {id, init} = node;
 
@@ -46,6 +58,10 @@ module.exports = {
       return renamable || property.name === name;
     }
 
+    /**
+     * @param {CompilerNode} node
+     * @return {boolean}
+     */
     function shouldBeIdempotent(node) {
       while (node.type === 'MemberExpression') {
         node = node.object;
@@ -54,6 +70,14 @@ module.exports = {
       return node.type === 'Identifier' || node.type === 'ThisExpression';
     }
 
+    /**
+     *
+     * @param {Map<K, V>} map
+     * @param {K} key
+     * @param {CompilerNode} node
+     * @param {*} declaration
+     * @return {string[]}
+     */
     function setStruct(map, key, node, declaration) {
       if (map.has(key)) {
         const struct = map.get(key);
@@ -72,6 +96,9 @@ module.exports = {
       }
     }
 
+    /**
+     * @param {Map[]} maps
+     */
     function processMaps(maps) {
       for (let i = 0; i < maps.length; i++) {
         const map = maps[i];
@@ -80,6 +107,10 @@ module.exports = {
       }
     }
 
+    /**
+     * @param {*} struct
+     * @param {*} base
+     */
     function processVariables(struct, base) {
       const {names, nodes, declarations, node} = struct;
 
@@ -118,6 +149,9 @@ module.exports = {
     }
 
     return {
+      /**
+       * @param {CompilerNode} node
+       */
       VariableDeclarator(node) {
         if (!shouldBeDestructure(node)) {
           return;
@@ -141,6 +175,9 @@ module.exports = {
         });
       },
 
+      /**
+       * @param {CompilerNode} node
+       */
       'BlockStatement, Program': function (node) {
         const {body} = node;
         const sourceCode = context.getSourceCode();

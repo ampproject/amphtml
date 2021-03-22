@@ -35,7 +35,7 @@ The `amp-video` component loads the video resource specified by its `src` attrib
 The `amp-video` component accepts up to four unique types of HTML nodes as children:
 
 -   `source` tags: Just like in the HTML `<video>` tag, you can add `<source>` tag children to specify different source media files to play.
--   `track` tags to enable subtitles in the video. If the track is hosted on a different origin than the document, you must add the `crossorigin` attribute to the `<amp-video>` tag.
+-   `track` tags to enable subtitles in the video. If the track is hosted on a different origin than the document, you must add the `crossorigin` attribute to the `<amp-video>` tag. Whenever the video has narration or important audio information, make sure to include subtitles/captions for users who may not be able to hear it or have their sound turned off.
 -   a placeholder for before the video starts
 -   a fallback if the browser doesn’t support HTML5 video: One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that displays if HTML5 video is not supported on the user’s browser.
 
@@ -61,7 +61,7 @@ The `amp-video` component accepts up to four unique types of HTML nodes as child
 
 #### Standalone use outside valid AMP documents
 
-Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide `[Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/)`.
+Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
 
 [example preview="top-frame" playground="false"]
 
@@ -113,7 +113,7 @@ Bento enabled components in standalone use are highly interactive through their 
 
 The `amp-video` component API is accessible by including the following script tag in your document:
 
-```
+```js
 await customElements.whenDefined('amp-video');
 const videoHandle = await video.getApi();
 ```
@@ -126,7 +126,7 @@ The `amp-video` API allows you to perform the following actions:
 
 Plays the video.
 
-```
+```js
 videoHandle.play();
 ```
 
@@ -134,7 +134,7 @@ videoHandle.play();
 
 Pauses the video.
 
-```
+```js
 videoHandle.pause();
 ```
 
@@ -142,7 +142,7 @@ videoHandle.pause();
 
 Mutes the video.
 
-```
+```js
 videoHandle.mute();
 ```
 
@@ -150,7 +150,7 @@ videoHandle.mute();
 
 Unmutes the video.
 
-```
+```js
 videoHandle.unmute();
 ```
 
@@ -158,7 +158,7 @@ videoHandle.unmute();
 
 Expands the video to fullscreen when possible.
 
-```
+```js
 videoHandle.requestFullscreen();
 ```
 
@@ -170,7 +170,7 @@ It also exposes the following read-only properties:
 
 The current playback time in seconds.
 
-```
+```js
 console.log(videoHandle.currentTime);
 ```
 
@@ -178,7 +178,7 @@ console.log(videoHandle.currentTime);
 
 The video's duration in seconds, when it's known (e.g. is not a livestream).
 
-```
+```js
 console.log(videoHandle.duration);
 ```
 
@@ -186,7 +186,7 @@ console.log(videoHandle.duration);
 
 Whether the video autoplays.
 
-```
+```js
 console.log(videoHandle.autoplay);
 ```
 
@@ -194,7 +194,7 @@ console.log(videoHandle.autoplay);
 
 Whether the video shows controls.
 
-```
+```js
 console.log(videoHandle.controls);
 ```
 
@@ -202,7 +202,7 @@ console.log(videoHandle.controls);
 
 Whether the video loops.
 
-```
+```js
 console.log(videoHandle.loop);
 ```
 
@@ -251,12 +251,17 @@ The `muted` attribute is deprecated and no longer has any effect. The `autoplay`
 
 ### noaudio
 
-Annotates the video as having no audio. This hides the equalizer icon that is displayed
-when the video has autoplay.
+Annotates the video as having no audio. This has the following effects:
+
+-   An equalizer icon will **not** be drawn when setting [`autoplay`](#autoplay).
+
+-   An `<amp-story>` that includes this video will **not** draw an unnecessary mute button.
 
 ### rotate-to-fullscreen
 
 If the video is visible, the video displays fullscreen after the user rotates their device into landscape mode. For more details, see the [Video in AMP spec](../../spec/amp-video-interface.md#rotate-to-fullscreen).
+
+This attribute can be configured to based on a [media query](./../../spec/amp-html-responsive-attributes.md).
 
 ### common attributes
 

@@ -19,7 +19,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const {getReplacePlugin} = require('./helpers');
 
 /**
- * Gets the config for pre-closure babel transforms run during `gulp dist`.
+ * Gets the config for pre-closure babel transforms run during `amp dist`.
  *
  * @return {!Object}
  */
@@ -39,6 +39,7 @@ function getPreClosureConfig() {
   ];
   const replacePlugin = getReplacePlugin();
   const preClosurePlugins = [
+    'optimize-objstr',
     argv.coverage ? 'babel-plugin-istanbul' : null,
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
@@ -97,6 +98,7 @@ function getPreClosureConfig() {
     plugins: preClosurePlugins,
     presets: preClosurePresets,
     retainLines: true,
+    sourceMaps: true,
   };
   return preClosureConfig;
 }

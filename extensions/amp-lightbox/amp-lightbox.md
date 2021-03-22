@@ -45,7 +45,7 @@ component. To show a gallery of images in a lightbox, you can use
 
 ### Standalone use outside valid AMP documents
 
-Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide `[Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/)`.
+Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
 
 #### Example
 
@@ -85,7 +85,7 @@ Bento enabled components in standalone use are highly interactive through their 
 
 The `amp-lightbox` component API is accessible by including the following script tag in your document:
 
-```
+```js
 await customElements.whenDefined('amp-lightbox');
 const api = await lightbox.getApi();
 ```
@@ -97,14 +97,14 @@ The `amp-lightbox` API allows you to perform the following actions:
 **open()**
 Opens the lightbox.
 
-```
+```js
 api.open();
 ```
 
 **close()**
 Closes the lightbox.
 
-```
+```js
 api.close();
 ```
 
@@ -116,7 +116,7 @@ The `amp-lightbox` API allows you to register and respond to the following event
 
 This event is triggered when the lightbox is opened.
 
-```
+```js
 lightbox.addEventListener('open', (e) => console.log(e))
 ```
 
@@ -124,7 +124,7 @@ lightbox.addEventListener('open', (e) => console.log(e))
 
 This event is triggered when the lightbox is closed.
 
-```
+```js
 lightbox.addEventListener('close', (e) => console.log(e))
 ```
 
@@ -132,7 +132,7 @@ lightbox.addEventListener('close', (e) => console.log(e))
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
-```
+```html
 <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-lightbox-1.0.css">
 ```
 
@@ -144,26 +144,20 @@ Fully valid AMP pages use the AMP layout system to infer sizing of elements to c
 
 A unique identifier for the lightbox.
 
-### `layout`
+### `layout` (required)
 
 Must be set to `nodisplay`.
 
-### `animation` (optional)
+### `animation`
 
 Defines the style of animation for opening the lightbox. By default, this will
 be set to `fade-in`. Valid values are `fade-in`, `fly-in-bottom`, and
 `fly-in-top`.
 
-[tip type="important"]
+This attribute can be configured to use different
+options based on a [media query](./../../spec/amp-html-responsive-attributes.md).
 
-The `fly-in-top` and `fly-in-bottom` animation presets modify the `transform`
-property of the `amp-lightbox` element. Do not rely on transforming the
-`amp-lightbox` element directly. If you need to apply a transform, set it on a
-nested element instead.
-
-[/tip]
-
-### `scrollable` (optional)
+### `scrollable`
 
 When the `scrollable` attribute is present, the content of the lightbox can
 scroll when overflowing the height of the lightbox.

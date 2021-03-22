@@ -211,18 +211,24 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/30385',
   },
   {
-    id: 'fie-resources',
-    name: 'Separate FIE resource manager from the main doc',
-    spec: 'https://github.com/ampproject/amphtml/issues/31246',
-  },
-  {
     id: 'dfp-render-on-idle-cwv-exp',
     name: 'To measure the CWV impact of ads idle rendering',
     spec: 'https://github.com/ampproject/amphtml/issues/31436',
   },
   {
-    id: 'inabox-resources-eager',
-    name: 'Determine impact of building inabox/fie amp elements ASAP',
-    spec: 'https://github.com/ampproject/amphtml/issues/31776',
+    id: 'amp-consent-granular-consent',
+    name: 'Client-side granular consent',
+    spec: 'https://github.com/ampproject/amphtml/issues/31607',
+  },
+  {
+    id: 'amp-story-page-attachment-ui-v2',
+    name: 'New UI for all new page attachments in stories format',
+    spec: 'https://github.com/ampproject/amphtml/projects/123',
+  },
+  {
+    id: 'flexible-bitrate',
+    name:
+      'Adaptive bitrate algorithm for videos on documents from the AMPProject CDN',
+    spec: 'https://github.com/ampproject/amphtml/projects/111',
   },
 ];

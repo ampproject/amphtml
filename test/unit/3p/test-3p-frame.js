@@ -405,14 +405,6 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
         });
       });
 
-      it('should pick default url if custom disabled', () => {
-        addCustomBootstrap('http://localhost:9876/boot/remote.html');
-        const ampdoc = Services.ampdoc(window.document);
-        expect(getBootstrapBaseUrl(window, ampdoc, true, true)).to.equal(
-          'http://ads.localhost:9876/dist.3p/current/frame.max.html'
-        );
-      });
-
       it('should create frame with default url if custom disabled', () => {
         setupElementFunctions(container);
         const iframe = getIframe(window, container, '_ping_', {
@@ -424,37 +416,20 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
       });
 
       it('should prefetch bootstrap frame and JS', () => {
-        mockMode({localDev: true});
+        mockMode({});
         const ampdoc = Services.ampdoc(window.document);
         preloadBootstrap(window, ampdoc, preconnect);
         // Wait for visible promise.
         return ampdoc.whenFirstVisible().then(() => {
           const fetches = document.querySelectorAll('link[rel=preload]');
           expect(fetches).to.have.length(2);
-          expect(fetches[0]).to.have.property(
-            'href',
-            'http://ads.localhost:9876/dist.3p/current/frame.max.html'
+          expect(fetches[0].href).to.match(
+            /^https:\/\/d-\d+\.ampproject\.net\/\$internalRuntimeVersion\$\/frame\.html$/
           );
           expect(fetches[1]).to.have.property(
             'href',
-            'http://ads.localhost:9876/dist.3p/current/integration.js'
+            'https://3p.ampproject.net/$internalRuntimeVersion$/f.js'
           );
-        });
-      });
-
-      it('should prefetch default bootstrap frame if custom disabled', () => {
-        mockMode({localDev: true});
-        addCustomBootstrap('http://localhost:9876/boot/remote.html');
-        const ampdoc = Services.ampdoc(window.document);
-        preloadBootstrap(window, ampdoc, preconnect, true);
-        // Wait for visible promise.
-        return ampdoc.whenFirstVisible().then(() => {
-          expect(
-            document.querySelectorAll(
-              'link[rel=preload]' +
-                '[href="http://ads.localhost:9876/dist.3p/current/frame.max.html"]'
-            )
-          ).to.be.ok;
         });
       });
 

@@ -108,10 +108,11 @@ export let InteractiveReactData;
  *    infoDialogState: boolean,
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
  *    interactiveReactState: !Map<string, !InteractiveReactData>,
+ *    keyboardActiveState: boolean,
  *    mutedState: boolean,
  *    pageAudioState: boolean,
  *    pageHasElementsWithPlaybackState: boolean,
- *    panningMediaState: {x: float, y: float, zoom: float},
+ *    panningMediaState: !Map<string, ../../amp-story-panning-media/0.1/amp-story-panning-media.panningMediaPositionDef> ,
  *    pausedState: boolean,
  *    previewState: boolean,
  *    rtlState: boolean,
@@ -162,6 +163,7 @@ export const StateProperty = {
   INTERACTIVE_COMPONENT_STATE: 'interactiveEmbeddedComponentState',
   // State of interactive components (polls, quizzes) on the story.
   INTERACTIVE_REACT_STATE: 'interactiveReactState',
+  KEYBOARD_ACTIVE_STATE: 'keyboardActiveState',
   MUTED_STATE: 'mutedState',
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
   PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE: 'pageHasElementsWithPlaybackState',
@@ -213,6 +215,7 @@ export const Action = {
   TOGGLE_HAS_SIDEBAR: 'toggleHasSidebar',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
   TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
+  TOGGLE_KEYBOARD_ACTIVE_STATE: 'toggleKeyboardActiveState',
   TOGGLE_MUTED: 'toggleMuted',
   TOGGLE_PAGE_ATTACHMENT_STATE: 'togglePageAttachmentState',
   TOGGLE_PAGE_HAS_AUDIO: 'togglePageHasAudio',
@@ -231,7 +234,7 @@ export const Action = {
   TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
   ADD_NEW_PAGE_ID: 'addNewPageId',
   SET_PAGE_SIZE: 'updatePageSize',
-  SET_PANNING_MEDIA_STATE: 'setPanningMediaState',
+  ADD_PANNING_MEDIA_STATE: 'addPanningMediaState',
   SET_VIEWER_CUSTOM_CONTROLS: 'setCustomControls',
 };
 
@@ -256,11 +259,7 @@ const stateComparisonFunctions = {
     old.width !== curr.width ||
     old.height !== curr.height,
   [StateProperty.PANNING_MEDIA_STATE]: (old, curr) =>
-    old === null ||
-    curr === null ||
-    old.x !== curr.x ||
-    old.y !== curr.y ||
-    old.zoom !== curr.zoom,
+    old === null || curr === null || !deepEquals(old, curr, 2),
   [StateProperty.INTERACTIVE_REACT_STATE]: (old, curr) =>
     !deepEquals(old, curr, 3),
 };
@@ -286,6 +285,15 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.NEW_PAGE_AVAILABLE_ID]: data,
+      });
+    case Action.ADD_PANNING_MEDIA_STATE:
+      const updatedState = {
+        ...state[StateProperty.PANNING_MEDIA_STATE],
+        ...data,
+      };
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.PANNING_MEDIA_STATE]: updatedState,
       });
     case Action.ADD_TO_ACTIONS_ALLOWLIST:
       const newActionsAllowlist = [].concat(
@@ -407,6 +415,11 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.RTL_STATE]: !!data,
       });
+    case Action.TOGGLE_KEYBOARD_ACTIVE_STATE:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.KEYBOARD_ACTIVE_STATE]: !!data,
+      });
     case Action.TOGGLE_SIDEBAR:
       // Don't change the PAUSED_STATE if SIDEBAR_STATE is not changed.
       if (state[StateProperty.SIDEBAR_STATE] === data) {
@@ -491,11 +504,6 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.PAGE_SIZE]: data,
-      });
-    case Action.SET_PANNING_MEDIA_STATE:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.PANNING_MEDIA_STATE]: data,
       });
     case Action.SET_VIEWER_CUSTOM_CONTROLS:
       return /** @type {!State} */ ({
@@ -618,11 +626,12 @@ export class AmpStoryStoreService {
         state: EmbeddedComponentState.HIDDEN,
       },
       [StateProperty.INTERACTIVE_REACT_STATE]: {},
+      [StateProperty.KEYBOARD_ACTIVE_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.PAGE_ATTACHMENT_STATE]: false,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
       [StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: false,
-      [StateProperty.PANNING_MEDIA_STATE]: null,
+      [StateProperty.PANNING_MEDIA_STATE]: {},
       [StateProperty.PAUSED_STATE]: false,
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,

@@ -16,7 +16,7 @@
 'use strict';
 
 const globby = require('globby');
-const {cyan, green, red} = require('ansi-colors');
+const {cyan, green, red} = require('kleur/colors');
 const {getStderr} = require('../common/exec');
 const {gitDiffFileMaster} = require('../common/git');
 const {log, logLocalDev, logWithoutTimestamp} = require('../common/logging');

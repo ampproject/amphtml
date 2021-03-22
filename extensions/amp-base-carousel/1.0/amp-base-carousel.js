@@ -23,8 +23,9 @@ import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
+import {dispatchCustomEvent} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const {string} */
 const TAG = 'amp-base-carousel';
@@ -92,30 +93,16 @@ AmpBaseCarousel['Component'] = BaseCarousel;
 AmpBaseCarousel['layoutSizeDefined'] = true;
 
 /** @override */
-AmpBaseCarousel['children'] = {
+AmpBaseCarousel['props'] = {
+  'advanceCount': {attr: 'advance-count', type: 'number', media: true},
   'arrowPrev': {
-    name: 'arrowPrev',
     selector: '[slot="prev-arrow"]',
     single: true,
   },
   'arrowNext': {
-    name: 'arrowNext',
     selector: '[slot="next-arrow"]',
     single: true,
   },
-  'children': {
-    name: 'children',
-    props: {
-      'thumbnailSrc': {attr: 'data-thumbnail-src'},
-    },
-    selector: '*', // This should be last as catch-all.
-    single: false,
-  },
-};
-
-/** @override */
-AmpBaseCarousel['props'] = {
-  'advanceCount': {attr: 'advance-count', type: 'number', media: true},
   'autoAdvance': {attr: 'auto-advance', type: 'boolean', media: true},
   'autoAdvanceCount': {attr: 'auto-advance-count', type: 'number', media: true},
   'autoAdvanceInterval': {
@@ -138,7 +125,17 @@ AmpBaseCarousel['props'] = {
   'snapBy': {attr: 'snap-by', type: 'number', media: true},
   'snapAlign': {attr: 'snap-align', type: 'string', media: true},
   'visibleCount': {attr: 'visible-count', type: 'number', media: true},
+  'children': {
+    props: {
+      'thumbnailSrc': {attr: 'data-thumbnail-src'},
+    },
+    selector: '*', // This should be last as catch-all.
+    single: false,
+  },
 };
+
+/** @override */
+AmpBaseCarousel['usesShadowDom'] = true;
 
 /** @override */
 AmpBaseCarousel['shadowCss'] = COMPONENT_CSS;
@@ -156,13 +153,20 @@ AmpBaseCarousel['useContexts'] = [CarouselContextProp];
  * @private
  */
 function fireSlideChangeEvent(win, el, index, trust) {
-  const name = 'slideChange';
+  const eventName = 'slideChange';
+  const data = dict({'index': index});
   const slideChangeEvent = createCustomEvent(
     win,
-    `amp-base-carousel.${name}`,
-    dict({'index': index})
+    `amp-base-carousel.${eventName}`,
+    data
   );
-  Services.actionServiceForDoc(el).trigger(el, name, slideChangeEvent, trust);
+  Services.actionServiceForDoc(el).trigger(
+    el,
+    eventName,
+    slideChangeEvent,
+    trust
+  );
+  dispatchCustomEvent(el, eventName, data);
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {

@@ -17,10 +17,6 @@
 import {Deferred} from '../utils/promise';
 import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
-import {
-  INTERSECT_RESOURCES_EXP,
-  divertIntersectResources,
-} from '../experiments/intersect-resources-exp';
 import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
 
@@ -31,13 +27,11 @@ import {VisibilityState} from '../visibility-state';
 import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
 import {expandLayoutRect} from '../layout-rect';
-import {getExperimentBranch, isExperimentOn} from '../experiments';
 import {getMode} from '../mode';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
 import {ieMediaCheckAndFix} from './ie-media-bug';
-import {isAmp4Email} from '../format';
 import {isBlockedByConsent, reportError} from '../error';
 import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
@@ -56,7 +50,6 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
-const MAX_BUILD_CHUNK_SIZE = 10;
 
 /**
  * @implements {ResourcesInterface}
@@ -156,7 +149,7 @@ export class ResourcesImpl {
     /** @const {!TaskQueue} */
     this.queue_ = new TaskQueue();
 
-    /** @const {!function(./task-queue.TaskDef):number} */
+    /** @const {function(./task-queue.TaskDef):number} */
     this.boundTaskScorer_ = this.calcTaskScore_.bind(this);
 
     /**
@@ -194,18 +187,6 @@ export class ResourcesImpl {
     /** @const @private {!Array<!Element>} */
     this.elementsThatScrolled_ = [];
 
-    /** @const @private {boolean} */
-    this.onlyBuildWhenCloseToViewport_ = isExperimentOn(
-      this.win,
-      'build-close-to-viewport'
-    );
-
-    /** @const @private {boolean} */
-    this.buildInChunks_ = isExperimentOn(this.win, 'build-in-chunks');
-
-    /** @const @private {boolean} */
-    this.removeTaskTimeout_ = isExperimentOn(this.win, 'remove-task-timeout');
-
     /** @const @private {!Deferred} */
     this.firstPassDone_ = new Deferred();
 
@@ -223,14 +204,8 @@ export class ResourcesImpl {
      */
     this.intersectionObserverCallbackFired_ = false;
 
-    divertIntersectResources(this.win);
-
-    if (
-      isExperimentOn(this.win, 'bento') ||
-      getExperimentBranch(this.win, INTERSECT_RESOURCES_EXP.id) ===
-        INTERSECT_RESOURCES_EXP.experiment ||
-      isAmp4Email(this.win.document)
-    ) {
+    // TODO(#33262): cleanup intersect-resources experiment.
+    if (false) {
       const iframed = isIframed(this.win);
 
       // Classic IntersectionObserver doesn't support viewport tracking and
@@ -464,9 +439,6 @@ export class ResourcesImpl {
    * @return {boolean}
    */
   isUnderBuildQuota_() {
-    if (this.buildInChunks_ && this.buildsThisPass_ >= MAX_BUILD_CHUNK_SIZE) {
-      return false;
-    }
     // For pre-render we want to limit the amount of CPU used, so we limit
     // the number of elements build. For pre-render to "seem complete"
     // we only need to build elements in the first viewport. We can't know
@@ -504,17 +476,6 @@ export class ResourcesImpl {
       resource.prerenderAllowed();
     if (!shouldBuildResource) {
       return;
-    }
-
-    if (this.onlyBuildWhenCloseToViewport_) {
-      const isCloseEnoughToViewport =
-        ignoreQuota ||
-        resource.isBuildRenderBlocking() ||
-        resource.renderOutsideViewport() ||
-        (this.isIdle_() && resource.idleRenderOutsideViewport());
-      if (!isCloseEnoughToViewport) {
-        return;
-      }
     }
 
     if (this.documentReady_) {
@@ -628,6 +589,10 @@ export class ResourcesImpl {
     if (this.intersectionObserver_) {
       // TODO(willchou): Fix observe/unobserve/remeasure churn in reparenting.
       this.intersectionObserver_.unobserve(resource.element);
+    }
+
+    if (resource.getState() === ResourceState.LAYOUT_SCHEDULED) {
+      resource.layoutCanceled();
     }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev().fine(TAG_, 'resource removed:', resource.debugid);
@@ -747,6 +712,7 @@ export class ResourcesImpl {
         dict({
           'title': doc.title,
           'sourceUrl': getSourceUrl(this.ampdoc.getUrl()),
+          'isStory': doc.body.firstElementChild?.tagName === 'AMP-STORY',
           'serverLayout': doc.documentElement.hasAttribute('i-amphtml-element'),
           'linkRels': documentInfo.linkRels,
           'metaTags': {'viewport': documentInfo.viewport} /* deprecated */,
@@ -1203,7 +1169,11 @@ export class ResourcesImpl {
     let remeasureCount = 0;
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
-      if (r.getState() == ResourceState.NOT_BUILT && !r.isBuilding()) {
+      if (
+        r.getState() == ResourceState.NOT_BUILT &&
+        !r.isBuilding() &&
+        !r.element.V1()
+      ) {
         this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
       }
       if (this.intersectionObserver_) {
@@ -1230,7 +1200,7 @@ export class ResourcesImpl {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
         const requested = r.isMeasureRequested();
-        if (r.hasOwner() && !requested) {
+        if ((r.hasOwner() && !requested) || r.element.V1()) {
           continue;
         }
         const premeasured = r.hasBeenPremeasured();
@@ -1269,7 +1239,7 @@ export class ResourcesImpl {
     ) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        if (r.hasOwner() && !r.isMeasureRequested()) {
+        if ((r.hasOwner() && !r.isMeasureRequested()) || r.element.V1()) {
           // If element has owner, and measure is not requested, do nothing.
           continue;
         }
@@ -1330,7 +1300,11 @@ export class ResourcesImpl {
     // Phase 3: Set inViewport status for resources.
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
-      if (r.getState() == ResourceState.NOT_BUILT || r.hasOwner()) {
+      if (
+        r.getState() == ResourceState.NOT_BUILT ||
+        r.hasOwner() ||
+        r.element.V1()
+      ) {
         continue;
       }
       // Note that when the document is not visible, neither are any of its
@@ -1355,6 +1329,7 @@ export class ResourcesImpl {
           !r.isBuilt() &&
           !r.isBuilding() &&
           !r.hasOwner() &&
+          !r.element.V1() &&
           r.hasBeenMeasured() &&
           r.isDisplayed() &&
           r.overlaps(loadRect)
@@ -1390,6 +1365,7 @@ export class ResourcesImpl {
         if (
           r.getState() == ResourceState.READY_FOR_LAYOUT &&
           !r.hasOwner() &&
+          !r.element.V1() &&
           r.isDisplayed() &&
           r.idleRenderOutsideViewport()
         ) {
@@ -1409,6 +1385,7 @@ export class ResourcesImpl {
         if (
           r.getState() == ResourceState.READY_FOR_LAYOUT &&
           !r.hasOwner() &&
+          !r.element.V1() &&
           r.isDisplayed()
         ) {
           dev().fine(TAG_, 'idle layout:', r.debugid);
@@ -1455,9 +1432,7 @@ export class ResourcesImpl {
     let timeout = -1;
     let task = this.queue_.peek(this.boundTaskScorer_);
     while (task) {
-      if (!this.removeTaskTimeout_) {
-        timeout = this.calcTaskTimeout_(task);
-      }
+      timeout = this.calcTaskTimeout_(task);
       dev().fine(
         TAG_,
         'peek from queue:',
@@ -1469,10 +1444,8 @@ export class ResourcesImpl {
         'timeout',
         timeout
       );
-      if (!this.removeTaskTimeout_) {
-        if (timeout > 16) {
-          break;
-        }
+      if (timeout > 16) {
+        break;
       }
 
       this.queue_.dequeue(task);
@@ -1535,12 +1508,10 @@ export class ResourcesImpl {
       this.exec_.getSize()
     );
 
-    if (!this.removeTaskTimeout_) {
-      if (timeout >= 0) {
-        // Still tasks in the queue, but we took too much time.
-        // Schedule the next work pass.
-        return timeout;
-      }
+    if (timeout >= 0) {
+      // Still tasks in the queue, but we took too much time.
+      // Schedule the next work pass.
+      return timeout;
     }
 
     // No tasks left in the queue.
@@ -1714,6 +1685,9 @@ export class ResourcesImpl {
     opt_parentPriority,
     opt_forceOutsideViewport
   ) {
+    if (resource.element.V1()) {
+      return;
+    }
     const isBuilt = resource.getState() != ResourceState.NOT_BUILT;
     const isDisplayed = resource.isDisplayed();
     if (!isBuilt || !isDisplayed) {
@@ -1791,11 +1765,7 @@ export class ResourcesImpl {
         this.queue_.dequeue(queued);
       }
       this.queue_.enqueue(task);
-      if (this.removeTaskTimeout_) {
-        this.schedulePass();
-      } else {
-        this.schedulePass(this.calcTaskTimeout_(task));
-      }
+      this.schedulePass(this.calcTaskTimeout_(task));
     }
     task.resource.layoutScheduled(task.scheduleTime);
   }

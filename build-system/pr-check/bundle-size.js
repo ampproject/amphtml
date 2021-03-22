@@ -26,7 +26,6 @@ const {
   timedExecOrDie,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
-const {isTravisBuild} = require('../common/ci');
 const {runCiJob} = require('./ci-job');
 
 const jobName = 'bundle-size.js';
@@ -34,16 +33,16 @@ const jobName = 'bundle-size.js';
 function pushBuildWorkflow() {
   downloadNomoduleOutput();
   downloadModuleOutput();
-  timedExecOrDie('gulp bundle-size --on_push_build');
+  timedExecOrDie('amp bundle-size --on_push_build');
 }
 
 function prBuildWorkflow() {
-  if (buildTargetsInclude(Targets.RUNTIME, Targets.FLAG_CONFIG)) {
+  if (buildTargetsInclude(Targets.RUNTIME)) {
     downloadNomoduleOutput();
     downloadModuleOutput();
-    timedExecOrDie('gulp bundle-size --on_pr_build');
+    timedExecOrDie('amp bundle-size --on_pr_build');
   } else {
-    timedExecOrDie('gulp bundle-size --on_skipped_build');
+    timedExecOrDie('amp bundle-size --on_skipped_build');
     printSkipMessage(
       jobName,
       'this PR does not affect the runtime or flag configs'
@@ -51,12 +50,4 @@ function prBuildWorkflow() {
   }
 }
 
-// TODO(rsimha): Remove this block once Travis is shut off.
-if (!isTravisBuild()) {
-  printSkipMessage(
-    jobName,
-    'this is a CircleCI build. Sizes will be reported from Travis'
-  );
-  return;
-}
 runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

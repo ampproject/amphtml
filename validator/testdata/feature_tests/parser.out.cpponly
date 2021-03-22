@@ -100,18 +100,18 @@ feature_tests/parser.html:59:2 The attribute 'a' may not appear in tag 'a'. (see
 |    <!-- Tags that may be processing instructions: -->
 |    <?php ?>
 |    < ?php ?>
->>    ^~~~~~~~~
-feature_tests/parser.html:63:3 The tag '<?' is disallowed.
+>>     ^~~~~~~~~
+feature_tests/parser.html:63:4 The tag '<?' is disallowed.
 |    <?php echo 'Hello, World'; ?>
 |    <?php <span>Content</span> ?>
->>    ^~~~~~~~~
-feature_tests/parser.html:65:3 The tag '<?' is disallowed.
+>>     ^~~~~~~~~
+feature_tests/parser.html:65:4 The tag '<?' is disallowed.
 |    <?xml:namespace prefix = o ns = "urn:schemas-microsoft-com:office:office" />
->>    ^~~~~~~~~
-feature_tests/parser.html:66:3 The tag '<?' is disallowed.
+>>     ^~~~~~~~~
+feature_tests/parser.html:66:4 The tag '<?' is disallowed.
 |    < ?xml:namespace ?>
->>    ^~~~~~~~~
-feature_tests/parser.html:67:3 The tag '<?' is disallowed.
+>>     ^~~~~~~~~
+feature_tests/parser.html:67:4 The tag '<?' is disallowed.
 |
 |  </body>
 |  </html>

@@ -27,8 +27,7 @@ const viewport = {
 describes.endtoend(
   'amp-story-auto-ads:fullbleed',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-story-auto-ads/fullbleed.html',
+    fixture: 'amp-story-auto-ads/fullbleed.html',
     initialRect: {width: viewport.WIDTH, height: viewport.HEIGHT},
     // TODO(ccordry): re-enable viewer-demo that should handle the 64px
     // offset set by the viewer header.

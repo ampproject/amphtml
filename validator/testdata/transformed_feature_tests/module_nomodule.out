@@ -1,4 +1,4 @@
-FAIL
+PASS
 |  <!--
 |    Copyright 2020 The AMP HTML Authors. All Rights Reserved.
 |
@@ -18,10 +18,6 @@ FAIL
 |    Test Description:
 |    This test demonstrates that all scripts having a module and nomodule pairing
 |    are considered valid.
-|
-|    TODO(b/173803451) some of the test comments below may be incorrect due
-|    to module/nomodule not being allowed yet. They will be correct once
-|    module/nomodule is allowed.
 |  -->
 |  <!doctype html>
 |  <html ⚡ transformed="google;v=1">
@@ -29,22 +25,15 @@ FAIL
 |    <meta charset=utf-8>
 |    <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
 |    <meta name=viewport content="width=device-width">
+|    <link as=script crossorigin=anonymous href=https://cdn.ampproject.org/rtv/123456789012345/v0.mjs rel=modulepreload>
 |
 |    <!-- Valid: module/nomodule pair for AMP runtime script -->
 |    <script async crossorigin=anonymous src=https://cdn.ampproject.org/v0.mjs type=module></script>
->>   ^~~~~~~~~
-transformed_feature_tests/module_nomodule.html:33:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
 |    <script async nomodule src=https://cdn.ampproject.org/v0.js></script>
->>   ^~~~~~~~~
-transformed_feature_tests/module_nomodule.html:34:2 The attribute 'nomodule' may not appear in tag 'amphtml engine script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |
 |    <!-- Valid: module/nomodule pair for AMP extension script -->
 |    <script async crossorigin=anonymous custom-element=amp-ad src=https://cdn.ampproject.org/v0/amp-ad-0.1.mjs type=module></script>
->>   ^~~~~~~~~
-transformed_feature_tests/module_nomodule.html:37:2 The attribute 'type' in tag 'amp-ad extension script' is set to the invalid value 'module'. (see https://amp.dev/documentation/components/amp-ad)
 |    <script async custom-element=amp-ad nomodule src=https://cdn.ampproject.org/v0/amp-ad-0.1.js></script>
->>   ^~~~~~~~~
-transformed_feature_tests/module_nomodule.html:38:2 The attribute 'nomodule' may not appear in tag 'amp-ad extension script'. (see https://amp.dev/documentation/components/amp-ad)
 |
 |    <link rel=canonical href="./regular-html-version.html">
 |  </head>

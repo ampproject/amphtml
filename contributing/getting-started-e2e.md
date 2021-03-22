@@ -18,34 +18,46 @@ limitations under the License.
 
 This end-to-end guide will show you how to contribute code to the AMP open source project. It covers everything from creating a GitHub account to getting your code reviewed and merged.
 
-This guide is intended for people who don't know much about Git/GitHub and the tools we use to build/test AMP (Node.js, Gulp, etc.). The guide may look long, but it includes a lot of explanation so you can get a better understanding of how things work.
+This guide is intended for people who don't know much about Git/GitHub and the tools we use to build/test AMP. The guide may look long, but it includes a lot of explanation so you can get a better understanding of how things work.
 
 If you're already familiar with Git/GitHub/etc. or you just want to know what commands to type in instead of what they're doing take a look at the much shorter [Quick Start Guide](getting-started-quick.md).
 
 If you do not yet have a specific code contribution project in mind as you go through this guide, consider grabbing one of the [Good First Issues](https://github.com/ampproject/amphtml/labels/good%20first%20issue) we have created for new contributors.
 
+<!--
+  (Do not remove or edit this comment.)
+
+  This table-of-contents is automatically generated. To generate it, run:
+    amp markdown-toc --fix
+-->
+
 -   [How to get help](#how-to-get-help)
 -   [Intro to Git and GitHub](#intro-to-git-and-github)
 -   [Set up your GitHub account and Git](#set-up-your-github-account-and-git)
 -   [Get a copy of the amphtml code](#get-a-copy-of-the-amphtml-code)
-    -   [Understanding repositories](#understanding-repositories)
-    -   [Creating your GitHub fork and your local repository](#creating-your-github-fork-and-your-local-repository)
+-   [Understanding repositories](#understanding-repositories)
+-   [Creating your GitHub fork and your local repository](#creating-your-github-fork-and-your-local-repository)
 -   [Set up aliases for the remote Git repositories](#set-up-aliases-for-the-remote-git-repositories)
 -   [Building AMP and starting a local server](#building-amp-and-starting-a-local-server)
 -   [Create a Git branch](#create-a-git-branch)
 -   [Pull the latest changes from the amphtml repository](#pull-the-latest-changes-from-the-amphtml-repository)
 -   [Edit files and commit them](#edit-files-and-commit-them)
-    -   [Code quality and style](#code-quality-and-style)
+-   [Code quality and style](#code-quality-and-style)
+    -   [Workflow for Visual Studio Code](#workflow-for-visual-studio-code)
+        -   [To automatically fix JS files on save](#to-automatically-fix-js-files-on-save)
+        -   [To automatically fix non-JS files on save](#to-automatically-fix-non-js-files-on-save)
+    -   [Manually fixing code](#manually-fixing-code)
 -   [Testing your changes](#testing-your-changes)
-    -   [Running tests locally](#running-tests-locally)
-    -   [Running all the CircleCI checks locally](#running-all-the-circleci-checks-locally)
-    -   [Adding tests for your change](#adding-tests-for-your-change)
+-   [Running tests locally](#running-tests-locally)
+-   [Running all the CircleCI checks locally](#running-all-the-circleci-checks-locally)
+-   [Adding tests](#adding-tests)
+-   [Perform manual tests](#perform-manual-tests)
 -   [Push your changes to your GitHub fork](#push-your-changes-to-your-github-fork)
 -   [Send a Pull Request (i.e. request a code review)](#send-a-pull-request-ie-request-a-code-review)
 -   [Respond to Pull Request comments](#respond-to-pull-request-comments)
 -   [Delete your branch](#delete-your-branch)
 -   [See your changes in production](#see-your-changes-in-production)
--   [⚡⚡⚡... (Next steps)](#-next-steps)
+-   [⚡⚡⚡... (Next steps)](#%E2%9A%A1%E2%9A%A1%E2%9A%A1-next-steps)
 -   [Other resources](#other-resources)
 
 # How to get help
@@ -159,7 +171,7 @@ git branch -u upstream/master master
 
 # Building AMP and starting a local server
 
-Now that you have all of the files copied locally you can actually build the code and run a local server to try things out. We use Node.js, the NPM package manager, Closure Compiler, and the Gulp build system to build amphtml and start up a local server that lets you try out your changes.
+Now that you have all of the files copied locally you can actually build the code and run a local server to try things out. We use Node.js, the NPM package manager, and Closure Compiler to build amphtml and start up a local server that lets you try out your changes.
 
 -   Install the latest LTS version of [Node.js](https://nodejs.org/) (which includes npm). If you're on Mac or Linux, an easy way to install Node.js is with `nvm`: [here](https://github.com/creationix/nvm).
 
@@ -175,20 +187,6 @@ Now that you have all of the files copied locally you can actually build the cod
     export JAVA_HOME=`/usr/libexec/java_home -v 1.8`
     ```
 
--   If you have a global install of [Gulp](https://gulpjs.com/), uninstall it. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md). See [this article](https://medium.com/gulpjs/gulp-sips-command-line-interface-e53411d4467) for why.)
-
-    ```sh
-    npm uninstall --global gulp
-    ```
-
--   Install the [Gulp](https://gulpjs.com/) command line tool, which will automatically use the version of `gulp` packaged with the the amphtml repository. (instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md))
-
-    ```sh
-    npm install --global gulp-cli
-    ```
-
-    An alternative to installing `gulp-cli` is to invoke each Gulp command in this guide with `npx gulp` during local development. This will also use the version of `gulp` packaged with the amphtml repository.
-
 -   In your local repository directory (e.g. `~/src/ampproject/amphtml`), install the packages that AMP uses by running
     ```
     npm install
@@ -198,10 +196,10 @@ Now that you have all of the files copied locally you can actually build the cod
 Now whenever you're ready to build amphtml and start up your local server, simply go to your local repository directory and run:
 
 ```sh
-gulp
+amp
 ```
 
-Running the `gulp` command will start up a Node.js server listening on port 8000. Once you see a message like `Finished 'default'` you can access the local server in your browser at [http://localhost:8000](http://localhost:8000).
+Running the `amp` command will start up a Node.js server listening on port 8000. Once you see a message like `Finished 'default'` you can access the local server in your browser at [http://localhost:8000](http://localhost:8000).
 
 You can browse the [http://localhost:8000/examples](http://localhost:8000/examples) directory to see some demo pages for various AMP components and combination of components. When a page is visited, the JS files and extensions used by the page will get lazily built and served.
 
@@ -213,7 +211,7 @@ Note that by default each of the pages in the /examples directory uses the unmin
 
 -   [http://localhost:8000/serve_mode=compiled](http://localhost:8000/serve_mode=compiled)
 
-    Minified AMP JavaScript is served from the local server. This is only available after running `gulp dist --fortesting`.
+    Minified AMP JavaScript is served from the local server. This is only available after running `amp dist --fortesting`.
 
 -   [http://localhost:8000/serve_mode=cdn](http://localhost:8000/serve_mode=cdn)
 
@@ -389,13 +387,13 @@ Alternatively, you can manually fix most quality and style errors in your code b
 For JS files:
 
 ```sh
-gulp lint --local_changes --fix
+amp lint --local_changes --fix
 ```
 
 For non-JS files:
 
 ```sh
-gulp prettify --local_changes --fix
+amp prettify --local_changes --fix
 ```
 
 # Testing your changes
@@ -409,7 +407,7 @@ Note: You can automatically run critical checks before `git push` by enabling ou
 To run the tests that are affected by the changes on your feature branch:
 
 ```sh
-gulp unit --local_changes
+amp unit --local_changes
 ```
 
 By default, all tests are run on Chrome. Pass one of the following flags to run tests on a different browser: `--firefox`, `--safari`, `--edge`, `--ie`.
@@ -421,14 +419,14 @@ If you need help with fixing failing tests, please ask on the GitHub issue you'r
 To avoid repeatedly waiting for CircleCI to run all pull-request checks, you can run them locally:
 
 ```sh
-gulp pr-check
+amp pr-check
 ```
 
 Notes:
 
 -   This will force a clean build and run all the PR checks one by one.
 -   Just like on CircleCI, a failing check will prevent subsequent checks from being run.
--   The `gulp visual-diff` check will be skipped unless you have set up a Percy account as described in the [Testing](TESTING.md#running-visual-diff-tests-locally) guide.
+-   The `amp visual-diff` check will be skipped unless you have set up a Percy account as described in the [Testing](TESTING.md#running-visual-diff-tests-locally) guide.
 -   Unit and integration tests will be run on local Chrome.
 
 ## Adding tests
@@ -437,22 +435,22 @@ The `amphtml` testing framework uses the [Mocha](https://mochajs.org/), [Chai](h
 
 Existing components will usually have existing tests that you can follow as an example. For example, the [amp-video](../extensions/amp-video/amp-video.md) component has tests in [test/test-amp-video.js](../extensions/amp-video/0.1/test/test-amp-video.js).
 
-To run tests in a single file, use `gulp unit --files=<path>`:
+To run tests in a single file, use `amp unit --files=<path>`:
 
 ```sh
-gulp unit --files=extensions/amp-youtube/0.1/test/test-amp-youtube.js
+amp unit --files=extensions/amp-youtube/0.1/test/test-amp-youtube.js
 ```
 
-To run tests in multiple files, use `gulp unit --files=<path-1> --files=<path-2>`:
+To run tests in multiple files, use `amp unit --files=<path-1> --files=<path-2>`:
 
 ```sh
-gulp unit --files=extensions/amp-story/1.0/test/test-amp-story-embedded-component.js --files=extensions/amp-story/1.0/test/test-amp-story-hint.js
+amp unit --files=extensions/amp-story/1.0/test/test-amp-story-embedded-component.js --files=extensions/amp-story/1.0/test/test-amp-story-hint.js
 ```
 
 Testing tips:
 
 -   Use Mocha's [`.only()`](https://mochajs.org/#exclusive-tests) feature to exclusively run certain test-cases or suites.
--   Add `--watch` to your `gulp unit` command to automatically re-run tests on code changes.
+-   Add `--watch` to your `amp unit` command to automatically re-run tests on code changes.
 
 For more help, see [How to get help](#how-to-get-help).
 

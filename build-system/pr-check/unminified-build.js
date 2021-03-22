@@ -30,26 +30,18 @@ const {runCiJob} = require('./ci-job');
 const jobName = 'unminified-build.js';
 
 function pushBuildWorkflow() {
-  timedExecOrDie('gulp update-packages');
-  timedExecOrDie('gulp build --fortesting');
+  timedExecOrDie('amp build --fortesting');
   uploadUnminifiedOutput();
 }
 
 function prBuildWorkflow() {
-  if (
-    buildTargetsInclude(
-      Targets.RUNTIME,
-      Targets.FLAG_CONFIG,
-      Targets.INTEGRATION_TEST
-    )
-  ) {
-    timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp build --fortesting');
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
+    timedExecOrDie('amp build --fortesting');
     uploadUnminifiedOutput();
   } else {
     printSkipMessage(
       jobName,
-      'this PR does not affect the runtime, flag configs, or integration tests'
+      'this PR does not affect the runtime or integration tests'
     );
   }
 }

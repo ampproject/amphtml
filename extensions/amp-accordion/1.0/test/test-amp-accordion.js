@@ -16,7 +16,7 @@
 import '../amp-accordion';
 import {ActionInvocation} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
-import {CanRender} from '../../../../src/contextprops';
+import {CanRender} from '../../../../src/core/contextprops';
 import {htmlFor} from '../../../../src/static-template';
 import {subscribe, unsubscribe} from '../../../../src/context';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -73,7 +73,7 @@ describes.realWin(
         </amp-accordion>
       `;
       win.document.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
     });
 
     it('should render expanded and collapsed sections', () => {
@@ -323,7 +323,7 @@ describes.realWin(
         </amp-accordion>
       `;
       win.document.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
 
       const sections = element.children;
       const {
@@ -363,6 +363,43 @@ describes.realWin(
       expect(header2.getAttribute('id')).to.equal(
         content2.getAttribute('aria-labelledby')
       );
+    });
+
+    it('should not overwrite existing role attributes', async () => {
+      element = html`
+        <amp-accordion layout="fixed" width="300" height="200">
+          <section expanded id="section1">
+            <h1 role="cat">header1</h1>
+            <div role="dog">content1</div>
+          </section>
+          <section>
+            <h1 id="h2">header2</h1>
+            <div>content2</div>
+          </section>
+        </amp-accordion>
+      `;
+      win.document.body.appendChild(element);
+      await element.buildInternal();
+
+      const sections = element.children;
+      const {
+        firstElementChild: header0,
+        lastElementChild: content0,
+      } = sections[0];
+      const {
+        firstElementChild: header1,
+        lastElementChild: content1,
+      } = sections[1];
+
+      expect(header0).to.have.attribute('role');
+      expect(header0.getAttribute('role')).to.equal('cat');
+      expect(content0).to.have.attribute('role');
+      expect(content0.getAttribute('role')).to.equal('dog');
+
+      expect(header1).to.have.attribute('role');
+      expect(header1.getAttribute('role')).to.equal('button');
+      expect(content1).to.have.attribute('role');
+      expect(content1.getAttribute('role')).to.equal('region');
     });
 
     it('should pick up new children', async () => {
@@ -407,7 +444,7 @@ describes.realWin(
           </amp-accordion>
         `;
         win.document.body.appendChild(element);
-        await element.build();
+        await element.buildInternal();
       });
 
       function invocation(method, args = {}) {
@@ -573,7 +610,7 @@ describes.realWin(
           </amp-accordion>
         `;
         win.document.body.appendChild(element);
-        await element.build();
+        await element.buildInternal();
       });
 
       it('should not animate on build', () => {
@@ -652,7 +689,7 @@ describes.realWin(
         win.document.body.appendChild(element);
         win.CSS.supports = () => true;
         win.document.body.onbeforematch = null;
-        await element.build();
+        await element.buildInternal();
 
         const section1 = element.children[0];
         const content1 = section1.lastElementChild;
@@ -667,7 +704,7 @@ describes.realWin(
         win.document.body.appendChild(element);
         win.CSS.supports = () => true;
         win.document.body.onbeforematch = null;
-        await element.build();
+        await element.buildInternal();
 
         const section2 = element.children[1];
         const content2 = section2.lastElementChild;
@@ -684,7 +721,7 @@ describes.realWin(
         win.document.body.appendChild(element);
         win.CSS.supports = () => true;
         win.document.body.onbeforematch = null;
-        await element.build();
+        await element.buildInternal();
 
         const section1 = element.children[0];
         const content1 = section1.lastElementChild;
@@ -817,7 +854,7 @@ describes.realWin(
             </amp-accordion>
           `;
           win.document.body.appendChild(element);
-          await element.build();
+          await element.buildInternal();
 
           section1 = element.children[0];
           section2 = element.children[1];

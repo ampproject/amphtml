@@ -17,15 +17,19 @@
       owners: [{name: 'ampproject/wg-caching', required: true}],
     },
     {
+      pattern: '**/*',
+      owners: [{name: 'ampproject/wg-ads-reviewers', required: true}],
+    },
+    {
       pattern: '**/*.md',
       owners: [{name: '*'}],
     },
     {
-      pattern: '{.*,**/ads/vendors/colombia.js}',
+      pattern: '{.*,amp.js,gulp-deprecated.js}',
       owners: [{name: 'ampproject/wg-infra'}],
     },
     {
-      pattern: '{babel.config.js,package.json,package-lock.json}',
+      pattern: '{babel.config.js,package.json,package-lock.json,package-scripts.js}',
       owners: [
         {name: 'ampproject/wg-infra'},
         {name: 'ampproject/wg-performance'},

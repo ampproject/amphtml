@@ -22,7 +22,7 @@
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {log} = require('../common/logging');
 const {printSkipMessage, timedExecOrDie} = require('./utils');
-const {red, cyan} = require('ansi-colors');
+const {red, cyan} = require('kleur/colors');
 const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runCiJob} = require('./ci-job');
 
@@ -35,15 +35,15 @@ function runIntegrationTestsForPlatform() {
   switch (process.platform) {
     case 'linux':
       timedExecOrDie(
-        'gulp integration --nobuild --compiled --headless --firefox'
+        'amp integration --nobuild --compiled --headless --firefox'
       );
       break;
     case 'darwin':
-      timedExecOrDie('gulp integration --nobuild --compiled --safari');
+      timedExecOrDie('amp integration --nobuild --compiled --safari');
       break;
     case 'win32':
-      timedExecOrDie('gulp integration --nobuild --compiled --headless --edge');
-      timedExecOrDie('gulp integration --nobuild --compiled --ie');
+      timedExecOrDie('amp integration --nobuild --compiled --headless --edge');
+      timedExecOrDie('amp integration --nobuild --compiled --ie');
       break;
     default:
       log(
@@ -55,18 +55,40 @@ function runIntegrationTestsForPlatform() {
 }
 
 /**
+ * Helper that runs platform-specific E2E tests
+ */
+function runE2eTestsForPlatform() {
+  switch (process.platform) {
+    case 'linux':
+      timedExecOrDie('amp e2e --nobuild --compiled --browsers=firefox');
+      break;
+    case 'darwin':
+      timedExecOrDie('amp e2e --nobuild --compiled --browsers=safari');
+      break;
+    case 'win32':
+      break;
+    default:
+      log(
+        red('ERROR:'),
+        'Cannot run cross-browser E2E tests on',
+        cyan(process.platform) + '.'
+      );
+  }
+}
+
+/**
  * Helper that runs platform-specific unit tests
  */
 function runUnitTestsForPlatform() {
   switch (process.platform) {
     case 'linux':
-      timedExecOrDie('gulp unit --headless --firefox');
+      timedExecOrDie('amp unit --headless --firefox');
       break;
     case 'darwin':
-      timedExecOrDie('gulp unit --safari');
+      timedExecOrDie('amp unit --safari');
       break;
     case 'win32':
-      timedExecOrDie('gulp unit --headless --edge');
+      timedExecOrDie('amp unit --headless --edge');
       break;
     default:
       log(
@@ -78,12 +100,14 @@ function runUnitTestsForPlatform() {
 }
 
 function pushBuildWorkflow() {
-  timedExecOrDie('gulp update-packages');
-  timedExecOrDie('gulp dist --fortesting');
-  runIntegrationTestsForPlatform();
   runUnitTestsForPlatform();
+  timedExecOrDie('amp dist --fortesting');
+  runIntegrationTestsForPlatform();
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function prBuildWorkflow() {
   if (process.platform == 'linux') {
     await reportAllExpectedTests(); // Only once is sufficient.
@@ -91,30 +115,34 @@ async function prBuildWorkflow() {
   if (
     !buildTargetsInclude(
       Targets.RUNTIME,
-      Targets.FLAG_CONFIG,
       Targets.UNIT_TEST,
+      Targets.E2E_TEST,
       Targets.INTEGRATION_TEST
     )
   ) {
     printSkipMessage(
       jobName,
-      'this PR does not affect the runtime, flag configs, unit tests, or integration tests'
+      'this PR does not affect the runtime, unit tests, integration tests, or end-to-end tests'
     );
     return;
   }
-  timedExecOrDie('gulp update-packages');
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
+    runUnitTestsForPlatform();
+  }
   if (
     buildTargetsInclude(
       Targets.RUNTIME,
-      Targets.FLAG_CONFIG,
-      Targets.INTEGRATION_TEST
+      Targets.INTEGRATION_TEST,
+      Targets.E2E_TEST
     )
   ) {
-    timedExecOrDie('gulp dist --fortesting');
+    timedExecOrDie('amp dist --fortesting');
+  }
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     runIntegrationTestsForPlatform();
   }
-  if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
-    runUnitTestsForPlatform();
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.E2E_TEST)) {
+    runE2eTestsForPlatform();
   }
 }
 

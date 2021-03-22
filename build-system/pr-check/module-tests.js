@@ -19,6 +19,7 @@
  * @fileoverview Script that tests the module AMP runtime during CI.
  */
 
+const argv = require('minimist')(process.argv.slice(2));
 const {
   downloadModuleOutput,
   downloadNomoduleOutput,
@@ -26,33 +27,40 @@ const {
   timedExecOrDie,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
+const {MINIFIED_TARGETS} = require('../tasks/helpers');
 const {runCiJob} = require('./ci-job');
 
 const jobName = 'module-tests.js';
 
+function prependConfig() {
+  const targets = MINIFIED_TARGETS.flatMap((target) => [
+    `dist/${target}.js`,
+    `dist/${target}.mjs`,
+  ]).join(',');
+  timedExecOrDie(
+    `amp prepend-global --${argv.config} --local_dev --fortesting --derandomize --target=${targets}`
+  );
+}
+
 function pushBuildWorkflow() {
   downloadNomoduleOutput();
   downloadModuleOutput();
-  timedExecOrDie('gulp update-packages');
-  timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
+  prependConfig();
+  timedExecOrDie('amp integration --nobuild --compiled --headless --esm');
 }
 
 function prBuildWorkflow() {
-  if (
-    buildTargetsInclude(
-      Targets.RUNTIME,
-      Targets.FLAG_CONFIG,
-      Targets.INTEGRATION_TEST
-    )
-  ) {
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     downloadNomoduleOutput();
     downloadModuleOutput();
-    timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
+    prependConfig();
+    timedExecOrDie(
+      `amp integration --nobuild --compiled --headless --esm --config=${argv.config}`
+    );
   } else {
     printSkipMessage(
       jobName,
-      'this PR does not affect the runtime, flag configs, or integration tests'
+      'this PR does not affect the runtime or integration tests'
     );
   }
 }
