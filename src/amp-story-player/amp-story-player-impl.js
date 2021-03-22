@@ -199,12 +199,6 @@ export class AmpStoryPlayer {
     /** @private {?Element} */
     this.rootEl_ = null;
 
-    /** @private {boolean} */
-    this.isLaidOut_ = false;
-
-    /** @private {boolean} */
-    this.isBuilt_ = false;
-
     /** @private {number} */
     this.currentIdx_ = 0;
 
@@ -241,6 +235,8 @@ export class AmpStoryPlayer {
 
     /** @private {boolean} */
     this.autoplay_ = true;
+
+    return this.element_;
   }
 
   /**
@@ -248,6 +244,9 @@ export class AmpStoryPlayer {
    * @private
    */
   attachCallbacksToElement_() {
+    this.element_.buildCallback = this.buildCallback.bind(this);
+    this.element_.layoutCallback = this.layoutCallback.bind(this);
+    this.element_.getElement = this.getElement.bind(this);
     this.element_.getStories = this.getStories.bind(this);
     this.element_.load = this.load.bind(this);
     this.element_.show = this.show.bind(this);
@@ -270,6 +269,9 @@ export class AmpStoryPlayer {
       throw new Error(
         `[${TAG}] element must be connected to the DOM before calling load().`
       );
+    }
+    if (!!this.element_.isBuilt_) {
+      throw new Error(`[${TAG}] calling load() on an already loaded element.`);
     }
     this.buildCallback();
     this.layoutCallback();
@@ -364,7 +366,7 @@ export class AmpStoryPlayer {
 
   /** @public */
   buildCallback() {
-    if (this.isBuilt_) {
+    if (!!this.element_.isBuilt_) {
       return;
     }
 
@@ -378,7 +380,7 @@ export class AmpStoryPlayer {
     this.initializePageScroll_();
     this.initializeCircularWrapping_();
     this.signalReady_();
-    this.isBuilt_ = true;
+    this.element_.isBuilt_ = true;
   }
 
   /**
@@ -681,7 +683,7 @@ export class AmpStoryPlayer {
    * @public
    */
   layoutCallback() {
-    if (this.isLaidOut_) {
+    if (!!this.element_.isLaidOut_) {
       return;
     }
 
@@ -691,7 +693,7 @@ export class AmpStoryPlayer {
 
     this.render_();
 
-    this.isLaidOut_ = true;
+    this.element_.isLaidOut_ = true;
   }
 
   /**
