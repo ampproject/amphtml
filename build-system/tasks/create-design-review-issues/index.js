@@ -14,7 +14,22 @@
  * limitations under the License.
  */
 
-// This script runs standalone so it must ONLY require standard node modules
+/**
+ * @fileoverview
+ * Creates a Github issue for an upcoming design review.
+ *
+ * https://go.amp.dev/design-reviews
+ *
+ * A Github Action runs this once a week.
+ * See .github/workflows/create-design-review-issues.yml
+ */
+
+/*
+ * ⚠️ Only use standard node modules.
+ *
+ * This file runs by itself. It cannot depend on `npm install` nor file
+ * structure since the Github Action downloads this file only.
+ */
 const https = require('https');
 
 const dayOfWeek = /* wednesday */ 3; // sunday = 0, monday = 1, ...
