@@ -177,7 +177,7 @@ function ciJobId() {
   return isGithubActions
     ? env('GITHUB_RUN_NUMBER')
     : isCircleci
-    ? env('CIRCLE_NODE_INDEX')
+    ? env('CIRCLE_JOB')
     : '';
 }
 
