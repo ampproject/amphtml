@@ -82,8 +82,8 @@ export class PredeterminedPositionAlgorithm {
     /** @private {!Array<string>} */
     this.storyPageIds_ = storeService.get(StateProperty.PAGE_IDS);
 
-    /** @private {?Array<number>} */
-    this.adPositions_ = null;
+    /** @private {!Array<number>} */
+    this.adPositions_ = [];
 
     /** @private {number} */
     this.pagesCreated_ = 0;
@@ -100,8 +100,11 @@ export class PredeterminedPositionAlgorithm {
     const storyLength = this.storyPageIds_.length;
     const numberOfAds = getNumberOfAds(storyLength, this.targetInterval_);
     this.adPositions_ = getAdPositions(storyLength, numberOfAds);
-    // TODO(ccordry): once 1px impression is launched create all ads at once.
-    return [this.createNextPage_()];
+    if (numberOfAds) {
+      // TODO(ccordry): once 1px impression is launched create all ads at once.
+      return [this.createNextPage_()];
+    }
+    return [];
   }
 
   /**

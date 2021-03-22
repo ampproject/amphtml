@@ -82,6 +82,28 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
         expect(createPageStub).to.be.calledOnce;
         expect(insertPageStub).to.be.calledWithExactly('4', mockPage);
       });
+
+      it('does not create a page when num ads == 0 ', () => {
+        env.sandbox.stub(Math, 'random').returns(6 / 8);
+        const pageIds = ['1', '2', '3', '4', '5'];
+        storeService.dispatch(Action.SET_PAGE_IDS, pageIds);
+        const mockPage = {registerLoadCallback: env.sandbox.stub().callsArg(0)};
+        const createPageStub = env.sandbox
+          .stub(pageManager, 'createAdPage')
+          .returns(mockPage);
+        const insertPageStub = env.sandbox.stub(
+          pageManager,
+          'maybeInsertPageAfter'
+        );
+        const algo = new PredeterminedPositionAlgorithm(
+          storeService,
+          pageManager
+        );
+        const pages = algo.initializePages();
+        expect(pages[0]).not.to.exist;
+        expect(createPageStub).not.to.be.called;
+        expect(insertPageStub).not.to.be.called;
+      });
     });
 
     describe('#onNewAdView', () => {
