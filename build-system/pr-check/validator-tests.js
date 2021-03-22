@@ -48,6 +48,9 @@ function prBuildWorkflow() {
 
   if (buildTargetsInclude(Targets.RUNTIME, Targets.VALIDATOR)) {
     timedExecOrDie('amp validator');
+  }
+
+  if (buildTargetsInclude(Targets.VALIDATOR)) {
     timedExecOrDie('amp validator-cpp');
   }
 
