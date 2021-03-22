@@ -20,6 +20,7 @@ import {dict} from './utils/object';
 import {getContextMetadata} from '../src/iframe-attributes';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
+import {isExperimentOn} from './experiments';
 import {setStyle} from './style';
 import {tryParseJson} from './json';
 import {urls} from './config';
@@ -115,7 +116,7 @@ export function getIframe(
   const name = JSON.stringify(
     dict({
       'host': host,
-      'bootstrap': getBootstrapUrl(),
+      'bootstrap': getBootstrapUrl(attributes['type'], parentWindow),
       'type': attributes['type'],
       // https://github.com/ampproject/amphtml/pull/2955
       'count': count[attributes['type']],
@@ -196,11 +197,21 @@ export function addDataAndJsonAttributes_(element, attributes) {
 
 /**
  * Get the bootstrap script URL for iframe.
+ * @param {string} type
+ * @param {!Window} win
  * @return {string}
  */
-export function getBootstrapUrl() {
+export function getBootstrapUrl(type, win) {
   if (getMode().localDev || getMode().test) {
-    return getMode().minified ? './f.js' : './integration.js';
+    const filename = getMode().minified
+      ? `./vendor/${type}.`
+      : `./vendor/${type}.max.`;
+    return IS_ESM ? filename + 'mjs' : filename + 'js';
+  }
+  if (isExperimentOn(win, '3p-vendor-split')) {
+    return IS_ESM
+      ? `${urls.thirdParty}/${internalRuntimeVersion()}/vendor/${type}.mjs`
+      : `${urls.thirdParty}/${internalRuntimeVersion()}/vendor/${type}.js`;
   }
   return `${urls.thirdParty}/${internalRuntimeVersion()}/f.js`;
 }
@@ -208,16 +219,17 @@ export function getBootstrapUrl() {
 /**
  * Preloads URLs related to the bootstrap iframe.
  * @param {!Window} win
+ * @param {string} type
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!./preconnect.PreconnectService} preconnect
  */
-export function preloadBootstrap(win, ampdoc, preconnect) {
+export function preloadBootstrap(win, type, ampdoc, preconnect) {
   const url = getBootstrapBaseUrl(win, ampdoc);
   preconnect.preload(ampdoc, url, 'document');
 
   // While the URL may point to a custom domain, this URL will always be
   // fetched by it.
-  preconnect.preload(ampdoc, getBootstrapUrl(), 'script');
+  preconnect.preload(ampdoc, getBootstrapUrl(type, win), 'script');
 }
 
 /**

@@ -22,6 +22,8 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 
+const TYPE = 'twitter';
+
 class AmpTwitter extends AMP.BaseElement {
   /** @override @nocollapse */
   static createLoaderLogoCallback(element) {
@@ -69,7 +71,7 @@ class AmpTwitter extends AMP.BaseElement {
   preconnectCallback(opt_onLayout) {
     const preconnect = Services.preconnectFor(this.win);
     const ampdoc = this.getAmpDoc();
-    preloadBootstrap(this.win, ampdoc, preconnect);
+    preloadBootstrap(this.win, TYPE, ampdoc, preconnect);
     // Hosts the script that renders tweets.
     preconnect.preload(
       ampdoc,
@@ -95,7 +97,7 @@ class AmpTwitter extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = getIframe(this.win, this.element, 'twitter', null, {
+    const iframe = getIframe(this.win, this.element, TYPE, null, {
       allowFullscreen: true,
     });
     iframe.title = this.element.title || 'Twitter';

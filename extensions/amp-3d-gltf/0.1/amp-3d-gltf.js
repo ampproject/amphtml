@@ -33,6 +33,7 @@ import {
 import {removeElement} from '../../../src/dom';
 
 const TAG = 'amp-3d-gltf';
+const TYPE = '3d-gltf';
 
 const isWebGLSupported = () => {
   const canvas = document.createElement('canvas');
@@ -70,7 +71,7 @@ export class Amp3dGltf extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     const preconnect = Services.preconnectFor(this.win);
-    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
+    preloadBootstrap(this.win, TYPE, this.getAmpDoc(), preconnect);
     preconnect.url(
       this.getAmpDoc(),
       'https://cdnjs.cloudflare.com/ajax/libs/three.js/91/three.js',
@@ -166,7 +167,7 @@ export class Amp3dGltf extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    const iframe = getIframe(this.win, this.element, '3d-gltf', this.context_);
+    const iframe = getIframe(this.win, this.element, TYPE, this.context_);
     iframe.title = this.element.title || 'GLTF 3D model';
     this.applyFillContent(iframe, true);
     this.iframe_ = iframe;

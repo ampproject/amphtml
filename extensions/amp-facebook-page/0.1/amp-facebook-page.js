@@ -25,6 +25,8 @@ import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 
+const TYPE = 'facebook';
+
 class AmpFacebookPage extends AMP.BaseElement {
   /** @override @nocollapse */
   static createLoaderLogoCallback(element) {
@@ -68,7 +70,7 @@ class AmpFacebookPage extends AMP.BaseElement {
       'https://connect.facebook.net/' + this.dataLocale_ + '/sdk.js',
       'script'
     );
-    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
+    preloadBootstrap(this.win, TYPE, this.getAmpDoc(), preconnect);
   }
 
   /** @override */
@@ -78,7 +80,7 @@ class AmpFacebookPage extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = getIframe(this.win, this.element, 'facebook');
+    const iframe = getIframe(this.win, this.element, TYPE);
     iframe.title = this.element.title || 'Facebook page';
     this.applyFillContent(iframe);
     // Triggered by context.updateDimensions() inside the iframe.

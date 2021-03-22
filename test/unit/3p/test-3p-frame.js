@@ -417,8 +417,9 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
 
       it('should prefetch bootstrap frame and JS', () => {
         mockMode({});
+        toggleExperiment(window, '3p-vendor-split', true);
         const ampdoc = Services.ampdoc(window.document);
-        preloadBootstrap(window, ampdoc, preconnect);
+        preloadBootstrap(window, 'avendor', ampdoc, preconnect);
         // Wait for visible promise.
         return ampdoc.whenFirstVisible().then(() => {
           const fetches = document.querySelectorAll('link[rel=preload]');
@@ -428,7 +429,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
           );
           expect(fetches[1]).to.have.property(
             'href',
-            'https://3p.ampproject.net/$internalRuntimeVersion$/f.js'
+            'https://3p.ampproject.net/$internalRuntimeVersion$/vendor/avendor.js'
           );
         });
       });
