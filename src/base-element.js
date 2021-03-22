@@ -626,14 +626,6 @@ export class BaseElement {
   }
 
   /**
-   * Unloads the element.
-   * @final
-   */
-  unload() {
-    this.element.getResources().getResourceForElement(this.element).unload();
-  }
-
-  /**
    * Whether the element needs to be reconstructed after it has been
    * re-parented. Many elements cannot survive fully the reparenting and
    * are better to be reconstructed from scratch.
