@@ -1010,13 +1010,12 @@ export class ResourcesImpl {
    * Always returns true unless the resource was previously displayed but is
    * not displayed now (i.e. the resource should be unloaded).
    * @param {!Resource} r
-   * @param {boolean} usePremeasuredRect
    * @return {boolean}
    * @private
    */
-  measureResource_(r, usePremeasuredRect = false) {
+  measureResource_(r) {
     const wasDisplayed = r.isDisplayed();
-    r.measure(usePremeasuredRect);
+    r.measure();
     return !(wasDisplayed && !r.isDisplayed());
   }
 

@@ -225,12 +225,6 @@ export class Resource {
     // TODO(#30620): remove isInViewport_ and whenWithinViewport.
     /** @const @private {boolean} */
     this.isInViewport_ = false;
-
-    /**
-     * A client rect that was "premeasured" by an IntersectionObserver.
-     * @private {?ClientRect}
-     */
-    this.premeasuredRect_ = null;
   }
 
   /**
@@ -427,19 +421,11 @@ export class Resource {
     return this.element.getUpgradeDelayMs();
   }
 
-  /** Removes the premeasured rect, likely forcing a manual measure. */
-  invalidatePremeasurementAndRequestMeasure() {
-    this.premeasuredRect_ = null;
-    this.requestMeasure();
-  }
-
   /**
    * Measures the resource's boundaries. An upgraded element will be
    * transitioned to the "ready for layout" state.
-   * @param {boolean} usePremeasuredRect If true, consumes the previously
-   *    premeasured ClientRect instead of calling getBoundingClientRect().
    */
-  measure(usePremeasuredRect = false) {
+  measure() {
     // Check if the element is ready to be measured.
     // Placeholders are special. They are technically "owned" by parent AMP
     // elements, sized by parents, but laid out independently. This means
@@ -470,12 +456,7 @@ export class Resource {
     this.isMeasureRequested_ = false;
 
     const oldBox = this.layoutBox_;
-    if (usePremeasuredRect) {
-      this.computeMeasurements_(devAssert(this.premeasuredRect_));
-    } else {
-      this.computeMeasurements_();
-    }
-    this.premeasuredRect_ = null;
+    this.computeMeasurements_();
     const newBox = this.layoutBox_;
 
     // Note that "left" doesn't affect readiness for the layout.
@@ -521,12 +502,11 @@ export class Resource {
 
   /**
    * Computes the current layout box and position-fixed state of the element.
-   * @param {!ClientRect=} opt_premeasuredRect
    * @private
    */
-  computeMeasurements_(opt_premeasuredRect) {
+  computeMeasurements_() {
     const viewport = Services.viewportForDoc(this.element);
-    this.layoutBox_ = viewport.getLayoutRect(this.element, opt_premeasuredRect);
+    this.layoutBox_ = viewport.getLayoutRect(this.element);
 
     // Calculate whether the element is currently is or in `position:fixed`.
     let isFixed = false;
