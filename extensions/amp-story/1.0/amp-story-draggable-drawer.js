@@ -27,9 +27,9 @@ import {closest, isAmpElement} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
+import {isPageAttachmentUiV2ExperimentOn} from './amp-story-open-page-attachment';
 import {listen} from '../../../src/event-helper';
 import {resetStyles, setImportantStyles, toggle} from '../../../src/style';
-import {isPageAttachmentUiV2ExperimentOn} from './amp-story-open-page-attachment';
 
 /** @const {number} */
 const TOGGLE_THRESHOLD_PX = 50;
