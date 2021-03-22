@@ -112,8 +112,8 @@ async function postGithub(token, url, data) {
   return JSON.parse(body);
 }
 
-function postGithubIssue(token, owner, repo, data) {
-  const url = `https://api.github.com/repos/${owner}/${repo}/issues`;
+function postGithubIssue(token, repo, data) {
+  const url = `https://api.github.com/repos/${repo}/issues`;
   return postGithub(token, url, data);
 }
 
@@ -193,12 +193,17 @@ function env(key) {
   return process.env[key];
 }
 
-const token = env('GITHUB_TOKEN');
-const [owner, repo] = env('GITHUB_REPOSITORY').split('/');
+async function createDesignReviewIssue() {
+  const {title, 'html_url': htmlUrl} = await postGithubIssue(
+    env('GITHUB_TOKEN'),
+    env('GITHUB_REPOSITORY'),
+    getNextIssueData()
+  );
+  console./*OK*/ log(title);
+  console./*OK*/ log(htmlUrl);
+}
 
-postGithubIssue(token, owner, repo, getNextIssueData()).then(
-  ({title, 'html_url': htmlUrl}) => {
-    console./*OK*/ log(title);
-    console./*OK*/ log(htmlUrl);
-  }
-);
+createDesignReviewIssue().catch((e) => {
+  console./*OK*/ error(e);
+  process.exit(1);
+});
