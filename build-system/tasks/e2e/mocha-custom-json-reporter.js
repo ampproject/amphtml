@@ -35,8 +35,7 @@ const {inherits} = require('mocha').utils;
  */
 async function writeOutput(output, filename) {
   try {
-    await fs.ensureDir('result-reports');
-    await fs.writeFile(filename, JSON.stringify(output, null, 4));
+    await fs.outputJson(filename, output, {spaces: 4});
   } catch (error) {
     process.stdout.write(
       Base.color(
