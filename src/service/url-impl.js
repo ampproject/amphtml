@@ -172,16 +172,17 @@ export class Url {
    * If the resource URL is referenced from the publisher's origin,
    * convert the URL to be referenced from the cache.
    * @param {string} resourceUrl The URL of the document to load
+   * @param {string=} type the type of resource (default is c)
    * @return {string}
    */
-  getCdnUrlOnOrigin(resourceUrl) {
+  getCdnUrlOnOrigin(resourceUrl, type = 'c') {
     if (isProxyOrigin(resourceUrl)) {
       return resourceUrl;
     }
 
     const {host, hash, pathname, search} = this.parse_(resourceUrl);
     const encodedHost = encodeURIComponent(host);
-    return `${urls.cdn}/c/${encodedHost}${pathname}${search}${hash}`;
+    return `${urls.cdn}/${type}/${encodedHost}${pathname}${search}${hash}`;
   }
 }
 
