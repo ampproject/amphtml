@@ -53,6 +53,7 @@ const wrapper = {
 
 const content = {
   overflow: 'auto !important',
+  overscrollBehavior: 'none !important',
 };
 
 const JSS = {
