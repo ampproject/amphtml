@@ -46,7 +46,7 @@ import {
   setInitialDisplay,
   setStyles,
 } from '../../../src/style';
-import {resolveCachedSources} from './cached-sources';
+import {resolveGoogleCachedSources} from './cached-sources';
 import {toArray} from '../../../src/types';
 
 const TAG = 'amp-video';
@@ -267,7 +267,9 @@ export class AmpVideo extends AMP.BaseElement {
 
     Services.videoManagerForDoc(element).register(this);
 
-    return resolveCachedSources(this);
+    if (this.element.hasAttribute('enable-google-video-cache')) {
+      return resolveGoogleCachedSources(this);
+    }
   }
 
   /**

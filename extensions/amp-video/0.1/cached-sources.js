@@ -15,49 +15,45 @@
  */
 
 import {Services} from '../../../src/services';
+import {ampToolboxCacheUrl} from '@ampproject/toolbox-cache-url';
 import {createElementWithAttributes} from '../../../src/dom';
 import {toArray} from '../../../src/types';
 
 /**
- * @param {!AmpVideo} video
- * @return {?Promise}
- */
-export function resolveCachedSources(video) {
-  if (video.querySelector('source[data-orig-src]')) {
-    return Promise.resolve();
-  }
-  if (video.element.getAttribute('cache') === 'google') {
-    return fetchGoogleCachedVideos(video);
-  }
-  return Promise.resolve();
-}
-
-/**
  * Set up google cached videos.
+ * @public
  * @param {!AmpVideo} video
  * @return {!Promise}
  */
-function fetchGoogleCachedVideos(video) {
-  const requestUrl = selectVideoSource(video.element);
-  return Services.storyRequestServiceForOrNull(video.win)
-    .then((requestService) =>
-      requestService.executeRequest(requestUrl).then((response) => {
-        response['sources']
-          .sort((a, b) => a['bitrate_kbps'] - b['bitrate_kbps'])
-          .forEach((source) => {
-            const sourceEl = createElementWithAttributes(
-              video.element.ownerDocument,
-              'source',
-              {
-                'src': source['url'],
-                'type': source['type'],
-                'data-bitrate': source['bitrate_kbps'],
-              }
-            );
-            video.element.prepend(sourceEl);
-          });
-      })
-    )
+function resolveGoogleCachedSources(video) {
+  if (video.querySelector('source[data-orig-src]')) {
+    return Promise.resolve();
+  }
+  const videoSource = selectVideoSource(video.element);
+  return ampToolboxCacheUrl
+    .createCacheUrl('cdn.ampproject.org', videoSource)
+    .then((cacheUrl) => {
+      const requestUrl = cacheUrl.replace('/c', '/mbv');
+      return Services.storyRequestServiceForOrNull(video.win).then(
+        (requestService) =>
+          requestService.executeRequest(requestUrl).then((response) => {
+            response['sources']
+              .sort((a, b) => a['bitrate_kbps'] - b['bitrate_kbps'])
+              .forEach((source) => {
+                const sourceEl = createElementWithAttributes(
+                  video.element.ownerDocument,
+                  'source',
+                  {
+                    'src': source['url'],
+                    'type': source['type'],
+                    'data-bitrate': source['bitrate_kbps'],
+                  }
+                );
+                video.element.prepend(sourceEl);
+              });
+          })
+      );
+    })
     .catch((unusedErr) => {});
 }
 
@@ -67,41 +63,14 @@ function fetchGoogleCachedVideos(video) {
  * @return {string}
  */
 function selectVideoSource(videoEl) {
-  const possibleSources = [];
-  toArray(videoEl.querySelectorAll('source[src]')).forEach((sourceEl) => {
-    possibleSources.push({
-      src: sourceEl.getAttribute('src'),
-      bitrate: parseFloat(sourceEl.getAttribute('data-bitrate')),
-    });
-  });
+  const possibleSources = toArray(videoEl.querySelectorAll('source[src]'));
   if (videoEl.hasAttribute('src')) {
-    possibleSources.push({
-      src: videoEl.getAttribute('src'),
-      bitrate: null,
-    });
+    possibleSources.push(videoEl);
   }
-  const prioritizedSource = possibleSources.reduce((a, b) =>
-    !b.bitrate || (a.bitrate && a.bitrate >= b.bitrate) ? a : b
-  );
-  return convertToCDN(videoEl, prioritizedSource.src);
-}
-
-/**
- * Follows https://developers.google.com/amp/cache/overview to construct the URL in the CDN
- * @param {!Element} videoEl
- * @param {string} src
- * @return {string}
- */
-function convertToCDN(videoEl, src) {
-  const urlService = Services.urlForDoc(videoEl);
-  const mbvUrl = urlService.getCdnUrlOnOrigin(src, 'mvb');
-  const originUrl = urlService.getSourceOrigin(src);
-  const cdnOrigin =
-    'https://' +
-    originUrl
-      .replace(/\.|-/, (str) => (str === '.' ? '-' : '--'))
-      .replace(/https?:\/\//, '') +
-    '.';
-
-  return mbvUrl.replace('https://', cdnOrigin);
+  for (let i = 0; i < possibleSources.length; i++) {
+    if (possibleSources[i].getAttribute('type') === 'video/mp4') {
+      return possibleSources[i];
+    }
+  }
+  return possibleSources[0];
 }
