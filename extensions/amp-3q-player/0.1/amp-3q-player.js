@@ -15,6 +15,7 @@
  */
 
 import {Deferred} from '../../../src/utils/promise';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamToUrl} from '../../../src/url';
@@ -33,10 +34,6 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {
-  observeContentSize,
-  unobserveContentSize,
-} from '../../../src/utils/size-observer';
 
 const TAG = 'amp-3q-player';
 
@@ -60,10 +57,8 @@ class Amp3QPlayer extends AMP.BaseElement {
 
     this.dataId = null;
 
-    /** @private {boolean} */
-    this.isPlaying_ = false;
-
-    this.pauseWhenNoSize_ = this.pauseWhenNoSize_.bind(this);
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -161,7 +156,7 @@ class Amp3QPlayer extends AMP.BaseElement {
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
 
-    this.updateIsPlaying_(false);
+    this.pauseHelper_.updatePlaying(false);
 
     return true;
   }
@@ -174,30 +169,6 @@ class Amp3QPlayer extends AMP.BaseElement {
   /** @override */
   pauseCallback() {
     this.pause();
-  }
-
-  /** @private */
-  updateIsPlaying_(isPlaying) {
-    if (isPlaying === this.isPlaying_) {
-      return;
-    }
-    this.isPlaying_ = isPlaying;
-    if (isPlaying) {
-      observeContentSize(this.element, this.pauseWhenNoSize_);
-    } else {
-      unobserveContentSize(this.element, this.pauseWhenNoSize_);
-    }
-  }
-
-  /**
-   * @param {!../../../src/layout-rect.LayoutSizeDef} size
-   * @private
-   */
-  pauseWhenNoSize_({width, height}) {
-    const hasSize = width > 0 && height > 0;
-    if (!hasSize) {
-      this.pause();
-    }
   }
 
   /**
@@ -224,11 +195,11 @@ class Amp3QPlayer extends AMP.BaseElement {
         this.playerReadyResolver_();
         break;
       case 'playing':
-        this.updateIsPlaying_(true);
+        this.pauseHelper_.updatePlaying(true);
         break;
       case 'paused':
       case 'complete':
-        this.updateIsPlaying_(false);
+        this.pauseHelper_.updatePlaying(false);
         break;
     }
 
