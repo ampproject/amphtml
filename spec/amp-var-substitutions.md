@@ -277,20 +277,21 @@ The tables below list the available URL variables grouped by type of usage. Furt
 
 ### Analytics Advanced Variable Syntax
 
-| Variable Name               | Platform Variable | amp-analytics Variable |
-| --------------------------- | ----------------- | ---------------------- |
-| [Default](#default)         | N/A               | `$DEFAULT`             |
-| [SubStr](#string-substr)    | N/A               | `$SUBSTR`              |
-| [Trim](#trim)               | N/A               | `$TRIM`                |
-| [ToLowerCase](#tolowercase) | N/A               | `$TOLOWERCASE`         |
-| [ToUpperCase](#touppercase) | N/A               | `$TOUPPERCASE`         |
-| [Not](#not)                 | N/A               | `$NOT`                 |
-| [Base64](#base64)           | N/A               | `$BASE64`              |
-| [Hash](#hash)               | N/A               | `$HASH`                |
-| [If](#if)                   | N/A               | `$IF`                  |
-| [Replace](#replace)         | N/A               | `$REPLACE`             |
-| [Match](#match)             | N/A               | `$MATCH`               |
-| [Equals](#equals)           | N/A               | `$EQUALS`              |
+| Variable Name                | Platform Variable | amp-analytics Variable |
+| ---------------------------- | ----------------- | ---------------------- |
+| [Default](#default)          | N/A               | `$DEFAULT`             |
+| [SubStr](#string-substr)     | N/A               | `$SUBSTR`              |
+| [Trim](#trim)                | N/A               | `$TRIM`                |
+| [ToLowerCase](#tolowercase)  | N/A               | `$TOLOWERCASE`         |
+| [ToUpperCase](#touppercase)  | N/A               | `$TOUPPERCASE`         |
+| [Not](#not)                  | N/A               | `$NOT`                 |
+| [Base64](#base64)            | N/A               | `$BASE64`              |
+| [Hash](#hash)                | N/A               | `$HASH`                |
+| [If](#if)                    | N/A               | `$IF`                  |
+| [Replace](#replace)          | N/A               | `$REPLACE`             |
+| [Match](#match)              | N/A               | `$MATCH`               |
+| [Equals](#equals)            | N/A               | `$EQUALS`              |
+| [Simple Calculations](#calc) | N/A               | `$CALC`                |
 
 ### Miscellaneous
 
@@ -1374,3 +1375,16 @@ Find the specified (or first) matched pattern.
 ##### Equals
 
 -   Example: `$EQUALS(${val}, value)` resolves to `'true'` or `'false'`
+
+##### Simple Calculations
+
+This macro allows you to perform basic arithmetics like addition, subtraction, multiplication and division.
+
+Parameters:
+
+-   **leftOperand** : A variable or a literal that resolves to a number or, a number string.
+-   **rightOperand** : A variable or a literal that resolves to a number or, a number string.
+-   **operation** : A literal. One of `add`, `subtract`, `multiply`, `divide`.
+-   **round** : An optional flag. If truthy, the result will be rounded.
+
+Example: `$CALC(${cumulativeLayoutShift}, 1000, multiply, true)`
