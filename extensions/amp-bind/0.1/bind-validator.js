@@ -311,6 +311,15 @@ function createElementRules_() {
       'state': null,
       'is-layout-container': null,
     },
+    'AMP-RENDER': {
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
+      'state': null,
+      'is-layout-container': null,
+    },
     'AMP-SELECTOR': {
       'disabled': null,
       'selected': null,

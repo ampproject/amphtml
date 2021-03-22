@@ -79,7 +79,6 @@ const getAmpStateJson = (element) => {
  * Returns the correct fetch function for amp-state, amp-script or
  * to fetch remote JSON.
  *
- * @param ampDoc
  * @param {!AmpElement} element
  * @return {Function}
  */
@@ -114,69 +113,6 @@ class AmpRender extends BaseElement {
       'Experiment "amp-render" is not turned on.'
     );
     return super.isLayoutSupported(layout);
-  }
-
-  // /** @override */
-  // init() {
-  //   return dict({
-  //     'getJson': this.getJsonFn_(),
-  //   });
-  // }
-
-  // /**
-  //  * Returns the correct fetch function for amp-state, amp-script or
-  //  * to fetch remote JSON.
-  //  *
-  //  * @return {Function}
-  //  * @private
-  //  */
-  // getJsonFn_() {
-  //   const src = this.element.getAttribute('src');
-  //   if (isAmpStateSrc(src)) {
-  //     return this.getAmpStateJson.bind(null, this.element);
-  //   }
-  //   if (isAmpScriptSrc(src)) {
-  //     // TODO(dmanek): implement this
-  //     return () => {};
-  //   }
-  //   return batchFetchJsonFor.bind(null, this.getAmpDoc(), this.element);
-  // }
-
-  // /** @override */
-  // mutationObserverCallback(mutations) {
-  //   console.log(
-  //     '🚀 ~ file: amp-render.js ~ line 94 ~ AmpRender ~ mutationObserverCallback ~ mutations',
-  //     mutations
-  //   );
-  // }
-  /** @override */
-  init() {
-    return dict({
-      'getJson': this.getJsonFn_(),
-    });
-  }
-
-  /**
-   * Returns the correct fetch function for amp-state, amp-script or
-   * to fetch remote JSON.
-   *
-   * @return {Function}
-   * @private
-   */
-  getJsonFn_() {
-    const src = this.element.getAttribute('src');
-    if (!src) {
-      // TODO(dmanek): assert that src is provided instead of silently failing below.
-      return () => {};
-    }
-    if (isAmpStateSrc(src)) {
-      return this.getAmpStateJson.bind(null, this.element);
-    }
-    if (isAmpScriptSrc(src)) {
-      // TODO(dmanek): implement this
-      return () => {};
-    }
-    return batchFetchJsonFor.bind(null, this.getAmpDoc(), this.element);
   }
 
   /**
