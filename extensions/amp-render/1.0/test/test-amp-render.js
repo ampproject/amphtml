@@ -83,7 +83,7 @@ describes.realWin(
       await ampState.buildInternal();
 
       const text = await getRenderedData();
-      expect(text).to.contain('Hello Bill');
+      expect(text).to.equal('Hello Bill');
     });
 
     it('renders json from src', async () => {
@@ -108,7 +108,19 @@ describes.realWin(
       env.sandbox.stub(ampRender, 'getJsonFn_').returns(fetchFn);
 
       const text = await getRenderedData();
-      expect(text).to.contain('Hello Joe');
+      expect(text).to.equal('Hello Joe');
+    });
+
+    it('fails gracefully when src is omitted', async () => {
+      element = html`
+        <amp-render width="auto" height="140" layout="fixed-height">
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      const text = await getRenderedData();
+      expect(text).to.equal('Hello ');
     });
   }
 );

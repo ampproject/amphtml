@@ -19,7 +19,7 @@ import {Render} from '../component';
 import {macroTask} from '../../../../testing/yield';
 import {mount} from 'enzyme';
 
-describes.sandboxed('Render 1.0 preact component', {}, (env) => {
+describes.sandboxed('Render 1.0 preact component', {}, () => {
   it('should render', async () => {
     const wrapper = mount(
       <Render

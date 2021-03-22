@@ -29,17 +29,17 @@ const AMP_SCRIPT_URI_SCHEME = 'amp-script:';
 
 /**
  * Returns true if element's src points to amp-state.
- * @param {string} src
+ * @param {?string} src
  * @return {boolean}
  */
-const isAmpStateSrc = (src) => src.startsWith(AMP_STATE_URI_SCHEME);
+const isAmpStateSrc = (src) => src && src.startsWith(AMP_STATE_URI_SCHEME);
 
 /**
  * Returns true if element's src points to an amp-script function.
- * @param {string} src
+ * @param {?string} src
  * @return {boolean}
  */
-const isAmpScriptSrc = (src) => src.startsWith(AMP_SCRIPT_URI_SCHEME);
+const isAmpScriptSrc = (src) => src && src.startsWith(AMP_SCRIPT_URI_SCHEME);
 
 class AmpRender extends BaseElement {
   /** @param {!AmpElement} element */
@@ -78,6 +78,10 @@ class AmpRender extends BaseElement {
    */
   getJsonFn_() {
     const src = this.element.getAttribute('src');
+    if (!src) {
+      // TODO(dmanek): assert that src is provided instead of silently failing below.
+      return () => {};
+    }
     if (isAmpStateSrc(src)) {
       return this.getAmpStateJson.bind(null, this.element);
     }
