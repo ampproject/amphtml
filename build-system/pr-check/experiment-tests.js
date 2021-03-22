@@ -23,29 +23,47 @@ const {
   downloadExperimentOutput,
   printSkipMessage,
   timedExecOrDie,
+  timedExecOrThrow,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {experiment} = require('minimist')(process.argv.slice(2));
 const {getExperimentConfig} = require('../common/utils');
+const {isPushBuild} = require('../common/ci');
 const {runCiJob} = require('./ci-job');
 
 const jobName = `${experiment}-tests.js`;
 
 /**
- * @return {void}
+ * Runs tests for the given configuration and reports results for push builds.
+ * @param {!Object} config
  */
+function runExperimentTests(config) {
+  try {
+    const defineFlag = `--define_experiment_constant ${config.define_experiment_constant}`;
+    const experimentFlag = `--experiment ${experiment}`;
+    const reportFlag = isPushBuild() ? '--report' : '';
+    timedExecOrThrow(
+      `amp integration --nobuild --compiled --headless ${experimentFlag} ${defineFlag} ${reportFlag}`
+    );
+    timedExecOrThrow(
+      `amp e2e --nobuild --compiled --headless ${experimentFlag} ${defineFlag} ${reportFlag}`
+    );
+  } catch (e) {
+    if (e.status) {
+      process.exitCode = e.status;
+    }
+  } finally {
+    if (isPushBuild()) {
+      timedExecOrDie('amp test-report-upload');
+    }
+  }
+}
+
 function pushBuildWorkflow() {
   const config = getExperimentConfig(experiment);
   if (config) {
-    const defineFlag = `--define_experiment_constant ${config.define_experiment_constant}`;
-    const experimentFlag = `--experiment ${experiment}`;
     downloadExperimentOutput(experiment);
-    timedExecOrDie(
-      `gulp integration --nobuild --compiled --headless ${experimentFlag} ${defineFlag}`
-    );
-    timedExecOrDie(
-      `gulp e2e --nobuild --compiled --headless ${experimentFlag} ${defineFlag}`
-    );
+    runExperimentTests(config);
   } else {
     printSkipMessage(
       jobName,
@@ -54,9 +72,6 @@ function pushBuildWorkflow() {
   }
 }
 
-/**
- * @return {void}
- */
 function prBuildWorkflow() {
   if (
     buildTargetsInclude(

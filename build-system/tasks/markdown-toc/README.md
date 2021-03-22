@@ -3,7 +3,7 @@
 Ensures that Markdown files in this repository have updated Tables-Of-Content.
 
 ```
-gulp markdown-toc [--fix]
+amp markdown-toc [--fix]
 ```
 
 ## Usage
@@ -15,7 +15,7 @@ Files must contain the following header comment:
   (Do not remove or edit this comment.)
 
   This table-of-contents is automatically generated. To generate it, run:
-    gulp markdown-toc --fix
+    amp markdown-toc --fix
 -->
 ```
 
@@ -28,7 +28,7 @@ Running the mentioned command inserts the TOC after the comment if necessary:
     (Do not remove or edit this comment.)
 
     This table-of-contents is automatically generated. To generate it, run:
-      gulp markdown-toc --fix
+      amp markdown-toc --fix
   -->
 
 + -   [Section](#section)
@@ -59,7 +59,7 @@ In this markdown file:
   (Do not remove or edit this comment.)
 
   This table-of-contents is automatically generated. To generate it, run:
-    gulp markdown-toc --fix
+    amp markdown-toc --fix
 -->
 
 <!-- {"maxdepth": 1} -->

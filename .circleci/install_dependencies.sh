@@ -31,9 +31,6 @@ export NVM_DIR="/opt/circleci/.nvm"
 echo $(GREEN "Installing Node LTS...")
 nvm install 'lts/*'
 
-echo $(GREEN "Installing gulp-cli...")
-npm install --global gulp-cli
-
 echo $(GREEN "Installing dependencies...")
 npm ci
 

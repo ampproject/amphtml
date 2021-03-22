@@ -16,16 +16,17 @@
 
 const fs = require('fs');
 const {CONTROL, maybeCopyImageToCache, urlToCachePath} = require('./helpers');
-const {JSDOM} = require('jsdom');
 
 /**
  * Lookup URL from cache. Inspect tags that could use images.
  *
  * @param {string} url
+ * @return {Promise<void>}
  */
-function copyImagesFromTags(url) {
+async function copyImagesFromTags(url) {
   const cachePath = urlToCachePath(url, CONTROL);
   const document = fs.readFileSync(cachePath);
+  const {JSDOM} = await import('jsdom'); // Lazy-imported to speed up task loading.
   const dom = new JSDOM(document);
 
   copyImagesFromAmpImg(url, dom);
@@ -79,9 +80,10 @@ function copyImagesFromAmpVideo(url, dom) {
  * Copy locally stored images found in the markup to cache.
  *
  * @param {!Array<string>} urls
+ * @return {Promise<void>}
  */
-function copyLocalImages(urls) {
-  urls.forEach(copyImagesFromTags);
+async function copyLocalImages(urls) {
+  await Promise.all(urls.map(copyImagesFromTags));
 }
 
 module.exports = copyLocalImages;
