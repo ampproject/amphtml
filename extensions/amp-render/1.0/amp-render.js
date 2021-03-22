@@ -147,7 +147,10 @@ class AmpRender extends BaseElement {
    * src="amp-state:json.path".
    *
    * TODO: this implementation is identical to one in amp-list. Move it
-   * to a common file and import it.
+   * to a common file and import it
+   *
+   * TODO: Add src as a param once this method is moved out of this class
+   * to support src binding (https://github.com/ampproject/amphtml/pull/33189#discussion_r598743971).
    *
    * @param {!AmpElement} element
    * @return {Promise<!JsonObject>}
