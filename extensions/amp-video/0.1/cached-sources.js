@@ -36,7 +36,6 @@ export function resolveCachedSources(video) {
  */
 function fetchGoogleCachedVideos(video) {
   const requestUrl = selectVideoSource(video.element);
-  console.log(requestUrl);
   return Services.storyRequestServiceForOrNull(video.win)
     .then((requestService) =>
       requestService.executeRequest(requestUrl).then((response) => {
