@@ -29,6 +29,7 @@ import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {listen} from '../../../src/event-helper';
 import {resetStyles, setImportantStyles, toggle} from '../../../src/style';
+import {isPageAttachmentUiV2ExperimentOn} from './amp-story-open-page-attachment';
 
 /** @const {number} */
 const TOGGLE_THRESHOLD_PX = 50;
@@ -135,7 +136,6 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.headerEl_ = getHeaderEl(this.element);
 
     createShadowRootWithStyle(headerShadowRootEl, this.headerEl_, CSS);
-    templateEl.insertBefore(headerShadowRootEl, templateEl.firstChild);
 
     this.containerEl_ = dev().assertElement(
       templateEl.querySelector('.i-amphtml-story-draggable-drawer-container')
@@ -145,6 +145,13 @@ export class DraggableDrawer extends AMP.BaseElement {
         '.i-amphtml-story-draggable-drawer-content'
       )
     );
+
+    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+      this.contentEl_.appendChild(headerShadowRootEl);
+      this.element.classList.add('amp-story-page-attachment-ui-v2');
+    } else {
+      templateEl.insertBefore(headerShadowRootEl, templateEl.firstChild);
+    }
 
     this.element.appendChild(templateEl);
     this.element.setAttribute('aria-hidden', true);
@@ -181,6 +188,14 @@ export class DraggableDrawer extends AMP.BaseElement {
       },
       true /** callToInitialize */
     );
+
+    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+      this.element.addEventListener('click', (e) => {
+        if (!this.isDrawerContentDescendant_(e.target)) {
+          this.close_();
+        }
+      });
+    }
   }
 
   /**
@@ -513,6 +528,10 @@ export class DraggableDrawer extends AMP.BaseElement {
         this.mutateElement(() => resetStyles(this.element, ['transition']));
       }
 
+      if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+        this.element.closest('amp-story-page').classList.add('attachment-open');
+      }
+
       this.element.classList.add('i-amphtml-story-draggable-drawer-open');
       toggle(dev().assertElement(this.containerEl_), true);
     }).then(() => {
@@ -554,6 +573,12 @@ export class DraggableDrawer extends AMP.BaseElement {
         // next frame, after the element is positioned.
         setImportantStyles(this.element, {transition: 'initial'});
         this.mutateElement(() => resetStyles(this.element, ['transition']));
+      }
+
+      if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+        this.element
+          .closest('amp-story-page')
+          .classList.remove('attachment-open');
       }
 
       this.element.classList.remove('i-amphtml-story-draggable-drawer-open');

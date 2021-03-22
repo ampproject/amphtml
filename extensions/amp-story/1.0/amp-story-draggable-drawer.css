@@ -127,3 +127,38 @@
 [desktop] .i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-content {
   padding-top: 0 !important;
 }
+
+/* For amp-story-page-attachment-ui-v2 experiment. */
+
+amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-content {
+  margin-top: 20% !important;
+  background: #fff!important;
+}
+
+amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-container {
+  background: none !important;
+  height: 100% !important;
+}
+
+amp-story:not([desktop]) amp-story-page.attachment-open:after {
+  content: "" !important;
+  display: block !important;
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  right: 0 !important;
+  position: absolute !important;
+  background: #000 !important;
+  animation: i-amphtml-attachment-overlay-opacity 0.3s cubic-bezier(0, 0, .2 ,1) forwards !important;
+  z-index: 2 !important;
+}
+
+@keyframes i-amphtml-attachment-overlay-opacity {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 0.75;
+  }
+}
