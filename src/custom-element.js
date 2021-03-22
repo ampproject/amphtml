@@ -716,9 +716,9 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         this.pause();
       }
 
-      // Legacy pre-V1 elements simply unload.
+      // Legacy pre-V1 elements simply unlayout.
       if (!this.V1()) {
-        this.getResource_().unlayout();
+        this.unlayout_();
         return;
       }
 
@@ -1642,7 +1642,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
       // Legacy unlayoutOnPause support.
       if (!this.V1() && this.impl_.unlayoutOnPause()) {
-        this.getResource_().unlayout();
+        this.unlayout_();
       }
     }
 
@@ -1683,6 +1683,14 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       }
       this.dispatchCustomEventForTesting(AmpEvents.UNLOAD);
       return isReLayoutNeeded;
+    }
+
+    /** @private */
+    unlayout_() {
+      this.getResource_().unlayout();
+      if (this.isConnected_ && this.resources_) {
+        this.resources_./*OK*/ schedulePass();
+      }
     }
 
     /** @private */
