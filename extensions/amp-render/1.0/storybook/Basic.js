@@ -34,3 +34,7 @@ export const _default = () => {
     ></Render>
   );
 };
+
+export const defaultRenderAndGetJson = () => {
+  return <Render src={'/examples/amp-render-data.json'}></Render>;
+};
