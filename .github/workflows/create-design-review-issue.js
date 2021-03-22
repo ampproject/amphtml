@@ -20,8 +20,7 @@
  *
  * https://go.amp.dev/design-reviews
  *
- * A Github Action runs this once a week.
- * See .github/workflows/create-design-review-issues.yml
+ * A Github Action runs this once a week. See create-design-review-issues.yml
  */
 
 /*
@@ -186,12 +185,17 @@ function getNextIssueData() {
   return {title, labels, body};
 }
 
-const {GITHUB_TOKEN} = process.env;
-if (!GITHUB_TOKEN) {
-  throw new Error('no GITHUB_TOKEN');
+function env(key) {
+  if (!(key in process.env)) {
+    throw new Error(`Missing env variable: ${key}`);
+  }
+  return process.env[key];
 }
 
-postGithubIssue(GITHUB_TOKEN, 'ampproject', 'amphtml', getNextIssueData()).then(
+const token = env('GITHUB_TOKEN');
+const [owner, repo] = env('GITHUB_REPOSITORY').split('/');
+
+postGithubIssue(token, owner, repo, getNextIssueData()).then(
   ({title, 'html_url': htmlUrl}) => {
     console./*OK*/ log(title);
     console./*OK*/ log(htmlUrl);
