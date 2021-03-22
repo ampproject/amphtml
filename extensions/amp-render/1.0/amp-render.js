@@ -42,8 +42,7 @@ const isAmpStateSrc = (src) => src && src.startsWith(AMP_STATE_URI_SCHEME);
 const isAmpScriptSrc = (src) => src && src.startsWith(AMP_SCRIPT_URI_SCHEME);
 
 /**
- * Gets the json an amp-list that has an "amp-state:" uri. For example,
- * src="amp-state:json.path".
+ * Gets the json from an "amp-state:" uri. For example, src="amp-state:json.path".
  *
  * TODO: this implementation is identical to one in amp-list. Move it
  * to a common file and import it.
@@ -116,7 +115,7 @@ class AmpRender extends BaseElement {
   }
 
   /**
-   * TODO: this implementation is identical to one in amp-data-display &
+   * TODO: this implementation is identical to one in amp-date-display &
    * amp-date-countdown. Move it to a common file and import it.
    *
    * @override
@@ -126,43 +125,41 @@ class AmpRender extends BaseElement {
       this.templates_ ||
       (this.templates_ = Services.templatesForDoc(this.element));
     const template = templates.maybeFindTemplate(this.element);
-    if (template != this.template_) {
-      this.template_ = template;
-      if (template) {
-        // Only overwrite `render` when template is ready to minimize FOUC.
-        templates.whenReady(template).then(() => {
-          if (template != this.template_) {
-            // A new template has been set while the old one was initializing.
-            return;
-          }
-          this.mutateProps(
-            dict({
-              'render': (data) => {
-                return templates
-                  .renderTemplateAsString(dev().assertElement(template), data)
-                  .then((html) => dict({'__html': html}));
-              },
-            })
-          );
-        });
-      } else {
-        this.mutateProps(dict({'render': null}));
-      }
+    if (template === this.template_) {
+      return;
+    }
+    this.template_ = template;
+    if (template) {
+      // Only overwrite `render` when template is ready to minimize FOUC.
+      templates.whenReady(template).then(() => {
+        if (template != this.template_) {
+          // A new template has been set while the old one was initializing.
+          return;
+        }
+        this.mutateProps(
+          dict({
+            'render': (data) => {
+              return templates
+                .renderTemplateAsString(dev().assertElement(template), data)
+                .then((html) => dict({'__html': html}));
+            },
+          })
+        );
+      });
+    } else {
+      this.mutateProps(dict({'render': null}));
     }
   }
 
   /**
-   * TODO: this implementation is identical to one in amp-data-display &
+   * TODO: this implementation is identical to one in amp-date-display &
    * amp-date-countdown. Move it to a common file and import it.
    *
    * @override
    */
   isReady(props) {
-    if (this.template_ && !('render' in props)) {
-      // The template is specified, but not available yet.
-      return false;
-    }
-    return true;
+    // If a template is specified, then it must be available.
+    return !this.template_ || 'render' in props;
   }
 }
 
