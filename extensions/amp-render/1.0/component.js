@@ -48,9 +48,12 @@ export function Render({
   const [data, setData] = useState({});
 
   useEffect(() => {
+    // TODO(dmanek): Add additional validation for src
+    // when adding url replacement logic.
     if (!src) {
       return;
     }
+
     getJson(src).then((data) => {
       setData(data);
     });
