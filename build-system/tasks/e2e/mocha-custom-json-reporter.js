@@ -29,7 +29,7 @@ const {inherits} = require('mocha').utils;
 
 /**
  *
- * @param {string} output
+ * @param {!Object} output
  * @param {string} filename
  * @return {Promise<void>}
  */
