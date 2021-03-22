@@ -210,6 +210,7 @@ function calcMacro(leftOperand, rightOperand, operation, round) {
       result = left * right;
       break;
     case 'DIVIDE':
+      userAssert(right, 'CALC macro - cannot divide by 0');
       result = left / right;
       break;
     default:

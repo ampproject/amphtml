@@ -380,9 +380,6 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
       it('calc with unknown operation defaults to zero', () =>
         check('$CALC(1, 2, SOMETHINGELSE, true)', '0'));
 
-      it('calc division by 0 works', () =>
-        check('$CALC(1, 0, DIVIDE, true)', Infinity.toString()));
-
       it('calc with nested macro works', () =>
         check('$CALC($SUBSTR(123456, 2, 5), 10, MULTIPLY, false)', '34560'));
 
