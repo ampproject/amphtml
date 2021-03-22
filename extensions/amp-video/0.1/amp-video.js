@@ -46,6 +46,7 @@ import {
   setInitialDisplay,
   setStyles,
 } from '../../../src/style';
+import {resolveCachedSources} from './cached-sources';
 import {toArray} from '../../../src/types';
 
 const TAG = 'amp-video';
@@ -264,6 +265,8 @@ export class AmpVideo extends AMP.BaseElement {
     installVideoManagerForDoc(element);
 
     Services.videoManagerForDoc(element).register(this);
+
+    return resolveCachedSources(this);
   }
 
   /**
