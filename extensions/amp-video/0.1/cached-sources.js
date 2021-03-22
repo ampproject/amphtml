@@ -69,7 +69,7 @@ function selectVideoSource(videoEl) {
   toArray(videoEl.querySelectorAll('source[src]')).forEach((sourceEl) => {
     possibleSources.push({
       src: sourceEl.getAttribute('src'),
-      bitrate: parseFloat(sourceEl.getAttribute('data-bitrate')) | null,
+      bitrate: parseFloat(sourceEl.getAttribute('data-bitrate')),
     });
   });
   if (videoEl.hasAttribute('src')) {
