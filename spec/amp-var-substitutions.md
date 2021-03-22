@@ -1384,7 +1384,7 @@ Parameters:
 
 -   **leftOperand** : A variable or a literal that resolves to a number or, a number string.
 -   **rightOperand** : A variable or a literal that resolves to a number or, a number string.
--   **operation** : A literal. One of ADD, SUBTRACT, MULTIPLY, DIVIDE
--   **round** : An optional flag. If truthy, the result will be rounded
+-   **operation** : A literal. One of `add`, `subtract`, `multiply`, `divide`.
+-   **round** : An optional flag. If truthy, the result will be rounded.
 
--   Example: `$CALC(${cumulativeLayoutShift}, 1000, MULTIPLY, true)`
+Example: `$CALC(${cumulativeLayoutShift}, 1000, multiply, true)`

@@ -193,31 +193,25 @@ function matchMacro(string, matchPattern, opt_matchingGroupIndexStr) {
 function calcMacro(leftOperand, rightOperand, operation, round) {
   const left = Number(leftOperand);
   const right = Number(rightOperand);
+  userAssert(!isNaN(left), 'CALC macro - left operand must be a number');
+  userAssert(!isNaN(right), 'CALC macro - right operand must be a number');
   let result = 0;
-  userAssert(!isNaN(left), 'CALC macro - left operand must be a number found');
-  userAssert(
-    !isNaN(right),
-    'CALC macro - right operand must be a number found'
-  );
   switch (operation) {
-    case 'ADD':
+    case 'add':
       result = left + right;
       break;
-    case 'SUBTRACT':
+    case 'subtract':
       result = left - right;
       break;
-    case 'MULTIPLY':
+    case 'multiply':
       result = left * right;
       break;
-    case 'DIVIDE':
+    case 'divide':
       userAssert(right, 'CALC macro - cannot divide by 0');
       result = left / right;
       break;
     default:
-      user().error(
-        TAG,
-        'Operation in $CALC macro must be one of ADD, SUBTRACT, MULTIPLY, DIVIDE'
-      );
+      user().error(TAG, 'CALC macro - Invalid operation');
   }
   return stringToBool(round) ? Math.round(result) : result;
 }

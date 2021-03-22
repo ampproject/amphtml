@@ -354,37 +354,37 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
     });
 
     describe('$CALC', () => {
-      it('calc addition works', () => check('$CALC(1, 2, ADD)', '3'));
+      it('calc addition works', () => check('$CALC(1, 2, add)', '3'));
 
       it('calc addition works with rounding flag', () =>
-        check('$CALC(1, 2, ADD, true)', '3'));
+        check('$CALC(1, 2, add, true)', '3'));
 
       it('calc subtraction works', () =>
-        check('$CALC(1, 2, SUBTRACT, true)', '-1'));
+        check('$CALC(1, 2, subtract, true)', '-1'));
 
       it('calc multiplication works', () =>
-        check('$CALC(1, 2, MULTIPLY, true)', '2'));
+        check('$CALC(1, 2, multiply, true)', '2'));
 
       it('calc division works', () =>
-        check('$CALC(1, 2, DIVIDE, false)', '0.5'));
+        check('$CALC(1, 2, divide, false)', '0.5'));
 
       it('calc division should round 2/3 to 1', () =>
-        check('$CALC(2, 3, DIVIDE, true)', '1'));
+        check('$CALC(2, 3, divide, true)', '1'));
 
       it('calc division should round 1/3 to 0', () =>
-        check('$CALC(1, 3, DIVIDE, true)', '0'));
+        check('$CALC(1, 3, divide, true)', '0'));
 
       it('calc division should round 1/2 to 1', () =>
-        check('$CALC(1, 2, DIVIDE, true)', '1'));
+        check('$CALC(1, 2, divide, true)', '1'));
 
       it('calc with unknown operation defaults to zero', () =>
-        check('$CALC(1, 2, SOMETHINGELSE, true)', '0'));
+        check('$CALC(1, 2, somethingelse, true)', '0'));
 
       it('calc with nested macro works', () =>
-        check('$CALC($SUBSTR(123456, 2, 5), 10, MULTIPLY, false)', '34560'));
+        check('$CALC($SUBSTR(123456, 2, 5), 10, multiply, false)', '34560'));
 
       it('calc should replace CUMULATIVE_LAYOUT_SHIFT with 1', () =>
-        check('$CALC(CUMULATIVE_LAYOUT_SHIFT, 10, MULTIPLY, true)', '10'));
+        check('$CALC(CUMULATIVE_LAYOUT_SHIFT, 10, multiply, true)', '10'));
     });
 
     it('if works with true', () =>
