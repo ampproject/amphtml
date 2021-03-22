@@ -37,7 +37,7 @@
     },
     {
       pattern: '**/OWNERS',
-      owners: [{name: 'mrjoro', requestReviews: false}],
+      owners: [{name: 'mrjoro', requestReviews: true}],
     },
   ],
 }
