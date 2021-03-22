@@ -1687,9 +1687,6 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
     /** @private */
     unlayout_() {
-      if (!this.isBuilt()) {
-        return;
-      }
       this.getResource_().unlayout();
       if (this.isConnected_ && this.resources_) {
         this.resources_./*OK*/ schedulePass();
