@@ -265,7 +265,8 @@ export class AmpVideo extends AMP.BaseElement {
     // Cached so mediapool operations (eg: swapping sources) don't interfere with this bool.
     this.hasBitrateSources_ =
       !!this.element.querySelector('source[data-bitrate]') ||
-      this.hasAnyCachedSources_();
+      this.hasAnyCachedSources_() ||
+      this.element.hasAttribute('cache');
 
     installVideoManagerForDoc(element);
 

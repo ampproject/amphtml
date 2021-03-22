@@ -23,6 +23,9 @@ import {toArray} from '../../../src/types';
  * @return {?Promise}
  */
 export function resolveCachedSources(video) {
+  if (video.querySelector('source[data-orig-src]')) {
+    return Promise.resolve();
+  }
   if (video.element.getAttribute('cache') === 'google') {
     return fetchGoogleCachedVideos(video);
   }
