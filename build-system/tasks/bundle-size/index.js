@@ -39,8 +39,6 @@ const {cyan, red, yellow} = require('kleur/colors');
 const {log, logWithoutTimestamp} = require('../../common/logging');
 const {report, NoTTYReport} = require('@ampproject/filesize');
 
-const requestPost = util.promisify(require('request').post);
-
 const filesizeConfigPath = require.resolve('./filesize.json');
 const fileGlobs = require(filesizeConfigPath).filesize.track;
 const normalizedRtvNumber = '1234567890123';
@@ -87,6 +85,17 @@ function checkResponse(response, ...successMessages) {
   } else {
     log(...successMessages);
   }
+}
+
+/**
+ * Helper that lazily imports and promisifies request.post, and invokes it with
+ * the given args.
+ * @param {*} args
+ * @return {function()}
+ */
+async function requestPost(...args) {
+  const {default: request} = await import('request');
+  return util.promisify(request.post)(...args);
 }
 
 /**

@@ -151,7 +151,12 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, (env) => {
           expect(impl.getAmpAdMetadata()).to.jsonEqual({
             minifiedCreative: creative,
             customElementExtensions: ['amp-mustache'],
-            extensions: [],
+            extensions: [
+              {
+                'custom-element': 'amp-mustache',
+                'src': 'https://cdn.ampproject.org/v0/amp-mustache-0.1.js',
+              },
+            ],
           });
         });
     });
@@ -210,13 +215,31 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, (env) => {
           expect(impl.getAmpAdMetadata()).to.jsonEqual({
             minifiedCreative: creative,
             customElementExtensions: ['amp-analytics', 'amp-mustache'],
-            extensions: [],
+            extensions: [
+              {
+                'custom-element': 'amp-analytics',
+                'src': 'https://cdn.ampproject.org/v0/amp-analytics-0.1.js',
+              },
+              {
+                'custom-element': 'amp-mustache',
+                'src': 'https://cdn.ampproject.org/v0/amp-mustache-0.1.js',
+              },
+            ],
           });
           // Won't insert duplicate
           expect(impl.getAmpAdMetadata()).to.jsonEqual({
             minifiedCreative: creative,
             customElementExtensions: ['amp-analytics', 'amp-mustache'],
-            extensions: [],
+            extensions: [
+              {
+                'custom-element': 'amp-analytics',
+                'src': 'https://cdn.ampproject.org/v0/amp-analytics-0.1.js',
+              },
+              {
+                'custom-element': 'amp-mustache',
+                'src': 'https://cdn.ampproject.org/v0/amp-mustache-0.1.js',
+              },
+            ],
           });
         });
     });
@@ -242,7 +265,12 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, (env) => {
           expect(impl.getAmpAdMetadata()).to.jsonEqual({
             minifiedCreative: creative,
             customElementExtensions: ['amp-mustache'],
-            extensions: [],
+            extensions: [
+              {
+                'custom-element': 'amp-mustache',
+                'src': 'https://cdn.ampproject.org/v0/amp-mustache-0.1.js',
+              },
+            ],
           });
         });
     });
