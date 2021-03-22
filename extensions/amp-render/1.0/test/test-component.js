@@ -16,20 +16,11 @@
 
 import * as Preact from '../../../../src/preact';
 import {Render} from '../component';
+import {macroTask} from '../../../../testing/yield';
 import {mount} from 'enzyme';
 
 describes.sandboxed('Render 1.0 preact component', {}, (env) => {
-  let sandbox;
-  const response = {
-    name: 'Google',
-    url: 'http://google.com',
-  };
-
-  beforeEach(() => {
-    sandbox = env.sandbox;
-  });
-
-  it('should render as a div by default', () => {
+  it('should render', async () => {
     const wrapper = mount(
       <Render
         src={'http://example.com'}
@@ -38,10 +29,11 @@ describes.sandboxed('Render 1.0 preact component', {}, (env) => {
       ></Render>
     );
 
-    // Generic test for the Wrapper
-    // This is actually fairly arbitrary that it should be a "div". But it's
-    // checked here to ensure that we can change it controllably when needed.
+    // Since getJson method retuns a promise, we need to wait for
+    // the promise to resolve.
+    await macroTask();
+
     expect(wrapper.getDOMNode().tagName).to.equal('DIV');
-    // expect(wrapper.html()).to.contain('Hi George');
+    expect(wrapper.getDOMNode().innerHTML).to.contain('Hi George');
   });
 });
