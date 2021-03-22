@@ -16,7 +16,6 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const debounce = require('debounce');
-const del = require('del');
 const esbuild = require('esbuild');
 /** @type {Object} */
 const experimentDefines = require('../global-configs/experiments-const.json');
@@ -25,6 +24,7 @@ const magicstring = require('magic-string');
 const open = require('open');
 const path = require('path');
 const Remapping = require('@ampproject/remapping');
+const terser = require('terser');
 const wrappers = require('../compile/compile-wrappers');
 const {
   VERSION: internalRuntimeVersion,
@@ -36,8 +36,8 @@ const {green, red, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
+const {removeFromClosureBabelCache} = require('../compile/pre-closure-babel');
 const {thirdPartyFrames} = require('../test-configs/config');
-const {transpileTs} = require('../compile/typescript');
 const {watch: fileWatch} = require('chokidar');
 
 /** @type {Remapping.default} */
@@ -158,22 +158,25 @@ async function bootstrapThirdPartyFrames(options) {
  * @return {Promise<void>}
  */
 async function compileCoreRuntime(options) {
-  /**
-   * @return {Promise<void>}
-   */
-  async function watchFunc() {
-    const bundleComplete = await doBuildJs(jsBundles, 'amp.js', {
-      ...options,
-      watch: false,
-    });
-    if (options.onWatchBuild) {
-      options.onWatchBuild(bundleComplete);
-    }
-  }
-
   if (options.watch) {
-    const debouncedRebuild = debounce(watchFunc, watchDebounceDelay);
-    fileWatch('src/**/*.js').on('change', debouncedRebuild);
+    /** @return {Promise<void>} */
+    async function watchFunc() {
+      if (options.minify) {
+        removeFromClosureBabelCache('src');
+      }
+      const bundleComplete = await doBuildJs(jsBundles, 'amp.js', {
+        ...options,
+        continueOnError: true,
+        watch: false,
+      });
+      if (options.onWatchBuild) {
+        options.onWatchBuild(bundleComplete);
+      }
+    }
+    fileWatch('src/**/*.js').on(
+      'change',
+      debounce(watchFunc, watchDebounceDelay)
+    );
   }
 
   await doBuildJs(jsBundles, 'amp.js', {
@@ -202,7 +205,6 @@ async function compileAllJs(options) {
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', options),
     doBuildJs(jsBundles, 'alp.max.js', options),
     doBuildJs(jsBundles, 'examiner.max.js', options),
-    doBuildJs(jsBundles, 'ww.max.js', options),
     doBuildJs(jsBundles, 'integration.js', options),
     doBuildJs(jsBundles, 'ampcontext-lib.js', options),
     doBuildJs(jsBundles, 'iframe-transport-client-lib.js', options),
@@ -329,12 +331,15 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
   const minifiedName = maybeToEsmName(options.minifiedName);
 
   if (options.watch) {
-    const watchFunc = async () => {
+    async function watchFunc() {
+      if (options.minify) {
+        removeFromClosureBabelCache(entryPoint);
+      }
       const compileDone = await doCompileMinifiedJs(/* continueOnError */ true);
       if (options.onWatchBuild) {
         options.onWatchBuild(compileDone);
       }
-    };
+    }
     fileWatch(entryPoint).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
@@ -481,8 +486,8 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     const sentinel = '<%= contents %>';
     const start = wrapper.indexOf(sentinel);
     return {
-      banner: wrapper.slice(0, start),
-      footer: wrapper.slice(start + sentinel.length),
+      banner: {js: wrapper.slice(0, start)},
+      footer: {js: wrapper.slice(start + sentinel.length)},
     };
   }
 
@@ -552,36 +557,46 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
     options.minify ? 'minified' : 'unminified',
     /* enableCache */ true
   );
-  const buildResult = await esbuild
-    .build({
-      entryPoints: [entryPoint],
-      bundle: true,
-      sourcemap: true,
-      outfile: destFile,
-      plugins: [plugin],
-      minify: options.minify,
-      incremental: !!options.watch,
-      logLevel: 'silent',
-    })
-    .then((result) => {
-      finishBundle(srcFilename, destDir, destFilename, options, startTime);
-      return result;
-    })
-    .catch((err) => handleBundleError(err, !!options.watch, destFilename));
+
+  let result = null;
+
+  /**
+   * @param {number} time
+   */
+  async function build(time) {
+    if (!result) {
+      result = await esbuild.build({
+        entryPoints: [entryPoint],
+        bundle: true,
+        sourcemap: true,
+        outfile: destFile,
+        plugins: [plugin],
+        minify: options.minify,
+        target: argv.esm ? 'es6' : 'es5',
+        incremental: !!options.watch,
+        logLevel: 'silent',
+      });
+    } else {
+      result = await result.rebuild();
+    }
+    await minifyWithTerser(destDir, destFilename, options);
+    await finishBundle(srcFilename, destDir, destFilename, options, time);
+  }
+
+  await build(startTime).catch((err) =>
+    handleBundleError(err, !!options.watch, destFilename)
+  );
 
   if (options.watch) {
     watchedTargets.set(entryPoint, {
       rebuild: async () => {
         const time = Date.now();
-        const buildPromise = buildResult
-          .rebuild()
-          .then(() =>
-            finishBundle(srcFilename, destDir, destFilename, options, time)
-          )
-          .catch((err) =>
-            handleBundleError(err, /* continueOnError */ true, destFilename)
-          );
-        options?.onWatchBuild(buildPromise);
+        const buildPromise = build(time).catch((err) =>
+          handleBundleError(err, !!options.watch, destFilename)
+        );
+        if (options.onWatchBuild) {
+          options.onWatchBuild(buildPromise);
+        }
         await buildPromise;
       },
     });
@@ -589,22 +604,41 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
 }
 
 /**
- * Transpiles from TypeScript into intermediary files before compilation and
- * deletes them afterwards.
+ * Minify the code with Terser. Only used by the ESBuild.
  *
- * @param {string} srcDir Path to the src directory
- * @param {string} srcFilename Name of the JS source file
- * @param {string} destDir Destination folder for output script
+ * @param {string} destDir
+ * @param {string} destFilename
  * @param {?Object} options
  * @return {!Promise}
  */
-async function compileTs(srcDir, srcFilename, destDir, options) {
-  options = options || {};
-  const startTime = Date.now();
-  await transpileTs(srcDir, srcFilename);
-  endBuildStep('Transpiled', srcFilename, startTime);
-  await compileJs(srcDir, srcFilename, destDir, options);
-  del.sync(path.join(srcDir, '**/*.js'));
+async function minifyWithTerser(destDir, destFilename, options) {
+  if (!options.minify) {
+    return;
+  }
+
+  const filename = destDir + destFilename;
+  const terserOptions = {
+    mangle: true,
+    compress: true,
+    output: {
+      beautify: !!argv.pretty_print,
+      comments: /\/*/,
+      // eslint-disable-next-line google-camelcase/google-camelcase
+      keep_quoted_props: true,
+    },
+    sourceMap: true,
+  };
+  const minified = await terser.minify(
+    fs.readFileSync(filename, 'utf8'),
+    terserOptions
+  );
+  const remapped = remapping(
+    [minified.map, fs.readFileSync(`${filename}.map`, 'utf8')],
+    () => null,
+    !argv.full_sourcemaps
+  );
+  fs.writeFileSync(filename, minified.code);
+  fs.writeFileSync(`${filename}.map`, remapped.toString());
 }
 
 /**
@@ -681,7 +715,7 @@ function printNobuildHelp() {
         green('runs, use'),
         cyan('--nobuild'),
         green('with your'),
-        cyan(`gulp ${task}`),
+        cyan(`amp ${task}`),
         green('command.')
       );
       return;
@@ -705,7 +739,7 @@ async function maybePrintCoverageMessage(covPath = '') {
 
 /**
  * Writes AMP_CONFIG to a runtime file. Optionally enables localDev mode and
- * fortesting mode. Called by "gulp build" and "gulp dist" while building
+ * fortesting mode. Called by "amp build" and "amp dist" while building
  * various runtime files.
  *
  * @param {string} targetFile File to which the config is to be written.
@@ -792,7 +826,6 @@ module.exports = {
   compileCoreRuntime,
   compileJs,
   compileJsWithEsbuild,
-  compileTs,
   doBuildJs,
   endBuildStep,
   maybePrintCoverageMessage,

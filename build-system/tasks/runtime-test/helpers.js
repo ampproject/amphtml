@@ -107,13 +107,13 @@ function maybePrintArgvMessages() {
       green('Launching'),
       cyan(CHROMEBASE),
       green('with flags'),
-      cyan(chromeFlags)
+      cyan(`${chromeFlags}`)
     );
   }
 
   log(
     green('Run'),
-    cyan('gulp --tasks'),
+    cyan('amp --tasks'),
     green('to see a list of all test flags.')
   );
   log(green('⤷ Use'), cyan('--nohelp'), green('to silence these messages.'));
@@ -182,13 +182,13 @@ function karmaBrowserStart_() {
  * @return {!Promise<number>}
  */
 async function createKarmaServer(config) {
-  let resolver, browsers_, results_;
+  let resolver, results_;
   const deferred = new Promise((resolverIn) => {
     resolver = resolverIn;
   });
 
   const karmaServer = new Server(config, async (exitCode) => {
-    await reportTestRunComplete(browsers_, results_);
+    await reportTestRunComplete(results_);
     maybePrintCoverageMessage('test/coverage/index.html');
     resolver(exitCode);
   });
@@ -196,8 +196,7 @@ async function createKarmaServer(config) {
   karmaServer
     .on('browser_start', karmaBrowserStart_)
     .on('browser_complete', karmaBrowserComplete_)
-    .on('run_complete', (browsers, results) => {
-      browsers_ = browsers;
+    .on('run_complete', (_browsers, results) => {
       results_ = results;
     });
 
