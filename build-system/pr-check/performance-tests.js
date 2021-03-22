@@ -24,12 +24,9 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'performance-tests.js';
 
-/**
- * @return {void}
- */
 function pushBuildWorkflow() {
   downloadNomoduleOutput(jobName);
-  timedExecOrDie('gulp performance --nobuild --quiet --headless');
+  timedExecOrDie('amp performance --nobuild --quiet --headless');
 }
 
 runCiJob(jobName, pushBuildWorkflow, () => {});

@@ -36,11 +36,8 @@ const {signalPrDeployUpload} = require('../tasks/pr-deploy-bot-utils');
 
 const jobName = 'nomodule-build.js';
 
-/**
- * @return {void}
- */
 function pushBuildWorkflow() {
-  timedExecOrDie('gulp dist --fortesting');
+  timedExecOrDie('amp dist --fortesting');
   uploadNomoduleOutput();
 }
 
@@ -57,7 +54,7 @@ async function prBuildWorkflow() {
       Targets.VISUAL_DIFF
     )
   ) {
-    const process = timedExecWithError('gulp dist --fortesting');
+    const process = timedExecWithError('amp dist --fortesting');
     if (process.status !== 0) {
       const message = process?.error
         ? process.error.message
@@ -66,7 +63,7 @@ async function prBuildWorkflow() {
       await signalPrDeployUpload('errored');
       return abortTimedJob(jobName, startTime);
     }
-    timedExecOrDie('gulp storybook --build');
+    timedExecOrDie('amp storybook --build');
     await processAndUploadNomoduleOutput();
     await signalPrDeployUpload('success');
   } else {

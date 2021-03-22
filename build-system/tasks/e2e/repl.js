@@ -26,8 +26,8 @@ const REPL_INFINITE_TIMEOUT = 86400000; // milliseconds in a day
  *    This will cause the test to wait indefinitely when you want to execute
  *    commands in the DevTools console.
  *    You may have to change `async() => {}` to `async function() {}`
- * 2. Run gulp with Node debugging enabled:
- *   `node --inspect-brk $(which gulp) e2e ...`
+ * 2. Run amp with Node debugging enabled:
+ *   `node --inspect-brk $(which amp) e2e ...`
  * 3. Open Chrome DevTools and open the Node debugger
  * 4. Wait for the `READY_MESSAGE` to appear in the console
  * 5. You are now free to execute code in the console using the controller API.
@@ -65,9 +65,6 @@ function installRepl(global, env) {
     return replPromise;
   };
 
-  /**
-   * @return {void}
-   */
   function replContinue() {
     if (!replResolve) {
       return;
@@ -84,9 +81,6 @@ function installRepl(global, env) {
   }
 }
 
-/**
- * @return {void}
- */
 function uninstallRepl() {
   delete global.repl;
 }

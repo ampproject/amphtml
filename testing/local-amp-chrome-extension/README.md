@@ -24,7 +24,7 @@ Install this extension to test existing public AMP docs against the current vers
     -   Select "Load unpacked extension".
 -   Only works with HTTP host pages.
 
-For the basic use case of just proxying all amp js files, you can just run amp locally (via `gulp`), and hit:
+For the basic use case of just proxying all amp js files, you can just run amp locally (via `amp`), and hit:
 http://localhost:8000/proxy/s/url-of-website-you-wish-to-test
 
 For example:

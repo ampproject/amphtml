@@ -18,7 +18,7 @@
 const fs = require('fs');
 const globby = require('globby');
 const path = require('path');
-const postcss = require('postcss');
+const Postcss = require('postcss');
 const prettier = require('prettier');
 const textTable = require('text-table');
 const {
@@ -29,6 +29,9 @@ const {getStdout} = require('../../common/process');
 const {gray, magenta} = require('kleur/colors');
 const {logOnSameLineLocalDev, logLocalDev} = require('../../common/logging');
 const {writeDiffOrFail} = require('../../common/diff');
+
+/** @type {Postcss.default} */
+const postcss = /** @type {*} */ (Postcss);
 
 const tableHeaders = [
   ['context', 'z-index', 'file'],
@@ -41,7 +44,7 @@ const tableOptions = {
 };
 
 const preamble = `
-**Run \`gulp get-zindex --fix\` to generate this file.**
+**Run \`amp get-zindex --fix\` to generate this file.**
 
 <!-- markdown-link-check-disable -->
 `.trim();
@@ -52,28 +55,29 @@ const logChecking = (filename) =>
 const sortedByEntryKey = (a, b) => a[0].localeCompare(b[0]);
 
 /**
- * @param {!Object<string, !Array<number>} acc accumulator object for selectors
- * @param {!Rules} css post css rules object
+ * @param {!Object<string, string>} acc accumulator object for selectors
+ * @param {!Postcss.Rule} css post css rules object
  */
 function zIndexCollector(acc, css) {
   css.walkRules((rule) => {
     rule.walkDecls((decl) => {
       // Split out multi selector rules
-      let selectorNames = rule.selector.replace('\n', '');
-      selectorNames = selectorNames.split(',');
       if (decl.prop == 'z-index') {
-        selectorNames.forEach((selector) => {
-          // If multiple redeclaration of a selector and z index
-          // are done in a single file, this will get overridden.
-          acc[selector] = decl.value;
-        });
+        rule.selector
+          .replace('\n', '')
+          .split(',')
+          .forEach((selector) => {
+            // If multiple redeclaration of a selector and z index
+            // are done in a single file, this will get overridden.
+            acc[selector] = decl.value;
+          });
       }
     });
   });
 }
 
 /**
- * @param {!Object<string, !Object<string, !Array<number>} filesData
+ * @param {!Object<string, !Object<string, !Array<number>>>} filesData
  *    accumulation of files and the rules and z index values.
  * @return {!Array<!Array<string>>}
  */
@@ -116,7 +120,7 @@ function createTable(filesData) {
  * the given working directory
  * @param {string|Array<string>} glob
  * @param {string=} cwd
- * @return {Object}
+ * @return {Promise<Object>}
  */
 async function getZindexSelectors(glob, cwd = '.') {
   const filesData = Object.create(null);
@@ -190,7 +194,7 @@ function getZindexChainsInJs(glob, cwd = '.') {
 }
 
 /**
- * Entry point for gulp get-zindex
+ * Entry point for amp get-zindex
  */
 async function getZindex() {
   logLocalDev('...');
@@ -233,7 +237,7 @@ async function getZindex() {
 /**
  * @param {string} filename
  * @param {string} output
- * @return {string}
+ * @return {Promise<string>}
  */
 async function prettierFormat(filename, output) {
   return prettier.format(output, {
@@ -253,5 +257,5 @@ getZindex.description =
   'Runs through all css files of project to gather z-index values';
 
 getZindex.flags = {
-  'fix': '  Write to file',
+  'fix': 'Write to file',
 };

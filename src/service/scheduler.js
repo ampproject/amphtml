@@ -21,10 +21,10 @@ import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
 import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {removeItem} from '../utils/array';
 
-const ID = 'builder';
+const ID = 'scheduler';
 
 /** @implements {../service.Disposable} */
-export class Builder {
+export class Scheduler {
   /** @param {!./ampdoc-impl.AmpDoc} ampdoc  */
   constructor(ampdoc) {
     /** @private @const */
@@ -227,15 +227,15 @@ export class Builder {
       asap || target.getBuildPriority() <= LayoutPriority.CONTENT
         ? win.setTimeout
         : win.requestIdleCallback || win.setTimeout;
-    scheduler(() => target.buildInternal());
+    scheduler(() => target.mountInternal());
   }
 }
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!Builder}
+ * @return {!Scheduler}
  */
-export function getBuilderForDoc(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, ID, Builder);
-  return /** @type {!Builder} */ (getServiceForDoc(ampdoc, ID));
+export function getSchedulerForDoc(ampdoc) {
+  registerServiceBuilderForDoc(ampdoc, ID, Scheduler);
+  return /** @type {!Scheduler} */ (getServiceForDoc(ampdoc, ID));
 }

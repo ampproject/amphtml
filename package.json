@@ -10,8 +10,12 @@
     "type": "git",
     "url": "https://github.com/ampproject/amphtml.git"
   },
+  "bin": {
+    "amp": "./amp.js"
+  },
   "scripts": {
-    "preinstall": "node build-system/common/check-package-manager.js"
+    "preinstall": "node build-system/common/check-package-manager.js",
+    "postinstall": "node build-system/common/install-task-runner.js"
   },
   "dependencies": {
     "@ampproject/animations": "0.2.2",
@@ -33,7 +37,7 @@
     "resize-observer-polyfill": "1.5.1",
     "rrule": "2.6.6",
     "timeago.js": "4.0.2",
-    "web-activities": "1.13.0",
+    "web-activities": "1.24.0",
     "web-animations-js": "2.3.1"
   },
   "devDependencies": {
@@ -84,7 +88,7 @@
     "del": "6.0.0",
     "enzyme": "3.11.0",
     "enzyme-adapter-preact-pure": "3.0.0",
-    "esbuild": "0.8.57",
+    "esbuild": "0.9.6",
     "escodegen": "2.0.0",
     "eslint": "7.22.0",
     "eslint-config-prettier": "8.1.0",
@@ -110,23 +114,22 @@
     "fs-extra": "9.1.0",
     "fuse.js": "6.4.6",
     "globby": "11.0.2",
-    "gulp": "4.0.2",
     "gulp-connect": "5.7.0",
     "html-minifier": "4.0.0",
     "istanbul-middleware": "0.2.2",
     "jest-dot-reporter": "1.0.12",
-    "jest-silent-reporter": "0.4.0",
+    "jest-silent-reporter": "0.5.0",
     "jison": "0.4.18",
     "jscodeshift": "0.11.0",
     "jsdom": "16.5.0",
     "json-stable-stringify": "1.0.1",
     "json5": "2.2.0",
     "jsonminify": "0.4.1",
-    "karma": "6.1.1",
+    "karma": "6.2.0",
     "karma-chai": "0.1.0",
     "karma-chrome-launcher": "3.1.0",
     "karma-coverage-istanbul-reporter": "3.0.3",
-    "karma-esbuild": "2.0.0",
+    "karma-esbuild": "2.1.2",
     "karma-firefox-launcher": "2.1.0",
     "karma-fixture": "0.2.6",
     "karma-html2js-preprocessor": "1.1.0",
@@ -174,7 +177,6 @@
     "terser": "5.6.0",
     "text-table": "0.2.0",
     "traverse": "0.6.6",
-    "tsickle": "0.39.1",
     "typescript": "4.2.3",
     "util": "0.12.3",
     "vinyl-fs": "3.0.3"

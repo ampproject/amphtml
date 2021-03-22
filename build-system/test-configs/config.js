@@ -28,7 +28,8 @@ const initTestsPath = ['test/_init_tests.js'];
 
 const karmaHtmlFixturesPath = 'test/fixtures/*.html';
 
-const fixturesExamplesPaths = [karmaHtmlFixturesPath].concat([
+const fixturesExamplesPaths = [
+  karmaHtmlFixturesPath,
   {
     pattern: 'test/fixtures/served/*.html',
     included: false,
@@ -41,7 +42,7 @@ const fixturesExamplesPaths = [karmaHtmlFixturesPath].concat([
     nocache: false,
     watched: true,
   },
-]);
+];
 
 const builtRuntimePaths = [
   {
@@ -157,7 +158,7 @@ const presubmitGlobs = [
 ];
 
 /**
- * List of non-JS files to be checked by `gulp prettify` (using prettier).
+ * List of non-JS files to be checked by `amp prettify` (using prettier).
  * NOTE: When you add a new filename / glob to this list:
  * 1. Make sure its formatting options are specified in .prettierrc
  * 2. Make sure it is listed in .vscode/settings.json (for auto-fix-on-save)
@@ -181,7 +182,7 @@ const prettifyGlobs = [
 ];
 
 /**
- * List of markdown files that may be checked by `gulp check-links` (using
+ * List of markdown files that may be checked by `amp check-links` (using
  * markdown-link-check).
  */
 const linkCheckGlobs = [
