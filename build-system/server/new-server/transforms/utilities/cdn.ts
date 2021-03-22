@@ -55,7 +55,7 @@ export function CDNURLToLocalDistURL(
   useMaxNames = false,
 ): URL {
   url.protocol = 'http';
-  url.hostname = 'localhost';
+  url.hostname = '0.0.0.0';
   url.port = String(port);
 
   const [overwriteablePathname, newPathname] = pathnames;
