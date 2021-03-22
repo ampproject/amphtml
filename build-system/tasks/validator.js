@@ -37,10 +37,13 @@ async function validator() {
  * Simple wrapper around the C++ validator tests
  */
 async function validatorCpp() {
-  execOrDie(`bazel test --repo_env=CC=gcc --cxxopt='-std=c++17' validator_test`, {
-    cwd: 'validator/cpp/engine',
-    stdio: 'inherit',
-  });
+  execOrDie(
+    `bazel test --repo_env=CC=gcc --cxxopt='-std=c++17' validator_test`,
+    {
+      cwd: 'validator/cpp/engine',
+      stdio: 'inherit',
+    }
+  );
 }
 
 /**
