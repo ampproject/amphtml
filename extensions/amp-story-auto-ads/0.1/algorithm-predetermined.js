@@ -34,6 +34,9 @@ const MAX_ADS_PER_STORY = 4;
  * @visibleForTesting
  */
 export function getAdPositions(storyLength, numberOfAds) {
+  if (!numberOfAds) {
+    return [];
+  }
   const firstPosition = Math.ceil(storyLength / (numberOfAds + 1));
   const pagesLeft = storyLength - firstPosition;
   const positions = [firstPosition];

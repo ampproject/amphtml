@@ -113,6 +113,9 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
   describe('helpers', () => {
     describe('getAdPositions', () => {
       it('should pick the right position for short stories', () => {
+        expect(getAdPositions(0, 0)).to.eql([]);
+        expect(getAdPositions(5, 0)).to.eql([]);
+        expect(getAdPositions(10, 0)).to.eql([]);
         expect(getAdPositions(5, 1)).to.eql([3]);
         expect(getAdPositions(6, 1)).to.eql([3]);
         expect(getAdPositions(7, 1)).to.eql([4]);
