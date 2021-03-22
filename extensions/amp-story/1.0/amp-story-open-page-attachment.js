@@ -24,6 +24,14 @@ import {isExperimentOn} from '../../../src/experiments';
 import {setImportantStyles} from '../../../src/style';
 
 /**
+ * @enum {string}
+ */
+const AttachmentTheme = {
+  LIGHT: 'light', // default
+  DARK: 'dark',
+};
+
+/**
  * @param {!Element} element
  * @return {!Element}
  */
@@ -110,6 +118,26 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
 const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
   const openAttachmentEl = buildOpenInlineAttachmentElement(pageEl);
 
+  // Setting theme
+  const theme = attachmentEl.getAttribute('theme');
+  if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
+    openAttachmentEl.setAttribute('theme', 'dark');
+
+    const arrowEl = openAttachmentEl.querySelector(
+      '.i-amphtml-story-inline-page-attachment-arrow'
+    );
+    arrowEl.classList.add(
+      'i-amphtml-story-inline-page-attachment-arrow-dark-theme'
+    );
+
+    const chipEl = openAttachmentEl.querySelector(
+      '.i-amphtml-story-inline-page-attachment-chip'
+    );
+    chipEl.classList.add(
+      'i-amphtml-story-inline-page-attachment-chip-dark-theme'
+    );
+  }
+
   // Appending text & aria-label.
   const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
   const openLabel =
@@ -122,6 +150,11 @@ const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
   if (openLabel !== 'none') {
     const textEl = win.document.createElement('span');
     textEl.classList.add('i-amphtml-story-inline-page-attachment-label');
+    if (openAttachmentEl.getAttribute('theme') === 'dark') {
+      textEl.classList.add(
+        'i-amphtml-story-inline-page-attachment-label-dark-theme'
+      );
+    }
     textEl.textContent = openLabel;
     openAttachmentEl.appendChild(textEl);
   }
@@ -137,11 +170,22 @@ const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
     'background-image': 'url(' + openImgAttr + ')',
   });
 
+  if (openAttachmentEl.getAttribute('theme') === 'dark') {
+    ctaImgEl.classList.add(
+      'i-amphtml-story-inline-page-attachment-img-dark-theme'
+    );
+  }
+
   const openImgAttr2 = attachmentEl.getAttribute('cta-image-2');
 
   if (openImgAttr2) {
     const ctaImgEl2 = win.document.createElement('div');
     ctaImgEl2.classList.add('i-amphtml-story-inline-page-attachment-img');
+    if (openAttachmentEl.getAttribute('theme') === 'dark') {
+      ctaImgEl2.classList.add(
+        'i-amphtml-story-inline-page-attachment-img-dark-theme'
+      );
+    }
     setImportantStyles(ctaImgEl2, {
       'background-image': 'url(' + openImgAttr2 + ')',
     });

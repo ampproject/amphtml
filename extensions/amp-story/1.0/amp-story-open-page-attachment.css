@@ -177,6 +177,10 @@
   margin-bottom: 12px !important;
 }
 
+.i-amphtml-story-inline-page-attachment-chip-dark-theme {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
 .i-amphtml-story-inline-page-attachment-chip:only-child {
   margin-bottom: 20px !important;
 }
@@ -193,6 +197,10 @@
   background-color: white !important;
 }
 
+.i-amphtml-story-inline-page-attachment-img-dark-theme {
+  background-color: black !important;
+}
+
 .i-amphtml-story-inline-page-attachment-img:nth-child(2) {
   margin-inline-start: 1px !important;
 }
@@ -203,6 +211,10 @@
   margin: 8px !important;
   background-image: url('data:image/svg+xml;charset=utf-8,<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M16 32C24.8366 32 32 24.8366 32 16C32 7.16344 24.8366 0 16 0C7.16344 0 0 7.16344 0 16C0 24.8366 7.16344 32 16 32Z" fill="white"/> <path d="M6.74612 18.796C6.33376 18.0797 6.57889 17.1649 7.29412 16.7508L15.0632 12.2529C15.7808 11.8374 16.6995 12.0835 17.1132 12.8022C17.5256 13.5184 17.2805 14.4333 16.5652 14.8474L8.7962 19.3453C8.07854 19.7608 7.15989 19.5146 6.74612 18.796Z" fill="black"/> <path d="M14.724 12.8022C15.1377 12.0835 16.0564 11.8374 16.774 12.2528L24.5431 16.7508C25.2583 17.1648 25.5034 18.0797 25.0911 18.7959C24.6773 19.5146 23.7587 19.7607 23.041 19.3452L15.272 14.8473C14.5567 14.4332 14.3116 13.5184 14.724 12.8022Z" fill="black"/> </svg>') !important;
   background-position: center !important;
+}
+
+.i-amphtml-story-inline-page-attachment-arrow-dark-theme {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 32 32"><path d="M16 32a16 16 0 100-32 16 16 0 000 32z" fill="black"/><path d="M7 19v-2l8-5a1 1 0 112 3l-8 4H7z" fill="white"/><path d="M15 13l2-1 8 5a1 1 0 11-2 2l-8-4v-2z" fill="white"/></svg>') !important;
 }
 
 .i-amphtml-story-inline-page-attachment-label {
@@ -216,4 +228,8 @@
   white-space: nowrap !important;
   max-width: 210px !important;
   margin-bottom: 20px !important;
+}
+
+.i-amphtml-story-inline-page-attachment-label-dark-theme {
+  color: black !important;
 }

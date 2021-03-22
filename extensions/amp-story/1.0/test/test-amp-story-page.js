@@ -700,6 +700,50 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     toggleExperiment(win, 'amp-story-page-attachment-ui-v2', false);
   });
 
+  it('should build the inline page attachment UI with dark theme', async () => {
+    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
+
+    const attachmentEl = win.document.createElement(
+      'amp-story-page-attachment'
+    );
+
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    attachmentEl.setAttribute('cta-image', 'nodisplay');
+    attachmentEl.setAttribute('theme', 'dark');
+    element.appendChild(attachmentEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    expect(
+      openAttachmentEl.querySelector(
+        '.i-amphtml-story-inline-page-attachment-chip-dark-theme'
+      )
+    ).to.exist;
+    expect(
+      openAttachmentEl.querySelector(
+        '.i-amphtml-story-inline-page-attachment-img-dark-theme'
+      )
+    ).to.exist;
+    expect(
+      openAttachmentEl.querySelector(
+        '.i-amphtml-story-inline-page-attachment-arrow-dark-theme'
+      )
+    ).to.exist;
+    expect(
+      openAttachmentEl.querySelector(
+        '.i-amphtml-story-inline-page-attachment-label-dark-theme'
+      )
+    ).to.exist;
+
+    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', false);
+  });
+
   it('should build the open attachment UI with custom CTA label', async () => {
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
