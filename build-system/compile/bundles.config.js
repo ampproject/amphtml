@@ -199,6 +199,17 @@ exports.jsBundles = {
       extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
     },
   },
+  'amp-trinity-test.max.js': {
+    srcDir: './extensions/amp-trinity-test/0.1/examples/',
+    srcFilename: 'amp-trinity-test.js',
+    destDir: './dist/v0/examples',
+    minifiedDestDir: './dist/v0/examples',
+    options: {
+      toName: 'amp-trinity-test.max.js',
+      minifiedName: 'amp-trinity-test.js',
+      incudePolyfills: true,
+    },
+  },
 };
 
 /**

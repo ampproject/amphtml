@@ -1,0 +1,61 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-trinity-test example</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-element="amp-trinity-test" src="https://cdn.ampproject.org/v0/amp-trinity-test-0.1.js"></script>
+</head>
+<body>
+  <amp-analytics type="gtag" data-credentials="include">
+    <script type="application/json">
+      {
+        "vars": {
+          "gtag_id": "UA-192307884-1",
+          "config": {
+            "UA-192307884-1": { "groups": "default" }
+          }
+        },
+        "triggers": {
+          "trinityTest": {
+            "on": "TRINITY_TEST",
+            "selector": "#trinity-test",
+            "vars": {
+              "event_name": "TRINITY_TEST"
+            }
+          }
+        },
+        "extraUrlParams": {
+          "eventName": "${eventName}",
+          "state": "${state}",
+          "progress": "${progress}"
+        }
+      }
+    </script>
+  </amp-analytics>
+
+  <div [text]="'State: ' + state.state">State: idle</div>
+  <div [text]="'Last action: ' + state.eventName">Last action: none</div>
+
+  <br>
+
+  <amp-trinity-test
+    id="trinity-test"
+    height="75"
+    layout="fixed-height"
+    on="TRINITY_TEST:AMP.setState({state: event})"
+  ></amp-trinity-test>
+
+  <br>
+  <br>
+  <span>
+    Check for <i>https://www.google-analytics.com/collect</i> in the Dev Tools Network
+  </span>
+</body>
+</html>

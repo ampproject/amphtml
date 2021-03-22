@@ -231,4 +231,11 @@ export const EXPERIMENTS = [
       'Adaptive bitrate algorithm for videos on documents from the AMPProject CDN',
     spec: 'https://github.com/ampproject/amphtml/projects/111',
   },
+  {
+    id: 'amp-trinity-test',
+    name: 'Trinity Audio Player component',
+    spec:
+      'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+      'amp-trinity-test/amp-trinity-test.md',
+  },
 ];

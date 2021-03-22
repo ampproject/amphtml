@@ -533,6 +533,11 @@
   },
   {"name": "amp-timeago", "version": ["0.1", "1.0"], "latestVersion": "0.1"},
   {
+    "name": "amp-trinity-test",
+    "version": "0.1",
+    "latestVersion": "0.1"
+  },
+  {
     "name": "amp-truncate-text",
     "version": "0.1",
     "latestVersion": "0.1",
