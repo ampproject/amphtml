@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const fs = require('fs').promises;
+const fs = require('fs-extra');
 const {
   EVENT_TEST_PASS,
   EVENT_TEST_FAIL,
@@ -35,13 +35,13 @@ const {inherits} = require('mocha').utils;
  */
 async function writeOutput(output, filename) {
   try {
-    await fs.mkdir('result-reports');
+    await fs.ensureDir('result-reports');
     await fs.writeFile(filename, JSON.stringify(output, null, 4));
   } catch (error) {
     process.stdout.write(
       Base.color(
         'fail',
-        `Could not write test result report to file '${filename}'`
+        `Could not write test result report to file '${filename}': ${error}`
       )
     );
   }
