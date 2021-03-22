@@ -65,7 +65,7 @@ export class UserError extends Error {
  * @throws {Error} when shouldBeTruthy is not truthy.
  */
 function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
-  if (isMinifiedMode() || shouldBeTruthy) {
+  if (shouldBeTruthy) {
     return shouldBeTruthy;
   }
 
@@ -177,6 +177,10 @@ export function pureDevAssert(
   opt_8,
   opt_9
 ) {
+  if (isMinifiedMode()) {
+    return shouldBeTruthy;
+  }
+
   return assertion(
     Error,
     shouldBeTruthy,
