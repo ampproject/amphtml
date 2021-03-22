@@ -64,7 +64,7 @@ export class UserError extends Error {
  * @return {T}
  * @throws {Error} when shouldBeTruthy is not truthy.
  */
-function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
+export function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
   if (shouldBeTruthy) {
     return shouldBeTruthy;
   }
@@ -91,6 +91,7 @@ function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
   });
 
   const error = new errorCls(message);
+  error.fromAssert = true;
   error.messageArray = messageArray;
   if (firstElement) {
     error.associatedElement = firstElement;
