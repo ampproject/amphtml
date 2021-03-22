@@ -16,6 +16,7 @@
 
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Render} from './component';
+import {getJsonFn} from './amp-render';
 
 export class BaseElement extends PreactBaseElement {}
 
@@ -25,6 +26,7 @@ BaseElement['Component'] = Render;
 /** @override */
 BaseElement['props'] = {
   'src': {attr: 'src'},
+  'fetchFn': {attrs: ['src'], parseAttrs: getJsonFn},
 };
 
 /** @override */

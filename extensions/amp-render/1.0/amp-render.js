@@ -41,6 +41,60 @@ const isAmpStateSrc = (src) => src.startsWith(AMP_STATE_URI_SCHEME);
  */
 const isAmpScriptSrc = (src) => src.startsWith(AMP_SCRIPT_URI_SCHEME);
 
+/**
+ * Gets the json an amp-list that has an "amp-state:" uri. For example,
+ * src="amp-state:json.path".
+ *
+ * TODO: this implementation is identical to one in amp-list. Move it
+ * to a common file and import it.
+ *
+ * @param {!AmpElement} element
+ * @return {Promise<!JsonObject>}
+ */
+const getAmpStateJson = (element) => {
+  const src = element.getAttribute('src');
+  return Services.bindForDocOrNull(element)
+    .then((bind) => {
+      userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
+      const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length);
+      return bind.getStateAsync(ampStatePath).catch((err) => {
+        const stateKey = ampStatePath.split('.')[0];
+        user().error(
+          TAG,
+          `'amp-state' element with id '${stateKey}' was not found.`
+        );
+        throw err;
+      });
+    })
+    .then((json) => {
+      userAssert(
+        typeof json !== 'undefined',
+        `[amp-render] No data was found at provided uri: ${src}`
+      );
+      return json;
+    });
+};
+
+/**
+ * Returns the correct fetch function for amp-state, amp-script or
+ * to fetch remote JSON.
+ *
+ * @param ampDoc
+ * @param {!AmpElement} element
+ * @return {Function}
+ */
+export const getJsonFn = (element) => {
+  const src = element.getAttribute('src');
+  if (isAmpStateSrc(src)) {
+    return getAmpStateJson.bind(null, element);
+  }
+  if (isAmpScriptSrc(src)) {
+    // TODO(dmanek): implement this
+    return () => {};
+  }
+  return batchFetchJsonFor.bind(null, element.getAmpDoc(), element);
+};
+
 class AmpRender extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -62,31 +116,39 @@ class AmpRender extends BaseElement {
     return super.isLayoutSupported(layout);
   }
 
-  /** @override */
-  init() {
-    return dict({
-      'getJson': this.getJsonFn_(),
-    });
-  }
+  // /** @override */
+  // init() {
+  //   return dict({
+  //     'getJson': this.getJsonFn_(),
+  //   });
+  // }
 
-  /**
-   * Returns the correct fetch function for amp-state, amp-script or
-   * to fetch remote JSON.
-   *
-   * @return {Function}
-   * @private
-   */
-  getJsonFn_() {
-    const src = this.element.getAttribute('src');
-    if (isAmpStateSrc(src)) {
-      return this.getAmpStateJson.bind(null, this.element);
-    }
-    if (isAmpScriptSrc(src)) {
-      // TODO(dmanek): implement this
-      return () => {};
-    }
-    return batchFetchJsonFor.bind(null, this.getAmpDoc(), this.element);
-  }
+  // /**
+  //  * Returns the correct fetch function for amp-state, amp-script or
+  //  * to fetch remote JSON.
+  //  *
+  //  * @return {Function}
+  //  * @private
+  //  */
+  // getJsonFn_() {
+  //   const src = this.element.getAttribute('src');
+  //   if (isAmpStateSrc(src)) {
+  //     return this.getAmpStateJson.bind(null, this.element);
+  //   }
+  //   if (isAmpScriptSrc(src)) {
+  //     // TODO(dmanek): implement this
+  //     return () => {};
+  //   }
+  //   return batchFetchJsonFor.bind(null, this.getAmpDoc(), this.element);
+  // }
+
+  // /** @override */
+  // mutationObserverCallback(mutations) {
+  //   console.log(
+  //     '🚀 ~ file: amp-render.js ~ line 94 ~ AmpRender ~ mutationObserverCallback ~ mutations',
+  //     mutations
+  //   );
+  // }
 
   /**
    * TODO: this implementation is identical to one in amp-data-display &
@@ -136,40 +198,6 @@ class AmpRender extends BaseElement {
       return false;
     }
     return true;
-  }
-
-  /**
-   * Gets the json an amp-list that has an "amp-state:" uri. For example,
-   * src="amp-state:json.path".
-   *
-   * TODO: this implementation is identical to one in amp-list. Move it
-   * to a common file and import it.
-   *
-   * @param {!AmpElement} element
-   * @return {Promise<!JsonObject>}
-   */
-  getAmpStateJson(element) {
-    const src = element.getAttribute('src');
-    return Services.bindForDocOrNull(element)
-      .then((bind) => {
-        userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
-        const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length);
-        return bind.getStateAsync(ampStatePath).catch((err) => {
-          const stateKey = ampStatePath.split('.')[0];
-          user().error(
-            TAG,
-            `'amp-state' element with id '${stateKey}' was not found.`
-          );
-          throw err;
-        });
-      })
-      .then((json) => {
-        userAssert(
-          typeof json !== 'undefined',
-          `[amp-render] No data was found at provided uri: ${src}`
-        );
-        return json;
-      });
   }
 }
 
