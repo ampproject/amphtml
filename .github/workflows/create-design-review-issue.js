@@ -69,46 +69,47 @@ When attending a design review please read through the designs _before_ the desi
 We rotate our design review between times that work better for different parts of the world as described in our [design review documentation](https://github.com/ampproject/amphtml/blob/master/contributing/design-reviews.md), but you are welcome to attend any design review. If you cannot make any of the design reviews but have a design to discuss please let mrjoro@ know on [Slack](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#discussion-channels) and we will find a time that works for you.
 `.trim();
 
-function postGithub(token, url, data) {
+function httpsRequest(url, options, data) {
   return new Promise((resolve, reject) => {
-    const req = https.request(
-      url,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `token ${token}`,
-          'Content-Type': 'application/json',
-          'User-Agent': 'amphtml',
-          'Accept': 'application/vnd.github.v3+json',
-        },
-      },
-      (res) => {
-        const chunks = [];
-        res.on('data', (chunk) => {
-          chunks.push(Buffer.from(chunk));
-        });
-
-        res.on('close', () => {
-          const responseBody = Buffer.concat(chunks).toString('utf-8');
-
-          if (res.statusCode < 200 || res.statusCode > 299) {
-            console./*OK*/ error(responseBody);
-            reject(new Error(res.statusCode));
-            return;
-          }
-
-          resolve(JSON.parse(responseBody));
-        });
-      }
-    );
-
+    const req = https.request(url, options, (res) => {
+      const chunks = [];
+      res.on('data', (chunk) => {
+        chunks.push(Buffer.from(chunk));
+      });
+      res.on('close', () => {
+        const body = Buffer.concat(chunks).toString('utf-8');
+        resolve({res, body});
+      });
+    });
     req.on('error', (error) => {
       reject(error);
     });
-
-    req.write(JSON.stringify(data));
+    req.write(data);
     req.end();
   });
+}
+
+async function postGithub(token, url, data) {
+  const {res, body} = await httpsRequest(
+    url,
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Content-Type': 'application/json',
+        'User-Agent': 'amphtml',
+        'Accept': 'application/vnd.github.v3+json',
+      },
+    },
+    JSON.stringify(data)
+  );
+
+  if (res.statusCode < 200 || res.statusCode > 299) {
+    console./*OK*/ error(body);
+    throw new Error(res.statusCode);
+  }
+
+  return JSON.parse(body);
 }
 
 function postGithubIssue(token, owner, repo, data) {

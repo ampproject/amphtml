@@ -1,9 +1,6 @@
 name: Create Design Review Issue
 
 on:
-  push:
-    branches:
-      - master
   schedule:
     # Every Wednesday at 00:00:00
     - cron: '0 0 * * 3'
