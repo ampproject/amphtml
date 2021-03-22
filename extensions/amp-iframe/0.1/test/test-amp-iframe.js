@@ -1089,7 +1089,7 @@ describes.realWin(
           height: 100,
         });
         await ampIframe.getImpl(false);
-        env.sandbox.stub(ampIframe, 'pause');
+        env.sandbox./*OK*/ stub(ampIframe, 'pause');
         await waitForAmpIframeLayoutPromise(doc, ampIframe);
         expect(ampIframe.pause).to.not.be.called;
 

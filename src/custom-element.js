@@ -1692,7 +1692,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       }
       this.getResource_().unlayout();
       if (this.isConnected_ && this.resources_) {
-        this.resources_.schedulePass();
+        this.resources_./*OK*/ schedulePass();
       }
     }
 
