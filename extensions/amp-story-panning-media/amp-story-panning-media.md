@@ -109,6 +109,7 @@ Centered on 0 (default) with positive values moving the image down (50% centerin
 
 Specifies the level of zoom.
 The default is 1. This corresponds to the image fitting the viewport with [`layout=fill`](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/?format=stories).
+A higher value scales the image up (zooms in). A lower value scales the image down (zooms out).
 
 ### lock-bounds (optional)
 
