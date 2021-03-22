@@ -77,12 +77,9 @@ function selectVideoSource(videoEl) {
       bitrate: null,
     });
   }
-  const prioritizedSource = possibleSources.reduce((a, b) => {
-    if (!b.bitrate || (a.bitrate && a.bitrate >= b.bitrate)) {
-      return a;
-    }
-    return b;
-  });
+  const prioritizedSource = possibleSources.reduce((a, b) =>
+    !b.bitrate || (a.bitrate && a.bitrate >= b.bitrate) ? a : b
+  );
   return convertToCDN(videoEl, prioritizedSource.src);
 }
 
