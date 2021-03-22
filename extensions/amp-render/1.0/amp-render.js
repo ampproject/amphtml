@@ -154,6 +154,9 @@ class AmpRender extends BaseElement {
    */
   getAmpStateJson(element) {
     const src = element.getAttribute('src');
+    if (!src) {
+      return Promise.resolve({});
+    }
     return Services.bindForDocOrNull(element)
       .then((bind) => {
         userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
