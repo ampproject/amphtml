@@ -93,7 +93,7 @@ export const getJsonFn = (element) => {
   return batchFetchJsonFor.bind(null, element.getAmpDoc(), element);
 };
 
-class AmpRender extends BaseElement {
+export class AmpRender extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
