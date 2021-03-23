@@ -70,14 +70,14 @@ function startAtRepoRoot() {
  */
 async function runTask(taskName, taskFunc) {
   startAtRepoRoot();
-  log('Using task file', magenta('amphtml/amp.js'));
+  log('Using task file', magenta(path.join('amphtml', 'amp.js')));
   const start = Date.now();
   try {
     log(`Starting '${cyan(taskName)}'...`);
     await taskFunc();
     log('Finished', `'${cyan(taskName)}'`, 'after', magenta(getTime(start)));
   } catch (err) {
-    log(cyan(taskName), red('errored after'), magenta(getTime(start)));
+    log(`'${cyan(taskName)}'`, red('errored after'), magenta(getTime(start)));
     log(err);
     process.exit(1);
   }

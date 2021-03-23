@@ -31,18 +31,16 @@ export class AmpStoryComponentManager {
 
   /**
    * Calls layoutCallback on the element when it is close to the viewport.
-   * @param {!AmpStoryPlayer|!AmpStoryEntryPoint} elImpl
+   * @param {!Element} element
    * @private
    */
-  layoutEl_(elImpl) {
-    new AmpStoryPlayerViewportObserver(
-      this.win_,
-      elImpl.getElement(),
-      elImpl.layoutCallback.bind(elImpl)
+  layoutEl_(element) {
+    new AmpStoryPlayerViewportObserver(this.win_, element, () =>
+      element.layoutCallback()
     );
 
     const scrollHandler = () => {
-      elImpl.layoutCallback();
+      element.layoutCallback();
       this.win_.removeEventListener('scroll', scrollHandler);
     };
 
