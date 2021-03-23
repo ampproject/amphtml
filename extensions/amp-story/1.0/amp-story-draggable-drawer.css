@@ -172,6 +172,6 @@ amp-story:not([desktop]) amp-story-page.attachment-open:after {
   }
 
   100% {
-    opacity: 0.75;
+    opacity: 0.5;
   }
 }
