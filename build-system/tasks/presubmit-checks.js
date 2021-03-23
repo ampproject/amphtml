@@ -15,6 +15,9 @@
  */
 'use strict';
 
+// Terms are defined here.
+/* eslint-disable local/terms */
+
 const fs = require('fs');
 const globby = require('globby');
 const path = require('path');
@@ -1308,93 +1311,85 @@ function stripComments(contents) {
 }
 
 /**
- * Logs any issues found in the contents of file based on terms (regex
- * patterns), and provides any possible fix information for matched terms if
- * possible
- *
- * @param {string} srcFile a file to scan for term matches
- * @param {!Array<string, string>} terms Pairs of regex patterns and possible
- *   fix messages.
- * @return {boolean} true if any of the terms match the file content,
- *   false otherwise
+ * @typedef {{
+ *   line: number,
+ *   column: number,
+ *   term: string,
+ *   match: string,
+ *   message: string,
+ * }}
  */
-function matchTerms(srcFile, terms) {
-  const contents = stripComments(fs.readFileSync(srcFile, 'utf-8'));
-  return Object.keys(terms)
-    .map(function (term) {
-      let fix;
-      const {allowlist, checkInTestFolder} = terms[term];
-      // NOTE: we could do a glob test instead of exact check in the future
-      // if needed but that might be too permissive.
-      if (
-        isInBuildSystemFixtureFolder(srcFile) ||
-        (Array.isArray(allowlist) &&
-          (allowlist.indexOf(srcFile) != -1 ||
-            (isInTestFolder(srcFile) && !checkInTestFolder)))
-      ) {
-        return false;
-      }
-      // we can't optimize building the `RegExp` objects early unless we build
-      // another mapping of term -> regexp object to be able to get back to the
-      // original term to get the possible fix value. This is ok as the
-      // presubmit doesn't have to be blazing fast and this is most likely
-      // negligible.
-      const regex = new RegExp(term, 'gm');
-      let index = 0;
-      let line = 1;
-      let column = 0;
-      let match;
-      let hasTerm = false;
+let ForbiddenTermMatchDef;
 
-      while ((match = regex.exec(contents))) {
-        hasTerm = true;
-        for (index; index < match.index; index++) {
-          if (contents[index] === '\n') {
-            line++;
-            column = 1;
-          } else {
-            column++;
-          }
-        }
+/**
+ * Collects any forbidden terms (regex patterns) found in the contents of a file.
+ * @param {string} srcFile
+ * @param {string} contents
+ * @param {!Array<string, string>} terms
+ * @return {Array<!ForbiddenTermMatchDef>}
+ */
+function matchForbiddenTerms(srcFile, contents, terms) {
+  const contentsWithoutComments = stripComments(contents);
 
-        log(
-          red('ERROR:'),
-          'Found forbidden',
-          cyan(`"${match[0]}"`),
-          'in',
-          cyan(`${srcFile}:${line}:${column}`)
-        );
-        if (typeof terms[term] === 'string') {
-          fix = terms[term];
+  return Object.keys(terms).reduce((fixes, term) => {
+    const {allowlist, checkInTestFolder} = terms[term];
+    // NOTE: we could do a glob test instead of exact check in the future
+    // if needed but that might be too permissive.
+    if (
+      isInBuildSystemFixtureFolder(srcFile) ||
+      (Array.isArray(allowlist) &&
+        (allowlist.indexOf(srcFile) != -1 ||
+          (isInTestFolder(srcFile) && !checkInTestFolder)))
+    ) {
+      return fixes;
+    }
+    // we can't optimize building the `RegExp` objects early unless we build
+    // another mapping of term -> regexp object to be able to get back to the
+    // original term to get the possible fix value. This is ok as the
+    // presubmit doesn't have to be blazing fast and this is most likely
+    // negligible.
+    const regex = new RegExp(term, 'gm');
+    let index = 0;
+    let line = 1;
+    let column = 0;
+    let match;
+
+    while ((match = regex.exec(contentsWithoutComments))) {
+      for (index; index < match.index; index++) {
+        if (contentsWithoutComments[index] === '\n') {
+          line++;
+          column = 1;
         } else {
-          fix = terms[term].message;
-        }
-
-        // log the possible fix information if provided for the term.
-        if (fix) {
-          log('⤷', yellow('To fix:'), fix);
+          column++;
         }
       }
 
-      return hasTerm;
-    })
-    .some(function (hasAnyTerm) {
-      return hasAnyTerm;
-    });
+      const message =
+        typeof terms[term] === 'string' ? terms[term] : terms[term].message;
+
+      fixes.push({
+        match: match[0],
+        term,
+        line,
+        column,
+        message,
+      });
+    }
+
+    return fixes;
+  }, /** @type {Array<!ForbiddenTermMatchDef>} */ ([]));
 }
 
 /**
  * Test if a file's contents match any of the forbidden terms
  * @param {string} srcFile
- * @return {boolean} true if any of the terms match the file content,
- *   false otherwise
+ * @param {string} contents
+ * @return {Array<!ForbiddenTermMatchDef>}
  */
-function hasAnyTerms(srcFile) {
+function getForbiddenTerms(srcFile, contents) {
   const basename = path.basename(srcFile);
-  let hasTerms = false;
-  let hasSrcInclusiveTerms = false;
 
-  hasTerms = matchTerms(srcFile, forbiddenTerms);
+  const terms = matchForbiddenTerms(srcFile, contents, forbiddenTerms);
 
   const isTestFile =
     /^test-/.test(basename) ||
@@ -1403,10 +1398,53 @@ function hasAnyTerms(srcFile) {
     /testing\//.test(srcFile) ||
     /storybook\/[^/]+\.js$/.test(srcFile);
   if (!isTestFile) {
-    hasSrcInclusiveTerms = matchTerms(srcFile, forbiddenTermsSrcInclusive);
+    return [
+      ...terms,
+      ...matchForbiddenTerms(srcFile, contents, forbiddenTermsSrcInclusive),
+    ];
   }
 
-  return hasTerms || hasSrcInclusiveTerms;
+  return terms;
+}
+
+/**
+ * Test if a file's contents match any of the forbidden terms
+ * @param {string} srcFile
+ * @return {boolean} true if any of the terms match the file content,
+ *   false otherwise
+ */
+function hasForbiddenTerms(srcFile) {
+  const contents = fs.readFileSync(srcFile, 'utf-8');
+  const terms = getForbiddenTerms(srcFile, contents);
+  for (const {match, line, column, message} of terms) {
+    log(
+      red('ERROR:'),
+      'Found forbidden',
+      cyan(`"${match}"`),
+      'in',
+      cyan(`${srcFile}:${line}:${column}`)
+    );
+
+    // log the possible fix information if provided for the term.
+    if (message) {
+      log('⤷', yellow('To fix:'), message);
+    }
+  }
+  return terms.length > 0;
+}
+
+/**
+ * @param {string} srcFile
+ * @param {string} contents
+ * @return {Array<string>}
+ */
+function getMissingTerms(srcFile, contents) {
+  return Object.keys(requiredTerms).filter(
+    (term) =>
+      requiredTerms[term].test(srcFile) &&
+      !requiredTermsExcluded.test(srcFile) &&
+      !contents.match(new RegExp(term))
+  );
 }
 
 /**
@@ -1419,29 +1457,17 @@ function hasAnyTerms(srcFile) {
  */
 function isMissingTerms(srcFile) {
   const contents = fs.readFileSync(srcFile, 'utf-8');
-  return Object.keys(requiredTerms)
-    .map(function (term) {
-      const filter = requiredTerms[term];
-      if (!filter.test(srcFile) || requiredTermsExcluded.test(srcFile)) {
-        return false;
-      }
-
-      const matches = contents.match(new RegExp(term));
-      if (!matches) {
-        log(
-          red('ERROR:'),
-          'Did not find required',
-          cyan(`"${term}"`),
-          'in',
-          cyan(srcFile)
-        );
-        return true;
-      }
-      return false;
-    })
-    .some(function (hasMissingTerm) {
-      return hasMissingTerm;
-    });
+  const terms = getMissingTerms(srcFile, contents);
+  for (const term of terms) {
+    log(
+      red('ERROR:'),
+      'Did not find required',
+      cyan(`"${term}"`),
+      'in',
+      cyan(srcFile)
+    );
+  }
+  return terms.length > 0;
 }
 
 /**
@@ -1452,7 +1478,7 @@ async function presubmit() {
   let missingRequirements = false;
   const srcFiles = globby.sync(srcGlobs);
   for (const srcFile of srcFiles) {
-    forbiddenFound = hasAnyTerms(srcFile) || forbiddenFound;
+    forbiddenFound = hasForbiddenTerms(srcFile) || forbiddenFound;
     missingRequirements = isMissingTerms(srcFile) || missingRequirements;
   }
   if (forbiddenFound) {
@@ -1474,6 +1500,8 @@ async function presubmit() {
 
 module.exports = {
   presubmit,
+  getMissingTerms,
+  getForbiddenTerms,
 };
 
 presubmit.description = 'Check source files for forbidden and required terms';

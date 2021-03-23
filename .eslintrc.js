@@ -15,6 +15,10 @@
  */
 
 const fs = require('fs');
+const {
+  getForbiddenTerms,
+  getMissingTerms,
+} = require('./build-system/tasks/presubmit-checks.js');
 
 /**
  * Dynamically extracts experiment globals from the config file.
@@ -167,6 +171,13 @@ module.exports = {
     'local/prefer-unnested-spread-objects': 2,
     'local/private-prop-names': 2,
     'local/query-selector': 2,
+    'local/terms': [
+      2,
+      {
+        getForbiddenTerms,
+        getMissingTerms,
+      },
+    ],
     'local/todo-format': 0,
     'local/unused-private-field': 2,
     'local/vsync': 0,
