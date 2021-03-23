@@ -121,9 +121,6 @@ async function prepareEnvironment_(outputDir, tempDir) {
   await fs.emptyDir(outputDir);
   await fs.emptyDir(tempDir);
   logSeparator_();
-
-  execOrDie('amp update-packages');
-  logSeparator_();
 }
 
 /**
