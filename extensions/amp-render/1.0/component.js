@@ -53,10 +53,15 @@ export function Render({
     if (!src) {
       return;
     }
-
+    let cancelled = false;
     getJson(src).then((data) => {
-      setData(data);
+      if (!cancelled) {
+        setData(data);
+      }
     });
+    return () => {
+      cancelled = true;
+    };
   }, [src, getJson]);
 
   const rendered = useRenderer(render, data);
