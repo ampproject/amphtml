@@ -36,16 +36,18 @@ const jobName = 'pr-check.js';
 /**
  * This file runs tests against the local workspace to mimic the CI build as
  * closely as possible.
- * @param {Function} cb
+ * @param {?Function} cb
  */
 async function prCheck(cb) {
   setLoggingPrefix(jobName);
 
   const failTask = () => {
     stopTimer(jobName, startTime);
-    const err = new Error('Local PR check failed. See logs above.');
-    err.showStack = false;
-    cb(err);
+    if (cb) {
+      const err = new Error('Local PR check failed. See logs above.');
+      err.showStack = false;
+      cb(err);
+    }
   };
 
   const runCheck = (cmd) => {

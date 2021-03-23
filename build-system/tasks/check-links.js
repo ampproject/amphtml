@@ -119,6 +119,8 @@ function checkLinksInFile(file) {
       {pattern: /localhost/},
       // codepen returns a 503 for these link checks
       {pattern: /https:\/\/codepen.*/},
+      // GitHub PRs can be assumed to exist
+      {pattern: /https:\/\/github.com\/ampproject\/amphtml\/pull\/d+.*/},
       // Templated links are merely used to generate other markdown files.
       {pattern: /\$\{[a-z]*\}/},
       {pattern: /https:.*?__component_name\w*__/},
