@@ -77,6 +77,17 @@ export function CDNURLToLocalDistURL(
   return url;
 }
 
+export function CDNURLToLocalHostRelativeAbsoluteDist(
+  url: URL,
+  pathnames: [string | null, string | null] = [null, null],
+  extension: string = '.js',
+  port: number = 8000,
+  useMaxNames = false,
+): string {
+  const newUrl = CDNURLToLocalDistURL(url, pathnames, extension, port, useMaxNames);
+  return `${newUrl.pathname}${newUrl.search}${newUrl.hash}`;
+}
+
 /**
  * Convert an existing URL to one from a specific RTV.
  */
