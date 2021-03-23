@@ -131,7 +131,8 @@ describes.realWin(
       expect(iframe.src).to.equal(await expandUrlAsync.firstCall.returnValue);
     });
 
-    it('returns parent_frame_ready message with nonce on ACTIONS.READY', async () => {
+    // TODO(#33437, wg-components): Fix flakiness
+    it.skip('returns parent_frame_ready message with nonce on ACTIONS.READY', async () => {
       const element = createElementWithAttributes(document, TAG, defaultAttrs);
       document.body.appendChild(element);
 

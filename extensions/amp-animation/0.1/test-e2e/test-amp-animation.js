@@ -28,7 +28,8 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('transparency animation should pause and restart', async () => {
+    // TODO(#33438, wg-components): Fix flakiness
+    it.skip('transparency animation should pause and restart', async () => {
       const cancelBtn = await controller.findElement('#cancelBtn');
       await controller.click(cancelBtn);
 
