@@ -26,9 +26,9 @@ const {runCiJob} = require('./ci-job');
 const jobName = 'validator-tests.js';
 
 function pushBuildWorkflow() {
+  timedExecOrDie('amp validator-webui');
   timedExecOrDie('amp validator');
   timedExecOrDie('amp validator-cpp');
-  timedExecOrDie('amp validator-webui');
 }
 
 function prBuildWorkflow() {
