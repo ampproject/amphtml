@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-export class GoogleVideoCacheService {
+export class AmpCacheUrlService {
   /**
    * Create video cache service
    */
   constructor() {}
 }
 
-AMP.extension('amp-video-google-cache', '0.1', (AMP) => {
-  AMP.registerServiceForDoc('google-video-cache', GoogleVideoCacheService);
+AMP.extension('amp-cache-url', '0.1', (AMP) => {
+  AMP.registerServiceForDoc('cache-url', AmpCacheUrlService);
 });
