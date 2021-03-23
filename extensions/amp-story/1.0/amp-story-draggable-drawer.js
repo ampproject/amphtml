@@ -206,11 +206,14 @@ export class DraggableDrawer extends AMP.BaseElement {
       isPageAttachmentUiV2ExperimentOn(this.win) &&
       this.element.tagName === 'AMP-STORY-PAGE-ATTACHMENT'
     ) {
+      // Handle click outside of content to close.
       this.element.addEventListener('click', (e) => {
         if (!this.isDrawerContentDescendant_(e.target)) {
           this.close_();
         }
       });
+
+      // Update spacerElHeight_ on resize for drag offset.
       const spacerEl = dev().assertElement(
         this.element.querySelector('.i-amphtml-story-draggable-drawer-spacer')
       );
@@ -218,6 +221,16 @@ export class DraggableDrawer extends AMP.BaseElement {
         this.spacerElHeight_ = e[0].contentRect.height;
       });
       observer.observe(spacerEl);
+
+      // Reset scroll position on end of close transiton.
+      this.element.addEventListener('transitionend', (e) => {
+        if (
+          e.propertyName === 'transform' &&
+          this.state_ === DrawerState.CLOSED
+        ) {
+          this.containerEl_.scrollTop = 0;
+        }
+      });
     }
   }
 
