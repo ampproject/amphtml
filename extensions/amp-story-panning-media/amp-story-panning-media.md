@@ -140,20 +140,6 @@ With these components we wanted to help users create more entertaining and immer
 </tr>
 </table>
 
-You can check the roadmap in https://github.com/ampproject/amphtml/projects/121
-
-## FAQ
-
-**Can we have more than one component per page?**
-
-Yes, the components will automatically be associated with each other by sharing the same `src` value.
-
-**I have found a bug or have questions / comments / issues, how do I contact you?**
-
-If you have found a bug or have an issue request, file a [Github issue](https://github.com/ampproject/amphtml/issues?q=is%3Aissue+is%3Aopen+label%3A%22WG%3A+stories%22+) and tag the @ampproject/wg-stories working group.
-
-For questions / disscusion, join the [amp-story slack channel](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#discussion-channels) and ping us!.
-
 ## Validation
 
-This component is still under development. Validation details will be defined before launch.
+This component is available in experimental. Validation details will be defined before launch.
