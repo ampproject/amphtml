@@ -85,6 +85,10 @@ describes.realWin(
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
       });
+      storeService.dispatch(Action.SET_PAGE_SIZE, {
+        width: 700,
+        height: 1000,
+      });
     });
 
     it('should build', async () => {
@@ -115,10 +119,29 @@ describes.realWin(
       await panningMedia.layoutCallback();
       await storeService.dispatch(Action.CHANGE_PAGE, {id: 'page1', index: 0});
       await afterRenderPromise();
-      expect(panningMedia.ampImgEl_.style.transform).to.equal(
+      expect(panningMedia.element.firstChild.style.transform).to.equal(
         `translate3d(${attributes.x}, ${attributes.y}, ${
           (attributes.zoom - 1) / attributes.zoom
         }px)`
+      );
+    });
+
+    it('calculates transform with lock-bounds', async () => {
+      const attributes = {
+        'group-id': 'group-1',
+        'y': '50%',
+        'zoom': 0.2,
+        'lock-bounds': '',
+      };
+      await createAmpStoryPanningMedia(
+        '/examples/amp-story/img/conservatory-coords.jpg',
+        attributes
+      );
+      await storeService.dispatch(Action.CHANGE_PAGE, {id: 'page1', index: 0});
+      await panningMedia.layoutCallback();
+      await afterRenderPromise();
+      expect(panningMedia.element.firstChild.style.transform).to.equal(
+        `translate3d(0%, 0%, 0px)`
       );
     });
   }
