@@ -146,7 +146,10 @@ export class DraggableDrawer extends AMP.BaseElement {
       )
     );
 
-    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+    if (
+      isPageAttachmentUiV2ExperimentOn(this.win) &&
+      this.element.tagName === 'AMP-STORY-PAGE-ATTACHMENT'
+    ) {
       this.contentEl_.appendChild(headerShadowRootEl);
       this.element.classList.add('amp-story-page-attachment-ui-v2');
     } else {
@@ -189,7 +192,10 @@ export class DraggableDrawer extends AMP.BaseElement {
       true /** callToInitialize */
     );
 
-    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+    if (
+      isPageAttachmentUiV2ExperimentOn(this.win) &&
+      this.element.tagName === 'AMP-STORY-PAGE-ATTACHMENT'
+    ) {
       this.element.addEventListener('click', (e) => {
         if (!this.isDrawerContentDescendant_(e.target)) {
           this.close_();
@@ -528,7 +534,10 @@ export class DraggableDrawer extends AMP.BaseElement {
         this.mutateElement(() => resetStyles(this.element, ['transition']));
       }
 
-      if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+      if (
+        isPageAttachmentUiV2ExperimentOn(this.win) &&
+        this.element.tagName === 'AMP-STORY-PAGE-ATTACHMENT'
+      ) {
         this.element.closest('amp-story-page').classList.add('attachment-open');
       }
 
@@ -575,7 +584,10 @@ export class DraggableDrawer extends AMP.BaseElement {
         this.mutateElement(() => resetStyles(this.element, ['transition']));
       }
 
-      if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+      if (
+        isPageAttachmentUiV2ExperimentOn(this.win) &&
+        this.element.tagName === 'AMP-STORY-PAGE-ATTACHMENT'
+      ) {
         this.element
           .closest('amp-story-page')
           .classList.remove('attachment-open');
