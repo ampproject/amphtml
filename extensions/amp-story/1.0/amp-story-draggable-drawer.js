@@ -123,7 +123,7 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     /**
      * For amp-story-page-attachment-ui-v2 experiment
-     * Fills the empty top space of the viewport, used for scrolling to full viewport and offset drag & transitioins.
+     * Used for filling the empty top space of the viewport, scrolling to full screen and offsetting drag & transitioins.
      * @protected {?Element}
      */
     this.spacerEl_ = null;
