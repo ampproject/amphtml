@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,37 +20,18 @@
  */
 
 const {buildTargetsInclude, Targets} = require('./build-targets');
-const {printSkipMessage, timedExecOrDie} = require('./utils');
+const {timedExecOrDie} = require('./utils');
 const {runCiJob} = require('./ci-job');
 
-const jobName = 'validator-tests.js';
+const jobName = 'validator-cpp-tests.js';
 
 function pushBuildWorkflow() {
-  timedExecOrDie('amp validator');
-  timedExecOrDie('amp validator-webui');
+  timedExecOrDie('amp validator-cpp');
 }
 
 function prBuildWorkflow() {
-  if (
-    !buildTargetsInclude(
-      Targets.RUNTIME,
-      Targets.VALIDATOR,
-      Targets.VALIDATOR_WEBUI
-    )
-  ) {
-    printSkipMessage(
-      jobName,
-      'this PR does not affect the runtime, validator, or validator web UI'
-    );
-    return;
-  }
-
-  if (buildTargetsInclude(Targets.RUNTIME, Targets.VALIDATOR)) {
-    timedExecOrDie('amp validator');
-  }
-
-  if (buildTargetsInclude(Targets.VALIDATOR_WEBUI)) {
-    timedExecOrDie('amp validator-webui');
+  if (buildTargetsInclude(Targets.VALIDATOR)) {
+    timedExecOrDie('amp validator-cpp');
   }
 }
 

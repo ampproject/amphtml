@@ -33,6 +33,3 @@ sudo apt install bazel
 
 echo $(GREEN "Installing Clang...")
 sudo apt install clang
-
-echo $(GREEN "Installing Protobuf...")
-pip3 install --user protobuf
