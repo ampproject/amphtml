@@ -34,6 +34,7 @@ const {
   logOnSameLineLocalDev,
   logWithoutTimestamp,
 } = require('../common/logging');
+const {default: ignore} = require('ignore');
 const {exec} = require('../common/exec');
 const {getFilesToCheck} = require('../common/utils');
 const {green, cyan, red, yellow} = require('kleur/colors');
@@ -46,7 +47,10 @@ const tempDir = tempy.directory();
  * Checks files for formatting (and optionally fixes them) with Prettier.
  */
 async function prettify() {
-  const filesToCheck = getFilesToCheck(prettifyGlobs, {dot: true});
+  const ignored = ignore().add(fs.readFileSync('.prettierignore', 'utf8'));
+  const filesToCheck = ignored.filter(
+    getFilesToCheck(prettifyGlobs, {dot: true})
+  );
   if (filesToCheck.length == 0) {
     return;
   }
