@@ -54,9 +54,7 @@ async function checkExactVersions() {
   if (success) {
     return Promise.resolve();
   } else {
-    const reason = new Error('Check failed');
-    reason.showStack = false;
-    return Promise.reject(reason);
+    return Promise.reject('Check failed');
   }
 }
 
