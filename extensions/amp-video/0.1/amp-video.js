@@ -46,7 +46,6 @@ import {
   setInitialDisplay,
   setStyles,
 } from '../../../src/style';
-import {resolveGoogleCachedSources} from './cached-sources';
 import {toArray} from '../../../src/types';
 
 const TAG = 'amp-video';
