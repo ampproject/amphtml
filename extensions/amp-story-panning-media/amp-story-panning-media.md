@@ -115,29 +115,6 @@ A higher value scales the image up (zooms in). A lower value scales the image do
 
 Prevents the image from panning beyond the viewport. When using `lock-bounds` `width` and `height` must be specified on the `amp-img` child.
 
-## Demos
-
-<table>
-  <tr>
-   <td><strong>The Northern Sky Constellations:</strong> This story uses a star chart for the entire story by panning and zooming into different constellations. A parallax transition effect is also achieved by layering two png star images with transparency.
-<br><br>
-<a href="https://philipbell-panning-media.web.app/examples/amp-story/northern-sky-constellations.html">The Northern Sky Constellations</a>
-   </td>
-<td>
-<img src="https://raw.githubusercontent.com/processprocess/amphtml/panning-media-docs/extensions/amp-story-panning-media/img/constellations-screenshot.jpg">
-   </td>
-  </tr>
-<tr>
-<td>
-<img src="https://raw.githubusercontent.com/processprocess/amphtml/panning-media-docs/extensions/amp-story-panning-media/img/controls.jpg">
-   </td>
-   <td>Story featuring sliders to modify the attributes of the panning-media component on the current page. This is an example of how a gui in a creation tool could configure the component.
-<br><br>
-<a href="https://philipbell-panning-media.web.app/examples/amp-story/controls.html">https://webstoriesinteractivity-beta.web.app/animals-polls.html</a>
-   </td>
-</tr>
-</table>
-
 ## Validation
 
 This component is available in experimental. Validation details will be defined before launch.
