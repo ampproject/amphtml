@@ -20,9 +20,9 @@ Exchanges will need to indicate in the RTB bid request whether a page is built i
 
 A new field is added to the `Site` object of the OpenRTB standard to indicate whether a webpage is built on AMP. In OpenRTB 2.5, this is section 3.2.13.
 
-| Field | Scope    | Type    | Default | Description                                                                                                                                 |
-| ----- | -------- | ------- | :-----: | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `amp` | optional | integer |    -    | Whether the request is for an Accelerated Mobile Page. 0 = page is non-AMP, 1 = page is built with AMP HTML. AMP status unknown if omitted. |
+| Field | Scope    | Type    | Default | Description                                                                                                                      |
+| ----- | -------- | ------- | :-----: | -------------------------------------------------------------------------------------------------------------------------------- |
+| `amp` | optional | integer |    -    | Whether the request is for an AMP Document. 0 = page is non-AMP, 1 = page is built with AMP HTML. AMP status unknown if omitted. |
 
 **`Imp` Object additional field: `ampad`**
 
