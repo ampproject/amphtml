@@ -241,8 +241,6 @@ Prevents the image from panning beyond the viewport. When using `lock-bounds` `w
 
 ## Demos
 
-With these components we wanted to help users create more entertaining and immersive experiences, and to facilitate that, we have created demos with good use cases of the components. Feel free to ~~steal~~ implement any ideas from these demos into your own stories (or check the source code).
-
 <table>
   <tr>
 <<<<<<< HEAD
