@@ -137,23 +137,11 @@ jobs:
     steps:
       - setup_vm
       - run:
-          name: 'Install Protobuf'
-          command: pip3 install --user protobuf
+          name: 'Install Validator Dependencies'
+          command: ./.circleci/install_validator_dependencies.sh
       - run:
           name: 'Validator Tests'
           command: node build-system/pr-check/validator-tests.js
-      - fail_fast
-  'Validator cpp Tests':
-    executor:
-      name: amphtml-medium-executor
-    steps:
-      - setup_vm
-      - run:
-          name: 'Install Validator cpp Dependencies'
-          command: ./.circleci/install_validator_dependencies.sh
-      - run:
-          name: 'Validator cpp Tests'
-          command: node build-system/pr-check/validator-cpp-tests.js
       - fail_fast
   'Visual Diff Tests':
     executor:
@@ -292,10 +280,6 @@ workflows:
             - 'Nomodule Build'
             - 'Module Build'
       - 'Validator Tests':
-          <<: *push_and_pr_builds
-          requires:
-            - 'Compute Merge Commit'
-      - 'Validator cpp Tests':
           <<: *push_and_pr_builds
           requires:
             - 'Compute Merge Commit'
