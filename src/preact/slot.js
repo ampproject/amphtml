@@ -16,7 +16,7 @@
 
 import * as Preact from './index';
 import {CanPlay, CanRender, LoadingProp} from '../core/contextprops';
-import {pureDevAssert as devAssert} from '../core/assert';
+import {devAssert} from '../log';
 import {rediscoverChildren, removeProp, setProp} from '../context';
 import {useAmpContext} from './context';
 import {useEffect, useLayoutEffect, useRef} from './index';

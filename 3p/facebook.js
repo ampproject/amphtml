@@ -18,7 +18,7 @@ import {dashToUnderline} from '../src/string';
 import {dict} from '../src/utils/object';
 import {loadScript} from './3p';
 import {setStyle} from '../src/style';
-import {pureUserAssert as userAssert} from '../src/core/assert';
+import {userAssert} from '../src/log';
 
 /**
  * Produces the Facebook SDK object for the passed in callback.
