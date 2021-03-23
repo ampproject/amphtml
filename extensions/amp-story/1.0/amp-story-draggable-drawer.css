@@ -130,9 +130,12 @@
 
 /* For amp-story-page-attachment-ui-v2 experiment. */
 
+.amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-container { 
+  height: 100% !important;
+}
+
 amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-container {
   background: none !important;
-  height: 100% !important;
   /* This makes the spacer elmement take up all available space to push content to the bottom of the screen. */
   display: flex !important;
   flex-direction: column !important;
