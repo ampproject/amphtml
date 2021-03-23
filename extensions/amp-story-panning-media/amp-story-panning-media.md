@@ -71,7 +71,7 @@ Add the following import to your AMP documents:
 <script async custom-element="amp-story-panning-media" src="https://cdn.ampproject.org/v0/amp-story-panning-media-0.1.js"><script>
 ```
 
-### Configuration
+#### Configuration
 
 The `amp-story-panning-media` component accepts 1 descendant. This descendant must be an [amp-img](https://amp.dev/documentation/components/amp-img/?format=stories). Components associate with each other when they have a child with the same `src`.
 
