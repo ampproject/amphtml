@@ -130,7 +130,7 @@
 
 /* For amp-story-page-attachment-ui-v2 experiment. */
 
-amp-story:not(.i-amphtml-story-desktop-fullbleed) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-container {
+amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-container {
   background: none !important;
   height: 100% !important;
   /* This makes the spacer elmement take up all available space to push content to the bottom of the screen. */
@@ -138,7 +138,7 @@ amp-story:not(.i-amphtml-story-desktop-fullbleed) .amp-story-page-attachment-ui-
   flex-direction: column !important;
 }
 
-amp-story:not(.i-amphtml-story-desktop-fullbleed) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-spacer {
+amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-spacer {
   /* This placeholder element takes up all available space when drawer-content is less than 80vh. */
   display: block !important;
   height: calc(var(--story-page-vh) * 100) !important;
@@ -146,11 +146,11 @@ amp-story:not(.i-amphtml-story-desktop-fullbleed) .amp-story-page-attachment-ui-
   min-height: calc(var(--story-page-vh) * 20) !important;
 }
 
-amp-story:not(.i-amphtml-story-desktop-fullbleed) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-content {
+amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-content {
   background: #fff !important;
 }
 
-amp-story:not(.i-amphtml-story-desktop-fullbleed) amp-story-page.attachment-open:after {
+amp-story:not([desktop]) amp-story-page.attachment-open:after {
   content: "" !important;
   display: block !important;
   left: 0 !important;

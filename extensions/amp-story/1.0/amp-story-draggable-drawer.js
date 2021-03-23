@@ -212,7 +212,7 @@ export class DraggableDrawer extends AMP.BaseElement {
         }
       });
       const spacerEl = dev().assertElement(
-        this.element.querySelector('i-amphtml-story-draggable-drawer-spacer')
+        this.element.querySelector('.i-amphtml-story-draggable-drawer-spacer')
       );
       const observer = new this.win.ResizeObserver((e) => {
         this.spacerElHeight_ = e[0].contentRect.height;
