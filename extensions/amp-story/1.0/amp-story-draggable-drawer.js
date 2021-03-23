@@ -120,6 +120,9 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     /** @private {number} Threshold in pixels above which the drawer opens itself. */
     this.openThreshold_ = Infinity;
+
+    /** @protected {?Element} Tor amp-story-page-attachment-ui-v2 experiment's spacer element. */
+    this.spacerEl_ = null;
   }
 
   /** @override */
@@ -150,6 +153,9 @@ export class DraggableDrawer extends AMP.BaseElement {
       isPageAttachmentUiV2ExperimentOn(this.win) &&
       this.element.tagName === 'AMP-STORY-PAGE-ATTACHMENT'
     ) {
+      this.spacerEl_ = this.win.document.createElement('div');
+      this.spacerEl_.classList.add('i-amphtml-story-draggable-drawer-spacer');
+      this.containerEl_.prepend(this.spacerEl_);
       this.contentEl_.appendChild(headerShadowRootEl);
       this.element.classList.add('amp-story-page-attachment-ui-v2');
     } else {
@@ -488,7 +494,13 @@ export class DraggableDrawer extends AMP.BaseElement {
           return;
         }
         this.state_ = DrawerState.DRAGGING_TO_OPEN;
-        const drag = Math.max(deltaY, -this.dragCap_);
+        let drag = Math.max(deltaY, -this.dragCap_);
+        if (
+          isPageAttachmentUiV2ExperimentOn(this.win) &&
+          this.element.tagName === 'AMP-STORY-PAGE-ATTACHMENT'
+        ) {
+          drag -= this.spacerEl_.offsetHeight;
+        }
         translate = `translate3d(0, calc(100% + ${drag}px), 0)`;
         break;
       case DrawerState.OPEN:
