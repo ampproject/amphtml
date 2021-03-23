@@ -28,7 +28,6 @@ const checkerExecutable = 'npx npm-exact-versions';
  * @return {!Promise}
  */
 async function checkExactVersions() {
-  let success = true;
   const packageJsonFiles = globby.sync(['**/package.json', '!**/node_modules']);
   packageJsonFiles.forEach((file) => {
     const checkerCmd = `${checkerExecutable} --path ${file}`;
@@ -41,7 +40,7 @@ async function checkExactVersions() {
         'do not have an exact version.'
       );
       logWithoutTimestamp(gitDiffFileMaster(file));
-      success = false;
+      throw new Error('Check failed');
     } else {
       logLocalDev(
         green('SUCCESS:'),
@@ -51,13 +50,6 @@ async function checkExactVersions() {
       );
     }
   });
-  if (success) {
-    return Promise.resolve();
-  } else {
-    const reason = new Error('Check failed');
-    reason.showStack = false;
-    return Promise.reject(reason);
-  }
 }
 
 module.exports = {

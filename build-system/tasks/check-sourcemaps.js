@@ -38,17 +38,6 @@ const expectedFirstLineFile = 'src/polyfills/abort-controller.js'; // First file
 const expectedFirstLineCode = 'class AbortController {'; // First line of code in that file.
 
 /**
- * Throws an error with the given message
- *
- * @param {string} message
- */
-function throwError(message) {
-  const err = new Error(message);
-  err.showStack = false;
-  throw err;
-}
-
-/**
  * Build runtime with sourcemaps if needed.
  */
 function maybeBuild() {
@@ -68,7 +57,7 @@ function maybeBuild() {
 function getSourcemapJson(map) {
   if (!fs.existsSync(map)) {
     log(red('ERROR:'), 'Could not find', cyan(map));
-    throwError(`Could not find sourcemap file '${map}'`);
+    throw new Error(`Could not find sourcemap file '${map}'`);
   }
   return JSON.parse(fs.readFileSync(map, 'utf8'));
 }
@@ -83,11 +72,11 @@ function checkSourcemapUrl(sourcemapJson, map) {
   log('Inspecting', cyan('sourceRoot'), 'in', cyan(map) + '...');
   if (!sourcemapJson.sourceRoot) {
     log(red('ERROR:'), 'Could not find', cyan('sourceRoot'));
-    throwError('Could not find sourcemap URL');
+    throw new Error('Could not find sourcemap URL');
   }
   if (!sourcemapJson.sourceRoot.match(sourcemapUrlMatcher)) {
     log(red('ERROR:'), cyan(sourcemapJson.sourceRoot), 'is badly formatted');
-    throwError('Badly formatted sourcemap URL');
+    throw new Error('Badly formatted sourcemap URL');
   }
 }
 
@@ -101,7 +90,7 @@ function checkSourcemapSources(sourcemapJson, map) {
   log('Inspecting', cyan('sources'), 'in', cyan(map) + '...');
   if (!sourcemapJson.sources) {
     log(red('ERROR:'), 'Could not find', cyan('sources'));
-    throwError('Could not find sources array');
+    throw new Error('Could not find sources array');
   }
   const invalidSources = sourcemapJson.sources
     .filter((source) => !source.match(/\[.*\]/)) // Ignore non-path sources '[...]'
@@ -113,7 +102,7 @@ function checkSourcemapSources(sourcemapJson, map) {
       cyan('sources') + ':',
       cyan(invalidSources.join(', '))
     );
-    throwError('Invalid paths in sources array');
+    throw new Error('Invalid paths in sources array');
   }
 }
 
@@ -138,7 +127,7 @@ function checkSourcemapMappings(sourcemapJson, map) {
   log('Inspecting', cyan('mappings'), 'in', cyan(map) + '...');
   if (!sourcemapJson.mappings) {
     log(red('ERROR:'), 'Could not find', cyan('mappings'));
-    throwError('Could not find mappings array');
+    throw new Error('Could not find mappings array');
   }
 
   // Zeroth sub-array corresponds to ';' and has no mappings.
@@ -158,14 +147,14 @@ function checkSourcemapMappings(sourcemapJson, map) {
     log('Actual:', cyan(firstLineFile));
     log('Expected:', cyan(expectedFirstLineFile));
     log(helpMessage);
-    throwError('Found mapping for incorrect file');
+    throw new Error('Found mapping for incorrect file');
   }
   if (firstLineCode != expectedFirstLineCode) {
     log(red('ERROR:'), 'Found mapping for incorrect code.');
     log('Actual:', cyan(firstLineCode));
     log('Expected:', cyan(expectedFirstLineCode));
     log(helpMessage);
-    throwError('Found mapping for incorrect code');
+    throw new Error('Found mapping for incorrect code');
   }
 }
 

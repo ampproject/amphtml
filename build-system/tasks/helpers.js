@@ -404,9 +404,7 @@ function handleBundleError(err, continueOnError, destFilename) {
   if (continueOnError) {
     log(red('ERROR:'), reasonMessage);
   } else {
-    const reason = new Error(reasonMessage);
-    reason.showStack = false;
-    throw reason;
+    throw new Error(reasonMessage);
   }
 }
 

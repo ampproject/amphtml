@@ -162,9 +162,7 @@ function reportResult() {
     `(${cyan(passed)} passed, ${cyan(failed)} failed).`;
   if (failed > 0) {
     log(red('ERROR:'), result);
-    const err = new Error('Tests failed');
-    err.showStack = false;
-    throw err;
+    throw new Error('Tests failed');
   } else {
     log(green('SUCCESS:'), result);
   }
