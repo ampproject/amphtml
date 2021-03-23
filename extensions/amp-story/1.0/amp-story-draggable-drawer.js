@@ -573,7 +573,7 @@ export class DraggableDrawer extends AMP.BaseElement {
         isPageAttachmentUiV2ExperimentOn(this.win) &&
         this.element.tagName === 'AMP-STORY-PAGE-ATTACHMENT'
       ) {
-        this.element.closest('amp-story-page').classList.add('attachment-open');
+        this.getPage_().classList.add('attachment-open');
       }
 
       this.element.classList.add('i-amphtml-story-draggable-drawer-open');
@@ -623,9 +623,7 @@ export class DraggableDrawer extends AMP.BaseElement {
         isPageAttachmentUiV2ExperimentOn(this.win) &&
         this.element.tagName === 'AMP-STORY-PAGE-ATTACHMENT'
       ) {
-        this.element
-          .closest('amp-story-page')
-          .classList.remove('attachment-open');
+        this.getPage_().classList.remove('attachment-open');
       }
 
       this.element.classList.remove('i-amphtml-story-draggable-drawer-open');
@@ -633,5 +631,16 @@ export class DraggableDrawer extends AMP.BaseElement {
       const owners = Services.ownersForDoc(this.element);
       owners.schedulePause(this.element, this.ampComponents_);
     });
+  }
+
+  /**
+   * @private
+   * @return {?Element} the parent amp-story-page
+   */
+  getPage_() {
+    return closest(
+      dev().assertElement(this.element),
+      (el) => el.tagName.toLowerCase() === 'amp-story-page'
+    );
   }
 }
