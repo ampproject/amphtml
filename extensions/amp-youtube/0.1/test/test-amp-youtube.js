@@ -17,6 +17,7 @@
 import '../amp-youtube';
 import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
+import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
 import {listenOncePromise} from '../../../../src/event-helper';
 
 const EXAMPLE_VIDEOID = 'mGENRKrdoGY';
@@ -36,11 +37,13 @@ describes.realWin(
     this.timeout(5000);
     let win, doc;
     let timer;
+    let resizeObserverStub;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
       timer = Services.timerFor(win);
+      resizeObserverStub = installResizeObserverStub(env.sandbox, win);
     });
 
     async function getYt(attributes, opt_responsive, opt_beforeLayoutCallback) {
@@ -205,6 +208,40 @@ describes.realWin(
         return Promise.all([pEnded, pPause]);
       });
     }
+
+    describe('pause', () => {
+      let yt, impl, iframe;
+      let pauseCallbackSpy;
+
+      beforeEach(async () => {
+        yt = await getYt({'data-videoid': EXAMPLE_VIDEOID});
+        impl = await yt.getImpl();
+        iframe = yt.querySelector('iframe');
+        pauseCallbackSpy = env.sandbox.spy(impl, 'pauseCallback');
+      });
+
+      it('should auto-pause when playing and no size', async () => {
+        // PLAYING state.
+        await sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
+        resizeObserverStub.notifySync({
+          target: yt,
+          contentRect: {width: 0, height: 0},
+        });
+        expect(pauseCallbackSpy).to.be.calledOnce;
+      });
+
+      it('should NOT auto-pause when not playing', async () => {
+        // PLAYING state.
+        await sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
+        // PAUSE state.
+        await sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 2});
+        resizeObserverStub.notifySync({
+          target: yt,
+          contentRect: {width: 0, height: 0},
+        });
+        expect(pauseCallbackSpy).to.not.be.called;
+      });
+    });
 
     it('renders for video ids', async () => {
       const yt = await getYt({'data-videoid': EXAMPLE_VIDEOID});
