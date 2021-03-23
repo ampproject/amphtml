@@ -87,7 +87,7 @@ describes.realWin(
       expect(text).to.equal('Hello Bill');
     });
 
-    it('renders json from src', async () => {
+    it.skip('renders json from src', async () => {
       // const fetchFn = () => {
       //   return Promise.resolve({name: 'Joe'});
       // };
