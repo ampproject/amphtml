@@ -123,10 +123,10 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     /**
      * For amp-story-page-attachment-ui-v2 experiment
-     * Used for filling the empty top space of the viewport, scrolling to full screen and offsetting drag & transitioins.
-     * @protected {?Element}
+     * Used for offsetting drag.
+     * @protected {?number}
      */
-    this.spacerEl_ = null;
+    this.spacerElHeight_ = null;
   }
 
   /** @override */
@@ -157,9 +157,9 @@ export class DraggableDrawer extends AMP.BaseElement {
       isPageAttachmentUiV2ExperimentOn(this.win) &&
       this.element.tagName === 'AMP-STORY-PAGE-ATTACHMENT'
     ) {
-      this.spacerEl_ = this.win.document.createElement('div');
-      this.spacerEl_.classList.add('i-amphtml-story-draggable-drawer-spacer');
-      this.containerEl_.prepend(this.spacerEl_);
+      const spacerEl = this.win.document.createElement('div');
+      spacerEl.classList.add('i-amphtml-story-draggable-drawer-spacer');
+      this.containerEl_.prepend(spacerEl);
       this.contentEl_.appendChild(headerShadowRootEl);
       this.element.classList.add('amp-story-page-attachment-ui-v2');
     } else {
@@ -211,6 +211,13 @@ export class DraggableDrawer extends AMP.BaseElement {
           this.close_();
         }
       });
+      const spacerEl = dev().assertElement(
+        this.element.querySelector('i-amphtml-story-draggable-drawer-spacer')
+      );
+      const observer = new this.win.ResizeObserver((e) => {
+        this.spacerElHeight_ = e[0].contentRect.height;
+      });
+      observer.observe(spacerEl);
     }
   }
 
@@ -503,7 +510,7 @@ export class DraggableDrawer extends AMP.BaseElement {
           isPageAttachmentUiV2ExperimentOn(this.win) &&
           this.element.tagName === 'AMP-STORY-PAGE-ATTACHMENT'
         ) {
-          drag -= this.spacerEl_.offsetHeight;
+          drag -= this.spacerElHeight_;
         }
         translate = `translate3d(0, calc(100% + ${drag}px), 0)`;
         break;
