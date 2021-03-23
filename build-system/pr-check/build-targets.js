@@ -99,7 +99,7 @@ function isOwnersFile(file) {
 }
 
 /**
- * Checks if the given file is of the form validator-.*\.(html|out|protoascii)
+ * Checks if the given file is of the form validator-.*\.(html|out|out.cpponly|protoascii)
  *
  * @param {string} file
  * @return {boolean}
@@ -109,6 +109,7 @@ function isValidatorFile(file) {
   return (
     name.startsWith('validator-') &&
     (name.endsWith('.out') ||
+      name.endsWith('.out.cpponly') ||
       name.endsWith('.html') ||
       name.endsWith('.protoascii'))
   );

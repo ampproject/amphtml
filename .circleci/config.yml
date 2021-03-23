@@ -133,12 +133,12 @@ jobs:
       - fail_fast
   'Validator Tests':
     executor:
-      name: amphtml-medium-executor
+      name: amphtml-xlarge-executor
     steps:
       - setup_vm
       - run:
-          name: 'Install Protobuf'
-          command: pip3 install --user protobuf
+          name: 'Install Validator Dependencies'
+          command: ./.circleci/install_validator_dependencies.sh
       - run:
           name: 'Validator Tests'
           command: node build-system/pr-check/validator-tests.js
