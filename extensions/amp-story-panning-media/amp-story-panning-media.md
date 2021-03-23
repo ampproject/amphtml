@@ -79,8 +79,12 @@ The `amp-story-panning-media` component provides a way to pan and zoom an image 
 
 Use the `amp-story-panning-media` to transition an image between pages. The component can animate between position and zoom.
 
+<<<<<<< HEAD
 <<<<<<<< HEAD:extensions/amp-story-panning-media/README.md
 ## Environment setup
+=======
+### Environment setup
+>>>>>>> e40a5cf82 (Update extensions/amp-story-panning-media/amp-story-panning-media.md)
 
 Add the following import to your AMP documents:
 
