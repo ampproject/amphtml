@@ -16,7 +16,7 @@
 
 export class AmpCacheUrlService {
   /**
-   * Create cache url service
+   * Create video cache service
    */
   constructor() {}
 }
