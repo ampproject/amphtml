@@ -55,7 +55,7 @@ export function CDNURLToLocalDistURL(
   useMaxNames = false,
 ): URL {
   url.protocol = 'http';
-  url.hostname = '0.0.0.0';
+  url.hostname = 'localhost';
   url.port = String(port);
 
   const [overwriteablePathname, newPathname] = pathnames;
@@ -75,6 +75,17 @@ export function CDNURLToLocalDistURL(
   url.pathname = format(parsedPath);
 
   return url;
+}
+
+export function CDNURLToLocalHostRelativeAbsoluteDist(
+  url: URL,
+  pathnames: [string | null, string | null] = [null, null],
+  extension: string = '.js',
+  port: number = 8000,
+  useMaxNames = false,
+): string {
+  const newUrl = CDNURLToLocalDistURL(url, pathnames, extension, port, useMaxNames);
+  return `${newUrl.pathname}${newUrl.search}${newUrl.hash}`;
 }
 
 /**
