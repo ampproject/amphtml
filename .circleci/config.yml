@@ -143,16 +143,16 @@ jobs:
           name: 'Validator Tests'
           command: node build-system/pr-check/validator-tests.js
       - fail_fast
-  'Validator C++ Tests':
+  'Validator cpp Tests':
     executor:
       name: amphtml-medium-executor
     steps:
       - setup_vm
       - run:
-          name: 'Install Validator C++ Dependencies'
+          name: 'Install Validator cpp Dependencies'
           command: ./.circleci/install_validator_dependencies.sh
       - run:
-          name: 'Validator C++ Tests'
+          name: 'Validator cpp Tests'
           command: node build-system/pr-check/validator-cpp-tests.js
       - fail_fast
   'Visual Diff Tests':
