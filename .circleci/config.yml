@@ -295,6 +295,10 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Compute Merge Commit'
+      - 'Validator cpp Tests':
+          <<: *push_and_pr_builds
+          requires:
+            - 'Compute Merge Commit'
       - 'Visual Diff Tests':
           <<: *push_and_pr_builds
           requires:
