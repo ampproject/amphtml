@@ -16,7 +16,7 @@
 
 import posthtml from 'posthtml';
 import {isJsonScript, isValidScript, tryGetUrl} from '../utilities/script';
-import {CDNURLToLocalDistURL} from '../utilities/cdn';
+import {CDNURLToLocalHostRelativeAbsoluteDist} from '../utilities/cdn';
 import {OptionSet} from '../utilities/option-set';
 import {parse} from 'path';
 
@@ -38,7 +38,7 @@ function modifySrc(script: posthtml.Node, options: OptionSet): posthtml.Node {
 
   const url = tryGetUrl(script.attrs.src || '');
   const parsedPath = parse(url.pathname);
-  const src = CDNURLToLocalDistURL(url, [null, null], parsedPath.ext, options.port, options.useMaxNames)
+  const src = CDNURLToLocalHostRelativeAbsoluteDist(url, [null, null], parsedPath.ext, options.port, options.useMaxNames)
       .toString();
   script.attrs.src = src;
   return script;
