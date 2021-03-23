@@ -13,19 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CountPagesAlgorithm} from './algorithm-count-pages';
-import {isExperimentOn} from '../../../src/experiments';
+
+/** @externs */
+
+/** @const */
+var RenderDef = {};
 
 /**
- * Choose placement algorithm implementation.
- * @param {!Window} win
- * @param {!StoryStoreService} storeService
- * @param {!StoryAdPageManager} pageManager
- * @return {!StoryAdPlacementAlgorithm}
+ * @typedef {{
+ *   src: (!string),
+ *   getJson: (!Function)
+ *   render: (?RendererFunctionType|undefined),
+ * }}
  */
-export function getPlacementAlgo(win, storeService, pageManager) {
-  if (isExperimentOn(win, 'story-ad-placements')) {
-    // TODO(ccordry): return predetermined placement algo.
-  }
-  return new CountPagesAlgorithm(storeService, pageManager);
-}
+RenderDef.Props;

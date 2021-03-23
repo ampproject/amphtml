@@ -13,19 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CountPagesAlgorithm} from './algorithm-count-pages';
-import {isExperimentOn} from '../../../src/experiments';
 
-/**
- * Choose placement algorithm implementation.
- * @param {!Window} win
- * @param {!StoryStoreService} storeService
- * @param {!StoryAdPageManager} pageManager
- * @return {!StoryAdPlacementAlgorithm}
- */
-export function getPlacementAlgo(win, storeService, pageManager) {
-  if (isExperimentOn(win, 'story-ad-placements')) {
-    // TODO(ccordry): return predetermined placement algo.
-  }
-  return new CountPagesAlgorithm(storeService, pageManager);
-}
+import * as Preact from '../../../../src/preact';
+import {Render} from '../component';
+import {withA11y} from '@storybook/addon-a11y';
+import {withKnobs} from '@storybook/addon-knobs';
+
+export default {
+  title: 'Render',
+  component: Render,
+  decorators: [withKnobs, withA11y],
+};
+
+export const _default = () => {
+  return (
+    <Render
+      src={'http://example.com'}
+      getJson={() => Promise.resolve({name: 'George'})}
+      render={(data) => `Hi ${data.name}!`}
+    ></Render>
+  );
+};
+
+export const defaultRenderAndGetJson = () => {
+  return <Render src={'/examples/amp-render-data.json'}></Render>;
+};

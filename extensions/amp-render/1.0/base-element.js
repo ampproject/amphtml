@@ -13,19 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CountPagesAlgorithm} from './algorithm-count-pages';
-import {isExperimentOn} from '../../../src/experiments';
 
-/**
- * Choose placement algorithm implementation.
- * @param {!Window} win
- * @param {!StoryStoreService} storeService
- * @param {!StoryAdPageManager} pageManager
- * @return {!StoryAdPlacementAlgorithm}
- */
-export function getPlacementAlgo(win, storeService, pageManager) {
-  if (isExperimentOn(win, 'story-ad-placements')) {
-    // TODO(ccordry): return predetermined placement algo.
-  }
-  return new CountPagesAlgorithm(storeService, pageManager);
-}
+import {PreactBaseElement} from '../../../src/preact/base-element';
+import {Render} from './component';
+
+export class BaseElement extends PreactBaseElement {}
+
+/** @override */
+BaseElement['Component'] = Render;
+
+/** @override */
+BaseElement['props'] = {
+  'src': {attr: 'src'},
+};
+
+/** @override */
+BaseElement['usesTemplate'] = true;
+
+/** @override */
+BaseElement['lightDomTag'] = 'div';
+
+/** @override */
+BaseElement['layoutSizeDefined'] = true;
