@@ -80,6 +80,7 @@ createTask('test-report-upload', 'testReportUpload', 'test-report-upload');
 createTask('unit', 'unit', 'unit');
 createTask('update-packages', 'updatePackages', 'update-packages');
 createTask('validator', 'validator', 'validator');
+createTask('validator-cpp', 'validatorCpp', 'validator');
 createTask('validator-webui', 'validatorWebui', 'validator');
 createTask('visual-diff', 'visualDiff', 'visual-diff');
 
