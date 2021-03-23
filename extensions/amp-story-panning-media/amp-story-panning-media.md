@@ -73,7 +73,7 @@ Add the following script tag to the head of your Web Story:
 
 #### Configuration
 
-The `amp-story-panning-media` component accepts 1 descendant. This descendant must be an [amp-img](https://amp.dev/documentation/components/amp-img/?format=stories). Components associate with each other when they have a child with the same `src`.
+The `amp-story-panning-media` component accepts 1 descendant. This descendant must be an [amp-img](https://amp.dev/documentation/components/amp-img/?format=stories). Components transition between pages when their child has the same `src` value.
 
 ```html
 <amp-story-page>
