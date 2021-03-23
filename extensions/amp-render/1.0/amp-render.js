@@ -114,6 +114,13 @@ class AmpRender extends BaseElement {
     return super.isLayoutSupported(layout);
   }
 
+  /** @override */
+  init() {
+    return dict({
+      'getJson': getJsonFn(this.element),
+    });
+  }
+
   /**
    * TODO: this implementation is identical to one in amp-date-display &
    * amp-date-countdown. Move it to a common file and import it.

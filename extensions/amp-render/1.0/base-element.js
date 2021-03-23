@@ -26,7 +26,7 @@ BaseElement['Component'] = Render;
 /** @override */
 BaseElement['props'] = {
   'src': {attr: 'src'},
-  'fetchFn': {attrs: ['src'], parseAttrs: getJsonFn},
+  'getJson': {attrs: ['src'], parseAttrs: getJsonFn},
 };
 
 /** @override */
