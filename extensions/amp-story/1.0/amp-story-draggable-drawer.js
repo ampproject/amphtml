@@ -121,7 +121,11 @@ export class DraggableDrawer extends AMP.BaseElement {
     /** @private {number} Threshold in pixels above which the drawer opens itself. */
     this.openThreshold_ = Infinity;
 
-    /** @protected {?Element} Tor amp-story-page-attachment-ui-v2 experiment's spacer element. */
+    /**
+     * For amp-story-page-attachment-ui-v2 experiment
+     * Fills the empty top space of the viewport, used for scrolling to full viewport and offset drag & transitioins.
+     * @protected {?Element}
+     */
     this.spacerEl_ = null;
   }
 
