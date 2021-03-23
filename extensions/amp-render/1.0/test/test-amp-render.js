@@ -16,7 +16,8 @@
 
 import '../../../amp-bind/0.1/amp-bind';
 import '../../../amp-mustache/0.2/amp-mustache';
-import * as AmpRenderModule from '../amp-render';
+// import * as AmpRenderModule from '../amp-render';
+import * as BatchJsonModule from '../../../../src/batched-json';
 import {htmlFor} from '../../../../src/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';
@@ -87,10 +88,13 @@ describes.realWin(
     });
 
     it('renders json from src', async () => {
-      const fetchFn = () => {
-        return Promise.resolve({name: 'Joe'});
-      };
-      env.sandbox.stub(AmpRenderModule, 'getJsonFn').returns(fetchFn);
+      // const fetchFn = () => {
+      //   return Promise.resolve({name: 'Joe'});
+      // };
+      // env.sandbox.stub(AmpRenderModule, 'getJsonFn').returns(fetchFn);
+
+      const stub = env.sandbox.stub(BatchJsonModule, 'batchFetchJsonFor');
+      stub.resolves({name: 'Joe'});
 
       element = html`
         <amp-render
