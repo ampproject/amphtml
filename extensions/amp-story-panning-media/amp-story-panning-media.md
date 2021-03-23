@@ -5,8 +5,8 @@ formats:
 teaser:
   text: >-
     Transition an image's position and zoom between pages.
-draft:
-  - true
+draft: true
+experimental: true
 tags:
   - immersive
   - panning
