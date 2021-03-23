@@ -84,14 +84,10 @@ async function cherryPick() {
   let onto = String(argv.onto || '');
 
   if (!commits.length) {
-    const error = new Error('Must provide commit list with --commits');
-    error.showStack = false;
-    throw error;
+    throw new Error('Must provide commit list with --commits');
   }
   if (!onto) {
-    const error = new Error('Must provide 13-digit AMP version with --onto');
-    error.showStack = false;
-    throw error;
+    throw new Error('Must provide 13-digit AMP version with --onto');
   }
   if (onto.length === 15) {
     log(
@@ -103,9 +99,7 @@ async function cherryPick() {
     onto = onto.substr(2);
   }
   if (onto.length !== 13) {
-    const error = new Error('Expected 13-digit AMP version');
-    error.showStack = false;
-    throw error;
+    throw new Error('Expected 13-digit AMP version');
   }
 
   const branch = cherryPickBranchName(onto, commits.length);
