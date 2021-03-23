@@ -20,6 +20,7 @@ import {AmpDoc} from '../../../../src/service/ampdoc-impl';
 import {BaseElement} from '../../../../src/base-element';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes, waitForChild} from '../../../../src/dom';
+import {loadPromise} from '../../../../src/event-helper';
 import {macroTask} from '../../../../testing/yield';
 import {user} from '../../../../src/log';
 
@@ -60,6 +61,8 @@ describes.realWin(
 
     async function fakePostMessage(element, iframe, data) {
       const origin = 'https://fake.localhost';
+
+      await loadPromise(iframe); // so we have access to a contentWindow
 
       const impl = await element.getImpl();
       impl.handleIntermediateIframeMessage_(origin, {
@@ -131,14 +134,16 @@ describes.realWin(
       expect(iframe.src).to.equal(await expandUrlAsync.firstCall.returnValue);
     });
 
-    // TODO(#33437, wg-components): Fix flakiness
-    it.skip('returns parent_frame_ready message with nonce on ACTIONS.READY', async () => {
+    it('returns parent_frame_ready message with nonce on ACTIONS.READY', async () => {
       const element = createElementWithAttributes(document, TAG, defaultAttrs);
       document.body.appendChild(element);
 
       const iframe = await whenSelectedAvailable(element, 'iframe');
 
-      env.sandbox./*OK*/ stub(iframe.contentWindow, 'postMessage');
+      const postMessage = env.sandbox.stub(
+        await element.getImpl(),
+        'postMessage_'
+      );
 
       const nonce = 'chilaquiles';
 
@@ -149,7 +154,8 @@ describes.realWin(
       });
 
       expect(
-        iframe.contentWindow.postMessage.withArgs(
+        postMessage.withArgs(
+          iframe.contentWindow,
           env.sandbox.match({command: 'parent_frame_ready', nonce})
         )
       ).to.have.been.calledOnce;
