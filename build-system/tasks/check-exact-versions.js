@@ -51,10 +51,8 @@ async function checkExactVersions() {
       );
     }
   });
-  if (success) {
-    return Promise.resolve();
-  } else {
-    return Promise.reject('Check failed');
+  if (!success) {
+    throw new Error('Check failed');
   }
 }
 
