@@ -14,11 +14,23 @@
  * limitations under the License.
  */
 
+import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
+
 export class AmpCacheUrlService {
   /**
    * Create cache url service
    */
   constructor() {}
+
+  /**
+   *
+   * @param {string} url
+   * @param {string=} cache
+   * @return {!Promise<string>}
+   */
+  createCacheUrl(url, cache = 'cdn.ampproject.org') {
+    return ampToolboxCacheUrl.createCacheUrl(cache, url);
+  }
 }
 
 AMP.extension('amp-cache-url', '0.1', (AMP) => {
