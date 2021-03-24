@@ -32,7 +32,7 @@ module.exports = function (context) {
       for (const {line, column, match, message} of forbiddenTerms) {
         const start = {line, column};
         const end = sourceCode.getLocFromIndex(
-          sourceCode.getIndexFromLoc(start) + match.length - 1
+          sourceCode.getIndexFromLoc(start) + match.length
         );
 
         context.report({

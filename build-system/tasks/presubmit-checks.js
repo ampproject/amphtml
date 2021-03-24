@@ -1377,7 +1377,7 @@ function matchForbiddenTerms(srcFile, contents, terms) {
         for (index; index < match.index; index++) {
           if (contentsWithoutComments[index] === '\n') {
             line++;
-            column = 1;
+            column = 0;
           } else {
             column++;
           }
