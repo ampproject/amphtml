@@ -55,12 +55,12 @@ const backdrop = {
   /* Prevent someone from making this a full-sceen image */
   backgroundImage: 'none !important',
   overscrollBehavior: 'none !important',
-  zIndex: 2147483646,
 };
 
 // User overridable styles
 const defaultBackdropStyles = {
   backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  zIndex: 2147483646,
 };
 
 //TODO(#32400): See PR description.  This is a workaround dependent on a
