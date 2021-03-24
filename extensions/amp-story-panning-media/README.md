@@ -176,30 +176,42 @@ The [Web Story creation tool integration example](https://philipbell-panning-med
 Specifies the horizontal position in percentage.  
 Centered on 0 (default) with positive values moving the image to the right (50% centering left edge of image) and negative to the left (-50% centering right edge of image).
 
+<<<<<<< HEAD
 <<<<<<<< HEAD:extensions/amp-story-panning-media/README.md
 ### y {string} optional
 ========
 ### y (optional)
 >>>>>>>> 1dc9cb4b9 (add examples):extensions/amp-story-panning-media/amp-story-panning-media.md
+=======
+### y {string} (optional)
+>>>>>>> 57baa17af (Parens around optional.)
 
 Specifies the vertical position in percentage.
 Centered on 0 (default) with positive values moving the image down (50% centering top edge of image) and negative upward (-50% centering bottom edge of image).
 
+<<<<<<< HEAD
 <<<<<<<< HEAD:extensions/amp-story-panning-media/README.md
 ### zoom {float} optional
 ========
 ### zoom (optional)
 >>>>>>>> 1dc9cb4b9 (add examples):extensions/amp-story-panning-media/amp-story-panning-media.md
+=======
+### zoom {float} (optional)
+>>>>>>> 57baa17af (Parens around optional.)
 
 Specifies the level of zoom.
 The default is 1. This corresponds to the image fitting the viewport with [`layout=fill`](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/?format=stories).
 A higher value scales the image up (zooms in). A lower value scales the image down (zooms out).
 
+<<<<<<< HEAD
 <<<<<<<< HEAD:extensions/amp-story-panning-media/README.md
 ### lock-bounds optional
 ========
 ### lock-bounds (optional)
 >>>>>>>> 1dc9cb4b9 (add examples):extensions/amp-story-panning-media/amp-story-panning-media.md
+=======
+### lock-bounds (optional)
+>>>>>>> 57baa17af (Parens around optional.)
 
 Prevents the image from panning beyond the viewport. When using `lock-bounds` `width` and `height` must be specified on the `amp-img` child.
 
