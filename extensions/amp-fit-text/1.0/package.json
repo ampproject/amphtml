@@ -11,7 +11,7 @@
       "import": "dist/component.mjs",
       "require": "dist/component.js"
     },
-    "preact": {
+    "./preact": {
       "import": "dist/component.mjs",
       "require": "dist/component.js"
     }
