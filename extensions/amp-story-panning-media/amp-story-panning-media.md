@@ -92,9 +92,13 @@ Add the following import to your AMP documents:
 <script async custom-element="amp-story-panning-media" src="https://cdn.ampproject.org/v0/amp-story-panning-media-0.1.js"><script>
 ```
 
+<<<<<<< HEAD
 ### Configuration
 ========
 ### Environment setup
+=======
+#### Configuration
+>>>>>>> 486ac6012 (Update extensions/amp-story-panning-media/amp-story-panning-media.md)
 
 Add the following script tag to the head of your Web Story:
 
