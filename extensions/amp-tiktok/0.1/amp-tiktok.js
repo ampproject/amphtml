@@ -87,6 +87,14 @@ export class AmpTiktok extends AMP.BaseElement {
     /** @private {string} */
     this.iframeNameString_ = this.getIframeNameString_();
 
+    /**
+     * @private {number}
+     * This value is calculated by multiplying our fixed width (325px)
+     * by the video aspect ratio (13:23 or 1.77) and adding 200px to account
+     * for the height of the caption.
+     */
+    this.fallbackHeight_ = 775;
+
     this.resizeOuter_ = debounce(
       this.win,
       (height) => {
@@ -180,11 +188,11 @@ export class AmpTiktok extends AMP.BaseElement {
         .timeoutPromise(1000, promise)
         .catch(() => {
           // If no resize messages are recieved the fallback is to
-          // resize to '525px' in height.
-          this.resizeOuter_('525px');
+          // resize to the fallbackHeight value.
+          this.resizeOuter_(this.fallbackHeight_);
           setStyles(this.iframe_, {
             'width': px('325px'),
-            'height': px('525px'),
+            'height': px(this.fallbackHeight_),
           });
         });
     });
