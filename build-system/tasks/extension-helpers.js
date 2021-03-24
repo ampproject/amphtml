@@ -537,7 +537,7 @@ function buildExtensionCss(extDir, name, version, options) {
  */
 async function buildNpm(extDir, options) {
   const {binaries, external} = options.npm;
-  mkdirSync(`${extDir}/build`);
+  mkdirSync(`${extDir}/dist`);
 
   const promises = binaries.map((filename) => {
     const {name} = pathParse(filename);
@@ -545,7 +545,7 @@ async function buildNpm(extDir, options) {
     return compileJsWithEsbuild(
       extDir + '/',
       filename,
-      `${extDir}/build`,
+      `${extDir}/dist`,
       Object.assign(options, {
         toName: maybeToEsmName(`${name}.max.js`),
         minifiedName: maybeToEsmName(`${name}.js`),
