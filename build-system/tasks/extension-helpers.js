@@ -469,7 +469,7 @@ async function buildExtension(
   }
   if (options.npm) {
     mkdirSync(`${path}/build`);
-    await buildNpm(path, name, version, options);
+    await buildNpm(path, options);
   }
   if (name === 'amp-analytics') {
     await analyticsVendorConfigs(options);
@@ -528,7 +528,12 @@ function buildExtensionCss(extDir, name, version, options) {
   return Promise.all(promises);
 }
 
-async function buildNpm(path, name, version, options) {
+/**
+ * @param {string} path
+ * @param {!Object} options
+ * @return {!Promise}
+ */
+async function buildNpm(path, options) {
   const {binaries, external} = options.npm;
   const promises = binaries.map((filename) => {
     const {name} = pathParse(filename);
@@ -545,11 +550,6 @@ async function buildNpm(path, name, version, options) {
         external,
       })
     );
-
-    // If an incremental watch build fails, simply return.
-    if (options.errored) {
-      return;
-    }
   });
   return Promise.all(promises);
 }

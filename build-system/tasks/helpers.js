@@ -652,7 +652,6 @@ async function minifyWithTerser(destDir, destFilename, options) {
  */
 async function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
-  // TODO
   if (options.minify) {
     return compileMinifiedJs(srcDir, srcFilename, destDir, options);
   } else {
