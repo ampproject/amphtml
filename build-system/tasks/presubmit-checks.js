@@ -16,8 +16,10 @@
 'use strict';
 
 // Terms are defined here.
-/* eslint-disable local/forbidden-terms */
+/* eslint-disable local/source */
 
+// eslint-disable-next-line no-unused-vars
+const eslint = require('eslint');
 const fs = require('fs');
 const globby = require('globby');
 const path = require('path');
@@ -1279,11 +1281,10 @@ const requiredTermsExcluded = /amp-__component_name_hyphenated__/;
 
 /**
  * @typedef {{
- *   line: number,
- *   column: number,
  *   term: string,
  *   match: string,
  *   message: string,
+ *   loc: eslint.AST.SourceLocation,
  * }}
  */
 let ForbiddenTermMatchDef;
@@ -1371,10 +1372,17 @@ function matchForbiddenTerms(srcFile, contents, terms) {
       let index = 0;
       let line = 1;
       let column = 0;
-      let match;
+      const start = {line: -1, column: -1};
 
-      while ((match = regex.exec(contentsWithoutComments))) {
-        for (index; index < match.index; index++) {
+      let result;
+      while ((result = regex.exec(contentsWithoutComments))) {
+        const [match] = result;
+
+        for (index; index < result.index + match.length; index++) {
+          if (index === result.index) {
+            start.line = line;
+            start.column = column;
+          }
           if (contentsWithoutComments[index] === '\n') {
             line++;
             column = 0;
@@ -1384,11 +1392,10 @@ function matchForbiddenTerms(srcFile, contents, terms) {
         }
 
         matches.push({
-          match: match[0],
+          match,
           term,
-          line,
-          column,
           message,
+          loc: {start, end: {line, column}},
         });
       }
 
@@ -1424,6 +1431,18 @@ function getForbiddenTerms(srcFile, contents) {
 }
 
 /**
+ * @param {string} srcFile
+ * @param {string} contents
+ * @return {Array<!eslint.Rule.ReportDescriptor>}
+ */
+function eslintReportForbiddenTerms(srcFile, contents) {
+  return getForbiddenTerms(srcFile, contents).map(({match, message, loc}) => ({
+    loc,
+    message: `Forbidden: "${match}".${message ? `\n${message}.` : ''}`,
+  }));
+}
+
+/**
  * Test if a file's contents match any of the forbidden terms
  * @param {string} srcFile
  * @return {boolean} true if any of the terms match the file content,
@@ -1432,13 +1451,13 @@ function getForbiddenTerms(srcFile, contents) {
 function hasForbiddenTerms(srcFile) {
   const contents = fs.readFileSync(srcFile, 'utf-8');
   const terms = getForbiddenTerms(srcFile, contents);
-  for (const {match, line, column, message} of terms) {
+  for (const {match, loc, message} of terms) {
     log(
       red('ERROR:'),
       'Found forbidden',
       cyan(`"${match}"`),
       'in',
-      cyan(`${srcFile}:${line}:${column}`)
+      cyan(`${srcFile}:${loc.start.line}:${loc.start.column}`)
     );
 
     // log the possible fix information if provided for the term.
@@ -1514,7 +1533,7 @@ async function presubmit() {
 
 module.exports = {
   presubmit,
-  getForbiddenTerms,
+  eslintReportForbiddenTerms,
 };
 
 presubmit.description = 'Check source files for forbidden and required terms';

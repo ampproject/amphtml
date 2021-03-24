@@ -16,29 +16,20 @@
 
 /**
  * @fileoverview
- * Reports forbidden terms from presubmit-checks.js.
+ * Passes source to functions set as options, which return an array of option
+ * objects for context.report.
  */
 
 module.exports = function (context) {
   return {
     Program() {
-      // See signature of this function on presubmit-checks.js
-      const [getForbiddenTerms] = context.options;
-
       const filename = context.getFilename();
       const sourceCode = context.getSourceCode();
 
-      const forbiddenTerms = getForbiddenTerms(filename, sourceCode.text);
-      for (const {line, column, match, message} of forbiddenTerms) {
-        const start = {line, column};
-        const end = sourceCode.getLocFromIndex(
-          sourceCode.getIndexFromLoc(start) + match.length
-        );
-
-        context.report({
-          message: `Forbidden: "${match}".${message ? `\n${message}.` : ''}`,
-          loc: {start, end},
-        });
+      for (const getReports of context.options) {
+        for (const report of getReports(filename, sourceCode.text)) {
+          context.report(report);
+        }
       }
     },
   };

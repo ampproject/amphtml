@@ -15,7 +15,9 @@
  */
 
 const fs = require('fs');
-const {getForbiddenTerms} = require('./build-system/tasks/presubmit-checks.js');
+const {
+  eslintReportForbiddenTerms,
+} = require('./build-system/tasks/presubmit-checks.js');
 
 /**
  * Dynamically extracts experiment globals from the config file.
@@ -126,7 +128,6 @@ module.exports = {
     'local/await-expect': 2,
     'local/closure-type-primitives': 2,
     'local/dict-string-keys': 2,
-    'local/forbidden-terms': [2, getForbiddenTerms],
     'local/get-mode-usage': 2,
     'local/html-template': 2,
     'local/is-experiment-on': 2,
@@ -169,6 +170,7 @@ module.exports = {
     'local/prefer-unnested-spread-objects': 2,
     'local/private-prop-names': 2,
     'local/query-selector': 2,
+    'local/source': [2, eslintReportForbiddenTerms],
     'local/todo-format': 0,
     'local/unused-private-field': 2,
     'local/vsync': 0,
