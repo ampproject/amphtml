@@ -289,7 +289,8 @@ amp-story-page [data-text-background-color] {
 }
 
 /* TODO(gmajoulet): move the overlay to the bookend styles. */
-.i-amphtml-story-bookend-active amp-story-page[active]::after {
+.i-amphtml-story-bookend-active amp-story-page[active]::after,
+.i-amphtml-story-attachment-active amp-story-page[active]::after {
   content: '' !important;
   display: block !important;
   left: 0 !important;
@@ -312,21 +313,13 @@ amp-story-page [data-text-background-color] {
   }
 }
 
-/* For amp-story-page-attachment-ui-v2 experiment. */
+/* Overrides for amp-story-page-attachment-ui-v2 experiment. */
 .i-amphtml-story-attachment-active amp-story-page[active]::after {
-  content: '' !important;
-  display: block !important;
-  left: 0 !important;
-  top: 0 !important;
-  bottom: 0 !important;
-  right: 0 !important;
-  position: absolute !important;
-  background: #000 !important;
   z-index: 3 !important;
-  animation: i-amphtml-bookend-overlay-opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) forwards !important;
+  animation: i-amphtml-attachment-overlay-opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) forwards !important;
 }
 
-@keyframes i-amphtml-bookend-overlay-opacity {
+@keyframes i-amphtml-attachment-overlay-opacity {
   0% {
     opacity: 0;
   }

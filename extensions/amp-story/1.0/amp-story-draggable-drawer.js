@@ -609,15 +609,4 @@ export class DraggableDrawer extends AMP.BaseElement {
       owners.schedulePause(this.element, this.ampComponents_);
     });
   }
-
-  /**
-   * @private
-   * @return {?Element} the parent amp-story-page
-   */
-  getPage_() {
-    return closest(
-      dev().assertElement(this.element),
-      (el) => el.tagName.toLowerCase() === 'amp-story-page'
-    );
-  }
 }
