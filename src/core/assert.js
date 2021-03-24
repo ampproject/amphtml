@@ -83,7 +83,7 @@ function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
     }
 
     // If an element is provided, add it to the error object
-    if (!firstElement && subValue?.nodeType == 1) {
+    if (!firstElement && subValue?.tagName) {
       firstElement = subValue;
     }
 
@@ -91,11 +91,9 @@ function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
   });
 
   const error = new errorCls(message);
-  error.fromAssert = true;
   error.messageArray = messageArray;
   if (firstElement) {
     error.associatedElement = firstElement;
-    firstElement.classList.add('i-amphtml-error');
   }
   throw error;
 }

@@ -75,9 +75,9 @@ t.run('error page', function () {
         expect(fixture.errors.join('\n')).to.contain(
           e.getAttribute('data-expectederror')
         );
-        expect(e.getAttribute('error-message')).to.contain(
-          e.getAttribute('data-expectederror')
-        );
+        // expect(e.getAttribute('error-message')).to.contain(
+        //   e.getAttribute('data-expectederror')
+        // );
         expect(e.className).to.contain('i-amphtml-element-error');
       });
   }
