@@ -1394,7 +1394,7 @@ function matchForbiddenTerms(srcFile, contents, terms) {
 
       return matches;
     })
-    .flat();
+    .reduce((a, b) => a.concat(b));
 }
 
 /**
