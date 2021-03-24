@@ -1332,7 +1332,6 @@ function stripComments(contents) {
  */
 function matchForbiddenTerms(srcFile, contents, terms) {
   const contentsWithoutComments = stripComments(contents);
-
   return Object.keys(terms).reduce((fixes, term) => {
     const {allowlist, checkInTestFolder} = terms[term];
     // NOTE: we could do a glob test instead of exact check in the future
