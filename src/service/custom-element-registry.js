@@ -19,7 +19,7 @@ import {Services} from '../services';
 import {createCustomElementClass, stubbedElements} from '../custom-element';
 import {extensionScriptsInNode} from './extension-script';
 import {reportError} from '../error';
-import {pureUserAssert as userAssert} from '../core/assert';
+import {userAssert} from '../log';
 
 /** @type {!WeakMap<!./service/ampdoc-impl.AmpDoc, boolean>} */
 const docInitializedMap = new WeakMap();

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {pureDevAssert as devAssert} from '../core/assert';
+import {devAssert} from '../log';
 
 /**
  * Interpret a byte array as a UTF-8 string.

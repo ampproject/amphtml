@@ -25,7 +25,7 @@ import {
   removeChildren,
 } from '../../../src/dom';
 import {hasOwn} from '../../../src/utils/object';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} Tag name for custom ad implementation. */
 export const TAG_AD_CUSTOM = 'amp-ad-custom';

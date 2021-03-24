@@ -21,7 +21,7 @@ import {
 } from './bookend-component-interface';
 import {htmlFor} from '../../../../../src/static-template';
 import {isArray} from '../../../../../src/types';
-import {pureUserAssert as userAssert} from '../../../../../src/core/assert';
+import {userAssert} from '../../../../../src/log';
 
 /**
  * @typedef {{

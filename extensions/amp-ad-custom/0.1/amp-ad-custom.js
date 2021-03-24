@@ -24,7 +24,7 @@ import {Services} from '../../../src/services';
 import {TemplateRenderer} from '../../amp-a4a/0.1/template-renderer';
 import {TemplateValidator} from '../../amp-a4a/0.1/template-validator';
 import {addParamToUrl} from '../../../src/url';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
+import {devAssert} from '../../../src/log';
 
 // These have no side-effects, and so may be reused between all instances.
 const validator = new TemplateValidator();

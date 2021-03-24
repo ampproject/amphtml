@@ -17,7 +17,7 @@
 import {InlineGalleryEvents} from './inline-gallery-events';
 import {Layout} from '../../../src/layout';
 import {createCustomEvent} from '../../../src/event-helper';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
+import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {scopedQuerySelectorAll} from '../../../src/dom';

@@ -15,7 +15,7 @@
  */
 
 import {Filter, FilterType} from './filter';
-import {pureUserAssert as userAssert} from '../../../../src/core/assert';
+import {userAssert} from '../../../../src/log';
 
 export class ClickLocationFilter extends Filter {
   /**

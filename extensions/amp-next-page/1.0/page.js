@@ -16,7 +16,7 @@
 
 import {ViewportRelativePos} from './visibility-observer';
 import {VisibilityState} from '../../../src/visibility-state';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
+import {devAssert} from '../../../src/log';
 
 /** @enum {number} */
 export const PageState = {

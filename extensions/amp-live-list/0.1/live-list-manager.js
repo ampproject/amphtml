@@ -21,7 +21,7 @@ import {extensionScriptsInNode} from '../../../src/service/extension-script';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 export const SERVICE_ID = 'liveListManager';
