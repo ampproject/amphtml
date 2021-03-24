@@ -47,6 +47,9 @@ const isAmpScriptSrc = (src) => src && src.startsWith(AMP_SCRIPT_URI_SCHEME);
  * TODO: this implementation is identical to one in amp-list. Move it
  * to a common file and import it.
  *
+ * TODO: Add src as a param to this method
+ * (https://github.com/ampproject/amphtml/pull/33189#discussion_r598743971).
+ *
  * @param {!AmpElement} element
  * @return {Promise<!JsonObject>}
  */
@@ -83,6 +86,10 @@ const getAmpStateJson = (element) => {
  */
 export const getJsonFn = (element) => {
   const src = element.getAttribute('src');
+  if (!src) {
+    // TODO(dmanek): assert that src is provided instead of silently failing below.
+    return () => {};
+  }
   if (isAmpStateSrc(src)) {
     return getAmpStateJson.bind(null, element);
   }
