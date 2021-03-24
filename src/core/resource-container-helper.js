@@ -19,7 +19,7 @@ import {rethrowAsync} from './rethrow-async';
 const AMP_CLASS = 'i-amphtml-element';
 const DEEP = true;
 
-const load = (element) => element.ensureLoaded();
+const ensureLoaded = (element) => element.ensureLoaded();
 const pause = (element) => element.pause();
 const unmount = (element) => element.unmount();
 
@@ -30,7 +30,7 @@ const unmount = (element) => element.unmount();
  * @param {boolean=} includeSelf
  */
 export function loadAll(containerOrContainers, includeSelf = true) {
-  forAllWithin(containerOrContainers, includeSelf, !DEEP, load);
+  forAllWithin(containerOrContainers, includeSelf, !DEEP, ensureLoaded);
 }
 
 /**
