@@ -257,9 +257,13 @@
 | `amp-story-cta-layer`                                                                                     | 3          | [extensions/amp-story-auto-ads/0.1/amp-story-auto-ads-inabox.css](/extensions/amp-story-auto-ads/0.1/amp-story-auto-ads-inabox.css)                                     |
 | `.i-amphtml-story-page-open-attachment[active]`                                                           | 3          | [extensions/amp-story/1.0/amp-story-open-page-attachment.css](/extensions/amp-story/1.0/amp-story-open-page-attachment.css)                                             |
 <<<<<<< HEAD
+<<<<<<< HEAD
 | `.i-amphtml-story-attachment-active amp-story-page[active]::after`                                        | 3          | [extensions/amp-story/1.0/amp-story.css](/extensions/amp-story/1.0/amp-story.css)                                                                                       |
 =======
 >>>>>>> ddea5efd9 (revert z-index)
+=======
+| `.i-amphtml-story-attachment-active amp-story-page[active]::after`                                        | 3          | [extensions/amp-story/1.0/amp-story.css](/extensions/amp-story/1.0/amp-story.css)                                                                                       |
+>>>>>>> 0554fb056 (Update z-index.)
 | `amp-story-cta-layer`                                                                                     | 3          | [extensions/amp-story/1.0/amp-story.css](/extensions/amp-story/1.0/amp-story.css)                                                                                       |
 | `.i-amphtml-element > [overflow]`                                                                         | 2          | [css/ampshared.css](/css/ampshared.css)                                                                                                                                 |
 | `body noscript > *`                                                                                       | 2          | [css/ampshared.css](/css/ampshared.css)                                                                                                                                 |
