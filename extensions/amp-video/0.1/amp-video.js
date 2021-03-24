@@ -267,7 +267,6 @@ export class AmpVideo extends AMP.BaseElement {
     Services.videoManagerForDoc(element).register(this);
 
     if (this.element.hasAttribute('enable-google-video-cache')) {
-      console.log('addCacheSources');
       return addCacheSources(this);
     }
   }
