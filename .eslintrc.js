@@ -325,6 +325,7 @@ module.exports = {
       },
       'rules': {
         'local/no-module-exports': 0,
+        'local/forbidden-terms': 0,
       },
     },
     {
