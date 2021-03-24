@@ -112,9 +112,14 @@ The `amp-story-panning-media` component accepts 1 descendant. This descendant mu
 =======
 <amp-story-page>
   <amp-story-grid-layer>
+<<<<<<< HEAD:extensions/amp-story-panning-media/README.md
     <amp-story-panning-media layout="fill">
       <amp-img layout="fill" src="assets/world-map.jpg" x="-10%" y="-20%" zoom=".8" width="4000" height="3059" ></amp-img>
 >>>>>>> e5e5d21e1 (Update inline code.)
+=======
+    <amp-story-panning-media layout="fill" x="-10%" y="-20%" zoom=".8">
+      <amp-img layout="fill" src="assets/world-map.jpg" width="4000" height="3059" ></amp-img>
+>>>>>>> 69e24e243 (Revise docs):extensions/amp-story-panning-media/amp-story-panning-media.md
     </amp-story-panning-media>
   </amp-story-grid-layer>
 </amp-story-page>
@@ -137,8 +142,8 @@ The `amp-story-panning-media` component accepts 1 descendant. This descendant mu
 </amp-story-page>
 =======
   <amp-story-grid-layer>
-    <amp-story-panning-media layout="fill">
-      <amp-img layout="fill" src="assets/world-map.jpg" x="20%" y="30%" zoom="2" width="4000" height="3059" ></amp-img>
+    <amp-story-panning-media layout="fill" x="20%" y="30%" zoom="2">
+      <amp-img layout="fill" src="assets/world-map.jpg" width="4000" height="3059" ></amp-img>
     </amp-story-panning-media>
   </amp-story-grid-layer>
 <<<<<<< HEAD
@@ -168,14 +173,18 @@ The [Web Story creation tool integration example](https://philipbell-panning-med
 ## Attributes
 
 ### x (optional)
+<<<<<<< HEAD:extensions/amp-story-panning-media/README.md
 >>>>>>>> 1dc9cb4b9 (add examples):extensions/amp-story-panning-media/amp-story-panning-media.md
 =======
 ### x {string} (optional)
 >>>>>>> 0dacbd0e6 (Update extensions/amp-story-panning-media/README.md)
+=======
+>>>>>>> 69e24e243 (Revise docs):extensions/amp-story-panning-media/amp-story-panning-media.md
 
 Specifies the horizontal position in percentage.  
 Centered on 0 (default) with positive values moving the image to the right (50% centering left edge of image) and negative to the left (-50% centering right edge of image).
 
+<<<<<<< HEAD:extensions/amp-story-panning-media/README.md
 <<<<<<< HEAD
 <<<<<<<< HEAD:extensions/amp-story-panning-media/README.md
 ### y {string} optional
@@ -185,10 +194,14 @@ Centered on 0 (default) with positive values moving the image to the right (50% 
 =======
 ### y {string} (optional)
 >>>>>>> 57baa17af (Parens around optional.)
+=======
+### y (optional)
+>>>>>>> 69e24e243 (Revise docs):extensions/amp-story-panning-media/amp-story-panning-media.md
 
 Specifies the vertical position in percentage.
 Centered on 0 (default) with positive values moving the image down (50% centering top edge of image) and negative upward (-50% centering bottom edge of image).
 
+<<<<<<< HEAD:extensions/amp-story-panning-media/README.md
 <<<<<<< HEAD
 <<<<<<<< HEAD:extensions/amp-story-panning-media/README.md
 ### zoom {float} optional
@@ -198,6 +211,9 @@ Centered on 0 (default) with positive values moving the image down (50% centerin
 =======
 ### zoom {float} (optional)
 >>>>>>> 57baa17af (Parens around optional.)
+=======
+### zoom (optional)
+>>>>>>> 69e24e243 (Revise docs):extensions/amp-story-panning-media/amp-story-panning-media.md
 
 Specifies the level of zoom.
 The default is 1. This corresponds to the image fitting the viewport with [`layout=fill`](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/?format=stories).
@@ -261,13 +277,15 @@ You can check the roadmap in https://github.com/ampproject/amphtml/projects/121
 
 ## FAQ
 
-**Who can I contact if I have any questions?**
-
-We're available on slack to answer questoins, or feel free to email [philipbell@google.com](mailto:philipbell@google.com) for questions or feedback.
-
 **Can we have more than one component per page?**
 
-Yes! The components will automatically be associated with each other with their `src` tag.
+Yes, the components will automatically be associated with each other by sharing the same `src` value.
+
+**I have found a bug or have questions / comments / issues, how do I contact you?**
+
+If you have found a bug or have an issue request, file a [Github issue](https://github.com/ampproject/amphtml/issues?q=is%3Aissue+is%3Aopen+label%3A%22WG%3A+stories%22+) and tag the @ampproject/wg-stories working group.
+
+For questions / disscusion, join the [amp-story slack channel](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#discussion-channels) and ping us!.
 
 ## Validation
 
