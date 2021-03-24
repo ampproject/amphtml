@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+const {relative} = require('path');
+
 /**
  * @fileoverview
  * Passes source to functions set as options, which return an array of option
@@ -23,7 +25,7 @@
 module.exports = function (context) {
   return {
     Program() {
-      const filename = context.getFilename();
+      const filename = relative(process.cwd(), context.getFilename());
       const sourceCode = context.getSourceCode();
 
       for (const getReports of context.options) {
