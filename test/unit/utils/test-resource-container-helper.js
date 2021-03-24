@@ -19,7 +19,7 @@ import {
   loadAll,
   pauseAll,
   unmountAll,
-} from '../../../src/core/resource-container-helper';
+} from '../../../src/utils/resource-container-helper';
 
 const INCLUDE_SELF = true;
 const DEEP = true;

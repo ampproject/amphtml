@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-import * as Preact from './index';
+import * as Preact from '../preact';
 import {CanPlay, CanRender, LoadingProp} from '../core/contextprops';
 import {pureDevAssert as devAssert} from '../core/assert';
-import {
-  loadAll,
-  pauseAll,
-  unmountAll,
-} from '../utils/resource-container-helper';
 import {rediscoverChildren, removeProp, setProp} from '../context';
-import {useAmpContext} from './context';
-import {useEffect, useLayoutEffect, useRef} from './index';
+import {rethrowAsync} from '../log';
+import {useAmpContext} from '../preact/context';
+import {useEffect, useLayoutEffect, useRef} from '../preact';
 
 /**
  * @param {!Element} element
@@ -63,13 +59,15 @@ export function Slot(props) {
  */
 export function useSlotContext(ref) {
   const context = useAmpContext();
-
-  // Context changes.
   useLayoutEffect(() => {
     const slot = ref.current;
     devAssert(slot?.nodeType == 1, 'Element expected');
 
-    setProp(slot, CanRender, Slot, context.renderable);
+    try {
+      setProp(slot, CanRender, Slot, context.renderable);
+    } catch (e) {
+      rethrowAsync(e);
+    }
     setProp(slot, CanPlay, Slot, context.playable);
     setProp(
       slot,
@@ -77,11 +75,6 @@ export function useSlotContext(ref) {
       Slot,
       /** @type {!./core/loading-instructions.Loading} */ (context.loading)
     );
-
-    if (!context.playable) {
-      execute(slot, pauseAll);
-    }
-
     return () => {
       removeProp(slot, CanRender, Slot);
       removeProp(slot, CanPlay, Slot);
@@ -89,41 +82,4 @@ export function useSlotContext(ref) {
       rediscoverChildren(slot);
     };
   }, [ref, context]);
-
-  // Unmount and unmount. Keep it at the bottom because it's much better to
-  // execute `pause` before `unmount` in this case.
-  // This has to be a layout-effect to capture the old `Slot.assignedElements`
-  // before the browser undistributes them.
-  useLayoutEffect(() => {
-    const slot = ref.current;
-    devAssert(slot?.nodeType == 1, 'Element expected');
-
-    // TODO(#31915): switch to `mount`.
-    execute(slot, loadAll);
-
-    return () => {
-      execute(slot, unmountAll);
-    };
-  }, [ref]);
-}
-
-/**
- * @param {!Element} slot
- * @param {function(!AmpElement|!Array<!AmpElement>)} action
- */
-function execute(slot, action) {
-  const assignedElements = slot.assignedElements
-    ? slot.assignedElements()
-    : slot;
-  if (Array.isArray(assignedElements) && assignedElements.length == 0) {
-    return;
-  }
-
-  const win = slot.ownerDocument.defaultView;
-  if (!win) {
-    return;
-  }
-
-  const scheduler = win.requestIdleCallback || win.setTimeout;
-  scheduler(() => action(assignedElements));
 }
