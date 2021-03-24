@@ -20,6 +20,7 @@ const fs = require('fs-extra');
 const globby = require('globby');
 const path = require('path');
 const {clean} = require('../tasks/clean');
+const {default: ignore} = require('ignore');
 const {doBuild} = require('../tasks/build');
 const {doDist} = require('../tasks/dist');
 const {getOutput} = require('./process');
@@ -124,18 +125,22 @@ function getFilesFromArgv() {
  * @return {!Array<string>}
  */
 function getFilesToCheck(globs, options = {}) {
+  const ignored = ignore();
+  if (options.ignore) {
+    ignored.add(options.ignore);
+  }
   if (argv.files) {
-    return logFiles(getFilesFromArgv());
+    return logFiles(ignored.filter(getFilesFromArgv()));
   }
   if (argv.local_changes) {
-    const filesChanged = getFilesChanged(globs);
+    const filesChanged = ignored.filter(getFilesChanged(globs));
     if (filesChanged.length == 0) {
       log(green('INFO: ') + 'No files to check in this PR');
       return [];
     }
     return logFiles(filesChanged);
   }
-  return globby.sync(globs, options);
+  return ignored.filter(globby.sync(globs, options));
 }
 
 /**

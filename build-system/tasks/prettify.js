@@ -34,7 +34,6 @@ const {
   logOnSameLineLocalDev,
   logWithoutTimestamp,
 } = require('../common/logging');
-const {default: ignore} = require('ignore');
 const {exec} = require('../common/exec');
 const {getFilesToCheck} = require('../common/utils');
 const {green, cyan, red, yellow} = require('kleur/colors');
@@ -47,10 +46,10 @@ const tempDir = tempy.directory();
  * Checks files for formatting (and optionally fixes them) with Prettier.
  */
 async function prettify() {
-  const ignored = ignore().add(fs.readFileSync('.prettierignore', 'utf8'));
-  const filesToCheck = ignored.filter(
-    getFilesToCheck(prettifyGlobs, {dot: true})
-  );
+  // Prettier ignores the `.prettierignore` file when using the API like we
+  // are. So we need to filter our files down before feeding them to the API.
+  const ignore = fs.readFileSync('.prettierignore', 'utf8');
+  const filesToCheck = getFilesToCheck(prettifyGlobs, {dot: true, ignore});
   if (filesToCheck.length == 0) {
     return;
   }
