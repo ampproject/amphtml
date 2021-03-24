@@ -36,7 +36,7 @@ module.exports = function (context) {
         );
 
         context.report({
-          message: `Forbidden: "${match}".${message ? ` ${message}.` : ''}`,
+          message: `Forbidden: "${match}".${message ? `\n${message}.` : ''}`,
           loc: {start, end},
         });
       }
