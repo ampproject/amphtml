@@ -367,6 +367,7 @@
   },
   {"name": "amp-redbull-player", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-reddit", "version": "0.1", "latestVersion": "0.1"},
+  {"name": "amp-render", "version": "1.0", "latestVersion": "1.0"},
   {
     "name": "amp-resize-observer-polyfill",
     "version": "0.1",

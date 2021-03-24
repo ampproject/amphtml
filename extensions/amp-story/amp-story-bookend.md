@@ -2,6 +2,7 @@
 $category@: presentation
 formats:
   - stories
+deprecated: true
 teaser:
   text: The end screen of an AMP story, showcasing sharing and related content.
 ---
@@ -22,7 +23,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# amp-story-bookend
+# amp-story-bookend (deprecated)
 
 The `amp-story-bookend` is the last screen of the story. It contains related links, sharing options, call to action links, and more.
 

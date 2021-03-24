@@ -16,7 +16,6 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const debounce = require('debounce');
-const del = require('del');
 const esbuild = require('esbuild');
 /** @type {Object} */
 const experimentDefines = require('../global-configs/experiments-const.json');
@@ -39,7 +38,6 @@ const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
 const {removeFromClosureBabelCache} = require('../compile/pre-closure-babel');
 const {thirdPartyFrames} = require('../test-configs/config');
-const {transpileTs} = require('../compile/typescript');
 const {watch: fileWatch} = require('chokidar');
 
 /** @type {Remapping.default} */
@@ -406,9 +404,7 @@ function handleBundleError(err, continueOnError, destFilename) {
   if (continueOnError) {
     log(red('ERROR:'), reasonMessage);
   } else {
-    const reason = new Error(reasonMessage);
-    reason.showStack = false;
-    throw reason;
+    throw new Error(reasonMessage);
   }
 }
 
@@ -644,25 +640,6 @@ async function minifyWithTerser(destDir, destFilename, options) {
 }
 
 /**
- * Transpiles from TypeScript into intermediary files before compilation and
- * deletes them afterwards.
- *
- * @param {string} srcDir Path to the src directory
- * @param {string} srcFilename Name of the JS source file
- * @param {string} destDir Destination folder for output script
- * @param {?Object} options
- * @return {!Promise}
- */
-async function compileTs(srcDir, srcFilename, destDir, options) {
-  options = options || {};
-  const startTime = Date.now();
-  await transpileTs(srcDir, srcFilename);
-  endBuildStep('Transpiled', srcFilename, startTime);
-  await compileJs(srcDir, srcFilename, destDir, options);
-  del.sync(path.join(srcDir, '**/*.js'));
-}
-
-/**
  * Bundles (max) or compiles (min) a given JavaScript file entry point.
  *
  * @param {string} srcDir Path to the src directory
@@ -847,7 +824,6 @@ module.exports = {
   compileCoreRuntime,
   compileJs,
   compileJsWithEsbuild,
-  compileTs,
   doBuildJs,
   endBuildStep,
   maybePrintCoverageMessage,
