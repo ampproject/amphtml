@@ -39,9 +39,15 @@ describes.realWin('resource-container-helper', {}, (env) => {
     doc.body.appendChild(tree);
 
     ampGrandparent = createAmpElement({id: 'grandparent', parent: tree});
-    ampGrandparentSibling = createAmpElement({id: 'grandparent-sibling', parent: tree});
+    ampGrandparentSibling = createAmpElement({
+      id: 'grandparent-sibling',
+      parent: tree,
+    });
     ampParent = createAmpElement({id: 'parent', parent: ampGrandparent});
-    ampParentSibling = createAmpElement({id: 'parent-sibling', parent: ampGrandparent});
+    ampParentSibling = createAmpElement({
+      id: 'parent-sibling',
+      parent: ampGrandparent,
+    });
     ampChild1 = createAmpElement({id: 'child1', parent: ampParent});
     ampChild2 = createAmpElement({id: 'child2', parent: ampParent});
   });
@@ -55,10 +61,18 @@ describes.realWin('resource-container-helper', {}, (env) => {
       const placeholder = doc.createElement('div');
       placeholder.setAttribute('placeholder', '');
       element.appendChild(placeholder);
-      const placeholderAmpChild = createAmpElement({id: `placeholder-${id}`, parent: placeholder, createPlaceholder: false});
+      const placeholderAmpChild = createAmpElement({
+        id: `placeholder-${id}`,
+        parent: placeholder,
+        createPlaceholder: false,
+      });
       element.getPlaceholder = () => placeholder;
       element.placeholderAmpChild = placeholderAmpChild;
-      element.placeholderAmpGrandchild = createAmpElement({id: `placeholder-child-${id}`, parent: placeholderAmpChild, createPlaceholder: false});
+      element.placeholderAmpGrandchild = createAmpElement({
+        id: `placeholder-child-${id}`,
+        parent: placeholderAmpChild,
+        createPlaceholder: false,
+      });
     } else {
       element.getPlaceholder = () => null;
     }
@@ -80,24 +94,26 @@ describes.realWin('resource-container-helper', {}, (env) => {
 
     it('should include self in shallow mode and include placeholder', () => {
       forAllWithin(ampGrandparent, INCLUDE_SELF, !DEEP, callback);
-      expect(callback).to.be.calledTwice
-        .calledWith(ampGrandparent)
+      expect(callback)
+        .to.be.calledTwice.calledWith(ampGrandparent)
         .calledWith(ampGrandparent.placeholderAmpChild);
       // Shouldn't be called for a placeholder grandchild.
-      expect(callback).to.not.be.calledWith(ampGrandparent.placeholderAmpGrandchild);
+      expect(callback).to.not.be.calledWith(
+        ampGrandparent.placeholderAmpGrandchild
+      );
     });
 
     it('should only include the nearest first element in includeSelf/shallow mode', () => {
       forAllWithin(tree, INCLUDE_SELF, !DEEP, callback);
-      expect(callback).to.be.calledTwice
-        .calledWith(ampGrandparent)
+      expect(callback)
+        .to.be.calledTwice.calledWith(ampGrandparent)
         .calledWith(ampGrandparentSibling);
     });
 
     it('should only include shallow elements in shallow mode not including self', () => {
       forAllWithin(ampGrandparent, !INCLUDE_SELF, !DEEP, callback);
-      expect(callback).to.be.calledThrice
-        .calledWith(ampParent)
+      expect(callback)
+        .to.be.calledThrice.calledWith(ampParent)
         .calledWith(ampParentSibling)
         .calledWith(ampGrandparent.placeholderAmpChild);
     });
