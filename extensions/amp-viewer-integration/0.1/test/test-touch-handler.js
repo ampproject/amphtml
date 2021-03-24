@@ -114,21 +114,59 @@ describes.fakeWin('TouchHandler', {}, (env) => {
       expect(messages[0].data.data.type).to.equal('touchstart');
     });
 
-    it('should not forward events marked with `shouldViewerCancelPropagation`', () => {
-      const event = fakeTouchEvent('touchmove');
-      event.stopImmediatePropagation = env.sandbox.spy();
+    describe('event propagation', () => {
+      let event, event2;
 
-      touchHandler.handleEvent_(event);
-      expect(messages).to.have.length(1);
-      expect(messages[0].data.data.type).to.equal('touchmove');
-      expect(event.stopImmediatePropagation).to.not.be.called;
+      beforeEach(() => {
+        event = fakeTouchEvent('touchmove');
+        event2 = fakeTouchEvent('touchmove');
+        event.stopImmediatePropagation = env.sandbox.spy();
+        event2.stopImmediatePropagation = env.sandbox.spy();
+      });
 
-      event.shouldViewerCancelPropagation = true;
-      messages = [];
-      touchHandler.handleEvent_(event);
+      it('should forward events if event does not contain `shouldViewerCancelPropagation`', () => {
+        touchHandler.handleEvent_(event);
 
-      expect(messages).to.have.length(0);
-      expect(event.stopImmediatePropagation).to.be.calledOnce;
+        expect(messages).to.have.length(1);
+        expect(messages[0].data.data.type).to.equal('touchmove');
+        expect(event.stopImmediatePropagation).to.not.be.called;
+      });
+
+      it('should not forward events marked with `shouldViewerCancelPropagation`', () => {
+        event.shouldViewerCancelPropagation = true;
+        touchHandler.handleEvent_(event);
+
+        expect(messages).to.have.length(0);
+        expect(event.stopImmediatePropagation).to.be.calledOnce;
+      });
+
+      it('should stop propagation once, and then allow', () => {
+        event.shouldViewerCancelPropagation = true;
+        touchHandler.handleEvent_(event);
+
+        expect(messages).to.have.length(0);
+        expect(event.stopImmediatePropagation).to.be.calledOnce;
+
+        touchHandler.handleEvent_(event2);
+        expect(messages).to.have.length(1);
+        expect(messages[0].data.data.type).to.equal('touchmove');
+        expect(event2.stopImmediatePropagation).to.not.be.called;
+      });
+
+      it('should allow once, and then stop propagation', () => {
+        touchHandler.handleEvent_(event);
+
+        expect(messages).to.have.length(1);
+        expect(messages[0].data.data.type).to.equal('touchmove');
+        expect(event.stopImmediatePropagation).to.not.be.called;
+
+        event2.shouldViewerCancelPropagation = true;
+        touchHandler.handleEvent_(event2);
+
+        expect(messages).to.have.length(1);
+        expect(messages[0].data.data.type).to.equal('touchmove');
+        expect(event2.stopImmediatePropagation).to.be.calledOnce;
+      });
     });
 
     it('should lock scrolling', () => {
