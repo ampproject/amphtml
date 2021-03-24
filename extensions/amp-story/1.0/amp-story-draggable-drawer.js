@@ -153,10 +153,7 @@ export class DraggableDrawer extends AMP.BaseElement {
       )
     );
 
-    if (
-      isPageAttachmentUiV2ExperimentOn(this.win) &&
-      this.element.tagName === 'AMP-STORY-PAGE-ATTACHMENT'
-    ) {
+    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
       const spacerEl = this.win.document.createElement('div');
       spacerEl.classList.add('i-amphtml-story-draggable-drawer-spacer');
       this.containerEl_.prepend(spacerEl);
@@ -202,10 +199,7 @@ export class DraggableDrawer extends AMP.BaseElement {
       true /** callToInitialize */
     );
 
-    if (
-      isPageAttachmentUiV2ExperimentOn(this.win) &&
-      this.element.tagName === 'AMP-STORY-PAGE-ATTACHMENT'
-    ) {
+    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
       const spacerEl = dev().assertElement(
         this.element.querySelector('.i-amphtml-story-draggable-drawer-spacer')
       );
@@ -518,10 +512,7 @@ export class DraggableDrawer extends AMP.BaseElement {
         }
         this.state_ = DrawerState.DRAGGING_TO_OPEN;
         let drag = Math.max(deltaY, -this.dragCap_);
-        if (
-          isPageAttachmentUiV2ExperimentOn(this.win) &&
-          this.element.tagName === 'AMP-STORY-PAGE-ATTACHMENT'
-        ) {
+        if (isPageAttachmentUiV2ExperimentOn(this.win)) {
           drag -= this.spacerElHeight_;
         }
         translate = `translate3d(0, calc(100% + ${drag}px), 0)`;
@@ -569,13 +560,6 @@ export class DraggableDrawer extends AMP.BaseElement {
         this.mutateElement(() => resetStyles(this.element, ['transition']));
       }
 
-      if (
-        isPageAttachmentUiV2ExperimentOn(this.win) &&
-        this.element.tagName === 'AMP-STORY-PAGE-ATTACHMENT'
-      ) {
-        this.getPage_().classList.add('attachment-open');
-      }
-
       this.element.classList.add('i-amphtml-story-draggable-drawer-open');
       toggle(dev().assertElement(this.containerEl_), true);
     }).then(() => {
@@ -617,13 +601,6 @@ export class DraggableDrawer extends AMP.BaseElement {
         // next frame, after the element is positioned.
         setImportantStyles(this.element, {transition: 'initial'});
         this.mutateElement(() => resetStyles(this.element, ['transition']));
-      }
-
-      if (
-        isPageAttachmentUiV2ExperimentOn(this.win) &&
-        this.element.tagName === 'AMP-STORY-PAGE-ATTACHMENT'
-      ) {
-        this.getPage_().classList.remove('attachment-open');
       }
 
       this.element.classList.remove('i-amphtml-story-draggable-drawer-open');

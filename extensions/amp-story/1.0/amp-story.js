@@ -73,6 +73,7 @@ import {SystemLayer} from './amp-story-system-layer';
 import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
 import {ViewportWarningLayer} from './amp-story-viewport-warning-layer';
 import {VisibilityState} from '../../../src/visibility-state';
+import {isPageAttachmentUiV2ExperimentOn} from './amp-story-open-page-attachment';
 import {
   childElement,
   childElementByTag,
@@ -771,6 +772,13 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
       this.onBookendStateUpdate_(isActive);
     });
+
+    this.storeService_.subscribe(
+      StateProperty.PAGE_ATTACHMENT_STATE,
+      (isActive) => {
+        this.onAttachmentStateUpdate_(isActive);
+      }
+    );
 
     this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
       this.onPausedStateUpdate_(isPaused);
@@ -2165,6 +2173,19 @@ export class AmpStory extends AMP.BaseElement {
   onBookendStateUpdate_(isActive) {
     this.toggleElementsOnBookend_(/* display */ isActive);
     this.element.classList.toggle('i-amphtml-story-bookend-active', isActive);
+  }
+
+  /**
+   * @param {boolean} isActive
+   * @private
+   */
+  onAttachmentStateUpdate_(isActive) {
+    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+      this.element.classList.toggle(
+        'i-amphtml-story-attachment-active',
+        isActive
+      );
+    }
   }
 
   /**
