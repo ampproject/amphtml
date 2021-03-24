@@ -22,7 +22,6 @@ const {cyan} = require('kleur/colors');
 const {defaultTask: runAmpDevBuildServer} = require('../default-task');
 const {exec, execScriptAsync} = require('../../common/exec');
 const {getBaseUrl} = require('../pr-deploy-bot-utils');
-const {installPackages} = require('../../common/utils');
 const {isCiBuild} = require('../../common/ci');
 const {isPullRequestBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
@@ -107,7 +106,6 @@ async function storybook() {
   if (!build && envs.includes('amp')) {
     await runAmpDevBuildServer();
   }
-  await installPackages(__dirname);
   if (!build) {
     createCtrlcHandler('storybook');
   }
