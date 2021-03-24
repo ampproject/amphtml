@@ -15,7 +15,7 @@
  */
 
 import {cssEscape} from '../third_party/css-escape/css-escape';
-import {pureDevAssert as devAssert} from './core/assert';
+import {devAssert} from './log';
 
 /**
  * Asserts that name is just an alphanumeric word, and does not contain
