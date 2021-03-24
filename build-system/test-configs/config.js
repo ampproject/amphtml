@@ -176,9 +176,6 @@ const prettifyGlobs = [
   '**/*.json',
   '**/OWNERS',
   '**/*.md',
-  '!**/package*.json',
-  '!.github/ISSUE_TEMPLATE/**',
-  '!**/{node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
 
 /**

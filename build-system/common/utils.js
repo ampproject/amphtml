@@ -19,6 +19,7 @@ const experimentsConfig = require('../global-configs/experiments-config.json');
 const fs = require('fs-extra');
 const globby = require('globby');
 const {clean} = require('../tasks/clean');
+const {default: ignore} = require('ignore');
 const {doBuild} = require('../tasks/build');
 const {doDist} = require('../tasks/dist');
 const {gitDiffNameOnlyMaster} = require('./git');
@@ -117,21 +118,26 @@ function getFilesFromArgv() {
  *
  * @param {!Array<string>} globs
  * @param {Object=} options
+ * @param {(string|Array<string>)=} ignoreRules
  * @return {!Array<string>}
  */
-function getFilesToCheck(globs, options = {}) {
+function getFilesToCheck(globs, options = {}, ignoreRules = undefined) {
+  const ignored = ignore();
+  if (ignoreRules) {
+    ignored.add(ignoreRules);
+  }
   if (argv.files) {
-    return logFiles(getFilesFromArgv());
+    return logFiles(ignored.filter(getFilesFromArgv()));
   }
   if (argv.local_changes) {
-    const filesChanged = getFilesChanged(globs);
+    const filesChanged = ignored.filter(getFilesChanged(globs));
     if (filesChanged.length == 0) {
       log(green('INFO: ') + 'No files to check in this PR');
       return [];
     }
     return logFiles(filesChanged);
   }
-  return globby.sync(globs, options);
+  return ignored.filter(globby.sync(globs, options));
 }
 
 /**
