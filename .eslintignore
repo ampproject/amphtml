@@ -6,6 +6,7 @@ dist.tools/**
 firebase/**
 out/**
 test/coverage/**
+.babel-cache/**
 
 # Code directories
 build-system/tasks/visual-diff/snippets/*.js
