@@ -402,7 +402,10 @@ export class Log {
 
     try {
       const assertion = this == logs.user ? pureUserAssert : pureDevAssert;
-      assertion.apply(null, [shouldBeTrueish, opt_message].concat(var_args));
+      return assertion.apply(
+        null,
+        [shouldBeTrueish, opt_message].concat(var_args)
+      );
     } catch (assertionError) {
       this.prepareError_(assertionError);
       self.__AMP_REPORT_ERROR(assertionError);
