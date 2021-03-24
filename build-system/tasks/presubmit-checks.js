@@ -48,7 +48,19 @@ const realiasGetMode =
   'Do not re-alias getMode or its return so it can be ' +
   'DCE\'d. Use explicitly like "getMode().localDev" instead.';
 
-// Terms that must not appear in our source files.
+/**
+ * @typedef {{
+ *   message: string,
+ *   allowlist: (undefined|Array<string>),
+ *   checkInTestFolder: (undefined|boolean,
+ * }}
+ */
+let ForbiddenTermDef;
+
+/**
+ * Terms that must not appear in our source files.
+ * @const {Object<string, string|!ForbiddenTermDef>}
+ */
 const forbiddenTerms = {
   'DO NOT SUBMIT': '',
   'whitelist|white-list': {
@@ -1327,15 +1339,17 @@ function stripComments(contents) {
  *
  * @param {string} srcFile
  * @param {string} contents
- * @param {!Array<string, string>} terms
+ * @param {!Object<string, string|!ForbiddenTermDef>} terms
  * @return {Array<!ForbiddenTermMatchDef>}
  */
 function matchForbiddenTerms(srcFile, contents, terms) {
   const contentsWithoutComments = stripComments(contents);
-  return Object.keys(terms)
-    .map((term) => {
-      const matches = /** @type {Array<!ForbiddenTermMatchDef>} */ ([]);
-      const {allowlist, checkInTestFolder} = terms[term];
+  return Object.entries(terms)
+    .map(([term, messageOrDef]) => {
+      const {message, allowlist = null, checkInTestFolder = false} =
+        typeof messageOrDef === 'string'
+          ? {message: messageOrDef}
+          : messageOrDef;
       // NOTE: we could do a glob test instead of exact check in the future
       // if needed but that might be too permissive.
       if (
@@ -1344,8 +1358,10 @@ function matchForbiddenTerms(srcFile, contents, terms) {
           (allowlist.indexOf(srcFile) != -1 ||
             (isInTestFolder(srcFile) && !checkInTestFolder)))
       ) {
-        return matches;
+        return [];
       }
+
+      const matches = /** @type {Array<!ForbiddenTermMatchDef>} */ ([]);
       // we can't optimize building the `RegExp` objects early unless we build
       // another mapping of term -> regexp object to be able to get back to the
       // original term to get the possible fix value. This is ok as the
@@ -1366,9 +1382,6 @@ function matchForbiddenTerms(srcFile, contents, terms) {
             column++;
           }
         }
-
-        const message =
-          typeof terms[term] === 'string' ? terms[term] : terms[term].message;
 
         matches.push({
           match: match[0],
