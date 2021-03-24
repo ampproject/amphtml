@@ -141,8 +141,12 @@ The `amp-story-panning-media` component accepts 1 descendant. This descendant mu
       <amp-img layout="fill" src="assets/world-map.jpg" x="20%" y="30%" zoom="2" width="4000" height="3059" ></amp-img>
     </amp-story-panning-media>
   </amp-story-grid-layer>
+<<<<<<< HEAD
 </mp-story-page>
 >>>>>>> e5e5d21e1 (Update inline code.)
+=======
+</amp-story-page>
+>>>>>>> 91d1a6960 (Update extensions/amp-story-panning-media/README.md)
 ```
 
 ### Web Story use example
