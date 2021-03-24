@@ -800,7 +800,7 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
 }
 
 /**
- * Installs package.json dependencies are returns an instance of BrowserFetcher.
+ * Loads task-specific dependencies are returns an instance of BrowserFetcher.
  *
  * @return {!Promise<!puppeteer.BrowserFetcher>}
  */

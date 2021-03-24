@@ -112,7 +112,7 @@ function logSeparator_() {
 }
 
 /**
- * Prepares output and temp directories, and ensures dependencies are installed.
+ * Prepares output and temp directories.
  *
  * @param {string} outputDir full directory path to emplace artifacts in.
  * @param {string} tempDir full directory path to temporary working directory.
