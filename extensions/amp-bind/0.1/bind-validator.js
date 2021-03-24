@@ -317,7 +317,6 @@ function createElementRules_() {
           'https': true,
         },
       },
-      'state': null,
     },
     'AMP-SELECTOR': {
       'disabled': null,

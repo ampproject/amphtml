@@ -260,7 +260,6 @@ describe('BindValidator (allowUrlProperties=true)', () => {
 
     it('should support <amp-render>', () => {
       expect(val.canBind('AMP-RENDER', 'src')).to.be.true;
-      expect(val.canBind('AMP-RENDER', 'state')).to.be.true;
     });
 
     it('should support <amp-selector>', () => {
