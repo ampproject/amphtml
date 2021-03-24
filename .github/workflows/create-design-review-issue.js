@@ -234,6 +234,13 @@ function env(key) {
 }
 
 async function createDesignReviewIssue() {
+  const nextIssueData = getNextIssueData();
+
+  if (process.argv.includes('--dry-run')) {
+    console./*OK*/log(nextIssueData);
+    return;
+  }
+
   const repo = env('GITHUB_REPOSITORY');
   if (repo !== 'ampproject/amphtml') {
     // don't run on forks.
@@ -242,7 +249,7 @@ async function createDesignReviewIssue() {
   const {title, 'html_url': htmlUrl} = await postGithubIssue(
     env('GITHUB_TOKEN'),
     repo,
-    getNextIssueData()
+    nextIssueData
   );
   console./*OK*/ log(title);
   console./*OK*/ log(htmlUrl);
