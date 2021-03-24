@@ -4,6 +4,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 28fd0c378 (Revert z-index.)
 | context                                                         | z-index | file                                                                              |
@@ -168,6 +169,8 @@
 `.i-amphtml-story-media-query-matcher` | -1 | [extensions/amp-story/1.0/amp-story.css](/extensions/amp-story/1.0/amp-story.css)
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> ddea5efd9 (revert z-index)
 | context                                                                                                   | z-index    | file                                                                                                                                                                    |
 | --------------------------------------------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `amp-img.i-amphtml-ssr:not(.i-amphtml-element) > [placeholder]`                                           | auto       | [css/ampshared.css](/css/ampshared.css)                                                                                                                                 |
@@ -253,7 +256,10 @@
 | `.i-amphtml-image-slider-bar`                                                                             | 3          | [extensions/amp-image-slider/0.1/amp-image-slider.css](/extensions/amp-image-slider/0.1/amp-image-slider.css)                                                           |
 | `amp-story-cta-layer`                                                                                     | 3          | [extensions/amp-story-auto-ads/0.1/amp-story-auto-ads-inabox.css](/extensions/amp-story-auto-ads/0.1/amp-story-auto-ads-inabox.css)                                     |
 | `.i-amphtml-story-page-open-attachment[active]`                                                           | 3          | [extensions/amp-story/1.0/amp-story-open-page-attachment.css](/extensions/amp-story/1.0/amp-story-open-page-attachment.css)                                             |
+<<<<<<< HEAD
 | `.i-amphtml-story-attachment-active amp-story-page[active]::after`                                        | 3          | [extensions/amp-story/1.0/amp-story.css](/extensions/amp-story/1.0/amp-story.css)                                                                                       |
+=======
+>>>>>>> ddea5efd9 (revert z-index)
 | `amp-story-cta-layer`                                                                                     | 3          | [extensions/amp-story/1.0/amp-story.css](/extensions/amp-story/1.0/amp-story.css)                                                                                       |
 | `.i-amphtml-element > [overflow]`                                                                         | 2          | [css/ampshared.css](/css/ampshared.css)                                                                                                                                 |
 | `body noscript > *`                                                                                       | 2          | [css/ampshared.css](/css/ampshared.css)                                                                                                                                 |
@@ -327,6 +333,9 @@
 | `.i-amphtml-story-consent-logo::before`                                                                   | -1         | [extensions/amp-story/1.0/amp-story-consent.css](/extensions/amp-story/1.0/amp-story-consent.css)                                                                       |
 | `.i-amphtml-story-page-open-attachment-icon::after`                                                       | -1         | [extensions/amp-story/1.0/amp-story-open-page-attachment.css](/extensions/amp-story/1.0/amp-story-open-page-attachment.css)                                             |
 | `.i-amphtml-story-media-query-matcher`                                                                    | -1         | [extensions/amp-story/1.0/amp-story.css](/extensions/amp-story/1.0/amp-story.css)                                                                                       |
+<<<<<<< HEAD
 >>>>>>> fcf71cac8 (Update z-index)
 =======
 >>>>>>> 28fd0c378 (Revert z-index.)
+=======
+>>>>>>> ddea5efd9 (revert z-index)
