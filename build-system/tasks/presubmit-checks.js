@@ -16,7 +16,7 @@
 'use strict';
 
 // Terms are defined here.
-/* eslint-disable local/source */
+/* eslint-disable local/forbidden-terms */
 
 // eslint-disable-next-line no-unused-vars
 const eslint = require('eslint');
