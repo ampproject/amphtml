@@ -3,6 +3,9 @@
 <!-- markdown-link-check-disable -->
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 28fd0c378 (Revert z-index.)
 | context                                                         | z-index | file                                                                              |
 | --------------------------------------------------------------- | ------- | --------------------------------------------------------------------------------- |
 | `amp-img.i-amphtml-ssr:not(.i-amphtml-element) > [placeholder]` | auto    | [css/ampshared.css](/css/ampshared.css)                                           |
@@ -163,6 +166,7 @@
 `.i-amphtml-story-consent-logo::before` | -1 | [extensions/amp-story/1.0/amp-story-consent.css](/extensions/amp-story/1.0/amp-story-consent.css)
 `.i-amphtml-story-page-open-attachment-icon::after` | -1 | [extensions/amp-story/1.0/amp-story-open-page-attachment.css](/extensions/amp-story/1.0/amp-story-open-page-attachment.css)
 `.i-amphtml-story-media-query-matcher` | -1 | [extensions/amp-story/1.0/amp-story.css](/extensions/amp-story/1.0/amp-story.css)
+<<<<<<< HEAD
 =======
 | context                                                                                                   | z-index    | file                                                                                                                                                                    |
 | --------------------------------------------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -324,3 +328,5 @@
 | `.i-amphtml-story-page-open-attachment-icon::after`                                                       | -1         | [extensions/amp-story/1.0/amp-story-open-page-attachment.css](/extensions/amp-story/1.0/amp-story-open-page-attachment.css)                                             |
 | `.i-amphtml-story-media-query-matcher`                                                                    | -1         | [extensions/amp-story/1.0/amp-story.css](/extensions/amp-story/1.0/amp-story.css)                                                                                       |
 >>>>>>> fcf71cac8 (Update z-index)
+=======
+>>>>>>> 28fd0c378 (Revert z-index.)
