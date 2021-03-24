@@ -82,7 +82,7 @@ export class AmpTiktok extends AMP.BaseElement {
     this.unlistenMessage_ = null;
 
     /** @private {?Promise} */
-    this.resolveRecievedFirstMessage_ = null;
+    this.resolveReceivedFirstMessage_ = null;
 
     /** @private {string} */
     this.iframeNameString_ = this.getIframeNameString_();
@@ -112,8 +112,9 @@ export class AmpTiktok extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    //See
-    //https://developers.tiktok.com/doc/Embed
+    /**
+     * @see {@link https://developers.tiktok.com/doc/Embed}
+     */
     Services.preconnectFor(this.win).url(
       this.getAmpDoc(),
       'https://www.tiktok.com',
@@ -124,16 +125,20 @@ export class AmpTiktok extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const {src} = this.element.dataset;
-    const videoIdRegex = /^((.+\/)?)(\d+)\/?$/;
     if (src) {
-      this.videoId_ = src.replace(videoIdRegex, (_, _1, _2, id) => id);
+      // If the user provides a src attribute extract the video id from the src
+      const videoIdRegex = /^((.+\/)?)(\d+)\/?$/;
+      this.videoId_ = src.replace(videoIdRegex, '$3');
     } else {
+      // If the user provides a blockquote element use the blockquote videoId as video id
       const blockquoteOrNull = childElementByTag(this.element, 'blockquote');
       if (
         !blockquoteOrNull ||
         !blockquoteOrNull.hasAttribute('placeholder') ||
         !blockquoteOrNull.dataset.videoId
       ) {
+        // If the blockquote is not a placeholder or it does not contain a videoId
+        // exit early and do not set this.videoId to this value.
         return;
       }
       this.videoId_ = blockquoteOrNull.dataset.videoId;
@@ -155,10 +160,9 @@ export class AmpTiktok extends AMP.BaseElement {
         'name': this.iframeNameString_,
         'aria-hidden': 'true',
         'frameborder': '0',
+        'class': 'i-amphtml-tiktok-unresolved',
       }
     );
-
-    iframe.classList.add('i-amphtml-tiktok-unresolved');
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
@@ -202,8 +206,8 @@ export class AmpTiktok extends AMP.BaseElement {
       return;
     }
     if (data['height']) {
-      if (this.resolveRecievedFirstMessage_) {
-        this.resolveRecievedFirstMessage_();
+      if (this.resolveReceivedFirstMessage_) {
+        this.resolveReceivedFirstMessage_();
       }
       this.resizeOuter_(data['height']);
       setStyles(this.iframe_, {
@@ -222,7 +226,7 @@ export class AmpTiktok extends AMP.BaseElement {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
-    return true; // layout again
+    return true;
   }
 
   /** @override */
