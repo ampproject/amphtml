@@ -55,12 +55,12 @@ const backdrop = {
   /* Prevent someone from making this a full-sceen image */
   backgroundImage: 'none !important',
   overscrollBehavior: 'none !important',
-  zIndex: 2147483646,
 };
 
 // User overridable styles
 const defaultBackdropStyles = {
   backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  zIndex: 2147483646,
 };
 
 //TODO(#32400): See PR description.  This is a workaround dependent on a
@@ -68,6 +68,10 @@ const defaultBackdropStyles = {
 const backdropOverscrollBlocker = {
   height: '101vh !important',
   width: '0 !important',
+};
+
+const unmounted = {
+  display: 'none',
 };
 
 const JSS = {
@@ -78,6 +82,7 @@ const JSS = {
   backdrop,
   defaultBackdropStyles,
   backdropOverscrollBlocker,
+  unmounted,
 };
 
 // useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.
