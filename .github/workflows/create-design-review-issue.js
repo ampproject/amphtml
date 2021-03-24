@@ -237,7 +237,7 @@ async function createDesignReviewIssue() {
   const nextIssueData = getNextIssueData();
 
   if (process.argv.includes('--dry-run')) {
-    console./*OK*/log(nextIssueData);
+    console./*OK*/ log(nextIssueData);
     return;
   }
 
