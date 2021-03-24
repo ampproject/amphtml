@@ -41,7 +41,7 @@ const timeRotationUtc = [
   ['Africa/Europe/western Asia', '16:30'],
 ];
 
-const timeRotationStartYyyyMmDd = '2021-03-17';
+const timeRotationStartYyyyMmDd = '2021-03-31';
 
 // All previous weeks have already been handled.
 const generateWeeksFromNow = 3;
