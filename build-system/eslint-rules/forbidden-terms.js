@@ -36,8 +36,7 @@ module.exports = function (context) {
         );
 
         context.report({
-          message:
-            `Found forbidden term: ${match}.` + (message ? ` ${message}.` : ''),
+          message: `Forbidden: "${match}".${message ? ` ${message}.` : ''}`,
           loc: {start, end},
         });
       }
