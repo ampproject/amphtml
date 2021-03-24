@@ -151,6 +151,7 @@ The `amp-story-panning-media` component accepts 1 descendant. This descendant mu
 
 ### Web Story use example
 
+<<<<<<< HEAD
 The [Northern Sky Constellations Web Story](https://philipbell-panning-media.web.app/examples/amp-story/northern-sky-constellations.html) uses a single star chart for the entire story. It highlights different constellations by panning and zooming. A parallax transition effect is also achieved by layering two png star images with transparency.
 
 <<<<<<<< HEAD:extensions/amp-story-panning-media/README.md
@@ -168,6 +169,9 @@ The [Web Story creation tool integration example](https://philipbell-panning-med
 
 ### x (optional)
 >>>>>>>> 1dc9cb4b9 (add examples):extensions/amp-story-panning-media/amp-story-panning-media.md
+=======
+### x {string} (optional)
+>>>>>>> 0dacbd0e6 (Update extensions/amp-story-panning-media/README.md)
 
 Specifies the horizontal position in percentage.  
 Centered on 0 (default) with positive values moving the image to the right (50% centering left edge of image) and negative to the left (-50% centering right edge of image).
