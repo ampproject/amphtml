@@ -33,6 +33,10 @@ describes.realWin(
       await waitFor(isOpenOrNot, 'element open updated');
     }
 
+    function isMounted(win, container) {
+      return win.getComputedStyle(container)['display'] !== 'none';
+    }
+
     describe('basic actions', () => {
       let win;
       let html;
@@ -100,7 +104,7 @@ describes.realWin(
         win.document.body.appendChild(fullHtml);
         await element.buildInternal();
 
-        container = element.shadowRoot.firstElementChild;
+        container = element.shadowRoot.firstElementChild.firstElementChild;
         openButton = fullHtml.querySelector('#open');
         closeButton = fullHtml.querySelector('#close');
         toggleButton = fullHtml.querySelector('#toggle');
@@ -114,51 +118,51 @@ describes.realWin(
       it('open attribute is synced with component mounted', async () => {
         // sidebar is initially closed
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
 
         openButton.click();
         await waitForOpen(element, true);
 
         expect(element).to.have.attribute('open');
-        expect(container.children.length).to.not.equal(0);
+        expect(isMounted(win, container)).to.equal(true);
 
         closeButton.click();
         await waitForOpen(element, false);
 
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
       });
 
       it('should open and close when "open" attribute is set', async () => {
         // sidebar is initially closed
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
 
         element.setAttribute('open', '');
         await waitForOpen(element, true);
 
         expect(element).to.have.attribute('open');
-        expect(container.children.length).to.not.equal(0);
+        expect(isMounted(win, container)).to.equal(true);
 
         element.removeAttribute('open');
         await waitForOpen(element, false);
 
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
       });
 
       it('should close when the backdrop is clicked', async () => {
         element.enqueAction(invocation('open'));
         await waitForOpen(element, true);
 
-        expect(container.children.length).to.equal(2);
+        expect(isMounted(win, container)).to.equal(true);
         const backdrop = container.children[1];
         backdrop.click();
 
         await waitForOpen(element, false);
 
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
       });
 
       it('should close the sidebar when the esc key is pressed', async () => {
@@ -166,7 +170,7 @@ describes.realWin(
         await waitForOpen(element, true);
 
         // sidebar is opened, wait for eventListener to be attached
-        expect(container.children.length).to.equal(2);
+        expect(isMounted(win, container)).to.equal(true);
         const sidebar = container.children[0];
         const doc = sidebar.ownerDocument;
         const addListenerSpy = env.sandbox.spy(doc, 'addEventListener');
@@ -185,12 +189,12 @@ describes.realWin(
         // verify sidebar is closed
         await waitForOpen(element, false);
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
       });
 
       it('should render all children of the sidebar', async () => {
         // closed sidebar should not render any content
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
 
         // open the sidebar
         openButton.click();
@@ -198,7 +202,7 @@ describes.realWin(
         expect(element).to.have.attribute('open');
 
         // confirm slot within the shadow root
-        expect(container.children.length).to.equal(2);
+        expect(isMounted(win, container)).to.equal(true);
         expect(container.children[0].firstElementChild).to.be.ok;
         expect(container.children[0].firstElementChild.firstElementChild).to.be
           .ok;
@@ -383,7 +387,7 @@ describes.realWin(
         element = fullHtml.firstElementChild;
         win.document.body.appendChild(fullHtml);
         await element.buildInternal();
-        container = element.shadowRoot.firstElementChild;
+        container = element.shadowRoot.firstElementChild.firstElementChild;
         openButton = fullHtml.querySelector('#open');
 
         // open the sidebar
@@ -413,7 +417,7 @@ describes.realWin(
         element = fullHtml.firstElementChild;
         win.document.body.appendChild(fullHtml);
         await element.buildInternal();
-        container = element.shadowRoot.firstElementChild;
+        container = element.shadowRoot.firstElementChild.firstElementChild;
         openButton = fullHtml.querySelector('#open');
 
         // open the sidebar
@@ -595,7 +599,7 @@ describes.realWin(
         win.document.body.appendChild(fullHtml);
         await element.buildInternal();
 
-        container = element.shadowRoot.firstElementChild;
+        container = element.shadowRoot.firstElementChild.firstElementChild;
         openButton = fullHtml.querySelector('#open');
         closeButton = fullHtml.querySelector('#close');
       });
@@ -616,7 +620,7 @@ describes.realWin(
 
         // sidebar is initially closed
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
 
         openButton.click();
         await waitForOpen(element, true);
@@ -626,7 +630,7 @@ describes.realWin(
         animation.onfinish();
 
         expect(element).to.have.attribute('open');
-        expect(container.children.length).to.not.equal(0);
+        expect(isMounted(win, container)).to.equal(true);
       });
 
       it('should animate collapse', async () => {
@@ -635,7 +639,7 @@ describes.realWin(
 
         // sidebar is initially closed
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
 
         // synchronous open
         openButton.click();
@@ -655,12 +659,12 @@ describes.realWin(
 
         // still displayed while animating
         expect(element).to.have.attribute('open');
-        expect(container.children.length).to.not.equal(0);
+        expect(isMounted(win, container)).to.equal(true);
 
         animation.onfinish();
         await waitForOpen(element, false);
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
       });
 
       it('should reverse animations if closed while opening', async () => {
@@ -672,7 +676,7 @@ describes.realWin(
 
         // sidebar is initially closed
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
 
         // begin open animation
         openButton.click();
@@ -698,7 +702,7 @@ describes.realWin(
 
         // sidebar is initially closed
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
 
         // synchronous open
         openButton.click();
@@ -712,7 +716,7 @@ describes.realWin(
 
         // sidebar is initially opened
         expect(element).to.have.attribute('open');
-        expect(container.children.length).to.not.equal(0);
+        expect(isMounted(win, container)).to.equal(true);
 
         // begin close animation
         closeButton.click();

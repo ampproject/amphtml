@@ -30,7 +30,16 @@ var SidebarDef = {};
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-SidebarDef.Props;
+SidebarDef.SidebarProps;
+
+/**
+ * @typedef {{
+ *   toolbar: (string|undefined),
+ *   toolbarTarget: (string|undefined),
+ *   children: (?PreactDef.Renderable|undefined),
+ * }}
+ */
+SidebarDef.SidebarToolbarProps;
 
 /** @interface */
 SidebarDef.SidebarApi = class {
