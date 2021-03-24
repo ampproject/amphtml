@@ -19,6 +19,7 @@ import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {VisibilityState} from '../../../src/visibility-state';
+import {addCacheSources} from './video-cache';
 import {addParamsToUrl} from '../../../src/url';
 import {
   childElement,
@@ -264,6 +265,10 @@ export class AmpVideo extends AMP.BaseElement {
     installVideoManagerForDoc(element);
 
     Services.videoManagerForDoc(element).register(this);
+
+    if (this.element.hasAttribute('enable-google-video-cache')) {
+      return addCacheSources(this);
+    }
   }
 
   /**
