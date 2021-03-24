@@ -1332,53 +1332,56 @@ function stripComments(contents) {
  */
 function matchForbiddenTerms(srcFile, contents, terms) {
   const contentsWithoutComments = stripComments(contents);
-  return Object.keys(terms).reduce((fixes, term) => {
-    const {allowlist, checkInTestFolder} = terms[term];
-    // NOTE: we could do a glob test instead of exact check in the future
-    // if needed but that might be too permissive.
-    if (
-      isInBuildSystemFixtureFolder(srcFile) ||
-      (Array.isArray(allowlist) &&
-        (allowlist.indexOf(srcFile) != -1 ||
-          (isInTestFolder(srcFile) && !checkInTestFolder)))
-    ) {
-      return fixes;
-    }
-    // we can't optimize building the `RegExp` objects early unless we build
-    // another mapping of term -> regexp object to be able to get back to the
-    // original term to get the possible fix value. This is ok as the
-    // presubmit doesn't have to be blazing fast and this is most likely
-    // negligible.
-    const regex = new RegExp(term, 'gm');
-    let index = 0;
-    let line = 1;
-    let column = 0;
-    let match;
+  return Object.keys(terms)
+    .map((term) => {
+      const matches = /** @type {Array<!ForbiddenTermMatchDef>} */ ([]);
+      const {allowlist, checkInTestFolder} = terms[term];
+      // NOTE: we could do a glob test instead of exact check in the future
+      // if needed but that might be too permissive.
+      if (
+        isInBuildSystemFixtureFolder(srcFile) ||
+        (Array.isArray(allowlist) &&
+          (allowlist.indexOf(srcFile) != -1 ||
+            (isInTestFolder(srcFile) && !checkInTestFolder)))
+      ) {
+        return matches;
+      }
+      // we can't optimize building the `RegExp` objects early unless we build
+      // another mapping of term -> regexp object to be able to get back to the
+      // original term to get the possible fix value. This is ok as the
+      // presubmit doesn't have to be blazing fast and this is most likely
+      // negligible.
+      const regex = new RegExp(term, 'gm');
+      let index = 0;
+      let line = 1;
+      let column = 0;
+      let match;
 
-    while ((match = regex.exec(contentsWithoutComments))) {
-      for (index; index < match.index; index++) {
-        if (contentsWithoutComments[index] === '\n') {
-          line++;
-          column = 1;
-        } else {
-          column++;
+      while ((match = regex.exec(contentsWithoutComments))) {
+        for (index; index < match.index; index++) {
+          if (contentsWithoutComments[index] === '\n') {
+            line++;
+            column = 1;
+          } else {
+            column++;
+          }
         }
+
+        const message =
+          typeof terms[term] === 'string' ? terms[term] : terms[term].message;
+
+        matches.push({
+          match: match[0],
+          term,
+          line,
+          column,
+          message,
+        });
       }
 
-      const message =
-        typeof terms[term] === 'string' ? terms[term] : terms[term].message;
-
-      fixes.push({
-        match: match[0],
-        term,
-        line,
-        column,
-        message,
-      });
-    }
-
-    return fixes;
-  }, /** @type {Array<!ForbiddenTermMatchDef>} */ ([]));
+      return matches;
+    })
+    .flat();
 }
 
 /**
