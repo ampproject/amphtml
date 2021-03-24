@@ -180,7 +180,7 @@ function finalizeRunner() {
     log(red('ERROR:'), 'Unknown task', cyan(args.join(' ')));
     log('⤷ Run', cyan('amp --help'), 'for a full list of tasks.');
     log('⤷ Run', cyan('amp <task> --help'), 'for help with a specific task.');
-    process.exit(1);
+    process.exitCode = 1;
   });
   commander.parse();
 }
