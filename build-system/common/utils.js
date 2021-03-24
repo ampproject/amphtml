@@ -18,16 +18,12 @@ const argv = require('minimist')(process.argv.slice(2));
 const experimentsConfig = require('../global-configs/experiments-config.json');
 const fs = require('fs-extra');
 const globby = require('globby');
-const path = require('path');
 const {clean} = require('../tasks/clean');
 const {doBuild} = require('../tasks/build');
 const {doDist} = require('../tasks/dist');
-const {getOutput} = require('./process');
 const {gitDiffNameOnlyMaster} = require('./git');
-const {green, cyan, red, yellow} = require('kleur/colors');
+const {green, cyan, yellow} = require('kleur/colors');
 const {log, logLocalDev} = require('./logging');
-
-const ROOT_DIR = path.resolve(__dirname, '../../');
 
 /**
  * Performs a clean build of the AMP runtime in testing mode.
@@ -166,26 +162,6 @@ function usesFilesOrLocalChanges(taskName) {
   return validUsage;
 }
 
-/**
- * Runs 'npm ci' to install packages in a given directory. Some notes:
- * - Since install scripts can be async, we `await` the process object.
- * - Since script output is noisy, we capture and print the stderr if needed.
- *
- * @param {string} dir
- * @return {Promise<void>}
- */
-async function installPackages(dir) {
-  const relativeDir = path.relative(ROOT_DIR, dir);
-  log('Running', cyan('npm ci'), 'in', cyan(relativeDir) + '...');
-  const output = await getOutput(`npm ci --prefix ${dir}`);
-  if (output.status === 0) {
-    log('Done running', cyan('npm ci'), 'in', cyan(relativeDir) + '.');
-  } else {
-    log(red('ERROR:'), output.stderr);
-    throw new Error('Installation failed');
-  }
-}
-
 module.exports = {
   buildRuntime,
   getExperimentConfig,
@@ -193,6 +169,5 @@ module.exports = {
   getFilesChanged,
   getFilesFromArgv,
   getFilesToCheck,
-  installPackages,
   usesFilesOrLocalChanges,
 };

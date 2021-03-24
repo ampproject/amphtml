@@ -25,7 +25,7 @@ const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
 const {runNpmChecks} = require('./npm-checks');
 const {setLoggingPrefix} = require('../common/logging');
-const {updatePackages} = require('../tasks/update-packages');
+const {updatePackages} = require('../common/update-packages');
 
 /**
  * Helper used by all CI job scripts. Runs the PR / push build workflow.
