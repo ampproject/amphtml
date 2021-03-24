@@ -465,7 +465,7 @@ async function finishBundle(
  * @param {?Object} options
  * @return {!Promise}
  */
-async function esbuildJs(srcDir, srcFilename, destDir, options) {
+async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const startTime = Date.now();
   const entryPoint = path.join(srcDir, srcFilename);
   const destFilename = options.toName || srcFilename;
@@ -616,7 +616,7 @@ async function minifyWithTerser(destDir, destFilename, options) {
     return;
   }
 
-  const filename = destDir + destFilename;
+  const filename = path.join(destDir, destFilename);
   const terserOptions = {
     mangle: true,
     compress: true,
@@ -655,7 +655,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
   if (options.minify) {
     return compileMinifiedJs(srcDir, srcFilename, destDir, options);
   } else {
-    return esbuildJs(srcDir, srcFilename, destDir, options);
+    return compileUnminifiedJs(srcDir, srcFilename, destDir, options);
   }
 }
 
@@ -828,7 +828,7 @@ module.exports = {
   compileJsWithEsbuild,
   doBuildJs,
   endBuildStep,
-  esbuildJs,
+  compileUnminifiedJs,
   maybePrintCoverageMessage,
   maybeToEsmName,
   mkdirSync,

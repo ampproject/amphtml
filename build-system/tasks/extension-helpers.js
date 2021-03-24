@@ -25,6 +25,12 @@ const {
   verifyExtensionBundles,
   jsBundles,
 } = require('../compile/bundles.config');
+const {
+  maybeToEsmName,
+  compileJs,
+  compileJsWithEsbuild,
+  mkdirSync,
+} = require('./helpers');
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
 const {compileJison} = require('./compile-jison');
 const {endBuildStep, watchDebounceDelay, doBuildJs} = require('./helpers');
@@ -32,7 +38,6 @@ const {green, red, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
 const {log} = require('../common/logging');
-const {maybeToEsmName, compileJs, esbuildJs, mkdirSync} = require('./helpers');
 const {parse: pathParse} = require('path');
 const {removeFromClosureBabelCache} = require('../compile/pre-closure-babel');
 const {watch} = require('chokidar');
@@ -466,7 +471,6 @@ async function buildExtension(
     await doBuildJs(jsBundles, 'ww.max.js', options);
   }
   if (options.npm) {
-    mkdirSync(`${extDir}/build`);
     await buildNpm(extDir, options);
   }
   if (name === 'amp-analytics') {
@@ -533,15 +537,18 @@ function buildExtensionCss(extDir, name, version, options) {
  */
 async function buildNpm(extDir, options) {
   const {binaries, external} = options.npm;
+  mkdirSync(`${extDir}/build`);
+
   const promises = binaries.map((filename) => {
     const {name} = pathParse(filename);
     const esm = argv.esm || argv.sxg || false;
-    return esbuildJs(
+    return compileJsWithEsbuild(
       extDir + '/',
       filename,
       `${extDir}/build`,
       Object.assign(options, {
-        toName: `${name}${options.minify ? '' : '.max'}.${esm ? 'm' : ''}js`,
+        toName: maybeToEsmName(`${name}.max.js`),
+        minifiedName: maybeToEsmName(`${name}.js`),
         latestName: '',
         outputFormat: esm ? 'esm' : 'cjs',
         wrapper: '',
