@@ -32,12 +32,10 @@ const {green, red, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
 const {log} = require('../common/logging');
-const {maybeToEsmName, compileJs, mkdirSync} = require('./helpers');
+const {maybeToEsmName, compileJs, esbuildJs, mkdirSync} = require('./helpers');
 const {parse: pathParse} = require('path');
 const {removeFromClosureBabelCache} = require('../compile/pre-closure-babel');
 const {watch} = require('chokidar');
-const {maybeToEsmName, compileJs, esbuildJs, mkdirSync} = require('./helpers');
-const {watch} = require('gulp');
 
 /**
  * Extensions to build when `--extensions=inabox`.
@@ -83,7 +81,7 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
  *   loadPriority?: string,
  *   cssBinaries?: Array<string>,
  *   extraGlobs?: Array<string>,
- *   npm?: Array<string>,
+ *   npm?: {binaries: Array<string>, external: Array<string>},
  * }}
  */
 const ExtensionOption = {}; // eslint-disable-line no-unused-vars
@@ -468,8 +466,8 @@ async function buildExtension(
     await doBuildJs(jsBundles, 'ww.max.js', options);
   }
   if (options.npm) {
-    mkdirSync(`${path}/build`);
-    await buildNpm(path, options);
+    mkdirSync(`${extDir}/build`);
+    await buildNpm(extDir, options);
   }
   if (name === 'amp-analytics') {
     await analyticsVendorConfigs(options);
@@ -529,19 +527,19 @@ function buildExtensionCss(extDir, name, version, options) {
 }
 
 /**
- * @param {string} path
+ * @param {string} extDir
  * @param {!Object} options
  * @return {!Promise}
  */
-async function buildNpm(path, options) {
+async function buildNpm(extDir, options) {
   const {binaries, external} = options.npm;
   const promises = binaries.map((filename) => {
     const {name} = pathParse(filename);
     const esm = argv.esm || argv.sxg || false;
     return esbuildJs(
-      path + '/',
+      extDir + '/',
       filename,
-      `${path}/build`,
+      `${extDir}/build`,
       Object.assign(options, {
         toName: `${name}${options.minify ? '' : '.max'}.${esm ? 'm' : ''}js`,
         latestName: '',
