@@ -52,6 +52,7 @@ module.exports = {
     {
       'files': [
         './preact/base-element.js',
+        './preact/slot.js',
         './core/contextprops.js',
         './context/subscriber.js',
         './context/node.js',
