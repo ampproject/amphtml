@@ -318,7 +318,6 @@ function createElementRules_() {
         },
       },
       'state': null,
-      'is-layout-container': null,
     },
     'AMP-SELECTOR': {
       'disabled': null,
