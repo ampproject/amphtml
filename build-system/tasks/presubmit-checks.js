@@ -1266,6 +1266,17 @@ const requiredTerms = {
 const requiredTermsExcluded = /amp-__component_name_hyphenated__/;
 
 /**
+ * @typedef {{
+ *   line: number,
+ *   column: number,
+ *   term: string,
+ *   match: string,
+ *   message: string,
+ * }}
+ */
+let ForbiddenTermMatchDef;
+
+/**
  * Check if root of path is test/ or file is in a folder named test.
  * @param {string} path
  * @return {boolean}
@@ -1311,18 +1322,9 @@ function stripComments(contents) {
 }
 
 /**
- * @typedef {{
- *   line: number,
- *   column: number,
- *   term: string,
- *   match: string,
- *   message: string,
- * }}
- */
-let ForbiddenTermMatchDef;
-
-/**
- * Collects any forbidden terms (regex patterns) found in the contents of a file.
+ * Collects any forbidden terms (regex patterns) in the contents of a file,
+ * and provides any possible fix information.
+ *
  * @param {string} srcFile
  * @param {string} contents
  * @param {!Array<string, string>} terms
@@ -1381,7 +1383,6 @@ function matchForbiddenTerms(srcFile, contents, terms) {
 }
 
 /**
- * Test if a file's contents match any of the forbidden terms
  * @param {string} srcFile
  * @param {string} contents
  * @return {Array<!ForbiddenTermMatchDef>}
