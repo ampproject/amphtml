@@ -1,17 +1,17 @@
-# AMP Buildcop
+# AMP Build On-Duty
 
-The AMP buildcop is responsible for ensuring that the [master build](https://app.circleci.com/pipelines/github/ampproject/amphtml?branch=master) remains green. The AMP buildcop responsibility rotates between members of the community.
+The AMP build on-duty is responsible for ensuring that the [master build](https://app.circleci.com/pipelines/github/ampproject/amphtml?branch=master) remains green. The AMP build on-duty responsibility rotates between members of the community.
 
-Make sure you are a member of the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN) channel on Slack while you are buildcop.
+Make sure you are a member of the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN) channel on Slack while you are build on-duty.
 
 -   If the build has been red for some time, please send a note to the #contributing channel if the issue is not already reported.
--   Pay attention for reports of issues with the build that the community may send to this channel. (You may want to enable notifications for this channel while you are buildcop to make this easier.)
+-   Pay attention for reports of issues with the build that the community may send to this channel. (You may want to enable notifications for this channel while you are build on-duty to make this easier.)
 
-## Buildcop Tasks
+## Build On-Duty Tasks
 
 1. Ensure the [master build](https://app.circleci.com/pipelines/github/ampproject/amphtml?branch=master) remains green. Your goal is to keep the build from being red for more than an hour.
     1. Note that yellow builds are in the process of being created/tested so you do not need to do anything special with them.
-    2. Keep an eye out for emails sent to an address starting with amp-build-cop. **You are encouraged to set up a filter so that these emails will stand out to you.**
+    2. Keep an eye out for emails sent to an address starting with amp-build-on-duty. **You are encouraged to set up a filter so that these emails will stand out to you.**
     3. You will need to investigate whether a red build is due to a flake or due to a real issue.
         - If the issue is due to a flaky test:
             - Create a ["Related to: Flaky Tests" issue](https://github.com/ampproject/amphtml/issues?q=is%3Aopen+is%3Aissue+label%3A%22Related+to%3A+Flaky+Tests%22). **Make sure to find an appropriate owner for the issue and assign it to them.**
