@@ -14,8 +14,18 @@
 # limitations under the license.
 #
 
-tags: {  # amp-fit-text
+tags: {  # amp-fit-text in websites
   html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-fit-text"
+    version: "0.1"
+    version: "1.0"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-fit-text in ads
   html_format: AMP4ADS
   tag_name: "SCRIPT"
   extension_spec: {
