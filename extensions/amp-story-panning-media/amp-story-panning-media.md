@@ -239,6 +239,7 @@ A higher value scales the image up (zooms in). A lower value scales the image do
 
 Prevents the image from panning beyond the viewport. When using `lock-bounds` `width` and `height` must be specified on the `amp-img` child.
 
+<<<<<<< HEAD
 ## Demos
 
 <table>
@@ -307,6 +308,8 @@ This component is available in experimental. Validation details will be defined 
 >>>>>>>> 1dc9cb4b9 (add examples):extensions/amp-story-panning-media/amp-story-panning-media.md
 >>>>>>> 1dc9cb4b9 (add examples)
 =======
+=======
+>>>>>>> 4cb65e65e (Move demos and FAQ to readme.)
 ## Validation
 
 This component is available in experimental. Validation details will be defined before launch.
