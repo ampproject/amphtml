@@ -25,7 +25,7 @@ import {
   getServicePromiseOrNull,
   getServicePromiseOrNullForDoc,
 } from './service';
-import {pureUserAssert as userAssert} from './core/assert';
+import {userAssert} from './log';
 
 /**
  * Same as getElementService but produces null if the given element is not

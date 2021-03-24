@@ -37,7 +37,7 @@ const {
   gitCiMasterBaseline,
   shortSha,
 } = require('../../common/git');
-const {buildRuntime, installPackages} = require('../../common/utils');
+const {buildRuntime} = require('../../common/utils');
 const {cyan, yellow} = require('kleur/colors');
 const {isCiBuild} = require('../../common/ci');
 const {startServer, stopServer} = require('../serve');
@@ -800,15 +800,11 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
 }
 
 /**
- * Installs package.json dependencies are returns an instance of BrowserFetcher.
+ * Loads task-specific dependencies are returns an instance of BrowserFetcher.
  *
  * @return {!Promise<!puppeteer.BrowserFetcher>}
  */
 async function installDependencies_() {
-  if (!argv.noinstall) {
-    await installPackages(__dirname);
-  }
-
   puppeteer = require('puppeteer');
   percySnapshot = require('@percy/puppeteer');
   Percy = require('@percy/core');
@@ -867,5 +863,4 @@ visualDiff.flags = {
   'percy_disabled':
     'Disables Percy integration (for testing local changes only)',
   'nobuild': 'Skip build',
-  'noinstall': 'Skip installing npm dependencies',
 };

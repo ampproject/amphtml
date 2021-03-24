@@ -17,7 +17,7 @@
 import {LruCache} from '../../../src/utils/lru-cache';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
+import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {
