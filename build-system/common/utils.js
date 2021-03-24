@@ -122,12 +122,13 @@ function getFilesFromArgv() {
  *
  * @param {!Array<string>} globs
  * @param {Object=} options
+ * @param {(string|Array<string>)=} ignoreRules
  * @return {!Array<string>}
  */
-function getFilesToCheck(globs, options = {}) {
+function getFilesToCheck(globs, options = {}, ignoreRules = undefined) {
   const ignored = ignore();
-  if (options.ignore) {
-    ignored.add(options.ignore);
+  if (ignoreRules) {
+    ignored.add(ignoreRules);
   }
   if (argv.files) {
     return logFiles(ignored.filter(getFilesFromArgv()));

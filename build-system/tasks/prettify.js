@@ -49,7 +49,7 @@ async function prettify() {
   // Prettier ignores the `.prettierignore` file when using the API like we
   // are. So we need to filter our files down before feeding them to the API.
   const ignore = fs.readFileSync('.prettierignore', 'utf8');
-  const filesToCheck = getFilesToCheck(prettifyGlobs, {dot: true, ignore});
+  const filesToCheck = getFilesToCheck(prettifyGlobs, {dot: true}, ignore);
   if (filesToCheck.length == 0) {
     return;
   }
