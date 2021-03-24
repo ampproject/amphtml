@@ -433,7 +433,6 @@ exports.rules = [
       'src/polyfills/fetch.js->src/utils/bytes.js',
       'src/polyfills/intersection-observer.js->src/polyfillstub/intersection-observer-stub.js',
       'src/polyfills/resize-observer.js->src/polyfillstub/resize-observer-stub.js',
-      'src/polyfills/promise.js->node_modules/promise-pjs/promise.js',
       'src/polyfills/custom-elements.js->src/resolved-promise.js',
     ],
   },
