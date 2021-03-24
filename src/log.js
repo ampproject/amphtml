@@ -18,11 +18,11 @@ import {
   USER_ERROR_SENTINEL,
   elementStringOrPassThru,
 } from './core/error-message-helpers';
-import {UserError, assertion} from './core/assert';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
 import {isArray, isEnumValue} from './types';
 import {once} from './utils/function';
+import {pureDevAssert, pureUserAssert} from './core/assert';
 import {urls} from './config';
 
 const noop = () => {};
@@ -401,7 +401,8 @@ export class Log {
     }
 
     try {
-      return assertion(this == logs.user ? UserError : Error, shouldBeTrueish);
+      const assertion = this == logs.user ? pureUserAssert : pureDevAssert;
+      assertion.apply(null, [shouldBeTrueish, opt_message].concat(var_args));
     } catch (assertionError) {
       this.prepareError_(assertionError);
       self.__AMP_REPORT_ERROR(assertionError);
@@ -607,23 +608,6 @@ export class Log {
     } else {
       this.assert(assertion, `${opt_message || defaultMessage}: %s`, subject);
     }
-  }
-}
-
-/**
- * @param {string|!Element} val
- * @return {string}
- */
-const stringOrElementString = (val) =>
-  /** @type {string} */ (elementStringOrPassThru(val));
-
-/**
- * @param {!Array} array
- * @param {*} val
- */
-function pushIfNonEmpty(array, val) {
-  if (val != '') {
-    array.push(val);
   }
 }
 

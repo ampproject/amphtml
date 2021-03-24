@@ -64,7 +64,7 @@ export class UserError extends Error {
  * @return {T}
  * @throws {Error} when shouldBeTruthy is not truthy.
  */
-export function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
+function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
   if (shouldBeTruthy) {
     return shouldBeTruthy;
   }
