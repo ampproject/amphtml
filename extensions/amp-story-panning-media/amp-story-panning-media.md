@@ -270,6 +270,7 @@ With these components we wanted to help users create more entertaining and immer
 </table>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## FAQ
 
 **What's next for `amp-story-panning-media`?**
@@ -303,3 +304,8 @@ This component is still under development. Validation details will be defined be
 This component is available in experimental. Validation details will be defined before launch.
 >>>>>>>> 1dc9cb4b9 (add examples):extensions/amp-story-panning-media/amp-story-panning-media.md
 >>>>>>> 1dc9cb4b9 (add examples)
+=======
+## Validation
+
+This component is available in experimental. Validation details will be defined before launch.
+>>>>>>> 7e4d23bae (Remove FAQ. mention experimental in validation.)
