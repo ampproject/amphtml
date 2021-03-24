@@ -76,13 +76,6 @@ export function toExtension(url: URL, extension: string): URL {
  * This is a temporary measure to allow for a relaxed parsing of our
  * fixture files' src urls before they are all fixed accordingly.
  */
-export function tryGetUrl(src: string, port: number = 8000): URL {
-  let url;
-  try {
-    url = new URL(src);
-  } catch (e) {
-    url = new URL(src, `http://localhost:${port}`);
-  } finally {
-    return url as URL;
-  }
+export function tryGetUrl(src: string, host: string = '0.0.0.0', port: number = 8000): URL {
+  return new URL(src, `http://${host}:${port}`);
 }

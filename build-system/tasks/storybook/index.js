@@ -42,15 +42,6 @@ const repoDir = path.join(__dirname, '../../..');
 const envConfigDir = (env) => path.join(__dirname, `${env}-env`);
 
 /**
- * @param {string} message Message for amp task (call stack is already in logs)
- */
-const throwError = (message) => {
-  const err = new Error(message);
-  err.showStack = false;
-  throw err;
-};
-
-/**
  * @param {string} env 'amp' or 'preact'
  */
 function launchEnv(env) {
@@ -67,7 +58,7 @@ function launchEnv(env) {
     ].join(' '),
     {cwd: __dirname, stdio: 'inherit'}
   ).on('error', () => {
-    throwError('Launch failed');
+    throw new Error('Launch failed');
   });
 }
 
@@ -103,7 +94,7 @@ function buildEnv(env) {
     {cwd: __dirname, stdio: 'inherit'}
   );
   if (result.status != 0) {
-    throwError('Build failed');
+    throw new Error('Build failed');
   }
 }
 
