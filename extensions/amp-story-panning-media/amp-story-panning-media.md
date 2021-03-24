@@ -245,8 +245,12 @@ With these components we wanted to help users create more entertaining and immer
 
 <table>
   <tr>
+<<<<<<< HEAD
    <td><strong>The Northern Sky Constellations:</strong> This story uses a star chart for the entire story by panning and zooming into different constellations. A parallax transition effect is also acheived by layering two png star images with transparency.
 >>>>>>> 1dc9cb4b9 (add examples)
+=======
+   <td><strong>The Northern Sky Constellations:</strong> This story uses a star chart for the entire story by panning and zooming into different constellations. A parallax transition effect is also achieved by layering two png star images with transparency.
+>>>>>>> 772f2a1a0 (Update extensions/amp-story-panning-media/amp-story-panning-media.md)
 <br><br>
 <a href="https://philipbell-panning-media.web.app/examples/amp-story/northern-sky-constellations.html">The Northern Sky Constellations</a>
    </td>
