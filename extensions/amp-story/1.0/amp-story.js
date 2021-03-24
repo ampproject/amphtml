@@ -773,12 +773,14 @@ export class AmpStory extends AMP.BaseElement {
       this.onBookendStateUpdate_(isActive);
     });
 
-    this.storeService_.subscribe(
-      StateProperty.PAGE_ATTACHMENT_STATE,
-      (isActive) => {
-        this.onAttachmentStateUpdate_(isActive);
-      }
-    );
+    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+      this.storeService_.subscribe(
+        StateProperty.PAGE_ATTACHMENT_STATE,
+        (isActive) => {
+          this.onAttachmentStateUpdate_(isActive);
+        }
+      );
+    }
 
     this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
       this.onPausedStateUpdate_(isPaused);
@@ -2180,12 +2182,10 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onAttachmentStateUpdate_(isActive) {
-    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-      this.element.classList.toggle(
-        'i-amphtml-story-attachment-active',
-        isActive
-      );
-    }
+    this.element.classList.toggle(
+      'i-amphtml-story-attachment-active',
+      isActive
+    );
   }
 
   /**
