@@ -16,17 +16,17 @@
 
 /**
  * @fileoverview
- * Reports term checks from presubmit-checks.js.
+ * Reports forbidden terms from presubmit-checks.js.
  */
 
 module.exports = function (context) {
   return {
     Program() {
+      // See signature of this function on presubmit-checks.js
+      const [getForbiddenTerms] = context.options;
+
       const filename = context.getFilename();
       const sourceCode = context.getSourceCode();
-
-      const [options] = context.options;
-      const {getForbiddenTerms, getMissingTerms} = options;
 
       const forbiddenTerms = getForbiddenTerms(filename, sourceCode.text);
       for (const {line, column, match, message} of forbiddenTerms) {
@@ -39,17 +39,6 @@ module.exports = function (context) {
           message:
             `Found forbidden term: ${match}.` + (message ? ` ${message}.` : ''),
           loc: {start, end},
-        });
-      }
-
-      const missingTerms = getMissingTerms(filename, sourceCode.text);
-      for (const term of missingTerms) {
-        context.report({
-          message: `Missing required term: ${term}.`,
-          loc: {
-            start: {line: 1, column: 0},
-            end: {line: 1, column: 0},
-          },
         });
       }
     },

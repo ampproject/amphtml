@@ -16,7 +16,7 @@
 'use strict';
 
 // Terms are defined here.
-/* eslint-disable local/terms */
+/* eslint-disable local/forbidden-terms */
 
 const fs = require('fs');
 const globby = require('globby');
@@ -1434,20 +1434,6 @@ function hasForbiddenTerms(srcFile) {
 }
 
 /**
- * @param {string} srcFile
- * @param {string} contents
- * @return {Array<string>}
- */
-function getMissingTerms(srcFile, contents) {
-  return Object.keys(requiredTerms).filter(
-    (term) =>
-      requiredTerms[term].test(srcFile) &&
-      !requiredTermsExcluded.test(srcFile) &&
-      !contents.match(new RegExp(term))
-  );
-}
-
-/**
  * Test if a file's contents fail to match any of the required terms and log
  * any missing terms
  *
@@ -1457,17 +1443,29 @@ function getMissingTerms(srcFile, contents) {
  */
 function isMissingTerms(srcFile) {
   const contents = fs.readFileSync(srcFile, 'utf-8');
-  const terms = getMissingTerms(srcFile, contents);
-  for (const term of terms) {
-    log(
-      red('ERROR:'),
-      'Did not find required',
-      cyan(`"${term}"`),
-      'in',
-      cyan(srcFile)
-    );
-  }
-  return terms.length > 0;
+  return Object.keys(requiredTerms)
+    .map(function (term) {
+      const filter = requiredTerms[term];
+      if (!filter.test(srcFile) || requiredTermsExcluded.test(srcFile)) {
+        return false;
+      }
+
+      const matches = contents.match(new RegExp(term));
+      if (!matches) {
+        log(
+          red('ERROR:'),
+          'Did not find required',
+          cyan(`"${term}"`),
+          'in',
+          cyan(srcFile)
+        );
+        return true;
+      }
+      return false;
+    })
+    .some(function (hasMissingTerm) {
+      return hasMissingTerm;
+    });
 }
 
 /**
@@ -1500,7 +1498,6 @@ async function presubmit() {
 
 module.exports = {
   presubmit,
-  getMissingTerms,
   getForbiddenTerms,
 };
 
