@@ -73,7 +73,6 @@ import {SystemLayer} from './amp-story-system-layer';
 import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
 import {ViewportWarningLayer} from './amp-story-viewport-warning-layer';
 import {VisibilityState} from '../../../src/visibility-state';
-import {isPageAttachmentUiV2ExperimentOn} from './amp-story-open-page-attachment';
 import {
   childElement,
   childElementByTag,
@@ -107,6 +106,7 @@ import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
 import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
+import {isPageAttachmentUiV2ExperimentOn} from './amp-story-open-page-attachment';
 import {parseQueryString} from '../../../src/url';
 import {
   removeAttributeInMutate,
