@@ -46,31 +46,20 @@ const wrapper = {
   height: '100%',
   position: 'fixed',
   boxSizing: 'border-box',
-};
-
-// User overridable styles
-const defaultStyles = {
   zIndex: 1000,
   backgroundColor: 'rgba(0, 0, 0, 0.9)',
   color: '#fff',
 };
 
-/* 
-  overflow: hidden does not trigger overscrollBehavior, so 
-  overflow: auto is applied even though the lightbox should not scroll.
-  We rely instead on the overflow: hidden in ContainWrapper to prevent 
-  scrolling inside the lightbox.
-*/
-const containScroll = {
-  overflow: 'auto', // Prevent scrolling inside lightbox.
-  overscrollBehavior: 'none', // Prevent scrolling outside lightbox.
+const content = {
+  overflow: 'auto !important',
+  overscrollBehavior: 'none !important',
 };
 
 const JSS = {
   closeButton,
   wrapper,
-  defaultStyles,
-  containScroll,
+  content,
 };
 
 // useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.

@@ -58,7 +58,6 @@ function LightboxWithRef(
     closeButtonAs,
     onBeforeOpen,
     onAfterClose,
-    scrollable = false,
     ...rest
   },
   ref
@@ -158,18 +157,10 @@ function LightboxWithRef(
         layout={true}
         paint={true}
         part="lightbox"
-        contentStyle={
-          // Prefer style over class to override `ContainWrapper`'s overflow
-          scrollable && {
-            overflow: 'scroll',
-            overscrollBehavior: 'none',
-          }
-        }
-        wrapperClassName={`${classes.defaultStyles} ${classes.wrapper} ${
-          scrollable ? '' : classes.containScroll
-        }`}
+        contentClassName={classes.content}
+        wrapperClassName={classes.wrapper}
         role="dialog"
-        tabindex="0"
+        tabIndex="0"
         onKeyDown={(event) => {
           if (event.key === Keys.ESCAPE) {
             setVisible(false);
