@@ -24,7 +24,7 @@ import {dict} from '../../../../../src/utils/object';
 import {getSourceUrl, resolveRelativeUrl} from '../../../../../src/url';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {isArray} from '../../../../../src/types';
-import {pureUserAssert as userAssert} from '../../../../../src/core/assert';
+import {userAssert} from '../../../../../src/log';
 import {userAssertValidProtocol} from '../../utils';
 
 /**

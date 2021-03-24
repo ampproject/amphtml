@@ -22,7 +22,7 @@ import {
   tryDecodeUriComponent,
 } from './url';
 import {urls} from './config';
-import {pureUserAssert as userAssert} from './core/assert';
+import {userAssert} from './log';
 
 const TEST_COOKIE_NAME = '-test-amp-cookie-tmp';
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {pureUserAssert as userAssert} from '../../../../src/core/assert';
+import {userAssert} from '../../../../src/log';
 
 /**
  * Interface for amp-experiment mutations.

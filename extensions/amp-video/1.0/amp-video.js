@@ -17,7 +17,7 @@
 import {CSS} from '../../../build/amp-video-1.0.css';
 import {VideoBaseElement} from './base-element';
 import {isExperimentOn} from '../../../src/experiments';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-video';
