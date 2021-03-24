@@ -227,7 +227,7 @@ export class DraggableDrawer extends AMP.BaseElement {
           e.propertyName === 'transform' &&
           this.state_ === DrawerState.CLOSED
         ) {
-          this.containerEl_.scrollTop = 0;
+          this.containerEl_./*OK*/ scrollTop = 0;
         }
       });
     }
