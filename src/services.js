@@ -866,4 +866,15 @@ export class Services {
       'assistjs-config-service'
     ));
   }
+
+  /**
+   * @param {!Element} el
+   * @return {!Promise<../amp-cache-url/amp-cache-url.AmpCacheUrlService>}
+   */
+  static cacheUrlServicePromiseForDoc(el) {
+    return /** @type {!Promise<?../amp-cache-url/amp-cache-url.AmpCacheUrlService>} */ (getServicePromiseForDoc(
+      el,
+      'cache-url'
+    ));
+  }
 }

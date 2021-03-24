@@ -1,0 +1,122 @@
+/**
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import * as videoCache from '../video-cache';
+import {AmpCacheUrlService} from '../../../amp-cache-url/0.1/amp-cache-url';
+import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
+import {AmpVideo} from '../amp-video';
+import {Services} from '../../../../src/services';
+import {createElementWithAttributes} from '../../../../src/dom';
+
+describes.realWin(
+  'amp-video cached-sources',
+  {
+    amp: {
+      runtimeOn: true,
+      extensions: ['amp-video', 'amp-cache-url'],
+    },
+  },
+  (env) => {
+    let requestService;
+    let cacheUrlService;
+
+    beforeEach(() => {
+      requestService = new AmpStoryRequestService(
+        env.win,
+        env.win.document.body
+      );
+      env.sandbox
+        .stub(Services, 'storyRequestServiceForOrNull')
+        .returns(requestService);
+
+      cacheUrlService = new AmpCacheUrlService();
+      env.sandbox
+        .stub(Services, 'cacheUrlServicePromiseForDoc')
+        .returns(Promise.resolve(cacheUrlService));
+      env.sandbox.stub(videoCache, 'hasCacheUrlService').returns(true);
+
+      env.win.document.head.appendChild(
+        createElementWithAttributes(env.win.document, 'script', {
+          'custom-element': 'amp-cache-url',
+        })
+      );
+    });
+
+    describe('select sources', () => {
+      it('should select the source if there is only one source', () => {
+        const videoEl = createVideo([{src: 'video1.mp4'}]);
+        expect(videoCache.selectVideoSource(videoEl)).to.contain('video1.mp4');
+      });
+
+      it('should select the first source if there are similar sources', () => {
+        const videoEl = createVideo([{src: 'video1.mp4'}, {src: 'video2.mp4'}]);
+        expect(videoCache.selectVideoSource(videoEl)).to.contain('video1.mp4');
+      });
+
+      it('should select the mp4 source if there are many sources', () => {
+        const videoEl = createVideo([
+          {src: 'video1.mp4'},
+          {src: 'video2.mp4', type: 'video/mp4'},
+        ]);
+        expect(videoCache.selectVideoSource(videoEl)).to.contain('video2.mp4');
+      });
+
+      it('should select the src attribute of amp-video if there are no sources', () => {
+        const videoEl = createVideo([]);
+        videoEl.setAttribute('src', 'video1.mp4');
+        expect(videoCache.selectVideoSource(videoEl)).to.contain('video1.mp4');
+      });
+    });
+
+    describe('create sources', () => {
+      it('should create the sources from the request with the correct attributes', async () => {
+        env.sandbox.stub(requestService, 'executeRequest').returns(
+          Promise.resolve({
+            sources: [
+              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+            ],
+          })
+        );
+
+        const videoEl = createVideo([{src: 'video.mp4'}]);
+        await videoEl.buildInternal();
+
+        expect(videoEl.querySelector('source[data-bitrate]')).to.not.be.null;
+      });
+    });
+
+    function createVideo(children) {
+      const videoEl = createElementWithAttributes(
+        env.win.document,
+        'amp-video',
+        {
+          'enable-google-video-cache': '',
+          'layout': 'fill',
+        }
+      );
+      children.forEach((childJson) => {
+        const sourceEl = createElementWithAttributes(
+          env.win.document,
+          'source',
+          childJson
+        );
+        videoEl.appendChild(sourceEl);
+      });
+      env.win.document.body.appendChild(videoEl);
+      return videoEl;
+    }
+  }
+);

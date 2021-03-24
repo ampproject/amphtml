@@ -16,11 +16,10 @@
 
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
-import {getServicePromiseForDoc} from '../../../src/service';
 import {toArray} from '../../../src/types';
 
 /**
- * Add the cached url
+ * Add the caching sources to the video if opted in.
  * @param {!AmpVideo} video
  * @return {!Promise}
  */
@@ -28,7 +27,7 @@ export function addCacheSources(video) {
   if (!hasCacheUrlService(video.win)) {
     return Promise.resolve();
   }
-  const servicePromise = getServicePromiseForDoc(video.element, 'cache-url');
+  const servicePromise = Services.cacheUrlServicePromiseForDoc(video.element);
   return servicePromise
     .then((service) =>
       Promise.all([
@@ -49,7 +48,7 @@ export function addCacheSources(video) {
  * @param {!Element} videoEl
  * @return {string}
  */
-function selectVideoSource(videoEl) {
+export function selectVideoSource(videoEl) {
   const possibleSources = toArray(videoEl.querySelectorAll('source[src]'));
   if (videoEl.hasAttribute('src')) {
     possibleSources.push(videoEl);
@@ -67,8 +66,7 @@ function selectVideoSource(videoEl) {
  * @param {!Element} videoEl
  * @param {!Array<!Object>} sources
  */
-function applySourcesToVideo(videoEl, sources) {
-  console.log(sources);
+export function applySourcesToVideo(videoEl, sources) {
   sources
     .sort((a, b) => a['bitrate_kbps'] - b['bitrate_kbps'])
     .forEach((source) => {
@@ -89,7 +87,7 @@ function applySourcesToVideo(videoEl, sources) {
  * @param {!Window} win
  * @return {boolean}
  */
-function hasCacheUrlService(win) {
+export function hasCacheUrlService(win) {
   return !!win.document.head.querySelector(
     'script[custom-element="amp-cache-url"]'
   );
