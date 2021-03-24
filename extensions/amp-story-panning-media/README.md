@@ -84,11 +84,9 @@ Use the `amp-story-panning-media` to transition an image between pages. The comp
 
 Add the following import to your AMP documents:
 
-[sourcecode:html]
-
-<script async custom-element="amp-story-panning-media" src="https://cdn.ampproject.org/v0/amp-story-panning-media-0.1.js"></script>
-
-[/sourcecode]
+```html
+<script async custom-element="amp-story-panning-media" src="https://cdn.ampproject.org/v0/amp-story-panning-media-0.1.js"><script>
+```
 
 ### Configuration
 ========
@@ -97,6 +95,7 @@ Add the following import to your AMP documents:
 Add the following script tag to the head of your Web Story:
 
 ```html
+<<<<<<< HEAD
 <script async custom-element="amp-story-panning-media" src="https://cdn.ampproject.org/v0/amp-story-panning-media-0.1.js"><script>
 ```
 >>>>>>>> 1dc9cb4b9 (add examples):extensions/amp-story-panning-media/amp-story-panning-media.md
@@ -110,11 +109,18 @@ The `amp-story-panning-media` component accepts 1 descendant. This descendant mu
   <amp-story-grid-layer>
     <amp-story-panning-media layout="fill" x="-10%" y="-20%" zoom=".8">
       <amp-img layout="fill" src="assets/world-map.jpg" width="4000" height="3059" ></amp-img>
+=======
+<amp-story-page>
+  <amp-story-grid-layer>
+    <amp-story-panning-media layout="fill">
+      <amp-img layout="fill" src="assets/world-map.jpg" x="-10%" y="-20%" zoom=".8" width="4000" height="3059" ></amp-img>
+>>>>>>> e5e5d21e1 (Update inline code.)
     </amp-story-panning-media>
   </amp-story-grid-layer>
 </amp-story-page>
 
 <amp-story-page>
+<<<<<<< HEAD
 <<<<<<<< HEAD:extensions/amp-story-panning-media/README.md
 <amp-story-grid-layer>
 <amp-story-panning-media layout="fill">
@@ -129,6 +135,14 @@ The `amp-story-panning-media` component accepts 1 descendant. This descendant mu
   </amp-story-grid-layer>
 >>>>>>>> 1dc9cb4b9 (add examples):extensions/amp-story-panning-media/amp-story-panning-media.md
 </amp-story-page>
+=======
+  <amp-story-grid-layer>
+    <amp-story-panning-media layout="fill">
+      <amp-img layout="fill" src="assets/world-map.jpg" x="20%" y="30%" zoom="2" width="4000" height="3059" ></amp-img>
+    </amp-story-panning-media>
+  </amp-story-grid-layer>
+</mp-story-page>
+>>>>>>> e5e5d21e1 (Update inline code.)
 ```
 
 ### Web Story use example
