@@ -53,8 +53,8 @@ const realiasGetMode =
 /**
  * @typedef {{
  *   message: string,
- *   allowlist: (undefined|Array<string>),
- *   checkInTestFolder: (undefined|boolean,
+ *   allowlist?: (undefined|Array<string>),
+ *   checkInTestFolder?: (undefined|boolean),
  * }}
  */
 let ForbiddenTermDef;
@@ -928,6 +928,9 @@ const measurementApiDeprecated =
   'getLayoutSize/Box APIs are being deprecated. Please contact the' +
   ' @ampproject/wg-performance for questions.';
 
+/**
+ * @const {Object<string, string|!ForbiddenTermDef>}
+ */
 const forbiddenTermsSrcInclusive = {
   '\\.innerHTML(?!_)': bannedTermsHelpString,
   '\\.outerHTML(?!_)': bannedTermsHelpString,
