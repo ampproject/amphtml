@@ -75,7 +75,7 @@ async function buildVendorConfigs(options) {
  * @param {?Object} options
  * @return {!Promise}
  */
-async function buildVendorLazily(jsBundles, name, options) {
+async function doBuild3pVendor(jsBundles, name, options) {
   const target = jsBundles[name];
   if (target) {
     return compileJsWithEsbuild(
@@ -92,7 +92,7 @@ async function buildVendorLazily(jsBundles, name, options) {
 }
 
 /**
- * Generate bundles for all JS to be built.
+ * Generate bundles for all 3p vendors to be built.
  * @return {Object}
  */
 function generateBundles() {
@@ -140,6 +140,6 @@ function listVendors() {
 
 module.exports = {
   buildVendorConfigs,
-  buildVendorLazily,
+  doBuild3pVendor,
   generateBundles,
 };

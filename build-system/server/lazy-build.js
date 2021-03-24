@@ -15,15 +15,16 @@
  */
 'use strict';
 
-const {generateBundles} = require('../tasks/3p-vendor-helpers');
-
 const argv = require('minimist')(process.argv.slice(2));
+const {
+  doBuild3pVendor,
+  generateBundles,
+} = require('../tasks/3p-vendor-helpers');
 const {
   doBuildExtension,
   maybeInitializeExtensions,
   getExtensionsToBuild,
 } = require('../tasks/extension-helpers');
-const {buildVendorLazily} = require('../tasks/3p-vendor-helpers');
 const {doBuildJs, compileCoreRuntime} = require('../tasks/helpers');
 const {jsBundles} = require('../compile/bundles.config');
 const {VERSION} = require('../compile/internal-version');
@@ -144,7 +145,7 @@ async function lazyBuild3pVendor(req, _res, next) {
   const matcher = argv.compiled
     ? new RegExp(`\\/dist\\.3p\\/${VERSION}\\/vendor\\/([^\/]*)\\.js`) // '/dist.3p/21900000/vendor/*.js'
     : /\/dist\.3p\/current\/vendor\/([^\/]*)\.max\.js/; // '/dist.3p/current/vendor/*.max.js'
-  await lazyBuild(req.url, matcher, vendorBundles, buildVendorLazily, next);
+  await lazyBuild(req.url, matcher, vendorBundles, doBuild3pVendor, next);
 }
 
 /**
