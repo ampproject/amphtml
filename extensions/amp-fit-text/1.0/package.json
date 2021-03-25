@@ -7,13 +7,14 @@
   "main": "dist/component.js",
   "module": "dist/component.mjs",
   "exports": {
-    ".": {
-      "import": "dist/component.mjs",
-      "require": "dist/component.js"
-    },
+    ".": "./preact",
     "./preact": {
-      "import": "dist/component.mjs",
-      "require": "dist/component.js"
+      "import": "dist/component-preact.mjs",
+      "require": "dist/component-preact.js"
+    },
+    "./react": {
+      "import": "dist/component-react.mjs",
+      "require": "dist/component-react.js"
     }
   },
   "files": ["dist/*"],
