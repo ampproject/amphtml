@@ -31,7 +31,7 @@ function logClosureCompilerError(message) {
   log(red('ERROR:'));
   const babelCacheDir = `${getBabelCacheDir()}/`;
   const loggingPrefix = /^.*?gulp-google-closure-compiler.*?: /;
-  const highlight = require('cli-highlight'); // Lazy-required to speed up task loading.
+  const {highlight} = require('cli-highlight'); // Lazy-required to speed up task loading.
   const highlightedMessage = highlight(message, {ignoreIllegals: true});
   const formattedMessage = highlightedMessage
     .replace(loggingPrefix, '')
