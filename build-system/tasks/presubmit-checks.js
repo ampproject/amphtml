@@ -15,9 +15,6 @@
  */
 'use strict';
 
-// Terms are defined here.
-/* eslint-disable local/forbidden-terms */
-
 const fs = require('fs');
 const globby = require('globby');
 const srcGlobs = require('../test-configs/config').presubmitGlobs;
