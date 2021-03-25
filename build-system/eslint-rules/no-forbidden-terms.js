@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const {getForbiddenTerms} = require('../test-configs/forbidden-terms');
+const {matchForbiddenTerms} = require('../test-configs/forbidden-terms');
 const {relative} = require('path');
 
 /**
@@ -28,13 +28,16 @@ module.exports = function (context) {
     Program() {
       const filename = relative(process.cwd(), context.getFilename());
       const sourceCode = context.getSourceCode();
+      const contents = sourceCode.text;
 
-      for (const report of getForbiddenTerms(filename, sourceCode.text)) {
-        const {match, message, loc} = report;
-        context.report({
-          loc,
-          message: `Forbidden: "${match}".${message ? `\n${message}.` : ''}`,
-        });
+      for (const terms of context.options) {
+        for (const report of matchForbiddenTerms(filename, contents, terms)) {
+          const {match, message, loc} = report;
+          context.report({
+            loc,
+            message: `Forbidden: "${match}".${message ? `\n${message}.` : ''}`,
+          });
+        }
       }
     },
   };
