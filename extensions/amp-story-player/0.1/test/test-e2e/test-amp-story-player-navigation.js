@@ -67,7 +67,7 @@ describes.endtoend(
         'paused'
       );
 
-      await timeout(500);
+      await timeout(800);
       await expect(isVideoPaused).to.eql(false);
     });
 
@@ -92,7 +92,7 @@ describes.endtoend(
         'paused'
       );
 
-      await timeout(500);
+      await timeout(800);
       await expect(isVideoPaused).to.eql(true);
     });
   }
