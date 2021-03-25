@@ -1144,19 +1144,6 @@ function isInTestFolder(path) {
 }
 
 /**
- * Check if file is inside the build-system/babel-plugins test/fixture folder.
- * @param {string} srcFile
- * @return {boolean}
- */
-function isInBuildSystemFixtureFolder(srcFile) {
-  const folder = path.dirname(srcFile);
-  return (
-    folder.startsWith('build-system/babel-plugins') &&
-    folder.includes('test/fixtures')
-  );
-}
-
-/**
  * Strip Comments
  * @param {string} contents
  * @return {string}
