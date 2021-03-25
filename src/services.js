@@ -868,12 +868,12 @@ export class Services {
   }
 
   /**
-   * @param {!Element} el
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<../amp-cache-url/amp-cache-url.AmpCacheUrlService>}
    */
-  static cacheUrlServicePromiseForDoc(el) {
+  static cacheUrlServicePromiseForDoc(elementOrAmpDoc) {
     return /** @type {!Promise<?../amp-cache-url/amp-cache-url.AmpCacheUrlService>} */ (getServicePromiseForDoc(
-      el,
+      elementOrAmpDoc,
       'cache-url'
     ));
   }
