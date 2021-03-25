@@ -740,7 +740,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       // Complete unmount and reset the state.
       this.mounted_ = false;
       this.mountPromise_ = null;
-      this.signals_.reset(CommonSignals.MOUNTED);
+      this.reset_();
 
       // Prepare for the next mount if the element is connected.
       if (this.isConnected_) {
@@ -1148,7 +1148,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           this.reset_();
         }
         if (this.isUpgraded()) {
-          if (reconstruct) {
+          if (reconstruct && !this.V1()) {
             this.getResources().upgraded(this);
           }
           this.connected_();
@@ -1697,6 +1697,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     reset_() {
       this.layoutCount_ = 0;
       this.isFirstLayoutCompleted_ = false;
+      this.signals_.reset(CommonSignals.MOUNTED);
       this.signals_.reset(CommonSignals.RENDER_START);
       this.signals_.reset(CommonSignals.LOAD_START);
       this.signals_.reset(CommonSignals.LOAD_END);

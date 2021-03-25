@@ -140,6 +140,51 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       doc.body.appendChild(element);
       expect(element.readyState).to.equal('building');
     });
+
+    it('should reschedule build when re-attached after build', async () => {
+      const element = new ElementClass();
+
+      builderMock.expects('schedule').withExactArgs(element).twice();
+      builderMock.expects('unschedule').withExactArgs(element).once();
+
+      doc.body.appendChild(element);
+      expect(element.readyState).to.equal('building');
+
+      const promise = element.buildInternal();
+      expect(element.readyState).to.equal('building');
+
+      await promise;
+      expect(element.readyState).to.equal('mounting');
+
+      doc.body.removeChild(element);
+      expect(element.readyState).to.equal('mounting');
+
+      doc.body.appendChild(element);
+      expect(element.readyState).to.equal('mounting');
+    });
+
+    it('should reschedule build when re-attached after build with usesLoading', async () => {
+      env.sandbox.stub(TestElement, 'usesLoading').returns(true);
+      const element = new ElementClass();
+
+      builderMock.expects('schedule').withExactArgs(element).twice();
+      builderMock.expects('unschedule').withExactArgs(element).once();
+
+      doc.body.appendChild(element);
+      expect(element.readyState).to.equal('building');
+
+      const promise = element.buildInternal();
+      expect(element.readyState).to.equal('building');
+
+      await promise;
+      expect(element.readyState).to.equal('mounting');
+
+      doc.body.removeChild(element);
+      expect(element.readyState).to.equal('mounting');
+
+      doc.body.appendChild(element);
+      expect(element.readyState).to.equal('loading');
+    });
   });
 
   describe('preconnect', () => {

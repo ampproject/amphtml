@@ -419,13 +419,22 @@ export class PreactBaseElement extends AMP.BaseElement {
   }
 
   /** @override */
-  attachedCallback() {
+  mountCallback() {
     discover(this.element);
+    const Ctor = this.constructor;
+    if (Ctor['loadable'] && this.getProp('loading') != Loading.AUTO) {
+      this.mutateProps({'loading': Loading.AUTO});
+      this.resetLoading_ = false;
+    }
   }
 
   /** @override */
-  detachedCallback() {
+  unmountCallback() {
     discover(this.element);
+    const Ctor = this.constructor;
+    if (Ctor['loadable']) {
+      this.mutateProps({'loading': Loading.UNLOAD});
+    }
     this.updateIsPlaying_(false);
     this.mediaQueryProps_?.dispose();
   }
