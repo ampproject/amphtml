@@ -225,4 +225,9 @@ export const EXPERIMENTS = [
       'Adaptive bitrate algorithm for videos on documents from the AMPProject CDN',
     spec: 'https://github.com/ampproject/amphtml/projects/111',
   },
+  {
+    id: 'story-ad-placements',
+    name: 'Optimization of story ad placements',
+    spec: 'https://github.com/ampproject/amphtml/issues/33147',
+  },
 ];
