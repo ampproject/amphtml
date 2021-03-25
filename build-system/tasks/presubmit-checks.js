@@ -150,14 +150,18 @@ const forbiddenTerms = {
   '\\.buildInternal': {
     message: 'can only be called by the framework',
     allowlist: [
-      'src/service/builder.js',
+      'src/custom-element.js',
       'src/service/resource.js',
       'testing/iframe.js',
     ],
   },
-  'getBuilderForDoc': {
+  '\\.mountInternal': {
+    message: 'can only be called by the framework',
+    allowlist: ['src/service/scheduler.js', 'testing/iframe.js'],
+  },
+  'getSchedulerForDoc': {
     message: 'can only be used by the runtime',
-    allowlist: ['src/custom-element.js', 'src/service/builder.js'],
+    allowlist: ['src/custom-element.js', 'src/service/scheduler.js'],
   },
   // Service factories that should only be installed once.
   'installActionServiceForDoc': {
@@ -322,7 +326,7 @@ const forbiddenTerms = {
       'src/chunk.js',
       'src/element-service.js',
       'src/service.js',
-      'src/service/builder.js',
+      'src/service/scheduler.js',
       'src/service/cid-impl.js',
       'src/service/origin-experiments-impl.js',
       'src/service/template-impl.js',
@@ -1066,6 +1070,7 @@ const forbiddenTermsSrcInclusive = {
   '\\.getTime\\(\\)': {
     message: 'Unless you do weird date math (allowlist), use Date.now().',
     allowlist: [
+      '.github/workflows/create-design-review-issue.js',
       'extensions/amp-timeago/0.1/amp-timeago.js',
       'extensions/amp-timeago/1.0/component.js',
       'src/utils/date.js',
@@ -1440,7 +1445,7 @@ function isMissingTerms(srcFile) {
 }
 
 /**
- * Entry point for gulp presubmit.
+ * Entry point for amp presubmit.
  */
 async function presubmit() {
   let forbiddenFound = false;

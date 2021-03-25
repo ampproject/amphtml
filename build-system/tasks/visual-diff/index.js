@@ -37,7 +37,7 @@ const {
   gitCiMasterBaseline,
   shortSha,
 } = require('../../common/git');
-const {buildRuntime, installPackages} = require('../../common/utils');
+const {buildRuntime} = require('../../common/utils');
 const {cyan, yellow} = require('kleur/colors');
 const {isCiBuild} = require('../../common/ci');
 const {startServer, stopServer} = require('../serve');
@@ -110,7 +110,7 @@ const SNAPSHOT_ERROR_SNIPPET = fs.readFileSync(
 let browser_;
 
 /**
- * Override PERCY_* environment variables if passed via gulp task parameters.
+ * Override PERCY_* environment variables if passed via amp task parameters.
  */
 function maybeOverridePercyEnvironmentVariables() {
   ['percy_token', 'percy_branch'].forEach((variable) => {
@@ -788,7 +788,7 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
       log(
         'fatal',
         'The AMP runtime was not built in test mode. Run',
-        cyan('gulp dist --fortesting'),
+        cyan('amp dist --fortesting'),
         'or remove the',
         cyan('--nobuild'),
         'option from this command'
@@ -800,15 +800,11 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
 }
 
 /**
- * Installs package.json dependencies are returns an instance of BrowserFetcher.
+ * Loads task-specific dependencies are returns an instance of BrowserFetcher.
  *
  * @return {!Promise<!puppeteer.BrowserFetcher>}
  */
 async function installDependencies_() {
-  if (!argv.noinstall) {
-    installPackages(__dirname);
-  }
-
   puppeteer = require('puppeteer');
   percySnapshot = require('@percy/puppeteer');
   Percy = require('@percy/core');
@@ -852,20 +848,19 @@ module.exports = {
 
 visualDiff.description = 'Runs the AMP visual diff tests.';
 visualDiff.flags = {
-  'master': '  Includes a blank snapshot (baseline for skipped builds)',
-  'empty': '  Creates a dummy Percy build with only a blank snapshot',
+  'master': 'Includes a blank snapshot (baseline for skipped builds)',
+  'empty': 'Creates a dummy Percy build with only a blank snapshot',
   'config':
-    '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
-  'chrome_debug': '  Prints debug info from Chrome',
-  'webserver_debug': '  Prints debug info from the local gulp webserver',
-  'percy_agent_debug': '  Prints debug info from the @percy/agent instance',
-  'debug': '  Sets all debugging flags',
-  'verbose': '  Prints verbose log statements',
-  'grep': '  Runs tests that match the pattern',
-  'percy_token': '  Override the PERCY_TOKEN environment variable',
-  'percy_branch': '  Override the PERCY_BRANCH environment variable',
+    'Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
+  'chrome_debug': 'Prints debug info from Chrome',
+  'webserver_debug': 'Prints debug info from the local amp webserver',
+  'percy_agent_debug': 'Prints debug info from the @percy/agent instance',
+  'debug': 'Sets all debugging flags',
+  'verbose': 'Prints verbose log statements',
+  'grep': 'Runs tests that match the pattern',
+  'percy_token': 'Override the PERCY_TOKEN environment variable',
+  'percy_branch': 'Override the PERCY_BRANCH environment variable',
   'percy_disabled':
-    '  Disables Percy integration (for testing local changes only)',
-  'nobuild': '  Skip build',
-  'noinstall': '  Skip installing npm dependencies',
+    'Disables Percy integration (for testing local changes only)',
+  'nobuild': 'Skip build',
 };

@@ -16,7 +16,7 @@ limitations under the License.
 
 <!--
   Run to insert missing sections:
-    gulp check-analytics-vendors-list --fix
+    amp check-analytics-vendors-list --fix
 
   (Some are intentionally commented-out and should be kept for the CI check.)
 -->
@@ -534,6 +534,12 @@ Type attribute value: `snowplow_v2`
 ### subscriptions-propensity
 
 Type attribute value: `subscriptions-propensity`
+
+### Taboola
+
+Type attribute value: `taboola`
+
+Adds support for Taboola. More details for adding Taboola support can be found at [Taboola](https://taboola.com).
 
 ### Tail
 

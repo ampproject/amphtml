@@ -34,7 +34,6 @@ const {cyan, yellow} = require('kleur/colors');
  */
 const babelTransforms = new Map([
   ['babel-jest', 'getEmptyConfig'],
-  ['dep-check', 'getDepCheckConfig'],
   ['post-closure', 'getPostClosureConfig'],
   ['pre-closure', 'getPreClosureConfig'],
   ['test', 'getTestConfig'],

@@ -27,9 +27,10 @@ import {isFiniteNumber, isObject} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {parseJson} from '../../../src/json';
 import {removeElement} from '../../../src/dom';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-bodymovin-animation';
+const TYPE = 'bodymovinanimation';
 
 export class AmpBodymovinAnimation extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -72,7 +73,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     const preconnect = Services.preconnectFor(this.win);
-    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
+    preloadBootstrap(this.win, TYPE, this.getAmpDoc(), preconnect);
     // Different scripts are loaded based on `renderer` but their origin is the
     // same. See 3p/bodymovinanimation.js#libSourceUrl.
     preconnect.url(
@@ -140,12 +141,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
         renderer: this.renderer_,
         animationData: data,
       };
-      const iframe = getIframe(
-        this.win,
-        this.element,
-        'bodymovinanimation',
-        opt_context
-      );
+      const iframe = getIframe(this.win, this.element, TYPE, opt_context);
       iframe.title = this.element.title || 'Airbnb BodyMovin animation';
       return Services.vsyncFor(this.win)
         .mutatePromise(() => {

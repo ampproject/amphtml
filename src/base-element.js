@@ -154,6 +154,20 @@ export class BaseElement {
   }
 
   /**
+   * Subclasses can override this method to indicate that an element can load
+   * network resources.
+   *
+   * Such elements can have their `ensureLoaded` method called.
+   *
+   * @param {!AmpElement} unusedElement
+   * @return {boolean}
+   * @nocollapse
+   */
+  static usesLoading(unusedElement) {
+    return false;
+  }
+
+  /**
    * Subclasses can override this method to provide a svg logo that will be
    * displayed as the loader.
    *
@@ -447,6 +461,28 @@ export class BaseElement {
   }
 
   /**
+   * Set itself as a container element that can be monitored by the scheduler
+   * for auto-mounting. Scheduler is used for V1 elements. A container is
+   * usually a top-level scrollable overlay such as a lightbox or a sidebar.
+   * The main scheduler (`IntersectionObserver`) cannot properly handle elements
+   * inside a non-document scroller and this method instructs the scheduler
+   * to also use the `IntersectionObserver` corresponding to the container.
+   *
+   * @param {!Element=} opt_scroller A child of the container that should be
+   * monitored. Typically a scrollable element.
+   */
+  setAsContainer(opt_scroller) {
+    this.element.setAsContainerInternal(opt_scroller);
+  }
+
+  /**
+   * Removes itself as a container. See `setAsContainer`.
+   */
+  removeAsContainer() {
+    this.element.removeAsContainerInternal();
+  }
+
+  /**
    * Subclasses can override this method to indicate that it is has
    * render-blocking service.
    *
@@ -512,6 +548,25 @@ export class BaseElement {
   setReadyState(state, opt_failure) {
     this.element.setReadyStateInternal(state, opt_failure);
   }
+
+  /**
+   * Load heavy elements, perform expensive operations, add global
+   * listeners/observers, etc. The mount and unmount can be called multiple
+   * times for resource management. The unmount should reverse the changes
+   * made by the mount. See `unmountCallback` for more info.
+   *
+   * If this callback returns a promise, the `readyState` becomes "complete"
+   * after the promise is resolved.
+   *
+   * @param {!AbortSignal=} opt_abortSignal
+   * @return {?Promise|undefined}
+   */
+  mountCallback(opt_abortSignal) {}
+
+  /**
+   * Unload heavy elements, remove global listeners, etc.
+   */
+  unmountCallback() {}
 
   /**
    * Subclasses can override this method to opt-in into receiving additional
@@ -590,14 +645,6 @@ export class BaseElement {
    */
   unlayoutOnPause() {
     return false;
-  }
-
-  /**
-   * Unloads the element.
-   * @final
-   */
-  unload() {
-    this.element.getResources().getResourceForElement(this.element).unload();
   }
 
   /**

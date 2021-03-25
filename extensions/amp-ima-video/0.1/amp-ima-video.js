@@ -41,6 +41,8 @@ import {
 /** @const */
 const TAG = 'amp-ima-video';
 
+const TYPE = 'ima-video';
+
 /**
  * @implements {../../../src/video-interface.VideoInterface}
  */
@@ -158,7 +160,7 @@ class AmpImaVideo extends AMP.BaseElement {
       preconnect.url(this.getAmpDoc(), this.preconnectTrack_);
     }
     preconnect.url(this.getAmpDoc(), element.getAttribute('data-tag'));
-    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
+    preloadBootstrap(this.win, TYPE, this.getAmpDoc(), preconnect);
   }
 
   /** @override */
@@ -182,7 +184,7 @@ class AmpImaVideo extends AMP.BaseElement {
       const iframe = getIframe(
         win,
         element,
-        'ima-video',
+        TYPE,
         {initialConsentState},
         {allowFullscreen: true}
       );

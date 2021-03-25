@@ -39,8 +39,6 @@ const {cyan, red, yellow} = require('kleur/colors');
 const {log, logWithoutTimestamp} = require('../../common/logging');
 const {report, NoTTYReport} = require('@ampproject/filesize');
 
-const requestPost = util.promisify(require('request').post);
-
 const filesizeConfigPath = require.resolve('./filesize.json');
 const fileGlobs = require(filesizeConfigPath).filesize.track;
 const normalizedRtvNumber = '1234567890123';
@@ -52,10 +50,11 @@ const replacementExpression = new RegExp(internalRuntimeVersion, 'g');
 /**
  * Get the brotli bundle sizes of the current build after normalizing the RTV number.
  *
- * @return {Map<string, number>} the bundle size in KB rounded to 2 decimal
+ * @return {Promise<Object<string, number>>} the bundle size in KB rounded to 2 decimal
  *   points.
  */
 async function getBrotliBundleSizes() {
+  /** @type {Object<string, number>} */
   const bundleSizes = {};
   const sizes = await report(
     filesizeConfigPath,
@@ -86,6 +85,17 @@ function checkResponse(response, ...successMessages) {
   } else {
     log(...successMessages);
   }
+}
+
+/**
+ * Helper that lazily imports and promisifies request.post, and invokes it with
+ * the given args.
+ * @param {*} args
+ * @return {function()}
+ */
+async function requestPost(...args) {
+  const {default: request} = await import('request');
+  return util.promisify(request.post)(...args);
 }
 
 /**
@@ -218,7 +228,7 @@ async function reportBundleSize() {
 async function getLocalBundleSize() {
   if (globby.sync(fileGlobs).length === 0) {
     log('Could not find runtime files.');
-    log('Run', cyan('gulp dist --noextensions'), 'and re-run this task.');
+    log('Run', cyan('amp dist --noextensions'), 'and re-run this task.');
     process.exitCode = 1;
     return;
   } else {
@@ -245,7 +255,7 @@ async function bundleSize() {
   } else if (argv.on_local_build) {
     return getLocalBundleSize();
   } else {
-    log(red('Called'), cyan('gulp bundle-size'), red('with no task.'));
+    log(red('Called'), cyan('amp bundle-size'), red('with no task.'));
     process.exitCode = 1;
   }
 }
@@ -258,11 +268,11 @@ bundleSize.description =
   'Checks if the minified AMP binary has exceeded its size cap';
 bundleSize.flags = {
   'on_push_build':
-    '  Store bundle sizes in the AMP build artifacts repo ' +
+    'Store bundle sizes in the AMP build artifacts repo ' +
     '(also implies --on_pr_build)',
-  'on_pr_build': '  Report the bundle sizes for this pull request to GitHub',
+  'on_pr_build': 'Report the bundle sizes for this pull request to GitHub',
   'on_skipped_build':
-    "  Set the status of this pull request's bundle " +
+    "Set the status of this pull request's bundle " +
     'size check in GitHub to `skipped`',
-  'on_local_build': '  Compute bundle sizes for the locally built runtime',
+  'on_local_build': 'Compute bundle sizes for the locally built runtime',
 };

@@ -106,6 +106,7 @@ import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
 import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
+import {isPageAttachmentUiV2ExperimentOn} from './amp-story-open-page-attachment';
 import {parseQueryString} from '../../../src/url';
 import {
   removeAttributeInMutate,
@@ -772,6 +773,15 @@ export class AmpStory extends AMP.BaseElement {
       this.onBookendStateUpdate_(isActive);
     });
 
+    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+      this.storeService_.subscribe(
+        StateProperty.PAGE_ATTACHMENT_STATE,
+        (isActive) => {
+          this.onAttachmentStateUpdate_(isActive);
+        }
+      );
+    }
+
     this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
       this.onPausedStateUpdate_(isPaused);
     });
@@ -832,6 +842,15 @@ export class AmpStory extends AMP.BaseElement {
       );
     });
 
+    // Listen for class mutations on the <body> element.
+    const bodyElObserver = new this.win.MutationObserver((mutations) =>
+      this.onBodyElMutation_(mutations)
+    );
+    bodyElObserver.observe(this.win.document.body, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
     this.installGestureRecognizers_();
 
@@ -844,6 +863,19 @@ export class AmpStory extends AMP.BaseElement {
     if (this.viewerMessagingHandler_) {
       this.viewerMessagingHandler_.startListening();
     }
+  }
+
+  /** @private */
+  onBodyElMutation_(mutations) {
+    mutations.forEach((mutation) => {
+      const bodyEl = dev().assertElement(mutation.target);
+
+      // Updates presence of the `amp-mode-keyboard-active` class on the store.
+      this.storeService_.dispatch(
+        Action.TOGGLE_KEYBOARD_ACTIVE_STATE,
+        bodyEl.classList.contains('amp-mode-keyboard-active')
+      );
+    });
   }
 
   /** @private */
@@ -2143,6 +2175,17 @@ export class AmpStory extends AMP.BaseElement {
   onBookendStateUpdate_(isActive) {
     this.toggleElementsOnBookend_(/* display */ isActive);
     this.element.classList.toggle('i-amphtml-story-bookend-active', isActive);
+  }
+
+  /**
+   * @param {boolean} isActive
+   * @private
+   */
+  onAttachmentStateUpdate_(isActive) {
+    this.element.classList.toggle(
+      'i-amphtml-story-attachment-active',
+      isActive
+    );
   }
 
   /**

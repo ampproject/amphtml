@@ -70,11 +70,7 @@ t.run('Viewer Visibility State', () => {
 
       let shouldPass = false;
       let doPass_;
-      let intersect_;
       let notifyPass = noop;
-
-      let intersected;
-      let notifyIntersected;
 
       function doPass() {
         if (shouldPass) {
@@ -84,26 +80,11 @@ t.run('Viewer Visibility State', () => {
         }
       }
 
-      function intersect() {
-        intersect_.apply(this, arguments);
-        notifyIntersected();
-      }
-
       function waitForNextPass() {
         return new Promise((resolve) => {
           notifyPass = resolve;
-
-          if (resources.isIntersectionExperimentOn()) {
-            // Element lifecycle callbacks depend on the observer taking its
-            // initial measurements, so wait for an intersection first.
-            return intersected.then(() => {
-              shouldPass = true;
-              resources.schedulePass();
-            });
-          } else {
-            shouldPass = true;
-            resources.schedulePass();
-          }
+          shouldPass = true;
+          resources.schedulePass();
         });
       }
 
@@ -118,9 +99,6 @@ t.run('Viewer Visibility State', () => {
         win = env.win;
         notifyPass = noop;
         shouldPass = false;
-        intersected = new Promise((resolve) => {
-          notifyIntersected = resolve;
-        });
 
         const vsync = Services.vsyncFor(win);
         env.sandbox.stub(vsync, 'mutate').callsFake((mutator) => {
@@ -140,9 +118,7 @@ t.run('Viewer Visibility State', () => {
 
             resources = Services.resourcesForDoc(win.document);
             doPass_ = resources.doPass;
-            intersect_ = resources.intersect;
             env.sandbox.stub(resources, 'doPass').callsFake(doPass);
-            env.sandbox.stub(resources, 'intersect').callsFake(intersect);
 
             const img = win.document.createElement('amp-img');
             img.setAttribute('width', 100);
@@ -520,7 +496,7 @@ t.run('Viewer Visibility State', () => {
           return waitForNextPass().then(() => {
             expect(layoutCallback).not.to.have.been.called;
             expect(unlayoutCallback).to.have.been.called;
-            expect(pauseCallback).not.to.have.been.called;
+            expect(pauseCallback).to.have.been.called;
             expect(resumeCallback).not.to.have.been.called;
           });
         });

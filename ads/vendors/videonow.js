@@ -23,7 +23,7 @@ import {tryDecodeUriComponent} from '../../src/url';
  * @param {!Object} data
  */
 export function videonow(global, data) {
-  const mandatoryAttributes = ['pid', 'width', 'height'];
+  const mandatoryAttributes = ['pid'];
   const optionalAttributes = ['kind', 'src'];
 
   let customTag = '';

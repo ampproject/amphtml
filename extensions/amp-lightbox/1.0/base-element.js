@@ -73,7 +73,6 @@ BaseElement['props'] = {
   'closeButton': {selector: '[slot="close-button"]', single: true},
   'children': {passthrough: true},
   'id': {attr: 'id'},
-  'scrollable': {attr: 'scrollable', type: 'boolean'},
 };
 
 /** @override */

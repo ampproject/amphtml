@@ -13,15 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import {CountPagesAlgorithm} from './algorithm-count-pages';
+import {PredeterminedPositionAlgorithm} from './algorithm-predetermined';
+import {isExperimentOn} from '../../../src/experiments';
 
 /**
  * Choose placement algorithm implementation.
+ * @param {!Window} win
  * @param {!StoryStoreService} storeService
  * @param {!StoryAdPageManager} pageManager
  * @return {!StoryAdPlacementAlgorithm}
  */
-export function getPlacementAlgo(storeService, pageManager) {
+export function getPlacementAlgo(win, storeService, pageManager) {
   // TODO(ccordry): Update to use experiment branching.
+  if (isExperimentOn(win, 'story-ad-placements')) {
+    return new PredeterminedPositionAlgorithm(storeService, pageManager);
+  }
   return new CountPagesAlgorithm(storeService, pageManager);
 }

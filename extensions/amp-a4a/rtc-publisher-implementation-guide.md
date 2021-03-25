@@ -31,9 +31,10 @@ To use RTC, you must meet the following requirements:
 -   FLUX
 -   [Freestar](https://freestar.com)
 -   Future Plc
+-   [Highfivve](https://highfivve.com)
 -   IndexExchange
 -   Kargo
--   Local Media Consortium
+-   Newspassid
 -   Lotame
 -   Media.net
 -   OpenX
