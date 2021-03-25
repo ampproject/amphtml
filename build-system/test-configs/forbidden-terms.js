@@ -120,7 +120,7 @@ const forbiddenTerms = {
       'build-system/common/logging.js',
       'src/purifier/noop.js',
       'validator/js/engine/validator-in-browser.js',
-      'validator/js/engine/validator.js', // NodeJs only.
+      'validator/js/engine/validator.js',
     ],
     checkInTestFolder: true,
   },
@@ -506,7 +506,7 @@ const forbiddenTerms = {
     allowlist: [
       'src/3p-frame-messaging.js',
       'src/event-helper.js',
-      'src/event-helper-listen.js', // includes previous
+      'src/event-helper-listen.js',
     ],
   },
   'setTimeout.*throw': {

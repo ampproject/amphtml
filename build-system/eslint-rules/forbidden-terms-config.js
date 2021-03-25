@@ -27,15 +27,26 @@ const allowlistProperty = 'allowlist';
 module.exports = {
   meta: {fixable: 'code'},
   create(context) {
-    function removeFromArray(fixer, {start, end}) {
+    function removeFromArray(fixer, node) {
+      let {start} = node;
+      let last = node;
       const {text} = context.getSourceCode();
       while (/\s/.test(text[start - 1])) {
         start--;
       }
-      while (/[,\n]/.test(text[end])) {
-        end++;
+      const after = context.getTokenAfter(node);
+      if (after.type === 'Punctuator' && after.value === ',') {
+        last = after;
       }
-      return fixer.removeRange([start, end]);
+      const [nextComment] = context.getCommentsAfter(last);
+      if (nextComment) {
+        const isInline =
+          text.substr(last.end, nextComment.start - last.end).indexOf('\n') < 0;
+        if (isInline) {
+          last = nextComment;
+        }
+      }
+      return fixer.removeRange([start, last.end]);
     }
 
     return {
