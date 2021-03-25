@@ -148,7 +148,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       builderMock.expects('unschedule').withExactArgs(element).once();
 
       doc.body.appendChild(element);
-      expect(element.readyState).to.equal('upgrading');
+      expect(element.readyState).to.equal('building');
 
       const promise = element.buildInternal();
       expect(element.readyState).to.equal('building');
@@ -171,7 +171,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       builderMock.expects('unschedule').withExactArgs(element).once();
 
       doc.body.appendChild(element);
-      expect(element.readyState).to.equal('upgrading');
+      expect(element.readyState).to.equal('building');
 
       const promise = element.buildInternal();
       expect(element.readyState).to.equal('building');
