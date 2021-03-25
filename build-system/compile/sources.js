@@ -65,6 +65,7 @@ const COMMON_GLOBS = [
   'node_modules/@ampproject/worker-dom/dist/amp-production/main.mjs',
   'node_modules/preact/package.json',
   'node_modules/preact/dist/*.js',
+  'node_modules/preact/dom/*.js',
   'node_modules/preact/hooks/package.json',
   'node_modules/preact/hooks/dist/*.js',
   'node_modules/preact/compat/package.json',
