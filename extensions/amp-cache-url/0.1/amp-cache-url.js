@@ -15,6 +15,7 @@
  */
 
 import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
+import {urls} from '../../../src/config';
 
 export class AmpCacheUrlService {
   /**
@@ -28,7 +29,7 @@ export class AmpCacheUrlService {
    * @param {string=} cache
    * @return {!Promise<string>}
    */
-  createCacheUrl(url, cache = 'cdn.ampproject.org') {
+  createCacheUrl(url, cache = urls.cdn.replace('https://', '')) {
     return ampToolboxCacheUrl.createCacheUrl(cache, url);
   }
 }
