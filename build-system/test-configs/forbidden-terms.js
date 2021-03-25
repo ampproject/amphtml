@@ -339,7 +339,7 @@ const forbiddenTerms = {
       // iframe-messaging-client.sendMessage
       '3p/iframe-messaging-client.js',
       '3p/ampcontext.js',
-      '3p/ampcontext-integration.js', // includes previous
+      '3p/ampcontext-integration.js',
     ],
   },
   '\\.sendMessageAwaitResponse\\(': {
