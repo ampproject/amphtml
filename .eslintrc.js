@@ -317,7 +317,6 @@ module.exports = {
     },
     {
       'files': [
-        'build-system/babel-plugins/**/test/fixtures/**/*',
         '**/test-*',
         '**/_init_tests*',
         '**/*_test.js',
@@ -326,6 +325,12 @@ module.exports = {
       ],
       'rules': {
         'local/no-forbidden-terms': [2, forbiddenTermsGlobal],
+      },
+    },
+    {
+      'files': ['build-system/babel-plugins/**/test/fixtures/**/*'],
+      'rules': {
+        'local/no-forbidden-terms': 0,
       },
     },
     {
