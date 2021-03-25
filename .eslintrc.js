@@ -125,7 +125,6 @@ module.exports = {
     'local/await-expect': 2,
     'local/closure-type-primitives': 2,
     'local/dict-string-keys': 2,
-    'local/forbidden-terms': 2,
     'local/get-mode-usage': 2,
     'local/html-template': 2,
     'local/is-experiment-on': 2,
@@ -141,6 +140,7 @@ module.exports = {
     'local/no-es2015-number-props': 2,
     'local/no-export-side-effect': 2,
     'local/no-for-of-statement': 2,
+    'local/no-forbidden-terms': 2,
     'local/no-function-async': 2,
     'local/no-function-generator': 2,
     'local/no-global': 0,
@@ -321,8 +321,8 @@ module.exports = {
         'require': false,
       },
       'rules': {
+        'local/no-forbidden-terms': 0,
         'local/no-module-exports': 0,
-        'local/forbidden-terms': 0,
       },
     },
     {
