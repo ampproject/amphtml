@@ -1198,10 +1198,8 @@ function matchForbiddenTerms(srcFile, contents, terms) {
       // NOTE: we could do a glob test instead of exact check in the future
       // if needed but that might be too permissive.
       if (
-        isInBuildSystemFixtureFolder(srcFile) ||
-        (Array.isArray(allowlist) &&
-          (allowlist.indexOf(srcFile) != -1 ||
-            (isInTestFolder(srcFile) && !checkInTestFolder)))
+        (Array.isArray(allowlist) && allowlist.indexOf(srcFile) != -1) ||
+        (isInTestFolder(srcFile) && !checkInTestFolder)
       ) {
         return [];
       }
