@@ -21,6 +21,7 @@ import {dict} from '../../../src/utils/object';
 import {pauseAll} from '../../../src/utils/resource-container-helper';
 import {toggle} from '../../../src/style';
 import {toggleAttribute} from '../../../src/dom';
+import {unmountAll} from '../../../src/utils/resource-container-helper';
 
 export class BaseElement extends PreactBaseElement {
   /** @param {!AmpElement} element */
@@ -65,7 +66,7 @@ export class BaseElement extends PreactBaseElement {
     toggle(this.element, false);
 
     this.removeAsContainer();
-    pauseAll(this.element, /* includeSelf */ false);
+    unmountAll(this.element, /* includeSelf */ false);
   }
 
   /** @override */

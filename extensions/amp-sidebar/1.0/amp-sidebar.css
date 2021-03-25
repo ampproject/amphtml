@@ -37,7 +37,6 @@ amp-sidebar {
 }
 
 amp-sidebar::part(c),
-amp-sidebar::part(wrapper),
 amp-sidebar::part(sidebar) {
   /* Inherit values specified on amp-sidebar */
   color: inherit;
