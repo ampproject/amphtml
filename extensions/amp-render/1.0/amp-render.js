@@ -174,6 +174,11 @@ export class AmpRender extends BaseElement {
   }
 }
 
+AmpRender['props'] = {
+  ...BaseElement['props'],
+  'getJson': {attrs: ['src'], parseAttrs: getJsonFn},
+};
+
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpRender);
 });
