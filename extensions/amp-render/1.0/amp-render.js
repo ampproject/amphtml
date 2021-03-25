@@ -140,26 +140,26 @@ export class AmpRender extends BaseElement {
       return;
     }
     this.template_ = template;
-    if (template) {
-      // Only overwrite `render` when template is ready to minimize FOUC.
-      templates.whenReady(template).then(() => {
-        if (template != this.template_) {
-          // A new template has been set while the old one was initializing.
-          return;
-        }
-        this.mutateProps(
-          dict({
-            'render': (data) => {
-              return templates
-                .renderTemplateAsString(dev().assertElement(template), data)
-                .then((html) => dict({'__html': html}));
-            },
-          })
-        );
-      });
-    } else {
+    if (!template) {
       this.mutateProps(dict({'render': null}));
+      return;
     }
+    // Only overwrite `render` when template is ready to minimize FOUC.
+    templates.whenReady(template).then(() => {
+      if (template != this.template_) {
+        // A new template has been set while the old one was initializing.
+        return;
+      }
+      this.mutateProps(
+        dict({
+          'render': (data) => {
+            return templates
+              .renderTemplateAsString(dev().assertElement(template), data)
+              .then((html) => dict({'__html': html}));
+          },
+        })
+      );
+    });
   }
 
   /**
