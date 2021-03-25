@@ -30,7 +30,7 @@ const {log} = require('../common/logging');
  * build-system/test-configs/forbidden-terms.js
  */
 
-const dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;
+const dedicatedCopyrightNoteSources = /(\.css|\.go)$/;
 
 // Terms that must appear in a source file.
 const requiredTerms = {
