@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const fs = require('fs');
+const fs = require('fs-extra');
 const globby = require('globby');
 const semver = require('semver');
 const {cyan, green, red} = require('kleur/colors');
@@ -27,7 +27,7 @@ const {log, logLocalDev, logWithoutTimestamp} = require('../common/logging');
  * @return {boolean}
  */
 function check(file) {
-  const json = JSON.parse(fs.readFileSync(file, 'utf8'));
+  const json = fs.readJsonSync(file, 'utf8');
 
   // We purposfully ignore peerDependencies here, because that's that's for the
   // consumer to decide.
