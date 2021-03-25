@@ -13,8 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 #
-tags: {  # amp-accordion
+
+tags: {  # amp-accordion for websites
   html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-accordion"
+    version: "0.1"
+    version: "1.0"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-accordion for ads
   html_format: AMP4ADS
   tag_name: "SCRIPT"
   extension_spec: {
@@ -80,6 +93,10 @@ tags: {  # <amp-accordion> > <section>
   # amp-bind
   attrs: {
     name: "[data-expand]"
+  }
+  # amp-bind
+  attrs: {
+    name: "[expanded]"
   }
   child_tags: {
     mandatory_num_child_tags: 2
