@@ -47,14 +47,11 @@ const isAmpScriptSrc = (src) => src && src.startsWith(AMP_SCRIPT_URI_SCHEME);
  * TODO: this implementation is identical to one in amp-list. Move it
  * to a common file and import it.
  *
- * TODO: Add src as a param to this method
- * (https://github.com/ampproject/amphtml/pull/33189#discussion_r598743971).
- *
  * @param {!AmpElement} element
+ * @param {string} src
  * @return {Promise<!JsonObject>}
  */
-const getAmpStateJson = (element) => {
-  const src = element.getAttribute('src');
+const getAmpStateJson = (element, src) => {
   return Services.bindForDocOrNull(element)
     .then((bind) => {
       userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
@@ -70,7 +67,7 @@ const getAmpStateJson = (element) => {
     })
     .then((json) => {
       userAssert(
-        typeof json !== 'undefined',
+        json !== undefined,
         `[amp-render] No data was found at provided uri: ${src}`
       );
       return json;
@@ -78,8 +75,8 @@ const getAmpStateJson = (element) => {
 };
 
 /**
- * Returns the correct fetch function for amp-state, amp-script or
- * to fetch remote JSON.
+ * Returns a function to fetch json from remote url, amp-state or
+ * amp-script.
  *
  * @param {!AmpElement} element
  * @return {Function}
@@ -91,13 +88,13 @@ export const getJsonFn = (element) => {
     return () => {};
   }
   if (isAmpStateSrc(src)) {
-    return getAmpStateJson.bind(null, element);
+    return (src) => getAmpStateJson(element, src);
   }
   if (isAmpScriptSrc(src)) {
     // TODO(dmanek): implement this
     return () => {};
   }
-  return batchFetchJsonFor.bind(null, element.getAmpDoc(), element);
+  return () => batchFetchJsonFor(element.getAmpDoc(), element);
 };
 
 export class AmpRender extends BaseElement {
