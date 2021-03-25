@@ -156,7 +156,8 @@ describes.realWin(
       await waitFor(() => scroller.scrollLeft > 0, 'advanced to next slide');
     });
 
-    it('should navigate pagination using carousel', async () => {
+    // TODO(#33483): Resolve flakiness
+    it.skip('should navigate pagination using carousel', async () => {
       const scroller = getScroller();
       const dots = getDots();
       expect(lastContext.currentSlide).to.equal(0);
