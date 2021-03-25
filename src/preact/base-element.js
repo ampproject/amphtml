@@ -792,7 +792,7 @@ export class PreactBaseElement extends AMP.BaseElement {
       return;
     }
     // Hack around https://github.com/preactjs/preact/issues/3084
-    if (current.constructor && current.constructor !== 'Object') {
+    if (current.constructor && current.constructor.name !== 'Object') {
       return;
     }
     const api = this.apiWrapper_;
