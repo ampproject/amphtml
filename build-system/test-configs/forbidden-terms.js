@@ -17,7 +17,7 @@
 const path = require('path');
 
 // Terms are defined in this file.
-/* eslint-disable local/forbidden-terms */
+/* eslint-disable local/no-forbidden-terms */
 
 const requiresReviewPrivacy =
   'Usage of this API requires dedicated review due to ' +
