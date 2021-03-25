@@ -58,8 +58,7 @@ module.exports = {
           if (!stringLiteral.type.endsWith('Literal')) {
             context.report({
               node: stringLiteral,
-              message:
-                'Forbidden terms allowlist should only contain string literals',
+              message: `${node.key.name} should only contain string literals`,
             });
             continue;
           }
