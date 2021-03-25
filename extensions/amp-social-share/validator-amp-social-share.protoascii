@@ -27,7 +27,6 @@ tags: {  # amp-social-share in websites
   }
   attr_lists: "common-extension-attrs"
 }
-
 tags: {  # amp-social-share in ads
   html_format: AMP4ADS
   tag_name: "SCRIPT"
