@@ -86,10 +86,20 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
  *   loadPriority?: string,
  *   cssBinaries?: Array<string>,
  *   extraGlobs?: Array<string>,
- *   npm?: {binaries: Array<string>, external: Array<string>},
+ *   binaries?: Array<ExtensionBinary>,
  * }}
  */
 const ExtensionOption = {}; // eslint-disable-line no-unused-vars
+
+/**
+ * @typedef {{
+ *   entryPoint: string,
+ *   outfile: string,
+ *   external?: Array<string>
+ *   remap?: Map<string, string>
+ * }}
+ */
+const ExtensionBinary = {}; // eslint-disable-line no-unused-vars
 
 // All declared extensions.
 const extensions = {};
@@ -470,8 +480,8 @@ async function buildExtension(
   if (name === 'amp-bind') {
     await doBuildJs(jsBundles, 'ww.max.js', options);
   }
-  if (options.npm) {
-    await buildNpm(extDir, options);
+  if (options.binaries) {
+    await buildBinaries(extDir, options);
   }
   if (name === 'amp-analytics') {
     await analyticsVendorConfigs(options);
@@ -535,16 +545,17 @@ function buildExtensionCss(extDir, name, version, options) {
  * @param {!Object} options
  * @return {!Promise}
  */
-async function buildNpm(extDir, options) {
-  const {binaries, external} = options.npm;
+async function buildBinaries(extDir, options) {
+  const {binaries} = options;
   mkdirSync(`${extDir}/dist`);
 
-  const promises = binaries.map((filename) => {
-    const {name} = pathParse(filename);
+  const promises = binaries.map((binary) => {
+    const {entryPoint, outfile, external, remap} = binary;
+    const {name} = pathParse(outfile);
     const esm = argv.esm || argv.sxg || false;
     return compileJsWithEsbuild(
       extDir + '/',
-      filename,
+      entryPoint,
       `${extDir}/dist`,
       Object.assign(options, {
         toName: maybeToEsmName(`${name}.max.js`),
@@ -552,7 +563,8 @@ async function buildNpm(extDir, options) {
         latestName: '',
         outputFormat: esm ? 'esm' : 'cjs',
         wrapper: '',
-        external,
+        externalDependencies: external,
+        remapDependencies: remap,
       })
     );
   });
