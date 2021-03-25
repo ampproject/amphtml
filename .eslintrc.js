@@ -15,9 +15,6 @@
  */
 
 const fs = require('fs');
-const {
-  eslintReportForbiddenTerms,
-} = require('./build-system/tasks/presubmit-checks.js');
 
 /**
  * Dynamically extracts experiment globals from the config file.
@@ -128,7 +125,7 @@ module.exports = {
     'local/await-expect': 2,
     'local/closure-type-primitives': 2,
     'local/dict-string-keys': 2,
-    'local/forbidden-terms': [2, eslintReportForbiddenTerms],
+    'local/forbidden-terms': 2,
     'local/get-mode-usage': 2,
     'local/html-template': 2,
     'local/is-experiment-on': 2,

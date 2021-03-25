@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+const {getForbiddenTerms} = require('../test-configs/forbidden-terms');
 const {relative} = require('path');
 
 /**
  * @fileoverview
- * Passes source to functions set as options, which return an array of option
- * objects for context.report.
+ * Reports forbidden terms found by regex.
+ * See test-configs/forbidden-terms.js
  */
 
 module.exports = function (context) {
@@ -28,10 +29,12 @@ module.exports = function (context) {
       const filename = relative(process.cwd(), context.getFilename());
       const sourceCode = context.getSourceCode();
 
-      for (const getReports of context.options) {
-        for (const report of getReports(filename, sourceCode.text)) {
-          context.report(report);
-        }
+      for (const report of getForbiddenTerms(filename, sourceCode.text)) {
+        const {match, message, loc} = report;
+        context.report({
+          loc,
+          message: `Forbidden: "${match}".${message ? `\n${message}.` : ''}`,
+        });
       }
     },
   };
