@@ -66,6 +66,7 @@
   place-items: center !important;
   display: flex !important;
   text-decoration: none !important;
+  visibility: hidden !important;
 }
 
 [dir=rtl] .i-amphtml-story-story-attribution {
