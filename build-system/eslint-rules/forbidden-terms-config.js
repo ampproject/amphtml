@@ -27,6 +27,21 @@ const allowlistProperty = 'allowlist';
 module.exports = {
   meta: {fixable: 'code'},
   create(context) {
+    // Some files are allowlisted for multiple terms, so caching their content
+    // greatly speeds up this rule.
+    const fileContent = {};
+
+    function readFileContent(filename) {
+      try {
+        return (
+          fileContent[filename] ||
+          (fileContent[filename] = readFileSync(filename, 'utf-8'))
+        );
+      } catch (_) {
+        return null;
+      }
+    }
+
     function* removeFromArray(fixer, node) {
       const {text} = context.getSourceCode();
       let {start} = node;
@@ -98,11 +113,7 @@ module.exports = {
           }
 
           const filename = stringLiteral.value;
-
-          let content;
-          try {
-            content = readFileSync(filename, 'utf-8');
-          } catch (_) {}
+          const content = readFileContent(filename);
 
           if (content && content.match(termRegexp)) {
             continue;
