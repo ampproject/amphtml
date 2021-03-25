@@ -66,7 +66,6 @@ let lazyBuild = false;
  */
 function getMiddleware() {
   const middleware = [require('../server/app')]; // Lazy-required to enable live-reload
-  middleware.push(header({'Access-Control-Allow-Origin': '*'}));
   if (!quiet) {
     middleware.push(morgan('dev'));
   }
