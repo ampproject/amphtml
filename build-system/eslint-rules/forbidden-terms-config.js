@@ -22,6 +22,8 @@ const {readFileSync} = require('fs');
  * do not include the allowed term.
  */
 
+const allowlistProperty = 'allowlist';
+
 module.exports = {
   meta: {fixable: 'code'},
   create(context) {
@@ -38,13 +40,33 @@ module.exports = {
 
     return {
       ['Property' +
-      "[key.name='allowlist']" +
+      `[key.name='${allowlistProperty}']` +
       "[value.type='ArrayExpression']" +
       "[parent.parent.type='Property']"]: function (node) {
+        const termProperty = node.parent.parent;
+        const termKey = termProperty.key;
+
+        const termKeyIsIdentifier = termKey.type === 'Identifier';
+        if (termProperty.computed || termKeyIsIdentifier) {
+          let fix;
+          if (!termProperty.computed && termKeyIsIdentifier) {
+            // we can replace non-computed ids with string literals
+            fix = function (fixer) {
+              return fixer.replaceText(termKey, `'${termKey.name}'`);
+            };
+          }
+          context.report({
+            node: termKey,
+            message: 'Term keys should be string literals.',
+            fix,
+          });
+          return;
+        }
+
         if (node.value.elements.length < 1) {
           context.report({
             node,
-            message: `Remove empty ${node.key.name}`,
+            message: `Remove empty ${allowlistProperty}`,
             fix(fixer) {
               return removeFromArray(fixer, node);
             },
@@ -52,13 +74,13 @@ module.exports = {
           return;
         }
 
-        const termRegexp = new RegExp(node.parent.parent.key, 'gm');
+        const termRegexp = new RegExp(termKey.value, 'gm');
 
         for (const stringLiteral of node.value.elements) {
           if (!stringLiteral.type.endsWith('Literal')) {
             context.report({
               node: stringLiteral,
-              message: `${node.key.name} should only contain string literals`,
+              message: `${allowlistProperty} should only contain string literals`,
             });
             continue;
           }
@@ -81,7 +103,7 @@ module.exports = {
               : 'File does not exist.',
             suggest: [
               {
-                desc: `Remove from ${node.key.name}`,
+                desc: `Remove from ${allowlistProperty}`,
                 fix(fixer) {
                   return removeFromArray(fixer, stringLiteral);
                 },
