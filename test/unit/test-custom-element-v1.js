@@ -934,6 +934,42 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
     });
   });
 
+  describe('setAsContainerInternal', () => {
+    let element, scroller, impl;
+
+    beforeEach(async () => {
+      builderMock.expects('schedule').atLeast(0);
+
+      element = new ElementClass();
+      doc.body.appendChild(element);
+      impl = await element.getImpl();
+
+      scroller = doc.createElement('div');
+      element.appendChild(scroller);
+    });
+
+    it('should propagate setAsContainerInternal without scroller', () => {
+      builderMock
+        .expects('setContainer')
+        .withExactArgs(element, undefined)
+        .once();
+      impl.setAsContainer();
+    });
+
+    it('should propagate setAsContainerInternal with scroller', () => {
+      builderMock
+        .expects('setContainer')
+        .withExactArgs(element, scroller)
+        .once();
+      impl.setAsContainer(scroller);
+    });
+
+    it('should propagate removeAsContainerInternal', () => {
+      builderMock.expects('removeContainer').withExactArgs(element).once();
+      impl.removeAsContainer();
+    });
+  });
+
   describe('setReadyStateInternal', () => {
     let element;
 

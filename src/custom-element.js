@@ -810,6 +810,29 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     }
 
     /**
+     * See `BaseElement.setAsContainer`.
+     *
+     * @param {!Element=} opt_scroller A child of the container that should be
+     * monitored. Typically a scrollable element.
+     * @restricted
+     * @final
+     */
+    setAsContainerInternal(opt_scroller) {
+      const builder = getSchedulerForDoc(this.getAmpDoc());
+      builder.setContainer(this, opt_scroller);
+    }
+
+    /**
+     * See `BaseElement.removeAsContainer`.
+     * @restricted
+     * @final
+     */
+    removeAsContainerInternal() {
+      const builder = getSchedulerForDoc(this.getAmpDoc());
+      builder.removeContainer(this);
+    }
+
+    /**
      * Update the internal ready state.
      *
      * @param {!ReadyState} state

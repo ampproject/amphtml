@@ -322,5 +322,73 @@ describes.realWin(
         expect(tryFocusSpy).to.be.calledWith(impl.closeButtonHeader_);
       });
     });
+
+    it('should set itself as a container when fully opened', async () => {
+      const lightbox = createLightbox();
+      const impl = await lightbox.getImpl(false);
+      env.sandbox.stub(lightbox, 'setAsContainerInternal');
+
+      const finalizeSpy = env.sandbox.spy(impl, 'finalizeOpen_');
+      impl.getHistory_ = () => {
+        return {
+          pop: () => {},
+          push: () => Promise.resolve(11),
+        };
+      };
+
+      const args = {};
+      const openInvocation = {
+        method: 'open',
+        args,
+        satisfiesTrust: () => true,
+      };
+      impl.executeAction(openInvocation);
+
+      expect(lightbox.setAsContainerInternal).to.not.be.called;
+
+      await whenCalled(finalizeSpy);
+
+      expect(lightbox.setAsContainerInternal).to.be.calledOnce;
+    });
+
+    it('should set and remove itself as a container and unmount children', async () => {
+      const lightbox = createLightbox();
+
+      // Lightbox has a child.
+      const child = dom.createElementWithAttributes(doc, 'amp-img', {
+        layout: 'nodisplay',
+      });
+      lightbox.appendChild(child);
+      env.sandbox.stub(child, 'unmount');
+
+      const openButton = createOpeningButton('openingButton');
+      const closeButton = createCloseButton();
+      lightbox.appendChild(closeButton);
+
+      const impl = await lightbox.getImpl(false);
+      env.sandbox.stub(lightbox, 'setAsContainerInternal');
+      env.sandbox.stub(lightbox, 'removeAsContainerInternal');
+
+      const openSpy = env.sandbox.spy(impl, 'finalizeOpen_');
+      const closeSpy = env.sandbox.spy(impl, 'finalizeClose_');
+      impl.getHistory_ = () => {
+        return {
+          pop: () => {},
+          push: () => Promise.resolve(11),
+        };
+      };
+
+      openButton.click();
+      expect(lightbox.setAsContainerInternal).to.not.be.called;
+      await whenCalled(openSpy);
+      expect(lightbox.setAsContainerInternal).to.be.calledOnce;
+
+      closeButton.click();
+      expect(lightbox.removeAsContainerInternal).to.not.be.called;
+      expect(child.unmount).to.not.be.called;
+      await whenCalled(closeSpy);
+      expect(lightbox.removeAsContainerInternal).to.be.calledOnce;
+      expect(child.unmount).to.be.calledOnce;
+    });
   }
 );

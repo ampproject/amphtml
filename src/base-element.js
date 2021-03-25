@@ -461,6 +461,28 @@ export class BaseElement {
   }
 
   /**
+   * Set itself as a container element that can be monitored by the scheduler
+   * for auto-mounting. Scheduler is used for V1 elements. A container is
+   * usually a top-level scrollable overlay such as a lightbox or a sidebar.
+   * The main scheduler (`IntersectionObserver`) cannot properly handle elements
+   * inside a non-document scroller and this method instructs the scheduler
+   * to also use the `IntersectionObserver` corresponding to the container.
+   *
+   * @param {!Element=} opt_scroller A child of the container that should be
+   * monitored. Typically a scrollable element.
+   */
+  setAsContainer(opt_scroller) {
+    this.element.setAsContainerInternal(opt_scroller);
+  }
+
+  /**
+   * Removes itself as a container. See `setAsContainer`.
+   */
+  removeAsContainer() {
+    this.element.removeAsContainerInternal();
+  }
+
+  /**
    * Subclasses can override this method to indicate that it is has
    * render-blocking service.
    *
