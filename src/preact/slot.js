@@ -90,7 +90,7 @@ export function useSlotContext(ref) {
     };
   }, [ref, context]);
 
-  // Unmount and unmount. Keep it at the bottom because it's much better to
+  // Mount and unmount. Keep it at the bottom because it's much better to
   // execute `pause` before `unmount` in this case.
   // This has to be a layout-effect to capture the old `Slot.assignedElements`
   // before the browser undistributes them.
