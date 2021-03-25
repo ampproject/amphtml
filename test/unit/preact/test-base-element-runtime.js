@@ -22,6 +22,7 @@ import {
 } from '../../../src/preact/base-element';
 import {Slot} from '../../../src/preact/slot';
 import {forwardRef} from '../../../src/preact/compat';
+import {getSchedulerForDoc} from '../../../src/service/scheduler';
 import {htmlFor} from '../../../src/static-template';
 import {installResizeObserverStub} from '../../../testing/resize-observer-stub';
 import {removeElement} from '../../../src/dom';
@@ -92,7 +93,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     });
 
     it('should render with default context', async () => {
-      await element.buildInternal();
+      await element.mountInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
       expect(lastContext).to.contain({
         renderable: true,
@@ -104,7 +105,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     });
 
     it('should propagate context to children', async () => {
-      await element.buildInternal();
+      await element.mountInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
 
       const child1 = element.querySelector('#child1');
@@ -121,7 +122,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
         );
       }
 
-      await element.buildInternal();
+      await element.mountInternal();
       const child1 = element.querySelector('#child1');
 
       await waitFor(() => getSlot(), 'slot rendered');
@@ -265,7 +266,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       const pauseStub = env.sandbox.stub();
       api = {pause: pauseStub};
 
-      await element.buildInternal();
+      await element.mountInternal();
 
       element.pause();
       expect(pauseStub).to.be.calledOnce;
@@ -274,7 +275,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     it('should unload on pauseCallback with unloadOnPause', async () => {
       Impl['unloadOnPause'] = true;
 
-      await element.buildInternal();
+      await element.mountInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
 
       element.pause();
@@ -291,7 +292,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     });
 
     it('should NOT track size until playing', async () => {
-      await element.buildInternal();
+      await element.mountInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
 
       expect(resizeObserverStub.isObserved(element)).to.be.false;
@@ -306,7 +307,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     it('should track size when unloadOnPause when loaded', async () => {
       Impl['unloadOnPause'] = true;
 
-      await element.buildInternal();
+      await element.mountInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
 
       expect(resizeObserverStub.isObserved(element)).to.be.false;
@@ -319,7 +320,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     });
 
     it('should NOT track size when disconnected', async () => {
-      await element.buildInternal();
+      await element.mountInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
       lastProps.onPlayingState(true);
       expect(resizeObserverStub.isObserved(element)).to.be.true;
@@ -332,7 +333,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       const pauseStub = env.sandbox.stub();
       api = {pause: pauseStub};
 
-      await element.buildInternal();
+      await element.mountInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
       lastProps.onPlayingState(true);
       expect(resizeObserverStub.isObserved(element)).to.be.true;
@@ -375,7 +376,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     }
 
     it('should unrender component on disconnect', async () => {
-      await element.buildInternal();
+      await element.mountInternal();
       await waitFor(() => getSlot(), 'content rendered');
 
       // Disconnect.
@@ -384,7 +385,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     });
 
     it('should rerender component on reconnect', async () => {
-      await element.buildInternal();
+      await element.mountInternal();
       await waitFor(() => getSlot(), 'content rendered');
       removeElement(element);
       await waitFor(() => getSlot() === null, 'content unrendered');
@@ -392,6 +393,43 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       // Reconnect.
       doc.body.appendChild(element);
       await waitFor(() => getSlot(), 'content rerendered');
+    });
+  });
+
+  describe('mount/unmount', () => {
+    let element;
+
+    beforeEach(() => {
+      element = html`
+        <amp-preact layout="fixed" width="100" height="100"> </amp-preact>
+      `;
+      doc.body.appendChild(element);
+    });
+
+    it('should render with loading=auto when mounted', async () => {
+      await element.mountInternal();
+      expect(lastLoading).to.equal('auto');
+    });
+
+    it('should render with loading=unload when unmounted', async () => {
+      // Block from rescheduling.
+      const scheduler = getSchedulerForDoc(env.ampdoc);
+      env.sandbox.stub(scheduler, 'schedule');
+
+      // Mount the first time.
+      await element.mountInternal();
+
+      // Unmount.
+      component.resetHistory();
+      element.unmount();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      expect(lastLoading).to.equal('unload');
+
+      // Mount again.
+      component.resetHistory();
+      await element.mountInternal();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      expect(lastLoading).to.equal('auto');
     });
   });
 });
@@ -426,7 +464,7 @@ describes.realWin('whenUpgraded', {amp: true}, (env) => {
     doc.body.appendChild(el);
     const p = whenUpgraded(el);
     upgradeOrRegisterElement(win, 'amp-preact', Impl);
-    el.buildInternal();
+    el.mountInternal();
 
     const api = await p;
     expect(api.key).to.be.true;
@@ -437,7 +475,7 @@ describes.realWin('whenUpgraded', {amp: true}, (env) => {
     doc.body.appendChild(el);
     upgradeOrRegisterElement(win, 'amp-preact', Impl);
     const p = whenUpgraded(el);
-    el.buildInternal();
+    el.mountInternal();
 
     const api = await p;
     expect(api.key).to.be.true;
@@ -447,7 +485,7 @@ describes.realWin('whenUpgraded', {amp: true}, (env) => {
     const el = doc.createElement('amp-preact');
     doc.body.appendChild(el);
     upgradeOrRegisterElement(win, 'amp-preact', Impl);
-    await el.buildInternal();
+    await el.mountInternal();
     const p = whenUpgraded(el);
 
     const api = await p;
@@ -469,7 +507,7 @@ describes.realWin('whenUpgraded', {amp: true}, (env) => {
     doc.body.appendChild(el);
     upgradeOrRegisterElement(win, 'amp-preact', Impl);
     const p = whenUpgraded(el);
-    el.buildInternal();
+    el.mountInternal();
 
     const api = await p;
     expect(api).not.to.equal(imperativeApi);
@@ -503,7 +541,7 @@ describes.realWin('whenUpgraded', {amp: true}, (env) => {
     doc.body.appendChild(el);
     upgradeOrRegisterElement(win, 'amp-preact', Impl);
     const p = whenUpgraded(el);
-    el.buildInternal();
+    el.mountInternal();
 
     const api = await p;
     expect(api.first).to.be.true;
