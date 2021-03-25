@@ -97,7 +97,7 @@ describes.realWin(
           ActionTrust.HIGH
         );
         // THIS FAILS ON LOCAL!
-        expect(element.enqueAction.callCount > 0).to.be.true;
+        expect(element.enqueAction.callCount).to.be.above(0);
         expect(element.enqueAction).to.be.calledWith(
           env.sandbox.match({
             actionEventType: '?',
