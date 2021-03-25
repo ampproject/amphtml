@@ -812,13 +812,12 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     /**
      * See `BaseElement.setAsContainer`.
      *
-     * @param {!Element} opt_scroller A child of the container that should be
+     * @param {!Element=} opt_scroller A child of the container that should be
      * monitored. Typically a scrollable element.
      * @restricted
      * @final
      */
     setAsContainerInternal(opt_scroller) {
-      devAssert(!opt_scroller || this.contains(opt_scroller));
       const builder = getSchedulerForDoc(this.getAmpDoc());
       builder.setContainer(this, opt_scroller);
     }

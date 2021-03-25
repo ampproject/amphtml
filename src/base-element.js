@@ -468,7 +468,7 @@ export class BaseElement {
    * inside a non-document scroller and this method instructs the scheduler
    * to also use the `IntersectionObserver` corresponding to the container.
    *
-   * @param {!Element} opt_scroller A child of the container that should be
+   * @param {!Element=} opt_scroller A child of the container that should be
    * monitored. Typically a scrollable element.
    */
   setAsContainer(opt_scroller) {
