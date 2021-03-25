@@ -156,7 +156,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     if (isPageAttachmentUiV2ExperimentOn(this.win)) {
       const spacerEl = this.win.document.createElement('div');
       spacerEl.classList.add('i-amphtml-story-draggable-drawer-spacer');
-      this.containerEl_.prepend(spacerEl);
+      this.containerEl_.insertBefore(spacerEl, this.contentEl_);
       this.contentEl_.appendChild(headerShadowRootEl);
       this.element.classList.add('amp-story-page-attachment-ui-v2');
     } else {
