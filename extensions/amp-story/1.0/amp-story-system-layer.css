@@ -53,6 +53,77 @@
   opacity: 0 !important;
 }
 
+.i-amphtml-story-story-attribution {
+  top: 0 !important;
+  left: 0 !important;
+  position: absolute;
+  border: none !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  max-width: 50% !important;
+  padding-top: 6px !important;
+  height: 48px !important;
+  place-items: center !important;
+  display: flex !important;
+  text-decoration: none !important;
+}
+
+[dir=rtl] .i-amphtml-story-story-attribution {
+  left: auto !important;
+  right: 0 !important;
+}
+
+.i-amphtml-story-story-attribution > * {
+  padding-left: 6px !important;
+}
+
+[dir=rtl] .i-amphtml-story-story-attribution > * {
+  padding-left: 0 !important;
+  padding-right: 6px !important;
+}
+
+.i-amphtml-story-desktop-panels .i-amphtml-story-story-attribution > * {
+  padding-left: 8px !important;
+}
+
+[dir=rtl].i-amphtml-story-desktop-panels .i-amphtml-story-story-attribution > * {
+  padding-left: 0 !important;
+  padding-right: 8px !important;
+}
+
+.i-amphtml-story-logo-container {
+  display: grid !important;
+  place-items: center !important;
+}
+
+[desktop] .i-amphtml-story-logo-container {
+  margin-left: 4px !important;
+}
+
+[dir=rtl][desktop] .i-amphtml-story-logo-container {
+  margin-left: 0 !important;
+  margin-right: 4px !important;
+}
+
+.i-amphtml-story-logo-container img {
+  border-radius: 100% !important;
+  border: 1px solid #D4D4D4 !important;
+  width: 32px !important;
+  height: 32px !important;
+  object-fit: cover !important;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.16) !important;
+}
+
+.i-amphtml-story-attribution-text {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  text-shadow: 0px 2px 6px rgba(0, 0, 0, 0.16) !important;
+  color: #FFFF !important;
+}
+
 .i-amphtml-story-system-layer-buttons,
 .i-amphtml-story-system-layer-buttons-start-position {
   display: flex !important;
@@ -68,7 +139,8 @@
   justify-content: flex-start !important;
 }
 
-[desktop] .i-amphtml-story-system-layer-buttons {
+[desktop] .i-amphtml-story-system-layer-buttons,
+[desktop] .i-amphtml-story-story-attribution {
   padding: 8px 4px 0 !important;
 }
 
@@ -113,7 +185,8 @@
   z-index: 100001 !important;
 }
 
-[ad-showing] .i-amphtml-story-progress-bar {
+[ad-showing] .i-amphtml-story-progress-bar,
+[ad-showing] .i-amphtml-story-story-attribution {
   visibility: hidden !important;
 }
 
@@ -452,7 +525,8 @@
 }
 
 .i-amphtml-story-desktop-panels.i-amphtml-story-system-layer .i-amphtml-story-system-layer-buttons,
-.i-amphtml-story-desktop-panels.i-amphtml-story-system-layer .i-amphtml-story-system-layer-buttons-start-position
+.i-amphtml-story-desktop-panels.i-amphtml-story-system-layer .i-amphtml-story-system-layer-buttons-start-position,
+.i-amphtml-story-desktop-panels.i-amphtml-story-system-layer .i-amphtml-story-story-attribution
  {
   position: fixed !important;
   top: 0 !important;

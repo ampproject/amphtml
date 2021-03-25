@@ -92,6 +92,9 @@ const SIDEBAR_CLASS = 'i-amphtml-story-sidebar-control';
 /** @private @const {string} */
 const HAS_NEW_PAGE_ATTRIBUTE = 'i-amphtml-story-has-new-page';
 
+/** @private @const {string} */
+const ATTRIBUTION_CLASS = 'i-amphtml-story-story-attribution';
+
 /** @private @const {number} */
 const HIDE_MESSAGE_TIMEOUT_MS = 1500;
 
@@ -262,6 +265,40 @@ const TEMPLATE = {
       attrs: dict({
         'class': 'i-amphtml-story-system-layer-buttons-start-position',
       }),
+    },
+    {
+      tag: 'a',
+      attrs: dict({
+        'class': ATTRIBUTION_CLASS,
+        'src': 'https://www.google.com',
+      }),
+      children: [
+        {
+          tag: 'div',
+          attrs: dict({
+            'class': 'i-amphtml-story-logo-container',
+          }),
+          children: [
+            {
+              tag: 'img',
+              attrs: dict({
+                // DELETE THIS
+                'src': 'https://placekitten.com/g/64/64',
+                'alt': '',
+              }),
+            },
+          ],
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            'class': 'i-amphtml-story-attribution-text',
+          }),
+          // DELETE THIS
+          unlocalizedString:
+            'Glossier Shop Doggos Glossier Shop DoggosGlossier Shop DoggosGlossier Shop DoggosGlossier Shop DoggosGlossier Shop DoggosGlossier Shop Doggos ',
+        },
+      ],
     },
   ],
 };
@@ -610,6 +647,8 @@ export class SystemLayer {
       (config) => this.onViewerCustomControls_(config),
       true /* callToInitialize */
     );
+
+    // storeservice.subscribe(ATTRIBUTION)
   }
 
   /**
