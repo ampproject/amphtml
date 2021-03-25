@@ -31,7 +31,7 @@ import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setIsMediaComponent} from '../../../src/video-interface';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 class AmpSoundcloud extends AMP.BaseElement {
   /** @param {!AmpElement} element */

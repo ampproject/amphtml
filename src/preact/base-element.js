@@ -40,7 +40,7 @@ import {
   parseBooleanAttribute,
 } from '../dom';
 import {dashToCamelCase} from '../string';
-import {pureDevAssert as devAssert} from '../core/assert';
+import {devAssert} from '../log';
 import {dict, hasOwn, map} from '../utils/object';
 import {getDate} from '../utils/date';
 import {getMode} from '../mode';
@@ -419,13 +419,22 @@ export class PreactBaseElement extends AMP.BaseElement {
   }
 
   /** @override */
-  attachedCallback() {
+  mountCallback() {
     discover(this.element);
+    const Ctor = this.constructor;
+    if (Ctor['loadable'] && this.getProp('loading') != Loading.AUTO) {
+      this.mutateProps({'loading': Loading.AUTO});
+      this.resetLoading_ = false;
+    }
   }
 
   /** @override */
-  detachedCallback() {
+  unmountCallback() {
     discover(this.element);
+    const Ctor = this.constructor;
+    if (Ctor['loadable']) {
+      this.mutateProps({'loading': Loading.UNLOAD});
+    }
     this.updateIsPlaying_(false);
     this.mediaQueryProps_?.dispose();
   }

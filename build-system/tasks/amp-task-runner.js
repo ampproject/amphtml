@@ -21,11 +21,15 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const commander = require('commander');
+const fs = require('fs-extra');
 const path = require('path');
+const {
+  updatePackages,
+  updateSubpackages,
+} = require('../common/update-packages');
 const {cyan, red, green, magenta, yellow} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {log, logWithoutTimestamp} = require('../common/logging');
-const {updatePackages} = require('./update-packages');
 
 /**
  * Special-case constant that indicates if `amp --help` was invoked.
@@ -63,17 +67,31 @@ function startAtRepoRoot() {
 }
 
 /**
- * Runs an AMP task with logging and timing. Always start at the repo root.
+ * Updates task-specific subpackages if there are any.
+ * @param {string} taskSourceFilePath
+ * @return {Promise<void>}
+ */
+async function maybeUpdateSubpackages(taskSourceFilePath) {
+  const packageFile = path.join(taskSourceFilePath, 'package.json');
+  const hasSubpackages = await fs.pathExists(packageFile);
+  if (hasSubpackages) {
+    await updateSubpackages(taskSourceFilePath);
+  }
+}
+
+/**
+ * Runs an AMP task with logging and timing after installing its subpackages.
  * @param {string} taskName
+ * @param {string} taskSourceFilePath
  * @param {Function()} taskFunc
  * @return {Promise<void>}
  */
-async function runTask(taskName, taskFunc) {
-  startAtRepoRoot();
+async function runTask(taskName, taskSourceFilePath, taskFunc) {
   log('Using task file', magenta(path.join('amphtml', 'amp.js')));
   const start = Date.now();
   try {
     log(`Starting '${cyan(taskName)}'...`);
+    await maybeUpdateSubpackages(taskSourceFilePath);
     await taskFunc();
     log('Finished', `'${cyan(taskName)}'`, 'after', magenta(getTime(start)));
   } catch (err) {
@@ -86,7 +104,9 @@ async function runTask(taskName, taskFunc) {
 /**
  * Helper that creates the tasks in AMP's toolchain based on the invocation:
  * - For `amp --help`, load all task descriptions so a list can be printed.
- * - For other tasks, load the entry point, validate usage, and run the task.
+ * - For `amp <task> --help`, load and print just the task description + flags.
+ * - When a task is actually run, update root packages, load the entry point,
+ *   validate usage, update task-specific packages, and run the task.
  * @param {string} taskName
  * @param {string} taskFuncName
  * @param {string} taskSourceFileName
@@ -96,6 +116,8 @@ function createTask(taskName, taskFuncName, taskSourceFileName) {
   const isInvokedTask = argv._.includes(taskName); // `amp <task>`
   const isDefaultTask =
     argv._.length === 0 && taskName == 'default' && !isHelpTask; // `amp`
+  const isTaskLevelHelp =
+    (isInvokedTask || isDefaultTask) && argv.hasOwnProperty('help'); // `amp <task> --help`
 
   if (isHelpTask) {
     const taskFunc = require(taskSourceFilePath)[taskFuncName];
@@ -103,6 +125,10 @@ function createTask(taskName, taskFuncName, taskSourceFileName) {
     task.description(taskFunc.description);
   }
   if (isInvokedTask || isDefaultTask) {
+    if (!isTaskLevelHelp && !isCiBuild()) {
+      startAtRepoRoot();
+      updatePackages();
+    }
     const taskFunc = require(taskSourceFilePath)[taskFuncName];
     const task = commander.command(taskName, {isDefault: isDefaultTask});
     task.description(green(taskFunc.description));
@@ -114,7 +140,7 @@ function createTask(taskName, taskFuncName, taskSourceFileName) {
     }
     task.action(async () => {
       validateUsage(task, taskName, taskFunc);
-      await runTask(taskName, taskFunc);
+      await runTask(taskName, taskSourceFilePath, taskFunc);
     });
   }
 }
@@ -136,17 +162,6 @@ function validateUsage(task, taskName, taskFunc) {
   if (invalidTasks.length > 0 || invalidFlags.length > 0) {
     task.addHelpText('before', red('ERROR: ') + 'Invalid usage');
     task.help({error: true});
-  }
-}
-
-/**
- * Initializes the task runner by running the package updater before any task
- * code can be loaded. As an optimization, we skip this during CI because it is
- * already done as a prereqisite step before every CI job.
- */
-function initializeRunner() {
-  if (!isCiBuild()) {
-    updatePackages();
   }
 }
 
@@ -202,6 +217,5 @@ function printGulpDeprecationNotice(withTimestamps) {
 module.exports = {
   createTask,
   finalizeRunner,
-  initializeRunner,
   printGulpDeprecationNotice,
 };

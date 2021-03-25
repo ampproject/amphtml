@@ -41,7 +41,7 @@ const timeRotationUtc = [
   ['Africa/Europe/western Asia', '16:30'],
 ];
 
-const timeRotationStartYyyyMmDd = '2021-03-17';
+const timeRotationStartYyyyMmDd = '2021-03-31';
 
 // All previous weeks have already been handled.
 const generateWeeksFromNow = 3;
@@ -194,9 +194,14 @@ function env(key) {
 }
 
 async function createDesignReviewIssue() {
+  const repo = env('GITHUB_REPOSITORY');
+  if (repo !== 'ampproject/amphtml') {
+    // don't run on forks.
+    return;
+  }
   const {title, 'html_url': htmlUrl} = await postGithubIssue(
     env('GITHUB_TOKEN'),
-    env('GITHUB_REPOSITORY'),
+    repo,
     getNextIssueData()
   );
   console./*OK*/ log(title);

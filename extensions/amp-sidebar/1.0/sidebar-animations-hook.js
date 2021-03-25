@@ -47,6 +47,7 @@ function safelySetStyles(element, styles) {
 }
 
 /**
+ * @param {boolean} mounted
  * @param {boolean} opened
  * @param {{current: function|undefined}} onAfterClose
  * @param {string} side
@@ -55,6 +56,7 @@ function safelySetStyles(element, styles) {
  * @param {function} setMounted
  */
 export function useSidebarAnimation(
+  mounted,
   opened,
   onAfterClose,
   side,
@@ -71,7 +73,10 @@ export function useSidebarAnimation(
     const backdropElement = backdropRef.current;
     // The component might start in a state where `side` is not known
     // This effect must be restarted when the `side` becomes known
-    if (!sidebarElement || !backdropElement || !side) {
+    // Must also check mounted as of #33244.  This is because previously
+    // sidebarElement and backdropElement would not be rendered when
+    // mounted is false.  This is no longer the case.
+    if (!mounted || !sidebarElement || !backdropElement || !side) {
       return;
     }
 
@@ -175,5 +180,13 @@ export function useSidebarAnimation(
       backdropAnimationRef.current = backdropAnimation;
       currentlyAnimatingRef.current = true;
     }
-  }, [opened, onAfterCloseRef, side, sidebarRef, backdropRef, setMounted]);
+  }, [
+    mounted,
+    opened,
+    onAfterCloseRef,
+    side,
+    sidebarRef,
+    backdropRef,
+    setMounted,
+  ]);
 }
