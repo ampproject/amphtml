@@ -158,7 +158,7 @@ const CLOSURE_SRC_GLOBS = [
   // Not sure what these files are, but they seem to duplicate code
   // one level below and confuse the compiler.
   '!node_modules/core-js/modules/library/**.js',
-  '!extensions/**/build/**/*.js',
+  '!extensions/**/dist/**/*.js',
 ].concat(COMMON_GLOBS);
 
 module.exports = {

@@ -31,7 +31,7 @@ async function clean() {
     '.amp-dep-check',
     '.babel-cache',
     'build',
-    'extensions/**/build',
+    'extensions/**/dist',
     'build-system/server/new-server/transforms/dist',
     'deps.txt',
     'dist',
