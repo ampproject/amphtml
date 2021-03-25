@@ -16,9 +16,6 @@
 
 const path = require('path');
 
-// Terms are defined in this file.
-/* eslint-disable local/no-forbidden-terms */
-
 const requiresReviewPrivacy =
   'Usage of this API requires dedicated review due to ' +
   'being privacy sensitive. Please file an issue asking for permission' +
@@ -64,7 +61,6 @@ const forbiddenTerms = {
   'grandfather|grandfathered': {
     message: 'Please use the term legacy instead',
   },
-  // TODO(dvoytenko, #8464): cleanup allowlist.
   '(^-amp-|\\W-amp-)': {
     message: 'Switch to new internal class form',
     allowlist: [
@@ -72,8 +68,6 @@ const forbiddenTerms = {
       'build-system/server/app-index/boilerplate.js',
       'build-system/server/variable-substitution.js',
       'build-system/tasks/extension-generator/index.js',
-      'css/ampdoc.css',
-      'css/ampshared.css',
       'extensions/amp-pinterest/0.1/amp-pinterest.css',
       'extensions/amp-pinterest/0.1/follow-button.js',
       'extensions/amp-pinterest/0.1/pin-widget.js',
@@ -85,8 +79,6 @@ const forbiddenTerms = {
     message: 'Switch to new internal ID form',
     allowlist: [
       'build-system/tasks/create-golden-css/css/main.css',
-      'build-system/tasks/extension-generator/index.js',
-      'css/ampdoc.css',
       'css/ampshared.css',
     ],
   },
@@ -121,26 +113,20 @@ const forbiddenTerms = {
       'build-system/common/check-package-manager.js',
       'build-system/common/logging.js',
       'src/purifier/noop.js',
-      'validator/js/engine/parse-css.js',
       'validator/js/engine/validator-in-browser.js',
       'validator/js/engine/validator.js',
-      'validator/js/nodejs/index.js', // NodeJs only.
     ],
     checkInTestFolder: true,
   },
   '\\bgetModeObject\\(': {
     message: realiasGetMode,
-    allowlist: [
-      'src/mode-object.js',
-      'src/iframe-attributes.js',
-      'dist.3p/current/integration.js',
-    ],
+    allowlist: ['src/mode-object.js', 'src/iframe-attributes.js'],
   },
   '(?:var|let|const) +IS_DEV +=': {
     message:
       'IS_DEV local var only allowed in mode.js and ' +
       'dist.3p/current/integration.js',
-    allowlist: ['src/mode.js', 'dist.3p/current/integration.js'],
+    allowlist: ['src/mode.js'],
   },
   '\\.prefetch\\(': {
     message: 'Do not use preconnect.prefetch, use preconnect.preload instead.',
@@ -164,7 +150,7 @@ const forbiddenTerms = {
   },
   '\\.mountInternal': {
     message: 'can only be called by the framework',
-    allowlist: ['src/service/scheduler.js', 'testing/iframe.js'],
+    allowlist: ['src/service/scheduler.js'],
   },
   'getSchedulerForDoc': {
     message: 'can only be used by the runtime',
@@ -177,7 +163,6 @@ const forbiddenTerms = {
       'src/inabox/inabox-services.js',
       'src/service/action-impl.js',
       'src/service/core-services.js',
-      'src/service/standard-actions-impl.js',
     ],
   },
   'installActionHandler': {
@@ -190,10 +175,7 @@ const forbiddenTerms = {
   },
   'installActivityService': {
     message: privateServiceFactory,
-    allowlist: [
-      'extensions/amp-analytics/0.1/activity-impl.js',
-      'extensions/amp-analytics/0.1/amp-analytics.js',
-    ],
+    allowlist: ['extensions/amp-analytics/0.1/activity-impl.js'],
   },
   'cidServiceForDocForTesting': {
     message: privateServiceFactory,
@@ -201,11 +183,7 @@ const forbiddenTerms = {
   },
   'installCryptoService': {
     message: privateServiceFactory,
-    allowlist: [
-      'src/runtime.js',
-      'src/service/core-services.js',
-      'src/service/crypto-impl.js',
-    ],
+    allowlist: ['src/service/core-services.js', 'src/service/crypto-impl.js'],
   },
   'installDocService': {
     message: privateServiceFactory,
@@ -220,17 +198,12 @@ const forbiddenTerms = {
   },
   'installMutatorServiceForDoc': {
     message: privateServiceFactory,
-    allowlist: [
-      'src/inabox/inabox-services.js',
-      'src/service/core-services.js',
-      'src/service/mutator-impl.js',
-    ],
+    allowlist: ['src/service/core-services.js', 'src/service/mutator-impl.js'],
   },
   'installPerformanceService': {
     message: privateServiceFactory,
     allowlist: [
       'src/amp.js',
-      'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
       'src/service/performance-impl.js',
     ],
@@ -238,23 +211,17 @@ const forbiddenTerms = {
   'installResourcesServiceForDoc': {
     message: privateServiceFactory,
     allowlist: [
-      'src/inabox/inabox-services.js',
       'src/service/core-services.js',
       'src/service/resources-impl.js',
     ],
   },
   'installStorageServiceForDoc': {
     message: privateServiceFactory,
-    allowlist: [
-      'src/runtime.js',
-      'src/service/core-services.js',
-      'src/service/storage-impl.js',
-    ],
+    allowlist: ['src/service/core-services.js', 'src/service/storage-impl.js'],
   },
   'installTemplatesServiceForDoc': {
     message: privateServiceFactory,
     allowlist: [
-      'src/runtime.js',
       'src/inabox/inabox-services.js',
       'src/service/core-services.js',
       'src/service/template-impl.js',
@@ -270,52 +237,32 @@ const forbiddenTerms = {
   },
   'installViewerServiceForDoc': {
     message: privateServiceFactory,
-    allowlist: [
-      'src/runtime.js',
-      'src/inabox/inabox-services.js',
-      'src/service/core-services.js',
-      'src/service/viewer-impl.js',
-    ],
+    allowlist: ['src/service/core-services.js', 'src/service/viewer-impl.js'],
   },
   'installViewportServiceForDoc': {
     message: privateServiceFactory,
     allowlist: [
-      'src/runtime.js',
       'src/service/core-services.js',
       'src/service/viewport/viewport-impl.js',
     ],
   },
   'installVsyncService': {
     message: privateServiceFactory,
-    allowlist: [
-      'src/runtime.js',
-      'src/service/core-services.js',
-      'src/service/resources-impl.js',
-      'src/service/viewport/viewport-impl.js',
-      'src/service/vsync-impl.js',
-    ],
+    allowlist: ['src/service/core-services.js', 'src/service/vsync-impl.js'],
   },
   'installXhrService': {
     message: privateServiceFactory,
-    allowlist: [
-      'src/runtime.js',
-      'src/service/core-services.js',
-      'src/service/xhr-impl.js',
-    ],
+    allowlist: ['src/service/core-services.js', 'src/service/xhr-impl.js'],
   },
   'installPositionObserverServiceForDoc': {
     message: privateServiceFactory,
     allowlist: [
       // Please keep list alphabetically sorted.
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
-      'extensions/amp-list/0.1/amp-list.js',
       'extensions/amp-next-page/0.1/next-page-service.js',
       'extensions/amp-next-page/1.0/visibility-observer.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js',
-      'extensions/amp-video-docking/0.1/amp-video-docking.js',
       'src/service/position-observer/position-observer-impl.js',
-      'src/service/video-manager-impl.js',
-      'src/service/video/autoplay.js',
     ],
   },
   'getServiceForDoc': {
@@ -351,9 +298,7 @@ const forbiddenTerms = {
       '3p/recaptcha.js',
       'ads/alp/install-alp.js',
       'ads/inabox/inabox-host.js',
-      'dist.3p/current/integration.js',
       'extensions/amp-access/0.1/amp-login-done.js',
-      'extensions/amp-viewer-integration/0.1/examples/amp-viewer-host.js',
       'src/amp-story-player/amp-story-component-manager.js',
       'src/runtime.js',
       'src/log.js',
@@ -365,9 +310,7 @@ const forbiddenTerms = {
     message: 'Use parseUrl instead.',
     allowlist: [
       'src/url.js',
-      'src/service/navigation.js',
       'src/service/url-impl.js',
-      'dist.3p/current/integration.js',
       'src/amp-story-player/amp-story-player-impl.js',
     ],
   },
@@ -377,7 +320,6 @@ const forbiddenTerms = {
       // viewer-impl.sendMessage
       'src/error.js',
       'src/service/navigation.js',
-      'src/service/viewer-impl.js',
       'src/service/viewport/viewport-impl.js',
       'src/service/performance-impl.js',
       'src/service/resources-impl.js',
@@ -392,15 +334,12 @@ const forbiddenTerms = {
       '3p/iframe-messaging-client.js',
       '3p/ampcontext.js',
       '3p/ampcontext-integration.js',
-      '3p/recaptcha.js',
-      'dist.3p/current/integration.js', // includes previous
     ],
   },
   '\\.sendMessageAwaitResponse\\(': {
     message: 'Usages must be reviewed.',
     allowlist: [
       'extensions/amp-access/0.1/login-dialog.js',
-      'extensions/amp-access/0.1/signin.js',
       'extensions/amp-story-education/0.1/amp-story-education.js',
       'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'src/impression.js',
@@ -408,7 +347,6 @@ const forbiddenTerms = {
       'src/service/history-impl.js',
       'src/service/storage-impl.js',
       'src/ssr-template-helper.js',
-      'src/service/viewer-impl.js',
       'src/service/viewer-cid-api.js',
       'src/utils/xhr-utils.js',
     ],
@@ -422,7 +360,6 @@ const forbiddenTerms = {
       // https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec
       'src/ad-cid.js',
       'src/services.js',
-      'src/service/cid-impl.js',
       'src/service/standard-actions-impl.js',
       'src/service/url-replacements-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
@@ -436,7 +373,7 @@ const forbiddenTerms = {
   },
   'getBaseCid': {
     message: requiresReviewPrivacy,
-    allowlist: ['src/service/cid-impl.js', 'src/service/viewer-impl.js'],
+    allowlist: ['src/service/cid-impl.js'],
   },
   'isTrustedViewer': {
     message: requiresReviewPrivacy,
@@ -464,7 +401,6 @@ const forbiddenTerms = {
   },
   'eval\\(': {
     message: shouldNeverBeUsed,
-    allowlist: ['extension/amp-bind/0.1/test/test-bind-expr.js'],
   },
   'storageForDoc|storageForTopLevelDoc': {
     message:
@@ -489,7 +425,6 @@ const forbiddenTerms = {
     message: requiresReviewPrivacy,
     allowlist: [
       'extensions/amp-access/0.1/amp-access-iframe.js',
-      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
       'extensions/amp-script/0.1/amp-script.js',
       'extensions/amp-story/1.0/history.js',
       'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
@@ -521,7 +456,6 @@ const forbiddenTerms = {
       'build-system/externs/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-access/0.1/access-vars.js',
-      'extensions/amp-access-scroll/0.1/scroll-impl.js',
       'extensions/amp-subscriptions/0.1/amp-subscriptions.js',
       'src/service/url-replacements-impl.js',
     ],
@@ -543,7 +477,6 @@ const forbiddenTerms = {
     allowlist: [
       '3p/integration-lib.js',
       'ads/google/a4a/utils.js',
-      'dist.3p/current/integration.js',
       'src/inabox/inabox-viewer.js',
       'src/service/viewer-impl.js',
       'src/error.js',
@@ -554,7 +487,6 @@ const forbiddenTerms = {
     message: 'Use Viewer.getReferrerUrl() instead.',
     allowlist: [
       'extensions/amp-dynamic-css-classes/0.1/amp-dynamic-css-classes.js',
-      'src/3p-frame.js',
       'src/iframe-attributes.js',
       'src/service/viewer-impl.js',
       'src/service/viewer-interface.js',
@@ -569,12 +501,10 @@ const forbiddenTerms = {
       'src/3p-frame-messaging.js',
       'src/event-helper.js',
       'src/event-helper-listen.js',
-      'dist.3p/current/integration.js', // includes previous
     ],
   },
   'setTimeout.*throw': {
     message: 'Use dev.error or user.error instead.',
-    allowlist: ['src/log.js'],
   },
   '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([A-Z0-9-]+|[\'"`][A-Z0-9-]+[\'"`]))[^,)\n]*': {
     message:
@@ -591,11 +521,7 @@ const forbiddenTerms = {
   '\\.requireLayout\\(': {
     message:
       'requireLayout is restricted b/c it affects non-contained elements',
-    allowlist: [
-      'extensions/amp-animation/0.1/web-animations.js',
-      'extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
-      'src/service/resources-impl.js',
-    ],
+    allowlist: ['extensions/amp-animation/0.1/web-animations.js'],
   },
   '\\.updateLayoutPriority\\(': {
     message: 'updateLayoutPriority is a restricted API.',
@@ -624,13 +550,11 @@ const forbiddenTerms = {
   },
   '\\.getWin\\(': {
     message: backwardCompat,
-    allowlist: [],
   },
   '/\\*\\* @type \\{\\!Element\\} \\*/': {
     message: 'Use assertElement instead of casting to !Element.',
     allowlist: [
       'src/log.js', // Has actual implementation of assertElement.
-      'dist.3p/current/integration.js', // Includes the previous.
       'src/polyfills/custom-elements.js',
       'ads/google/imaVideo.js', // Required until #22277 is fixed.
       '3p/twitter.js', // Runs in a 3p window context, so cannot import log.js.
@@ -665,7 +589,6 @@ const forbiddenTerms = {
       'build-system/tasks/default-task.js',
       'build-system/tasks/dist.js',
       'build-system/tasks/helpers.js',
-      'dist.3p/current/integration.js',
       'src/config.js',
       'src/experiments.js',
       'src/mode.js',
@@ -682,7 +605,6 @@ const forbiddenTerms = {
   },
   'new CustomEvent\\(': {
     message: 'Use createCustomEvent() helper instead.',
-    allowlist: ['src/event-helper.js'],
   },
   'new FormData\\(': {
     message:
@@ -713,7 +635,6 @@ const forbiddenTerms = {
       'body after an error please use `makeBodyVisibleRecovery`',
     allowlist: [
       'src/amp.js',
-      'src/amp-shadow.js',
       'src/style-installer.js',
       'src/inabox/amp-inabox.js',
     ],
@@ -779,8 +700,6 @@ const forbiddenTerms = {
       'extensions/amp-analytics/0.1/test/test-linker-reader.js',
       'extensions/amp-analytics/0.1/test/test-linker.js',
       'extensions/amp-analytics/0.1/test/test-transport-serializers.js',
-      'extensions/amp-analytics/0.1/test/test-vendors.js',
-      'extensions/amp-animation/0.1/test/test-css-expr.js',
       'extensions/amp-auto-ads/0.1/test/test-attributes.js',
       'extensions/amp-bind/0.1/test/test-bind-evaluator.js',
       'extensions/amp-bind/0.1/test/test-bind-expression.js',
@@ -795,20 +714,14 @@ const forbiddenTerms = {
       'extensions/amp-truncate-text/0.1/test/test-binary-search.js',
       'extensions/amp-viewer-integration/0.1/test/test-findtext.js',
       'test/integration/test-3p-nameframe.js',
-      'test/integration/test-actions.js',
       'test/integration/test-amp-ad-3p.js',
-      'test/integration/test-amp-ad-fake.js',
-      'test/integration/test-amp-analytics.js',
       'test/integration/test-amp-pixel.js',
-      'test/integration/test-amp-recaptcha-input.js',
       'test/integration/test-amp-skimlinks.js',
-      'test/integration/test-amphtml-ads.js',
       'test/integration/test-boilerplates.js',
       'test/integration/test-configuration.js',
       'test/integration/test-css.js',
       'test/integration/test-extensions-loading.js',
       'test/integration/test-released.js',
-      'test/integration/test-toggle-display.js',
       'test/integration/test-video-manager.js',
       'test/integration/test-video-players.js',
       'test/unit/3p/test-3p-messaging.js',
@@ -822,7 +735,6 @@ const forbiddenTerms = {
       'test/unit/test-ads-config.js',
       'test/unit/test-alp-handler.js',
       'test/unit/test-amp-context.js',
-      'test/unit/test-amp-img.js',
       'test/unit/test-amp-inabox.js',
       'test/unit/test-animation.js',
       'test/unit/test-batched-json.js',
@@ -833,7 +745,6 @@ const forbiddenTerms = {
       'test/unit/test-curve.js',
       'test/unit/test-describes.js',
       'test/unit/test-document-ready.js',
-      'test/unit/test-element-service.js',
       'test/unit/test-error.js',
       'test/unit/test-event-helper.js',
       'test/unit/test-experiments.js',
@@ -844,11 +755,9 @@ const forbiddenTerms = {
       'test/unit/test-gesture.js',
       'test/unit/test-get-html.js',
       'test/unit/test-ie-media-bug.js',
-      'test/unit/test-impression.js',
       'test/unit/test-input.js',
       'test/unit/test-integration.js',
       'test/unit/test-intersection-observer-polyfill.js',
-      'test/unit/test-intersection-observer.js',
       'test/unit/test-json.js',
       'test/unit/test-layout-rect.js',
       'test/unit/test-layout.js',
@@ -856,7 +765,6 @@ const forbiddenTerms = {
       'test/unit/test-mode.js',
       'test/unit/test-motion.js',
       'test/unit/test-mustache.js',
-      'test/unit/test-mutator.js',
       'test/unit/test-object.js',
       'test/unit/test-observable.js',
       'test/unit/test-pass.js',
@@ -865,15 +773,12 @@ const forbiddenTerms = {
       'test/unit/test-polyfill-math-sign.js',
       'test/unit/test-polyfill-object-assign.js',
       'test/unit/test-polyfill-object-values.js',
-      'test/unit/test-preconnect.js',
       'test/unit/test-pull-to-refresh.js',
       'test/unit/test-purifier.js',
       'test/unit/test-render-delaying-services.js',
       'test/unit/test-resource.js',
-      'test/unit/test-resources.js',
       'test/unit/test-sanitizer.js',
       'test/unit/test-service.js',
-      'test/unit/test-size-list.js',
       'test/unit/test-srcset.js',
       'test/unit/test-static-template.js',
       'test/unit/test-string.js',
@@ -887,10 +792,8 @@ const forbiddenTerms = {
       'test/unit/test-viewport.js',
       'test/unit/test-web-components.js',
       'test/unit/utils/test-array.js',
-      'test/unit/utils/test-base64.js',
       'test/unit/utils/test-bytes.js',
       'test/unit/utils/test-lru-cache.js',
-      'test/unit/utils/test-pem.js',
       'test/unit/utils/test-priority-queue.js',
       'test/unit/utils/test-rate-limit.js',
       'test/unit/web-worker/test-amp-worker.js',
@@ -969,18 +872,13 @@ const forbiddenTermsSrcInclusive = {
     message: bannedTermsHelpString,
     allowlist: [
       'extensions/amp-install-serviceworker/0.1/amp-install-serviceworker.js',
-      'src/service/viewport/viewport-impl.js',
     ],
   },
   'getComputedStyle\\(': {
     message:
       'Due to various bugs in Firefox, you must use the computedStyle ' +
       'helper in style.js.',
-    allowlist: [
-      'src/style.js',
-      'dist.3p/current/integration.js',
-      'build-system/tasks/coverage-map/index.js',
-    ],
+    allowlist: ['src/style.js', 'build-system/tasks/coverage-map/index.js'],
   },
   'decodeURIComponent\\(': {
     message:
@@ -988,12 +886,10 @@ const forbiddenTermsSrcInclusive = {
       'use tryDecodeUriComponent from src/url.js',
     allowlist: [
       '3p/integration-lib.js',
-      'dist.3p/current/integration.js',
       'examples/pwa/pwa.js',
       'validator/js/engine/parse-url.js',
       'validator/js/engine/validator.js',
       'validator/js/webui/webui.js',
-      'extensions/amp-pinterest/0.1/util.js',
       'src/url.js',
       'src/url-try-decode-uri-component.js',
       'src/utils/bytes.js',
@@ -1025,32 +921,18 @@ const forbiddenTermsSrcInclusive = {
   'preloadExtension': {
     message: bannedTermsHelpString,
     allowlist: [
-      'src/element-stub.js',
       'src/friendly-iframe-embed.js',
       'src/polyfillstub/intersection-observer-stub.js',
       'src/polyfillstub/resize-observer-stub.js',
-      'src/runtime.js',
       'src/service/extensions-impl.js',
-      'src/service/lightbox-manager-discovery.js',
       'src/service/crypto-impl.js',
-      'src/shadow-embed.js',
-      'src/analytics.js',
-      'src/extension-analytics.js',
-      'src/services.js',
-      'extensions/amp-ad/0.1/amp-ad.js',
-      'extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
-      'extensions/amp-animation/0.1/install-polyfill.js',
     ],
   },
   'loadElementClass': {
     message: bannedTermsHelpString,
     allowlist: [
-      'src/runtime.js',
       'src/service/extensions-impl.js',
       'extensions/amp-ad/0.1/amp-ad.js',
-      'extensions/amp-a4a/0.1/amp-a4a.js',
-      'extensions/amp-auto-ads/0.1/amp-auto-ads.js',
-      'extensions/amp-auto-ads/0.1/anchor-ad-strategy.js',
     ],
   },
   'reject\\(\\)': {
@@ -1064,17 +946,13 @@ const forbiddenTermsSrcInclusive = {
       'src/base-element.js',
       'src/event-helper.js',
       'src/friendly-iframe-embed.js',
-      'src/service/performance-impl.js',
       'src/service/resources-impl.js',
-      'src/service/url-replacements-impl.js',
       'src/service/variable-source.js',
       'src/validator-integration.js',
-      'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js',
       'extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
       'extensions/amp-analytics/0.1/transport.js',
       'extensions/amp-web-push/0.1/iframehost.js',
       'extensions/amp-recaptcha-input/0.1/amp-recaptcha-service.js',
-      'dist.3p/current/integration.js',
     ],
   },
   '\\.getTime\\(\\)': {
@@ -1088,16 +966,10 @@ const forbiddenTermsSrcInclusive = {
   },
   '\\.expandStringSync\\(': {
     message: requiresReviewPrivacy,
-    allowlist: [
-      'extensions/amp-form/0.1/amp-form.js',
-      'src/service/url-replacements-impl.js',
-    ],
   },
   '\\.expandStringAsync\\(': {
     message: requiresReviewPrivacy,
     allowlist: [
-      'extensions/amp-form/0.1/amp-form.js',
-      'src/service/url-replacements-impl.js',
       'extensions/amp-analytics/0.1/config.js',
       'extensions/amp-analytics/0.1/cookie-writer.js',
       'extensions/amp-analytics/0.1/requests.js',
@@ -1107,17 +979,11 @@ const forbiddenTermsSrcInclusive = {
   },
   '\\.expandInputValueSync\\(': {
     message: requiresReviewPrivacy,
-    allowlist: [
-      'extensions/amp-form/0.1/amp-form.js',
-      'src/service/url-replacements-impl.js',
-    ],
+    allowlist: ['extensions/amp-form/0.1/amp-form.js'],
   },
   '\\.expandInputValueAsync\\(': {
     message: requiresReviewPrivacy,
-    allowlist: [
-      'extensions/amp-form/0.1/amp-form.js',
-      'src/service/url-replacements-impl.js',
-    ],
+    allowlist: ['extensions/amp-form/0.1/amp-form.js'],
   },
   '\\.setNonBoolean\\(': {
     message: requiresReviewPrivacy,
@@ -1140,18 +1006,14 @@ const forbiddenTermsSrcInclusive = {
       'build-system/server/app.js',
       'build-system/server/shadow-viewer.js',
       'build-system/server/variable-substitution.js',
-      'build-system/tasks/check-links.js',
       'build-system/tasks/dist.js',
       'build-system/tasks/extension-generator/index.js',
       'build-system/tasks/helpers.js',
       'build-system/tasks/performance/helpers.js',
-      'dist.3p/current/integration.js',
-      'extensions/amp-iframe/0.1/amp-iframe.js',
       'src/3p-frame.js',
       'src/amp-story-player/amp-story-player-impl.js',
       'src/config.js',
       'testing/local-amp-chrome-extension/background.js',
-      'tools/errortracker/errortracker.go',
       'tools/experiments/experiments.js',
       'validator/js/engine/htmlparser-interface.js',
       'validator/js/engine/validator-in-browser.js',
@@ -1168,12 +1030,12 @@ const forbiddenTermsSrcInclusive = {
   },
   '\\.indexOf\\([\'"][^)]+\\)\\s*===?\\s*0\\b': {
     message: 'use startsWith helper in src/string.js',
-    allowlist: ['dist.3p/current/integration.js', 'build-system/server/app.js'],
+    allowlist: ['build-system/server/app.js'],
   },
   '\\.indexOf\\(.*===?.*\\.length': 'use endsWith helper in src/string.js',
   '/url-parse-query-string': {
     message: 'Import parseQueryString from `src/url.js`',
-    allowlist: ['src/url.js', 'src/mode.js', 'dist.3p/current/integration.js'],
+    allowlist: ['src/url.js', 'src/mode.js'],
   },
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
@@ -1235,8 +1097,6 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'extensions/amp-script/0.1/amp-script.js',
-      'extensions/amp-sidebar/0.1/amp-sidebar.js',
-      'extensions/amp-sidebar/0.2/amp-sidebar.js',
       'extensions/amp-story/1.0/amp-story-page.js',
     ],
   },
@@ -1284,19 +1144,6 @@ function isInTestFolder(path) {
 }
 
 /**
- * Check if file is inside the build-system/babel-plugins test/fixture folder.
- * @param {string} srcFile
- * @return {boolean}
- */
-function isInBuildSystemFixtureFolder(srcFile) {
-  const folder = path.dirname(srcFile);
-  return (
-    folder.startsWith('build-system/babel-plugins') &&
-    folder.includes('test/fixtures')
-  );
-}
-
-/**
  * Strip Comments
  * @param {string} contents
  * @return {string}
@@ -1338,10 +1185,8 @@ function matchForbiddenTerms(srcFile, contents, terms) {
       // NOTE: we could do a glob test instead of exact check in the future
       // if needed but that might be too permissive.
       if (
-        isInBuildSystemFixtureFolder(srcFile) ||
-        (Array.isArray(allowlist) &&
-          (allowlist.indexOf(srcFile) != -1 ||
-            (isInTestFolder(srcFile) && !checkInTestFolder)))
+        (Array.isArray(allowlist) && allowlist.indexOf(srcFile) != -1) ||
+        (isInTestFolder(srcFile) && !checkInTestFolder)
       ) {
         return [];
       }
