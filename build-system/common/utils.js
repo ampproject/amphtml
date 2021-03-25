@@ -114,16 +114,18 @@ function getFilesFromArgv() {
 
 /**
  * Gets a list of files to be checked based on command line args and the given
- * file matching globs. Used by tasks like prettify, check-links, etc.
+ * file matching globs. Used by tasks like prettify, lint, check-links, etc.
+ * Optionally takes in options for globbing and a file containing ignore rules.
  *
  * @param {!Array<string>} globs
  * @param {Object=} options
- * @param {(string|Array<string>)=} ignoreRules
+ * @param {string=} ignoreFile
  * @return {!Array<string>}
  */
-function getFilesToCheck(globs, options = {}, ignoreRules = undefined) {
+function getFilesToCheck(globs, options = {}, ignoreFile = undefined) {
   const ignored = ignore();
-  if (ignoreRules) {
+  if (ignoreFile) {
+    const ignoreRules = fs.readFileSync(ignoreFile, 'utf8');
     ignored.add(ignoreRules);
   }
   if (argv.files) {
@@ -172,7 +174,6 @@ module.exports = {
   buildRuntime,
   getExperimentConfig,
   getValidExperiments,
-  getFilesChanged,
   getFilesFromArgv,
   getFilesToCheck,
   usesFilesOrLocalChanges,
