@@ -259,8 +259,11 @@ exports.rules = [
       // AMP Story Panning Media
       'extensions/amp-story-panning-media/0.1/amp-story-panning-media.js->extensions/amp-story/1.0/amp-story-store-service.js',
       // Story ads
+      'extensions/amp-story-auto-ads/0.1/algorithm-count-pages.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-auto-ads/0.1/algorithm-predetermined.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-auto-ads/0.1/story-ad-page.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-auto-ads/0.1/story-ad-page-manager.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/events.js',
       // TODO(#24080) Remove this when story ads have full ad network support.
       'extensions/amp-story-auto-ads/0.1/story-ad-page.js->extensions/amp-ad-exit/0.1/config.js',
