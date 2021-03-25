@@ -402,14 +402,12 @@ export class Log {
 
     try {
       const assertion = this == logs.user ? pureUserAssert : pureDevAssert;
-      return assertion.apply(
-        null,
-        [shouldBeTrueish, opt_message].concat(var_args)
-      );
-    } catch (assertionError) {
-      this.prepareError_(assertionError);
-      self.__AMP_REPORT_ERROR(assertionError);
-      throw assertionError;
+      return assertion.apply(null, arguments);
+    } catch (e) {
+      this.prepareError_(e);
+      // __AMP_REPORT_ERROR is installed globally per window in the entry point.
+      self.__AMP_REPORT_ERROR(e);
+      throw e;
     }
   }
 

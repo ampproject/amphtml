@@ -71,24 +71,36 @@ function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
 
   // Skip the first 3 arguments to isolate format params
   const messageArgs = Array.prototype.slice.call(arguments, 3);
-  const messageArray = [];
   let firstElement;
 
-  // Substitute provided values into format string in message
-  const message = (opt_message || 'Assertion failed').replace(/%s/g, () => {
-    const subValue = messageArgs.shift();
+  // Substitute provided values into format string in message(
+  const splitMessage = (opt_message || 'Assertion failed').split('%s');
+  let message = splitMessage.shift();
+  const messageArray = [message];
 
-    if (subValue != '') {
-      messageArray.push(subValue);
-    }
+  while (splitMessage.length > 0) {
+    let subValue = messageArgs.shift();
+    let nextConstant = splitMessage.shift();
 
     // If an element is provided, add it to the error object
     if (!firstElement && subValue?.tagName) {
+      // Here we want the actual element
       firstElement = subValue;
     }
 
-    return elementStringOrPassThru(subValue);
-  });
+    // Past this point, we want any elements string-ified
+    subValue = elementStringOrPassThru(subValue);
+    message += subValue + nextConstant;
+    // Trim away whitespace and exclude empty strings from messageArray
+    nextConstant = nextConstant.trim();
+
+    messageArray.push(subValuegd);
+    // Importantly, this will exclude empty string but allow other falsey values
+    // such as null or undefined
+    if (nextConstant !== '') {
+      messageArray.push(nextConstant);
+    }
+  }
 
   const error = new errorCls(message);
   error.messageArray = messageArray;
