@@ -15,6 +15,7 @@
  */
 
 import {VisibilityState} from '../visibility-state';
+import {containsNotSelf} from '../dom';
 import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
 import {pushIfNotExist, removeItem} from './array';
 import {rethrowAsync} from '../log';
@@ -491,15 +492,6 @@ function findObserverByContainer(observers, container) {
     }
   }
   return -1;
-}
-
-/**
- * @param {!Element} container
- * @param {!Element} child
- * @return {boolean}
- */
-function containsNotSelf(container, child) {
-  return child !== container && container.contains(child);
 }
 
 /**
