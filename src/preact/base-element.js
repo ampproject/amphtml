@@ -1147,12 +1147,16 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
     let value;
     if (def.passthrough) {
       devAssert(Ctor['usesShadowDom']);
-      value = [<Slot />];
+      // Use lazy loading inside the passthrough by default due to too many
+      // elements.
+      value = [<Slot loading={Loading.LAZY} />];
     } else if (def.passthroughNonEmpty) {
       devAssert(Ctor['usesShadowDom']);
+      // Use lazy loading inside the passthrough by default due to too many
+      // elements.
       value = element.getRealChildNodes().every(IS_EMPTY_TEXT_NODE)
         ? null
-        : [<Slot />];
+        : [<Slot loading={Loading.LAZY} />];
     } else if (def.attr) {
       value = element.getAttribute(def.attr);
       if (def.media && value != null) {

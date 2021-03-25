@@ -16,6 +16,7 @@
 
 import * as Preact from './index';
 import {CanPlay, CanRender, LoadingProp} from '../core/contextprops';
+import {Loading} from '../core/loading-instructions';
 import {pureDevAssert as devAssert} from '../core/assert';
 import {
   loadAll,
@@ -26,6 +27,8 @@ import {rediscoverChildren, removeProp, setProp} from '../context';
 import {useAmpContext} from './context';
 import {useEffect, useLayoutEffect, useRef} from './index';
 
+const EMPTY = {};
+
 /**
  * @param {!Element} element
  * @param {string} name
@@ -34,7 +37,7 @@ import {useEffect, useLayoutEffect, useRef} from './index';
  */
 export function createSlot(element, name, props) {
   element.setAttribute('slot', name);
-  return <Slot {...(props || {})} name={name} />;
+  return <Slot {...(props || EMPTY)} name={name} />;
 }
 
 /**
@@ -46,7 +49,7 @@ export function createSlot(element, name, props) {
 export function Slot(props) {
   const ref = useRef(/** @type {?Element} */ (null));
 
-  useSlotContext(ref);
+  useSlotContext(ref, props);
 
   useEffect(() => {
     // Post-rendering cleanup, if any.
@@ -60,8 +63,10 @@ export function Slot(props) {
 
 /**
  * @param {{current:?}} ref
+ * @param {!JsonObject=} opt_props
  */
-export function useSlotContext(ref) {
+export function useSlotContext(ref, opt_props) {
+  const {'loading': loading} = opt_props || EMPTY;
   const context = useAmpContext();
 
   // Context changes.
@@ -98,13 +103,17 @@ export function useSlotContext(ref) {
     const slot = ref.current;
     devAssert(slot?.nodeType == 1, 'Element expected');
 
-    // TODO(#31915): switch to `mount`.
-    execute(slot, loadAll);
+    // Mount children, unless lazy loading requested. If so the element should
+    // use `BaseElement.setAsContainer`.
+    if (loading != Loading.LAZY) {
+      // TODO(#31915): switch to `mount`.
+      execute(slot, loadAll);
+    }
 
     return () => {
       execute(slot, unmountAll);
     };
-  }, [ref]);
+  }, [ref, loading]);
 }
 
 /**
