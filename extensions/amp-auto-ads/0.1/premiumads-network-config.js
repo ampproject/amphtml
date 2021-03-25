@@ -44,9 +44,9 @@ export class PremiumadsNetworkConfig {
 
   /** @override */
   getConfigUrl() {
+    const data = this.autoAmpAdsElement_.dataset;
     return buildUrl(
-      this.autoAmpAdsElement_.getAttribute('data-host') || 'https://tags.premiumads.com.br/autoads/' +
-      this.autoAmpAdsElement_.getAttribute('data-publisher'),
+      data.host || 'https://tags.premiumads.com.br/autoads/' + data.publisher,
       {},
       4096
     );
@@ -54,14 +54,15 @@ export class PremiumadsNetworkConfig {
 
   /** @override */
   getAttributes() {
+    const data = this.autoAmpAdsElement_.dataset;
     const attributesObj = dict({
       'type': 'doubleclick',
       'data-ad': 'premiumads',
-      'width': this.autoAmpAdsElement_.getAttribute('data-width') || 336,
-      'height': this.autoAmpAdsElement_.getAttribute('data-height') || 280,
-      'layout': this.autoAmpAdsElement_.getAttribute('data-layout') || Layout.RESPONSIVE,
-      'sizes': this.autoAmpAdsElement_.getAttribute('data-sizes') || '(min-width: 320px) 320px, 100vw',
-      'style': this.autoAmpAdsElement_.getAttribute('data-style') || 'position:relative!important',
+      'width': data.width || 336,
+      'height': data.height || 280,
+      'layout': data.layout || Layout.RESPONSIVE,
+      'sizes': data.sizes || '(min-width: 320px) 320px, 100vw',
+      'style': data.style || 'position:relative!important',
     });
     return attributesObj;
   }
