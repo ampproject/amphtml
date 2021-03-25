@@ -31,30 +31,25 @@ class BabelTransformCache {
   constructor() {
     fs.ensureDirSync(CACHE_DIR);
 
-    /** @type {Map<string, Promise<{contents: string}>>} */
+    /** @type {Map<string, Promise<Buffer|string>>} */
     this.map = new Map();
 
     /** @type {Set<string>} */
     this.fsCache = new Set(fs.readdirSync(CACHE_DIR));
   }
 
-  getKey_(hash) {
-    return `${hash}.json`;
-  }
-
   /**
    * @param {string} hash
-   * @return {null|Promise<{contents: string}>}
+   * @return {null|Promise<Buffer|string>}
    */
   get(hash) {
-    const key = this.getKey_(hash);
-    const cached = this.map.get(key);
+    const cached = this.map.get(hash);
     if (cached) {
       return cached;
     }
-    if (this.fsCache.has(key)) {
-      const transformedPromise = fs.readJson(path.join(CACHE_DIR, key));
-      this.map.set(key, transformedPromise);
+    if (this.fsCache.has(hash)) {
+      const transformedPromise = fs.readFile(path.join(CACHE_DIR, hash));
+      this.map.set(hash, transformedPromise);
       return transformedPromise;
     }
     return null;
@@ -62,19 +57,18 @@ class BabelTransformCache {
 
   /**
    * @param {string} hash
-   * @param {Promise<{contents: string}>} transformPromise
+   * @param {Promise<string>} transformPromise
    */
   set(hash, transformPromise) {
-    const key = this.getKey_(hash);
-    if (this.map.has(key)) {
+    if (this.map.has(hash)) {
       throw new Error(
         `Read race occured. Attempting to transform a file twice.`
       );
     }
 
-    this.map.set(key, transformPromise);
+    this.map.set(hash, transformPromise);
     transformPromise.then((contents) => {
-      fs.outputJson(path.join(CACHE_DIR, key), contents);
+      fs.outputFile(path.join(CACHE_DIR, hash), contents);
     });
   }
 }
@@ -152,9 +146,7 @@ function getEsbuildBabelPlugin(
 
     const promise = babel
       .transformAsync(contents, babelOptions)
-      .then((result) => {
-        return {contents: result.code};
-      });
+      .then((result) => result.code);
 
     if (enableCache) {
       transformCache.set(hash, promise);
@@ -178,11 +170,12 @@ function getEsbuildBabelPlugin(
       build.onLoad({filter: /\.[cm]?js$/, namespace: ''}, async (file) => {
         const filename = file.path;
         const {contents, hash} = await batchedRead(filename, optionsHash);
-        return transformContents(contents, hash, {
+        const transformed = await transformContents(contents, hash, {
           ...babelOptions,
           filename,
           filenameRelative: path.basename(filename),
         });
+        return {contents: transformed};
       });
     },
   };
