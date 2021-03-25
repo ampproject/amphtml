@@ -18,7 +18,7 @@ import {randomlySelectUnsetExperiments} from '../experiments';
 
 /** @const {!{id: string, control: string, experiment: string}} */
 export const StoryAdPlacements = {
-  ID: 'story-ads-placements',
+  ID: 'story-ad-placements',
   CONTROL: '31060567',
   PREDETERMINED_EIGHT: '31060568',
   PREDETERMINED_TWELVE: '31060569',
