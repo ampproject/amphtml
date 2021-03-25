@@ -226,6 +226,8 @@ describes.realWin(
       it('should open sidebar on button click', async () => {
         const sidebarElement = await getAmpSidebar();
         const impl = await sidebarElement.getImpl(false);
+        env.sandbox.stub(sidebarElement, 'setAsContainerInternal');
+        env.sandbox.stub(sidebarElement, 'removeAsContainerInternal');
         const screenReaderCloseButton = sidebarElement.querySelector(
           'button.i-amphtml-screen-reader'
         );
@@ -273,6 +275,9 @@ describes.realWin(
         expect(owners.scheduleLayout).to.be.calledOnce;
         expect(historyPushSpy).to.be.calledOnce;
         expect(historyPopSpy).to.have.not.been.called;
+
+        expect(sidebarElement.setAsContainerInternal).to.be.calledOnce;
+        expect(sidebarElement.removeAsContainerInternal).to.not.be.called;
       });
 
       it('ignore repeated calls to open', async () => {
@@ -335,9 +340,19 @@ describes.realWin(
       it('should close sidebar on button click', async () => {
         const sidebarElement = await getAmpSidebar({'stubHistory': true});
         const impl = await sidebarElement.getImpl(false);
+        env.sandbox.stub(sidebarElement, 'setAsContainerInternal');
+        env.sandbox.stub(sidebarElement, 'removeAsContainerInternal');
         clock = fakeTimers.withGlobal(impl.win).install({
           toFake: ['Date', 'setTimeout'],
         });
+
+        // Sidebar has a child.
+        const child = createElementWithAttributes(doc, 'amp-img', {
+          layout: 'nodisplay',
+        });
+        sidebarElement.appendChild(child);
+        env.sandbox.stub(child, 'unmount');
+
         owners.schedulePause = env.sandbox.spy();
         const historyPushSpy = env.sandbox.spy();
         const historyPopSpy = env.sandbox.spy();
@@ -374,6 +389,9 @@ describes.realWin(
         execute(impl, 'close');
         expect(owners.schedulePause).to.be.calledOnce;
         expect(historyPopSpy).to.be.calledOnce;
+
+        expect(sidebarElement.removeAsContainerInternal).to.be.calledOnce;
+        expect(child.unmount).to.be.calledOnce;
       });
 
       it('should toggle sidebar on button click', async () => {
