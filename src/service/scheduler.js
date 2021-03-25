@@ -87,7 +87,7 @@ export class Scheduler {
       return;
     }
 
-    if (target.deferredBuild()) {
+    if (target.deferredMount()) {
       this.targets_.set(target, {asap: false, isIntersecting: false});
       this.observer_.observe(target);
       if (this.containerMap_.size > 0) {
