@@ -29,12 +29,12 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
     requestService = new AmpStoryRequestService(env.win, env.win.document.body);
     env.sandbox
       .stub(Services, 'storyRequestServiceForOrNull')
-      .returns(requestService);
+      .resolves(requestService);
 
     cacheUrlService = new AmpCacheUrlService();
     env.sandbox
       .stub(Services, 'cacheUrlServicePromiseForDoc')
-      .returns(Promise.resolve(cacheUrlService));
+      .resolves(cacheUrlService);
 
     env.win.document.head.appendChild(
       createElementWithAttributes(env.win.document, 'script', {
@@ -95,13 +95,11 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
 
   describe('end to end', () => {
     it('should create the sources from the request with the correct attributes', async () => {
-      env.sandbox.stub(requestService, 'executeRequest').returns(
-        Promise.resolve({
-          sources: [
-            {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
-          ],
-        })
-      );
+      env.sandbox.stub(requestService, 'executeRequest').resolves({
+        sources: [
+          {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+        ],
+      });
 
       const videoEl = createVideo([{src: 'video.mp4'}]);
       const ampVideo = new AmpVideo(videoEl);

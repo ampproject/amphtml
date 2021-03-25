@@ -18,8 +18,8 @@ import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {toArray} from '../../../src/types';
 
-/** @private {?boolean} whether the document can use cache url */
-let docSupportsCache = null;
+/** @private {?boolean} store the result of whether the document can use cache url */
+let docSupportsCacheResult = null;
 
 /**
  * Add the caching sources to the video if opted in.
@@ -27,7 +27,7 @@ let docSupportsCache = null;
  * @return {!Promise}
  */
 export function addCacheSources(video) {
-  if (!triggerVideoCache(video.win)) {
+  if (!docSupportsCache(video.win)) {
     return Promise.resolve();
   }
   const servicePromise = Services.cacheUrlServicePromiseForDoc(video.element);
@@ -91,11 +91,11 @@ export function applySourcesToVideo(videoEl, sources) {
  * @param {!Window} win
  * @return {boolean}
  */
-export function triggerVideoCache(win) {
-  if (docSupportsCache === null) {
-    docSupportsCache = !!win.document.head.querySelector(
+function docSupportsCache(win) {
+  if (docSupportsCacheResult === null) {
+    docSupportsCacheResult = !!win.document.head.querySelector(
       'script[custom-element="amp-cache-url"]'
     );
   }
-  return docSupportsCache;
+  return docSupportsCacheResult;
 }
