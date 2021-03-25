@@ -328,12 +328,6 @@ module.exports = {
       },
     },
     {
-      'files': ['build-system/babel-plugins/**/test/fixtures/**/*'],
-      'rules': {
-        'local/no-forbidden-terms': 0,
-      },
-    },
-    {
       'files': [
         '**/.eslintrc.js',
         'amp.js',
