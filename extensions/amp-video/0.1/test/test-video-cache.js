@@ -21,102 +21,110 @@ import {AmpVideo} from '../amp-video';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 
-describes.realWin(
-  'amp-video cached-sources',
-  {
-    amp: {
-      runtimeOn: true,
-      extensions: ['amp-video', 'amp-cache-url'],
-    },
-  },
-  (env) => {
-    let requestService;
-    let cacheUrlService;
+describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
+  let requestService;
+  let cacheUrlService;
 
-    beforeEach(() => {
-      requestService = new AmpStoryRequestService(
-        env.win,
-        env.win.document.body
-      );
-      env.sandbox
-        .stub(Services, 'storyRequestServiceForOrNull')
-        .returns(requestService);
+  beforeEach(() => {
+    requestService = new AmpStoryRequestService(env.win, env.win.document.body);
+    env.sandbox
+      .stub(Services, 'storyRequestServiceForOrNull')
+      .returns(requestService);
 
-      cacheUrlService = new AmpCacheUrlService();
-      env.sandbox
-        .stub(Services, 'cacheUrlServicePromiseForDoc')
-        .returns(Promise.resolve(cacheUrlService));
-      env.sandbox.stub(videoCache, 'hasCacheUrlService').returns(true);
+    cacheUrlService = new AmpCacheUrlService();
+    env.sandbox
+      .stub(Services, 'cacheUrlServicePromiseForDoc')
+      .returns(Promise.resolve(cacheUrlService));
 
-      env.win.document.head.appendChild(
-        createElementWithAttributes(env.win.document, 'script', {
-          'custom-element': 'amp-cache-url',
+    env.win.document.head.appendChild(
+      createElementWithAttributes(env.win.document, 'script', {
+        'custom-element': 'amp-cache-url',
+      })
+    );
+  });
+
+  describe('select sources', () => {
+    it('should select the source if there is only one source', () => {
+      const videoEl = createVideo([{src: 'video1.mp4'}]);
+      expect(videoCache.selectVideoSource(videoEl)).to.contain('video1.mp4');
+    });
+
+    it('should select the first source if there are similar sources', () => {
+      const videoEl = createVideo([{src: 'video1.mp4'}, {src: 'video2.mp4'}]);
+      expect(videoCache.selectVideoSource(videoEl)).to.contain('video1.mp4');
+    });
+
+    it('should select the mp4 source if there are many sources', () => {
+      const videoEl = createVideo([
+        {src: 'video1.mp4'},
+        {src: 'video2.mp4', type: 'video/mp4'},
+      ]);
+      expect(videoCache.selectVideoSource(videoEl)).to.contain('video2.mp4');
+    });
+
+    it('should select the src attribute of amp-video if there are no sources', () => {
+      const videoEl = createVideo([]);
+      videoEl.setAttribute('src', 'video1.mp4');
+      expect(videoCache.selectVideoSource(videoEl)).to.contain('video1.mp4');
+    });
+  });
+
+  describe('add sources', () => {
+    it('should set the correct attributes on the source added', () => {
+      const videoEl = createVideo([{src: 'video1.mp4'}]);
+      videoCache.applySourcesToVideo(videoEl, [
+        {'url': 'video1.mp4', 'bitrate_kbps': 700, type: 'video/mp4'},
+      ]);
+      const addedSource = videoEl.querySelector('source');
+      expect(addedSource.getAttribute('src')).to.equal('video1.mp4');
+      expect(addedSource.getAttribute('data-bitrate')).to.equal('700');
+      expect(addedSource.getAttribute('type')).to.equal('video/mp4');
+    });
+
+    it('should add the sources sorted by bitrate', () => {
+      const videoEl = createVideo([{src: 'video1.mp4'}]);
+      videoCache.applySourcesToVideo(videoEl, [
+        {'url': 'video1.mp4', 'bitrate_kbps': 700, type: 'video/mp4'},
+        {'url': 'video2.mp4', 'bitrate_kbps': 2000, type: 'video/mp4'},
+      ]);
+      const addedSources = videoEl.querySelectorAll('source');
+      expect(addedSources[0].getAttribute('data-bitrate')).to.equal('2000');
+      expect(addedSources[1].getAttribute('data-bitrate')).to.equal('700');
+    });
+  });
+
+  describe('end to end', () => {
+    it('should create the sources from the request with the correct attributes', async () => {
+      env.sandbox.stub(requestService, 'executeRequest').returns(
+        Promise.resolve({
+          sources: [
+            {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+          ],
         })
       );
+
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+      const ampVideo = new AmpVideo(videoEl);
+      await ampVideo.buildCallback();
+
+      expect(videoEl.querySelector('source[data-bitrate]')).to.not.be.null;
     });
+  });
 
-    describe('select sources', () => {
-      it('should select the source if there is only one source', () => {
-        const videoEl = createVideo([{src: 'video1.mp4'}]);
-        expect(videoCache.selectVideoSource(videoEl)).to.contain('video1.mp4');
-      });
-
-      it('should select the first source if there are similar sources', () => {
-        const videoEl = createVideo([{src: 'video1.mp4'}, {src: 'video2.mp4'}]);
-        expect(videoCache.selectVideoSource(videoEl)).to.contain('video1.mp4');
-      });
-
-      it('should select the mp4 source if there are many sources', () => {
-        const videoEl = createVideo([
-          {src: 'video1.mp4'},
-          {src: 'video2.mp4', type: 'video/mp4'},
-        ]);
-        expect(videoCache.selectVideoSource(videoEl)).to.contain('video2.mp4');
-      });
-
-      it('should select the src attribute of amp-video if there are no sources', () => {
-        const videoEl = createVideo([]);
-        videoEl.setAttribute('src', 'video1.mp4');
-        expect(videoCache.selectVideoSource(videoEl)).to.contain('video1.mp4');
-      });
+  function createVideo(children) {
+    const videoEl = createElementWithAttributes(env.win.document, 'amp-video', {
+      'enable-google-video-cache': '',
+      'layout': 'fill',
     });
-
-    describe('create sources', () => {
-      it('should create the sources from the request with the correct attributes', async () => {
-        env.sandbox.stub(requestService, 'executeRequest').returns(
-          Promise.resolve({
-            sources: [
-              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
-            ],
-          })
-        );
-
-        const videoEl = createVideo([{src: 'video.mp4'}]);
-        await videoEl.buildInternal();
-
-        expect(videoEl.querySelector('source[data-bitrate]')).to.not.be.null;
-      });
-    });
-
-    function createVideo(children) {
-      const videoEl = createElementWithAttributes(
+    children.forEach((childJson) => {
+      const sourceEl = createElementWithAttributes(
         env.win.document,
-        'amp-video',
-        {
-          'enable-google-video-cache': '',
-          'layout': 'fill',
-        }
+        'source',
+        childJson
       );
-      children.forEach((childJson) => {
-        const sourceEl = createElementWithAttributes(
-          env.win.document,
-          'source',
-          childJson
-        );
-        videoEl.appendChild(sourceEl);
-      });
-      env.win.document.body.appendChild(videoEl);
-      return videoEl;
-    }
+      videoEl.appendChild(sourceEl);
+    });
+    env.win.document.body.appendChild(videoEl);
+    return videoEl;
   }
-);
+});
