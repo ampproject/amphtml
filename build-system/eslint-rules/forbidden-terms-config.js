@@ -41,9 +41,6 @@ module.exports = {
       "[key.name='allowlist']" +
       "[value.type='ArrayExpression']" +
       "[parent.parent.type='Property']"]: function (node) {
-        const {value: term} = node.parent.parent.key;
-        const termRegexp = new RegExp(term, 'gm');
-
         if (node.value.elements.length < 1) {
           context.report({
             node,
@@ -54,6 +51,8 @@ module.exports = {
           });
           return;
         }
+
+        const termRegexp = new RegExp(node.parent.parent.key, 'gm');
 
         for (const stringLiteral of node.value.elements) {
           if (!stringLiteral.type.endsWith('Literal')) {
