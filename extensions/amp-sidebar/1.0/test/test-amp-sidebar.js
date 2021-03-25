@@ -18,7 +18,7 @@ import {ActionInvocation} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {htmlFor} from '../../../../src/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {waitFor, whenCalled} from '../../../../testing/test-helper';
 
 describes.realWin(
   'amp-sidebar:1.0',
@@ -137,6 +137,8 @@ describes.realWin(
         // sidebar is initially closed
         expect(element).to.not.have.attribute('open');
         expect(isMounted(win, container)).to.equal(false);
+        env.sandbox.stub(element, 'setAsContainerInternal');
+        env.sandbox.stub(element, 'removeAsContainerInternal');
 
         element.setAttribute('open', '');
         await waitForOpen(element, true);
@@ -144,11 +146,22 @@ describes.realWin(
         expect(element).to.have.attribute('open');
         expect(isMounted(win, container)).to.equal(true);
 
+        await whenCalled(element.setAsContainerInternal);
+        const sidebar = element.shadowRoot.querySelector('[part=sidebar]');
+        expect(sidebar).to.exist;
+        expect(element.setAsContainerInternal).to.be.calledOnce.calledWith(
+          sidebar
+        );
+        expect(element.removeAsContainerInternal).to.not.be.called;
+
         element.removeAttribute('open');
         await waitForOpen(element, false);
 
         expect(element).to.not.have.attribute('open');
         expect(isMounted(win, container)).to.equal(false);
+
+        expect(element.removeAsContainerInternal).to.be.calledOnce;
+        expect(element.setAsContainerInternal).to.be.calledOnce; // no change.
       });
 
       it('should close when the backdrop is clicked', async () => {
