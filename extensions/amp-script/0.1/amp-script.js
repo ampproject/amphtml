@@ -19,6 +19,7 @@ import {CSS} from '../../../build/amp-script-0.1.css';
 import {Deferred} from '../../../src/utils/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Purifier} from '../../../src/purifier/purifier';
+import {ReadyState} from '../../../src/ready-state';
 import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
 import {calculateExtensionScriptUrl} from '../../../src/service/extension-script';
@@ -72,6 +73,21 @@ export const StorageLocation = {
 };
 
 export class AmpScript extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static V1() {
+    return true;
+  }
+
+  /** @override @nocollapse */
+  static deferredBuild() {
+    return false;
+  }
+
+  /** @override @nocollapse */
+  static usesLoading() {
+    return true;
+  }
+
   /**
    * @param {!Element} element
    */
@@ -92,12 +108,6 @@ export class AmpScript extends AMP.BaseElement {
 
     /** @private {string} */
     this.debugId_ = 'amp-script[unknown].js';
-
-    /** @private {boolean} */
-    this.layoutCompleted_ = false;
-
-    /** @private {boolean} */
-    this.reportedZeroSize_ = false;
 
     /** @private {Deferred} */
     this.initialize_ = new Deferred();
@@ -128,7 +138,7 @@ export class AmpScript extends AMP.BaseElement {
   }
 
   /** @override */
-  buildCallback() {
+  mountCallback() {
     this.nodom_ = this.element.hasAttribute('nodom');
     this.development_ =
       this.element.hasAttribute('data-ampdevmode') ||
@@ -157,28 +167,14 @@ export class AmpScript extends AMP.BaseElement {
       );
     }
 
-    return getElementServiceForDoc(this.element, TAG, TAG).then((service) => {
-      this.setService(/** @type {!AmpScriptService} */ (service));
-    });
-  }
-
-  /**
-   * @override
-   */
-  onLayoutMeasure() {
-    if (this.layoutCompleted_ || this.reportedZeroSize_) {
-      return;
-    }
-
-    const {width, height} = this.getLayoutSize();
-    if (width === 0 && height === 0) {
-      this.reportedZeroSize_ = true;
-      user().warn(
-        TAG,
-        'Skipped initializing amp-script due to zero width and height.',
-        this.element
-      );
-    }
+    return getElementServiceForDoc(this.element, TAG, TAG)
+      .then((service) => {
+        this.setService(/** @type {!AmpScriptService} */ (service));
+      })
+      .then(() => {
+        this.setReadyState(ReadyState.LOADING);
+        this.layoutCallback();
+      });
   }
 
   /**
@@ -211,8 +207,6 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.layoutCompleted_ = true;
-
     // Layouts that use sizers (responsive, fluid) require the worker-dom
     // subtree to be wrapped in a "fill content" container. This is because
     // these layouts do _not_ constrain the size of the amp-script element
@@ -296,20 +290,29 @@ export class AmpScript extends AMP.BaseElement {
       container || this.element,
       workerAndAuthorScripts,
       config
-    ).then((workerDom) => {
-      this.workerDom_ = workerDom;
-      this.initialize_.resolve();
-      // workerDom will be null if it failed to init.
-      if (this.workerDom_) {
-        this.workerDom_.onerror = (errorEvent) => {
-          errorEvent.preventDefault();
-          user().error(
-            TAG,
-            `${errorEvent.message}\n    at (${errorEvent.filename}:${errorEvent.lineno})`
-          );
-        };
-      }
-    });
+    )
+      .then((workerDom) => {
+        this.workerDom_ = workerDom;
+        this.initialize_.resolve();
+        // workerDom will be null if it failed to init.
+        if (this.workerDom_) {
+          this.workerDom_.onerror = (errorEvent) => {
+            errorEvent.preventDefault();
+            user().error(
+              TAG,
+              `${errorEvent.message}\n    at (${errorEvent.filename}:${errorEvent.lineno})`
+            );
+          };
+        }
+      })
+      .then(
+        () => {
+          this.setReadyState(ReadyState.COMPLETE);
+        },
+        () => {
+          this.setReadyState(ReadyState.ERROR);
+        }
+      );
   }
 
   /**

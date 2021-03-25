@@ -37,6 +37,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
 
   beforeEach(() => {
     element = document.createElement('amp-script');
+    element.setReadyStateInternal = () => {}
     env.ampdoc.getBody().appendChild(element);
 
     script = new AmpScript(element);
@@ -83,7 +84,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     );
 
     expectAsyncConsoleError(/Same-origin "src" requires/);
-    return script.layoutCallback().should.be.rejected;
+    return script.mountCallback().should.be.rejected;
   });
 
   it('should support nodom variant', async () => {
@@ -108,12 +109,11 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
       AmpScriptService
     );
 
-    await script.buildCallback();
-    await script.layoutCallback();
+    await script.mountCallback();
     resetServiceForTesting(env.win, 'amp-script');
   });
 
-  it('should work with "text/javascript" content-type for same-origin src', () => {
+  it.only('should work with "text/javascript" content-type for same-origin src', () => {
     env.sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
     element.setAttribute('src', 'https://foo.example/foo.txt');
 
@@ -124,7 +124,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     );
 
     expectAsyncConsoleError(/should require JS content-type/);
-    return script.layoutCallback().should.be.fulfilled;
+    return script.mountCallback().should.be.fulfilled;
   });
 
   it('should check sha384(author_js) for cross-origin src', async () => {
@@ -138,7 +138,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     );
 
     service.checkSha384.withArgs('alert(1)').resolves();
-    await script.layoutCallback();
+    await script.mountCallback();
     expect(service.checkSha384).to.be.called;
   });
 
@@ -157,37 +157,6 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     expect(await result).to.equal(42);
   });
 
-  describe('Initialization skipped warning due to zero height/width', () => {
-    it('should not warn when there is positive width/height', () => {
-      const warnStub = env.sandbox.stub(user(), 'warn');
-      env.sandbox.stub(script, 'getLayoutSize').returns({height: 1, width: 1});
-      script.onLayoutMeasure();
-      expect(warnStub).to.have.callCount(0);
-    });
-
-    it('should warn if there is zero width/height', () => {
-      const warnStub = env.sandbox.stub(user(), 'warn');
-      env.sandbox.stub(script, 'getLayoutSize').returns({height: 0, width: 0});
-      script.onLayoutMeasure();
-
-      expect(warnStub).calledWith(
-        'amp-script',
-        'Skipped initializing amp-script due to zero width and height.',
-        script.element
-      );
-      expect(warnStub).to.have.callCount(1);
-    });
-
-    it('should only warn if layoutCallback hasnt happened', () => {
-      const warnStub = env.sandbox.stub(user(), 'warn');
-      allowConsoleError(() => {
-        script.layoutCallback();
-      });
-      script.onLayoutMeasure();
-      expect(warnStub).to.have.callCount(0);
-    });
-  });
-
   it('should fail on invalid sha384(author_js) for cross-origin src', () => {
     env.sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
     element.setAttribute('src', 'https://bar.example/bar.js');
@@ -199,7 +168,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     );
 
     service.checkSha384.withArgs('alert(1)').rejects(/Invalid sha384/);
-    return script.layoutCallback().should.be.rejected;
+    return script.mountCallback().should.be.rejected;
   });
 
   it('should check response URL to handle redirects', () => {
@@ -214,7 +183,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     );
 
     service.checkSha384.withArgs('alert(1)').rejects(/Invalid sha384/);
-    return script.layoutCallback().should.be.rejected;
+    return script.mountCallback().should.be.rejected;
   });
 
   it('should check sha384(author_js) for local scripts', async () => {
@@ -228,7 +197,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     env.ampdoc.getBody().appendChild(local);
 
     service.checkSha384.withArgs('alert(1)').resolves();
-    await script.layoutCallback();
+    await script.mountCallback();
     expect(service.checkSha384).to.be.called;
   });
 
@@ -243,7 +212,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     env.ampdoc.getBody().appendChild(local);
 
     service.checkSha384.withArgs('alert(1)').rejects(/Invalid sha384/);
-    return script.layoutCallback().should.be.rejected;
+    return script.mountCallback().should.be.rejected;
   });
 
   describe('development mode', () => {
@@ -258,22 +227,22 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
       resetServiceForTesting(env.win, 'amp-script');
     });
 
-    it('should not be in dev mode by default', () => {
-      script.buildCallback();
+    it('should not be in dev mode by default', async () => {
+      await script.mountCallback();
       expect(script.development_).false;
     });
 
     it('data-ampdevmode on just the element should enable dev mode', () => {
       element.setAttribute('data-ampdevmode', '');
       script = new AmpScript(element);
-      script.buildCallback();
+      script.mountCallback();
       expect(script.development_).true;
     });
 
     it('data-ampdevmode on just the root html element should enable dev mode', () => {
       element.ownerDocument.documentElement.setAttribute('data-ampdevmode', '');
       script = new AmpScript(element);
-      script.buildCallback();
+      script.mountCallback();
       expect(script.development_).true;
     });
   });
