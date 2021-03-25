@@ -167,9 +167,6 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       /** @type {boolean} */
       this.everAttached = false;
 
-      /** @private {boolean} */
-      this.mounted_ = false;
-
       /**
        * Ampdoc can only be looked up when an element is attached.
        * @private {?./service/ampdoc-impl.AmpDoc}
@@ -763,35 +760,6 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     /**
      * @return {!Promise}
      * @final
-     * @restricted
-     */
-    mountInternal() {
-      return this.buildInternal().then(() => {
-        if (!this.mounted_ && this.isConnected_) {
-          this.mounted_ = true;
-          return this.impl_.mountCallback();
-        }
-      });
-    }
-
-    /**
-     */
-    unmount() {
-      if (!this.mounted_ || !this.impl_) {
-        return;
-      }
-      this.mounted_ = false;
-      this.impl_.unmountCallback();
-      if (this.isConnected_) {
-        // Wait for the next change to mount again.
-        const builder = getBuilderForDoc(this.getAmpDoc());
-        builder.schedule(this);
-      }
-    }
-
-    /**
-     * @return {!Promise}
-     * @final
      */
     whenLoaded() {
       return this.signals_.whenSignal(CommonSignals.LOAD_END);
@@ -1368,11 +1336,6 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     connected_() {
       if (this.built_) {
         this.impl_.attachedCallback();
-        if (!this.mounted_) {
-          // Schedule mounting again.
-          const builder = getBuilderForDoc(this.getAmpDoc());
-          builder.schedule(this);
-        }
       }
     }
 
@@ -1409,7 +1372,6 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       this.getResources().remove(this);
       if (this.impl_) {
         this.impl_.detachedCallback();
-        this.unmount();
       }
       if (this.V1()) {
         this.unmount();
