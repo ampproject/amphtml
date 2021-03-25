@@ -49,6 +49,7 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS =
  *  verboseLogging?: boolean,
  *  typeCheckOnly?: boolean,
  *  skipUnknownDepsCheck?: boolean,
+ *  warningLevel?: boolean,
  * }}
  */
 let OptionsDef;
@@ -272,8 +273,8 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     jscomp_off: [],
     define,
     hide_warnings_for: hideWarningsFor,
-    // TODO(amphtml): Change 'QUIET' to 'DEFAULT' after #32875 is merged.
-    warning_level: argv.warning_level || 'QUIET',
+    // TODO(amphtml): Change 'QUIET' to 'DEFAULT'.
+    warning_level: argv.warning_level ?? options.warningLevel ?? 'QUIET',
   };
   if (argv.pseudo_names) {
     // Some optimizations get turned off when pseudo_names is on.
