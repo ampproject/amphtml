@@ -14,8 +14,21 @@
 # limitations under the license.
 #
 
-tags: {  # amp-social-share
+tags: {  # amp-social-share in websites
   html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-social-share"
+    version: "0.1"
+    version: "1.0"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+tags: {  # amp-social-share in ads
   html_format: AMP4ADS
   tag_name: "SCRIPT"
   extension_spec: {
