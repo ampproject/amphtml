@@ -17,7 +17,7 @@
 import * as hooks from /*OK*/ 'preact/hooks';
 import * as preact from /*OK*/ 'preact';
 // The preactDOM name is explicit, so we can remap to react-dom.
-import * as preactDOM from /*OK*/ 'preact';
+import * as preactDOM from /*OK*/ 'preact/dom';
 
 // Defines the type interfaces for the approved Preact APIs.
 // TODO: isValidElement, Component
