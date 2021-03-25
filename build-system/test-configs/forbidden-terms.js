@@ -1363,7 +1363,12 @@ function matchForbiddenTerms(srcFile, contents, terms) {
       // original term to get the possible fix value. This is ok as the
       // presubmit doesn't have to be blazing fast and this is most likely
       // negligible.
-      const regex = new RegExp(term, 'gm');
+      const regex = new RegExp(
+        term,
+        'gm' +
+          // case insensitive in comments
+          (checkComments ? 'i' : '')
+      );
       let index = 0;
       let line = 1;
       let column = 0;
