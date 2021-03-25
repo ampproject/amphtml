@@ -24,7 +24,7 @@ const {readFileSync} = require('fs');
 
 module.exports = {
   meta: {fixable: 'code'},
-  create: function (context) {
+  create(context) {
     function removeFromArray(fixer, {start, end}) {
       const {text} = context.getSourceCode();
       while (/\s/.test(text[start - 1])) {
