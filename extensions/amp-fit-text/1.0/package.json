@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/ampproject/amphtml/tree/master/extensions/amp-fit-text/1.0",
   "peerDependencies": {
-    "preact": "^10.2.1"
+    "preact": "^10.2.1",
+    "react": "^17.0.0"
   }
 }
