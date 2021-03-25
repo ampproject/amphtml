@@ -65,7 +65,9 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
   });
 
   function createAmpElement(options = {}) {
-    const element = createElementWithAttributes(doc, 'amp-el', {});
+    const element = createElementWithAttributes(doc, 'amp-el', {
+      id: options.id || '',
+    });
     element.deferredBuild = () => options.deferredBuild || false;
     element.prerenderAllowed = () => options.prerenderAllowed || false;
     element.getBuildPriority = () =>
@@ -82,6 +84,19 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
 
       scheduler.unschedule(element);
       expect(intersectionObserverStub.isObserved(element)).to.be.false;
+    });
+
+    it('should use the correct observer parameters', () => {
+      const element = createAmpElement({deferredBuild: true});
+      scheduler.schedule(element);
+
+      expect(
+        intersectionObserverStub.isObserved(element, {
+          root: doc,
+          rootMargin: '250% 31.25%',
+          thresholds: [0],
+        })
+      ).to.be.true;
     });
 
     it('should schedule a non-deferredBuild element', () => {
@@ -408,6 +423,339 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
       scheduler.scheduleAsap(element);
       clock.tick(1);
       expect(element.mountInternal).to.be.calledOnce;
+    });
+  });
+
+  describe('container', () => {
+    let container;
+    let topElement;
+    let containerScroller;
+    let containerElement, containerElementChild;
+
+    beforeEach(() => {
+      container = createAmpElement({id: 'container', deferredBuild: true});
+      containerScroller = createElementWithAttributes(doc, 'div', {
+        id: 'scroller',
+      });
+
+      topElement = createAmpElement({id: 'topElement', deferredBuild: true});
+      containerElement = createAmpElement({
+        id: 'containerElement',
+        deferredBuild: true,
+      });
+      containerElementChild = createAmpElement({
+        id: 'containerElementChild',
+        deferredBuild: true,
+      });
+
+      doc.body.appendChild(container);
+      doc.body.appendChild(topElement);
+      container.appendChild(containerScroller);
+      containerScroller.appendChild(containerElement);
+      containerElement.appendChild(containerElementChild);
+    });
+
+    it('should be observed by the document observer', () => {
+      scheduler.schedule(topElement);
+      scheduler.schedule(containerElement);
+      scheduler.schedule(containerElementChild);
+
+      // Observed on the document observer.
+      expect(intersectionObserverStub.isObserved(topElement, {root: doc})).to.be
+        .true;
+      expect(intersectionObserverStub.isObserved(containerElement, {root: doc}))
+        .to.be.true;
+      expect(
+        intersectionObserverStub.isObserved(containerElementChild, {root: doc})
+      ).to.be.true;
+    });
+
+    it('should be observed and unobserved by the container observer', () => {
+      scheduler.schedule(topElement);
+      scheduler.schedule(containerElement);
+      scheduler.schedule(containerElementChild);
+      scheduler.schedule(container);
+
+      // Set container.
+      scheduler.setContainer(container);
+
+      // Observed on the document observer.
+      expect(intersectionObserverStub.isObserved(topElement, {root: doc})).to.be
+        .true;
+      expect(intersectionObserverStub.isObserved(containerElement, {root: doc}))
+        .to.be.true;
+      expect(
+        intersectionObserverStub.isObserved(containerElementChild, {root: doc})
+      ).to.be.true;
+
+      // A contained element is observed by the container.
+      expect(
+        intersectionObserverStub.isObserved(containerElement, {root: container})
+      ).to.be.true;
+      expect(
+        intersectionObserverStub.isObserved(containerElementChild, {
+          root: container,
+        })
+      ).to.be.true;
+      // Not observed by the container because not contained by it.
+      expect(intersectionObserverStub.isObserved(topElement, {root: container}))
+        .to.be.false;
+
+      // Should not observe the container itself on the container observer.
+      expect(intersectionObserverStub.isObserved(container, {root: container}))
+        .to.be.false;
+      expect(intersectionObserverStub.isObserved(container, {root: doc})).to.be
+        .true;
+
+      // Remove container.
+      scheduler.removeContainer(container);
+      expect(
+        intersectionObserverStub.isObserved(containerElement, {root: container})
+      ).to.be.false;
+      expect(
+        intersectionObserverStub.isObserved(containerElementChild, {
+          root: container,
+        })
+      ).to.be.false;
+
+      // Set container again.
+      scheduler.setContainer(container);
+      expect(
+        intersectionObserverStub.isObserved(containerElement, {root: container})
+      ).to.be.true;
+      expect(
+        intersectionObserverStub.isObserved(containerElementChild, {
+          root: container,
+        })
+      ).to.be.true;
+    });
+
+    it('should be observed with scroller when specified', () => {
+      scheduler.schedule(topElement);
+      scheduler.schedule(containerElement);
+      scheduler.schedule(containerElementChild);
+      scheduler.schedule(container);
+
+      // Set container.
+      scheduler.setContainer(container, containerScroller);
+
+      // Observed on the document observer.
+      expect(intersectionObserverStub.isObserved(topElement, {root: doc})).to.be
+        .true;
+      expect(intersectionObserverStub.isObserved(containerElement, {root: doc}))
+        .to.be.true;
+      expect(
+        intersectionObserverStub.isObserved(containerElementChild, {root: doc})
+      ).to.be.true;
+
+      // A contained element is observed by the container.
+      expect(
+        intersectionObserverStub.isObserved(containerElement, {
+          root: containerScroller,
+        })
+      ).to.be.true;
+      expect(
+        intersectionObserverStub.isObserved(containerElementChild, {
+          root: containerScroller,
+        })
+      ).to.be.true;
+      // Not observed by the container because not contained by it.
+      expect(
+        intersectionObserverStub.isObserved(topElement, {
+          root: containerScroller,
+        })
+      ).to.be.false;
+
+      // No observers for the container itself.
+      expect(
+        intersectionObserverStub.isObserved(containerElement, {root: container})
+      ).to.be.false;
+      expect(
+        intersectionObserverStub.isObserved(containerElementChild, {
+          root: container,
+        })
+      ).to.be.false;
+      expect(intersectionObserverStub.isObserved(topElement, {root: container}))
+        .to.be.false;
+
+      // Should not observe the container itself on the container observer.
+      expect(
+        intersectionObserverStub.isObserved(container, {
+          root: containerScroller,
+        })
+      ).to.be.false;
+      expect(intersectionObserverStub.isObserved(container, {root: doc})).to.be
+        .true;
+    });
+
+    it('should be observed by the container for elements added after it was set', () => {
+      // Set container.
+      scheduler.setContainer(container);
+
+      // Schedule elements.
+      scheduler.schedule(topElement);
+      scheduler.schedule(containerElement);
+      scheduler.schedule(containerElementChild);
+      scheduler.schedule(container);
+
+      // Observed on the document observer.
+      expect(intersectionObserverStub.isObserved(topElement, {root: doc})).to.be
+        .true;
+      expect(intersectionObserverStub.isObserved(containerElement, {root: doc}))
+        .to.be.true;
+      expect(
+        intersectionObserverStub.isObserved(containerElementChild, {root: doc})
+      ).to.be.true;
+
+      // A contained element is observed by the container.
+      expect(
+        intersectionObserverStub.isObserved(containerElement, {root: container})
+      ).to.be.true;
+      expect(
+        intersectionObserverStub.isObserved(containerElementChild, {
+          root: container,
+        })
+      ).to.be.true;
+      // Not observed by the container because not contained by it.
+      expect(intersectionObserverStub.isObserved(topElement, {root: container}))
+        .to.be.false;
+
+      // Should not observe the container itself on the container observer.
+      expect(intersectionObserverStub.isObserved(container, {root: container}))
+        .to.be.false;
+      expect(intersectionObserverStub.isObserved(container, {root: doc})).to.be
+        .true;
+
+      // Remove container.
+      scheduler.removeContainer(container);
+      expect(
+        intersectionObserverStub.isObserved(containerElement, {root: container})
+      ).to.be.false;
+      expect(
+        intersectionObserverStub.isObserved(containerElementChild, {
+          root: container,
+        })
+      ).to.be.false;
+    });
+
+    it('should be unobserved by all observers when unscheduled', () => {
+      // Set container.
+      scheduler.setContainer(container);
+
+      // Schedule elements.
+      scheduler.schedule(containerElement);
+      expect(intersectionObserverStub.isObserved(containerElement, {root: doc}))
+        .to.be.true;
+      expect(
+        intersectionObserverStub.isObserved(containerElement, {root: container})
+      ).to.be.true;
+
+      // Unschedule
+      scheduler.unschedule(containerElement);
+      expect(intersectionObserverStub.isObserved(containerElement, {root: doc}))
+        .to.be.false;
+      expect(
+        intersectionObserverStub.isObserved(containerElement, {root: container})
+      ).to.be.false;
+    });
+
+    it('should mount if the document observer fires first', async () => {
+      await setAmpdocReady();
+
+      // Set container and schedule.
+      scheduler.setContainer(container);
+      scheduler.schedule(containerElement);
+      expect(intersectionObserverStub.isObserved(containerElement, {root: doc}))
+        .to.be.true;
+      expect(
+        intersectionObserverStub.isObserved(containerElement, {root: container})
+      ).to.be.true;
+
+      intersectionObserverStub.notifySync(
+        {
+          target: containerElement,
+          isIntersecting: true,
+        },
+        {root: doc}
+      );
+
+      clock.tick(1);
+      expect(containerElement.mountInternal).to.be.calledOnce;
+
+      // Unscheduled from both.
+      expect(intersectionObserverStub.isObserved(containerElement, {root: doc}))
+        .to.be.false;
+      expect(
+        intersectionObserverStub.isObserved(containerElement, {root: container})
+      ).to.be.false;
+    });
+
+    it('should mount if the container observer fires first', async () => {
+      await setAmpdocReady();
+
+      // Set container and schedule.
+      scheduler.setContainer(container);
+      scheduler.schedule(containerElement);
+      expect(intersectionObserverStub.isObserved(containerElement, {root: doc}))
+        .to.be.true;
+      expect(
+        intersectionObserverStub.isObserved(containerElement, {root: container})
+      ).to.be.true;
+
+      intersectionObserverStub.notifySync(
+        {
+          target: containerElement,
+          isIntersecting: true,
+        },
+        {root: container}
+      );
+
+      clock.tick(1);
+      expect(containerElement.mountInternal).to.be.calledOnce;
+      expect(intersectionObserverStub.isObserved(containerElement, {root: doc}))
+        .to.be.false;
+      expect(
+        intersectionObserverStub.isObserved(containerElement, {root: container})
+      ).to.be.false;
+    });
+
+    it('should wait for the first intersecing observation', async () => {
+      await setAmpdocReady();
+
+      // Set container and schedule.
+      scheduler.setContainer(container);
+      scheduler.schedule(containerElement);
+
+      intersectionObserverStub.notifySync(
+        {
+          target: containerElement,
+          isIntersecting: false,
+        },
+        {root: doc}
+      );
+      clock.tick(1);
+      expect(containerElement.mountInternal).to.not.be.called;
+
+      intersectionObserverStub.notifySync(
+        {
+          target: containerElement,
+          isIntersecting: false,
+        },
+        {root: container}
+      );
+      clock.tick(1);
+      expect(containerElement.mountInternal).to.not.be.called;
+
+      intersectionObserverStub.notifySync(
+        {
+          target: containerElement,
+          isIntersecting: true,
+        },
+        {root: container}
+      );
+
+      clock.tick(1);
+      expect(containerElement.mountInternal).to.be.calledOnce;
     });
   });
 });
