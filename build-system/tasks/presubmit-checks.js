@@ -18,8 +18,6 @@
 // Terms are defined here.
 /* eslint-disable local/forbidden-terms */
 
-// eslint-disable-next-line no-unused-vars
-const eslint = require('eslint');
 const fs = require('fs');
 const globby = require('globby');
 const path = require('path');
@@ -1287,7 +1285,7 @@ const requiredTermsExcluded = /amp-__component_name_hyphenated__/;
  *   term: string,
  *   match: string,
  *   message: string,
- *   loc: eslint.AST.SourceLocation,
+ *   loc: import('eslint').AST.SourceLocation,
  * }}
  */
 let ForbiddenTermMatchDef;
@@ -1436,7 +1434,7 @@ function getForbiddenTerms(srcFile, contents) {
 /**
  * @param {string} srcFile
  * @param {string} contents
- * @return {Array<!eslint.Rule.ReportDescriptor>}
+ * @return {Array<!import('eslint').Rule.ReportDescriptor>}
  */
 function eslintReportForbiddenTerms(srcFile, contents) {
   return getForbiddenTerms(srcFile, contents).map(({match, message, loc}) => ({
