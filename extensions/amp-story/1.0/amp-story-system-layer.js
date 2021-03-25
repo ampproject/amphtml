@@ -270,7 +270,6 @@ const TEMPLATE = {
       tag: 'a',
       attrs: dict({
         'class': ATTRIBUTION_CLASS,
-        'src': 'https://www.google.com',
       }),
       children: [
         {
@@ -282,8 +281,6 @@ const TEMPLATE = {
             {
               tag: 'img',
               attrs: dict({
-                // DELETE THIS
-                'src': 'https://placekitten.com/g/64/64',
                 'alt': '',
               }),
             },
@@ -294,9 +291,6 @@ const TEMPLATE = {
           attrs: dict({
             'class': 'i-amphtml-story-attribution-text',
           }),
-          // DELETE THIS
-          unlocalizedString:
-            'Glossier Shop Doggos Glossier Shop DoggosGlossier Shop DoggosGlossier Shop DoggosGlossier Shop DoggosGlossier Shop DoggosGlossier Shop Doggos ',
         },
       ],
     },
