@@ -43,6 +43,10 @@ describes.sandboxed('Lightbox preact component v1.0', {}, () => {
     const closeButton = buttons.first().getDOMNode();
     expect(closeButton.getAttribute('aria-label')).to.equal('Close the modal');
     expect(closeButton.textContent).to.equal('');
+
+    // Scroller.
+    const scroller = wrapper.getDOMNode().querySelector('[part=scroller]');
+    expect(scroller).to.exist;
   });
 
   it('renders custom close button', () => {

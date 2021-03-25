@@ -27,6 +27,7 @@ var LightboxDef = {};
  *   scrollable: (boolean),
  *   initialOpen: (boolean),
  *   onBeforeOpen: (function|undefined),
+ *   onAfterOpen: (function|undefined),
  *   onAfterClose: (function|undefined),
  * }}
  */

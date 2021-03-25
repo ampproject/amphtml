@@ -157,7 +157,7 @@ function VideoWrapperWithRef(
   }, [readyDeferred]);
 
   const pause = useCallback(() => {
-    readyDeferred.promise.then(() => playerRef.current.pause());
+    readyDeferred.promise.then(() => playerRef.current?.pause());
   }, [readyDeferred]);
 
   const requestFullscreen = useCallback(() => {

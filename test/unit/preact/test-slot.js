@@ -203,6 +203,68 @@ describes.realWin('Slot mount/unmount', {}, (env) => {
     });
   });
 
+  describe('with Shadow DOM and loading=lazy slot', () => {
+    let shadowRoot;
+    let child1, child2;
+
+    before(function () {
+      if (!Element.prototype.attachShadow) {
+        this.skipTest();
+      }
+    });
+
+    beforeEach(() => {
+      child1 = createAmpElement({slot: 'slot1'});
+      child2 = createAmpElement({slot: 'slot1'});
+      host.append(child1, child2);
+
+      shadowRoot = host.attachShadow({mode: 'open'});
+      setIsRoot(shadowRoot, true);
+
+      wrapper = mount(
+        <WithAmpContext>
+          <div>
+            <Slot name="slot1" loading="lazy" />
+          </div>
+        </WithAmpContext>,
+        {attachTo: shadowRoot}
+      );
+    });
+
+    function createAmpElement(attrs) {
+      const element = createElementWithAttributes(doc, 'amp-element', attrs);
+      return stubAmpElement(element);
+    }
+
+    it('should load AMP elements on mount', () => {
+      clock.runAll();
+      expect(child1.ensureLoaded).to.not.be.called;
+      expect(child2.ensureLoaded).to.not.be.called;
+      expect(child1.unmount).to.not.be.called;
+      expect(child2.unmount).to.not.be.called;
+      expect(child1.pause).to.not.be.called;
+      expect(child2.pause).to.not.be.called;
+    });
+
+    it('should unmount AMP elements on unmount', () => {
+      wrapper.unmount();
+      clock.runAll();
+      expect(child1.unmount).to.be.calledOnce;
+      expect(child2.unmount).to.be.calledOnce;
+      expect(child1.pause).to.not.be.called;
+      expect(child2.pause).to.not.be.called;
+    });
+
+    it('should pause AMP elements when playable changes', () => {
+      wrapper.setProps({playable: false});
+      clock.runAll();
+      expect(child1.pause).to.be.calledOnce;
+      expect(child2.pause).to.be.calledOnce;
+      expect(child1.unmount).to.not.be.called;
+      expect(child2.unmount).to.not.be.called;
+    });
+  });
+
   describe('with Light DOM', () => {
     let child1Ref, child2Ref;
 
