@@ -30,7 +30,10 @@ export class AmpCacheUrlService {
    * @return {!Promise<string>}
    */
   createCacheUrl(url, cache = urls.cdn) {
-    return ampToolboxCacheUrl.createCacheUrl(cache.replace(/https?:\/\//), url);
+    return ampToolboxCacheUrl.createCacheUrl(
+      cache.replace(/https?:\/\//, ''),
+      url
+    );
   }
 }
 
