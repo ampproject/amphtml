@@ -318,7 +318,7 @@ module.exports = {
     {
       'files': [
         '**/test-*',
-        '**/_init_tests*',
+        '**/_init_tests.js',
         '**/*_test.js',
         '**/testing/**',
         '**/storybook/*.js',
