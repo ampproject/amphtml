@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const {cyan} = require('kleur/colors');
 const {matchForbiddenTerms} = require('../test-configs/forbidden-terms');
 const {relative} = require('path');
 
@@ -22,6 +23,8 @@ const {relative} = require('path');
  * Reports forbidden terms found by regex.
  * See test-configs/forbidden-terms.js
  */
+
+const addPeriod = (str) => (/.\s*$/.test(str) ? str : `${str}.`);
 
 module.exports = function (context) {
   return {
@@ -33,9 +36,12 @@ module.exports = function (context) {
       for (const terms of context.options) {
         for (const report of matchForbiddenTerms(filename, contents, terms)) {
           const {match, message, loc} = report;
+          const formattedMatch = cyan(`"${match}"`);
           context.report({
             loc,
-            message: `Forbidden: "${match}".${message ? `\n${message}.` : ''}`,
+            message:
+              `Forbidden: ${formattedMatch}.` +
+              (message ? ` ${addPeriod(message)}` : ''),
           });
         }
       }

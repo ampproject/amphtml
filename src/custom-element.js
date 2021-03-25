@@ -917,13 +917,13 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     }
 
     /**
-     * See `BaseElement.deferredBuild()`.
+     * See `BaseElement.deferredMount()`.
      *
      * @return {boolean}
      * @final
      */
-    deferredBuild() {
-      return this.implClass_ ? this.implClass_.deferredBuild(this) : false;
+    deferredMount() {
+      return this.implClass_ ? this.implClass_.deferredMount(this) : false;
     }
 
     /**

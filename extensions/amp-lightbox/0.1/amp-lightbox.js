@@ -623,7 +623,7 @@ class AmpLightbox extends AMP.BaseElement {
 
     // Unmount all children when the lightbox is closed. They will automatically
     // remount when the lightbox is opened again.
-    unmountAll(this.element);
+    unmountAll(this.element, /* includeSelf */ false);
 
     Services.ownersForDoc(this.element).schedulePause(
       this.element,

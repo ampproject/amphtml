@@ -18,7 +18,6 @@ import {LayoutPriority} from '../layout';
 import {READY_SCAN_SIGNAL} from './resources-interface';
 import {VisibilityState} from '../visibility-state';
 import {containsNotSelf, hasNextNodeInDocumentOrder, isIframed} from '../dom';
-import {devAssert} from '../log';
 import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
 import {removeItem} from '../utils/array';
 
@@ -87,7 +86,7 @@ export class Scheduler {
       return;
     }
 
-    if (target.deferredBuild()) {
+    if (target.deferredMount()) {
       this.targets_.set(target, {asap: false, isIntersecting: false});
       this.observer_.observe(target);
       if (this.containerMap_.size > 0) {
@@ -135,7 +134,6 @@ export class Scheduler {
    * @param {!Element=} opt_scroller
    */
   setContainer(container, opt_scroller) {
-    devAssert(!opt_scroller || container.contains(opt_scroller));
     if (this.containerMap_.has(container)) {
       return;
     }
