@@ -45,8 +45,8 @@ export class PremiumadsNetworkConfig {
   /** @override */
   getConfigUrl() {
     return buildUrl(
-      'https://tags.premiumads.com.br/autoads/' +
-        this.autoAmpAdsElement_.getAttribute('data-publisher'),
+      this.autoAmpAdsElement_.getAttribute('data-host') || 'https://tags.premiumads.com.br/autoads/' +
+      this.autoAmpAdsElement_.getAttribute('data-publisher'),
       {},
       4096
     );
@@ -57,11 +57,11 @@ export class PremiumadsNetworkConfig {
     const attributesObj = dict({
       'type': 'doubleclick',
       'data-ad': 'premiumads',
-      'width': 336,
-      'height': 280,
-      'layout': Layout.RESPONSIVE,
-      'sizes': '(min-width: 320px) 320px, 100vw',
-      'style': 'position:relative!important',
+      'width': this.autoAmpAdsElement_.getAttribute('data-width') || 336,
+      'height': this.autoAmpAdsElement_.getAttribute('data-height') || 280,
+      'layout': this.autoAmpAdsElement_.getAttribute('data-layout') || Layout.RESPONSIVE,
+      'sizes': this.autoAmpAdsElement_.getAttribute('data-sizes') || '(min-width: 320px) 320px, 100vw',
+      'style': this.autoAmpAdsElement_.getAttribute('data-style') || 'position:relative!important',
     });
     return attributesObj;
   }
