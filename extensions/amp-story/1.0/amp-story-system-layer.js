@@ -641,8 +641,6 @@ export class SystemLayer {
       (config) => this.onViewerCustomControls_(config),
       true /* callToInitialize */
     );
-
-    // storeservice.subscribe(ATTRIBUTION)
   }
 
   /**
