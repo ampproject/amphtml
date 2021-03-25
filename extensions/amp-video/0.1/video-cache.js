@@ -43,7 +43,9 @@ export function addCacheSources(video) {
       return promiseResult[1].executeRequest(requestUrl);
     })
     .then((response) => applySourcesToVideo(video.element, response['sources']))
-    .catch(() => {});
+    .catch(() => {
+      // If cache fails, video should still load properly.
+    });
 }
 
 /**

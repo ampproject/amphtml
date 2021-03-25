@@ -26,12 +26,12 @@ export class AmpCacheUrlService {
   /**
    *
    * @param {string} url
-   * @param {string=} cache the suffix to the cache URL (eg: cdn.approject.org)
+   * @param {string=} cacheDomain the cache domain name (eg: cdn.approject.org)
    * @return {!Promise<string>}
    */
-  createCacheUrl(url, cache = urls.cdn) {
+  createCacheUrl(url, cacheDomain = urls.cdn) {
     return ampToolboxCacheUrl.createCacheUrl(
-      cache.replace(/https?:\/\//, ''),
+      cacheDomain.replace(/https?:\/\//, ''),
       url
     );
   }
