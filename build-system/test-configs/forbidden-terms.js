@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-const path = require('path');
-
 const requiresReviewPrivacy =
   'Usage of this API requires dedicated review due to ' +
   'being privacy sensitive. Please file an issue asking for permission' +
@@ -50,7 +48,7 @@ let ForbiddenTermDef;
  * Terms that must not appear in our source files.
  * @const {Object<string, string|!ForbiddenTermDef>}
  */
-const forbiddenTerms = {
+const forbiddenTermsGlobal = {
   'DO NOT SUBMIT': '',
   'whitelist|white-list': {
     message: 'Please use the term allowlist instead',
@@ -1233,30 +1231,8 @@ function matchForbiddenTerms(srcFile, contents, terms) {
     .reduce((a, b) => a.concat(b));
 }
 
-/**
- * @param {string} srcFile
- * @param {string} contents
- * @return {Array<!ForbiddenTermMatchDef>}
- */
-function getForbiddenTerms(srcFile, contents) {
-  const basename = path.basename(srcFile);
-
-  const terms = matchForbiddenTerms(srcFile, contents, forbiddenTerms);
-
-  const isTestFile =
-    /^test-/.test(basename) ||
-    /^_init_tests/.test(basename) ||
-    /_test\.js$/.test(basename) ||
-    /testing\//.test(srcFile) ||
-    /storybook\/[^/]+\.js$/.test(srcFile);
-  if (!isTestFile) {
-    return [
-      ...terms,
-      ...matchForbiddenTerms(srcFile, contents, forbiddenTermsSrcInclusive),
-    ];
-  }
-
-  return terms;
-}
-
-module.exports = {getForbiddenTerms};
+module.exports = {
+  forbiddenTermsGlobal,
+  forbiddenTermsSrcInclusive,
+  matchForbiddenTerms,
+};
