@@ -23,6 +23,7 @@ import {
   validateMediaMetadata,
 } from '../../../src/mediasession-helper';
 import {Layout, isLayoutSizeFixed} from '../../../src/layout';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {assertHttpsUrl} from '../../../src/url';
 import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
@@ -49,6 +50,9 @@ export class AmpAudio extends AMP.BaseElement {
 
     /** @public {boolean} */
     this.isPlaying = false;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /** @override */
@@ -149,9 +153,13 @@ export class AmpAudio extends AMP.BaseElement {
     listen(this.audio_, 'play', () =>
       triggerAnalyticsEvent(this.element, 'audio-play')
     );
-    listen(this.audio_, 'pause', () =>
-      triggerAnalyticsEvent(this.element, 'audio-pause')
-    );
+    listen(this.audio_, 'pause', () => {
+      this.pauseHelper_.updatePlaying(false);
+      triggerAnalyticsEvent(this.element, 'audio-pause');
+    });
+    listen(this.audio_, 'ended', () => {
+      this.pauseHelper_.updatePlaying(false);
+    });
   }
 
   /** @override */
@@ -213,6 +221,7 @@ export class AmpAudio extends AMP.BaseElement {
   pauseCallback() {
     if (this.audio_) {
       this.audio_.pause();
+      this.pauseHelper_.updatePlaying(false);
       this.setPlayingStateForTesting_(false);
     }
   }
@@ -238,12 +247,14 @@ export class AmpAudio extends AMP.BaseElement {
 
   /**
    * Pause action for <amp-audio>.
+   * @private
    */
   pause_() {
     if (!this.isInvocationValid_()) {
       return;
     }
     this.audio_.pause();
+    this.pauseHelper_.updatePlaying(false);
     this.setPlayingStateForTesting_(false);
   }
 
@@ -288,6 +299,8 @@ export class AmpAudio extends AMP.BaseElement {
       this.audio_.pause();
       this.setPlayingStateForTesting_(false);
     };
+
+    this.pauseHelper_.updatePlaying(true);
 
     // Update the media session
     validateMediaMetadata(this.element, this.metadata_);
