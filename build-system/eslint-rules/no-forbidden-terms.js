@@ -15,7 +15,7 @@
  */
 
 const {cyan} = require('kleur/colors');
-const {getForbiddenTerms} = require('../test-configs/forbidden-terms');
+const {matchForbiddenTerms} = require('../test-configs/forbidden-terms');
 const {relative} = require('path');
 
 /**
@@ -31,16 +31,19 @@ module.exports = function (context) {
     Program() {
       const filename = relative(process.cwd(), context.getFilename());
       const sourceCode = context.getSourceCode();
+      const contents = sourceCode.text;
 
-      for (const report of getForbiddenTerms(filename, sourceCode.text)) {
-        const {match, message, loc} = report;
-        const formattedMatch = cyan(`"${match}"`);
-        context.report({
-          loc,
-          message:
-            `Forbidden: ${formattedMatch}.` +
-            (message ? ` ${addPeriod(message)}` : ''),
-        });
+      for (const terms of context.options) {
+        for (const report of matchForbiddenTerms(filename, contents, terms)) {
+          const {match, message, loc} = report;
+          const formattedMatch = cyan(`"${match}"`);
+          context.report({
+            loc,
+            message:
+              `Forbidden: ${formattedMatch}.` +
+              (message ? ` ${addPeriod(message)}` : ''),
+          });
+        }
       }
     },
   };
