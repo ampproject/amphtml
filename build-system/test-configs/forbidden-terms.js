@@ -37,9 +37,10 @@ const realiasGetMode =
 
 /**
  * @typedef {{
- *   message: string,
+ *   message?: (undefined|string),
  *   allowlist?: (undefined|Array<string>),
  *   checkInTestFolder?: (undefined|boolean),
+ *   checkComments?: (undefined|boolean),
  * }}
  */
 let ForbiddenTermDef;
@@ -49,15 +50,20 @@ let ForbiddenTermDef;
  * @const {Object<string, string|!ForbiddenTermDef>}
  */
 const forbiddenTermsGlobal = {
-  'DO NOT SUBMIT': '',
+  'DO NOT SUBMIT': {
+    checkComments: true,
+  },
   'whitelist|white-list': {
     message: 'Please use the term allowlist instead',
+    checkComments: true,
   },
   'blacklist|black-list': {
     message: 'Please use the term denylist instead',
+    checkComments: true,
   },
   'grandfather|grandfathered': {
     message: 'Please use the term legacy instead',
+    checkComments: true,
   },
   '(^-amp-|\\W-amp-)': {
     message: 'Switch to new internal class form',
@@ -1125,7 +1131,7 @@ const forbiddenTermsSrcInclusive = {
  * @typedef {{
  *   term: string,
  *   match: string,
- *   message: string,
+ *   message?: (undefined|string),
  *   loc: import('eslint').AST.SourceLocation,
  * }}
  */
@@ -1160,7 +1166,7 @@ function stripComments(contents) {
   });
   // Single line comments either on its own line or following a space,
   // semi-colon, or closing brace
-  return contents.replace(/( |}|;|^) *\/\/.*/g, '$1');
+  return contents.replace(/( |}|;|^) *\/\/.*/gm, '$1');
 }
 
 /**
@@ -1176,7 +1182,12 @@ function matchForbiddenTerms(srcFile, contents, terms) {
   const contentsWithoutComments = stripComments(contents);
   return Object.entries(terms)
     .map(([term, messageOrDef]) => {
-      const {message, allowlist = null, checkInTestFolder = false} =
+      const {
+        message,
+        allowlist = null,
+        checkInTestFolder = false,
+        checkComments = false,
+      } =
         typeof messageOrDef === 'string'
           ? {message: messageOrDef}
           : messageOrDef;
@@ -1195,14 +1206,15 @@ function matchForbiddenTerms(srcFile, contents, terms) {
       // original term to get the possible fix value. This is ok as the
       // presubmit doesn't have to be blazing fast and this is most likely
       // negligible.
-      const regex = new RegExp(term, 'gm');
+      const regex = new RegExp(term, 'gm' + (checkComments ? 'i' : ''));
       let index = 0;
       let line = 1;
       let column = 0;
       const start = {line: -1, column: -1};
 
+      const subject = checkComments ? contents : contentsWithoutComments;
       let result;
-      while ((result = regex.exec(contentsWithoutComments))) {
+      while ((result = regex.exec(subject))) {
         const [match] = result;
 
         for (index; index < result.index + match.length; index++) {
@@ -1210,7 +1222,7 @@ function matchForbiddenTerms(srcFile, contents, terms) {
             start.line = line;
             start.column = column;
           }
-          if (contentsWithoutComments[index] === '\n') {
+          if (subject[index] === '\n') {
             line++;
             column = 0;
           } else {
