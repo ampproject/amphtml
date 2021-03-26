@@ -141,6 +141,7 @@ const presubmitGlobs = [
   '!build-system/runner/build/**/*.*',
   '!third_party/**/*.*',
   '!**/node_modules/**/*.*',
+  '!extensions/**/dist/*',
   '!examples/**/*',
   '!examples/visual-tests/**/*',
   '!test/coverage/**/*.*',
