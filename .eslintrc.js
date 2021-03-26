@@ -15,6 +15,10 @@
  */
 
 const fs = require('fs');
+const {
+  forbiddenTermsGlobal,
+  forbiddenTermsSrcInclusive,
+} = require('./build-system/test-configs/forbidden-terms');
 
 /**
  * Dynamically extracts experiment globals from the config file.
@@ -140,7 +144,11 @@ module.exports = {
     'local/no-es2015-number-props': 2,
     'local/no-export-side-effect': 2,
     'local/no-for-of-statement': 2,
-    'local/no-forbidden-terms': 2,
+    'local/no-forbidden-terms': [
+      2,
+      forbiddenTermsGlobal,
+      forbiddenTermsSrcInclusive,
+    ],
     'local/no-function-async': 2,
     'local/no-function-generator': 2,
     'local/no-global': 0,
@@ -305,6 +313,18 @@ module.exports = {
         'restoreAsyncErrorThrows': false,
         'stubAsyncErrorThrows': false,
         'Key': false,
+      },
+    },
+    {
+      'files': [
+        '**/test-*',
+        '**/_init_tests.js',
+        '**/*_test.js',
+        '**/testing/**',
+        '**/storybook/*.js',
+      ],
+      'rules': {
+        'local/no-forbidden-terms': [2, forbiddenTermsGlobal],
       },
     },
     {

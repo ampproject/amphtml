@@ -18,8 +18,11 @@
 const fs = require('fs');
 const globby = require('globby');
 const srcGlobs = require('../test-configs/config').presubmitGlobs;
+const {
+  matchForbiddenTerms,
+  forbiddenTermsGlobal,
+} = require('../test-configs/forbidden-terms');
 const {cyan, red, yellow} = require('kleur/colors');
-const {getForbiddenTerms} = require('../test-configs/forbidden-terms');
 const {log} = require('../common/logging');
 
 /**
@@ -46,7 +49,7 @@ const requiredTermsExcluded = /amp-__component_name_hyphenated__/;
  */
 function hasForbiddenTerms(srcFile) {
   const contents = fs.readFileSync(srcFile, 'utf-8');
-  const terms = getForbiddenTerms(srcFile, contents);
+  const terms = matchForbiddenTerms(srcFile, contents, forbiddenTermsGlobal);
   for (const {match, loc, message} of terms) {
     log(
       red('ERROR:'),
