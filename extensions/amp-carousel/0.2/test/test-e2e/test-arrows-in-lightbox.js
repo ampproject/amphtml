@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {sleep} from './helpers';
-
 describes.endtoend(
   'amp carousel in lightbox',
   {
@@ -47,8 +45,11 @@ describes.endtoend(
       // Click on image 2
       const secondImage = await controller.findElement('#second');
       await controller.click(secondImage);
+
       // Wait for lightbox to load the carousel and image
-      await sleep(500);
+      const lightbox = await controller.findElement('#lightbox1');
+      await expect(await controller.getElementProperty(lightbox, 'style')).to
+        .not.be.null;
 
       // Both arrows should be showing
       prevArrow = await getPrevArrow(controller);
@@ -62,13 +63,16 @@ describes.endtoend(
     });
 
     it('should open with one arrow', async () => {
-      // Click on image 2
-      const secondImage = await controller.findElement('#fourth');
-      await controller.click(secondImage);
-      // Wait for lightbox to load the carousel and image
-      await sleep(500);
+      // Click on last image
+      const lastImage = await controller.findElement('#fourth');
+      await controller.click(lastImage);
 
-      // Both arrows should be showing
+      // Wait for lightbox to load the carousel and image
+      const lightbox = await controller.findElement('#lightbox1');
+      await expect(await controller.getElementProperty(lightbox, 'style')).to
+        .not.be.null;
+
+      // Only prev arrow should be showing since non-looping carousel is on the last slide.
       prevArrow = await getPrevArrow(controller);
       nextArrow = await getNextArrow(controller);
       await expect(

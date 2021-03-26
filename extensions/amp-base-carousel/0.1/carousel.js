@@ -918,6 +918,10 @@ export class Carousel {
     if (this.isLooping()) {
       return false;
     }
+    // Lightbox and trivial case
+    if (!this.mixedLength_ && this.visibleCount_ === 1) {
+      return this.getCurrentIndex() >= this.slides_.length - 1;
+    }
 
     return this.isScrollAtEndingEdge_();
   }
@@ -930,6 +934,10 @@ export class Carousel {
     if (this.isLooping()) {
       return false;
     }
+    // Lightbox and trivial case
+    if (!this.mixedLength_ && this.visibleCount_ === 1) {
+      return this.getCurrentIndex() <= 0;
+    }
 
     return this.isScrollAtBeginningEdge_();
   }
@@ -940,10 +948,6 @@ export class Carousel {
    * @private
    */
   isScrollAtEndingEdge_() {
-    // Lightbox and trivial case
-    if (!this.mixedLength_ && this.visibleCount_ === 1) {
-      return this.getCurrentIndex() >= this.slides_.length - 1;
-    }
     const el = this.scrollContainer_;
     const vector =
       el./*OK*/ getBoundingClientRect().width * (this.forwards_ ? 1 : -1);
@@ -965,10 +969,6 @@ export class Carousel {
    * @private
    */
   isScrollAtBeginningEdge_() {
-    // Lightbox and trivial case
-    if (!this.mixedLength_ && this.visibleCount_ === 1) {
-      return this.getCurrentIndex() <= 0;
-    }
     const currentScrollPos = this.scrollContainer_./*OK*/ scrollLeft;
     return this.forwards_ ? currentScrollPos <= 0 : currentScrollPos >= 0;
   }
