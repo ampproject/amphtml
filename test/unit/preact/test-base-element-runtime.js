@@ -79,6 +79,19 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     });
   }
 
+  it('preact ref passing vnode smoke test', () => {
+    function App() {
+      // Don't call useImperativeHandle.
+    }
+    const ref = env.sandbox.spy();
+    Preact.render(<App ref={ref} />, document.body);
+    // When this test fails, that means Preact has fixed their ref setting.
+    // See https://github.com/preactjs/preact/issues/3084
+    // Please remove the hack in src/preact/base-element.js inside `checkApiWrapper_`,
+    // and add a `.not` below so we don't regress again.
+    expect(ref).to.be.called;
+  });
+
   describe('context', () => {
     let element;
 

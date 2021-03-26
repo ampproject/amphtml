@@ -791,6 +791,10 @@ export class PreactBaseElement extends AMP.BaseElement {
     if (!getMode().localDev) {
       return;
     }
+    // Hack around https://github.com/preactjs/preact/issues/3084
+    if (current.constructor && current.constructor.name !== 'Object') {
+      return;
+    }
     const api = this.apiWrapper_;
     const newKeys = Object.keys(current);
     for (let i = 0; i < newKeys.length; i++) {
