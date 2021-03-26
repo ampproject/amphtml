@@ -216,13 +216,6 @@ module.exports = {
     'no-useless-concat': 2,
     'no-undef': 2,
     'no-var': 2,
-    'no-warning-comments': [
-      2,
-      {
-        'terms': ['do not submit'],
-        'location': 'anywhere',
-      },
-    ],
     'notice/notice': [
       2,
       {
