@@ -201,6 +201,12 @@ function patchShadowDom() {
   writeIfUpdated(patchedName, file);
 }
 
+function patchPreact() {
+  fs.ensureDirSync('node_modules/preact/dom');
+  const file = `export { render, hydrate } from 'preact';`;
+  writeIfUpdated('node_modules/preact/dom/index.js', file);
+}
+
 /**
  * Deletes the map file for rrule, which breaks closure compiler.
  * TODO(rsimha): Remove this workaround after a fix is merged for
@@ -242,6 +248,7 @@ async function updatePackages() {
   patchIntersectionObserver();
   patchResizeObserver();
   patchShadowDom();
+  patchPreact();
   removeRruleSourcemap();
 }
 
