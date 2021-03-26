@@ -18,7 +18,6 @@
 const connect = require('gulp-connect');
 const debounce = require('debounce');
 const globby = require('globby');
-const header = require('connect-header');
 const minimist = require('minimist');
 const morgan = require('morgan');
 const open = require('open');
@@ -68,9 +67,6 @@ function getMiddleware() {
   const middleware = [require('../server/app')]; // Lazy-required to enable live-reload
   if (!quiet) {
     middleware.push(morgan('dev'));
-  }
-  if (argv.cache) {
-    middleware.push(header({'cache-control': 'max-age=600'}));
   }
   if (lazyBuild) {
     middleware.push(lazyBuildExtensions);

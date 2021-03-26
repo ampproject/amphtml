@@ -100,6 +100,9 @@ if (argv.coverage) {
 
 // Built binaries should be fetchable from other origins, i.e. Storybook.
 app.use(header({'Access-Control-Allow-Origin': '*'}));
+if (argv.cache) {
+  app.use(header({'cache-control': 'max-age=600'}));
+}
 
 // Append ?csp=1 to the URL to turn on the CSP header.
 // TODO: shall we turn on CSP all the time?
