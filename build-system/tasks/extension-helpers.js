@@ -545,7 +545,7 @@ function buildExtensionCss(extDir, name, version, options) {
  * @param {!Object} options
  * @return {!Promise}
  */
-async function buildBinaries(extDir, options) {
+function buildBinaries(extDir, options) {
   const {binaries} = options;
   mkdirSync(`${extDir}/dist`);
 
