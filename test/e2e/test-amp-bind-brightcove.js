@@ -32,11 +32,11 @@ describes.endtoend(
         const iframe = await controller.findElement('#brightcove iframe');
 
         await expect(
-          controller.getElementProperty(iframe, 'src')
+          await controller.getElementProperty(iframe, 'src')
         ).to.not.contain('bound');
 
         await controller.click(button);
-        await expect(controller.getElementProperty(iframe, 'src')).to.contain(
+        await expect(await controller.getElementProperty(iframe, 'src')).to.contain(
           'bound'
         );
       });
