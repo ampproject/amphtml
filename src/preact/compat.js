@@ -33,3 +33,11 @@ export function forwardRef(fn) {
 export function createPortal(vnode, container) {
   return compat.createPortal(vnode, container);
 }
+
+/**
+ * @param {...PreactDef.Renderable} unusedChildren
+ * @return {!Array<PreactDef.Renderable>}
+ */
+export function toChildArray(unusedChildren) {
+  return compat.Children.toArray.apply(undefined, arguments);
+}
