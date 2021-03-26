@@ -104,11 +104,7 @@ describes.realWin(
         },
       });
       ampFormService = new AmpFormService(env.ampdoc);
-      dirtinessHandler = new FormDirtiness(
-        form,
-        env.win,
-        Promise.resolve(ampFormService)
-      );
+      dirtinessHandler = new FormDirtiness(form, env.win, ampFormService);
       await macroTask();
     });
 
@@ -482,11 +478,7 @@ describes.realWin(
       it('adds the dirtiness class if the form already has dirty fields', async () => {
         changeInput(input, 'changed');
         ampFormService = new AmpFormService(env.ampdoc);
-        dirtinessHandler = new FormDirtiness(
-          newForm,
-          env.win,
-          Promise.resolve(ampFormService)
-        );
+        dirtinessHandler = new FormDirtiness(newForm, env.win, ampFormService);
         await macroTask();
 
         expect(newForm).to.have.class(DIRTINESS_INDICATOR_CLASS);
@@ -494,11 +486,7 @@ describes.realWin(
 
       it('does not add the dirtiness class if the form does not have dirty fields', async () => {
         ampFormService = new AmpFormService(env.ampdoc);
-        dirtinessHandler = new FormDirtiness(
-          newForm,
-          env.win,
-          Promise.resolve(ampFormService)
-        );
+        dirtinessHandler = new FormDirtiness(newForm, env.win, ampFormService);
         await macroTask();
 
         expect(newForm).to.not.have.class(DIRTINESS_INDICATOR_CLASS);

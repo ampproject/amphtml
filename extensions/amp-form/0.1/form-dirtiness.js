@@ -34,17 +34,17 @@ export class FormDirtiness {
   /**
    * @param {!HTMLFormElement} form
    * @param {!Window} win
-   * @param {!Promise<!AmpFormService>} ampFormServicePromise
+   * @param {?AmpFormService} ampFormService
    */
-  constructor(form, win, ampFormServicePromise) {
+  constructor(form, win, ampFormService) {
     /** @private @const {!HTMLFormElement} */
     this.form_ = form;
 
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private @const {!Promise<!AmpFormService>} */
-    this.ampFormServicePromise_ = ampFormServicePromise;
+    /** @private @const {?AmpFormService} */
+    this.ampFormService_ = ampFormService;
 
     /** @private {number} */
     this.dirtyFieldCount_ = 0;
@@ -134,13 +134,13 @@ export class FormDirtiness {
    * @private
    */
   installEventHandlers_() {
-    this.ampFormServicePromise_.then((ampFormService) => {
-      ampFormService.addFormEventListener(
+    if (this.ampFormService_) {
+      this.ampFormService_.addFormEventListener(
         this.form_,
         'input',
         this.onInput_.bind(this)
       );
-      ampFormService.addFormEventListener(
+      this.ampFormService_.addFormEventListener(
         this.form_,
         'reset',
         this.onReset_.bind(this)
@@ -148,12 +148,12 @@ export class FormDirtiness {
 
       // `amp-bind` dispatches the custom event `FORM_VALUE_CHANGE` when it
       // mutates the value of a form field (e.g. textarea, input, etc)
-      ampFormService.addFormEventListener(
+      this.ampFormService_.addFormEventListener(
         this.form_,
         AmpEvents.FORM_VALUE_CHANGE,
         this.onInput_.bind(this)
       );
-    });
+    }
   }
 
   /** @private */

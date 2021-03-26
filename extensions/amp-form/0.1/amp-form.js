@@ -62,7 +62,7 @@ import {
 } from '../../../src/form';
 import {getFormValidator, isCheckValiditySupported} from './form-validators';
 import {getMode} from '../../../src/mode';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {getServiceForDocOrNull} from '../../../src/service';
 import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isAmp4Email} from '../../../src/format';
@@ -144,8 +144,8 @@ export class AmpForm {
     /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc}  */
     this.ampdoc_ = Services.ampdoc(this.form_);
 
-    /** @const @private {!Promise<!AmpFormService>} */
-    this.ampFormServicePromise_ = getServicePromiseForDoc(this.ampdoc_, TAG);
+    /** @const @private {?AmpFormService} */
+    this.ampFormService_ = getServiceForDocOrNull(this.ampdoc_, TAG);
 
     /** @private {?Promise} */
     this.dependenciesPromise_ = null;
@@ -222,7 +222,7 @@ export class AmpForm {
     this.dirtinessHandler_ = new FormDirtiness(
       this.form_,
       this.win_,
-      this.ampFormServicePromise_
+      this.ampFormService_
     );
 
     /** @const @private {!./form-validators.FormValidator} */
@@ -426,16 +426,15 @@ export class AmpForm {
         tryFocus(autofocus);
       }
     });
-
-    this.ampFormServicePromise_.then((ampFormService) => {
-      ampFormService.addFormEventListener(
+    if (this.ampFormService_) {
+      this.ampFormService_.addFormEventListener(
         this.form_,
         'submit',
         this.handleSubmitEvent_.bind(this),
         true
       );
 
-      ampFormService.addFormEventListener(
+      this.ampFormService_.addFormEventListener(
         this.form_,
         'blur',
         (e) => {
@@ -445,7 +444,7 @@ export class AmpForm {
         true
       );
 
-      ampFormService.addFormEventListener(
+      this.ampFormService_.addFormEventListener(
         this.form_,
         AmpEvents.FORM_VALUE_CHANGE,
         (e) => {
@@ -457,7 +456,7 @@ export class AmpForm {
 
       //  Form verification is not supported when SSRing templates is enabled.
       if (!this.ssrTemplateHelper_.isEnabled()) {
-        ampFormService.addFormEventListener(this.form_, 'change', (e) => {
+        this.ampFormService_.addFormEventListener(this.form_, 'change', (e) => {
           this.verifier_.onCommit().then((updatedErrors) => {
             const {updatedElements, errors} = updatedErrors;
             updatedElements.forEach(checkUserValidityAfterInteraction_);
@@ -486,11 +485,11 @@ export class AmpForm {
         });
       }
 
-      ampFormService.addFormEventListener(this.form_, 'change', (e) => {
+      this.ampFormService_.addFormEventListener(this.form_, 'change', (e) => {
         checkUserValidityAfterInteraction_(dev().assertElement(e.target));
         this.validator_.onInput(e);
       });
-    });
+    }
   }
 
   /** @private */
