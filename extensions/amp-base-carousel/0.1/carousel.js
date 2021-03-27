@@ -919,9 +919,9 @@ export class Carousel {
       return false;
     }
     // Lightbox and trivial case
-    if (!this.mixedLength_ && this.visibleCount_ === 1) {
-      return this.getCurrentIndex() >= this.slides_.length - 1;
-    }
+    // if (!this.mixedLength_ && this.visibleCount_ === 1) {
+    //   return this.getCurrentIndex() >= this.slides_.length - 1;
+    // }
 
     return this.isScrollAtEndingEdge_();
   }
@@ -935,9 +935,9 @@ export class Carousel {
       return false;
     }
     // Lightbox and trivial case
-    if (!this.mixedLength_ && this.visibleCount_ === 1) {
-      return this.getCurrentIndex() <= 0;
-    }
+    // if (!this.mixedLength_ && this.visibleCount_ === 1) {
+    //   return this.getCurrentIndex() <= 0;
+    // }
 
     return this.isScrollAtBeginningEdge_();
   }

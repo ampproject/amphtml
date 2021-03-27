@@ -14,28 +14,18 @@
  * limitations under the License.
  */
 
+import {getNextArrow, getPrevArrow} from './helpers';
+
 describes.endtoend(
-  'amp carousel in lightbox',
+  'amp base carousel in lightbox',
   {
-    fixture: 'amp-carousel/0.2/amp-lightbox-carousel-selector.amp.html',
+    fixture: 'amp-base-carousel/arrows-in-lightbox.amp.html',
     environments: ['single'],
   },
   async (env) => {
     let controller;
     let nextArrow;
     let prevArrow;
-
-    function getPrevArrow() {
-      return controller.findElement(
-        '.amp-carousel-button.amp-carousel-button-prev'
-      );
-    }
-
-    function getNextArrow() {
-      return controller.findElement(
-        '.amp-carousel-button.amp-carousel-button-next'
-      );
-    }
 
     beforeEach(async () => {
       controller = env.controller;
@@ -55,11 +45,11 @@ describes.endtoend(
       prevArrow = await getPrevArrow(controller);
       nextArrow = await getNextArrow(controller);
       await expect(
-        await controller.getElementProperty(nextArrow, 'ariaDisabled')
-      ).to.equal('false');
+        controller.getElementCssValue(prevArrow, 'opacity')
+      ).to.equal('1');
       await expect(
-        await controller.getElementProperty(prevArrow, 'ariaDisabled')
-      ).to.equal('false');
+        controller.getElementCssValue(nextArrow, 'opacity')
+      ).to.equal('1');
     });
 
     it('should open with one arrow', async () => {
@@ -76,11 +66,11 @@ describes.endtoend(
       prevArrow = await getPrevArrow(controller);
       nextArrow = await getNextArrow(controller);
       await expect(
-        await controller.getElementProperty(nextArrow, 'ariaDisabled')
-      ).to.equal('true');
+        controller.getElementCssValue(prevArrow, 'opacity')
+      ).to.equal('1');
       await expect(
-        await controller.getElementProperty(prevArrow, 'ariaDisabled')
-      ).to.equal('false');
+        controller.getElementCssValue(nextArrow, 'opacity')
+      ).to.equal('0');
     });
   }
 );
