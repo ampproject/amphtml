@@ -47,7 +47,7 @@ and in many features builds on top of `amp-access`. However, it's a much more
 specialized version of access/paywall protocol. Some of the key differences are:
 
 1. The `amp-subscriptions` [authorization endpoint](#authorization-endpoint) is similar to the
-   [`amp-access` authorization endpoint](../amp-access/amp-access.md#authorization-endpoint) but it's response is strictly defined and standardized.
+   [`amp-access` authorization endpoint](../amp-access/amp-access.md#authorization-endpoint) but its response is strictly defined and standardized.
 2. Instead of using `amp-access-hide` and `amp-access` attributes as described in [`amp-access` Access Content Markup](../amp-access/amp-access.md#access-content-markup), you'll need to use:
    -  [`subscription-section`](#subscriptions-section) to define sections of content for subscribers and non-subscribers.
    -  [`subscription-display`](#subscriptions-display) to display elements based on factors that are **not** related to the subscription that the user has.
@@ -421,7 +421,7 @@ To accurately identify the Reader, the Publisher should associate the [AMP Reade
   </noscript>
 </amp-img>
 
-**Note:** due to the way that the [AMP Reader ID][1] is created, there may be multiple [AMP Reader IDs][1] for the same the Reader so the Publisher should be able to handle that appropriately.
+**Note:** due to the way that the [AMP Reader ID][1] is created, there may be multiple [AMP Reader IDs][1] for the same the user across different devices and browsers so the Publisher must take care to handle that appropriately.
 
 #### "iframe" mode
 
