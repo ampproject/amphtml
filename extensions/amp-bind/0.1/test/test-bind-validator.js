@@ -258,6 +258,10 @@ describe('BindValidator (allowUrlProperties=true)', () => {
       expect(val.canBind('AMP-LIST', 'is-layout-container')).to.be.true;
     });
 
+    it('should support <amp-render>', () => {
+      expect(val.canBind('AMP-RENDER', 'src')).to.be.true;
+    });
+
     it('should support <amp-selector>', () => {
       expect(val.canBind('AMP-SELECTOR', 'disabled')).to.be.true;
       expect(val.canBind('AMP-SELECTOR', 'selected')).to.be.true;
