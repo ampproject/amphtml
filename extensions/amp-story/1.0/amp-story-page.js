@@ -1865,14 +1865,14 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Set the i-amphtml-orig-tabindex to the default tabindex of tabbable elements
    */
   initializeTabbableElements_() {
-    scopedQuerySelectorAll(this.element, Selectors.ALL_TABBABLE).forEach(
-      (el) => {
-        el.setAttribute(
-          'i-amphtml-orig-tabindex',
-          el.getAttribute('tabindex') || 0
-        );
-      }
-    );
+    toArray(
+      scopedQuerySelectorAll(this.element, Selectors.ALL_TABBABLE)
+    ).forEach((el) => {
+      el.setAttribute(
+        'i-amphtml-orig-tabindex',
+        el.getAttribute('tabindex') || 0
+      );
+    });
   }
 
   /**
@@ -1880,13 +1880,13 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @param {boolean} toggle
    */
   toggleTabbableElements_(toggle) {
-    scopedQuerySelectorAll(this.element, Selectors.ALL_TABBABLE).forEach(
-      (el) => {
-        el.setAttribute(
-          'tabindex',
-          toggle ? el.getAttribute('i-amphtml-orig-tabindex') : -1
-        );
-      }
-    );
+    toArray(
+      scopedQuerySelectorAll(this.element, Selectors.ALL_TABBABLE)
+    ).forEach((el) => {
+      el.setAttribute(
+        'tabindex',
+        toggle ? el.getAttribute('i-amphtml-orig-tabindex') : -1
+      );
+    });
   }
 }
