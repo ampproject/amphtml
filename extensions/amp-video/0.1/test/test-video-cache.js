@@ -16,31 +16,30 @@
 
 import * as videoCache from '../video-cache';
 import {AmpCacheUrlService} from '../../../amp-cache-url/0.1/amp-cache-url';
-import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {AmpVideo} from '../amp-video';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {createExtensionScript} from '../../../../src/service/extension-script';
+import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';
 
 describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
-  let requestService;
+  let xhrService;
   let cacheUrlService;
 
   beforeEach(() => {
-    requestService = new AmpStoryRequestService(env.win, env.win.document.body);
-    env.sandbox
-      .stub(Services, 'storyRequestServiceForOrNull')
-      .resolves(requestService);
+    xhrService = xhrServiceForTesting(env.win);
+    env.sandbox.stub(Services, 'xhrFor').returns(xhrService);
 
     cacheUrlService = new AmpCacheUrlService();
     env.sandbox
       .stub(Services, 'cacheUrlServicePromiseForDoc')
       .resolves(cacheUrlService);
-
     env.win.document.head.appendChild(
-      createElementWithAttributes(env.win.document, 'script', {
-        'custom-element': 'amp-cache-url',
-      })
+      createExtensionScript(env.win, 'amp-cache-url', '0.1')
     );
+    env.sandbox
+      .stub(Services, 'documentInfoForDoc')
+      .returns({sourceUrl: 'https://example.com'});
   });
 
   describe('select sources', () => {
@@ -61,17 +60,11 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       ]);
       expect(videoCache.selectVideoSource(videoEl)).to.contain('video2.mp4');
     });
-
-    it('should select the src attribute of amp-video if there are no sources', () => {
-      const videoEl = createVideo([]);
-      videoEl.setAttribute('src', 'video1.mp4');
-      expect(videoCache.selectVideoSource(videoEl)).to.contain('video1.mp4');
-    });
   });
 
   describe('add sources', () => {
     it('should set the correct attributes on the source added', () => {
-      const videoEl = createVideo([{src: 'video1.mp4'}]);
+      const videoEl = createVideo([]);
       videoCache.applySourcesToVideo(videoEl, [
         {'url': 'video1.mp4', 'bitrate_kbps': 700, type: 'video/mp4'},
       ]);
@@ -82,23 +75,29 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
     });
 
     it('should add the sources sorted by bitrate', () => {
-      const videoEl = createVideo([{src: 'video1.mp4'}]);
+      const videoEl = createVideo([]);
       videoCache.applySourcesToVideo(videoEl, [
         {'url': 'video1.mp4', 'bitrate_kbps': 700, type: 'video/mp4'},
         {'url': 'video2.mp4', 'bitrate_kbps': 2000, type: 'video/mp4'},
+        {'url': 'video3.mp4', 'bitrate_kbps': 1500, type: 'video/mp4'},
       ]);
       const addedSources = videoEl.querySelectorAll('source');
       expect(addedSources[0].getAttribute('data-bitrate')).to.equal('2000');
-      expect(addedSources[1].getAttribute('data-bitrate')).to.equal('700');
+      expect(addedSources[1].getAttribute('data-bitrate')).to.equal('1500');
+      expect(addedSources[2].getAttribute('data-bitrate')).to.equal('700');
     });
   });
 
   describe('end to end', () => {
     it('should create the sources from the request with the correct attributes', async () => {
-      env.sandbox.stub(requestService, 'executeRequest').resolves({
-        sources: [
-          {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
-        ],
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () => {
+          return {
+            sources: [
+              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+            ],
+          };
+        },
       });
 
       const videoEl = createVideo([{src: 'video.mp4'}]);
