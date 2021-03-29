@@ -716,9 +716,9 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         this.pause();
       }
 
-      // Legacy pre-V1 elements simply unload.
+      // Legacy pre-V1 elements simply unlayout.
       if (!this.V1()) {
-        this.getResource_().unlayout();
+        this.unlayout_();
         return;
       }
 
@@ -740,7 +740,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       // Complete unmount and reset the state.
       this.mounted_ = false;
       this.mountPromise_ = null;
-      this.signals_.reset(CommonSignals.MOUNTED);
+      this.reset_();
 
       // Prepare for the next mount if the element is connected.
       if (this.isConnected_) {
@@ -807,6 +807,29 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           return this.whenLoaded();
         });
       });
+    }
+
+    /**
+     * See `BaseElement.setAsContainer`.
+     *
+     * @param {!Element=} opt_scroller A child of the container that should be
+     * monitored. Typically a scrollable element.
+     * @restricted
+     * @final
+     */
+    setAsContainerInternal(opt_scroller) {
+      const builder = getSchedulerForDoc(this.getAmpDoc());
+      builder.setContainer(this, opt_scroller);
+    }
+
+    /**
+     * See `BaseElement.removeAsContainer`.
+     * @restricted
+     * @final
+     */
+    removeAsContainerInternal() {
+      const builder = getSchedulerForDoc(this.getAmpDoc());
+      builder.removeContainer(this);
     }
 
     /**
@@ -894,13 +917,13 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     }
 
     /**
-     * See `BaseElement.deferredBuild()`.
+     * See `BaseElement.deferredMount()`.
      *
      * @return {boolean}
      * @final
      */
-    deferredBuild() {
-      return this.implClass_ ? this.implClass_.deferredBuild(this) : false;
+    deferredMount() {
+      return this.implClass_ ? this.implClass_.deferredMount(this) : false;
     }
 
     /**
@@ -1148,7 +1171,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           this.reset_();
         }
         if (this.isUpgraded()) {
-          if (reconstruct) {
+          if (reconstruct && !this.V1()) {
             this.getResources().upgraded(this);
           }
           this.connected_();
@@ -1642,7 +1665,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
       // Legacy unlayoutOnPause support.
       if (!this.V1() && this.impl_.unlayoutOnPause()) {
-        this.getResource_().unlayout();
+        this.unlayout_();
       }
     }
 
@@ -1686,9 +1709,18 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     }
 
     /** @private */
+    unlayout_() {
+      this.getResource_().unlayout();
+      if (this.isConnected_ && this.resources_) {
+        this.resources_./*OK*/ schedulePass();
+      }
+    }
+
+    /** @private */
     reset_() {
       this.layoutCount_ = 0;
       this.isFirstLayoutCompleted_ = false;
+      this.signals_.reset(CommonSignals.MOUNTED);
       this.signals_.reset(CommonSignals.RENDER_START);
       this.signals_.reset(CommonSignals.LOAD_START);
       this.signals_.reset(CommonSignals.LOAD_END);
