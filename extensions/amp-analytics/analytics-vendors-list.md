@@ -363,13 +363,13 @@ Type attribute value: `mparticle`
 
 Adds support for mParticle. More details for adding mParticle support can be found at [docs.mparticle.com](http://docs.mparticle.com/?javascript#amp).
 
-### SOASTA mPulse
+### Akamai mPulse
 
 Type attribute value: `mpulse`
 
 <!-- markdown-link-check-disable -->
 
-Adds support for [SOASTA mPulse](https://www.soasta.com/mPulse). Configuration details can be found at [docs.soasta.com](http://docs.soasta.com/).
+Adds support for [Akamai mPulse](https://www.akamai.com/uk/en/products/performance/mpulse-real-user-monitoring.jsp). Configuration details can be found at [learn.akamai.com](https://learn.akamai.com/en-us/products/web_performance/mpulse.html).
 
 <!-- markdown-link-check-enable -->
 
