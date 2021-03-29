@@ -41,7 +41,7 @@ const browsersList = {
   ],
 };
 
-// See http://cssnano.co/optimisations/ for full list.
+// See https://cssnano.co/docs/what-are-optimisations for full list.
 // We try and turn off any optimization that is marked unsafe.
 const cssNanoDefaultOptions = {
   autoprefixer: false,
