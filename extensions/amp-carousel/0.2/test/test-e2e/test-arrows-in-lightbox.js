@@ -15,7 +15,7 @@
  */
 
 describes.endtoend(
-  'amp carousel in lightbox',
+  'amp carousel:0.2 in lightbox',
   {
     fixture: 'amp-carousel/0.2/amp-lightbox-carousel-selector.amp.html',
     environments: ['single'],
