@@ -236,6 +236,12 @@ export class AmpImg extends BaseElement {
    * @private
    */
   maybeGenerateSizes_(sync) {
+    if (V1_IMG_DEFERRED_BUILD) {
+      // The `getLayoutSize()` is not available for a V1 element. Skip this
+      // codepath. Also: is this feature at all useful? E.g. it doesn't even
+      // execute in the `i-amphtml-ssr` mode.
+      return;
+    }
     if (!this.img_) {
       return;
     }
