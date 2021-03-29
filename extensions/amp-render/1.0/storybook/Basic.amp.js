@@ -77,3 +77,33 @@ export const WithRemoteSrc = () => {
 WithRemoteSrc.story = {
   name: 'With remote src',
 };
+
+export const WithBindableSrc = () => {
+  return (
+    <>
+      <amp-render
+        data-amp-bind-src="bindSrc"
+        src="https://amp.dev/static/samples/json/examples.json"
+        width="300"
+        height="200"
+        layout="fixed"
+      >
+        <template type="amp-mustache">
+          <ul>
+            {`{{#items}}`}
+            <li>{`{{title}}`}</li>
+            {`{{/items}}`}
+          </ul>
+        </template>
+      </amp-render>
+
+      <button on="tap:AMP.setState({ bindSrc: 'https://amp.dev/static/samples/json/examples2.json' })">
+        Change source
+      </button>
+    </>
+  );
+};
+
+WithBindableSrc.story = {
+  name: 'With bindable src',
+};
