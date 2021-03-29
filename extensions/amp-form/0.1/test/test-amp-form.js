@@ -610,16 +610,6 @@ describes.repeated(
               /Illegal input name, __amp_source_origin found/
             );
           });
-          form.removeChild(illegalInput);
-
-          form.setAttribute('id', 'registration');
-          illegalInput.setAttribute('form', 'registration');
-          document.body.appendChild(illegalInput);
-          allowConsoleError(() => {
-            expect(() => new AmpForm(form)).to.throw(
-              /Illegal input name, __amp_source_origin found/
-            );
-          });
           document.body.removeChild(form);
         });
 
@@ -727,17 +717,6 @@ describes.repeated(
           emailInput.setAttribute('type', 'email');
           emailInput.setAttribute('required', '');
           form.appendChild(emailInput);
-
-          const emailInput2 = createElement('input');
-          emailInput2.setAttribute('name', 'email');
-          emailInput2.setAttribute('type', 'email');
-          emailInput2.setAttribute('required', '');
-          form.setAttribute('id', 'registration');
-          emailInput2.setAttribute('id', 'registration');
-
-          form.appendChild(emailInput);
-          document.body.appendChild(emailInput2);
-
           const ampForm = new AmpForm(form);
           env.sandbox.stub(ampForm.xhr_, 'fetch').resolves();
           const event = {
@@ -748,7 +727,6 @@ describes.repeated(
 
           env.sandbox.spy(form, 'checkValidity');
           env.sandbox.spy(emailInput, 'reportValidity');
-          env.sandbox.spy(emailInput2, 'reportValidity');
 
           env.sandbox.stub(ampForm, 'handleXhrSubmitSuccess_').resolves();
           return ampForm.handleSubmitEvent_(event).then(() => {
@@ -760,7 +738,6 @@ describes.repeated(
 
             // However reporting validity shouldn't happen when novalidate.
             expect(emailInput.reportValidity).to.not.be.called;
-            expect(emailInput2.reportValidity).to.not.be.called;
           });
         });
 
@@ -892,32 +869,6 @@ describes.repeated(
             emailInput.setAttribute('name', 'email');
             emailInput.setAttribute('required', '');
             form.appendChild(emailInput);
-            env.sandbox.spy(form, 'checkValidity');
-            env.sandbox.spy(ampForm.validator_, 'onInput');
-
-            const event = createCustomEvent(
-              env.win,
-              AmpEvents.FORM_VALUE_CHANGE,
-              /* detail */ null,
-              {bubbles: true}
-            );
-            emailInput.dispatchEvent(event);
-            expect(form.checkValidity).to.be.called;
-            expect(ampForm.validator_.onInput).to.be.calledWith(event);
-          });
-        });
-
-        it.only('should check validity on FORM_VALUE_CHANGE for inputs outside', () => {
-          setCheckValiditySupportedForTesting(true);
-          return getAmpForm(getForm()).then((ampForm) => {
-            const form = ampForm.form_;
-            const emailInput = createElement('input');
-            emailInput.setAttribute('name', 'email');
-            emailInput.setAttribute('required', '');
-            form.setAttribute('id', 'registration');
-            emailInput.setAttribute('form', 'registration');
-            document.body.appendChild(emailInput);
-            document.body.appendChild(form);
             env.sandbox.spy(form, 'checkValidity');
             env.sandbox.spy(ampForm.validator_, 'onInput');
 
