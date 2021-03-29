@@ -16,7 +16,6 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const debounce = require('debounce');
-const del = require('del');
 const esbuild = require('esbuild');
 /** @type {Object} */
 const experimentDefines = require('../global-configs/experiments-const.json');
@@ -39,7 +38,6 @@ const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
 const {removeFromClosureBabelCache} = require('../compile/pre-closure-babel');
 const {thirdPartyFrames} = require('../test-configs/config');
-const {transpileTs} = require('../compile/typescript');
 const {watch: fileWatch} = require('chokidar');
 
 /** @type {Remapping.default} */
@@ -406,9 +404,7 @@ function handleBundleError(err, continueOnError, destFilename) {
   if (continueOnError) {
     log(red('ERROR:'), reasonMessage);
   } else {
-    const reason = new Error(reasonMessage);
-    reason.showStack = false;
-    throw reason;
+    throw new Error(reasonMessage);
   }
 }
 
@@ -494,7 +490,10 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   }
 
   const {banner, footer} = splitWrapper();
-  const plugin = getEsbuildBabelPlugin('unminified', /* enableCache */ true);
+  const babelPlugin = getEsbuildBabelPlugin(
+    'unminified',
+    /* enableCache */ true
+  );
   const buildResult = await esbuild
     .build({
       entryPoints: [entryPoint],
@@ -502,7 +501,7 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       sourcemap: true,
       define: experimentDefines,
       outfile: destFile,
-      plugins: [plugin],
+      plugins: [babelPlugin],
       banner,
       footer,
       incremental: !!options.watch,
@@ -555,10 +554,15 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
     return watchedTargets.get(entryPoint).rebuild();
   }
 
-  const plugin = getEsbuildBabelPlugin(
+  const babelPlugin = getEsbuildBabelPlugin(
     options.minify ? 'minified' : 'unminified',
     /* enableCache */ true
   );
+  const plugins = [babelPlugin];
+
+  if (options.remapDependencies) {
+    plugins.unshift(remapDependenciesPlugin());
+  }
 
   let result = null;
 
@@ -572,17 +576,40 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
         bundle: true,
         sourcemap: true,
         outfile: destFile,
-        plugins: [plugin],
+        plugins,
         minify: options.minify,
+        format: options.outputFormat || undefined,
         target: argv.esm ? 'es6' : 'es5',
         incremental: !!options.watch,
         logLevel: 'silent',
+        external: options.externalDependencies,
       });
     } else {
       result = await result.rebuild();
     }
     await minifyWithTerser(destDir, destFilename, options);
     await finishBundle(srcFilename, destDir, destFilename, options, time);
+  }
+
+  function remapDependenciesPlugin() {
+    const remapDependencies = {__proto__: null, ...options.remapDependencies};
+    const external = options.externalDependencies;
+    return {
+      name: 'remap-dependencies',
+      setup(build) {
+        build.onResolve({filter: /.*/}, (args) => {
+          const dep = args.path;
+          const remap = remapDependencies[dep];
+          if (remap) {
+            const isExternal = external.includes(remap);
+            return {
+              path: isExternal ? remap : require.resolve(remap),
+              external: isExternal,
+            };
+          }
+        });
+      },
+    };
   }
 
   await build(startTime).catch((err) =>
@@ -618,7 +645,7 @@ async function minifyWithTerser(destDir, destFilename, options) {
     return;
   }
 
-  const filename = destDir + destFilename;
+  const filename = path.join(destDir, destFilename);
   const terserOptions = {
     mangle: true,
     compress: true,
@@ -644,25 +671,6 @@ async function minifyWithTerser(destDir, destFilename, options) {
 }
 
 /**
- * Transpiles from TypeScript into intermediary files before compilation and
- * deletes them afterwards.
- *
- * @param {string} srcDir Path to the src directory
- * @param {string} srcFilename Name of the JS source file
- * @param {string} destDir Destination folder for output script
- * @param {?Object} options
- * @return {!Promise}
- */
-async function compileTs(srcDir, srcFilename, destDir, options) {
-  options = options || {};
-  const startTime = Date.now();
-  await transpileTs(srcDir, srcFilename);
-  endBuildStep('Transpiled', srcFilename, startTime);
-  await compileJs(srcDir, srcFilename, destDir, options);
-  del.sync(path.join(srcDir, '**/*.js'));
-}
-
-/**
  * Bundles (max) or compiles (min) a given JavaScript file entry point.
  *
  * @param {string} srcDir Path to the src directory
@@ -676,7 +684,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
   if (options.minify) {
     return compileMinifiedJs(srcDir, srcFilename, destDir, options);
   } else {
-    return await compileUnminifiedJs(srcDir, srcFilename, destDir, options);
+    return compileUnminifiedJs(srcDir, srcFilename, destDir, options);
   }
 }
 
@@ -847,9 +855,9 @@ module.exports = {
   compileCoreRuntime,
   compileJs,
   compileJsWithEsbuild,
-  compileTs,
   doBuildJs,
   endBuildStep,
+  compileUnminifiedJs,
   maybePrintCoverageMessage,
   maybeToEsmName,
   mkdirSync,

@@ -22,7 +22,6 @@ const loadConfig = require('./load-config');
 const rewriteAnalyticsTags = require('./rewrite-analytics-tags');
 const rewriteScriptTags = require('./rewrite-script-tags');
 const runTests = require('./run-tests');
-const {installPackages} = require('../../common/utils');
 const {printReport} = require('./print-report');
 
 /**
@@ -34,13 +33,12 @@ async function performance() {
     resolver = resolverIn;
   });
 
-  await installPackages(__dirname);
   const config = new loadConfig();
   const urls = Object.keys(config.urlToHandlers);
   const urlsAndAdsUrls = urls.concat(config.adsUrls || []);
   await cacheDocuments(urlsAndAdsUrls);
   await compileScripts(urlsAndAdsUrls);
-  copyLocalImages(urlsAndAdsUrls);
+  await copyLocalImages(urlsAndAdsUrls);
   await rewriteScriptTags(urlsAndAdsUrls);
   await rewriteAnalyticsTags(config.handlers);
   await getMetrics(urls, config);

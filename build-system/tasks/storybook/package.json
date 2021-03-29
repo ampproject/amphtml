@@ -15,7 +15,7 @@
     "babel-loader": "8.2.2",
     "core-js": "3.9.1",
     "preact": "10.5.13",
-    "preact-render-to-string": "5.1.16",
+    "preact-render-to-string": "5.1.17",
     "styled-jsx": "3.4.4"
   }
 }

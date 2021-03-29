@@ -86,6 +86,16 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
   }
 
   /**
+   * @param {!MessageEventSource} source
+   * @param {*} message
+   * @param {string} origin
+   * @private
+   */
+  postMessage_(source, message, origin) {
+    source./*OK*/ postMessage(message, origin);
+  }
+
+  /**
    * @param {string} origin
    * @param {Event} event
    * @private
@@ -107,7 +117,8 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
         if (!nonce) {
           return;
         }
-        event.source./*OK*/ postMessage(
+        this.postMessage_(
+          event.source,
           dict({
             'sentinel': SENTINEL,
             'command': 'parent_frame_ready',
