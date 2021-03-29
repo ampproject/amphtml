@@ -18,7 +18,7 @@ tags: {  # amp-social-share 1.0
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-social-share"
+    name: "amp-social-share 1.0"
     version: "1.0"
   }
   attr_lists: "common-extension-attrs"
