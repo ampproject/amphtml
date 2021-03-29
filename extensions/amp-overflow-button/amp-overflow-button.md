@@ -48,7 +48,7 @@ This is an overflow wrapper for amp-ad and amp-iframe. It covers the ad or ifram
 ```html
 <amp-ad height="150" type="myfinance" data-ad-type="widget" data-test="true">
   <amp-overflow-button overflow color="#B80000" cta="Show more"> </amp-overflow-button>
-</amp-ad>__
+</amp-ad>
 ```
 
 ![alt_text](images/custom_color_cta.png 'image_tooltip')
