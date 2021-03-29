@@ -30,8 +30,8 @@ export function addCacheSources(videoEl, win) {
   if (
     !extensionScriptsInNode(win.document).some(
       (extension) => extension.extensionId === 'amp-cache-url'
-    ) &&
-    videoEl.querySelector('source[src]')
+    ) ||
+    !videoEl.querySelector('source[src]')
   ) {
     return Promise.resolve();
   }
