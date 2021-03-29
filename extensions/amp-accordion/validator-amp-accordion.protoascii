@@ -19,15 +19,12 @@ tags: {  # amp-accordion for websites
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-accordion"
-    version: "0.1"
     version: "1.0"
-    version: "latest"
-    requires_usage: EXEMPTED
-    deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # amp-accordion for ads
+  html_format: AMP
   html_format: AMP4ADS
   tag_name: "SCRIPT"
   extension_spec: {
