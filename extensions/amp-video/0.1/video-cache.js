@@ -15,34 +15,38 @@
  */
 
 import {Services} from '../../../src/services';
-import {createElementWithAttributes} from '../../../src/dom';
+import {createElementWithAttributes, matches} from '../../../src/dom';
+import {extensionScriptsInNode} from '../../../src/service/extension-script';
+import {resolveRelativeUrl} from '../../../src/url';
 import {toArray} from '../../../src/types';
-
-/** @private {?boolean} store the result of whether the document can use cache url */
-let docSupportsCacheResult = null;
 
 /**
  * Add the caching sources to the video if opted in.
- * @param {!AmpVideo} video
+ * @param {!Element} videoEl
+ * @param {!Window} win
  * @return {!Promise}
  */
-export function addCacheSources(video) {
-  if (!docSupportsCache(video.win)) {
+export function addCacheSources(videoEl, win) {
+  if (
+    !extensionScriptsInNode(win.document).some(
+      (extension) => extension.extensionId === 'amp-cache-url'
+    ) &&
+    videoEl.querySelector('source[src]')
+  ) {
     return Promise.resolve();
   }
-  const servicePromise = Services.cacheUrlServicePromiseForDoc(video.element);
+  const {sourceUrl} = Services.documentInfoForDoc(win.document);
+  const servicePromise = Services.cacheUrlServicePromiseForDoc(videoEl);
+  const videoUrl = resolveRelativeUrl(selectVideoSource(videoEl), sourceUrl);
   return servicePromise
-    .then((service) =>
-      Promise.all([
-        service.createCacheUrl(selectVideoSource(video.element)),
-        Services.storyRequestServiceForOrNull(video.win),
-      ])
-    )
-    .then((promiseResult) => {
-      const requestUrl = promiseResult[0].replace('/c/', '/mbv/');
-      return promiseResult[1].executeRequest(requestUrl);
+    .then((service) => service.createCacheUrl(videoUrl))
+    .then((cacheUrl) => {
+      const requestUrl = cacheUrl.replace('/c/', '/mbv/');
+      return Services.xhrFor(win).fetch(requestUrl);
     })
-    .then((response) => applySourcesToVideo(video.element, response['sources']))
+    .then((response) =>
+      applySourcesToVideo(videoEl, response.json()['sources'])
+    )
     .catch(() => {
       // If cache fails, video should still load properly.
     });
@@ -51,15 +55,12 @@ export function addCacheSources(video) {
 /**
  * Selects and returns the prioritized video source URL
  * @param {!Element} videoEl
- * @return {string}
+ * @return {?string}
  */
 export function selectVideoSource(videoEl) {
   const possibleSources = toArray(videoEl.querySelectorAll('source[src]'));
-  if (videoEl.hasAttribute('src')) {
-    possibleSources.push(videoEl);
-  }
   for (let i = 0; i < possibleSources.length; i++) {
-    if (possibleSources[i].getAttribute('type') === 'video/mp4') {
+    if (matches(possibleSources[i], '[type*="video/mp4"]')) {
       return possibleSources[i].getAttribute('src');
     }
   }
@@ -84,20 +85,6 @@ export function applySourcesToVideo(videoEl, sources) {
           'data-bitrate': source['bitrate_kbps'],
         }
       );
-      videoEl.prepend(sourceEl);
+      videoEl.insertBefore(sourceEl, videoEl.firstChild);
     });
-}
-
-/**
- * Whether the doc supports cache url
- * @param {!Window} win
- * @return {boolean}
- */
-function docSupportsCache(win) {
-  if (docSupportsCacheResult === null) {
-    docSupportsCacheResult = !!win.document.head.querySelector(
-      'script[custom-element="amp-cache-url"]'
-    );
-  }
-  return docSupportsCacheResult;
 }

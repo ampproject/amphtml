@@ -267,12 +267,12 @@ export class AmpVideo extends AMP.BaseElement {
 
     Services.videoManagerForDoc(element).register(this);
 
-    // Add cache sources if opted-in and it's not a cached doc already.
+    // Add cache sources if opted-in and it's sources are not already cached.
     if (
       this.element.hasAttribute('enable-google-video-cache') &&
       !this.element.querySelector('source[amp-orig-src]')
     ) {
-      return addCacheSources(this);
+      return addCacheSources(this.element, this.win);
     }
   }
 
