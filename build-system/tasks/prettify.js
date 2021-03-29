@@ -44,12 +44,14 @@ const tempDir = tempy.directory();
 
 /**
  * Checks files for formatting (and optionally fixes them) with Prettier.
+ * Explicitly makes sure the API doesn't check files in `.prettierignore`.
  */
 async function prettify() {
-  // Prettier ignores the `.prettierignore` file when using the API like we
-  // are. So we need to filter our files down before feeding them to the API.
-  const ignore = fs.readFileSync('.prettierignore', 'utf8');
-  const filesToCheck = getFilesToCheck(prettifyGlobs, {dot: true}, ignore);
+  const filesToCheck = getFilesToCheck(
+    prettifyGlobs,
+    {dot: true},
+    '.prettierignore'
+  );
   if (filesToCheck.length == 0) {
     return;
   }

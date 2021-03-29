@@ -791,6 +791,10 @@ export class PreactBaseElement extends AMP.BaseElement {
     if (!getMode().localDev) {
       return;
     }
+    // Hack around https://github.com/preactjs/preact/issues/3084
+    if (current.constructor && current.constructor.name !== 'Object') {
+      return;
+    }
     const api = this.apiWrapper_;
     const newKeys = Object.keys(current);
     for (let i = 0; i < newKeys.length; i++) {
@@ -1147,12 +1151,16 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
     let value;
     if (def.passthrough) {
       devAssert(Ctor['usesShadowDom']);
-      value = [<Slot />];
+      // Use lazy loading inside the passthrough by default due to too many
+      // elements.
+      value = [<Slot loading={Loading.LAZY} />];
     } else if (def.passthroughNonEmpty) {
       devAssert(Ctor['usesShadowDom']);
+      // Use lazy loading inside the passthrough by default due to too many
+      // elements.
       value = element.getRealChildNodes().every(IS_EMPTY_TEXT_NODE)
         ? null
-        : [<Slot />];
+        : [<Slot loading={Loading.LAZY} />];
     } else if (def.attr) {
       value = element.getAttribute(def.attr);
       if (def.media && value != null) {
