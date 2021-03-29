@@ -34,6 +34,6 @@ describes.sandboxed('Render 1.0 preact component', {}, () => {
     await macroTask();
 
     expect(wrapper.getDOMNode().tagName).to.equal('DIV');
-    expect(wrapper.getDOMNode().innerHTML).to.contain('Hi George');
+    expect(wrapper.getDOMNode().innerHTML).to.equal('Hi George');
   });
 });
