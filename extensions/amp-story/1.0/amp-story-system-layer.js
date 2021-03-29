@@ -110,6 +110,36 @@ const TEMPLATE = {
   }),
   children: [
     {
+      tag: 'a',
+      attrs: dict({
+        'class': ATTRIBUTION_CLASS,
+        'target': '_blank',
+      }),
+      children: [
+        {
+          tag: 'div',
+          attrs: dict({
+            'class': 'i-amphtml-story-attribution-logo-container',
+          }),
+          children: [
+            {
+              tag: 'img',
+              attrs: dict({
+                'alt': '',
+                'class': 'i-amphtml-story-attribution-logo',
+              }),
+            },
+          ],
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            'class': 'i-amphtml-story-attribution-text',
+          }),
+        },
+      ],
+    },
+    {
       tag: 'div',
       attrs: dict({
         'class': 'i-amphtml-story-has-new-page-notification-container',
@@ -269,36 +299,6 @@ const TEMPLATE = {
       attrs: dict({
         'class': 'i-amphtml-story-system-layer-buttons-start-position',
       }),
-    },
-    {
-      tag: 'a',
-      attrs: dict({
-        'class': ATTRIBUTION_CLASS,
-        'target': '_blank',
-      }),
-      children: [
-        {
-          tag: 'div',
-          attrs: dict({
-            'class': 'i-amphtml-story-attribution-logo-container',
-          }),
-          children: [
-            {
-              tag: 'img',
-              attrs: dict({
-                'alt': '',
-                'class': 'i-amphtml-story-attribution-logo',
-              }),
-            },
-          ],
-        },
-        {
-          tag: 'div',
-          attrs: dict({
-            'class': 'i-amphtml-story-attribution-text',
-          }),
-        },
-      ],
     },
   ],
 };

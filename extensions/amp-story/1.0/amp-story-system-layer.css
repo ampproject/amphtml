@@ -20,6 +20,8 @@
 .i-amphtml-story-system-layer {
   background: linear-gradient(to bottom, rgba(0, 0, 0, 0.32), transparent) !important;
   position: absolute !important;
+  display: flex !important;
+  justify-content: space-between !important;
   top: 0 !important;
   left: 0 !important;
   right: 0 !important;
@@ -55,55 +57,31 @@
 
 .i-amphtml-story-story-attribution {
   top: 0 !important;
-  left: 0 !important;
-  position: absolute;
   border: none !important;
   pointer-events: auto !important;
   cursor: pointer !important;
-  max-width: 50% !important;
-  padding-top: 6px !important;
+  padding: 6px 3px 0 !important;
   height: 48px !important;
   place-items: center !important;
   display: flex !important;
   text-decoration: none !important;
+  overflow: hidden !important;
   visibility: hidden !important;
 }
 
-[dir=rtl] .i-amphtml-story-story-attribution {
-  left: auto !important;
+[desktop] .i-amphtml-story-story-attribution {
+  padding: 6px 6px 0 !important;
+  left: 0 !important;
   right: 0 !important;
 }
 
 .i-amphtml-story-story-attribution > * {
-  padding-left: 6px !important;
-}
-
-[dir=rtl] .i-amphtml-story-story-attribution > * {
-  padding-left: 0 !important;
-  padding-right: 6px !important;
-}
-
-.i-amphtml-story-desktop-panels .i-amphtml-story-story-attribution > * {
-  padding-left: 8px !important;
-}
-
-[dir=rtl].i-amphtml-story-desktop-panels .i-amphtml-story-story-attribution > * {
-  padding-left: 0 !important;
-  padding-right: 8px !important;
+  margin: 0px 3px !important;
 }
 
 .i-amphtml-story-attribution-logo-container {
   display: grid !important;
   place-items: center !important;
-}
-
-[desktop] .i-amphtml-story-attribution-logo-container {
-  margin-left: 4px !important;
-}
-
-[dir=rtl][desktop] .i-amphtml-story-attribution-logo-container {
-  margin-left: 0 !important;
-  margin-right: 4px !important;
 }
 
 .i-amphtml-story-attribution-logo {
@@ -140,8 +118,7 @@
   justify-content: flex-start !important;
 }
 
-[desktop] .i-amphtml-story-system-layer-buttons,
-[desktop] .i-amphtml-story-story-attribution {
+[desktop] .i-amphtml-story-system-layer-buttons {
   padding: 8px 4px 0 !important;
 }
 
