@@ -88,7 +88,7 @@ tags: {  # <amp-accordion> > <section>
   }
   attrs: { name: "expanded" value: "" }
   # amp-bind
-  attrs: {
+  attrs: { # binding to this attribute in 1.0 performs no action (see #33493)
     name: "[data-expand]"
   }
   # amp-bind
