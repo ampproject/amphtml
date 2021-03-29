@@ -232,6 +232,11 @@ export class VideoManager {
     element.classList.add('i-amphtml-video-interface');
   }
 
+  /** @param {!../video-interface.VideoInterface} video */
+  unregister(video) {
+    // TODO
+  }
+
   /**
    * Register common actions such as play, pause, etc... on the video element
    * so they can be called using AMP Actions.

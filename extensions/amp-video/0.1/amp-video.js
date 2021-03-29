@@ -15,6 +15,7 @@
  */
 
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
+import {MediaElementPool} from '../../../src/utils/media-element-pool';
 import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
@@ -35,6 +36,7 @@ import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert, user} from '../../../src/log';
 import {getBitrateManager} from './flexible-bitrate';
 import {getMode} from '../../../src/mode';
+import {getServiceForDoc} from '../../../src/service';
 import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -49,6 +51,7 @@ import {
 import {toArray} from '../../../src/types';
 
 const TAG = 'amp-video';
+const VIDEO_POOL_SERVICE_ID = 'video-media-pool';
 
 /** @private {!Array<string>} */
 const ATTRS_TO_PROPAGATE_ON_BUILD = [
@@ -215,11 +218,27 @@ export class AmpVideo extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.configure_();
+    if (!VIDEO_POOL2) {
+      // Old behavior: create the `video` element immediately.
+      this.createVideo_();
+    }
+  }
+
+  /** @private */
+  createVideo_() {
+    if (this.video_) {
+      return;
+    }
+
     const {element} = this;
 
-    this.configure_();
-
-    this.video_ = element.ownerDocument.createElement('video');
+    if (VIDEO_POOL2) {
+      const videoPool = getServiceForDoc(this.element, VIDEO_POOL_SERVICE_ID);
+      this.video_ = videoPool.alloc(this.element);
+    } else {
+      this.video_ = element.ownerDocument.createElement('video');
+    }
 
     const poster = element.getAttribute('poster');
     if (!poster && getMode().development) {
@@ -264,6 +283,25 @@ export class AmpVideo extends AMP.BaseElement {
     installVideoManagerForDoc(element);
 
     Services.videoManagerForDoc(element).register(this);
+  }
+
+  /** @private */
+  disposeVideo_() {
+    if (!this.video_) {
+      return;
+    }
+
+    this.uninstallEventHandlers_();
+
+    const {element, video_: video} = this;
+    this.video_ = null;
+    element.removeChild(video);
+    Services.videoManagerForDoc(element).unregister(this);
+
+    if (VIDEO_POOL2) {
+      const videoPool = getServiceForDoc(this.element, VIDEO_POOL_SERVICE_ID);
+      videoPool.dealloc(this.element);
+    }
   }
 
   /**
@@ -343,6 +381,8 @@ export class AmpVideo extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    console.log('amp-video: layoutCallback:', this.element.id);
+    this.createVideo_();
     this.video_ = dev().assertElement(this.video_);
 
     if (!this.isVideoSupported_()) {
@@ -383,6 +423,7 @@ export class AmpVideo extends AMP.BaseElement {
               if (this.isManagedByPool_()) {
                 return;
               }
+              // TODO: Leaky listener. A problem? Probably a minor one.
               return this.loadPromise(this.video_);
             });
         });
@@ -391,6 +432,7 @@ export class AmpVideo extends AMP.BaseElement {
     }
 
     // loadPromise for media elements listens to `loadedmetadata`.
+    // TODO: Leaky listener. A problem? Probably a minor one.
     const promise = this.loadPromise(this.video_)
       .then(null, (reason) => {
         if (pendingOriginPromise) {
@@ -412,6 +454,13 @@ export class AmpVideo extends AMP.BaseElement {
     }
 
     return promise;
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    console.log('amp-video: unlayoutCallback:', this.element.id);
+    this.disposeVideo_();
+    return true;
   }
 
   /**
@@ -656,6 +705,9 @@ export class AmpVideo extends AMP.BaseElement {
    * this element's DOM.
    */
   resetOnDomChange() {
+    if (VIDEO_POOL2) {
+      return;
+    }
     this.video_ = dev().assertElement(
       childElementByTag(this.element, 'video'),
       'Tried to reset amp-video without an underlying <video>.'
@@ -679,7 +731,9 @@ export class AmpVideo extends AMP.BaseElement {
 
   /** @private */
   onVideoLoaded_() {
-    dispatchCustomEvent(this.element, VideoEvents.LOAD);
+    if (this.video_) {
+      dispatchCustomEvent(this.element, VideoEvents.LOAD);
+    }
   }
 
   /** @override */
@@ -956,5 +1010,10 @@ export function isCachedByCdn(element, opt_videoElement) {
 }
 
 AMP.extension(TAG, '0.1', (AMP) => {
+  if (VIDEO_POOL2) {
+    AMP.registerServiceForDoc(VIDEO_POOL_SERVICE_ID, function (ampdoc) {
+      return new MediaElementPool(ampdoc.win, 'video');
+    });
+  }
   AMP.registerElement(TAG, AmpVideo);
 });
