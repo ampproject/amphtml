@@ -154,7 +154,21 @@ amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-dragg
 }
 
 amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-content {
-  background: #fff !important;
+  border-radius: 16px 16px 0 0 !important;
+  position: relative;
+}
+
+/* Sets default background color if none is set on amp-story-page-attachment. */
+amp-story:not([desktop]) .amp-story-page-attachment-ui-v2:not(.i-amphtml-story-draggable-drawer-bookend) .i-amphtml-story-draggable-drawer-content:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  z-index: -1;
+  border-radius: inherit !important;
 }
 
 amp-story:not([desktop]) .amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-content {
