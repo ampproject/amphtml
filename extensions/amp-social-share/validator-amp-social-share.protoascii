@@ -20,7 +20,6 @@ tags: {  # amp-social-share 1.0
   extension_spec: {
     name: "amp-social-share"
     version: "1.0"
-    deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
