@@ -88,6 +88,32 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
     });
   });
 
+  describe('url forming', () => {
+    it('should send the request to the correct address if the video has an absolute url', async () => {
+      const videoEl = createVideo([{'src': 'https://website.com/video.html'}]);
+      const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
+
+      const ampVideo = new AmpVideo(videoEl);
+      await ampVideo.buildCallback();
+
+      expect(xhrSpy).to.have.been.calledWith(
+        'https://website-com.cdn.ampproject.org/mbv/s/website.com/video.html'
+      );
+    });
+
+    it('should send the request to the correct address if the video has a relative url', async () => {
+      const videoEl = createVideo([{'src': 'video.html'}]);
+      const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
+
+      const ampVideo = new AmpVideo(videoEl);
+      await ampVideo.buildCallback();
+
+      expect(xhrSpy).to.have.been.calledWith(
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video.html'
+      );
+    });
+  });
+
   describe('end to end', () => {
     it('should create the sources from the request with the correct attributes', async () => {
       env.sandbox.stub(xhrService, 'fetch').resolves({
@@ -105,6 +131,13 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await ampVideo.buildCallback();
 
       expect(videoEl.querySelector('source[data-bitrate]')).to.not.be.null;
+    });
+    it('should not create the sources if there is amp-orig-src attribute', async () => {
+      const videoEl = createVideo([{'src': 'video.mp4', 'amp-orig-src': ''}]);
+      const ampVideo = new AmpVideo(videoEl);
+      await ampVideo.buildCallback();
+
+      expect(videoEl.querySelector('source[data-bitrate]')).to.be.null;
     });
   });
 
