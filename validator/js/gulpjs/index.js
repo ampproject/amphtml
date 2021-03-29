@@ -19,7 +19,6 @@
 
 const amphtmlValidator = require('amphtml-validator');
 const colors = require('kleur/colors');
-const log = require('fancy-log');
 const through = require('through2');
 
 const PLUGIN_NAME = 'gulp-amphtml-validator';
@@ -62,7 +61,7 @@ module.exports.validate = function(validator) {
           // build, but map the exception to an validation error instead. This
           // makes it possible to configure via failAfterError whether this
           // should fail the build or not.
-            log(colors.red(err.message));
+            console.log(colors.red(err.message));
             file.ampValidationResult = {
               status: STATUS_UNKNOWN,
             };
@@ -83,7 +82,7 @@ module.exports.format = function(logger) {
 
   const results = [];
   if (!logger) {
-    logger = log;
+    logger = console.log;
   }
 
   function collectResults(file, encoding, callback) {
