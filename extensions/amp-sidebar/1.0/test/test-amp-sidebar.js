@@ -16,6 +16,7 @@
 import '../amp-sidebar';
 import {ActionInvocation} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
+import {createElementWithAttributes} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor, whenCalled} from '../../../../testing/test-helper';
@@ -140,6 +141,14 @@ describes.realWin(
         env.sandbox.stub(element, 'setAsContainerInternal');
         env.sandbox.stub(element, 'removeAsContainerInternal');
 
+        // Sidebar has a child.
+        const child = createElementWithAttributes(win.document, 'amp-img', {
+          layout: 'nodisplay',
+        });
+        element.appendChild(child);
+        env.sandbox.stub(child, 'pause');
+        env.sandbox.stub(child, 'unmount');
+
         element.setAttribute('open', '');
         await waitForOpen(element, true);
 
@@ -162,6 +171,8 @@ describes.realWin(
 
         expect(element.removeAsContainerInternal).to.be.calledOnce;
         expect(element.setAsContainerInternal).to.be.calledOnce; // no change.
+        expect(child.pause).to.be.calledOnce;
+        expect(child.unmount).to.not.be.called;
       });
 
       it('should close when the backdrop is clicked', async () => {
