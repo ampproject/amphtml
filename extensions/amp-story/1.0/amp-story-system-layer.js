@@ -29,11 +29,15 @@ import {
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
-import {createShadowRootWithStyle, shouldShowStoryUrlInfo} from './utils';
+import {closest, matches, scopedQuerySelector} from '../../../src/dom';
+import {
+  createShadowRootWithStyle,
+  shouldShowStoryUrlInfo,
+  triggerClickFromLightDom,
+} from './utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {matches, scopedQuerySelector} from '../../../src/dom';
 import {renderAsElement} from './simple-template';
 import {setImportantStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
@@ -270,18 +274,20 @@ const TEMPLATE = {
       tag: 'a',
       attrs: dict({
         'class': ATTRIBUTION_CLASS,
+        'target': '_blank',
       }),
       children: [
         {
           tag: 'div',
           attrs: dict({
-            'class': 'i-amphtml-story-logo-container',
+            'class': 'i-amphtml-story-attribution-logo-container',
           }),
           children: [
             {
               tag: 'img',
               attrs: dict({
                 'alt': '',
+                'class': 'i-amphtml-story-attribution-logo',
               }),
             },
           ],
@@ -510,6 +516,11 @@ export class SystemLayer {
         )
       ) {
         this.onViewerControlClick_(dev().assertElement(event.target));
+      } else if (
+        matches(target, `.${ATTRIBUTION_CLASS}, .${ATTRIBUTION_CLASS} *`)
+      ) {
+        const anchorClicked = closest(target, (e) => matches(e, 'a[href]'));
+        triggerClickFromLightDom(anchorClicked, this.parentEl_);
       }
     });
 
