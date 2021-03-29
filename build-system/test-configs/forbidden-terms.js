@@ -1118,12 +1118,6 @@ const forbiddenTermsSrcInclusive = {
   "require\\('fancy-log'\\)": {
     message:
       'Instead of fancy-log, use the logging functions in build-system/common/logging.js.',
-    allowlist: [
-      'babel.config.js',
-      'build-system/common/logging.js',
-      'build-system/tasks/visual-diff/helpers.js',
-      'validator/js/gulpjs/index.js',
-    ],
   },
 };
 
