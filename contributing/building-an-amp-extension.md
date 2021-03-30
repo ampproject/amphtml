@@ -512,7 +512,7 @@ HTML-native `img` tag which will be out of AMP resource management.
 
 #### Loading indicators
 
-Loading indicators are displayed while a component's [`layoutCallback`](#layoutcallback) resolves, **except** when their [layout](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/#layout) is `container` or `nodisplay`.
+Loading indicators are displayed while a component's [`layoutCallback`](#layoutcallback) resolves, **except** when its [layout](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/#layout) is `container` or `nodisplay`.
 
 A component may optionally provide a `createLoaderLogoCallback`, returning an icon or a third-party logo that's displayed on a loading indicator. See [`amp-twitter.js`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/0.1/amp-twitter.js) for an example.
 
