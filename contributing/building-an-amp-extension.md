@@ -183,7 +183,7 @@ AMP.extension('amp-my-element', '0.1', (AMP) => {
     create a lightweight placeholder. This gets called only if the element
     doesn't already have a publisher-provided placeholder (through [the
     placeholder
-    attribute](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#placeholder)).
+    attribute](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/#placeholder)).
 -   **Usage**: Create placeholder DOM and return it. For example,
     amp-instagram uses this to create a placeholder dynamically by creating
     an amp-img placeholder instead of loading the iframe, leaving the iframe
@@ -446,7 +446,7 @@ placeholder for itself (in case a placeholder wasn't provided by the
 developer/publisher who is using your element). This allows elements to
 display content as fast as possible and allow prerendering that
 placeholder. Learn [more about placeholder
-elements](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#placeholder).
+elements](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/#placeholder).
 
 NOTE: Make sure not to request external resources in the pre-render
 phase. Requests to the publisher's origin itself are OK. If in doubt,
@@ -512,10 +512,9 @@ HTML-native `img` tag which will be out of AMP resource management.
 
 #### Loading indicators
 
-Loading indicators are displayed for all component elements that have either of these properties:
+Loading indicators are displayed for all components, **except** when their [layout](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/#layout) is `container` or `nodisplay`.
 
--   its `layout` attribute is **not** `container` or `nodisplay`
--   it has a `loadable` attribute
+A component may optionally provide a `createLoaderLogoCallback`, returning an icon or a third-party logo that's displayed on a loading indicator. See [`amp-twitter.js`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/0.1/amp-twitter.js) for an example.
 
 ### Destroying heavyweight resources
 
@@ -590,9 +589,9 @@ AMP defines different layouts that elements can choose whether or not to
 support Your element needs to announce which layouts it supports through
 overriding the `isLayoutSupported(layout)` callback and returning true
 if the element supports that layout. [Read more about AMP Layout
-System](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md)
+System](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/)
 and [Layout
-Types](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#layout).
+Types](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/#layout).
 
 ### What layout should your element support?
 
