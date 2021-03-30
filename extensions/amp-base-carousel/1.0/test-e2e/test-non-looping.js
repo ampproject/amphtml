@@ -68,7 +68,8 @@ describes.endtoend(
       await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
     });
 
-    it('should have the correct scroll position when resizing', async () => {
+    // TODO(wg-bento, #24195): Flaky
+    it.skip('should have the correct scroll position when resizing', async () => {
       // Note: 513 seems to be the smallest settable width.
       await controller.setWindowRect({
         width: 800,

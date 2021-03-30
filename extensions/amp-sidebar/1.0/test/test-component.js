@@ -15,10 +15,15 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Sidebar} from '../component';
+import {Sidebar, SidebarToolbar} from '../component';
+import {htmlFor} from '../../../../src/static-template';
 import {mount} from 'enzyme';
 
 describes.sandboxed('Sidebar preact component', {}, (env) => {
+  const isOpened = (sidebarElement) => {
+    return !sidebarElement.className.includes('unmounted');
+  };
+
   describe('basic actions', () => {
     let wrapper;
     let ref;
@@ -60,7 +65,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
 
       // verify sidebar is opened
       let sidebarElement = wrapper.find(Sidebar).getDOMNode();
-      expect(sidebarElement).to.not.be.null;
+      expect(isOpened(sidebarElement)).to.be.true;
 
       // click on the backdrop
       const backdropElement = wrapper.find(Sidebar).getDOMNode().nextSibling;
@@ -69,7 +74,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
 
       // verify sidebar closes
       sidebarElement = wrapper.find(Sidebar).getDOMNode();
-      expect(sidebarElement).to.be.null;
+      expect(isOpened(sidebarElement)).to.be.false;
     });
 
     it('should close the sidebar when the esc key is pressed', () => {
@@ -78,7 +83,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
 
       // verify sidebar is opened
       let sidebarElement = wrapper.find(Sidebar).getDOMNode();
-      expect(sidebarElement).to.not.be.null;
+      expect(isOpened(sidebarElement)).to.be.true;
 
       // forces flush of effect queue (attaches esc key event listener)
       wrapper.mount();
@@ -93,7 +98,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
 
       // Sidebar closes
       sidebarElement = wrapper.find(Sidebar).getDOMNode();
-      expect(sidebarElement).to.be.null;
+      expect(isOpened(sidebarElement)).to.be.false;
     });
 
     it('should include the content in the sidebar', () => {
@@ -109,7 +114,8 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       openButton.getDOMNode().click();
       wrapper.update();
 
-      const sidebarElement = wrapper.find(Sidebar).getDOMNode();
+      const sidebarElement = wrapper.find(Sidebar).getDOMNode()
+        .firstElementChild;
       const backdropElement = sidebarElement.nextSibling;
 
       expect(sidebarElement.className.includes('default')).to.be.true;
@@ -149,7 +155,8 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       openButton.getDOMNode().click();
       wrapper.update();
 
-      const sidebarElement = wrapper.find(Sidebar).getDOMNode();
+      const sidebarElement = wrapper.find(Sidebar).getDOMNode()
+        .firstElementChild;
       const backdropElement = sidebarElement.nextSibling;
 
       expect(sidebarElement.style.color).to.equal('rgb(1, 1, 1)');
@@ -186,7 +193,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       wrapper.update();
       sidebar = wrapper.find(Sidebar);
 
-      const sidebarNode = sidebar.getDOMNode();
+      const sidebarNode = sidebar.getDOMNode().firstElementChild;
       expect(sidebarNode.className.includes('right')).to.be.true;
     });
 
@@ -213,7 +220,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       wrapper.update();
       sidebar = wrapper.find(Sidebar);
 
-      let sidebarNode = sidebar.getDOMNode();
+      let sidebarNode = sidebar.getDOMNode().firstElementChild;
       expect(sidebarNode.className.includes('right')).to.be.true;
 
       // default to left
@@ -236,7 +243,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       wrapper.update();
       sidebar = wrapper.find(Sidebar);
 
-      sidebarNode = sidebar.getDOMNode();
+      sidebarNode = sidebar.getDOMNode().firstElementChild;
       expect(sidebarNode.className.includes('left')).to.be.true;
 
       document.dir = documentDir;
@@ -245,132 +252,132 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
     describe('programatic access to imperative API', () => {
       it('open', () => {
         // Sidebar is initially closed (no rendered nodes)
-        expect(sidebar.getDOMNode()).to.be.null;
+        expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
         ref.current.open();
         wrapper.update();
         sidebar = wrapper.find(Sidebar);
 
         // Sidebar opens
-        expect(sidebar.getDOMNode()).to.not.be.null;
+        expect(isOpened(sidebar.getDOMNode())).to.be.true;
 
         ref.current.open();
         wrapper.update();
         sidebar = wrapper.find(Sidebar);
 
         // Sidebar remains opens
-        expect(sidebar.getDOMNode()).to.not.be.null;
+        expect(isOpened(sidebar.getDOMNode())).to.be.true;
       });
 
       it('close', () => {
         // Sidebar is initially closed (no rendered nodes)
-        expect(sidebar.getDOMNode()).to.be.null;
+        expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
         ref.current.open();
         wrapper.update();
         sidebar = wrapper.find(Sidebar);
 
         // Sidebar opens
-        expect(sidebar.getDOMNode()).to.not.be.null;
+        expect(isOpened(sidebar.getDOMNode())).to.be.true;
 
         ref.current.close();
         wrapper.update();
         sidebar = wrapper.find(Sidebar);
 
         // Sidebar closes
-        expect(sidebar.getDOMNode()).to.be.null;
+        expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
         ref.current.close();
         wrapper.update();
         sidebar = wrapper.find(Sidebar);
 
         // Sidebar remains closed
-        expect(sidebar.getDOMNode()).to.be.null;
+        expect(isOpened(sidebar.getDOMNode())).to.be.false;
       });
 
       it('toggle', () => {
         // Sidebar is initially closed (no rendered nodes)
-        expect(sidebar.getDOMNode()).to.be.null;
+        expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
         ref.current.toggle();
         wrapper.update();
         sidebar = wrapper.find(Sidebar);
 
         // Sidebar opens
-        expect(sidebar.getDOMNode()).to.not.be.null;
+        expect(isOpened(sidebar.getDOMNode())).to.be.true;
 
         ref.current.toggle();
         wrapper.update();
         sidebar = wrapper.find(Sidebar);
 
         // Sidebar closes
-        expect(sidebar.getDOMNode()).to.be.null;
+        expect(isOpened(sidebar.getDOMNode())).to.be.false;
       });
     });
 
     describe('click button to access imperative API', () => {
       it('open', () => {
         // Sidebar is initially closed (no rendered nodes)
-        expect(sidebar.getDOMNode()).to.be.null;
+        expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
         openButton.getDOMNode().click();
         wrapper.update();
         sidebar = wrapper.find(Sidebar);
 
         // Sidebar opens
-        expect(sidebar.getDOMNode()).to.not.be.null;
+        expect(isOpened(sidebar.getDOMNode())).to.be.true;
 
         openButton.getDOMNode().click();
         wrapper.update();
         sidebar = wrapper.find(Sidebar);
 
         // Sidebar remains opens
-        expect(sidebar.getDOMNode()).to.not.be.null;
+        expect(isOpened(sidebar.getDOMNode())).to.be.true;
       });
 
       it('close', () => {
         // Sidebar is initially closed (no rendered nodes)
-        expect(sidebar.getDOMNode()).to.be.null;
+        expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
         openButton.getDOMNode().click();
         wrapper.update();
         sidebar = wrapper.find(Sidebar);
 
         // Sidebar opens
-        expect(sidebar.getDOMNode()).to.not.be.null;
+        expect(isOpened(sidebar.getDOMNode())).to.be.true;
 
         closeButton.getDOMNode().click();
         wrapper.update();
         sidebar = wrapper.find(Sidebar);
 
         // Sidebar closes
-        expect(sidebar.getDOMNode()).to.be.null;
+        expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
         closeButton.getDOMNode().click();
         wrapper.update();
         sidebar = wrapper.find(Sidebar);
 
         // Sidebar remains closed
-        expect(sidebar.getDOMNode()).to.be.null;
+        expect(isOpened(sidebar.getDOMNode())).to.be.false;
       });
 
       it('toggle', () => {
         // Sidebar is initially closed (no rendered nodes)
-        expect(sidebar.getDOMNode()).to.be.null;
+        expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
         toggleButton.getDOMNode().click();
         wrapper.update();
         sidebar = wrapper.find(Sidebar);
 
         // Sidebar opens
-        expect(sidebar.getDOMNode()).to.not.be.null;
+        expect(isOpened(sidebar.getDOMNode())).to.be.true;
 
         toggleButton.getDOMNode().click();
         wrapper.update();
         sidebar = wrapper.find(Sidebar);
 
         // Sidebar closes
-        expect(sidebar.getDOMNode()).to.be.null;
+        expect(isOpened(sidebar.getDOMNode())).to.be.false;
       });
     });
   });
@@ -402,8 +409,6 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       closeButton = wrapper.find('#close');
     });
 
-    afterEach(() => {});
-
     it('should not animate on mount', () => {
       animateStub = env.sandbox.stub(Element.prototype, 'animate');
       expect(animateStub).to.not.be.called;
@@ -415,14 +420,14 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       animateStub.returns(animation);
 
       // Sidebar is closed
-      expect(sidebar.getDOMNode()).to.be.null;
+      expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
       // Click to open the sidebar
       openButton.simulate('click');
 
       // Sidebar immediately begins to open
       sidebar = wrapper.find(Sidebar);
-      expect(sidebar.getDOMNode()).to.not.be.null;
+      expect(isOpened(sidebar.getDOMNode())).to.be.true;
 
       // Animation has been started
       // One call each for the backdrop and the sidebar
@@ -452,14 +457,14 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       Element.prototype.animate = null;
 
       // Sidebar is closed
-      expect(sidebar.getDOMNode()).to.be.null;
+      expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
       // Click to open the sidebar
       openButton.simulate('click');
 
       // Synchronously open the sidebar
       sidebar = wrapper.find(Sidebar);
-      expect(sidebar.getDOMNode()).to.not.be.null;
+      expect(isOpened(sidebar.getDOMNode())).to.be.true;
 
       // Turn on animations after Sidebar is opened
       Element.prototype.animate = animateFunction;
@@ -472,7 +477,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
 
       // Sidebar begins to close but is not immediately closed
       sidebar = wrapper.find(Sidebar);
-      expect(sidebar.getDOMNode()).to.not.be.null;
+      expect(isOpened(sidebar.getDOMNode())).to.be.true;
 
       // Animation has been started
       // One call each for the backdrop and the sidebar
@@ -502,7 +507,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       animation.onfinish();
       wrapper.update();
       sidebar = wrapper.find(Sidebar);
-      expect(sidebar.getDOMNode()).to.be.null;
+      expect(isOpened(sidebar.getDOMNode())).to.be.false;
     });
 
     it('should reverse animations if closed while opening', () => {
@@ -513,7 +518,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       animateStub.returns(animation);
 
       // Sidebar is closed
-      expect(sidebar.getDOMNode()).to.be.null;
+      expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
       // Click to open the sidebar
       openButton.simulate('click');
@@ -537,7 +542,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       animateStub.returns(animation);
 
       // Sidebar is closed
-      expect(sidebar.getDOMNode()).to.be.null;
+      expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
       // Click to open the sidebar
       openButton.simulate('click');
@@ -558,7 +563,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       Element.prototype.animate = null;
 
       // Sidebar is closed
-      expect(sidebar.getDOMNode()).to.be.null;
+      expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
       // Click to open the sidebar
       openButton.simulate('click');
@@ -594,7 +599,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       Element.prototype.animate = null;
 
       // Sidebar is closed
-      expect(sidebar.getDOMNode()).to.be.null;
+      expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
       // Click to open the sidebar
       openButton.simulate('click');
@@ -630,23 +635,200 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       Element.prototype.animate = null;
 
       // Sidebar is closed
-      expect(sidebar.getDOMNode()).to.be.null;
+      expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
       // Click to open the sidebar
       openButton.simulate('click');
 
       // Immediately opens the sidebar
       sidebar = wrapper.find(Sidebar);
-      expect(sidebar.getDOMNode()).to.not.be.null;
+      expect(isOpened(sidebar.getDOMNode())).to.be.true;
 
       // Click to close the sidebar
       closeButton.simulate('click');
 
       // Immediately closes the sidebar
       sidebar = wrapper.find(Sidebar);
-      expect(sidebar.getDOMNode()).to.be.null;
+      expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
-      // Restore animatinos to the system
+      // Restore animations to the system
+      Element.prototype.animate = animateFunction;
+    });
+  });
+
+  describe('toolbar', () => {
+    let wrapper;
+    let ref;
+    let matchMediaFunction;
+    let html;
+    let mediaQuery;
+    let target;
+
+    beforeEach(() => {
+      ref = Preact.createRef();
+      matchMediaFunction = window.matchMedia;
+
+      // append the toolbar target to document body separately
+      // test cannot find it otherwise
+      html = htmlFor(document);
+      target = html`<div id="toolbar-target"></div>`;
+      document.body.appendChild(target);
+    });
+
+    afterEach(() => {
+      window.matchMedia = matchMediaFunction;
+      wrapper.unmount();
+      document.body.removeChild(target);
+    });
+
+    it('toolbar target receives content when media query is true', () => {
+      // this media query is always true
+      mediaQuery = '';
+      wrapper = mount(
+        <>
+          <Sidebar ref={ref} side="left">
+            <div>Content</div>
+            <SidebarToolbar toolbar={mediaQuery} toolbarTarget="toolbar-target">
+              <ul>
+                <li>Toolbar Item 1</li>
+                <li>Toolbar Item 2</li>
+              </ul>
+            </SidebarToolbar>
+          </Sidebar>
+        </>
+      );
+
+      // Toolbar target should have children
+      expect(target.hasChildNodes()).to.be.true;
+    });
+
+    it('toolbar target does not receive content when media query is false', () => {
+      // this media query is always true
+      mediaQuery = 'false';
+      wrapper = mount(
+        <>
+          <Sidebar ref={ref} side="left">
+            <div>Content</div>
+            <SidebarToolbar toolbar={mediaQuery} toolbarTarget="toolbar-target">
+              <ul>
+                <li>Toolbar Item 1</li>
+                <li>Toolbar Item 2</li>
+              </ul>
+            </SidebarToolbar>
+          </Sidebar>
+        </>
+      );
+
+      // Toolbar target should have children
+      expect(target.hasChildNodes()).to.be.false;
+    });
+
+    it('toolbar target content changes when sidebar is opened and closed', () => {
+      // disable animations for synchronous testing
+      const animateFunction = Element.prototype.animate;
+      Element.prototype.animate = null;
+
+      // this media query is always true
+      mediaQuery = '';
+      wrapper = mount(
+        <>
+          <Sidebar ref={ref} side="left">
+            <div>Content</div>
+            <SidebarToolbar toolbar={mediaQuery} toolbarTarget="toolbar-target">
+              <ul>
+                <li>Toolbar Item 1</li>
+                <li>Toolbar Item 2</li>
+              </ul>
+            </SidebarToolbar>
+          </Sidebar>
+          <button id="open" onClick={() => ref.current.open()}></button>
+          <button id="close" onClick={() => ref.current.close()}></button>
+        </>
+      );
+
+      const openButton = wrapper.find('#open');
+      const closeButton = wrapper.find('#close');
+
+      // verify sidebar is closed
+      let sidebarElement = wrapper.find(Sidebar).getDOMNode();
+      expect(isOpened(sidebarElement)).to.be.false;
+
+      // Toolbar target should have children
+      expect(target.hasChildNodes()).to.be.true;
+
+      // click to open the sidebar
+      openButton.simulate('click');
+
+      // verify sidebar is opened and toolbar has children
+      sidebarElement = wrapper.find(Sidebar).getDOMNode();
+      expect(isOpened(sidebarElement)).to.be.true;
+      expect(target.hasChildNodes()).to.be.true;
+
+      // click to close the sidebar
+      closeButton.simulate('click');
+
+      // verify sidebar is closed and toolbar has children
+      sidebarElement = wrapper.find(Sidebar).getDOMNode();
+      expect(isOpened(sidebarElement)).to.be.false;
+      expect(target.hasChildNodes()).to.be.true;
+
+      Element.prototype.animate = animateFunction;
+    });
+
+    it('toolbar target content updates when media query truthiness change', () => {
+      // disable animations for synchronous testing
+      const animateFunction = Element.prototype.animate;
+      Element.prototype.animate = null;
+
+      // mock the media query to manually update matching
+      let mockMediaQueryList;
+      window.matchMedia = (media) => {
+        const mql = matchMediaFunction(media);
+        mockMediaQueryList = {
+          matches: mql.matches,
+          addEventListener: function (type, callback) {
+            this.callback = callback;
+          },
+          removeEventListener: function () {
+            this.callback = null;
+          },
+        };
+        return mockMediaQueryList;
+      };
+
+      // this media query is always true
+      mediaQuery = '';
+      wrapper = mount(
+        <>
+          <Sidebar ref={ref} side="left">
+            <div>Content</div>
+            <SidebarToolbar toolbar={mediaQuery} toolbarTarget="toolbar-target">
+              <ul>
+                <li>Toolbar Item 1</li>
+                <li>Toolbar Item 2</li>
+              </ul>
+            </SidebarToolbar>
+          </Sidebar>
+        </>
+      );
+
+      // media query is true so toolbar-target should have content
+      expect(target.hasChildNodes()).to.be.true;
+
+      // update the media query to be false (mocked)
+      // verify toolbar-target no longer has children
+      mockMediaQueryList.matches = false;
+      mockMediaQueryList.callback();
+      wrapper.update();
+      expect(target.hasChildNodes()).to.be.false;
+
+      // update the media query to be true (mocked)
+      // verify toolbar-target has children
+      mockMediaQueryList.matches = true;
+      mockMediaQueryList.callback();
+      wrapper.update();
+      expect(target.hasChildNodes()).to.be.true;
+
       Element.prototype.animate = animateFunction;
     });
   });

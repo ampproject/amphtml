@@ -17,7 +17,7 @@
 import {Services} from '../../../src/services';
 import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
 import {createElementWithAttributes} from '../../../src/dom';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
+import {devAssert} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
 
 /** @abstract */

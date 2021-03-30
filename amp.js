@@ -18,13 +18,7 @@
 const {
   createTask,
   finalizeRunner,
-  initializeRunner,
 } = require('./build-system/tasks/amp-task-runner');
-
-/**
- * Initialize the task runner before any task is created.
- */
-initializeRunner();
 
 /**
  * All the AMP tasks. Keep this list alphabetized.
@@ -78,8 +72,8 @@ createTask('storybook', 'storybook', 'storybook');
 createTask('sweep-experiments', 'sweepExperiments', 'sweep-experiments');
 createTask('test-report-upload', 'testReportUpload', 'test-report-upload');
 createTask('unit', 'unit', 'unit');
-createTask('update-packages', 'updatePackages', 'update-packages');
 createTask('validator', 'validator', 'validator');
+createTask('validator-cpp', 'validatorCpp', 'validator');
 createTask('validator-webui', 'validatorWebui', 'validator');
 createTask('visual-diff', 'visualDiff', 'visual-diff');
 

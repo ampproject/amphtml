@@ -15,7 +15,7 @@
  */
 
 import {Values} from './values';
-import {pureDevAssert as devAssert} from '../core/assert';
+import {devAssert} from '../log';
 import {getMode} from '../mode';
 import {pushIfNotExist, removeItem} from '../utils/array';
 import {throttleTail} from './scheduler';
@@ -233,14 +233,11 @@ export class ContextNode {
     /** @package {!Values} */
     this.values = new Values(this);
 
-    /** @private {?Map<*, !./component.Component>} */
-    this.components_ = null;
+    /** @private {?Map<*, !./subscriber.Subscriber>} */
+    this.subscribers_ = null;
 
     /** @private {boolean} */
     this.parentOverridden_ = false;
-
-    /** @private {?Array<function(!ContextNode)>} */
-    this.cleanups_ = null;
 
     /** @const @private {function()} */
     this.scheduleDiscover_ = throttleTail(
@@ -323,23 +320,16 @@ export class ContextNode {
     devAssert(!root || root.isRoot);
     const oldRoot = this.root;
     if (root != oldRoot) {
-      // Call root cleanups.
-      const cleanups = this.cleanups_;
-      if (cleanups) {
-        cleanups.forEach((cleanup) => cleanup(this));
-        this.cleanups_ = null;
-      }
-
       // The root has changed.
       this.root = root;
 
       // Make sure the tree changes have been reflected for values.
       this.values.rootUpdated();
 
-      // Make sure the tree changes have been reflected for components.
-      const components = this.components_;
-      if (components) {
-        components.forEach((comp) => {
+      // Make sure the tree changes have been reflected for subscribers.
+      const subscribers = this.subscribers_;
+      if (subscribers) {
+        subscribers.forEach((comp) => {
           comp.rootUpdated();
         });
       }
@@ -401,60 +391,35 @@ export class ContextNode {
   }
 
   /**
-   * Add or update a component with a specified ID. If component doesn't
+   * Add or update a subscriber with a specified ID. If subscriber doesn't
    * yet exist, it will be created using the specified factory. The use
    * of factory is important to reduce bundling costs for context node.
    *
    * @param {*} id
-   * @param {./component.ComponentFactoryDef} factory
+   * @param {fucntion(new:./subscriber.Subscriber, function(...?), !Array<!ContextProp>)} constr
    * @param {!Function} func
    * @param {!Array<!ContextProp>} deps
-   * @param {*} input
    */
-  mountComponent(id, factory, func, deps, input) {
-    const components = this.components_ || (this.components_ = new Map());
-    let comp = components.get(id);
-    if (!comp) {
-      comp = factory(id, this, func, deps);
-      components.set(id, comp);
+  subscribe(id, constr, func, deps) {
+    const subscribers = this.subscribers_ || (this.subscribers_ = new Map());
+    let subscriber = subscribers.get(id);
+    if (!subscriber) {
+      subscriber = new constr(this, func, deps);
+      subscribers.set(id, subscriber);
     }
-    comp.set(input);
   }
 
   /**
-   * Removes the component previously set with `mountComponent`.
+   * Removes the subscriber previously set with `subscribe`.
    *
    * @param {*} id
    */
-  unmountComponent(id) {
-    const components = this.components_;
-    const comp = components && components.get(id);
-    if (comp) {
-      comp.dispose();
-      components.delete(id);
-    }
-  }
-
-  /**
-   * Registers a root cleanup handler that will be called each time the
-   * root has changed or the node has been disconnected.
-   *
-   * @param {function(!ContextNode)} cleanup
-   */
-  pushCleanup(cleanup) {
-    const cleanups = this.cleanups_ || (this.cleanups_ = []);
-    pushIfNotExist(cleanups, cleanup);
-  }
-
-  /**
-   * Unregisters a cleanup handler previously registered with `pushCleanup`.
-   *
-   * @param {function(!ContextNode)} cleanup
-   */
-  popCleanup(cleanup) {
-    const cleanups = this.cleanups_;
-    if (cleanups) {
-      removeItem(cleanups, cleanup);
+  unsubscribe(id) {
+    const subscribers = this.subscribers_;
+    const subscriber = subscribers && subscribers.get(id);
+    if (subscriber) {
+      subscriber.dispose();
+      subscribers.delete(id);
     }
   }
 

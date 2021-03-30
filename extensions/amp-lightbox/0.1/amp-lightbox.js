@@ -41,6 +41,7 @@ import {htmlFor} from '../../../src/static-template';
 import {isInFie} from '../../../src/iframe-helper';
 import {toArray} from '../../../src/types';
 import {tryFocus} from '../../../src/dom';
+import {unmountAll} from '../../../src/utils/resource-container-helper';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
@@ -391,6 +392,8 @@ class AmpLightbox extends AMP.BaseElement {
     element.addEventListener('transitionend', onAnimationEnd);
     element.addEventListener('animationend', onAnimationEnd);
 
+    this.setAsContainer();
+
     // TODO: instead of laying out children all at once, layout children based
     // on visibility.
     const owners = Services.ownersForDoc(this.element);
@@ -615,6 +618,12 @@ class AmpLightbox extends AMP.BaseElement {
     this.boundFocusin_ = null;
 
     this.untieCloseButton_();
+
+    this.removeAsContainer();
+
+    // Unmount all children when the lightbox is closed. They will automatically
+    // remount when the lightbox is opened again.
+    unmountAll(this.element, /* includeSelf */ false);
 
     Services.ownersForDoc(this.element).schedulePause(
       this.element,

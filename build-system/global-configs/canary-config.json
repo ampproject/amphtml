@@ -10,7 +10,6 @@
   "dfp-render-on-idle-cwv-exp": 1,
   "expand-json-targeting": 1,
   "flexAdSlots": 0.05,
-  "intersect-resources": 0,
   "ios-fixed-no-transfer": 1,
   "visibility-trigger-improvements": 1,
   "ads-initialIntersection": 1,
@@ -19,5 +18,7 @@
   "layout-aspect-ratio-css": 1,
   "tcf-post-message-proxy-api": 1,
   "amp-consent-granular-consent": 1,
-  "disable-a4a-non-sd": 1
+  "disable-a4a-non-sd": 1,
+  "3p-vendor-split": 0.1,
+  "story-ad-placements": 1
 }
