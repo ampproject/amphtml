@@ -24,7 +24,7 @@ describes.endtoend(
   {
     version: '0.1',
     fixture: 'amp-base-carousel/initial-slide.amp.html',
-    experiments: ['amp-base-carousel', 'layers'],
+    environments: ['single', 'viewer-demo'],
     initialRect: {width: pageWidth, height: pageHeight},
   },
   async (env) => {
@@ -34,8 +34,7 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    //TODO(spaharmi): fails on all environments
-    it.skip('should render with the correct initial slide', async () => {
+    it('should render with the correct initial slide', async () => {
       const thirdSlide = await getSlide(controller, 2);
 
       // Normally, resizing would cause the position to change. We're testing
