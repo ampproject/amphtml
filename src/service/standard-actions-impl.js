@@ -21,7 +21,6 @@ import {computedStyle, toggle} from '../style';
 import {dev, user, userAssert} from '../log';
 import {getAmpdoc, registerServiceBuilderForDoc} from '../service';
 import {isFiniteNumber, toWin} from '../types';
-import {startsWith} from '../string';
 import {tryFocus} from '../dom';
 
 /**
@@ -181,7 +180,7 @@ export class StandardActions {
     const win = (node.ownerDocument || node).defaultView;
     // Some components have additional constraints on allowing navigation.
     let permission = Promise.resolve();
-    if (startsWith(caller.tagName, 'AMP-')) {
+    if (caller.tagName.startsWith('AMP-')) {
       permission = caller.getImpl().then((impl) => {
         if (typeof impl.throwIfCannotNavigate == 'function') {
           impl.throwIfCannotNavigate();

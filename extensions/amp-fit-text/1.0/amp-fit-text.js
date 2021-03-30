@@ -14,40 +14,26 @@
  * limitations under the License.
  */
 
-import {FitText} from './fit-text';
-import {PreactBaseElement} from '../../../src/preact/base-element';
+import {BaseElement} from './base-element';
+import {CSS} from '../../../build/amp-fit-text-1.0.css';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-fit-text';
 
-class AmpFitText extends PreactBaseElement {
+class AmpFitText extends BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-fit-text-bento'),
-      'expected amp-fit-text-bento experiment to be enabled'
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-fit-text'),
+      'expected global "bento" or specific "bento-fit-text" experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
   }
 }
 
-/** @override */
-AmpFitText['Component'] = FitText;
-
-/** @override */
-AmpFitText['props'] = {
-  'minFontSize': {attr: 'min-font-size', type: 'number'},
-  'maxFontSize': {attr: 'max-font-size', type: 'number'},
-};
-
-/** @override */
-AmpFitText['passthrough'] = true;
-
-/** @override */
-AmpFitText['layoutSizeDefined'] = true;
-
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpFitText);
+  AMP.registerElement(TAG, AmpFitText, CSS);
 });

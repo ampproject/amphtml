@@ -1197,6 +1197,26 @@ describes.sandboxed('DOM', {}, (env) => {
     }
   );
 
+  it('should implement containsNotSelf', () => {
+    const parent = document.createElement('div');
+    const child = document.createElement('div');
+    const uncle = document.createElement('div');
+    const grandparent = document.createElement('div');
+    grandparent.appendChild(parent);
+    grandparent.appendChild(uncle);
+    parent.appendChild(child);
+
+    expect(dom.containsNotSelf(grandparent, grandparent)).to.be.false;
+    expect(dom.containsNotSelf(grandparent, parent)).to.be.true;
+    expect(dom.containsNotSelf(grandparent, uncle)).to.be.true;
+    expect(dom.containsNotSelf(grandparent, child)).to.be.true;
+
+    expect(dom.containsNotSelf(parent, parent)).to.be.false;
+    expect(dom.containsNotSelf(parent, uncle)).to.be.false;
+    expect(dom.containsNotSelf(parent, grandparent)).to.be.false;
+    expect(dom.containsNotSelf(parent, child)).to.be.true;
+  });
+
   describe('domOrderComparator', () => {
     it('should sort elements by dom order', () => {
       //
@@ -1331,6 +1351,29 @@ describes.realWin(
         el.setAttribute('foo', 'asdf');
         dom.toggleAttribute(el, 'foo', true);
         expect(el.getAttribute('foo')).to.equal('asdf');
+      });
+    });
+
+    describe('parseBooleanAttribute', () => {
+      it('should return null for null/undefined', () => {
+        expect(dom.parseBooleanAttribute(null)).to.be.undefined;
+        expect(dom.parseBooleanAttribute(undefined)).to.be.undefined;
+      });
+
+      it('should return true for empty string', () => {
+        expect(dom.parseBooleanAttribute('')).to.be.true;
+      });
+
+      it('should return true for "true" string', () => {
+        expect(dom.parseBooleanAttribute('true')).to.be.true;
+      });
+
+      it('should return false for "false" string', () => {
+        expect(dom.parseBooleanAttribute('false')).to.be.false;
+      });
+
+      it('should return true for a random string', () => {
+        expect(dom.parseBooleanAttribute('a')).to.be.true;
       });
     });
   }

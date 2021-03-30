@@ -66,7 +66,7 @@ describes.repeated(
             findAndRenderTemplate: env.sandbox.stub(),
             findAndRenderTemplateArray: env.sandbox.stub(),
           };
-          env.sandbox.stub(Services, 'templatesFor').returns(templates);
+          env.sandbox.stub(Services, 'templatesForDoc').returns(templates);
           env.sandbox
             .stub(AmpDocService.prototype, 'getAmpDoc')
             .returns(ampdoc);
@@ -174,7 +174,10 @@ describes.repeated(
           // If "reset-on-refresh" is set, show loading/placeholder before fetch.
           if (opts.resetOnRefresh) {
             listMock.expects('togglePlaceholder').withExactArgs(true).once();
-            listMock.expects('toggleLoading').withExactArgs(true).once();
+            listMock
+              .expects('toggleLoading')
+              .withExactArgs(true, opts.resetOnRefresh)
+              .once();
           }
 
           // Stub the rendering of the template.
@@ -312,11 +315,21 @@ describes.repeated(
 
                 it('should require placeholder', () => {
                   list.getPlaceholder = () => null;
-                  allowConsoleError(() => {
-                    expect(() => list.isLayoutSupported('container')).to.throw(
-                      /amp-list\[layout=container\] requires a placeholder/
+                  if (variant.type === 'experiment') {
+                    allowConsoleError(() => {
+                      expect(() =>
+                        list.isLayoutSupported('container')
+                      ).to.throw(
+                        /amp-list\[layout=container\] should have a placeholder/
+                      );
+                    });
+                  } else {
+                    expect(() =>
+                      list.isLayoutSupported('container')
+                    ).to.not.throw(
+                      /amp-list\[layout=container\] should have a placeholder/
                     );
-                  });
+                  }
                 });
 
                 it('should unlock height for layout=container with successful attemptChangeHeight', () => {
@@ -463,12 +476,13 @@ describes.repeated(
             });
           });
 
-          it('should resize with viewport', () => {
+          it('should resize with viewport', async () => {
             const resize = env.sandbox.spy(list, 'attemptToFit_');
-            list.layoutCallback().then(() => {
-              list.viewport_.resize_();
-              expect(resize).to.have.been.called;
-            });
+            const itemElement = doc.createElement('div');
+            expectFetchAndRender(DEFAULT_FETCHED_DATA, [itemElement]);
+            await list.layoutCallback();
+            list.viewport_.resize_();
+            expect(resize).to.be.calledOnce;
           });
 
           // TODO(choumx, #14772): Flaky.
@@ -607,7 +621,7 @@ describes.repeated(
             });
           });
 
-          it('should set tabbindex only if the list item is not tabbable', () => {
+          it('should not override or set missing tabindex', () => {
             // A list item with a no tabindex value or tabbable child
             const nonTabbableItemElement = doc.createElement('div');
 
@@ -628,9 +642,8 @@ describes.repeated(
             ]);
 
             return list.layoutCallback().then(() => {
-              expect(nonTabbableItemElement.getAttribute('tabindex')).to.equal(
-                '0'
-              );
+              expect(nonTabbableItemElement.getAttribute('tabindex')).to.be
+                .null;
               expect(tabbableItemElement.getAttribute('tabindex')).to.equal(
                 '4'
               );
@@ -819,14 +832,14 @@ describes.repeated(
             it('should error if proxied fetch fails', () => {
               env.sandbox
                 .stub(ssrTemplateHelper, 'ssr')
-                .returns(Promise.reject());
+                .returns(Promise.reject(new Error('error')));
 
               listMock.expects('toggleLoading').withExactArgs(false).once();
 
               return expect(
                 list.layoutCallback()
               ).to.eventually.be.rejectedWith(
-                /Error proxying amp-list templates/
+                /XHR Failed fetching \(https:\/\/data.com\/\.\.\.\): error/
               );
             });
 
@@ -850,7 +863,7 @@ describes.repeated(
               return expect(
                 list.layoutCallback()
               ).to.eventually.be.rejectedWith(
-                /Error proxying amp-list templates with status/
+                /fetching JSON data \(https:\/\/data.com\/\.\.\.\): HTTP error 400/
               );
             });
 
@@ -1257,7 +1270,10 @@ describes.repeated(
               listMock.expects('fetchList_').never();
               // Expect display of placeholder/loading before render.
               listMock.expects('togglePlaceholder').withExactArgs(true).once();
-              listMock.expects('toggleLoading').withExactArgs(true).once();
+              listMock
+                .expects('toggleLoading')
+                .withExactArgs(true, true)
+                .once();
               // Expect hiding of placeholder/loading after render.
               listMock.expects('togglePlaceholder').withExactArgs(false).once();
               listMock.expects('toggleLoading').withExactArgs(false).once();
@@ -1517,7 +1533,8 @@ describes.realWin(
       env.sandbox.spy(element, 'enqueAction');
       env.sandbox.stub(element, 'getDefaultActionAlias').returns({'items': []});
       await whenUpgradedToCustomElement(element);
-      env.sandbox.stub(element.implementation_, 'fetchList_');
+      const impl = await element.getImpl(false);
+      env.sandbox.stub(impl, 'fetchList_');
 
       ['changeToLayoutContainer', 'refresh'].forEach((method) => {
         action.execute(

@@ -70,11 +70,7 @@ t.run('Viewer Visibility State', () => {
 
       let shouldPass = false;
       let doPass_;
-      let intersect_;
       let notifyPass = noop;
-
-      let intersected;
-      let notifyIntersected;
 
       function doPass() {
         if (shouldPass) {
@@ -84,26 +80,11 @@ t.run('Viewer Visibility State', () => {
         }
       }
 
-      function intersect() {
-        intersect_.apply(this, arguments);
-        notifyIntersected();
-      }
-
       function waitForNextPass() {
         return new Promise((resolve) => {
           notifyPass = resolve;
-
-          if (resources.isIntersectionExperimentOn()) {
-            // Element lifecycle callbacks depend on the observer taking its
-            // initial measurements, so wait for an intersection first.
-            return intersected.then(() => {
-              shouldPass = true;
-              resources.schedulePass();
-            });
-          } else {
-            shouldPass = true;
-            resources.schedulePass();
-          }
+          shouldPass = true;
+          resources.schedulePass();
         });
       }
 
@@ -118,9 +99,6 @@ t.run('Viewer Visibility State', () => {
         win = env.win;
         notifyPass = noop;
         shouldPass = false;
-        intersected = new Promise((resolve) => {
-          notifyIntersected = resolve;
-        });
 
         const vsync = Services.vsyncFor(win);
         env.sandbox.stub(vsync, 'mutate').callsFake((mutator) => {
@@ -140,9 +118,7 @@ t.run('Viewer Visibility State', () => {
 
             resources = Services.resourcesForDoc(win.document);
             doPass_ = resources.doPass;
-            intersect_ = resources.intersect;
             env.sandbox.stub(resources, 'doPass').callsFake(doPass);
-            env.sandbox.stub(resources, 'intersect').callsFake(intersect);
 
             const img = win.document.createElement('amp-img');
             img.setAttribute('width', 100);
@@ -153,36 +129,20 @@ t.run('Viewer Visibility State', () => {
             return whenUpgradedToCustomElement(img);
           })
           .then((img) => {
-            layoutCallback = env.sandbox.stub(
-              img.implementation_,
-              'layoutCallback'
-            );
-            unlayoutCallback = env.sandbox.stub(
-              img.implementation_,
-              'unlayoutCallback'
-            );
-            pauseCallback = env.sandbox.stub(
-              img.implementation_,
-              'pauseCallback'
-            );
-            resumeCallback = env.sandbox.stub(
-              img.implementation_,
-              'resumeCallback'
-            );
-            prerenderAllowed = env.sandbox.stub(
-              img.implementation_,
-              'prerenderAllowed'
-            );
-            env.sandbox
-              .stub(img.implementation_, 'isRelayoutNeeded')
-              .callsFake(() => true);
-            env.sandbox
-              .stub(img.implementation_, 'isLayoutSupported')
-              .callsFake(() => true);
+            prerenderAllowed = env.sandbox.stub(img, 'prerenderAllowed');
+            prerenderAllowed.returns(false);
+            return img.getImpl(false);
+          })
+          .then((impl) => {
+            layoutCallback = env.sandbox.stub(impl, 'layoutCallback');
+            unlayoutCallback = env.sandbox.stub(impl, 'unlayoutCallback');
+            pauseCallback = env.sandbox.stub(impl, 'pauseCallback');
+            resumeCallback = env.sandbox.stub(impl, 'resumeCallback');
+            env.sandbox.stub(impl, 'isRelayoutNeeded').callsFake(() => true);
+            env.sandbox.stub(impl, 'isLayoutSupported').callsFake(() => true);
 
             layoutCallback.returns(Promise.resolve());
             unlayoutCallback.returns(true);
-            prerenderAllowed.returns(false);
           });
       });
 
@@ -536,7 +496,7 @@ t.run('Viewer Visibility State', () => {
           return waitForNextPass().then(() => {
             expect(layoutCallback).not.to.have.been.called;
             expect(unlayoutCallback).to.have.been.called;
-            expect(pauseCallback).not.to.have.been.called;
+            expect(pauseCallback).to.have.been.called;
             expect(resumeCallback).not.to.have.been.called;
           });
         });

@@ -41,7 +41,6 @@ import {
 } from '../../../src/layout-rect';
 import {setStyles, toggle} from '../../../src/style';
 import {srcsetFromElement} from '../../../src/srcset';
-import {startsWith} from '../../../src/string';
 
 const TAG = 'amp-image-lightbox';
 
@@ -899,10 +898,9 @@ class AmpImageLightbox extends AMP.BaseElement {
         // happens in window.resize event. Adding a timeout for correct
         // measurement. See https://github.com/ampproject/amphtml/issues/8479
         if (
-          startsWith(
-            Services.platformFor(this.win).getIosVersionString(),
-            '10.3'
-          )
+          Services.platformFor(this.win)
+            .getIosVersionString()
+            .startsWith('10.3')
         ) {
           Services.timerFor(this.win).delay(() => {
             this.imageViewer_.measure();

@@ -82,6 +82,9 @@ export class AmpAdXOriginIframeHandler {
     this.viewport_ = Services.viewportForDoc(this.baseInstance_.getAmpDoc());
 
     /** @private {boolean} */
+    this.inViewport_ = false;
+
+    /** @private {boolean} */
     this.sendPositionPending_ = false;
   }
 
@@ -97,7 +100,9 @@ export class AmpAdXOriginIframeHandler {
     devAssert(!this.iframe, 'multiple invocations of init without destroy!');
     this.iframe = iframe;
     this.iframe.setAttribute('scrolling', 'no');
-    this.baseInstance_.applyFillContent(this.iframe);
+    if (!this.uiHandler_.isStickyAd()) {
+      this.baseInstance_.applyFillContent(this.iframe);
+    }
     const timer = Services.timerFor(this.baseInstance_.win);
 
     // Init the legacy observeInterection API service.
@@ -111,7 +116,7 @@ export class AmpAdXOriginIframeHandler {
       this.iframe,
       'send-embed-state',
       true,
-      () => this.sendEmbedInfo_(this.baseInstance_.isInViewport())
+      () => this.sendEmbedInfo_(this.inViewport_)
     );
 
     // Enable creative position observer if inabox experiment enabled OR
@@ -180,7 +185,7 @@ export class AmpAdXOriginIframeHandler {
       )
     );
 
-    if (this.baseInstance_.isStickyAd()) {
+    if (this.uiHandler_.isStickyAd()) {
       setStyle(iframe, 'pointer-events', 'none');
       this.unlisteners_.push(
         listenFor(
@@ -197,7 +202,7 @@ export class AmpAdXOriginIframeHandler {
 
     this.unlisteners_.push(
       this.baseInstance_.getAmpDoc().onVisibilityChanged(() => {
-        this.sendEmbedInfo_(this.baseInstance_.isInViewport());
+        this.sendEmbedInfo_(this.inViewport_);
       })
     );
 
@@ -455,7 +460,7 @@ export class AmpAdXOriginIframeHandler {
         .updateSize(height, width, iframeHeight, iframeWidth, event)
         .then(
           (info) => {
-            this.baseInstance_.onResizeSuccess();
+            this.uiHandler_.onResizeSuccess();
             this.sendEmbedSizeResponse_(
               info.success,
               id,
@@ -593,6 +598,7 @@ export class AmpAdXOriginIframeHandler {
    * @param {boolean} inViewport
    */
   viewportCallback(inViewport) {
+    this.inViewport_ = inViewport;
     this.sendEmbedInfo_(inViewport);
   }
 

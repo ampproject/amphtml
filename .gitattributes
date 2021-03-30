@@ -1,0 +1,5 @@
+# Force line endings to LF.
+# Specially useful for contributors on Windows machines.
+* text=auto eol=lf
+*.{cmd,[cC][mM][dD]} text eol=crlf
+*.{bat,[bB][aA][tT]} text eol=crlf

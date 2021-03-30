@@ -15,7 +15,6 @@
  */
 
 import {dict} from '../../../src/utils/object';
-import {startsWith} from '../../../src/string';
 import {user} from '../../../src/log';
 
 /**
@@ -140,7 +139,7 @@ export function getMaskPrefix(mask) {
  */
 export function removePrefix(value, prefixes) {
   const longestPrefix = prefixes
-    .filter((prefix) => startsWith(value, prefix))
+    .filter((prefix) => value.startsWith(prefix))
     .sort((a, b) => b.length - a.length)[0];
 
   if (longestPrefix) {

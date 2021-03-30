@@ -19,14 +19,14 @@ import {getScrollingElement, getSlide, waitForCarouselImg} from './helpers';
 const pageWidth = 800;
 const pageHeight = 600;
 
-/** Increase timeout for running on Travis macOS **/
+/** Increase timeout for running on macOS **/
 const testTimeout = 20000;
 
 describes.endtoend(
-  'AMP carousel',
+  'amp-base-carousel - basic functionality',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/basic.amp.html',
+    version: '0.1',
+    fixture: 'amp-base-carousel/basic.amp.html',
     experiments: [
       'amp-base-carousel',
       'amp-lightbox-gallery-base-carousel',
@@ -113,7 +113,7 @@ describes.endtoend(
       await expect(prop(el, 'scrollLeft')).to.equal(scrollLeft);
     });
 
-    // TODO(wg-ui-and-a11y, #27701): Flaky on Chrome+viewer environment.
+    // TODO(wg-components, #27701): Flaky on Chrome+viewer environment.
     it.skip('should have the correct scroll position when resizing', async function () {
       this.timeout(testTimeout);
       // Note: 513 seems to be the smallest settable width.
@@ -143,6 +143,26 @@ describes.endtoend(
         'x': 0,
         'width': 900,
       });
+    });
+
+    it.skip('should go to slide 0 when index is set to 0 ', async function () {
+      this.timeout(testTimeout);
+      const el = await getScrollingElement(controller);
+
+      const firstSlide = await getSlide(controller, 0);
+      const secondSlide = await getSlide(controller, 1);
+      const goToSlideBtn = await controller.findElement(
+        'button[on="tap:carousel-1.goToSlide(index = 0)"]'
+      );
+
+      await waitForCarouselImg(controller, 0);
+      await waitForCarouselImg(controller, 1);
+
+      await controller.scrollTo(el, {left: 1});
+      await expect(controller.getElementRect(secondSlide)).to.include({x: 0});
+
+      await controller.click(goToSlideBtn);
+      await expect(controller.getElementRect(firstSlide)).to.include({x: 0});
     });
 
     describe('looping', function () {

@@ -18,15 +18,15 @@
 const fs = require('fs');
 const globby = require('globby');
 const listImportsExports = require('list-imports-exports');
-const log = require('fancy-log');
 const minimatch = require('minimatch');
 const path = require('path');
 const testConfig = require('../../test-configs/config');
 const {execOrDie} = require('../../common/exec');
 const {extensions, maybeInitializeExtensions} = require('../extension-helpers');
 const {gitDiffNameOnlyMaster} = require('../../common/git');
-const {green, cyan} = require('ansi-colors');
-const {isTravisBuild} = require('../../common/travis');
+const {green, cyan} = require('kleur/colors');
+const {isCiBuild} = require('../../common/ci');
+const {log, logLocalDev} = require('../../common/logging');
 const {reportTestSkipped} = require('../report-test-status');
 
 const LARGE_REFACTOR_THRESHOLD = 50;
@@ -51,11 +51,18 @@ function isLargeRefactor() {
  * @return {!Object<string, string>}
  */
 function extractCssJsFileMap() {
-  execOrDie('gulp css', {'stdio': 'ignore'});
+  execOrDie('amp css', {'stdio': 'ignore'});
   maybeInitializeExtensions(extensions);
+  /** @type {Object<string, string>} */
   const cssJsFileMap = {};
 
-  // Adds an entry that maps a CSS file to a JS file
+  /**
+   * Adds an entry that maps a CSS file to a JS file
+   *
+   * @param {Object} cssData
+   * @param {string} cssBinaryName
+   * @param {Object} cssJsFileMap
+   */
   function addCssJsEntry(cssData, cssBinaryName, cssJsFileMap) {
     const cssFilePath =
       `extensions/${cssData['name']}/${cssData['version']}/` +
@@ -87,7 +94,9 @@ function extractCssJsFileMap() {
  */
 function getImports(jsFile) {
   const jsFileContents = fs.readFileSync(jsFile, 'utf8');
-  const {imports} = listImportsExports.parse(jsFileContents);
+  const {imports} = listImportsExports.parse(jsFileContents, [
+    'importAssertions',
+  ]);
   const files = [];
   const jsFileDir = path.dirname(jsFile);
   imports.forEach(function (file) {
@@ -124,7 +133,11 @@ function getJsFilesFor(cssFile, cssJsFileMap) {
   return jsFiles;
 }
 
-function getUnitTestsToRun() {
+/**
+ * Computes the list of unit tests to run under difference scenarios
+ * @return {Promise<Array<string>|void>}
+ */
+async function getUnitTestsToRun() {
   log(green('INFO:'), 'Determining which unit tests to run...');
 
   if (isLargeRefactor()) {
@@ -132,7 +145,7 @@ function getUnitTestsToRun() {
       green('INFO:'),
       'Skipping tests on local changes because this is a large refactor.'
     );
-    reportTestSkipped();
+    await reportTestSkipped();
     return;
   }
 
@@ -142,15 +155,15 @@ function getUnitTestsToRun() {
       green('INFO:'),
       'No unit tests were directly affected by local changes.'
     );
-    reportTestSkipped();
+    await reportTestSkipped();
     return;
   }
-  if (isTravisBuild() && tests.length > TEST_FILE_COUNT_THRESHOLD) {
+  if (isCiBuild() && tests.length > TEST_FILE_COUNT_THRESHOLD) {
     log(
       green('INFO:'),
       'Several tests were affected by local changes. Running all tests below.'
     );
-    reportTestSkipped();
+    await reportTestSkipped();
     return;
   }
 
@@ -178,12 +191,21 @@ function unitTestsToRun() {
   testsToRun = [];
   let srcFiles = [];
 
+  /**
+   * @param {string} file
+   * @return {boolean}
+   */
   function isUnitTest(file) {
     return unitTestPaths.some((pattern) => {
       return minimatch(file, pattern);
     });
   }
 
+  /**
+   * @param {string} testFile
+   * @param {string[]} srcFiles
+   * @return {boolean}
+   */
   function shouldRunTest(testFile, srcFiles) {
     const filesImported = getImports(testFile);
     return (
@@ -193,8 +215,13 @@ function unitTestsToRun() {
     );
   }
 
-  // Retrieves the set of unit tests that should be run
-  // for a set of source files.
+  /**
+   * Retrieves the set of unit tests that should be run
+   * for a set of source files.
+   *
+   * @param {string[]} srcFiles
+   * @return {string[]}
+   */
   function getTestsFor(srcFiles) {
     const allUnitTests = globby.sync(unitTestPaths);
     return allUnitTests.filter((testFile) => {
@@ -204,9 +231,12 @@ function unitTestsToRun() {
 
   filesChanged.forEach((file) => {
     if (!fs.existsSync(file)) {
-      if (!isTravisBuild()) {
-        log(green('INFO:'), 'Skipping', cyan(file), 'because it was deleted');
-      }
+      logLocalDev(
+        green('INFO:'),
+        'Skipping',
+        cyan(file),
+        'because it was deleted'
+      );
     } else if (isUnitTest(file)) {
       testsToRun.push(file);
     } else if (path.extname(file) == '.js') {

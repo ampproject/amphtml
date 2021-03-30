@@ -20,6 +20,11 @@
  */
 export const CommonSignals = {
   /**
+   * The element's implementation has been registered and ready for upgrade.
+   */
+  READY_TO_UPGRADE: 'ready-upgrade',
+
+  /**
    * The element has been upgraded from ElementStub to its real implementation.
    */
   UPGRADED: 'upgraded',
@@ -28,6 +33,11 @@ export const CommonSignals = {
    * The element has been built.
    */
   BUILT: 'built',
+
+  /**
+   * The element has been mounted.
+   */
+  MOUNTED: 'mounted',
 
   /**
    * The element has started loading.

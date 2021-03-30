@@ -16,15 +16,13 @@
 'use strict';
 
 const fs = require('fs-extra');
-const log = require('fancy-log');
 const markdownLinkCheck = require('markdown-link-check');
 const path = require('path');
 const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
 const {gitDiffAddedNameOnlyMaster} = require('../common/git');
-const {green, cyan, red, yellow} = require('ansi-colors');
-const {isTravisBuild} = require('../common/travis');
+const {green, cyan, red, yellow} = require('kleur/colors');
 const {linkCheckGlobs} = require('../test-configs/config');
-const {maybeUpdatePackages} = require('./update-packages');
+const {log, logLocalDev} = require('../common/logging');
 
 const LARGE_REFACTOR_THRESHOLD = 20;
 const GITHUB_BASE_PATH = 'https://github.com/ampproject/amphtml/blob/master/';
@@ -35,7 +33,6 @@ let filesIntroducedByPr;
  * Checks for dead links in .md files passed in via --files or --local_changes.
  */
 async function checkLinks() {
-  maybeUpdatePackages();
   if (!usesFilesOrLocalChanges('check-links')) {
     return;
   }
@@ -47,9 +44,7 @@ async function checkLinks() {
     log(green('INFO:'), 'Skipping check because this is a large refactor.');
     return;
   }
-  if (!isTravisBuild()) {
-    log(green('Starting checks...'));
-  }
+  logLocalDev(green('Starting checks...'));
   filesIntroducedByPr = gitDiffAddedNameOnlyMaster();
   const results = await Promise.all(filesToCheck.map(checkLinksInFile));
   reportResults(results);
@@ -58,7 +53,7 @@ async function checkLinks() {
 /**
  * Reports results after all markdown files have been checked.
  *
- * @param {!Array<string>} results
+ * @param {!Array<{file: string, containsDeadLinks: boolean}>} results
  */
 function reportResults(results) {
   const filesWithDeadLinks = results
@@ -72,7 +67,7 @@ function reportResults(results) {
     );
     log(
       yellow('NOTE 1:'),
-      "Valid links that don't resolve on Travis can be ignored via",
+      "Valid links that don't resolve during CI can be ignored via",
       cyan('ignorePatterns'),
       'in',
       cyan('build-system/tasks/check-links.js') + '.'
@@ -107,7 +102,7 @@ function isLinkToFileIntroducedByPR(link) {
  * Checks a given markdown file for dead links.
  *
  * @param {string} file
- * @return {!Promise}
+ * @return {!Promise<{file: string, containsDeadLinks: boolean}>}
  */
 function checkLinksInFile(file) {
   let markdown = fs.readFileSync(file).toString();
@@ -120,10 +115,17 @@ function checkLinksInFile(file) {
     // Relative links start at the markdown file's path.
     baseUrl: 'file://' + path.dirname(path.resolve(file)),
     ignorePatterns: [
-      // Localhost links don't work unless a `gulp` server is running.
+      // Localhost links don't work unless a `amp` server is running.
       {pattern: /localhost/},
+      // codepen returns a 503 for these link checks
+      {pattern: /https:\/\/codepen.*/},
+      // GitHub PRs and Issues can be assumed to exist
+      {
+        pattern: /https:\/\/github.com\/ampproject\/amphtml\/(pull|issue)\/d+.*/,
+      },
       // Templated links are merely used to generate other markdown files.
       {pattern: /\$\{[a-z]*\}/},
+      {pattern: /https:.*?__component_name\w*__/},
     ],
   };
 
@@ -149,14 +151,10 @@ function checkLinksInFile(file) {
         }
         switch (status) {
           case 'alive':
-            if (!isTravisBuild()) {
-              log(`[${green('✔')}] ${link}`);
-            }
+            logLocalDev(`[${green('✔')}] ${link}`);
             break;
           case 'ignored':
-            if (!isTravisBuild()) {
-              log(`[${yellow('•')}] ${link}`);
-            }
+            logLocalDev(`[${yellow('•')}] ${link}`);
             break;
           case 'dead':
             containsDeadLinks = true;
@@ -180,6 +178,6 @@ module.exports = {
 
 checkLinks.description = 'Detects dead links in markdown files';
 checkLinks.flags = {
-  'files': '  Checks only the specified files',
-  'local_changes': '  Checks just the files changed in the local branch',
+  'files': 'Checks only the specified files',
+  'local_changes': 'Checks just the files changed in the local branch',
 };

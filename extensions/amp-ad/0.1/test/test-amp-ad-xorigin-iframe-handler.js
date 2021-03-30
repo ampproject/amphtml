@@ -59,10 +59,9 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     adImpl.lifecycleReporter = {
       addPingsForVisibility: (unusedElement) => {},
     };
-    adImpl.isStickyAd = () => false;
-    adImpl.onResizeSuccess = window.sandbox.spy();
     document.body.appendChild(adElement);
     adImpl.uiHandler = new AmpAdUIHandler(adImpl);
+    adImpl.uiHandler.onResizeSuccess = window.sandbox.spy();
     iframeHandler = new AmpAdXOriginIframeHandler(adImpl);
     testIndex++;
 
@@ -237,7 +236,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       it('should be able to use user-error API', () => {
         const err = new Error();
         err.message = 'error test';
-        const userErrorReportSpy = window.sandbox./*OK*/ spy(
+        const userErrorReportSpy = window.sandbox.stub(
           iframeHandler,
           'userErrorForAnalytics_'
         );
@@ -366,7 +365,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
             type: 'embed-size-changed',
             sentinel: 'amp3ptest' + testIndex,
           });
-          expect(adImpl.onResizeSuccess).to.be.called;
+          expect(adImpl.uiHandler.onResizeSuccess).to.be.called;
         });
     });
 
@@ -392,7 +391,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
             type: 'embed-size-changed',
             sentinel: 'amp3ptest' + testIndex,
           });
-          expect(adImpl.onResizeSuccess).to.be.called;
+          expect(adImpl.uiHandler.onResizeSuccess).to.be.called;
         });
     });
 

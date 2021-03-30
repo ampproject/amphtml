@@ -185,7 +185,7 @@ TEST(ValidatorTest, TestDocSizeAmpEmail) {
   // 200000 bytes in the tested document.
   {
     std::string test_case_name = StrCat(test_case.name, "[MaxBytesTest]");
-    std::string body = RepeatString(valid_body_content, /*n_times=*/9945);
+    std::string body = RepeatString(valid_body_content, /*n_times=*/9944);
     std::string test_html = TestWithDocSize(test_case.input_content, body);
     EXPECT_EQ(200000, test_html.length());
     EXPECT_EQ(
@@ -198,7 +198,7 @@ TEST(ValidatorTest, TestDocSizeAmpEmail) {
   {
     std::string test_case_name = StrCat(test_case.name, "[OffByOneTest]");
     std::string body =
-        StrCat(RepeatString(valid_body_content, /*n_times=*/9945), " ");
+        StrCat(RepeatString(valid_body_content, /*n_times=*/9944), " ");
     std::string test_html = TestWithDocSize(test_case.input_content, body);
     EXPECT_EQ(200001, test_html.length());
     std::string output = RenderResult(
@@ -206,7 +206,7 @@ TEST(ValidatorTest, TestDocSizeAmpEmail) {
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
-        ":9978:6 "
+        ":9977:6 "
         "Document exceeded 200000 bytes limit. Actual size 200001 bytes. "
         "(see https://amp.dev/documentation/guides-and-tutorials/learn/"
         "email-spec/amp-email-format/?format=email)");
@@ -279,7 +279,7 @@ TEST(ValidatorTest, TestCssLengthAmp) {
 
   // We use a blob of length 10 (both bytes and chars) to make it easy to
   // construct stylesheets of any length that we want.
-  const std::string valid_style_blob = "h1 {a: b}\n";
+  const std::string valid_style_blob = "h1{top:0}\n";
   ASSERT_EQ(10, valid_style_blob.length());
   // This string is 10 bytes of inline style inside a B tag.
   const std::string inline_10_bytes = "<b style='width:1px;'></b>";
@@ -322,7 +322,7 @@ TEST(ValidatorTest, TestCssLengthAmp) {
   {
     std::string test_case_name = StrCat(test_case.name, "[UTF8Test]");
     std::string stylesheet =
-        StrCat(RepeatString(valid_style_blob, /*n_times=*/7499), "h1 {a: 😺}");
+        StrCat(RepeatString(valid_style_blob, /*n_times=*/7499), "h1{top:😺}");
     EXPECT_EQ(75002, stylesheet.length());
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, "");
@@ -432,7 +432,7 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
 
   // We use a blob of length 10 (both bytes and chars) to make it easy to
   // construct stylesheets of any length that we want.
-  const std::string valid_style_blob = "h1 {a: b}\n";
+  const std::string valid_style_blob = "h1{top:0}\n";
   ASSERT_EQ(10, valid_style_blob.length());
   // This string is 10 bytes of inline style inside a B tag.
   const std::string inline_10_bytes = "<b style='width:1px;'></b>";
@@ -447,7 +447,12 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
     std::string output = RenderResult(
         /*filename=*/test_case_name, /*include_revisions*/ false,
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
-    std::string expected_output = "PASS";
+    std::string expected_output = StrCat(
+        "PASS\n", test_case_name,
+        ":23:0 Tag 'html' marked with attribute 'amp4email' is missing the "
+        "corresponding attribute 'data-css-strict' for enabling strict "
+        "CSS validation. This may become an error in the future. "
+        "(see https://github.com/ampproject/amphtml/issues/32587)");
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 
@@ -464,6 +469,11 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
+        ":23:0 Tag 'html' marked with attribute 'amp4email' is missing the "
+        "corresponding attribute 'data-css-strict' for enabling strict "
+        "CSS validation. This may become an error in the future. "
+        "(see https://github.com/ampproject/amphtml/issues/32587)\n",
+        test_case_name,
         ":28:2 The author stylesheet specified in tag 'style amp-custom' "
         "is too long - document contains 75001 bytes whereas the "
         "limit is 75000 "
@@ -481,7 +491,12 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
     std::string output = RenderResult(
         /*filename=*/test_case_name, /*include_revisions*/ false,
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
-    std::string expected_output = "PASS";
+    std::string expected_output = StrCat(
+        "PASS\n", test_case_name,
+        ":23:0 Tag 'html' marked with attribute 'amp4email' is missing the "
+        "corresponding attribute 'data-css-strict' for enabling strict "
+        "CSS validation. This may become an error in the future. "
+        "(see https://github.com/ampproject/amphtml/issues/32587)");
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 
@@ -500,6 +515,11 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
     // to make the transition.
     std::string expected_output = StrCat(
         "PASS\n", test_case_name,
+        ":23:0 Tag 'html' marked with attribute 'amp4email' is missing the "
+        "corresponding attribute 'data-css-strict' for enabling strict "
+        "CSS validation. This may become an error in the future. "
+        "(see https://github.com/ampproject/amphtml/issues/32587)\n",
+        test_case_name,
         ":34:6 The author stylesheet specified in tag 'style amp-custom' "
         "and the combined inline styles is too large - document contains 75010 "
         "bytes whereas the limit is 75000 bytes. (see https://amp.dev/"
@@ -523,6 +543,11 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
     // to make the transition.
     std::string expected_output = StrCat(
         "PASS\n", test_case_name,
+        ":23:0 Tag 'html' marked with attribute 'amp4email' is missing the "
+        "corresponding attribute 'data-css-strict' for enabling strict "
+        "CSS validation. This may become an error in the future. "
+        "(see https://github.com/ampproject/amphtml/issues/32587)\n",
+        test_case_name,
         ":7534:6 The author stylesheet specified in tag 'style amp-custom' "
         "and the combined inline styles is too large - document contains 75014 "
         "bytes whereas the limit is 75000 bytes. (see https://amp.dev/"
@@ -540,7 +565,12 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
     std::string output = RenderResult(
         /*filename=*/test_case_name, /*include_revisions*/ false,
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
-    std::string expected_output = "PASS";
+    std::string expected_output = StrCat(
+        "PASS\n", test_case_name,
+        ":23:0 Tag 'html' marked with attribute 'amp4email' is missing the "
+        "corresponding attribute 'data-css-strict' for enabling strict "
+        "CSS validation. This may become an error in the future. "
+        "(see https://github.com/ampproject/amphtml/issues/32587)");
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 
@@ -558,12 +588,17 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
     // TODO(b/153679479): Email per-inline-style limits are currently enforced
     // only as a warning due to this bug until we sort out what the correct
     // value should be.
-    std::string expected_output =
-        StrCat("PASS\n", test_case_name,
-               ":32:2 The inline style specified in tag 'div' is too long - it "
-               "contains 1001 bytes whereas the limit is 1000 bytes. (see "
-               "https://amp.dev/documentation/guides-and-tutorials/learn/spec/"
-               "amphtml/#maximum-size)");
+    std::string expected_output = StrCat(
+        "PASS\n", test_case_name,
+        ":23:0 Tag 'html' marked with attribute 'amp4email' is missing the "
+        "corresponding attribute 'data-css-strict' for enabling strict "
+        "CSS validation. This may become an error in the future. "
+        "(see https://github.com/ampproject/amphtml/issues/32587)\n",
+        test_case_name,
+        ":32:2 The inline style specified in tag 'div' is too long - it "
+        "contains 1001 bytes whereas the limit is 1000 bytes. (see "
+        "https://amp.dev/documentation/guides-and-tutorials/learn/spec/"
+        "amphtml/#maximum-size)");
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 }
@@ -708,7 +743,7 @@ TEST(ValidatorTest, TestCssLengthAmpAds) {
 
   // We use a blob of length 10 (both bytes and chars) to make it easy to
   // construct stylesheets of any length that we want.
-  const std::string valid_style_blob = "h1 {a: b}\n";
+  const std::string valid_style_blob = "h1{top:0}\n";
   ASSERT_EQ(10, valid_style_blob.length());
   // This string is 10 bytes of inline style inside a B tag.
   const std::string inline_10_bytes = "<b style='width:1px;'></b>";
@@ -787,7 +822,7 @@ TEST(ValidatorTest, TestCssLengthWithUrls) {
 
   // We use a blob of length 10 (both bytes and chars) to make it easy to
   // construct stylesheets of any length that we want.
-  const std::string valid_style_blob = "h1 {a: b}\n";
+  const std::string valid_style_blob = "h1{top:0}\n";
   ASSERT_EQ(10, valid_style_blob.length());
 
   // 75010 bytes in the author stylesheet, but includes a URL of 19 bytes.
@@ -924,7 +959,7 @@ TEST(ValidatorTest, TestTransformedAmpCssLengthWithUrls) {
 
   // We use a blob of length 10 (both bytes and chars) to make it easy to
   // construct stylesheets of any length that we want.
-  const std::string valid_style_blob = "h1 {a: b}\n";
+  const std::string valid_style_blob = "h1{top:0}\n";
   ASSERT_EQ(10, valid_style_blob.length());
 
   // 75010 bytes in the stylesheet, but includes an absolute URL of 19 bytes.
@@ -996,15 +1031,15 @@ TEST(ValidatorTest, TestTransformedAmpCssLengthWithUrls) {
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 
-  // 0 bytes in the stylesheet, 75009 bytes inline style with a relative URL.
+  // 0 bytes in the stylesheet, 112530 bytes inline style with a relative URL.
   {
     std::string test_case_name =
         StrCat(test_case.name, "[ExtraInlineBytesUrlTest]");
     // This string is 33 bytes of inline style inside a B tag.
     const std::string inline_33_bytes =
         "<b style=\"color: url('a-relative-url.html')\"></b>";
-    // 2273 x 33 = 75009
-    std::string inline_style = RepeatString(inline_33_bytes, /*n_times=*/2273);
+    // 3410 x 33 = 112530
+    std::string inline_style = RepeatString(inline_33_bytes, /*n_times=*/3510);
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
@@ -1014,15 +1049,15 @@ TEST(ValidatorTest, TestTransformedAmpCssLengthWithUrls) {
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 
-  // 0 bytes in the stylesheet, 75009 bytes inline style with a data URL.
+  // 0 bytes in the stylesheet, 112530 bytes inline style with a data URL.
   {
     std::string test_case_name =
         StrCat(test_case.name, "[ExtraInlineBytesUrlTest]");
     // This string is 33 bytes of inline style inside a B tag.
     const std::string inline_33_bytes =
         "<b style=\"color: url('data:nineteen-bytes')\"></b>";
-    // 2273 x 33 = 75009
-    std::string inline_style = RepeatString(inline_33_bytes, /*n_times=*/2273);
+    // 3410 x 33 = 112530
+    std::string inline_style = RepeatString(inline_33_bytes, /*n_times=*/3410);
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
@@ -1032,7 +1067,7 @@ TEST(ValidatorTest, TestTransformedAmpCssLengthWithUrls) {
         "FAIL\n", test_case_name,
         ":36:6 The author stylesheet specified in tag 'style amp-custom' "
         "and the combined inline styles is too large - document contains "
-        "75009 bytes whereas the limit is 75000 bytes. (see "
+        "112530 bytes whereas the limit is 112500 bytes. (see "
         "https://amp.dev/documentation/guides-and-tutorials/learn/spec/"
         "amphtml/#maximum-size)");
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;

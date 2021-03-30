@@ -67,4 +67,8 @@ The `width` and `height` attributes determine the aspect ratio of the Viqeo embe
     <td width="40%"><strong>width and height</strong></td>
     <td>The width and height attributes are special for the Viqeo embed. Viqeo supports any proportions of videos. Basically Viqeo generates an unique code for each video depending on video size and proportions, but Viqeo user may change proportions in interface. Anyway after pressing 'Get code' button an unique code will be generated.</td>
   </tr>
+   <tr>
+    <td width="40%"><strong>title</strong></td>
+    <td>Define a <code>title</code> attribute for the component. The default is <code>Viqeo video</code>.</td>
+  </tr>
 </table>

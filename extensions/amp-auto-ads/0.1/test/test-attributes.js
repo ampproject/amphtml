@@ -43,6 +43,7 @@ describe('attributes', () => {
       getAttributesFromConfigObj(configObj, Attributes.BASE_ATTRIBUTES)
     ).to.deep.equal({
       'type': 'val2',
+      'layout': 'val3',
       'data-something': 'val5',
       'data-1234': 'val6',
     });

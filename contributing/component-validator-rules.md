@@ -22,9 +22,9 @@ displays an image of a cat inside an AMP document. This extended component
 loads one of a set of 3 different pre-built cat images, so that the user
 doesn't need to host the images on their server. Each image has a cat name:
 
-- Oscar
-- Chloe
-- Bella
+-   Oscar
+-   Chloe
+-   Bella
 
 Common usage of this extended component might look like:
 
@@ -38,11 +38,11 @@ Common usage of this extended component might look like:
 
 Your first step will be writing the extended component JavaScript code. Place
 this code in the amphtml src tree at the location of
-`amphtml/extensions/amp-cat/0.1/`. This document only describes how to
-specify validation rules for an extended component - it does not cover
-implementing its runtime behavior. For the latter, see the codelab [Creating
-your first AMP
-Component](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/).
+`amphtml/extensions/amp-cat/0.1/`. This document only describes how to specify
+validation rules for an extended component - it does not cover implementing its
+runtime behavior. For the latter, see the [Building an AMP
+Extension](https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md)
+guide.
 
 ## Validation Rules
 
@@ -113,6 +113,7 @@ tags: {  # <amp-cat>
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
@@ -266,6 +267,7 @@ tags.
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
@@ -342,11 +344,11 @@ generate mixed-mode warnings when displayed from the AMP Cache.
 
 Only one of:
 
-- `value`
-- `value_casei`
-- `value_regex`
-- `value_regex_casei`
-- `value_url`
+-   `value`
+-   `value_casei`
+-   `value_regex`
+-   `value_regex_casei`
+-   `value_url`
 
 may be specified for a single attribute. However, multiple values may be specified
 for `value` and `value_casei` as seen in the example above.
@@ -398,6 +400,7 @@ tags: {  # <amp-cat>
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
@@ -462,7 +465,7 @@ Optionally, you may add more than one valid variant and/or invalid examples.
 
 ## Test Output files
 
-After creating your validator html file, You need to create the corresponding `.out` file to act as your test results. These are used to verify if the validator is validating your extension correctly. To do this, navigate to the root of the project, `amphtml/` and run `gulp validator --update_tests`. This should generate a matching `.out` file, and for this example, it would be:
+After creating your validator html file, You need to create the corresponding `.out` file to act as your test results. These are used to verify if the validator is validating your extension correctly. To do this, navigate to the root of the project, `amphtml/` and run `amp validator --update_tests`. This should generate a matching `.out` file, and for this example, it would be:
 
 <pre>
 amphtml/extensions/<b>amp-cat</b>/0.1/test/validator-<b>amp-cat.out</b>

@@ -79,6 +79,9 @@ export class AbstractAmpContext {
     this.initialConsentValue = null;
 
     /** @type {?Object} */
+    this.initialConsentMetadata = null;
+
+    /** @type {?Object} */
     this.initialLayoutRect = null;
 
     /** @type {?Object} */
@@ -355,6 +358,7 @@ export class AbstractAmpContext {
     this.hidden = context.hidden;
     this.initialConsentState = context.initialConsentState;
     this.initialConsentValue = context.initialConsentValue;
+    this.initialConsentMetadata = context.initialConsentMetadata;
     this.initialLayoutRect = context.initialLayoutRect;
     this.initialIntersection = context.initialIntersection;
     this.location = parseUrlDeprecated(context.location.href);

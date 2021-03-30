@@ -21,7 +21,7 @@ import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Purifier} from '../../../src/purifier/purifier';
 import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
-import {calculateExtensionScriptUrl} from '../../../src/service/extension-location';
+import {calculateExtensionScriptUrl} from '../../../src/service/extension-script';
 import {cancellation} from '../../../src/error';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
@@ -29,7 +29,6 @@ import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
-import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
 import {utf8Encode} from '../../../src/utils/bytes';
 
@@ -97,6 +96,9 @@ export class AmpScript extends AMP.BaseElement {
     /** @private {boolean} */
     this.layoutCompleted_ = false;
 
+    /** @private {boolean} */
+    this.reportedZeroSize_ = false;
+
     /** @private {Deferred} */
     this.initialize_ = new Deferred();
 
@@ -145,11 +147,12 @@ export class AmpScript extends AMP.BaseElement {
     if (
       this.nodom_ &&
       (this.element.hasAttribute('width') ||
-        this.element.hasAttribute('height'))
+        this.element.hasAttribute('height') ||
+        this.element.hasAttribute('layout'))
     ) {
       user().warn(
         TAG,
-        'Cannot set width or height of a nodom <amp-script>',
+        'Cannot set width, height, or layout of a nodom <amp-script>',
         this.element
       );
     }
@@ -162,13 +165,14 @@ export class AmpScript extends AMP.BaseElement {
   /**
    * @override
    */
-  onMeasureChanged() {
-    if (this.layoutCompleted_) {
+  onLayoutMeasure() {
+    if (this.layoutCompleted_ || this.reportedZeroSize_) {
       return;
     }
 
-    const {width, height} = this.getLayoutBox();
+    const {width, height} = this.getLayoutSize();
     if (width === 0 && height === 0) {
+      this.reportedZeroSize_ = true;
       user().warn(
         TAG,
         'Skipped initializing amp-script due to zero width and height.',
@@ -390,8 +394,8 @@ export class AmpScript extends AMP.BaseElement {
           if (
             !contentType ||
             !(
-              startsWith(contentType, 'application/javascript') ||
-              startsWith(contentType, 'text/javascript')
+              contentType.startsWith('application/javascript') ||
+              contentType.startsWith('text/javascript')
             )
           ) {
             // TODO(#24266): Refactor to %s interpolation when error string
@@ -775,7 +779,7 @@ export class SanitizerImpl {
     const output = {};
     for (let i = 0; i < storage.length; i++) {
       const key = storage.key(i);
-      if (key && !startsWith(key, 'amp-')) {
+      if (key && !key.startsWith('amp-')) {
         output[key] = storage.getItem(key);
       }
     }
@@ -823,7 +827,7 @@ export class SanitizerImpl {
         user().error(TAG, 'Storage.clear() is not supported in amp-script.');
       }
     } else {
-      if (startsWith(key, 'amp-')) {
+      if (key.startsWith('amp-')) {
         user().error(TAG, 'Invalid "amp-" prefix for storage key: %s', key);
       } else {
         if (value === null) {

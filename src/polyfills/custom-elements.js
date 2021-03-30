@@ -797,6 +797,7 @@ function polyfill(win) {
   subClass(HTMLElement, HTMLElementPolyfill);
 
   // Expose the polyfilled HTMLElement constructor for everyone to extend from.
+  win.HTMLElementOrig = win.HTMLElement;
   win.HTMLElement = HTMLElementPolyfill;
 
   // When we transpile `super` in Custom Element subclasses, we change it to
@@ -838,6 +839,7 @@ function wrapHTMLElement(win) {
   subClass(HTMLElement, HTMLElementWrapper);
 
   // Expose the wrapped HTMLElement constructor for everyone to extend from.
+  win.HTMLElementOrig = win.HTMLElement;
   win.HTMLElement = HTMLElementWrapper;
 }
 
@@ -882,7 +884,7 @@ function supportsUnderProto() {
  * @param {!Object} prototype
  */
 function setPrototypeOf(obj, prototype) {
-  if (Object.setPrototypeOf) {
+  if (IS_ESM || Object.setPrototypeOf) {
     // Every decent browser.
     Object.setPrototypeOf(obj, prototype);
   } else if (supportsUnderProto()) {

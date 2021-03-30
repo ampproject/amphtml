@@ -28,7 +28,6 @@ import {dict} from './utils/object';
 import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
 import {isAmp4Email} from './format';
 import {rewriteAttributeValue} from './url-rewrite';
-import {startsWith} from './string';
 import {user} from './log';
 
 /** @private @const {string} */
@@ -105,7 +104,7 @@ export function sanitizeHtml(html, doc) {
         }
         return;
       }
-      const isAmpElement = startsWith(tagName, 'amp-');
+      const isAmpElement = tagName.startsWith('amp-');
       // Preprocess "binding" attributes, e.g. [attr], by stripping enclosing
       // brackets before custom validation and restoring them afterwards.
       const bindingAttribs = [];
@@ -115,7 +114,7 @@ export function sanitizeHtml(html, doc) {
           continue;
         }
         const classicBinding = attr[0] == '[' && attr[attr.length - 1] == ']';
-        const alternativeBinding = startsWith(attr, BIND_PREFIX);
+        const alternativeBinding = attr.startsWith(BIND_PREFIX);
         if (classicBinding) {
           attribs[i] = attr.slice(1, -1);
         }
@@ -214,7 +213,7 @@ export function sanitizeHtml(html, doc) {
           continue;
         }
         emit(' ');
-        if (bindingAttribs.includes(i) && !startsWith(attrName, BIND_PREFIX)) {
+        if (bindingAttribs.includes(i) && !attrName.startsWith(BIND_PREFIX)) {
           emit(`[${attrName}]`);
         } else {
           emit(attrName);

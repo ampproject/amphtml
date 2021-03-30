@@ -15,7 +15,7 @@
  */
 
 /**
- * @fileoverview This file implements the `gulp check-owners` task, which checks
+ * @fileoverview This file implements the `amp check-owners` task, which checks
  * all OWNERS files in the repo for correctness, as determined by the parsing
  * API provided by the AMP owners bot.
  */
@@ -24,12 +24,11 @@
 
 const fs = require('fs-extra');
 const JSON5 = require('json5');
-const log = require('fancy-log');
 const request = require('request');
 const util = require('util');
-const {cyan, red, green} = require('ansi-colors');
+const {cyan, red, green} = require('kleur/colors');
 const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
-const {isTravisBuild} = require('../common/travis');
+const {log, logLocalDev} = require('../common/logging');
 
 const requestPost = util.promisify(request.post);
 
@@ -38,14 +37,14 @@ const OWNERS_SYNTAX_CHECK_URI =
 
 /**
  * Checks OWNERS files for correctness using the owners bot API.
- * The cumulative result is returned to the `gulp` process via process.exitCode
+ * The cumulative result is returned to the `amp` process via process.exitCode
  * so that all OWNERS files can be checked / fixed.
  */
 async function checkOwners() {
   if (!usesFilesOrLocalChanges('check-owners')) {
     return;
   }
-  const filesToCheck = getFilesToCheck('**/OWNERS');
+  const filesToCheck = getFilesToCheck(['**/OWNERS']);
   for (const file of filesToCheck) {
     await checkFile(file);
   }
@@ -65,9 +64,7 @@ async function checkFile(file) {
   const contents = fs.readFileSync(file, 'utf8').toString();
   try {
     JSON5.parse(contents);
-    if (!isTravisBuild()) {
-      log(green('SUCCESS:'), 'No errors in', cyan(file));
-    }
+    logLocalDev(green('SUCCESS:'), 'No errors in', cyan(file));
   } catch {
     log(red('FAILURE:'), 'Found errors in', cyan(file));
     process.exitCode = 1;
@@ -117,6 +114,6 @@ module.exports = {
 
 checkOwners.description = 'Checks all OWNERS files in the repo for correctness';
 checkOwners.flags = {
-  'files': '  Checks only the specified OWNERS files',
-  'local_changes': '  Checks just the OWNERS files changed in the local branch',
+  'files': 'Checks only the specified OWNERS files',
+  'local_changes': 'Checks just the OWNERS files changed in the local branch',
 };

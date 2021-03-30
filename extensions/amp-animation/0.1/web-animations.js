@@ -40,7 +40,7 @@ import {
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
-import {dashToCamelCase, startsWith} from '../../../src/string';
+import {dashToCamelCase} from '../../../src/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {extractKeyframes} from './parsers/keyframes-extractor';
@@ -725,13 +725,13 @@ export class MeasureScanner extends Scanner {
     // the previous and new vars.
     const result = map(prevVars);
     for (const k in newVars) {
-      if (startsWith(k, '--')) {
+      if (k.startsWith('--')) {
         result[k] = newVars[k];
       }
     }
     this.css_.withVars(result, () => {
       for (const k in newVars) {
-        if (startsWith(k, '--')) {
+        if (k.startsWith('--')) {
           result[k] = this.css_.resolveCss(newVars[k]);
         }
       }
@@ -972,7 +972,7 @@ class CssContextImpl {
     }
 
     // Resolve a var or a property.
-    return startsWith(prop, '--')
+    return prop.startsWith('--')
       ? styles.getPropertyValue(prop)
       : styles[getVendorJsPropertyName(styles, dashToCamelCase(prop))];
   }

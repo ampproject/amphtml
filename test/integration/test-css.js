@@ -15,7 +15,11 @@
  */
 
 import {AmpEvents} from '../../src/amp-events.js';
-import {createFixtureIframe} from '../../testing/iframe.js';
+import {computedStyle} from '../../src/style.js';
+import {
+  createFixtureIframe,
+  expectBodyToBecomeVisible,
+} from '../../testing/iframe.js';
 
 describe.configure().run('CSS', () => {
   it('should include height of [overflow] child in size before build', async () => {
@@ -36,8 +40,21 @@ describe.configure().run('CSS', () => {
     expect(overflowRect.height).to.be.greaterThan(0);
     // The amp-iframe has a 1:1 aspect ratio, and its height should be
     // incremented by the overflow's height.
-    expect(
-      Math.abs(iframeRect.width + overflowRect.height) - iframeRect.height
-    ).to.lessThan(2);
+    expect(Math.abs(iframeRect.width - iframeRect.height)).to.lessThan(2);
+  });
+
+  it('should include height of [placeholder] child in size before build', async () => {
+    const fixture = await createFixtureIframe(
+      'test/fixtures/placeholder.html',
+      500
+    );
+    // Wait until layout.js CSS is applied.
+    await expectBodyToBecomeVisible(fixture.win);
+    const {doc} = fixture;
+
+    const placeholder = doc.querySelector('[placeholder]');
+    expect(computedStyle(fixture.win, placeholder).lineHeight).to.equal(
+      'normal'
+    );
   });
 });

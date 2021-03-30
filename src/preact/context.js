@@ -15,8 +15,8 @@
  */
 
 import * as Preact from './index';
-import {Loading, reducer as loadingReducer} from '../loading';
-import {createContext, useContext, useMemo, useRef} from './index';
+import {Loading, reducer as loadingReducer} from '../core/loading-instructions';
+import {createContext, useContext, useMemo} from './index';
 
 /** @type {PreactDef.Context} */
 let context;
@@ -92,26 +92,7 @@ export function useAmpContext() {
  * @param {!Loading|string} loadingProp
  * @return {boolean}
  */
-export function useLoad(loadingProp) {
-  const loadingRef = useRef(false);
-
-  const {loading: loadingContext, renderable} = useAmpContext();
-
-  const loading = loadingReducer(loadingProp, loadingContext);
-
-  // Compute whether the element should be loading at this time.
-  const load =
-    // Explicit instruction to unload.
-    loading == Loading.UNLOAD
-      ? false
-      : // Explicit instruction to load.
-      loading == Loading.EAGER
-      ? true
-      : // Auto: allowed to load.
-      loading == Loading.AUTO && renderable
-      ? true
-      : // Lazy: can continue loading if already started, but do not start it.
-        loadingRef.current || false;
-  loadingRef.current = load;
-  return load;
+export function useLoading(loadingProp) {
+  const {loading: loadingContext} = useAmpContext();
+  return loadingReducer(loadingProp, loadingContext);
 }

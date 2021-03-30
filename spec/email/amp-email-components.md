@@ -18,9 +18,16 @@ limitations under the License.
 
 The following is the list of [AMP components](https://amp.dev/documentation/components/?format=email) that are currently supported in AMP email messages. The components are grouped into the following categories:
 
-- [Dynamic Content](#dynamic-content)
-- [Layout](#layout)
-- [Media](#media)
+<!--
+  (Do not remove or edit this comment.)
+
+  This table-of-contents is automatically generated. To generate it, run:
+    amp markdown-toc --fix
+-->
+
+-   [Dynamic Content](#dynamic-content)
+-   [Layout](#layout)
+-   [Media](#media)
 
 ## Dynamic Content
 

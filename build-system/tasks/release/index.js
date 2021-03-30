@@ -20,11 +20,11 @@ const experimentsConfig = require('../../global-configs/experiments-config.json'
 const fetch = require('node-fetch');
 const fs = require('fs-extra');
 const klaw = require('klaw');
-const log = require('fancy-log');
 const path = require('path');
 const tar = require('tar');
-const {cyan, green} = require('ansi-colors');
+const {cyan, green} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
+const {log} = require('../../common/logging');
 const {MINIFIED_TARGETS} = require('../helpers');
 const {VERSION} = require('../../compile/internal-version');
 
@@ -34,7 +34,7 @@ const BASE_FLAVOR_CONFIG = {
   name: 'base',
   rtvPrefixes: ['00', '01', '02', '03', '04', '05'],
   // TODO(#28168, erwinmombay): relace with single `--module --nomodule` command.
-  command: 'gulp dist --noconfig --esm && gulp dist --noconfig',
+  command: 'amp dist --noconfig --esm && amp dist --noconfig',
   environment: 'AMP',
 };
 
@@ -112,7 +112,7 @@ function logSeparator_() {
 }
 
 /**
- * Prepares output and temp directories, and ensures dependencies are installed.
+ * Prepares output and temp directories.
  *
  * @param {string} outputDir full directory path to emplace artifacts in.
  * @param {string} tempDir full directory path to temporary working directory.
@@ -120,9 +120,6 @@ function logSeparator_() {
 async function prepareEnvironment_(outputDir, tempDir) {
   await fs.emptyDir(outputDir);
   await fs.emptyDir(tempDir);
-  logSeparator_();
-
-  execOrDie('gulp update-packages');
   logSeparator_();
 }
 
@@ -144,7 +141,7 @@ function discoverDistFlavors_() {
       )
       .map(([flavorType, experimentConfig]) => ({
         // TODO(#28168, erwinmombay): relace with single `--module --nomodule` command.
-        command: `gulp dist --noconfig --esm --define_experiment_constant ${experimentConfig.define_experiment_constant} && gulp dist --noconfig --define_experiment_constant ${experimentConfig.define_experiment_constant}`,
+        command: `amp dist --noconfig --esm --define_experiment_constant ${experimentConfig.define_experiment_constant} && amp dist --noconfig --define_experiment_constant ${experimentConfig.define_experiment_constant}`,
         flavorType,
         rtvPrefixes: [
           EXPERIMENTAL_RTV_PREFIXES[experimentConfig.environment][flavorType],
@@ -158,7 +155,7 @@ function discoverDistFlavors_() {
 
   log(
     'The following',
-    cyan('gulp dist'),
+    cyan('amp dist'),
     'commands will be executed to compile each',
     `${green('flavor')}:`
   );
@@ -181,7 +178,7 @@ async function compileDistFlavors_(distFlavors, tempDir) {
   for (const {flavorType, command} of distFlavors) {
     log('Compiling flavor', green(flavorType), 'using', cyan(command));
 
-    execOrDie('gulp clean');
+    execOrDie('amp clean');
     execOrDie(command);
 
     const flavorTempDistDir = path.join(tempDir, flavorType);
@@ -405,10 +402,10 @@ async function cleanup_(tempDir) {
   logSeparator_();
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function release() {
-  // TODO(#27771, danielrozenberg): fail this release quickly if there are
-  // commits in the tree that are not from the `master` branch.
-
   const outputDir = path.resolve(argv.output_dir || './release');
   const tempDir = path.join(outputDir, 'tmp');
 
@@ -460,7 +457,7 @@ module.exports = {
 release.description = 'Generates a release build';
 release.flags = {
   'output_dir':
-    '  Directory path to emplace release files (defaults to "./release")',
+    'Directory path to emplace release files (defaults to "./release")',
   'flavor':
-    '  Limit this release build to a single flavor. Can be used to split the release work between multiple build machines.',
+    'Limit this release build to a single flavor. Can be used to split the release work between multiple build machines.',
 };

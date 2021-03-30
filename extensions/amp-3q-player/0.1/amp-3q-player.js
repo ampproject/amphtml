@@ -15,8 +15,10 @@
  */
 
 import {Deferred} from '../../../src/utils/promise';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
+import {addParamToUrl} from '../../../src/url';
 import {
   createFrameFor,
   objOrParseJson,
@@ -54,6 +56,9 @@ class Amp3QPlayer extends AMP.BaseElement {
     this.playerReadyResolver_ = null;
 
     this.dataId = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -86,15 +91,45 @@ class Amp3QPlayer extends AMP.BaseElement {
     Services.videoManagerForDoc(el).register(this);
   }
 
+  /** @private */
+  generateIframeSrc_() {
+    const explicitParamsAttributes = [
+      'key',
+      'timestamp',
+      'controls',
+      'userToken',
+      'userGroup',
+      'player',
+    ];
+
+    let iframeSrc = 'https://playout.3qsdn.com/';
+    if (this.element.getAttribute(`data-datasource`)) {
+      iframeSrc +=
+        'config_by_metadata/' +
+        this.element.getAttribute(`data-project`) +
+        '/' +
+        this.element.getAttribute(`data-datafield`) +
+        '/';
+    }
+
+    iframeSrc +=
+      dev().assertString(this.dataId) +
+      // Autoplay is handled by VideoManager
+      '?autoplay=false&amp=true';
+
+    explicitParamsAttributes.forEach((explicitParam) => {
+      const val = this.element.getAttribute(`data-${explicitParam}`);
+      if (val) {
+        iframeSrc = addParamToUrl(iframeSrc, explicitParam, val);
+      }
+    });
+
+    return iframeSrc;
+  }
+
   /** @override */
   layoutCallback() {
-    const iframe = createFrameFor(
-      this,
-      'https://playout.3qsdn.com/' +
-        encodeURIComponent(dev().assertString(this.dataId)) +
-        // Autoplay is handled by VideoManager
-        '?autoplay=false&amp=true'
-    );
+    const iframe = createFrameFor(this, this.generateIframeSrc_());
 
     this.iframe_ = iframe;
 
@@ -121,6 +156,8 @@ class Amp3QPlayer extends AMP.BaseElement {
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
 
+    this.pauseHelper_.updatePlaying(false);
+
     return true;
   }
 
@@ -130,15 +167,8 @@ class Amp3QPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
-  }
-
-  /** @override */
   pauseCallback() {
-    if (this.iframe_) {
-      this.pause();
-    }
+    this.pause();
   }
 
   /**
@@ -160,14 +190,24 @@ class Amp3QPlayer extends AMP.BaseElement {
 
     const eventType = data['data'];
 
-    if (eventType == 'ready') {
-      this.playerReadyResolver_();
+    switch (eventType) {
+      case 'ready':
+        this.playerReadyResolver_();
+        break;
+      case 'playing':
+        this.pauseHelper_.updatePlaying(true);
+        break;
+      case 'paused':
+      case 'complete':
+        this.pauseHelper_.updatePlaying(false);
+        break;
     }
 
     redispatch(this.element, eventType, {
       'ready': VideoEvents.LOAD,
       'playing': VideoEvents.PLAYING,
       'paused': VideoEvents.PAUSE,
+      'complete': VideoEvents.ENDED,
       'muted': VideoEvents.MUTED,
       'unmuted': VideoEvents.UNMUTED,
     });
@@ -194,6 +234,9 @@ class Amp3QPlayer extends AMP.BaseElement {
 
   /** @override */
   pause() {
+    if (!this.iframe_) {
+      return;
+    }
     this.sdnPostMessage_('pause');
   }
 

@@ -44,8 +44,8 @@ export class Url {
     /** @private @const {!HTMLAnchorElement} */
     this.anchor_ = /** @type {!HTMLAnchorElement} */ (doc.createElement('a'));
 
-    /** @private @const {!LruCache} */
-    this.cache_ = new LruCache(100);
+    /** @private @const {?LruCache} */
+    this.cache_ = IS_ESM ? null : new LruCache(100);
   }
 
   /**
@@ -53,10 +53,15 @@ export class Url {
    *
    * @param {string} url
    * @param {boolean=} opt_nocache
+   *   Cache is always ignored on ESM builds, see https://go.amp.dev/pr/31594
    * @return {!Location}
    */
   parse(url, opt_nocache) {
-    return parseUrlWithA(this.anchor_, url, opt_nocache ? null : this.cache_);
+    return parseUrlWithA(
+      this.anchor_,
+      url,
+      IS_ESM || opt_nocache ? null : this.cache_
+    );
   }
 
   /**

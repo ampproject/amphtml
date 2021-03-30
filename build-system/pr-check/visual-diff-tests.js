@@ -16,59 +16,38 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script runs the visual diff tests.
- * This is run during the CI stage = test; job = visual diff tests.
+ * @fileoverview Script that runs the visual diff tests during CI.
  */
 
 const atob = require('atob');
-const colors = require('ansi-colors');
 const {
-  downloadDistOutput,
-  printChangeSummary,
-  startTimer,
-  stopTimer,
-  timedExecOrDie: timedExecOrDieBase,
+  downloadNomoduleOutput,
+  printSkipMessage,
+  timedExecOrDie,
 } = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
-const {isTravisPullRequestBuild} = require('../common/travis');
+const {buildTargetsInclude, Targets} = require('./build-targets');
+const {runCiJob} = require('./ci-job');
 
-const FILENAME = 'visual-diff-tests.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const jobName = 'visual-diff-tests.js';
 
-function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-
-  if (!isTravisPullRequestBuild()) {
-    downloadDistOutput(FILENAME);
-    timedExecOrDie('gulp update-packages');
-    process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-    timedExecOrDie('gulp visual-diff --compiled --nobuild --master');
-  } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
-    process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('VISUAL_DIFF')
-    ) {
-      downloadDistOutput(FILENAME);
-      timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp visual-diff --compiled --nobuild');
-    } else {
-      timedExecOrDie('gulp visual-diff --empty');
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Visual Diff Tests'),
-        'because this commit does not affect the runtime, flag configs,',
-        'or visual diff tests.'
-      );
-    }
-  }
-
-  stopTimer(FILENAME, FILENAME, startTime);
+function pushBuildWorkflow() {
+  downloadNomoduleOutput();
+  process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
+  timedExecOrDie('amp visual-diff --nobuild --master');
 }
 
-main();
+function prBuildWorkflow() {
+  process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.VISUAL_DIFF)) {
+    downloadNomoduleOutput();
+    timedExecOrDie('amp visual-diff --nobuild');
+  } else {
+    timedExecOrDie('amp visual-diff --empty');
+    printSkipMessage(
+      jobName,
+      'this PR does not affect the runtime or visual diff tests'
+    );
+  }
+}
+
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

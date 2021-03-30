@@ -4,26 +4,31 @@ This guide outlines the requirements and steps for ad networks to implement Fast
 Fetch for early ad request and support for AMP ads returned by the ad network to
 be given preferential rendering.
 
-- _Status: Draft_
-- _Authors: [kjwright@google.com](mailto:kjwright@google.com),
-  [bradfrizzell@google.com](mailto:bradfrizzell@google.com)_
-- _Last Updated: 1-27-2016_
+-   _Status: Draft_
+-   _Authors: [kjwright@google.com](mailto:kjwright@google.com),
+    [bradfrizzell@google.com](mailto:bradfrizzell@google.com)_
+-   _Last Updated: 1-27-2016_
 
-## Contents
+<!--
+  (Do not remove or edit this comment.)
 
-- [Background](#background)
-- [Overview](#overview)
-- [Detailed design](#detailed-design)
-  - [Ad server requirements](#ad-server-requirements)
-    - [SSL](#ssl)
-    - [AMPHTML ad creative signature](#amphtml-ad-creative-signature)
-    - [Ad response headers](#ad-response-headers)
-  - [Creating an AMPHTML ad extension implementation](#creating-an-amphtml-ad-extension-implementation)
-    - [Create the implementation script](#create-the-implementation-script)
-    - [Create the configuration file](#create-the-configuration-file)
-    - [Create documentation](#create-documentation)
-    - [Create tests](#create-tests)
-- [Checklist for ad network implementation](#checklist-for-ad-network-implementation)
+  This table-of-contents is automatically generated. To generate it, run:
+    amp markdown-toc --fix
+-->
+
+-   [Background](#background)
+-   [Overview](#overview)
+-   [Detailed design](#detailed-design)
+    -   [Ad server requirements](#ad-server-requirements)
+        -   [SSL](#ssl)
+        -   [AMPHTML ad creative signature](#amphtml-ad-creative-signature)
+        -   [Ad response headers](#ad-response-headers)
+    -   [Creating an AMPHTML ad extension implementation](#creating-an-amphtml-ad-extension-implementation)
+        -   [Create the implementation script](#create-the-implementation-script)
+        -   [Create the configuration file](#create-the-configuration-file)
+        -   [Create documentation](#create-documentation)
+        -   [Create tests](#create-tests)
+-   [Checklist for ad network implementation](#checklist-for-ad-network-implementation)
 
 ## Background
 
@@ -221,14 +226,14 @@ for your AMP ad network implementation.
 
 ## Checklist for ad network implementation
 
-- [ ] All Server-AMP communication done with SSL
-- [ ] AMP ads sent to validation server
-- [ ] Validated AMP ads sent from network to AMP with signature
-- [ ] Validated AMP ads sent from network to AMP with appropriate headers
-- [ ] File hierarchy created within amphtml/extensions
-- [ ] Custom `amp-ad-network-<TYPE>-impl.js` overwrites `getAdUrl()`
-- [ ] `<TYPE>-a4a-config.js` implements `<TYPE>IsA4AEnabled()`
-- [ ] Mapping added for ad network to a4aRegistry map within `_a4a-config.js`
-- [ ] Documentation written in `amp-ad-network-<TYPE>-impl-internal.md`
-- [ ] Tests written in `test-amp-ad-network-<TYPE>-impl.js`
-- [ ] Pull request merged to master
+-   [ ] All Server-AMP communication done with SSL
+-   [ ] AMP ads sent to validation server
+-   [ ] Validated AMP ads sent from network to AMP with signature
+-   [ ] Validated AMP ads sent from network to AMP with appropriate headers
+-   [ ] File hierarchy created within amphtml/extensions
+-   [ ] Custom `amp-ad-network-<TYPE>-impl.js` overwrites `getAdUrl()`
+-   [ ] `<TYPE>-a4a-config.js` implements `<TYPE>IsA4AEnabled()`
+-   [ ] Mapping added for ad network to a4aRegistry map within `_a4a-config.js`
+-   [ ] Documentation written in `amp-ad-network-<TYPE>-impl-internal.md`
+-   [ ] Tests written in `test-amp-ad-network-<TYPE>-impl.js`
+-   [ ] Pull request merged to master

@@ -16,9 +16,14 @@
 
  /**
  * A list of options to correspond with options.json for testing purposes.
- * To add an option, add the corresponding key-value pair into the 
+ * To add an option, add the corresponding key-value pair into the
  * options.json, then add the field to this interface.
  */
 export interface OptionSet {
-    compiled?: boolean;
+  compiled?: boolean;
+  esm?: boolean;
+  port?: number;
+  fortesting?: boolean;
+  looseScriptSrcCheck?: boolean;
+  useMaxNames?: boolean;
 }

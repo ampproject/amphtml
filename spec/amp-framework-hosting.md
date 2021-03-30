@@ -2,10 +2,10 @@
 
 You can host the AMP framework and components from your own server or CDN. This feature has a number of applications. For example, you can...
 
-- set a release cadence that matches your development cycle.
-- deliver the AMP framework in regions where `cdn.ampproject.org` may not be available.
-- serve AMP pages and the framework from the same host, potentially improving content delivery times.
-- test and demonstrate changes to the framework or components.
+-   set a release cadence that matches your development cycle.
+-   deliver the AMP framework in regions where `cdn.ampproject.org` may not be available.
+-   serve AMP pages and the framework from the same host, potentially improving content delivery times.
+-   test and demonstrate changes to the framework or components.
 
 The AMP Project is looking into options for [validation](https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp/) of AMP pages that use an AMP framework hosted outside of `cdn.ampproject.org` ([#27546](https://github.com/ampproject/amphtml/issues/27546)). As of April 2020, these AMP pages do not pass validation.
 
@@ -19,26 +19,26 @@ When the AMP framework is built (either by you or by the AMP Project), a 13-digi
 
 A more complete picture of the conventions adopted by the AMP Project for the version and runtime version is below. This is more than you need to get started with hosting the AMP framework, but serves as a good reference in case you want to expand your hosting capabilities.
 
-- Version ([#16631](https://github.com/ampproject/amphtml/pull/16631) and [#27848](https://github.com/ampproject/amphtml/pull/27848)): the commit time of the last commit in the active branch
+-   Version ([#16631](https://github.com/ampproject/amphtml/pull/16631) and [#27848](https://github.com/ampproject/amphtml/pull/27848)): the commit time of the last commit in the active branch
 
-  ```
-  TZ=UTC git log -1 --pretty="%cd" --date=format-local:%y%m%d%H%M
-  ```
+    ```
+    TZ=UTC git log -1 --pretty="%cd" --date=format-local:%y%m%d%H%M
+    ```
 
-  with three trailing digits indicating the number of cherry-picks included in the release. This version corresponds to the release versions found on [github.com/ampproject/amphtml/releases](https://github.com/ampproject/amphtml/releases).
+    with three trailing digits indicating the number of cherry-picks included in the release. This version corresponds to the release versions found on [github.com/ampproject/amphtml/releases](https://github.com/ampproject/amphtml/releases).
 
-  Note: Prior to 2020-04-25, the version was based on date/time format `%y%m%d%H%M%S` with a single trailing digit – typically `0`, but could be change arbitrarily.
+    Note: Prior to 2020-04-25, the version was based on date/time format `%y%m%d%H%M%S` with a single trailing digit – typically `0`, but could be change arbitrarily.
 
-- Runtime version (rtv): the version prefixed by a 2-digit config code:
+-   Runtime version (rtv): the version prefixed by a 2-digit config code:
 
-  - Experimental: `00`
-  - Stable: `01`
-  - Control: `02`
-  - Beta: `03`
-  - Nightly: `04`
-  - Nightly-Control: `05`
-  - AMP Experiments: `10`, `11`, `12`
-  - INABOX Control and Experiments: `20`, `21`, `22`, `23`, `24`, `25`
+    -   Experimental: `00`
+    -   Stable: `01`
+    -   Control: `02`
+    -   Beta: `03`
+    -   Nightly: `04`
+    -   Nightly-Control: `05`
+    -   AMP Experiments: `10`, `11`, `12`
+    -   INABOX Control and Experiments: `20`, `21`, `22`, `23`, `24`, `25`
 
 The runtime version is found in URLs and is reported in the console of browser inspectors when an AMP page loads. For example, runtime version `012004041903580` is stable version `2004041903580`.
 
@@ -65,8 +65,8 @@ Create JSON file `build-system/global-configs/custom-config.json` with the follo
 
 where
 
-- `cdnUrl` is the base URL to your AMP framework. Defaults to `https://cdn.ampproject.org`.
-- `geoApiUrl` (optional) is your amp-geo fallback API URL. This API is described in section [amp-geo hotpatching](#amp-geo-hotpatching). Defaults to `null`.
+-   `cdnUrl` is the base URL to your AMP framework. Defaults to `https://cdn.ampproject.org`.
+-   `geoApiUrl` (optional) is your amp-geo fallback API URL. This API is described in section [amp-geo hotpatching](#amp-geo-hotpatching). Defaults to `null`.
 
 Important: `build-system/global-configs/custom-config.json` is not part of checked-in source. If it exists, it _always_ applies at build time, overlaying the active config. Don't forget about it! You can verify the overlay applies by looking for log line `Overlaid config with custom-config.json` during the build process.
 
@@ -75,23 +75,23 @@ Important: `build-system/global-configs/custom-config.json` is not part of check
 Build an AMP release with
 
 ```
-gulp dist
+amp dist
 ```
 
 The built framework can be found in directory `dist`. The version assigned to the build is in `dist/version.txt` and a listing of all files included in build is in `dist/files.txt`. The framework is ready to be moved to and served from your host.
 
-If you have advanced hosting capabilities or would like to manually assign a version, `gulp dist` accepts these flags (among others):
+If you have advanced hosting capabilities or would like to manually assign a version, `amp dist` accepts these flags (among others):
 
-- `--config`: Indicate the release type, production (`prod`) or canary (`canary`). Defaults to `prod`.
-- `--version_override`: Assign a version to the distribution. The version must consist of 13-digits. Defaults to the latest git commit time of the active branch.
-- `--sourcemap_url`: Provide the base URL for JavaScript source map links. This URL should contain placeholder `{version}` that will be replaced with the actual version when the AMP framework is built, for example `https://raw.githubusercontent.com/<github-username>/amphtml/{version}/`. Defaults to `https://raw.githubusercontent.com/ampproject/amphtml/{version}/`.
+-   `--config`: Indicate the release type, production (`prod`) or canary (`canary`). Defaults to `prod`.
+-   `--version_override`: Assign a version to the distribution. The version must consist of 13-digits. Defaults to the latest git commit time of the active branch.
+-   `--sourcemap_url`: Provide the base URL for JavaScript source map links. This URL should contain placeholder `{version}` that will be replaced with the actual version when the AMP framework is built, for example `https://raw.githubusercontent.com/<github-username>/amphtml/{version}/`. Defaults to `https://raw.githubusercontent.com/ampproject/amphtml/{version}/`.
 
 ### Option 2: Download the framework with an AMP Toolbox tool
 
 [AMP Toolbox](https://github.com/ampproject/amp-toolbox) has both a Node.js module and a command line tool that will fetch a complete AMP framework from `cdn.ampproject.org`. Pick the tool best suited to your release workflow.
 
-- [@ampproject/toolbox-runtime-fetch](https://github.com/ampproject/amp-toolbox/tree/master/packages/runtime-fetch) - Node.js module
-- [@ampproject/toolbox-cli](https://github.com/ampproject/amp-toolbox/tree/master/packages/cli) - command line interface
+-   [@ampproject/toolbox-runtime-fetch](https://github.com/ampproject/amp-toolbox/tree/master/packages/runtime-fetch) - Node.js module
+-   [@ampproject/toolbox-cli](https://github.com/ampproject/amp-toolbox/tree/master/packages/cli) - command line interface
 
 ### Option 3: Manually copy the framework from cdn.ampproject.org
 
@@ -204,9 +204,9 @@ If you inspect the DOM after an AMP page loads, you'll notice additional compone
 
 The AMP Project hosts a metadata endpoint at [cdn.ampproject.org/rtv/metadata](https://cdn.ampproject.org/rtv/metadata) that returns information on current releases. Hosting this endpoint yourself is optional, but may be useful if you use [AMP Toolbox](https://github.com/ampproject/amp-toolbox):
 
-- [@ampproject/toolbox-runtime-version](https://github.com/ampproject/amp-toolbox/tree/master/packages/runtime-version) uses the data to determine the latest AMP framework version available.
-- [@ampproject/toolbox-optimizer](https://github.com/ampproject/amp-toolbox/tree/master/packages/optimizer) uses the data to identify the boilerplate CSS that should be included in optimized AMP pages.
-- [@ampproject/toolbox-runtime-fetch](https://github.com/ampproject/amp-toolbox/tree/master/packages/runtime-fetch) uses the data to identify an rtv-specific path from which the framework should be downloaded.
+-   [@ampproject/toolbox-runtime-version](https://github.com/ampproject/amp-toolbox/tree/master/packages/runtime-version) uses the data to determine the latest AMP framework version available.
+-   [@ampproject/toolbox-optimizer](https://github.com/ampproject/amp-toolbox/tree/master/packages/optimizer) uses the data to identify the boilerplate CSS that should be included in optimized AMP pages.
+-   [@ampproject/toolbox-runtime-fetch](https://github.com/ampproject/amp-toolbox/tree/master/packages/runtime-fetch) uses the data to identify an rtv-specific path from which the framework should be downloaded.
 
 Consider the following sample from [cdn.ampproject.org/rtv/metadata](https://cdn.ampproject.org/rtv/metadata), most JSON properties are optional:
 
@@ -223,33 +223,33 @@ Consider the following sample from [cdn.ampproject.org/rtv/metadata](https://cdn
 
 The properties are defined as follows:
 
-- `ampRuntimeVersion` (required) is the current stable runtime version of the AMP framework.
-- `ampCssUrl` (optional) is a URL to the boilerplate CSS for the current stable runtime version.
-- `canaryPercentage` (optional) indicates the fraction of users who receive the experimental runtime version of the AMP framework instead of the current stable runtime version.
-- `diversions` (optional) lists active non-stable runtime versions.
-- `ltsRuntimeVersion` (optional) is the current [long-term stable](https://github.com/ampproject/amphtml/blob/master/contributing/lts-release.md) runtime version.
-- `ltsCssUrl` (optional) is a URL to the boilerplate CSS for the current long-term stable runtime version.
+-   `ampRuntimeVersion` (required) is the current stable runtime version of the AMP framework.
+-   `ampCssUrl` (optional) is a URL to the boilerplate CSS for the current stable runtime version.
+-   `canaryPercentage` (optional) indicates the fraction of users who receive the experimental runtime version of the AMP framework instead of the current stable runtime version.
+-   `diversions` (optional) lists active non-stable runtime versions.
+-   `ltsRuntimeVersion` (optional) is the current [long-term stable](https://github.com/ampproject/amphtml/blob/master/contributing/lts-release.md) runtime version.
+-   `ltsCssUrl` (optional) is a URL to the boilerplate CSS for the current long-term stable runtime version.
 
 ### amp-geo hotpatching
 
 [amp-geo](https://amp.dev/documentation/components/amp-geo/) requires special attention when hosting the AMP framework. When `cdn.ampproject.org` serves any of `amp-geo-0.1.js`, `amp-geo-0.1.mjs`, `amp-geo-latest.js`, or `amp-geo-latest.mjs`, it detects the country and subdivision where the request originated and replaces string `{{AMP_ISO_COUNTRY_HOTPATCH}}` with region data and enough trailing spaces to maintain the original string length. Ideally, when hosting the AMP framework, your content distribution platform would perform the same manipulation. The logic is as follows:
 
-- If country could not be determined, substitute 28 spaces:
-  ```
-  Before: "{{AMP_ISO_COUNTRY_HOTPATCH}}"
-  After:  "                            "
-  ```
-- If country could be determined, substitute the ISO 3166-1 alpha-2 country code followed by 26 spaces:
-  ```
-  Before: "{{AMP_ISO_COUNTRY_HOTPATCH}}"
-  After:  "xx                          "
-  ```
-  where `xx` is the country code (e.g. `de` for Germany).
-- If country and subdivision could be determined and are exactly `us` (United States) and `ca` (California), respectively (this is the only subdivision supported by amp-geo as of this writing), substitute the ISO 3166-1 alpha-2 country code _and_ the ISO 3166-2 country-subdivision code followed by 20 spaces:
-  ```
-  Before: "{{AMP_ISO_COUNTRY_HOTPATCH}}"
-  After:  "us us-ca                    "
-  ```
+-   If country could not be determined, substitute 28 spaces:
+    ```
+    Before: "{{AMP_ISO_COUNTRY_HOTPATCH}}"
+    After:  "                            "
+    ```
+-   If country could be determined, substitute the ISO 3166-1 alpha-2 country code followed by 26 spaces:
+    ```
+    Before: "{{AMP_ISO_COUNTRY_HOTPATCH}}"
+    After:  "xx                          "
+    ```
+    where `xx` is the country code (e.g. `de` for Germany).
+-   If country and subdivision could be determined and are exactly `us` (United States) and `ca` (California), respectively (this is the only subdivision supported by amp-geo as of this writing), substitute the ISO 3166-1 alpha-2 country code _and_ the ISO 3166-2 country-subdivision code followed by 20 spaces:
+    ```
+    Before: "{{AMP_ISO_COUNTRY_HOTPATCH}}"
+    After:  "us us-ca                    "
+    ```
 
 #### amp-geo fallback API
 
@@ -257,32 +257,32 @@ If location detection and file modification at time of delivery are not possible
 
 The API must meet the following requirements:
 
-- Satisfy [CORS security in AMP](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md)
-- Be secure (HTTPS)
-- Return `application/json` content conforming to the following schema:
-  ```
-  {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "type": "object",
-    "properties": {
-      "country": {
-        "type": "string",
-        "title": "ISO 3166-1 alpha-2 (case insensitive) country code of client request",
-        "default": "",
-        "pattern": "^[a-zA-Z]{2}$"
+-   Satisfy [CORS security in AMP](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md)
+-   Be secure (HTTPS)
+-   Return `application/json` content conforming to the following schema:
+    ```
+    {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {
+        "country": {
+          "type": "string",
+          "title": "ISO 3166-1 alpha-2 (case insensitive) country code of client request",
+          "default": "",
+          "pattern": "^[a-zA-Z]{2}$"
+        },
+        "subdivision": {
+          "type": "string",
+          "title": "Subdivision part of ISO 3166-2 (case insensitive) country-subdivision code of client request",
+          "default": "",
+          "pattern": "^[a-zA-Z0-9]{1,3}$"
+        }
       },
-      "subdivision": {
-        "type": "string",
-        "title": "Subdivision part of ISO 3166-2 (case insensitive) country-subdivision code of client request",
-        "default": "",
-        "pattern": "^[a-zA-Z0-9]{1,3}$"
-      }
-    },
-    "required": [
-      "country"
-    ]
-  }
-  ```
+      "required": [
+        "country"
+      ]
+    }
+    ```
 
 A sample response for a user in Germany looks like:
 
@@ -309,16 +309,16 @@ There are trade-offs in accuracy and performance when you set the client cache t
 
 In addition to following [TLS best practices](https://infosec.mozilla.org/guidelines/web_security), consider the following headers when hosting the AMP framework:
 
-- `content-security-policy`: If your pages implement [AMP's CSP](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/secure-pages/), apply a matching content security policy to your hosted framework responses. Inspect the headers on `https://cdn.ampproject.org/v0.js` for a base policy that should be expanded to include resources served from your host.
-- `access-control-allow-origin`: Some runtime components are fetched via XHR. If your AMP pages will be served from a different host than your framework, be sure to include CORS headers (see also [CORS Requests in AMP](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md)).
-- `content-type`: There are a few resources served without file extensions, or with extensions that may not be recognized by all web servers. In addition to [common types](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types), you may want to include special handling for the following:
+-   `content-security-policy`: If your pages implement [AMP's CSP](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/secure-pages/), apply a matching content security policy to your hosted framework responses. Inspect the headers on `https://cdn.ampproject.org/v0.js` for a base policy that should be expanded to include resources served from your host.
+-   `access-control-allow-origin`: Some runtime components are fetched via XHR. If your AMP pages will be served from a different host than your framework, be sure to include CORS headers (see also [CORS Requests in AMP](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md)).
+-   `content-type`: There are a few resources served without file extensions, or with extensions that may not be recognized by all web servers. In addition to [common types](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types), you may want to include special handling for the following:
 
-  - `/rtv/metadata` - `application/json`
-  - `/amp_preconnect_polyfill_404_or_other_error_expected._Do_not_worry_about_it` - `text/html`
+    -   `/rtv/metadata` - `application/json`
+    -   `/amp_preconnect_polyfill_404_or_other_error_expected._Do_not_worry_about_it` - `text/html`
 
-  A complete list of files in each AMP release can be found in `files.txt`, for example `https://cdn.ampproject.org/files.txt`.
+    A complete list of files in each AMP release can be found in `files.txt`, for example `https://cdn.ampproject.org/files.txt`.
 
-- `cache-control`: The AMP framework hosted from versioned URLs should be "immutable"; users should expect to find the same content from these URLs for as long as the URLs are active (amp-geo is an exception, see below). Long cache times are appropriate. On the other hand, the AMP framework hosted from versionless URLs should be served with relatively short cache times so that minimal time is required for your latest update to reach all users.
-  - Versioned URL example: `cdn.ampproject.org` sets a 1 year client cache time on resources served under `cdn.ampproject.org/rtv/<rtv>`: `cache-control: public, max-age=31536000`.
-  - Versionless URL example: `cdn.ampproject.org` sets a 50 minute client cache time for resources served from versionless URLs, but also allows a long 2 week stale-while-revalidate time in the event that versionless URLs experience an outage: `cache-control: private, max-age=3000, stale-while-revalidate=1206600`.
-  - `amp-geo-*.(m)js`: If amp-geo hotpatching is utilized, there is a trade-off in accuracy and performance when you set this cache time. Longer cache times are better for performance on subsequent page loads but can lead to incorrect country detection. Both `cdn.ampproject.org/v0/amp-geo-0.1.js` and `cdn.ampproject.org/rtv/<rtv>/v0/amp-geo-0.1.js` set the client cache time to 30 minutes.
+-   `cache-control`: The AMP framework hosted from versioned URLs should be "immutable"; users should expect to find the same content from these URLs for as long as the URLs are active (amp-geo is an exception, see below). Long cache times are appropriate. On the other hand, the AMP framework hosted from versionless URLs should be served with relatively short cache times so that minimal time is required for your latest update to reach all users.
+    -   Versioned URL example: `cdn.ampproject.org` sets a 1 year client cache time on resources served under `cdn.ampproject.org/rtv/<rtv>`: `cache-control: public, max-age=31536000`.
+    -   Versionless URL example: `cdn.ampproject.org` sets a 50 minute client cache time for resources served from versionless URLs, but also allows a long 2 week stale-while-revalidate time in the event that versionless URLs experience an outage: `cache-control: private, max-age=3000, stale-while-revalidate=1206600`.
+    -   `amp-geo-*.(m)js`: If amp-geo hotpatching is utilized, there is a trade-off in accuracy and performance when you set this cache time. Longer cache times are better for performance on subsequent page loads but can lead to incorrect country detection. Both `cdn.ampproject.org/v0/amp-geo-0.1.js` and `cdn.ampproject.org/rtv/<rtv>/v0/amp-geo-0.1.js` set the client cache time to 30 minutes.

@@ -24,7 +24,6 @@ import {htmlFor} from './static-template';
 import {isExperimentOn} from './experiments';
 import {isFiniteNumber, toWin} from './types';
 import {setStyle, setStyles, toggle} from './style';
-import {startsWith} from './string';
 
 import {transparentPng} from './utils/img';
 
@@ -179,7 +178,7 @@ export function isLayoutSizeFixed(layout) {
  */
 export function isInternalElement(tag) {
   const tagName = typeof tag == 'string' ? tag : tag.tagName;
-  return tagName && startsWith(tagName.toLowerCase(), 'i-');
+  return tagName && tagName.toLowerCase().startsWith('i-');
 }
 
 /**

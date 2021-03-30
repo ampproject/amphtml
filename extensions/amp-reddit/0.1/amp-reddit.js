@@ -20,6 +20,8 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {userAssert} from '../../../src/log';
 
+const TYPE = 'reddit';
+
 class AmpReddit extends AMP.BaseElement {
   /**
    * @param {boolean=} onLayout
@@ -51,7 +53,7 @@ class AmpReddit extends AMP.BaseElement {
       );
     }
 
-    preloadBootstrap(this.win, ampdoc, preconnect);
+    preloadBootstrap(this.win, TYPE, ampdoc, preconnect);
   }
 
   /** @override */
@@ -72,9 +74,10 @@ class AmpReddit extends AMP.BaseElement {
       this.element
     );
 
-    const iframe = getIframe(this.win, this.element, 'reddit', null, {
+    const iframe = getIframe(this.win, this.element, TYPE, null, {
       allowFullscreen: true,
     });
+    iframe.title = this.element.title || 'Reddit';
     this.applyFillContent(iframe);
     listenFor(
       iframe,

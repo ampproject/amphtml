@@ -1,24 +1,14 @@
 # AMP Purifier
 
-[![npm package](https://img.shields.io/npm/v/@ampproject/purifier)](https://www.npmjs.com/package/@ampproject/purifier)
-
 The AMP Purifier library contains an AMP-specific configuration for [DOMPurify](https://github.com/cure53/DOMPurify).
 
 This library is internally used by [`amp-mustache`](https://amp.dev/documentation/components/amp-mustache/)
 to sanitize rendered Mustache.js templates before displaying them.
 
-## Installation
-
-Install via:
-
-```sh
-npm i @ampproject/purifier
-```
-
 ## Usage
 
 ```js
-import {Purifier} from '@ampproject/purifier';
+import {Purifier} from './src/purifier/purifier';
 
 const purifier = new Purifier(document);
 purifier.purifyHtml('a<script>b</script>c'); // "ac"
@@ -28,7 +18,7 @@ purifier.purifyHtml('a<script>b</script>c'); // "ac"
 
 ```js
 import Mustache from 'mustache';
-import {Purifier} from '@ampproject/purifier';
+import {Purifier} from '../../../src/purifier/purifier';
 
 const purifier = new Purifier(document);
 const _unescapedValue = Mustache.Writer.prototype.unescapedValue;
@@ -70,9 +60,9 @@ _Optional_
 A function that, if provided, will be called for every sanitized attribute in
 the output to change its value. It accepts the following attributes:
 
-- `tagName` - name of tag containing the attribute
-- `attrName` - name of attribute
-- `attrValue` - current attribute value
+-   `tagName` - name of tag containing the attribute
+-   `attrName` - name of attribute
+-   `attrValue` - current attribute value
 
 The returned value of this function is used as the new attribute value.
 

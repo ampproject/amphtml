@@ -317,6 +317,15 @@ export class LoadTask extends MediaTask {
     mediaEl.load();
     return Promise.resolve();
   }
+
+  /** @override */
+  requiresSynchronousExecution() {
+    // When recycling a media pool element, its sources are removed and the
+    // LoadTask runs to reset it (buffered data, readyState, etc). It needs to
+    // run synchronously so the media element can't be used in a new context
+    // but with old data.
+    return true;
+  }
 }
 
 /**
@@ -372,6 +381,11 @@ export class UpdateSourcesTask extends MediaTask {
     Sources.removeFrom(this.win_, mediaEl);
     this.newSources_.applyToElement(this.win_, mediaEl);
     return Promise.resolve();
+  }
+
+  /** @override */
+  requiresSynchronousExecution() {
+    return true;
   }
 }
 

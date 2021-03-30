@@ -17,6 +17,7 @@
 import {DomBasedWeakRef} from '../../../src/utils/dom-based-weakref';
 import {childElement, childElementsByTag} from '../../../src/dom';
 import {dev, devAssert} from '../../../src/log';
+import {isExperimentOn} from '../../../src/experiments';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {toArray} from '../../../src/types';
 
@@ -34,6 +35,9 @@ const BITRATE_BY_EFFECTIVE_TYPE = {
   '4g': 2500,
   '5g': 5000,
 };
+
+/** @const {number} Do not downgrade the quality of a video that has loaded enough content */
+const BUFFERED_THRESHOLD_PERCENTAGE = 0.8;
 
 /** @type {!BitrateManager|undefined} */
 let instance;
@@ -91,9 +95,20 @@ export class BitrateManager {
    * @param {!Element} video
    */
   manage(video) {
+    if (!isExperimentOn(this.win, 'flexible-bitrate')) {
+      return;
+    }
+    // Prevent duplicate listeners if already managing this video.
+    if (video.changedSources) {
+      return;
+    }
     onNontrivialWait(video, () => {
       const current = currentSource(video);
-      this.acceptableBitrate_ = current.bitrate_ - 1;
+      const newBitrate = current.bitrate_ - 1;
+      if (newBitrate >= this.acceptableBitrate_) {
+        return;
+      }
+      this.acceptableBitrate_ = newBitrate;
       this.switchToLowerBitrate_(video, current.bitrate_);
       this.updateOtherManagedAndPausedVideos_();
     });
@@ -139,7 +154,9 @@ export class BitrateManager {
   /**
    * Sorts the sources of the given video element by their bitrates such that
    * the sources closest matching the acceptable bitrate are in front.
+   * Returns true if the sorting changed the order of sources.
    * @param {!Element} video
+   * @return {boolean}
    */
   sortSources_(video) {
     const sources = toArray(childElementsByTag(video, 'source'));
@@ -153,15 +170,23 @@ export class BitrateManager {
         ? parseInt(bitrate, 10)
         : Number.POSITIVE_INFINITY;
     });
+    let hasChanges = false;
     sources.sort((a, b) => {
       // Biggest first, bitrates above threshold to the back
-      return (
-        this.getBitrateForComparison_(b) - this.getBitrateForComparison_(a)
-      );
+      const value =
+        this.getBitrateForComparison_(b) - this.getBitrateForComparison_(a);
+      if (value < 0) {
+        hasChanges = true;
+      }
+      return value;
     });
-    sources.forEach((source) => {
-      video.appendChild(source);
-    });
+
+    if (hasChanges) {
+      sources.forEach((source) => {
+        video.appendChild(source);
+      });
+    }
+    return hasChanges;
   }
 
   /**
@@ -210,7 +235,11 @@ export class BitrateManager {
     }
     const {currentTime} = video;
     video.pause();
-    this.sortSources_(video);
+    const hasChanges = this.sortSources_(video);
+    if (!hasChanges) {
+      video.play();
+      return;
+    }
     video.load();
     listenOnce(video, 'loadedmetadata', () => {
       // Restore currentTime after loading new source.
@@ -234,11 +263,16 @@ export class BitrateManager {
         this.videos_.splice(i, 1);
         return;
       }
-      if (!video.paused) {
+      if (
+        !video.paused ||
+        getBufferedPercentage(video) > BUFFERED_THRESHOLD_PERCENTAGE
+      ) {
         return;
       }
-      this.sortSources_(video);
-      video.load();
+      const hasChanges = this.sortSources_(video);
+      if (hasChanges) {
+        video.load();
+      }
     }
   }
 }
@@ -251,6 +285,10 @@ export class BitrateManager {
  */
 function onNontrivialWait(video, callback) {
   listen(video, 'waiting', () => {
+    // Do not trigger downgrade if not loaded metadata yet.
+    if (video.readyState < 1) {
+      return;
+    }
     let timer = null;
     const unlisten = listenOnce(video, 'playing', () => {
       clearTimeout(timer);
@@ -288,4 +326,21 @@ function currentSource(video) {
       return source.src == video.currentSrc;
     })
   );
+}
+
+/**
+ * @private
+ * @param {!Element} videoEl
+ * @return {number} the percentage buffered [0-1]
+ */
+function getBufferedPercentage(videoEl) {
+  // videoEl.duration can be NaN if video is not loaded or 0.
+  if (!videoEl.duration) {
+    return 0;
+  }
+  let bufferedSum = 0;
+  for (let i = 0; i < videoEl.buffered.length; i++) {
+    bufferedSum += videoEl.buffered.end(i) - videoEl.buffered.start(i);
+  }
+  return bufferedSum / videoEl.duration;
 }

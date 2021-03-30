@@ -71,7 +71,7 @@ class AmpStickyAd extends AMP.BaseElement {
       dev().assertElement(this.ad_)
     )
       .then((ad) => {
-        return ad.whenBuilt();
+        return ad.build();
       })
       .then(() => {
         return this.mutateElement(() => {
@@ -99,11 +99,6 @@ class AmpStickyAd extends AMP.BaseElement {
       const borderBottom = this.element./*OK*/ offsetHeight;
       this.viewport_.updatePaddingBottom(borderBottom);
       const owners = Services.ownersForDoc(this.element);
-      owners.updateInViewport(
-        this.element,
-        dev().assertElement(this.ad_),
-        true
-      );
       owners.scheduleLayout(this.element, dev().assertElement(this.ad_));
     }
     return Promise.resolve();
@@ -126,7 +121,12 @@ class AmpStickyAd extends AMP.BaseElement {
   }
 
   /** @override */
-  collapsedCallback() {
+  collapsedCallback(element) {
+    // We will only collapse the stick-ad when the ad collapses. The analytics
+    // element will collapse after it's done initializing, which is normal.
+    if (element !== this.ad_) {
+      return;
+    }
     this.collapsed_ = true;
     this.visible_ = false;
     toggle(this.element, false);
@@ -188,7 +188,7 @@ class AmpStickyAd extends AMP.BaseElement {
    */
   scheduleLayoutForAd_() {
     whenUpgradedToCustomElement(dev().assertElement(this.ad_)).then((ad) => {
-      ad.whenBuilt().then(this.layoutAd_.bind(this));
+      ad.build().then(() => this.layoutAd_());
     });
   }
 
@@ -200,7 +200,6 @@ class AmpStickyAd extends AMP.BaseElement {
   layoutAd_() {
     const ad = dev().assertElement(this.ad_);
     const owners = Services.ownersForDoc(this.element);
-    owners.updateInViewport(this.element, ad, true);
     owners.scheduleLayout(this.element, ad);
     // Wait for the earliest: `render-start` or `load-end` signals.
     // `render-start` is expected to arrive first, but it's not emitted by

@@ -1,0 +1,339 @@
+version: 2.1
+
+orbs:
+  browser-tools: circleci/browser-tools@1.1.3
+
+push_and_pr_builds: &push_and_pr_builds
+  filters:
+    branches:
+      ignore:
+        - nightly
+
+push_builds_only: &push_builds_only
+  filters:
+    branches:
+      only:
+        - master
+        - /^amp-release-.*$/
+
+executors:
+  amphtml-docker-small-executor:
+    docker:
+      - image: cimg/base:2020.12
+    resource_class: small
+  amphtml-medium-executor:
+    machine:
+      image: ubuntu-2004:202010-01
+    resource_class: medium
+  amphtml-large-executor:
+    machine:
+      image: ubuntu-2004:202010-01
+    resource_class: large
+  amphtml-xlarge-executor:
+    machine:
+      image: ubuntu-2004:202010-01
+    resource_class: xlarge
+
+commands:
+  save_merge_commit:
+    steps:
+      - save_cache:
+          name: 'Save Merge Commit'
+          key: git-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - .CIRCLECI_MERGE_COMMIT
+  restore_merge_commit:
+    steps:
+      - restore_cache:
+          name: 'Restore Merge Commit'
+          key: git-{{ .Branch }}-{{ .Revision }}
+  setup_vm:
+    steps:
+      - checkout
+      - restore_merge_commit
+      - run:
+          name: 'Fetch Merge Commit'
+          command: ./.circleci/fetch_merge_commit.sh
+      - run:
+          name: 'Check Config'
+          command: ./.circleci/check_config.sh
+      - run:
+          name: 'Setup Google Cloud Storage'
+          command: ./.circleci/setup_storage.sh
+      - run:
+          name: 'Configure Hosts'
+          command: cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
+      - run:
+          name: 'Install Dependencies'
+          command: ./.circleci/install_dependencies.sh
+  install_chrome:
+    steps:
+      - browser-tools/install-chrome:
+          replace-existing: true
+  fail_fast:
+    steps:
+      - run:
+          name: 'Fail Fast'
+          when: on_fail
+          command: ./.circleci/fail_fast.sh
+
+jobs:
+  'Compute Merge Commit':
+    executor:
+      name: amphtml-docker-small-executor
+    steps:
+      - run:
+          name: 'Compute Merge Commit'
+          command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/master/.circleci/compute_merge_commit.sh | bash
+      - save_merge_commit
+  'Checks':
+    executor:
+      name: amphtml-medium-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Checks'
+          command: node build-system/pr-check/checks.js
+      - fail_fast
+  'Unminified Build':
+    executor:
+      name: amphtml-xlarge-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Unminified Build'
+          command: node build-system/pr-check/unminified-build.js
+      - fail_fast
+  'Nomodule Build':
+    executor:
+      name: amphtml-xlarge-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Nomodule Build'
+          command: node build-system/pr-check/nomodule-build.js
+      - fail_fast
+  'Module Build':
+    executor:
+      name: amphtml-xlarge-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Module Build'
+          command: node build-system/pr-check/module-build.js
+      - fail_fast
+  'Bundle Size':
+    executor:
+      name: amphtml-medium-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Bundle Size'
+          command: node build-system/pr-check/bundle-size.js
+      - fail_fast
+  'Validator Tests':
+    executor:
+      name: amphtml-xlarge-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Install Validator Dependencies'
+          command: ./.circleci/install_validator_dependencies.sh
+      - run:
+          name: 'Validator Tests'
+          command: node build-system/pr-check/validator-tests.js
+      - fail_fast
+  'Visual Diff Tests':
+    executor:
+      name: amphtml-large-executor
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: 'Visual Diff Tests'
+          command: node build-system/pr-check/visual-diff-tests.js
+      - fail_fast
+  'Unit Tests':
+    executor:
+      name: amphtml-large-executor
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: 'Unit Tests'
+          command: node build-system/pr-check/unit-tests.js
+      - fail_fast
+  'Unminified Tests':
+    executor:
+      name: amphtml-large-executor
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: 'Unminified Tests'
+          command: node build-system/pr-check/unminified-tests.js
+      - fail_fast
+  'Nomodule Tests':
+    executor:
+      name: amphtml-large-executor
+    parameters:
+      config:
+        description: 'Which config file to use'
+        type: enum
+        enum: ['prod', 'canary']
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: 'Nomodule Tests (<< parameters.config >>)'
+          command: node build-system/pr-check/nomodule-tests.js --config=<< parameters.config >>
+      - fail_fast
+  'Module Tests':
+    executor:
+      name: amphtml-large-executor
+    parameters:
+      config:
+        description: 'Which config file to use'
+        type: enum
+        enum: ['prod', 'canary']
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: 'Module Tests (<< parameters.config >>)'
+          command: node build-system/pr-check/module-tests.js --config=<< parameters.config >>
+      - fail_fast
+  'End-to-End Tests':
+    executor:
+      name: amphtml-large-executor
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: 'End-to-End Tests'
+          command: node build-system/pr-check/e2e-tests.js
+      - fail_fast
+  'Performance Tests':
+    executor:
+      name: amphtml-xlarge-executor
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: 'Performance Tests'
+          command: node build-system/pr-check/performance-tests.js
+      - fail_fast
+  'Experiment Build':
+    executor:
+      name: amphtml-xlarge-executor
+    parameters:
+      exp:
+        description: 'Which of the three (A/B/C) experiments to use'
+        type: enum
+        enum: ['A', 'B', 'C']
+    steps:
+      - setup_vm
+      - run:
+          name: 'Experiment << parameters.exp >> Build'
+          command: node build-system/pr-check/experiment-build.js --experiment=experiment<< parameters.exp >>
+      - fail_fast
+  'Experiment Tests':
+    executor:
+      name: amphtml-large-executor
+    parameters:
+      exp:
+        description: 'Which of the three (A/B/C) experiments to use'
+        type: enum
+        enum: ['A', 'B', 'C']
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: 'Experiment << parameters.exp >> Tests'
+          command: node build-system/pr-check/experiment-tests.js --experiment=experiment<< parameters.exp >>
+      - fail_fast
+
+workflows:
+  'CircleCI':
+    jobs:
+      - 'Compute Merge Commit':
+          <<: *push_and_pr_builds
+      - 'Checks':
+          <<: *push_and_pr_builds
+          requires:
+            - 'Compute Merge Commit'
+      - 'Unminified Build':
+          <<: *push_and_pr_builds
+          requires:
+            - 'Compute Merge Commit'
+      - 'Nomodule Build':
+          <<: *push_and_pr_builds
+          requires:
+            - 'Compute Merge Commit'
+      - 'Module Build':
+          <<: *push_and_pr_builds
+          requires:
+            - 'Compute Merge Commit'
+      - 'Bundle Size':
+          <<: *push_and_pr_builds
+          requires:
+            - 'Nomodule Build'
+            - 'Module Build'
+      - 'Validator Tests':
+          <<: *push_and_pr_builds
+          requires:
+            - 'Compute Merge Commit'
+      - 'Visual Diff Tests':
+          <<: *push_and_pr_builds
+          requires:
+            - 'Nomodule Build'
+      - 'Unit Tests':
+          <<: *push_and_pr_builds
+          requires:
+            - 'Compute Merge Commit'
+      - 'Unminified Tests':
+          <<: *push_and_pr_builds
+          requires:
+            - 'Unminified Build'
+      - 'Nomodule Tests':
+          name: 'Nomodule Tests (<< matrix.config >>)'
+          matrix:
+            parameters:
+              config: ['prod', 'canary']
+          <<: *push_and_pr_builds
+          requires:
+            - 'Nomodule Build'
+      - 'Module Tests':
+          name: 'Module Tests (<< matrix.config >>)'
+          matrix:
+            parameters:
+              config: ['prod', 'canary']
+          <<: *push_and_pr_builds
+          requires:
+            - 'Nomodule Build'
+            - 'Module Build'
+      - 'End-to-End Tests':
+          <<: *push_and_pr_builds
+          requires:
+            - 'Nomodule Build'
+      - 'Experiment Build':
+          name: 'Experiment << matrix.exp >> Build'
+          matrix:
+            parameters:
+              exp: ['A', 'B', 'C']
+          <<: *push_and_pr_builds
+          requires:
+            - 'Compute Merge Commit'
+      - 'Experiment Tests':
+          name: 'Experiment << matrix.exp >> Tests'
+          matrix:
+            parameters:
+              exp: ['A', 'B', 'C']
+          <<: *push_and_pr_builds
+          requires:
+            - 'Experiment << matrix.exp >> Build'
+      # TODO(wg-performance, #12128): This takes 30 mins and fails regularly.
+      # - 'Performance Tests':
+      #     <<: *push_builds_only
+      #     requires:
+      #       - 'Nomodule Build'

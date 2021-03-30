@@ -15,8 +15,8 @@
  */
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
-const log = require('fancy-log');
-const {cyan} = require('colors');
+const {cyan} = require('kleur/colors');
+const {log} = require('../common/logging');
 
 const pathPrefix = 'dist/log-messages';
 

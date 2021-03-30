@@ -15,29 +15,49 @@
  */
 'use strict';
 
+const babel = require('@babel/core');
+const fs = require('fs-extra');
 const globby = require('globby');
-const gulpBabel = require('gulp-babel');
-const log = require('fancy-log');
 const path = require('path');
-const through = require('through2');
-const {BABEL_SRC_GLOBS, THIRD_PARTY_TRANSFORM_GLOBS} = require('./sources');
+const tempy = require('tempy');
+const {BABEL_SRC_GLOBS} = require('./sources');
 const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
-const {EventEmitter} = require('events');
-const {red, cyan} = require('ansi-colors');
+const {log} = require('../common/logging');
+const {red, cyan} = require('kleur/colors');
 
 /**
  * Files on which to run pre-closure babel transforms.
  *
  * @private @const {!Array<string>}
  */
-const filesToTransform = getFilesToTransform();
+let filesToTransform;
 
 /**
- * Used to cache babel transforms.
+ * Directory used to cache babel transforms.
  *
- * @private @const {!Map<string, File>}
+ * @private @const {string}
  */
-const cache = new Map();
+let cacheDir;
+
+/**
+ * Returns the name of the babel cache directory if it has been created.
+ * @return {string}
+ */
+function getBabelCacheDir() {
+  return cacheDir || '';
+}
+
+/**
+ * Removes the transformed output of a file or a directory from the babel cache
+ * so it can be retransformed during a watch build.
+ * @param {string} fileOrDir
+ */
+function removeFromClosureBabelCache(fileOrDir) {
+  const cachedPath = path.join(cacheDir, fileOrDir);
+  if (fs.existsSync(cachedPath)) {
+    fs.removeSync(cachedPath);
+  }
+}
 
 /**
  * Computes the set of files on which to run pre-closure babel transforms.
@@ -45,94 +65,79 @@ const cache = new Map();
  * @return {!Array<string>}
  */
 function getFilesToTransform() {
-  return globby
-    .sync([...BABEL_SRC_GLOBS, '!node_modules/', '!third_party/'])
-    .concat(globby.sync(THIRD_PARTY_TRANSFORM_GLOBS))
-    .map(path.normalize);
+  return globby.sync([...BABEL_SRC_GLOBS, '!node_modules/', '!third_party/']);
 }
 
 /**
- * Apply babel transforms prior to closure compiler pass.
+ * Apply babel transforms prior to closure compiler pass and return the path
+ * of the transformed file.
  *
- * When a source file is transformed for the first time, it is written to an
- * in-memory cache from where it is retrieved every subsequent time without
+ * When a source file is transformed for the first time, it is written to a
+ * cache directory from where it is retrieved every subsequent time without
  * invoking babel.
  *
- * @return {!Promise}
+ * @param {string} file
+ * @param {string} outputFilename
+ * @param {!Object} options
+ * @return {string}
  */
-function preClosureBabel() {
-  const babel = gulpBabel({caller: {name: 'pre-closure'}});
-
-  return through.obj((file, enc, next) => {
-    if (!filesToTransform.includes(file.relative)) {
-      return next(null, file);
-    }
-
-    if (cache.has(file.path)) {
-      return next(null, cache.get(file.path));
-    }
-
-    let data, err;
-    debug(
-      CompilationLifecycles['pre-babel'],
-      file.path,
-      file.contents,
-      file.sourceMap
-    );
-    function onData(d) {
-      babel.off('error', onError);
-      data = d;
-    }
-    function onError(e) {
-      babel.off('data', onData);
-      err = e;
-    }
-    babel.once('data', onData);
-    babel.once('error', onError);
-    babel.write(file, enc, () => {
-      if (err) {
-        return next(err);
-      }
-
-      debug(
-        CompilationLifecycles['pre-closure'],
-        file.path,
-        data.contents,
-        data.sourceMap
-      );
-      cache.set(file.path, data);
-      next(null, data);
-    });
+async function preClosureBabel(file, outputFilename, options) {
+  if (!cacheDir) {
+    cacheDir = tempy.directory();
+  }
+  if (!filesToTransform) {
+    filesToTransform = getFilesToTransform();
+  }
+  const transformedFile = path.join(cacheDir, file);
+  if (fs.existsSync(transformedFile)) {
+    return transformedFile;
+  }
+  if (!filesToTransform.includes(file)) {
+    await fs.copy(file, transformedFile);
+    return transformedFile;
+  }
+  debug(CompilationLifecycles['pre-babel'], file);
+  const babelOptions = babel.loadOptions({
+    caller: {name: 'pre-closure'},
+    filename: file,
+    sourceFileName: path.relative(process.cwd(), file),
   });
+  try {
+    const {code} = await babel.transformFileAsync(file, babelOptions);
+    await fs.outputFile(transformedFile, Buffer.from(code, 'utf-8'));
+    debug(CompilationLifecycles['pre-closure'], transformedFile);
+  } catch (err) {
+    const reason = handlePreClosureError(err, outputFilename, options);
+    if (reason) {
+      throw reason;
+      return;
+    }
+  }
+  return transformedFile;
 }
 
 /**
- * Handles a pre-closure babel error. Optionally doesn't emit a fatal error when
- * compilation fails and signals the error so subsequent operations can be
- * skipped (used in watch mode).
+ * Handles a pre-closure babel error. Returns an error when transformation fails
+ * except except in watch mode, where we want to print a message and continue.
  *
  * @param {Error} err
  * @param {string} outputFilename
- * @param {?Object} options
- * @param {?Function} resolve
+ * @param {?Object=} options
+ * @return {Error|undefined}
  */
-function handlePreClosureError(err, outputFilename, options, resolve) {
+function handlePreClosureError(err, outputFilename, options) {
   log(red('ERROR:'), err.message, '\n');
-  const reasonMessage = `Could not compile ${cyan(outputFilename)}`;
+  const reasonMessage = `Could not transform ${cyan(outputFilename)}`;
   if (options && options.continueOnError) {
     log(red('ERROR:'), reasonMessage);
     options.errored = true;
-    if (resolve) {
-      resolve();
-    }
-  } else {
-    const reason = new Error(reasonMessage);
-    reason.showStack = false;
-    new EventEmitter().emit('error', reason);
+    return;
   }
+  return new Error(reasonMessage);
 }
 
 module.exports = {
-  handlePreClosureError,
+  getBabelCacheDir,
+  removeFromClosureBabelCache,
   preClosureBabel,
 };

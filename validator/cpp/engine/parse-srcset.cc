@@ -28,7 +28,9 @@ using std::vector;
 
 namespace amp::validator::parse_srcset {
 // If parsing fails, returns false in SrcsetParsingResult.status.
-SrcsetParsingResult ParseSourceSet(absl::string_view srcset) {
+SrcsetParsingResult ParseSourceSet(
+    re2::StringPiece srcset
+) {
   // Regex for leading spaces, followed by an optional comma and whitespace,
   // followed by an URL*, followed by an optional space, followed by an
   // optional width or pixel density**, followed by spaces, followed by an
@@ -59,7 +61,7 @@ SrcsetParsingResult ParseSourceSet(absl::string_view srcset) {
   //   [1-9]\d*\.\d+x          a decimal with its whole-number part greater
   //                           than zero and followed by an x ...
   //   |                       or ...
-  //   0.\d*[1-9]\d*x          a decimal with its fractional part greater
+  //   0\.\d*[1-9]\d*x         a decimal with its fractional part greater
   //                           than zero and followed by an x ...
   // )?                        and make it optional.
   // \s*                       Match, but don't capture space.
@@ -75,7 +77,7 @@ SrcsetParsingResult ParseSourceSet(absl::string_view srcset) {
       "|"
       "[1-9]\\d*\\.\\d+x"
       "|"
-      "0.\\d*[1-9]\\d*"
+      "0\\.\\d*[1-9]\\d*x"
       ")?"
       "\\s*"
       "(?:(,)\\s*)?"};

@@ -15,8 +15,8 @@
 # 5. You should then be able to access <https://amphtml.lando.site> in your browser.
 # 6. If using the Local AMP Chrome Extension, open the popup and configure the Base URL to be https://amphtml.lando.site/
 #
-# Now instead of running `gulp` commands directly, you instead run `lando gulp`. Additionally, some of the common gulp
-# commands have shortcuts, so you can run `lando watch` instead of `lando gulp build --watch`. For a full list of the
+# Now instead of running `amp` commands directly, you instead run `lando amp`. Additionally, some of the common amp
+# commands have shortcuts, so you can run `lando watch` instead of `lando amp build --watch`. For a full list of the
 # shortcuts run `lando help`.
 #
 # For details on the file format, see <https://docs.lando.dev/config/lando.html>.
@@ -28,53 +28,49 @@ services:
   appserver:
     type: node
     install_dependencies_as_root:
-      - curl --compressed -o- -L https://yarnpkg.com/install.sh | bash
       - apt-get update && apt-get install -y openjdk-8-jdk && apt-get install -y ant && apt-get clean
       - apt-get install -y openjdk-7-jre protobuf-compiler python2.7 python-protobuf
     build:
-      - yarn global add gulp-cli
-      - yarn
+      - npm install
     run_as_root:
       - echo "127.0.0.1 amphtml.lndo.site" >> /etc/hosts
-    command: cd /app && yarn gulp serve --port=80 --host=0.0.0.0
+    command: cd /app && amp serve --port=80 --host=0.0.0.0
 
 tooling:
-  yarn:
+  amp:
     service: appserver
-  gulp:
-    service: appserver
-    cmd: 'yarn gulp'
+    cmd: 'amp'
   watch:
     service: appserver
-    cmd: 'yarn gulp build --watch'
+    cmd: 'amp build --watch'
     description: 'Builds unminified code, watches for changes in files, re-builds when detected'
   watch-minified:
     service: appserver
-    cmd: 'yarn gulp dist --watch'
+    cmd: 'amp dist --watch'
     description: 'Builds minified code, watches for changes in files, re-builds when detected'
   lint:
     service: appserver
-    cmd: 'yarn gulp lint'
+    cmd: 'amp lint'
     description: 'Validates against Google Closure Linter'
   check-types:
     service: appserver
-    cmd: 'yarn gulp check-types'
+    cmd: 'amp check-types'
     description: 'Check source code for JS type errors'
   dist:
     service: appserver
-    cmd: 'yarn gulp dist'
+    cmd: 'amp dist'
     description: 'Build production binaries'
   unit:
     service: appserver
-    cmd: 'yarn gulp unit'
+    cmd: 'amp unit'
     description: 'Run unit tests'
   integration:
     service: appserver
-    cmd: 'yarn gulp integration'
+    cmd: 'amp integration'
     description: 'Run integration tests'
   e2e:
     service: appserver
-    cmd: 'yarn gulp e2e'
+    cmd: 'amp e2e'
     description: 'Runs e2e tests'
 
 proxy:

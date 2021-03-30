@@ -19,17 +19,14 @@ import {ActionTrust} from '../../../src/action-constants';
 import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
 import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {MessageType} from '../../../src/3p-frame-messaging';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {endsWith, startsWith} from '../../../src/string';
-import {
-  getConsentMetadata,
-  getConsentPolicyInfo,
-  getConsentPolicyState,
-} from '../../../src/consent';
+import {endsWith} from '../../../src/string';
+import {getConsentDataToForward} from '../../../src/consent';
 import {
   isAdLike,
   listenFor,
@@ -128,10 +125,11 @@ export class AmpIframe extends AMP.BaseElement {
      */
     this.targetOrigin_ = null;
 
-    /**
-     * @private {boolean}
-     */
+    /** @private {boolean} */
     this.hasErroredEmbedSize_ = false;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /** @override */
@@ -164,7 +162,7 @@ export class AmpIframe extends AMP.BaseElement {
       !this.sandboxContainsToken_(sandbox, 'allow-same-origin') ||
         (origin != containerUrl.origin && protocol != 'data:'),
       'Origin of <amp-iframe> must not be equal to container %s' +
-        'if allow-same-origin is set. See https://github.com/ampproject/' +
+        ' if allow-same-origin is set. See https://github.com/ampproject/' +
         'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.',
       element
     );
@@ -495,6 +493,8 @@ export class AmpIframe extends AMP.BaseElement {
           });
         }, 1000);
       }
+
+      this.pauseHelper_.updatePlaying(true);
     });
   }
 
@@ -510,7 +510,7 @@ export class AmpIframe extends AMP.BaseElement {
       return;
     }
     const data = getData(event);
-    if (typeof data !== 'string' || !startsWith(data, 'pym')) {
+    if (typeof data !== 'string' || !data.startsWith('pym')) {
       return;
     }
 
@@ -537,30 +537,21 @@ export class AmpIframe extends AMP.BaseElement {
    * @private
    */
   sendConsentData_(source, origin) {
-    const consentPolicyId = super.getConsentPolicy() || 'default';
-    const consentStringPromise = this.getConsentString_(consentPolicyId);
-    const metadataPromise = this.getConsentMetadata_(consentPolicyId);
-    const consentPolicyStatePromise = this.getConsentPolicyState_(
-      consentPolicyId
+    getConsentDataToForward(this.element, this.getConsentPolicy()).then(
+      (consents) => {
+        this.sendConsentDataToIframe_(
+          source,
+          origin,
+          Object.assign(
+            dict({
+              'sentinel': 'amp',
+              'type': MessageType.CONSENT_DATA,
+            }),
+            consents
+          )
+        );
+      }
     );
-
-    Promise.all([
-      metadataPromise,
-      consentStringPromise,
-      consentPolicyStatePromise,
-    ]).then((consents) => {
-      this.sendConsentDataToIframe_(
-        source,
-        origin,
-        dict({
-          'sentinel': 'amp',
-          'type': MessageType.CONSENT_DATA,
-          'consentMetadata': consents[0],
-          'consentString': consents[1],
-          'consentPolicyState': consents[2],
-        })
-      );
-    });
   }
 
   /**
@@ -572,41 +563,6 @@ export class AmpIframe extends AMP.BaseElement {
    */
   sendConsentDataToIframe_(source, origin, data) {
     source./*OK*/ postMessage(data, origin);
-  }
-
-  /**
-   * Get the consent string
-   * @param {string} consentPolicyId
-   * @private
-   * @return {Promise}
-   */
-  getConsentString_(consentPolicyId = 'default') {
-    return getConsentPolicyInfo(this.element, consentPolicyId);
-  }
-
-  /**
-   * Get the consent metadata
-   * @param {string} consentPolicyId
-   * @private
-   * @return {Promise}
-   */
-  getConsentMetadata_(consentPolicyId = 'default') {
-    return getConsentMetadata(this.element, consentPolicyId);
-  }
-
-  /**
-   * Get the consent policy state
-   * @param {string} consentPolicyId
-   * @private
-   * @return {Promise}
-   */
-  getConsentPolicyState_(consentPolicyId = 'default') {
-    return getConsentPolicyState(this.element, consentPolicyId);
-  }
-
-  /** @override */
-  unlayoutOnPause() {
-    return true;
   }
 
   /**
@@ -633,6 +589,7 @@ export class AmpIframe extends AMP.BaseElement {
         this.intersectionObserverHostApi_ = null;
       }
     }
+    this.pauseHelper_.updatePlaying(false);
     return true;
   }
 
@@ -662,9 +619,13 @@ export class AmpIframe extends AMP.BaseElement {
     }
     if (this.iframe_ && mutations['title']) {
       // only propagating title because propagating all causes e2e error:
-      // See <https://travis-ci.org/ampproject/amphtml/jobs/657440421>
       this.propagateAttributes(['title'], this.iframe_);
     }
+  }
+
+  /** @override */
+  unlayoutOnPause() {
+    return true;
   }
 
   /**

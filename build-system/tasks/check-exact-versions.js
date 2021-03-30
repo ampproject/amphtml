@@ -15,57 +15,61 @@
  */
 'use strict';
 
-const colors = require('ansi-colors');
-const log = require('fancy-log');
-const {getStderr} = require('../common/exec');
+const fs = require('fs-extra');
+const globby = require('globby');
+const semver = require('semver');
+const {cyan, green, red} = require('kleur/colors');
 const {gitDiffFileMaster} = require('../common/git');
-const {isTravisBuild} = require('../common/travis');
+const {log, logLocalDev, logWithoutTimestamp} = require('../common/logging');
 
-const PACKAGE_JSON_PATHS = [
-  'package.json',
-  'build-system/tasks/e2e/package.json',
-  'build-system/tasks/visual-diff/package.json',
-  'build-system/tasks/storybook/package.json',
-];
+/**
+ * @param {string} file
+ * @return {boolean}
+ */
+function check(file) {
+  const json = fs.readJsonSync(file, 'utf8');
 
-const checkerExecutable = 'npx npm-exact-versions';
+  // We purposfully ignore peerDependencies here, because that's that's for the
+  // consumer to decide.
+  const keys = ['dependencies', 'devDependencies', 'optionalDependencies'];
+
+  for (const key of keys) {
+    const deps = json[key];
+    for (const dep in deps) {
+      const version = deps[dep];
+      if (!semver.clean(version)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
 
 /**
  * Makes sure all package.json files in the repo use exact versions.
  * @return {!Promise}
  */
 async function checkExactVersions() {
-  let success = true;
-  PACKAGE_JSON_PATHS.forEach((file) => {
-    const checkerCmd = `${checkerExecutable} --path ${file}`;
-    const err = getStderr(checkerCmd);
-    if (err) {
+  const packageJsonFiles = globby.sync(['**/package.json', '!**/node_modules']);
+  packageJsonFiles.forEach((file) => {
+    if (check(file)) {
+      logLocalDev(
+        green('SUCCESS:'),
+        'All packages in',
+        cyan(file),
+        'have exact versions.'
+      );
+    } else {
       log(
-        colors.red('ERROR:'),
+        red('ERROR:'),
         'One or more packages in',
-        colors.cyan(file),
+        cyan(file),
         'do not have an exact version.'
       );
-      console.log(gitDiffFileMaster(file));
-      success = false;
-    } else {
-      if (!isTravisBuild()) {
-        log(
-          colors.green('SUCCESS:'),
-          'All packages in',
-          colors.cyan(file),
-          'have exact versions.'
-        );
-      }
+      logWithoutTimestamp(gitDiffFileMaster(file));
+      throw new Error('Check failed');
     }
   });
-  if (success) {
-    return Promise.resolve();
-  } else {
-    const reason = new Error('Check failed');
-    reason.showStack = false;
-    return Promise.reject(reason);
-  }
 }
 
 module.exports = {
@@ -73,4 +77,4 @@ module.exports = {
 };
 
 checkExactVersions.description =
-  'Checks that all packages in package.json use exact versions.';
+  'Checks that all package.json files in the repo use exact versions.';

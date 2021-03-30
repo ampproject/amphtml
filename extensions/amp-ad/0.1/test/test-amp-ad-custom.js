@@ -188,7 +188,7 @@ describes.realWin('Amp custom ad', {amp: true}, (env) => {
   });
 });
 
-// TODO(wg-ads, #25726): This test fails when run by itself.
+// TODO(wg-monetization, #25726): This test fails when run by itself.
 describe.skip('#getLayoutPriority', () => {
   const url = '/examples/custom.ad.example.json';
   const slot = 'myslot';

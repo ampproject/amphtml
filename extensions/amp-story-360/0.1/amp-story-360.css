@@ -27,8 +27,8 @@ amp-story-360 amp-img {
 
 .i-amphtml-story-360-activate-button {
   position: absolute !important;
-  bottom: 8px !important;
-  right: 8px !important;
+  bottom: 12px !important;
+  right: 12px !important;
   background: rgba(0, 0, 0, .8) !important;
   color: white !important;
   outline: none !important;

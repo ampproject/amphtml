@@ -258,6 +258,10 @@ describe('BindValidator (allowUrlProperties=true)', () => {
       expect(val.canBind('AMP-LIST', 'is-layout-container')).to.be.true;
     });
 
+    it('should support <amp-render>', () => {
+      expect(val.canBind('AMP-RENDER', 'src')).to.be.true;
+    });
+
     it('should support <amp-selector>', () => {
       expect(val.canBind('AMP-SELECTOR', 'disabled')).to.be.true;
       expect(val.canBind('AMP-SELECTOR', 'selected')).to.be.true;
@@ -301,6 +305,11 @@ describe('BindValidator (allowUrlProperties=true)', () => {
           /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;'
         )
       ).to.be.false;
+    });
+
+    it('should support <section> elements (from <amp-accordion>)', () => {
+      expect(val.canBind('SECTION', 'data-expand')).to.be.true;
+      expect(val.canBind('SECTION', 'expanded')).to.be.true;
     });
   });
 });
