@@ -80,13 +80,6 @@ describes.realWin('Layout', {}, (env) => {
         expect(isLoadingAllowed(element)).to.be.true;
       });
     }
-
-    it('is allowed when loadable', () => {
-      const element = createElementWithAttributes(env.win.document, 'div', {
-        loadable: '',
-      });
-      expect(isLoadingAllowed(element)).to.be.true;
-    });
   });
 
   it('parseLayout - failure', () => {

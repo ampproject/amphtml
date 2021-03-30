@@ -278,11 +278,8 @@ export function getNaturalDimensions(element) {
  * @return {boolean}
  */
 export function isLoadingAllowed(element) {
-  return (
-    element.getAttribute('layout') !== Layout.CONTAINER ||
-    element.getAttribute('layout') !== Layout.NODISPLAY ||
-    element.hasAttribute('loadable')
-  );
+  const layout = element.getAttribute('layout');
+  return layout !== Layout.CONTAINER || layout !== Layout.NODISPLAY;
 }
 
 /**
