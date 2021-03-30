@@ -75,6 +75,45 @@ const getAmpStateJson = (element, src) => {
 };
 
 /**
+ * Gets the json from an amp-script uri.
+ *
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} src
+ * @return {Promise<!JsonObject>}
+ */
+function getAmpScriptJson(ampdoc, src) {
+  return Promise.resolve()
+    .then(() => {
+      const args = src.slice('amp-script:'.length).split('.');
+      userAssert(
+        args.length === 2 && args[0].length > 0 && args[1].length > 0,
+        '[amp-list]: "amp-script" URIs must be of the format "scriptId.functionIdentifier".'
+      );
+
+      const ampScriptId = args[0];
+      const fnIdentifier = args[1];
+      // const ampScriptEl = element.getAmpdoc().getElementById(ampScriptId);
+      const ampScriptEl = ampdoc.getElementById(ampScriptId);
+      userAssert(
+        ampScriptEl && ampScriptEl.tagName === 'AMP-SCRIPT',
+        `[amp-list]: could not find <amp-script> with script set to ${ampScriptId}`
+      );
+
+      return ampScriptEl.getImpl().then((impl) => {
+        impl.layoutCallback();
+        return impl.callFunction(fnIdentifier);
+      });
+    })
+    .then((json) => {
+      userAssert(
+        json !== undefined,
+        `[amp-list] ${src} must return json, but instead returned: ${typeof json}`
+      );
+      return json;
+    });
+}
+
+/**
  * Returns a function to fetch json from remote url, amp-state or
  * amp-script.
  *
@@ -91,8 +130,8 @@ export const getJsonFn = (element) => {
     return (src) => getAmpStateJson(element, src);
   }
   if (isAmpScriptSrc(src)) {
-    // TODO(dmanek): implement this
-    return () => {};
+    return (src) => getAmpScriptJson(element.getAmpDoc(), src);
+    // return (src) => getAmpScriptJson(element, src);
   }
   return () => batchFetchJsonFor(element.getAmpDoc(), element);
 };
