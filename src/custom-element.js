@@ -1869,11 +1869,12 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
     /**
      * Get the purpose consents that should be granted.
-     * @return {?Array<string>}
+     * @return {Array<string>|undefined}
      */
     getPurposesConsent_() {
-      const purposes = this.getAttribute('data-block-on-consent-purposes');
-      return purposes ? purposes.split(',') : null;
+      const purposes =
+        this.getAttribute('data-block-on-consent-purposes') || null;
+      return purposes?.replace(/\s+/g, '')?.split(',');
     }
 
     /**
