@@ -20,19 +20,6 @@ import {htmlFor} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {setImportantStyles, setStyle} from '../../../src/style';
 
-const videoPlayerTagNameRe = /^amp\-(video|.+player)|AMP-BRIGHTCOVE|AMP-DAILYMOTION|AMP-YOUTUBE|AMP-VIMEO|AMP-IMA-VIDEO/i;
-
-/**
- * @param {string} tagName
- * @return {boolean}
- */
-function isIframeVideoPlayerComponent(tagName) {
-  if (tagName == 'AMP-VIDEO') {
-    return false;
-  }
-  return videoPlayerTagNameRe.test(tagName);
-}
-
 /**
  * @fileoverview This file implements the new AMP loader as an extension. This
  *    allows loading the runtime without incurring the cost of the loader code.
@@ -58,6 +45,39 @@ const LOADER_BACKGROUND_TAGS = {
   'AMP-INSTAGRAM': true,
   'AMP-GOOGLE-DOCUMENT-EMBED': true,
 };
+
+/**
+ * All video player components must either have a) "video" or b) "player" in
+ * their name.
+ * @private @const {!RegExp}
+ */
+const VIDEO_PLAYER_TAG_PATTERN = /^amp\-(video|.+player)/;
+
+/**
+ * A few components don't follow the previous convention for historical
+ * reasons, so they are listed individually.
+ * @enum {boolean}
+ */
+const VIDEO_PLAYER_TAGS_LEGACY = {
+  'AMP-BRIGHTCOVE': true,
+  'AMP-DAILYMOTION': true,
+  'AMP-YOUTUBE': true,
+  'AMP-VIMEO': true,
+  'AMP-IMA-VIDEO': true,
+};
+
+/**
+ * @param {string} tagName
+ * @return {boolean}
+ */
+function isIframeVideoPlayerComponent(tagName) {
+  const tagNameUppercase = tagName.toUpperCase();
+  return (
+    tagNameUppercase !== 'AMP-VIDEO' &&
+    (VIDEO_PLAYER_TAGS_LEGACY[tagNameUppercase] ||
+      VIDEO_PLAYER_TAG_PATTERN.test(tagName))
+  );
+}
 
 /**
  * Used to cache the loader DOM once created, so we do not need to recreate it
