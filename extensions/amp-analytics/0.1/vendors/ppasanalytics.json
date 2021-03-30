@@ -32,7 +32,7 @@
         "vid": "${visitor_id_from_cookie}",
         "timestamp": "${timestamp}"
       },
-      "proxyOnly" : false
+      "proxyOnly": false
     }
   }
 }
