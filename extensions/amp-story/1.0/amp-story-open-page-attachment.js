@@ -122,20 +122,6 @@ const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
   const theme = attachmentEl.getAttribute('theme');
   if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
     openAttachmentEl.setAttribute('theme', 'dark');
-
-    const arrowEl = openAttachmentEl.querySelector(
-      '.i-amphtml-story-inline-page-attachment-arrow'
-    );
-    arrowEl.classList.add(
-      'i-amphtml-story-inline-page-attachment-arrow-dark-theme'
-    );
-
-    const chipEl = openAttachmentEl.querySelector(
-      '.i-amphtml-story-inline-page-attachment-chip'
-    );
-    chipEl.classList.add(
-      'i-amphtml-story-inline-page-attachment-chip-dark-theme'
-    );
   }
 
   // Appending text & aria-label.
@@ -150,11 +136,6 @@ const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
   if (openLabel !== 'none') {
     const textEl = win.document.createElement('span');
     textEl.classList.add('i-amphtml-story-inline-page-attachment-label');
-    if (openAttachmentEl.getAttribute('theme') === 'dark') {
-      textEl.classList.add(
-        'i-amphtml-story-inline-page-attachment-label-dark-theme'
-      );
-    }
     textEl.textContent = openLabel;
     openAttachmentEl.appendChild(textEl);
   }
@@ -169,12 +150,6 @@ const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
   setImportantStyles(ctaImgEl, {
     'background-image': 'url(' + openImgAttr + ')',
   });
-
-  if (openAttachmentEl.getAttribute('theme') === 'dark') {
-    ctaImgEl.classList.add(
-      'i-amphtml-story-inline-page-attachment-img-dark-theme'
-    );
-  }
 
   const openImgAttr2 = attachmentEl.getAttribute('cta-image-2');
 

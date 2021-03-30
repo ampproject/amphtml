@@ -177,7 +177,7 @@
   margin-bottom: 12px !important;
 }
 
-.i-amphtml-story-inline-page-attachment-chip-dark-theme {
+[theme="dark"] .i-amphtml-story-inline-page-attachment-chip {
   background-color: rgba(0, 0, 0, 0.5) !important;
 }
 
@@ -197,7 +197,7 @@
   background-color: white !important;
 }
 
-.i-amphtml-story-inline-page-attachment-img-dark-theme {
+[theme="dark"] .i-amphtml-story-inline-page-attachment-img {
   background-color: black !important;
 }
 
@@ -213,7 +213,7 @@
   background-position: center !important;
 }
 
-.i-amphtml-story-inline-page-attachment-arrow-dark-theme {
+[theme="dark"] .i-amphtml-story-inline-page-attachment-arrow {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 32 32"><path d="M16 32a16 16 0 100-32 16 16 0 000 32z" fill="black"/><path d="M7 19v-2l8-5a1 1 0 112 3l-8 4H7z" fill="white"/><path d="M15 13l2-1 8 5a1 1 0 11-2 2l-8-4v-2z" fill="white"/></svg>') !important;
 }
 
@@ -230,6 +230,6 @@
   margin-bottom: 20px !important;
 }
 
-.i-amphtml-story-inline-page-attachment-label-dark-theme {
+[theme="dark"] .i-amphtml-story-inline-page-attachment-label {
   color: black !important;
 }
