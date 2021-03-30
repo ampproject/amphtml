@@ -169,19 +169,19 @@
 
 /** For amp-story-inline-page-attachment-v2 experiment elements. */
 .i-amphtml-story-page-open-attachment {
-  --chip-background-color: rgba(255, 255, 255, 0.5);
-  --img-background-color: white;
-  --label-text-color: white;
+  --i-amphtml-chip-background-color: rgba(255, 255, 255, 0.5) !important;
+  --i-amphtml-img-background-color: white !important;
+  --i-amphtml-label-text-color: white !important;
 }
 
 [theme="dark"].i-amphtml-story-page-open-attachment {
-  --chip-background-color: rgba(0, 0, 0, 0.5);
-  --img-background-color: black;
-  --label-text-color: black;
+  --i-amphtml-chip-background-color: rgba(0, 0, 0, 0.5) !important;
+  --i-amphtml-img-background-color: black !important;
+  --i-amphtml-label-text-color: black !important;
 }
 
 .i-amphtml-story-inline-page-attachment-chip {
-  background-color: var(--chip-background-color) !important;
+  background-color: var(--i-amphtml-chip-background-color) !important;
   display: flex !important;
   border-radius: 24px !important;
   align-items: center !important;
@@ -202,7 +202,7 @@
 .i-amphtml-story-inline-page-attachment-img {
   height: 48px !important;
   width: 48px !important;
-  background-color: var(--img-background-color) !important;
+  background-color: var(--i-amphtml-img-background-color) !important;
 }
 
 .i-amphtml-story-inline-page-attachment-img:nth-child(2) {
@@ -232,5 +232,5 @@
   white-space: nowrap !important;
   max-width: 210px !important;
   margin-bottom: 20px !important;
-  color: var(--label-text-color) !important;
+  color: var(--i-amphtml-label-text-color) !important;
 }
