@@ -467,7 +467,7 @@ Type attribute value: `piStats`
 
 Type attribute value: `ppasanalytics`
 
-Adds support for PPAS analytics. Configuration details can be found as [piwik.pro](https://help.piwik.pro/).
+Adds support for PPAS analytics. Configuration details can be found at [piwik.pro](https://developers.piwik.pro/).
 
 ### Pressboard
 
