@@ -156,11 +156,6 @@ const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
   if (openImgAttr2) {
     const ctaImgEl2 = win.document.createElement('div');
     ctaImgEl2.classList.add('i-amphtml-story-inline-page-attachment-img');
-    if (openAttachmentEl.getAttribute('theme') === 'dark') {
-      ctaImgEl2.classList.add(
-        'i-amphtml-story-inline-page-attachment-img-dark-theme'
-      );
-    }
     setImportantStyles(ctaImgEl2, {
       'background-image': 'url(' + openImgAttr2 + ')',
     });
