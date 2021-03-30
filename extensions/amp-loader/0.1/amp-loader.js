@@ -56,7 +56,7 @@ const VIDEO_PLAYER_TAG_PATTERN = /^amp\-(video|.+player)/;
 /**
  * A few components don't follow the previous convention for historical
  * reasons, so they are listed individually.
- * @enum {boolean}
+ * @private @enum {boolean}
  */
 const VIDEO_PLAYER_TAGS_LEGACY = {
   'AMP-BRIGHTCOVE': true,
