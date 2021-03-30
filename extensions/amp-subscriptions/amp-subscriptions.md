@@ -49,9 +49,9 @@ specialized version of access/paywall protocol. Some of the key differences are:
 1. The `amp-subscriptions` [authorization endpoint](#authorization-endpoint) is similar to the
    [`amp-access` authorization endpoint](../amp-access/amp-access.md#authorization-endpoint) but its response is strictly defined and standardized.
 2. Instead of using `amp-access-hide` and `amp-access` attributes as described in [`amp-access` Access Content Markup](../amp-access/amp-access.md#access-content-markup), you'll need to use:
-   -  [`subscription-section`](#subscriptions-section) to define sections of content for subscribers and non-subscribers.
-   -  [`subscription-display`](#subscriptions-display) to display elements based on factors that are **not** related to the subscription that the user has.
-3. The `amp-subscriptions` component allows multiple [vendor services](#vendor-services) to be configured 
+    - [`subscription-section`](#subscriptions-section) to define sections of content for subscribers and non-subscribers.
+    - [`subscription-display`](#subscriptions-display) to display elements based on factors that are **not** related to the subscription that the user has.
+3. The `amp-subscriptions` component allows multiple [vendor services](#vendor-services) to be configured
    for the page to participate in access/paywall decisions. Services are executed
    concurrently and prioritized based on which service returns the positive response.
 4. AMP viewers are allowed to provide `amp-subscriptions` a signed authorization
