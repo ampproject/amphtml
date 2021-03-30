@@ -28,6 +28,7 @@ tags: {  # amp-fit-text in websites
 tags: {  # amp-fit-text in ads
   html_format: AMP4ADS
   tag_name: "SCRIPT"
+  spec_name: "SCRIPT[custom-element=amp-fit-text] (AMP4ADS)"
   extension_spec: {
     name: "amp-fit-text"
     version: "0.1"
