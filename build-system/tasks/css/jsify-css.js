@@ -85,7 +85,7 @@ const CACHE_DIR = path.join(__dirname, '..', '..', '..', '.css-cache');
  * Used to cache css transforms done by postcss.
  * @const {!TransformCache}
  */
-const transformCache = new TransformCache(CACHE_DIR);
+const transformCache = new TransformCache(CACHE_DIR, '.css');
 
 /**
  * @typedef {{css: string, warnings: string[]}}:

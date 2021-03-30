@@ -27,7 +27,7 @@ const CACHE_DIR = path.resolve(__dirname, '..', '..', '.babel-cache');
  * Used to cache babel transforms done by esbuild.
  * @const {!TransformCache}
  */
-const transformCache = new TransformCache(CACHE_DIR);
+const transformCache = new TransformCache(CACHE_DIR, '.js');
 
 /**
  * Creates a babel plugin for esbuild for the given caller. Optionally enables

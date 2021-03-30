@@ -22,7 +22,10 @@ const path = require('path');
  * Cache for storing transformed files on both memory and on disk.
  */
 class TransformCache {
-  constructor(cacheDir) {
+  constructor(cacheDir, fileExtension) {
+    /** @type {string} */
+    this.fileExtension = fileExtension;
+
     /** @type {string} */
     this.cacheDir = cacheDir;
     fs.ensureDirSync(cacheDir);
@@ -43,8 +46,11 @@ class TransformCache {
     if (cached) {
       return cached;
     }
-    if (this.fsCache.has(hash)) {
-      const transformedPromise = fs.readFile(path.join(this.cacheDir, hash));
+    const filename = hash + this.fileExtension;
+    if (this.fsCache.has(filename)) {
+      const transformedPromise = fs.readFile(
+        path.join(this.cacheDir, filename)
+      );
       this.transformMap.set(hash, transformedPromise);
       return transformedPromise;
     }
@@ -63,8 +69,9 @@ class TransformCache {
     }
 
     this.transformMap.set(hash, transformPromise);
+    const filepath = path.join(this.cacheDir, hash) + this.fileExtension;
     transformPromise.then((contents) => {
-      fs.outputFile(path.join(this.cacheDir, hash), contents);
+      fs.outputFile(filepath, contents);
     });
   }
 }
