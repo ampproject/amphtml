@@ -866,7 +866,7 @@
       "name": "amp-story-inline-page-attachment-dark-theme: displays new inline CTA button with dark theme",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
-        ".i-amphtml-story-loaded"
+        ".i-amphtml-story-loaded",
         "amp-story-page#cover[active]"
       ],
       // for page navigation
