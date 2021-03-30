@@ -25,6 +25,7 @@ import {
   getNumberOfAds,
 } from '../algorithm-predetermined';
 import {StoryAdPageManager} from '../story-ad-page-manager';
+import {StoryAdPlacements} from '../../../../src/experiments/story-ad-placements';
 
 describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
   let storeService;
@@ -45,7 +46,8 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
         storeService.dispatch(Action.SET_PAGE_IDS, pageIds);
         const algo = new PredeterminedPositionAlgorithm(
           storeService,
-          pageManager
+          pageManager,
+          StoryAdPlacements.PREDETERMINED_EIGHT
         );
         expect(algo.isStoryEligible()).to.be.false;
       });
@@ -55,15 +57,15 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
         storeService.dispatch(Action.SET_PAGE_IDS, pageIds);
         const algo = new PredeterminedPositionAlgorithm(
           storeService,
-          pageManager
+          pageManager,
+          StoryAdPlacements.PREDETERMINED_EIGHT
         );
         expect(algo.isStoryEligible()).to.be.true;
       });
     });
 
     describe('#initializePages', () => {
-      // TODO(ccordry): unskip flaky test. Started failing with #onNewAdView skip?!?
-      it.skip('should create and insert a single page', () => {
+      it('should create and insert a single page', () => {
         const pageIds = ['1', '2', '3', '4', '5', '6', '7', '8'];
         storeService.dispatch(Action.SET_PAGE_IDS, pageIds);
         const mockPage = {registerLoadCallback: env.sandbox.stub().callsArg(0)};
@@ -76,7 +78,8 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
         );
         const algo = new PredeterminedPositionAlgorithm(
           storeService,
-          pageManager
+          pageManager,
+          StoryAdPlacements.PREDETERMINED_EIGHT
         );
         const pages = algo.initializePages();
         expect(pages[0]).to.equal(mockPage);
@@ -98,7 +101,8 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
         );
         const algo = new PredeterminedPositionAlgorithm(
           storeService,
-          pageManager
+          pageManager,
+          StoryAdPlacements.PREDETERMINED_EIGHT
         );
         const pages = algo.initializePages();
         expect(pages[0]).not.to.exist;
@@ -108,8 +112,7 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
     });
 
     describe('#onNewAdView', () => {
-      // TODO(ccordry): unskip flaky test. CalledTwice fails on race.
-      it.skip('should create and insert the next ad page', () => {
+      it('should create and insert the next ad page', () => {
         // ['1' ... '16']
         const pageIds = new Array(16).fill(0).map((_, i) => (i + 1).toString());
         storeService.dispatch(Action.SET_PAGE_IDS, pageIds);
@@ -123,7 +126,8 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
         );
         const algo = new PredeterminedPositionAlgorithm(
           storeService,
-          pageManager
+          pageManager,
+          StoryAdPlacements.PREDETERMINED_EIGHT
         );
         algo.initializePages();
         algo.onNewAdView();
