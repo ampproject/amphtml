@@ -51,7 +51,7 @@ const LOADER_BACKGROUND_TAGS = {
  * their name.
  * @private @const {!RegExp}
  */
-const VIDEO_PLAYER_TAG_PATTERN = /^amp\-(video|.+player)/;
+const VIDEO_PLAYER_TAG_PATTERN = /\-(video|.+player)/;
 
 /**
  * A few components don't follow the previous convention for historical
@@ -63,7 +63,6 @@ const VIDEO_PLAYER_TAGS_LEGACY = {
   'AMP-DAILYMOTION': true,
   'AMP-YOUTUBE': true,
   'AMP-VIMEO': true,
-  'AMP-IMA-VIDEO': true,
 };
 
 /**
