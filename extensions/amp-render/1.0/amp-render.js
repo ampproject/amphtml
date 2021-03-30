@@ -92,7 +92,6 @@ function getAmpScriptJson(ampdoc, src) {
 
       const ampScriptId = args[0];
       const fnIdentifier = args[1];
-      // const ampScriptEl = element.getAmpdoc().getElementById(ampScriptId);
       const ampScriptEl = ampdoc.getElementById(ampScriptId);
       userAssert(
         ampScriptEl && ampScriptEl.tagName === 'AMP-SCRIPT',
@@ -100,7 +99,6 @@ function getAmpScriptJson(ampdoc, src) {
       );
 
       return ampScriptEl.getImpl().then((impl) => {
-        impl.layoutCallback();
         return impl.callFunction(fnIdentifier);
       });
     })
@@ -131,7 +129,6 @@ export const getJsonFn = (element) => {
   }
   if (isAmpScriptSrc(src)) {
     return (src) => getAmpScriptJson(element.getAmpDoc(), src);
-    // return (src) => getAmpScriptJson(element, src);
   }
   return () => batchFetchJsonFor(element.getAmpDoc(), element);
 };
