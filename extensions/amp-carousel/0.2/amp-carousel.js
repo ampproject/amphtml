@@ -157,7 +157,7 @@ class AmpCarousel extends AMP.BaseElement {
       win,
       element,
       scrollContainer: dev().assertElement(this.scrollContainer_),
-      initialIndex: Number(this.element.getAttribute('slide')),
+      initialIndex: Number(this.element.getAttribute('slide') || '0'),
       runMutate: (cb) => this.mutateElement(cb),
     });
     this.configureCarousel_(slides);
