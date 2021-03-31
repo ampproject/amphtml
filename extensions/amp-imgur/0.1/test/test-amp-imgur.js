@@ -81,9 +81,6 @@ describes.realWin(
 
     it('renders a/ type urls', async () => {
       const element = await getImgur('a/ZF7NS3V');
-      const laidOut = element.layoutCallback();
-      fakePostMessage(element);
-      await laidOut;
       testIframe(element.querySelector('iframe'), 'a/ZF7NS3V');
     });
 
@@ -91,24 +88,18 @@ describes.realWin(
     it('falls back to adding a/ prefix when a message is not received', async () => {
       const element = await getImgurElement('ZF7NS3V');
 
-      const laidOut = element.layoutCallback();
+      element.layoutCallback();
 
       // wait for first iframe to fail and the second to be added
       let firstIframe;
+      let iframe;
       await waitForChildPromise(element, (element) => {
-        const iframe = element.querySelector('iframe');
-        if (!firstIframe) {
-          firstIframe = iframe;
-          return false;
-        }
-        return iframe !== firstIframe;
+        iframe = element.querySelector('iframe');
+        firstIframe = firstIframe || iframe;
+        return iframe && iframe !== firstIframe;
       });
 
-      fakePostMessage(element);
-
-      await laidOut;
-
-      testIframe(element.querySelector('iframe'), 'a/ZF7NS3V');
+      testIframe(iframe, 'a/ZF7NS3V');
     });
 
     it('resizes with JSON String message', async () => {
