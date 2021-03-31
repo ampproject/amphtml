@@ -851,6 +851,12 @@
       "loading_complete_delay_ms": 2000,
     },
     {
+      "url": "examples/visual-tests/amp-carousel/amp-carousel-slides-autoplay.html",
+      "name": "amp-carousel-slides-autoplay",
+      "interactive_tests": "examples/visual-tests/amp-carousel/amp-carousel-slides-autoplay.js",
+      "no_base_test": true
+    },
+    {
       "url": "examples/visual-tests/amp-story/basic-transformed.html",
       "name": "amp-story: basic example transformed with toolbox-optimizer",
       "viewport": {"width": 320, "height": 480},
