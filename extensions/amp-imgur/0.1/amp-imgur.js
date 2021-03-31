@@ -79,7 +79,7 @@ export class AmpImgur extends AMP.BaseElement {
     );
 
     return this.insertLoadIframe_(sanitizedId).then(() => {
-      // Unfortunately, between April 2020 to May 2021 we incorrectly interpreted
+      // Unfortunately, between April 2020 and May 2021 we incorrectly interpreted
       // image ids as album ids, so we'd add an a/ prefix even when unnecessary.
       // When 404ing, we won't receive messages, so we retry with a/
       // https://go.amp.dev/issue/28049
