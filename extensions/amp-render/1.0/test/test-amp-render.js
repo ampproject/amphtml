@@ -16,10 +16,8 @@
 
 import '../../../amp-bind/0.1/amp-bind';
 import '../../../amp-mustache/0.2/amp-mustache';
-import '../../../amp-script/0.1/amp-script';
 import '../amp-render';
 import * as BatchedJsonModule from '../../../../src/batched-json';
-import {Services} from '../../../../src/services';
 import {htmlFor} from '../../../../src/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';
@@ -111,6 +109,7 @@ describes.realWin(
     });
 
     it('renders from amp-script', async () => {
+      // needed to stub `callFunction` below
       const ampScriptScript = html`<script
         async
         custom-element="amp-script"
