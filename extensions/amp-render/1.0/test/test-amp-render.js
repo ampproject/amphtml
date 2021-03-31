@@ -16,8 +16,10 @@
 
 import '../../../amp-bind/0.1/amp-bind';
 import '../../../amp-mustache/0.2/amp-mustache';
+import '../../../amp-script/0.1/amp-script';
 import '../amp-render';
 import * as BatchedJsonModule from '../../../../src/batched-json';
+import {Services} from '../../../../src/services';
 import {htmlFor} from '../../../../src/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';
@@ -109,36 +111,46 @@ describes.realWin(
     });
 
     it('renders from amp-script', async () => {
+      const ampScriptScript = html`<script
+        async
+        custom-element="amp-script"
+        src="https://cdn.ampproject.org/v0/amp-script-0.1.js"
+      ></script>`;
+      doc.head.appendChild(ampScriptScript);
+
       const ampScript = html`
-        <div>
-          <amp-script
-            id="dataFunctions"
-            script="local-script"
-            nodom
-          ></amp-script>
+        <amp-script id="dataFunctions" script="local-script" nodom></amp-script>
+      `;
+      const fetchScript = html`
           <script id="local-script" type="text/plain" target="amp-script">
             function getRemoteData() {
               return fetch('https://example.com/data.json')
-                .then(resp => resp.json());
-
+                  .then((resp) => resp.json());
             }
             exportFunction('getRemoteData', getRemoteData);
           </script>
         </div>
       `;
-      doc.body.appendChild(ampScript);
 
       element = html`
         <amp-render
           src="amp-script:dataFunctions.getRemoteData"
           width="auto"
-          height="140"
+          height="200"
           layout="fixed-height"
         >
           <template type="amp-mustache"><p>Hello {{name}}</p></template>
         </amp-render>
       `;
+      doc.body.appendChild(fetchScript);
+      doc.body.appendChild(ampScript);
       doc.body.appendChild(element);
+
+      const impl = {
+        callFunction: env.sandbox.stub(),
+      };
+      impl.callFunction.resolves({name: 'Joe'});
+      env.sandbox.stub(ampScript, 'getImpl').resolves(impl);
 
       const text = await getRenderedData();
       expect(text).to.equal('Hello Joe');
