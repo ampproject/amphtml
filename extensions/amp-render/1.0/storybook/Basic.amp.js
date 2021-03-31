@@ -111,17 +111,25 @@ WithBindableSrc.story = {
 export const WithAmpScriptSrc = () => {
   return (
     <>
+      <script
+        async
+        custom-element="amp-script"
+        src="https://cdn.ampproject.org/v0/amp-script-0.1.js"
+      ></script>
+      <meta
+        name="amp-script-src"
+        content="sha384-W71daLvaG1fVtSoGC4xq80vkUeKAZPo2hPEj4ofjtSOSfK1m02U0gQXp1ChLV1O8"
+      ></meta>
+      <amp-script id="dataFunctions" script="local-script" nodom></amp-script>
       <script id="local-script" type="text/plain" target="amp-script">
         {`
         function getRemoteData() {
-          return fetch('http://localhost:9001/examples/amp-render-data.json')
+          return fetch('https://amp.dev/static/samples/json/examples2.json')
             .then(function(resp) { return resp.json(); });
-
         }
         exportFunction('getRemoteData', getRemoteData);
         `}
       </script>
-      <amp-script id="dataFunctions" script="local-script" nodom></amp-script>
 
       <amp-render
         src="amp-script:dataFunctions.getRemoteData"
@@ -129,7 +137,13 @@ export const WithAmpScriptSrc = () => {
         height="100"
         layout="fixed-height"
       >
-        <template type="amp-mustache">{`Hi {{name}}!`}</template>
+        <template type="amp-mustache">
+          <ul>
+            {`{{#items}}`}
+            <li>{`{{title}}`}</li>
+            {`{{/items}}`}
+          </ul>
+        </template>
       </amp-render>
     </>
   );
