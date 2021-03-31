@@ -24,14 +24,6 @@ import {isExperimentOn} from '../../../src/experiments';
 import {setImportantStyles} from '../../../src/style';
 
 /**
- * @enum {string}
- */
-const AttachmentTheme = {
-  LIGHT: 'light', // default
-  DARK: 'dark',
-};
-
-/**
  * @param {!Element} element
  * @return {!Element}
  */
@@ -117,12 +109,6 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
  */
 const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
   const openAttachmentEl = buildOpenInlineAttachmentElement(pageEl);
-
-  // Setting theme
-  const theme = attachmentEl.getAttribute('theme');
-  if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
-    openAttachmentEl.setAttribute('theme', AttachmentTheme.DARK);
-  }
 
   // Appending text & aria-label.
   const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
