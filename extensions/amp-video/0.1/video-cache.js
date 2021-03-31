@@ -35,7 +35,7 @@ export function addCacheSources(videoEl, win) {
     !videoEl.querySelector('source[src]')
   ) {
     user().error(
-      'amp-video',
+      'AMP-VIDEO',
       'Need to import amp-cache-url in the story to enable google video cache'
     );
     return Promise.resolve();
