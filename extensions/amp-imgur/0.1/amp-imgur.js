@@ -136,10 +136,11 @@ export class AmpImgur extends AMP.BaseElement {
     this.applyFillContent(iframe);
     element.appendChild(iframe);
 
+    // We're sure we've loaded when we receive the first message.
+    const {promise, resolve} = new Deferred();
+    this.resolveReceivedMessage_ = resolve;
+
     return this.loadPromise(this.iframe_).then(() => {
-      // We're sure we've loaded when we receive the first message.
-      const {promise, resolve} = new Deferred();
-      this.resolveReceivedMessage_ = resolve;
       return Services.timerFor(this.win).timeoutPromise(500, promise);
     });
   }

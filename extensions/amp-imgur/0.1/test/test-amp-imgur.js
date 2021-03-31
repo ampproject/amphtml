@@ -15,6 +15,10 @@
  */
 
 import '../amp-imgur';
+import {
+  createElementWithAttributes,
+  waitForChildPromise,
+} from '../../../../src/dom';
 
 describes.realWin(
   'amp-imgur',
@@ -31,17 +35,35 @@ describes.realWin(
       doc = win.document;
     });
 
-    function getImgur(imgurId) {
-      const imgur = doc.createElement('amp-imgur');
-      imgur.setAttribute('data-imgur-id', imgurId);
-      imgur.setAttribute('width', '1');
-      imgur.setAttribute('height', '1');
-      imgur.setAttribute('layout', 'responsive');
-      doc.body.appendChild(imgur);
-      return imgur
-        .buildInternal()
-        .then(() => imgur.layoutCallback())
-        .then(() => imgur);
+    async function fakePostMessage(element, data = {}) {
+      const iframe = element.querySelector('iframe');
+      (await element.getImpl()).handleImgurMessages_({
+        data: JSON.stringify(data),
+        origin: 'https://imgur.com',
+        source: iframe.contentWindow,
+      });
+    }
+
+    function getImgurElement(imgurId) {
+      const element = createElementWithAttributes(doc, 'amp-imgur', {
+        'data-imgur-id': imgurId,
+        'width': '100',
+        'height': '100',
+        'layout': 'responsive',
+      });
+      doc.body.appendChild(element);
+      return element.buildInternal().then(() => element);
+    }
+
+    async function getImgur(imgurId) {
+      const element = await getImgurElement(imgurId);
+      const laidOut = element.layoutCallback();
+
+      // layoutCallback is not resolved until the first message is received
+      fakePostMessage(element);
+
+      await laidOut;
+      return element;
     }
 
     function testIframe(iframe, id) {
@@ -52,16 +74,41 @@ describes.realWin(
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
     }
 
-    it('renders', () => {
-      return getImgur('2CnX7').then((imgur) => {
-        testIframe(imgur.querySelector('iframe'), 'a/2CnX7');
-      });
+    it('renders', async () => {
+      const element = await getImgur('2CnX7');
+      testIframe(element.querySelector('iframe'), '2CnX7');
     });
 
-    it('renders a/ type urls', () => {
-      return getImgur('a/ZF7NS3V').then((imgur) => {
-        testIframe(imgur.querySelector('iframe'), 'a/ZF7NS3V');
+    it('renders a/ type urls', async () => {
+      const element = await getImgur('a/ZF7NS3V');
+      const laidOut = element.layoutCallback();
+      fakePostMessage(element);
+      await laidOut;
+      testIframe(element.querySelector('iframe'), 'a/ZF7NS3V');
+    });
+
+    // https://go.amp.dev/issue/28049
+    it('falls back to adding a/ prefix when a message is not received', async () => {
+      const element = await getImgurElement('ZF7NS3V');
+
+      const laidOut = element.layoutCallback();
+
+      // wait for first iframe to fail and the second to be added
+      let firstIframe;
+      await waitForChildPromise(element, (element) => {
+        const iframe = element.querySelector('iframe');
+        if (!firstIframe) {
+          firstIframe = iframe;
+          return false;
+        }
+        return iframe !== firstIframe;
       });
+
+      fakePostMessage(element);
+
+      await laidOut;
+
+      testIframe(element.querySelector('iframe'), 'a/ZF7NS3V');
     });
 
     it('resizes with JSON String message', async () => {
