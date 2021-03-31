@@ -134,4 +134,4 @@ Redirects in [`<amp-form>`](https://amp.dev/documentation/components/amp-form) a
 
 ## Feedback & Support
 
-For support and feedback on AMP for Email, please use the following channel: [ongoing-participation](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#ongoing-participation)
+For support and feedback on AMP for Email, please use the following channel: [ongoing-participation](https://github.com/ampproject/amphtml/blob/main/CONTRIBUTING.md#ongoing-participation)
