@@ -100,12 +100,6 @@ const CHANNEL_CONFIGS = {
   '25': {type: 'experimentC', configBase: 'prod'}, // Spec name: 'inabox-experimentC'
 };
 
-// Mapping of entry file names to a dictionary of AMP_CONFIG additions.
-const TARGETS_TO_CONFIG = MINIFIED_TARGETS.flatMap((minifiedTarget) => [
-  {file: `${minifiedTarget}.js`, config: {}},
-  {file: `${minifiedTarget}.mjs`, config: {esm: 1}},
-]);
-
 function logSeparator_() {
   log('---\n\n');
 }
@@ -366,9 +360,20 @@ async function prependConfig_(outputDir) {
       type: channelConfig.type,
       ...require(`../../global-configs/${channelConfig.configBase}-config.json`),
     };
+    // Mapping of entry file names to a dictionary of AMP_CONFIG additions.
+    const targetsToConfig = MINIFIED_TARGETS.flatMap((minifiedTarget) => {
+      const targets = [];
+      if (!argv.esm) {
+        targets.push({file: `${minifiedTarget}.js`, config: {}});
+      }
+      if (argv.esm === undefined || argv.esm) {
+        targets.push({file: `${minifiedTarget}.mjs`, config: {esm: 1}});
+      }
+      return targets;
+    });
 
     allPrependPromises.push(
-      ...TARGETS_TO_CONFIG.map(async (target) => {
+      ...targetsToConfig.map(async (target) => {
         const targetPath = path.join(rtvPath, target.file);
         const channelConfig = JSON.stringify({
           ...channelPartialConfig,
