@@ -41,3 +41,11 @@ export function createPortal(vnode, container) {
 export function toChildArray(unusedChildren) {
   return compat.Children.toArray.apply(undefined, arguments);
 }
+
+/**
+ * @param {...PreactDef.Renderable} children
+ * @return {!Array<PreactDef.Renderable>}
+ */
+export function cloneChildren(children) {
+  return compat.Children.map(children, (child) => compat.cloneElement(child));
+}
