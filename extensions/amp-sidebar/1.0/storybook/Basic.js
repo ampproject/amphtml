@@ -98,7 +98,7 @@ export const _default = () => {
 export const toolbar = () => {
   const sideConfigurations = ['left', 'right', undefined];
   const side = select('side', sideConfigurations, sideConfigurations[0]);
-  const toolbarMedia = text('toolbar media', '(max-width: 500px)');
+  //const toolbarMedia = text('toolbar media', '(max-width: 500px)');
   const foregroundColor = color('color');
   const backgroundColor = color('background');
   const backdropColor = color('backdrop color');
@@ -109,14 +109,7 @@ export const toolbar = () => {
         side={side}
         style={{color: foregroundColor, backgroundColor}}
         backdropStyle={{backgroundColor: backdropColor}}
-      >
-        <SidebarToolbar toolbar={toolbarMedia} toolbarTarget="toolbar-target">
-          <ul>
-            <li>Toolbar Item 1</li>
-            <li>Toolbar Item 2</li>
-          </ul>
-        </SidebarToolbar>
-      </SidebarWithActions>
+      ></SidebarWithActions>
       <div id="toolbar-target"></div>
     </main>
   );
