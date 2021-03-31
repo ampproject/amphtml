@@ -85,23 +85,24 @@ export class AmpImgur extends AMP.BaseElement {
       // image ids as album ids, so we'd add an a/ prefix even when unnecessary.
       // When 404ing, we won't receive messages, so we retry with a/
       // https://go.amp.dev/issue/28049
-      if (!sanitizedId.startsWith('a/')) {
-        const idWithPrefix = `a/${sanitizedId}`;
-        return this.insertLoadIframe_(idWithPrefix).then(
-          () => {
-            user().warn(
-              TAG,
-              `id should be prefixed with "a/", loaded album using data-imgur-id="${idWithPrefix}". This element should be updated to use "a/".`
-            );
-          },
-          () => {
-            user().error(
-              TAG,
-              `Failed to load. Is "${sanitizedId}" a correct id?`
-            );
-          }
-        );
+      if (sanitizedId.startsWith('a/')) {
+        return;
       }
+      const idWithPrefix = `a/${sanitizedId}`;
+      return this.insertLoadIframe_(idWithPrefix).then(
+        () => {
+          user().warn(
+            TAG,
+            `id should be prefixed with "a/", loaded album using data-imgur-id="${idWithPrefix}". This element should be updated to use "a/".`
+          );
+        },
+        () => {
+          user().error(
+            TAG,
+            `Failed to load. Is "${sanitizedId}" a correct id?`
+          );
+        }
+      );
     });
   }
 
