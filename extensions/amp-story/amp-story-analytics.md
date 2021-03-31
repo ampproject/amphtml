@@ -122,7 +122,6 @@ Example:
 The `story-open` trigger is fired when opening a drawer or dialog inside a story. The components that are currently trackable by this are:
 
 -   Page attachment (`<amp-story-page-attachment>`)
--   Bookend (`<amp-story-bookend>`)
 -   Share dialog (`<amp-story-share-menu>`)
 -   Info dialog (`<amp-story-info-dialog>`)
 -   Sidebar (`<amp-sidebar>`)

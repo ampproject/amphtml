@@ -171,8 +171,6 @@ The following markup is a decent starting point or boilerplate. Copy this and sa
           <h1>The End</h1>
         </amp-story-grid-layer>
       </amp-story-page>
-      <amp-story-bookend src="bookendv1.json" layout="nodisplay">
-      </amp-story-bookend>
     </amp-story>
   </body>
 </html>
@@ -218,7 +216,6 @@ The `amp-story` component represents an entire story. The component itself imple
   <amp-story-page>[...]</amp-story-page>
   <amp-story-page>[...]</amp-story-page>
   <amp-story-page>[...]</amp-story-page>
-  <amp-story-bookend src="./related.json"></amp-story-bookend>
 </amp-story>
 ```
 
