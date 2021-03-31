@@ -81,9 +81,10 @@ export class AmpImgur extends AMP.BaseElement {
     );
 
     return this.insertLoadIframe_(sanitizedId).catch(() => {
-      // Unfortunately, between April 2020 and May 2021 we incorrectly interpreted
-      // image ids as album ids, so we'd add an a/ prefix even when unnecessary.
-      // When 404ing, we won't receive messages, so we retry with a/
+      // Unfortunately, from May 2020 to May 2021 we incorrectly interpreted
+      // any post id as an album id.
+      // To maintain compatibility with this period, we retry with by adding
+      // the a/ prefix when failing to load.
       // https://go.amp.dev/issue/28049
       if (sanitizedId.startsWith('a/')) {
         return;
