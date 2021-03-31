@@ -80,31 +80,27 @@ export class AmpImgur extends AMP.BaseElement {
       (unusedMatch, aSlash, rest) => (aSlash || '') + encodeURIComponent(rest)
     );
 
-    return this.insertLoadIframe_(sanitizedId).catch(() => {
-      // Unfortunately, from May 2020 to May 2021 we incorrectly interpreted
-      // any post id as an album id.
-      // To maintain compatibility with this period, we retry with by adding
-      // the a/ prefix when failing to load.
-      // https://go.amp.dev/issue/28049
-      if (sanitizedId.startsWith('a/')) {
-        return;
-      }
-      const idWithPrefix = `a/${sanitizedId}`;
-      return this.insertLoadIframe_(idWithPrefix).then(
-        () => {
+    return this.insertLoadIframe_(sanitizedId)
+      .catch((e) => {
+        // Unfortunately, from May 2020 to May 2021 we incorrectly interpreted
+        // any post id as an album id.
+        // To maintain compatibility with this period, we retry with by adding
+        // the a/ prefix when failing to load.
+        // https://go.amp.dev/issue/28049
+        if (sanitizedId.startsWith('a/')) {
+          throw e;
+        }
+        const idWithPrefix = `a/${sanitizedId}`;
+        return this.insertLoadIframe_(idWithPrefix).then(() => {
           user().warn(
             TAG,
             `id should be prefixed with "a/", loaded album using data-imgur-id="${idWithPrefix}". This element should be updated to use "a/".`
           );
-        },
-        () => {
-          user().error(
-            TAG,
-            `Failed to load. Is "${sanitizedId}" a correct id?`
-          );
-        }
-      );
-    });
+        });
+      })
+      .catch(() => {
+        user().error(TAG, `Failed to load. Is "${sanitizedId}" a correct id?`);
+      });
   }
 
   /**
