@@ -121,7 +121,7 @@ const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
   // Setting theme
   const theme = attachmentEl.getAttribute('theme');
   if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
-    openAttachmentEl.setAttribute('theme', 'dark');
+    openAttachmentEl.setAttribute('theme', AttachmentTheme.DARK);
   }
 
   // Appending text & aria-label.
