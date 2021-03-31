@@ -127,6 +127,8 @@ class AmpBridPlayer extends AMP.BaseElement {
       feedType = this.element.getAttribute('data-dynamic');
     } else if (this.element.hasAttribute('data-playlist')) {
       feedType = 'playlist';
+    } else if (this.element.hasAttribute('data-carousel')) {
+      feedType = 'carousel';
     } else if (this.element.hasAttribute('data-outstream')) {
       feedType = 'outstream';
     }
@@ -169,8 +171,9 @@ class AmpBridPlayer extends AMP.BaseElement {
     this.feedID_ = userAssert(
       element.getAttribute('data-video') ||
         element.getAttribute('data-playlist') ||
+        element.getAttribute('data-carousel') ||
         element.getAttribute('data-outstream'),
-      'Either the data-video or the data-playlist or the data-outstream ' +
+      'Either the data-video, data-playlist, data-carousel or data-outstream ' +
         'attributes must be specified for <amp-brid-player> %s',
       element
     );
