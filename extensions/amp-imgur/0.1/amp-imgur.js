@@ -83,6 +83,9 @@ export class AmpImgur extends AMP.BaseElement {
       // image ids as album ids, so we'd add an a/ prefix even when unnecessary.
       // When 404ing, we won't receive messages, so we retry with a/
       // https://go.amp.dev/issue/28049
+      if (sanitizedId.startsWith('a/')) {
+        return;
+      }
       const {promise, resolve} = new Deferred();
       this.resolveReceivedMessage_ = resolve;
       return Services.timerFor(this.win)
