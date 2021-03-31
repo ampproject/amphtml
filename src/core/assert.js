@@ -47,6 +47,21 @@ export class UserError extends Error {
 }
 
 /**
+ * Append an item to an array unless it's an empty string.
+ * Importantly, this will exclude empty string but allow other falsey values
+ * such as null or undefined.
+ * @param {Array} arr
+ * @param {any} item
+ */
+function pushIfNonEmpty(arr, item) {
+  // Trim away whitespace and exclude empty strings
+  item = typeof item == 'string' ? item.trim() : item;
+  if (item !== '') {
+    arr.push(item);
+  }
+}
+
+/**
  * Throws a provided error if the second argument isn't trueish.
  *
  * Supports argument substitution into the message via %s placeholders.
@@ -73,14 +88,17 @@ function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
   const messageArgs = Array.prototype.slice.call(arguments, 3);
   let firstElement;
 
-  // Substitute provided values into format string in message(
+  const messageArray = [];
+  const pushMessage = pushIfNonEmpty.bind(null, messageArray);
+
+  // Substitute provided values into format string in message
   const splitMessage = (opt_message || 'Assertion failed').split('%s');
   let message = splitMessage.shift();
-  const messageArray = [message];
+  pushMessage(message);
 
   while (splitMessage.length > 0) {
     let subValue = messageArgs.shift();
-    let nextConstant = splitMessage.shift();
+    const nextConstant = splitMessage.shift();
 
     // If an element is provided, add it to the error object
     if (!firstElement && subValue?.tagName) {
@@ -91,15 +109,9 @@ function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
     // Past this point, we want any elements string-ified
     subValue = elementStringOrPassThru(subValue);
     message += subValue + nextConstant;
-    // Trim away whitespace and exclude empty strings from messageArray
-    nextConstant = nextConstant.trim();
 
-    messageArray.push(subValuegd);
-    // Importantly, this will exclude empty string but allow other falsey values
-    // such as null or undefined
-    if (nextConstant !== '') {
-      messageArray.push(nextConstant);
-    }
+    pushMessage(subValue);
+    pushMessage(nextConstant);
   }
 
   const error = new errorCls(message);
