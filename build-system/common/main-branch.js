@@ -13,19 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
-
-const {transformCssString} = require('./jsify-css');
 
 /**
- * Wrapper for the asynchronous transformCssString that is used by transformCssSync()
- * in build-system/tasks/css/jsify-css-sync.js.
- *
- * @return {function(string, !Object=, !Object=): ReturnType<transformCssString>}
+ * TODO(rsimha, #32195): Change this to main when branch is renamed, and delete
+ * this file once the dust settles.
  */
-function init() {
-  return function (cssStr, opt_filename) {
-    return Promise.resolve(transformCssString(cssStr, opt_filename));
-  };
-}
-module.exports = init;
+const mainBranch = 'master';
+
+module.exports = {
+  mainBranch,
+};
