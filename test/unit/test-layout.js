@@ -62,22 +62,16 @@ describes.realWin('Layout', {}, (env) => {
     expect(parseLayout('fluid')).to.equal('fluid');
   });
 
-  it('are loading components allowed', () => {
+  it('isLoadingAllowed', () => {
     for (const layout of [Layout.NODISPLAY, Layout.CONTAINER]) {
       it(`is disallowed when layout="${layout}"`, () => {
-        const element = createElementWithAttributes(env.win.document, 'div', {
-          layout,
-        });
-        expect(isLoadingAllowed(element)).to.be.false;
+        expect(isLoadingAllowed(layout)).to.be.false;
       });
     }
 
     for (const layout of [Layout.FIXED, Layout.INTRINSIC, Layout.RESPONSIVE]) {
       it(`is allowed when layout="${layout}"`, () => {
-        const element = createElementWithAttributes(env.win.document, 'div', {
-          layout,
-        });
-        expect(isLoadingAllowed(element)).to.be.true;
+        expect(isLoadingAllowed(layout)).to.be.true;
       });
     }
   });

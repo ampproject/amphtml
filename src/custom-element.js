@@ -2021,7 +2021,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         this.layout_ == Layout.NODISPLAY ||
         this.hasAttribute('noloading') ||
         (laidOut && !force) ||
-        !isLoadingAllowed(this) ||
+        !isLoadingAllowed(this.layout_) ||
         isInternalOrServiceNode(this)
       ) {
         return false;
