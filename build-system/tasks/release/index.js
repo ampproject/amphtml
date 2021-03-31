@@ -197,7 +197,7 @@ async function compileDistFlavors_(distFlavors, tempDir) {
     );
 
     log('Copying static files...');
-    await Promise.all([
+    const staticFilesPromise = Promise.all([
       // Directory-to-directory copy from the ./static sub-directory.
       fs.copy(STATIC_FILES_DIR, path.join(flavorTempDistDir, 'dist')),
       // Individual files to copy from the Git repository.
@@ -207,14 +207,20 @@ async function compileDistFlavors_(distFlavors, tempDir) {
           path.join(flavorTempDistDir, 'dist', path.basename(staticFilePath))
         )
       ),
-      // Individual files to copy from the resulting build artifacts.
-      ...Object.entries(POST_BUILD_MOVES).map(([from, to]) =>
-        fs.copy(
-          path.join(flavorTempDistDir, from),
-          path.join(flavorTempDistDir, to)
-        )
-      ),
     ]);
+    const postBuildMovesPromise = !argv.esm
+      ? Promise.all([
+          // Individual files to copy from the resulting build artifacts.
+          // This is only relevant for nomodule builds.
+          ...Object.entries(POST_BUILD_MOVES).map(([from, to]) =>
+            fs.copy(
+              path.join(flavorTempDistDir, from),
+              path.join(flavorTempDistDir, to)
+            )
+          ),
+        ])
+      : Promise.resolve();
+    await Promise.all([...staticFilesPromise, ...postBuildMovesPromise]);
 
     logSeparator_();
   }
