@@ -847,6 +847,7 @@
     {
       "url": "examples/visual-tests/amp-carousel/amp-carousel-slides.html",
       "name": "amp-carousel-slides",
+      "interactive_tests": "examples/visual-tests/amp-carousel/amp-carousel-slides.js",
       "loading_complete_delay_ms": 2000,
     },
     {
