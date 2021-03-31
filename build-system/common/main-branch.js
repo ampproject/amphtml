@@ -15,7 +15,8 @@
  */
 
 /**
- * TODO(rsimha, #32195): Change this to main.
+ * TODO(rsimha, #32195): Change this to main when branch is renamed, and delete
+ * this file once the dust settles.
  */
 const mainBranch = 'master';
 
