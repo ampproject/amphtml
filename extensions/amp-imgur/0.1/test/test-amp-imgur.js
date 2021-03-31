@@ -128,6 +128,8 @@ describes.realWin(
 
       await laidOut;
 
+      testIframe(element.querySelector('iframe'), 'a/000000');
+
       expect(
         error.withArgs(
           env.sandbox.match.any,
