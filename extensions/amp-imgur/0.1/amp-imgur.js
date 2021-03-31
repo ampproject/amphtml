@@ -34,7 +34,9 @@ import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
-import {userAssert} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
+
+const TAG = 'amp-imgur';
 
 export class AmpImgur extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -78,21 +80,28 @@ export class AmpImgur extends AMP.BaseElement {
       (unusedMatch, aSlash, rest) => (aSlash || '') + encodeURIComponent(rest)
     );
 
-    return this.insertLoadIframe_(sanitizedId).then(() => {
+    return this.insertLoadIframe_(sanitizedId).catch(() => {
       // Unfortunately, between April 2020 and May 2021 we incorrectly interpreted
       // image ids as album ids, so we'd add an a/ prefix even when unnecessary.
       // When 404ing, we won't receive messages, so we retry with a/
       // https://go.amp.dev/issue/28049
-      if (sanitizedId.startsWith('a/')) {
-        return;
+      if (!sanitizedId.startsWith('a/')) {
+        const idWithPrefix = `a/${sanitizedId}`;
+        return this.insertLoadIframe_(idWithPrefix).then(
+          () => {
+            user().warn(
+              TAG,
+              `id should be prefixed with "a/", loaded album using data-imgur-id="${idWithPrefix}". This element should be updated to use "a/".`
+            );
+          },
+          () => {
+            user().error(
+              TAG,
+              `Failed to load. Is "${sanitizedId}" a correct id?`
+            );
+          }
+        );
       }
-      const {promise, resolve} = new Deferred();
-      this.resolveReceivedMessage_ = resolve;
-      return Services.timerFor(this.win)
-        .timeoutPromise(500, promise)
-        .catch(() => {
-          this.insertLoadIframe_(`a/${sanitizedId}`);
-        });
     });
   }
 
@@ -123,7 +132,12 @@ export class AmpImgur extends AMP.BaseElement {
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
 
-    return this.loadPromise(this.iframe_);
+    return this.loadPromise(this.iframe_).then(() => {
+      // We're sure we've loaded when we receive the first message.
+      const {promise, resolve} = new Deferred();
+      this.resolveReceivedMessage_ = resolve;
+      return Services.timerFor(this.win).timeoutPromise(500, promise);
+    });
   }
 
   /**
@@ -169,6 +183,6 @@ export class AmpImgur extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-imgur', '0.1', (AMP) => {
-  AMP.registerElement('amp-imgur', AmpImgur);
+AMP.extension(TAG, '0.1', (AMP) => {
+  AMP.registerElement(TAG, AmpImgur);
 });
