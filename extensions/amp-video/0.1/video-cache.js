@@ -19,6 +19,7 @@ import {createElementWithAttributes, matches} from '../../../src/dom';
 import {extensionScriptsInNode} from '../../../src/service/extension-script';
 import {resolveRelativeUrl} from '../../../src/url';
 import {toArray} from '../../../src/types';
+import {user} from '../../../src/log';
 
 /**
  * Add the caching sources to the video if opted in.
@@ -33,6 +34,10 @@ export function addCacheSources(videoEl, win) {
     ) ||
     !videoEl.querySelector('source[src]')
   ) {
+    user().error(
+      'amp-video',
+      'Need to import amp-cache-url in the story to enable google video cache'
+    );
     return Promise.resolve();
   }
   const {sourceUrl} = Services.documentInfoForDoc(win.document);
