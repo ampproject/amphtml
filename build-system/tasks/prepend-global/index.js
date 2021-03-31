@@ -22,6 +22,7 @@ const fs = require('fs');
 const path = require('path');
 const util = require('util');
 const {log} = require('../../common/logging');
+const {mainBranch} = require('../../common/main-branch');
 
 const exec = util.promisify(childProcess.exec);
 
@@ -68,7 +69,7 @@ async function fetchConfigFromBranch_(filename, opt_localBranch, opt_branch) {
   if (opt_localBranch) {
     return fs.promises.readFile(filename, 'utf8');
   }
-  const branch = opt_branch || 'origin/master';
+  const branch = opt_branch || `origin/${mainBranch}`;
   return (await exec(`git show ${branch}:${filename}`)).stdout;
 }
 
@@ -317,8 +318,7 @@ prependGlobal.flags = {
     'Takes in an optional value for a custom prod config source.',
   'local_dev': 'Enables runtime to be used for local development.',
   'branch':
-    'Switch to a git branch to get config source from. ' +
-    'Uses master by default.',
+    'Get config source from the given branch. Uses the main branch by default.',
   'local_branch':
     "Don't switch branches and use the config from the local branch.",
   'fortesting': 'Force the config to return true for getMode().test',

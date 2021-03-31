@@ -22,7 +22,7 @@ const url = require('url');
 const util = require('util');
 const {
   gitCommitHash,
-  gitCiMasterBaseline,
+  gitCiMainBaseline,
   shortSha,
 } = require('../../common/git');
 const {
@@ -37,6 +37,7 @@ const {
 } = require('../../compile/internal-version');
 const {cyan, red, yellow} = require('kleur/colors');
 const {log, logWithoutTimestamp} = require('../../common/logging');
+const {mainBranch} = require('../../common/main-branch');
 const {report, NoTTYReport} = require('@ampproject/filesize');
 
 const filesizeConfigPath = require.resolve('./filesize.json');
@@ -103,11 +104,11 @@ async function requestPost(...args) {
  * repository to the passed value.
  */
 async function storeBundleSize() {
-  if (!isPushBuild() || ciPushBranch() !== 'master') {
+  if (!isPushBuild() || ciPushBranch() !== mainBranch) {
     log(
       yellow('Skipping'),
       cyan('--on_push_build') + ':',
-      'this action can only be performed on `master` push builds during CI'
+      'this action can only be performed on main branch push builds during CI'
     );
     return;
   }
@@ -182,7 +183,7 @@ async function skipBundleSize() {
 async function reportBundleSize() {
   if (isPullRequestBuild()) {
     const headSha = gitCommitHash();
-    const baseSha = gitCiMasterBaseline();
+    const baseSha = gitCiMainBaseline();
     const mergeSha = circleciPrMergeCommit();
     log(
       'Reporting bundle sizes for commit',
@@ -268,8 +269,7 @@ bundleSize.description =
   'Checks if the minified AMP binary has exceeded its size cap';
 bundleSize.flags = {
   'on_push_build':
-    'Store bundle sizes in the AMP build artifacts repo ' +
-    '(also implies --on_pr_build)',
+    'Store bundle sizes in the AMP build artifacts repo for main branch builds',
   'on_pr_build': 'Report the bundle sizes for this pull request to GitHub',
   'on_skipped_build':
     "Set the status of this pull request's bundle " +

@@ -23,7 +23,7 @@ const path = require('path');
 const testConfig = require('../../test-configs/config');
 const {execOrDie} = require('../../common/exec');
 const {extensions, maybeInitializeExtensions} = require('../extension-helpers');
-const {gitDiffNameOnlyMaster} = require('../../common/git');
+const {gitDiffNameOnlyMain} = require('../../common/git');
 const {green, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../../common/ci');
 const {log, logLocalDev} = require('../../common/logging');
@@ -40,7 +40,7 @@ let testsToRun = null;
  * @return {boolean}
  */
 function isLargeRefactor() {
-  const filesChanged = gitDiffNameOnlyMaster();
+  const filesChanged = gitDiffNameOnlyMain();
   return filesChanged.length >= LARGE_REFACTOR_THRESHOLD;
 }
 
@@ -186,7 +186,7 @@ function unitTestsToRun() {
     return testsToRun;
   }
   const cssJsFileMap = extractCssJsFileMap();
-  const filesChanged = gitDiffNameOnlyMaster();
+  const filesChanged = gitDiffNameOnlyMain();
   const {unitTestPaths} = testConfig;
   testsToRun = [];
   let srcFiles = [];
