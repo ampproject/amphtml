@@ -140,9 +140,9 @@ export class AmpImgur extends AMP.BaseElement {
     const {promise, resolve} = new Deferred();
     this.resolveReceivedMessage_ = resolve;
 
-    return this.loadPromise(this.iframe_).then(() => {
-      return Services.timerFor(this.win).timeoutPromise(500, promise);
-    });
+    return this.loadPromise(this.iframe_).then(() =>
+      Services.timerFor(this.win).timeoutPromise(500, promise)
+    );
   }
 
   /**
