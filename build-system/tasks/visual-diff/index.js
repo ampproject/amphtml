@@ -68,6 +68,8 @@ const percyCss = [
 // 6. Paste the full version in the "Version" field and click "Lookup"
 // 7. Copy the value next to "Branch Base Position" and update the line below
 const PUPPETEER_CHROMIUM_REVISION = '827102'; // 88.0.4324.0
+const BETA_CHROMIUM_REVISION = '856583'; // 90.0.4427.0
+const CANARY_CHROMIUM_REVISION = '865017'; // 91.0.4456.0
 
 const SNAPSHOT_SINGLE_BUILD_OPTIONS = {
   widths: [375],
@@ -168,8 +170,13 @@ async function launchPercyAgent(browserFetcher) {
     config: path.join(__dirname, '.percy.yaml'),
     discovery: {
       launchOptions: {
-        executable: browserFetcher.revisionInfo(PUPPETEER_CHROMIUM_REVISION)
-          .executablePath,
+        executable: browserFetcher.revisionInfo(
+          argv.canary_chromium_revision
+            ? CANARY_CHROMIUM_REVISION
+            : argv.beta_chromium_revision
+            ? BETA_CHROMIUM_REVISION
+            : PUPPETEER_CHROMIUM_REVISION
+        ).executablePath,
       },
     },
   });
@@ -212,8 +219,13 @@ async function launchBrowser(browserFetcher) {
     args: ['--no-sandbox', '--disable-extensions', '--disable-gpu'],
     dumpio: argv.chrome_debug,
     headless: true,
-    executablePath: browserFetcher.revisionInfo(PUPPETEER_CHROMIUM_REVISION)
-      .executablePath,
+    executable: browserFetcher.revisionInfo(
+      argv.canary_chromium_revision
+        ? CANARY_CHROMIUM_REVISION
+        : argv.beta_chromium_revision
+        ? BETA_CHROMIUM_REVISION
+        : PUPPETEER_CHROMIUM_REVISION
+    ).executablePath,
   };
 
   try {
@@ -811,21 +823,26 @@ async function loadBrowserFetcher_() {
 
   const browserFetcher = puppeteer.createBrowserFetcher();
   const chromiumRevisions = await browserFetcher.localRevisions();
-  if (chromiumRevisions.includes(PUPPETEER_CHROMIUM_REVISION)) {
+  const targetRevision = argv.canary_chromium_revision
+    ? CANARY_CHROMIUM_REVISION
+    : argv.beta_chromium_revision
+    ? BETA_CHROMIUM_REVISION
+    : PUPPETEER_CHROMIUM_REVISION;
+  if (chromiumRevisions.includes(targetRevision)) {
     log(
       'info',
       'Using Percy-compatible version of Chromium',
-      cyan(PUPPETEER_CHROMIUM_REVISION)
+      cyan(targetRevision)
     );
   } else {
     log(
       'info',
       'Percy-compatible version of Chromium',
-      cyan(PUPPETEER_CHROMIUM_REVISION),
+      cyan(targetRevision),
       'was not found. Downloading...'
     );
     await browserFetcher.download(
-      PUPPETEER_CHROMIUM_REVISION,
+      targetRevision,
       (/* downloadedBytes, totalBytes */) => {
         // TODO(@ampproject/wg-infra): display download progress.
         // Logging every call is too verbose.
@@ -856,4 +873,6 @@ visualDiff.flags = {
   'percy_disabled':
     'Disables Percy integration (for testing local changes only)',
   'nobuild': 'Skip build',
+  'canary_chromium_revision': 'Use Chrome Canary revision',
+  'beta_chromium_revision': 'Use Chrome Beta revision.',
 };
