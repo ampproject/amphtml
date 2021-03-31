@@ -17,6 +17,7 @@
 import * as Preact from '../../../../src/preact';
 import {Sidebar, SidebarToolbar} from '../component';
 import {boolean, color, select, text, withKnobs} from '@storybook/addon-knobs';
+import {useEffect} from 'preact/hooks';
 import {withA11y} from '@storybook/addon-a11y';
 
 export default {
@@ -33,6 +34,11 @@ function SidebarWithActions(props) {
   // TODO(#30447): replace imperative calls with "button" knobs when the
   // Storybook 6.1 is released.
   const ref = Preact.useRef();
+  const secondRef = Preact.useRef();
+
+  useEffect(() => {
+    console.log(secondRef.current, secondRef.current.parentElement);
+  });
   return (
     <>
       <Sidebar ref={ref} {...props}>
@@ -50,6 +56,15 @@ function SidebarWithActions(props) {
           <button onClick={() => ref.current.open()}>open</button>
           <button onClick={() => ref.current.close()}>close</button>
           {props.children}
+          <SidebarToolbar
+            toolbar="(max-width: 500px)"
+            toolbarTarget="toolbar-target"
+          >
+            <ul ref={secondRef}>
+              <li>Toolbar Item 1</li>
+              <li>Toolbar Item 2</li>
+            </ul>
+          </SidebarToolbar>
         </div>
       </Sidebar>
       <div style={{marginTop: 8}}>
