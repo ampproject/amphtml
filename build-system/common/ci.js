@@ -15,6 +15,8 @@
  */
 'use strict';
 
+const {mainBranch} = require('./main-branch');
+
 /**
  * @fileoverview Provides various kinds of CI state.
  *
@@ -70,7 +72,7 @@ const isCircleci = isCircleciBuild();
  * @return {boolean}
  */
 function isCircleciPushBranch(branchName) {
-  return branchName == 'master' || /^amp-release-.*$/.test(branchName);
+  return branchName == mainBranch || /^amp-release-.*$/.test(branchName);
 }
 
 /**

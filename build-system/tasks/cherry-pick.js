@@ -19,6 +19,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const {execOrThrow, getOutput} = require('../common/exec');
 const {green, cyan, red, yellow} = require('kleur/colors');
 const {log} = require('../common/logging');
+const {mainBranch} = require('../common/main-branch');
 
 /**
  * Determines the name of the cherry-pick branch.
@@ -128,7 +129,7 @@ async function cherryPick() {
   } catch (e) {
     log(red('ERROR:'), e.message);
     log('Deleting branch', cyan(branch));
-    getOutput(`git checkout master && git branch -d ${branch}`);
+    getOutput(`git checkout ${mainBranch} && git branch -d ${branch}`);
     throw e;
   }
 }
