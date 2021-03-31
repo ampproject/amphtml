@@ -124,33 +124,24 @@ const lintGlobs = [
   // To ignore a file / directory, add it to .eslintignore.
 ];
 
+/**
+ * This should not include .js files, since those are handled by eslint:
+ *  - required terms: notice/notice
+ *  - forbidden terms: local/no-forbidden-terms
+ */
 const presubmitGlobs = [
-  '**/*.{css,js,go}',
-  // This does match dist.3p/current, so we run presubmit checks on the
-  // built 3p binary. This is done, so we make sure our special 3p checks
-  // run against the entire transitive closure of deps.
+  '**/*.{css,go}',
   '!{node_modules,build,dist,dist.tools,' +
     'dist.3p/[0-9]*,dist.3p/current,dist.3p/current-min}/**/*.*',
-  '!dist.3p/current/**/ampcontext-lib.js',
-  '!dist.3p/current/**/iframe-transport-client-lib.js',
   '!out/**/*.*',
   '!validator/validator.pb.go',
   '!validator/dist/**/*.*',
   '!validator/htmlparser/**/*.*',
-  '!validator/js/chromeextension/*.*',
-  '!validator/js/webui/dist/**/*.*',
-  '!build-system/server/new-server/transforms/dist/**/*.*',
   '!build-system/tasks/performance/cache/**/*.*',
-  '!build-system/tasks/presubmit-checks.js',
   '!build-system/runner/build/**/*.*',
-  '!build-system/tasks/visual-diff/snippets/*.js',
-  '!build/polyfills.js',
-  '!build/polyfills/*.js',
   '!third_party/**/*.*',
   '!**/node_modules/**/*.*',
-  // Files in this testdata dir are machine-generated and are not part
-  // of the AMP runtime, so shouldn't be checked.
-  '!extensions/amp-a4a/*/test/testdata/*.js',
+  '!extensions/**/dist/*',
   '!examples/**/*',
   '!examples/visual-tests/**/*',
   '!test/coverage/**/*.*',
@@ -176,9 +167,6 @@ const prettifyGlobs = [
   '**/*.json',
   '**/OWNERS',
   '**/*.md',
-  '!**/package*.json',
-  '!.github/ISSUE_TEMPLATE/**',
-  '!**/{node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
 
 /**

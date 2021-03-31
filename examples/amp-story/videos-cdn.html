@@ -5,7 +5,7 @@
   <link rel="canonical" href="ampconf.html">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <title>Example story with 10 videos</title>
+  <title>10 videos with flexible bitrate</title>
 
   <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
   <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
@@ -24,6 +24,11 @@
 		border-radius: 50%;
 	}
 	</style>
+  <script>
+    (self.AMP = self.AMP || []).push(function(AMP) {
+      AMP.toggleExperiment('flexible-bitrate', true);
+    });
+</script>
 </head>
   <body>
     <amp-story standalone id="cats"

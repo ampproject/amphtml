@@ -17,6 +17,7 @@
 import '../../../amp-bind/0.1/amp-bind';
 import '../../../amp-mustache/0.2/amp-mustache';
 import '../amp-render';
+import * as BatchedJsonModule from '../../../../src/batched-json';
 import {htmlFor} from '../../../../src/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';
@@ -87,6 +88,10 @@ describes.realWin(
     });
 
     it('renders json from src', async () => {
+      env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .resolves({name: 'Joe'});
+
       element = html`
         <amp-render
           src="https://example.com/data.json"
@@ -98,14 +103,6 @@ describes.realWin(
         </amp-render>
       `;
       doc.body.appendChild(element);
-
-      const ampRender = await element.getImpl(false);
-
-      const fetchFn = () => {
-        return Promise.resolve({name: 'Joe'});
-      };
-
-      env.sandbox.stub(ampRender, 'getJsonFn_').returns(fetchFn);
 
       const text = await getRenderedData();
       expect(text).to.equal('Hello Joe');

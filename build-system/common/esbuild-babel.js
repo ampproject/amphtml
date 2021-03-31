@@ -15,9 +15,8 @@
  */
 
 const babel = require('@babel/core');
-const crypto = require('crypto');
-const fs = require('fs-extra');
 const path = require('path');
+const {TransformCache, batchedRead, md5} = require('./transform-cache');
 
 /**
  * Directory where the babel filecache lives.
@@ -25,73 +24,10 @@ const path = require('path');
 const CACHE_DIR = path.resolve(__dirname, '..', '..', '.babel-cache');
 
 /**
- * Cache for storing transformed files on both memory and on disk.
- */
-class BabelTransformCache {
-  constructor() {
-    fs.ensureDirSync(CACHE_DIR);
-
-    /** @type {Map<string, Promise<{contents: string}>>} */
-    this.map = new Map();
-
-    /** @type {Set<string>} */
-    this.fsCache = new Set(fs.readdirSync(CACHE_DIR));
-  }
-
-  getKey_(hash) {
-    return `${hash}.json`;
-  }
-
-  /**
-   * @param {string} hash
-   * @return {null|Promise<{contents: string}>}
-   */
-  get(hash) {
-    const key = this.getKey_(hash);
-    const cached = this.map.get(key);
-    if (cached) {
-      return cached;
-    }
-    if (this.fsCache.has(key)) {
-      const transformedPromise = fs.readJson(path.join(CACHE_DIR, key));
-      this.map.set(key, transformedPromise);
-      return transformedPromise;
-    }
-    return null;
-  }
-
-  /**
-   * @param {string} hash
-   * @param {Promise<{contents: string}>} transformPromise
-   */
-  set(hash, transformPromise) {
-    const key = this.getKey_(hash);
-    if (this.map.has(key)) {
-      throw new Error(
-        `Read race occured. Attempting to transform a file twice.`
-      );
-    }
-
-    this.map.set(key, transformPromise);
-    transformPromise.then((contents) => {
-      fs.outputJson(path.join(CACHE_DIR, key), contents);
-    });
-  }
-}
-
-/**
  * Used to cache babel transforms done by esbuild.
- * @const {!BabelTransformCache}
+ * @const {!TransformCache}
  */
-const transformCache = new BabelTransformCache();
-
-/**
- * Used to cache file reads done by esbuild, since it can issue multiple
- * "loads" per file. This batches consecutive reads into a single, and then
- * clears its cache item for the next load.
- * @private @const {!Map<string, Promise<{hash: string, contents: string}>>}
- */
-const readCache = new Map();
+const transformCache = new TransformCache(CACHE_DIR, '.js');
 
 /**
  * Creates a babel plugin for esbuild for the given caller. Optionally enables
@@ -108,40 +44,6 @@ function getEsbuildBabelPlugin(
   preSetup = () => {},
   postLoad = () => {}
 ) {
-  function md5(...args) {
-    if (!enableCache) {
-      return '';
-    }
-    const hash = crypto.createHash('md5');
-    for (const a of args) {
-      hash.update(a);
-    }
-    return hash.digest('hex');
-  }
-
-  /**
-   * @param {string} path
-   * @param {string} optionsHash
-   * @return {{contents: string, hash: string}}
-   */
-  function batchedRead(path, optionsHash) {
-    let read = readCache.get(path);
-    if (!read) {
-      read = fs.promises
-        .readFile(path)
-        .then((contents) => ({
-          contents,
-          hash: md5(contents, optionsHash),
-        }))
-        .finally(() => {
-          readCache.delete(path);
-        });
-      readCache.set(path, read);
-    }
-
-    return read;
-  }
-
   function transformContents(contents, hash, babelOptions) {
     if (enableCache) {
       const cached = transformCache.get(hash);
@@ -152,9 +54,7 @@ function getEsbuildBabelPlugin(
 
     const promise = babel
       .transformAsync(contents, babelOptions)
-      .then((result) => {
-        return {contents: result.code};
-      });
+      .then((result) => result.code);
 
     if (enableCache) {
       transformCache.set(hash, promise);
@@ -178,11 +78,12 @@ function getEsbuildBabelPlugin(
       build.onLoad({filter: /\.[cm]?js$/, namespace: ''}, async (file) => {
         const filename = file.path;
         const {contents, hash} = await batchedRead(filename, optionsHash);
-        return transformContents(contents, hash, {
+        const transformed = await transformContents(contents, hash, {
           ...babelOptions,
           filename,
           filenameRelative: path.basename(filename),
         });
+        return {contents: transformed};
       });
     },
   };
