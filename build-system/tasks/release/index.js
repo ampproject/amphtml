@@ -33,8 +33,7 @@ const BASE_FLAVOR_CONFIG = {
   flavorType: 'base',
   name: 'base',
   rtvPrefixes: ['00', '01', '02', '03', '04', '05'],
-  // TODO(#28168, erwinmombay): relace with single `--module --nomodule` command.
-  command: 'amp dist --noconfig --esm && amp dist --noconfig',
+  command: 'amp dist --noconfig',
   environment: 'AMP',
 };
 
@@ -141,7 +140,7 @@ function discoverDistFlavors_() {
       )
       .map(([flavorType, experimentConfig]) => ({
         // TODO(#28168, erwinmombay): relace with single `--module --nomodule` command.
-        command: `amp dist --noconfig --esm --define_experiment_constant ${experimentConfig.define_experiment_constant} && amp dist --noconfig --define_experiment_constant ${experimentConfig.define_experiment_constant}`,
+        command: `amp dist --noconfig --define_experiment_constant ${experimentConfig.define_experiment_constant}`,
         flavorType,
         rtvPrefixes: [
           EXPERIMENTAL_RTV_PREFIXES[experimentConfig.environment][flavorType],
@@ -175,7 +174,13 @@ function discoverDistFlavors_() {
  * @param {string} tempDir full directory path to temporary working directory.
  */
 async function compileDistFlavors_(distFlavors, tempDir) {
-  for (const {flavorType, command} of distFlavors) {
+  for (const {flavorType, command: baseCommand} of distFlavors) {
+    const command =
+      argv.esm === undefined
+        ? `${baseCommand} --esm && ${baseCommand}`
+        : argv.esm
+        ? `${baseCommand} --esm`
+        : baseCommand;
     log('Compiling flavor', green(flavorType), 'using', cyan(command));
 
     execOrDie('amp clean');
@@ -460,4 +465,7 @@ release.flags = {
     'Directory path to emplace release files (defaults to "./release")',
   'flavor':
     'Limit this release build to a single flavor. Can be used to split the release work between multiple build machines.',
+  'esm':
+    // TODO(danielrozenberg): remove undefined case when the release automation platform explicitly handles it.
+    'True to compile with --esm, false to compile without; Do not set to compile both.',
 };
