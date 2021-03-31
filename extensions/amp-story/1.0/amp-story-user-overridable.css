@@ -18,7 +18,7 @@ amp-story {
   font-display: optional;
 }
 
-amp-story-grid-layer {
+amp-story-grid-layer:not([aspect-ratio]) {
   overflow: hidden;
 }
 
