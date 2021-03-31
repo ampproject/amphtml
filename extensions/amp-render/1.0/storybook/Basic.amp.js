@@ -107,3 +107,34 @@ export const WithBindableSrc = () => {
 WithBindableSrc.story = {
   name: 'With bindable src',
 };
+
+export const WithAmpScriptSrc = () => {
+  return (
+    <>
+      <script id="local-script" type="text/plain" target="amp-script">
+        {`
+        function getRemoteData() {
+          return fetch('http://localhost:9001/examples/amp-render-data.json')
+            .then(function(resp) { return resp.json(); });
+
+        }
+        exportFunction('getRemoteData', getRemoteData);
+        `}
+      </script>
+      <amp-script id="dataFunctions" script="local-script" nodom></amp-script>
+
+      <amp-render
+        src="amp-script:dataFunctions.getRemoteData"
+        width="auto"
+        height="100"
+        layout="fixed-height"
+      >
+        <template type="amp-mustache">{`Hi {{name}}!`}</template>
+      </amp-render>
+    </>
+  );
+};
+
+WithAmpScriptSrc.story = {
+  name: 'With AMP script src',
+};

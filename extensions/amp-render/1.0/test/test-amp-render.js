@@ -108,6 +108,42 @@ describes.realWin(
       expect(text).to.equal('Hello Joe');
     });
 
+    it('renders from amp-script', async () => {
+      const ampScript = html`
+        <div>
+          <amp-script
+            id="dataFunctions"
+            script="local-script"
+            nodom
+          ></amp-script>
+          <script id="local-script" type="text/plain" target="amp-script">
+            function getRemoteData() {
+              return fetch('https://example.com/data.json')
+                .then(resp => resp.json());
+
+            }
+            exportFunction('getRemoteData', getRemoteData);
+          </script>
+        </div>
+      `;
+      doc.body.appendChild(ampScript);
+
+      element = html`
+        <amp-render
+          src="amp-script:dataFunctions.getRemoteData"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      const text = await getRenderedData();
+      expect(text).to.equal('Hello Joe');
+    });
+
     it('fails gracefully when src is omitted', async () => {
       element = html`
         <amp-render width="auto" height="140" layout="fixed-height">

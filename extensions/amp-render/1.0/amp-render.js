@@ -44,7 +44,7 @@ const isAmpScriptSrc = (src) => src && src.startsWith(AMP_SCRIPT_URI_SCHEME);
 /**
  * Gets the json from an "amp-state:" uri. For example, src="amp-state:json.path".
  *
- * TODO: this implementation is identical to one in amp-list. Move it
+ * TODO: this is similar to the implementation in amp-list. Move it
  * to a common file and import it.
  *
  * @param {!AmpElement} element
@@ -76,6 +76,8 @@ const getAmpStateJson = (element, src) => {
 
 /**
  * Gets the json from an amp-script uri.
+ * TODO: this is similar to the implementation in amp-list. Move it
+ * to a common file and import it.
  *
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} src
@@ -87,7 +89,7 @@ function getAmpScriptJson(ampdoc, src) {
       const args = src.slice('amp-script:'.length).split('.');
       userAssert(
         args.length === 2 && args[0].length > 0 && args[1].length > 0,
-        '[amp-list]: "amp-script" URIs must be of the format "scriptId.functionIdentifier".'
+        '[amp-render]: "amp-script" URIs must be of the format "scriptId.functionIdentifier".'
       );
 
       const ampScriptId = args[0];
@@ -95,7 +97,7 @@ function getAmpScriptJson(ampdoc, src) {
       const ampScriptEl = ampdoc.getElementById(ampScriptId);
       userAssert(
         ampScriptEl && ampScriptEl.tagName === 'AMP-SCRIPT',
-        `[amp-list]: could not find <amp-script> with script set to ${ampScriptId}`
+        `[amp-render]: could not find <amp-script> with script set to ${ampScriptId}`
       );
 
       return ampScriptEl.getImpl().then((impl) => {
@@ -105,7 +107,7 @@ function getAmpScriptJson(ampdoc, src) {
     .then((json) => {
       userAssert(
         json !== undefined,
-        `[amp-list] ${src} must return json, but instead returned: ${typeof json}`
+        `[amp-render] ${src} must return json, but instead returned: ${typeof json}`
       );
       return json;
     });
