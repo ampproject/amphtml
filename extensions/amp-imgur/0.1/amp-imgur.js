@@ -27,10 +27,12 @@
  * </code>
  */
 
+import {Deferred} from '../../../src/utils/promise';
+import {Services} from '../../../src/services';
+import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/types';
-import {removeElement} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 import {userAssert} from '../../../src/log';
 
@@ -45,8 +47,8 @@ export class AmpImgur extends AMP.BaseElement {
     /** @private {?Function} */
     this.unlistenMessage_ = null;
 
-    /** @private {string} */
-    this.imgurid_ = '';
+    /** @private {?Function} */
+    this.resolveReceivedMessage_ = null;
   }
 
   /** @override */
@@ -56,8 +58,8 @@ export class AmpImgur extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.imgurid_ = userAssert(
-      this.element.getAttribute('data-imgur-id'),
+    userAssert(
+      this.element.dataset.imgurId,
       'The data-imgur-id attribute is required for <amp-imgur> %s',
       this.element
     );
@@ -65,29 +67,60 @@ export class AmpImgur extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    this.iframe_ = iframe;
-
     this.unlistenMessage_ = listen(
       this.win,
       'message',
       this.handleImgurMessages_.bind(this)
     );
 
-    iframe.setAttribute('scrolling', 'no');
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowfullscreen', 'true');
-
-    const sanitizedID = this.imgurid_.replace(
+    const sanitizedId = this.element.dataset.imgurId.replace(
       /^(a\/)?(.*)/,
-      (match, aSlash, rest) => {
-        return (aSlash || '') + encodeURIComponent(rest);
+      (unusedMatch, aSlash, rest) => (aSlash || '') + encodeURIComponent(rest)
+    );
+
+    return this.insertLoadIframe_(sanitizedId).then(() => {
+      // Unfortunately, between April 2020 to May 2021 we incorrectly interpreted
+      // image ids as album ids, so we'd add an a/ prefix even when unnecessary.
+      // When 404ing, we won't receive messages, so we retry with a/
+      // https://go.amp.dev/issue/28049
+      const {promise, resolve} = new Deferred();
+      this.resolveReceivedMessage_ = resolve;
+      return Services.timerFor(this.win)
+        .timeoutPromise(500, promise)
+        .catch(() => {
+          this.insertLoadIframe_(`a/${sanitizedId}`);
+        });
+    });
+  }
+
+  /**
+   * @param {string} id
+   * @return {!Promise<HTMLIFrameElement>}
+   * @private
+   */
+  insertLoadIframe_(id) {
+    if (this.iframe_) {
+      // reloading
+      this.element.removeChild(this.iframe_);
+    }
+
+    const iframe = createElementWithAttributes(
+      this.element.ownerDocument,
+      'iframe',
+      {
+        'scrolling': 'no',
+        'frameborder': '0',
+        'allowfullscreen': 'true',
       }
     );
-    iframe.src = 'https://imgur.com/' + sanitizedID + '/embed?pub=true';
+
+    iframe.src = `https://imgur.com/${id}/embed?pub=true`;
+
+    this.iframe_ = iframe;
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
-    return this.loadPromise(iframe);
+
+    return this.loadPromise(this.iframe_);
   }
 
   /**
@@ -110,6 +143,9 @@ export class AmpImgur extends AMP.BaseElement {
     ) {
       return;
     }
+
+    this?.resolveReceivedMessage_();
+
     const data = isObject(eventData) ? eventData : tryParseJson(eventData);
     if (data['message'] == 'resize_imgur') {
       const height = data['height'];
