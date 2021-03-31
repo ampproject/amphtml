@@ -111,18 +111,21 @@ export class AmpImgur extends AMP.BaseElement {
    * @private
    */
   insertLoadIframe_(id) {
+    const {element} = this;
+
     if (this.iframe_) {
       // reloading
-      this.element.removeChild(this.iframe_);
+      element.removeChild(this.iframe_);
     }
 
     const iframe = createElementWithAttributes(
-      this.element.ownerDocument,
+      element.ownerDocument,
       'iframe',
       {
         'scrolling': 'no',
         'frameborder': '0',
         'allowfullscreen': 'true',
+        'title': element.title || 'imgur post',
       }
     );
 
@@ -130,7 +133,7 @@ export class AmpImgur extends AMP.BaseElement {
 
     this.iframe_ = iframe;
     this.applyFillContent(iframe);
-    this.element.appendChild(iframe);
+    element.appendChild(iframe);
 
     return this.loadPromise(this.iframe_).then(() => {
       // We're sure we've loaded when we receive the first message.
