@@ -136,7 +136,7 @@
   padding: 15px !important;
 }
 
-/* Handle UI */
+/* Draggable handle UI */
 :not([desktop]).amp-story-page-attachment-ui-v2:before {
   content: '' !important;
   position: absolute !important;
