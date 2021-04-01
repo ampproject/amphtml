@@ -120,10 +120,15 @@
   font-size: 14px !important;
   position: absolute !important;
   padding: 0 !important;
+  color: #202124 !important;
 }
 
 .amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-close-button {
   margin-inline-start: auto !important; /* RTL support */
+  width: 14px !important;
+  height: 14px !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14"><path fill="rgba(0, 0, 0, .4)" d="M13.295 2.115a.997.997 0 10-1.41-1.41L7 5.59 2.115.705a.997.997 0 10-1.41 1.41L5.59 7 .705 11.885a.997.997 0 101.41 1.41L7 8.41l4.885 4.885a.997.997 0 101.41-1.41L8.41 7l4.885-4.885z"/></svg>') !important;
+  padding: 15px !important;
 }
 
 /* Handle UI */
