@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {observeContentSize, unobserveContentSize} from './size-observer';
+import {observeBorderSize, unobserveBorderSize} from './size-observer';
 
 export class PauseHelper {
   /**
@@ -39,9 +39,9 @@ export class PauseHelper {
     }
     this.isPlaying_ = isPlaying;
     if (isPlaying) {
-      observeContentSize(this.element_, this.pauseWhenNoSize_);
+      observeBorderSize(this.element_, this.pauseWhenNoSize_);
     } else {
-      unobserveContentSize(this.element_, this.pauseWhenNoSize_);
+      unobserveBorderSize(this.element_, this.pauseWhenNoSize_);
     }
   }
 

@@ -14,42 +14,33 @@
  * limitations under the License.
  */
 
-import {pushIfNotExist, removeItem} from './array';
+import {remove} from './array';
 import {rethrowAsync} from '../log';
 
 /** @typedef {function(../layout-rect.LayoutSizeDef)} */
-let ContentSizeObserverCallbackDef;
+let SizeObserverCallbackDef;
+
+/** @enum {number} */
+const Type = {
+  CONTENT: 0,
+  BORDER: 1,
+};
 
 /** @const {!WeakMap<!Window, !ResizeObserver>} */
 const observers = new WeakMap();
 
-/** @const {!WeakMap<!Element, !Array<!ContentSizeObserverCallbackDef>>} */
+/** @const {!WeakMap<!Element, !Array<{type: Type, callback: !SizeObserverCallbackDef}>>} */
 const targetObserverMultimap = new WeakMap();
 
-/** @const {!WeakMap<!Element, !../layout-rect.LayoutSizeDef>} */
-const targetSizeMap = new WeakMap();
+/** @const {!WeakMap<!Element, !ResizeObserverEntry>} */
+const targetEntryMap = new WeakMap();
 
 /**
  * @param {!Element} element
- * @param {!ContentSizeObserverCallbackDef} callback
+ * @param {!SizeObserverCallbackDef} callback
  */
 export function observeContentSize(element, callback) {
-  const win = element.ownerDocument.defaultView;
-  if (!win) {
-    return;
-  }
-  let callbacks = targetObserverMultimap.get(element);
-  if (!callbacks) {
-    callbacks = [];
-    targetObserverMultimap.set(element, callbacks);
-    getObserver(win).observe(element);
-  }
-  if (pushIfNotExist(callbacks, callback)) {
-    const size = targetSizeMap.get(element);
-    if (size) {
-      setTimeout(() => callCallbackNoInline(callback, size));
-    }
-  }
+  observeSize(element, Type.CONTENT, callback);
 }
 
 /**
@@ -57,19 +48,7 @@ export function observeContentSize(element, callback) {
  * @param {!ObserverCallbackDef} callback
  */
 export function unobserveContentSize(element, callback) {
-  const callbacks = targetObserverMultimap.get(element);
-  if (!callbacks) {
-    return;
-  }
-  removeItem(callbacks, callback);
-  if (callbacks.length == 0) {
-    targetObserverMultimap.delete(element);
-    targetSizeMap.delete(element);
-    const win = element.ownerDocument.defaultView;
-    if (win) {
-      getObserver(win).unobserve(element);
-    }
-  }
+  unobserveSize(element, Type.CONTENT, callback);
 }
 
 /**
@@ -84,6 +63,86 @@ export function measureContentSize(element) {
     };
     observeContentSize(element, onSize);
   });
+}
+
+/**
+ * Note: this method doesn't support multi-fragment border boxes.
+ * @param {!Element} element
+ * @param {!SizeObserverCallbackDef} callback
+ */
+export function observeBorderSize(element, callback) {
+  observeSize(element, Type.BORDER, callback);
+}
+
+/**
+ * Note: this method doesn't support multi-fragment border boxes.
+ * @param {!Element} element
+ * @param {!ObserverCallbackDef} callback
+ */
+export function unobserveBorderSize(element, callback) {
+  unobserveSize(element, Type.BORDER, callback);
+}
+
+/**
+ * Note: this method doesn't support multi-fragment border boxes.
+ * @param {!Element} element
+ * @return {!Promise<!../layout-rect.LayoutSizeDef>}
+ */
+export function measureBorderSize(element) {
+  return new Promise((resolve) => {
+    const onSize = (size) => {
+      resolve(size);
+      unobserveBorderSize(element, onSize);
+    };
+    observeBorderSize(element, onSize);
+  });
+}
+
+/**
+ * @param {!Element} element
+ * @param {Type} type
+ * @param {!SizeObserverCallbackDef} callback
+ */
+function observeSize(element, type, callback) {
+  const win = element.ownerDocument.defaultView;
+  if (!win) {
+    return;
+  }
+  let callbacks = targetObserverMultimap.get(element);
+  if (!callbacks) {
+    callbacks = [];
+    targetObserverMultimap.set(element, callbacks);
+    getObserver(win).observe(element);
+  }
+  const exists = callbacks.some((cb) => cb.callback === callback);
+  if (!exists) {
+    callbacks.push({type, callback});
+    const entry = targetEntryMap.get(element);
+    if (entry) {
+      setTimeout(() => computeAndCall(type, callback, entry));
+    }
+  }
+}
+
+/**
+ * @param {!Element} element
+ * @param {Type} type
+ * @param {!ObserverCallbackDef} callback
+ */
+function unobserveSize(element, type, callback) {
+  const callbacks = targetObserverMultimap.get(element);
+  if (!callbacks) {
+    return;
+  }
+  remove(callbacks, (cb) => cb.callback === callback);
+  if (callbacks.length == 0) {
+    targetObserverMultimap.delete(element);
+    targetEntryMap.delete(element);
+    const win = element.ownerDocument.defaultView;
+    if (win) {
+      getObserver(win).unobserve(element);
+    }
+  }
 }
 
 /**
@@ -105,7 +164,8 @@ function getObserver(win) {
 function processEntries(entries) {
   const seen = new Set();
   for (let i = entries.length - 1; i >= 0; i--) {
-    const {target, contentRect} = entries[i];
+    const entry = entries[i];
+    const {target} = entry;
     if (seen.has(target)) {
       continue;
     }
@@ -114,19 +174,49 @@ function processEntries(entries) {
     if (!callbacks) {
       continue;
     }
-    const {width, height} = contentRect;
-    /** @type {../layout-rect.LayoutSizeDef} */
-    const size = {width, height};
-    targetSizeMap.set(target, size);
+    targetEntryMap.set(target, entry);
     for (let k = 0; k < callbacks.length; k++) {
-      callCallbackNoInline(callbacks[k], size);
+      const {type, callback} = callbacks[k];
+      computeAndCall(type, callback, entry);
     }
   }
 }
 
 /**
+ * @param {Type} type
  * @param {!ObserverCallbackDef} callback
- * @param {../layout-rect.LayoutSizeDef} size
+ * @param {!ResizeObserverEntry} entry
+ */
+function computeAndCall(type, callback, entry) {
+  let width, height;
+  if (type == Type.CONTENT) {
+    const {contentRect} = entry;
+    width = contentRect.width;
+    height = contentRect.height;
+  } else if (type == Type.BORDER) {
+    const {borderBoxSize} = entry;
+    if (borderBoxSize?.length > 0) {
+      // `borderBoxSize` is supported. Only single-fragment border boxes are
+      // supported here (`borderBoxSize[0]`).
+      width = borderBoxSize[0].inlineSize;
+      height = borderBoxSize[0].blockSize;
+    } else {
+      // `borderBoxSize` is not supported: polyfill it via blocking measures.
+      const {target} = entry;
+      width = target.offsetWidth;
+      height = target.offsetHeight;
+    }
+  }
+  if (width != null && height != null) {
+    /** @type {!../layout-rect.LayoutSizeDef} */
+    const size = {width, height};
+    callCallbackNoInline(callback, size);
+  }
+}
+
+/**
+ * @param {!ObserverCallbackDef} callback
+ * @param {!../layout-rect.LayoutSizeDef} size
  */
 function callCallbackNoInline(callback, size) {
   try {
