@@ -112,11 +112,6 @@ WithBindableSrc.story = {
 export const WithAmpScriptSrc = () => {
   return (
     <>
-      {/* TODO(alanorozco): Remove hash once storybook-addon-amp#22 is mainlined */}
-      <meta
-        name="amp-script-src"
-        content="sha384-W71daLvaG1fVtSoGC4xq80vkUeKAZPo2hPEj4ofjtSOSfK1m02U0gQXp1ChLV1O8"
-      ></meta>
       <amp-script id="dataFunctions" script="local-script" nodom></amp-script>
       <script id="local-script" type="text/plain" target="amp-script">
         {`
