@@ -16,6 +16,7 @@
 
 import '../../../amp-bind/0.1/amp-bind';
 import '../../../amp-mustache/0.2/amp-mustache';
+import '../../../amp-script/0.1/amp-script';
 import '../amp-render';
 import * as BatchedJsonModule from '../../../../src/batched-json';
 import {htmlFor} from '../../../../src/static-template';
@@ -27,7 +28,12 @@ describes.realWin(
   'amp-render-v1.0',
   {
     amp: {
-      extensions: ['amp-mustache:0.2', 'amp-bind:0.1', 'amp-render:1.0'],
+      extensions: [
+        'amp-mustache:0.2',
+        'amp-bind:0.1',
+        'amp-render:1.0',
+        'amp-script:0.1',
+      ],
     },
   },
   (env) => {
@@ -103,6 +109,44 @@ describes.realWin(
         </amp-render>
       `;
       doc.body.appendChild(element);
+
+      const text = await getRenderedData();
+      expect(text).to.equal('Hello Joe');
+    });
+
+    it('renders from amp-script', async () => {
+      const ampScript = html`
+        <amp-script id="dataFunctions" script="local-script" nodom></amp-script>
+      `;
+      const fetchScript = html`
+        <script id="local-script" type="text/plain" target="amp-script">
+          function getRemoteData() {
+            return fetch('https://example.com/data.json')
+                .then((resp) => resp.json());
+          }
+          exportFunction('getRemoteData', getRemoteData);
+        </script>
+      `;
+
+      element = html`
+        <amp-render
+          src="amp-script:dataFunctions.getRemoteData"
+          width="auto"
+          height="200"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(fetchScript);
+      doc.body.appendChild(ampScript);
+      doc.body.appendChild(element);
+
+      const impl = {
+        callFunction: env.sandbox.stub(),
+      };
+      impl.callFunction.resolves({name: 'Joe'});
+      env.sandbox.stub(ampScript, 'getImpl').resolves(impl);
 
       const text = await getRenderedData();
       expect(text).to.equal('Hello Joe');
