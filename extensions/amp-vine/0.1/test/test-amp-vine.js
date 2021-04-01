@@ -71,7 +71,7 @@ describes.realWin(
       );
     });
 
-    it('unlayout and reloayout', async () => {
+    it('unlayout and relayout', async () => {
       const vine = await getVine('MdKjXez002d', true);
       expect(vine.querySelector('iframe')).to.exist;
 
