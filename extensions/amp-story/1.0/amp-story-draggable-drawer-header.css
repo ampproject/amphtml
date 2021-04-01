@@ -96,9 +96,11 @@
 
 .amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header .i-amphtml-story-draggable-drawer-header-title-and-close {
   opacity: 1 !important;
-  height: 40px !important;
+  height: 44px !important;
+  /* line-height: 44px!important; */
   width: 100% !important;
   display: flex !important;
+  align-items: center !important;
   justify-content: center !important;
   background: white !important;
 }
@@ -114,6 +116,8 @@
 }
 
 .amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-title {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 14px !important;
   position: absolute !important;
   padding: 0 !important;
 }
