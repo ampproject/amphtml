@@ -70,5 +70,17 @@ describes.realWin(
         /The data-vineid attribute is required for/
       );
     });
+
+    it('unlayout and relayout', async () => {
+      const vine = await getVine('MdKjXez002d', true);
+      expect(vine.querySelector('iframe')).to.exist;
+
+      const unlayoutResult = vine.unlayoutCallback();
+      expect(unlayoutResult).to.be.true;
+      expect(vine.querySelector('iframe')).to.not.exist;
+
+      await vine.layoutCallback();
+      expect(vine.querySelector('iframe')).to.exist;
+    });
   }
 );
