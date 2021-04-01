@@ -76,7 +76,7 @@ describes.realWin(
       });
     });
 
-    it('unlayout and reloayout', async () => {
+    it('unlayout and relayout', async () => {
       const reach = await getReach({
         'data-embed-id': 'default',
       });
