@@ -28,6 +28,7 @@ export default {
       {name: 'amp-mustache', version: '0.2'},
       {name: 'amp-bind', version: '0.1'},
       {name: 'amp-render', version: '1.0'},
+      {name: 'amp-script', version: '0.1'},
     ],
     experiments: ['amp-render'],
   },
@@ -113,11 +114,6 @@ export const WithAmpScriptSrc = () => {
   // For more context, see: https://github.com/ampproject/amphtml/pull/33537#discussion_r605740202
   return (
     <>
-      <script
-        async
-        custom-element="amp-script"
-        src="https://cdn.ampproject.org/v0/amp-script-0.1.js"
-      ></script>
       <meta
         name="amp-script-src"
         content="sha384-W71daLvaG1fVtSoGC4xq80vkUeKAZPo2hPEj4ofjtSOSfK1m02U0gQXp1ChLV1O8"
