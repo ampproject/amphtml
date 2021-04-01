@@ -75,7 +75,7 @@ describes.realWin(
       });
     });
 
-    it('unlayout and reloayout', async () => {
+    it('unlayout and relayout', async () => {
       const izlesene = await getIzlesene('7221390');
       expect(izlesene.querySelector('iframe')).to.exist;
 
