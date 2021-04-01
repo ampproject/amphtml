@@ -161,7 +161,10 @@ export class DraggableDrawer extends AMP.BaseElement {
       this.element.classList.add('amp-story-page-attachment-ui-v2');
       this.headerEl_.classList.add('amp-story-page-attachment-ui-v2');
       const handler = (entries) => {
-        this.headerEl_.classList.toggle('stuck', !entries[0].isIntersecting);
+        this.headerEl_.classList.toggle(
+          'i-amphtml-story-draggable-drawer-header-stuck',
+          !entries[0].isIntersecting
+        );
       };
       const observer = new window.IntersectionObserver(handler);
       setTimeout(() => {
