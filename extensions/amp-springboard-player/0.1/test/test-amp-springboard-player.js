@@ -142,7 +142,7 @@ describes.realWin(
       );
     });
 
-    it('unlayout and reloayout', async () => {
+    it('unlayout and relayout', async () => {
       const bc = await getSpringboardPlayer({
         'data-site-id': '261',
         'data-mode': 'video',
