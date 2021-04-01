@@ -25,6 +25,7 @@ import {
   getNumberOfAds,
 } from '../algorithm-predetermined';
 import {StoryAdPageManager} from '../story-ad-page-manager';
+import {StoryAdPlacements} from '../../../../src/experiments/story-ad-placements';
 
 describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
   let storeService;
@@ -45,7 +46,8 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
         storeService.dispatch(Action.SET_PAGE_IDS, pageIds);
         const algo = new PredeterminedPositionAlgorithm(
           storeService,
-          pageManager
+          pageManager,
+          StoryAdPlacements.PREDETERMINED_EIGHT
         );
         expect(algo.isStoryEligible()).to.be.false;
       });
@@ -55,7 +57,8 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
         storeService.dispatch(Action.SET_PAGE_IDS, pageIds);
         const algo = new PredeterminedPositionAlgorithm(
           storeService,
-          pageManager
+          pageManager,
+          StoryAdPlacements.PREDETERMINED_EIGHT
         );
         expect(algo.isStoryEligible()).to.be.true;
       });
@@ -75,7 +78,8 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
         );
         const algo = new PredeterminedPositionAlgorithm(
           storeService,
-          pageManager
+          pageManager,
+          StoryAdPlacements.PREDETERMINED_EIGHT
         );
         const pages = algo.initializePages();
         expect(pages[0]).to.equal(mockPage);
@@ -97,7 +101,8 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
         );
         const algo = new PredeterminedPositionAlgorithm(
           storeService,
-          pageManager
+          pageManager,
+          StoryAdPlacements.PREDETERMINED_EIGHT
         );
         const pages = algo.initializePages();
         expect(pages[0]).not.to.exist;
@@ -121,7 +126,8 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
         );
         const algo = new PredeterminedPositionAlgorithm(
           storeService,
-          pageManager
+          pageManager,
+          StoryAdPlacements.PREDETERMINED_EIGHT
         );
         algo.initializePages();
         algo.onNewAdView();

@@ -33,7 +33,7 @@ const jobName = 'visual-diff-tests.js';
 function pushBuildWorkflow() {
   downloadNomoduleOutput();
   process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-  timedExecOrDie('amp visual-diff --nobuild --master');
+  timedExecOrDie('amp visual-diff --nobuild --main');
 }
 
 function prBuildWorkflow() {

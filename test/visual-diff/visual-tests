@@ -860,6 +860,17 @@
       "name": "amp-story-360: 360 image rendering",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [".i-amphtml-story-360-loaded"]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-inline-page-attachment-dark-theme.html",
+      "name": "amp-story-inline-page-attachment-dark-theme: displays new inline CTA button with dark theme",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+        "amp-story-page#cover[active]"
+      ],
+      // for page navigation
+      "loading_complete_delay_ms": 500
     }
   ]
 }
