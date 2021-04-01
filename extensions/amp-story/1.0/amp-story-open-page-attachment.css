@@ -168,8 +168,20 @@
 }
 
 /** For amp-story-inline-page-attachment-v2 experiment elements. */
+.i-amphtml-story-page-open-attachment {
+  --i-amphtml-chip-background-color: rgba(255, 255, 255, 0.5) !important;
+  --i-amphtml-img-background-color: white !important;
+  --i-amphtml-label-text-color: white !important;
+}
+
+[theme="dark"].i-amphtml-story-page-open-attachment {
+  --i-amphtml-chip-background-color: rgba(0, 0, 0, 0.5) !important;
+  --i-amphtml-img-background-color: black !important;
+  --i-amphtml-label-text-color: black !important;
+}
+
 .i-amphtml-story-inline-page-attachment-chip {
-  background-color: rgba(255, 255, 255, 0.5) !important;
+  background-color: var(--i-amphtml-chip-background-color) !important;
   display: flex !important;
   border-radius: 24px !important;
   align-items: center !important;
@@ -190,7 +202,7 @@
 .i-amphtml-story-inline-page-attachment-img {
   height: 48px !important;
   width: 48px !important;
-  background-color: white !important;
+  background-color: var(--i-amphtml-img-background-color) !important;
 }
 
 .i-amphtml-story-inline-page-attachment-img:nth-child(2) {
@@ -205,6 +217,10 @@
   background-position: center !important;
 }
 
+[theme="dark"] .i-amphtml-story-inline-page-attachment-arrow {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 32 32"><path d="M16 32a16 16 0 100-32 16 16 0 000 32z" fill="black"/><path d="M7 19v-2l8-5a1 1 0 112 3l-8 4H7z" fill="white"/><path d="M15 13l2-1 8 5a1 1 0 11-2 2l-8-4v-2z" fill="white"/></svg>') !important;
+}
+
 .i-amphtml-story-inline-page-attachment-label {
   font-family: 'Roboto', sans-serif !important;
   font-size: 16px !important;
@@ -216,4 +232,5 @@
   white-space: nowrap !important;
   max-width: 210px !important;
   margin-bottom: 20px !important;
+  color: var(--i-amphtml-label-text-color) !important;
 }
