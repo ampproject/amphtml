@@ -85,6 +85,32 @@
   justify-content: center !important;
   box-shadow: none !important;
   border-radius: inherit !important;
+  height: auto !important;
+}
+
+:not([desktop]).amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header {
+  height: 20px !important;
+  position: sticky !important;
+  top: 0 !important;
+}
+
+.amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header .i-amphtml-story-draggable-drawer-header-title-and-close {
+  opacity: 1 !important;
+  height: 40px !important;
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  background: white !important;
+}
+
+:not([desktop]).amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header .i-amphtml-story-draggable-drawer-header-title-and-close {
+  position: absolute !important;
+  transition: opacity .3s !important;
+  opacity: 0 !important;
+}
+
+:not([desktop]).amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header.stuck .i-amphtml-story-draggable-drawer-header-title-and-close {
+  opacity: 1 !important;
 }
 
 .amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-title {
@@ -94,4 +120,15 @@
 
 .amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-close-button {
   margin-inline-start: auto !important; /* RTL support */
+}
+
+/* Handle UI */
+:not([desktop]).amp-story-page-attachment-ui-v2:before {
+  content: '' !important;
+  position: absolute !important;
+  top: 8px !important;
+  width: 40px !important;
+  height: 3px !important;
+  background-color: rgba(0, 0, 0, .2) !important;
+  border-radius: 3px !important;
 }

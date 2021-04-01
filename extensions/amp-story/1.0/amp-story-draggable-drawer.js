@@ -241,9 +241,13 @@ export class DraggableDrawer extends AMP.BaseElement {
    * @protected
    */
   onUIStateUpdate_(uiState) {
-    uiState === UIType.MOBILE
+    const isMobile = uiState === UIType.MOBILE;
+
+    isMobile
       ? this.startListeningForTouchEvents_()
       : this.stopListeningForTouchEvents_();
+
+    this.headerEl_.toggleAttribute('desktop', !isMobile);
   }
 
   /**
