@@ -114,7 +114,9 @@ function observeSize(element, type, callback) {
     targetObserverMultimap.set(element, callbacks);
     getObserver(win).observe(element);
   }
-  const exists = callbacks.some((cb) => cb.callback === callback);
+  const exists = callbacks.some(
+    (cb) => cb.callback === callback && cb.type === type
+  );
   if (!exists) {
     callbacks.push({type, callback});
     const entry = targetEntryMap.get(element);
@@ -134,7 +136,7 @@ function unobserveSize(element, type, callback) {
   if (!callbacks) {
     return;
   }
-  remove(callbacks, (cb) => cb.callback === callback);
+  remove(callbacks, (cb) => cb.callback === callback && cb.type === type);
   if (callbacks.length == 0) {
     targetObserverMultimap.delete(element);
     targetEntryMap.delete(element);
@@ -203,8 +205,8 @@ function computeAndCall(type, callback, entry) {
     } else {
       // `borderBoxSize` is not supported: polyfill it via blocking measures.
       const {target} = entry;
-      width = target.offsetWidth;
-      height = target.offsetHeight;
+      width = target./*OK*/ offsetWidth;
+      height = target./*OK*/ offsetHeight;
     }
   }
   if (width != null && height != null) {
