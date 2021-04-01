@@ -75,5 +75,19 @@ describes.realWin(
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });
     });
+
+    it('unlayout and relayout', async () => {
+      const reach = await getReach({
+        'data-embed-id': 'default',
+      });
+      expect(reach.querySelector('iframe')).to.exist;
+
+      const unlayoutResult = reach.unlayoutCallback();
+      expect(unlayoutResult).to.be.true;
+      expect(reach.querySelector('iframe')).to.not.exist;
+
+      await reach.layoutCallback();
+      expect(reach.querySelector('iframe')).to.exist;
+    });
   }
 );

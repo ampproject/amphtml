@@ -67,6 +67,16 @@ class AmpReachPlayer extends AMP.BaseElement {
   }
 
   /** @override */
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    return true;
+  }
+
+  /** @override */
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.iframe_.contentWindow./*OK*/ postMessage(
