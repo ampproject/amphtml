@@ -160,6 +160,13 @@ export class DraggableDrawer extends AMP.BaseElement {
       this.contentEl_.appendChild(headerShadowRootEl);
       this.element.classList.add('amp-story-page-attachment-ui-v2');
       this.headerEl_.classList.add('amp-story-page-attachment-ui-v2');
+      const handler = (entries) => {
+        this.headerEl_.classList.toggle('stuck', !entries[0].isIntersecting);
+      };
+      const observer = new window.IntersectionObserver(handler);
+      setTimeout(() => {
+        observer.observe(spacerEl);
+      }, 1000);
     } else {
       templateEl.insertBefore(headerShadowRootEl, templateEl.firstChild);
     }
