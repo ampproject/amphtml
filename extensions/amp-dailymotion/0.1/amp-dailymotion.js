@@ -176,6 +176,16 @@ class AmpDailymotion extends AMP.BaseElement {
     return this.loadPromise(this.iframe_);
   }
 
+  /** @override */
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    return true;
+  }
+
   /**
    * @param {!Event} event
    * @private
