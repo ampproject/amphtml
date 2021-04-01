@@ -211,19 +211,18 @@ export class DraggableDrawer extends AMP.BaseElement {
       });
 
       // For displaying sticky header on mobile.
-      const intersectionObserver = new this.win.IntersectionObserver((e) => {
+      new this.win.IntersectionObserver((e) => {
         this.headerEl_.classList.toggle(
           'i-amphtml-story-draggable-drawer-header-stuck',
           !e[0].isIntersecting
         );
-      });
-      intersectionObserver.observe(spacerEl);
+      }).observe(spacerEl);
+      // intersectionObserver.observe(spacerEl);
 
       // Update spacerElHeight_ on resize for drag offset.
-      const resizeObserver = new this.win.ResizeObserver((e) => {
+      new this.win.ResizeObserver((e) => {
         this.spacerElHeight_ = e[0].contentRect.height;
-      });
-      resizeObserver.observe(spacerEl);
+      }).observe(spacerEl);
 
       // Reset scroll position on end of close transiton.
       this.element.addEventListener('transitionend', (e) => {
