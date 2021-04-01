@@ -153,7 +153,7 @@ describes.realWin(
       );
     });
 
-    it('unlayout and reloayout', async () => {
+    it('unlayout and relayout', async () => {
       const o2 = await getO2player({
         'data-pid': '123',
         'data-bcid': '456',
