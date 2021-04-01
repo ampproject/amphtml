@@ -108,66 +108,37 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildInline_() {
+    const localizationService = getLocalizationService(devAssert(this.element));
+
+    const closeButtonEl = htmlFor(this.element)`
+          <button class="i-amphtml-story-page-attachment-close-button" aria-label="close"
+              role="button">
+          </button>`;
+
+    const titleEl = htmlFor(this.element)`
+    <span class="i-amphtml-story-page-attachment-title"></span>`;
+
+    if (localizationService) {
+      const localizedCloseString = localizationService.getLocalizedString(
+        LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
+      );
+      closeButtonEl.setAttribute('aria-label', localizedCloseString);
+    }
+
+    if (this.element.hasAttribute('data-title')) {
+      titleEl.textContent = this.element.getAttribute('data-title');
+    }
+
     if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-      // Only difference in these blocks is appending the title and close button to this wrapper element.
-      // This is to stick it to the top of the page and transition it's opacity.
       const titleAndCloseWrapperEl = this.headerEl_.appendChild(
         htmlFor(this.element)`
             <div class="i-amphtml-story-draggable-drawer-header-title-and-close"></div>`
       );
-      const closeButtonEl = titleAndCloseWrapperEl.appendChild(
-        htmlFor(this.element)`
-            <button class="i-amphtml-story-page-attachment-close-button" aria-label="close"
-                role="button">
-            </button>`
-      );
-      const localizationService = getLocalizationService(
-        devAssert(this.element)
-      );
-      if (localizationService) {
-        const localizedCloseString = localizationService.getLocalizedString(
-          LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
-        );
-        closeButtonEl.setAttribute('aria-label', localizedCloseString);
-      }
-
-      titleAndCloseWrapperEl.appendChild(
-        htmlFor(this.element)`
-            <span class="i-amphtml-story-page-attachment-title"></span>`
-      );
-
-      if (this.element.hasAttribute('data-title')) {
-        this.headerEl_.querySelector(
-          '.i-amphtml-story-page-attachment-title'
-        ).textContent = this.element.getAttribute('data-title');
-      }
+      titleAndCloseWrapperEl.appendChild(closeButtonEl);
+      titleAndCloseWrapperEl.appendChild(titleEl);
     } else {
-      const closeButtonEl = this.headerEl_.appendChild(
-        htmlFor(this.element)`
-            <button class="i-amphtml-story-page-attachment-close-button" aria-label="close"
-                role="button">
-            </button>`
-      );
-      const localizationService = getLocalizationService(
-        devAssert(this.element)
-      );
-      if (localizationService) {
-        const localizedCloseString = localizationService.getLocalizedString(
-          LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
-        );
-        closeButtonEl.setAttribute('aria-label', localizedCloseString);
-      }
-
-      this.headerEl_.appendChild(
-        htmlFor(this.element)`
-            <span class="i-amphtml-story-page-attachment-title"></span>`
-      );
-
-      if (this.element.hasAttribute('data-title')) {
-        this.headerEl_.querySelector(
-          '.i-amphtml-story-page-attachment-title'
-        ).textContent = this.element.getAttribute('data-title');
-      }
+      this.headerEl_.appendChild(closeButtonEl);
+      this.headerEl_.appendChild(titleEl);
     }
 
     const templateEl = this.element.querySelector(
