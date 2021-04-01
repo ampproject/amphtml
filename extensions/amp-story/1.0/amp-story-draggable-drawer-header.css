@@ -77,8 +77,13 @@
 
 /* For amp-story-page-attachment-ui-v2 experiment. */
 
+:host {
+  border-radius: inherit !important; /* Propogate border-radius */
+}
+
 .amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header {
   box-shadow: none !important;
+  border-radius: inherit !important;
 }
 
 .amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-title {
