@@ -86,12 +86,12 @@
   box-shadow: none !important;
   border-radius: inherit !important;
   height: auto !important;
+  position: sticky !important;
+  top: 0 !important;
 }
 
 :not([desktop]).amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header {
   height: 20px !important;
-  position: sticky !important;
-  top: 0 !important;
 }
 
 .amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header .i-amphtml-story-draggable-drawer-header-title-and-close {
