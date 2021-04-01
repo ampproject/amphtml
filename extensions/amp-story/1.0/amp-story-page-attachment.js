@@ -109,6 +109,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    */
   buildInline_() {
     if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+      // Only difference in these blocks is appending the title and close button to this wrapper element.
+      // This is to stick it to the top of the page and transition it's opacity.
       const titleAndCloseWrapperEl = this.headerEl_.appendChild(
         htmlFor(this.element)`
             <div class="i-amphtml-story-draggable-drawer-header-title-and-close"></div>`
