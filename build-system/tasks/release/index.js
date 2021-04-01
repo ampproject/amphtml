@@ -100,12 +100,6 @@ const CHANNEL_CONFIGS = {
   '25': {type: 'experimentC', configBase: 'prod'}, // Spec name: 'inabox-experimentC'
 };
 
-// Mapping of entry file names to a dictionary of AMP_CONFIG additions.
-const TARGETS_TO_CONFIG = MINIFIED_TARGETS.flatMap((minifiedTarget) => [
-  {file: `${minifiedTarget}.js`, config: {}},
-  {file: `${minifiedTarget}.mjs`, config: {esm: 1}},
-]);
-
 function logSeparator_() {
   log('---\n\n');
 }
@@ -175,6 +169,7 @@ function discoverDistFlavors_() {
  */
 async function compileDistFlavors_(distFlavors, tempDir) {
   for (const {flavorType, command: baseCommand} of distFlavors) {
+    // TODO(danielrozenberg): remove undefined case when the release automation platform explicitly handles it.
     const command =
       argv.esm === undefined
         ? `${baseCommand} --esm && ${baseCommand}`
@@ -197,7 +192,7 @@ async function compileDistFlavors_(distFlavors, tempDir) {
     );
 
     log('Copying static files...');
-    await Promise.all([
+    const staticFilesPromise = Promise.all([
       // Directory-to-directory copy from the ./static sub-directory.
       fs.copy(STATIC_FILES_DIR, path.join(flavorTempDistDir, 'dist')),
       // Individual files to copy from the Git repository.
@@ -207,14 +202,20 @@ async function compileDistFlavors_(distFlavors, tempDir) {
           path.join(flavorTempDistDir, 'dist', path.basename(staticFilePath))
         )
       ),
-      // Individual files to copy from the resulting build artifacts.
-      ...Object.entries(POST_BUILD_MOVES).map(([from, to]) =>
-        fs.copy(
-          path.join(flavorTempDistDir, from),
-          path.join(flavorTempDistDir, to)
-        )
-      ),
     ]);
+    const postBuildMovesPromise = !argv.esm
+      ? Promise.all([
+          // Individual files to copy from the resulting build artifacts.
+          // This is only relevant for nomodule builds.
+          ...Object.entries(POST_BUILD_MOVES).map(([from, to]) =>
+            fs.copy(
+              path.join(flavorTempDistDir, from),
+              path.join(flavorTempDistDir, to)
+            )
+          ),
+        ])
+      : Promise.resolve();
+    await Promise.all([staticFilesPromise, postBuildMovesPromise]);
 
     logSeparator_();
   }
@@ -360,9 +361,23 @@ async function prependConfig_(outputDir) {
       type: channelConfig.type,
       ...require(`../../global-configs/${channelConfig.configBase}-config.json`),
     };
+    // Mapping of entry file names to a dictionary of AMP_CONFIG additions.
+    const targetsToConfig = MINIFIED_TARGETS.flatMap((minifiedTarget) => {
+      const targets = [];
+      // TODO(danielrozenberg): remove undefined case when the release automation platform explicitly handles it.
+      if (!argv.esm) {
+        // For explicit --no-esm or when no ESM flag is passed.
+        targets.push({file: `${minifiedTarget}.js`, config: {}});
+      }
+      if (argv.esm === undefined || argv.esm) {
+        // For explicit --esm or when no ESM flag is passed.
+        targets.push({file: `${minifiedTarget}.mjs`, config: {esm: 1}});
+      }
+      return targets;
+    });
 
     allPrependPromises.push(
-      ...TARGETS_TO_CONFIG.map(async (target) => {
+      ...targetsToConfig.map(async (target) => {
         const targetPath = path.join(rtvPath, target.file);
         const channelConfig = JSON.stringify({
           ...channelPartialConfig,
