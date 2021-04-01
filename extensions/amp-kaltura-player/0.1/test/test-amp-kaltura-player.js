@@ -120,7 +120,7 @@ describes.realWin(
       });
     });
 
-    it('unlayout and reloayout', async () => {
+    it('unlayout and relayout', async () => {
       const kp = await getKaltura({
         'data-partner': '1281471',
         'data-entryid': '1_3ts1ms9c',
