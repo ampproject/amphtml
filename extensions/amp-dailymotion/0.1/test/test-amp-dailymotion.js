@@ -84,7 +84,7 @@ describes.realWin(
       });
     });
 
-    it('unlayout and reloayout', async () => {
+    it('unlayout and relayout', async () => {
       const dailymotion = await getDailymotion('x2m8jpp');
       expect(dailymotion.querySelector('iframe')).to.exist;
 
