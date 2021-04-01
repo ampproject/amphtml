@@ -108,12 +108,11 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildInline_() {
-    const localizationService = getLocalizationService(devAssert(this.element));
-
     const closeButtonEl = htmlFor(this.element)`
           <button class="i-amphtml-story-page-attachment-close-button" aria-label="close"
               role="button">
           </button>`;
+    const localizationService = getLocalizationService(devAssert(this.element));
 
     const titleEl = htmlFor(this.element)`
     <span class="i-amphtml-story-page-attachment-title"></span>`;
