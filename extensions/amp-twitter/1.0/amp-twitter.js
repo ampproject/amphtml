@@ -24,6 +24,7 @@ import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const {string} */
 const TAG = 'amp-twitter';
+const TYPE = 'twitter';
 
 class AmpTwitter extends BaseElement {
   /** @param {!AmpElement} element */
@@ -57,7 +58,7 @@ class AmpTwitter extends BaseElement {
     const ampdoc = element.getAmpDoc();
     const {win} = ampdoc;
     const preconnect = Services.preconnectFor(win);
-    preloadBootstrap(win, ampdoc, preconnect);
+    preloadBootstrap(win, TYPE, ampdoc, preconnect);
     // Hosts the script that renders tweets.
     preconnect.preload(
       ampdoc,

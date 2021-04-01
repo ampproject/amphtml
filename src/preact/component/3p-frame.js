@@ -107,7 +107,7 @@ function ProxyIframeEmbedWithRef(
       JSON.stringify(
         dict({
           'host': parseUrlDeprecated(src.current).hostname,
-          'bootstrap': getBootstrapUrl(),
+          'bootstrap': getBootstrapUrl(type, win),
           'type': type,
           // "name" must be unique across iframes, so we add a count.
           // See: https://github.com/ampproject/amphtml/pull/2955

@@ -27,6 +27,7 @@ import {useCallback, useState} from '../../../src/preact';
 /** @const {string} */
 const TYPE = 'twitter';
 const NO_HEIGHT_STYLE = dict({'height': '100%'});
+const MATCHES_MESSAGING_ORIGIN = () => true;
 
 /**
  * @param {!TwitterDef.Props} props
@@ -57,6 +58,7 @@ function TwitterWithRef({requestResize, title, ...rest}, ref) {
       title={title}
       {...rest}
       // non-overridable props
+      matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
       messageHandler={messageHandler}
       type={TYPE}
       wrapperStyle={heightStyle}
