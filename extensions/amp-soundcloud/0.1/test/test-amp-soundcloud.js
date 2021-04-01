@@ -129,7 +129,7 @@ describes.realWin(
       );
     });
 
-    it('unlayout and reloayout', async () => {
+    it('unlayout and relayout', async () => {
       const scplayer = await getSCPlayer('1595551', true);
       expect(scplayer.querySelector('iframe')).to.exist;
 
