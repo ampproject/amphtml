@@ -28,8 +28,8 @@ import {
   useRef,
 } from '../../../src/preact';
 
-const DEFAULT_MATCHES_MESSAGING_ORIGIN = () => true;
-
+const DEFAULT_MATCHES_MESSAGING_ORIGIN = () => false;
+const ABOUT_BLANK = 'about:blank';
 /**
  * @param {!IframeEmbedDef.Props} props
  * @param {{current: (!IframeEmbedDef.Api|null)}} ref
@@ -101,10 +101,17 @@ export function IframeEmbedWithRef(
   useEffect(() => {
     const iframe = iframeRef.current;
     if (!playable && iframe) {
+      const {src} = iframe;
       // Resetting the `src` will reset the iframe and pause it. It will force
       // the reload of the whole iframe. But it's the only reliable option
       // to force pause.
-      iframe.src = iframe.src;
+      if (src && src != ABOUT_BLANK && !src.includes('#')) {
+        iframe.src = iframe.src;
+      } else {
+        const parent = iframe.parentNode;
+        parent.removeChild(iframe);
+        parent.appendChild(iframe);
+      }
     }
   }, [playable]);
 

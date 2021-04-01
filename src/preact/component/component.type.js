@@ -62,17 +62,15 @@ var IframeEmbedDef = {};
  *   allow: (string|undefined),
  *   allowFullScreen: (boolean|undefined),
  *   allowTransparency: (boolean|undefined),
- *   loading: (Loading),
- *   manageMessageHandler: (function({current: ?}, function):function|undefined),
+ *   loading: (string),
+ *   manageMessageHandler: (function({current: HTMLIFrameElement}, function):function|undefined),
  *   name: (string|undefined),
- *   onReadyState: (function|undefined),
+ *   onReadyState: (function(string)|undefined),
  *   options: (Object|undefined)
  *   ready: (boolean|undefined),
- *   requestResize: (function(number)|undefined),
  *   sandbox: (string|undefined),
  *   src: (string|undefined),
  *   title: (string|undefined),
- *   type: (string|undefined),
  * }}
  */
 IframeEmbedDef.Props;
