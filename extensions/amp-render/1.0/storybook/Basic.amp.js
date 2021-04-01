@@ -109,6 +109,8 @@ WithBindableSrc.story = {
 };
 
 export const WithAmpScriptSrc = () => {
+  // TODO: Look into generating the hash on the fly or serving the json as a static asset.
+  // For more context, see: https://github.com/ampproject/amphtml/pull/33537#discussion_r605740202
   return (
     <>
       <script
