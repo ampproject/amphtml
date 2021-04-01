@@ -108,6 +108,15 @@ class AmpIzlesene extends AMP.BaseElement {
   }
 
   /** @override */
+  unlayoutCallback() {
+    if (this.iframe_) {
+      this.element.removeChild(this.iframe_);
+      this.iframe_ = null;
+    }
+    return true;
+  }
+
+  /** @override */
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.iframe_.contentWindow./*OK*/ postMessage(
