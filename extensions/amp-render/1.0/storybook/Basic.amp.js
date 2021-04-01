@@ -28,6 +28,7 @@ export default {
       {name: 'amp-mustache', version: '0.2'},
       {name: 'amp-bind', version: '0.1'},
       {name: 'amp-render', version: '1.0'},
+      {name: 'amp-script', version: '0.1'},
     ],
     experiments: ['amp-render'],
   },
@@ -106,4 +107,45 @@ export const WithBindableSrc = () => {
 
 WithBindableSrc.story = {
   name: 'With bindable src',
+};
+
+export const WithAmpScriptSrc = () => {
+  return (
+    <>
+      {/* TODO(alanorozco): Remove hash once storybook-addon-amp#22 is mainlined */}
+      <meta
+        name="amp-script-src"
+        content="sha384-W71daLvaG1fVtSoGC4xq80vkUeKAZPo2hPEj4ofjtSOSfK1m02U0gQXp1ChLV1O8"
+      ></meta>
+      <amp-script id="dataFunctions" script="local-script" nodom></amp-script>
+      <script id="local-script" type="text/plain" target="amp-script">
+        {`
+        function getRemoteData() {
+          return fetch('https://amp.dev/static/samples/json/examples2.json')
+            .then(function(resp) { return resp.json(); });
+        }
+        exportFunction('getRemoteData', getRemoteData);
+        `}
+      </script>
+
+      <amp-render
+        src="amp-script:dataFunctions.getRemoteData"
+        width="auto"
+        height="100"
+        layout="fixed-height"
+      >
+        <template type="amp-mustache">
+          <ul>
+            {`{{#items}}`}
+            <li>{`{{title}}`}</li>
+            {`{{/items}}`}
+          </ul>
+        </template>
+      </amp-render>
+    </>
+  );
+};
+
+WithAmpScriptSrc.story = {
+  name: 'With AMP script src',
 };
