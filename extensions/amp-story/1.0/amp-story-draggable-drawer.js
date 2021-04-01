@@ -217,7 +217,6 @@ export class DraggableDrawer extends AMP.BaseElement {
           !e[0].isIntersecting
         );
       }).observe(spacerEl);
-      // intersectionObserver.observe(spacerEl);
 
       // Update spacerElHeight_ on resize for drag offset.
       new this.win.ResizeObserver((e) => {
