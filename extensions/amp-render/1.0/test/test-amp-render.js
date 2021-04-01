@@ -119,14 +119,13 @@ describes.realWin(
         <amp-script id="dataFunctions" script="local-script" nodom></amp-script>
       `;
       const fetchScript = html`
-          <script id="local-script" type="text/plain" target="amp-script">
-            function getRemoteData() {
-              return fetch('https://example.com/data.json')
-                  .then((resp) => resp.json());
-            }
-            exportFunction('getRemoteData', getRemoteData);
-          </script>
-        </div>
+        <script id="local-script" type="text/plain" target="amp-script">
+          function getRemoteData() {
+            return fetch('https://example.com/data.json')
+                .then((resp) => resp.json());
+          }
+          exportFunction('getRemoteData', getRemoteData);
+        </script>
       `;
 
       element = html`

@@ -110,10 +110,9 @@ WithBindableSrc.story = {
 };
 
 export const WithAmpScriptSrc = () => {
-  // TODO: Look into generating the hash on the fly or serving the json as a static asset.
-  // For more context, see: https://github.com/ampproject/amphtml/pull/33537#discussion_r605740202
   return (
     <>
+      {/* TODO(alanorozco): Remove hash once storybook-addon-amp#22 is mainlined */}
       <meta
         name="amp-script-src"
         content="sha384-W71daLvaG1fVtSoGC4xq80vkUeKAZPo2hPEj4ofjtSOSfK1m02U0gQXp1ChLV1O8"
