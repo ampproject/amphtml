@@ -330,7 +330,7 @@ const crypto = require('crypto');
 const hash = crypto.createHash('sha384');
 
 function generateCSPHash(script) {
-  const data = hash.update(script, 'utf-8');
+  const data = hash.update(script, 'utf8');
   return (
     'sha384-' +
     data
