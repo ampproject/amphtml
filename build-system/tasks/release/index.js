@@ -169,6 +169,7 @@ function discoverDistFlavors_() {
  */
 async function compileDistFlavors_(distFlavors, tempDir) {
   for (const {flavorType, command: baseCommand} of distFlavors) {
+    // TODO(danielrozenberg): remove undefined case when the release automation platform explicitly handles it.
     const command =
       argv.esm === undefined
         ? `${baseCommand} --esm && ${baseCommand}`
@@ -214,7 +215,7 @@ async function compileDistFlavors_(distFlavors, tempDir) {
           ),
         ])
       : Promise.resolve();
-    await Promise.all([...staticFilesPromise, ...postBuildMovesPromise]);
+    await Promise.all([staticFilesPromise, postBuildMovesPromise]);
 
     logSeparator_();
   }
@@ -363,10 +364,13 @@ async function prependConfig_(outputDir) {
     // Mapping of entry file names to a dictionary of AMP_CONFIG additions.
     const targetsToConfig = MINIFIED_TARGETS.flatMap((minifiedTarget) => {
       const targets = [];
+      // TODO(danielrozenberg): remove undefined case when the release automation platform explicitly handles it.
       if (!argv.esm) {
+        // For explicit --no-esm or when no ESM flag is passed.
         targets.push({file: `${minifiedTarget}.js`, config: {}});
       }
       if (argv.esm === undefined || argv.esm) {
+        // For explicit --esm or when no ESM flag is passed.
         targets.push({file: `${minifiedTarget}.mjs`, config: {esm: 1}});
       }
       return targets;
