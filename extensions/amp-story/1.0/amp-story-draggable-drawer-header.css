@@ -74,3 +74,19 @@
 .i-amphtml-story-draggable-drawer-header-attachment-remote {
   display: none !important;
 }
+
+/* For amp-story-page-attachment-ui-v2 experiment. */
+
+.amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header {
+  box-shadow: none !important;
+}
+
+.amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-title {
+  position: absolute !important;
+  width: 100% !important;
+  padding: 0 !important;
+}
+
+.amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-close-button {
+  margin-inline-start: auto !important; /* RTL support */
+}
