@@ -25,11 +25,11 @@ const bodyParser = require('body-parser');
 const cors = require('./amp-cors');
 const devDashboard = require('./app-index/index');
 const express = require('express');
+const fetch = require('node-fetch');
 const formidable = require('formidable');
 const fs = require('fs');
 const jsdom = require('jsdom');
 const path = require('path');
-const request = require('request');
 const upload = require('multer')();
 const pc = process;
 const autocompleteEmailData = require('./autocomplete-test-data');
@@ -47,8 +47,32 @@ const {
 } = require('./recaptcha-router');
 const {getServeMode} = require('./app-utils');
 const {logWithoutTimestamp} = require('../common/logging');
+const {log} = require('../common/logging');
+const {red} = require('kleur/colors');
 const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls, isRtvMode} = require('./app-utils');
+
+/**
+ * Respond with content received from a URL when SERVE_MODE is "cdn".
+ * @param {express.Response} res
+ * @param {string} cdnUrl
+ * @return {Promise<boolean>}
+ */
+async function passthroughServeModeCdn(res, cdnUrl) {
+  if (SERVE_MODE !== 'cdn') {
+    return false;
+  }
+  try {
+    const response = await fetch(cdnUrl);
+    res.status(response.status);
+    res.send(await response.text());
+  } catch (e) {
+    log(red('ERROR:'), e);
+    res.status(500);
+    res.end();
+  }
+  return true;
+}
 
 const app = express();
 const TEST_SERVER_PORT = argv.port || 8000;
@@ -185,32 +209,22 @@ app.get('/proxy', async (req, res, next) => {
  * @param {string=} protocol 'https' or 'http'. 'https' retries using 'http'.
  * @return {!Promise<string>}
  */
-function requestAmphtmlDocUrl(urlSuffix, protocol = 'https') {
+async function requestAmphtmlDocUrl(urlSuffix, protocol = 'https') {
   const defaultUrl = `${protocol}://${urlSuffix}`;
   logWithoutTimestamp(`Fetching URL: ${defaultUrl}`);
-  return new Promise((resolve, reject) => {
-    request(defaultUrl, (error, response, body) => {
-      if (
-        error ||
-        (response && (response.statusCode < 200 || response.statusCode >= 300))
-      ) {
-        if (protocol == 'https') {
-          return requestAmphtmlDocUrl(urlSuffix, 'http');
-        }
-        return reject(new Error(error || `Status: ${response.statusCode}`));
-      }
-      const {window} = new jsdom.JSDOM(body);
-      const linkRelAmphtml = window.document.querySelector('link[rel=amphtml]');
-      if (!linkRelAmphtml) {
-        return resolve(defaultUrl);
-      }
-      const amphtmlUrl = linkRelAmphtml.getAttribute('href');
-      if (!amphtmlUrl) {
-        return resolve(defaultUrl);
-      }
-      return resolve(amphtmlUrl);
-    });
-  });
+
+  const response = await fetch(defaultUrl);
+  if (!response.ok) {
+    if (protocol == 'https') {
+      return requestAmphtmlDocUrl(urlSuffix, 'http');
+    }
+    throw new Error(`Status: ${response.status}`);
+  }
+
+  const {window} = new jsdom.JSDOM(await response.text());
+  const linkRelAmphtml = window.document.querySelector('link[rel=amphtml]');
+  const amphtmlUrl = linkRelAmphtml && linkRelAmphtml.getAttribute('href');
+  return amphtmlUrl || defaultUrl;
 }
 
 /*
@@ -1384,21 +1398,11 @@ app.get('/dist/*.mjs', (req, res, next) => {
  */
 app.get(
   ['/dist/rtv/*/v0/*.(m?js)', '/dist/rtv/*/v0/*.(m?js).map'],
-  (req, res, next) => {
+  async (req, res, next) => {
     const mode = SERVE_MODE;
     const fileName = path.basename(req.path).replace('.max.', '.');
     let filePath = 'https://cdn.ampproject.org/v0/' + fileName;
-    if (mode == 'cdn') {
-      // This will not be useful until extension-script.js change in prod
-      // Require url from cdn
-      request(filePath, (error, response) => {
-        if (error) {
-          res.status(404);
-          res.end();
-        } else {
-          res.send(response);
-        }
-      });
+    if (await passthroughServeModeCdn(res, filePath)) {
       return;
     }
     const isJsMap = filePath.endsWith('.map');
@@ -1440,22 +1444,11 @@ window.addEventListener('beforeunload', (evt) => {
  */
 app.get(
   ['/dist/sw.(m?js)', '/dist/sw-kill.(m?js)', '/dist/ww.(m?js)'],
-  (req, res, next) => {
+  async (req, res, next) => {
     // Special case for entry point script url. Use compiled for testing
     const mode = SERVE_MODE;
     const fileName = path.basename(req.path);
-    if (mode == 'cdn') {
-      // This will not be useful until extension-script.js change in prod
-      // Require url from cdn
-      const filePath = 'https://cdn.ampproject.org/' + fileName;
-      request(filePath, function (error, response) {
-        if (error) {
-          res.status(404);
-          res.end();
-        } else {
-          res.send(response);
-        }
-      });
+    if (await passthroughServeModeCdn(res, fileName)) {
       return;
     }
     if (mode == 'default') {
@@ -1696,36 +1689,33 @@ function decryptDocumentKey(encryptedDocumentKey) {
 }
 
 // serve local vendor config JSON files
-app.use('(/dist)?/rtv/*/v0/analytics-vendors/:vendor.json', (req, res) => {
-  const {vendor} = req.params;
-  const serveMode = SERVE_MODE;
+app.use(
+  '(/dist)?/rtv/*/v0/analytics-vendors/:vendor.json',
+  async (req, res) => {
+    const {vendor} = req.params;
+    const serveMode = SERVE_MODE;
 
-  if (serveMode === 'cdn') {
-    const vendorUrl = `https://cdn.ampproject.org/v0/analytics-vendors/${vendor}.json`;
-    request(vendorUrl, (error, response) => {
-      if (error) {
-        res.status(404);
-        res.end();
-      } else {
-        res.send(response);
-      }
-    });
-    return;
-  }
+    const filePath = `https://cdn.ampproject.org/v0/analytics-vendors/${vendor}.json`;
+    if (await passthroughServeModeCdn(res, filePath)) {
+      return;
+    }
 
-  const max = serveMode === 'default' ? '.max' : '';
-  const localVendorConfigPath = `${pc.cwd()}/dist/v0/analytics-vendors/${vendor}${max}.json`;
+    const max = serveMode === 'default' ? '.max' : '';
+    const localPath = `${pc.cwd()}/dist/v0/analytics-vendors/${vendor}${max}.json`;
 
-  fs.promises
-    .readFile(localVendorConfigPath)
-    .then((file) => {
+    // TODO(alanorozco): This might work with a simpler pattern seen above:
+    // Instead of reading, override url:
+    //   req.url = 'foo'
+    //   next();
+    try {
+      const file = await fs.promises.readFile(localPath);
       res.setHeader('Content-Type', 'application/json');
       res.end(file);
-    })
-    .catch(() => {
+    } catch (_) {
       res.status(404);
-      res.end('Not found: ' + localVendorConfigPath);
-    });
-});
+      res.end('Not found: ' + localPath);
+    }
+  }
+);
 
 module.exports = app;

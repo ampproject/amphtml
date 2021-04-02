@@ -19,7 +19,6 @@ const argv = require('minimist')(process.argv.slice(2));
 const globby = require('globby');
 const path = require('path');
 const url = require('url');
-const util = require('util');
 const {
   gitCommitHash,
   gitCiMainBaseline,
@@ -75,13 +74,13 @@ async function getBrotliBundleSizes() {
 /**
  * Checks the response of an operation. Throws if there's an error, and prints
  * success messages if not.
- * @param {!Object} response
+ * @param {!Response} response
  * @param {...string} successMessages
  */
-function checkResponse(response, ...successMessages) {
-  if (response.statusCode < 200 || response.statusCode >= 300) {
+async function checkResponse(response, ...successMessages) {
+  if (!response.ok) {
     throw new Error(
-      `${response.statusCode} ${response.statusMessage}: ` + response.body
+      `${response.status} ${response.statusText}: ` + (await response.text())
     );
   } else {
     log(...successMessages);
@@ -89,14 +88,15 @@ function checkResponse(response, ...successMessages) {
 }
 
 /**
- * Helper that lazily imports and promisifies request.post, and invokes it with
- * the given args.
- * @param {*} args
- * @return {function()}
+ * Helper that lazily imports node-fetch, and does a JSON POST request.
+ * @param {string} url
+ * @param {*} body
+ * @param {?Object=} options
+ * @return {Promise<Response>}
  */
-async function requestPost(...args) {
-  const {default: request} = await import('request');
-  return util.promisify(request.post)(...args);
+async function postJson(url, body, options) {
+  const fetch = await import('node-fetch');
+  return fetch(url, {...options, method: 'POST', body: JSON.stringify(body)});
 }
 
 /**
@@ -127,18 +127,15 @@ async function storeBundleSize() {
   const commitHash = gitCommitHash();
   log('Storing bundle sizes for commit', cyan(shortSha(commitHash)) + '...');
   try {
-    const response = await requestPost({
-      uri: url.resolve(
-        bundleSizeAppBaseUrl,
-        path.join('commit', commitHash, 'store')
-      ),
-      json: true,
-      body: {
-        token: process.env.BUNDLE_SIZE_TOKEN,
-        bundleSizes: await getBrotliBundleSizes(),
-      },
+    const requestUrl = url.resolve(
+      bundleSizeAppBaseUrl,
+      path.join('commit', commitHash, 'store')
+    );
+    const response = await postJson(requestUrl, {
+      token: process.env.BUNDLE_SIZE_TOKEN,
+      bundleSizes: await getBrotliBundleSizes(),
     });
-    checkResponse(response, 'Successfully stored bundle sizes.');
+    await checkResponse(response, 'Successfully stored bundle sizes.');
   } catch (error) {
     log(yellow('WARNING:'), 'Could not store bundle sizes');
     logWithoutTimestamp(error);
@@ -157,13 +154,15 @@ async function skipBundleSize() {
       cyan(shortSha(commitHash)) + '...'
     );
     try {
-      const response = await requestPost(
-        url.resolve(
-          bundleSizeAppBaseUrl,
-          path.join('commit', commitHash, 'skip')
-        )
+      const requestUrl = url.resolve(
+        bundleSizeAppBaseUrl,
+        path.join('commit', commitHash, 'skip')
       );
-      checkResponse(response, 'Successfully skipped bundle size reporting.');
+      const response = await postJson(requestUrl, {});
+      await checkResponse(
+        response,
+        'Successfully skipped bundle size reporting.'
+      );
     } catch (error) {
       log(yellow('WARNING:'), 'Could not skip bundle size reporting');
       logWithoutTimestamp(error);
@@ -194,19 +193,16 @@ async function reportBundleSize() {
       cyan(shortSha(mergeSha)) + '...'
     );
     try {
-      const response = await requestPost({
-        uri: url.resolve(
-          bundleSizeAppBaseUrl,
-          path.join('commit', headSha, 'report')
-        ),
-        json: true,
-        body: {
-          baseSha,
-          mergeSha,
-          bundleSizes: await getBrotliBundleSizes(),
-        },
+      const requestUrl = url.resolve(
+        bundleSizeAppBaseUrl,
+        path.join('commit', headSha, 'report')
+      );
+      const response = await postJson(requestUrl, {
+        baseSha,
+        mergeSha,
+        bundleSizes: await getBrotliBundleSizes(),
       });
-      checkResponse(response, 'Successfully reported bundle sizes.');
+      await checkResponse(response, 'Successfully reported bundle sizes.');
     } catch (error) {
       log(
         yellow('WARNING:'),
