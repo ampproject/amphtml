@@ -22,7 +22,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const {
   downloadNomoduleOutput,
-  printSkipMessage,
+  skipFollowupJobs,
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
@@ -66,7 +66,7 @@ function prBuildWorkflow() {
       `amp integration --nobuild --compiled --headless --config=${argv.config}`
     );
   } else {
-    printSkipMessage(
+    skipFollowupJobs(
       jobName,
       'this PR does not affect the runtime or integration tests'
     );

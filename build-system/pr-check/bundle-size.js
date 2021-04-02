@@ -22,7 +22,7 @@
 const {
   downloadModuleOutput,
   downloadNomoduleOutput,
-  printSkipMessage,
+  skipFollowupJobs,
   timedExecOrDie,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
@@ -43,7 +43,7 @@ function prBuildWorkflow() {
     timedExecOrDie('amp bundle-size --on_pr_build');
   } else {
     timedExecOrDie('amp bundle-size --on_skipped_build');
-    printSkipMessage(
+    skipFollowupJobs(
       jobName,
       'this PR does not affect the runtime or flag configs'
     );

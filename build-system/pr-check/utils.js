@@ -108,7 +108,7 @@ function printChangeSummary() {
  * @param {string} jobName
  * @param {string} skipReason
  */
-function printSkipMessage(jobName, skipReason) {
+function skipFollowupJobs(jobName, skipReason) {
   const loggingPrefix = getLoggingPrefix();
   logWithoutTimestamp(
     `${loggingPrefix} Skipping ${cyan(jobName)} because ${skipReason}.`
@@ -342,7 +342,7 @@ module.exports = {
   downloadNomoduleOutput,
   downloadModuleOutput,
   printChangeSummary,
-  printSkipMessage,
+  skipFollowupJobs,
   processAndUploadNomoduleOutput,
   startTimer,
   stopTimer,

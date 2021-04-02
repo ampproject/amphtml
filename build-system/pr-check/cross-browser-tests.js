@@ -21,7 +21,7 @@
 
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {log} = require('../common/logging');
-const {printSkipMessage, timedExecOrDie} = require('./utils');
+const {skipFollowupJobs, timedExecOrDie} = require('./utils');
 const {red, cyan} = require('kleur/colors');
 const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runCiJob} = require('./ci-job');
@@ -120,7 +120,7 @@ async function prBuildWorkflow() {
       Targets.INTEGRATION_TEST
     )
   ) {
-    printSkipMessage(
+    skipFollowupJobs(
       jobName,
       'this PR does not affect the runtime, unit tests, integration tests, or end-to-end tests'
     );

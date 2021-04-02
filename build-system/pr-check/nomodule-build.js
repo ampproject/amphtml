@@ -21,7 +21,7 @@
 
 const {
   abortTimedJob,
-  printSkipMessage,
+  skipFollowupJobs,
   processAndUploadNomoduleOutput,
   startTimer,
   timedExecWithError,
@@ -68,7 +68,7 @@ async function prBuildWorkflow() {
     await signalPrDeployUpload('success');
   } else {
     await signalPrDeployUpload('skipped');
-    printSkipMessage(
+    skipFollowupJobs(
       jobName,
       'this PR does not affect the runtime, integration tests, end-to-end tests, or visual diff tests'
     );
