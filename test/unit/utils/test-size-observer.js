@@ -182,7 +182,7 @@ describes.realWin('size-observer', {}, (env) => {
   });
 
   describe('border-box size', () => {
-    it('should measure content size', async () => {
+    it('should measure border size', async () => {
       const promise = measureBorderBoxSize(element);
       observer.notify([
         {target: element, borderBoxSize: [{inlineSize: 101, blockSize: 102}]},
