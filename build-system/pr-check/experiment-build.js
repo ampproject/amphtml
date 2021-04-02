@@ -20,7 +20,7 @@
  */
 
 const {
-  printSkipMessage,
+  skipFollowupJobs: skipFollowupJobs,
   timedExecOrDie,
   uploadExperimentOutput,
 } = require('./utils');
@@ -38,7 +38,7 @@ function pushBuildWorkflow() {
     timedExecOrDie(`amp dist --fortesting ${defineFlag}`);
     uploadExperimentOutput(experiment);
   } else {
-    printSkipMessage(
+    skipFollowupJobs(
       jobName,
       `${experiment} is expired, misconfigured, or does not exist`
     );
@@ -55,7 +55,7 @@ function prBuildWorkflow() {
   ) {
     pushBuildWorkflow();
   } else {
-    printSkipMessage(
+    skipFollowupJobs(
       jobName,
       'this PR does not affect the runtime, integration tests, or end-to-end tests'
     );

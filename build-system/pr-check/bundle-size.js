@@ -20,8 +20,8 @@
  */
 
 const {buildTargetsInclude, Targets} = require('./build-targets');
-const {printSkipMessage, timedExecOrDie} = require('./utils');
 const {runCiJob} = require('./ci-job');
+const {skipFollowupJobs, timedExecOrDie} = require('./utils');
 
 const jobName = 'bundle-size.js';
 
@@ -38,7 +38,7 @@ function prBuildWorkflow() {
     timedExecOrDie('amp bundle-size --on_pr_build');
   } else {
     timedExecOrDie('amp bundle-size --on_skipped_build');
-    printSkipMessage(jobName, 'this PR does not affect the runtime');
+    skipFollowupJobs(jobName, 'this PR does not affect the runtime');
   }
 }
 

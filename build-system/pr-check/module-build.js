@@ -20,7 +20,7 @@
  */
 
 const {
-  printSkipMessage,
+  skipFollowupJobs,
   timedExecOrDie,
   uploadModuleOutput,
 } = require('./utils');
@@ -42,7 +42,7 @@ function prBuildWorkflow() {
     timedExecOrDie('amp dist --esm --fortesting');
     uploadModuleOutput();
   } else {
-    printSkipMessage(
+    skipFollowupJobs(
       jobName,
       'this PR does not affect the runtime or integration tests'
     );

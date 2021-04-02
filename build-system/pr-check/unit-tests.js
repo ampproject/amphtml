@@ -20,8 +20,8 @@
  */
 
 const {buildTargetsInclude, Targets} = require('./build-targets');
-const {printSkipMessage, timedExecOrDie, timedExecOrThrow} = require('./utils');
 const {runCiJob} = require('./ci-job');
+const {skipFollowupJobs, timedExecOrDie, timedExecOrThrow} = require('./utils');
 
 const jobName = 'unit-tests.js';
 
@@ -50,7 +50,7 @@ function prBuildWorkflow() {
     timedExecOrDie('amp unit --headless --coverage');
     timedExecOrDie('amp codecov-upload');
   } else {
-    printSkipMessage(
+    skipFollowupJobs(
       jobName,
       'this PR does not affect the runtime or unit tests'
     );
