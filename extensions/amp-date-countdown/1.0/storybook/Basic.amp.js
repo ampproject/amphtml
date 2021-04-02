@@ -132,9 +132,7 @@ export const Default = () => {
   );
 };
 
-Default.story = {
-  name: 'default',
-};
+Default.storyName = 'default';
 
 export const DefaultRenderer = () => {
   const dateAttribute = select(
@@ -187,9 +185,7 @@ export const DefaultRenderer = () => {
   );
 };
 
-DefaultRenderer.story = {
-  name: 'default renderer',
-};
+DefaultRenderer.storyName = 'default renderer';
 
 export const ExternalTemplate = () => {
   const template = select('template', ['template1', 'template2'], 'template1');
@@ -260,6 +256,4 @@ export const ExternalTemplate = () => {
   );
 };
 
-ExternalTemplate.story = {
-  name: 'external template',
-};
+ExternalTemplate.storyName = 'external template';
