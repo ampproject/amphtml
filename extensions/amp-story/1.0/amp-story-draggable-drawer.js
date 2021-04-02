@@ -159,6 +159,7 @@ export class DraggableDrawer extends AMP.BaseElement {
       this.containerEl_.insertBefore(spacerEl, this.contentEl_);
       this.contentEl_.appendChild(headerShadowRootEl);
       this.element.classList.add('amp-story-page-attachment-ui-v2');
+      this.headerEl_.classList.add('amp-story-page-attachment-ui-v2');
     } else {
       templateEl.insertBefore(headerShadowRootEl, templateEl.firstChild);
     }
@@ -209,11 +210,18 @@ export class DraggableDrawer extends AMP.BaseElement {
         this.close_();
       });
 
+      // For displaying sticky header on mobile.
+      new this.win.IntersectionObserver((e) => {
+        this.headerEl_.classList.toggle(
+          'i-amphtml-story-draggable-drawer-header-stuck',
+          !e[0].isIntersecting
+        );
+      }).observe(spacerEl);
+
       // Update spacerElHeight_ on resize for drag offset.
-      const observer = new this.win.ResizeObserver((e) => {
+      new this.win.ResizeObserver((e) => {
         this.spacerElHeight_ = e[0].contentRect.height;
-      });
-      observer.observe(spacerEl);
+      }).observe(spacerEl);
 
       // Reset scroll position on end of close transiton.
       this.element.addEventListener('transitionend', (e) => {
@@ -233,9 +241,13 @@ export class DraggableDrawer extends AMP.BaseElement {
    * @protected
    */
   onUIStateUpdate_(uiState) {
-    uiState === UIType.MOBILE
+    const isMobile = uiState === UIType.MOBILE;
+
+    isMobile
       ? this.startListeningForTouchEvents_()
       : this.stopListeningForTouchEvents_();
+
+    this.headerEl_.toggleAttribute('desktop', !isMobile);
   }
 
   /**
