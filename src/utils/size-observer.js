@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-import {pushIfNotExist, removeItem} from './array';
 import {rethrowAsync} from '../log';
 
 /** @typedef {function(../layout-rect.LayoutSizeDef)} */
 let ContentSizeObserverCallbackDef;
 
+/** @typedef {function(!ResizeObserverEntry)} */
+let SizeObserverCallbackDef;
+
 /** @const {!WeakMap<!Window, !ResizeObserver>} */
 const observers = new WeakMap();
 
-/** @const {!WeakMap<!Element, !Array<!ContentSizeObserverCallbackDef>>} */
+/** @const {!WeakMap<!Element, !Map<?, !ContentSizeObserverCallbackDef>>} */
 const targetObserverMultimap = new WeakMap();
 
-/** @const {!WeakMap<!Element, !../layout-rect.LayoutSizeDef>} */
+/** @const {!WeakMap<!Element, !ResizeObserverEntry>} */
 const targetSizeMap = new WeakMap();
 
 /**
@@ -34,22 +36,13 @@ const targetSizeMap = new WeakMap();
  * @param {!ContentSizeObserverCallbackDef} callback
  */
 export function observeContentSize(element, callback) {
-  const win = element.ownerDocument.defaultView;
-  if (!win) {
-    return;
-  }
-  let callbacks = targetObserverMultimap.get(element);
-  if (!callbacks) {
-    callbacks = [];
-    targetObserverMultimap.set(element, callbacks);
-    getObserver(win).observe(element);
-  }
-  if (pushIfNotExist(callbacks, callback)) {
-    const size = targetSizeMap.get(element);
-    if (size) {
-      setTimeout(() => callCallbackNoInline(callback, size));
-    }
-  }
+  observeSizeInternal(element, callback, (entry) => {
+    const {contentRect} = entry;
+    const {width, height} = contentRect;
+    /** @type {../layout-rect.LayoutSizeDef} */
+    const size = {width, height};
+    callback(size);
+  });
 }
 
 /**
@@ -57,19 +50,7 @@ export function observeContentSize(element, callback) {
  * @param {!ObserverCallbackDef} callback
  */
 export function unobserveContentSize(element, callback) {
-  const callbacks = targetObserverMultimap.get(element);
-  if (!callbacks) {
-    return;
-  }
-  removeItem(callbacks, callback);
-  if (callbacks.length == 0) {
-    targetObserverMultimap.delete(element);
-    targetSizeMap.delete(element);
-    const win = element.ownerDocument.defaultView;
-    if (win) {
-      getObserver(win).unobserve(element);
-    }
-  }
+  unobserveSizeInternal(element, callback);
 }
 
 /**
@@ -84,6 +65,68 @@ export function measureContentSize(element) {
     };
     observeContentSize(element, onSize);
   });
+}
+
+/**
+ * @param {!Element} element
+ * @param {!ContentSizeObserverCallbackDef} callback
+ */
+export function observeSize(element, callback) {
+  observeSizeInternal(element, callback, callback);
+}
+
+/**
+ * @param {!Element} element
+ * @param {!ObserverCallbackDef} callback
+ */
+export function unobserveSize(element, callback) {
+  unobserveSizeInternal(element, callback);
+}
+
+
+/**
+ * @param {!Element} element
+ * @param {?} key
+ * @param {!ContentSizeObserverCallbackDef} callback
+ */
+function observeSizeInternal(element, key, callback) {
+  const win = element.ownerDocument.defaultView;
+  if (!win) {
+    return;
+  }
+  let callbacks = targetObserverMultimap.get(element);
+  if (!callbacks) {
+    callbacks = new Map();
+    targetObserverMultimap.set(element, callbacks);
+    getObserver(win).observe(element);
+  }
+  if (!callbacks.has(key)) {
+    callbacks.set(key, callback);
+    const entry = targetSizeMap.get(element);
+    if (entry) {
+      setTimeout(() => callCallbackNoInline(callback, entry));
+    }
+  }
+}
+
+/**
+ * @param {!Element} element
+ * @param {?} key
+ */
+function unobserveSizeInternal(element, key) {
+  const callbacks = targetObserverMultimap.get(element);
+  if (!callbacks) {
+    return;
+  }
+  callbacks.delete(key);
+  if (callbacks.size == 0) {
+    targetObserverMultimap.delete(element);
+    targetSizeMap.delete(element);
+    const win = element.ownerDocument.defaultView;
+    if (win) {
+      getObserver(win).unobserve(element);
+    }
+  }
 }
 
 /**
@@ -105,7 +148,8 @@ function getObserver(win) {
 function processEntries(entries) {
   const seen = new Set();
   for (let i = entries.length - 1; i >= 0; i--) {
-    const {target, contentRect} = entries[i];
+    const entry = entries[i];
+    const {target} = entry;
     if (seen.has(target)) {
       continue;
     }
@@ -114,13 +158,8 @@ function processEntries(entries) {
     if (!callbacks) {
       continue;
     }
-    const {width, height} = contentRect;
-    /** @type {../layout-rect.LayoutSizeDef} */
-    const size = {width, height};
-    targetSizeMap.set(target, size);
-    for (let k = 0; k < callbacks.length; k++) {
-      callCallbackNoInline(callbacks[k], size);
-    }
+    targetSizeMap.set(target, entry);
+    callbacks.forEach((callback) => callCallbackNoInline(callback, entry));
   }
 }
 

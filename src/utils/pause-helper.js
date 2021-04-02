@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {observeContentSize, unobserveContentSize} from './size-observer';
+import {observeSize, unobserveSize} from './size-observer';
 
 export class PauseHelper {
   /**
@@ -39,18 +39,29 @@ export class PauseHelper {
     }
     this.isPlaying_ = isPlaying;
     if (isPlaying) {
-      observeContentSize(this.element_, this.pauseWhenNoSize_);
+      observeSize(this.element_, this.pauseWhenNoSize_);
     } else {
-      unobserveContentSize(this.element_, this.pauseWhenNoSize_);
+      unobserveSize(this.element_, this.pauseWhenNoSize_);
     }
   }
 
   /**
-   * @param {!../layout-rect.LayoutSizeDef} size
+   * @param {!ResizeObserverEntry} entry
    * @private
    */
-  pauseWhenNoSize_({width, height}) {
-    const hasSize = width > 0 && height > 0;
+  pauseWhenNoSize_(({contentRect, borderBoxSize})) {
+    const hasSize = (
+      // The most accurate information is in the `borderBoxSize`, but it's not
+      // available on all platforms.
+      borderBoxSize?.length > 0 && borderBoxSize[0].inlineSize > 0 && borderBoxSize[0].blockSize > 0 ||
+      // If content size is non-zero - then the whole element is also non-zero.
+      // This helps because the `contentRect` is available on all platforms.
+      contentRect.width > 0 && contentRect.height > 0 ||
+      // Fallback to offsetWidth/Height. This will cause a blocking measure,
+      // but a collision with a mutation is less likely inside the `ResizeObserver`
+      // callback.
+      this.element_.offsetWidth > 0 && this.element_.offsetHeight > 0
+    );
     if (!hasSize) {
       this.element_.pause();
     }
