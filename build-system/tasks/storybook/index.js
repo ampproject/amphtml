@@ -75,8 +75,7 @@ function buildEnv(env) {
       // dynamic value. This prevents XSS and other types of garbling.
       `// DO NOT${' '}SUBMIT.
        // This preview.js file was generated for a specific PR build.
-       import {addParameters} from '@storybook/preact';
-       addParameters(${JSON.stringify({
+       export const parameters = (${JSON.stringify({
          ampBaseUrlOptions: [`${getBaseUrl()}/dist`],
        })});`
     );

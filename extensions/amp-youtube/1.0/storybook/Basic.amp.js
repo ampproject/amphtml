@@ -94,6 +94,4 @@ export const InsideDetails = () => {
   );
 };
 
-Default.story = {
-  name: 'Default',
-};
+Default.storyName = 'Default';

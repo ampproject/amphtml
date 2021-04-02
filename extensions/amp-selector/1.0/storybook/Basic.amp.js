@@ -71,9 +71,7 @@ export const WithAmpImg = () => {
   );
 };
 
-WithAmpImg.story = {
-  name: 'with <amp-img>',
-};
+WithAmpImg.storyName = 'with <amp-img>';
 
 export const WithUl = () => {
   return (
@@ -88,9 +86,7 @@ export const WithUl = () => {
   );
 };
 
-WithUl.story = {
-  name: 'with <ul>',
-};
+WithUl.storyName = 'with <ul>';
 
 export const Actions = () => {
   const keyboardSelectMode = select(
@@ -135,9 +131,7 @@ export const Actions = () => {
   );
 };
 
-Actions.story = {
-  name: 'actions',
-};
+Actions.storyName = 'actions';
 
 export const Responsive = () => {
   return (
@@ -152,6 +146,4 @@ export const Responsive = () => {
   );
 };
 
-Responsive.story = {
-  name: 'responsive',
-};
+Responsive.storyName = 'responsive';
