@@ -44,9 +44,14 @@ const tempDir = tempy.directory();
 
 /**
  * Checks files for formatting (and optionally fixes them) with Prettier.
+ * Explicitly makes sure the API doesn't check files in `.prettierignore`.
  */
 async function prettify() {
-  const filesToCheck = getFilesToCheck(prettifyGlobs, {dot: true});
+  const filesToCheck = getFilesToCheck(
+    prettifyGlobs,
+    {dot: true},
+    '.prettierignore'
+  );
   if (filesToCheck.length == 0) {
     return;
   }

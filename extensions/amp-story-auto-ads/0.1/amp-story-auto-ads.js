@@ -34,6 +34,7 @@ import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {divertStoryAdPlacements} from '../../../src/experiments/story-ad-placements';
 import {getPlacementAlgo} from './algorithm-utils';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
@@ -133,6 +134,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
           this.ampStory_,
           this.config_
         );
+        divertStoryAdPlacements(this.win);
         this.placementAlgorithm_ = getPlacementAlgo(
           this.win,
           this.storeService_,

@@ -122,6 +122,50 @@ describes.realWin(
       });
     });
 
+    it('requires data-partner for playlists', () => {
+      return allowConsoleError(() => {
+        return getBridPlayer({
+          'data-player': '4144',
+          'data-playlist': '13663',
+        }).should.eventually.be.rejectedWith(
+          /The data-partner attribute is required for/
+        );
+      });
+    });
+
+    it('requires data-player for playlists', () => {
+      return allowConsoleError(() => {
+        return getBridPlayer({
+          'data-partner': '264',
+          'data-playlist': '13663',
+        }).should.eventually.be.rejectedWith(
+          /The data-player attribute is required for/
+        );
+      });
+    });
+
+    it('requires data-partner for carousels', () => {
+      return allowConsoleError(() => {
+        return getBridPlayer({
+          'data-player': '4144',
+          'data-carousel': '459',
+        }).should.eventually.be.rejectedWith(
+          /The data-partner attribute is required for/
+        );
+      });
+    });
+
+    it('requires data-player for carousels', () => {
+      return allowConsoleError(() => {
+        return getBridPlayer({
+          'data-partner': '264',
+          'data-carousel': '459',
+        }).should.eventually.be.rejectedWith(
+          /The data-player attribute is required for/
+        );
+      });
+    });
+
     it('should forward events from brid-player to the amp element', async () => {
       const bc = await getBridPlayer(
         {

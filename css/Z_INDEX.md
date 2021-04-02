@@ -89,6 +89,7 @@
 `.i-amphtml-image-slider-bar` | 3 | [extensions/amp-image-slider/0.1/amp-image-slider.css](/extensions/amp-image-slider/0.1/amp-image-slider.css)
 `amp-story-cta-layer` | 3 | [extensions/amp-story-auto-ads/0.1/amp-story-auto-ads-inabox.css](/extensions/amp-story-auto-ads/0.1/amp-story-auto-ads-inabox.css)
 `.i-amphtml-story-page-open-attachment[active]` | 3 | [extensions/amp-story/1.0/amp-story-open-page-attachment.css](/extensions/amp-story/1.0/amp-story-open-page-attachment.css)
+`.i-amphtml-story-attachment-active amp-story-page[active]::after` | 3 | [extensions/amp-story/1.0/amp-story.css](/extensions/amp-story/1.0/amp-story.css)
 `amp-story-cta-layer` | 3 | [extensions/amp-story/1.0/amp-story.css](/extensions/amp-story/1.0/amp-story.css)
 `.i-amphtml-element > [overflow]` | 2 | [css/ampshared.css](/css/ampshared.css)
 `body noscript > *` | 2 | [css/ampshared.css](/css/ampshared.css)

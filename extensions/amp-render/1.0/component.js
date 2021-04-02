@@ -29,7 +29,7 @@ const DEFAULT_RENDER = (data) => JSON.stringify(data);
  * @param {string} url
  * @return {!Promise<!JsonObject>}
  */
-const DEFAULT_FETCH = (url) => {
+const DEFAULT_GET_JSON = (url) => {
   return fetch(url).then((res) => res.json());
 };
 
@@ -39,7 +39,7 @@ const DEFAULT_FETCH = (url) => {
  */
 export function Render({
   src = '',
-  getJson = DEFAULT_FETCH,
+  getJson = DEFAULT_GET_JSON,
   render = DEFAULT_RENDER,
   ...rest
 }) {
@@ -53,10 +53,15 @@ export function Render({
     if (!src) {
       return;
     }
-
+    let cancelled = false;
     getJson(src).then((data) => {
-      setData(data);
+      if (!cancelled) {
+        setData(data);
+      }
     });
+    return () => {
+      cancelled = true;
+    };
   }, [src, getJson]);
 
   const rendered = useRenderer(render, data);

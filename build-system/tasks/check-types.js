@@ -28,17 +28,15 @@ const {log} = require('../common/logging');
 const {typecheckNewServer} = require('../server/typescript-compile');
 
 /**
- * Dedicated type check path.
- * @return {!Promise}
+ * Runs closure compiler's type checker against all AMP code.
+ * @return {!Promise<void>}
  */
 async function checkTypes() {
   const handlerProcess = createCtrlcHandler('check-types');
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   maybeInitializeExtensions();
-
   typecheckNewServer();
-
   const compileSrcs = [
     'src/amp.js',
     'src/amp-shadow.js',
@@ -47,78 +45,66 @@ async function checkTypes() {
     'ads/inabox/inabox-host.js',
     'src/web-worker/web-worker.js',
   ];
-  const extensionValues = Object.keys(extensions).map(function (key) {
-    return extensions[key];
-  });
+  const extensionValues = Object.keys(extensions).map((key) => extensions[key]);
   const extensionSrcs = extensionValues
-    .filter(function (extension) {
-      return !extension.noTypeCheck;
-    })
-    .map(function (extension) {
-      return (
-        'extensions/' +
-        extension.name +
-        '/' +
-        extension.version +
-        '/' +
-        extension.name +
-        '.js'
-      );
-    })
+    .filter((ext) => !ext.noTypeCheck)
+    .map((ext) => `extensions/${ext.name}/${ext.version}/${ext.name}.js`)
     .sort();
-  return compileCss()
-    .then(() => {
-      log('Checking types...');
-      displayLifecycleDebugging();
-      return Promise.all([
-        closureCompile(
-          compileSrcs.concat(extensionSrcs),
-          './dist',
-          'check-types.js',
-          {
-            include3pDirectories: true,
-            includePolyfills: true,
-            extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
-            typeCheckOnly: true,
-          }
-        ),
-        // Type check 3p/ads code.
-        closureCompile(
-          ['3p/integration.js'],
-          './dist',
-          'integration-check-types.js',
-          {
-            externs: ['ads/ads.extern.js'],
-            include3pDirectories: true,
-            includePolyfills: true,
-            typeCheckOnly: true,
-          }
-        ),
-        closureCompile(
-          ['3p/ampcontext-lib.js'],
-          './dist',
-          'ampcontext-check-types.js',
-          {
-            externs: ['ads/ads.extern.js'],
-            include3pDirectories: true,
-            includePolyfills: true,
-            typeCheckOnly: true,
-          }
-        ),
-        closureCompile(
-          ['3p/iframe-transport-client-lib.js'],
-          './dist',
-          'iframe-transport-client-check-types.js',
-          {
-            externs: ['ads/ads.extern.js'],
-            include3pDirectories: true,
-            includePolyfills: true,
-            typeCheckOnly: true,
-          }
-        ),
-      ]);
-    })
-    .then(() => exitCtrlcHandler(handlerProcess));
+  await compileCss();
+  log('Checking types...');
+  displayLifecycleDebugging();
+  await Promise.all([
+    closureCompile(
+      compileSrcs.concat(extensionSrcs),
+      './dist',
+      'check-types.js',
+      {
+        include3pDirectories: true,
+        includePolyfills: true,
+        extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
+        typeCheckOnly: true,
+        warningLevel: 'QUIET', // TODO(amphtml): Make this 'DEFAULT'
+      }
+    ),
+    // Type check 3p/ads code.
+    closureCompile(
+      ['3p/integration.js'],
+      './dist',
+      'integration-check-types.js',
+      {
+        externs: ['ads/ads.extern.js'],
+        include3pDirectories: true,
+        includePolyfills: true,
+        typeCheckOnly: true,
+        warningLevel: 'QUIET', // TODO(amphtml): Make this 'DEFAULT'
+      }
+    ),
+    closureCompile(
+      ['3p/ampcontext-lib.js'],
+      './dist',
+      'ampcontext-check-types.js',
+      {
+        externs: ['ads/ads.extern.js'],
+        include3pDirectories: true,
+        includePolyfills: true,
+        typeCheckOnly: true,
+        warningLevel: 'QUIET', // TODO(amphtml): Make this 'DEFAULT'
+      }
+    ),
+    closureCompile(
+      ['3p/iframe-transport-client-lib.js'],
+      './dist',
+      'iframe-transport-client-check-types.js',
+      {
+        externs: ['ads/ads.extern.js'],
+        include3pDirectories: true,
+        includePolyfills: true,
+        typeCheckOnly: true,
+        warningLevel: 'QUIET', // TODO(amphtml): Make this 'DEFAULT'
+      }
+    ),
+  ]);
+  exitCtrlcHandler(handlerProcess);
 }
 
 module.exports = {
