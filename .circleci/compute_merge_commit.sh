@@ -23,7 +23,7 @@ err=0
 GREEN() { echo -e "\n\033[0;32m$1\033[0m"; }
 
 # Try to determine the PR number.
-curl -sS https://raw.githubusercontent.com/ampproject/amphtml/master/.circleci/get_pr_number.sh | bash
+./.circleci/get_pr_number.sh
 if [[ -f "$BASH_ENV" ]]; then
   source $BASH_ENV
 fi

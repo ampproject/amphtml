@@ -17,10 +17,6 @@ push_builds_only: &push_builds_only
         - /^amp-release-.*$/
 
 executors:
-  amphtml-docker-small-executor:
-    docker:
-      - image: cimg/base:2020.12
-    resource_class: small
   amphtml-medium-executor:
     machine:
       image: ubuntu-2004:202010-01
@@ -35,32 +31,14 @@ executors:
     resource_class: xlarge
 
 commands:
-  save_merge_commit:
-    steps:
-      - save_cache:
-          name: 'Save Merge Commit'
-          key: git-{{ .Branch }}-{{ .Revision }}
-          paths:
-            - .CIRCLECI_MERGE_COMMIT
-  restore_merge_commit:
-    steps:
-      - restore_cache:
-          name: 'Restore Merge Commit'
-          key: git-{{ .Branch }}-{{ .Revision }}
   maybe_gracefully_halt:
     steps:
-      - attach_workspace:
-          at: /tmp
       - run:
           name: 'Maybe Gracefully Halt'
           command: if [[ -f "/tmp/workspace/CI_GRACEFULLY_HALT" ]]; then echo "Gracefully halting this job."; circleci-agent step halt; fi
   setup_vm:
     steps:
-      - run:
-          name: 'Create Workspace'
-          command: mkdir -p /tmp/workspace
       - checkout
-      - restore_merge_commit
       - run:
           name: 'Fetch Merge Commit'
           command: ./.circleci/fetch_merge_commit.sh
@@ -74,8 +52,8 @@ commands:
           name: 'Configure Hosts'
           command: cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
       - run:
-          name: 'Install Dependencies'
-          command: ./.circleci/install_dependencies.sh
+          name: 'Restore Dependencies'
+          command: ./.circleci/restore_dependencies.sh
   teardown_vm:
     steps:
       - persist_to_workspace:
@@ -94,18 +72,39 @@ commands:
           command: ./.circleci/fail_fast.sh
 
 jobs:
-  'Compute Merge Commit':
+  'Init':
     executor:
-      name: amphtml-docker-small-executor
+      name: amphtml-medium-executor
     steps:
+      - checkout
       - run:
           name: 'Compute Merge Commit'
-          command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/master/.circleci/compute_merge_commit.sh | bash
-      - save_merge_commit
+          command: ./.circleci/compute_merge_commit.sh
+      - run:
+          name: 'Fetch Merge Commit'
+          command: ./.circleci/fetch_merge_commit.sh
+      - restore_cache:
+          keys:
+            - node-modules-v1-{{ .Branch }}-{{ checksum "package-lock.json" }}
+            - node-modules-v1-{{ .Branch }}-
+            - node-modules-v1-
+      - run:
+          name: 'Install Dependencies'
+          command: ./.circleci/install_dependencies.sh
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - workspace
+      - save_cache:
+          paths:
+            - node_modules
+          key: node-modules-v1-{{ .Branch }}-{{ checksum "package-lock.json" }}
   'Checks':
     executor:
       name: amphtml-medium-executor
     steps:
+      - attach_workspace:
+          at: /tmp
       - maybe_gracefully_halt
       - setup_vm
       - run:
@@ -117,6 +116,8 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - attach_workspace:
+          at: /tmp
       - maybe_gracefully_halt
       - setup_vm
       - run:
@@ -128,6 +129,8 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - attach_workspace:
+          at: /tmp
       - maybe_gracefully_halt
       - setup_vm
       - run:
@@ -139,6 +142,8 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - attach_workspace:
+          at: /tmp
       - maybe_gracefully_halt
       - setup_vm
       - run:
@@ -150,6 +155,8 @@ jobs:
     executor:
       name: amphtml-medium-executor
     steps:
+      - attach_workspace:
+          at: /tmp
       - maybe_gracefully_halt
       - setup_vm
       - run:
@@ -161,6 +168,8 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - attach_workspace:
+          at: /tmp
       - maybe_gracefully_halt
       - setup_vm
       - run:
@@ -177,11 +186,8 @@ jobs:
     steps:
       # NOTE: deliberately not running the `maybe_gracefully_halt` step because
       # visual diff tests need to at least run with --empty when skipped.
-      # Instead we must create an empty workspace to prevent `teardown_vm` from
-      # crashing.
-      - run:
-          name: 'Create Workspace'
-          command: mkdir -p /tmp/workspace
+      - attach_workspace:
+          at: /tmp
       - setup_vm
       - install_chrome
       - run:
@@ -193,6 +199,8 @@ jobs:
     executor:
       name: amphtml-large-executor
     steps:
+      - attach_workspace:
+          at: /tmp
       - maybe_gracefully_halt
       - setup_vm
       - install_chrome
@@ -205,6 +213,8 @@ jobs:
     executor:
       name: amphtml-large-executor
     steps:
+      - attach_workspace:
+          at: /tmp
       - maybe_gracefully_halt
       - setup_vm
       - install_chrome
@@ -222,6 +232,8 @@ jobs:
         type: enum
         enum: ['prod', 'canary']
     steps:
+      - attach_workspace:
+          at: /tmp
       - maybe_gracefully_halt
       - setup_vm
       - install_chrome
@@ -239,6 +251,8 @@ jobs:
         type: enum
         enum: ['prod', 'canary']
     steps:
+      - attach_workspace:
+          at: /tmp
       - maybe_gracefully_halt
       - setup_vm
       - install_chrome
@@ -251,6 +265,8 @@ jobs:
     executor:
       name: amphtml-large-executor
     steps:
+      - attach_workspace:
+          at: /tmp
       - maybe_gracefully_halt
       - setup_vm
       - install_chrome
@@ -263,6 +279,8 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - attach_workspace:
+          at: /tmp
       - maybe_gracefully_halt
       - setup_vm
       - install_chrome
@@ -280,6 +298,8 @@ jobs:
         type: enum
         enum: ['A', 'B', 'C']
     steps:
+      - attach_workspace:
+          at: /tmp
       - maybe_gracefully_halt
       - setup_vm
       - run:
@@ -296,6 +316,8 @@ jobs:
         type: enum
         enum: ['A', 'B', 'C']
     steps:
+      - attach_workspace:
+          at: /tmp
       - maybe_gracefully_halt
       - setup_vm
       - install_chrome
@@ -308,24 +330,24 @@ jobs:
 workflows:
   'CircleCI':
     jobs:
-      - 'Compute Merge Commit':
+      - 'Init':
           <<: *push_and_pr_builds
       - 'Checks':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Init'
       - 'Unminified Build':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Init'
       - 'Nomodule Build':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Init'
       - 'Module Build':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Init'
       - 'Bundle Size':
           <<: *push_and_pr_builds
           requires:
@@ -334,7 +356,7 @@ workflows:
       - 'Validator Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Init'
       - 'Visual Diff Tests':
           <<: *push_and_pr_builds
           requires:
@@ -342,7 +364,7 @@ workflows:
       - 'Unit Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Init'
       - 'Unminified Tests':
           <<: *push_and_pr_builds
           requires:
@@ -375,7 +397,7 @@ workflows:
               exp: ['A', 'B', 'C']
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Init'
       - 'Experiment Tests':
           name: 'Experiment << matrix.exp >> Tests'
           matrix:

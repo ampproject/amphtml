@@ -20,19 +20,16 @@ set -e
 
 GREEN() { echo -e "\033[0;32m$1\033[0m"; }
 
-echo $(GREEN "Installing NVM...")
-export NVM_DIR=/tmp/workspace/.nvm
-mkdir -p "$NVM_DIR"
 curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
 
-echo $(GREEN "Setting up NVM environment...")
+echo $(GREEN "Restoring NVM environment...")
+export NVM_DIR="$HOME/.nvm"
+mv /tmp/workspace/.nvm $NVM_DIR
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-echo $(GREEN "Installing Node LTS...")
-nvm install 'lts/*'
+echo $(GREEN "Restoring npm environment...")
+NPM_BIN_DIR="`npm config get prefix`/bin"
+(set -x && echo "export PATH=$NPM_BIN_DIR:$PATH" >> $BASH_ENV)
 
-echo $(GREEN "Installing dependencies...")
-npm ci
-cp -r node_modules /tmp/workspace
-
-echo $(GREEN "Successfully installed all project dependencies.")
+echo $(GREEN "Restoring node_modules...")
+mv /tmp/workspace/node_modules .
