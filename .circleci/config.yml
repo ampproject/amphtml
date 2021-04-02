@@ -47,14 +47,15 @@ commands:
       - restore_cache:
           name: 'Restore Merge Commit'
           key: git-{{ .Branch }}-{{ .Revision }}
-  setup_vm:
+  maybe_gracefully_halt:
     steps:
       - attach_workspace:
           at: /tmp
       - run:
-          name: 'Maybe Gracefully Stop'
+          name: 'Maybe Gracefully Halt'
           command: if [[ -f "/tmp/workspace/CI_GRACEFULLY_HALT" ]]; then echo "Gracefully halting this job."; circleci-agent step halt; fi
-          # TODO(danielrozenberg): visual-diffs still need to run, even if the previous job gracefully halted, because it needs to run with --skip
+  setup_vm:
+    steps:
       - run:
           name: 'Create Workspace'
           command: mkdir -p /tmp/workspace
@@ -105,6 +106,7 @@ jobs:
     executor:
       name: amphtml-medium-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Checks'
@@ -115,6 +117,7 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Unminified Build'
@@ -125,6 +128,7 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Nomodule Build'
@@ -135,6 +139,7 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Module Build'
@@ -145,6 +150,7 @@ jobs:
     executor:
       name: amphtml-medium-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Bundle Size'
@@ -155,6 +161,7 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Install Validator Dependencies'
@@ -168,6 +175,11 @@ jobs:
     executor:
       name: amphtml-large-executor
     steps:
+      # NOTE: deliberately not running the `maybe_gracefully_halt` step because
+      # visual diff tests need to at least run with --empty when skipped.
+      # Instead we must attach the workspace to prevent crashing `teardown_vm`.
+      - attach_workspace:
+          at: /tmp
       - setup_vm
       - install_chrome
       - run:
@@ -179,6 +191,7 @@ jobs:
     executor:
       name: amphtml-large-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
@@ -190,6 +203,7 @@ jobs:
     executor:
       name: amphtml-large-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
@@ -206,6 +220,7 @@ jobs:
         type: enum
         enum: ['prod', 'canary']
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
@@ -222,6 +237,7 @@ jobs:
         type: enum
         enum: ['prod', 'canary']
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
@@ -233,6 +249,7 @@ jobs:
     executor:
       name: amphtml-large-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
@@ -244,6 +261,7 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
@@ -260,6 +278,7 @@ jobs:
         type: enum
         enum: ['A', 'B', 'C']
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Experiment << parameters.exp >> Build'
@@ -275,6 +294,7 @@ jobs:
         type: enum
         enum: ['A', 'B', 'C']
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
