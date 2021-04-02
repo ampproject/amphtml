@@ -842,8 +842,9 @@
     {
       "url": "examples/visual-tests/amp-story-player/player-amp-version.html",
       "name": "amp-story-player AMP version",
+      "interactive_tests": "examples/visual-tests/amp-story-player/story-loaded-amp-version.js",
       "viewport": {"width": 400, "height": 800},
-      "loading_complete_delay_ms": 8000,
+      "loading_complete_delay_ms": 5000,
     },
     {
       "url": "examples/visual-tests/amp-carousel/amp-carousel.html",
