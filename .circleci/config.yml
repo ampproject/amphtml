@@ -14,7 +14,7 @@ push_builds_only: &push_builds_only
     branches:
       only:
         - master
-        - /^amp-release-.*$/
+        - /amp-release-.*/
 
 executors:
   amphtml-docker-small-executor:
