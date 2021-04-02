@@ -15,13 +15,35 @@
  */
 'use strict';
 
+const fs = require('fs-extra');
 const globby = require('globby');
+const semver = require('semver');
 const {cyan, green, red} = require('kleur/colors');
-const {getStderr} = require('../common/exec');
-const {gitDiffFileMaster} = require('../common/git');
+const {gitDiffFileMain} = require('../common/git');
 const {log, logLocalDev, logWithoutTimestamp} = require('../common/logging');
 
-const checkerExecutable = 'npx npm-exact-versions';
+/**
+ * @param {string} file
+ * @return {boolean}
+ */
+function check(file) {
+  const json = fs.readJsonSync(file, 'utf8');
+
+  // We purposfully ignore peerDependencies here, because that's that's for the
+  // consumer to decide.
+  const keys = ['dependencies', 'devDependencies', 'optionalDependencies'];
+
+  for (const key of keys) {
+    const deps = json[key];
+    for (const dep in deps) {
+      const version = deps[dep];
+      if (!semver.clean(version)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
 
 /**
  * Makes sure all package.json files in the repo use exact versions.
@@ -30,24 +52,22 @@ const checkerExecutable = 'npx npm-exact-versions';
 async function checkExactVersions() {
   const packageJsonFiles = globby.sync(['**/package.json', '!**/node_modules']);
   packageJsonFiles.forEach((file) => {
-    const checkerCmd = `${checkerExecutable} --path ${file}`;
-    const err = getStderr(checkerCmd);
-    if (err) {
-      log(
-        red('ERROR:'),
-        'One or more packages in',
-        cyan(file),
-        'do not have an exact version.'
-      );
-      logWithoutTimestamp(gitDiffFileMaster(file));
-      throw new Error('Check failed');
-    } else {
+    if (check(file)) {
       logLocalDev(
         green('SUCCESS:'),
         'All packages in',
         cyan(file),
         'have exact versions.'
       );
+    } else {
+      log(
+        red('ERROR:'),
+        'One or more packages in',
+        cyan(file),
+        'do not have an exact version.'
+      );
+      logWithoutTimestamp(gitDiffFileMain(file));
+      throw new Error('Check failed');
     }
   });
 }

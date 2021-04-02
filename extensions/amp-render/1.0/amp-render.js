@@ -41,7 +41,101 @@ const isAmpStateSrc = (src) => src && src.startsWith(AMP_STATE_URI_SCHEME);
  */
 const isAmpScriptSrc = (src) => src && src.startsWith(AMP_SCRIPT_URI_SCHEME);
 
-class AmpRender extends BaseElement {
+/**
+ * Gets the json from an "amp-state:" uri. For example, src="amp-state:json.path".
+ *
+ * TODO: this is similar to the implementation in amp-list. Move it
+ * to a common file and import it.
+ *
+ * @param {!AmpElement} element
+ * @param {string} src
+ * @return {Promise<!JsonObject>}
+ */
+const getAmpStateJson = (element, src) => {
+  return Services.bindForDocOrNull(element)
+    .then((bind) => {
+      userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
+      const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length);
+      return bind.getStateAsync(ampStatePath).catch((err) => {
+        const stateKey = ampStatePath.split('.')[0];
+        user().error(
+          TAG,
+          `'amp-state' element with id '${stateKey}' was not found.`
+        );
+        throw err;
+      });
+    })
+    .then((json) => {
+      userAssert(
+        json !== undefined,
+        `[amp-render] No data was found at provided uri: ${src}`
+      );
+      return json;
+    });
+};
+
+/**
+ * Gets the json from an amp-script uri.
+ * TODO: this is similar to the implementation in amp-list. Move it
+ * to a common file and import it.
+ *
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} src
+ * @return {Promise<!JsonObject>}
+ */
+function getAmpScriptJson(ampdoc, src) {
+  return Promise.resolve()
+    .then(() => {
+      const args = src.slice('amp-script:'.length).split('.');
+      userAssert(
+        args.length === 2 && args[0].length > 0 && args[1].length > 0,
+        '[amp-render]: "amp-script" URIs must be of the format "scriptId.functionIdentifier".'
+      );
+
+      const ampScriptId = args[0];
+      const fnIdentifier = args[1];
+      const ampScriptEl = ampdoc.getElementById(ampScriptId);
+      userAssert(
+        ampScriptEl && ampScriptEl.tagName === 'AMP-SCRIPT',
+        `[amp-render]: could not find <amp-script> with script set to ${ampScriptId}`
+      );
+
+      return ampScriptEl.getImpl().then((impl) => {
+        return impl.callFunction(fnIdentifier);
+      });
+    })
+    .then((json) => {
+      userAssert(
+        json !== undefined,
+        `[amp-render] ${src} must return json, but instead returned: ${typeof json}`
+      );
+      return json;
+    });
+}
+
+/**
+ * Returns a function to fetch json from remote url, amp-state or
+ * amp-script.
+ *
+ * @param {!AmpElement} element
+ * @return {Function}
+ */
+export const getJsonFn = (element) => {
+  const src = element.getAttribute('src');
+  if (!src) {
+    // TODO(dmanek): assert that src is provided instead of silently failing below.
+    return () => {};
+  }
+  if (isAmpStateSrc(src)) {
+    return (src) => getAmpStateJson(element, src);
+  }
+  if (isAmpScriptSrc(src)) {
+    return (src) => getAmpScriptJson(element.getAmpDoc(), src);
+  }
+  return () => batchFetchJsonFor(element.getAmpDoc(), element);
+};
+
+export class AmpRender extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -65,35 +159,12 @@ class AmpRender extends BaseElement {
   /** @override */
   init() {
     return dict({
-      'getJson': this.getJsonFn_(),
+      'getJson': getJsonFn(this.element),
     });
   }
 
   /**
-   * Returns the correct fetch function for amp-state, amp-script or
-   * to fetch remote JSON.
-   *
-   * @return {Function}
-   * @private
-   */
-  getJsonFn_() {
-    const src = this.element.getAttribute('src');
-    if (!src) {
-      // TODO(dmanek): assert that src is provided instead of silently failing below.
-      return () => {};
-    }
-    if (isAmpStateSrc(src)) {
-      return this.getAmpStateJson.bind(null, this.element);
-    }
-    if (isAmpScriptSrc(src)) {
-      // TODO(dmanek): implement this
-      return () => {};
-    }
-    return batchFetchJsonFor.bind(null, this.getAmpDoc(), this.element);
-  }
-
-  /**
-   * TODO: this implementation is identical to one in amp-data-display &
+   * TODO: this implementation is identical to one in amp-date-display &
    * amp-date-countdown. Move it to a common file and import it.
    *
    * @override
@@ -103,85 +174,48 @@ class AmpRender extends BaseElement {
       this.templates_ ||
       (this.templates_ = Services.templatesForDoc(this.element));
     const template = templates.maybeFindTemplate(this.element);
-    if (template != this.template_) {
-      this.template_ = template;
-      if (template) {
-        // Only overwrite `render` when template is ready to minimize FOUC.
-        templates.whenReady(template).then(() => {
-          if (template != this.template_) {
-            // A new template has been set while the old one was initializing.
-            return;
-          }
-          this.mutateProps(
-            dict({
-              'render': (data) => {
-                return templates
-                  .renderTemplateAsString(dev().assertElement(template), data)
-                  .then((html) => dict({'__html': html}));
-              },
-            })
-          );
-        });
-      } else {
-        this.mutateProps(dict({'render': null}));
-      }
+    if (template === this.template_) {
+      return;
     }
+    this.template_ = template;
+    if (!template) {
+      this.mutateProps(dict({'render': null}));
+      return;
+    }
+    // Only overwrite `render` when template is ready to minimize FOUC.
+    templates.whenReady(template).then(() => {
+      if (template != this.template_) {
+        // A new template has been set while the old one was initializing.
+        return;
+      }
+      this.mutateProps(
+        dict({
+          'render': (data) => {
+            return templates
+              .renderTemplateAsString(dev().assertElement(template), data)
+              .then((html) => dict({'__html': html}));
+          },
+        })
+      );
+    });
   }
 
   /**
-   * TODO: this implementation is identical to one in amp-data-display &
+   * TODO: this implementation is identical to one in amp-date-display &
    * amp-date-countdown. Move it to a common file and import it.
    *
    * @override
    */
   isReady(props) {
-    if (this.template_ && !('render' in props)) {
-      // The template is specified, but not available yet.
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   * Gets the json an amp-list that has an "amp-state:" uri. For example,
-   * src="amp-state:json.path".
-   *
-   * TODO: this implementation is identical to one in amp-list. Move it
-   * to a common file and import it
-   *
-   * TODO: Add src as a param once this method is moved out of this class
-   * to support src binding (https://github.com/ampproject/amphtml/pull/33189#discussion_r598743971).
-   *
-   * @param {!AmpElement} element
-   * @return {Promise<!JsonObject>}
-   */
-  getAmpStateJson(element) {
-    const src = element.getAttribute('src');
-    if (!src) {
-      return Promise.resolve({});
-    }
-    return Services.bindForDocOrNull(element)
-      .then((bind) => {
-        userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
-        const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length);
-        return bind.getStateAsync(ampStatePath).catch((err) => {
-          const stateKey = ampStatePath.split('.')[0];
-          user().error(
-            TAG,
-            `'amp-state' element with id '${stateKey}' was not found.`
-          );
-          throw err;
-        });
-      })
-      .then((json) => {
-        userAssert(
-          typeof json !== 'undefined',
-          `[amp-render] No data was found at provided uri: ${src}`
-        );
-        return json;
-      });
+    // If a template is specified, then it must be available.
+    return !this.template_ || 'render' in props;
   }
 }
+
+AmpRender['props'] = {
+  ...BaseElement['props'],
+  'getJson': {attrs: ['src'], parseAttrs: getJsonFn},
+};
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpRender);

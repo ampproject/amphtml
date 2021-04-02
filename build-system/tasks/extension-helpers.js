@@ -25,6 +25,12 @@ const {
   verifyExtensionBundles,
   jsBundles,
 } = require('../compile/bundles.config');
+const {
+  maybeToEsmName,
+  compileJs,
+  compileJsWithEsbuild,
+  mkdirSync,
+} = require('./helpers');
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
 const {compileJison} = require('./compile-jison');
 const {endBuildStep, watchDebounceDelay, doBuildJs} = require('./helpers');
@@ -32,7 +38,7 @@ const {green, red, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
 const {log} = require('../common/logging');
-const {maybeToEsmName, compileJs, mkdirSync} = require('./helpers');
+const {parse: pathParse} = require('path');
 const {removeFromClosureBabelCache} = require('../compile/pre-closure-babel');
 const {watch} = require('chokidar');
 
@@ -80,9 +86,29 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
  *   loadPriority?: string,
  *   cssBinaries?: Array<string>,
  *   extraGlobs?: Array<string>,
+ *   binaries?: Array<ExtensionBinary>,
+ *   npm?: Map<string, NpmBinaries>,
  * }}
  */
 const ExtensionOption = {}; // eslint-disable-line no-unused-vars
+
+/**
+ * @typedef {{
+ *   preact?: string,
+ *   react?: string,
+ * }}
+ */
+const NpmBinaries = {}; // eslint-disable-line no-unused-vars
+
+/**
+ * @typedef {{
+ *   entryPoint: string,
+ *   outfile: string,
+ *   external?: Array<string>
+ *   remap?: Map<string, string>
+ * }}
+ */
+const ExtensionBinary = {}; // eslint-disable-line no-unused-vars
 
 // All declared extensions.
 const extensions = {};
@@ -109,7 +135,7 @@ function declareExtension(
   extensionsObject,
   includeLatest
 ) {
-  const defaultOptions = {hasCss: false};
+  const defaultOptions = {hasCss: false, npm: undefined};
   const versions = Array.isArray(version) ? version : [version];
   versions.forEach((v) => {
     extensionsObject[`${name}-${v}`] = {
@@ -463,6 +489,12 @@ async function buildExtension(
   if (name === 'amp-bind') {
     await doBuildJs(jsBundles, 'ww.max.js', options);
   }
+  if (options.npm) {
+    await buildNpmBinaires(extDir, options);
+  }
+  if (options.binaries) {
+    await buildBinaries(extDir, options.binaries, options);
+  }
   if (name === 'amp-analytics') {
     await analyticsVendorConfigs(options);
   }
@@ -517,6 +549,74 @@ function buildExtensionCss(extDir, name, version, options) {
     );
   }
   promises.push(mainCssBinary);
+  return Promise.all(promises);
+}
+
+/**
+ * @param {string} extDir
+ * @param {!Object} options
+ * @return {!Promise}
+ */
+function buildNpmBinaires(extDir, options) {
+  const {npm} = options;
+  const keys = Object.keys(npm);
+  const promises = keys.flatMap((entryPoint) => {
+    const {preact, react} = npm[entryPoint];
+    const binaries = [];
+    if (preact) {
+      binaries.push({
+        entryPoint,
+        outfile: preact,
+        external: ['preact', 'preact/dom', 'preact/compat', 'preact/hooks'],
+        remap: {'preact/dom': 'preact'},
+      });
+    }
+    if (react) {
+      binaries.push({
+        entryPoint,
+        outfile: react,
+        external: ['react', 'react-dom'],
+        remap: {
+          'preact': 'react',
+          'preact/compat': 'react',
+          'preact/hooks': 'react',
+          'preact/dom': 'react-dom',
+        },
+      });
+    }
+    return buildBinaries(extDir, binaries, options);
+  });
+  return Promise.all(promises);
+}
+
+/**
+ * @param {string} extDir
+ * @param {!Array<ExtensionBinary>} binaries
+ * @param {!Object} options
+ * @return {!Promise}
+ */
+function buildBinaries(extDir, binaries, options) {
+  mkdirSync(`${extDir}/dist`);
+
+  const promises = binaries.map((binary) => {
+    const {entryPoint, outfile, external, remap} = binary;
+    const {name} = pathParse(outfile);
+    const esm = argv.esm || argv.sxg || false;
+    return compileJsWithEsbuild(
+      extDir + '/',
+      entryPoint,
+      `${extDir}/dist`,
+      Object.assign(options, {
+        toName: maybeToEsmName(`${name}.max.js`),
+        minifiedName: maybeToEsmName(`${name}.js`),
+        latestName: '',
+        outputFormat: esm ? 'esm' : 'cjs',
+        wrapper: '',
+        externalDependencies: external,
+        remapDependencies: remap,
+      })
+    );
+  });
   return Promise.all(promises);
 }
 

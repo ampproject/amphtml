@@ -19,7 +19,6 @@ import {ActionTrust} from '../../../src/action-constants';
 import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
 import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {MessageType} from '../../../src/3p-frame-messaging';
-import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';
@@ -127,9 +126,6 @@ export class AmpIframe extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.hasErroredEmbedSize_ = false;
-
-    /** @private @const */
-    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /** @override */
@@ -493,8 +489,6 @@ export class AmpIframe extends AMP.BaseElement {
           });
         }, 1000);
       }
-
-      this.pauseHelper_.updatePlaying(true);
     });
   }
 
@@ -589,7 +583,6 @@ export class AmpIframe extends AMP.BaseElement {
         this.intersectionObserverHostApi_ = null;
       }
     }
-    this.pauseHelper_.updatePlaying(false);
     return true;
   }
 

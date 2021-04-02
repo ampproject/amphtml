@@ -18,7 +18,7 @@ import * as Preact from '../../../src/preact';
 import {ContainWrapper, useValueRef} from '../../../src/preact/component';
 import {Keys} from '../../../src/utils/key-codes';
 import {Side} from './sidebar-config';
-import {forwardRef} from '../../../src/preact/compat';
+import {createPortal, forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
 import {
   useCallback,
@@ -30,9 +30,10 @@ import {
 } from '../../../src/preact';
 import {useSidebarAnimation} from './sidebar-animations-hook';
 import {useStyles} from './component.jss';
+import objstr from 'obj-str';
 
 /**
- * @param {!SidebarDef.Props} props
+ * @param {!SidebarDef.SidebarProps} props
  * @param {{current: (!SidebarDef.SidebarApi|null)}} ref
  * @return {PreactDef.Renderable}
  */
@@ -41,6 +42,7 @@ function SidebarWithRef(
     as: Comp = 'div',
     side: sideProp,
     onBeforeOpen,
+    onAfterOpen,
     onAfterClose,
     backdropStyle,
     backdropClassName,
@@ -67,9 +69,7 @@ function SidebarWithRef(
   const onBeforeOpenRef = useValueRef(onBeforeOpen);
 
   const open = useCallback(() => {
-    if (onBeforeOpenRef.current) {
-      onBeforeOpenRef.current();
-    }
+    onBeforeOpenRef.current?.();
     setMounted(true);
     setOpened(true);
   }, [onBeforeOpenRef]);
@@ -103,7 +103,9 @@ function SidebarWithRef(
   }, [side, mounted]);
 
   useSidebarAnimation(
+    mounted,
     opened,
+    onAfterOpen,
     onAfterClose,
     side,
     sidebarRef,
@@ -135,42 +137,98 @@ function SidebarWithRef(
   }, [opened, close]);
 
   return (
-    mounted && (
-      <>
-        <ContainWrapper
-          as={Comp}
-          ref={sidebarRef}
-          size={false}
-          layout={true}
-          paint={true}
-          part="sidebar"
-          wrapperClassName={`${classes.sidebar} ${
-            classes.defaultSidebarStyles
-          } ${side === Side.LEFT ? classes.left : classes.right}`}
-          role="menu"
-          tabindex="-1"
-          hidden={!side}
-          {...rest}
-        >
-          {children}
-        </ContainWrapper>
-        <div
-          ref={backdropRef}
-          onClick={() => close()}
-          part="backdrop"
-          style={backdropStyle}
-          className={`${backdropClassName ?? ''} ${classes.backdrop} ${
-            classes.defaultBackdropStyles
-          }`}
-          hidden={!side}
-        >
-          <div className={classes.backdropOverscrollBlocker}></div>
-        </div>
-      </>
-    )
+    <div className={objstr({[classes.unmounted]: !mounted})} part="wrapper">
+      <ContainWrapper
+        as={Comp}
+        ref={sidebarRef}
+        size={false}
+        layout={true}
+        paint={true}
+        part="sidebar"
+        wrapperClassName={objstr({
+          [classes.sidebar]: true,
+          [classes.defaultSidebarStyles]: true,
+          [classes.left]: side === Side.LEFT,
+          [classes.right]: side !== Side.LEFT,
+        })}
+        role="menu"
+        tabindex="-1"
+        hidden={!side}
+        {...rest}
+      >
+        {children}
+      </ContainWrapper>
+      <div
+        ref={backdropRef}
+        onClick={() => close()}
+        part="backdrop"
+        style={backdropStyle}
+        className={objstr({
+          [classes.backdrop]: true,
+          [classes.defaultBackdropStyles]: true,
+          [backdropClassName]: backdropClassName,
+        })}
+        hidden={!side}
+      >
+        <div className={classes.backdropOverscrollBlocker}></div>
+      </div>
+    </div>
   );
 }
 
 const Sidebar = forwardRef(SidebarWithRef);
 Sidebar.displayName = 'Sidebar'; // Make findable for tests.
 export {Sidebar};
+
+/**
+ * @param {!SidebarDef.SidebarToolbarProps} props
+ * @return {PreactDef.Renderable}
+ */
+export function SidebarToolbar({
+  toolbar: mediaQueryProp,
+  toolbarTarget,
+  children,
+  ...rest
+}) {
+  const ref = useRef();
+  const [matches, setMatches] = useState(false);
+  const [targetEl, setTargetEl] = useState(null);
+
+  useEffect(() => {
+    const window = ref.current?.ownerDocument?.defaultView;
+    if (!window) {
+      return;
+    }
+
+    const mediaQueryList = window.matchMedia(mediaQueryProp);
+    const updateMatches = () => setMatches(mediaQueryList.matches);
+    mediaQueryList.addEventListener('change', updateMatches);
+    setMatches(mediaQueryList.matches);
+    return () => mediaQueryList.removeEventListener('change', updateMatches);
+  }, [mediaQueryProp]);
+
+  useEffect(() => {
+    const document = ref.current?.ownerDocument;
+    if (!document) {
+      return;
+    }
+
+    const selector = `#${CSS.escape(toolbarTarget)}`;
+    const newTargetEl = document.querySelector(selector);
+    setTargetEl(newTargetEl);
+  }, [toolbarTarget]);
+
+  return (
+    <>
+      <nav
+        ref={ref}
+        toolbar={mediaQueryProp}
+        toolbar-target={toolbarTarget}
+        {...rest}
+      >
+        {children}
+      </nav>
+      {matches && targetEl && createPortal(children, targetEl)}
+    </>
+  );
+}

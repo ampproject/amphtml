@@ -19,9 +19,10 @@ const experimentsConfig = require('../global-configs/experiments-config.json');
 const fs = require('fs-extra');
 const globby = require('globby');
 const {clean} = require('../tasks/clean');
+const {default: ignore} = require('ignore');
 const {doBuild} = require('../tasks/build');
 const {doDist} = require('../tasks/dist');
-const {gitDiffNameOnlyMaster} = require('./git');
+const {gitDiffNameOnlyMain} = require('./git');
 const {green, cyan, yellow} = require('kleur/colors');
 const {log, logLocalDev} = require('./logging');
 
@@ -74,7 +75,7 @@ function getValidExperiments() {
  */
 function getFilesChanged(globs) {
   const allFiles = globby.sync(globs, {dot: true});
-  return gitDiffNameOnlyMaster().filter((changedFile) => {
+  return gitDiffNameOnlyMain().filter((changedFile) => {
     return fs.existsSync(changedFile) && allFiles.includes(changedFile);
   });
 }
@@ -113,25 +114,32 @@ function getFilesFromArgv() {
 
 /**
  * Gets a list of files to be checked based on command line args and the given
- * file matching globs. Used by tasks like prettify, check-links, etc.
+ * file matching globs. Used by tasks like prettify, lint, check-links, etc.
+ * Optionally takes in options for globbing and a file containing ignore rules.
  *
  * @param {!Array<string>} globs
  * @param {Object=} options
+ * @param {string=} ignoreFile
  * @return {!Array<string>}
  */
-function getFilesToCheck(globs, options = {}) {
+function getFilesToCheck(globs, options = {}, ignoreFile = undefined) {
+  const ignored = ignore();
+  if (ignoreFile) {
+    const ignoreRules = fs.readFileSync(ignoreFile, 'utf8');
+    ignored.add(ignoreRules);
+  }
   if (argv.files) {
-    return logFiles(getFilesFromArgv());
+    return logFiles(ignored.filter(getFilesFromArgv()));
   }
   if (argv.local_changes) {
-    const filesChanged = getFilesChanged(globs);
+    const filesChanged = ignored.filter(getFilesChanged(globs));
     if (filesChanged.length == 0) {
       log(green('INFO: ') + 'No files to check in this PR');
       return [];
     }
     return logFiles(filesChanged);
   }
-  return globby.sync(globs, options);
+  return ignored.filter(globby.sync(globs, options));
 }
 
 /**
@@ -166,7 +174,6 @@ module.exports = {
   buildRuntime,
   getExperimentConfig,
   getValidExperiments,
-  getFilesChanged,
   getFilesFromArgv,
   getFilesToCheck,
   usesFilesOrLocalChanges,
