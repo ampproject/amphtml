@@ -139,6 +139,16 @@ class AmpO2Player extends AMP.BaseElement {
     return this.loadPromise(iframe);
   }
 
+  /** @override */
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    return true;
+  }
+
   /**
    * Requests consent data from consent module
    * and forwards information to iframe
