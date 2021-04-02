@@ -21,10 +21,10 @@
 
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {log} = require('../common/logging');
-const {skipFollowupJobs, timedExecOrDie} = require('./utils');
 const {red, cyan} = require('kleur/colors');
 const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runCiJob} = require('./ci-job');
+const {skipFollowupJobs, timedExecOrDie} = require('./utils');
 
 const jobName = 'cross-browser-tests.js';
 
