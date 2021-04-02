@@ -135,7 +135,12 @@
 }
 
 .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-container { 
+  border-radius: 16px !important;
   height: 100% !important;
+}
+
+amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-container {
+  border-radius: 16px 16px 0 0 !important;
 }
 
 amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-container {
@@ -154,6 +159,7 @@ amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-dragg
 }
 
 amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-content {
+  border-radius: inherit !important;
   background: #fff !important;
 }
 
