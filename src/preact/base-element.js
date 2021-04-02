@@ -22,6 +22,7 @@ import {Deferred} from '../utils/promise';
 import {Layout, isLayoutSizeDefined} from '../layout';
 import {Loading} from '../core/loading-instructions';
 import {MediaQueryProps} from '../utils/media-query-props';
+import {PauseHelper} from '../utils/pause-helper';
 import {ReadyState} from '../ready-state';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
@@ -46,7 +47,6 @@ import {getDate} from '../utils/date';
 import {getMode} from '../mode';
 import {hydrate, render} from './index';
 import {installShadowStyle} from '../shadow-embed';
-import {observeContentSize, unobserveContentSize} from '../utils/size-observer';
 import {sequentialIdGenerator} from '../utils/id-generator';
 import {toArray} from '../types';
 
@@ -291,10 +291,11 @@ export class PreactBaseElement extends AMP.BaseElement {
     /** @private {boolean} */
     this.isPlaying_ = false;
 
+    /** @private {?PauseHelper} */
+    this.pauseHelper_ = null;
+
     /** @protected {?MediaQueryProps} */
     this.mediaQueryProps_ = null;
-
-    this.pauseWhenNoSize_ = this.pauseWhenNoSize_.bind(this);
   }
 
   /**
@@ -852,20 +853,12 @@ export class PreactBaseElement extends AMP.BaseElement {
     }
     this.isPlaying_ = isPlaying;
     if (isPlaying) {
-      observeContentSize(this.element, this.pauseWhenNoSize_);
+      if (!this.pauseHelper_) {
+        this.pauseHelper_ = new PauseHelper(this.element);
+      }
+      this.pauseHelper_.updatePlaying(true);
     } else {
-      unobserveContentSize(this.element, this.pauseWhenNoSize_);
-    }
-  }
-
-  /**
-   * @param {!../../../src/layout-rect.LayoutSizeDef} size
-   * @private
-   */
-  pauseWhenNoSize_({width, height}) {
-    const hasSize = width > 0 && height > 0;
-    if (!hasSize) {
-      this.pauseCallback();
+      this.pauseHelper_?.updatePlaying(false);
     }
   }
 }
