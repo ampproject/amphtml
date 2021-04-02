@@ -58,9 +58,7 @@ export const WithAmpState = () => {
   );
 };
 
-WithAmpState.story = {
-  name: 'With AMP State',
-};
+WithAmpState.storyName = 'With AMP State';
 
 export const WithRemoteSrc = () => {
   const srcUrl = text(
@@ -75,9 +73,7 @@ export const WithRemoteSrc = () => {
   );
 };
 
-WithRemoteSrc.story = {
-  name: 'With remote src',
-};
+WithRemoteSrc.storyName = 'With remote src';
 
 export const WithBindableSrc = () => {
   return (
@@ -105,9 +101,7 @@ export const WithBindableSrc = () => {
   );
 };
 
-WithBindableSrc.story = {
-  name: 'With bindable src',
-};
+WithBindableSrc.storyName = 'With bindable src';
 
 export const WithAmpScriptSrc = () => {
   return (
@@ -141,6 +135,4 @@ export const WithAmpScriptSrc = () => {
   );
 };
 
-WithAmpScriptSrc.story = {
-  name: 'With AMP script src',
-};
+WithAmpScriptSrc.storyName = 'With AMP script src';

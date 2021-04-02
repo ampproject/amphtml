@@ -46,9 +46,7 @@ export const Default = () => {
   );
 };
 
-Default.story = {
-  name: 'default',
-};
+Default.storyName = 'default';
 
 export const CustomHints = () => {
   const first = text(
@@ -90,6 +88,4 @@ export const CustomHints = () => {
   );
 };
 
-CustomHints.story = {
-  name: 'custom-hints',
-};
+CustomHints.storyName = 'custom-hints';

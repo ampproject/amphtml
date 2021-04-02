@@ -40,9 +40,7 @@ export const Default = () => {
   );
 };
 
-Default.story = {
-  name: 'default',
-};
+Default.storyName = 'default';
 
 export const Responsive = () => {
   const videoId = text('Video ID', 'mGENRKrdoGY');
@@ -56,9 +54,7 @@ export const Responsive = () => {
   );
 };
 
-Responsive.story = {
-  name: 'responsive',
-};
+Responsive.storyName = 'responsive';
 
 export const Autoplay = () => {
   const videoId = text('Video ID', 'mGENRKrdoGY');
@@ -73,6 +69,4 @@ export const Autoplay = () => {
   );
 };
 
-Autoplay.story = {
-  name: 'autoplay',
-};
+Autoplay.storyName = 'autoplay';
