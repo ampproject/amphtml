@@ -23,7 +23,7 @@ let SizeObserverCallbackDef;
 /** @enum {number} */
 const Type = {
   CONTENT: 0,
-  BORDER: 1,
+  BORDER_BOX: 1,
 };
 
 /** @const {!WeakMap<!Window, !ResizeObserver>} */
@@ -70,8 +70,8 @@ export function measureContentSize(element) {
  * @param {!Element} element
  * @param {!SizeObserverCallbackDef} callback
  */
-export function observeBorderSize(element, callback) {
-  observeSize(element, Type.BORDER, callback);
+export function observeBorderBoxSize(element, callback) {
+  observeSize(element, Type.BORDER_BOX, callback);
 }
 
 /**
@@ -79,8 +79,8 @@ export function observeBorderSize(element, callback) {
  * @param {!Element} element
  * @param {!ObserverCallbackDef} callback
  */
-export function unobserveBorderSize(element, callback) {
-  unobserveSize(element, Type.BORDER, callback);
+export function unobserveBorderBoxSize(element, callback) {
+  unobserveSize(element, Type.BORDER_BOX, callback);
 }
 
 /**
@@ -88,13 +88,13 @@ export function unobserveBorderSize(element, callback) {
  * @param {!Element} element
  * @return {!Promise<!../layout-rect.LayoutSizeDef>}
  */
-export function measureBorderSize(element) {
+export function measureBorderBoxSize(element) {
   return new Promise((resolve) => {
     const onSize = (size) => {
       resolve(size);
-      unobserveBorderSize(element, onSize);
+      unobserveBorderBoxSize(element, onSize);
     };
-    observeBorderSize(element, onSize);
+    observeBorderBoxSize(element, onSize);
   });
 }
 
@@ -195,7 +195,7 @@ function computeAndCall(type, callback, entry) {
     const {contentRect} = entry;
     width = contentRect.width;
     height = contentRect.height;
-  } else if (type == Type.BORDER) {
+  } else if (type == Type.BORDER_BOX) {
     const {borderBoxSize} = entry;
     if (borderBoxSize?.length > 0) {
       // `borderBoxSize` is supported. Only single-fragment border boxes are
