@@ -629,6 +629,34 @@ describe('Google A4A utils', () => {
         });
       });
     });
+
+    it('should include user agent hint params', () => {
+      return createIframePromise().then((fixture) => {
+        setupForAdTesting(fixture);
+        const {doc} = fixture;
+        doc.win = fixture.win;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {});
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, fixture.ampdoc, window.sandbox);
+        impl.win.navigator.userAgentData = {
+          'getHighEntropyValues': () =>
+            Promise.resolve({
+              platform: 'Windows',
+              platformVersion: 10,
+              architecture: 'x86',
+              model: 'Pixel',
+              uaFullVersion: 3.14159,
+            }),
+        };
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', Date.now(), [], []).then((url) => {
+            expect(url).to.match(
+              /[&?]uach_platform=Windows&uach_platform_version=10&uach_architecture=x86&uach_model=Pixel&uach_full_version=3.14159[&$]/
+            );
+          });
+        });
+      });
+    });
   });
 
   describe('#mergeExperimentIds', () => {
