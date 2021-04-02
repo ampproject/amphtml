@@ -25,11 +25,11 @@ const bodyParser = require('body-parser');
 const cors = require('./amp-cors');
 const devDashboard = require('./app-index/index');
 const express = require('express');
+const fetch = require('node-fetch');
 const formidable = require('formidable');
 const fs = require('fs');
 const jsdom = require('jsdom');
 const path = require('path');
-const request = require('request');
 const upload = require('multer')();
 const pc = process;
 const autocompleteEmailData = require('./autocomplete-test-data');
@@ -185,32 +185,22 @@ app.get('/proxy', async (req, res, next) => {
  * @param {string=} protocol 'https' or 'http'. 'https' retries using 'http'.
  * @return {!Promise<string>}
  */
-function requestAmphtmlDocUrl(urlSuffix, protocol = 'https') {
+async function requestAmphtmlDocUrl(urlSuffix, protocol = 'https') {
   const defaultUrl = `${protocol}://${urlSuffix}`;
   logWithoutTimestamp(`Fetching URL: ${defaultUrl}`);
-  return new Promise((resolve, reject) => {
-    request(defaultUrl, (error, response, body) => {
-      if (
-        error ||
-        (response && (response.statusCode < 200 || response.statusCode >= 300))
-      ) {
-        if (protocol == 'https') {
-          return requestAmphtmlDocUrl(urlSuffix, 'http');
-        }
-        return reject(new Error(error || `Status: ${response.statusCode}`));
-      }
-      const {window} = new jsdom.JSDOM(body);
-      const linkRelAmphtml = window.document.querySelector('link[rel=amphtml]');
-      if (!linkRelAmphtml) {
-        return resolve(defaultUrl);
-      }
-      const amphtmlUrl = linkRelAmphtml.getAttribute('href');
-      if (!amphtmlUrl) {
-        return resolve(defaultUrl);
-      }
-      return resolve(amphtmlUrl);
-    });
-  });
+
+  const response = await fetch(defaultUrl);
+  if (!response.ok) {
+    if (protocol == 'https') {
+      return requestAmphtmlDocUrl(urlSuffix, 'http');
+    }
+    throw new Error(`Status: ${response.status}`);
+  }
+
+  const {window} = new jsdom.JSDOM(await response.text());
+  const linkRelAmphtml = window.document.querySelector('link[rel=amphtml]');
+  const amphtmlUrl = linkRelAmphtml && linkRelAmphtml.getAttribute('href');
+  return amphtmlUrl || defaultUrl;
 }
 
 /*
