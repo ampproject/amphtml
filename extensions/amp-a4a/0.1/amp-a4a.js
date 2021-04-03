@@ -303,6 +303,9 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?../../../src/layout-rect.LayoutSizeDef} */
     this.originalSlotSize_ = null;
 
+    /** @private {Promise<!IntersectionObserverEntry>} */
+    this.initialIntersectionPromise_ = null;
+
     /**
      * Note(keithwrightbos) - ensure the default here is null so that ios
      * uses safeframe when response header is not specified.
@@ -451,6 +454,13 @@ export class AmpA4A extends AMP.BaseElement {
     }
 
     this.isSinglePageStoryAd = this.element.hasAttribute('amp-story');
+
+    const asyncIntersection =
+      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
+      ADS_INITIAL_INTERSECTION_EXP.experiment;
+    this.initialIntersectionPromise_ = asyncIntersection
+      ? measureIntersection(this.element)
+      : Promise.resolve(this.element.getIntersectionChangeEntry());
   }
 
   /** @override */
@@ -2087,14 +2097,7 @@ export class AmpA4A extends AMP.BaseElement {
       this.sentinel
     );
 
-    const asyncIntersection =
-      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
-      ADS_INITIAL_INTERSECTION_EXP.experiment;
-    const intersectionPromise = asyncIntersection
-      ? measureIntersection(this.element)
-      : Promise.resolve(this.element.getIntersectionChangeEntry());
-
-    return intersectionPromise.then((intersection) => {
+    return this.initialIntersectionPromise_.then((intersection) => {
       contextMetadata['_context'][
         'initialIntersection'
       ] = intersectionEntryToJson(intersection);
@@ -2171,13 +2174,7 @@ export class AmpA4A extends AMP.BaseElement {
         this.getAdditionalContextMetadata(method == XORIGIN_MODE.SAFEFRAME)
       );
 
-      const asyncIntersection =
-        getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
-        ADS_INITIAL_INTERSECTION_EXP.experiment;
-      const intersectionPromise = asyncIntersection
-        ? measureIntersection(this.element)
-        : Promise.resolve(this.element.getIntersectionChangeEntry());
-      return intersectionPromise.then((intersection) => {
+      return this.initialIntersectionPromise_.then((intersection) => {
         contextMetadata['initialIntersection'] = intersectionEntryToJson(
           intersection
         );
