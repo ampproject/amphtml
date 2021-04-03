@@ -35,7 +35,7 @@ import {LinkerManager} from './linker-manager';
 import {RequestHandler, expandPostMessage} from './requests';
 import {Services} from '../../../src/services';
 import {Transport} from './transport';
-import {dev, devAssert, rethrowAsync, user} from '../../../src/log';
+import {dev, devAssert, rethrowAsync, user, userAssert} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
 import {getMode} from '../../../src/mode';
@@ -108,6 +108,9 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {?boolean} */
     this.isInFie_ = null;
+
+    /** @private {?function({!JsonObject|!./events.AnalyticsEvent}):void} */
+    this.sendToAmpScript_ = null;
   }
 
   /** @override */
@@ -146,6 +149,28 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (this.element.getAttribute('trigger') == 'immediate') {
       this.ensureInitialized_();
+    }
+
+    // TODO: bikeshed attribute name.
+    if (this.hasAttribute('amp-script-target')) {
+      const target = this.getAttribute('amp-script-target').split('.');
+      userAssert(
+        target.length === 2 && target[0].length > 0 && target[1].length > 0,
+        '[amp-analytics]: "amp-script" target must be specified as "scriptId.functionIdentifier".'
+      );
+
+      const ampScriptId = target[0];
+      const fnIdentifier = target[1];
+      const ampScriptEl = this.element.getAmpDoc().getElementById(ampScriptId);
+      userAssert(
+        ampScriptEl && ampScriptEl.tagName === 'AMP-SCRIPT',
+        `[amp-analytics]: could not find <amp-script> with ID "${ampScriptId}"`
+      );
+
+      this.sendToAmpScript_ = (message) =>
+        ampScriptEl
+          .getImpl()
+          .then((impl) => impl.callFunction(fnIdentifier, message));
     }
   }
 
@@ -647,7 +672,28 @@ export class AmpAnalytics extends AMP.BaseElement {
         return;
       }
       this.expandAndSendRequest_(request, trigger, event);
-      this.expandAndPostMessage_(trigger, event);
+
+      /**
+       * Only expand for either:
+       * 1. An amp-ad with parentPostMessage specified
+       * 2. An amp-script target
+       */
+      const shouldSendToAmpAd =
+        trigger['parentPostMessage'] &&
+        this.allowParentPostMessage_() &&
+        isIframed(this.win);
+      const shouldSendToAmpScript = !!this.sendToAmpScript_;
+
+      if (shouldSendToAmpAd || shouldSendToAmpScript) {
+        this.expandEventToMessage_(trigger, event).then((message) => {
+          if (shouldSendToAmpAd) {
+            this.win.parent./*OK*/ postMessage(message, '*');
+          }
+          if (shouldSendToAmpScript) {
+            this.sendToAmpScript_(message);
+          }
+        });
+      }
     });
   }
 
@@ -670,28 +716,20 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Expand and post message to parent window if applicable.
    * @param {!JsonObject} trigger JSON config block that resulted in this event.
    * @param {!JsonObject|!./events.AnalyticsEvent} event Object with details about the event.
+   * @return {JsonObject}
    * @private
    */
-  expandAndPostMessage_(trigger, event) {
+  expandEventToMessage_(trigger, event) {
     const msg = trigger['parentPostMessage'];
-    if (!msg || !this.allowParentPostMessage_()) {
-      // Only send message for AMP ad with parentPostMessage specified.
-      return;
-    }
     const expansionOptions = this.expansionOptions_(event, trigger);
-    expandPostMessage(
+    return expandPostMessage(
       this.getAmpDoc(),
       msg,
       this.config_['extraUrlParams'],
       trigger,
       expansionOptions,
       this.element
-    ).then((message) => {
-      if (isIframed(this.win)) {
-        // Only post message with explict `parentPostMessage`
-        this.win.parent./*OK*/ postMessage(message, '*');
-      }
-    });
+    );
   }
 
   /**
