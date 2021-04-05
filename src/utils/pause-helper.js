@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {observeContentSize, unobserveContentSize} from './size-observer';
+import {observeBorderBoxSize, unobserveBorderBoxSize} from './size-observer';
 
 export class PauseHelper {
   /**
@@ -39,18 +39,18 @@ export class PauseHelper {
     }
     this.isPlaying_ = isPlaying;
     if (isPlaying) {
-      observeContentSize(this.element_, this.pauseWhenNoSize_);
+      observeBorderBoxSize(this.element_, this.pauseWhenNoSize_);
     } else {
-      unobserveContentSize(this.element_, this.pauseWhenNoSize_);
+      unobserveBorderBoxSize(this.element_, this.pauseWhenNoSize_);
     }
   }
 
   /**
-   * @param {!../layout-rect.LayoutSizeDef} size
+   * @param {!ResizeObserverSize} size
    * @private
    */
-  pauseWhenNoSize_({width, height}) {
-    const hasSize = width > 0 && height > 0;
+  pauseWhenNoSize_({inlineSize, blockSize}) {
+    const hasSize = inlineSize > 0 && blockSize > 0;
     if (!hasSize) {
       this.element_.pause();
     }
