@@ -24,8 +24,8 @@ import {CommonSignals} from '../../../src/common-signals';
 import {EventType, dispatch} from './events';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
+import {dev, devAssert} from '../../../src/log';
+
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
 

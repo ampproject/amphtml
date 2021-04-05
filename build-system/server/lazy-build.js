@@ -17,15 +17,22 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
+  doBuild3pVendor,
+  generateBundles,
+} = require('../tasks/3p-vendor-helpers');
+const {
   doBuildExtension,
   maybeInitializeExtensions,
   getExtensionsToBuild,
 } = require('../tasks/extension-helpers');
 const {doBuildJs, compileCoreRuntime} = require('../tasks/helpers');
 const {jsBundles} = require('../compile/bundles.config');
+const {VERSION} = require('../compile/internal-version');
 
 const extensionBundles = {};
 maybeInitializeExtensions(extensionBundles, /* includeLatest */ true);
+
+const vendorBundles = generateBundles();
 
 /**
  * Gets the unminified name of the bundle if it can be lazily built.
@@ -128,6 +135,20 @@ async function lazyBuildJs(req, _res, next) {
 }
 
 /**
+ * Lazy builds a 3p iframe vendor file when requested.
+ *
+ * @param {!Object} req
+ * @param {!Object} _res
+ * @param {function(): void} next
+ */
+async function lazyBuild3pVendor(req, _res, next) {
+  const matcher = argv.compiled
+    ? new RegExp(`\\/dist\\.3p\\/${VERSION}\\/vendor\\/([^\/]*)\\.js`) // '/dist.3p/21900000/vendor/*.js'
+    : /\/dist\.3p\/current\/vendor\/([^\/]*)\.max\.js/; // '/dist.3p/current/vendor/*.max.js'
+  await lazyBuild(req.url, matcher, vendorBundles, doBuild3pVendor, next);
+}
+
+/**
  * Pre-builds the core runtime and the JS files that it loads.
  */
 async function preBuildRuntimeFiles() {
@@ -152,6 +173,7 @@ async function preBuildExtensions() {
 module.exports = {
   lazyBuildExtensions,
   lazyBuildJs,
+  lazyBuild3pVendor,
   preBuildExtensions,
   preBuildRuntimeFiles,
 };

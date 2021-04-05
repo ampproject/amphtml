@@ -33,6 +33,7 @@ const request = require('request');
 const upload = require('multer')();
 const pc = process;
 const autocompleteEmailData = require('./autocomplete-test-data');
+const header = require('connect-header');
 const runVideoTestBench = require('./app-video-testbench');
 const {
   getVariableRequest,
@@ -72,6 +73,9 @@ app.use('/test', require('./routes/test'));
 if (argv.coverage) {
   app.use('/coverage', require('istanbul-middleware').createHandler());
 }
+
+// Built binaries should be fetchable from other origins, i.e. Storybook.
+app.use(header({'Access-Control-Allow-Origin': '*'}));
 
 // Append ?csp=1 to the URL to turn on the CSP header.
 // TODO: shall we turn on CSP all the time?

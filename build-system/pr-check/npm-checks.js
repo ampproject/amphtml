@@ -27,6 +27,7 @@ const {cyan, red} = require('kleur/colors');
 const {exec} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {gitDiffColor, gitDiffNameOnly} = require('../common/git');
+const {mainBranch} = require('../common/main-branch');
 
 /**
  * Makes sure package.json and package-lock.json are in sync.
@@ -103,7 +104,7 @@ function isPackageLockFileProperlyUpdated() {
     logWithoutTimestamp(
       loggingPrefix,
       '⤷ To fix this, sync your branch to',
-      cyan('ampproject/amphtml:master') + ', run',
+      cyan(`ampproject/amphtml:${mainBranch}`) + ', run',
       cyan('npm install') + ', and push a new commit containing the changes.'
     );
     logWithoutTimestamp(loggingPrefix, 'Expected changes:');

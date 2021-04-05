@@ -23,7 +23,7 @@ import {
   toggleAttribute,
   tryFocus,
 } from '../../../src/dom';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
+import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {toArray} from '../../../src/types';
 import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';

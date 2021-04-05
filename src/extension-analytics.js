@@ -17,7 +17,7 @@
 import {CommonSignals} from './common-signals';
 import {Services} from './services';
 import {createElementWithAttributes, removeElement} from './dom';
-import {pureDevAssert as devAssert} from './core/assert';
+import {devAssert} from './log';
 import {dict} from './utils/object';
 import {isArray, toWin} from './types';
 import {triggerAnalyticsEvent} from './analytics';

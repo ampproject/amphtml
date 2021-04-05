@@ -25,7 +25,7 @@ import {
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {setIsMediaComponent} from '../../../src/video-interface';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 class AmpO2Player extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -137,6 +137,16 @@ class AmpO2Player extends AMP.BaseElement {
 
     this.element.appendChild(iframe);
     return this.loadPromise(iframe);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    return true;
   }
 
   /**

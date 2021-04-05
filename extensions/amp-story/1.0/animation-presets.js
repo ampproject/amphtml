@@ -24,7 +24,7 @@ import {
   whooshIn,
 } from './animation-presets-utils';
 import {px} from '../../../src/style';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const FULL_BLEED_CATEGORY = 'full-bleed';

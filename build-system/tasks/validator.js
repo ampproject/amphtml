@@ -34,6 +34,19 @@ async function validator() {
 }
 
 /**
+ * Simple wrapper around the C++ validator tests
+ */
+async function validatorCpp() {
+  execOrDie(
+    `bazel test --repo_env=CC=clang --cxxopt='-std=c++17' validator_test`,
+    {
+      cwd: 'validator/cpp/engine',
+      stdio: 'inherit',
+    }
+  );
+}
+
+/**
  * Simple wrapper around the python based validator webui build.
  */
 async function validatorWebui() {
@@ -45,6 +58,7 @@ async function validatorWebui() {
 
 module.exports = {
   validator,
+  validatorCpp,
   validatorWebui,
 };
 
@@ -52,6 +66,9 @@ validator.description = 'Builds and tests the AMP validator.';
 validator.flags = {
   'update_tests': 'Updates validation test output files',
 };
+
+validatorCpp.description = 'Builds and tests the AMP C++ validator.';
+// TODO(antiphoton): Add the ability to update validation test output files.
 
 validatorWebui.description = 'Builds and tests the AMP validator web UI.';
 validatorWebui.flags = {

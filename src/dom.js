@@ -980,3 +980,14 @@ export function dispatchCustomEvent(node, name, opt_data, opt_options) {
   event.initEvent(name, bubbles, cancelable);
   node.dispatchEvent(event);
 }
+
+/**
+ * Ensures the child is contained by the parent, but not the parent itself.
+ *
+ * @param {!Node} parent
+ * @param {!Node} child
+ * @return {boolean}
+ */
+export function containsNotSelf(parent, child) {
+  return child !== parent && parent.contains(child);
+}

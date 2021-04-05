@@ -1063,16 +1063,21 @@ describes.realWin(
       expect(iframe.getAttribute('title')).to.equal(newTitle);
     });
 
-    it('should unlayout on pause', async () => {
-      const ampIframe = createAmpIframe(env, {
-        src: iframeSrc,
-        width: 100,
-        height: 100,
+    describe('pause', () => {
+      it('should have unlayoutOnPause', async () => {
+        const ampIframe = createAmpIframe(env, {
+          src: iframeSrc,
+          width: 100,
+          height: 100,
+        });
+        const impl = await ampIframe.getImpl(false);
+        await waitForAmpIframeLayoutPromise(doc, ampIframe);
+        expect(ampIframe.querySelector('iframe')).to.exist;
+        expect(impl.unlayoutOnPause()).to.be.true;
+
+        ampIframe.pause();
+        expect(ampIframe.querySelector('iframe')).to.not.exist;
       });
-      const impl = await ampIframe.getImpl(false);
-      await waitForAmpIframeLayoutPromise(doc, ampIframe);
-      expect(ampIframe.querySelector('iframe')).to.exist;
-      expect(impl.unlayoutOnPause()).to.be.true;
     });
 
     describe('throwIfCannotNavigate()', () => {

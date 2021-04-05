@@ -59,7 +59,7 @@ export const Default = () => {
   );
 };
 
-export const scrollable = () => {
+export const overflowAuto = () => {
   const animation = select('animation', [
     'fade-in',
     'fly-in-top',
@@ -67,7 +67,6 @@ export const scrollable = () => {
   ]);
   const backgroundColor = text('background color', 'rgba(0,0,0,0.5)');
   const color = text('font color', '');
-  const scrollable = boolean('scrollable', true);
   const lotsOfText = boolean('lots of text?', true);
   return (
     <>
@@ -78,12 +77,7 @@ export const scrollable = () => {
         }
       `}</style>
       <div style="height: 300px;">
-        <amp-lightbox
-          id="lightbox"
-          layout="nodisplay"
-          animation={animation}
-          scrollable={scrollable}
-        >
+        <amp-lightbox id="lightbox" layout="nodisplay" animation={animation}>
           <p>
             Dessert tootsie roll marzipan pastry. Powder powder jelly beans
             chocolate bar candy sugar plum. Jelly-o gummi bears jelly icing
@@ -346,6 +340,4 @@ export const scrollable = () => {
   );
 };
 
-Default.story = {
-  name: 'Default',
-};
+Default.storyName = 'Default';

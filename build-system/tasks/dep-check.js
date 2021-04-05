@@ -190,7 +190,7 @@ async function getEntryPointModule() {
  * @return {!Promise<ModuleDef>}
  */
 async function getModuleGraph(entryPointModule) {
-  const plugin = getEsbuildBabelPlugin('dep-check', /* enableCache */ true);
+  const plugin = getEsbuildBabelPlugin('unminified', /* enableCache */ true);
   const result = await esbuild.build({
     stdin: {
       contents: entryPointModule,

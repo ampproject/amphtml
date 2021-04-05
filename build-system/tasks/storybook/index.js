@@ -22,7 +22,6 @@ const {cyan} = require('kleur/colors');
 const {defaultTask: runAmpDevBuildServer} = require('../default-task');
 const {exec, execScriptAsync} = require('../../common/exec');
 const {getBaseUrl} = require('../pr-deploy-bot-utils');
-const {installPackages} = require('../../common/utils');
 const {isCiBuild} = require('../../common/ci');
 const {isPullRequestBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
@@ -42,15 +41,6 @@ const repoDir = path.join(__dirname, '../../..');
 const envConfigDir = (env) => path.join(__dirname, `${env}-env`);
 
 /**
- * @param {string} message Message for amp task (call stack is already in logs)
- */
-const throwError = (message) => {
-  const err = new Error(message);
-  err.showStack = false;
-  throw err;
-};
-
-/**
  * @param {string} env 'amp' or 'preact'
  */
 function launchEnv(env) {
@@ -67,7 +57,7 @@ function launchEnv(env) {
     ].join(' '),
     {cwd: __dirname, stdio: 'inherit'}
   ).on('error', () => {
-    throwError('Launch failed');
+    throw new Error('Launch failed');
   });
 }
 
@@ -85,8 +75,7 @@ function buildEnv(env) {
       // dynamic value. This prevents XSS and other types of garbling.
       `// DO NOT${' '}SUBMIT.
        // This preview.js file was generated for a specific PR build.
-       import {addParameters} from '@storybook/preact';
-       addParameters(${JSON.stringify({
+       export const parameters = (${JSON.stringify({
          ampBaseUrlOptions: [`${getBaseUrl()}/dist`],
        })});`
     );
@@ -103,7 +92,7 @@ function buildEnv(env) {
     {cwd: __dirname, stdio: 'inherit'}
   );
   if (result.status != 0) {
-    throwError('Build failed');
+    throw new Error('Build failed');
   }
 }
 
@@ -116,7 +105,6 @@ async function storybook() {
   if (!build && envs.includes('amp')) {
     await runAmpDevBuildServer();
   }
-  await installPackages(__dirname);
   if (!build) {
     createCtrlcHandler('storybook');
   }

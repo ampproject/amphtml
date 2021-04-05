@@ -15,7 +15,7 @@
  */
 
 import {computedStyle} from '../../../src/style';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
+import {devAssert} from '../../../src/log';
 
 /**
  * Simple implementation of CircularBuffer.

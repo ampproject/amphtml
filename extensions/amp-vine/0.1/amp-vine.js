@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 class AmpVine extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -69,6 +69,16 @@ class AmpVine extends AMP.BaseElement {
     this.iframe_ = iframe;
 
     return this.loadPromise(iframe);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    return true;
   }
 
   /** @override */

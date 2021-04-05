@@ -18,7 +18,6 @@ const fs = require('fs').promises;
 const {buildNewServer} = require('../../server/typescript-compile');
 const {cyan} = require('kleur/colors');
 const {dist} = require('../dist');
-const {installPackages} = require('../../common/utils');
 const {log} = require('../../common/logging');
 const {startServer, stopServer} = require('../serve');
 
@@ -143,7 +142,6 @@ async function generateMap() {
  * @return {Promise<void>}
  */
 async function coverageMap() {
-  await installPackages(__dirname);
   await buildNewServer();
 
   if (!argv.nobuild) {

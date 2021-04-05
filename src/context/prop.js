@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {pureDevAssert as devAssert} from '../core/assert';
+import {devAssert} from '../log';
 
 const EMPTY_DEPS = [];
 

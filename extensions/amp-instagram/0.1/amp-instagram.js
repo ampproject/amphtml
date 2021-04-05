@@ -43,7 +43,7 @@ import {isObject} from '../../../src/types';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 export class AmpInstagram extends AMP.BaseElement {
   /** @param {!AmpElement} element */

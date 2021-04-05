@@ -124,9 +124,7 @@ export class AmpIframe extends AMP.BaseElement {
      */
     this.targetOrigin_ = null;
 
-    /**
-     * @private {boolean}
-     */
+    /** @private {boolean} */
     this.hasErroredEmbedSize_ = false;
   }
 

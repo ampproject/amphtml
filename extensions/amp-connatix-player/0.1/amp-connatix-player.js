@@ -37,7 +37,7 @@ import {
 import {removeElement} from '../../../src/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {tryParseJson} from '../../../src/json';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 /**
  * @param {!Array<T>} promises

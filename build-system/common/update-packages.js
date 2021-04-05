@@ -18,9 +18,12 @@
 const checkDependencies = require('check-dependencies');
 const del = require('del');
 const fs = require('fs-extra');
-const {cyan, green, yellow} = require('kleur/colors');
-const {execOrDie} = require('../common/exec');
-const {log, logLocalDev} = require('../common/logging');
+const path = require('path');
+const {cyan, red} = require('kleur/colors');
+const {execOrDie} = require('./exec');
+const {getOutput} = require('./process');
+const {isCiBuild} = require('./ci');
+const {log, logLocalDev} = require('./logging');
 
 /**
  * Writes the given contents to the patched file if updated
@@ -30,7 +33,7 @@ const {log, logLocalDev} = require('../common/logging');
 function writeIfUpdated(patchedName, file) {
   if (!fs.existsSync(patchedName) || fs.readFileSync(patchedName) != file) {
     fs.writeFileSync(patchedName, file);
-    logLocalDev(green('Patched'), cyan(patchedName));
+    logLocalDev('Patched', cyan(patchedName));
   }
 }
 
@@ -198,6 +201,12 @@ function patchShadowDom() {
   writeIfUpdated(patchedName, file);
 }
 
+function patchPreact() {
+  fs.ensureDirSync('node_modules/preact/dom');
+  const file = `export { render, hydrate } from 'preact';`;
+  writeIfUpdated('node_modules/preact/dom/index.js', file);
+}
+
 /**
  * Deletes the map file for rrule, which breaks closure compiler.
  * TODO(rsimha): Remove this workaround after a fix is merged for
@@ -207,7 +216,7 @@ function removeRruleSourcemap() {
   const rruleMapFile = 'node_modules/rrule/dist/es5/rrule.js.map';
   if (fs.existsSync(rruleMapFile)) {
     del.sync(rruleMapFile);
-    logLocalDev(green('Deleted'), cyan(rruleMapFile));
+    logLocalDev('Deleted', cyan(rruleMapFile));
   }
 }
 
@@ -220,22 +229,11 @@ function updateDeps() {
     log: () => {},
     error: console.log,
   });
-  if (!results.depsWereOk) {
-    log(
-      yellow('WARNING:'),
-      'The packages in',
-      cyan('node_modules'),
-      'do not match',
-      cyan('package.json') + '.'
-    );
-    log('Running', cyan('npm install'), 'to update packages...');
-    execOrDie('npm install');
+  if (results.depsWereOk) {
+    logLocalDev('All packages in', cyan('node_modules'), 'are up to date.');
   } else {
-    log(
-      green('All packages in'),
-      cyan('node_modules'),
-      green('are up to date.')
-    );
+    log('Running', cyan('npm install') + '...');
+    execOrDie('npm install');
   }
 }
 
@@ -250,12 +248,38 @@ async function updatePackages() {
   patchIntersectionObserver();
   patchResizeObserver();
   patchShadowDom();
+  patchPreact();
   removeRruleSourcemap();
+}
+
+/**
+ * Update packages in a given task directory. Some notes:
+ * - During CI, do a clean install.
+ * - During local development, do an incremental install if necessary.
+ * - Since install scripts can be async, `await` the process object.
+ * - Since script output is noisy, capture and print the stderr if needed.
+ *
+ * @param {string} dir
+ * @return {Promise<void>}
+ */
+async function updateSubpackages(dir) {
+  const results = checkDependencies.sync({packageDir: dir});
+  const relativeDir = path.relative(process.cwd(), dir);
+  if (results.depsWereOk) {
+    const nodeModulesDir = path.join(relativeDir, 'node_modules');
+    logLocalDev('All packages in', cyan(nodeModulesDir), 'are up to date.');
+  } else {
+    const installCmd = isCiBuild() ? 'npm ci' : 'npm install';
+    log('Running', cyan(installCmd), 'in', cyan(relativeDir) + '...');
+    const output = await getOutput(`${installCmd} --prefix ${dir}`);
+    if (output.status !== 0) {
+      log(red('ERROR:'), output.stderr);
+      throw new Error('Installation failed');
+    }
+  }
 }
 
 module.exports = {
   updatePackages,
+  updateSubpackages,
 };
-
-updatePackages.description =
-  'Updates npm packages if node_modules is out of date, and applies custom patches';

@@ -18,16 +18,13 @@ const argv = require('minimist')(process.argv.slice(2));
 const experimentsConfig = require('../global-configs/experiments-config.json');
 const fs = require('fs-extra');
 const globby = require('globby');
-const path = require('path');
 const {clean} = require('../tasks/clean');
+const {default: ignore} = require('ignore');
 const {doBuild} = require('../tasks/build');
 const {doDist} = require('../tasks/dist');
-const {getOutput} = require('./process');
-const {gitDiffNameOnlyMaster} = require('./git');
-const {green, cyan, red, yellow} = require('kleur/colors');
+const {gitDiffNameOnlyMain} = require('./git');
+const {green, cyan, yellow} = require('kleur/colors');
 const {log, logLocalDev} = require('./logging');
-
-const ROOT_DIR = path.resolve(__dirname, '../../');
 
 /**
  * Performs a clean build of the AMP runtime in testing mode.
@@ -78,7 +75,7 @@ function getValidExperiments() {
  */
 function getFilesChanged(globs) {
   const allFiles = globby.sync(globs, {dot: true});
-  return gitDiffNameOnlyMaster().filter((changedFile) => {
+  return gitDiffNameOnlyMain().filter((changedFile) => {
     return fs.existsSync(changedFile) && allFiles.includes(changedFile);
   });
 }
@@ -117,25 +114,32 @@ function getFilesFromArgv() {
 
 /**
  * Gets a list of files to be checked based on command line args and the given
- * file matching globs. Used by tasks like prettify, check-links, etc.
+ * file matching globs. Used by tasks like prettify, lint, check-links, etc.
+ * Optionally takes in options for globbing and a file containing ignore rules.
  *
  * @param {!Array<string>} globs
  * @param {Object=} options
+ * @param {string=} ignoreFile
  * @return {!Array<string>}
  */
-function getFilesToCheck(globs, options = {}) {
+function getFilesToCheck(globs, options = {}, ignoreFile = undefined) {
+  const ignored = ignore();
+  if (ignoreFile) {
+    const ignoreRules = fs.readFileSync(ignoreFile, 'utf8');
+    ignored.add(ignoreRules);
+  }
   if (argv.files) {
-    return logFiles(getFilesFromArgv());
+    return logFiles(ignored.filter(getFilesFromArgv()));
   }
   if (argv.local_changes) {
-    const filesChanged = getFilesChanged(globs);
+    const filesChanged = ignored.filter(getFilesChanged(globs));
     if (filesChanged.length == 0) {
       log(green('INFO: ') + 'No files to check in this PR');
       return [];
     }
     return logFiles(filesChanged);
   }
-  return globby.sync(globs, options);
+  return ignored.filter(globby.sync(globs, options));
 }
 
 /**
@@ -166,33 +170,11 @@ function usesFilesOrLocalChanges(taskName) {
   return validUsage;
 }
 
-/**
- * Runs 'npm ci' to install packages in a given directory. Some notes:
- * - Since install scripts can be async, we `await` the process object.
- * - Since script output is noisy, we capture and print the stderr if needed.
- *
- * @param {string} dir
- * @return {Promise<void>}
- */
-async function installPackages(dir) {
-  const relativeDir = path.relative(ROOT_DIR, dir);
-  log('Running', cyan('npm ci'), 'in', cyan(relativeDir) + '...');
-  const output = await getOutput(`npm ci --prefix ${dir}`);
-  if (output.status === 0) {
-    log('Done running', cyan('npm ci'), 'in', cyan(relativeDir) + '.');
-  } else {
-    log(red('ERROR:'), output.stderr);
-    throw new Error('Installation failed');
-  }
-}
-
 module.exports = {
   buildRuntime,
   getExperimentConfig,
   getValidExperiments,
-  getFilesChanged,
   getFilesFromArgv,
   getFilesToCheck,
-  installPackages,
   usesFilesOrLocalChanges,
 };

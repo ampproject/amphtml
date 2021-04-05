@@ -17,11 +17,13 @@
 import {LayoutPriority} from '../layout';
 import {READY_SCAN_SIGNAL} from './resources-interface';
 import {VisibilityState} from '../visibility-state';
+import {containsNotSelf, hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
-import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {removeItem} from '../utils/array';
 
 const ID = 'scheduler';
+
+const ROOT_MARGIN = '250% 31.25%';
 
 /** @implements {../service.Disposable} */
 export class Scheduler {
@@ -37,9 +39,11 @@ export class Scheduler {
       // Root bounds are not important, so we can use the `root:null` for a
       // top-level window.
       root: isIframed(win) ? win.document : null,
-      rootMargin: '250% 31.25%',
-      threshold: 0.001,
+      rootMargin: ROOT_MARGIN,
     });
+
+    /** @private @const {!Map<!Element, !IntersectionObserver>} */
+    this.containerMap_ = new Map();
 
     /** @private @const {!Map<!AmpElement, {asap: boolean, isIntersecting: boolean}>} */
     this.targets_ = new Map();
@@ -82,9 +86,16 @@ export class Scheduler {
       return;
     }
 
-    if (target.deferredBuild()) {
+    if (target.deferredMount()) {
       this.targets_.set(target, {asap: false, isIntersecting: false});
       this.observer_.observe(target);
+      if (this.containerMap_.size > 0) {
+        this.containerMap_.forEach((observer, container) => {
+          if (containsNotSelf(container, target)) {
+            observer.observe(target);
+          }
+        });
+      }
     } else {
       this.targets_.set(target, {asap: false, isIntersecting: true});
     }
@@ -103,11 +114,62 @@ export class Scheduler {
     this.targets_.delete(target);
 
     this.observer_.unobserve(target);
+    if (this.containerMap_.size > 0) {
+      this.containerMap_.forEach((observer) => {
+        observer.unobserve(target);
+      });
+    }
 
     if (this.parsingTargets_) {
       removeItem(this.parsingTargets_, target);
       this.checkParsing_();
     }
+  }
+
+  /**
+   * Adds the observer for the specified container. The first observer to
+   * find an intersection will trigger the element's mount.
+   *
+   * @param {!Element} container
+   * @param {!Element=} opt_scroller
+   */
+  setContainer(container, opt_scroller) {
+    if (this.containerMap_.has(container)) {
+      return;
+    }
+
+    // Create observer.
+    const {win} = this.ampdoc_;
+    const observer = new win.IntersectionObserver((e) => this.observed_(e), {
+      root: opt_scroller || container,
+      rootMargin: ROOT_MARGIN,
+    });
+    this.containerMap_.set(container, observer);
+
+    // Subscribe all pending children. Ignore `asap` targets since they
+    // will be scheduled immediately and do not need an intersection
+    // observer input.
+    this.targets_.forEach(({asap}, target) => {
+      if (!asap && containsNotSelf(container, target)) {
+        observer.observe(target);
+      }
+    });
+  }
+
+  /**
+   * Removes the container and its observer that were set by the `setContainer`.
+   *
+   * @param {!Element} container
+   */
+  removeContainer(container) {
+    const observer = this.containerMap_.get(container);
+    if (!observer) {
+      return;
+    }
+
+    // Disconnect. All children will be unobserved automatically.
+    observer.disconnect();
+    this.containerMap_.delete(container);
   }
 
   /** @private*/
@@ -180,14 +242,17 @@ export class Scheduler {
    */
   observed_(entries) {
     for (let i = 0; i < entries.length; i++) {
-      const {target, isIntersecting} = entries[i];
+      const {target, isIntersecting: isThisIntersecting} = entries[i];
 
       const current = this.targets_.get(target);
       if (!current) {
         continue;
       }
 
-      this.targets_.set(target, {asap: current.asap, isIntersecting});
+      const isIntersecting = isThisIntersecting || current.isIntersecting;
+      if (isIntersecting !== current.isIntersecting) {
+        this.targets_.set(target, {asap: current.asap, isIntersecting});
+      }
       if (isIntersecting) {
         this.maybeBuild_(target);
       }

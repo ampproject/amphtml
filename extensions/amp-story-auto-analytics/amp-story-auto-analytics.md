@@ -22,6 +22,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# amp-story-auto-analytics
+# Usage
 
-Automatically generates analytics configs for stories.
+The `amp-story-auto-analytics` component configures [`amp-analytics`](https://amp.dev/documentation/components/amp-analytics/) on a story with useful analytics events for a Google Analytics gtag.
+
+```html
+<amp-story>
+  <amp-story-auto-analytics gtag-id="UA-123456789-0"></amp-story-auto-analytics>
+</amp-story>
+```
+
+# Attributes
+
+## gtag-id (required)
+
+Google Analytics ID used to link the story to the analytics account.
