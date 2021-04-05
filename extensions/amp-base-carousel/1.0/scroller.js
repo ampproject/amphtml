@@ -57,7 +57,6 @@ function ScrollerWithRef(
   {
     advanceCount,
     alignment,
-    autoAdvanceCount,
     axis,
     children,
     lightbox,
@@ -268,11 +267,6 @@ function ScrollerWithRef(
     debouncedResetScrollReferencePoint();
   };
 
-  const incrementCount = Math.max(advanceCount, autoAdvanceCount);
-  const needMoreSlidesToScroll =
-    loop &&
-    incrementCount > 1 &&
-    children.length - pivotIndex - visibleCount < incrementCount;
   return (
     <div
       ref={containerRef}
@@ -284,7 +278,6 @@ function ScrollerWithRef(
       {...rest}
     >
       {slides}
-      {needMoreSlidesToScroll && slides}
     </div>
   );
 }
