@@ -77,7 +77,7 @@ describes.realWin(
         sendFakeMessage(impl, iframe, 'playing');
         resizeObserverStub.notifySync({
           target: player,
-          contentRect: {width: 0, height: 0},
+          borderBoxSize: [{inlineSize: 0, blockSize: 0}],
         });
         expect(postMessageSpy).to.be.calledWith('pause');
       });
@@ -87,7 +87,7 @@ describes.realWin(
         sendFakeMessage(impl, iframe, 'paused');
         resizeObserverStub.notifySync({
           target: player,
-          contentRect: {width: 0, height: 0},
+          borderBoxSize: [{inlineSize: 0, blockSize: 0}],
         });
         expect(postMessageSpy).to.not.be.calledWith('pause');
       });
