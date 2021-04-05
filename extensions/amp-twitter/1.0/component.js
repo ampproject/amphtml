@@ -43,8 +43,9 @@ function TwitterWithRef({requestResize, title, ...rest}, ref) {
         const height = data['height'];
         if (requestResize) {
           requestResize(height);
+          setHeightStyle(NO_HEIGHT_STYLE);
         } else {
-          setHeightStyle(height);
+          setHeightStyle({height});
         }
       }
     },
