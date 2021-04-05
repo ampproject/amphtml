@@ -59,6 +59,9 @@ module.exports = {
         './context/prop.js',
         './context/scheduler.js',
         './context/values.js',
+        // TEMPORARY, follow tracking issue #33631
+        './preact/component/3p-frame.js',
+        './preact/component/iframe.js',
       ],
       'rules': {'import/no-restricted-paths': isCiBuild() ? 0 : 1},
     },
