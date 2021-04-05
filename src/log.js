@@ -895,7 +895,8 @@ export function devAssert(
     // builds. It will be DCE'd away from minified builds, and so can be used to
     // validate that Babel is properly removing dev assertions in minified
     // builds.
-    console.log('__devAssert_sentinel__');
+    console /*OK*/
+      .log('__devAssert_sentinel__');
   }
 
   return dev()./*Orig call*/ assert(

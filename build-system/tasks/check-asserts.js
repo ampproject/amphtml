@@ -68,10 +68,8 @@ async function checkSentinels(filePath, sentinels) {
  * - In unminified code, it should remain present but never execute.
  * - Even when devAssert is DCE'd, pureAssert still includes the base assertion
  *   logic, so the 'Assertion failed' string will be present.
- * @param {string} unminifiedJsPath
- * @param {string} minifiedJsPath
  */
-async function checkAsserts(unminifiedJsPath, minifiedJsPath) {
+async function checkAsserts() {
   try {
     await checkSentinels(UNMINIFIED_JS, {
       [PURE_ASSERT_SENTINEL]: true,
