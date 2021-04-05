@@ -181,6 +181,14 @@ export function pureDevAssert(
     return shouldBeTruthy;
   }
 
+  if (window.__thisVariableDoesNotExist) {
+    // This will never execute regardless, but will be included on unminified
+    // builds. It will be DCE'd away from minified builds, and so can be used to
+    // validate that Babel is properly removing dev assertions in minified
+    // builds.
+    console.log('__devAssert_sentinel__');
+  }
+
   return assertion(
     Error,
     shouldBeTruthy,
