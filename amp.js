@@ -28,55 +28,55 @@ const {
  * 2. Name of the function in the source file. E.g. defaultTask()
  * 3. Basename of the source file in build-system/tasks/. E.g. build-system/tasks/default-task.js
  */
-createTask('analytics-vendor-configs', 'analyticsVendorConfigs', 'analytics-vendor-configs'); // prettier-ignore
-createTask('ava', 'ava', 'ava');
-createTask('babel-plugin-tests', 'babelPluginTests', 'babel-plugin-tests');
-createTask('build', 'build', 'build');
-createTask('bundle-size', 'bundleSize', 'bundle-size');
-createTask('caches-json', 'cachesJson', 'caches-json');
-createTask('check-analytics-vendors-list', 'checkAnalyticsVendorsList', 'check-analytics-vendors-list'); // prettier-ignore
-createTask('check-build-system', 'checkBuildSystem', 'check-build-system');
-createTask('check-exact-versions', 'checkExactVersions','check-exact-versions'); // prettier-ignore
-createTask('check-links', 'checkLinks', 'check-links');
-createTask('check-owners', 'checkOwners', 'check-owners');
-createTask('check-renovate-config','checkRenovateConfig','check-renovate-config'); // prettier-ignore
-createTask('check-sourcemaps', 'checkSourcemaps', 'check-sourcemaps');
-createTask('check-types', 'checkTypes', 'check-types');
-createTask('check-video-interface-list', 'checkVideoInterfaceList', 'check-video-interface-list'); // prettier-ignore
-createTask('cherry-pick', 'cherryPick', 'cherry-pick');
-createTask('clean', 'clean', 'clean');
-createTask('codecov-upload', 'codecovUpload', 'codecov-upload');
-createTask('compile-jison', 'compileJison', 'compile-jison');
-createTask('coverage-map', 'coverageMap', 'coverage-map');
-createTask('css', 'css', 'css');
+createTask('analytics-vendor-configs', 'analyticsVendorConfigs'); // prettier-ignore
+createTask('ava', 'ava');
+createTask('babel-plugin-tests', 'babelPluginTests');
+createTask('build', 'build');
+createTask('bundle-size', 'bundleSize');
+createTask('caches-json', 'cachesJson');
+createTask('check-analytics-vendors-list', 'checkAnalyticsVendorsList'); // prettier-ignore
+createTask('check-build-system', 'checkBuildSystem');
+createTask('check-exact-versions', 'checkExactVersions'); // prettier-ignore
+createTask('check-links', 'checkLinks');
+createTask('check-owners', 'checkOwners');
+createTask('check-renovate-config','checkRenovateConfig'); // prettier-ignore
+createTask('check-sourcemaps', 'checkSourcemaps');
+createTask('check-types', 'checkTypes');
+createTask('check-video-interface-list', 'checkVideoInterfaceList'); // prettier-ignore
+createTask('cherry-pick', 'cherryPick');
+createTask('clean', 'clean');
+createTask('codecov-upload', 'codecovUpload');
+createTask('compile-jison', 'compileJison');
+createTask('coverage-map', 'coverageMap');
+createTask('css', 'css');
 createTask('default', 'defaultTask', 'default-task');
-createTask('dep-check', 'depCheck', 'dep-check');
-createTask('dev-dashboard-tests', 'devDashboardTests', 'dev-dashboard-tests');
-createTask('dist', 'dist', 'dist');
-createTask('e2e', 'e2e', 'e2e');
-createTask('firebase', 'firebase', 'firebase');
-createTask('get-zindex', 'getZindex', 'get-zindex');
-createTask('integration', 'integration', 'integration');
-createTask('lint', 'lint', 'lint');
+createTask('dep-check', 'depCheck');
+createTask('dev-dashboard-tests', 'devDashboardTests');
+createTask('dist', 'dist');
+createTask('e2e', 'e2e');
+createTask('firebase', 'firebase');
+createTask('get-zindex', 'getZindex');
+createTask('integration', 'integration');
+createTask('lint', 'lint');
 createTask('make-extension', 'makeExtension', 'extension-generator');
-createTask('markdown-toc', 'markdownToc', 'markdown-toc');
-createTask('performance', 'performance', 'performance');
-createTask('performance-urls', 'performanceUrls', 'performance-urls');
-createTask('pr-check', 'prCheck', 'pr-check');
-createTask('prepend-global', 'prependGlobal', 'prepend-global');
+createTask('markdown-toc', 'markdownToc');
+createTask('performance', 'performance');
+createTask('performance-urls', 'performanceUrls');
+createTask('pr-check', 'prCheck');
+createTask('prepend-global', 'prependGlobal');
 createTask('presubmit', 'presubmit', 'presubmit-checks');
-createTask('prettify', 'prettify', 'prettify');
-createTask('release', 'release', 'release');
-createTask('serve', 'serve', 'serve');
-createTask('server-tests', 'serverTests', 'server-tests');
-createTask('storybook', 'storybook', 'storybook');
-createTask('sweep-experiments', 'sweepExperiments', 'sweep-experiments');
-createTask('test-report-upload', 'testReportUpload', 'test-report-upload');
-createTask('unit', 'unit', 'unit');
-createTask('validator', 'validator', 'validator');
+createTask('prettify', 'prettify');
+createTask('release', 'release');
+createTask('serve', 'serve');
+createTask('server-tests', 'serverTests');
+createTask('storybook', 'storybook');
+createTask('sweep-experiments', 'sweepExperiments');
+createTask('test-report-upload', 'testReportUpload');
+createTask('unit', 'unit');
+createTask('validator', 'validator');
 createTask('validator-cpp', 'validatorCpp', 'validator');
 createTask('validator-webui', 'validatorWebui', 'validator');
-createTask('visual-diff', 'visualDiff', 'visual-diff');
+createTask('visual-diff', 'visualDiff');
 
 /**
  * Finalize the task runner after all tasks have been created.

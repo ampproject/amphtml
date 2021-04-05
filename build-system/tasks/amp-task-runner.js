@@ -112,6 +112,9 @@ async function runTask(taskName, taskSourceFilePath, taskFunc) {
  * @param {string} taskSourceFileName
  */
 function createTask(taskName, taskFuncName, taskSourceFileName) {
+  // By default, assume the task is implemented in a file of the same name.
+  taskSourceFileName = taskSourceFileName || taskName;
+
   const taskSourceFilePath = path.join(__dirname, taskSourceFileName);
   const isInvokedTask = argv._.includes(taskName); // `amp <task>`
   const isDefaultTask =
