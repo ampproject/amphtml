@@ -18,6 +18,7 @@ import '../amp-tiktok';
 import * as dom from '../../../../src/dom';
 import {Services} from '../../../../src/services';
 import {isAmpElement} from '../../../../src/dom';
+import {listen} from '../../../../src/event-helper';
 
 describes.realWin(
   'amp-tiktok',
@@ -29,23 +30,23 @@ describes.realWin(
   (env) => {
     let win;
     let doc;
-    let createElementWithAttributes;
+    // let createElementWithAttributes;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      createElementWithAttributes = dom.createElementWithAttributes;
+      // createElementWithAttributes = dom.createElementWithAttributes;
 
-      env.sandbox
-        .stub(dom, 'createElementWithAttributes')
-        .callsFake((document, tagName, attributes) => {
-          if (tagName === 'iframe' && attributes.src) {
-            // Serve a blank page, since these tests don't require an actual page.
-            // hash # at the end so path is not affected by param concat
-            attributes.src = `http://localhost:${location.port}/test/fixtures/served/blank.html#${attributes.src}`;
-          }
-          return createElementWithAttributes(document, tagName, attributes);
-        });
+      // env.sandbox
+      //   .stub(dom, 'createElementWithAttributes')
+      //   .callsFake((document, tagName, attributes) => {
+      //     if (tagName === 'iframe' && attributes.src) {
+      //       // Serve a blank page, since these tests don't require an actual page.
+      //       // hash # at the end so path is not affected by param concat
+      //       attributes.src = `http://localhost:${location.port}/test/fixtures/served/blank.html#${attributes.src}`;
+      //     }
+      //     return createElementWithAttributes(document, tagName, attributes);
+      //   });
     });
 
     async function getTiktok(attrs = {}) {
@@ -98,6 +99,43 @@ describes.realWin(
       expect(iframe).to.not.be.null;
       expect(iframe.getAttribute('src')).to.contain(videoId);
       expect(iframe.getAttribute('src')).to.contain('fr-FR');
+    });
+
+    it('recieves "message" from the Tiktok API', async () => {
+      const videoId = '6718335390845095173';
+      const player = await getTiktok({'data-src': videoId});
+      const impl = await player.getImpl(false);
+      const handleTiktokMessagesSpy = env.sandbox.spy(
+        impl,
+        'handleTiktokMessages_'
+      );
+      // Wait for TikTok to send the mesages.
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, 1900);
+      });
+      // Tiktok sends multiple messages so we only need to verify that its called at all.
+      expect(handleTiktokMessagesSpy).to.be.called;
+    });
+
+    it('resizes using the fallback mechanism when no messages are received', async () => {
+      const videoId = '6718335390845095173';
+      const player = await getTiktok({'data-src': videoId});
+      const playerIframe = player.querySelector('iframe');
+      // const impl = await player.getImpl(false);
+      // env.sandbox.stub(impl, 'handleTiktokMessages_');
+      playerIframe.setAttribute('name', '');
+      expect(player.style.height).to.equal('730px');
+
+      // Wait 1100ms for resize fallback to be invoked.
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, 1100);
+      });
+
+      expect(player.style.height).to.equal('775px');
     });
 
     it('removes iframe after unlayoutCallback', async () => {
