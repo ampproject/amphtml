@@ -103,7 +103,7 @@ amp::validator::AmpLayout::Layout CalculateLayout(
 std::string GetCssLengthStyle(const CssLength& length, const std::string& type);
 
 // Returns the CSS class name for the given AmpLayout. Equivalent to
-// https://github.com/ampproject/amphtml/blob/main/src/layout.js.
+// https://github.com/ampproject/amphtml/blob/master/src/layout.js.
 std::string GetLayoutClass(amp::validator::AmpLayout::Layout layout);
 
 // Returns the name for the given AmpLayout.
@@ -119,7 +119,7 @@ std::string GetSizerStyle(amp::validator::AmpLayout::Layout layout,
                           const CssLength& width, const CssLength& height);
 
 // Returns whether the given AmpLayout has size defined. Equivalent to
-// https://github.com/ampproject/amphtml/blob/main/src/layout.js.
+// https://github.com/ampproject/amphtml/blob/master/src/layout.js.
 bool IsLayoutSizeDefined(amp::validator::AmpLayout::Layout layout);
 
 // Returns the CSS class name for AmpLayouts with defined sizes.
