@@ -465,6 +465,11 @@ describes.realWin(
       env.sandbox.spy(video, 'pause');
       // The auto-pause only happens on when the video is actually playing.
       dispatchCustomEvent(video, 'play');
+      // First send "size" event and then "no size".
+      resizeObserverStub.notifySync({
+        target: v,
+        borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+      });
       resizeObserverStub.notifySync({
         target: v,
         borderBoxSize: [{inlineSize: 0, blockSize: 0}],

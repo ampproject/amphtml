@@ -27,6 +27,9 @@ export class PauseHelper {
     /** @private {boolean} */
     this.isPlaying_ = false;
 
+    /** @private {boolean} */
+    this.hasSize_ = false;
+
     this.pauseWhenNoSize_ = this.pauseWhenNoSize_.bind(this);
   }
 
@@ -39,6 +42,10 @@ export class PauseHelper {
     }
     this.isPlaying_ = isPlaying;
     if (isPlaying) {
+      // Pause will not be called until transitioning from "has size" to
+      // "no size". Which means a measurement must first be received that
+      // has size, then a measurement that does not have size.
+      this.hasSize_ = false;
       observeBorderBoxSize(this.element_, this.pauseWhenNoSize_);
     } else {
       unobserveBorderBoxSize(this.element_, this.pauseWhenNoSize_);
@@ -51,6 +58,10 @@ export class PauseHelper {
    */
   pauseWhenNoSize_({inlineSize, blockSize}) {
     const hasSize = inlineSize > 0 && blockSize > 0;
+    if (hasSize === this.hasSize_) {
+      return;
+    }
+    this.hasSize_ = hasSize;
     if (!hasSize) {
       this.element_.pause();
     }
