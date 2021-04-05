@@ -15,11 +15,10 @@
  */
 
 import {BaseElement} from './base-element';
-import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
+import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
-import {preloadBootstrap} from '../../../src/3p-frame';
 import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const {string} */
@@ -57,19 +56,19 @@ class AmpTwitter extends BaseElement {
   static getPreconnects(element) {
     const ampdoc = element.getAmpDoc();
     const {win} = ampdoc;
-    const preconnect = Services.preconnectFor(win);
-    preloadBootstrap(win, TYPE, ampdoc, preconnect);
-    // Hosts the script that renders tweets.
-    preconnect.preload(
-      ampdoc,
+    return [
+      // Base URL for 3p bootstrap iframes
+      getBootstrapBaseUrl(win, ampdoc),
+      // Script URL for iframe
+      getBootstrapUrl(TYPE, win),
+      // Hosts the script that renders tweets.
       'https://platform.twitter.com/widgets.js',
-      'script'
-    );
-    // This domain serves the actual tweets as JSONP.
-    preconnect.url(ampdoc, 'https://syndication.twitter.com');
-    // All images
-    preconnect.url(ampdoc, 'https://pbs.twimg.com');
-    preconnect.url(ampdoc, 'https://cdn.syndication.twimg.com');
+      // This domain serves the actual tweets as JSONP.
+      'https://syndication.twitter.com',
+      // All images
+      'https://pbs.twimg.com',
+      'https://cdn.syndication.twimg.com',
+    ];
   }
 
   /** @override */
