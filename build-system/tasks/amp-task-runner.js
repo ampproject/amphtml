@@ -114,7 +114,8 @@ async function runTask(taskName, taskSourceFilePath, taskFunc) {
 function createTask(taskName, taskFuncName, taskSourceFileName) {
   // By default, assume the function is the camelCase version of the task name.
   taskFuncName =
-    taskFuncName || taskName.replace(/-([a-z])/g, (c) => c.toUpperCase());
+    taskFuncName ||
+    taskName.replace(/-([a-z])/g, (unusedMatch, c) => c.toUpperCase());
   // By default, assume the task is implemented in a file of the same name.
   taskSourceFileName = taskSourceFileName || taskName;
 
