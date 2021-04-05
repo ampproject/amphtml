@@ -49,6 +49,7 @@ function safelySetStyles(element, styles) {
 /**
  * @param {boolean} mounted
  * @param {boolean} opened
+ * @param {{current: function|undefined}} onAfterOpen
  * @param {{current: function|undefined}} onAfterClose
  * @param {string} side
  * @param {{current: Element|null}} sidebarRef
@@ -58,12 +59,14 @@ function safelySetStyles(element, styles) {
 export function useSidebarAnimation(
   mounted,
   opened,
+  onAfterOpen,
   onAfterClose,
   side,
   sidebarRef,
   backdropRef,
   setMounted
 ) {
+  const onAfterOpenRef = useValueRef(onAfterOpen);
   const onAfterCloseRef = useValueRef(onAfterClose);
   const sidebarAnimationRef = useRef(null);
   const backdropAnimationRef = useRef(null);
@@ -86,11 +89,10 @@ export function useSidebarAnimation(
       sidebarAnimationRef.current = null;
       backdropAnimationRef.current = null;
       currentlyAnimatingRef.current = false;
+      onAfterOpenRef.current?.();
     };
     const postInvisibleAnim = () => {
-      if (onAfterCloseRef.current) {
-        onAfterCloseRef.current();
-      }
+      onAfterCloseRef.current?.();
       sidebarAnimationRef.current = null;
       backdropAnimationRef.current = null;
       currentlyAnimatingRef.current = false;
@@ -183,6 +185,7 @@ export function useSidebarAnimation(
   }, [
     mounted,
     opened,
+    onAfterOpenRef,
     onAfterCloseRef,
     side,
     sidebarRef,

@@ -6,6 +6,7 @@ build/
 .amp-dep-check
 extensions/**/dist/**
 c
+.css-cache/
 /dist
 dist.3p
 dist.tools

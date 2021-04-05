@@ -24,6 +24,7 @@ var SidebarDef = {};
  *   as: (string|PreactDef.FunctionalComponent|undefined),
  *   side: (string|undefined),
  *   onBeforeOpen: (function|undefined),
+ *   onAfterOpen: (function|undefined),
  *   onAfterClose: (function|undefined),
  *   backdropStyle: (?Object|undefined),
  *   backdropClassName: (string|undefined),

@@ -19,7 +19,7 @@ const fs = require('fs-extra');
 const markdownLinkCheck = require('markdown-link-check');
 const path = require('path');
 const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
-const {gitDiffAddedNameOnlyMaster} = require('../common/git');
+const {gitDiffAddedNameOnlyMain} = require('../common/git');
 const {green, cyan, red, yellow} = require('kleur/colors');
 const {linkCheckGlobs} = require('../test-configs/config');
 const {log, logLocalDev} = require('../common/logging');
@@ -45,7 +45,7 @@ async function checkLinks() {
     return;
   }
   logLocalDev(green('Starting checks...'));
-  filesIntroducedByPr = gitDiffAddedNameOnlyMaster();
+  filesIntroducedByPr = gitDiffAddedNameOnlyMain();
   const results = await Promise.all(filesToCheck.map(checkLinksInFile));
   reportResults(results);
 }
