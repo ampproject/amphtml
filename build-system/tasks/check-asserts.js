@@ -33,7 +33,6 @@ const MINIFIED_JS = './dist/v0.js';
  */
 async function checkSentinels(filePath, sentinels) {
   const fileContents = await fs.readFile(filePath, 'utf8');
-  console.log(fileContents.length);
 
   for (const [sentinel, shouldBePresent] of Object.entries(sentinels)) {
     const isPresent = fileContents.includes(sentinel);
