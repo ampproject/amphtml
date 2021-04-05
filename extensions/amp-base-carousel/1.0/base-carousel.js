@@ -340,7 +340,6 @@ function BaseCarouselWithRef(
       <Scroller
         advanceCount={advanceCount}
         alignment={snapAlign}
-        autoAdvanceCount={autoAdvanceCount}
         axis={axis}
         lightbox={lightbox}
         loop={loop}
