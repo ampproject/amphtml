@@ -24,59 +24,64 @@ const {
  * All the AMP tasks. Keep this list alphabetized.
  *
  * The three params used below are:
- * 1. Name of the amp task to be invoked E.g. amp default
- * 2. Name of the function in the source file. E.g. defaultTask()
- * 3. Basename of the source file in build-system/tasks/. E.g. build-system/tasks/default-task.js
+ * 1. Name of the amp task to be invoked
+ *    Ex. `amp default`
+ * 2. Name of the function in the source file
+ *    Ex. `defaultTask()`
+ *    Default: the task name in camelCase
+ * 3. Basename of the source file in `build-system/tasks/`
+ *    Ex. `build-system/tasks/default-task.js`
+ *    Default: the file name is the same as the task name
  */
-createTask('analytics-vendor-configs', 'analyticsVendorConfigs'); // prettier-ignore
-createTask('ava', 'ava');
-createTask('babel-plugin-tests', 'babelPluginTests');
-createTask('build', 'build');
-createTask('bundle-size', 'bundleSize');
-createTask('caches-json', 'cachesJson');
-createTask('check-analytics-vendors-list', 'checkAnalyticsVendorsList'); // prettier-ignore
-createTask('check-build-system', 'checkBuildSystem');
-createTask('check-exact-versions', 'checkExactVersions'); // prettier-ignore
-createTask('check-links', 'checkLinks');
-createTask('check-owners', 'checkOwners');
-createTask('check-renovate-config','checkRenovateConfig'); // prettier-ignore
-createTask('check-sourcemaps', 'checkSourcemaps');
-createTask('check-types', 'checkTypes');
-createTask('check-video-interface-list', 'checkVideoInterfaceList'); // prettier-ignore
-createTask('cherry-pick', 'cherryPick');
-createTask('clean', 'clean');
-createTask('codecov-upload', 'codecovUpload');
-createTask('compile-jison', 'compileJison');
-createTask('coverage-map', 'coverageMap');
-createTask('css', 'css');
+createTask('analytics-vendor-configs');
+createTask('ava');
+createTask('babel-plugin-tests');
+createTask('build');
+createTask('bundle-size');
+createTask('caches-json');
+createTask('check-analytics-vendors-list');
+createTask('check-build-system');
+createTask('check-exact-versions');
+createTask('check-links');
+createTask('check-owners');
+createTask('check-renovate-config');
+createTask('check-sourcemaps');
+createTask('check-types');
+createTask('check-video-interface-list');
+createTask('cherry-pick');
+createTask('clean');
+createTask('codecov-upload');
+createTask('compile-jison');
+createTask('coverage-map');
+createTask('css');
 createTask('default', 'defaultTask', 'default-task');
-createTask('dep-check', 'depCheck');
-createTask('dev-dashboard-tests', 'devDashboardTests');
-createTask('dist', 'dist');
-createTask('e2e', 'e2e');
-createTask('firebase', 'firebase');
-createTask('get-zindex', 'getZindex');
-createTask('integration', 'integration');
-createTask('lint', 'lint');
+createTask('dep-check');
+createTask('dev-dashboard-tests');
+createTask('dist');
+createTask('e2e');
+createTask('firebase');
+createTask('get-zindex');
+createTask('integration');
+createTask('lint');
 createTask('make-extension', 'makeExtension', 'extension-generator');
-createTask('markdown-toc', 'markdownToc');
-createTask('performance', 'performance');
-createTask('performance-urls', 'performanceUrls');
+createTask('markdown-toc');
+createTask('performance');
+createTask('performance-urls');
 createTask('pr-check', 'prCheck');
-createTask('prepend-global', 'prependGlobal');
+createTask('prepend-global');
 createTask('presubmit', 'presubmit', 'presubmit-checks');
-createTask('prettify', 'prettify');
-createTask('release', 'release');
-createTask('serve', 'serve');
-createTask('server-tests', 'serverTests');
-createTask('storybook', 'storybook');
-createTask('sweep-experiments', 'sweepExperiments');
-createTask('test-report-upload', 'testReportUpload');
-createTask('unit', 'unit');
-createTask('validator', 'validator');
+createTask('prettify');
+createTask('release');
+createTask('serve');
+createTask('server-tests');
+createTask('storybook');
+createTask('sweep-experiments');
+createTask('test-report-upload');
+createTask('unit');
+createTask('validator');
 createTask('validator-cpp', 'validatorCpp', 'validator');
 createTask('validator-webui', 'validatorWebui', 'validator');
-createTask('visual-diff', 'visualDiff');
+createTask('visual-diff');
 
 /**
  * Finalize the task runner after all tasks have been created.
