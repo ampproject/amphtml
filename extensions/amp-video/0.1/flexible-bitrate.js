@@ -105,7 +105,10 @@ export class BitrateManager {
     onNontrivialWait(video, () => {
       const current = currentSource(video);
       const newBitrate = current.bitrate_ - 1;
-      if (newBitrate >= this.acceptableBitrate_) {
+      if (
+        newBitrate >= this.acceptableBitrate_ ||
+        getBufferedPercentage(video) > BUFFERED_THRESHOLD_PERCENTAGE
+      ) {
         return;
       }
       this.acceptableBitrate_ = newBitrate;
