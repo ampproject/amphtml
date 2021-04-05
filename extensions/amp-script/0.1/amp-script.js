@@ -197,7 +197,7 @@ export class AmpScript extends AMP.BaseElement {
     return this.userActivation_;
   }
 
-   // * @param {Array<*>} args
+  // * @param {Array<*>} args
 
   /**
    * Calls the specified function on this amp-script's worker-dom instance.
@@ -208,7 +208,11 @@ export class AmpScript extends AMP.BaseElement {
   callFunction(functionIdentifier) {
     // TODO: how to property expand arguments
     return this.initialize_.promise.then(() => {
-      return this.workerDom_.callFunction.apply(this.workerDom_, functionIdentifier, arguments.slice(1));
+      return this.workerDom_.callFunction.apply(
+        this.workerDom_,
+        functionIdentifier,
+        arguments.slice(1)
+      );
     });
   }
 

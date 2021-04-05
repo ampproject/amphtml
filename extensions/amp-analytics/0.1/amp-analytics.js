@@ -152,8 +152,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
 
     // TODO: bikeshed attribute name.
-    if (this.hasAttribute('amp-script-target')) {
-      const target = this.getAttribute('amp-script-target').split('.');
+    if (this.element.hasAttribute('amp-script-target')) {
+      const target = this.element.getAttribute('amp-script-target').split('.');
       userAssert(
         target.length === 2 && target[0].length > 0 && target[1].length > 0,
         '[amp-analytics]: "amp-script" target must be specified as "scriptId.functionIdentifier".'
