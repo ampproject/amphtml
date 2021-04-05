@@ -42,8 +42,9 @@ export class PauseHelper {
     }
     this.isPlaying_ = isPlaying;
     if (isPlaying) {
-      // Reset hasSize to ensure that the very first measurement doesn't
-      // immediately pause the element.
+      // Pause will not be called until transitioning from "has size" to
+      // "no size". Which means a measurement must first be received that
+      // has size, then a measurement that does not have size.
       this.hasSize_ = false;
       observeBorderBoxSize(this.element_, this.pauseWhenNoSize_);
     } else {
