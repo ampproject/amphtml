@@ -467,7 +467,7 @@ describes.realWin(
       dispatchCustomEvent(video, 'play');
       resizeObserverStub.notifySync({
         target: v,
-        contentRect: {width: 0, height: 0},
+        borderBoxSize: [{inlineSize: 0, blockSize: 0}],
       });
       expect(video.pause.called).to.be.true;
     });

@@ -42,7 +42,7 @@ describes.realWin('PauseHelper', {}, (env) => {
 
     resizeObserverStub.notifySync({
       target: element,
-      contentRect: {width: 100, height: 100},
+      borderBoxSize: [{inlineSize: 101, blockSize: 102}],
     });
     expect(element.pause).to.not.be.called;
   });
@@ -54,7 +54,7 @@ describes.realWin('PauseHelper', {}, (env) => {
 
     resizeObserverStub.notifySync({
       target: element,
-      contentRect: {width: 0, height: 0},
+      borderBoxSize: [{inlineSize: 0, blockSize: 0}],
     });
     expect(element.pause).to.be.calledOnce;
   });
