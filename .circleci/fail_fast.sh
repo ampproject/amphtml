@@ -29,7 +29,7 @@ if [[ "$CIRCLE_BRANCH" == "main" ]]; then
   echo $(YELLOW "This main branch build failed, notifying @ampproject/build-on-duty.")
   echo $(RED "NotImplementedError")
   exit 0
-if [[ "$CIRCLE_BRANCH" =~ ^amp-release-* ]]; then
+elif [[ "$CIRCLE_BRANCH" =~ ^amp-release-* ]]; then
   echo $(YELLOW "This release branch build failed, notifying @ampproject/release-on-duty.")
   echo $(RED "NotImplementedError")
   exit 0
