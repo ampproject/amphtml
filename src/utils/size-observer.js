@@ -14,22 +14,30 @@
  * limitations under the License.
  */
 
+import {computedStyle} from '../style';
 import {remove} from './array';
 import {rethrowAsync} from '../log';
 
-/** @typedef {function(../layout-rect.LayoutSizeDef)} */
-let SizeObserverCallbackDef;
-
 /** @enum {number} */
 const Type = {
+  /**
+   * Mapped to the `ResizeObserverEntry.contentRect` and returns a
+   * `LayoutSizeDef` value.
+   */
   CONTENT: 0,
+  /**
+   * Mapped to the `ResizeObserverEntry.borderBoxSize` and returns a
+   * `ResizeObserverSize` value.
+   */
   BORDER_BOX: 1,
 };
+
+const VERTICAL_RE = /vertical/;
 
 /** @const {!WeakMap<!Window, !ResizeObserver>} */
 const observers = new WeakMap();
 
-/** @const {!WeakMap<!Element, !Array<{type: Type, callback: !SizeObserverCallbackDef}>>} */
+/** @const {!WeakMap<!Element, !Array<{type: Type, callback: function(?)}>>} */
 const targetObserverMultimap = new WeakMap();
 
 /** @const {!WeakMap<!Element, !ResizeObserverEntry>} */
@@ -37,7 +45,7 @@ const targetEntryMap = new WeakMap();
 
 /**
  * @param {!Element} element
- * @param {!SizeObserverCallbackDef} callback
+ * @param {function(!../layout-rect.LayoutSizeDef)} callback
  */
 export function observeContentSize(element, callback) {
   observeSize(element, Type.CONTENT, callback);
@@ -45,7 +53,7 @@ export function observeContentSize(element, callback) {
 
 /**
  * @param {!Element} element
- * @param {!ObserverCallbackDef} callback
+ * @param {!Function} callback
  */
 export function unobserveContentSize(element, callback) {
   unobserveSize(element, Type.CONTENT, callback);
@@ -68,7 +76,7 @@ export function measureContentSize(element) {
 /**
  * Note: this method doesn't support multi-fragment border boxes.
  * @param {!Element} element
- * @param {!SizeObserverCallbackDef} callback
+ * @param {function(!ResizeObserverSize)} callback
  */
 export function observeBorderBoxSize(element, callback) {
   observeSize(element, Type.BORDER_BOX, callback);
@@ -77,7 +85,7 @@ export function observeBorderBoxSize(element, callback) {
 /**
  * Note: this method doesn't support multi-fragment border boxes.
  * @param {!Element} element
- * @param {!ObserverCallbackDef} callback
+ * @param {!Function} callback
  */
 export function unobserveBorderBoxSize(element, callback) {
   unobserveSize(element, Type.BORDER_BOX, callback);
@@ -86,7 +94,7 @@ export function unobserveBorderBoxSize(element, callback) {
 /**
  * Note: this method doesn't support multi-fragment border boxes.
  * @param {!Element} element
- * @return {!Promise<!../layout-rect.LayoutSizeDef>}
+ * @return {!Promise<!ResizeObserverSize>}
  */
 export function measureBorderBoxSize(element) {
   return new Promise((resolve) => {
@@ -101,7 +109,7 @@ export function measureBorderBoxSize(element) {
 /**
  * @param {!Element} element
  * @param {Type} type
- * @param {!SizeObserverCallbackDef} callback
+ * @param {function(?)} callback
  */
 function observeSize(element, type, callback) {
   const win = element.ownerDocument.defaultView;
@@ -129,7 +137,7 @@ function observeSize(element, type, callback) {
 /**
  * @param {!Element} element
  * @param {Type} type
- * @param {!ObserverCallbackDef} callback
+ * @param {function(?)} callback
  */
 function unobserveSize(element, type, callback) {
   const callbacks = targetObserverMultimap.get(element);
@@ -186,43 +194,57 @@ function processEntries(entries) {
 
 /**
  * @param {Type} type
- * @param {!ObserverCallbackDef} callback
+ * @param {function(?)} callback
  * @param {!ResizeObserverEntry} entry
  */
 function computeAndCall(type, callback, entry) {
-  let width, height;
   if (type == Type.CONTENT) {
     const {contentRect} = entry;
-    width = contentRect.width;
-    height = contentRect.height;
-  } else if (type == Type.BORDER_BOX) {
-    const {borderBoxSize} = entry;
-    if (borderBoxSize?.length > 0) {
-      // `borderBoxSize` is supported. Only single-fragment border boxes are
-      // supported here (`borderBoxSize[0]`).
-      width = borderBoxSize[0].inlineSize;
-      height = borderBoxSize[0].blockSize;
-    } else {
-      // `borderBoxSize` is not supported: polyfill it via blocking measures.
-      const {target} = entry;
-      width = target./*OK*/ offsetWidth;
-      height = target./*OK*/ offsetHeight;
-    }
-  }
-  if (width != null && height != null) {
+    const {width, height} = contentRect;
     /** @type {!../layout-rect.LayoutSizeDef} */
     const size = {width, height};
     callCallbackNoInline(callback, size);
+  } else if (type == Type.BORDER_BOX) {
+    const {borderBoxSize: borderBoxSizeArray} = entry;
+    /** @type {!ResizeObserverSize} */
+    let borderBoxSize;
+    if (borderBoxSizeArray) {
+      // `borderBoxSize` is supported. Only single-fragment border boxes are
+      // supported here (`borderBoxSize[0]`).
+      if (borderBoxSizeArray.length > 0) {
+        borderBoxSize = borderBoxSizeArray[0];
+      } else {
+        borderBoxSize = {inlineSize: 0, blockSize: 0};
+      }
+    } else {
+      // `borderBoxSize` is not supported: polyfill it via blocking measures.
+      const {target} = entry;
+      const win = target.ownerDocument.defaultView;
+      const isVertical = VERTICAL_RE.test(
+        computedStyle(win, target).writingMode
+      );
+      const {offsetWidth, offsetHeight} = target;
+      let inlineSize, blockSize;
+      if (isVertical) {
+        blockSize = offsetWidth;
+        inlineSize = offsetHeight;
+      } else {
+        inlineSize = offsetWidth;
+        blockSize = offsetHeight;
+      }
+      borderBoxSize = {inlineSize, blockSize};
+    }
+    callCallbackNoInline(callback, borderBoxSize);
   }
 }
 
 /**
- * @param {!ObserverCallbackDef} callback
- * @param {!../layout-rect.LayoutSizeDef} size
+ * @param {function(?)} callback
+ * @param {?} value
  */
-function callCallbackNoInline(callback, size) {
+function callCallbackNoInline(callback, value) {
   try {
-    callback(size);
+    callback(value);
   } catch (e) {
     rethrowAsync(e);
   }

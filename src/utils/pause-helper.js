@@ -46,11 +46,11 @@ export class PauseHelper {
   }
 
   /**
-   * @param {!../layout-rect.LayoutSizeDef} size
+   * @param {!ResizeObserverSize} size
    * @private
    */
-  pauseWhenNoSize_({width, height}) {
-    const hasSize = width > 0 && height > 0;
+  pauseWhenNoSize_({inlineSize, blockSize}) {
+    const hasSize = inlineSize > 0 && blockSize > 0;
     if (!hasSize) {
       this.element_.pause();
     }

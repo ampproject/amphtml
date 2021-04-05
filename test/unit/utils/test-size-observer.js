@@ -187,9 +187,9 @@ describes.realWin('size-observer', {}, (env) => {
       observer.notify([
         {target: element, borderBoxSize: [{inlineSize: 101, blockSize: 102}]},
       ]);
-      const {width, height} = await promise;
-      expect(width).to.equal(101);
-      expect(height).to.equal(102);
+      const {inlineSize, blockSize} = await promise;
+      expect(inlineSize).to.equal(101);
+      expect(blockSize).to.equal(102);
       expect(observer.elements).to.not.include(element);
     });
 
@@ -198,9 +198,21 @@ describes.realWin('size-observer', {}, (env) => {
       env.sandbox.stub(element, 'offsetHeight').value(102);
       const promise = measureBorderBoxSize(element);
       observer.notify([{target: element}]);
-      const {width, height} = await promise;
-      expect(width).to.equal(101);
-      expect(height).to.equal(102);
+      const {inlineSize, blockSize} = await promise;
+      expect(inlineSize).to.equal(101);
+      expect(blockSize).to.equal(102);
+      expect(observer.elements).to.not.include(element);
+    });
+
+    it('should fallback to offsetWidth and offsetHeight as a polyfill in vertical mode', async () => {
+      element.style.writingMode = 'vertical-lr';
+      env.sandbox.stub(element, 'offsetWidth').value(101);
+      env.sandbox.stub(element, 'offsetHeight').value(102);
+      const promise = measureBorderBoxSize(element);
+      observer.notify([{target: element}]);
+      const {inlineSize, blockSize} = await promise;
+      expect(inlineSize).to.equal(102);
+      expect(blockSize).to.equal(101);
       expect(observer.elements).to.not.include(element);
     });
 
@@ -226,8 +238,8 @@ describes.realWin('size-observer', {}, (env) => {
       expect(contentSize.height).to.equal(102);
 
       const borderBoxSize = await borderBoxSizeCallbackCaller.next();
-      expect(borderBoxSize.width).to.equal(201);
-      expect(borderBoxSize.height).to.equal(202);
+      expect(borderBoxSize.inlineSize).to.equal(201);
+      expect(borderBoxSize.blockSize).to.equal(202);
 
       unobserveContentSize(element, contentSizeCallbackCaller);
       expect(observer.elements).to.include(element);
@@ -245,16 +257,16 @@ describes.realWin('size-observer', {}, (env) => {
         {target: element, borderBoxSize: [{inlineSize: 201, blockSize: 202}]},
       ]);
       const size1 = await callbackCaller.next();
-      expect(size1.width).to.equal(201);
-      expect(size1.height).to.equal(202);
+      expect(size1.inlineSize).to.equal(201);
+      expect(size1.blockSize).to.equal(202);
 
       // Resize.
       observer.notify([
         {target: element, borderBoxSize: [{inlineSize: 301, blockSize: 202}]},
       ]);
       const size2 = await callbackCaller.next();
-      expect(size2.width).to.equal(301);
-      expect(size2.height).to.equal(202);
+      expect(size2.inlineSize).to.equal(301);
+      expect(size2.blockSize).to.equal(202);
     });
 
     it('should observe multiple callbacks', async () => {
@@ -265,15 +277,15 @@ describes.realWin('size-observer', {}, (env) => {
         {target: element, borderBoxSize: [{inlineSize: 201, blockSize: 202}]},
       ]);
       const size1 = await callbackCaller1.next();
-      expect(size1.width).to.equal(201);
-      expect(size1.height).to.equal(202);
+      expect(size1.inlineSize).to.equal(201);
+      expect(size1.blockSize).to.equal(202);
 
       // Second callback.
       const callbackCaller2 = createCallbackCaller();
       observeBorderBoxSize(element, callbackCaller2);
       const size2 = await callbackCaller2.next();
-      expect(size2.width).to.equal(201);
-      expect(size2.height).to.equal(202);
+      expect(size2.inlineSize).to.equal(201);
+      expect(size2.blockSize).to.equal(202);
     });
 
     it('should unobserve multiple callbacks', async () => {
