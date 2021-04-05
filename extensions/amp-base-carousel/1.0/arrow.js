@@ -16,6 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {useStyles} from './base-carousel.jss';
+import objstr from 'obj-str';
 
 /**
  * @param {!BaseCarouselDef.ArrowProps} props
@@ -23,41 +24,37 @@ import {useStyles} from './base-carousel.jss';
  */
 export function Arrow({
   advance,
+  as: Comp = DefaultArrow,
   by,
-  customArrow = <DefaultArrow by={by} />,
   disabled,
   outsetArrows,
   rtl,
+  ...rest
 }) {
-  const {
-    'disabled': customDisabled,
-    'onClick': onCustomClick,
-  } = customArrow.props;
-  const isDisabled = disabled || customDisabled;
-  const onClick = (e) => {
-    if (isDisabled) {
-      return;
-    }
-    if (onCustomClick) {
-      onCustomClick(e);
-    }
-    advance();
-  };
   const classes = useStyles();
-  const classNames = `${classes.arrow} ${
-    by < 0 ? classes.arrowPrev : classes.arrowNext
-  } ${isDisabled ? classes.arrowDisabled : ''} ${
-    outsetArrows ? classes.outsetArrow : classes.insetArrow
-  } ${rtl ? classes.rtl : classes.ltr}`;
-
+  const onClick = () => {
+    if (!disabled) {
+      advance();
+    }
+  };
   return (
-    <div class={classNames}>
-      {Preact.cloneElement(customArrow, {
-        'onClick': onClick,
-        'disabled': isDisabled,
-        'aria-disabled': String(!!isDisabled),
+    <Comp
+      aria-disabled={String(!!disabled)}
+      by={by}
+      className={objstr({
+        [classes.arrow]: true,
+        [classes.arrowDisabled]: disabled,
+        [classes.arrowPrev]: by < 0,
+        [classes.arrowNext]: by > 0,
+        [classes.outsetArrow]: outsetArrows,
+        [classes.insetArrow]: !outsetArrows,
+        [classes.rtl]: rtl,
+        [classes.ltr]: !rtl,
       })}
-    </div>
+      disabled={disabled}
+      onClick={onClick}
+      {...rest}
+    />
   );
 }
 
@@ -65,28 +62,38 @@ export function Arrow({
  * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-function DefaultArrow({by, ...rest}) {
+function DefaultArrow({by, className, ...rest}) {
   const classes = useStyles();
   return (
-    <button
-      class={classes.defaultArrowButton}
-      aria-label={
-        by < 0 ? 'Previous item in carousel' : 'Next item in carousel'
-      }
-      {...rest}
-    >
-      <div class={`${classes.arrowBaseStyle} ${classes.arrowFrosting}`}></div>
-      <div class={`${classes.arrowBaseStyle} ${classes.arrowBackdrop}`}></div>
-      <div class={`${classes.arrowBaseStyle} ${classes.arrowBackground}`}></div>
-      <svg class={classes.arrowIcon} viewBox="0 0 24 24">
-        <path
-          d={by < 0 ? 'M14,7.4 L9.4,12 L14,16.6' : 'M10,7.4 L14.6,12 L10,16.6'}
-          fill="none"
-          stroke-width="2px"
-          stroke-linejoin="round"
-          stroke-linecap="round"
-        />
-      </svg>
-    </button>
+    <div className={className}>
+      <button
+        aria-label={
+          by < 0 ? 'Previous item in carousel' : 'Next item in carousel'
+        }
+        className={classes.defaultArrowButton}
+        {...rest}
+      >
+        <div
+          className={`${classes.arrowBaseStyle} ${classes.arrowFrosting}`}
+        ></div>
+        <div
+          className={`${classes.arrowBaseStyle} ${classes.arrowBackdrop}`}
+        ></div>
+        <div
+          className={`${classes.arrowBaseStyle} ${classes.arrowBackground}`}
+        ></div>
+        <svg className={classes.arrowIcon} viewBox="0 0 24 24">
+          <path
+            d={
+              by < 0 ? 'M14,7.4 L9.4,12 L14,16.6' : 'M10,7.4 L14.6,12 L10,16.6'
+            }
+            fill="none"
+            stroke-width="2px"
+            stroke-linejoin="round"
+            stroke-linecap="round"
+          />
+        </svg>
+      </button>
+    </div>
   );
 }
