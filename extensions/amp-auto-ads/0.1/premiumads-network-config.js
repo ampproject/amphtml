@@ -62,7 +62,7 @@ export class PremiumadsNetworkConfig {
       'height': data.height || 280,
       'layout': data.layout || Layout.RESPONSIVE,
       'sizes': data.sizes || '(min-width: 320px) 320px, 100vw',
-      'style': data.style || 'position:relative!important',
+      'style': data['style'] || 'position:relative!important',
     });
     return attributesObj;
   }
