@@ -419,13 +419,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         // here, though, allows us to measure the impact of ad throttling via
         // incrementLoadingAds().
 
-        const asyncIntersection =
-          getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
-          ADS_INITIAL_INTERSECTION_EXP.experiment;
-        const intersectionPromise = asyncIntersection
-          ? measureIntersection(this.element)
-          : Promise.resolve(this.element.getIntersectionChangeEntry());
-        return intersectionPromise.then((intersection) => {
+        return this.initialIntersectionPromise_.then((intersection) => {
           const iframe = getIframe(
             toWin(this.element.ownerDocument.defaultView),
             this.element,
