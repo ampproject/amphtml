@@ -1703,10 +1703,6 @@ app.use(
     const max = serveMode === 'default' ? '.max' : '';
     const localPath = `${pc.cwd()}/dist/v0/analytics-vendors/${vendor}${max}.json`;
 
-    // TODO(alanorozco): This might work with a simpler pattern seen above:
-    // Instead of reading, override url:
-    //   req.url = 'foo'
-    //   next();
     try {
       const file = await fs.promises.readFile(localPath);
       res.setHeader('Content-Type', 'application/json');
