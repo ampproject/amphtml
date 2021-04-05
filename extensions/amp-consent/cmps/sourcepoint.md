@@ -84,12 +84,12 @@ An optional parameter that adds a light black overlay to the site behind the mes
 | propertyHref     | String |    yes    | This is the property created in the Sourcepoint UI that contains the message, scenario, partition and campaign. The property name should be preceded by the `https://` protocol. For example, a property defined as `amp.property.tcfv2` in the UI should have a propertyHref parameter of `https://amp.property.tcfv2`.                                                                  |
 | propertyId       | Number |    yes    | The ID of the property on which the message is supposed to be served. You can get the property from the address bar at the end of the URL.                                                        |
 | privacyManagerId | Number |    yes    | The ID of the privacy manager to be associated with the postPromptUI element. The ID of the privacy manager can be obtained from the Privacy Manager builder. |      
-| isTCFV2          |  Bool  |    yes    | Indicates that the implementation is for TCF v2 |
+| isTCFV2          |  Bool  |    yes    | Indicates that the implementation is for TCF v2. If `false`, implementation will run TCF v1 logic. |
 | pmTab            | String |    yes    | Determines which section of the privacy manager opens when the button is clicked. Values can be set to either `purposes` or `vendors` |
 | stageCampaign    |  Bool  |    no     | Indicates if the campaign to load is staging or published. The default value is `false`, meaning published campaign. |
 | targetingParams  | Object |    no     | A collection of key values to be used in the scenario manager.                                                       |
 
-## Resuface Privacy Manager
+## Resurface Privacy Manager
 
 By placing a button or link to your Privacy Manager on your property configuration, you allow end-users to manage their consent preferences on an ongoing basis without having to re-encounter your organization's First Layer message. The Privacy Manager can be resurfaced by adding the following `on` attribute to a link or button on your property:
 
