@@ -24,7 +24,10 @@ import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial
 import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {CONSENT_POLICY_STATE, CONSENT_STRING_TYPE} from '../../../src/consent-state';
+import {
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '../../../src/consent-state';
 import {Navigation} from '../../../src/service/navigation';
 import {
   QQID_HEADER,
@@ -380,9 +383,15 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           ? this.responsiveState_.getRafmtParam()
           : null,
       'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
-      'gdpr_consent': consentStringType != CONSENT_STRING_TYPE.US_PRIVACY_STRING ? consentString : null,
+      'gdpr_consent':
+        consentStringType != CONSENT_STRING_TYPE.US_PRIVACY_STRING
+          ? consentString
+          : null,
       'addtl_consent': additionalConsent,
-      'us_privacy': consentStringType == CONSENT_STRING_TYPE.US_PRIVACY_STRING ? consentString : null,
+      'us_privacy':
+        consentStringType == CONSENT_STRING_TYPE.US_PRIVACY_STRING
+          ? consentString
+          : null,
       'pfx': pfx ? '1' : '0',
       'aanf': /^(true|false)$/i.test(this.element.getAttribute('data-no-fill'))
         ? this.element.getAttribute('data-no-fill')

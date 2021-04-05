@@ -791,7 +791,13 @@ export class AmpA4A extends AMP.BaseElement {
         return /** @type {!Promise<?string>} */ (this.getServeNpaSignal().then(
           (npaSignal) =>
             this.getAdUrl(
-              {consentState, consentString, consentStringType, gdprApplies, additionalConsent},
+              {
+                consentState,
+                consentString,
+                consentStringType,
+                gdprApplies,
+                additionalConsent,
+              },
               this.tryExecuteRealTimeConfig_(
                 consentState,
                 consentString,

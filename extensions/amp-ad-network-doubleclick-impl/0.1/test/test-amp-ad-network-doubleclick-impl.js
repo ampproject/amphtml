@@ -43,7 +43,10 @@ import {
   resetLocationQueryParametersForTesting,
   resetTokensToInstancesMap,
 } from '../amp-ad-network-doubleclick-impl';
-import {CONSENT_POLICY_STATE, CONSENT_STRING_TYPE} from '../../../../src/consent-state';
+import {
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '../../../../src/consent-state';
 import {Deferred} from '../../../../src/utils/promise';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {Layout} from '../../../../src/layout';
@@ -1085,24 +1088,36 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       impl.getAdUrl({}).then((url) => {
         expect(url).to.not.match(/(\?|&)addtl_consent=/);
       }));
-      
+
     it('should include us_privacy, if consentStringType matches', () =>
-      impl.getAdUrl({consentStringType: CONSENT_STRING_TYPE.US_PRIVACY_STRING, consentString: 'usPrivacyString'}).then((url) => {
-        expect(url).to.match(/(\?|&)us_privacy=usPrivacyString(&|$)/);
-        expect(url).to.not.match(/(\?|&)gdpr_consent=/);
-      }));
+      impl
+        .getAdUrl({
+          consentStringType: CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+          consentString: 'usPrivacyString',
+        })
+        .then((url) => {
+          expect(url).to.match(/(\?|&)us_privacy=usPrivacyString(&|$)/);
+          expect(url).to.not.match(/(\?|&)gdpr_consent=/);
+        }));
 
     it('should include gdpr_consent, if consentStringType is not US_PRIVACY_STRING', () =>
-      impl.getAdUrl({consentStringType: CONSENT_STRING_TYPE.TCF_V2, consentString: 'gdprString'}).then((url) => {
-        expect(url).to.match(/(\?|&)gdpr_consent=gdprString(&|$)/);
-        expect(url).to.not.match(/(\?|&)us_privacy=/);
-      }));
-    
+      impl
+        .getAdUrl({
+          consentStringType: CONSENT_STRING_TYPE.TCF_V2,
+          consentString: 'gdprString',
+        })
+        .then((url) => {
+          expect(url).to.match(/(\?|&)gdpr_consent=gdprString(&|$)/);
+          expect(url).to.not.match(/(\?|&)us_privacy=/);
+        }));
+
     it('should include gdpr_consent, if consentStringType is undefined', () =>
-      impl.getAdUrl({consentStringType: undefined, consentString: 'gdprString'}).then((url) => {
-        expect(url).to.match(/(\?|&)gdpr_consent=gdprString(&|$)/);
-        expect(url).to.not.match(/(\?|&)us_privacy=/);
-      }));
+      impl
+        .getAdUrl({consentStringType: undefined, consentString: 'gdprString'})
+        .then((url) => {
+          expect(url).to.match(/(\?|&)gdpr_consent=gdprString(&|$)/);
+          expect(url).to.not.match(/(\?|&)us_privacy=/);
+        }));
 
     it('should include msz/psz/fws if in holdback control', () => {
       env.sandbox
