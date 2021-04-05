@@ -288,11 +288,8 @@ export class PreactBaseElement extends AMP.BaseElement {
     /** @protected {?MutationObserver} */
     this.observer = null;
 
-    /** @private {boolean} */
-    this.isPlaying_ = false;
-
-    /** @private {?PauseHelper} */
-    this.pauseHelper_ = null;
+    /** @private {!PauseHelper} */
+    this.pauseHelper_ = new PauseHelper(element);
 
     /** @protected {?MediaQueryProps} */
     this.mediaQueryProps_ = null;
@@ -848,18 +845,7 @@ export class PreactBaseElement extends AMP.BaseElement {
    * @private
    */
   updateIsPlaying_(isPlaying) {
-    if (isPlaying === this.isPlaying_) {
-      return;
-    }
-    this.isPlaying_ = isPlaying;
-    if (isPlaying) {
-      if (!this.pauseHelper_) {
-        this.pauseHelper_ = new PauseHelper(this.element);
-      }
-      this.pauseHelper_.updatePlaying(true);
-    } else {
-      this.pauseHelper_?.updatePlaying(false);
-    }
+    this.pauseHelper_.updatePlaying(isPlaying);
   }
 }
 
