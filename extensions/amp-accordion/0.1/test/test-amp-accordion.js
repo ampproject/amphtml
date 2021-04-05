@@ -201,25 +201,6 @@ describes.realWin(
       expect(headerElements[1].getAttribute('aria-expanded')).to.equal('false');
     });
 
-    it('should expand when beforematch event is triggered on a collapsed section', async () => {
-      // Enable display locking feature.
-      toggleExperiment(win, 'amp-accordion-display-locking', true);
-      doc.body.onbeforematch = null;
-      await getAmpAccordion();
-      const section = doc.querySelector('section:not([expanded])');
-      const header = section.firstElementChild;
-      const content = section.children[1];
-      expect(section.hasAttribute('expanded')).to.be.false;
-      expect(header.getAttribute('aria-expanded')).to.equal('false');
-      content.dispatchEvent(new Event('beforematch'));
-      expect(section.hasAttribute('expanded')).to.be.true;
-      expect(header.getAttribute('aria-expanded')).to.equal('true');
-
-      // Reset display locking feature
-      toggleExperiment(win, 'amp-accordion-display-locking', false);
-      doc.body.onbeforematch = undefined;
-    });
-
     it(
       "should trigger a section's expand event the section is expanded " +
         'without animation',
