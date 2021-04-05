@@ -55,14 +55,14 @@ describes.realWin('PauseHelper', {}, (env) => {
     // No size, but didn't have size before.
     resizeObserverStub.notifySync({
       target: element,
-      contentRect: {width: 0, height: 0},
+      borderBoxSize: [{inlineSize: 0, blockSize: 0}],
     });
     expect(element.pause).to.not.be.called;
 
     // Has size.
     resizeObserverStub.notifySync({
       target: element,
-      contentRect: {width: 1, height: 2},
+      borderBoxSize: [{inlineSize: 1, blockSize: 2}],
     });
     expect(element.pause).to.not.be.called;
 
