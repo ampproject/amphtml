@@ -77,6 +77,10 @@ describes.realWin(
         sendFakeMessage(impl, iframe, 'playing');
         resizeObserverStub.notifySync({
           target: player,
+          borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+        });
+        resizeObserverStub.notifySync({
+          target: player,
           borderBoxSize: [{inlineSize: 0, blockSize: 0}],
         });
         expect(postMessageSpy).to.be.calledWith('pause');
@@ -85,6 +89,10 @@ describes.realWin(
       it('should NOT auto-pause when not playing', async () => {
         sendFakeMessage(impl, iframe, 'playing');
         sendFakeMessage(impl, iframe, 'paused');
+        resizeObserverStub.notifySync({
+          target: player,
+          borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+        });
         resizeObserverStub.notifySync({
           target: player,
           borderBoxSize: [{inlineSize: 0, blockSize: 0}],

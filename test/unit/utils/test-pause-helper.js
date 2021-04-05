@@ -47,11 +47,26 @@ describes.realWin('PauseHelper', {}, (env) => {
     expect(element.pause).to.not.be.called;
   });
 
-  it('should start observing and pause', () => {
+  it('should pause only after the element receives a non-zero size', () => {
     expect(resizeObserverStub.isObserved(element)).to.be.false;
     helper.updatePlaying(true);
     expect(resizeObserverStub.isObserved(element)).to.be.true;
 
+    // No size, but didn't have size before.
+    resizeObserverStub.notifySync({
+      target: element,
+      borderBoxSize: [{inlineSize: 0, blockSize: 0}],
+    });
+    expect(element.pause).to.not.be.called;
+
+    // Has size.
+    resizeObserverStub.notifySync({
+      target: element,
+      borderBoxSize: [{inlineSize: 1, blockSize: 2}],
+    });
+    expect(element.pause).to.not.be.called;
+
+    // No size, and had size before.
     resizeObserverStub.notifySync({
       target: element,
       borderBoxSize: [{inlineSize: 0, blockSize: 0}],
