@@ -117,8 +117,14 @@ const externalMessageUrl = (id, interpolatedParts) =>
  * which maps message id to full message template.
  * @return {string}
  */
-const externalMessagesSimpleTableUrl = () =>
-  `${urls.cdn}/rtv/${messageUrlRtv()}/log-messages.simple.json`;
+const externalMessagesSimpleTableUrl = () => {
+  if (IS_ESM) {
+    return `${urls.cdn}/rtv/${messageUrlRtv()}/log-messages-mjs.simple.json`;
+  }
+  if (!IS_ESM) {
+    return `${urls.cdn}/rtv/${messageUrlRtv()}/log-messages-js.simple.json`;
+  }
+}
 
 /**
  * @param {*} arg
