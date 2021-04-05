@@ -162,6 +162,7 @@ export let CreativeMetaDataDef;
 /** @typedef {{
       consentState: (?CONSENT_POLICY_STATE|undefined),
       consentString: (?string|undefined),
+      consentStringType: (?CONSENT_STRING_TYPE|boolean),
       gdprApplies: (?boolean|undefined),
       additionalConsent: (?string|undefined),
     }} */
@@ -783,11 +784,20 @@ export class AmpA4A extends AMP.BaseElement {
         const additionalConsent = consentMetadata
           ? consentMetadata['additionalConsent']
           : consentMetadata;
+        const consentStringType = consentMetadata
+          ? consentMetadata['consentStringType']
+          : consentMetadata;
 
         return /** @type {!Promise<?string>} */ (this.getServeNpaSignal().then(
           (npaSignal) =>
             this.getAdUrl(
-              {consentState, consentString, gdprApplies, additionalConsent},
+              {
+                consentState,
+                consentString,
+                consentStringType,
+                gdprApplies,
+                additionalConsent,
+              },
               this.tryExecuteRealTimeConfig_(
                 consentState,
                 consentString,
