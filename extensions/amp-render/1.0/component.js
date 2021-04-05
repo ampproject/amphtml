@@ -41,11 +41,14 @@ export function Render({
   src = '',
   getJson = DEFAULT_GET_JSON,
   render = DEFAULT_RENDER,
+  placeholder = null,
+  fallback = null,
   ...rest
 }) {
   useResourcesNotify();
 
   const [data, setData] = useState({});
+  const [showPlaceholder, setShowPlaceholder] = useState(true);
 
   useEffect(() => {
     // TODO(dmanek): Add additional validation for src
@@ -54,11 +57,16 @@ export function Render({
       return;
     }
     let cancelled = false;
-    getJson(src).then((data) => {
-      if (!cancelled) {
-        setData(data);
-      }
-    });
+    getJson(src)
+      .then((data) => {
+        if (!cancelled) {
+          setData(data);
+          setShowPlaceholder(false);
+        }
+      })
+      .catch(() => {
+        setShowPlaceholder(false);
+      });
     return () => {
       cancelled = true;
     };
@@ -71,6 +79,7 @@ export function Render({
   return (
     <Wrapper {...rest} dangerouslySetInnerHTML={isHtml ? rendered : null}>
       {isHtml ? null : rendered}
+      <div>{showPlaceholder ? placeholder : null}</div>
     </Wrapper>
   );
 }

@@ -160,6 +160,8 @@ export class AmpRender extends BaseElement {
   init() {
     return dict({
       'getJson': getJsonFn(this.element),
+      'placeholder': this.getPlaceholder(),
+      'fallback': this.getFallback(),
     });
   }
 
