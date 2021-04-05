@@ -23,7 +23,6 @@ import {
   useCallback,
   useImperativeHandle,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
 } from '../../../src/preact';
@@ -39,8 +38,8 @@ const OUTSET_ARROWS_WIDTH = 100;
  */
 function StreamGalleryWithRef(props, ref) {
   const {
-    arrowPrev: customArrowPrev,
-    arrowNext: customArrowNext,
+    arrowPrevAs = DefaultArrow,
+    arrowNextAs = DefaultArrow,
     children,
     className,
     extraSpace,
@@ -56,16 +55,6 @@ function StreamGalleryWithRef(props, ref) {
   const classes = useStyles();
   const carouselRef = useRef(null);
   const [visibleCount, setVisibleCount] = useState(DEFAULT_VISIBLE_COUNT);
-  const arrowPrev = useMemo(
-    () =>
-      customArrowPrev ?? <DefaultArrow by={-1} outsetArrows={outsetArrows} />,
-    [customArrowPrev, outsetArrows]
-  );
-  const arrowNext = useMemo(
-    () =>
-      customArrowNext ?? <DefaultArrow by={1} outsetArrows={outsetArrows} />,
-    [customArrowNext, outsetArrows]
-  );
 
   const measure = useCallback(
     (containerWidth) =>
@@ -127,8 +116,8 @@ function StreamGalleryWithRef(props, ref) {
   return (
     <BaseCarousel
       advanceCount={Math.floor(visibleCount)}
-      arrowPrev={arrowPrev}
-      arrowNext={arrowNext}
+      arrowPrevAs={arrowPrevAs}
+      arrowNextAs={arrowNextAs}
       className={`${className ?? ''} ${classes.gallery} ${
         extraSpace === 'around' ? classes.extraSpace : ''
       }`}
@@ -151,28 +140,31 @@ export {StreamGallery};
  * @param {!StreamGalleryDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-function DefaultArrow({advance, by, outsetArrows, ...rest}) {
+function DefaultArrow({by, className, outsetArrows, ...rest}) {
   const classes = useStyles();
   return (
-    <button
-      onClick={() => advance(by)}
-      className={`${classes.arrow} ${
-        by < 0 ? classes.arrowPrev : classes.arrowNext
-      } ${outsetArrows ? classes.outsetArrow : classes.insetArrow}`}
-      aria-hidden="true"
-      {...rest}
-    >
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d={by < 0 ? 'M14,7.4 L9.4,12 L14,16.6' : 'M10,7.4 L14.6,12 L10,16.6'}
-          fill="none"
-          stroke="#000"
-          stroke-width="2"
-          stroke-linejoin="round"
-          stroke-linecap="round"
-        />
-      </svg>
-    </button>
+    <div className={className}>
+      <button
+        className={`${classes.arrow} ${
+          by < 0 ? classes.arrowPrev : classes.arrowNext
+        } ${outsetArrows ? classes.outsetArrow : classes.insetArrow}`}
+        aria-hidden="true"
+        {...rest}
+      >
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d={
+              by < 0 ? 'M14,7.4 L9.4,12 L14,16.6' : 'M10,7.4 L14.6,12 L10,16.6'
+            }
+            fill="none"
+            stroke="#000"
+            stroke-width="2"
+            stroke-linejoin="round"
+            stroke-linecap="round"
+          />
+        </svg>
+      </button>
+    </div>
   );
 }
 

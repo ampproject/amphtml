@@ -53,6 +53,8 @@ export function Arrow({
       })}
       disabled={disabled}
       onClick={onClick}
+      outsetArrows={outsetArrows}
+      rtl={rtl}
       {...rest}
     />
   );

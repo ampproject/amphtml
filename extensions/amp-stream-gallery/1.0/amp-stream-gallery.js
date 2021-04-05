@@ -61,6 +61,24 @@ class AmpStreamGallery extends PreactBaseElement {
     );
     return super.isLayoutSupported(layout);
   }
+
+  /** @override */
+  updatePropsForRendering(props) {
+    if (props['arrowPrev']) {
+      const Comp = props['arrowPrev'];
+      props['arrowPrevAs'] = (props) => {
+        Comp.props = {...Comp.props, ...props};
+        return Comp;
+      };
+    }
+    if (props['arrowNext']) {
+      const Comp = props['arrowNext'];
+      props['arrowNextAs'] = (props) => {
+        Comp.props = {...Comp.props, ...props};
+        return Comp;
+      };
+    }
+  }
 }
 
 /**
