@@ -1093,9 +1093,14 @@ describes.realWin(
         await waitForAmpIframeLayoutPromise(doc, ampIframe);
         expect(ampIframe.pause).to.not.be.called;
 
+        // First send "size" event and then "no size".
         resizeObserverStub.notifySync({
           target: ampIframe,
-          contentRect: {width: 0, height: 0},
+          borderBoxSize: [{inlineSize: 10, blockSize: 100}],
+        });
+        resizeObserverStub.notifySync({
+          target: ampIframe,
+          borderBoxSize: [{inlineSize: 0, blockSize: 0}],
         });
         expect(ampIframe.pause).to.be.calledOnce;
       });
