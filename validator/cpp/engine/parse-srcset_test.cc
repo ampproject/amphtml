@@ -40,7 +40,7 @@ namespace {
 }
 
 // Most test cases copied from
-// https://github.com/ampproject/amphtml/blob/main/test/functional/test-srcset.js
+// https://github.com/ampproject/amphtml/blob/master/test/functional/test-srcset.js
 TEST(ParseSrcsetTest, SingleUrl) {
   SrcsetParsingResult result = ParseSourceSet("image");
   EXPECT_TRUE(result.success);
