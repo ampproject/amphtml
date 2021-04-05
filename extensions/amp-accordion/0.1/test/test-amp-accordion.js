@@ -26,7 +26,6 @@ import {
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
 import {poll} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
   'amp-accordion',
