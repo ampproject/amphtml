@@ -29,7 +29,7 @@ import {
 } from '../../core/3p-frame';
 import {parseUrlDeprecated} from '../../url';
 import {sequentialIdGenerator} from '../../utils/id-generator';
-import {useLayoutEffect, useRef, useState} from '../../../src/preact';
+import {useLayoutEffect, useMemo, useRef, useState} from '../../../src/preact';
 
 /** @type {!Object<string,function>} 3p frames for that type. */
 export const countGenerators = {};
@@ -72,10 +72,12 @@ function ProxyIframeEmbedWithRef(
   ref
 ) {
   const contentRef = useRef(null);
-  if (!countGenerators[type]) {
-    countGenerators[type] = sequentialIdGenerator();
-  }
-  const [count] = useState(countGenerators[type]);
+  const count = useMemo(() => {
+    if (!countGenerators[type]) {
+      countGenerators[type] = sequentialIdGenerator();
+    }
+    return countGenerators[type]();
+  }, [type]);
   const [name, setName] = useState(nameProp);
   const src = useRef(null);
   const win = contentRef.current?.ownerDocument?.defaultView;
