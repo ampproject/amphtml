@@ -684,6 +684,12 @@ async function buildExtensionJs(extDir, name, version, latestVersion, options) {
 
   if (name === 'amp-script') {
     copyWorkerDomResources(version);
+
+    // Create the proxy iframe for sandboxed worker.
+    await doBuildJs(jsBundles, 'amp-script-proxy-iframe.js', options);
+    const proxyScript = await fs.readFile('dist.3p/amp-script-proxy-iframe.js');
+    const proxyIframe = `<html><script>${proxyScript}</script></html>`;
+    await fs.outputFile('dist.3p/amp-script-proxy-iframe.html', proxyIframe);
   }
 }
 

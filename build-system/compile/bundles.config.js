@@ -88,6 +88,17 @@ exports.jsBundles = {
       includePolyfills: false,
     },
   },
+  'amp-script-proxy-iframe.js': {
+    srcDir: './3p/',
+    srcFilename: 'amp-script-proxy-iframe.js',
+    destDir: './dist.3p/current',
+    minifiedDestDir: './dist.3p/' + internalRuntimeVersion,
+    options: {
+      minifiedName: 'amp-script-proxy-iframe.js',
+      includePolyfills: false,
+      include3pDirectories: true,
+    },
+  },
   'iframe-transport-client-lib.js': {
     srcDir: './3p/',
     srcFilename: 'iframe-transport-client-lib.js',

@@ -120,6 +120,15 @@ export class AmpScript extends AMP.BaseElement {
      * @private {boolean}
      */
     this.nodom_ = false;
+
+    /**
+     * If true, signals that worker-dom should activate sandboxed mode.
+     * In this mode the Worker lives in its own crossorigin iframe, creating
+     * a strong security boundary.
+     *
+     * @private {boolean}
+     */
+    this.sandboxed_ = false;
   }
 
   /** @override */
@@ -130,6 +139,7 @@ export class AmpScript extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.nodom_ = this.element.hasAttribute('nodom');
+    this.sandboxed_ = this.element.hasAttribute('sandboxed');
     this.development_ =
       this.element.hasAttribute('data-ampdevmode') ||
       this.element.ownerDocument.documentElement.hasAttribute(
@@ -290,6 +300,10 @@ export class AmpScript extends AMP.BaseElement {
       },
       onReceiveMessage: (data) => {
         dev().info(TAG, 'From worker:', data);
+      },
+      sandbox: this.sandboxed_ && {
+        // QQQQ: Must get the correct RTVed version of this HTML.
+        iframeUrl: 'cdn.ampproject.net/TODO/amp-script-proxy-iframe.html',
       },
     };
 
