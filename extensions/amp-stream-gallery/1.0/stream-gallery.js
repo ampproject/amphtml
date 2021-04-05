@@ -27,6 +27,7 @@ import {
   useState,
 } from '../../../src/preact';
 import {useStyles} from './stream-gallery.jss';
+import objstr from 'obj-str';
 
 const DEFAULT_VISIBLE_COUNT = 1;
 const OUTSET_ARROWS_WIDTH = 100;
@@ -118,9 +119,11 @@ function StreamGalleryWithRef(props, ref) {
       advanceCount={Math.floor(visibleCount)}
       arrowPrevAs={arrowPrevAs}
       arrowNextAs={arrowNextAs}
-      className={`${className ?? ''} ${classes.gallery} ${
-        extraSpace === 'around' ? classes.extraSpace : ''
-      }`}
+      className={objstr({
+        [className]: !!className,
+        [classes.gallery]: true,
+        [classes.extraSpace]: extraSpace === 'around',
+      })}
       outsetArrows={outsetArrows}
       snapAlign={slideAlign}
       ref={carouselRef}
@@ -145,10 +148,14 @@ function DefaultArrow({by, className, outsetArrows, ...rest}) {
   return (
     <div className={className}>
       <button
-        className={`${classes.arrow} ${
-          by < 0 ? classes.arrowPrev : classes.arrowNext
-        } ${outsetArrows ? classes.outsetArrow : classes.insetArrow}`}
         aria-hidden="true"
+        className={objstr({
+          [classes.arrow]: true,
+          [classes.arrowPrev]: by < 0,
+          [classes.arrowNext]: by > 0,
+          [classes.outsetArrow]: outsetArrows,
+          [classes.insetArrow]: !outsetArrows,
+        })}
         {...rest}
       >
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
