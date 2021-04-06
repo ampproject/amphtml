@@ -20,32 +20,6 @@ import {
 } from './error-message-helpers';
 import {isMinifiedMode} from './minified-mode';
 
-/** @fileoverview Dependency-free assertion helpers for use in Preact. */
-
-/**
- * User error class for use in Preact. Use of sentinel string instead of a
- * boolean to check user errors because errors could be rethrown by some native
- * code as a new error, and only a message would survive. Mirrors errors
- * produced by `user().error()` in src/log.js.
- * @final
- * @public
- */
-export class UserError extends Error {
-  /**
-   * Builds the error, adding the user sentinel if not present.
-   * @param {string} message
-   */
-  constructor(message) {
-    if (!message) {
-      message = USER_ERROR_SENTINEL;
-    } else if (message.indexOf(USER_ERROR_SENTINEL) == -1) {
-      message += USER_ERROR_SENTINEL;
-    }
-
-    super(message);
-  }
-}
-
 /**
  * Append an item to an array unless it's an empty string.
  * Importantly, this will exclude empty string but allow other falsey values
@@ -54,15 +28,13 @@ export class UserError extends Error {
  * @param {any} item
  */
 function pushIfNonEmpty(arr, item) {
-  // Trim away whitespace and exclude empty strings
-  item = typeof item == 'string' ? item.trim() : item;
   if (item !== '') {
     arr.push(item);
   }
 }
 
 /**
- * Throws a provided error if the second argument isn't trueish.
+ * Throws an error if the second argument isn't trueish.
  *
  * Supports argument substitution into the message via %s placeholders.
  *
@@ -72,16 +44,26 @@ function pushIfNonEmpty(arr, item) {
  * - messageArray: The elements of the substituted message as non-stringified
  *   elements in an array. When e.g. passed to console.error this yields
  *   native displays of things like HTML elements.
- * @param {Object} errorCls
+ * @param {string} sentinel
  * @param {T} shouldBeTruthy
  * @param {string} opt_message
  * @param {...*} var_args Arguments substituted into %s in the message
  * @return {T}
  * @throws {Error} when shouldBeTruthy is not truthy.
  */
-function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
+function assertion(
+  sentinel,
+  shouldBeTruthy,
+  opt_message = 'Assertion failed',
+  var_args
+) {
   if (shouldBeTruthy) {
     return shouldBeTruthy;
+  }
+
+  // Include the sentinel string if provided and not already present
+  if (sentinel && !opt_message.includes(sentinel)) {
+    opt_message += sentinel;
   }
 
   // Skip the first 3 arguments to isolate format params
@@ -92,7 +74,7 @@ function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
   const pushMessage = pushIfNonEmpty.bind(null, messageArray);
 
   // Substitute provided values into format string in message
-  const splitMessage = (opt_message || 'Assertion failed').split('%s');
+  const splitMessage = opt_message.split('%s');
   let message = splitMessage.shift();
   pushMessage(message);
 
@@ -110,11 +92,11 @@ function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
     subValue = elementStringOrPassThru(subValue);
     message += subValue + nextConstant;
 
-    pushMessage(subValue);
-    pushMessage(nextConstant);
+    messageArray.push(subValue);
+    pushMessage(nextConstant.trim());
   }
 
-  const error = new errorCls(message);
+  const error = new Error(message);
   error.messageArray = messageArray;
   if (firstElement) {
     error.associatedElement = firstElement;
@@ -154,7 +136,7 @@ export function pureUserAssert(
   opt_9
 ) {
   return assertion(
-    UserError,
+    USER_ERROR_SENTINEL,
     shouldBeTruthy,
     opt_message,
     opt_1,
@@ -214,7 +196,7 @@ export function pureDevAssert(
   }
 
   return assertion(
-    Error,
+    null,
     shouldBeTruthy,
     opt_message,
     opt_1,
