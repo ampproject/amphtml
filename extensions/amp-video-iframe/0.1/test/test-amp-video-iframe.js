@@ -218,9 +218,14 @@ describes.realWin(
 
       it('should auto-pause when playing and no size', async () => {
         impl.onMessage_({data: {event: VideoEvents.PLAYING}});
+        // First send "size" event and then "no size".
         resizeObserverStub.notifySync({
           target: player,
-          contentRect: {width: 0, height: 0},
+          borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+        });
+        resizeObserverStub.notifySync({
+          target: player,
+          borderBoxSize: [{inlineSize: 0, blockSize: 0}],
         });
         await macroTask();
         expect(
@@ -236,9 +241,14 @@ describes.realWin(
       it('should NOT auto-pause when not playing', async () => {
         impl.onMessage_({data: {event: VideoEvents.PLAYING}});
         impl.onMessage_({data: {event: VideoEvents.PAUSE}});
+        // First send "size" event and then "no size".
         resizeObserverStub.notifySync({
           target: player,
-          contentRect: {width: 0, height: 0},
+          borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+        });
+        resizeObserverStub.notifySync({
+          target: player,
+          borderBoxSize: [{inlineSize: 0, blockSize: 0}],
         });
         await macroTask();
         expect(

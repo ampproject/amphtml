@@ -223,9 +223,14 @@ describes.realWin(
       it('should auto-pause when playing and no size', async () => {
         // PLAYING state.
         await sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
+        // First send "size" event and then "no size".
         resizeObserverStub.notifySync({
           target: yt,
-          contentRect: {width: 0, height: 0},
+          borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+        });
+        resizeObserverStub.notifySync({
+          target: yt,
+          borderBoxSize: [{inlineSize: 0, blockSize: 0}],
         });
         expect(pauseCallbackSpy).to.be.calledOnce;
       });
@@ -235,9 +240,14 @@ describes.realWin(
         await sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
         // PAUSE state.
         await sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 2});
+        // First send "size" event and then "no size".
         resizeObserverStub.notifySync({
           target: yt,
-          contentRect: {width: 0, height: 0},
+          borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+        });
+        resizeObserverStub.notifySync({
+          target: yt,
+          borderBoxSize: [{inlineSize: 0, blockSize: 0}],
         });
         expect(pauseCallbackSpy).to.not.be.called;
       });
