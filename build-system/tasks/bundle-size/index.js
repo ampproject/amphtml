@@ -80,7 +80,7 @@ async function getBrotliBundleSizes() {
 async function checkResponse(response, ...successMessages) {
   if (!response.ok) {
     throw new Error(
-      `${response.status} ${response.statusText}: ` + (await response.text())
+      `${response.status} ${response.statusText}: ${await response.text()}`
     );
   } else {
     log(...successMessages);
