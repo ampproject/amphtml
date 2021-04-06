@@ -543,8 +543,8 @@ amp-accordion {
 This media query is used instead of @supports due to low compatibility.
 At the time of this change (4/6/2021) no version of Webkit support @supports queries.
 
-These provide low-specificity UI styles to preventing CLS for 
-the header and content segments of accordions.
+These provide low-specificity UI styles to prevent CLS for the header and content 
+segments of accordions.
 */
 @media (min-width: 1px) {
   :where(amp-accordion > section) > :first-child {
