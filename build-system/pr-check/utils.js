@@ -15,11 +15,12 @@
  */
 'use strict';
 
+const fs = require('fs');
 const {
   ciBuildSha,
   ciPullRequestSha,
   isCiBuild,
-  signalGracefulHalt,
+  isCircleciBuild,
 } = require('../common/ci');
 const {
   gitBranchCreationPoint,
@@ -105,6 +106,17 @@ function printChangeSummary() {
       "If rebasing doesn't work, you may have to recreate the branch. See",
       cyan(GIT_BRANCH_URL) + '.\n'
     );
+  }
+}
+
+/**
+ * Signal to dependent jobs that they should be skipped.
+ *
+ * Currently only relevant for CircleCI builds.
+ */
+function signalGracefulHalt() {
+  if (isCircleciBuild()) {
+    fs.closeSync(fs.openSync('/tmp/workspace/.CI_GRACEFULLY_HALT', 'w'));
   }
 }
 

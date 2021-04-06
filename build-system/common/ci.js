@@ -15,7 +15,6 @@
  */
 'use strict';
 
-const fs = require('fs');
 const {mainBranch} = require('./main-branch');
 
 /**
@@ -226,17 +225,6 @@ function ciBuildSha() {
   return isPullRequestBuild() ? ciPullRequestSha() : ciCommitSha();
 }
 
-/**
- * Signal to dependent jobs that they should be skipped.
- *
- * Currently only relevant for CircleCI builds.
- */
-function signalGracefulHalt() {
-  if (isCircleciBuild()) {
-    fs.closeSync(fs.openSync('/tmp/workspace/.CI_GRACEFULLY_HALT', 'w'));
-  }
-}
-
 module.exports = {
   ciBuildId,
   ciBuildSha,
@@ -254,5 +242,4 @@ module.exports = {
   isGithubActionsBuild,
   isPullRequestBuild,
   isPushBuild,
-  signalGracefulHalt,
 };
