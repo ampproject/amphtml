@@ -47,12 +47,15 @@ const TAG_ = 'amp-analytics/transport';
  */
 export class Transport {
   /**
-   * @param {!Window} win
+   * @param {!AmpDoc} ampdoc
    * @param {!JsonObject} options
    */
-  constructor(win, options = /** @type {!JsonObject} */ ({})) {
+  constructor(ampdoc, options = /** @type {!JsonObject} */ ({})) {
+    /** @private {!AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
     /** @private {!Window} */
-    this.win_ = win;
+    this.win_ = ampdoc.win;
 
     /** @private {!JsonObject} */
     this.options_ = options;
@@ -75,7 +78,7 @@ export class Transport {
     this.iframeTransport_ = null;
 
     /** @private {boolean} */
-    this.isInabox_ = getMode(win).runtime == 'inabox';
+    this.isInabox_ = getMode(this.win_).runtime == 'inabox';
   }
 
   /**
@@ -97,8 +100,10 @@ export class Transport {
       const request = inBatch
         ? serializer.generateBatchRequest(url, segments, withPayload)
         : serializer.generateRequest(url, segments[0], withPayload);
-      assertHttpsUrl(request.url, 'amp-analytics request');
-      checkCorsUrl(request.url);
+      if (!request.url.startsWith('amp-script:')) {
+        assertHttpsUrl(request.url, 'amp-analytics request');
+        checkCorsUrl(request.url);
+      }
       return request;
     }
 
@@ -110,6 +115,14 @@ export class Transport {
         return;
       }
       this.iframeTransport_.sendRequest(getRequest(false).url);
+      return;
+    }
+
+    if (this.options_['amp-script']) {
+      Transport.sendRequestUsingAmpScript(this.ampdoc_, {
+        url,
+        payload: getRequest(true).payload,
+      });
       return;
     }
 
@@ -305,6 +318,31 @@ export class Transport {
 
     xhr.send(request.payload || '');
     return true;
+  }
+
+  /**
+   * @param {!AmpDoc} ampdoc
+   * @param {!RequestDef} request
+   * @return {boolean} True if this browser supports cross-domain XHR.
+   */
+  static sendRequestUsingAmpScript(ampdoc, request) {
+    const target = request.url.slice('amp-script:'.length).split('.');
+    userAssert(
+      target.length === 2 && target[0].length > 0 && target[1].length > 0,
+      '[amp-analytics]: "amp-script" target must be specified as "scriptId.functionIdentifier".'
+    );
+
+    const ampScriptId = target[0];
+    const fnIdentifier = target[1];
+    const ampScriptEl = ampdoc.getElementById(ampScriptId);
+    userAssert(
+      ampScriptEl && ampScriptEl.tagName === 'AMP-SCRIPT',
+      `[amp-analytics]: could not find <amp-script> with ID "${ampScriptId}"`
+    );
+
+    ampScriptEl
+      .getImpl()
+      .then((impl) => impl.callFunction(fnIdentifier, request.payload || ''));
   }
 }
 

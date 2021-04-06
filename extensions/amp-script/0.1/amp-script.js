@@ -202,17 +202,12 @@ export class AmpScript extends AMP.BaseElement {
   /**
    * Calls the specified function on this amp-script's worker-dom instance.
    *
-   * @param {string} functionIdentifier
+   * @param {string} unused - function identifier
    * @return {!Promise<*>}
    */
-  callFunction(functionIdentifier) {
-    // TODO: how to property expand arguments
+  callFunction(unused /*, ...args */) {
     return this.initialize_.promise.then(() => {
-      return this.workerDom_.callFunction.apply(
-        this.workerDom_,
-        functionIdentifier,
-        arguments.slice(1)
-      );
+      return this.workerDom_.callFunction.apply(this.workerDom_, arguments);
     });
   }
 

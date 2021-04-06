@@ -35,7 +35,7 @@ import {LinkerManager} from './linker-manager';
 import {RequestHandler, expandPostMessage} from './requests';
 import {Services} from '../../../src/services';
 import {Transport} from './transport';
-import {dev, devAssert, rethrowAsync, user, userAssert} from '../../../src/log';
+import {dev, devAssert, rethrowAsync, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
 import {getMode} from '../../../src/mode';
@@ -108,9 +108,6 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {?boolean} */
     this.isInFie_ = null;
-
-    /** @private {?function({!JsonObject|!./events.AnalyticsEvent}):void} */
-    this.sendToAmpScript_ = null;
   }
 
   /** @override */
@@ -149,28 +146,6 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (this.element.getAttribute('trigger') == 'immediate') {
       this.ensureInitialized_();
-    }
-
-    // TODO: bikeshed attribute name.
-    if (this.element.hasAttribute('amp-script-target')) {
-      const target = this.element.getAttribute('amp-script-target').split('.');
-      userAssert(
-        target.length === 2 && target[0].length > 0 && target[1].length > 0,
-        '[amp-analytics]: "amp-script" target must be specified as "scriptId.functionIdentifier".'
-      );
-
-      const ampScriptId = target[0];
-      const fnIdentifier = target[1];
-      const ampScriptEl = this.element.getAmpDoc().getElementById(ampScriptId);
-      userAssert(
-        ampScriptEl && ampScriptEl.tagName === 'AMP-SCRIPT',
-        `[amp-analytics]: could not find <amp-script> with ID "${ampScriptId}"`
-      );
-
-      this.sendToAmpScript_ = (message) =>
-        ampScriptEl
-          .getImpl()
-          .then((impl) => impl.callFunction(fnIdentifier, message));
     }
   }
 
@@ -234,14 +209,13 @@ export class AmpAnalytics extends AMP.BaseElement {
       return this.iniPromise_;
     }
 
-    this.iniPromise_ = this.getAmpDoc()
+    const ampdoc = this.getAmpDoc();
+    this.iniPromise_ = ampdoc
       .whenFirstVisible()
       // Rudimentary "idle" signal.
       .then(() => Services.timerFor(this.win).promise(1))
       .then(() => this.consentPromise_)
-      .then(() => Services.ampdocServiceFor(this.win))
-      .then((ampDocService) => ampDocService.getAmpDoc(this.element))
-      .then((ampdoc) =>
+      .then(() =>
         Promise.all([
           instrumentationServicePromiseForDoc(ampdoc),
           variableServicePromiseForDoc(ampdoc),
@@ -270,7 +244,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       })
       .then(() => {
         this.transport_ = new Transport(
-          this.win,
+          this.getAmpDoc(),
           this.config_['transport'] || {}
         );
       })
@@ -682,16 +656,10 @@ export class AmpAnalytics extends AMP.BaseElement {
         trigger['parentPostMessage'] &&
         this.allowParentPostMessage_() &&
         isIframed(this.win);
-      const shouldSendToAmpScript = !!this.sendToAmpScript_;
 
-      if (shouldSendToAmpAd || shouldSendToAmpScript) {
+      if (shouldSendToAmpAd) {
         this.expandEventToMessage_(trigger, event).then((message) => {
-          if (shouldSendToAmpAd) {
-            this.win.parent./*OK*/ postMessage(message, '*');
-          }
-          if (shouldSendToAmpScript) {
-            this.sendToAmpScript_(message);
-          }
+          this.win.parent./*OK*/ postMessage(message, '*');
         });
       }
     });
