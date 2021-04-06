@@ -1364,6 +1364,44 @@ describes.realWin(
       });
     });
 
+    describe('Snap Styling', () => {
+      let platform;
+
+      beforeEach(() => {
+        platform = Services.platformFor(win);
+      });
+
+      it('shoud add disabled CSS snap class for iOS 10.3', async () => {
+        env.sandbox.stub(platform, 'isIos').returns(true);
+        env.sandbox.stub(platform, 'getIosVersionString').returns('10.3');
+        const el = await getAmpSlideScroll(false, 3);
+        const slidesContainer = el.querySelector('.i-amphtml-slides-container');
+        expect(
+          slidesContainer.classList.contains('i-amphtml-slidescroll-no-snap')
+        ).to.be.true;
+      });
+
+      it('shoud not contain disabled snap class for non iOS 10.3', async () => {
+        env.sandbox.stub(platform, 'isIos').returns(true);
+        env.sandbox.stub(platform, 'getIosVersionString').returns('10.4');
+        const el = await getAmpSlideScroll(false, 3);
+        const slidesContainer = el.querySelector('.i-amphtml-slides-container');
+        expect(
+          slidesContainer.classList.contains('i-amphtml-slidescroll-no-snap')
+        ).to.be.false;
+      });
+
+      it('shoud add disabled CSS snap class for for non iOS', async () => {
+        env.sandbox.stub(platform, 'isIos').returns(false);
+        env.sandbox.stub(platform, 'getIosVersionString').returns('10.4');
+        const el = await getAmpSlideScroll(false, 3);
+        const slidesContainer = el.querySelector('.i-amphtml-slides-container');
+        expect(
+          slidesContainer.classList.contains('i-amphtml-slidescroll-no-snap')
+        ).to.be.true;
+      });
+    });
+
     describe('button titles', () => {
       function getNextTitle(el) {
         return el
