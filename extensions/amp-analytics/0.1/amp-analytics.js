@@ -652,9 +652,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         this.allowParentPostMessage_() &&
         isIframed(this.win);
       if (shouldSendToAmpAd) {
-        this.expandEventToMessage_(trigger, event).then((message) => {
-          this.win.parent./*OK*/ postMessage(message, '*');
-        });
+        this.expandAndPostMessage_(trigger, event);
       }
     });
   }
@@ -678,20 +676,21 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Expand and post message to parent window if applicable.
    * @param {!JsonObject} trigger JSON config block that resulted in this event.
    * @param {!JsonObject|!./events.AnalyticsEvent} event Object with details about the event.
-   * @return {JsonObject}
    * @private
    */
-  expandEventToMessage_(trigger, event) {
+  expandAndPostMessage_(trigger, event) {
     const msg = trigger['parentPostMessage'];
     const expansionOptions = this.expansionOptions_(event, trigger);
-    return expandPostMessage(
+    expandPostMessage(
       this.getAmpDoc(),
       msg,
       this.config_['extraUrlParams'],
       trigger,
       expansionOptions,
       this.element
-    );
+    ).then((message) => {
+      this.win.parent./*OK*/ postMessage(message, '*');
+    });
   }
 
   /**
