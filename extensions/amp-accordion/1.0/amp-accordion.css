@@ -38,12 +38,15 @@ amp-accordion > section > * {
   position: relative;
 }
 
-/*
+/**
+ * This media query is used instead of @supports due to low compatibility.
+ * At the time of this change (4/6/2021) no version of Webkit support @supports queries.
+ *
  * Note! This is a new CSS incompatible with older browsers. It provides
  * low-specificity UI styles. The same styles are later set for older browsers
  * via the `i-amphtml-accordion-header` class.
  */
-@supports selector(:where(A)) {
+@media (min-width: 1px) {
   :where(amp-accordion > section) > :first-child {
     cursor: pointer;
     background-color: #efefef;
