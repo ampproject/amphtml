@@ -114,7 +114,7 @@ function skipFollowupJobs(jobName, skipReason) {
   logWithoutTimestamp(
     `${loggingPrefix} Skipping ${cyan(jobName)} because ${skipReason}.`
   );
-  fs.closeSync(fs.openSync('/tmp/workspace/CI_GRACEFULLY_HALT', 'w'));
+  fs.closeSync(fs.openSync('/tmp/workspace/.CI_GRACEFULLY_HALT', 'w'));
 }
 
 /**
