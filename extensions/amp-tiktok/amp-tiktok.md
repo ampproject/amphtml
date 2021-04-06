@@ -7,14 +7,9 @@ limitations under the License.
 
 # amp-tiktok
 
-<!--
-  If the component is relevant for more than one format and operates differently between these
-  formats, include and filter multiple content blocks and code samples.
--->
-
 ## Usage
 
-The simplest usage of the `amp-tiktok` component has the `width`, `height` and `data-src` attributes. This will display the Tiktok embed inside of an iframe on the page.
+The `amp-tiktok` component embeds a [TikTok](https://www.tiktok.com/about) video on your page.
 
 ```html
 <amp-tiktok
@@ -24,10 +19,9 @@ The simplest usage of the `amp-tiktok` component has the `width`, `height` and `
 ></amp-tiktok>
 ```
 
-`amp-tiktok` does not support autoplay and requires user interaction to play videos.
 
 ### Behavior
-
+The `amp-tiktok` component displays the TikToc video in an iframe. You may specify the `width`, `height` and `data-src` attributes. `amp-tiktok` does not support autoplay and requires user interaction to play videos.
 ## Avoiding Layout shift
 
 The `width` and `height` attributes determine the initial laid out height of the Tiktok embedded in the page.
