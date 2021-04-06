@@ -17,10 +17,6 @@
       owners: [{name: 'ampproject/wg-caching', required: true}],
     },
     {
-      pattern: '**/*',
-      owners: [{name: 'ampproject/wg-ads-reviewers', required: true}],
-    },
-    {
       pattern: '**/*.md',
       owners: [{name: '*'}],
     },
@@ -37,7 +33,7 @@
     },
     {
       pattern: '**/OWNERS',
-      owners: [{name: 'mrjoro', requestReviews: true}],
+      owners: [{name: 'mrjoro', requestReviews: false}],
     },
   ],
 }
