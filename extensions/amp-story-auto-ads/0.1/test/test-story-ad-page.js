@@ -550,6 +550,8 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
       cta.target = '_self';
       cta.click();
 
+      // In real world the shadow host element will be the click target.
+      expect(cta.parentElement.getAttribute('role')).to.equal('button');
       await macroTask();
       expect(fireEventStub).to.be.calledWithExactly(
         pageElement,

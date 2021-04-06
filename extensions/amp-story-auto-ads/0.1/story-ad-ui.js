@@ -249,6 +249,7 @@ export function createCta(doc, buttonFitter, container, uiMetadata) {
       'div',
       dict({
         'class': 'i-amphtml-story-ad-link-root',
+        'role': 'button',
       })
     );
 
