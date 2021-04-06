@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
+import {Key} from '../../../../build-system/tasks/e2e/functional-test-controller';
+
+const VIEWPORT = {
+  HEIGHT: 768,
+  WIDTH: 1024,
+};
+
 describes.endtoend(
   'amp-video flexible bitrate',
   {
     fixture: 'amp-video/videos-cdn.html',
     environments: ['single'],
     experiments: ['flexible-bitrate'],
+    initialRect: {width: VIEWPORT.WIDTH, height: VIEWPORT.HEIGHT},
   },
   (env) => {
     let controller;
