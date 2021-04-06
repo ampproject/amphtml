@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {devAssert} from '../../../src/log';
+
 export const ACTIVATION_TIMEOUT = 5000; // 5 seconds.
 
 const ACTIVATION_EVENTS = [
@@ -99,6 +101,10 @@ export class UserActivationTracker {
     if (!this.isActive()) {
       return;
     }
+    devAssert(
+      !this.inLongTask_,
+      'Should not expand while a longTask is already ongoing.'
+    );
     this.inLongTask_ = true;
 
     const longTaskComplete = () => {
