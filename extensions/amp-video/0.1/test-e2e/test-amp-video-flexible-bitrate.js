@@ -19,6 +19,7 @@ describes.endtoend(
   {
     fixture: 'amp-video/videos-cdn.html',
     environments: ['single'],
+    experiments: ['flexible-bitrate'],
   },
   (env) => {
     let controller;
@@ -28,20 +29,29 @@ describes.endtoend(
 
       await expect(controller.findElement('amp-story.i-amphtml-story-loaded'))
         .to.exist;
+
+      await expect(controller.findElement('amp-story-page#page-1[active]')).to
+        .exist;
     });
 
     it('should manage the first video in the story', async () => {
       const videoEl = await controller.findElement('#video1 video');
 
-      await expect(controller.getElementProperty(videoEl, 'changedSources')).to
-        .not.be.undefined;
+      await expect(
+        controller.findElement('#video1 video.i-amphtml-replaced-content')
+      ).to.exist;
+
+      await expect(
+        await controller.getElementProperty(videoEl, 'changedSources')
+      ).to.not.be.null;
     });
 
     it('should not manage a video far away in the story', async () => {
       const videoEl = await controller.findElement('#video4 video');
 
-      await expect(controller.getElementProperty(videoEl, 'changedSources')).to
-        .be.undefined;
+      await expect(
+        await controller.getElementProperty(videoEl, 'changedSources')
+      ).to.be.null;
     });
   }
 );
