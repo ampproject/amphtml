@@ -58,21 +58,25 @@ export class AmpTiktok extends AMP.BaseElement {
      */
     this.fallbackHeight_ = 775;
 
-    this.resizeOuter_ = debounce(
+    this.resizeOuter_ = (height) => {
+      resetStyles(this.iframe_, [
+        'width',
+        'height',
+        'position',
+        'opacity',
+        'pointer-events',
+      ]);
+      this.iframe_.removeAttribute('aria-hidden');
+      this.iframe_.setAttribute('aria-label', 'Tiktok');
+      this.iframe_.classList.remove('i-amphtml-tiktok-unresolved');
+      this.iframe_.classList.add('i-amphtml-tiktok-centered');
+      this.forceChangeHeight(height);
+    };
+
+    this.resizeOuterDebounced_ = debounce(
       this.win,
       (height) => {
-        resetStyles(this.iframe_, [
-          'width',
-          'height',
-          'position',
-          'opacity',
-          'pointer-events',
-        ]);
-        this.iframe_.removeAttribute('aria-hidden');
-        this.iframe_.setAttribute('aria-label', 'Tiktok');
-        this.iframe_.classList.remove('i-amphtml-tiktok-unresolved');
-        this.iframe_.classList.add('i-amphtml-tiktok-centered');
-        this.forceChangeHeight(height);
+        this.resizeOuter_(height);
       },
       1000
     );
@@ -128,7 +132,7 @@ export class AmpTiktok extends AMP.BaseElement {
       'iframe',
       {
         'src': src,
-        // 'name': this.iframeNameString_,
+        'name': this.iframeNameString_,
         'aria-hidden': 'true',
         'frameborder': '0',
         'class': 'i-amphtml-tiktok-unresolved',
@@ -154,7 +158,7 @@ export class AmpTiktok extends AMP.BaseElement {
           // resize to the fallbackHeight value.
           this.resizeOuter_(this.fallbackHeight_);
           setStyles(this.iframe_, {
-            'width': px('325px'),
+            'width': px('325'),
             'height': px(this.fallbackHeight_),
           });
         });
@@ -180,7 +184,7 @@ export class AmpTiktok extends AMP.BaseElement {
       if (this.resolveReceivedFirstMessage_) {
         this.resolveReceivedFirstMessage_();
       }
-      this.resizeOuter_(data['height']);
+      this.resizeOuterDebounced_(data['height']);
       setStyles(this.iframe_, {
         'width': px(data['width']),
         'height': px(data['height']),

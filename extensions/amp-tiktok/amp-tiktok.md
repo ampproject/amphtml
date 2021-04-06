@@ -1,4 +1,22 @@
-applicable law or agreed to in writing, software
+---
+$category@: social
+formats:
+  - websites
+teaser:
+  text: Displays a TikTok video embed.
+experimental: true
+---
+
+<!---
+Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS-IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
@@ -19,14 +37,15 @@ The `amp-tiktok` component embeds a [TikTok](https://www.tiktok.com/about) video
 ></amp-tiktok>
 ```
 
-
 ### Behavior
-The `amp-tiktok` component displays the TikToc video in an iframe. You may specify the `width`, `height` and `data-src` attributes. `amp-tiktok` does not support autoplay and requires user interaction to play videos.
+
+The `amp-tiktok` component displays the TikTok video in an iframe. You may specify the `width`, `height` and `data-src` attributes. `amp-tiktok` does not support autoplay and requires user interaction to play videos.
+
 ## Avoiding Layout shift
 
-Prevent layout shift by matching the `width` and `height` attributes on the `amp-tiktok` element to the size of the video player. 
+Prevent layout shift by matching the `width` and `height` attributes on the `amp-tiktok` element to the size of the video player.
 
-By default, the width of the `amp-tiktok` iframe is 325px, resulting in a hight of roughly 575px. The default height of the embedded TikTok video player depends on the length and content of the TikTok caption. To show the entire video, the `amp-tiktok` component resizes to match the player height. You can avoid this by defining the width and height to match the video player. 
+By default, the width of the `amp-tiktok` iframe is 325px, resulting in a hight of roughly 575px. The default height of the embedded TikTok video player depends on the length and content of the TikTok caption. To show the entire video, the `amp-tiktok` component resizes to match the player height. You can avoid this by defining the width and height to match the video player.
 
 [example preview="inline" playground="true" imports="amp-tiktok"]
 
