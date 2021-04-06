@@ -520,54 +520,54 @@ app.use('/form/verify-search-json/post', (req, res) => {
  * @param {express.Response} res
  * @param {string} mode
  */
-function proxyToAmpProxy(req, res, mode) {
+async function proxyToAmpProxy(req, res, mode) {
   const url =
     'https://cdn.ampproject.org/' +
     (req.query['amp_js_v'] ? 'v' : 'c') +
     req.url;
   logWithoutTimestamp('Fetching URL: ' + url);
-  request(url, function (_error, response, body) {
+  const urlResponse = await fetch(url);
+  let body = await urlResponse.text();
+  body = body
+    // Unversion URLs.
+    .replace(
+      /https\:\/\/cdn\.ampproject\.org\/rtv\/\d+\//g,
+      'https://cdn.ampproject.org/'
+    )
+    // <base> href pointing to the proxy, so that images, etc. still work.
+    .replace('<head>', '<head><base href="https://cdn.ampproject.org/">');
+  const inabox = req.query['inabox'];
+  // TODO(ccordry): Remove this when story v01 is depricated.
+  const storyV1 = req.query['story_v'] === '1';
+  const urlPrefix = getUrlPrefix(req);
+  if (req.query['mraid']) {
     body = body
-      // Unversion URLs.
       .replace(
-        /https\:\/\/cdn\.ampproject\.org\/rtv\/\d+\//g,
-        'https://cdn.ampproject.org/'
+        '</head>',
+        '<script async host-service="amp-mraid" src="https://cdn.ampproject.org/v0/amp-mraid-0.1.js">' +
+          '</script>' +
+          '</head>'
       )
-      // <base> href pointing to the proxy, so that images, etc. still work.
-      .replace('<head>', '<head><base href="https://cdn.ampproject.org/">');
-    const inabox = req.query['inabox'];
-    // TODO(ccordry): Remove this when story v01 is depricated.
-    const storyV1 = req.query['story_v'] === '1';
-    const urlPrefix = getUrlPrefix(req);
-    if (req.query['mraid']) {
-      body = body
-        .replace(
-          '</head>',
-          '<script async host-service="amp-mraid" src="https://cdn.ampproject.org/v0/amp-mraid-0.1.js">' +
-            '</script>' +
-            '</head>'
-        )
-        // Change cdnUrl from the default so amp-mraid requests the (mock)
-        // mraid.js from the local server. In a real environment this doesn't
-        // matter as the local environment would intercept this request.
-        .replace(
-          '<head>',
-          ' <head>' +
-            ' <script>' +
-            ' window.AMP_CONFIG = {' +
-            `   cdnUrl: "${urlPrefix}",` +
-            ' };' +
-            ' </script>'
-        );
-    }
-    body = replaceUrls(mode, body, urlPrefix, inabox, storyV1);
-    if (inabox) {
-      // Allow CORS requests for A4A.
-      const origin = req.headers.origin || urlPrefix;
-      cors.enableCors(req, res, origin);
-    }
-    res.status(response.statusCode).send(body);
-  });
+      // Change cdnUrl from the default so amp-mraid requests the (mock)
+      // mraid.js from the local server. In a real environment this doesn't
+      // matter as the local environment would intercept this request.
+      .replace(
+        '<head>',
+        ' <head>' +
+          ' <script>' +
+          ' window.AMP_CONFIG = {' +
+          `   cdnUrl: "${urlPrefix}",` +
+          ' };' +
+          ' </script>'
+      );
+  }
+  body = replaceUrls(mode, body, urlPrefix, inabox, storyV1);
+  if (inabox) {
+    // Allow CORS requests for A4A.
+    const origin = req.headers.origin || urlPrefix;
+    cors.enableCors(req, res, origin);
+  }
+  res.status(urlResponse.status).send(body);
 }
 
 let itemCtr = 2;
@@ -907,10 +907,7 @@ app.post('/check-consent', (req, res) => {
 // Proxy with local JS.
 // Example:
 // http://localhost:8000/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-app.use('/proxy/', (req, res) => {
-  const mode = SERVE_MODE;
-  proxyToAmpProxy(req, res, mode);
-});
+app.use('/proxy/', (req, res) => proxyToAmpProxy(req, res, SERVE_MODE));
 
 // Nest the response in an iframe.
 // Example:
