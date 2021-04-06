@@ -27,56 +27,33 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 3. [Install and set up Git](https://help.github.com/articles/set-up-git/); in the "Authenticating" step of that page use SSH instead of HTTPS.
 4. Install the latest LTS version of [Node.js](https://nodejs.org/) (which includes npm). An easy way to do so is with `nvm`. (Mac and Linux: [here](https://github.com/creationix/nvm), Windows: [here](https://github.com/coreybutler/nvm-windows))
 
-   ```shell
-   nvm install --lts
-   ```
+    ```shell
+    nvm install --lts
+    ```
 
-5. Install the stable version of [Yarn](https://yarnpkg.com/). (Mac and Linux: [here](https://yarnpkg.com/en/docs/install#alternatives-stable), Windows: [here](https://yarnpkg.com/lang/en/docs/install/#windows-stable))
+5. Create your own fork of the [amphtml repository](https://github.com/ampproject/amphtml) by clicking "Fork" in the Web UI. During local development, this will be referred to by `git` as `origin`.
 
-   ```shell
-   curl -o- -L https://yarnpkg.com/install.sh | bash
-   ```
+6. Download your fork to a local repository.
 
-   An alternative to installing `yarn` is to invoke each Yarn command in this guide with `npx yarn` during local development. This will automatically use the current stable version of `yarn`.
+    ```shell
+    git clone git@github.com:<your username>/amphtml.git
+    ```
 
-6. If you have a global install of [Gulp](https://gulpjs.com/), uninstall it. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md). See [this article](https://medium.com/gulpjs/gulp-sips-command-line-interface-e53411d4467) for why.)
-
-   ```shell
-   yarn global remove gulp
-   ```
-
-7. Install the [Gulp](https://gulpjs.com/) command line tool, which will automatically use the version of `gulp` packaged with the the amphtml repository. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md))
-
-   ```shell
-   yarn global add gulp-cli
-   ```
-
-   An alternative to installing `gulp-cli` is to invoke each Gulp command in this guide with `npx gulp` during local
-   development. This will also use the version of `gulp` packaged with the amphtml repository.
-
-8. Create your own fork of the [amphtml repository](https://github.com/ampproject/amphtml) by clicking "Fork" in the Web UI. During local development, this will be referred to by `git` as `origin`.
-
-9. Download your fork to a local repository.
-
-   ```shell
-   git clone git@github.com:<your username>/amphtml.git
-   ```
-
-10. Add an alias called `upstream` to refer to the main `ampproject/amphtml` repository. Go to the root directory of the
-    newly created local repository directory and run:
+7. Add an alias called `upstream` to refer to the main `ampproject/amphtml` repository. Go to the root directory of the
+   newly created local repository directory and run:
 
     ```shell
     git remote add upstream git@github.com:ampproject/amphtml.git
     ```
 
-11. Fetch data from the `upstream` remote:
+8. Fetch data from the `upstream` remote:
 
     ```shell
     git fetch upstream master
     ```
 
-12. Set up your local `master` branch to track `upstream/master` instead of `origin/master` (which will rapidly become
-    outdated).
+9. Set up your local `master` branch to track `upstream/master` instead of `origin/master` (which will rapidly become
+   outdated).
 
     ```shell
     git branch -u upstream/master master
@@ -92,28 +69,28 @@ git checkout -b <branch name> master
 
 ## Build AMP & run a local server
 
-1. Make sure you have the latest packages (after you pull): `yarn`
-1. Start the server: `gulp`
+1. Make sure you have the latest packages (after you pull): `npm install`
+1. Start the server: `amp`
 1. Access your server at [http://localhost:8000](http://localhost:8000)
 1. Access your sample pages at [http://localhost:8000/examples](http://localhost:8000/examples)
 
 ## Test AMP
 
-- Run the unit tests: `gulp unit` (doesn't build the runtime)
-- Run the integration tests: `gulp integration` (builds the runtime)
-- Run integration tests, but skip building after having done so previously: `gulp integration --nobuild`
-- Run the tests in a specified set of files: `gulp [unit|integration] --files=<test-files-path-glob>`
-- Add the `--watch` flag to `gulp [unit|integration]` to automatically re-run the tests when a file changes
-- To run only a certain set of Mocha tests, change `describe` to `describe.only` for the tests you want to run; combine this with `gulp [unit|integration] --watch` to automatically rerun your test when files are changed (but make sure to run all the tests before sending your change for review)
+-   Run the unit tests: `amp unit` (doesn't build the runtime)
+-   Run the integration tests: `amp integration` (builds the runtime)
+-   Run integration tests, but skip building after having done so previously: `amp integration --nobuild`
+-   Run the tests in a specified set of files: `amp [unit|integration] --files=<test-files-path-glob>`
+-   Add the `--watch` flag to `amp [unit|integration]` to automatically re-run the tests when a file changes
+-   To run only a certain set of Mocha tests, change `describe` to `describe.only` for the tests you want to run; combine this with `amp [unit|integration] --watch` to automatically rerun your test when files are changed (but make sure to run all the tests before sending your change for review)
 
 ## Create commits to contain your changes
 
 1. Edit files in your favorite editor
 2. Make sure your changes satisfy AMP's [code quality and style rules](getting-started-e2e.md#code-quality-and-style)
-3. If your code requires a new dependency, run `yarn add --dev --exact [packagename]`, which automatically updates `package.json` and `yarn.lock`
-   - If it is a build-time dependency, use the `--dev` flag
-   - If it is a runtime dependency, add it to `build-system/compile/sources.js`
-4. If you manually edited `package.json`, run `yarn` to install the dependency and generate an updated `yarn.lock` file
+3. If your code requires a new dependency, run `npm install --save-dev [packagename]`, which automatically updates `package.json` and `package-lock.json`
+    - If it is a build-time dependency, use the `--dev` flag
+    - If it is a runtime dependency, add it to `build-system/compile/sources.js`
+4. If you manually edited `package.json`, run `npm install` to install the dependency and generate an updated `package-lock.json` file
 5. Add each file you change: `git add <file>`
 6. Create a commit: `git commit -m "<your commit message>"`
 7. To avoid having to run `git add` on each file, you can use `git commit -a -m "<your commit message>"` instead.
@@ -154,8 +131,8 @@ git checkout -b <branch name> master
 
 ## See your changes in production
 
-- If your change affected internal documentation, tests, the build process, etc. you can generally see your changes right after they're merged.
-- If your change was to the code that runs on AMP pages across the web, you'll have to wait for the change to be included in a production release. Generally, it takes about 1-2 weeks for a change to be live for all users. See the [release schedule](release-schedule.md) for more specific details.
-- The [amphtml Releases page](https://github.com/ampproject/amphtml/releases) will list your PR in the first build that contains it. `Pre-release` is the build on the Experimental Channel, `Latest Release` is the build in production.
-- Opt in to using the Experimental Channel in a browser by enabling `experimental-channel` on the [AMP Experiments](https://cdn.ampproject.org/experiments.html) page.
-- Find the AMP version being used on a page in the developer console, i.e. `Powered by AMP ⚡ HTML – Version <build number>`.
+-   If your change affected internal documentation, tests, the build process, etc. you can generally see your changes right after they're merged.
+-   If your change was to the code that runs on AMP pages across the web, you'll have to wait for the change to be included in a production release. Generally, it takes about 1-2 weeks for a change to be live for all users. See the [release schedule](release-schedule.md) for more specific details.
+-   The [amphtml Releases page](https://github.com/ampproject/amphtml/releases) will list your PR in the first build that contains it. `Pre-release` is the build on the Experimental Channel, `Latest Release` is the build in production.
+-   Opt in to using the Experimental Channel in a browser by enabling `experimental-channel` on the [AMP Experiments](https://cdn.ampproject.org/experiments.html) page.
+-   Find the AMP version being used on a page in the developer console, i.e. `Powered by AMP ⚡ HTML – Version <build number>`.

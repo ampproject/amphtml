@@ -68,7 +68,7 @@ To prevent race conditions caused from loading the runtime and an inline script 
 To add a new experiment:
 
 1. Add the new experiment to this [list](https://github.com/ampproject/amphtml/blob/master/tools/experiments/experiments-config.js).
-1. (This is rare, most new experiments can skip this step) Decide if the experiment should allow document level opt-in. One top consideration is that switching the experiment on/off should not break any document. For example, experimental custom elements should never be white listed, as any documents start using it will get broken if the we switch it off. Add it to `allow-doc-opt-in` in `prod-config.json` and `canary-config.json` if so.
+1. (This is rare, most new experiments can skip this step) Decide if the experiment should allow document level opt-in. One top consideration is that switching the experiment on/off should not break any document. For example, experimental custom elements should never be allowed, as any documents start using it will get broken if the we switch it off. Add it to `allow-doc-opt-in` in `prod-config.json` and `canary-config.json` if so.
 1. Use it like this:
 
 ```javascript
@@ -79,3 +79,14 @@ if (expOn) {
   // experiment is on, do stuff
 }
 ```
+
+## Removing an experiment
+
+Experiments may be removed by following references to their id. To start off
+by finding those references, run:
+
+```bash
+amp sweep-experiments --experiment=my-experiment
+```
+
+This creates a starter commit history to remove the experiment. [Refer to the guide for this tool](../../build-system/tasks/sweep-experiments/README.md) for details on how to continue removal of the experiment.

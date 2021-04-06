@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import {ElementStub, stubbedElements} from '../element-stub';
-import {createCustomElementClass} from '../custom-element';
-import {extensionScriptsInNode} from '../element-service';
+import {ElementStub} from '../element-stub';
+import {Services} from '../services';
+import {createCustomElementClass, stubbedElements} from '../custom-element';
+import {extensionScriptsInNode} from './extension-script';
 import {reportError} from '../error';
 import {userAssert} from '../log';
+
+/** @type {!WeakMap<!./service/ampdoc-impl.AmpDoc, boolean>} */
+const docInitializedMap = new WeakMap();
 
 /**
  * @param {!Window} win
@@ -38,6 +42,21 @@ function getExtendedElements(win) {
  * @param {typeof ../base-element.BaseElement} toClass
  */
 export function upgradeOrRegisterElement(win, name, toClass) {
+  const waitPromise = waitReadyForUpgrade(win, toClass);
+  if (waitPromise) {
+    waitPromise.then(() => upgradeOrRegisterElementReady(win, name, toClass));
+  } else {
+    upgradeOrRegisterElementReady(win, name, toClass);
+  }
+}
+
+/**
+ * Registers an element. Upgrades it if has previously been stubbed.
+ * @param {!Window} win
+ * @param {string} name
+ * @param {typeof ../base-element.BaseElement} toClass
+ */
+function upgradeOrRegisterElementReady(win, name, toClass) {
   const knownElements = getExtendedElements(win);
   if (!knownElements[name]) {
     registerElement(win, name, toClass);
@@ -56,7 +75,7 @@ export function upgradeOrRegisterElement(win, name, toClass) {
   );
   knownElements[name] = toClass;
   for (let i = 0; i < stubbedElements.length; i++) {
-    const stub = stubbedElements[i];
+    const element = stubbedElements[i];
     // There are 3 possible states here:
     // 1. We never made the stub because the extended impl. loaded first.
     //    In that case the element won't be in the array.
@@ -65,12 +84,11 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     //    implementation.
     // 3. A stub was attached. We upgrade which means we replay the
     //    implementation.
-    const {element} = stub;
     if (
       element.tagName.toLowerCase() == name &&
       element.ownerDocument.defaultView == win
     ) {
-      tryUpgradeElement_(element, toClass);
+      tryUpgradeElement(element, toClass);
       // Remove element from array.
       stubbedElements.splice(i--, 1);
     }
@@ -82,13 +100,29 @@ export function upgradeOrRegisterElement(win, name, toClass) {
  * @param {Element} element
  * @param {typeof ../base-element.BaseElement} toClass
  * @private
- * @noinline
  */
-function tryUpgradeElement_(element, toClass) {
+function tryUpgradeElement(element, toClass) {
   try {
     element.upgrade(toClass);
   } catch (e) {
     reportError(e, element);
+  }
+}
+
+/**
+ * Ensures that the element is ready for upgrade. Either returns immediately
+ * with `undefined` indicating that no waiting is necessary, or returns a
+ * promise that will resolve when the upgrade can proceed.
+ *
+ * @param {!Window} win
+ * @param {typeof ../base-element.BaseElement} elementClass
+ * @return {!Promise|undefind}
+ */
+function waitReadyForUpgrade(win, elementClass) {
+  // Make sure the polyfill is installed for Shadow DOM if element needs it.
+  if (elementClass.requiresShadowDom() && !win.Element.prototype.attachShadow) {
+    const extensions = Services.extensionsFor(win);
+    return extensions.importUnwrapped(win, 'amp-shadow-dom-polyfill');
   }
 }
 
@@ -100,10 +134,13 @@ function tryUpgradeElement_(element, toClass) {
  */
 export function stubElementsForDoc(ampdoc) {
   const extensions = extensionScriptsInNode(ampdoc.getHeadNode());
-  extensions.forEach((name) => {
-    ampdoc.declareExtension(name);
-    stubElementIfNotKnown(ampdoc.win, name);
+  extensions.forEach(({extensionId, extensionVersion}) => {
+    ampdoc.declareExtension(extensionId, extensionVersion);
+    stubElementIfNotKnown(ampdoc.win, extensionId);
   });
+  if (ampdoc.isBodyAvailable()) {
+    ampdoc.setExtensionsKnown();
+  }
 }
 
 /**
@@ -140,8 +177,33 @@ export function copyElementToChildWindow(parentWin, childWin, name) {
 export function registerElement(win, name, implementationClass) {
   const knownElements = getExtendedElements(win);
   knownElements[name] = implementationClass;
-  const klass = createCustomElementClass(win);
+  const klass = createCustomElementClass(win, elementConnectedCallback);
   win['customElements'].define(name, klass);
+}
+
+/**
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!AmpElement} element
+ * @param {?(typeof BaseElement)} implementationClass
+ * @visibleForTesting
+ */
+export function elementConnectedCallback(ampdoc, element, implementationClass) {
+  // Make sure that the ampdoc has already been stubbed.
+  if (!docInitializedMap.has(ampdoc)) {
+    docInitializedMap.set(ampdoc, true);
+    stubElementsForDoc(ampdoc);
+  }
+
+  // Load the pre-stubbed legacy extension if needed.
+  const extensionId = element.localName;
+  if (!implementationClass && !ampdoc.declaresExtension(extensionId)) {
+    Services.extensionsFor(ampdoc.win).installExtensionForDoc(
+      ampdoc,
+      extensionId,
+      // The legacy auto-extensions are always 0.1.
+      '0.1'
+    );
+  }
 }
 
 /**

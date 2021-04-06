@@ -33,6 +33,11 @@ class NetworkLogger {
     this.driver_ = driver;
   }
 
+  /**
+   *
+   * @param {PerformanceMethods} networkMethod
+   * @return {Promise<string[]>}
+   */
   async getEntries_(networkMethod) {
     const entries = await this.driver_
       .manage()

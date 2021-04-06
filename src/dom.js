@@ -22,7 +22,7 @@ import {
 } from './css';
 import {dev, devAssert} from './log';
 import {dict} from './utils/object';
-import {includes, startsWith} from './string';
+import {includes} from './string';
 import {toWin} from './types';
 
 const HTML_ESCAPE_CHARS = {
@@ -42,6 +42,17 @@ export const UPGRADE_TO_CUSTOMELEMENT_PROMISE = '__AMP_UPG_PRM';
 export const UPGRADE_TO_CUSTOMELEMENT_RESOLVER = '__AMP_UPG_RES';
 
 /**
+ * @typedef {{
+ *   bubbles: (boolean|undefined),
+ *   cancelable: (boolean|undefined),
+ * }}
+ */
+export let CustomEventOptionsDef;
+
+/** @const {!CustomEventOptionsDef} */
+const DEFAULT_CUSTOM_EVENT_OPTIONS = {bubbles: true, cancelable: true};
+
+/**
  * Waits until the child element is constructed. Once the child is found, the
  * callback is executed.
  * @param {!Element} parent
@@ -55,7 +66,7 @@ export function waitForChild(parent, checkFunc, callback) {
   }
   /** @const {!Window} */
   const win = toWin(parent.ownerDocument.defaultView);
-  if (win.MutationObserver) {
+  if (IS_ESM || win.MutationObserver) {
     /** @const {MutationObserver} */
     const observer = new win.MutationObserver(() => {
       if (checkFunc(parent)) {
@@ -239,7 +250,6 @@ export function rootNodeFor(node) {
  * @return {boolean}
  */
 export function isShadowRoot(value) {
-  // TODO(#22733): remove in preference to dom's `rootNodeFor`.
   if (!value) {
     return false;
   }
@@ -415,7 +425,7 @@ export function childNodes(parent, callback) {
 
 /**
  * Finds the first child element that has the specified attribute.
- * @param {!Element} parent
+ * @param {!Element|!ShadowRoot} parent
  * @param {string} attr
  * @return {?Element}
  */
@@ -439,7 +449,7 @@ export function lastChildElementByAttr(parent, attr) {
 
 /**
  * Finds all child elements that has the specified attribute.
- * @param {!Element} parent
+ * @param {!Element|!ShadowRoot} parent
  * @param {string} attr
  * @return {!NodeList<!Element>}
  */
@@ -450,7 +460,7 @@ export function childElementsByAttr(parent, attr) {
 
 /**
  * Finds the first child element that has the specified tag name.
- * @param {!Element} parent
+ * @param {!Element|!ShadowRoot} parent
  * @param {string} tagName
  * @return {?Element}
  */
@@ -461,7 +471,7 @@ export function childElementByTag(parent, tagName) {
 
 /**
  * Finds all child elements with the specified tag name.
- * @param {!Element} parent
+ * @param {!Element|!ShadowRoot} parent
  * @param {string} tagName
  * @return {!NodeList<!Element>}
  */
@@ -506,7 +516,7 @@ export function elementByTag(element, tagName) {
  *
  * This method isn't required for modern builds, can be removed.
  *
- * @param {!Element} root
+ * @param {!Element|!ShadowRoot} root
  * @param {string} selector
  * @return {!NodeList<!Element>}
  */
@@ -522,12 +532,12 @@ function scopedQuerySelectionFallback(root, selector) {
 /**
  * Finds the first element that matches `selector`, scoped inside `root`.
  * Note: in IE, this causes a quick mutation of the element's class list.
- * @param {!Element} root
+ * @param {!Element|!ShadowRoot} root
  * @param {string} selector
  * @return {?Element}
  */
 export function scopedQuerySelector(root, selector) {
-  if (isScopeSelectorSupported(root)) {
+  if (IS_ESM || isScopeSelectorSupported(root)) {
     return root./*OK*/ querySelector(prependSelectorsWith(selector, ':scope'));
   }
 
@@ -539,12 +549,12 @@ export function scopedQuerySelector(root, selector) {
 /**
  * Finds every element that matches `selector`, scoped inside `root`.
  * Note: in IE, this causes a quick mutation of the element's class list.
- * @param {!Element} root
+ * @param {!Element|!ShadowRoot} root
  * @param {string} selector
  * @return {!NodeList<!Element>}
  */
 export function scopedQuerySelectorAll(root, selector) {
-  if (isScopeSelectorSupported(root)) {
+  if (IS_ESM || isScopeSelectorSupported(root)) {
     return root./*OK*/ querySelectorAll(
       prependSelectorsWith(selector, ':scope')
     );
@@ -758,7 +768,7 @@ export function isAmpElement(element) {
   // Use prefix to recognize AMP element. This is necessary because stub
   // may not be attached yet.
   return (
-    startsWith(tag, 'AMP-') &&
+    tag.startsWith('AMP-') &&
     // Some "amp-*" elements are not really AMP elements. :smh:
     !(tag == 'AMP-STICKY-AD-TOP-PADDING' || tag == 'AMP-BODY')
   );
@@ -928,6 +938,21 @@ export function toggleAttribute(element, name, forced) {
 }
 
 /**
+ * Parses a string as a boolean value using the expanded rules for DOM boolean
+ * attributes:
+ * - a `null` or `undefined` returns `null`;
+ * - an empty string returns `true`;
+ * - a "false" string returns `false`;
+ * - otherwise, `true` is returned.
+ *
+ * @param {?string|undefined} s
+ * @return {boolean|undefined}
+ */
+export function parseBooleanAttribute(s) {
+  return s == null ? undefined : s !== 'false';
+}
+
+/**
  * @param {!Window} win
  * @return {number} The width of the vertical scrollbar, in pixels.
  */
@@ -936,4 +961,33 @@ export function getVerticalScrollbarWidth(win) {
   const windowWidth = win./*OK*/ innerWidth;
   const documentWidth = documentElement./*OK*/ clientWidth;
   return windowWidth - documentWidth;
+}
+
+/**
+ * Dispatches a custom event.
+ *
+ * @param {!Node} node
+ * @param {string} name
+ * @param {!Object=} opt_data Event data.
+ * @param {!CustomEventOptionsDef=} opt_options
+ */
+export function dispatchCustomEvent(node, name, opt_data, opt_options) {
+  const data = opt_data || {};
+  // Constructors of events need to come from the correct window. Sigh.
+  const event = node.ownerDocument.createEvent('Event');
+  event.data = data;
+  const {bubbles, cancelable} = opt_options || DEFAULT_CUSTOM_EVENT_OPTIONS;
+  event.initEvent(name, bubbles, cancelable);
+  node.dispatchEvent(event);
+}
+
+/**
+ * Ensures the child is contained by the parent, but not the parent itself.
+ *
+ * @param {!Node} parent
+ * @param {!Node} child
+ * @return {boolean}
+ */
+export function containsNotSelf(parent, child) {
+  return child !== parent && parent.contains(child);
 }

@@ -31,6 +31,7 @@ import {
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
+  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   getDataParamsFromAttributes,
@@ -146,11 +147,6 @@ class AmpDailymotion extends AMP.BaseElement {
   }
 
   /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
-  }
-
-  /** @override */
   buildCallback() {
     this.videoid_ = userAssert(
       this.element.getAttribute('data-videoid'),
@@ -178,6 +174,16 @@ class AmpDailymotion extends AMP.BaseElement {
     listen(this.win, 'message', this.handleEvents_.bind(this));
 
     return this.loadPromise(this.iframe_);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    return true;
   }
 
   /**
@@ -225,7 +231,7 @@ class AmpDailymotion extends AMP.BaseElement {
           this.muted_ != isMuted
         ) {
           this.muted_ = isMuted;
-          this.element.dispatchCustomEvent(mutedOrUnmutedEvent(isMuted));
+          dispatchCustomEvent(this.element, mutedOrUnmutedEvent(isMuted));
         }
         break;
 
@@ -326,7 +332,7 @@ class AmpDailymotion extends AMP.BaseElement {
     // Hack to simulate firing mute events when video is not playing
     // since Dailymotion only fires volume changes when the video has started
     this.playerReadyPromise_.then(() => {
-      this.element.dispatchCustomEvent(VideoEvents.MUTED);
+      dispatchCustomEvent(this.element, VideoEvents.MUTED);
       this.muted_ = true;
     });
   }
@@ -339,7 +345,7 @@ class AmpDailymotion extends AMP.BaseElement {
     // Hack to simulate firing mute events when video is not playing
     // since Dailymotion only fires volume changes when the video has started
     this.playerReadyPromise_.then(() => {
-      this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
+      dispatchCustomEvent(this.element, VideoEvents.UNMUTED);
       this.muted_ = false;
     });
   }

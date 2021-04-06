@@ -217,6 +217,6 @@ feature_tests/urls.html:114:2 The attribute 'src' in tag 'amp-video' is set to t
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-feature_tests/urls.html:117:6 The tag 'amp-ad extension .js script' is missing or incorrect, but required by 'amp-ad'. This will soon be an error. (see https://amp.dev/documentation/components/amp-ad/)
+feature_tests/urls.html:117:6 The tag 'amp-ad extension script' is missing or incorrect, but required by 'amp-ad'. This will soon be an error. (see https://amp.dev/documentation/components/amp-ad/)
 >>       ^~~~~~~~~
-feature_tests/urls.html:117:6 The tag 'amp-video extension .js script' is missing or incorrect, but required by 'amp-video'. This will soon be an error. (see https://amp.dev/documentation/components/amp-video/)
+feature_tests/urls.html:117:6 The tag 'amp-video extension script' is missing or incorrect, but required by 'amp-video'. This will soon be an error. (see https://amp.dev/documentation/components/amp-video/)

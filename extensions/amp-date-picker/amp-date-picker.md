@@ -140,8 +140,8 @@ To opt-out of this behavior, add the `touch-keyboard-editable` attribute to the
 
 The `amp-date-picker` provides two types of dates to select:
 
-- `single`: Select a single date within the date picker.
-- `range`: Select a date range within the date picker.
+-   `single`: Select a single date within the date picker.
+-   `range`: Select a date range within the date picker.
 
 #### `type="single"`
 
@@ -197,16 +197,16 @@ The API is not friendly to memorize, but there are various
 
 Specifies how the date picker is rendered. Allowed values are:
 
-- **`static`** (default): The date picker renders as an interactive calendar view.
-- **`overlay`**: The date picker calendar view is not rendered until the user interacts
-  with required input field(s) nested in the `<amp-date-picker>`.
+-   **`static`** (default): The date picker renders as an interactive calendar view.
+-   **`overlay`**: The date picker calendar view is not rendered until the user interacts
+    with required input field(s) nested in the `<amp-date-picker>`.
 
 ### type
 
 Specifies the selection type for the date picker. Allowed values are:
 
-- **`single`** (default): The user can select a single date.
-- **`range`**: The user can select a date range.
+-   **`single`** (default): The user can select a single date.
+-   **`range`**: The user can select a date range.
 
 ### input-selector
 
@@ -242,7 +242,7 @@ with an existing element in the form, an error is emitted.
 When `amp-date-picker` loads, the input element's value is used to display the
 initially selected start date.
 
-Specify the `startDate` property via the [`src` attribute](#src-optional) to set
+Specify the `startDate` property via the [`src` attribute](#src) to set
 an initial end date dynamically.
 
 ```html
@@ -735,10 +735,10 @@ Using `src` prevents chached AMP documents from showing out-of-date information.
 
 A `date-template` must have a `dates` or `default` attribute.
 
-- **dates**: A space-separated list of ISO 8601 single dates or RFC 5545 RRULE repeating dates.
-  The template content will render for the dates matching the dates in the attribute.
-- **default**: If the `default` attribute is present, the template content will render for
-  all dates not matching an existing template.
+-   **dates**: A space-separated list of ISO 8601 single dates or RFC 5545 RRULE repeating dates.
+    The template content will render for the dates matching the dates in the attribute.
+-   **default**: If the `default` attribute is present, the template content will render for
+    all dates not matching an existing template.
 
 The date picker provides mustache variables to render in the templates.
 These variables are ISO 8601 format string values e.g. `DD`, `D`, `X`, etc.

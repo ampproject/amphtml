@@ -1,0 +1,47 @@
+{
+  "2": {"string": "Trokit te \"Para\""},
+  "3": {"string": "Trokit te \"Pas\""},
+  "4": {"string": "Lidhja nuk mund të kopjohej te kujtesa e fragmenteve :("},
+  "5": {"string": "Lidhja u kopjua!"},
+  "6": {"string": "Email"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Merr lidhjen"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "SMS"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {
+    "string": "Zgjero lartësinë dhe gjerësinë e dritares sate për të shikuar këtë eksperiencë"
+  },
+  "19": {
+    "string": "Duhet të aktivizosh eksperimentin e historisë së AMP për të shikuar këtë përmbajtje."
+  },
+  "20": {"string": "Faqja shikohet më mirë në modalitetin e portretit"},
+  "21": {
+    "string": "Na vjen keq, por duket se shfletuesi yt nuk e mbështet këtë eksperiencë"
+  },
+  "22": {"string": "Prano"},
+  "23": {"string": "Refuzo"},
+  "25": {"string": "Shiko në domenin origjinal:"},
+  "26": {"string": "Më shumë për rezultatet në AMP"},
+  "27": {"string": "Vazhdo gjithsesi"},
+  "28": {"string": "Ndrysho cilësimet e privatësisë së të dhënave"},
+  "29": {"string": "Cilësimet e privatësisë"},
+  "30": {"string": "Më shumë për të lexuar"},
+  "31": {"string": "Tingulli joaktiv"},
+  "32": {"string": "Tingulli aktiv"},
+  "33": {"string": "Kjo faqe nuk ka tingull"},
+  "34": {"string": "Luaj videon"},
+  "35": {"string": "Rrëshqit lart"},
+  "36": {"string": "Zgjero postimin e Tweeter"},
+  "37": {
+    "string": "Zgjero lartësinë e dritares për të shikuar këtë eksperiencë"
+  },
+  "38": {
+    "string": "Zgjero gjeresinë e dritares për të shikuar këtë eksperiencë"
+  },
+  "63": {"string": "Line"}
+}

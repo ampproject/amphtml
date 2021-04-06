@@ -71,9 +71,11 @@ export function runVideoPlayerIntegrationTests(
 
       it('should override the video interface methods', function () {
         this.timeout(TIMEOUT);
-        return getVideoPlayer({outsideView: false, autoplay: true}).then(
-          (r) => {
-            const impl = r.video.implementation_;
+        return getVideoPlayer({outsideView: false, autoplay: true})
+          .then((r) => {
+            return r.video.getImpl(false);
+          })
+          .then((impl) => {
             const methods = Object.getOwnPropertyNames(
               Object.getPrototypeOf(new VideoInterface())
             );
@@ -83,8 +85,7 @@ export function runVideoPlayerIntegrationTests(
               const methodName = methods[i];
               expect(impl[methodName]).to.exist;
             }
-          }
-        );
+          });
       });
 
       afterEach(cleanUp);
@@ -161,10 +162,11 @@ export function runVideoPlayerIntegrationTests(
           outsideView: true,
           autoplay: false,
         })
-          .then((r) => {
+          .then(async (r) => {
             video = r.video;
             playButton = createButton(r, 'play');
-            const viewport = video.implementation_.getViewport();
+            const impl = await video.getImpl(false);
+            const viewport = impl.getViewport();
             const promise = listenOncePromise(video, VideoEvents.LOAD);
             viewport.scrollIntoView(video);
             return promise;
@@ -228,9 +230,10 @@ export function runVideoPlayerIntegrationTests(
           outsideView: true,
           autoplay: true,
         })
-          .then((r) => {
+          .then(async (r) => {
             video = r.video;
-            viewport = video.implementation_.getViewport();
+            const impl = await video.getImpl(false);
+            viewport = impl.getViewport();
             // scroll to the bottom, make video fully visible
             viewport.scrollIntoView(video);
             return listenOncePromise(video, VideoEvents.PLAYING);
@@ -321,7 +324,7 @@ export function runVideoPlayerIntegrationTests(
           autoplay: true,
         })
           .then((r) => {
-            timer = Services.timerFor(r.video.implementation_.win);
+            timer = Services.timerFor(r.video.ownerDocument.defaultView);
             video = r.video;
             pauseButton = createButton(r, 'pause');
             playButton = createButton(r, 'play');
@@ -333,8 +336,9 @@ export function runVideoPlayerIntegrationTests(
               timer.promise(2000),
             ]);
           })
-          .then(() => {
-            const viewport = video.implementation_.getViewport();
+          .then(async () => {
+            const impl = await video.getImpl(false);
+            const viewport = impl.getViewport();
             viewport.scrollIntoView(video);
             return listenOncePromise(
               video,
@@ -382,9 +386,9 @@ export function runVideoPlayerIntegrationTests(
         );
       });
 
-      it('should not play when not in view port initially', () => {
+      it('should not play when initially outside viewport', () => {
         return getVideoPlayer({outsideView: true, autoplay: true}).then((r) => {
-          const timer = Services.timerFor(r.video.implementation_.win);
+          const timer = Services.timerFor(r.video.ownerDocument.defaultView);
           const p = listenOncePromise(r.video, VideoEvents.PLAYING).then(() => {
             return Promise.reject('should not have autoplayed');
           });
@@ -399,9 +403,10 @@ export function runVideoPlayerIntegrationTests(
         let video;
         let viewport;
         return getVideoPlayer({outsideView: true, autoplay: true})
-          .then((r) => {
+          .then(async (r) => {
             video = r.video;
-            viewport = video.implementation_.getViewport();
+            const impl = await video.getImpl(false);
+            viewport = impl.getViewport();
 
             // scroll to the bottom, make video fully visible
             const p = listenOncePromise(video, VideoEvents.PLAYING);
@@ -430,13 +435,14 @@ export function runVideoPlayerIntegrationTests(
               return !!video.querySelector('i-amphtml-video-eq');
             });
           })
-          .then(() => {
+          .then(async () => {
             icon = video.querySelector('i-amphtml-video-eq');
             expect(icon).to.exist;
             // animation should be paused since video is not played yet
             expect(isAnimationPaused(icon)).to.be.true;
 
-            viewport = video.implementation_.getViewport();
+            const impl = await video.getImpl(false);
+            viewport = impl.getViewport();
             // scroll to the bottom, make video fully visible so it autoplays
             viewport.scrollIntoView(video);
 
@@ -511,12 +517,13 @@ export function runVideoPlayerIntegrationTests(
           outsideView: true,
           'rotate-to-fullscreen': true,
         })
-          .then((r) => {
+          .then(async (r) => {
             video = r.video;
             playButton = createButton(r, 'play');
             mockLandscape(false);
             const whenLoaded = listenOncePromise(video, VideoEvents.LOAD);
-            const viewport = video.implementation_.getViewport();
+            const impl = await video.getImpl(false);
+            const viewport = impl.getViewport();
             viewport.scrollIntoView(video);
             return whenLoaded;
           })
@@ -525,11 +532,9 @@ export function runVideoPlayerIntegrationTests(
             playButton.click();
             return whenPlaying;
           })
-          .then(() => {
-            const enter = window.sandbox.stub(
-              video.implementation_,
-              'fullscreenEnter'
-            );
+          .then(async () => {
+            const impl = await video.getImpl(false);
+            const enter = window.sandbox.stub(impl, 'fullscreenEnter');
             mockLandscape(true);
             autoFullscreen.onRotation_();
             return poll('fullscreen enter', () => enter.called);
@@ -551,7 +556,7 @@ export function runVideoPlayerIntegrationTests(
 
   function getVideoPlayer(options) {
     options = options || {};
-    const top = options.outsideView ? '100vh' : '0';
+    const top = options.outsideView ? '126vh' : '0';
     let fixture;
     return createFixtureIframe('test/fixtures/video-players.html', FRAME_HEIGHT)
       .then((f) => {

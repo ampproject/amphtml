@@ -28,6 +28,7 @@ import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
 import {
   closestAncestorElementBySelector,
+  dispatchCustomEvent,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
@@ -158,7 +159,7 @@ export class Criteria {
       dev().assertElement(element.querySelector('img'))
     );
 
-    const {width: renderWidth, height: renderHeight} = element.getLayoutBox();
+    const {width: renderWidth, height: renderHeight} = element.getLayoutSize();
 
     const viewport = Services.viewportForDoc(element);
     const {width: vw, height: vh} = viewport.getSize();
@@ -340,7 +341,7 @@ export class DocMetaAnnotations {
         const {textContent} = el;
         return (tryParseJson(textContent) || {})['@type'];
       })
-      .filter((typeOrUndefined) => typeOrUndefined);
+      .filter(Boolean);
   }
 
   /**
@@ -420,7 +421,7 @@ export function apply(ampdoc, element) {
       REQUIRED_EXTENSION
     );
 
-    element.dispatchCustomEvent(AutoLightboxEvents.NEWLY_SET);
+    dispatchCustomEvent(element, AutoLightboxEvents.NEWLY_SET);
 
     return element;
   });

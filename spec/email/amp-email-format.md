@@ -44,14 +44,14 @@ The following code represents the minimum amount of markup that makes up a valid
 
 An AMP email message MUST
 
-- <a name="dctp"></a>start with the doctype `<!doctype html>`. [🔗](#dctp)
-- <a name="ampd"></a>contain a top-level `<html ⚡4email>` tag (`<html amp4email>` is accepted as well). [🔗](#ampd)
-- <a name="crps"></a>contain `<head>` and `<body>` tags (They are optional in HTML). [🔗](#crps)
-- <a name="chrs"></a>contain a `<meta charset="utf-8">` tag as the first child of their head tag. [🔗](#chrs)
-- <a name="scrpt"></a>contain a `<script async src="https://cdn.ampproject.org/v0.js"></script>` tag inside their head tag. [🔗](#scrpt)
-- <a name="boilerplate"></a>contain amp4email boilerplate (`<style amp4email-boilerplate>body{visibility:hidden}</style>`) inside their head tag to initially hide the content until AMP JS is loaded. [🔗](#boilerplate)
+-   <a name="dctp"></a>start with the doctype `<!doctype html>`. [🔗](#dctp)
+-   <a name="ampd"></a>contain a top-level `<html ⚡4email>` tag (`<html amp4email>` is accepted as well). [🔗](#ampd)
+-   <a name="crps"></a>contain `<head>` and `<body>` tags (They are optional in HTML). [🔗](#crps)
+-   <a name="chrs"></a>contain a `<meta charset="utf-8">` tag as the first child of their head tag. [🔗](#chrs)
+-   <a name="scrpt"></a>contain a `<script async src="https://cdn.ampproject.org/v0.js"></script>` tag inside their head tag. [🔗](#scrpt)
+-   <a name="boilerplate"></a>contain amp4email boilerplate (`<style amp4email-boilerplate>body{visibility:hidden}</style>`) inside their head tag to initially hide the content until AMP JS is loaded. [🔗](#boilerplate)
 
-The entire AMPHTML markup must not exceed 102,400 bytes.
+The entire AMPHTML markup must not exceed 200,000 bytes.
 
 ## Structure and rendering
 
@@ -100,9 +100,9 @@ Note: The entire `<style>` tag cannot exceed 50,000 bytes. The validator will ch
 
 ## Document dimensions
 
-- **Optimal width**: 800px or less (any wider and content may be unexpectedly truncated on some clients).
+-   **Optimal width**: 800px or less (any wider and content may be unexpectedly truncated on some clients).
 
-- **Height**: variable, the client allows the user to scroll through the content.
+-   **Height**: variable, the client allows the user to scroll through the content.
 
 ## Validation
 
@@ -120,10 +120,10 @@ AMPHTML allows tracking email opens with pixel tracking techniques, same as regu
 
 The following AMP-specific analytic techniques are not supported:
 
-- [AMP `CLIENT_ID`](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/analytics_basics#user-identification)
-- [`amp-analytics`](https://amp.dev/documentation/components/amp-analytics)
-- [`amp-pixel`](https://amp.dev/documentation/components/amp-pixel)
-- [AMP Variable Substitution](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/configure-analytics/analytics_basics/#variable-substitution)
+-   [AMP `CLIENT_ID`](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/analytics_basics#user-identification)
+-   [`amp-analytics`](https://amp.dev/documentation/components/amp-analytics)
+-   [`amp-pixel`](https://amp.dev/documentation/components/amp-pixel)
+-   [AMP Variable Substitution](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/configure-analytics/analytics_basics/#variable-substitution)
 
 ### Component-specific considerations
 

@@ -255,12 +255,14 @@ export class AmpStoryAccess extends AMP.BaseElement {
     );
     const logoSrc = storyEl && storyEl.getAttribute('publisher-logo-src');
 
-    logoSrc
-      ? assertHttpsUrl(logoSrc, storyEl, 'publisher-logo-src')
-      : user().warn(
-          TAG,
-          'Expected "publisher-logo-src" attribute on <amp-story>'
-        );
+    if (logoSrc) {
+      assertHttpsUrl(logoSrc, storyEl, 'publisher-logo-src');
+    } else {
+      user().warn(
+        TAG,
+        'Expected "publisher-logo-src" attribute on <amp-story>'
+      );
+    }
 
     return logoSrc;
   }
@@ -325,7 +327,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * @private
    */
   getActionObject_(namespace = undefined, type = undefined) {
-    const method = ['login', namespace, type].filter((s) => !!s).join('-');
+    const method = ['login', namespace, type].filter(Boolean).join('-');
     return {tagOrTarget: 'SCRIPT', method};
   }
 }

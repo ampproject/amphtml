@@ -15,32 +15,36 @@
  */
 'use strict';
 
-const gulp = require('gulp');
-const gulpAva = require('gulp-ava');
-const {isTravisBuild} = require('../common/travis');
+const argv = require('minimist')(process.argv.slice(2));
+const {execOrDie} = require('../common/exec');
 
 /**
  * Runs ava tests.
- * @return {!Vinyl}
  */
 async function ava() {
-  return gulp
-    .src([
-      require.resolve('./csvify-size/test.js'),
-      require.resolve('./get-zindex/test.js'),
-      require.resolve('./prepend-global/test.js'),
-    ])
-    .pipe(
-      gulpAva({
-        'concurrency': 5,
-        'failFast': true,
-        'silent': isTravisBuild(),
-      })
-    );
+  // These need equivalents for CI in build-system/pr-check/build-targets.js
+  // (see targetMatchers[Targets.AVA])
+  const testFiles = [
+    'build-system/tasks/get-zindex/get-zindex.test.js',
+    'build-system/tasks/markdown-toc/test/test.js',
+    'build-system/tasks/prepend-global/prepend-global.test.js',
+  ];
+  execOrDie(
+    [
+      'npx ava',
+      ...testFiles,
+      '--color --fail-fast',
+      argv.watch ? '--watch' : '',
+    ].join(' ')
+  );
 }
 
 module.exports = {
   ava,
 };
 
-ava.description = 'Runs ava tests for gulp tasks';
+ava.description = "Runs ava tests for AMP's tasks";
+
+ava.flags = {
+  'watch': 'Watches for changes',
+};

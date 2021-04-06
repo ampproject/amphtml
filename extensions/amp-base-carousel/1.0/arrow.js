@@ -15,66 +15,78 @@
  */
 
 import * as Preact from '../../../src/preact';
-import * as styles from './base-carousel.css';
-import {dict} from '../../../src/utils/object';
+import {useStyles} from './base-carousel.jss';
 
 /**
- * @param {!JsonObject} props
+ * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-export function Arrow(props) {
+export function Arrow({
+  advance,
+  by,
+  customArrow = <DefaultArrow by={by} />,
+  disabled,
+  outsetArrows,
+  rtl,
+}) {
   const {
-    'customArrow': customArrow,
-    'dir': dir,
-    'advance': advance,
-    'disabled': disabled,
-  } = props;
-  const button = customArrow
-    ? customArrow
-    : renderDefaultArrow(dict({'dir': dir}));
-  const {
-    'children': children,
     'disabled': customDisabled,
     'onClick': onCustomClick,
-    ...rest
-  } = button.props;
+  } = customArrow.props;
   const isDisabled = disabled || customDisabled;
   const onClick = (e) => {
+    if (isDisabled) {
+      return;
+    }
     if (onCustomClick) {
       onCustomClick(e);
     }
     advance();
   };
+  const classes = useStyles();
+  const classNames = `${classes.arrow} ${
+    by < 0 ? classes.arrowPrev : classes.arrowNext
+  } ${isDisabled ? classes.arrowDisabled : ''} ${
+    outsetArrows ? classes.outsetArrow : classes.insetArrow
+  } ${rtl ? classes.rtl : classes.ltr}`;
+
   return (
-    <div
-      style={{
-        ...styles.arrowPlacement,
-        // Offset button from the edge.
-        [dir < 0 ? 'left' : 'right']: '0px',
-      }}
-    >
-      {Preact.cloneElement(
-        button,
-        {
-          'onClick': onClick,
-          'disabled': isDisabled,
-          'aria-disabled': isDisabled,
-          ...rest,
-        },
-        children
-      )}
+    <div class={classNames}>
+      {Preact.cloneElement(customArrow, {
+        'onClick': onClick,
+        'disabled': isDisabled,
+        'aria-disabled': String(!!isDisabled),
+      })}
     </div>
   );
 }
 
 /**
- * @param {!JsonObject} props
+ * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-function renderDefaultArrow(props) {
+function DefaultArrow({by, ...rest}) {
+  const classes = useStyles();
   return (
-    <button style={styles.defaultArrowButton}>
-      {props['dir'] < 0 ? '<<' : '>>'}
+    <button
+      class={classes.defaultArrowButton}
+      aria-label={
+        by < 0 ? 'Previous item in carousel' : 'Next item in carousel'
+      }
+      {...rest}
+    >
+      <div class={`${classes.arrowBaseStyle} ${classes.arrowFrosting}`}></div>
+      <div class={`${classes.arrowBaseStyle} ${classes.arrowBackdrop}`}></div>
+      <div class={`${classes.arrowBaseStyle} ${classes.arrowBackground}`}></div>
+      <svg class={classes.arrowIcon} viewBox="0 0 24 24">
+        <path
+          d={by < 0 ? 'M14,7.4 L9.4,12 L14,16.6' : 'M10,7.4 L14.6,12 L10,16.6'}
+          fill="none"
+          stroke-width="2px"
+          stroke-linejoin="round"
+          stroke-linecap="round"
+        />
+      </svg>
     </button>
   );
 }

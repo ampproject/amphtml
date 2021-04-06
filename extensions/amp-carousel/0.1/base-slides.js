@@ -95,8 +95,8 @@ export class BaseSlides extends BaseCarousel {
   }
 
   /** @override */
-  onViewportCallback(inViewport) {
-    this.updateViewportState(inViewport);
+  viewportCallbackTemp(inViewport) {
+    super.viewportCallbackTemp(inViewport);
     if (inViewport) {
       this.autoplay_();
     } else {
@@ -125,13 +125,6 @@ export class BaseSlides extends BaseCarousel {
   moveSlide(unusedDir, unusedAnimate, unusedTrust) {
     // Subclasses may override.
   }
-
-  /**
-   * Updates the viewport state when there is a viewport callback.
-   * @param {boolean} unusedInViewport
-   * @protected
-   */
-  updateViewportState(unusedInViewport) {}
 
   /**
    * Checks if a carousel is eligible to loop, regardless of the loop attribute.

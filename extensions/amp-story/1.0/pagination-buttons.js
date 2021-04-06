@@ -16,14 +16,18 @@
 import {
   Action,
   StateProperty,
+  UIType,
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
 import {CommonSignals} from '../../../src/common-signals';
 import {EventType, dispatch} from './events';
-import {devAssert} from '../../../src/log';
-import {dict} from './../../../src/utils/object';
-import {renderAsElement} from './simple-template';
+import {LocalizedStringId} from '../../../src/localized-strings';
+import {Services} from '../../../src/services';
+import {dev, devAssert} from '../../../src/log';
+
+import {getLocalizationService} from './amp-story-localization-service';
+import {htmlFor} from '../../../src/static-template';
 
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */
 let ButtonState_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase
@@ -34,13 +38,13 @@ const BackButtonStates = {
     className: 'i-amphtml-story-back-close-bookend',
     action: Action.TOGGLE_BOOKEND,
     data: false,
-    label: 'Close bookend',
+    label: LocalizedStringId.AMP_STORY_CLOSE_BOOKEND,
   },
   HIDDEN: {className: 'i-amphtml-story-button-hidden'},
   PREVIOUS_PAGE: {
     className: 'i-amphtml-story-back-prev',
     triggers: EventType.PREVIOUS_PAGE,
-    label: 'Previous page',
+    label: LocalizedStringId.AMP_STORY_PREVIOUS_PAGE,
   },
 };
 
@@ -50,50 +54,48 @@ const ForwardButtonStates = {
   NEXT_PAGE: {
     className: 'i-amphtml-story-fwd-next',
     triggers: EventType.NEXT_PAGE,
-    // TODO: Here and other labels: i18n.
-    label: 'Next page',
+    label: LocalizedStringId.AMP_STORY_NEXT_PAGE,
+  },
+  NEXT_STORY: {
+    className: 'i-amphtml-story-fwd-next',
+    triggers: EventType.NEXT_PAGE,
+    label: LocalizedStringId.AMP_STORY_NEXT_STORY,
   },
   REPLAY: {
     className: 'i-amphtml-story-fwd-replay',
     triggers: EventType.REPLAY,
-    label: 'Replay',
+    label: LocalizedStringId.AMP_STORY_REPLAY,
   },
   SHOW_BOOKEND: {
     className: 'i-amphtml-story-fwd-more',
     action: Action.TOGGLE_BOOKEND,
     data: true,
-    label: 'Show bookend',
+    label: LocalizedStringId.AMP_STORY_SHOW_BOOKEND,
   },
 };
 
-/** @private @const {!./simple-template.ElementDef} */
-const BUTTON = {
-  tag: 'div',
-  attrs: dict({'class': 'i-amphtml-story-button-container'}),
-  children: [
-    {
-      tag: 'button',
-      attrs: dict({'class': 'i-amphtml-story-button-move'}),
-    },
-    {
-      tag: 'div',
-      attrs: dict({'class': 'i-amphtml-story-page-sentinel'}),
-    },
-  ],
-};
+/**
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildPaginationButton = (element) =>
+  htmlFor(element)`
+      <div class="i-amphtml-story-button-container">
+        <button class="i-amphtml-story-button-move"></button>
+      </div>`;
 
 /**
  * @param {!Element} hoverEl
  * @param {!Element} targetEl
  * @param {string} className
+ * @return {?Array<function(!Event)>}
  */
 function setClassOnHover(hoverEl, targetEl, className) {
-  hoverEl.addEventListener('mouseenter', () => {
-    targetEl.classList.add(className);
-  });
-  hoverEl.addEventListener('mouseleave', () => {
-    targetEl.classList.remove(className);
-  });
+  const enterListener = () => targetEl.classList.add(className);
+  const exitListener = () => targetEl.classList.remove(className);
+  hoverEl.addEventListener('mouseenter', enterListener);
+  hoverEl.addEventListener('mouseleave', exitListener);
+  return [enterListener, exitListener];
 }
 
 /**
@@ -111,16 +113,22 @@ class PaginationButton {
     this.state_ = initialState;
 
     /** @public @const {!Element} */
-    this.element = renderAsElement(doc, BUTTON);
-    /** @public @const {!Element} */
-    this.button_ = devAssert(
-      this.element.querySelector('button'),
-      'Expect to find a button'
+    this.element = buildPaginationButton(doc);
+
+    /** @private @const {!Element} */
+    this.buttonElement_ = dev().assertElement(
+      this.element.querySelector('button')
     );
 
-    this.element.classList.add(initialState.className);
-    this.button_.setAttribute('aria-label', initialState.label);
+    /** @private @const {!../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = getLocalizationService(doc);
 
+    this.element.classList.add(initialState.className);
+    initialState.label &&
+      this.buttonElement_.setAttribute(
+        'aria-label',
+        this.localizationService_.getLocalizedString(initialState.label)
+      );
     this.element.addEventListener('click', (e) => this.onClick_(e));
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
@@ -137,7 +145,13 @@ class PaginationButton {
     }
     this.element.classList.remove(this.state_.className);
     this.element.classList.add(state.className);
-    this.button_.setAttribute('aria-label', state.label);
+    state.label
+      ? this.buttonElement_.setAttribute(
+          'aria-label',
+          this.localizationService_.getLocalizedString(state.label)
+        )
+      : this.buttonElement_.removeAttribute('aria-label');
+
     this.state_ = state;
   }
 
@@ -181,9 +195,8 @@ class PaginationButton {
 export class PaginationButtons {
   /**
    * @param {!./amp-story.AmpStory} ampStory
-   * @param {function():Promise<boolean>} hasBookend
    */
-  constructor(ampStory, hasBookend) {
+  constructor(ampStory) {
     /** @private @const {!./amp-story.AmpStory} */
     this.ampStory_ = ampStory;
 
@@ -216,42 +229,37 @@ export class PaginationButtons {
     /** @private {?ButtonState_1_0_Def} */
     this.forwardButtonStateToRestore_ = null;
 
-    /** @private {function():Promise<boolean>} */
-    this.hasBookend_ = hasBookend;
+    /** @private {?Array<function(!Event)>} */
+    this.hoverListeners_ = null;
 
     this.initializeListeners_();
+
+    this.ampStory_.element.appendChild(this.forwardButton_.element);
+    this.ampStory_.element.appendChild(this.backButton_.element);
   }
 
-  /**
-   * @param {!./amp-story.AmpStory} ampStory
-   * @param {function():Promise<boolean>} hasBookend
-   * @return {!PaginationButtons}
-   */
-  static create(ampStory, hasBookend) {
-    return new PaginationButtons(ampStory, hasBookend);
-  }
+  /** @private */
+  addHoverListeners_() {
+    if (this.hoverListeners_) {
+      return;
+    }
 
-  /** @param {!Element} element */
-  attach(element) {
-    setClassOnHover(
+    const forwardButtonListeners = setClassOnHover(
       this.forwardButton_.element,
-      element,
+      this.ampStory_.element,
       'i-amphtml-story-next-hover'
     );
 
-    setClassOnHover(
+    const backButtonListeners = setClassOnHover(
       this.backButton_.element,
-      element,
+      this.ampStory_.element,
       'i-amphtml-story-prev-hover'
     );
 
-    element.appendChild(this.forwardButton_.element);
-    element.appendChild(this.backButton_.element);
+    this.hoverListeners_ = forwardButtonListeners.concat(backButtonListeners);
   }
 
-  /**
-   * @private
-   */
+  /** @private */
   initializeListeners_() {
     this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
       this.onBookendStateUpdate_(isActive);
@@ -264,26 +272,38 @@ export class PaginationButtons {
       }
     );
 
-    this.storeService_.subscribe(StateProperty.PAGE_IDS, () => {
-      // Since onCurrentPageIndexUpdate_ uses this.hasBookend_, and the bookend
-      // isn't initialized until after the story is laid out, we wait for the
-      // story to be laid out before calling this function.
-      this.ampStory_.element
-        .signals()
-        .whenSignal(CommonSignals.LOAD_END)
-        .then(() => {
-          const currentPageIndex = Number(
-            this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX)
-          );
-          this.onCurrentPageIndexUpdate_(currentPageIndex);
-        });
-    });
+    this.storeService_.subscribe(
+      StateProperty.PAGE_IDS,
+      () => {
+        // Since onCurrentPageIndexUpdate_ uses this.hasBookend, and the bookend
+        // isn't initialized until after the story is laid out, we wait for the
+        // story to be laid out before calling this function.
+        this.ampStory_.element
+          .signals()
+          .whenSignal(CommonSignals.LOAD_END)
+          .then(() => {
+            const currentPageIndex = Number(
+              this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX)
+            );
+            this.onCurrentPageIndexUpdate_(currentPageIndex);
+          });
+      },
+      true /** callToInitialize */
+    );
 
     this.storeService_.subscribe(
       StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
       (isVisible) => {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
       }
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.UI_STATE,
+      (uiState) => {
+        this.onUIStateUpdate_(uiState);
+      },
+      true /** callToInitialize */
     );
   }
 
@@ -326,9 +346,14 @@ export class PaginationButtons {
     }
 
     if (pageIndex === totalPages - 1) {
-      this.hasBookend_().then((hasBookend) => {
+      this.ampStory_.hasBookend().then((hasBookend) => {
+        const viewer = Services.viewerForDoc(this.ampStory_.element);
         if (!hasBookend) {
-          this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
+          if (viewer.hasCapability('swipe')) {
+            this.forwardButton_.updateState(ForwardButtonStates.NEXT_STORY);
+          } else {
+            this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
+          }
         }
       });
     }
@@ -356,6 +381,20 @@ export class PaginationButtons {
       this.backButton_.updateState(BackButtonStates.HIDDEN);
       this.forwardButtonStateToRestore_ = this.forwardButton_.getState();
       this.forwardButton_.updateState(ForwardButtonStates.HIDDEN);
+    }
+  }
+
+  /**
+   * Reacts to UI state updates.
+   * @param {!UIType} uiState
+   * @private
+   */
+  onUIStateUpdate_(uiState) {
+    if (
+      uiState === UIType.DESKTOP_PANELS ||
+      uiState === UIType.DESKTOP_FULLBLEED
+    ) {
+      this.addHoverListeners_();
     }
   }
 }

@@ -17,6 +17,12 @@
           name: 'enriqe',
           notify: true,
         },
+        {
+          name: 'processprocess',
+        },
+        {
+          name: 'mszylkowski',
+        },
       ],
     },
   ],

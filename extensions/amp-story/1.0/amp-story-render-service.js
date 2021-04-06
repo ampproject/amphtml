@@ -15,7 +15,16 @@
  */
 
 import {CommonSignals} from '../../../src/common-signals';
+import {Services} from '../../../src/services';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
+
+/**
+ * Maximum milliseconds to wait for service to load.
+ * Needs to be shorter than the render delay timeout to account for the latency
+ * downloading and executing the amp-story js.
+ * @const
+ */
+const LOAD_TIMEOUT = 2900;
 
 /** @implements {../../../src/render-delaying-services.RenderDelayingService} */
 export class AmpStoryRenderService {
@@ -27,6 +36,9 @@ export class AmpStoryRenderService {
      * @private {!../../../src/service/ampdoc-impl.AmpDoc}
      */
     this.ampdoc_ = ampdoc;
+
+    /** @const @private {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(ampdoc.win);
   }
 
   /**
@@ -35,7 +47,7 @@ export class AmpStoryRenderService {
    * @return {!Promise}
    */
   whenReady() {
-    return this.ampdoc_.whenReady().then((body) => {
+    const whenReadyPromise = this.ampdoc_.whenReady().then((body) => {
       const storyEl = body.querySelector('amp-story[standalone]');
 
       if (!storyEl) {
@@ -46,5 +58,7 @@ export class AmpStoryRenderService {
         return storyEl.signals().whenSignal(CommonSignals.LOAD_END);
       });
     });
+
+    return Promise.race([whenReadyPromise, this.timer_.promise(LOAD_TIMEOUT)]);
   }
 }

@@ -16,117 +16,186 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const log = require('fancy-log');
 const requestPromise = require('request-promise');
-const {cyan, green, yellow} = require('ansi-colors');
+const {
+  isCircleciBuild,
+  isPullRequestBuild,
+  isGithubActionsBuild,
+} = require('../common/ci');
+const {ciJobUrl} = require('../common/ci');
+const {cyan, yellow} = require('kleur/colors');
+const {determineBuildTargets, Targets} = require('../pr-check/build-targets');
+const {getValidExperiments} = require('../common/utils');
 const {gitCommitHash} = require('../common/git');
-const {travisJobUrl, isTravisPullRequestBuild} = require('../common/travis');
+const {log} = require('../common/logging');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 
-const IS_GULP_INTEGRATION = argv._[0] === 'integration';
-const IS_GULP_UNIT = argv._[0] === 'unit';
-const IS_GULP_E2E = argv._[0] === 'e2e';
+const IS_AMP_INTEGRATION = argv._[0] === 'integration';
+const IS_AMP_UNIT = argv._[0] === 'unit';
+const IS_AMP_E2E = argv._[0] === 'e2e';
 
-const IS_LOCAL_CHANGES = !!argv.local_changes;
-const IS_DIST = !!argv.compiled;
-
-const TEST_TYPE_SUBTYPES = new Map([
-  ['integration', ['local', 'minified']],
-  ['unit', ['local', 'local-changes']],
-  ['e2e', ['local']],
-]);
+const TEST_TYPE_SUBTYPES = isGithubActionsBuild()
+  ? new Map([
+      ['integration', ['firefox', 'safari', 'edge', 'ie']],
+      ['unit', ['firefox', 'safari', 'edge']],
+      ['e2e', ['firefox', 'safari']],
+    ])
+  : isCircleciBuild()
+  ? new Map([
+      [
+        'integration',
+        [
+          'unminified',
+          'nomodule-prod',
+          'nomodule-canary',
+          'module-prod',
+          'module-canary',
+          ...getValidExperiments(),
+        ],
+      ],
+      ['unit', ['unminified', 'local-changes']],
+      ['e2e', ['nomodule', ...getValidExperiments()]],
+    ])
+  : new Map([]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
-  ['integration', ['RUNTIME', 'FLAG_CONFIG', 'INTEGRATION_TEST']],
-  ['unit', ['RUNTIME', 'UNIT_TEST']],
-  ['e2e', ['RUNTIME', 'FLAG_CONFIG', 'E2E_TEST']],
+  ['integration', [Targets.RUNTIME, Targets.INTEGRATION_TEST]],
+  ['unit', [Targets.RUNTIME, Targets.UNIT_TEST]],
+  ['e2e', [Targets.RUNTIME, Targets.E2E_TEST]],
 ]);
 
+/**
+ * @return {string}
+ */
 function inferTestType() {
-  if (IS_GULP_E2E) {
-    return 'e2e/local';
+  // Determine type (early exit if there's no match).
+  const type = IS_AMP_E2E
+    ? 'e2e'
+    : IS_AMP_INTEGRATION
+    ? 'integration'
+    : IS_AMP_UNIT
+    ? 'unit'
+    : null;
+  if (type == null) {
+    throw new Error('No valid test type was inferred');
   }
 
-  let type;
-  if (IS_GULP_UNIT) {
-    type = 'unit';
-  } else if (IS_GULP_INTEGRATION) {
-    type = 'integration';
-  } else {
-    return null;
-  }
+  // Determine subtype (more specific cases come first).
+  const subtype = argv.local_changes
+    ? 'local-changes'
+    : argv.esm
+    ? 'module'
+    : argv.firefox
+    ? 'firefox'
+    : argv.safari
+    ? 'safari'
+    : argv.edge
+    ? 'edge'
+    : argv.ie
+    ? 'ie'
+    : argv.browsers == 'safari'
+    ? 'safari'
+    : argv.browsers == 'firefox'
+    ? 'firefox'
+    : argv.experiment
+    ? argv.experiment
+    : argv.compiled
+    ? 'nomodule'
+    : 'unminified';
 
-  if (IS_LOCAL_CHANGES) {
-    return `${type}/local-changes`;
-  } else if (IS_DIST) {
-    return `${type}/minified`;
-  } else {
-    return `${type}/local`;
-  }
+  return `${type}/${subtype}${maybeAddConfigSubtype()}`;
 }
 
-function postReport(type, action) {
-  if (type !== null && isTravisPullRequestBuild()) {
+/**
+ * @return {string}
+ */
+function maybeAddConfigSubtype() {
+  if (isCircleciBuild() && argv.config) {
+    return `-${argv.config}`;
+  }
+  return '';
+}
+
+/**
+ * @param {string} type
+ * @param {string} action
+ * @return {Promise<void>}
+ */
+async function postReport(type, action) {
+  if (type && isPullRequestBuild()) {
     const commitHash = gitCommitHash();
-    return requestPromise({
-      method: 'POST',
-      uri: `${reportBaseUrl}/${commitHash}/${type}/${action}`,
-      body: JSON.stringify({
-        travisJobUrl: travisJobUrl(),
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      // Do not use `json: true` because the response is a string, not JSON.
-    })
-      .then((body) => {
-        log(
-          green('INFO:'),
-          'reported',
-          cyan(`${type}/${action}`),
-          'to the test-status GitHub App'
-        );
-        if (body.length > 0) {
-          log(
-            green('INFO:'),
-            'response from test-status was',
-            cyan(body.substr(0, 100))
-          );
-        }
-      })
-      .catch((error) => {
-        log(
-          yellow('WARNING:'),
-          'failed to report',
-          cyan(`${type}/${action}`),
-          'to the test-status GitHub App:\n',
-          error.message.substr(0, 100)
-        );
-        return;
+
+    try {
+      const body = await requestPromise({
+        method: 'POST',
+        uri: `${reportBaseUrl}/${commitHash}/${type}/${action}`,
+        body: JSON.stringify({
+          ciJobUrl: ciJobUrl(),
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // Do not use `json: true` because the response is a string, not JSON.
       });
+
+      log('Reported', cyan(`${type}/${action}`), 'to GitHub');
+      if (body.length > 0) {
+        log('Response was', cyan(body.substr(0, 100)));
+      }
+    } catch (error) {
+      log(
+        yellow('WARNING:'),
+        'failed to report',
+        cyan(`${type}/${action}`),
+        'to GitHub:\n',
+        error.message.substr(0, 100)
+      );
+    }
   }
-  return Promise.resolve();
 }
 
-function reportTestErrored() {
-  return postReport(inferTestType(), 'report/errored');
+/**
+ * @return {Promise<void>}
+ */
+async function reportTestErrored() {
+  await postReport(inferTestType(), 'report/errored');
 }
 
-function reportTestFinished(success, failed) {
-  return postReport(inferTestType(), `report/${success}/${failed}`);
+/**
+ * @param {number|string} success
+ * @param {number|string} failed
+ * @return {Promise<void>}
+ */
+async function reportTestFinished(success, failed) {
+  await postReport(inferTestType(), `report/${success}/${failed}`);
 }
 
-function reportTestSkipped() {
-  return postReport(inferTestType(), 'skipped');
+/**
+ * @return {Promise<void>}
+ */
+async function reportTestSkipped() {
+  await postReport(inferTestType(), 'skipped');
 }
 
-function reportTestStarted() {
-  return postReport(inferTestType(), 'started');
+/**
+ * @return {Promise<void>}
+ */
+async function reportTestStarted() {
+  await postReport(inferTestType(), 'started');
 }
 
-async function reportAllExpectedTests(buildTargets) {
+/**
+ * @return {Promise<void>}
+ */
+async function reportAllExpectedTests() {
+  const buildTargets = determineBuildTargets();
   for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {
     const testTypeBuildTargets = TEST_TYPE_BUILD_TARGETS.get(type);
+    if (testTypeBuildTargets === undefined) {
+      throw new Error(
+        `Undefined test type ${type} for build targets ${buildTargets}`
+      );
+    }
     const action = testTypeBuildTargets.some((target) =>
       buildTargets.has(target)
     )
@@ -141,14 +210,13 @@ async function reportAllExpectedTests(buildTargets) {
 /**
  * Callback to the Karma.Server on('run_complete') event for simple test types.
  *
- * @param {!any} browsers
  * @param {!Karma.TestResults} results
  */
-function reportTestRunComplete(browsers, results) {
+async function reportTestRunComplete(results) {
   if (results.error) {
-    reportTestErrored();
+    await reportTestErrored();
   } else {
-    reportTestFinished(results.success, results.failed);
+    await reportTestFinished(results.success, results.failed);
   }
 }
 

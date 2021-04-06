@@ -17,11 +17,10 @@
 import {Poller} from './poller';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
+import {extensionScriptsInNode} from '../../../src/service/extension-script';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {startsWith} from '../../../src/string';
-import {toArray} from '../../../src/types';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -299,7 +298,7 @@ export class LiveListManager {
   setupVisibilityHandler_() {
     // Polling should always be stopped when document is no longer visible.
     this.ampdoc.onVisibilityChanged(() => {
-      if (this.ampdoc.isVisible()) {
+      if (this.ampdoc.isVisible() && this.hasActiveLiveLists_()) {
         // We use immediate so that the user starts getting updates
         // right away when they've switched back to the page.
         this.poller_.start(/** immediate */ true);
@@ -313,16 +312,15 @@ export class LiveListManager {
    * @param {!Document} doc
    */
   installExtensionsForDoc_(doc) {
-    const extensions = toArray(
-      doc.querySelectorAll('script[custom-element], script[custom-template]')
-    );
-    extensions.forEach((script) => {
-      const extensionName =
-        script.getAttribute('custom-element') ||
-        script.getAttribute('custom-template');
+    const extensions = extensionScriptsInNode(doc);
+    extensions.forEach(({extensionId, extensionVersion}) => {
       // This is a cheap operation if extension is already installed so no need
       // to over optimize checks.
-      this.extensions_.installExtensionForDoc(this.ampdoc, extensionName);
+      this.extensions_.installExtensionForDoc(
+        this.ampdoc,
+        extensionId,
+        extensionVersion
+      );
     });
   }
 
@@ -358,5 +356,5 @@ function isDocTransformed(root) {
   }
   const {documentElement} = root.ownerDocument;
   const transformed = documentElement.getAttribute('transformed');
-  return Boolean(transformed) && startsWith(transformed, TRANSFORMED_PREFIX);
+  return Boolean(transformed) && transformed.startsWith(TRANSFORMED_PREFIX);
 }

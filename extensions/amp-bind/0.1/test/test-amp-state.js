@@ -15,7 +15,6 @@
  */
 
 import '../amp-bind';
-import * as xhrUtils from '../../../../src/utils/xhr-utils';
 import {ActionTrust} from '../../../../src/action-constants';
 import {Services} from '../../../../src/services';
 import {UrlReplacementPolicy} from '../../../../src/batched-json';
@@ -48,7 +47,7 @@ describes.realWin(
       return el;
     }
 
-    beforeEach(() => {
+    beforeEach(async () => {
       ({win, ampdoc} = env);
 
       whenFirstVisiblePromise = new Promise((resolve, reject) => {
@@ -61,11 +60,7 @@ describes.realWin(
       env.sandbox.stub(ampdoc, 'hasBeenVisible').returns(false);
 
       element = getAmpState();
-      ampState = element.implementation_;
-
-      env.sandbox
-        .stub(xhrUtils, 'getViewerAuthTokenIfAvailable')
-        .returns(Promise.resolve());
+      ampState = await element.getImpl(false);
 
       // TODO(choumx): Remove stubbing of private function fetch_() once
       // batchFetchJsonFor() is easily stub-able.
@@ -79,7 +74,7 @@ describes.realWin(
 
     it('should not fetch until doc is visible', async () => {
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
-      element.build();
+      await element.buildInternal();
 
       whenFirstVisiblePromiseReject();
       await whenFirstVisiblePromise.catch(() => {});
@@ -90,7 +85,7 @@ describes.realWin(
 
     it('should fetch if `src` attribute exists', async () => {
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
-      element.build();
+      await element.buildInternal();
 
       whenFirstVisiblePromiseResolve();
       await whenFirstVisiblePromise;
@@ -102,8 +97,7 @@ describes.realWin(
       expect(ampState.fetch_).to.have.been.calledWithExactly(
         /* ampdoc */ env.sandbox.match.any,
         UrlReplacementPolicy.ALL,
-        /* refresh */ env.sandbox.match.falsy,
-        /* token */ env.sandbox.match.falsy
+        /* refresh */ env.sandbox.match.falsy
       );
 
       expect(bind.setState).calledWithMatch(
@@ -119,7 +113,7 @@ describes.realWin(
       env.sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
 
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
-      element.build();
+      await element.buildInternal();
 
       expect(actions.trigger).to.not.have.been.called;
 
@@ -141,7 +135,7 @@ describes.realWin(
       env.sandbox.spy(ampState, 'registerAction');
 
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
-      element.build();
+      await element.buildInternal();
 
       expect(ampState.registerAction).calledWithExactly(
         'refresh',
@@ -153,7 +147,7 @@ describes.realWin(
       env.sandbox.spy(ampState, 'registerAction');
 
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
-      element.build();
+      await element.buildInternal();
 
       const action = {method: 'refresh', satisfiesTrust: () => true};
       await ampState.executeAction(action);
@@ -175,7 +169,7 @@ describes.realWin(
     it('should parse its child script', async () => {
       element.innerHTML =
         '<script type="application/json">{"local": "data"}</script>';
-      await element.build();
+      await element.buildInternal();
 
       expect(bind.setState).calledWithMatch(
         {myAmpState: {local: 'data'}},
@@ -192,7 +186,7 @@ describes.realWin(
       element.innerHTML =
         '<script type="application/json">{"local": "data"}</script>';
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
-      await element.build();
+      await element.buildInternal();
 
       // No fetch should happen until doc is visible.
       expect(ampState.fetch_).to.not.have.been.called;
@@ -213,9 +207,9 @@ describes.realWin(
       );
     });
 
-    it('should not fetch if `src` is mutated and doc is not visible', () => {
+    it('should not fetch if `src` is mutated and doc is not visible', async () => {
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
-      element.build();
+      await element.buildInternal();
 
       // No fetch should happen until doc is visible.
       expect(ampState.fetch_).to.not.have.been.called;
@@ -230,7 +224,7 @@ describes.realWin(
 
     it('should fetch json if `src` is mutated', async () => {
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
-      element.build();
+      await element.buildInternal();
 
       // No fetch should happen until doc is visible.
       expect(ampState.fetch_).to.not.have.been.called;
@@ -249,35 +243,6 @@ describes.realWin(
       expect(bind.setState).calledWithMatch(
         {myAmpState: {remote: 'data'}},
         {skipEval: false, skipAmpState: true}
-      );
-    });
-
-    it('should use token with [crossorigin="amp-viewer-auth-token-via-post"]`', async () => {
-      xhrUtils.getViewerAuthTokenIfAvailable.returns(
-        Promise.resolve('idToken')
-      );
-
-      element.setAttribute('src', 'https://foo.com/bar?baz=1');
-      element.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
-      element.build();
-
-      whenFirstVisiblePromiseResolve();
-      await whenFirstVisiblePromise;
-
-      // await a single macro-task to let promise chains resolve.
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      expect(ampState.fetch_).to.have.been.calledOnce;
-      expect(ampState.fetch_).to.have.been.calledWithExactly(
-        /* ampdoc */ env.sandbox.match.any,
-        UrlReplacementPolicy.ALL,
-        /* refresh */ env.sandbox.match.falsy,
-        'idToken'
-      );
-
-      expect(bind.setState).calledWithMatch(
-        {myAmpState: {remote: 'data'}},
-        {skipEval: true, skipAmpState: false}
       );
     });
   }

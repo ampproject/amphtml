@@ -17,7 +17,6 @@
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 import {dev, devAssert} from './log';
 import {map} from './utils/object.js';
-import {startsWith} from './string';
 
 /** @type {Object<string, string>} */
 let propertyNameCache;
@@ -26,7 +25,6 @@ let propertyNameCache;
 const vendorPrefixes = ['Webkit', 'webkit', 'Moz', 'moz', 'ms', 'O', 'o'];
 
 /**
- * @export
  * @param {string} camelCase camel cased string
  * @return {string} title cased string
  */
@@ -56,7 +54,6 @@ function getVendorJsPropertyName_(style, titleCase) {
  * Returns the possibly prefixed JavaScript property name of a style property
  * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
  * (ex. transitionDuration).
- * @export
  * @param {!Object} style
  * @param {string} camelCase the camel cased version of a css property name
  * @param {boolean=} opt_bypassCache bypass the memoized cache of property
@@ -375,5 +372,5 @@ export function propagateObjectFitStyles(fromEl, toEl) {
  * @return {boolean}
  */
 function isVar(property) {
-  return startsWith(property, '--');
+  return property.startsWith('--');
 }

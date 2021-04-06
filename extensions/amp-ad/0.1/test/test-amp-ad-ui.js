@@ -245,6 +245,7 @@ describes.realWin(
             height: '50px',
           });
           env.win.document.body.appendChild(adElement);
+          env.sandbox.stub(uiHandler, 'setSize_');
           env.sandbox
             .stub(adImpl, 'attemptChangeSize')
             .callsFake((height, width) => {
@@ -262,6 +263,7 @@ describes.realWin(
         });
 
         it('should tolerate string input', () => {
+          env.sandbox.stub(uiHandler, 'setSize_');
           env.sandbox
             .stub(adImpl, 'attemptChangeSize')
             .callsFake((height, width) => {
@@ -319,6 +321,21 @@ describes.realWin(
             });
           });
         });
+      });
+    });
+
+    describe('sticky ads', () => {
+      it('should render close buttons on render once', () => {
+        expect(uiHandler.unlisteners_).to.be.empty;
+        uiHandler.stickyAdPosition_ = 'bottom';
+        uiHandler.onResizeSuccess();
+        expect(uiHandler.closeButtonRendered_).to.be.true;
+        expect(uiHandler.unlisteners_.length).to.equal(1);
+        expect(uiHandler.element_.querySelector('.amp-ad-close-button')).to.be
+          .not.null;
+
+        uiHandler.onResizeSuccess();
+        expect(uiHandler.unlisteners_.length).to.equal(1);
       });
     });
   }

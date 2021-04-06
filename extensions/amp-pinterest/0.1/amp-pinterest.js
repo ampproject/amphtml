@@ -50,12 +50,42 @@ import {user, userAssert} from '../../../src/log';
  *    - buttonFollow: User follow button
  */
 class AmpPinterest extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static createLoaderLogoCallback(element) {
+    const type = element.getAttribute('data-do');
+    if (type != 'embedPin') {
+      return {};
+    }
+
+    const html = htmlFor(element);
+    return {
+      color: '#E60019',
+      content: html`
+        <svg viewBox="0 0 72 72">
+          <path
+            fill="currentColor"
+            d="M36,26c-5.52,0-9.99,4.47-9.99,9.99c0,4.24,2.63,7.85,6.35,9.31c-0.09-0.79-0.16-2.01,0.03-2.87
+            c0.18-0.78,1.17-4.97,1.17-4.97s-0.3-0.6-0.3-1.48c0-1.39,0.81-2.43,1.81-2.43c0.86,0,1.27,0.64,1.27,1.41
+            c0,0.86-0.54,2.14-0.83,3.33c-0.24,1,0.5,1.81,1.48,1.81c1.78,0,3.14-1.88,3.14-4.57c0-2.39-1.72-4.06-4.18-4.06
+            c-2.85,0-4.51,2.13-4.51,4.33c0,0.86,0.33,1.78,0.74,2.28c0.08,0.1,0.09,0.19,0.07,0.29c-0.07,0.31-0.25,1-0.28,1.13
+            c-0.04,0.18-0.15,0.22-0.34,0.13c-1.25-0.58-2.03-2.4-2.03-3.87c0-3.15,2.29-6.04,6.6-6.04c3.46,0,6.16,2.47,6.16,5.77
+            c0,3.45-2.17,6.22-5.18,6.22c-1.01,0-1.97-0.53-2.29-1.15c0,0-0.5,1.91-0.62,2.38c-0.22,0.87-0.83,1.96-1.24,2.62
+            c0.94,0.29,1.92,0.44,2.96,0.44c5.52,0,9.99-4.47,9.99-9.99C45.99,30.47,41.52,26,36,26z"
+          />
+        </svg>
+      `,
+    };
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
     /** @private {string} */
     this.type_ = '';
+
+    /** @private {*} */
+    this.renderClass_ = null;
   }
   /**
    * @param {boolean=} onLayout
@@ -82,55 +112,38 @@ class AmpPinterest extends AMP.BaseElement {
       'The data-do attribute is required for <amp-pinterest> %s',
       this.element
     );
+
+    switch (this.type_) {
+      case 'embedPin':
+        this.renderClass_ = new PinWidget(this.element);
+        break;
+      case 'buttonPin':
+        this.renderClass_ = new SaveButton(this.element);
+        break;
+      case 'buttonFollow':
+        this.renderClass_ = new FollowButton(this.element);
+        break;
+      default:
+        return Promise.reject(
+          user().createError('Invalid type: %s', this.type_)
+        );
+    }
   }
 
   /** @override */
   layoutCallback() {
-    return this.render().then((node) => {
-      return this.element.appendChild(node);
-    });
-  }
-
-  /**
-   * Renders the component
-   * @return {*} TODO(#23582): Specify return type
-   */
-  render() {
-    switch (this.type_) {
-      case 'embedPin':
-        return new PinWidget(this.element).render();
-      case 'buttonPin':
-        return new SaveButton(this.element).render();
-      case 'buttonFollow':
-        return new FollowButton(this.element).render();
-    }
-    return Promise.reject(user().createError('Invalid type: %s', this.type_));
+    return this.renderClass_
+      .render()
+      .then((node) => this.element.appendChild(node));
   }
 
   /** @override */
-  createLoaderLogoCallback() {
-    if (this.type_ != 'embedPin') {
-      return {};
-    }
-
-    const html = htmlFor(this.element);
-    return {
-      color: '#E60019',
-      content: html`
-        <svg viewBox="0 0 72 72">
-          <path
-            fill="currentColor"
-            d="M36,26c-5.52,0-9.99,4.47-9.99,9.99c0,4.24,2.63,7.85,6.35,9.31c-0.09-0.79-0.16-2.01,0.03-2.87
-            c0.18-0.78,1.17-4.97,1.17-4.97s-0.3-0.6-0.3-1.48c0-1.39,0.81-2.43,1.81-2.43c0.86,0,1.27,0.64,1.27,1.41
-            c0,0.86-0.54,2.14-0.83,3.33c-0.24,1,0.5,1.81,1.48,1.81c1.78,0,3.14-1.88,3.14-4.57c0-2.39-1.72-4.06-4.18-4.06
-            c-2.85,0-4.51,2.13-4.51,4.33c0,0.86,0.33,1.78,0.74,2.28c0.08,0.1,0.09,0.19,0.07,0.29c-0.07,0.31-0.25,1-0.28,1.13
-            c-0.04,0.18-0.15,0.22-0.34,0.13c-1.25-0.58-2.03-2.4-2.03-3.87c0-3.15,2.29-6.04,6.6-6.04c3.46,0,6.16,2.47,6.16,5.77
-            c0,3.45-2.17,6.22-5.18,6.22c-1.01,0-1.97-0.53-2.29-1.15c0,0-0.5,1.91-0.62,2.38c-0.22,0.87-0.83,1.96-1.24,2.62
-            c0.94,0.29,1.92,0.44,2.96,0.44c5.52,0,9.99-4.47,9.99-9.99C45.99,30.47,41.52,26,36,26z"
-          />
-        </svg>
-      `,
-    };
+  firstLayoutCompleted() {
+    this.renderClass_.height().then((renderedHeight) => {
+      if (renderedHeight !== null) {
+        this.attemptChangeHeight(renderedHeight);
+      }
+    });
   }
 }
 

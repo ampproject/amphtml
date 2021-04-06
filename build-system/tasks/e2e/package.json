@@ -1,15 +1,15 @@
 {
   "private": true,
-  "name": "gulp-e2e",
+  "name": "amp-e2e",
   "version": "0.1.0",
-  "description": "Gulp e2e",
+  "description": "amp e2e",
   "devDependencies": {
-    "@babel/register": "7.10.5",
+    "@babel/register": "7.13.8",
     "babel-regenerator-runtime": "6.5.0",
-    "chromedriver": "84.0.0",
-    "puppeteer": "5.2.1",
-    "geckodriver": "1.19.1",
-    "selenium-webdriver": "4.0.0-alpha.7"
+    "chromedriver": "89.0.0",
+    "puppeteer": "8.0.0",
+    "geckodriver": "1.22.3",
+    "selenium-webdriver": "4.0.0-beta.2"
   },
   "resolutions": {
     "**/**/minimist": "^1.2.3"

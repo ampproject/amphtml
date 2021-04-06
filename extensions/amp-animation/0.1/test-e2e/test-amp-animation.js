@@ -17,8 +17,7 @@
 describes.endtoend(
   'amp-animation',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-animation/simple.html',
+    fixture: 'amp-animation/simple.html',
     // TODO(powerivq): Reenable for all environments
     environments: 'amp4ads-preset',
   },
@@ -29,7 +28,8 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('transparency animation should pause and restart', async () => {
+    // TODO(#33438, wg-components): Fix flakiness
+    it.skip('transparency animation should pause and restart', async () => {
       const cancelBtn = await controller.findElement('#cancelBtn');
       await controller.click(cancelBtn);
 

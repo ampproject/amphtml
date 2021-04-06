@@ -25,7 +25,7 @@ const EMPTY_DEPS = [];
  * @param {{
  *   type: (!Object|undefined),
  *   deps: (!Array<!ContextProp>|undefined),
- *   needsParent: (boolean|(function(!Array<T>):boolean)|undefined),
+ *   recursive: (boolean|(function(!Array<T>):boolean)|undefined),
  *   compute: ((function(!Node, !Array<T>, ...*):(T|undefined))|undefined),
  *   defaultValue: (T|undefined),
  * }=} opt_spec
@@ -38,7 +38,7 @@ export function contextProp(key, opt_spec) {
     // Default values.
     type: null,
     deps: EMPTY_DEPS,
-    needsParent: false,
+    recursive: false,
     compute: null,
     defaultValue: undefined,
     // Overrides.

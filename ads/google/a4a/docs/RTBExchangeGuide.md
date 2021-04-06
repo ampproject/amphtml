@@ -20,9 +20,9 @@ Exchanges will need to indicate in the RTB bid request whether a page is built i
 
 A new field is added to the `Site` object of the OpenRTB standard to indicate whether a webpage is built on AMP. In OpenRTB 2.5, this is section 3.2.13.
 
-| Field | Scope    | Type    | Default | Description                                                                                                                                 |
-| ----- | -------- | ------- | :-----: | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `amp` | optional | integer |    -    | Whether the request is for an Accelerated Mobile Page. 0 = page is non-AMP, 1 = page is built with AMP HTML. AMP status unknown if omitted. |
+| Field | Scope    | Type    | Default | Description                                                                                                                      |
+| ----- | -------- | ------- | :-----: | -------------------------------------------------------------------------------------------------------------------------------- |
+| `amp` | optional | integer |    -    | Whether the request is for an AMP Document. 0 = page is non-AMP, 1 = page is built with AMP HTML. AMP status unknown if omitted. |
 
 **`Imp` Object additional field: `ampad`**
 
@@ -55,29 +55,29 @@ SSPs will need to provide a new field in the bid response to allow bidders to re
 
 ### Verification of valid AMP
 
-- For AMPHTML ads to be rendered early, the exchange is required to verify and sign in real time that the ad is written in amp4ads `<html amp4ads>` creative format.
-- See "[Proposed Design](https://github.com/ampproject/amphtml/issues/3133)" for signing.
-- Ads that are valid AMPHTML ads will be allowed to render early by AMP pages. Ads that are not verified as valid AMPHTML ads will render at the same speed as non-AMPHTML ads.
-- Only AMPHTML ads should be returned in the `ampadurl`.
+-   For AMPHTML ads to be rendered early, the exchange is required to verify and sign in real time that the ad is written in amp4ads `<html amp4ads>` creative format.
+-   See "[Proposed Design](https://github.com/ampproject/amphtml/issues/3133)" for signing.
+-   Ads that are valid AMPHTML ads will be allowed to render early by AMP pages. Ads that are not verified as valid AMPHTML ads will render at the same speed as non-AMPHTML ads.
+-   Only AMPHTML ads should be returned in the `ampadurl`.
 
 ### Server-side fetch
 
-- For AMPHTML ads to be rendered early, AMPHTML ad content must be fetched with 0 additional "hops" from the client. This is designed to avoid poor user experiences due to ad latency and extra client-side calls.
-- The exchange's servers (not the client browser) will request the AMPHTML ad content located at the URL provided in `ampadurl` after a bidder wins the auction.
-- Creative servers must respond and return content within some reasonable SLA, recommended at 150ms.
-- The AMPHTML ad will be injected into the adslot and subsequently rendered. Note that since a valid AMPHTML ad cannot contain an iframe or another ad tag, the server-side fetch must retrieve the actual HTML of the creative.
+-   For AMPHTML ads to be rendered early, AMPHTML ad content must be fetched with 0 additional "hops" from the client. This is designed to avoid poor user experiences due to ad latency and extra client-side calls.
+-   The exchange's servers (not the client browser) will request the AMPHTML ad content located at the URL provided in `ampadurl` after a bidder wins the auction.
+-   Creative servers must respond and return content within some reasonable SLA, recommended at 150ms.
+-   The AMPHTML ad will be injected into the adslot and subsequently rendered. Note that since a valid AMPHTML ad cannot contain an iframe or another ad tag, the server-side fetch must retrieve the actual HTML of the creative.
 
 ### Impression Tracking and Billing URLs
 
-- RTB buyers often include impression trackers as a structured field in the bid response (for example `Bid.burl`, the "billing notice URL" in OpenRTB 2.5).
-- It is up to the exchange or publisher ad server to determine how these URLs are fired, but <code><[amp-pixel](https://amp.dev/documentation/components/amp-pixel)></code> and <code><[amp-analytics](https://amp.dev/documentation/components/amp-analytics)></code> can handle most impression tracking and analytics use cases.
+-   RTB buyers often include impression trackers as a structured field in the bid response (for example `Bid.burl`, the "billing notice URL" in OpenRTB 2.5).
+-   It is up to the exchange or publisher ad server to determine how these URLs are fired, but <code><[amp-pixel](https://amp.dev/documentation/components/amp-pixel)></code> and <code><[amp-analytics](https://amp.dev/documentation/components/amp-analytics)></code> can handle most impression tracking and analytics use cases.
 
 ## Background Docs
 
-- [AMPHTML Ads for AMP Pages (Github)](https://github.com/ampproject/amphtml/issues/3133)
-- [AMPHTML Ad Creative Format Spec (Github)](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md)
-- [AMPHTML Ads Overview (Github)](https://github.com/ampproject/amphtml/blob/master/ads/google/a4a/docs/a4a-readme.md)
-- [AMPHTML Ads Website from amp.dev](https://amp.dev/community/platform-and-vendor-partners)
-- [Example AMPHTML Ads](https://amp.dev/documentation/examples/)
-- [Speed comparison](https://amp.dev/documentation/examples/advertising-analytics/amphtml_ads_vs_non_amp_ads/?format=websites): see how fast an AMP Ad loads in comparison to a regular ad. Best viewed on a 3G connection.
-- [Discussion in OpenRTB Dev Forum](https://groups.google.com/forum/#!topic/openrtb-dev/0wyPsF5D07Q): RTB Specific Proposal
+-   [AMPHTML Ads for AMP Pages (Github)](https://github.com/ampproject/amphtml/issues/3133)
+-   [AMPHTML Ad Creative Format Spec (Github)](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md)
+-   [AMPHTML Ads Overview (Github)](https://github.com/ampproject/amphtml/blob/master/ads/google/a4a/docs/a4a-readme.md)
+-   [AMPHTML Ads Website from amp.dev](https://amp.dev/community/platform-and-vendor-partners)
+-   [Example AMPHTML Ads](https://amp.dev/documentation/examples/)
+-   [Speed comparison](https://amp.dev/documentation/examples/advertising-analytics/amphtml_ads_vs_non_amp_ads/?format=websites): see how fast an AMP Ad loads in comparison to a regular ad. Best viewed on a 3G connection.
+-   [Discussion in OpenRTB Dev Forum](https://groups.google.com/forum/#!topic/openrtb-dev/0wyPsF5D07Q): RTB Specific Proposal

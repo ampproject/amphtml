@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@import "../../../third_party/optimized-svg-icons/amp-social-share-svgs.css";
+@import '../../../third_party/optimized-svg-icons/amp-social-share-svgs.css';
 
 amp-social-share {
   background-repeat: no-repeat;
@@ -23,6 +23,11 @@ amp-social-share {
   text-decoration: none;
   cursor: pointer;
   position: relative;
+}
+
+amp-social-share:focus {
+  outline: #0389ff solid 2px;
+  outline-offset: 2px;
 }
 
 /**
@@ -78,7 +83,7 @@ amp-social-share {
 
 /* SMS Styling */
 .amp-social-share-sms {
-  background-color: #CA2B63;
+  background-color: #ca2b63;
 }
 
 /* "system" styling */

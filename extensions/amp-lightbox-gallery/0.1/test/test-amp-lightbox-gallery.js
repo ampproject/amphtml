@@ -41,7 +41,7 @@ describes.realWin(
     describe('basic functionality', function () {
       this.timeout(5000);
       it('should contain a container on build', (done) => {
-        gallery.build().then(() => {
+        gallery.buildInternal().then(() => {
           const container = doc.getElementsByClassName('i-amphtml-lbg');
           expect(container.length).to.equal(1);
           expect(container[0].tagName).to.equal('DIV');

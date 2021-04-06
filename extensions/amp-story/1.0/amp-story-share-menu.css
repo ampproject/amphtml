@@ -27,12 +27,14 @@
   transform: translate3d(0, 100vh, 0) !important;
   transition-delay: 0.15s !important;
   pointer-events: none !important;
+  visibility: hidden !important;
 }
 
 .i-amphtml-story-share-menu-visible {
   transform: translate3d(0, 0, 0) !important;
   transition-delay: 0s !important;
   pointer-events: auto !important;
+  visibility: initial !important;
 }
 
 /** Black opacity overlay. */
@@ -112,6 +114,9 @@
   font-size: 24px !important;
   line-height: 30px !important;
   text-align: center !important;
+  border: 0 !important;
+  padding: 0 !important;
+  background: none !important;
 }
 
 [desktop].i-amphtml-story-share-menu .i-amphtml-story-share-item {

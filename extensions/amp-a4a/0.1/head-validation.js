@@ -15,9 +15,12 @@
  */
 
 import {Services} from '../../../src/services';
+import {getMode} from '../../../src/mode';
+import {includes} from '../../../src/string';
 import {map} from '../../../src/utils/object';
-import {parseExtensionUrl} from '../../../src/service/extension-location';
-import {removeElement} from '../../../src/dom';
+import {parseExtensionUrl} from '../../../src/service/extension-script';
+import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
+import {removeElement, rootNodeFor} from '../../../src/dom';
 import {urls} from '../../../src/config';
 
 /**
@@ -88,8 +91,19 @@ export function processHead(win, adElement, head) {
     return null;
   }
 
-  const extensionService = Services.extensionsFor(win);
+  const root = rootNodeFor(head);
+  const htmlTag = root.documentElement;
+  if (
+    !htmlTag ||
+    (!htmlTag.hasAttribute('amp4ads') &&
+      !htmlTag.hasAttribute('⚡️4ads') &&
+      !htmlTag.hasAttribute('⚡4ads')) // Unicode weirdness.
+  ) {
+    return null;
+  }
+
   const urlService = Services.urlForDoc(adElement);
+  /** @type {!Array<{extensionId: string, extensionVersion: string}>} */
   const extensions = [];
   const fonts = [];
   const images = [];
@@ -123,13 +137,13 @@ export function processHead(win, adElement, head) {
 
   // Load any extensions; do not wait on their promises as this
   // is just to prefetch.
-  extensions.forEach((extension) =>
-    extensionService.preloadExtension(extension.extensionId)
-  );
+  preloadFriendlyIframeEmbedExtensions(win, extensions);
+
   // Preload any fonts.
   fonts.forEach((fontUrl) =>
     Services.preconnectFor(win).preload(adElement.getAmpDoc(), fontUrl)
   );
+
   // Preload any AMP images.
   images.forEach(
     (imageUrl) =>
@@ -144,8 +158,8 @@ export function processHead(win, adElement, head) {
 }
 
 /**
- * Allows json scripts and allow listed amp elements while removing others.
- * @param {!Array} extensions
+ * Allows json scripts and allowlisted amp elements while removing others.
+ * @param {!Array<{extensionId: string, extensionVersion: string}>} extensions
  * @param {!Element} script
  */
 function handleScript(extensions, script) {
@@ -154,9 +168,14 @@ function handleScript(extensions, script) {
   }
 
   const {src} = script;
-  if (EXTENSION_URL_PREFIX.test(src)) {
+  const isTesting = getMode().test || getMode().localDev;
+  if (
+    EXTENSION_URL_PREFIX.test(src) ||
+    // Integration tests point to local files.
+    (isTesting && includes(src, '/dist/'))
+  ) {
     const extensionInfo = parseExtensionUrl(src);
-    if (EXTENSION_ALLOWLIST[extensionInfo.extensionId]) {
+    if (extensionInfo && EXTENSION_ALLOWLIST[extensionInfo.extensionId]) {
       extensions.push(extensionInfo);
     }
   }
@@ -191,7 +210,11 @@ function handleLink(fonts, images, link) {
  * @param {!Element} style
  */
 function handleStyle(style) {
-  if (style.hasAttribute('amp-custom') || style.hasAttribute('amp-keyframes')) {
+  if (
+    style.hasAttribute('amp-custom') ||
+    style.hasAttribute('amp-keyframes') ||
+    style.hasAttribute('amp4ads-boilerplate')
+  ) {
     return;
   }
   removeElement(style);

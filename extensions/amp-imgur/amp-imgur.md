@@ -24,11 +24,9 @@ limitations under the License.
 
 # amp-imgur
 
-## Behavior
+## Usage
 
 This extension creates an iframe and displays an [imgur](http://imgur.com) post.
-
-Example:
 
 ```html
 <amp-imgur
@@ -41,25 +39,28 @@ Example:
 
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>data-imgur-id (required)</strong></td>
-    <td>The ID of the Imgur post.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>width (required)</strong></td>
-    <td>The width of the Imgur post.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>height (required)</strong></td>
-    <td>The height of the Imgur post.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
-  </tr>
-</table>
+### data-imgur-id (required)
+
+The id of the Imgur post.
+
+[tip type="important"]
+Album ids should prefixed with `a/` like `a/ZF7NS3V`.
+
+You can confirm this in the post's url. It should include `a/` before the rest of the id, like on: `https://imgur.com/a/ZF7NS3V`
+[/tip]
+
+### width (required)
+
+The width of the Imgur post.
+
+### height (required)
+
+The height of the Imgur post.
+
+### Common attributes
+
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
 ## Validation
 
-See [amp-imgur rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-imgur/validator-amp-imgur.protoascii) in the AMP validator specification.
+See [amp-imgur rules](validator-amp-imgur.protoascii) in the AMP validator specification.

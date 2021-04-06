@@ -61,16 +61,15 @@ import {
 } from '../../../src/form';
 import {getFormValidator, isCheckValiditySupported} from './form-validators';
 import {getMode} from '../../../src/mode';
-import {
-  getViewerAuthTokenIfAvailable,
-  setupAMPCors,
-  setupInit,
-  setupInput,
-} from '../../../src/utils/xhr-utils';
 import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray, toWin} from '../../../src/types';
+import {
+  setupAMPCors,
+  setupInit,
+  setupInput,
+} from '../../../src/utils/xhr-utils';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryParseJson} from '../../../src/json';
 
@@ -137,32 +136,32 @@ export class AmpForm {
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
 
-    /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacement_ = Services.urlReplacementsForDoc(element);
-
-    /** @private {?Promise} */
-    this.dependenciesPromise_ = null;
-
     /** @const @private {!HTMLFormElement} */
     this.form_ = element;
 
     /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc}  */
     this.ampdoc_ = Services.ampdoc(this.form_);
 
+    /** @private {?Promise} */
+    this.dependenciesPromise_ = null;
+
+    /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
+    this.urlReplacement_ = Services.urlReplacementsForDoc(this.ampdoc_);
+
     /** @const @private {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(this.win_);
+    this.templates_ = Services.templatesForDoc(this.ampdoc_);
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(this.win_);
 
     /** @const @private {!../../../src/service/action-impl.ActionService} */
-    this.actions_ = Services.actionServiceForDoc(this.form_);
+    this.actions_ = Services.actionServiceForDoc(this.ampdoc_);
 
     /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
-    this.mutator_ = Services.mutatorForDoc(this.form_);
+    this.mutator_ = Services.mutatorForDoc(this.ampdoc_);
 
     /** @const @private {!../../../src/service/viewer-interface.ViewerInterface}  */
-    this.viewer_ = Services.viewerForDoc(this.form_);
+    this.viewer_ = Services.viewerForDoc(this.ampdoc_);
 
     /**
      * @const {!../../../src/ssr-template-helper.SsrTemplateHelper}
@@ -258,7 +257,7 @@ export class AmpForm {
   getXhrUrl_(attribute) {
     const url = this.form_.getAttribute(attribute);
     if (url) {
-      const urlService = Services.urlForDoc(this.form_);
+      const urlService = Services.urlForDoc(this.ampdoc_);
       urlService.assertHttpsUrl(url, this.form_, attribute);
       userAssert(
         !urlService.isProxyOrigin(url),
@@ -305,7 +304,7 @@ export class AmpForm {
    * @param {string} method
    * @param {!Object<string, string>=} opt_extraFields
    * @param {!Array<string>=} opt_fieldDenylist
-   * @return {!Promise<!FetchRequestDef>}
+   * @return {!FetchRequestDef}
    */
   requestForFormFetch(url, method, opt_extraFields, opt_fieldDenylist) {
     let xhrUrl, body;
@@ -354,17 +353,7 @@ export class AmpForm {
         'headers': headers,
       }),
     };
-
-    return getViewerAuthTokenIfAvailable(this.form_).then((token) => {
-      if (token) {
-        userAssert(
-          request.fetchOpt['method'] == 'POST',
-          'Cannot attach auth token with GET request.'
-        );
-        body.append('ampViewerAuthToken', token);
-      }
-      return request;
-    });
+    return request;
   }
 
   /**
@@ -410,7 +399,7 @@ export class AmpForm {
       EXTERNAL_DEPS.join(',')
     );
     // Wait for an element to be built to make sure it is ready.
-    const promises = toArray(depElements).map((el) => el.whenBuilt());
+    const promises = toArray(depElements).map((el) => el.build());
     return (this.dependenciesPromise_ = this.waitOnPromisesOrTimeout_(
       promises,
       2000
@@ -487,7 +476,7 @@ export class AmpForm {
 
   /** @private */
   installInputMasking_() {
-    Services.inputmaskServiceForDocOrNull(this.form_).then(
+    Services.inputmaskServiceForDocOrNull(this.ampdoc_).then(
       (inputmaskService) => {
         if (inputmaskService) {
           inputmaskService.install();
@@ -515,7 +504,11 @@ export class AmpForm {
     }
     formDataForAnalytics['formId'] = this.form_.id;
 
-    this.analyticsEvent_(eventType, formDataForAnalytics);
+    try {
+      this.analyticsEvent_(eventType, formDataForAnalytics);
+    } catch (err) {
+      dev().error(TAG, 'Sending analytics failed:', err);
+    }
   }
 
   /**
@@ -771,26 +764,22 @@ export class AmpForm {
    * @private
    */
   handleSsrTemplate_(trust) {
-    let request;
     // Render template for the form submitting state.
     const values = this.getFormAsObject_();
     return this.renderTemplate_(values)
-      .then(() =>
-        this.actions_.trigger(
+      .then(() => {
+        return this.actions_.trigger(
           this.form_,
           FormEvents.SUBMIT,
           /* event */ null,
           trust
-        )
-      )
-      .then(() =>
-        this.requestForFormFetch(
+        );
+      })
+      .then(() => {
+        const request = this.requestForFormFetch(
           dev().assertString(this.xhrAction_),
           this.method_
-        )
-      )
-      .then((formRequest) => {
-        request = formRequest;
+        );
         request.fetchOpt = setupInit(request.fetchOpt);
         request.fetchOpt = setupAMPCors(
           this.win_,
@@ -973,12 +962,13 @@ export class AmpForm {
    */
   doXhr_(url, method, opt_extraFields, opt_fieldDenylist) {
     this.assertSsrTemplate_(false, 'XHRs should be proxied.');
-    return this.requestForFormFetch(
+    const request = this.requestForFormFetch(
       url,
       method,
       opt_extraFields,
       opt_fieldDenylist
-    ).then((request) => this.xhr_.fetch(request.xhrUrl, request.fetchOpt));
+    );
+    return this.xhr_.fetch(request.xhrUrl, request.fetchOpt);
   }
 
   /**
@@ -988,18 +978,8 @@ export class AmpForm {
    * @private
    */
   trustForSubmitResponse_(incomingTrust) {
-    // TODO(choumx): Remove this expected error before Q1 2020.
-    if (incomingTrust <= ActionTrust.DEFAULT) {
-      dev().expectedError(
-        TAG,
-        'Recursive form submissions are scheduled to be deprecated by 1/1/2020. ' +
-          'See https://github.com/ampproject/amphtml/issues/24894.'
-      );
-    }
-    // Only degrade trust across form submission in AMP4EMAIL for now.
-    return this.isAmp4Email_
-      ? /** @type {!ActionTrust} */ (incomingTrust - 1)
-      : incomingTrust;
+    // Degrade trust across form submission.
+    return /** @type {!ActionTrust} */ (incomingTrust - 1);
   }
 
   /**
@@ -1066,8 +1046,8 @@ export class AmpForm {
       promise = Promise.resolve(null);
     }
     return promise.then((responseJson) => {
-      this.triggerFormSubmitInAnalytics_('amp-form-submit-error');
       this.handleSubmitFailure_(e, responseJson, incomingTrust);
+      this.triggerFormSubmitInAnalytics_('amp-form-submit-error');
       this.maybeHandleRedirect_(e.response);
     });
   }
@@ -1197,7 +1177,7 @@ export class AmpForm {
         this.form_
       );
       try {
-        const urlService = Services.urlForDoc(this.form_);
+        const urlService = Services.urlForDoc(this.ampdoc_);
         urlService.assertAbsoluteHttpOrHttpsUrl(redirectTo);
         urlService.assertHttpsUrl(redirectTo, 'AMP-Redirect-To', 'Url');
       } catch (e) {
@@ -1208,7 +1188,7 @@ export class AmpForm {
           redirectTo
         );
       }
-      const navigator = Services.navigationForDoc(this.form_);
+      const navigator = Services.navigationForDoc(this.ampdoc_);
       navigator.navigateTo(this.win_, redirectTo, REDIRECT_TO_HEADER);
     }
   }
@@ -1296,12 +1276,24 @@ export class AmpForm {
         p = this.ssrTemplateHelper_
           .applySsrOrCsrTemplate(devAssert(container), data)
           .then((rendered) => {
-            rendered.id = messageId;
-            rendered.setAttribute('i-amphtml-rendered', '');
+            // TODO(#29566): Simplify section appending rendered contents to DOM.
+            let renderContainer;
+            if (isArray(rendered)) {
+              if (rendered.length === 1) {
+                renderContainer = rendered[0];
+              } else {
+                renderContainer = document.createElement('div');
+                rendered.forEach((child) => renderContainer.appendChild(child));
+              }
+            } else {
+              renderContainer = rendered;
+            }
+            renderContainer.id = messageId;
+            renderContainer.setAttribute('i-amphtml-rendered', '');
             return this.mutator_.mutateElement(
               dev().assertElement(container),
               () => {
-                container.appendChild(rendered);
+                container.appendChild(dev().assertElement(renderContainer));
                 const renderedEvent = createCustomEvent(
                   this.win_,
                   AmpEvents.DOM_UPDATE,

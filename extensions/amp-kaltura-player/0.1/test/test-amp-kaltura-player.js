@@ -43,7 +43,7 @@ describes.realWin(
       }
       doc.body.appendChild(kalturaPlayer);
       return kalturaPlayer
-        .build()
+        .buildInternal()
         .then(() => {
           return kalturaPlayer.layoutCallback();
         })
@@ -61,6 +61,22 @@ describes.realWin(
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.src).to.equal(
           'https://cdnapisec.kaltura.com/p/1281471/sp/128147100/embedIframeJs/uiconf_id/33502051/partner_id/1281471?iframeembed=true&playerId=kaltura_player_amp&entry_id=1_3ts1ms9c'
+        );
+      });
+    });
+
+    it('renders with service-url', () => {
+      return getKaltura({
+        'data-service-url': 'front.video.funke.press',
+        'data-partner': '106',
+        'data-entryid': '0_b87xdluw',
+        'data-uiconf': '23464665',
+      }).then((bc) => {
+        const iframe = bc.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.tagName).to.equal('IFRAME');
+        expect(iframe.src).to.equal(
+          'https://front.video.funke.press/p/106/sp/10600/embedIframeJs/uiconf_id/23464665/partner_id/106?iframeembed=true&playerId=kaltura_player_amp&entry_id=0_b87xdluw'
         );
       });
     });
@@ -84,7 +100,7 @@ describes.realWin(
       return allowConsoleError(() => {
         return getKaltura({})
           .then((kp) => {
-            kp.build();
+            kp.buildInternal();
           })
           .should.eventually.be.rejectedWith(
             /The data-partner attribute is required for/
@@ -102,6 +118,23 @@ describes.realWin(
         const iframe = bc.querySelector('iframe');
         expect(iframe.src).to.contain('flashvars%5BmyParam%5D=hello%20world');
       });
+    });
+
+    it('unlayout and relayout', async () => {
+      const kp = await getKaltura({
+        'data-partner': '1281471',
+        'data-entryid': '1_3ts1ms9c',
+        'data-uiconf': '33502051',
+        'data-param-my-param': 'hello world',
+      });
+      expect(kp.querySelector('iframe')).to.exist;
+
+      const unlayoutResult = kp.unlayoutCallback();
+      expect(unlayoutResult).to.be.true;
+      expect(kp.querySelector('iframe')).to.not.exist;
+
+      await kp.layoutCallback();
+      expect(kp.querySelector('iframe')).to.exist;
     });
 
     describe('createPlaceholderCallback', () => {

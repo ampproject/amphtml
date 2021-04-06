@@ -22,10 +22,10 @@ const pageWidth = 600;
 const pageHeight = 600;
 
 describes.endtoend(
-  'AMP carousel arrows when non-looping',
+  'amp-base-carousel - arrows when non-looping',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/non-looping.amp.html',
+    version: '0.1',
+    fixture: 'amp-base-carousel/non-looping.amp.html',
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
     //TODO(spaharmi): fails on shadow demo

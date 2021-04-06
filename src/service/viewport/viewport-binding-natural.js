@@ -59,7 +59,6 @@ export class ViewportBindingNatural_ {
     /** @const {function()} */
     this.boundScrollEventListener_ = this.handleScrollEvent_.bind(this);
 
-    // eslint-disable-next-line jsdoc/require-returns
     /** @const {function()} */
     this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
 
@@ -240,8 +239,8 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
-  getLayoutRect(el, opt_scrollLeft, opt_scrollTop, opt_premeasuredRect) {
-    const b = opt_premeasuredRect || el./*OK*/ getBoundingClientRect();
+  getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
+    const b = el./*OK*/ getBoundingClientRect();
     const scrollTop =
       opt_scrollTop != undefined ? opt_scrollTop : this.getScrollTop();
     const scrollLeft =

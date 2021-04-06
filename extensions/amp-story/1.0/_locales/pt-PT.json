@@ -1,0 +1,45 @@
+{
+  "2": {"string": "Toque em Seguinte."},
+  "3": {"string": "Toque em Anterior"},
+  "4": {
+    "string": "Não foi possível copiar o link para a área de transferência :("
+  },
+  "5": {"string": "Link copiado!"},
+  "6": {"string": "Email"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Obter link"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "SMS"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {
+    "string": "Expanda a altura e a largura da sua janela para ver esta experiência."
+  },
+  "19": {
+    "string": "Tem de ativar a experiência da história AMP para ver este conteúdo."
+  },
+  "20": {"string": "Conseguirá visualizar melhor esta página no modo retrato."},
+  "21": {
+    "string": "Lamentamos, mas parece que o seu navegador não suporta esta experiência."
+  },
+  "22": {"string": "Aceitar"},
+  "23": {"string": "Recusar"},
+  "25": {"string": "Veja no domínio original:"},
+  "26": {"string": "Mais acerca dos resultados AMP"},
+  "27": {"string": "Continuar mesmo assim"},
+  "28": {"string": "Alterar as definições de privacidade dos dados"},
+  "29": {"string": "Definições de privacidade"},
+  "30": {"string": "Mais para ler"},
+  "31": {"string": "Som desativado"},
+  "32": {"string": "Som ativado"},
+  "33": {"string": "Esta página não tem som."},
+  "34": {"string": "Reproduzir vídeo"},
+  "35": {"string": "Deslizar rapidamente para cima"},
+  "36": {"string": "Expandir twit"},
+  "37": {"string": "Expanda a altura da janela para ver esta experiência."},
+  "38": {"string": "Expanda a largura da janela para ver esta experiência."},
+  "63": {"string": "Line"}
+}

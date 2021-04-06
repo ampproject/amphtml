@@ -16,54 +16,45 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script runs end to end tests.
- * This is run during the CI stage = test; job = e2e tests.
+ * @fileoverview Script that runs the end-to-end tests during CI.
  */
 
-const colors = require('ansi-colors');
 const {
-  downloadDistOutput,
-  printChangeSummary,
-  startTimer,
-  stopTimer,
-  timedExecOrDie: timedExecOrDieBase,
+  downloadNomoduleOutput,
+  printSkipMessage,
+  timedExecOrDie,
+  timedExecOrThrow,
 } = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
-const {isTravisPullRequestBuild} = require('../common/travis');
+const {buildTargetsInclude, Targets} = require('./build-targets');
+const {runCiJob} = require('./ci-job');
 
-const FILENAME = 'e2e-tests.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const jobName = 'e2e-tests.js';
 
-async function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-
-  if (!isTravisPullRequestBuild()) {
-    downloadDistOutput(FILENAME);
-    timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp e2e --nobuild --headless --compiled');
-  } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('E2E_TEST')
-    ) {
-      downloadDistOutput(FILENAME);
-      timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp e2e --nobuild --headless --compiled');
-    } else {
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('End to End Tests'),
-        'because this commit does not affect the runtime, flag configs,',
-        'or end-to-end tests'
-      );
+function pushBuildWorkflow() {
+  downloadNomoduleOutput();
+  try {
+    timedExecOrThrow(
+      'amp e2e --nobuild --headless --compiled --report',
+      'End-to-end tests failed!'
+    );
+  } catch (e) {
+    if (e.status) {
+      process.exitCode = e.status;
     }
+  } finally {
+    timedExecOrDie('amp test-report-upload');
   }
-  stopTimer(FILENAME, FILENAME, startTime);
 }
 
-main();
+function prBuildWorkflow() {
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.E2E_TEST)) {
+    downloadNomoduleOutput();
+    timedExecOrDie('amp e2e --nobuild --headless --compiled');
+  } else {
+    printSkipMessage(
+      jobName,
+      'this PR does not affect the runtime or end-to-end tests'
+    );
+  }
+}
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

@@ -98,6 +98,11 @@ const mode = {
 export let GeoDef;
 
 export class AmpGeo extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -114,11 +119,6 @@ export class AmpGeo extends AMP.BaseElement {
     this.matchedGroups_ = [];
     /** @private {Array<string>} */
     this.definedGroups_ = [];
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @override */

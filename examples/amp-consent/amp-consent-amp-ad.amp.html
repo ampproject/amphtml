@@ -27,17 +27,16 @@
   <amp-consent id='ABC' layout='nodisplay' type='_ping_'>
     <script type="application/json">
       {
-            "consents": {},
-            "postPromptUI": "postPromptUI",
-            "clientConfig": {
-              "CMP_id": "test_id",
-              "other_info": "test_info"
-            }
-          }
+        "postPromptUI": "postPromptUI",
+        "clientConfig": {
+          "CMP_id": "test_id",
+          "other_info": "test_info"
+        }
+      }
     </script>
     <div id="postPromptUI">
       Post Prompt UI
-      <button on="tap:ABC.prompt(consent=_ping_)" role="button">Manage</button>
+      <button on="tap:ABC.prompt(consent=_ping_)">Manage</button>
     </div>
   </amp-consent>
   <!-- End _ping_ example -->
@@ -49,7 +48,7 @@
     width="320" height="50"
     type="doubleclick"
     data-slot="/4119129/mobile_ad_banner"
-    rtc-config='{"vendors": {"fakeVendor": {"SLOT_ID": "1"}}, "urls": ["https://localhost:4443/posts?slot_id=1&consent_state=CONSENT_STATE&consent_string=CONSENT_STRING"], "timeoutMillis": 500}'>
+    rtc-config='{"vendors": {"fakeVendor": {"SLOT_ID": "1"}}, "urls": ["https://localhost:4443/posts?slot_id=1&consent_state=CONSENT_STATE&consent_string=CONSENT_STRING&gdprApplies=CONSENT_METADATA(gdprApplies)&additionalConsent=CONSENT_METADATA(additionalConsent)&consentStringType=CONSENT_METADATA(consentStringType)"], "timeoutMillis": 500}'>
   </amp-ad>
 
   <h2>Doubleclick with RTC (Blocked by _till_accepted)</h2>
@@ -57,7 +56,7 @@
     width="320" height="50"
     type="doubleclick"
     data-slot="/4119129/mobile_ad_banner"
-    rtc-config='{"vendors": {"fakeVendor": {"SLOT_ID": "1"}}, "urls": ["https://localhost:4443/posts?slot_id=1&consent_state=CONSENT_STATE&consent_string=CONSENT_STRING"], "timeoutMillis": 500}'>
+    rtc-config='{"vendors": {"fakeVendor": {"SLOT_ID": "1"}}, "urls": ["https://localhost:4443/posts?slot_id=1&consent_state=CONSENT_STATE&consent_string=CONSENT_STRING&gdprApplies=CONSENT_METADATA(gdprApplies)&additionalConsent=CONSENT_METADATA(additionalConsent)&consentStringType=CONSENT_METADATA(consentStringType)"], "timeoutMillis": 500}'>
     </amp-ad>
 
   </amp-ad>

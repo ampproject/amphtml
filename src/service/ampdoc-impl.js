@@ -18,16 +18,19 @@ import {Deferred} from '../utils/promise';
 import {Observable} from '../observable';
 import {Signals} from '../utils/signals';
 import {VisibilityState} from '../visibility-state';
+import {WindowInterface} from '../window-interface';
 import {
   addDocumentVisibilityChangeListener,
   getDocumentVisibilityState,
   removeDocumentVisibilityChangeListener,
 } from '../utils/document-visibility';
 import {dev, devAssert} from '../log';
-import {getParentWindowFrameElement, registerServiceBuilder} from '../service';
-import {getShadowRootNode} from '../shadow-embed';
+import {
+  disposeServicesForDoc,
+  getParentWindowFrameElement,
+  registerServiceBuilder,
+} from '../service';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
-import {isInAmpdocFieExperiment} from '../ampdoc-fie';
 import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '../dom';
 import {map} from '../utils/object';
 import {parseQueryString} from '../url';
@@ -52,6 +55,8 @@ export let AmpDocOptions;
  * @enum {string}
  */
 const AmpDocSignals = {
+  // A complete preinstalled list of extensions is known.
+  EXTENSIONS_KNOWN: '-ampdoc-ext-known',
   // Signals the document has become visible for the first time.
   FIRST_VISIBLE: '-ampdoc-first-visible',
   // Signals when the document becomes visible the next time.
@@ -86,12 +91,6 @@ export class AmpDocService {
       });
       win.document[AMPDOC_PROP] = this.singleDoc_;
     }
-
-    /** @private {boolean} */
-    this.ampdocFieExperimentOn_ = isInAmpdocFieExperiment(win);
-
-    /** @private {boolean} */
-    this.mightHaveShadowRoots_ = !isSingleDoc;
   }
 
   /**
@@ -133,93 +132,45 @@ export class AmpDocService {
 
   /**
    * Returns the instance of the ampdoc (`AmpDoc`) that contains the specified
-   * node. If the runtime is in the single-doc mode, the one global `AmpDoc`
-   * instance is returned, unless specfically looking for a closer `AmpDoc`.
-   * Otherwise, this method locates the `AmpDoc` that contains the specified
-   * node and, if necessary, initializes it.
-   *
-   * TODO(#22733): rewrite docs once the ampdoc-fie is launched.
+   * node.
    *
    * @param {!Node} node
    * @return {?AmpDoc}
    */
   getAmpDocIfAvailable(node) {
-    if (this.ampdocFieExperimentOn_) {
-      let n = node;
-      while (n) {
-        // A custom element may already have the reference. If we are looking
-        // for the closest AmpDoc, the element might have a reference to the
-        // global AmpDoc, which we do not want. This occurs when using
-        // <amp-next-page>.
-
-        const cachedAmpDoc = this.getCustomElementAmpDocReference_(node);
-        if (cachedAmpDoc) {
-          return cachedAmpDoc;
-        }
-
-        // Root note: it's either a document, or a shadow document.
-        const rootNode = rootNodeFor(n);
-        if (!rootNode) {
-          break;
-        }
-        const ampdoc = rootNode[AMPDOC_PROP];
-        if (ampdoc) {
-          return ampdoc;
-        }
-
-        // Try to iterate to the host of the current root node.
-        // First try the shadow root's host.
-        if (rootNode.host) {
-          n = rootNode.host;
-        } else {
-          // Then, traverse the boundary of a friendly iframe.
-          n = getParentWindowFrameElement(rootNode, this.win);
-        }
-      }
-
-      return null;
-    }
-
-    // Otherwise discover and possibly create the ampdoc.
     let n = node;
     while (n) {
       // A custom element may already have the reference. If we are looking
       // for the closest AmpDoc, the element might have a reference to the
       // global AmpDoc, which we do not want. This occurs when using
       // <amp-next-page>.
+
       const cachedAmpDoc = this.getCustomElementAmpDocReference_(node);
       if (cachedAmpDoc) {
         return cachedAmpDoc;
       }
 
-      // Traverse the boundary of a friendly iframe.
-      const frameElement = getParentWindowFrameElement(n, this.win);
-      if (frameElement) {
-        n = frameElement;
-        continue;
-      }
-
-      if (!this.mightHaveShadowRoots_) {
+      // Root note: it's either a document, or a shadow document.
+      const rootNode = rootNodeFor(n);
+      if (!rootNode) {
         break;
       }
-
-      // Shadow doc.
-      const shadowRoot =
-        n.nodeType == /* DOCUMENT */ 9 ? n : getShadowRootNode(n);
-      if (!shadowRoot) {
-        break;
-      }
-
-      const ampdoc = shadowRoot[AMPDOC_PROP];
+      const ampdoc = rootNode[AMPDOC_PROP];
       if (ampdoc) {
         return ampdoc;
       }
-      n = shadowRoot.host;
+
+      // Try to iterate to the host of the current root node.
+      // First try the shadow root's host.
+      if (rootNode.host) {
+        n = rootNode.host;
+      } else {
+        // Then, traverse the boundary of a friendly iframe.
+        n = getParentWindowFrameElement(rootNode, this.win);
+      }
     }
 
-    // If we were looking for the closest AmpDoc, then fall back to the single
-    // doc if there is no other AmpDoc that is closer.
-    return this.singleDoc_;
+    return null;
   }
 
   /**
@@ -234,14 +185,6 @@ export class AmpDocService {
    * @return {!AmpDoc}
    */
   getAmpDoc(node) {
-    // Ensure that node is attached if specified. This check uses a new and
-    // fast `isConnected` API and thus only checked on platforms that have it.
-    // See https://www.chromestatus.com/feature/5676110549352448.
-    devAssert(
-      node['isConnected'] === undefined || node['isConnected'] === true,
-      'The node must be attached to request ampdoc.'
-    );
-
     const ampdoc = this.getAmpDocIfAvailable(node);
     if (!ampdoc) {
       throw dev().createError('No ampdoc found for', node);
@@ -258,7 +201,6 @@ export class AmpDocService {
    * @restricted
    */
   installShadowDoc(url, shadowRoot, opt_options) {
-    this.mightHaveShadowRoots_ = true;
     devAssert(
       !shadowRoot[AMPDOC_PROP],
       'The shadow root already contains ampdoc'
@@ -323,8 +265,8 @@ export class AmpDoc {
     /** @protected {?Object<string, string>} */
     this.meta_ = null;
 
-    /** @private @const {!Array<string>} */
-    this.declaredExtensions_ = [];
+    /** @private @const {!Object<string, string>} */
+    this.declaredExtensions_ = {};
 
     /** @private {?VisibilityState} */
     this.visibilityStateOverride_ =
@@ -375,6 +317,7 @@ export class AmpDoc {
    * Dispose the document.
    */
   dispose() {
+    disposeServicesForDoc(this);
     this.unsubsribes_.forEach((unsubsribe) => unsubsribe());
   }
 
@@ -481,21 +424,55 @@ export class AmpDoc {
   /**
    * Returns whether the specified extension has been declared on this ampdoc.
    * @param {string} extensionId
+   * @param {string=} opt_version
    * @return {boolean}
    */
-  declaresExtension(extensionId) {
-    return this.declaredExtensions_.indexOf(extensionId) != -1;
+  declaresExtension(extensionId, opt_version) {
+    const declared = this.declaredExtensions_[extensionId];
+    if (!declared) {
+      return false;
+    }
+    return !opt_version || declared === opt_version;
   }
 
   /**
    * Adds a declared extension to an ampdoc.
    * @param {string} extensionId
+   * @param {string} version
    * @restricted
    */
-  declareExtension(extensionId) {
-    if (!this.declaresExtension(extensionId)) {
-      this.declaredExtensions_.push(extensionId);
-    }
+  declareExtension(extensionId, version) {
+    devAssert(
+      !this.declaredExtensions_[extensionId] ||
+        this.declaredExtensions_[extensionId] === version,
+      'extension already declared %s',
+      extensionId
+    );
+    this.declaredExtensions_[extensionId] = version;
+  }
+
+  /**
+   * @param {string} extensionId
+   * @return {?string}
+   */
+  getExtensionVersion(extensionId) {
+    return this.declaredExtensions_[extensionId] || null;
+  }
+
+  /**
+   * Signal that the initial document set of extensions is known.
+   * @restricted
+   */
+  setExtensionsKnown() {
+    this.signals_.signal(AmpDocSignals.EXTENSIONS_KNOWN);
+  }
+
+  /**
+   * Resolved when the initial document set of extension is known.
+   * @return {!Promise}
+   */
+  whenExtensionsKnown() {
+    return this.signals_.whenSignal(AmpDocSignals.EXTENSIONS_KNOWN);
   }
 
   /**
@@ -802,7 +779,7 @@ export class AmpDocSingle extends AmpDoc {
 
   /** @override */
   getUrl() {
-    return this.win.location.href;
+    return WindowInterface.getLocation(this.win).href;
   }
 
   /** @override */
@@ -1087,14 +1064,4 @@ export function installDocService(win, isSingleDoc, opt_initParams) {
   registerServiceBuilder(win, 'ampdoc', function () {
     return new AmpDocService(win, isSingleDoc, opt_initParams);
   });
-}
-
-/**
- * @param {AmpDocService} ampdocService
- * @param {boolean} value
- * @visibleForTesting
- */
-export function updateFieModeForTesting(ampdocService, value) {
-  // TODO(#22733): remove this method once ampdoc-fie is launched.
-  ampdocService.ampdocFieExperimentOn_ = value;
 }

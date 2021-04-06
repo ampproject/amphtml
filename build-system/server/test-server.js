@@ -19,11 +19,18 @@
  * @fileoverview Creates an http server to handle responses for different test
  * cases.
  */
-const app = require('express')();
 const bodyParser = require('body-parser');
+const express = require('express');
+const app = express();
 
 app.use(bodyParser.json());
 
+/**
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
+ */
 function setCorsHeaders(req, res, next) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
@@ -44,11 +51,11 @@ app.use('/redirect-to', function (req, res) {
   res.redirect(302, req.query.url);
 });
 
-app.use('/status/404', function (req, res) {
+app.use('/status/404', function (_req, res) {
   res.status(404).end();
 });
 
-app.use('/status/500', function (req, res) {
+app.use('/status/500', function (_req, res) {
   res.status(500).end();
 });
 
@@ -101,7 +108,7 @@ app.use('/form/post', function (req, res) {
   });
 });
 
-app.use('/form/verify-error', function (req, res) {
+app.use('/form/verify-error', function (_req, res) {
   res.status(400).json({
     verifyErrors: [{name: 'email', message: 'That email is already taken.'}],
   });

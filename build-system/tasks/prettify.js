@@ -15,48 +15,57 @@
  */
 
 /**
- * @fileoverview This file implements the `gulp prettify` task, which uses
+ * @fileoverview This file implements the `amp prettify` task, which uses
  * prettier to check (and optionally fix) the formatting in a variety of
- * non-JS files in the repo. (JS files are separately checked by `gulp lint`,
+ * non-JS files in the repo. (JS files are separately checked by `amp lint`,
  * which uses eslint.)
  */
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
-const gulp = require('gulp');
-const log = require('fancy-log');
 const path = require('path');
-const prettier = require('gulp-prettier');
+const prettier = require('prettier');
 const tempy = require('tempy');
+const {
+  log,
+  logLocalDev,
+  logOnSameLine,
+  logOnSameLineLocalDev,
+  logWithoutTimestamp,
+} = require('../common/logging');
 const {exec} = require('../common/exec');
-const {getFilesToCheck, logOnSameLine} = require('../common/utils');
-const {green, cyan, red, yellow} = require('ansi-colors');
-const {isTravisBuild} = require('../common/travis');
-const {maybeUpdatePackages} = require('./update-packages');
+const {getFilesToCheck} = require('../common/utils');
+const {green, cyan, red, yellow} = require('kleur/colors');
 const {prettifyGlobs} = require('../test-configs/config');
 
 const rootDir = path.dirname(path.dirname(__dirname));
 const tempDir = tempy.directory();
-const prettierCmd = 'node_modules/.bin/prettier';
-
-// Message header printed by gulp-prettier before the list of files with errors.
-// See https://github.com/bhargavrpatel/gulp-prettier/blob/master/index.js#L90
-const header =
-  'Code style issues found in the following file(s). Forgot to run Prettier?';
 
 /**
  * Checks files for formatting (and optionally fixes them) with Prettier.
- *
- * @return {!Promise}
+ * Explicitly makes sure the API doesn't check files in `.prettierignore`.
  */
-function prettify() {
-  maybeUpdatePackages();
-  const filesToCheck = getFilesToCheck(prettifyGlobs, {dot: true});
+async function prettify() {
+  const filesToCheck = getFilesToCheck(
+    prettifyGlobs,
+    {dot: true},
+    '.prettierignore'
+  );
   if (filesToCheck.length == 0) {
-    return Promise.resolve();
+    return;
   }
-  return runPrettify(filesToCheck);
+  await runPrettify(filesToCheck);
+}
+
+/**
+ * Resolves the prettier config for the given file
+ * @param {string} file
+ * @return {Promise<Object>}
+ */
+async function getOptions(file) {
+  const config = await prettier.resolveConfig(file);
+  return {filepath: file, ...config};
 }
 
 /**
@@ -65,112 +74,85 @@ function prettify() {
  *
  * @param {string} file
  */
-function printErrorWithSuggestedFixes(file) {
-  console.log('\n');
+async function printErrorWithSuggestedFixes(file) {
+  logWithoutTimestamp('\n');
   log(`Suggested fixes for ${cyan(file)}:`);
+  const options = await getOptions(file);
+  const original = fs.readFileSync(file).toString();
+  const fixed = prettier.format(original, options);
   const fixedFile = `${tempDir}/${file}`;
   fs.ensureDirSync(path.dirname(fixedFile));
-  exec(`${prettierCmd} ${file} > ${fixedFile}`);
+  fs.writeFileSync(fixedFile, fixed);
   const diffCmd = `git -c color.ui=always diff -U0 ${file} ${fixedFile} | tail -n +5`;
   exec(diffCmd);
 }
 
 /**
- * Runs prettier on the given list of files with gulp-prettier.
- *
- * @param {!Array<string>} filesToCheck
- * @return {!Promise}
+ * Prints instructions for how to auto-fix errors.
  */
-function runPrettify(filesToCheck) {
-  if (!isTravisBuild()) {
-    log(green('Starting checks...'));
-  }
-  return new Promise((resolve, reject) => {
-    const onData = (data) => {
-      if (!isTravisBuild()) {
-        logOnSameLine(green('Checked: ') + path.relative(rootDir, data.path));
-      }
-    };
+function printFixMessages() {
+  log(
+    yellow('NOTE 1:'),
+    "If you are using GitHub's web-UI to edit files,",
+    'copy the suggested fixes printed above into your PR.'
+  );
+  log(
+    yellow('NOTE 2:'),
+    'If you are using the git command-line workflow, run',
+    cyan('amp prettify --local_changes --fix'),
+    'from your local branch.'
+  );
+  log(
+    yellow('NOTE 3:'),
+    'Since this is a destructive operation (that edits your files',
+    'in-place), make sure you commit before running the command.'
+  );
+  log(
+    yellow('NOTE 4:'),
+    'For more information, read',
+    cyan(
+      'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#code-quality-and-style\n'
+    )
+  );
+}
 
-    const rejectWithReason = (reasonText) => {
-      const reason = new Error(reasonText);
-      reason.showStack = false;
-      reject(reason);
-    };
-
-    const printFixMessages = () => {
-      log(
-        yellow('NOTE 1:'),
-        "If you are using GitHub's web-UI to edit files,",
-        'copy the suggested fixes printed above into your PR.'
-      );
-      log(
-        yellow('NOTE 2:'),
-        'If you are using the git command-line workflow, run',
-        cyan('gulp prettify --local_changes --fix'),
-        'from your local branch.'
-      );
-      log(
-        yellow('NOTE 3:'),
-        'Since this is a destructive operation (that edits your files',
-        'in-place), make sure you commit before running the command.'
-      );
-      log(
-        yellow('NOTE 4:'),
-        'For more information, read',
-        cyan(
-          'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#code-quality-and-style\n'
-        )
-      );
-    };
-
-    const onError = (error) => {
-      if (error.message.startsWith(header)) {
-        const filesWithErrors = error.message
-          .replace(header, '')
-          .trim()
-          .split('\n');
-        const reason = 'Found formatting errors in one or more files';
-        logOnSameLine(red('ERROR: ') + reason);
-        filesWithErrors.forEach((file) => {
-          printErrorWithSuggestedFixes(file);
-        });
-        printFixMessages();
-        rejectWithReason(reason);
-      } else {
-        const reason =
-          'Found an unrecoverable error in ' +
-          cyan(path.relative(rootDir, error.fileName));
-        logOnSameLine(red('ERROR: ') + reason + ':');
-        log(error.message);
-        rejectWithReason(reason);
-      }
-    };
-
-    const onFinish = () => {
-      if (!isTravisBuild()) {
-        logOnSameLine('Checked ' + cyan(filesToCheck.length) + ' file(s)');
-      }
-      resolve();
-    };
-
+/**
+ * Prettifies on the given list of files.
+ * @param {!Array<string>} filesToCheck
+ */
+async function runPrettify(filesToCheck) {
+  logLocalDev(green('Starting checks...'));
+  const filesWithErrors = [];
+  for (const file of filesToCheck) {
+    const options = await getOptions(file);
+    const original = fs.readFileSync(file).toString();
     if (argv.fix) {
-      return gulp
-        .src(filesToCheck)
-        .pipe(prettier())
-        .on('data', onData)
-        .on('error', onError)
-        .pipe(gulp.dest((file) => file.base))
-        .on('finish', onFinish);
+      const fixed = prettier.format(original, options);
+      if (fixed != original) {
+        fs.writeFileSync(file, fixed);
+      }
+      if (!prettier.check(fixed, options)) {
+        filesWithErrors.push(file);
+      }
     } else {
-      return gulp
-        .src(filesToCheck)
-        .pipe(prettier.check())
-        .on('data', onData)
-        .on('error', onError)
-        .on('finish', onFinish);
+      if (!prettier.check(original, options)) {
+        filesWithErrors.push(file);
+      }
     }
-  });
+    logOnSameLineLocalDev(green('Checked: ') + path.relative(rootDir, file));
+  }
+  if (filesWithErrors.length) {
+    logOnSameLine(
+      red('ERROR:'),
+      'Found formatting errors in one or more files'
+    );
+    for (const file of filesWithErrors) {
+      await printErrorWithSuggestedFixes(file);
+    }
+    printFixMessages();
+    process.exitCode = 1;
+  }
+  logOnSameLineLocalDev('Checked ' + cyan(filesToCheck.length) + ' file(s)');
 }
 
 module.exports = {
@@ -180,7 +162,7 @@ module.exports = {
 prettify.description =
   'Checks several non-JS files in the repo for formatting using prettier';
 prettify.flags = {
-  'files': '  Checks only the specified files',
-  'local_changes': '  Checks just the files changed in the local branch',
-  'fix': '  Fixes formatting errors',
+  'files': 'Checks only the specified files',
+  'local_changes': 'Checks just the files changed in the local branch',
+  'fix': 'Fixes formatting errors',
 };

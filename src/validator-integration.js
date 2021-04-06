@@ -17,7 +17,6 @@
 import {getMode} from './mode';
 import {loadPromise} from './event-helper';
 import {parseQueryString} from './url';
-import {startsWith} from './string';
 import {urls} from './config';
 
 /**
@@ -29,7 +28,7 @@ import {urls} from './config';
  */
 export function maybeValidate(win) {
   const filename = win.location.href;
-  if (startsWith(filename, 'about:')) {
+  if (filename.startsWith('about:')) {
     // Should only happen in tests.
     return;
   }

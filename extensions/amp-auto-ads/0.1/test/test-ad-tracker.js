@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Utils from '../utils';
+import * as Utils from '../../../../src/utils/page-layout-box';
 import {
   AdTracker,
   getAdConstraintsFromConfigObj,
@@ -31,7 +31,7 @@ describes.realWin('ad-tracker', {amp: true}, (env) => {
     win = env.win;
     doc = win.document;
 
-    env.sandbox.stub(Utils, 'getElementLayoutBox').callsFake((element) => {
+    env.sandbox.stub(Utils, 'measurePageLayoutBox').callsFake((element) => {
       return Promise.resolve(element.layoutBox);
     });
 

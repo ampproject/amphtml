@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Deferred} from '../../../src/utils/promise';
 import {InaboxResources} from '../../../src/inabox/inabox-resources';
+import {ResourceState} from '../../../src/service/resource';
+import {macroTask} from '../../../testing/yield';
+import {toggleExperiment} from '../../../src/experiments';
 
 describes.realWin('inabox-resources', {amp: true}, (env) => {
   let win;
@@ -73,71 +77,115 @@ describes.realWin('inabox-resources', {amp: true}, (env) => {
     await env.ampdoc.whenReady();
     expect(buildStub).to.be.calledOnce;
     await new Promise(setTimeout);
-    expect(schedulePassSpy).to.not.be.called;
+    schedulePassSpy.resetHistory();
     resolveBuild();
     await new Promise(setTimeout);
     expect(schedulePassSpy).to.be.calledOnce;
   });
 
-  it('observes element intersections for those opted in', () => {
-    const observe = env.sandbox.spy();
-    win.IntersectionObserver = () => ({observe});
+  it('eagerly builds amp elements', async () => {
+    toggleExperiment(win, 'inabox-resources-eager', true);
+    const readySignal = new Deferred();
+    env.sandbox.stub(env.ampdoc, 'whenReady').returns(readySignal.promise);
+    resources = new InaboxResources(env.ampdoc);
 
-    const element = env.createAmpElement('amp-carousel');
-    resources.add(element);
+    const element1 = env.createAmpElement('amp-one');
+    resources.add(element1);
+    const resource1 = resources.getResourceForElement(element1);
+    const build1 = env.sandbox.stub(resource1, 'build').resolves();
+    win.document.body.appendChild(element1);
 
-    expect(observe.withArgs(element)).to.have.been.calledOnce;
+    resources.upgraded(element1);
+    expect(build1).not.to.be.called;
+
+    const element2 = env.createAmpElement('amp-two');
+    resources.add(element2);
+    const resource2 = resources.getResourceForElement(element2);
+    const build2 = env.sandbox.stub(resource2, 'build').resolves();
+    win.document.body.appendChild(element2);
+
+    resources.upgraded(element2);
+    expect(build1).to.be.called;
+    expect(build2).not.to.be.called;
+
+    readySignal.resolve();
+    await macroTask();
+    expect(build2).to.be.called;
   });
 
-  it('unobserves element intersections when removed', () => {
-    const unobserve = env.sandbox.spy();
-    win.IntersectionObserver = () => ({observe: () => {}, unobserve});
-
-    const element = env.createAmpElement('amp-carousel');
-    resources.add(element);
-    resources.remove(element);
-
-    expect(unobserve.withArgs(element)).to.have.been.calledOnce;
-  });
-
-  it('does not observe element intersections for those not opted in', () => {
-    const observe = env.sandbox.spy();
-    win.IntersectionObserver = () => ({observe});
-
-    const element = env.createAmpElement('amp-foo');
-    resources.add(element);
-
-    expect(observe.withArgs(element)).to.not.have.been.called;
-  });
-
-  it('triggers viewportCallback on intersection for those opted in', () => {
-    let definedCallback;
-    win.IntersectionObserver = (callback, unusedOptions) => {
-      definedCallback = callback;
-      return {observe: () => {}};
-    };
-
-    const element1 = env.createAmpElement('amp-carousel');
-    element1.viewportCallback = env.sandbox.spy();
-
-    const element2 = env.createAmpElement('amp-carousel');
-    element2.viewportCallback = env.sandbox.spy();
-
-    const element3 = env.createAmpElement('amp-carousel');
-    element3.viewportCallback = env.sandbox.spy();
-
+  it('should pause and resume resources on doc visibility', () => {
+    const element1 = env.createAmpElement('amp-foo');
+    const element2 = env.createAmpElement('amp-bar');
     resources.add(element1);
     resources.add(element2);
-    resources.add(element3);
 
-    definedCallback([
-      {target: element1, isIntersecting: true},
-      {target: element2, isIntersecting: false},
-      {target: element3, isIntersecting: false},
-    ]);
+    env.sandbox.stub(element1, 'pause');
+    env.sandbox.stub(element1, 'resume');
+    env.sandbox.stub(element2, 'pause');
+    env.sandbox.stub(element2, 'resume');
 
-    expect(element1.viewportCallback.withArgs(true)).to.have.been.calledOnce;
-    expect(element2.viewportCallback.withArgs(false)).to.have.been.calledOnce;
-    expect(element3.viewportCallback.withArgs(false)).to.have.been.calledOnce;
+    env.ampdoc.overrideVisibilityState('paused');
+    expect(element1.pause).to.be.calledOnce;
+    expect(element2.pause).to.be.calledOnce;
+
+    env.ampdoc.overrideVisibilityState('visible');
+    expect(element1.resume).to.be.calledOnce;
+    expect(element2.resume).to.be.calledOnce;
+  });
+
+  it('should unload all resources on dispose', async () => {
+    const element1 = env.createAmpElement('amp-foo');
+    const element2 = env.createAmpElement('amp-bar');
+    resources.add(element1);
+    resources.add(element2);
+
+    const resource1 = resources.get()[0];
+    const resource2 = resources.get()[1];
+    env.sandbox.stub(resource1, 'unload');
+    env.sandbox.stub(resource2, 'unload');
+
+    resources.dispose();
+    expect(resource1.unload).to.be.calledOnce;
+    expect(resource2.unload).to.be.calledOnce;
+  });
+
+  it('should ignore V1 resources for layout pass', async () => {
+    const element1 = env.createAmpElement('amp-foo');
+    const element2 = env.createAmpElement('amp-bar');
+    env.sandbox.stub(element2, 'V1').returns(true);
+
+    win.document.body.appendChild(element1);
+    win.document.body.appendChild(element2);
+    resources.add(element1);
+    resources.add(element2);
+
+    const resource1 = resources.get()[0];
+    const resource2 = resources.get()[1];
+    env.sandbox.stub(resource1, 'measure');
+    env.sandbox.stub(resource2, 'measure');
+    env.sandbox.stub(resource1, 'startLayout');
+    env.sandbox.stub(resource2, 'startLayout');
+
+    env.sandbox.stub(resource1, 'build').resolves();
+    env.sandbox.stub(resource2, 'build').resolves();
+    env.sandbox
+      .stub(resource1, 'getState')
+      .returns(ResourceState.READY_FOR_LAYOUT);
+    env.sandbox
+      .stub(resource2, 'getState')
+      .returns(ResourceState.READY_FOR_LAYOUT);
+    env.sandbox.stub(resource1, 'isDisplayed').returns(true);
+    env.sandbox.stub(resource2, 'isDisplayed').returns(true);
+    resources.upgraded(element1);
+
+    resources.schedulePass(0);
+    await new Promise(setTimeout);
+    await new Promise(setTimeout);
+
+    expect(resource1.measure).to.be.called;
+    expect(resource2.measure).to.not.be.called;
+
+    expect(resource1.startLayout).to.be.called;
+    expect(resource2.startLayout).to.not.be.called;
   });
 });

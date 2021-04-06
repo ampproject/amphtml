@@ -788,7 +788,7 @@ describe('detectJsEngineFromStack', () => {
       it.configure()
         .ifSafari()
         .run('detects safari as safari', () => {
-          // TODO(wg-runtime): Fix detection of Safari 13+.
+          // TODO(wg-performance): Fix detection of Safari 13+.
           expect(detectJsEngineFromStack()).to.equal('unknown');
         });
 

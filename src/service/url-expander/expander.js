@@ -34,7 +34,7 @@ export class Expander {
    * @param {!Object<string, *>=} opt_collectVars Object passed in to collect
    *   variable resolutions.
    * @param {boolean=} opt_sync If the method should resolve syncronously.
-   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of names
+   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of names
    *   that can be substituted.
    * @param {boolean=} opt_noEncode Should not urlEncode macro resolution.
    */

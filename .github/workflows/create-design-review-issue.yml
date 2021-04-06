@@ -1,0 +1,17 @@
+name: Create Design Review Issue
+
+on:
+  schedule:
+    # Every Wednesday at 00:00:00
+    - cron: '0 0 * * 3'
+
+jobs:
+  create-design-review-issue:
+    name: Create Design Review Issue
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Design Review Issue
+        run: |
+          wget -q -O - "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/master/.github/workflows/create-design-review-issue.js" | node
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

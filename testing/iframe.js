@@ -22,6 +22,7 @@ import {Services} from '../src/services';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
+import {dev} from '../src/log';
 import {
   installAmpdocServices,
   installRuntimeServices,
@@ -29,7 +30,6 @@ import {
 import {install as installCustomElements} from '../src/polyfills/custom-elements';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
-import {installStylesLegacy} from '../src/style-installer';
 import {parseIfNeeded} from '../src/iframe-helper';
 
 let iframeCount = 0;
@@ -65,6 +65,10 @@ export function createFixtureIframe(
   initialIframeHeight,
   opt_beforeLoad
 ) {
+  dev().assertNumber(
+    initialIframeHeight,
+    'Attempted to create fixture iframe with non-numeric height'
+  );
   return new Promise((resolve, reject) => {
     // Counts the supported custom events.
     const events = {
@@ -263,7 +267,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
               const iWin = iframe.contentWindow;
               const p = onInsert(iWin)
                 .then(() => {
-                  return element.build();
+                  return element.buildInternal();
                 })
                 .then(() => {
                   if (!element.getPlaceholder()) {
@@ -272,16 +276,23 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
                       element.appendChild(placeholder);
                     }
                   }
+                  const resources = Services.resourcesForDoc(ampdoc);
+                  const resource = resources.getResourceForElementOptional(
+                    element
+                  );
+                  if (resource) {
+                    resource.measure();
+                  }
+                })
+                .then(() => {
                   if (element.layoutCount_ == 0) {
                     if (opt_beforeLayoutCallback) {
                       opt_beforeLayoutCallback(element);
                     }
-                    return element.layoutCallback().then(() => {
-                      return element;
-                    });
+                    return element.layoutCallback();
                   }
-                  return element;
-                });
+                })
+                .then(() => element);
               iWin.document.getElementById('parent').appendChild(element);
               return p;
             },
@@ -292,6 +303,44 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
     iframe.onerror = reject;
     document.body.appendChild(iframe);
   });
+}
+
+/**
+ * @param {!Document} doc
+ * @param {string} cssText
+ * @param {function()} cb
+ */
+function installStylesLegacy(doc, cssText, cb) {
+  const style = doc.createElement('style');
+  style.textContent = cssText;
+  doc.head.appendChild(style);
+
+  // Styles aren't always available synchronously. E.g. if there is a
+  // pending style download, it will have to finish before the new
+  // style is visible.
+  // For this reason we poll until the style becomes available.
+  // Sync case.
+  const styleLoaded = () => {
+    const sheets = doc.styleSheets;
+    for (let i = 0; i < sheets.length; i++) {
+      const sheet = sheets[i];
+      if (sheet.ownerNode == style) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  if (styleLoaded()) {
+    cb();
+  } else {
+    const interval = setInterval(() => {
+      if (styleLoaded()) {
+        clearInterval(interval);
+        cb();
+      }
+    }, 4);
+  }
 }
 
 export function createServedIframe(src) {
@@ -509,12 +558,14 @@ export function expectBodyToBecomeVisible(win, opt_timeout) {
  * Calling `triggerError` on the respective resources makes them
  * appear in error state.
  * @param {!Window} win
+ * @param {!Object} sandbox
  */
-export function doNotLoadExternalResourcesInTest(win) {
+export function doNotLoadExternalResourcesInTest(win, sandbox) {
+  const {document} = win;
   const {prototype} = win.Document;
   const {createElement} = prototype;
-  prototype.createElement = function (tagName) {
-    const element = createElement.apply(this, arguments);
+  sandbox.stub(prototype, 'createElement').callsFake(function (tagName) {
+    const element = createElement.apply(document, arguments);
     tagName = tagName.toLowerCase();
     if (tagName == 'iframe' || tagName == 'img') {
       // Make get/set write to a fake property instead of
@@ -547,7 +598,7 @@ export function doNotLoadExternalResourcesInTest(win) {
       }
     }
     return element;
-  };
+  });
 }
 
 /**

@@ -15,6 +15,7 @@
  */
 
 import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
+import {Animation} from '../../src/animation';
 import {FakeMutationObserver, FakeWindow} from '../../testing/fake-dom';
 import {FixedLayer} from '../../src/service/fixed-layer';
 import {Services} from '../../src/services';
@@ -24,7 +25,6 @@ import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {toggle} from '../../src/style';
-import {toggleExperiment} from '../../src/experiments';
 import {user} from '../../src/log';
 
 describes.sandboxed('FixedLayer', {}, () => {
@@ -1180,11 +1180,6 @@ describes.sandboxed('FixedLayer', {}, () => {
       describe('hidden toggle', () => {
         let mutationObserver;
         beforeEach(() => {
-          toggleExperiment(
-            documentApi.defaultView,
-            'hidden-mutation-observer',
-            true
-          );
           fixedLayer.observeHiddenMutations();
           mutationObserver = Services.hiddenObserverForDoc(
             documentApi.documentElement
@@ -1591,11 +1586,6 @@ describes.sandboxed('FixedLayer', {}, () => {
     describe('hidden toggle', () => {
       let mutationObserver;
       beforeEach(() => {
-        toggleExperiment(
-          documentApi.defaultView,
-          'hidden-mutation-observer',
-          true
-        );
         fixedLayer.observeHiddenMutations();
         mutationObserver = Services.hiddenObserverForDoc(
           documentApi.documentElement
@@ -1840,6 +1830,59 @@ describes.sandboxed(
       );
       const executed = fixedLayer.setup();
       expect(executed).to.be.true;
+    });
+  }
+);
+
+describes.sandboxed(
+  'FixedLayer bug due to calling browser native instead of AMP implementation',
+  {},
+  () => {
+    let win;
+    let ampdoc;
+    let viewer;
+    let vsyncApi;
+
+    beforeEach(() => {
+      win = new FakeWindow();
+      window.__AMP_MODE = {
+        localDev: true,
+        development: false,
+        minified: false,
+        test: false,
+        version: '$internalRuntimeVersion$',
+      };
+
+      const vsyncTasks = [];
+      vsyncApi = {
+        runPromise: async (task) => {
+          vsyncTasks.push(task);
+        },
+        mutate: (mutator) => {
+          vsyncTasks.push({mutate: mutator});
+        },
+      };
+    });
+
+    it('should call Animation.animate in animateFixedElements', () => {
+      const animateSpy = window.sandbox.spy(Animation, 'animate');
+
+      ampdoc = new AmpDocSingle(win);
+      installPlatformService(win);
+      installTimerService(win);
+      installViewerServiceForDoc(ampdoc);
+      viewer = Services.viewerForDoc(ampdoc);
+      viewer.isEmbedded = () => true;
+
+      const fixedLayer = new FixedLayer(
+        ampdoc,
+        vsyncApi,
+        /* borderTop */ 0,
+        /* paddingTop */ 11,
+        /* transfer */ false
+      );
+      fixedLayer.animateFixedElements(123, 456, 789, 'ease-in', false);
+      expect(animateSpy).to.be.calledOnce;
     });
   }
 );

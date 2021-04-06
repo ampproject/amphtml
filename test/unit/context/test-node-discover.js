@@ -134,10 +134,13 @@ describes.realWin('ContextNode', {}, (env) => {
     }
     if (spec.parent !== undefined) {
       const {parent} = contextNode;
-      expect((parent && parent.node) ?? null, 'parent').to.equal(spec.parent);
+      const parentNode = (parent && parent.node) ?? null;
+      const specNode =
+        ((spec.parent && spec.parent.node) || spec.parent) ?? null;
+      expect(parentNode, 'parent').to.equal(specNode);
     }
     if (spec.children !== undefined) {
-      const children = (contextNode.children || []).map((cn) => cn.node);
+      const children = (contextNode.children || []).map((cn) => cn.node || cn);
       children.sort(domOrderComparator);
       const specChildren = spec.children.slice(0);
       specChildren.sort(domOrderComparator);
@@ -890,6 +893,193 @@ describes.realWin('ContextNode', {}, (env) => {
           discoverable: true,
         });
       });
+    });
+  });
+
+  describe('discover shadow DOM', () => {
+    let sibling1;
+    let sibling2;
+    let parent;
+
+    beforeEach(() => {
+      sibling1 = el('T-1-1-1');
+      sibling2 = el('T-1-1-2');
+      parent = el('T-1-1');
+    });
+
+    it('should rediscover slots when shadow root is added', async () => {
+      doc.body.appendChild(tree);
+      await waitForDiscover(parent, sibling1, sibling2);
+
+      const shadowRoot = parent.attachShadow({mode: 'open'});
+      ContextNode.get(shadowRoot).setParent(parent);
+
+      const slot1 = doc.createElement('slot');
+      slot1.name = 'slot1';
+      sibling1.setAttribute('slot', 'slot1');
+      shadowRoot.appendChild(slot1);
+      await waitForDiscover(shadowRoot, sibling1);
+
+      // sibling1's parent is shadow root because it matches the slot.
+      expectContext(sibling1, {parent: shadowRoot});
+      // sibling2's parent stays with "parent" because it's unslotted.
+      expectContext(sibling2, {parent});
+    });
+
+    describe('shadow DOM exists from the start', () => {
+      let shadowRoot;
+      let slot1, slot1Parent;
+
+      beforeEach(async () => {
+        shadowRoot = parent.attachShadow({mode: 'open'});
+        ContextNode.get(shadowRoot).setParent(parent);
+
+        slot1Parent = doc.createElement('div');
+        slot1Parent.id = 'slot1-parent';
+        shadowRoot.appendChild(slot1Parent);
+
+        slot1 = doc.createElement('slot');
+        slot1.id = slot1.name = 'slot1';
+        sibling1.setAttribute('slot', 'slot1');
+        slot1Parent.appendChild(slot1);
+
+        doc.body.appendChild(tree);
+        await waitForDiscover(parent, shadowRoot, sibling1, sibling2);
+      });
+
+      function awaitSlotChange() {
+        return new Promise((resolve) => {
+          shadowRoot.addEventListener('slotchange', resolve);
+        });
+      }
+
+      it('should assign shadow root as a parent via slot', () => {
+        // sibling1's parent is shadow root because it matches the slot.
+        expectContext(sibling1, {parent: shadowRoot});
+        // sibling2's parent stays with "parent" because it's unslotted.
+        expectContext(sibling2, {parent});
+      });
+
+      it('should reassign when slots change', async () => {
+        sibling1.removeAttribute('slot');
+        sibling2.setAttribute('slot', 'slot1');
+        await awaitSlotChange();
+        clock.runAll();
+
+        // sibling1's parent stays with "parent" because it's unslotted.
+        expectContext(sibling1, {parent});
+        // sibling2's parent is shadow root because it matches the slot.
+        expectContext(sibling2, {parent: shadowRoot});
+      });
+
+      it('should reassign when slots are removed', async () => {
+        slot1Parent.removeChild(slot1);
+        await waitForDiscover(sibling1);
+        // Returns to parent.
+        expectContext(sibling1, {parent});
+      });
+
+      it('should reassign to slot if it becomes a context node', async () => {
+        const sibling1Wait = waitForDiscover(sibling1);
+        await rediscover(slot1);
+        await sibling1Wait;
+        // slot belongs to the shadow root.
+        expectContext(slot1, {parent: shadowRoot});
+        // sibling1's parent is slot now.
+        expectContext(sibling1, {parent: slot1});
+        // Not changed: unslotted.
+        expectContext(sibling2, {parent});
+      });
+
+      it('should reassign to slot parent becomes a context node', async () => {
+        const sibling1Wait = waitForDiscover(sibling1);
+        await rediscover(slot1Parent);
+        await sibling1Wait;
+        // slot belongs to the shadow root.
+        expectContext(slot1Parent, {parent: shadowRoot});
+        // sibling1's parent is slot now.
+        expectContext(sibling1, {parent: slot1Parent});
+        // Not changed: unslotted.
+        expectContext(sibling2, {parent});
+      });
+    });
+  });
+
+  describe('discover groups', () => {
+    let sibling1;
+    let sibling2;
+    let cousin1;
+    let parent;
+    let grandparent;
+
+    beforeEach(async () => {
+      sibling1 = el('T-1-1-1');
+      sibling2 = el('T-1-1-2');
+      cousin1 = el('T-1-2-1');
+      parent = el('T-1-1');
+      grandparent = el('T-1');
+      await waitForDiscover(grandparent, parent, sibling1, sibling2, cousin1);
+    });
+
+    it('should rediscover children when a new group is added', async () => {
+      const group1 = ContextNode.get(parent).addGroup(
+        'group1',
+        (node) => node == sibling1,
+        0
+      );
+      await waitForDiscover(group1, sibling1);
+      clock.runAll();
+
+      expect(group1.node).to.equal(parent);
+      expectContext(group1, {parent, children: [sibling1]});
+
+      // sibling1 is reassigned to the group.
+      expectContext(sibling1, {parent: group1});
+
+      // sibling2 stays stays unchanged.
+      expectContext(sibling2, {parent});
+    });
+
+    it('should discover a new child', async () => {
+      const sibling3 = el('T-1-1-3');
+      const group1 = ContextNode.get(parent).addGroup(
+        'group1',
+        (node) => node == sibling3,
+        0
+      );
+      await waitForDiscover(group1);
+
+      // Discover the new node.
+      await rediscover(sibling3);
+      expectContext(sibling3, {parent: group1});
+    });
+
+    it('should handle weight', async () => {
+      const group1 = ContextNode.get(parent).addGroup(
+        'group1',
+        (node) => node == sibling1,
+        0
+      );
+      await waitForDiscover(group1, sibling1);
+      expectContext(sibling1, {parent: group1});
+
+      // A lower weight.
+      const group2 = ContextNode.get(parent).addGroup(
+        'group1',
+        (node) => node == sibling1,
+        -1
+      );
+      await waitForDiscover(group2, sibling1);
+      expectContext(sibling1, {parent: group1});
+
+      // A higher weight.
+      const group3 = ContextNode.get(parent).addGroup(
+        'group1',
+        (node) => node == sibling1,
+        1
+      );
+      await waitForDiscover(group3, sibling1);
+      expectContext(sibling1, {parent: group3});
     });
   });
 

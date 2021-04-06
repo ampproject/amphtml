@@ -1,0 +1,43 @@
+{
+  "2": {"string": "Nhấn vào Tiếp theo"},
+  "3": {"string": "Nhấn vào Quay lại"},
+  "4": {"string": "Không thể sao chép liên kết vào khay nhớ tạm :("},
+  "5": {"string": "Đã sao chép liên kết!"},
+  "6": {"string": "Email"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Lấy liên kết"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "SMS"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {
+    "string": "Mở rộng cả chiều cao và chiều rộng cửa sổ để xem trải nghiệm này"
+  },
+  "19": {
+    "string": "Bạn cần phải bật thử nghiệm câu chuyện amp để xem nội dung này."
+  },
+  "20": {"string": "Trang này được xem tốt nhất ở chế độ chân dung"},
+  "21": {
+    "string": "Rất tiếc, có vẻ như trình duyệt của bạn không hỗ trợ trải nghiệm này"
+  },
+  "22": {"string": "Chấp nhận"},
+  "23": {"string": "Từ chối"},
+  "25": {"string": "Xem trên miền gốc:"},
+  "26": {"string": "Thêm thông tin về kết quả AMP"},
+  "27": {"string": "Vẫn tiếp tục"},
+  "28": {"string": "Thay đổi dữ liệu các tùy chọn cài đặt bảo mật"},
+  "29": {"string": "Các tùy chọn cài đặt quyền riêng tư"},
+  "30": {"string": "Những nội dung khác nên đọc"},
+  "31": {"string": "Tắt âm thanh"},
+  "32": {"string": "Bật âm thanh"},
+  "33": {"string": "Trang này không có âm thanh"},
+  "34": {"string": "Phát video"},
+  "35": {"string": "Vuốt lên"},
+  "36": {"string": "Mở rộng Tweet"},
+  "37": {"string": "Mở rộng chiều cao cửa sổ để xem trải nghiệm này"},
+  "38": {"string": "Mở rộng chiều rộng cửa sổ để xem trải nghiệm này"},
+  "63": {"string": "Line"}
+}

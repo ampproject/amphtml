@@ -43,7 +43,7 @@ describes.realWin(
     let addToFixedLayerStub, addToFixedLayerPromise;
     const adUpgradedToCustomElementPromise = Promise.resolve();
     describe('with valid child 1.0', () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         win = env.win;
         ampStickyAd = win.document.createElement('amp-sticky-ad');
         ampStickyAd.setAttribute('layout', 'nodisplay');
@@ -54,8 +54,8 @@ describes.realWin(
         });
         ampStickyAd.appendChild(ampAd);
         win.document.body.appendChild(ampStickyAd);
-        ampStickyAd.build();
-        impl = ampStickyAd.implementation_;
+        ampStickyAd.buildInternal();
+        impl = await ampStickyAd.getImpl(false);
         addToFixedLayerPromise = Promise.resolve();
         addToFixedLayerStub = env.sandbox
           .stub(impl.viewport_, 'addToFixedLayer')
@@ -210,27 +210,26 @@ describes.realWin(
         });
       });
 
-      it('should wait for built and render-start signals', () => {
+      it('should wait for built and render-start signals', async () => {
         impl.vsync_.mutate = function (callback) {
           callback();
         };
         const layoutAdSpy = env.sandbox.spy(impl, 'layoutAd_');
         impl.scheduleLayoutForAd_();
         expect(layoutAdSpy).to.not.been.called;
-        impl.ad_.signals().signal('built');
-        return adUpgradedToCustomElementPromise.then(() => {
-          return impl.ad_
-            .signals()
-            .whenSignal('built')
-            .then(() => {
-              expect(layoutAdSpy).to.be.called;
-              expect(ampStickyAd).to.not.have.attribute('visible');
-              impl.ad_.signals().signal('render-start');
-              return poll('visible attribute must be set', () => {
-                return ampStickyAd.hasAttribute('visible');
-              });
-            });
-        });
+
+        await adUpgradedToCustomElementPromise;
+        const ad = impl.ad_;
+        ad.signals().signal('built');
+        await ad.signals().whenSignal('built');
+        await new Promise(setTimeout);
+        expect(layoutAdSpy).to.be.called;
+        expect(ampStickyAd).to.not.have.attribute('visible');
+
+        ad.signals().signal('render-start');
+        await poll('visible attribute must be set', () =>
+          ampStickyAd.hasAttribute('visible')
+        );
       });
 
       it('should not allow container to be set semi-transparent', () => {
@@ -293,9 +292,9 @@ describes.realWin(
         win.document.body.appendChild(ampStickyAd);
       });
 
-      it('should not build when child is not ad', () => {
+      it('should not build when child is not ad', async () => {
         ampStickyAd.appendChild(ampImg);
-        const impl = ampStickyAd.implementation_;
+        const impl = await ampStickyAd.getImpl(false);
         allowConsoleError(() => {
           expect(() => impl.buildCallback()).to.throw(
             /amp-sticky-ad must have a single amp-ad child/
@@ -303,10 +302,10 @@ describes.realWin(
         });
       });
 
-      it('should not build when has more than 1 children', () => {
+      it('should not build when has more than 1 children', async () => {
         ampStickyAd.appendChild(ampAd1);
         ampStickyAd.appendChild(ampAd2);
-        const impl = ampStickyAd.implementation_;
+        const impl = await ampStickyAd.getImpl(false);
 
         allowConsoleError(() => {
           expect(() => impl.buildCallback()).to.throw(
@@ -337,7 +336,7 @@ describes.realWin(
     let ampStickyAd;
     let impl;
     let addToFixedLayerPromise;
-    beforeEach(() => {
+    beforeEach(async () => {
       win = env.win;
       ampStickyAd = win.document.createElement('amp-sticky-ad');
       ampStickyAd.setAttribute('layout', 'nodisplay');
@@ -348,13 +347,13 @@ describes.realWin(
       });
       ampStickyAd.appendChild(ampAd);
       win.document.body.appendChild(ampStickyAd);
-      ampStickyAd.build();
-      impl = ampStickyAd.implementation_;
+      ampStickyAd.buildInternal();
+      impl = await ampStickyAd.getImpl(false);
       addToFixedLayerPromise = Promise.resolve();
       env.sandbox
         .stub(impl.viewport_, 'addToFixedLayer')
         .callsFake(() => addToFixedLayerPromise);
-      return ampAd.implementation_.upgradeCallback();
+      return impl.upgradeCallback();
     });
 
     // TODO(zhouyx, #18574): Fix failing borderWidth check and re-enable.

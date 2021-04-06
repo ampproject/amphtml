@@ -116,8 +116,13 @@
   position: relative;
 }
 
+/* Fill layout requires higher specificity than i-amp-html-notbuilt
+ * so that the correct width/height can be applied before build.
+ */
 .i-amphtml-layout-fill,
-[layout=fill]:not(.i-amphtml-layout-fill)
+.i-amphtml-layout-fill.i-amphtml-notbuilt,
+[layout=fill]:not(.i-amphtml-layout-fill),
+body noscript > *
 {
   display: block;
   overflow: hidden !important;
@@ -126,6 +131,22 @@
   left: 0;
   bottom: 0;
   right: 0;
+}
+
+/* In previous rule and in this one, make sure noscript fallbacks get fill layout as if they are placeholders */
+body noscript > * {
+  position: absolute !important;
+
+  /* Override width/height attributes defined on HTML elements in noscript. */
+  width: 100%;
+  height: 100%;
+
+  /* Supersede sibling [placeholder]/[fallback] z-index:1 */
+  z-index: 2;
+}
+
+body noscript {
+  display: inline !important;
 }
 
 .i-amphtml-layout-flex-item,
@@ -152,6 +173,16 @@
 
 i-amphtml-sizer {
   display: block !important;
+}
+
+/*
+ * Disable `i-amphtml-sizer` when aspect ratio is supported by both the
+ * borwser and the optimizer.
+ */
+@supports (aspect-ratio: 1 / 1) {
+  i-amphtml-sizer.i-amphtml-disable-ar {
+    display: none !important;
+  }
 }
 
 .i-amphtml-fill-content,
@@ -264,12 +295,23 @@ i-amphtml-sizer {
  * [width][height][sizes] and [width][height][heights] imply layout=responsive
  * before the element has resolved.
  */
-.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > * ,
+.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > *,
 [layout]:not([layout=container]):not(.i-amphtml-element) > *,
 [width][height][sizes]:not([layout]):not(.i-amphtml-element) > *,
 [width][height][heights]:not([layout]):not(.i-amphtml-element) > *
 {
   display: none;
+}
+
+/**
+ * We special case the native <img> inside an SSR'd <amp-img>. We allow this to
+ * display using `block` defined by .i-amphtml-fill-content.
+ *
+ * As more elements get SSR, we'll need to add their special cases here.
+ */
+amp-img:not(.i-amphtml-element)[i-amphtml-ssr] > img.i-amphtml-fill-content
+{
+  display: block;
 }
 
 /** Hide all text node children of non-container elements. */
@@ -300,9 +342,12 @@ i-amphtml-sizer {
 .i-amphtml-element > [placeholder],
 [layout]:not(.i-amphtml-element) > [placeholder],
 [width][height][sizes]:not([layout]):not(.i-amphtml-element) > [placeholder],
-[width][height][heights]:not([layout]):not(.i-amphtml-element) > [placeholder]
-{
+[width][height][heights]:not([layout]):not(.i-amphtml-element) > [placeholder] {
   display: block;
+  /* line-height:normal overrides line-height:0 from the "hide all children of
+     non-container text node children" rule. This avoids a minor content jump during
+     element build since placeholders should be fully visible. */
+  line-height: normal;
 }
 
 .i-amphtml-element > [placeholder].hidden,
@@ -330,6 +375,14 @@ i-amphtml-sizer {
   right: 0 !important;
   bottom: 0 !important;
   z-index: 1;
+}
+
+/* We reset the z-index of blurry image placeholders for images that are
+   rendered by the server and are not (yet) controlled by JS to speed up
+   display of the real image. This conveniently also fixes the display of
+   the image when JS fails to load. */
+amp-img.i-amphtml-ssr:not(.i-amphtml-element) > [placeholder] {
+  z-index: auto;
 }
 
 .i-amphtml-notbuilt > [placeholder] {
@@ -407,6 +460,13 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
      element build since overflows increase the height of their parents. */
   display: initial;
   line-height: normal;
+}
+
+/**
+ * "overflow" element must not contribute space to a size-defined element.
+ */
+.i-amphtml-layout-size-defined > [overflow] {
+  position: absolute;
 }
 
 .i-amphtml-element > [overflow].amp-visible {
@@ -498,11 +558,11 @@ amp-accordion > section {
 }
 
 /* Collapse content by default. */
-amp-accordion > section > :last-child {
+amp-accordion:not(.i-amphtml-built) > section > :last-child {
   display: none !important;
 }
 
 /* Expand content when needed. */
-amp-accordion > section[expanded] > :last-child {
+amp-accordion:not(.i-amphtml-built) > section[expanded] > :last-child {
   display: block !important;
 }

@@ -1,0 +1,49 @@
+{
+  "2": {"string": "Tocca Avanti"},
+  "3": {"string": "Tocca Indietro"},
+  "4": {"string": "Impossibile copiare il link negli appunti :("},
+  "5": {"string": "Link copiato."},
+  "6": {"string": "Email"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Ottieni link"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "SMS"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {
+    "string": "Espandi sia l'altezza che la larghezza della finestra per visualizzare questa esperienza"
+  },
+  "19": {
+    "string": "Devi attivare l'esperimento di storia AMP per visualizzare questi contenuti."
+  },
+  "20": {
+    "string": "La pagina viene visualizzata in modo ottimale in orientamento verticale"
+  },
+  "21": {
+    "string": "Spiacenti, sembra che il tuo browser non supporti questa esperienza"
+  },
+  "22": {"string": "Accetta"},
+  "23": {"string": "Rifiuta"},
+  "25": {"string": "Visualizza sul dominio originale:"},
+  "26": {"string": "Ulteriori informazioni sui risultati AMP"},
+  "27": {"string": "Continua comunque"},
+  "28": {"string": "Modifica le impostazioni per la privacy dei dati"},
+  "29": {"string": "Impostazioni sulla privacy"},
+  "30": {"string": "Altri articoli da leggere"},
+  "31": {"string": "Audio disattivato"},
+  "32": {"string": "Audio attivo"},
+  "33": {"string": "Questa pagina non ha audio"},
+  "34": {"string": "Riproduci video"},
+  "35": {"string": "Scorri verso l'alto"},
+  "36": {"string": "Espandi tweet"},
+  "37": {
+    "string": "Espandi l'altezza della finestra per visualizzare questa esperienza"
+  },
+  "38": {
+    "string": "Espandi la larghezza della finestra per visualizzare questa esperienza"
+  },
+  "63": {"string": "Line"}
+}

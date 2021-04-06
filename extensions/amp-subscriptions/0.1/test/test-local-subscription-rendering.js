@@ -38,9 +38,9 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, (env) => {
       dialog,
       serviceAdapter
     );
-    const serviceIds = ['service1', 'service2'];
+    const platformKeys = ['platformKey1', 'platformKey2'];
     entitlementsForService1 = new Entitlement({
-      service: serviceIds[0],
+      service: platformKeys[0],
       granted: false,
       grantReason: null,
     });
@@ -134,7 +134,7 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, (env) => {
     let dialog0, dialog1, dialog2, dialog3;
 
     beforeEach(() => {
-      templatesMock = env.sandbox.mock(Services.templatesFor(win));
+      templatesMock = env.sandbox.mock(Services.templatesForDoc(ampdoc));
       dialogMock = env.sandbox.mock(renderer.dialog_);
       dialog0 = createElementWithAttributes(doc, 'div', {
         'id': 'dialog0',

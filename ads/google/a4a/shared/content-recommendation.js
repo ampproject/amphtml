@@ -143,7 +143,6 @@ const PUB_CONTROL_EXAMPLE =
  * @record
  */
 export class CoReConfig {
-  // eslint-disable-line no-unused-vars
   /** see comment on class */
   constructor() {
     /** @const {number} */
@@ -242,7 +241,7 @@ export function getAutoConfig(availableWidth, isMobile) {
  *   layoutType: (string|undefined),
  * }}
  */
-export let RawPublisherControlParams; // eslint-disable-line no-unused-vars
+export let RawPublisherControlParams;
 
 /**
  * Get CoRe Pub Control UI Sizes.

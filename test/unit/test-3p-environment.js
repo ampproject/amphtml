@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {Services} from '../../src/services';
 import {createIframePromise} from '../../testing/iframe';
 import {loadPromise} from '../../src/event-helper';
@@ -106,7 +106,7 @@ describe('3p environment', () => {
       progress = '';
       // testWin is created before each test and destroyed when the iframe it
       // comes from gets detached, causing bugs if we call clock.uninstall().
-      clock = lolex.install({target: testWin});
+      clock = fakeTimers.withGlobal(testWin).install();
     });
 
     function add(p) {

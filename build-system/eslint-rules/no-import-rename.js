@@ -51,6 +51,11 @@ const imports = {
 };
 
 module.exports = function (context) {
+  /**
+   * @param {*} node
+   * @param {string} modulePath
+   * @param {*} mods
+   */
   function ImportSpecifier(node, modulePath, mods) {
     const {imported, local} = node;
     const {name} = imported;
@@ -71,6 +76,14 @@ module.exports = function (context) {
     });
   }
 
+  /**
+   * @param {*} node
+   * @param {string} modulePath
+   * @param {*} mods
+   * @return {{
+   *   ImportDeclaration: {Function(node: *): void},
+   * }}
+   */
   function ImportNamespaceSpecifier(node, modulePath, mods) {
     const ns = node.local.name;
     const variable = context.getScope().set.get(ns);

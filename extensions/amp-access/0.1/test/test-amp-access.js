@@ -704,6 +704,18 @@ describes.fakeWin(
       templatesMock.expects('renderTemplate').never();
       service.applyAuthorizationToElement_(elementOff, {access: true});
     });
+
+    it('Invalid access expression should be treated as unathorized', () => {
+      const elementError = document.createElement('div');
+      elementError.setAttribute('amp-access', 'NOT (');
+      document.body.appendChild(elementError);
+      templatesMock.expects('renderTemplate').never();
+
+      // Should not throw, but should emit user().error().
+      allowConsoleError(() => {
+        service.applyAuthorizationToElement_(elementError, {access: true});
+      });
+    });
   }
 );
 

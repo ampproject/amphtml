@@ -16,20 +16,27 @@
 'use strict';
 const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
+const fs = require('fs-extra');
 const path = require('path');
-const remapping = require('@ampproject/remapping');
+const Remapping = require('@ampproject/remapping');
 const terser = require('terser');
-const through = require('through2');
 const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
+const {jsBundles} = require('./bundles.config.js');
+
+/** @type {Remapping.default} */
+const remapping = /** @type {*} */ (Remapping);
+
+let mainBundles;
 
 /**
  * Minify passed string.
  *
  * @param {string} code
- * @return {Object<string, string>}
+ * @param {string} filename
+ * @return {Promise<Object<string, terser.SourceMapOptions['content']>>}
  */
-function terserMinify(code) {
-  const minified = terser.minify(code, {
+async function terserMinify(code, filename) {
+  const options = {
     mangle: false,
     compress: {
       defaults: false,
@@ -42,7 +49,21 @@ function terserMinify(code) {
       keep_quoted_props: true,
     },
     sourceMap: true,
-  });
+  };
+  const basename = path.basename(filename, argv.esm ? '.mjs' : '.js');
+  if (!mainBundles) {
+    mainBundles = Object.keys(jsBundles).map((key) => {
+      const bundle = jsBundles[key];
+      if (bundle.options && bundle.options.minifiedName) {
+        return path.basename(bundle.options.minifiedName, '.js');
+      }
+      return path.basename(key, '.js');
+    });
+  }
+  if (mainBundles.includes(basename)) {
+    options.output.preamble = ';';
+  }
+  const minified = await terser.minify(code, options);
 
   return {
     compressed: minified.code,
@@ -53,55 +74,38 @@ function terserMinify(code) {
 /**
  * Apply Babel Transforms on output from Closure Compuler, then cleanup added
  * space with Terser. Used only in esm mode.
- *
- * @return {!Promise}
+ * @param {string} file
+ * @return {Promise<void>}
  */
-exports.postClosureBabel = function () {
-  return through.obj(function (file, enc, next) {
-    if (!argv.esm || path.extname(file.path) === '.map') {
-      debug(
-        CompilationLifecycles['complete'],
-        file.path,
-        file.contents,
-        file.sourceMap
-      );
-      return next(null, file);
-    }
+async function postClosureBabel(file) {
+  if ((!argv.esm && !argv.sxg) || path.extname(file) === '.map') {
+    debug(CompilationLifecycles['complete'], file);
+    return;
+  }
 
-    const map = file.sourceMap;
+  debug(CompilationLifecycles['closured-pre-babel'], file);
+  const babelOptions = babel.loadOptions({caller: {name: 'post-closure'}});
+  const {code, map: babelMap} =
+    (await babel.transformFileAsync(file, babelOptions)) || {};
+  if (!code || !babelMap) {
+    throw new Error(`Error transforming contents of ${file}`);
+  }
 
-    debug(
-      CompilationLifecycles['closured-pre-babel'],
-      file.path,
-      file.contents,
-      file.sourceMap
-    );
-    const {code, map: babelMap} = babel.transformSync(file.contents, {
-      caller: {name: 'post-closure'},
-    });
+  debug(CompilationLifecycles['closured-pre-terser'], file, code, babelMap);
+  const {compressed, terserMap} = await terserMinify(code, path.basename(file));
+  await fs.outputFile(file, compressed);
 
-    debug(
-      CompilationLifecycles['closured-pre-terser'],
-      file.path,
-      file.contents,
-      file.sourceMap
-    );
-    const {compressed, terserMap} = terserMinify(code);
+  const closureMap = await fs.readJson(`${file}.map`, 'utf-8');
+  const sourceMap = remapping(
+    [terserMap, babelMap, closureMap],
+    () => null,
+    !argv.full_sourcemaps
+  );
 
-    file.contents = Buffer.from(compressed, 'utf-8');
-    file.sourceMap = remapping(
-      [terserMap, babelMap, map],
-      () => null,
-      !argv.full_sourcemaps
-    );
+  debug(CompilationLifecycles['complete'], file, compressed, sourceMap);
+  await fs.writeJson(`${file}.map`, sourceMap);
+}
 
-    debug(
-      CompilationLifecycles['complete'],
-      file.path,
-      file.contents,
-      file.sourceMap
-    );
-
-    return next(null, file);
-  });
+module.exports = {
+  postClosureBabel,
 };

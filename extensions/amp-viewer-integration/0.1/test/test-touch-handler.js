@@ -114,6 +114,23 @@ describes.fakeWin('TouchHandler', {}, (env) => {
       expect(messages[0].data.data.type).to.equal('touchstart');
     });
 
+    it('should not forward events marked with `shouldViewerCancelPropagation`', () => {
+      const event = fakeTouchEvent('touchmove');
+      event.stopImmediatePropagation = env.sandbox.spy();
+
+      touchHandler.handleEvent_(event);
+      expect(messages).to.have.length(1);
+      expect(messages[0].data.data.type).to.equal('touchmove');
+      expect(event.stopImmediatePropagation).to.not.be.called;
+
+      event.shouldViewerCancelPropagation = true;
+      messages = [];
+      touchHandler.handleEvent_(event);
+
+      expect(messages).to.have.length(0);
+      expect(event.stopImmediatePropagation).to.be.calledOnce;
+    });
+
     it('should lock scrolling', () => {
       expect(unlistenCount).to.equal(0);
       expect(listeners).to.have.length(3);

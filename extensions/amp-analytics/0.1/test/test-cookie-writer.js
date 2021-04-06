@@ -15,7 +15,7 @@
  */
 
 import * as cookie from '../../../../src/cookies';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {CookieWriter} from '../cookie-writer';
 import {dict} from '../../../../src/utils/object';
 import {installLinkerReaderService} from '../linker-reader';
@@ -214,8 +214,7 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
   beforeEach(() => {
     win = env.win;
     doc = env.ampdoc;
-    clock = lolex.install({
-      target: window,
+    clock = fakeTimers.withGlobal(window).install({
       now: new Date('2018-01-01T08:00:00Z'),
     });
     installVariableServiceForTesting(doc);
@@ -290,7 +289,7 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
     });
   });
 
-  it('should write cookie with custom expiration (number value)', () => {
+  it('should write cookie with custom expiration (number value) and default to SameSite=Lax', () => {
     win.location = 'https://www.example.test/';
     const cookieWriter = new CookieWriter(
       win,
@@ -308,6 +307,99 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
       expect(win.document.lastSetCookieRaw).to.equal(
         'aCookie=testValue; path=/; domain=example.test; ' +
           'expires=Mon, 08 Jan 2018 08:00:00 GMT'
+      );
+    });
+  });
+
+  it('should write cookie with the specified sameSite (lowercase S) value', () => {
+    win.location = 'https://www.example.test/';
+    const cookieWriter = new CookieWriter(
+      win,
+      win.document.body,
+      dict({
+        'cookies': {
+          'cookieMaxAge': 604800, // 1 week in seconds
+          'sameSite': 'Lax',
+          'aCookie': {
+            'value': '123',
+          },
+        },
+      })
+    );
+    return cookieWriter.write().then(() => {
+      expect(win.document.lastSetCookieRaw).to.equal(
+        'aCookie=123; path=/; domain=example.test; ' +
+          'expires=Mon, 08 Jan 2018 08:00:00 GMT; SameSite=Lax'
+      );
+    });
+  });
+
+  it('should write cookie with the specified SameSite (capital S) value', () => {
+    win.location = 'https://www.example.test/';
+    const cookieWriter = new CookieWriter(
+      win,
+      win.document.body,
+      dict({
+        'cookies': {
+          'cookieMaxAge': 604800, // 1 week in seconds
+          'SameSite': 'Strict',
+          'aCookie': {
+            'value': '123',
+          },
+        },
+      })
+    );
+    return cookieWriter.write().then(() => {
+      expect(win.document.lastSetCookieRaw).to.equal(
+        'aCookie=123; path=/; domain=example.test; ' +
+          'expires=Mon, 08 Jan 2018 08:00:00 GMT; SameSite=Strict'
+      );
+    });
+  });
+
+  it('should override the sameSite value', () => {
+    win.location = 'https://www.example.test/';
+    const cookieWriter = new CookieWriter(
+      win,
+      win.document.body,
+      dict({
+        'cookies': {
+          'cookieMaxAge': 604800, // 1 week in seconds
+          'sameSite': 'Lax',
+          'aCookie': {
+            'value': '123',
+            'sameSite': 'Strict',
+          },
+        },
+      })
+    );
+    return cookieWriter.write().then(() => {
+      expect(win.document.lastSetCookieRaw).to.equal(
+        'aCookie=123; path=/; domain=example.test; ' +
+          'expires=Mon, 08 Jan 2018 08:00:00 GMT; SameSite=Strict'
+      );
+    });
+  });
+
+  it('should append Secure for when sameSite value is "None"', () => {
+    win.location = 'https://www.example.test/';
+    const cookieWriter = new CookieWriter(
+      win,
+      win.document.body,
+      dict({
+        'cookies': {
+          'cookieMaxAge': 604800, // 1 week in seconds
+          'aCookie': {
+            'value': 'testValue',
+            'sameSite': 'None',
+          },
+        },
+      })
+    );
+    return cookieWriter.write().then(() => {
+      expect(win.document.lastSetCookieRaw).to.equal(
+        'aCookie=testValue; path=/; domain=example.test; ' +
+          'expires=Mon, 08 Jan 2018 08:00:00 GMT; SameSite=None; Secure'
       );
     });
   });

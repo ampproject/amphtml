@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {
   getAmpAdRenderOutsideViewport,
@@ -78,8 +78,7 @@ describes.realWin('concurrent-load', {}, (env) => {
 
     beforeEach(() => {
       win = env.win;
-      clock = lolex.install({
-        target: win,
+      clock = fakeTimers.withGlobal(win).install({
         toFake: ['Date', 'setTimeout', 'clearTimeout'],
       });
       installTimerService(win);
