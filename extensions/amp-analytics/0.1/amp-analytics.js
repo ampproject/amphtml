@@ -647,16 +647,10 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
       this.expandAndSendRequest_(request, trigger, event);
 
-      /**
-       * Only expand for either:
-       * 1. An amp-ad with parentPostMessage specified
-       * 2. An amp-script target
-       */
       const shouldSendToAmpAd =
         trigger['parentPostMessage'] &&
         this.allowParentPostMessage_() &&
         isIframed(this.win);
-
       if (shouldSendToAmpAd) {
         this.expandEventToMessage_(trigger, event).then((message) => {
           this.win.parent./*OK*/ postMessage(message, '*');
