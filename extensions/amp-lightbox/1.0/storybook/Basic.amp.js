@@ -340,6 +340,4 @@ export const overflowAuto = () => {
   );
 };
 
-Default.story = {
-  name: 'Default',
-};
+Default.storyName = 'Default';

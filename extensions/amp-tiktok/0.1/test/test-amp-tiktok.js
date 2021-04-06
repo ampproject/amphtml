@@ -17,7 +17,9 @@
 import '../amp-tiktok';
 import * as dom from '../../../../src/dom';
 import {Services} from '../../../../src/services';
+import {computedStyle} from '../../../../src/style';
 import {isAmpElement} from '../../../../src/dom';
+import {listen} from '../../../../src/event-helper';
 
 describes.realWin(
   'amp-tiktok',
@@ -98,6 +100,22 @@ describes.realWin(
       expect(iframe).to.not.be.null;
       expect(iframe.getAttribute('src')).to.contain(videoId);
       expect(iframe.getAttribute('src')).to.contain('fr-FR');
+    });
+
+    it('resizes using the fallback mechanism when no messages are received', async () => {
+      const videoId = '6718335390845095173';
+      const player = await getTiktok({'data-src': videoId});
+      const impl = await player.getImpl(false);
+      env.sandbox.stub(impl, 'handleTiktokMessages_');
+
+      // Wait 1100ms for resize fallback to be invoked.
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, 1100);
+      });
+
+      expect(computedStyle(win, player).height).to.equal('775px');
     });
 
     it('removes iframe after unlayoutCallback', async () => {

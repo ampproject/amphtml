@@ -1,4 +1,22 @@
-applicable law or agreed to in writing, software
+---
+$category@: social
+formats:
+  - websites
+teaser:
+  text: Displays a TikTok video embed.
+experimental: true
+---
+
+<!---
+Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS-IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
@@ -7,14 +25,9 @@ limitations under the License.
 
 # amp-tiktok
 
-<!--
-  If the component is relevant for more than one format and operates differently between these
-  formats, include and filter multiple content blocks and code samples.
--->
-
 ## Usage
 
-The simplest usage of the `amp-tiktok` component has the `width`, `height` and `data-src` attributes. This will display the Tiktok embed inside of an iframe on the page.
+The `amp-tiktok` component embeds a [TikTok](https://www.tiktok.com/about) video on your page.
 
 ```html
 <amp-tiktok
@@ -24,17 +37,15 @@ The simplest usage of the `amp-tiktok` component has the `width`, `height` and `
 ></amp-tiktok>
 ```
 
-`amp-tiktok` does not support autoplay and requires user interaction to play videos.
-
 ### Behavior
+
+The `amp-tiktok` component displays the TikTok video in an iframe. You may specify the `width`, `height` and `data-src` attributes. `amp-tiktok` does not support autoplay and requires user interaction to play videos.
 
 ## Avoiding Layout shift
 
-The `width` and `height` attributes determine the initial laid out height of the Tiktok embedded in the page.
+Prevent layout shift by matching the `width` and `height` attributes on the `amp-tiktok` element to the size of the video player.
 
-However, we set the width of the Tiktok iframe player to be 325px wide. This results in a height of roughly 575px for the video player, however the full height of the player depends on the length and content of the Tiktok caption. (These values represent current behavior and subject to change).
-
-In order to show the entire height of the video, this component will resize its height to include the full player height. Therefore in order to avoid layout shift it is best to match the `width` and `height` attributes to those values.
+By default, the width of the `amp-tiktok` iframe is 325px, resulting in a hight of roughly 575px. The default height of the embedded TikTok video player depends on the length and content of the TikTok caption. To show the entire video, the `amp-tiktok` component resizes to match the player height. You can avoid this by defining the width and height to match the video player.
 
 [example preview="inline" playground="true" imports="amp-tiktok"]
 
@@ -56,7 +67,7 @@ If you choose to set the height of to a value which is which is greater than the
 
 ### `data-src`
 
-The `data-src` attribute can contain one of two values: a **video id** or a **full URL** to a Tiktok detail page.
+The `data-src` attribute can contain one of two values: a **video id** or a **full URL** to a TikTok detail page.
 
 Example with video-id
 

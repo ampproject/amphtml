@@ -167,25 +167,12 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "binaries": [
-        {
-          "entryPoint": "component.js",
-          "outfile": "component-preact.js",
-          "external": ["preact", "preact/dom", "preact/compat", "preact/hooks"],
-          "remap": {"preact/dom": "preact"}
-        },
-        {
-          "entryPoint": "component.js",
-          "outfile": "component-react.js",
-          "external": ["react", "react-dom"],
-          "remap": {
-            "preact": "react",
-            "preact/compat": "react",
-            "preact/hooks": "react",
-            "preact/dom": "react-dom"
-          }
+      "npm": {
+        "component.js": {
+          "preact": "component-preact.js",
+          "react": "component-react.js"
         }
-      ]
+      }
     }
   },
   {"name": "amp-font", "version": "0.1", "latestVersion": "0.1"},
