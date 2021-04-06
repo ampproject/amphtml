@@ -21,7 +21,7 @@
 
 const {
   downloadUnminifiedOutput,
-  printSkipMessage,
+  skipDependentJobs,
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
@@ -57,7 +57,7 @@ function prBuildWorkflow() {
     timedExecOrDie('amp integration --nobuild --headless --coverage');
     timedExecOrDie('amp codecov-upload');
   } else {
-    printSkipMessage(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime or integration tests'
     );
