@@ -100,13 +100,13 @@ export class UserActivationTracker {
       return;
     }
     this.inLongTask_ = true;
-    promise
-      .catch(() => {})
-      .then(() => {
-        this.inLongTask_ = false;
-        // Add additional "activity window" after a long task is done.
-        this.lastActivationTime_ = Date.now();
-      });
+
+    const longTaskComplete = () => {
+      this.inLongTask_ = false;
+      // Add additional "activity window" after a long task is done.
+      this.lastActivationTime_ = Date.now();
+    };
+    promise.then(longTaskComplete, longTaskComplete);
   }
 
   /**
