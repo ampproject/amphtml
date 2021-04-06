@@ -4,14 +4,14 @@
         "pageName": "",
         "trafficSegment": "",
         "pageType": "Main Group",
-        "datacenter":"Default",
-        "guid":"$SUBSTR(${random},0,19)",
-        "sessionID":"$SUBSTR(${random},0,19)"
+        "datacenter": "Default",
+        "guid": "$SUBSTR(${random},0,19)",
+        "sessionID": "$SUBSTR(${random},0,19)"
     },
-    "request":{
-        "host":"https://d.btttag.com",
-        "base": "${host}/btt.gif?",
-        "pageview":"${base}?gID=${guid}&sID=${sessionID}&siteID=${prefix}&pageName=${pageName}&txnName=${trafficSegment}&thisURL=${canonicalUrl}&RefURL=${documentReferrer}&dom=${navTiming(domLoading,domComplete)}&domContentLoadedEnd=${navTiming(domContentLoadedEventEnd)}&domContentLoadedStart=${navTiming(domContentLoadedEventStart)}&domInteractive=${navTiming(domInteractive)}&domLoading=${navTiming(domLoading)}&domainLookupStart=${navTiming(domainLookupStart)}&elementCount=0&fByte=${navTiming(requestStart,responseStart)}&fCPnt=${firstContentfulPaint}&fetchStart=${navTiming(fetchStart)}&firstPaint=0&fmp=0&fps=0&fps_tti=0&loadEventStart=${navTiming(loadEventStart)}&lt_tti=0&nst=${navTiming(navigationStart)}&orderTND=0&pSz=0&pWSz=0&pageValue=&pgTm=${navTiming(navigationStart, loadEventStart)}&redirectCount=${navRedirectCount}&redirectStart=${navTiming(redirectStart)}&requestStart=${navTiming(requestStart)}&responseStart=${navTiming(responseStart)}&secureConnectionStart=${navTiming(secureConnectionStart)}&ssl=${navTiming(secureConnectionStart, responseStart)}&tcp=${navTiming(connectStart, connectEnd)}&top=0&totRD=0&tti=0&tul=0&unloadEventStart=${navTiming(unloadEventStart)}&wcd=0&eT=1&navigationType=1"
+    "request": {
+        "host": "https://d.btttag.com",
+        "endpoint": "${host}/btt.gif?",
+        "pageview": "${endpoint}?gID=${guid}&sID=${sessionID}&siteID=${prefix}&pageName=${pageName}&txnName=${trafficSegment}&thisURL=${canonicalUrl}&RefURL=${documentReferrer}&dom=${navTiming(domLoading,domComplete)}&domContentLoadedEnd=${navTiming(domContentLoadedEventEnd)}&domContentLoadedStart=${navTiming(domContentLoadedEventStart)}&domInteractive=${navTiming(domInteractive)}&domLoading=${navTiming(domLoading)}&domainLookupStart=${navTiming(domainLookupStart)}&elementCount=0&fByte=${navTiming(requestStart,responseStart)}&fCPnt=${firstContentfulPaint}&fetchStart=${navTiming(fetchStart)}&firstPaint=0&fmp=0&fps=0&fps_tti=0&loadEventStart=${navTiming(loadEventStart)}&lt_tti=0&nst=${navTiming(navigationStart)}&orderTND=0&pSz=0&pWSz=0&pageValue=&pgTm=${navTiming(navigationStart, loadEventStart)}&redirectCount=${navRedirectCount}&redirectStart=${navTiming(redirectStart)}&requestStart=${navTiming(requestStart)}&responseStart=${navTiming(responseStart)}&secureConnectionStart=${navTiming(secureConnectionStart)}&ssl=${navTiming(secureConnectionStart, responseStart)}&tcp=${navTiming(connectStart, connectEnd)}&top=0&totRD=0&tti=0&tul=0&unloadEventStart=${navTiming(unloadEventStart)}&wcd=0&eT=1&navigationType=1"
     },
     "transport": {
         "beacon": false,
@@ -19,7 +19,7 @@
         "image": true
     },
     "triggers": {
-        "visible": {
+        "trackPageview": {
             "on": "visible",
             "request": [
                 "pageview"
@@ -49,9 +49,9 @@
         "CV8": "",
         "CV9": "",
         "CV10": "",
-        "currencycode":"",
-        "c_count":"0",
-        "campaign":"",
-        "campaignName":""
+        "currencycode": "",
+        "c_count": "0",
+        "campaign": "",
+        "campaignName": ""
     }
 }
