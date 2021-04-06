@@ -69,19 +69,14 @@ async function checkSentinels(filePath, sentinels) {
  *   logic, so the 'Assertion failed' string will be present.
  */
 async function checkAsserts() {
-  try {
-    await checkSentinels(UNMINIFIED_JS, {
-      [PURE_ASSERT_SENTINEL]: true,
-      [DEV_ASSERT_SENTINEL]: true,
-    });
-    await checkSentinels(MINIFIED_JS, {
-      [PURE_ASSERT_SENTINEL]: true,
-      [DEV_ASSERT_SENTINEL]: false,
-    });
-  } catch (e) {
-    process.exitCode = 1;
-    return;
-  }
+  await checkSentinels(UNMINIFIED_JS, {
+    [PURE_ASSERT_SENTINEL]: true,
+    [DEV_ASSERT_SENTINEL]: true,
+  });
+  await checkSentinels(MINIFIED_JS, {
+    [PURE_ASSERT_SENTINEL]: true,
+    [DEV_ASSERT_SENTINEL]: false,
+  });
 }
 
 module.exports = {
