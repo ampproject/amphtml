@@ -19,8 +19,12 @@
  * @fileoverview Script that runs the unit tests during CI.
  */
 
+const {
+  skipDependentJobs,
+  timedExecOrDie,
+  timedExecOrThrow,
+} = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
-const {printSkipMessage, timedExecOrDie, timedExecOrThrow} = require('./utils');
 const {runCiJob} = require('./ci-job');
 
 const jobName = 'unit-tests.js';
@@ -50,7 +54,7 @@ function prBuildWorkflow() {
     timedExecOrDie('amp unit --headless --coverage');
     timedExecOrDie('amp codecov-upload');
   } else {
-    printSkipMessage(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime or unit tests'
     );

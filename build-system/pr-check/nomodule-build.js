@@ -21,7 +21,7 @@
 
 const {
   abortTimedJob,
-  printSkipMessage,
+  skipDependentJobs,
   processAndUploadNomoduleOutput,
   startTimer,
   timedExecWithError,
@@ -68,7 +68,13 @@ async function prBuildWorkflow() {
     await signalPrDeployUpload('success');
   } else {
     await signalPrDeployUpload('skipped');
-    printSkipMessage(
+
+    // Special case for visual diffs - Percy is a required check and must pass,
+    // but we just called `skipDependentJobs` so the Visual Diffs job will not
+    // run. Instead, we create an empty, passing check on Percy here.
+    timedExecOrDie('amp visual-diff --empty');
+
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime, integration tests, end-to-end tests, or visual diff tests'
     );
