@@ -539,17 +539,24 @@ amp-accordion {
   display: block !important;
 }
 
-/* heading */
- .i-amphtml-accordion-header {
-  margin: 0;
-  cursor: pointer;
-  background-color: #efefef;
-  padding-right: 20px;
-  border: solid 1px #dfdfdf;
-}
-/* heading/content */
-.i-amphtml-accordion-content {
-  margin: 0;
+/* 
+This media query is used instead of @supports due to low compatibility.
+At the time of this change (4/6/2021) no version of Webkit support @supports queries.
+
+These provide low-specificity UI styles to preventing CLS for 
+the header and content segments of accordions.
+*/
+@media (min-width: 1px) {
+  :where(amp-accordion > section) > :first-child {
+    margin: 0;
+    cursor: pointer;
+    background-color: #efefef;
+    padding-right: 20px;
+    border: 1px solid #dfdfdf;
+  }
+  :where(amp-accordion > section) > :last-child {
+    margin: 0;
+  }
 }
 
 /* Make sections non-floatable */
