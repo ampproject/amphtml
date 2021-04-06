@@ -124,7 +124,7 @@ jobs:
       - fail_fast
   'Bundle Size':
     executor:
-      name: amphtml-medium-executor
+      name: amphtml-xlarge-executor
     steps:
       - setup_vm
       - run:
@@ -277,8 +277,7 @@ workflows:
       - 'Bundle Size':
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build'
-            - 'Module Build'
+            - 'Compute Merge Commit'
       - 'Validator Tests':
           <<: *push_and_pr_builds
           requires:
