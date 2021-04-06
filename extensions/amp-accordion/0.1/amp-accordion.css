@@ -41,15 +41,6 @@ amp-accordion > section[expanded] > :last-child {
   border: solid 1px #dfdfdf;
 }
 
-amp-accordion.i-amphtml-display-locking > section:not([expanded]) > :last-child,
-amp-accordion.i-amphtml-display-locking
-  > section:not([expanded])
-  > :last-child
-  * {
-  content-visibility: hidden-matchable !important;
-  display: block !important;
-}
-
 /* Media should never play when a section is collapsed */
 amp-accordion > section:not([expanded]) .i-amphtml-media-component,
 amp-accordion > section:not([expanded]) .i-amphtml-media-component * {

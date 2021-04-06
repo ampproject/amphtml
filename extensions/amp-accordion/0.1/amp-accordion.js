@@ -27,7 +27,6 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getStyle, setImportantStyles, setStyles} from '../../../src/style';
-import {isExperimentOn} from '../../../src/experiments';
 import {
   numeric,
   px,
@@ -41,10 +40,6 @@ const MAX_TRANSITION_DURATION = 500; // ms
 const MIN_TRANSITION_DURATION = 200; // ms
 const EXPAND_CURVE_ = bezierCurve(0.47, 0, 0.745, 0.715);
 const COLLAPSE_CURVE_ = bezierCurve(0.39, 0.575, 0.565, 1);
-
-const isDisplayLockingEnabledForAccordion = (win) =>
-  isExperimentOn(win, 'amp-accordion-display-locking') &&
-  win.document.body.onbeforematch !== undefined;
 
 class AmpAccordion extends AMP.BaseElement {
   /** @override @nocollapse */
@@ -183,13 +178,6 @@ class AmpAccordion extends AMP.BaseElement {
 
       header.addEventListener('click', this.clickHandler_.bind(this));
       header.addEventListener('keydown', this.keyDownHandler_.bind(this));
-
-      if (isDisplayLockingEnabledForAccordion(this.win)) {
-        this.element.classList.add('i-amphtml-display-locking');
-        content.addEventListener('beforematch', () => {
-          this.toggle_(section, ActionTrust.HIGH, /* force expand */ true);
-        });
-      }
     });
   }
 
