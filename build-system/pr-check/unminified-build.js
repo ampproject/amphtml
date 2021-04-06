@@ -20,7 +20,7 @@
  */
 
 const {
-  skipFollowupJobs,
+  skipDependentJobs,
   timedExecOrDie,
   uploadUnminifiedOutput,
 } = require('./utils');
@@ -39,7 +39,7 @@ function prBuildWorkflow() {
     timedExecOrDie('amp build --fortesting');
     uploadUnminifiedOutput();
   } else {
-    skipFollowupJobs(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime or integration tests'
     );

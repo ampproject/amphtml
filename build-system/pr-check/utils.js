@@ -15,7 +15,12 @@
  */
 'use strict';
 
-const fs = require('fs');
+const {
+  ciBuildSha,
+  ciPullRequestSha,
+  isCiBuild,
+  signalGracefulHalt,
+} = require('../common/ci');
 const {
   gitBranchCreationPoint,
   gitBranchName,
@@ -25,7 +30,6 @@ const {
   gitCiMainBaseline,
   shortSha,
 } = require('../common/git');
-const {ciBuildSha, ciPullRequestSha, isCiBuild} = require('../common/ci');
 const {cyan, green, yellow} = require('kleur/colors');
 const {execOrDie, execOrThrow, execWithError, exec} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
@@ -105,16 +109,17 @@ function printChangeSummary() {
 }
 
 /**
- * Prints a message indicating why a job was skipped.
+ * Prints a message indicating why a job was skipped and mark its dependent jobs
+ * for skipping.
  * @param {string} jobName
  * @param {string} skipReason
  */
-function skipFollowupJobs(jobName, skipReason) {
+function skipDependentJobs(jobName, skipReason) {
   const loggingPrefix = getLoggingPrefix();
   logWithoutTimestamp(
     `${loggingPrefix} Skipping ${cyan(jobName)} because ${skipReason}.`
   );
-  fs.closeSync(fs.openSync('/tmp/workspace/.CI_GRACEFULLY_HALT', 'w'));
+  signalGracefulHalt();
 }
 
 /**
@@ -344,7 +349,7 @@ module.exports = {
   downloadNomoduleOutput,
   downloadModuleOutput,
   printChangeSummary,
-  skipFollowupJobs,
+  skipDependentJobs,
   processAndUploadNomoduleOutput,
   startTimer,
   stopTimer,

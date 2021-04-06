@@ -22,7 +22,7 @@
 const atob = require('atob');
 const {
   downloadNomoduleOutput,
-  skipFollowupJobs,
+  skipDependentJobs,
   timedExecOrDie,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
@@ -42,7 +42,7 @@ function prBuildWorkflow() {
     downloadNomoduleOutput();
     timedExecOrDie('amp visual-diff --nobuild');
   } else {
-    skipFollowupJobs(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime or visual diff tests'
     );

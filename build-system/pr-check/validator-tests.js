@@ -21,7 +21,7 @@
 
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {runCiJob} = require('./ci-job');
-const {skipFollowupJobs, timedExecOrDie} = require('./utils');
+const {skipDependentJobs, timedExecOrDie} = require('./utils');
 
 const jobName = 'validator-tests.js';
 
@@ -39,7 +39,7 @@ function prBuildWorkflow() {
       Targets.VALIDATOR_WEBUI
     )
   ) {
-    skipFollowupJobs(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime, validator, or validator web UI'
     );

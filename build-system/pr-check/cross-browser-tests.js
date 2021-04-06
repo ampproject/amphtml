@@ -24,7 +24,7 @@ const {log} = require('../common/logging');
 const {red, cyan} = require('kleur/colors');
 const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runCiJob} = require('./ci-job');
-const {skipFollowupJobs, timedExecOrDie} = require('./utils');
+const {skipDependentJobs, timedExecOrDie} = require('./utils');
 
 const jobName = 'cross-browser-tests.js';
 
@@ -120,7 +120,7 @@ async function prBuildWorkflow() {
       Targets.INTEGRATION_TEST
     )
   ) {
-    skipFollowupJobs(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime, unit tests, integration tests, or end-to-end tests'
     );

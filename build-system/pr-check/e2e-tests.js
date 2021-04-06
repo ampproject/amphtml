@@ -21,7 +21,7 @@
 
 const {
   downloadNomoduleOutput,
-  skipFollowupJobs,
+  skipDependentJobs,
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
@@ -51,7 +51,7 @@ function prBuildWorkflow() {
     downloadNomoduleOutput();
     timedExecOrDie('amp e2e --nobuild --headless --compiled');
   } else {
-    skipFollowupJobs(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime or end-to-end tests'
     );
