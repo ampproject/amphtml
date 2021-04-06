@@ -33,6 +33,7 @@ describes.realWin(
   },
   (env) => {
     let win;
+    let ampdoc;
     let doc;
     let openXhrStub;
     let sendXhrStub;
@@ -41,6 +42,7 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
+      ampdoc = env.ampdoc
       doc = win.document;
       openXhrStub = env.sandbox.stub();
       sendXhrStub = env.sandbox.stub();
@@ -163,7 +165,7 @@ describes.realWin(
 
     it('send single segment request', () => {
       setupStubs(true, true);
-      new Transport(win, {beacon: true}).sendRequest(
+      new Transport(ampdoc, {beacon: true}).sendRequest(
         'https://e.com/test',
         [
           {
@@ -182,7 +184,7 @@ describes.realWin(
 
     it('send single segment request in batch', () => {
       setupStubs(true, true);
-      new Transport(win, {beacon: true}).sendRequest(
+      new Transport(ampdoc, {beacon: true}).sendRequest(
         'https://e.com/test',
         [
           {
@@ -201,7 +203,7 @@ describes.realWin(
 
     it('send single segment request useBody', () => {
       setupStubs(true, true);
-      new Transport(win, {beacon: true, useBody: true}).sendRequest(
+      new Transport(ampdoc, {beacon: true, useBody: true}).sendRequest(
         'https://e.com/test',
         [
           {
@@ -220,7 +222,7 @@ describes.realWin(
 
     it('send single segment request useBody in batch', () => {
       setupStubs(true, true);
-      new Transport(win, {beacon: true, useBody: true}).sendRequest(
+      new Transport(ampdoc, {beacon: true, useBody: true}).sendRequest(
         'https://e.com/test',
         [
           {
@@ -239,7 +241,7 @@ describes.realWin(
 
     it('send multi-segment request w/o batch (only 1st sent)', () => {
       setupStubs(true, true);
-      new Transport(win, {beacon: true}).sendRequest(
+      new Transport(ampdoc, {beacon: true}).sendRequest(
         'https://e.com/test',
         [
           {
@@ -264,7 +266,7 @@ describes.realWin(
 
     it('send multi-segment request in batch', () => {
       setupStubs(true, true);
-      new Transport(win, {beacon: true}).sendRequest(
+      new Transport(ampdoc, {beacon: true}).sendRequest(
         'https://e.com/test',
         [
           {
@@ -289,7 +291,7 @@ describes.realWin(
 
     it('send multi-segment request useBody in batch', () => {
       setupStubs(true, true);
-      new Transport(win, {beacon: true, useBody: true}).sendRequest(
+      new Transport(ampdoc, {beacon: true, useBody: true}).sendRequest(
         'https://e.com/test',
         [
           {
@@ -338,7 +340,7 @@ describes.realWin(
         'http://iframe.localhost:9876/test/fixtures/served/iframe.html';
 
       function sendRequestUsingIframe(win, url) {
-        new Transport(win).sendRequestUsingIframe(url, {});
+        new Transport(ampdoc).sendRequestUsingIframe(url, {});
       }
 
       it('should create and delete an iframe', () => {
@@ -382,7 +384,7 @@ describes.realWin(
 
     describe('iframe transport', () => {
       it('does not initialize transport iframe if not used', () => {
-        const transport = new Transport(win, {
+        const transport = new Transport(ampdoc, {
           image: true,
           xhrpost: true,
           beacon: false,
@@ -395,7 +397,7 @@ describes.realWin(
       });
 
       it('initialize iframe transport when used', () => {
-        const transport = new Transport(win, {
+        const transport = new Transport(ampdoc, {
           iframe: '//test',
         });
 
@@ -424,7 +426,7 @@ describes.realWin(
         win.__AMP_MODE.runtime = 'inabox';
         expect(getMode(win).runtime).to.equal('inabox');
 
-        const transport = new Transport(win, {
+        const transport = new Transport(ampdoc, {
           iframe: '//test',
         });
 
@@ -447,7 +449,7 @@ describes.realWin(
 
       it('send via iframe transport', () => {
         setupStubs(true, true);
-        const transport = new Transport(win, {
+        const transport = new Transport(ampdoc, {
           beacon: true,
           xhrpost: true,
           image: true,
@@ -484,7 +486,7 @@ describes.realWin(
     }
 
     function sendRequest(win, request, options) {
-      new Transport(win, options).sendRequest(request, [{}], false);
+      new Transport(ampdoc, options).sendRequest(request, [{}], false);
     }
 
     function expectBeacon(url, payload) {
