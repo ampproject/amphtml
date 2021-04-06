@@ -251,6 +251,12 @@ describe('parseUrlDeprecated', () => {
   it('should parse origin data:12345', () => {
     expect(parseUrlDeprecated('data:12345').origin).to.equal('data:12345');
   });
+
+  it('should parse relative', () => {
+    expect(parseUrlDeprecated('chilaquiles/rojos')).to.include({
+      pathname: '/chilaquiles/rojos',
+    });
+  });
 });
 
 describe('parseQueryString', () => {
@@ -764,14 +770,6 @@ describe('getSourceOrigin/Url', () => {
   testOrigin(
     'https://cdn.ampproject.org/ad/www.origin.com/foo/?f=0#h',
     'http://www.origin.com/foo/?f=0#h'
-  );
-  testOrigin(
-    'https://cdn.ampproject.org/action/www.origin.com/foo/?f=0#h',
-    'http://www.origin.com/foo/?f=0#h'
-  );
-  testOrigin(
-    'https://cdn.ampproject.org/action/s/www.origin.com/foo/?f=0#h',
-    'https://www.origin.com/foo/?f=0#h'
   );
 
   // Prefixed CDN

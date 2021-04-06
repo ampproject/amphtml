@@ -1,13 +1,15 @@
 .DS_Store
 .g4ignore
+.CIRCLECI_MERGE_COMMIT
+.babel-cache/
 build/
-.karma-cache
-.amp-build
+.amp-dep-check
+extensions/**/dist/**
 c
+.css-cache/
 /dist
 dist.3p
 dist.tools
-test-bin
 /release
 examples.min
 node_modules
@@ -19,10 +21,9 @@ typings
 typings.json
 /test/manual/amp-ad.adtech.html
 test/coverage
-./package-lock.json
+test/coverage-e2e
 *.swp
 *.swo
-yarn-error.log
 deps.txt
 firebase
 .firebaserc
@@ -35,3 +36,5 @@ build-system/tasks/performance/results.json
 build-system/global-configs/custom-config.json
 export
 validator/export
+result-reports/**
+examples/storybook

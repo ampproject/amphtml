@@ -75,8 +75,8 @@ _Examples : Tremor, Brightroll_
 
 If you are a video ad network, please work with your publisher to ensure that:
 
-- All video assets are served over HTTPS
-- The publisher’s video player has AMP support
+-   All video assets are served over HTTPS
+-   The publisher’s video player has AMP support
 
 ## Data Management Platform (DMP)
 

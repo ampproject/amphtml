@@ -196,4 +196,36 @@ describe('Object', () => {
       expect(() => object.deepMerge(destObject, destObject)).to.not.throw();
     });
   });
+
+  describe('memo', () => {
+    const PROP = '_a';
+
+    let counter;
+    let obj;
+
+    beforeEach(() => {
+      counter = 0;
+      obj = {
+        name: 'OBJ',
+      };
+    });
+
+    function factory(obj) {
+      const id = ++counter;
+      return `${obj.name}:${id}`;
+    }
+
+    it('should allocate object on first and first use only', () => {
+      // First access: allocate and reuse.
+      expect(object.memo(obj, PROP, factory)).to.equal('OBJ:1');
+      expect(object.memo(obj, PROP, factory)).to.equal('OBJ:1');
+
+      // Same object, different property: allocate again.
+      expect(object.memo(obj, PROP + '2', factory)).to.equal('OBJ:2');
+      expect(object.memo(obj, PROP + '2', factory)).to.equal('OBJ:2');
+
+      // A new object: allocate again.
+      expect(object.memo({name: 'OBJ'}, PROP, factory)).to.equal('OBJ:3');
+    });
+  });
 });

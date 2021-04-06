@@ -68,12 +68,12 @@ for content within the sidebar to be displayed on other parts of the main conten
 - The sidebar can only appear on the left or right side of a page.
 - The `<amp-sidebar>` may contain any valid HTML elements (supported by AMP).
 - The `<amp-sidebar>` may contain any of the following AMP elements:
-  - `<amp-accordion>`
-  - `<amp-img>`
-  - `<amp-fit-text>`
-  - `<amp-list>`
-  - `<amp-live-list>`
-  - `<amp-social-share>`
+    - `<amp-accordion>`
+    - `<amp-img>`
+    - `<amp-fit-text>`
+    - `<amp-list>`
+    - `<amp-live-list>`
+    - `<amp-social-share>`
 - The max-height of the sidebar is 100vh, if the height exceeds 100vh then a vertical scrollbar appears. The default height is set to 100vh in CSS and is overridable in CSS.
 - The width of the sidebar can be set and adjusted using CSS (minimum width is 45px).
 - Touch zoom is disabled on the `amp-sidebar` and its mask when the sidebar is open.
@@ -140,9 +140,9 @@ You can create a `toolbar` element that displays in the `<body>` by specifying t
 
 - The sidebar may implement toolbars by adding nav elements with the `toolbar` attribute and `toolbar-target` attribute.
 - The nav element must be a child of `<amp-sidebar>` and follow this format: `<nav toolbar="(media-query)" toolbar-target="elementID">`.
-  - For instance, this would be a valid use of toolbar: `<nav toolbar="(max-width: 1024px)" toolbar-target="target-element">`.
+    - For instance, this would be a valid use of toolbar: `<nav toolbar="(max-width: 1024px)" toolbar-target="target-element">`.
 - The nav containing the toolbar attribute must only contain a single `<ul>` or `<ol>` element, that contains `<li>` elements.
-  - The `<li>` elements may contain any valid HTML elements (supported by AMP), or any of the AMP elements that `<amp-sidebar>` supports.
+    - The `<li>` elements may contain any valid HTML elements (supported by AMP), or any of the AMP elements that `<amp-sidebar>` supports.
 - Toolbar behavior is only applied while the `toolbar` attribute media-query is valid. Also, an element with the `toolbar-target` attribute id must exist on the page for the toolbar to be applied.
 
 _Example: Basic Toolbar_
@@ -174,7 +174,7 @@ In the following example, we display a `toolbar` if the window width is less tha
 
 ## Styling Toolbar
 
-The `toolbar` element within the `<amp-sidebar>` element, will have classes applied to the element depending if the `toolbar-target` element is shown or hidden. This is useful for applying different styles on the `toolbar` element and then `toolbar-target` element. The classes are `amp-sidebar-toolbar-target-shown`, and `amp-sidebar-toolbar-target-hidden`. The class `amp-sidebar-toolbar-target-shown` is applied to the `toolbar` element when the `toolbar-target` element is shown. The class `amp-sidebar-toolbar-target-hidden` is applied to the `toolbar` element when the `toolbar-target` element is hidden.
+The `toolbar` element within the `<amp-sidebar>` element, will have classes applied to the element depending if the `toolbar-target` element is shown or hidden. This is useful for applying different styles on the `toolbar` element and then `toolbar-target` element. The classes are `amp-sidebar-toolbar-target-shown`, and `amp-sidebar-toolbar-target-hidden`. The class `amp-sidebar-toolbar-target-shown` is applied to the `toolbar` element when the `toolbar-target` element is shown. The class `amp-sidebar-toolbar-target-hidden` is applied to the `toolbar` element when the `toolbar-target` element is hidden. Additionally, one can customize the opacity of the mask via `amp-sidebar-mask`.
 
 _Example: Toolbar State Classes_
 

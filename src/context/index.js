@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-export {contextProp} from './prop';
-
 import {ContextNode} from './node';
+
+export {contextProp} from './prop';
+export {subscribe, unsubscribe} from './subscriber';
 
 /**
  * Direct slot assignment. Works the same way as shadow slots, but does not
@@ -41,6 +42,44 @@ export function assignSlot(node, slot) {
  */
 export function unassignSlot(node, slot) {
   ContextNode.unassignSlot(node, slot);
+}
+
+/**
+ * Sets (or unsets) the direct parent. If the parent is set, the node will no
+ * longer try to discover itself.
+ *
+ * @param {!Node} node
+ * @param {!Node|null} parent
+ */
+export function setParent(node, parent) {
+  ContextNode.get(node).setParent(parent);
+}
+
+/**
+ * @param {!Node} node
+ */
+export function discover(node) {
+  ContextNode.get(node).discover();
+}
+
+/**
+ * Designates (or undesignates) the node as a root node. If the node is
+ * designated as a root, it will no longer discover itself.
+ *
+ * @param {!Node} node
+ * @param {boolean} isRoot
+ */
+export function setIsRoot(node, isRoot) {
+  ContextNode.get(node).setIsRoot(isRoot);
+}
+
+/**
+ * Reruns discovery on the children of the specified node, if any.
+ *
+ * @param {!Node} node
+ */
+export function rediscoverChildren(node) {
+  ContextNode.rediscoverChildren(node);
 }
 
 /**
@@ -77,4 +116,36 @@ export function setProp(node, prop, setter, value) {
  */
 export function removeProp(node, prop, setter) {
   ContextNode.get(node).values.remove(prop, setter);
+}
+
+/**
+ * @param {!Node} node
+ * @param {string} name
+ * @param {function(!Node):boolean} match
+ * @param {number=} weight
+ */
+export function addGroup(node, name, match, weight = 0) {
+  ContextNode.get(node).addGroup(name, match, weight);
+}
+
+/**
+ * @param {!Node} node
+ * @param {string} groupName
+ * @param {!ContextProp<T>} prop
+ * @param {*} setter
+ * @param {T} value
+ * @template T
+ */
+export function setGroupProp(node, groupName, prop, setter, value) {
+  ContextNode.get(node).group(groupName).values.set(prop, setter, value);
+}
+
+/**
+ * @param {!Node} node
+ * @param {string} groupName
+ * @param {!ContextProp} prop
+ * @param {*} setter
+ */
+export function removeGroupProp(node, groupName, prop, setter) {
+  ContextNode.get(node).group(groupName).values.remove(prop, setter);
 }

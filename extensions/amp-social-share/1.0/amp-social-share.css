@@ -14,11 +14,42 @@
  * limitations under the License.
  */
 
+/*
+ * Pre-upgrade:
+ * - display:inline-block element
+ * - size-defined element
+ * - predefined default size
+ */
+amp-social-share {
+  display: inline-block;
+  overflow: hidden;
+  position: relative;
+  box-sizing: border-box;
+  width: 60px;
+  height: 44px;
+}
+
+/* Pre-upgrade: size-defining element - hide children until build. */
+amp-social-share:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc) {
+  display: none;
+  content-visibility: hidden;
+}
+
 /**
   * Note: Attribute selectors were used initially here but we switched to using
   * class-based selector to style each type because of a bug on iOS Safari 8.
   * See https://github.com/ampproject/amphtml/issues/4277 for more details.
   */
+
+amp-social-share:focus {
+  outline: #0389ff solid 2px;
+  outline-offset: 2px;
+}
+
+amp-social-share::part(button):focus {
+  outline: none !important;
+  outline-offset: 0 !important;
+}
 
 /* Twitter Styling */
 .amp-social-share-twitter {
@@ -28,26 +59,26 @@
 
 /* Facebook Styling */
 .amp-social-share-facebook {
-  color: #fff;
-  background-color: #32529f;
+  color: #1877f2;
+  background-color: #fff;
 }
 
 /* Pinterest Styling */
 .amp-social-share-pinterest {
-  color: #fff;
-  background-color: #e60023;
+  color: #e60023;
+  background-color: #fff;
 }
 
 /* LinkedIn Styling */
 .amp-social-share-linkedin {
   color: #fff;
-  background-color: #0077b5;
+  background-color: #0a66c2;
 }
 
 /* Tumblr Styling */
 .amp-social-share-tumblr {
   color: #fff;
-  background-color: #3c5a77;
+  background-color: #001935;
 }
 
 /* Email Styling */
@@ -65,13 +96,13 @@
 /* line Styling */
 .amp-social-share-line {
   color: #fff;
-  background-color: #52b448;
+  background-color: #00b900;
 }
 
 /* SMS Styling */
 .amp-social-share-sms {
   color: #fff;
-  background-color: #ca2b63;
+  background-color: #000000;
 }
 
 /* "system" styling */

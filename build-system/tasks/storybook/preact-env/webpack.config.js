@@ -14,21 +14,26 @@
  * limitations under the License.
  */
 const path = require('path');
+const {DefinePlugin} = require('webpack');
 
-module.exports = {
-  resolveLoader: {
+module.exports = ({config}) => {
+  config.resolveLoader = {
     modules: [
       path.join(__dirname, '../node_modules'),
       path.join(__dirname, '../../../../node_modules'),
     ],
-  },
-  resolve: {
+  };
+  config.resolve = {
     modules: [
       path.join(__dirname, '../node_modules'),
       path.join(__dirname, '../../../../node_modules'),
     ],
-  },
-  module: {
+    alias: {
+      'react': 'preact/compat',
+      'react-dom': 'preact/compat',
+    },
+  };
+  config.module = {
     rules: [
       {
         test: /\.jsx?$/,
@@ -36,6 +41,13 @@ module.exports = {
         exclude: /node_modules/,
         query: {
           presets: [
+            [
+              '@babel/preset-env',
+              {
+                bugfixes: true,
+                targets: {'browsers': ['Last 2 versions']},
+              },
+            ],
             [
               '@babel/preset-react',
               {
@@ -47,6 +59,14 @@ module.exports = {
           ],
         },
       },
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader'],
+      },
     ],
-  },
+  };
+  // Replaced by minify-replace (babel) in the usual build pipeline
+  // build-system/babel-config/helpers.js#getReplacePlugin
+  config.plugins.push(new DefinePlugin({IS_ESM: false}));
+  return config;
 };

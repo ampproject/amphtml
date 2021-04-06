@@ -172,6 +172,26 @@ event.value</pre>
   </tr>
 </table>
 
+### amp-accordion > section <a name="amp-accordion"></a>
+
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>expand</code></td>
+    <td>Fired when an accordion section expands.</td>
+    <td>None.</td>
+  </tr>
+  <tr>
+    <td><code>collapse</code></td>
+    <td>Fired when an accordion section collapses.</td>
+    <td>None.</td>
+  </tr>
+</table>
+
 ### amp-carousel[type="slides"] <a name="amp-carouseltypeslides"></a>
 
 <table>
@@ -215,10 +235,6 @@ event.index</pre></td>
     <th width="25%">Event</th>
     <th width="35%">Description</th>
     <th width="40%">Data</th>
-  </tr>
-  <tr>
-    <td><code>changeToLayoutContainer</code></td>
-    <td>Update's <code>amp-list</code>'s layout to <code>layout="CONTAINTER"</code> to allow <a href="../extensions/amp-list/amp-list.md#dynamic-resizing">dynamic resizing</a>.</td>
   </tr>
   <tr>
     <td><code>fetch-error</code>(low-trust)</td>
@@ -282,7 +298,13 @@ event.selectedOptions</pre></td>
   </tr>
 </table>
 
-### amp-video, amp-youtube <a name="amp-video-amp-youtube"></a>
+<!-- Previous anchor to the next heading, keeping to preserve old fragment links: -->
+
+<a name="amp-video-amp-youtube"></a>
+
+### <a name="amp-video-events"></a> amp-video and other Video Elements
+
+The events below are dispatched by `amp-video`, `amp-video-iframe` and [3rd party video players](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md) like `amp-youtube`.
 
 <table>
   <tr>
@@ -376,7 +398,8 @@ event.response</pre></td>
     <code>position</code> is optional. One of <code>top</code>, <code>center</code>
     or <code>bottom</code> (default <code>top</code>).
     Specifies the position of the element relative to the viewport after
-    scrolling.</td>
+    scrolling.<br>
+    As an accessibility best practice, pair this with a call to <code>focus()</code> to focus on the element being scrolled to.</td>
   </tr>
   <tr>
     <td><code>focus</code></td>
@@ -430,6 +453,27 @@ event.response</pre></td>
   <tr>
     <td><code>seekTo(percent=[0,1])</code></td>
     <td>Uses the given percentage value to determine the currentTime of the animation to the specified value and pauses animation. </td>
+  </tr>
+</table>
+
+### amp-accordion <a name="amp-accordion-1"></a>
+
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>toggle(section=STRING)</code></td>
+    <td>Toggles the <code>expanded</code> and <code>collapsed</code> states of <code>amp-accordion</code> sections. When called with no arguments, it toggles all sections of the accordion. Trigger on a specific section by providing the section id: <code>on="tap:myAccordion.toggle(section='section-id')"</code>.
+  </tr>
+  <tr>
+    <td><code>expand(section=STRING)</code></td>
+    <td>Expands the sections of the accordion. If a section is already expanded, it stays expanded. When called with no arguments, it expands all sections of the accordion. Trigger on a specific section by providing the section id: <code>on="tap:myAccordion.expand(section='section-id')"</code>.</td>
+  </tr>
+  <tr>
+    <td><code>collapse(section=STRING)</code></td>
+    <td>Collapses the sections of the accordion. If a section is already collapsed, it stays collapsed. When called with no arguments, it collapses all sections of the accordion. Trigger on a specific section by providing the section id: <code>on="tap:myAccordion.collapse(section='section-id')"</code>.</td>
   </tr>
 </table>
 
@@ -499,6 +543,10 @@ event.response</pre></td>
   <tr>
     <th>Action</th>
     <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>changeToLayoutContainer</code></td>
+    <td>Update's <code>amp-list</code>'s layout to <code>layout="CONTAINTER"</code> to allow <a href="../extensions/amp-list/amp-list.md#dynamic-resizing">dynamic resizing</a>.</td>
   </tr>
   <tr>
     <td><code>refresh</code></td>
@@ -595,9 +643,13 @@ event.response</pre></td>
   </tr>
 </table>
 
-### Video elements <a name="video-elements"></a>
+<!-- Previous anchor to the next heading, keeping to preserve old fragment links: -->
 
-The actions below are supported in the following AMP video elements: `amp-video`, `amp-youtube`, `amp-3q-player`, `amp-brid-player`, `amp-dailymotion`, `amp-delight-player`, `amp-ima-video`.
+<a name="video-elements"></a>
+
+### <a name="amp-video-actions"></a> amp-video and other Video Elements
+
+The actions below are supported in `amp-video`, `amp-video-iframe` and [3rd party video players](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md) like `amp-youtube`.
 
 <table>
   <tr>
@@ -621,7 +673,7 @@ The actions below are supported in the following AMP video elements: `amp-video`
     <td>Unmutes the video.</td>
   </tr>
   <tr>
-    <td><code>fullscreencenter</code></td>
+    <td><code>fullscreenenter</code></td>
     <td>Takes the video to fullscreen.</td>
   </tr>
 </table>
@@ -659,11 +711,17 @@ actions that apply to the whole document.
   </tr>
   <tr>
     <td><code>navigateTo(url=STRING, target=STRING, opener=BOOLEAN)</code></td>
-    <td>Navigates current window to given URL, to the optional specified target if given (currenly only supporting <code>_top</code> and <code>_blank </code>). The optional <code>opener</code> parameter can be specified when using a target of <code>_blank</code> to allow the newly opened page to access <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/opener"><code>window.opener<code></a>. Supports <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md">standard URL substitutions</a>.</td>
+    <td>
+      <p>Navigates current window to given URL, to the optional specified target if given (currenly only supporting <code>_top</code> and <code>_blank </code>). The optional <code>opener</code> parameter can be specified when using a target of <code>_blank</code> to allow the newly opened page to access <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/opener"><code>window.opener</code></a>. Supports <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md">standard URL substitutions</a>.</p>
+      <p><strong>Caveat:</strong> Using normal <code>&lt;a&gt;</code> links is recommended wherever possible since <code>AMP.navigateTo</code> is not recognized by web crawlers.</p>
+    </td>
   </tr>
   <tr>
     <td><code>closeOrNavigateTo(url=STRING, target=STRING, opener=BOOLEAN)</code></td>
-    <td>Tries to close the window if allowed, otherwise it navigates similar to <code>navigateTo</code> Action. Useful for use-cases where a "Back" button may need to close the window if it were opened in a new window from previous page or navigate if it wasn't opened.</td>
+    <td>
+      <p>Tries to close the window if allowed, otherwise it navigates similar to <code>navigateTo</code> Action. Useful for use-cases where a "Back" button may need to close the window if it were opened in a new window from previous page or navigate if it wasn't opened.</p>
+      <p><strong>Caveat:</strong> Using normal <code>&lt;a&gt;</code> links is recommended wherever possible since <code>AMP.closeOrNavigateTo</code> is not recognized by web crawlers.</p>
+    </td>
   </tr>
   <tr>
     <td><code>goBack</code></td>

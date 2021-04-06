@@ -18,7 +18,7 @@ limitations under the License.
 
 ## Introduction
 
-This document explains the communication between a Viewer and AMP documents by using the open-source [AMP Viewer Integration API](https://github.com/ampproject/amphtml/tree/master/extensions/amp-viewer-integration). The AMP Viewer Integration API provides a protocol to establish a connection and send [messages](https://github.com/ampproject/amphtml/blob/viewer-doc-api-link/extensions/amp-viewer-integration/amp-doc-viewer-api.md) between the Viewer and AMP documents.
+This document explains the communication between a Viewer and AMP documents by using the open-source [AMP Viewer Integration API](https://github.com/ampproject/amphtml/tree/master/extensions/amp-viewer-integration). The AMP Viewer Integration API provides a protocol to establish a connection and send [messages](https://github.com/ampproject/amphtml/blob/master/extensions/amp-viewer-integration/amp-doc-viewer-api.md) between the Viewer and AMP documents.
 
 <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/intro.png" height="300px"></img>
 
@@ -38,45 +38,45 @@ To establish communication between the Viewer and AMP Document, we need to estab
 
 1. The Viewer waits for the AMP document to load. The Viewer listens on its window for a `message` event.
 
-   <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/mobile-web-handshake1.png" height="300px"></img>
+    <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/mobile-web-handshake1.png" height="300px"></img>
 
 2. As soon as the AMP document loads, the AMP document sends a message to the Viewer (its parent) using `postMessage()`.
 
-   <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/mobile-web-handshake2.png" height="300px"></img>
+    <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/mobile-web-handshake2.png" height="300px"></img>
 
-   The message from the AMP Document to the Viewer looks like this:
+    The message from the AMP Document to the Viewer looks like this:
 
-   ```javascript
-   {
-     app: “__AMPHTML__”,     // Hey viewer, it's me AMP Doc!
-     requestid: 1,           // A unique ID for the request
-     type: “q”,              // Represents a REQUEST
-     name: “channelOpen”,    // Let’s shake hands
-     data: {
-       url: “amp...yoursite.com”,   // from the amp cache
-       sourceUrl: “yoursite.com”    // the original source url
-     }
-     rsvp: true              // response required
-   };
-   ```
+    ```javascript
+    {
+      app: "__AMPHTML__",     // Hey viewer, it's me AMP Doc!
+      requestid: 1,           // A unique ID for the request
+      type: "q",              // Represents a REQUEST
+      name: "channelOpen",    // Let’s shake hands
+      data: {
+        url: "amp...yoursite.com",   // from the amp cache
+        sourceUrl: "yoursite.com"    // the original source url
+      }
+      rsvp: true              // response required
+    };
+    ```
 
 3. The Viewer responds to the AMP Document by also using `postMessage()`.
 
-   <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/mobile-web-handshake3.png" height="300px"></img>
+    <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/mobile-web-handshake3.png" height="300px"></img>
 
-   The message from the Viewer to the AMP Document looks like this:
+    The message from the Viewer to the AMP Document looks like this:
 
-   ```javascript
-   {
-     app: “__AMPHTML__”,    // Hey AMP Doc, it's me Viewer!
-     type: “s”,             // Represents a RESPONSE
-     requestid: 1,          // The same ID used in the REQUEST
-   };
-   ```
+    ```javascript
+    {
+      app: "__AMPHTML__",    // Hey AMP Doc, it's me Viewer!
+      type: "s",             // Represents a RESPONSE
+      requestid: 1,          // The same ID used in the REQUEST
+    };
+    ```
 
 4. The Viewer and AMP Document are now introduced, and they can start posting messages to each other.
 
-   <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/mobile-web-handshake4.png" height="300px"></img>
+    <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/mobile-web-handshake4.png" height="300px"></img>
 
 ### Communicating between Doc and Viewer in Webview
 
@@ -88,37 +88,37 @@ Webview is for Native apps. In Webview, the Viewer can see the AMP document, but
 
 1. The Viewer starts by polling the AMP Document every x milliseconds until the AMP Document is loaded and ready.
 
-   <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/webview-connection2.png" height="300px"></img>
+    <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/webview-connection2.png" height="300px"></img>
 
 2. When the AMP document loads, it receives a “Are you there?” polling message but the AMP document doesn't know who to respond to. For this reason, the Viewer uses the [Channel Messaging API](https://developer.mozilla.org/en-US/docs/Web/API/Channel_Messaging_API) to create a 2-way connection.
 
 3. The Viewer creates two ports: one for the Viewer and one for the AMP Document. The Viewer sends a port with its polling message to the AMP Document.
 
-   <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/webview-connection3.png" height="300px"></img>
+    <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/webview-connection3.png" height="300px"></img>
 
-   The message sent from the Viewer to the AMP Doc is done using the `postMessage()` method. The post contains the following message:
+    The message sent from the Viewer to the AMP Doc is done using the `postMessage()` method. The post contains the following message:
 
-   ```javascript
-   var message = {
-     app: ‘__AMPHTML__’,       // Hey AMP Doc, it's me Viewer!
-     name: ‘handshake-poll’,   // I’m polling you so we can shake hands.
-   };
-   ```
+    ```javascript
+    var message = {
+      app: ‘__AMPHTML__’,       // Hey AMP Doc, it's me Viewer!
+      name: ‘handshake-poll’,   // I’m polling you so we can shake hands.
+    };
+    ```
 
-   When calling `postMessage()`, the Viewer also sends the port to the AMP Doc and it looks like this:
+    When calling `postMessage()`, the Viewer also sends the port to the AMP Doc and it looks like this:
 
-   ```javascript
-   var channel = new MessageChannel();
-   ampdoc.postMessage(message, ‘*’, [channel.port2]);
-   ```
+    ```javascript
+    var channel = new MessageChannel();
+    ampdoc.postMessage(message, ‘*’, [channel.port2]);
+    ```
 
 4. Eventually, the AMP Document loads and receives the message and the port.
 
-   <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/webview-connection4.png" height="300px"></img>
+    <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/webview-connection4.png" height="300px"></img>
 
 5. A 2-way connection is established where the Viewer can send messages to the AMP Doc and the AMP Doc can send messages to the Viewer!
 
-   <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/webview-connection5.png" height="300px"></img>
+    <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/webview-connection5.png" height="300px"></img>
 
 6. Now that the connection is set up, we need to establish the handshake between the Viewer and the AMP document.
 
@@ -128,41 +128,41 @@ In the previous section, we set up the connection between the Viewer and AMP Doc
 
 1. The AMP Doc sends a message to the Viewer over the port.
 
-   <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/webview-handshake1.png" height="300px"></img>
+    <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/webview-handshake1.png" height="300px"></img>
 
-   The message from the AMP document looks like this:
+    The message from the AMP document looks like this:
 
-   ```javascript
-   {
-     app: “__AMPHTML__”,     // Hey viewer, it's me AMP Doc!
-     requestid: 1,           // A unique ID for the request
-     type: “q”,              // Represents a REQUEST
-     name: “channelOpen”,    // Let’s shake hands
-     data: {
-       url: “amp...yoursite.com”,   // from the amp cache
-       sourceUrl: “yoursite.com”    // the original source url
-     }
-     rsvp: true              // response required
-   };
-   ```
+    ```javascript
+    {
+      app: "__AMPHTML__",     // Hey viewer, it's me AMP Doc!
+      requestid: 1,           // A unique ID for the request
+      type: "q",              // Represents a REQUEST
+      name: "channelOpen",    // Let’s shake hands
+      data: {
+        url: "amp...yoursite.com",   // from the amp cache
+        sourceUrl: "yoursite.com"    // the original source url
+      }
+      rsvp: true              // response required
+    };
+    ```
 
 2. The Viewer responds to the AMP document over the port.
 
-   <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/webview-handshake2.png" height="300px"></img>
+    <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/webview-handshake2.png" height="300px"></img>
 
-   The message looks like this:
+    The message looks like this:
 
-   ```javascript
-   {
-     app: “__AMPHTML__”,    // Hey AMP Doc, it's me Viewer!
-     type: “s”,             // Represents a RESPONSE
-     requestid: 1,          // The same ID used in the REQUEST
-   };
-   ```
+    ```javascript
+    {
+      app: "__AMPHTML__",    // Hey AMP Doc, it's me Viewer!
+      type: "s",             // Represents a RESPONSE
+      requestid: 1,          // The same ID used in the REQUEST
+    };
+    ```
 
 3. The handshake is established and now the Viewer and AMP Document can start communicating.
 
-   <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/webview-handshake3.png" height="300px"></img>
+    <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/webview-handshake3.png" height="300px"></img>
 
 ## Using the Integration API with the Viewer
 
@@ -196,22 +196,22 @@ AMP Cache providers must include the [amp-viewer-integration](https://github.com
 
 1. In the Viewer, you need to create initialization parameters in an object:
 
-   ```javascript
-   var initParams = {
-     origin: “http://yourAmpDocsOrigin.com”
-     someOtherParam: “someValue,anotherValue”
-   };
-   ```
+    ```javascript
+    var initParams = {
+      origin: "http://yourAmpDocsOrigin.com"
+      someOtherParam: "someValue,anotherValue"
+    };
+    ```
 
 2. Using `encodeUriComponent`, convert the object to query string format:
 
-   - Separated by `&`
-   - Encoded to UTF-8 (`','` -> `'%2C'`, `':'` -> `'%3A'`, `'/'` -> `'%2F'`, etc)
+    - Separated by `&`
+    - Encoded to UTF-8 (`','` -> `'%2C'`, `':'` -> `'%3A'`, `'/'` -> `'%2F'`, etc)
 
 3. Add the query string to the fragment part of the AMP Cache URL:
-   ```html
-   https://cdn.ampproject.org/v/s/origin?amp_js_v=0.1#origin=http%3A%2F%2FyourAmpDocsOrigin.com&someOtherParam=someValue%2CanotherValue
-   ```
+    ```html
+    https://cdn.ampproject.org/v/s/origin?amp_js_v=0.1#origin=http%3A%2F%2FyourAmpDocsOrigin.com&someOtherParam=someValue%2CanotherValue
+    ```
 
 ### Composing messages
 
@@ -229,15 +229,15 @@ A message can be either an Object, or a String that’s serialized using JSON st
 };
 ```
 
-- **app**: A sentinel that both the Viewer and AMP Documents will use to know that the message they’ve received is a part of the AMP Viewer Integrations API. The value should always be set to `'__AMPHTML__'`.
-- **type**: This signals that the message is either a request or a response.
-  - For a request message, specify a value of `'q'`.
-  - For a response message, specify a value of `'s'`.
-- **requestid**: A unique ID to identify the request. A simple request counter that increases its value with each request message should work just fine.
-- **name**: Specifies the message name.
-- **rsvp**: Set to `true` if you need a response to your message; otherwise, `false`.
-- **data**: The data you need to send with your message.
-- **error**: The string explaining the error that occurred. Only used in a response.
+-   **app**: A sentinel that both the Viewer and AMP Documents will use to know that the message they’ve received is a part of the AMP Viewer Integrations API. The value should always be set to `'__AMPHTML__'`.
+-   **type**: This signals that the message is either a request or a response.
+    -   For a request message, specify a value of `'q'`.
+    -   For a response message, specify a value of `'s'`.
+-   **requestid**: A unique ID to identify the request. A simple request counter that increases its value with each request message should work just fine.
+-   **name**: Specifies the message name.
+-   **rsvp**: Set to `true` if you need a response to your message; otherwise, `false`.
+-   **data**: The data you need to send with your message.
+-   **error**: The string explaining the error that occurred. Only used in a response.
 
 ### Establishing handshakes
 
@@ -245,8 +245,8 @@ There are two types of handshakes:
 
 1. A handshake initiated by the AMP Document (typically used in Mobile Web).
 2. A handshake initiated by the Viewer (typically used in Webview). In this case, the Viewer polls the AMP Document every X milliseconds to initiate the handshake. There are two ways to do this:
-   - Mobile Web
-   - Webview (Native apps)
+    - Mobile Web
+    - Webview (Native apps)
 
 #### AMP Document-initiated handshake
 
@@ -254,29 +254,29 @@ To establish a handshake initiated by the AMP Document:
 
 1. The AMP Document initiates the handshake by sending a request to the Viewer via `postMessage()`:
 
-   ```javascript
-   {
-     app: "__AMPHTML__",
-     requestid: 1,
-     type: "q",
-     name: "channelOpen",
-     data: {
-       url: “amp...yoursite.com”,
-       sourceUrl: “yoursite.com”
-     }
-     rsvp: true,
-   };
-   ```
+    ```javascript
+    {
+      app: "__AMPHTML__",
+      requestid: 1,
+      type: "q",
+      name: "channelOpen",
+      data: {
+        url: "amp...yoursite.com",
+        sourceUrl: "yoursite.com"
+      }
+      rsvp: true,
+    };
+    ```
 
 2. The Viewer needs to acknowledge the request and respond via `postMessage()`:
 
-   ```javascript
-   {
-     app: “__AMPHTML__”,
-     type: “s”,
-     requestid: 1,
-   };
-   ```
+    ```javascript
+    {
+      app: "__AMPHTML__",
+      type: "s",
+      requestid: 1,
+    };
+    ```
 
 #### Viewer-initiated handshake (polling)
 
@@ -316,13 +316,13 @@ The AMP Document sends the following message to the Viewer over the port:
 
 ```javascript
 {
-  app: “__AMPHTML__”,
+  app: "__AMPHTML__",
   requestid: 1,
-  type: “q”,
-  name: “channelOpen”,
+  type: "q",
+  name: "channelOpen",
   data: {
-    url: “amp...yoursite.com”,
-    sourceUrl: “yoursite.com”
+    url: "amp...yoursite.com",
+    sourceUrl: "yoursite.com"
   }
   rsvp: true,
 };
@@ -332,8 +332,8 @@ The Viewer needs to respond with the following message over the port:
 
 ```javascript
 {
-  app: “__AMPHTML__”,
-  type: “s”,
+  app: "__AMPHTML__",
+  type: "s",
   requestid: 1,
 };
 ```
@@ -348,8 +348,8 @@ _Example: Parameters in an object_
 
 ```javascript
 var initParams = {
-  origin: “http://yourAmpDocsOrigin.com”,
-  cap: “handshakepoll”
+  origin: "http://yourAmpDocsOrigin.com",
+  cap: "handshakepoll"
 };
 ```
 
@@ -374,13 +374,13 @@ Eventually, the AMP Document receives and loads the message. The AMP Document se
 
 ```javascript
 {
-  app: “__AMPHTML__”,
+  app: "__AMPHTML__",
   requestid: 1,
-  type: “q”,
-  name: “channelOpen”,
+  type: "q",
+  name: "channelOpen",
   data: {
-    url: “amp...yoursite.com”,
-    sourceUrl: “yoursite.com”
+    url: "amp...yoursite.com",
+    sourceUrl: "yoursite.com"
   }
   rsvp: true,
 };
@@ -390,8 +390,8 @@ The Viewer needs to respond with the following message via `postMessage()`:
 
 ```javascript
 {
-  app: “__AMPHTML__”,
-  type: “s”,
+  app: "__AMPHTML__",
+  type: "s",
   requestid: 1,
 };
 ```
@@ -404,18 +404,13 @@ A message needs to be sent from the Viewer to the AMP Doc:
 
 ```javascript
 {
-  app: “__AMPHTML__”,
+  app: "__AMPHTML__",
   requestid: 2,
-  type: “q”,
-  name: “visibilitychange”,     // The message type.
+  type: "q",
+  name: "visibilitychange",     // The message type.
   data: {
-    state: “the new state”,     // See visibility-state.js for allowed
-                                // values.Can be “visible” or “hidden”.
-                                // If “visible”, prerenderSize is
-                                // ignored and the page loads fully.
-    prerenderSize: 1            // # of Windows of content to prerender.
-                                // 0=no prerendering. 1=load resources for
-                                // 1st screen, etc. Default is 1.
+    state: "the new state",     // See visibility-state.js for allowed
+                                // values. Can be "visible" or "hidden".
   }
   rsvp: true
 };
@@ -429,8 +424,8 @@ Touch events go straight to the AMP Document. So how does the Viewer know when t
 
 ```javascript
 var initParams = {
-  origin: “http://yourAmpDocsOrigin.com”,
-  cap: “foo,swipe”
+  origin: "http://yourAmpDocsOrigin.com",
+  cap: "foo,swipe"
 };
 ```
 
@@ -442,18 +437,18 @@ https://cdn.ampproject.org/v/s/origin?amp_js_v=0.1#origin=http%3A%2F%2FyourAmpDo
 
 The forwarded touch events are:
 
-- touchstart
-- touchend
-- touchmove
+-   touchstart
+-   touchend
+-   touchmove
 
 The message forwarded from the AMP Doc to the Viewer looks like this:
 
 ```javascript
 {
-  app: “__AMPHTML__”,
+  app: "__AMPHTML__",
   requestid: 1,
-  type: “q”,
-  name: “touchmove”,
+  type: "q",
+  name: "touchmove",
   data: {
     … // The event data.
   }
@@ -463,4 +458,4 @@ The message forwarded from the AMP Doc to the Viewer looks like this:
 
 ### Related Resources
 
-- [AMP Viewer Integration API repo](https://github.com/ampproject/amphtml/tree/master/extensions/amp-viewer-integration)
+-   [AMP Viewer Integration API repo](https://github.com/ampproject/amphtml/tree/master/extensions/amp-viewer-integration)

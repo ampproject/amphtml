@@ -20,10 +20,10 @@ import {getNextArrow, getPrevArrow, getSlide} from './helpers';
 const SLIDE_COUNT = 7;
 
 describes.endtoend(
-  'AMP carousel arrows with custom arrows',
+  'amp-base-carousel - arrows with custom arrows',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/custom-arrows.amp.html',
+    version: '0.1',
+    fixture: 'amp-base-carousel/custom-arrows.amp.html',
     experiments: [
       'amp-base-carousel',
       'layers',

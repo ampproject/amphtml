@@ -110,10 +110,10 @@ You can find a more complete example [here](https://ampexample.laterpay.net/dual
 
 The following resources provide further documentation on using LaterPay with AMP:
 
-- [`amp-access`](https://amp.dev/documentation/components/amp-access)
-- [LaterPay](https://www.laterpay.net)
-- [LaterPay: How we do MicroPayments](https://docs.laterpay.net/how_we_do_micropayments/)
-- [LaterPay Connector](https://docs.laterpay.net/connector/) - Similar to `amp-access-laterpay` but for non AMP pages.
+-   [`amp-access`](https://amp.dev/documentation/components/amp-access)
+-   [LaterPay](https://www.laterpay.net)
+-   [LaterPay: How we do MicroPayments](https://docs.laterpay.net/how_we_do_micropayments/)
+-   [LaterPay Connector](https://docs.laterpay.net/connector/) - Similar to `amp-access-laterpay` but for non AMP pages.
 
 [/tip]
 

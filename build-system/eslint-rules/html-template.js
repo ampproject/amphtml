@@ -21,7 +21,17 @@ const {
   staticTemplateFactoryFns,
 } = require('../babel-plugins/static-template-metadata');
 
+/**
+ * @param {*} context
+ * @return {{
+ *   CallExpression: {Function(node: CompilerNode): void}
+ *   TaggedTemplateExpression: {Function(node: CompilerNode): void}
+ * }}
+ */
 module.exports = function (context) {
+  /**
+   * @param {CompilerNode} node
+   */
   function tagCannotBeCalled(node) {
     const {name} = node.callee;
     context.report({
@@ -34,6 +44,9 @@ module.exports = function (context) {
     });
   }
 
+  /**
+   * @param {CompilerNode} node
+   */
   function factoryUsage(node) {
     const {parent} = node;
     const {name} = node.callee;
@@ -41,7 +54,8 @@ module.exports = function (context) {
     const expectedTagName = staticTemplateFactories[name];
 
     if (parent.type === 'TaggedTemplateExpression' && parent.tag === node) {
-      return tagUsage(parent, `${name}()`);
+      tagUsage(parent, `${name}()`);
+      return;
     }
 
     if (
@@ -71,6 +85,10 @@ module.exports = function (context) {
     });
   }
 
+  /**
+   * @param {CompilerNode} node
+   * @param {string} opt_name
+   */
   function tagUsage(node, opt_name) {
     const {quasi, tag} = node;
     if (quasi.expressions.length !== 0) {
@@ -117,6 +135,13 @@ module.exports = function (context) {
     }
   }
 
+  /**
+   * @param {*} string
+   * @return {{
+   *   tag: string,
+   *   offset: number,
+   * }[]}
+   */
   function invalidVoidTag(string) {
     // Void tags are defined at
     // https://html.spec.whatwg.org/multipage/syntax.html#void-elements

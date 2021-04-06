@@ -15,11 +15,16 @@
  */
 
 import {AdResponseType, Validator, ValidatorResult} from './amp-ad-type-defs';
-import {AmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
-import {Services} from '../../../src/services';
-import {getAmpAdMetadata} from './amp-ad-utils';
-import {pushIfNotExist} from '../../../src/utils/array';
+import {
+  extensionsHasElement,
+  getAmpAdMetadata,
+  getExtensionsFromMetadata,
+  mergeExtensionsMetadata,
+} from './amp-ad-utils';
+import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
+import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
 import {tryParseJson} from '../../../src/json';
+import {urls} from '../../../src/config';
 import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @const {string} */
@@ -27,26 +32,12 @@ export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-Ad-Template-Extension';
 export const DEPRECATED_AMP_TEMPLATED_CREATIVE_HEADER_NAME =
   'AMP-template-amp-creative';
 
-/** @type {?AmpAdTemplateHelper} */
-let ampAdTemplateHelper;
-
-/**
- * Returns the global template helper.
- * @param {!Window} win
- * @return {!AmpAdTemplateHelper}
- */
-export function getAmpAdTemplateHelper(win) {
-  return (
-    ampAdTemplateHelper || (ampAdTemplateHelper = new AmpAdTemplateHelper(win))
-  );
-}
-
 /**
  * Validator for Template ads.
  */
 export class TemplateValidator extends Validator {
   /** @override */
-  validate(context, unvalidatedBytes, headers) {
+  validate(context, containerElement, unvalidatedBytes, headers) {
     const body = utf8Decode(/** @type {!ArrayBuffer} */ (unvalidatedBytes));
     const parsedResponseBody = /** @type {./amp-ad-type-defs.AmpTemplateCreativeDef} */ (tryParseJson(
       body
@@ -75,25 +66,35 @@ export class TemplateValidator extends Validator {
       );
     }
 
-    return getAmpAdTemplateHelper(context.win)
+    return getAmpAdTemplateHelper(containerElement)
       .fetch(parsedResponseBody.templateUrl)
       .then((template) => {
         const creativeMetadata = getAmpAdMetadata(template);
-        if (parsedResponseBody.analytics) {
-          pushIfNotExist(
-            creativeMetadata['customElementExtensions'],
-            'amp-analytics'
-          );
+        creativeMetadata['extensions'] = creativeMetadata['extensions'] || [];
+        const extensions = creativeMetadata['extensions'];
+        mergeExtensionsMetadata(
+          extensions,
+          creativeMetadata['customElementExtensions']
+        );
+        if (
+          parsedResponseBody.analytics &&
+          !extensionsHasElement(extensions, 'amp-analytics')
+        ) {
+          extensions.push({
+            'custom-element': 'amp-analytics',
+            src: `${urls.cdn}/v0/amp-analytics-0.1.js`,
+          });
         }
-        pushIfNotExist(
-          creativeMetadata['customElementExtensions'],
-          'amp-mustache'
-        );
+        if (!extensionsHasElement(extensions, 'amp-mustache')) {
+          extensions.push({
+            'custom-element': 'amp-mustache',
+            src: `${urls.cdn}/v0/amp-mustache-latest.js`,
+          });
+        }
 
-        const extensions = Services.extensionsFor(context.win);
-        creativeMetadata.customElementExtensions.forEach((extensionId) =>
-          extensions./*OK*/ preloadExtension(extensionId)
-        );
+        const extensionsInfo = getExtensionsFromMetadata(creativeMetadata);
+        preloadFriendlyIframeEmbedExtensions(context.win, extensionsInfo);
+
         // TODO(levitzky) Add preload logic for fonts / images.
         return Promise.resolve(
           /** @type {!./amp-ad-type-defs.ValidatorOutput} */ ({

@@ -38,6 +38,7 @@ import {userAssert} from '../../../../../src/log';
  *   url: string,
  *   domainName: string,
  *   image: string,
+ *   alt: string,
  * }}
  */
 export let PortraitComponentDef;
@@ -87,6 +88,7 @@ export class PortraitComponent {
       category: portraitJson['category'],
       title: portraitJson['title'],
       image: portraitJson['image'],
+      alt: portraitJson['alt'],
     };
 
     if (portraitJson['amphtml']) {
@@ -145,6 +147,10 @@ export class PortraitComponent {
       image,
       dict({'src': resolveImgSrc(win, portraitData.image)})
     );
+
+    addAttributesToElement(image, {
+      'alt': portraitData.alt ? portraitData.alt : '',
+    });
 
     meta.textContent = portraitData.domainName;
 

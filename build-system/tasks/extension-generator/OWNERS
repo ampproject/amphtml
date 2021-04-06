@@ -10,7 +10,7 @@
 
         // Most new extensions are reviewed by this group. It's in their
         // interest to maintain the extension generator.
-        {name: 'ampproject/wg-ui-and-a11y'},
+        {name: 'ampproject/wg-components'},
       ],
     },
   ],

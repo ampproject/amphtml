@@ -35,8 +35,9 @@ module.exports = [
     'href': 'https://github.com/ampproject/amphtml/find/master',
   },
   {
-    'name': 'Travis',
-    'href': 'https://travis-ci.org/ampproject/amphtml',
+    'name': 'CircleCI',
+    'href':
+      'https://app.circleci.com/pipelines/github/ampproject/amphtml?branch=master',
   },
   {
     'name': 'Percy',

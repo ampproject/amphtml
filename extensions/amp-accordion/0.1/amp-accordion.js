@@ -22,11 +22,10 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {clamp} from '../../../src/utils/math';
-import {closest, tryFocus} from '../../../src/dom';
+import {closest, dispatchCustomEvent, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
 import {getStyle, setImportantStyles, setStyles} from '../../../src/style';
 import {isExperimentOn} from '../../../src/experiments';
 import {
@@ -43,17 +42,16 @@ const MIN_TRANSITION_DURATION = 200; // ms
 const EXPAND_CURVE_ = bezierCurve(0.47, 0, 0.745, 0.715);
 const COLLAPSE_CURVE_ = bezierCurve(0.39, 0.575, 0.565, 1);
 
-const isDisplayLockingEnabledForAccordion = (win) => {
-  return (
-    isExperimentOn(win, 'amp-accordion-display-locking') &&
-    (('CSS' in window &&
-      window.CSS.supports &&
-      window.CSS.supports('content-visibility', 'hidden-matchable')) ||
-      getMode().test)
-  );
-};
+const isDisplayLockingEnabledForAccordion = (win) =>
+  isExperimentOn(win, 'amp-accordion-display-locking') &&
+  win.document.body.onbeforematch !== undefined;
 
 class AmpAccordion extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -86,11 +84,6 @@ class AmpAccordion extends AMP.BaseElement {
   }
 
   /** @override */
-  prerenderAllowed() {
-    return true;
-  }
-
-  /** @override */
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
     this.sessionOptOut_ = this.element.hasAttribute('disable-session-states');
@@ -117,21 +110,31 @@ class AmpAccordion extends AMP.BaseElement {
           'amp-accordion/amp-accordion.md. Found in: %s',
         this.element
       );
-      const content = sectionComponents[1];
+      const {0: header, 1: content} = sectionComponents;
       content.classList.add('i-amphtml-accordion-content');
+
+      // Ensure each accordion has a unique id, helping screen readers
+      // understand the relationship between the pieces of content.
       let contentId = content.getAttribute('id');
       if (!contentId) {
-        // To ensure that we pass Accessibility audits -
-        // we need to make sure that each accordion has a unique ID.
-        // In case the accordion doesn't have an ID we use a
-        // random number to ensure uniqueness.
         contentId = this.prefix_ + '_AMP_content_' + index;
         content.setAttribute('id', contentId);
+      }
+      let headerId = header.getAttribute('id');
+      if (!headerId) {
+        headerId = this.prefix_ + '_AMP_header_' + index;
+        header.setAttribute('id', headerId);
       }
 
       this.registerAction('toggle', (i) => this.handleAction_(i));
       this.registerAction('expand', (i) => this.handleAction_(i));
       this.registerAction('collapse', (i) => this.handleAction_(i));
+      /** If the element is in an email document, allow its `open` and `close` actions. */
+      this.action_.addToAllowlist(
+        TAG,
+        ['toggle', 'expand', 'collapse'],
+        ['email']
+      );
 
       // Listen for mutations on the 'data-expand' attribute.
       const expandObserver = new this.win.MutationObserver((mutations) => {
@@ -158,15 +161,20 @@ class AmpAccordion extends AMP.BaseElement {
       });
 
       const isExpanded = section.hasAttribute('expanded');
-      const header = sectionComponents[0];
       header.classList.add('i-amphtml-accordion-header');
-      header.setAttribute('role', 'button');
+      if (!header.hasAttribute('role')) {
+        header.setAttribute('role', 'button');
+      }
       header.setAttribute('aria-controls', contentId);
       header.setAttribute('aria-expanded', String(isExpanded));
       if (!header.hasAttribute('tabindex')) {
         header.setAttribute('tabindex', 0);
       }
       this.headers_.push(header);
+      content.setAttribute('aria-labelledby', headerId);
+      if (!content.hasAttribute('role')) {
+        content.setAttribute('role', 'region');
+      }
 
       userAssert(
         this.action_.hasAction(header, 'tap', section) == false,
@@ -178,10 +186,8 @@ class AmpAccordion extends AMP.BaseElement {
 
       if (isDisplayLockingEnabledForAccordion(this.win)) {
         this.element.classList.add('i-amphtml-display-locking');
-        content.addEventListener('beforematch', (event) => {
-          // Event occurs on the content element whose parent is the section to open.
-          const parentSection = dev().assertElement(event.target.parentElement);
-          this.toggle_(parentSection, ActionTrust.LOW, /* force expand */ true);
+        content.addEventListener('beforematch', () => {
+          this.toggle_(section, ActionTrust.HIGH, /* force expand */ true);
         });
       }
     });
@@ -292,7 +298,7 @@ class AmpAccordion extends AMP.BaseElement {
     );
     this.action_.trigger(section, name, event, trust);
 
-    this.element.dispatchCustomEvent(name);
+    dispatchCustomEvent(this.element, name);
   }
 
   /**

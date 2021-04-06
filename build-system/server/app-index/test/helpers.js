@@ -36,7 +36,7 @@ const getBoundAttr = ({outerHTML}, attr) => {
   if (!match) {
     return;
   }
-  const [_, valuePart] = match;
+  const [, valuePart] = match;
   if (valuePart.charAt(0) == '"' ||
       valuePart.charAt(0) == '\'') {
     return valuePart.substring(1, valuePart.length - 1);

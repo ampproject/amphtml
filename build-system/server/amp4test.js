@@ -24,7 +24,6 @@ const upload = require('multer')();
 const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls, getServeMode} = require('./app-utils');
 
-const KARMA_SERVER_PORT = 9876;
 const CUSTOM_TEMPLATES = ['amp-mustache'];
 const SERVE_MODE = getServeMode();
 
@@ -95,7 +94,6 @@ app.use('/compose-shadow', function (req, res) {
   const {docUrl} = req.query;
   const viewerHtml = renderShadowViewer({
     src: docUrl.replace(/^\//, ''),
-    port: KARMA_SERVER_PORT,
     baseHref: path.dirname(req.url),
   });
   res.send(replaceUrls(SERVE_MODE, viewerHtml));
@@ -233,7 +231,7 @@ app.get('/a4a/:bid', (req, res) => {
 });
 
 /**
- * @param {{body: string, css: string|undefined, extensions: Array<string>|undefined, head: string|undefined, spec: string|undefined}} config
+ * @param {{body: string, css?: string|undefined, extensions: Array<string>|undefined, head?: string|undefined, spec?: string|undefined, mode?: string|undefined}} config
  * @return {string}
  */
 function composeDocument(config) {

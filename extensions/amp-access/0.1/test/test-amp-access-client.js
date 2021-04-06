@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import * as mode from '../../../../src/mode';
 import {AccessClientAdapter} from '../amp-access-client';
 
@@ -32,7 +32,7 @@ describes.realWin(
 
     beforeEach(() => {
       ampdoc = env.ampdoc;
-      clock = lolex.install({target: ampdoc.win});
+      clock = fakeTimers.withGlobal(ampdoc.win).install();
 
       validConfig = {
         'authorization': 'https://acme.com/a?rid=READER_ID',

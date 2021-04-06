@@ -53,7 +53,9 @@
       <option>atinternet</option>
       <option>afsanalytics</option>
       <option>baiduanalytics</option>
+      <option>blackcrowai</option>
       <option>blueconic</option>
+      <option>bluetriangle</option>
       <option>browsi</option>
       <option>burt</option>
       <option>byside</option>
@@ -86,6 +88,7 @@
       <option>mediarithmics</option>
       <option>mediator</option>
       <option>memo</option>
+      <option>metrika</option>
       <option>mobify</option>
       <option>moengage</option>
       <option>mparticle</option>
@@ -108,10 +111,12 @@
       <option>retargetly</option>
       <option>rudderstack</option>
       <option>segment</option>
+      <option>sensorsanalytics</option>
       <option>shinystat</option>
-      <option>simplereach</option>
       <option>snowplow</option>
       <option>snowplow_v2</option>
+      <option>taboola</option>
+      <option>tail</option>
       <option>teaanalytics</option>
       <option>tealiumcollect</option>
       <option>top100</option>
@@ -342,6 +347,19 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- Baidu stats example -->
 
+<!-- Black Crow AI example -->
+<amp-analytics type="blackcrowai">
+  <script type="application/json">
+    {
+      "vars": {
+        "google_tracking_id": "YOUR-GA-Account-ID-like-UA-134511847-1",
+        "site_name": "YOUR-SITE-NAME-PROVIDED-BY-YOUR-BLACK-CROW"
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- END Black Crow AI example -->
+
 <!-- BlueConic analytics tracking -->
 <amp-analytics type="blueconic" id="blueconic">
   <script type="application/json">
@@ -363,6 +381,20 @@ For complete documentation and additional examples please see: https://marketing
   </script>
 </amp-analytics>
 <!-- End BlueConic analytics example -->
+
+<!-- Blue Triangle example -->
+<amp-analytics type="bluetriangle" id="bluetriangle">
+  <script type="application/json">
+    {
+      "vars": {
+        "prefix": "testsite1",
+        "pageName": "AMP Test",
+        "trafficSegment": "ampTestSite1",
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Blue Triangle example -->
 
 <!-- Browsi prediction tracking example -->
 <amp-analytics type="browsi" id="browsi">
@@ -1458,6 +1490,45 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 
+<!-- Sensorsanalytics stats tracking -->
+<amp-analytics type="sensorsanalytics" id="sensoranalytis">
+<script type="application/json">
+{
+   "requests": {
+      "event": "https://jssdkdata.debugbox.sensorsdata.cn/sa?project=liangshuang"
+   },
+   "triggers": {
+      "trackPageview": {
+         "on": "visible",
+         "request": "event",
+         "vars": {
+            "event": "$pageview",
+            "amp_properties": "%7B%22a%22%3A%22www%22%7D"
+          }
+       },
+      "id_test1": {
+          "on": "click",
+          "selector": "#test1",
+          "request": "event",
+          "vars": {
+             "event": "click_test1",
+             "amp_properties": "#test1"
+          }
+       },
+       "class_test2": {
+           "on": "click",
+           "selector": ".test2",
+           "request": "event",
+           "vars": {
+              "event": "click_test2",
+              "amp_properties": ".test2"
+           }
+        }
+    }
+}
+</script>
+</amp-analytics>
+
 <!-- Shinystat example -->
 <amp-analytics type="shinystat" id="shinystat">
 <script type="application/json">
@@ -1470,25 +1541,6 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Shinystat Example -->
-
-<!-- SimpleReach Tracking -->
-<amp-analytics type="simplereach" id="simplereach">
-<script type="application/json">
-  {
-    "vars": {
-      "pid": "000000000000000000000000",
-      "title": "a title",
-      "authors": ["john smith", "jane doe", "last name, first name"],
-      "categories": ["sports", "football"],
-      "tags": ["big-game", "nfl"],
-      "published_at": "2015-01-01 00:00:00",
-      "article_id": "1234567890",
-      "ignore_metadata": false
-    }
-  }
-</script>
-</amp-analytics>
-<!-- End SimpleReach Example -->
 
 <!-- Snowplow Analytics tracking -->
 <amp-analytics type="snowplow" id="snowplow">
@@ -1615,6 +1667,45 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Snowplow Analytics example -->
+
+<!-- Taboola Example
+-->
+<amp-analytics type="taboola" id="taboola">
+  <script type="application/json">
+    {
+      "vars": {
+        "aid": "1"
+      }
+    }
+  </script>
+</amp-analytics>
+
+<!-- Tail Analytics Example
+    Ensure you replace account with your account id.
+ -->
+<amp-analytics type="tail" id="tail">
+  <script type="application/json">
+    {
+      "vars": {
+        "account": "TT-0000-0"
+      },
+      "triggers": {
+        "click": {
+          "on": "click",
+          "selector": "#test1",
+          "request": "event",
+          "vars": {
+            "eventValue": "value1",
+            "eventCategory": "category1",
+            "eventAction": "action1",
+            "eventLabel": "label1"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Tail Analytics example -->
 
 <!-- TEA Analytics Example
     Ensure you replace app_id with your appId.
@@ -2003,6 +2094,52 @@ For complete documentation and additional examples please see: https://marketing
   </script>
 </amp-analytics>
 <!-- end WebEngage Analytics example -->
+
+<!-- start Yandex Metrika example -->
+<amp-analytics type="metrika">
+  <script type="application/json">
+    {
+      "vars": {
+        "counterId": "71129776",
+        "yaParams": "{\"key\": \"value\"}"
+      },
+      "requests": {},
+      "triggers": {
+        "notBounce": {
+          "on": "timer",
+          "timerSpec": {
+            "immediate": false,
+            "interval": 15,
+            "maxTimerLength": 14
+          },
+          "request": "notBounce"
+        },
+        "someGoalReach": {
+          "on": "click",
+          "selector": "#test1",
+          "request": "reachGoal",
+          "vars": {
+            "goalId": "superGoalId",
+            "yaParams": "{\"inner-key\": \"inner-value\"}"
+          }
+        },
+        "halfScroll": {
+          "on": "scroll",
+          "scrollSpec": {
+            "verticalBoundaries": [
+              50
+            ]
+          },
+          "request": "reachGoal",
+          "vars": {
+            "goalId": "halfScrollGoal"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- end Yandex Metrika example -->
 </div>
 
 <div class="logo"></div>

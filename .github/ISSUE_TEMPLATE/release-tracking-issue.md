@@ -1,11 +1,11 @@
 ---
 name: Release tracking issue
-about:
-  Create a tracking issue for a new AMP release (to be used by release on-duty
+about: Create a tracking issue for a new AMP release (to be used by release on-duty
   engineers)
 title: "\U0001F684 Release tracking issue for release <RELEASE_NUMBER>"
 labels: 'Type: Release'
 assignees: ''
+
 ---
 
 # Release tracking issue
@@ -27,7 +27,7 @@ up to date:
 - Add any updates that may be of interest to the community (such as delays) as
   comments on this issue, including after the release is promoted to Stable (and, in some cases, LTS).
 
-Note: remove the backticks (``) from the link. They are there to allow the template file for this issue to pass `gulp check-links`.
+Note: remove the backticks (``) from the link. They are there to allow the template file for this issue to pass `amp check-links`.
 -->
 
 This issue tracks release `[<RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<RELEASE_NUMBER>)`. See what's new compared to stable `[here](https://github.com/ampproject/amphtml/compare/<LATEST_STABLE_RELEASE_NUMBER>...<RELEASE_NUMBER>)`.

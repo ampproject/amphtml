@@ -33,6 +33,7 @@ import {
   Entitlement,
   GrantReason,
 } from '../../../amp-subscriptions/0.1/entitlement';
+import {GaaMeteringRegwall} from '../../../../third_party/subscriptions-project/swg-gaa';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
@@ -119,6 +120,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   let entitlementResponse;
   let rtcButtonElement;
   let win;
+  let subscriptionService;
 
   beforeEach(() => {
     win = env.win;
@@ -131,7 +133,8 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     xhr = Services.xhrFor(env.win);
     viewer = Services.viewerForDoc(ampdoc);
     ampdoc.params_['viewerUrl'] = 'https://www.google.com/other';
-    serviceAdapter = new ServiceAdapter(null);
+    subscriptionService = {};
+    serviceAdapter = new ServiceAdapter(subscriptionService);
     serviceAdapterMock = env.sandbox.mock(serviceAdapter);
     env.sandbox
       .stub(serviceAdapter, 'getPageConfig')
@@ -191,6 +194,10 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
         'showAbbrvOffer'
       ),
       linkAccount: env.sandbox.stub(ConfiguredRuntime.prototype, 'linkAccount'),
+      consumeShowcaseEntitlementJwt: env.sandbox.stub(
+        ConfiguredRuntime.prototype,
+        'consumeShowcaseEntitlementJwt'
+      ),
     };
     ackStub = env.sandbox.stub(Entitlements.prototype, 'ack');
     toggleExperiment(win, 'swg-gpay-api', true);
@@ -203,6 +210,13 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     analyticsMock.verify();
     toggleExperiment(win, 'swg-gpay-api', false);
   });
+
+  /** Awaits N times. Allows promises to resolve. */
+  async function flush(n = 100) {
+    for (let i = 0; i < n; i++) {
+      await 'tick';
+    }
+  }
 
   function callback(stub) {
     return stub.args[0][0];
@@ -232,6 +246,221 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     expect(platform.runtime_.config()['experiments']).to.have.members([
       'gpay-api',
     ]);
+  });
+
+  it('should throw if enableLAA and enableMetering are set', () => {
+    expect(
+      () =>
+        new GoogleSubscriptionsPlatform(
+          ampdoc,
+          {enableLAA: true, enableMetering: true},
+          serviceAdapter
+        )
+    ).to.throw(/enableLAA and enableMetering are mutually exclusive/);
+  });
+
+  it('should ignore enableLAA and fallback if url params are missing', async () => {
+    env.sandbox
+      .stub(viewer, 'getReferrerUrl')
+      .callsFake(() => Promise.resolve('http://localhost'));
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableLAA: true},
+      serviceAdapter
+    );
+    const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({
+            entitlements: {},
+          }),
+      })
+    );
+
+    await platform.getEntitlements();
+    expect(fetchStub).to.be.calledOnce;
+  });
+
+  it('should ignore enableLAA and not fallback if url params are missing and enableEntitlements is false', async () => {
+    env.sandbox
+      .stub(viewer, 'getReferrerUrl')
+      .callsFake(() => Promise.resolve('http://localhost'));
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableLAA: true, enableEntitlements: false},
+      serviceAdapter
+    );
+    const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({
+            entitlements: {},
+          }),
+      })
+    );
+
+    await platform.getEntitlements();
+    expect(fetchStub).to.not.be.called;
+  });
+
+  it('should ignore enableLAA if url params have expired', async () => {
+    env.sandbox
+      .stub(viewer, 'getReferrerUrl')
+      .callsFake(() => Promise.resolve('http://localhost'));
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableLAA: true},
+      serviceAdapter
+    );
+
+    env.sandbox.stub(platform, 'getUrlParams_').returns({
+      'gaa_ts': (Date.now() / 1000 - 10).toString(16),
+      'gaa_at': 'la',
+      'gaa_sig': 'signature',
+      'gaa_n': 123456,
+    });
+
+    const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({
+            entitlements: {},
+          }),
+      })
+    );
+    await platform.getEntitlements();
+    expect(fetchStub).to.be.calledOnce;
+  });
+
+  it('should return LAA if url params present and are in timestamp', async () => {
+    env.sandbox
+      .stub(viewer, 'getReferrerUrl')
+      .callsFake(() => Promise.resolve('http://localhost'));
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableLAA: true},
+      serviceAdapter
+    );
+    env.sandbox.stub(platform, 'getUrlParams_').returns({
+      'gaa_ts': (Date.now() / 1000 + 10).toString(16),
+      'gaa_at': 'la',
+      'gaa_sig': 'signature',
+      'gaa_n': 123456,
+    });
+    const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({
+            entitlements: {},
+          }),
+      })
+    );
+    const ents = await platform.getEntitlements();
+    expect(ents.service).to.not.be.null;
+    expect(ents.source).to.equal('google:laa');
+    expect(fetchStub).to.not.be.called;
+  });
+
+  it('should ignore valid LAA if referrer domain is not allowed', async () => {
+    env.sandbox
+      .stub(viewer, 'getReferrerUrl')
+      .callsFake(() => Promise.resolve('http://www.example.com'));
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableLAA: true, enableEntitlements: false},
+      serviceAdapter
+    );
+    ampdoc.win.__AMP_MODE.localDev = false;
+    env.sandbox.stub(platform, 'getUrlParams_').returns({
+      'gaa_ts': (Date.now() / 1000 + 10).toString(16),
+      'gaa_at': 'la',
+      'gaa_sig': 'signature',
+      'gaa_n': 123456,
+    });
+    const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({
+            entitlements: {},
+          }),
+      })
+    );
+
+    const ents = await platform.getEntitlements();
+    expect(ents).to.be.null;
+    expect(fetchStub).to.not.be.called;
+  });
+
+  it('should ignore valid LAA if referrer protocol is not allowed', async () => {
+    env.sandbox
+      .stub(viewer, 'getReferrerUrl')
+      .callsFake(() => Promise.resolve('http://google.com'));
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableLAA: true, enableEntitlements: false},
+      serviceAdapter
+    );
+    ampdoc.win.__AMP_MODE.localDev = false;
+    env.sandbox.stub(platform, 'getUrlParams_').returns({
+      'gaa_ts': (Date.now() / 1000 + 10).toString(16),
+      'gaa_at': 'la',
+      'gaa_sig': 'signature',
+      'gaa_n': 123456,
+    });
+    const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({
+            entitlements: {},
+          }),
+      })
+    );
+
+    const ents = await platform.getEntitlements();
+    expect(ents).to.be.null;
+    expect(fetchStub).to.not.be.called;
+  });
+
+  it('should request metering entitlements if URL params are present and timestamp is valid', async () => {
+    env.sandbox
+      .stub(viewer, 'getReferrerUrl')
+      .callsFake(() => Promise.resolve('http://localhost'));
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableMetering: true},
+      serviceAdapter
+    );
+    env.sandbox.stub(platform, 'getUrlParams_').returns({
+      'gaa_ts': (Date.now() / 1000 + 10).toString(16),
+      'gaa_at': 'g',
+      'gaa_sig': 'signature',
+      'gaa_n': 123456,
+    });
+    env.sandbox
+      .stub(serviceAdapter, 'loadMeteringState')
+      .resolves({key: 'value'});
+    const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({
+            entitlements: [
+              {
+                source: 'google:metering',
+                products: ['example.org:basic'],
+                subscriptionToken: 'tok1',
+              },
+            ],
+          }),
+      })
+    );
+    const ents = await platform.getEntitlements();
+    expect(ents.service).to.not.be.null;
+    expect(ents.source).to.equal('google:metering');
+
+    const fetchUrl = fetchStub.getCall(0).args[0];
+    expect(fetchUrl).to.equal(
+      'https://news.google.com/swg/_/api/v1/publication/example.org/entitlements?encodedParams=eyJtZXRlcmluZyI6eyJjbGllbnRUeXBlcyI6WzFdLCJvd25lciI6ImV4YW1wbGUub3JnIiwicmVzb3VyY2UiOnsiaGFzaGVkQ2Fub25pY2FsVXJsIjoiMjcwM2YyYjZlZjBlYWFhODEzNzZhMThmYWE3N2E1OTAwOTc1Zjc3MDVkNWQ4YjZlMWEzNzJkNWY2YzJiOTdiYjU5ZjI4M2Q3MzdiNmQ5YWI3N2M1YTNkODQ4YzZlY2UyMDdjZDYwMzU4M2NjMzIyZGQ4MGFiMGI5MzA5MmM2NTAifSwic3RhdGUiOnsiYXR0cmlidXRlcyI6W119fX0'
+    );
   });
 
   it('should proxy fetch via AMP fetcher', async () => {
@@ -331,15 +560,17 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     expect(methods.showAbbrvOffer).to.not.be.called;
   });
 
-  it('should show offers on activate when not granted', () => {
+  it('should show offers on activate when not granted', async () => {
     platform.activate(new Entitlement({service: PLATFORM_ID, granted: false}));
+    await flush();
+
     expect(methods.showOffers).to.be.calledOnce.calledWithExactly({
       list: 'amp',
     });
     expect(methods.showAbbrvOffer).to.not.be.called;
   });
 
-  it('should show abbrv offer on activate when granted non-subscriber', () => {
+  it('should show abbrv offer on activate when granted non-subscriber', async () => {
     platform.activate(
       new Entitlement({
         service: PLATFORM_ID,
@@ -347,6 +578,8 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
         grantReason: GrantReason.METERING,
       })
     );
+    await flush();
+
     expect(methods.showAbbrvOffer).to.be.calledOnce.calledWithExactly({
       list: 'amp',
     });
@@ -365,7 +598,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     expect(methods.showAbbrvOffer).to.not.be.called;
   });
 
-  it('should override show offers with the grant non-subscriber', () => {
+  it('should override show offers with the grant non-subscriber', async () => {
     const entitlement = new Entitlement({service: PLATFORM_ID, granted: false});
     const grantEntitlement = new Entitlement({
       service: 'local',
@@ -373,8 +606,61 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       grantReason: GrantReason.METERING,
     });
     platform.activate(entitlement, grantEntitlement);
+    await flush();
+
     expect(methods.showOffers).to.not.be.called;
     expect(methods.showAbbrvOffer).to.be.calledOnce;
+  });
+
+  it('should consume showcase entitlement, if appropriate', async () => {
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableMetering: true},
+      serviceAdapter
+    );
+    env.sandbox.stub(platform, 'getUrlParams_').returns({
+      'gaa_ts': (Date.now() / 1000 + 10).toString(16),
+      'gaa_at': 'g',
+      'gaa_sig': 'signature',
+      'gaa_n': 123456,
+    });
+    const entitlement = new Entitlement({service: PLATFORM_ID, granted: true});
+    const grantEntitlement = new Entitlement({
+      service: 'local',
+      granted: true,
+      grantReason: GrantReason.METERING,
+    });
+    platform.activate(entitlement, grantEntitlement);
+    await flush();
+
+    expect(methods.consumeShowcaseEntitlementJwt).to.be.called;
+  });
+
+  it('should show showcase regwall, if appropriate', async () => {
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableMetering: true},
+      serviceAdapter
+    );
+    env.sandbox.stub(platform, 'getUrlParams_').returns({
+      'gaa_ts': (Date.now() / 1000 + 10).toString(16),
+      'gaa_at': 'g',
+      'gaa_sig': 'signature',
+      'gaa_n': 123456,
+    });
+    env.sandbox.stub(serviceAdapter, 'loadMeteringState').resolves(null);
+    env.sandbox.stub(platform.fetcher_, 'sendPostToPublisher').resolves();
+    env.sandbox.stub(GaaMeteringRegwall, 'show').resolves();
+    env.sandbox.stub(serviceAdapter, 'saveMeteringState').resolves();
+    const entitlement = new Entitlement({service: PLATFORM_ID, granted: false});
+    const continueSpy = env.sandbox.spy();
+    platform.activate(entitlement, entitlement, continueSpy);
+    await flush();
+
+    expect(platform.fetcher_.sendPostToPublisher).to.be.calledOnce;
+    expect(GaaMeteringRegwall.show).to.be.calledOnce;
+    expect(serviceAdapter.saveMeteringState).to.be.calledOnce;
+    expect(continueSpy).to.be.calledOnce;
   });
 
   it('should start linking flow when requested', async () => {
@@ -467,7 +753,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   describe('should reauthorize on complete subscribe', () => {
     let productId;
     let entitlements;
-    const serviceId = 'serviceId';
+    const platformKey = 'platformKey';
 
     afterEach(() => {
       analyticsMock
@@ -505,7 +791,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     it('should work with poorly formatted entitlements', () => {
       productId = 'unknown subscriptionToken';
       entitlements = new Entitlements(
-        serviceId,
+        platformKey,
         null,
         [new SwgEntitlement(null, [productId], null)],
         productId
@@ -518,7 +804,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
         productId,
       });
       entitlements = new Entitlements(
-        serviceId,
+        platformKey,
         null,
         [new SwgEntitlement('google', [productId], token)],
         productId

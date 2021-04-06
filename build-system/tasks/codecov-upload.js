@@ -15,19 +15,20 @@
  */
 'use strict';
 
-const colors = require('ansi-colors');
+const colors = require('kleur/colors');
 const fs = require('fs-extra');
-const log = require('fancy-log');
-const {
-  isTravisBuild,
-  isTravisPullRequestBuild,
-  travisCommitSha,
-  travisPullRequestSha,
-} = require('../common/travis');
+const {ciBuildSha, isCiBuild} = require('../common/ci');
 const {getStdout} = require('../common/exec');
+const {log} = require('../common/logging');
 const {shortSha} = require('../common/git');
 
 const {green, yellow, cyan} = colors;
+const CODECOV_EXEC = './node_modules/.bin/codecov';
+const COVERAGE_REPORTS = {
+  'unit_tests': 'test/coverage/lcov-unit.info',
+  'integration_tests': 'test/coverage/lcov-integration.info',
+  'e2e_tests': 'test/coverage-e2e/lcov.info',
+};
 
 /**
  * Uploads a single report
@@ -35,8 +36,7 @@ const {green, yellow, cyan} = colors;
  * @param {string} flags
  */
 function uploadReport(file, flags) {
-  const codecovExecutable = './node_modules/.bin/codecov';
-  const codecovCmd = `${codecovExecutable} --file=${file} --flags=${flags}`;
+  const codecovCmd = `${CODECOV_EXEC} --file=${file} --flags=${flags}`;
   const output = getStdout(codecovCmd);
   const viewReportPrefix = 'View report at: ';
   const viewReport = output.match(`${viewReportPrefix}.*`);
@@ -52,33 +52,27 @@ function uploadReport(file, flags) {
 }
 
 /**
- * Uploads code coverage reports for unit and integration tests during Travis
- * jobs.
+ * Uploads code coverage reports for unit / integration tests during CI builds.
  */
 async function codecovUpload() {
-  if (!isTravisBuild()) {
+  if (!isCiBuild()) {
     log(
       yellow('WARNING:'),
-      'Code coverage reports can only be uploaded by Travis builds.'
+      'Code coverage reports can only be uploaded by CI builds.'
     );
     return;
   }
-  const commitSha = shortSha(
-    isTravisPullRequestBuild() ? travisPullRequestSha() : travisCommitSha()
-  );
+
+  const commitSha = shortSha(ciBuildSha());
   log(
     green('INFO:'),
     'Uploading coverage reports to',
     cyan(`https://codecov.io/gh/ampproject/amphtml/commit/${commitSha}`)
   );
-  const unitTestsReport = 'test/coverage/lcov-unit.info';
-  const integrationTestsReport = 'test/coverage/lcov-integration.info';
-  if (fs.existsSync(unitTestsReport)) {
-    uploadReport(unitTestsReport, 'unit_tests');
-  }
-  if (fs.existsSync(integrationTestsReport)) {
-    uploadReport(integrationTestsReport, 'integration_tests');
-  }
+
+  Object.entries(COVERAGE_REPORTS)
+    .filter(([, reportFile]) => fs.existsSync(reportFile))
+    .forEach(([testType, reportFile]) => uploadReport(reportFile, testType));
 }
 
 module.exports = {
@@ -86,4 +80,4 @@ module.exports = {
 };
 
 codecovUpload.description =
-  'Uploads code coverage reports to codecov.io during Travis builds.';
+  'Uploads code coverage reports to codecov.io during CI builds.';

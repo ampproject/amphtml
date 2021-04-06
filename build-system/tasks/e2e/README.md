@@ -2,22 +2,30 @@
 
 AMP contributors embrace testing to maintain confidence that their code is executing correctly during development and maintenance of features and fixes. End-to-end (or E2E) tests aim to closely reproduce how a user would interact with a document as possible.
 
-- [What is an end-to-end test?](#what-is-an-end-to-end-test)
-- [Choosing which features to test](#choosing-which-features-to-test)
-- [Writing E2E tests](#writing-e2e-tests)
-- [Debugging E2E tests](#debugging-e2e-tests)
+<!--
+  (Do not remove or edit this comment.)
+  This table-of-contents is automatically generated. To generate it, run:
+    amp markdown-toc --fix
+-->
+
+<!-- {"maxdepth": 1} -->
+
+-   [What is an end-to-end test?](#what-is-an-end-to-end-test)
+-   [Choosing which features to test](#choosing-which-features-to-test)
+-   [Writing E2E tests](#writing-e2e-tests)
+-   [Debugging E2E tests](#debugging-e2e-tests)
 
 This document is a usage guide. For full test command documentation, consult the following resource:
 
-- [Information on executing tests](../../../contributing/TESTING.md)
+-   [Information on executing tests](../../../contributing/TESTING.md)
 
 ## What is an end-to-end test?
 
 Let's compare the test types available to AMP contributors:
 
-- Unit tests
-- Integration tests
-- End-to-end tests
+-   Unit tests
+-   Integration tests
+-   End-to-end tests
 
 Unit tests are useful for testing individual behaviors of a feature or fix. They are cheap to execute since they use mocks heavily to eliminate dependencies that need to also be executed during testing. These should be the most common type of test for a feature. These should fail rarely for reasons other than bugs.
 
@@ -35,13 +43,13 @@ End-to-end tests are able to test a full page as the user's browser would load i
 
 End-to-end tests should verify the most important user flows of a component. Prioritize tests for behaviors that would make the page appear very obviously broken if there was a failure. For example:
 
-- The component's initial render
-- Primary user interactions
-  - e.g. clicking the next button on a carousel
-- Features with heavy usage by a large number of AMP publishers
-  - e.g. loading more content at the bottom of an amp page
-- Important behaviors that are frequently broken
-  - e.g. browser updates often break video autoplay behavior
+-   The component's initial render
+-   Primary user interactions
+    -   e.g. clicking the next button on a carousel
+-   Features with heavy usage by a large number of AMP publishers
+    -   e.g. loading more content at the bottom of an amp page
+-   Important behaviors that are frequently broken
+    -   e.g. browser updates often break video autoplay behavior
 
 ## Writing E2E tests
 
@@ -152,7 +160,7 @@ E2E test code runs in `node` and the code under test runs in the browser with th
 ### node inspect
 
 ```sh
-node --inspect-brk $(which gulp) e2e --nobuild --testnames --files=extensions/amp-foo/0.1/test-e2e/test-amp-foo-basic.js
+node --inspect-brk $(which amp) e2e --nobuild --testnames --files=extensions/amp-foo/0.1/test-e2e/test-amp-foo-basic.js
 ```
 
 Open Chrome DevTools and click the Node logo in the top left.
@@ -185,4 +193,4 @@ In the Node debugger, the `repl` global provides a reference to the test control
 
 ### watch mode
 
-Debug tests in `watch` mode with the `--watch` flag. This will allow you to make changes to test files without having to rerun the `gulp e2e` task.
+Debug tests in `watch` mode with the `--watch` flag. This will allow you to make changes to test files without having to rerun the `amp e2e` task.

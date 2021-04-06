@@ -282,6 +282,15 @@ export const VideoEvents = {
   LOADEDMETADATA: 'loadedmetadata',
 
   /**
+   * loadeddata
+   *
+   * Fired when the user agent can render the media for the first time.
+   *
+   * @event loadeddata
+   */
+  LOADEDDATA: 'loadeddata',
+
+  /**
    * play
    *
    * Fired when the video plays (either because of autoplay or the play method).
@@ -343,8 +352,7 @@ export const VideoEvents = {
   /**
    * amp:video:visibility
    *
-   * Fired when the video's visibility changes. Normally fired
-   * from `viewportCallback`.
+   * Fired when the video's visibility changes.
    *
    * @event amp:video:visibility
    * @property {boolean} visible Whether the video player is visible or not.

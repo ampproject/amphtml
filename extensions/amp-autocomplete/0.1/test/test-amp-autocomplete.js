@@ -73,13 +73,11 @@ describes.realWin(
 
     function getRenderedSuggestions() {
       const html = htmlFor(doc);
-      return html`
-        <div>
-          <div data-value="apple"></div>
-          <div data-value="mango"></div>
-          <div data-value="pear"></div>
-        </div>
-      `;
+      return [
+        html`<div data-value="apple"></div>`,
+        html`<div data-value="mango"></div>`,
+        html`<div data-value="pear"></div>`,
+      ];
     }
 
     describe('mutatedAttributesCallback_()', () => {
@@ -285,6 +283,82 @@ describes.realWin(
           .returns(Promise.resolve({rendered}));
         await impl.getRemoteData_();
         expect(ssrSpy).to.be.calledOnce;
+      });
+    });
+
+    describe('filterDataAndRenderResults_()', () => {
+      let renderSpy;
+
+      describe('with string data', () => {
+        beforeEach(() => {
+          // Use prefix filter for these tests.
+          impl.filter_ = 'prefix';
+          renderSpy = env.sandbox.spy(impl, 'renderResults_');
+        });
+
+        it('should resolve when data is []', async () => {
+          await impl.filterDataAndRenderResults_([], '');
+          expect(renderSpy).not.to.have.been.called;
+        });
+
+        it('should render data unchanged when input empty', async () => {
+          await impl.filterDataAndRenderResults_(['aa', 'bb', 'cc'], '');
+          expect(renderSpy).to.have.been.calledWith(
+            ['aa', 'bb', 'cc'],
+            impl.container_,
+            ''
+          );
+        });
+
+        it("should render no data when input doesn't match", async () => {
+          await impl.filterDataAndRenderResults_(['aa', 'bb', 'cc'], 'd');
+          expect(renderSpy).to.have.been.calledWith([], impl.container_, 'd');
+        });
+
+        it('should filter string data when input provided', async () => {
+          await impl.filterDataAndRenderResults_(['aa', 'bb', 'cc'], 'a');
+          expect(renderSpy).to.have.been.calledWith(
+            ['aa'],
+            impl.container_,
+            'a'
+          );
+        });
+      });
+
+      describe('with object data', () => {
+        beforeEach(async () => {
+          impl = await buildAmpAutocomplete(true);
+          impl.filter_ = 'prefix';
+          renderSpy = env.sandbox.spy(impl, 'renderResults_');
+          env.sandbox
+            .stub(impl.getSsrTemplateHelper(), 'applySsrOrCsrTemplate')
+            .returns(Promise.resolve(getRenderedSuggestions()));
+        });
+
+        it('should add objToJson property to objects', async () => {
+          const obj1 = {value: 'aa', any: 'zz'};
+          const obj2 = {value: 'bb', any: 'yy'};
+          await impl.filterDataAndRenderResults_([obj1, obj2], '');
+          expect(renderSpy).to.have.been.calledWithMatch(
+            [
+              {...obj1, objToJson: env.sandbox.match.func},
+              {...obj2, objToJson: env.sandbox.match.func},
+            ],
+            impl.container_,
+            ''
+          );
+        });
+
+        it('should add objToJson property to objects and filter', async () => {
+          const obj1 = {value: 'aa', any: 'zz'};
+          const obj2 = {value: 'bb', any: 'yy'};
+          await impl.filterDataAndRenderResults_([obj1, obj2], 'a');
+          expect(renderSpy).to.have.been.calledWithMatch(
+            [{...obj1, objToJson: env.sandbox.match.func}],
+            impl.container_,
+            'a'
+          );
+        });
       });
     });
 
@@ -847,15 +921,49 @@ describes.realWin(
         });
     });
 
+    it('should set input based on data-value and select item from data-json', async () => {
+      const selectItemSpy = env.sandbox.spy(impl, 'selectItem_');
+      const mockEl = impl.createElementFromItem_('abc');
+      const object = {a: 'aa', b: 'bb'};
+      mockEl.setAttribute('data-json', JSON.stringify(object));
+
+      await impl.layoutCallback();
+      await impl.selectHandler_({target: mockEl});
+
+      expect(impl.inputElement_.value).to.equal('abc');
+      expect(selectItemSpy).to.have.been.calledWith('abc', object);
+    });
+
     it('should fire events from selectItem_', () => {
       const fireEventSpy = env.sandbox.spy(impl, 'fireSelectAndChangeEvents_');
       const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
       const dispatchSpy = env.sandbox.spy(impl.inputElement_, 'dispatchEvent');
       return impl.layoutCallback().then(() => {
         impl.toggleResults_(true);
-        impl.selectItem_('test');
+        impl.selectItem_('test', {val: 'v'});
         expect(fireEventSpy).to.have.been.calledOnce;
-        expect(fireEventSpy).to.have.been.calledWith('test');
+        expect(fireEventSpy).to.have.been.calledWith('test', {val: 'v'});
+        expect(triggerSpy).to.have.been.calledWith(impl.element, 'select');
+        expect(triggerSpy).to.have.been.calledWith(
+          impl.inputElement_,
+          'change'
+        );
+        expect(dispatchSpy).to.have.been.calledOnce;
+      });
+    });
+
+    it('should fire event if when selectedObject is null', () => {
+      const fireEventSpy = env.sandbox.spy(impl, 'fireSelectAndChangeEvents_');
+      const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
+      const dispatchSpy = env.sandbox.spy(impl.inputElement_, 'dispatchEvent');
+      return impl.layoutCallback().then(() => {
+        impl.toggleResults_(true);
+        impl.selectItem_('test', /* selectedObject= */ null);
+        expect(fireEventSpy).to.have.been.calledOnce;
+        expect(fireEventSpy).to.have.been.calledWith(
+          'test',
+          /* selectedObject= */ null
+        );
         expect(triggerSpy).to.have.been.calledWith(impl.element, 'select');
         expect(triggerSpy).to.have.been.calledWith(
           impl.inputElement_,
@@ -956,8 +1064,8 @@ describes.realWin(
       impl = await buildAmpAutocomplete(true);
       const sourceData = ['apple', 'mango', 'pear'];
       const rendered = getRenderedSuggestions();
-      rendered.children[2].removeAttribute('data-value', '');
-      rendered.children[2].setAttribute('data-disabled', '');
+      rendered[2].removeAttribute('data-value', '');
+      rendered[2].setAttribute('data-disabled', '');
       env.sandbox
         .stub(impl.getSsrTemplateHelper(), 'applySsrOrCsrTemplate')
         .returns(Promise.resolve(rendered));

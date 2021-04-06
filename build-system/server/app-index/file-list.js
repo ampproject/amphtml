@@ -15,7 +15,6 @@
  */
 
 /* eslint-disable local/html-template */
-/* eslint-disable indent */
 
 const documentModes = require('./document-modes');
 const {AmpState, ampStateKey, containsExpr} = require('./amphtml-helpers');
@@ -73,13 +72,13 @@ const linksToExample = (shouldContainBasepath, opt_name) =>
   examplesPathRegex.test(shouldContainBasepath) &&
   htmlDocRegex.test(opt_name || shouldContainBasepath);
 
-const ExamplesSelectModeOptional = ({basepath, selectModePrefix}) =>
-  !examplesPathRegex.test(basepath + '/')
-    ? ''
-    : ExamplesDocumentModeSelect({
-        selectModePrefix,
-      });
+const ExamplesSelectModeOptional = ({basepath}) =>
+  !examplesPathRegex.test(basepath + '/') ? '' : ExamplesDocumentModeSelect();
 
+/**
+ * @param {{ name: string, href: string, boundHref?: string|undefined }} config
+ * @return {string}
+ */
 const FileListItem = ({name, href, boundHref}) =>
   html`
     <div class="file-link-container" role="listitem">
@@ -112,15 +111,13 @@ const maybePrefixExampleDocHref = (basepath, name, selectModePrefix) =>
 
 const FileListHeading = ({basepath, selectModePrefix}) => html`
   <div class="file-list-heading">
-    <h3 class="code" id="basepath">
-      ${basepath}
-    </h3>
+    <h3 class="code" id="basepath">${basepath}</h3>
     ${FileListSearchInput({basepath})}
     <div class="file-list-right-section">
       ${AmpState(selectModeStateId, {
         [selectModeStateKey]: selectModePrefix,
       })}
-      ${ExamplesSelectModeOptional({basepath, selectModePrefix})}
+      ${ExamplesSelectModeOptional({basepath})}
       <a href="/~" class="underlined">List root directory</a>
     </div>
   </div>
@@ -128,9 +125,7 @@ const FileListHeading = ({basepath, selectModePrefix}) => html`
 
 const wrapFileList = (rendered) => html`
   <div class="file-list-container">
-    <div class="wrap">
-      ${rendered}
-    </div>
+    <div class="wrap">${rendered}</div>
   </div>
 `;
 

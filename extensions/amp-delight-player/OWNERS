@@ -4,7 +4,7 @@
 {
   rules: [
     {
-      owners: [{name: 'xymw'}, {name: 'ampproject/wg-ui-and-a11y'}],
+      owners: [{name: 'xymw'}, {name: 'ampproject/wg-components'}],
     },
   ],
 }

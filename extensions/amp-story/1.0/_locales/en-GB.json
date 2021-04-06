@@ -1,0 +1,43 @@
+{
+  "2": {"string": "Tap Next"},
+  "3": {"string": "Tap Back"},
+  "4": {"string": "Could not copy link to clipboard :("},
+  "5": {"string": "Link copied!"},
+  "6": {"string": "Email"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Get Link"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "SMS"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {
+    "string": "Expand both the height and width of your window to view this experience"
+  },
+  "19": {
+    "string": "You must enable the amp-story experiment to view this content."
+  },
+  "20": {"string": "The page is best viewed in portrait mode"},
+  "21": {
+    "string": "We're sorry, it looks like your browser doesn't support this experience"
+  },
+  "22": {"string": "Accept"},
+  "23": {"string": "Decline"},
+  "25": {"string": "View on original domain:"},
+  "26": {"string": "More about AMP results"},
+  "27": {"string": "Continue Anyway"},
+  "28": {"string": "Change data privacy settings"},
+  "29": {"string": "Privacy settings"},
+  "30": {"string": "More to read"},
+  "31": {"string": "Sound off"},
+  "32": {"string": "Sound on"},
+  "33": {"string": "This page has no sound"},
+  "34": {"string": "Play video"},
+  "35": {"string": "Swipe up"},
+  "36": {"string": "Expand Tweet"},
+  "37": {"string": "Expand the height of your window to view this experience"},
+  "38": {"string": "Expand the width of your window to view this experience"},
+  "63": {"string": "Line"}
+}

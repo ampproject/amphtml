@@ -14,6 +14,4 @@
  * limitations under the License.
  */
 
-
- // Nothing yet.
-
+// Nothing yet.

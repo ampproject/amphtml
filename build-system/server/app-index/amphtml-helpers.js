@@ -57,6 +57,16 @@ const containsExpr = (haystack, needle, onTrue, onFalse) =>
 
 const ampStateKey = (...keys) => keys.join('.');
 
+/**
+ *
+ * @param {{
+ *  body: string,
+ *  canonical: string,
+ *  css?: string,
+ *  head?: string,
+ * }} param0
+ * @return {string}
+ */
 const AmpDoc = ({body, css, head, canonical}) => {
   assert(canonical);
   return html`
@@ -95,6 +105,14 @@ const componentExtensionNameMapping = {
 const componentExtensionName = (tagName) =>
   componentExtensionNameMapping[tagName] || tagName;
 
+/**
+ *
+ * @param {string} docStr
+ * @param {{
+ *  'amp-mustache': {version: string}
+ * }=} extensionConf
+ * @return {string}
+ */
 const addRequiredExtensionsToHead = (
   docStr,
   extensionConf = {
@@ -110,11 +128,11 @@ const addRequiredExtensionsToHead = (
     addExtension(name, {isTemplate: true, ...defaultConf});
 
   Array.from(matchIterator(componentTagNameRegex, docStr))
-    .map(([unusedFullMatch, tagName]) => componentExtensionName(tagName))
+    .map(([, tagName]) => componentExtensionName(tagName))
     .forEach(addExtension);
 
   Array.from(matchIterator(templateTagTypeRegex, docStr))
-    .map(([unusedFullMatch, type]) => type)
+    .map(([, type]) => type)
     .forEach(addTemplate);
 
   // TODO(alanorozco): Too greedy. Parse "on" attributes instead.

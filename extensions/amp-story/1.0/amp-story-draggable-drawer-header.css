@@ -40,6 +40,10 @@
   background-repeat: no-repeat !important;
   color: rgba(0, 0, 0, 0.87) !important;
   cursor: pointer !important;
+  /* default button style overrides */
+  box-sizing: content-box !important;
+  border: none !important;
+  background-color: transparent !important;
 }
 
 .i-amphtml-story-draggable-drawer-theme-dark .i-amphtml-story-page-attachment-close-button {
@@ -69,4 +73,74 @@
 .i-amphtml-story-draggable-drawer-header-bookend,
 .i-amphtml-story-draggable-drawer-header-attachment-remote {
   display: none !important;
+}
+
+/* For amp-story-page-attachment-ui-v2 experiment. */
+
+:host {
+  border-radius: inherit !important; /* Propogate border-radius */
+}
+
+.amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header {
+  justify-content: center !important;
+  box-shadow: none !important;
+  border-radius: inherit !important;
+  height: auto !important;
+  position: sticky !important;
+  top: 0 !important;
+}
+
+:not([desktop]).amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header {
+  height: 20px !important;
+}
+
+.amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header .i-amphtml-story-draggable-drawer-header-title-and-close {
+  opacity: 1 !important;
+  height: 44px !important;
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: white !important;
+  border-radius: inherit !important;
+}
+
+:not([desktop]).amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header .i-amphtml-story-draggable-drawer-header-title-and-close {
+  position: absolute !important;
+  transition: opacity .3s !important;
+  opacity: 0 !important;
+}
+
+:not([desktop]).amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header .i-amphtml-story-draggable-drawer-header-title-and-close:focus-within {
+  opacity: 1 !important;
+}
+
+:not([desktop]).amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header.i-amphtml-story-draggable-drawer-header-stuck .i-amphtml-story-draggable-drawer-header-title-and-close {
+  opacity: 1 !important;
+}
+
+.amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-title {
+  font-size: 14px !important;
+  position: absolute !important;
+  padding: 0 !important;
+  color: #202124 !important;
+}
+
+.amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-close-button {
+  margin-inline-start: auto !important; /* RTL support */
+  width: 14px !important;
+  height: 14px !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14"><path fill="rgba(0, 0, 0, .4)" d="M13.295 2.115a.997.997 0 10-1.41-1.41L7 5.59 2.115.705a.997.997 0 10-1.41 1.41L5.59 7 .705 11.885a.997.997 0 101.41 1.41L7 8.41l4.885 4.885a.997.997 0 101.41-1.41L8.41 7l4.885-4.885z"/></svg>') !important;
+  padding: 15px !important;
+}
+
+/* Draggable handle UI */
+:not([desktop]).amp-story-page-attachment-ui-v2:before {
+  content: '' !important;
+  position: absolute !important;
+  top: 8px !important;
+  width: 40px !important;
+  height: 3px !important;
+  background-color: rgba(0, 0, 0, .2) !important;
+  border-radius: 3px !important;
 }

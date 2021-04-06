@@ -21,10 +21,10 @@ limitations under the License.
 The AMP runtime defines a small set of custom elements that can be used in any
 AMP file. These custom elements serve two primary purposes:
 
-- Enable the AMP runtime to manage the loading of external resources, which may
-  slow down the initial render or cause jank.
-- Allow AMP authors to include functionality above and beyond standard HTML,
-  while maintaining the security- and performance-minded requirement that no author-written JavaScript is executed.
+-   Enable the AMP runtime to manage the loading of external resources, which may
+    slow down the initial render or cause jank.
+-   Allow AMP authors to include functionality above and beyond standard HTML,
+    while maintaining the security- and performance-minded requirement that no author-written JavaScript is executed.
 
 The initial set of elements included in the AMP spec is purposefully minimal,
 to keep the payload small. The AMP runtime also allows dynamic loading of additional
@@ -135,13 +135,13 @@ The AMP runtime itself will only build-in the most commonly-used components - ad
 
 The collection of official AMP components is open-source and open to contributions. To be considered for inclusion into the official AMP components, a contributed component must:
 
-- Use only the API surface area publicly specified by the AMP runtime to work.
-- Be open-sourceable with an Apache 2 license and not minified or obfuscated.
-- Have its behavior completely controllable by the runtime - e.g. not attempt to load resources outside of a timeframe allowed by the AMP runtime.
-- Have a fixed, known aspect ratio at initial page load, except if placed at the bottom of the page.
-- Not attempt to access or manipulate objects outside of the component's immediate ownership - e.g. elements that are not specified by or children of the component.
-- Not cause an AMP file to become invalid as per the AMP specification
-- The author of the component must sign the [Contributor License Agreement](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#contributor-license-agreement).
+-   Use only the API surface area publicly specified by the AMP runtime to work.
+-   Be open-sourceable with an Apache 2 license and not minified or obfuscated.
+-   Have its behavior completely controllable by the runtime - e.g. not attempt to load resources outside of a timeframe allowed by the AMP runtime.
+-   Have a fixed, known aspect ratio at initial page load, except if placed at the bottom of the page.
+-   Not attempt to access or manipulate objects outside of the component's immediate ownership - e.g. elements that are not specified by or children of the component.
+-   Not cause an AMP file to become invalid as per the AMP specification
+-   The author of the component must sign the [Contributor License Agreement](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#contributor-license-agreement).
 
 In the near-term, implementation will focus on the core components, before prioritizing extensibility. The long-term goal of the runtime though is to support this extensibility.
 

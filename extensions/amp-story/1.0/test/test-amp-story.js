@@ -32,13 +32,12 @@ import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
-import {PaginationButtons} from '../pagination-buttons';
 import {Services} from '../../../../src/services';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {poll} from '../../../../testing/iframe';
 import {registerServiceBuilder} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
+import {waitFor} from '../../../../testing/test-helper';
 
 // Represents the correct value of KeyboardEvent.which for the Right Arrow
 const KEYBOARD_EVENT_WHICH_RIGHT_ARROW = 39;
@@ -68,7 +67,7 @@ describes.realWin(
     async function createStoryWithPages(count, ids = [], autoAdvance = false) {
       element = win.document.createElement('amp-story');
 
-      Array(count)
+      const pageArray = Array(count)
         .fill(undefined)
         .map((unused, i) => {
           const page = win.document.createElement('amp-story-page');
@@ -82,6 +81,8 @@ describes.realWin(
 
       win.document.body.appendChild(element);
       story = await element.getImpl();
+
+      return pageArray;
     }
 
     /**
@@ -96,17 +97,6 @@ describes.realWin(
         eventObj.initEvent(eventType, true, true);
       }
       return eventObj;
-    }
-
-    function waitFor(callback, errorMessage) {
-      return poll(
-        errorMessage,
-        () => {
-          return callback();
-        },
-        undefined /** opt_onError */,
-        200 /** opt_timeout */
-      );
     }
 
     beforeEach(() => {
@@ -259,18 +249,17 @@ describes.realWin(
       await createStoryWithPages();
       const pages = story.element.querySelectorAll('amp-story-page');
 
-      element.build();
+      element.buildInternal();
 
       expect(pages[0].hasAttribute('active')).to.be.true;
       expect(pages[1].hasAttribute('active')).to.be.false;
 
       // Stubbing because we need to assert synchronously
-      env.sandbox
-        .stub(element.implementation_, 'mutateElement')
-        .callsFake((mutator) => {
-          mutator();
-          return Promise.resolve();
-        });
+      const impl = await element.getImpl(false);
+      env.sandbox.stub(impl, 'mutateElement').callsFake((mutator) => {
+        mutator();
+        return Promise.resolve();
+      });
 
       const eventObj = createEvent('keydown');
       eventObj.key = Keys.RIGHT_ARROW;
@@ -297,18 +286,14 @@ describes.realWin(
       ).to.be.equal('hidden');
     });
 
-    it('builds and attaches pagination buttons ', async () => {
+    it('checks if pagination buttons exist ', async () => {
       await createStoryWithPages(2, ['cover', 'page-1']);
 
       await story.layoutCallback();
-      const paginationButtonsStub = {attach: env.sandbox.spy()};
-      env.sandbox
-        .stub(PaginationButtons, 'create')
-        .returns(paginationButtonsStub);
-      story.buildPaginationButtonsForTesting();
-      expect(paginationButtonsStub.attach).to.have.been.calledWith(
-        story.element
-      );
+      expect(
+        story.element.querySelectorAll('.i-amphtml-story-button-container')
+          .length
+      ).to.equal(2);
     });
 
     it.skip('toggles `i-amphtml-story-landscape` based on height and width', () => {
@@ -729,12 +714,34 @@ describes.realWin(
         expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
       });
 
+      it('should rewind the story page when viewer becomes inactive', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+
+        await story.layoutCallback();
+        const setStateStub = window.sandbox.stub(story.activePage_, 'setState');
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.INACTIVE);
+        expect(setStateStub.getCall(1)).to.have.been.calledWithExactly(
+          PageState.NOT_ACTIVE
+        );
+      });
+
       it('should pause the story when viewer becomes hidden', async () => {
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
         story.getAmpDoc().overrideVisibilityState(VisibilityState.HIDDEN);
         expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
+      });
+
+      it('should pause the story page when viewer becomes hidden', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+
+        await story.layoutCallback();
+        const setStateStub = window.sandbox.stub(story.activePage_, 'setState');
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.HIDDEN);
+        expect(setStateStub).to.have.been.calledOnceWithExactly(
+          PageState.PAUSED
+        );
       });
 
       it('should pause the story when viewer becomes paused', async () => {
@@ -756,7 +763,7 @@ describes.realWin(
         );
       });
 
-      it('should play the story when viewer becomes active', async () => {
+      it('should play the story when viewer becomes active after paused', async () => {
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
@@ -765,7 +772,7 @@ describes.realWin(
         expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.false;
       });
 
-      it('should play the story page when viewer becomes active', async () => {
+      it('should play the story page when viewer becomes active after paused', async () => {
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
@@ -777,6 +784,25 @@ describes.realWin(
         );
       });
 
+      it('should play the story page when viewer becomes active after paused + inactive', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+
+        await story.layoutCallback();
+        const setStateStub = window.sandbox.stub(story.activePage_, 'setState');
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.INACTIVE);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
+        expect(setStateStub.getCall(0)).to.have.been.calledWithExactly(
+          PageState.PAUSED
+        );
+        expect(setStateStub.getCall(1)).to.have.been.calledWithExactly(
+          PageState.NOT_ACTIVE
+        );
+        expect(setStateStub.getCall(2)).to.have.been.calledWithExactly(
+          PageState.PLAYING
+        );
+      });
+
       it('should keep the story paused on resume when previously paused', async () => {
         await createStoryWithPages(2, ['cover', 'page-1']);
 
@@ -784,6 +810,18 @@ describes.realWin(
 
         await story.layoutCallback();
         story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
+        expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
+      });
+
+      it('should keep the story paused on resume when previously paused + inactive', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+
+        story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+
+        await story.layoutCallback();
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.INACTIVE);
         story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
         expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
       });
@@ -1030,30 +1068,6 @@ describes.realWin(
           expect(unmuteStub).not.to.have.been.called;
           expect(playStub).not.to.have.been.called;
         });
-
-        it('should mute the page and unmute the next page upon navigation', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
-
-          await story.layoutCallback();
-          const coverMuteStub = env.sandbox.stub(
-            story.getPageById('cover'),
-            'muteAllMedia'
-          );
-          const firstPageUnmuteStub = env.sandbox.stub(
-            story.getPageById('page-1'),
-            'unmuteAllMedia'
-          );
-          await story.switchTo_('page-1');
-          expect(coverMuteStub).to.have.been.calledOnce;
-          expect(firstPageUnmuteStub).to.have.been.calledOnce;
-        });
       });
 
       it('should remove the muted attribute on unmuted state change', async () => {
@@ -1129,6 +1143,40 @@ describes.realWin(
             [MediaType.VIDEO]: 8,
           };
           expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
+        });
+      });
+
+      describe('#getElementDistance', () => {
+        it('should return -1 for elements without a page', async () => {
+          await createStoryWithPages(3);
+          await story.layoutCallback();
+          const elToFind = win.document.createElement('video');
+          const distance = story.getElementDistance(elToFind);
+          expect(distance).to.equal(-1);
+        });
+
+        it('should find elements inside organic pages', async () => {
+          const pageArray = await createStoryWithPages(3);
+          await story.layoutCallback();
+          const elToFind = win.document.createElement('video');
+          const hostPage = pageArray[1];
+          hostPage.setAttribute('distance', '4');
+          hostPage.appendChild(elToFind);
+          const distance = story.getElementDistance(elToFind);
+          expect(distance).to.equal(4);
+        });
+
+        it('should find elements inside ad pages / FIE', async () => {
+          const pageArray = await createStoryWithPages(3);
+          await story.layoutCallback();
+          const elToFind = win.document.createElement('video');
+          const hostPage = pageArray[1];
+          hostPage.setAttribute('distance', '4');
+          const iframe = win.document.createElement('iframe');
+          hostPage.appendChild(iframe);
+          iframe.contentDocument.body.appendChild(elToFind);
+          const distance = story.getElementDistance(elToFind);
+          expect(distance).to.equal(4);
         });
       });
 
@@ -1643,14 +1691,6 @@ describes.realWin(
       });
 
       describe('amp-story rewriteStyles', () => {
-        beforeEach(() => {
-          toggleExperiment(win, 'amp-story-responsive-units', true);
-        });
-
-        afterEach(() => {
-          toggleExperiment(win, 'amp-story-responsive-units', false);
-        });
-
         it('should rewrite vw styles', async () => {
           await createStoryWithPages(1, ['cover']);
           const styleEl = win.document.createElement('style');

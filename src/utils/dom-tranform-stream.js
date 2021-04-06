@@ -15,15 +15,15 @@
  */
 
 import {Deferred} from './promise';
-import {Services} from '../services';
 import {dev, devAssert} from '../log';
 import {removeNoScriptElements} from './dom-writer';
 
 export class DomTransformStream {
   /**
    * @param {!Window} win
+   * @param {function=} opt_transferThrottleFunc
    */
-  constructor(win) {
+  constructor(win, opt_transferThrottleFunc) {
     const headDefer = new Deferred();
     /**
      * Resolves when head has been written to in memory document.
@@ -64,8 +64,13 @@ export class DomTransformStream {
     /** @private {boolean} */
     this.shouldTransfer_ = false;
 
-    /** @const @private */
-    this.vsync_ = Services.vsyncFor(win);
+    /**
+     * @param {!function} cb
+     * @const @private {!function}
+     * @return {!Promise}
+     */
+    this.transferThrottle_ =
+      opt_transferThrottleFunc || ((cb) => Promise.resolve(cb()));
   }
 
   /**
@@ -125,6 +130,14 @@ export class DomTransformStream {
     this.shouldTransfer_ = true;
     this.targetBodyResolver_(targetBody);
 
+    this.headPromise_.then(() => {
+      const attrs = this.detachedBody_.attributes;
+      for (let i = 0; i < attrs.length; i++) {
+        const {name, value} = attrs[i];
+        targetBody.setAttribute(name, value);
+      }
+    });
+
     this.transferBodyChunk_();
 
     return this.bodyTransferPromise_;
@@ -142,16 +155,17 @@ export class DomTransformStream {
     this.currentChunkTransferPromise_ = Promise.all([
       this.targetBodyPromise_,
       this.headPromise_,
-    ]).then((resolvedElements) =>
-      this.vsync_.mutatePromise(() => {
+    ]).then((resolvedElements) => {
+      const tranferThrottle = this.transferThrottle_;
+      return tranferThrottle(() => {
         this.currentChunkTransferPromise_ = null;
         const targetBody = resolvedElements[0];
         removeNoScriptElements(dev().assertElement(this.detachedBody_));
         while (this.detachedBody_.firstChild) {
           targetBody.appendChild(this.detachedBody_.firstChild);
         }
-      })
-    );
+      });
+    });
 
     return this.currentChunkTransferPromise_;
   }

@@ -17,6 +17,7 @@
 import {PlayingStates, VideoEvents} from '../../src/video-interface';
 import {Services} from '../../src/services';
 import {VideoUtils} from '../../src/utils/video';
+import {dispatchCustomEvent} from '../../src/dom';
 import {installVideoManagerForDoc} from '../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../src/layout';
 import {listenOncePromise} from '../../src/event-helper';
@@ -47,7 +48,7 @@ describe
   .configure()
   .ifChrome()
   .run('VideoManager', function () {
-    describes.fakeWin(
+    describes.realWin(
       'VideoManager',
       {
         amp: {
@@ -59,6 +60,26 @@ describe
         let klass;
         let video;
         let impl;
+
+        beforeEach(async () => {
+          klass = createFakeVideoPlayerClass(env.win);
+          video = env.createAmpElement('amp-test-fake-videoplayer', klass);
+          video.setAttribute('layout', 'fixed');
+          video.setAttribute('width', '400');
+          video.setAttribute('height', '300');
+          env.win.document.body.appendChild(video);
+          video.connectedCallback();
+          impl = await video.getImpl(false);
+          installVideoManagerForDoc(env.ampdoc);
+          videoManager = Services.videoManagerForDoc(env.ampdoc);
+        });
+
+        it('should not duplicate entries if laid out twice', async () => {
+          videoManager.register(impl);
+          expect(videoManager.entries_).to.have.length(1);
+          videoManager.register(impl);
+          expect(videoManager.entries_).to.have.length(1);
+        });
 
         it('should receive i-amphtml-video-interface class when registered', () => {
           const expectedClass = 'i-amphtml-video-interface';
@@ -203,8 +224,8 @@ describe
               expect(videoManager.userInteracted(impl)).to.be.true;
             });
 
-            video.dispatchCustomEvent(VideoEvents.AD_START);
-            video.dispatchCustomEvent(VideoEvents.UNMUTED);
+            dispatchCustomEvent(video, VideoEvents.AD_START);
+            dispatchCustomEvent(video, VideoEvents.UNMUTED);
           });
         });
 
@@ -253,15 +274,6 @@ describe
             expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
           });
         });
-
-        beforeEach(() => {
-          klass = createFakeVideoPlayerClass(env.win);
-          video = env.createAmpElement('amp-test-fake-videoplayer', klass);
-          env.win.document.body.appendChild(video);
-          impl = video.implementation_;
-          installVideoManagerForDoc(env.ampdoc);
-          videoManager = Services.videoManagerForDoc(env.ampdoc);
-        });
       }
     );
   });
@@ -301,9 +313,7 @@ describe
         },
       };
 
-      win = {
-        document: doc,
-      };
+      win = {document: doc};
 
       isLite = false;
 
@@ -435,13 +445,8 @@ function createFakeVideoPlayerClass(win) {
       this.element.appendChild(iframe);
 
       return Promise.resolve().then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.LOAD);
+        dispatchCustomEvent(this.element, VideoEvents.LOAD);
       });
-    }
-
-    /** @override */
-    viewportCallback(visible) {
-      this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
     }
 
     // VideoInterface Implementation. See ../src/video-interface.VideoInterface
@@ -465,10 +470,10 @@ function createFakeVideoPlayerClass(win) {
      */
     play(unusedIsAutoplay) {
       Promise.resolve().then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
+        dispatchCustomEvent(this.element, VideoEvents.PLAYING);
         this.timeoutId_ = this.timer_.delay(() => {
           this.currentTime_ = this.duration_;
-          this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+          dispatchCustomEvent(this.element, VideoEvents.PAUSE);
         }, this.length_);
       });
     }
@@ -478,7 +483,7 @@ function createFakeVideoPlayerClass(win) {
      */
     pause() {
       Promise.resolve().then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+        dispatchCustomEvent(this.element, VideoEvents.PAUSE);
         this.timer_.cancel(this.timeoutId_);
       });
     }
@@ -488,7 +493,7 @@ function createFakeVideoPlayerClass(win) {
      */
     mute() {
       Promise.resolve().then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.MUTED);
+        dispatchCustomEvent(this.element, VideoEvents.MUTED);
       });
     }
 
@@ -497,7 +502,7 @@ function createFakeVideoPlayerClass(win) {
      */
     unmute() {
       Promise.resolve().then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
+        dispatchCustomEvent(this.element, VideoEvents.UNMUTED);
       });
     }
 

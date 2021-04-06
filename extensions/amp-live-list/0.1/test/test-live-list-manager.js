@@ -627,6 +627,39 @@ describes.fakeWin('LiveListManager', {amp: true}, (env) => {
     }
   );
 
+  it("should not poll if all amp-live-list's are disabled on visible", () => {
+    const fetchSpy = env.sandbox.spy(manager, 'work_');
+    const liveList2 = getLiveList({'data-poll-interval': '8000'}, 'id-2');
+
+    liveList.toggle(false);
+    liveList2.toggle(false);
+    ready();
+    // Important that we set this before build since then is when they register
+    liveList.buildCallback();
+    liveList2.buildCallback();
+    expect(liveList.isEnabled()).to.be.false;
+    expect(liveList2.isEnabled()).to.be.false;
+    return manager.whenDocReady_().then(() => {
+      expect(ampdoc.isVisible()).to.be.true;
+      expect(manager.poller_.isRunning()).to.be.false;
+      ampdoc.overrideVisibilityState('hidden');
+      expect(fetchSpy).to.have.not.been.called;
+      expect(manager.poller_.isRunning()).to.be.false;
+      ampdoc.overrideVisibilityState('visible');
+      expect(manager.poller_.isRunning()).to.be.false;
+      ampdoc.overrideVisibilityState('inactive');
+      expect(manager.poller_.isRunning()).to.be.false;
+      ampdoc.overrideVisibilityState('visible');
+      expect(fetchSpy).to.have.not.been.called;
+      expect(manager.poller_.isRunning()).to.be.false;
+      ampdoc.overrideVisibilityState('prerender');
+      expect(fetchSpy).to.have.not.been.called;
+      expect(manager.poller_.isRunning()).to.be.false;
+      clock.tick(20000);
+      expect(fetchSpy).to.have.not.been.called;
+    });
+  });
+
   it('should fetch with url', () => {
     env.sandbox.stub(Math, 'random').callsFake(() => 1);
     env.sandbox.stub(ampdoc, 'isVisible').returns(true);
@@ -709,7 +742,7 @@ describes.fakeWin('LiveListManager', {amp: true}, (env) => {
   );
 
   it('should find highest "update time" from amp-live-list elements', () => {
-    const doc = [];
+    const doc = {};
     const list1 = getLiveList(undefined, 'id1');
     const list2 = getLiveList(undefined, 'id2');
     env.sandbox.stub(list1, 'update').returns(1000);
@@ -717,7 +750,7 @@ describes.fakeWin('LiveListManager', {amp: true}, (env) => {
     doc.getElementsByTagName = () => {
       return [list1.element, list2.element];
     };
-    doc.querySelectorAll = function () {};
+    doc.querySelectorAll = () => [];
     list1.buildCallback();
     list2.buildCallback();
     expect(manager.latestUpdateTime_).to.equal(0);
@@ -791,7 +824,13 @@ describes.realWin(
       const script1 = document.createElement('script');
       const script2 = document.createElement('script');
       script1.setAttribute('custom-element', 'amp-test');
+      env.sandbox
+        .stub(script1, 'src')
+        .value('https://cdn.ampproject.org/v0/amp-test-0.2.js');
       script2.setAttribute('custom-template', 'amp-template');
+      env.sandbox
+        .stub(script2, 'src')
+        .value('https://cdn.ampproject.org/v0/amp-template-0.2.js');
       div.appendChild(script1);
       div.appendChild(script2);
 
@@ -808,12 +847,14 @@ describes.realWin(
       manager.installExtensionsForDoc_(div);
 
       expect(
-        doc.head.querySelectorAll('[custom-element="amp-test"]')
+        doc.head.querySelectorAll('[custom-element="amp-test"][src*="-0.2"]')
       ).to.have.length(1);
       expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
 
       expect(
-        doc.head.querySelectorAll('[custom-element="amp-template"]')
+        doc.head.querySelectorAll(
+          '[custom-element="amp-template"][src*="-0.2"]'
+        )
       ).to.have.length(1);
       expect(extensions.extensions_['amp-template'].scriptPresent).to.be.true;
     });

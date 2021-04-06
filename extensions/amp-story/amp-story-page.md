@@ -24,6 +24,8 @@ limitations under the License.
 
 # amp-story-page
 
+## Usage
+
 The `<amp-story-page>` component represents the content to display on a single page of a story.
 
 <figure class="centered-fig">
@@ -40,8 +42,6 @@ The `<amp-story-page>` component represents the content to display on a single p
   </noscript>
   </amp-anim>
 </figure>
-
-## Example
 
 ```html
 <amp-story-page id="cover">
@@ -70,6 +70,10 @@ The `<amp-story-page>` component represents the content to display on a single p
 </amp-story-page>
 ```
 
+## Valid children
+
+The `<amp-story-page>` component contains one or more [layers](amp-story-grid-layer.md). Layers are stacked bottom-up (the first layer specified in the DOM is at the bottom; the last layer specified in the DOM is at the top).
+
 ## Attributes
 
 ### id [required]
@@ -78,15 +82,33 @@ A unique identifier for the page. Can be used for styling the page and its desce
 
 ### auto-advance-after [optional]
 
-Specifies when to auto-advance to the next page. If omitted, the page will not automatically advance. The value for `auto-advance-after` must be either:
+Specifies when to auto-advance to the next page. If omitted, the page will not automatically advance. The value for `auto-advance-after` must be either a specified amount of time, or the `id` of an [HTMLMediaElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement) or video-interface.
 
-- A positive amount of [time](https://developer.mozilla.org/en-US/docs/Web/CSS/time) to wait before automatically advancing to the next page
-- An ID of an [HTMLMediaElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement) or video-interface video whose completion will trigger the auto-advance
+#### Time
 
-For example:
+Auto-advance to the next story page after a specified amount of [time](https://developer.mozilla.org/en-US/docs/Web/CSS/time). The time must be positive.
 
 ```html
-<amp-story-page id="tokyo" auto-advance-after="1s"></amp-story-page>
+<amp-story-page id="tokyo" auto-advance-after="1s">
+  ...
+</amp-story-page>
+```
+
+#### Element `id`
+
+You can auto-advance to the next story page when a video completes. Point the `auto-advance-after` attribute to the id of an [HTMLMediaElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement) or video-interface that displays the video. This includes AMP specific components, like [`amp-video`](../amp-video/amp-video.md).
+
+```html
+<amp-story-page id="tokyo" auto-advance-after="video1">
+  ...
+  	<amp-video autoplay id="video1"
+    width="720" height="1280"
+    poster="todo.jpg"
+    layout="responsive">
+    <source src="video1.mp4" type="video/mp4">
+    </amp-video>
+  ...
+</amp-story-page>
 ```
 
 ### background-audio [optional]
@@ -101,7 +123,3 @@ For example:
   background-audio="./media/switzerland.mp3"
 ></amp-story-page>
 ```
-
-## Children (of amp-story-page)
-
-The `<amp-story-page>` component contains one or more [layers](amp-story-grid-layer.md). Layers are stacked bottom-up (the first layer specified in the DOM is at the bottom; the last layer specified in the DOM is at the top).

@@ -24,6 +24,8 @@ import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 
+const TYPE = 'facebook';
+
 class AmpFacebookLike extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -62,7 +64,7 @@ class AmpFacebookLike extends AMP.BaseElement {
       'https://connect.facebook.net/' + this.dataLocale_ + '/sdk.js',
       'script'
     );
-    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
+    preloadBootstrap(this.win, TYPE, this.getAmpDoc(), preconnect);
   }
 
   /** @override */
@@ -72,7 +74,8 @@ class AmpFacebookLike extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = getIframe(this.win, this.element, 'facebook');
+    const iframe = getIframe(this.win, this.element, TYPE);
+    iframe.title = this.element.title || 'Facebook like button';
     this.applyFillContent(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
     listenFor(

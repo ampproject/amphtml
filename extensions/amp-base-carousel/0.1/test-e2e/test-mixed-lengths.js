@@ -20,11 +20,10 @@ const pageWidth = 800;
 const pageHeight = 600;
 
 describes.endtoend(
-  'AMP carousel mixed length slides',
+  'amp-base-carousel - mixed length slides',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/' +
-      'mixed-lengths.amp.html',
+    version: '0.1',
+    fixture: 'amp-base-carousel/mixed-lengths.amp.html',
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
   },
@@ -76,7 +75,7 @@ describes.endtoend(
         .run('should snap on the center point', async () => {
           const el = await getScrollingElement(controller);
           const slides = await getSlides(controller);
-          const scrollAmount = 1 + (slideOneWidth + slideTwoWidth) / 2;
+          const scrollAmount = 1 + slideOneWidth / 2;
 
           await controller.scrollBy(el, {left: scrollAmount});
           await expect(controller.getElementRect(slides[1])).to.include({

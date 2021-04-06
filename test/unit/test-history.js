@@ -321,8 +321,8 @@ describes.sandboxed('History install', {}, () => {
     installTimerService(window);
     win = {
       __AMP_SERVICES: {
-        'viewer': {obj: viewer},
-        'timer': {obj: Services.timerFor(window)},
+        'viewer': {obj: viewer, ctor: Object},
+        'timer': {obj: Services.timerFor(window), ctor: Object},
       },
       history: {
         length: 0,

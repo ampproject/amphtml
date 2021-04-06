@@ -34,8 +34,9 @@ import {toggleExperiment} from '../../../../src/experiments';
  */
 async function afterIndexUpdate(el, index) {
   const event = await listenOncePromise(el, CarouselEvents.INDEX_CHANGE);
-  await el.implementation_.mutateElement(() => {});
-  await el.implementation_.mutateElement(() => {});
+  const impl = await el.getImpl(false);
+  await impl.mutateElement(() => {});
+  await impl.mutateElement(() => {});
 
   if (index != undefined && getDetail(event)['index'] != index) {
     return afterIndexUpdate(el, index);
@@ -168,7 +169,7 @@ describes.realWin(
 
       container.appendChild(el);
 
-      await el.build();
+      await el.buildInternal();
       await el.layoutCallback();
       await afterIndexUpdate(el);
 

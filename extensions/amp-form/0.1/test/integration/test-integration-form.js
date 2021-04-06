@@ -21,7 +21,8 @@ import {Services} from '../../../../../src/services';
 import {installGlobalSubmitListenerForDoc} from '../../../../../src/document-submit';
 import {listenOncePromise} from '../../../../../src/event-helper';
 import {poll} from '../../../../../testing/iframe';
-import {registerExtendedTemplate} from '../../../../../src/service/template-impl';
+import {registerExtendedTemplateForDoc} from '../../../../../src/service/template-impl';
+import {stubElementsForDoc} from '../../../../../src/service/custom-element-registry';
 
 /** @const {number} */
 const RENDER_TIMEOUT = 15000;
@@ -37,7 +38,7 @@ describes.realWin(
   },
   (env) => {
     const {testServerPort} = window.ampTestRuntimeConfig;
-    const baseUrl = `http://localhost:${testServerPort}`;
+    const baseUrl = `http://localhost:${testServerPort || '9876'}`;
     let doc;
 
     const realSetTimeout = window.setTimeout;
@@ -52,20 +53,26 @@ describes.realWin(
     beforeEach(() => {
       doc = env.win.document;
 
-      env.sandbox.stub(Services, 'formSubmitForDoc').returns(
-        Promise.resolve(() => {
-          fire: () => {};
-        })
-      );
+      env.sandbox.stub(Services, 'formSubmitForDoc').resolves({
+        fire: () => {},
+      });
 
       const mustache = document.createElement('script');
       mustache.setAttribute('custom-template', 'amp-mustache');
+      env.sandbox
+        .stub(mustache, 'src')
+        .value('https://cdn.ampproject.org/v0/amp-mustache-0.1.js');
       doc.body.appendChild(mustache);
-      registerExtendedTemplate(env.win, 'amp-mustache', AmpMustache);
+      registerExtendedTemplateForDoc(env.ampdoc, 'amp-mustache', AmpMustache);
 
       const form = document.createElement('script');
       form.setAttribute('custom-element', 'amp-form');
+      env.sandbox
+        .stub(form, 'src')
+        .value('https://cdn.ampproject.org/v0/amp-form-0.1.js');
       doc.head.appendChild(form);
+
+      stubElementsForDoc(env.ampdoc);
 
       new AmpFormService(env.ampdoc);
 

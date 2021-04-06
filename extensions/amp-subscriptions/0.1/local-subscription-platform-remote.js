@@ -57,9 +57,26 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
 
   /** @override */
   getEntitlements() {
-    return this.urlBuilder_
-      .buildUrl(this.authorizationUrl_, /* useAuthData */ false)
-      .then((fetchUrl) => {
+    const fetchUrlPromise = this.urlBuilder_.buildUrl(
+      this.authorizationUrl_,
+      /* useAuthData */ false
+    );
+    const meteringStatePromise = this.serviceAdapter_.loadMeteringState();
+    return Promise.all([fetchUrlPromise, meteringStatePromise]).then(
+      (results) => {
+        let fetchUrl = results[0];
+        const meteringState = results[1];
+
+        // WARNING: If this value is really long, you might run into issues by hitting
+        // the maximum URL length in some browsers when sending the GET fetch URL.
+        if (meteringState) {
+          fetchUrl = addParamToUrl(
+            fetchUrl,
+            'meteringState',
+            btoa(JSON.stringify(meteringState))
+          );
+        }
+
         // WARNING: If this key is really long, you might run into issues by hitting
         // the maximum URL length in some browsers when sending the GET fetch URL.
         const encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
@@ -73,9 +90,21 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
           .fetchJson(fetchUrl, {credentials: 'include'})
           .then((res) => res.json())
           .then((resJson) => {
-            return Entitlement.parseFromJson(resJson);
+            const promises = [];
+
+            // Save metering state, if present.
+            if (resJson.metering && resJson.metering.state) {
+              promises.push(
+                this.serviceAdapter_.saveMeteringState(resJson.metering.state)
+              );
+            }
+
+            return Promise.all(promises).then(() =>
+              Entitlement.parseFromJson(resJson)
+            );
           });
-      });
+      }
+    );
   }
 
   /** @override */

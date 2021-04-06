@@ -138,6 +138,10 @@ export class TouchHandler {
    * @private
    */
   forwardEvent_(e) {
+    if (e && e.shouldViewerCancelPropagation) {
+      e.stopImmediatePropagation();
+      return;
+    }
     if (e && e.type) {
       const msg = this.copyTouchEvent_(e);
       this.messaging_.sendRequest(e.type, msg, false);

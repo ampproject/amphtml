@@ -124,7 +124,7 @@ export function extractArticleTags(ampdoc) {
   return (ampdoc.getMetaByName('keywords') || '')
     .split(',')
     .map((e) => e.trim())
-    .filter((e) => e);
+    .filter(Boolean);
 }
 
 /**

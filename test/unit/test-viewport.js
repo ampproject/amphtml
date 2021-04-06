@@ -133,6 +133,7 @@ describes.fakeWin('Viewport', {}, (env) => {
         return {then: (callback) => callback()};
       },
       updatePaddingTop: () => {},
+      animateFixedElements: () => {},
     };
     viewport.getSize();
 
@@ -142,7 +143,7 @@ describes.fakeWin('Viewport', {}, (env) => {
     env.sandbox.stub(vsync, 'canAnimate').returns(true);
     env.sandbox
       .stub(vsync, 'createAnimTask')
-      .callsFake((unusedContextNode, task) => {
+      .callsFake((_unusedContextNode, task) => {
         return () => {
           vsyncTasks.push(task);
         };
@@ -219,6 +220,35 @@ describes.fakeWin('Viewport', {}, (env) => {
       ampdoc.win.parent = {};
       new ViewportImpl(ampdoc, binding, viewer);
       expect(root).to.have.class('i-amphtml-iframed');
+    });
+
+    describe('scroll to in ios-webview', () => {
+      beforeEach(() => {
+        ampdoc.win.scrollTo = env.sandbox.spy();
+        env.sandbox.stub(Services, 'platformFor').returns({
+          isIos: () => {
+            return true;
+          },
+        });
+        // To ensure isIframed() returns true
+        ampdoc.win.parent = {};
+      });
+
+      it('should scroll when in a single doc', async () => {
+        env.sandbox.stub(ampdoc, 'isSingleDoc').returns(true);
+
+        new ViewportImpl(ampdoc, binding, viewer);
+        await ampdoc.whenReady();
+        expect(ampdoc.win.scrollTo).to.have.been.called;
+      });
+
+      it('should *not* scroll when in a shadow doc', async () => {
+        env.sandbox.stub(ampdoc, 'isSingleDoc').returns(false);
+
+        new ViewportImpl(ampdoc, binding, viewer);
+        await ampdoc.whenReady();
+        expect(ampdoc.win.scrollTo).not.to.have.been.called;
+      });
     });
 
     describe('ios-webview', () => {
@@ -586,8 +616,14 @@ describes.fakeWin('Viewport', {}, (env) => {
     const bindingMock = env.sandbox.mock(binding);
     const fixedLayerMock = env.sandbox.mock(viewport.fixedLayer_);
     fixedLayerMock
-      .expects('updatePaddingTop')
-      .withExactArgs(/* paddingTop */ 0, /* transient */ undefined)
+      .expects('animateFixedElements')
+      .withExactArgs(
+        /* paddingTop */ 0,
+        /* lastPaddingTop */ 19,
+        /* duration */ 0,
+        /* curve */ undefined,
+        /* transient */ undefined
+      )
       .once();
     viewerViewportHandler({paddingTop: 0});
     bindingMock.verify();
@@ -598,36 +634,25 @@ describes.fakeWin('Viewport', {}, (env) => {
     const bindingMock = env.sandbox.mock(binding);
     const fixedLayerMock = env.sandbox.mock(viewport.fixedLayer_);
     fixedLayerMock
-      .expects('updatePaddingTop')
-      .withExactArgs(/* paddingTop */ 0, /* transient */ true)
+      .expects('animateFixedElements')
+      .withExactArgs(
+        /* paddingTop */ 0,
+        /* lastPaddingTop */ 19,
+        /* duration */ 300,
+        /* curve */ 'ease-in',
+        /* transient */ true
+      )
       .once();
     bindingMock.expects('hideViewerHeader').withArgs(true, 19).once();
     viewerViewportHandler({
       paddingTop: 0,
-      duation: 300,
+      duration: 300,
       curve: 'ease-in',
       transient: true,
     });
     bindingMock.verify();
     fixedLayerMock.verify();
   });
-
-  it(
-    'should update padding for fixed layer when viewer wants to ' +
-      'hide header',
-    () => {
-      viewport.fixedLayer_ = {updatePaddingTop: () => {}};
-      const fixedLayerMock = env.sandbox.mock(viewport.fixedLayer_);
-      fixedLayerMock.expects('updatePaddingTop').withArgs(0).once();
-      viewerViewportHandler({
-        paddingTop: 0,
-        duation: 300,
-        curve: 'ease-in',
-        transient: 'true',
-      });
-      fixedLayerMock.verify();
-    }
-  );
 
   it('should update viewport when entering lightbox mode', () => {
     const requestingEl = document.createElement('div');
@@ -1085,7 +1110,9 @@ describes.fakeWin('Viewport', {}, (env) => {
       .run('should set pan-y with experiment', () => {
         viewer.isEmbedded = () => true;
         viewport = new ViewportImpl(ampdoc, binding, viewer);
-        expect(win.getComputedStyle(root)['touch-action']).to.equal('pan-y');
+        expect(win.getComputedStyle(root)['touch-action']).to.equal(
+          'pan-y pinch-zoom'
+        );
       });
   });
 
