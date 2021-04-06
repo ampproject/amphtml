@@ -5985,8 +5985,12 @@ class ParsedValidatorRules {
       for (let tagSpecId = 0; tagSpecId < numTags; ++tagSpecId) {
         let tagSpec = this.rules_.tags[tagSpecId];
         if (tagSpec.extensionSpec == null) continue;
+        let baseSpecName = tagSpec.extensionSpec.name;
+        if (tagSpec.extensionSpec.versionName !== null)
+          baseSpecName = tagSpec.extensionSpec.name + ' ' +
+              tagSpec.extensionSpec.versionName;
         if (tagSpec.specName === null)
-          tagSpec.specName = tagSpec.extensionSpec.name + ' extension script';
+          tagSpec.specName = baseSpecName + ' extension script';
         if (tagSpec.descriptiveName === null)
           tagSpec.descriptiveName = tagSpec.specName;
         tagSpec.mandatoryParent = 'HEAD';
