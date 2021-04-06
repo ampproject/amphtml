@@ -455,7 +455,7 @@ message ReferencePoint {
 
 // Specs specific to AMP Extensions. This is a field within TagSpec that
 // replaces the standard tagspec list of attributes, requirements, etc.
-// NEXT AVAILABLE TAG: 9
+// NEXT AVAILABLE TAG: 10
 message ExtensionSpec {
   // e.g. "amp-video". This is used both as the attribute value for the
   // 'custom-element' attribute value as well as part of the 'src' attribute
@@ -463,6 +463,11 @@ message ExtensionSpec {
   optional string name = 1;
   // e.g. "0.1", "1.0", "latest".
   repeated string version = 2;
+  // If multiple TagSpecs for the same extension exist, separated by version,
+  // specify a version_name string to disambiguate their spec_names. For
+  // example, "v1.0" or "v0.1-0.2". This string will become part of the name
+  // used for referring to this extension in validator error messages.
+  optional string version_name = 9;
   // deprecated_version must be a strict subset of version. If the version
   // matches a deprecated_version, validation will emit a warning.
   repeated string deprecated_version = 3;
