@@ -1,0 +1,31 @@
+[debug] [2021-04-06T18:02:50.673Z] ----------------------------------------------------------------------
+[debug] [2021-04-06T18:02:50.675Z] Command:       /Users/mszylkowski/.nvm/versions/node/v14.16.0/bin/node /Users/mszylkowski/.nvm/versions/node/v13.14.0/bin/firebase deploy
+[debug] [2021-04-06T18:02:50.675Z] CLI Version:   9.6.0
+[debug] [2021-04-06T18:02:50.675Z] Platform:      darwin
+[debug] [2021-04-06T18:02:50.675Z] Node Version:  v14.16.0
+[debug] [2021-04-06T18:02:50.676Z] Time:          Tue Apr 06 2021 14:02:50 GMT-0400 (Eastern Daylight Time)
+[debug] [2021-04-06T18:02:50.676Z] ----------------------------------------------------------------------
+[debug] [2021-04-06T18:02:50.676Z] 
+[debug] [2021-04-06T18:02:50.682Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2021-04-06T18:02:50.682Z] > authorizing via signed-in user
+[debug] [2021-04-06T18:02:50.682Z] [iam] checking project stories-demos-matias for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2021-04-06T18:02:50.684Z] >>> HTTP REQUEST POST https://cloudresourcemanager.googleapis.com/v1/projects/stories-demos-matias:testIamPermissions  
+ {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2021-04-06T18:02:50.882Z] <<< HTTP RESPONSE 200 {"content-type":"application/json; charset=UTF-8","vary":"X-Origin, Referer, Origin,Accept-Encoding","date":"Tue, 06 Apr 2021 18:02:51 GMT","server":"ESF","cache-control":"private","x-xss-protection":"0","x-frame-options":"SAMEORIGIN","x-content-type-options":"nosniff","server-timing":"gfet4t7; dur=52","alt-svc":"h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"","accept-ranges":"none","transfer-encoding":"chunked"}
+[debug] [2021-04-06T18:02:50.883Z] > refreshing access token with scopes: []
+[debug] [2021-04-06T18:02:50.883Z] >>> HTTP REQUEST POST https://www.googleapis.com/oauth2/v3/token  
+ <request body omitted>
+[debug] [2021-04-06T18:02:51.063Z] <<< HTTP RESPONSE 200 {"expires":"Mon, 01 Jan 1990 00:00:00 GMT","date":"Tue, 06 Apr 2021 18:02:51 GMT","pragma":"no-cache","cache-control":"no-cache, no-store, max-age=0, must-revalidate","content-type":"application/json; charset=utf-8","vary":"X-Origin, Referer, Origin,Accept-Encoding","server":"scaffolding on HTTPServer2","x-xss-protection":"0","x-frame-options":"SAMEORIGIN","x-content-type-options":"nosniff","alt-svc":"h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"","accept-ranges":"none","transfer-encoding":"chunked"}
+[debug] [2021-04-06T18:02:51.092Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/stories-demos-matias [none]
+[debug] [2021-04-06T18:02:51.394Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/stories-demos-matias 200
+[debug] [2021-04-06T18:02:51.394Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/stories-demos-matias {"projectId":"stories-demos-matias","projectNumber":"559408437652","displayName":"stories-demos-matias","name":"projects/stories-demos-matias","resources":{"hostingSite":"stories-demos-matias"},"state":"ACTIVE"}
+[info] 
+[info] === Deploying to 'stories-demos-matias'...
+[info] 
+[info] i  deploying hosting 
+[debug] [2021-04-06T18:02:51.397Z] > refreshing access token with scopes: ["email","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","openid"]
+[debug] [2021-04-06T18:02:51.398Z] >>> HTTP REQUEST POST https://www.googleapis.com/oauth2/v3/token  
+ <request body omitted>
+[debug] [2021-04-06T18:02:51.548Z] <<< HTTP RESPONSE 200 {"date":"Tue, 06 Apr 2021 18:02:51 GMT","pragma":"no-cache","expires":"Mon, 01 Jan 1990 00:00:00 GMT","cache-control":"no-cache, no-store, max-age=0, must-revalidate","content-type":"application/json; charset=utf-8","vary":"X-Origin, Referer, Origin,Accept-Encoding","server":"scaffolding on HTTPServer2","x-xss-protection":"0","x-frame-options":"SAMEORIGIN","x-content-type-options":"nosniff","alt-svc":"h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"","accept-ranges":"none","transfer-encoding":"chunked"}
+[debug] [2021-04-06T18:02:51.576Z] >>> HTTP REQUEST POST https://firebasehosting.googleapis.com/v1beta1/sites/stories-demos-matias/versions  
+ {"config":{},"labels":{"deployment-tool":"cli-firebase"}}

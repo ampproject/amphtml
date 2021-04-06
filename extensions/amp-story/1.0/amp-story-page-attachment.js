@@ -280,7 +280,10 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   openRemote_() {
-    this.contentEl_.querySelector('a').click();
+    this.element.parentElement
+      .querySelector('.i-amphtml-page-attachment-host')
+      .shadowRoot.querySelector('a')
+      .click();
     // const animationEl = this.win.document.createElement('div');
     // // animationEl.classList.add('i-amphtml-story-page-attachment-expand');
     // const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
