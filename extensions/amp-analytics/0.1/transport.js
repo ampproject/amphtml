@@ -42,6 +42,9 @@ import {toggle} from '../../../src/style';
 /** @const {string} */
 const TAG_ = 'amp-analytics/transport';
 
+/** @const {string} */
+const AMP_SCRIPT_URI_SCHEME = 'amp-script:';
+
 /**
  * Transport defines the ways how the analytics pings are going to be sent.
  */
@@ -100,7 +103,7 @@ export class Transport {
       const request = inBatch
         ? serializer.generateBatchRequest(url, segments, withPayload)
         : serializer.generateRequest(url, segments[0], withPayload);
-      if (!request.url.startsWith('amp-script:')) {
+      if (!request.url.startsWith(AMP_SCRIPT_URI_SCHEME)) {
         assertHttpsUrl(request.url, 'amp-analytics request');
         checkCorsUrl(request.url);
       }
@@ -119,7 +122,7 @@ export class Transport {
     }
 
     if (this.options_['amp-script']) {
-      Transport.sendRequestUsingAmpScript(this.ampdoc_, {
+      Transport.forwardRequestToAmpScript(this.ampdoc_, {
         url,
         payload: getRequest(true).payload,
       });
@@ -325,8 +328,13 @@ export class Transport {
    * @param {!RequestDef} request
    * @return {boolean} True if this browser supports cross-domain XHR.
    */
-  static sendRequestUsingAmpScript(ampdoc, request) {
-    const target = request.url.slice('amp-script:'.length).split('.');
+  static forwardRequestToAmpScript(ampdoc, request) {
+    userAssert(
+      request.url.startsWith(AMP_SCRIPT_URI_SCHEME),
+      '[amp-analytics]: "amp-script" URL must begin with "amp-script:"'
+    );
+
+    const target = request.url.slice(AMP_SCRIPT_URI_SCHEME.length).split('.');
     userAssert(
       target.length === 2 && target[0].length > 0 && target[1].length > 0,
       '[amp-analytics]: "amp-script" target must be specified as "scriptId.functionIdentifier".'
@@ -342,7 +350,9 @@ export class Transport {
 
     ampScriptEl
       .getImpl()
-      .then((impl) => impl.callFunction(fnIdentifier, request.payload || ''));
+      .then((impl) =>
+        impl.callFunction(fnIdentifier, JSON.parse(request.payload))
+      );
   }
 }
 

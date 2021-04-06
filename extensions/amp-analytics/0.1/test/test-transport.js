@@ -28,7 +28,7 @@ import {loadPromise} from '../../../../src/event-helper';
 describes.realWin(
   'amp-analytics.transport',
   {
-    amp: false,
+    amp: true,
     allowExternalResources: true,
   },
   (env) => {
@@ -42,7 +42,7 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
-      ampdoc = env.ampdoc
+      ampdoc = env.ampdoc;
       doc = win.document;
       openXhrStub = env.sandbox.stub();
       sendXhrStub = env.sandbox.stub();
@@ -340,6 +340,7 @@ describes.realWin(
         'http://iframe.localhost:9876/test/fixtures/served/iframe.html';
 
       function sendRequestUsingIframe(win, url) {
+        const ampdoc = {win};
         new Transport(ampdoc).sendRequestUsingIframe(url, {});
       }
 
@@ -379,6 +380,46 @@ describes.realWin(
             sendRequestUsingIframe(fakeWin, 'https://example.test/123');
           }).to.throw(/Origin of iframe request/);
         });
+      });
+    });
+
+    describe('amp-script transport', () => {
+      it('should throw if the url does not begin with amp-script scheme', () => {
+        allowConsoleError(() => {
+          expect(() =>
+            Transport.forwardRequestToAmpScript(env.ampdoc, {
+              url: 'receiver.functionId',
+            })
+          ).throws(/URL must begin with/);
+        });
+      });
+
+      it('should throw if the amp-script cannot be found', () => {
+        allowConsoleError(() => {
+          expect(() =>
+            Transport.forwardRequestToAmpScript(env.ampdoc, {
+              url: 'amp-script:nonexistent.functionId',
+            })
+          ).throws(/could not find/);
+        });
+      });
+
+      it('should forward the payload to the specifed amp-script element', () => {
+        const callFunctionSpy = env.sandbox.spy();
+        const ampScript = doc.createElement('amp-script');
+        ampScript.id = 'receiver';
+        ampScript.getImpl = () => ({
+          then: (fn) => fn({callFunction: callFunctionSpy}),
+        });
+        doc.body.appendChild(ampScript);
+
+        const payload = '{}';
+        Transport.forwardRequestToAmpScript(env.ampdoc, {
+          url: 'amp-script:receiver.functionId',
+          payload,
+        });
+
+        expect(callFunctionSpy).calledWith('functionId', JSON.parse(payload));
       });
     });
 
