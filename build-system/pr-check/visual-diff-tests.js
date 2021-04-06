@@ -42,7 +42,6 @@ function prBuildWorkflow() {
     downloadNomoduleOutput();
     timedExecOrDie('amp visual-diff --nobuild');
   } else {
-    timedExecOrDie('amp visual-diff --empty');
     skipFollowupJobs(
       jobName,
       'this PR does not affect the runtime or visual diff tests'

@@ -175,13 +175,7 @@ jobs:
     executor:
       name: amphtml-large-executor
     steps:
-      # NOTE: deliberately not running the `maybe_gracefully_halt` step because
-      # visual diff tests need to at least run with --empty when skipped.
-      # Instead we must create an empty workspace to prevent `teardown_vm` from
-      # crashing.
-      - run:
-          name: 'Create Workspace'
-          command: mkdir -p /tmp/workspace
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
