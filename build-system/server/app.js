@@ -1692,8 +1692,8 @@ app.use(
     const {vendor} = req.params;
     const serveMode = SERVE_MODE;
 
-    const filePath = `https://cdn.ampproject.org/v0/analytics-vendors/${vendor}.json`;
-    if (await passthroughServeModeCdn(res, filePath)) {
+    const cdnUrl = `https://cdn.ampproject.org/v0/analytics-vendors/${vendor}.json`;
+    if (await passthroughServeModeCdn(res, cdnUrl)) {
       return;
     }
 
