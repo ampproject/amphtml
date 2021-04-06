@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {Key} from '../../../../build-system/tasks/e2e/functional-test-controller';
-
 const VIEWPORT = {
   HEIGHT: 768,
   WIDTH: 1024,
