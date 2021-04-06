@@ -97,7 +97,7 @@ async function signalPrDeployUpload(result) {
   const sha = ciBuildSha();
   const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
   const url = `${baseUrl}headshas/${sha}/${result}`;
-  await fetch(url, {method: 'post'});
+  await fetch(url, {method: 'POST'});
 }
 
 module.exports = {
