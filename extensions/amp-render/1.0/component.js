@@ -41,6 +41,8 @@ export function Render({
   src = '',
   getJson = DEFAULT_GET_JSON,
   render = DEFAULT_RENDER,
+  onLoad = () => {},
+  onError = () => {},
   ...rest
 }) {
   useResourcesNotify();
@@ -54,15 +56,20 @@ export function Render({
       return;
     }
     let cancelled = false;
-    getJson(src).then((data) => {
-      if (!cancelled) {
-        setData(data);
-      }
-    });
+    getJson(src)
+      .then((data) => {
+        if (!cancelled) {
+          setData(data);
+          onLoad();
+        }
+      })
+      .catch(() => {
+        onError();
+      });
     return () => {
       cancelled = true;
     };
-  }, [src, getJson]);
+  }, [src, getJson, onLoad, onError]);
 
   const rendered = useRenderer(render, data);
   const isHtml =
