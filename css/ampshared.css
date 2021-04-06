@@ -539,17 +539,17 @@ amp-accordion {
   display: block !important;
 }
 
-/* 
-This media query is used instead of @supports due to low compatibility.
-At the time of this change (4/6/2021) no version of Webkit support @supports queries.
+/** 
+ * This media query is used instead of @supports due to low compatibility.
+ * At the time of this change (4/6/2021) no version of Webkit support @supports queries.
 
-These provide low-specificity UI styles to prevent CLS for the header and content 
-segments of accordions.
-*/
+ * These provide low-specificity UI styles to prevent CLS for the header and content 
+ * segments of accordions. The same styles are later set for older browsers
+ * via the `i-amphtml-accordion-header` class in both 0.1 and the 1.0 version of accordion.
+ */
 @media (min-width: 1px) {
   :where(amp-accordion > section) > :first-child {
     margin: 0;
-    cursor: pointer;
     background-color: #efefef;
     padding-right: 20px;
     border: 1px solid #dfdfdf;
