@@ -38,7 +38,7 @@ amp-accordion > section > * {
   position: relative;
 }
 
-/*
+/**
  * This media query is used instead of @supports due to low compatibility.
  * At the time of this change (4/6/2021) no version of Webkit support @supports queries.
  *
