@@ -1708,6 +1708,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         isStickyAd: () => false,
         maybeInitStickyAd: () => {},
       };
+      await a4a.buildCallback();
       await a4a.layoutCallback();
       expect(
         renderNonAmpCreativeSpy.calledOnce,
