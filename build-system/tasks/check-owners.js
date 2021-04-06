@@ -76,7 +76,7 @@ async function checkFile(file) {
     if (!response.ok) {
       log(red('ERROR:'), 'Could not reach the owners syntax check API');
       throw new Error(
-        `${response.status} ${response.statusText}: ` + response.body
+        `${response.status} ${response.statusText}: ${await response.text()}`
       );
     }
 
