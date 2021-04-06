@@ -539,6 +539,19 @@ amp-accordion {
   display: block !important;
 }
 
+/* heading */
+ .i-amphtml-accordion-header {
+  margin: 0;
+  cursor: pointer;
+  background-color: #efefef;
+  padding-right: 20px;
+  border: solid 1px #dfdfdf;
+}
+/* heading/content */
+.i-amphtml-accordion-content {
+  margin: 0;
+}
+
 /* Make sections non-floatable */
 amp-accordion > section {
   float: none !important;
