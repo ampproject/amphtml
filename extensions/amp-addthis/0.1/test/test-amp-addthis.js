@@ -85,7 +85,7 @@ describes.realWin(
       }
       doc.body.appendChild(at);
       return at
-        .build()
+        .buildInternal()
         .then(() => {
           if (opt_beforeLayoutCallback) {
             opt_beforeLayoutCallback(at);
@@ -196,14 +196,13 @@ describes.realWin(
       ).to.not.equal(void 0);
     });
 
-    it('removes the iframe after unlayoutCallback', () => {
-      return getAT({pubId, widgetId}).then(({at}) => {
-        const obj = at.implementation_;
-        testIframe(at.querySelector('iframe'));
-        obj.unlayoutCallback();
-        expect(at.querySelector('iframe')).to.equal(null);
-        expect(obj.iframe_).to.equal(null);
-      });
+    it('removes the iframe after unlayoutCallback', async () => {
+      const {at} = await getAT({pubId, widgetId});
+      const obj = await at.getImpl();
+      testIframe(at.querySelector('iframe'));
+      obj.unlayoutCallback();
+      expect(at.querySelector('iframe')).to.equal(null);
+      expect(obj.iframe_).to.equal(null);
     });
 
     it('registers the frame with the configManager on layout', () => {
@@ -212,13 +211,12 @@ describes.realWin(
       });
     });
 
-    it('unregisters the frame with the configManager on unlayoutCallback', () => {
-      return getAT({pubId, widgetId}).then(({at}) => {
-        const obj = at.implementation_;
-        obj.unlayoutCallback();
+    it('unregisters the frame with the configManager on unlayoutCallback', async () => {
+      const {at} = await getAT({pubId, widgetId});
+      const obj = await at.getImpl();
+      obj.unlayoutCallback();
 
-        expect(unregisterStub.calledOnce).to.equal(true);
-      });
+      expect(unregisterStub.calledOnce).to.equal(true);
     });
 
     it('accepts and stores shareConfig data via custom attributes', () => {
@@ -239,13 +237,12 @@ describes.realWin(
       });
     });
 
-    it("defaults to sharing ownerDocument's title and url", () => {
-      return getAT({pubId, widgetId}).then(({at}) => {
-        const obj = at.implementation_;
-        const {shareConfig_} = obj;
-        expect(shareConfig_.title).to.equal(doc.title);
-        expect(shareConfig_.url).to.equal(doc.location.href);
-      });
+    it("defaults to sharing ownerDocument's title and url", async () => {
+      const {at} = await getAT({pubId, widgetId});
+      const obj = await at.getImpl();
+      const {shareConfig_} = obj;
+      expect(shareConfig_.title).to.equal(doc.title);
+      expect(shareConfig_.url).to.equal(doc.location.href);
     });
 
     it('registers a view at most once per "session"', (done) => {

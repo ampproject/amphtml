@@ -36,6 +36,12 @@
   -moz-box-shadow: var(--i-amphtml-interactive-chip-shadow), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
   border-radius: .5em !important;
   background-color: var(--i-amphtml-interactive-option-background-color);
+  border: none !important;
+  font: inherit !important;
+  color: inherit !important;
+  width: 100% !important;
+  outline: none !important;
+  text-align: start !important;
 }
 
 .i-amphtml-story-interactive-option:not(:first-child) {
@@ -60,6 +66,12 @@
   top: 0 !important;
   transform: translateX(-100%) !important;
   transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
+  .i-amphtml-story-interactive-option:focus::before {
+    opacity: 1 !important;
+    background-color: var(--i-amphtml-interactive-theme-shading) !important;
 }
 
 .i-amphtml-story-interactive-poll-container[dir="rtl"] .i-amphtml-story-interactive-option::after {
@@ -139,7 +151,7 @@
 }
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
-  .i-amphtml-story-interactive-option:before {
+  .i-amphtml-story-interactive-option::before {
   background-color: var(--i-amphtml-interactive-theme-shading-flash) !important;
   content: '' !important;
   position: absolute !important;
@@ -152,17 +164,17 @@
 }
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
-  .i-amphtml-story-interactive-option:nth-of-type(2):before {
+  .i-amphtml-story-interactive-option:nth-of-type(2)::before {
   animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el2) !important;
 } 
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
-  .i-amphtml-story-interactive-option:nth-of-type(3):before {
+  .i-amphtml-story-interactive-option:nth-of-type(3)::before {
   animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el3) !important;
 } 
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
-  .i-amphtml-story-interactive-option:nth-of-type(4):before {
+  .i-amphtml-story-interactive-option:nth-of-type(4)::before {
   animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el4) !important;
 } 
 

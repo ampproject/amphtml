@@ -46,6 +46,8 @@ PASS
 |        publisher-logo-src="https://example.com/logo/1x1.png"
 |        poster-portrait-src="https://example.com/my-story/poster/3x4.jpg">
 |        <amp-sidebar id="sidebar1" layout="nodisplay">
+>>       ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-sidebar.html:47:6 The tag 'amp-sidebar' is deprecated - use 'anchor tags or amp-story-player controls' instead. (see https://github.com/ampproject/amphtml/issues/33293)
 |          <ul>
 |            <li>Nav item 1</li>
 |            <li><a href="#idTwo" on="tap:idTwo.scrollTo">Nav item 2</a></li>

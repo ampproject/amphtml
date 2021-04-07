@@ -46,7 +46,7 @@ During transpiling, babel will replace the experiment flag with a boolean value 
 The experiment flag values are default to `false`. You can use the `--define_experiment_constant` flag to set the value to `true`.
 
 ```
-gulp build --define_experiment_const MY_EXPERIMENT`
+amp build --define_experiment_const MY_EXPERIMENT`
 ```
 
 ### Start an Experiment
@@ -68,6 +68,19 @@ Example
   "experimentC": {}
 }
 ```
+
+In the same pull request you also need to add an experiment constant in the `experiments-const.json` [file](https://github.com/ampproject/amphtml/blob/master/build-system/global-configs/experiments-const.json).
+
+Example
+
+```
+{
+  "MY_EXPERIMENT": false,
+  ...
+}
+```
+
+You start with the `false` value at first. Note that the `experiment-config.json` constants override the values set in the `experiment-const.json` file.
 
 #### More on Experiment Config
 

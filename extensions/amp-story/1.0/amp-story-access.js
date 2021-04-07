@@ -327,7 +327,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * @private
    */
   getActionObject_(namespace = undefined, type = undefined) {
-    const method = ['login', namespace, type].filter((s) => !!s).join('-');
+    const method = ['login', namespace, type].filter(Boolean).join('-');
     return {tagOrTarget: 'SCRIPT', method};
   }
 }

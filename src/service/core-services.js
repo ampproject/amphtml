@@ -15,12 +15,10 @@
  */
 
 import {
-  FIE_RESOURCES_EXP,
-  divertFieResources,
-} from '../experiments/fie-resources-exp';
-import {adoptServiceForEmbedDoc} from '../service';
+  adoptServiceFactoryForEmbedDoc,
+  adoptServiceForEmbedDoc,
+} from '../service';
 import {devAssert} from '../log';
-import {getExperimentBranch} from '../experiments';
 import {installActionServiceForDoc} from './action-impl';
 import {installBatchedXhrService} from './batched-xhr-impl';
 import {installCidService} from './cid-impl';
@@ -43,7 +41,7 @@ import {installPreconnectService} from '../preconnect';
 import {installResourcesServiceForDoc} from './resources-impl';
 import {installStandardActionsForDoc} from './standard-actions-impl';
 import {installStorageServiceForDoc} from './storage-impl';
-import {installTemplatesService} from './template-impl';
+import {installTemplatesServiceForDoc} from './template-impl';
 import {installTimerService} from './timer-impl';
 import {installUrlForDoc} from './url-impl';
 import {installUrlReplacementsServiceForDoc} from './url-replacements-impl';
@@ -72,7 +70,6 @@ export function installRuntimeServices(global) {
   installCryptoService(global);
   installBatchedXhrService(global);
   installPlatformService(global);
-  installTemplatesService(global);
   installTimerService(global);
   installVsyncService(global);
   installXhrService(global);
@@ -113,6 +110,9 @@ function installAmpdocServicesInternal(ampdoc, isEmbedded) {
   // 2. Consider to install same services to amp-inabox.js
   installUrlForDoc(ampdoc);
   isEmbedded
+    ? adoptServiceFactoryForEmbedDoc(ampdoc, 'templates')
+    : installTemplatesServiceForDoc(ampdoc);
+  isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'documentInfo')
     : installDocumentInfoServiceForDoc(ampdoc);
   // those services are installed in amp-inabox.js
@@ -130,31 +130,11 @@ function installAmpdocServicesInternal(ampdoc, isEmbedded) {
     ? adoptServiceForEmbedDoc(ampdoc, 'history')
     : installHistoryServiceForDoc(ampdoc);
 
-  // fie-resources experiment.
-  if (ampdoc.isSingleDoc()) {
-    divertFieResources(ampdoc.win);
-  }
-  const fieResourcesOn =
-    ampdoc.getParent() &&
-    getExperimentBranch(ampdoc.getParent().win, FIE_RESOURCES_EXP.id) ===
-      FIE_RESOURCES_EXP.experiment;
-  if (fieResourcesOn) {
-    isEmbedded
-      ? installInaboxResourcesServiceForDoc(ampdoc)
-      : installResourcesServiceForDoc(ampdoc);
-    installOwnersServiceForDoc(ampdoc);
-    installMutatorServiceForDoc(ampdoc);
-  } else {
-    isEmbedded
-      ? adoptServiceForEmbedDoc(ampdoc, 'resources')
-      : installResourcesServiceForDoc(ampdoc);
-    isEmbedded
-      ? adoptServiceForEmbedDoc(ampdoc, 'owners')
-      : installOwnersServiceForDoc(ampdoc);
-    isEmbedded
-      ? adoptServiceForEmbedDoc(ampdoc, 'mutator')
-      : installMutatorServiceForDoc(ampdoc);
-  }
+  isEmbedded
+    ? installInaboxResourcesServiceForDoc(ampdoc)
+    : installResourcesServiceForDoc(ampdoc);
+  installOwnersServiceForDoc(ampdoc);
+  installMutatorServiceForDoc(ampdoc);
 
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'url-replace')

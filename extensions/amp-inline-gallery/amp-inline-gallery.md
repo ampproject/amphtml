@@ -30,7 +30,7 @@ limitations under the License.
 
 The `<amp-inline-gallery>` component uses an `<amp-base-carousel>` to display slides. The page must have the required scripts for both components in the document head. Typical usage might look like:
 
-[example preview="inline" playground="true" imports="amp-inline-gallery:1.0,amp-base-carousel:1.0]
+[example preview="inline" playground="true" imports="amp-inline-gallery:1.0,amp-base-carousel:1.0"]
 
 ```html
 <amp-inline-gallery layout="container">
@@ -71,14 +71,140 @@ The `<amp-inline-gallery>` component uses an `<amp-base-carousel>` to display sl
 
 The above example shows slides using an aspect ratio of 3:2, with 10% of a slide peeking on either side. An aspect ratio of 3.6:2 is used on the `amp-base-carousel` to show 1.2 slides at a time.
 
-### Migrating from 0.1
+### Standalone use outside valid AMP documents
 
-Unlike `0.1`, the experimental `1.0` version of `amp-inline-gallery` includes the following changes:
+Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
 
--   `amp-inline-gallery-pagination` with `inset` attribute positions the element with an overwritable `bottom: 0`.
--   `amp-inline-gallery-thumbnails` takes `data-thumbnail-src` from slide elements (children of the `amp-base-carousel`) instead of `srcset`.
--   `amp-inline-gallery-thumbnails` takes `aspect-ratio` as expressed by `width / height` instead of two separate attributes, `aspect-ratio-width` and `aspect-ratio-height`.
--   `amp-inline-gallery-thumbnails` configuration for `loop` defaults to `"false"`.
+#### Example
+
+The example below demonstrates `amp-inline-gallery` component in standalone use.
+
+[example preview="top-frame" playground="false"]
+
+```html
+<head>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-inline-gallery-1.0.css">
+  <script async custom-element="amp-inline-gallery" src="https://cdn.ampproject.org/v0/amp-inline-gallery-1.0.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-base-carousel-1.0.css">
+  <script async custom-element="amp-inline-gallery" src="https://cdn.ampproject.org/v0/amp-base-carousel-1.0.js"></script>
+  <style>
+    amp-base-carousel {
+      aspect-ratio: 3/1;
+    }
+    amp-base-carousel > div {
+      aspect-ratio: 1/1;
+    }
+    amp-inline-gallery-pagination {
+      height: 20px;
+    }
+    .red-gradient {
+      background: brown;
+      background: linear-gradient(90deg, brown 50%, lightsalmon 90%, wheat 100%);
+    }
+    .blue-gradient {
+      background: steelblue;
+      background: linear-gradient(90deg, steelblue 50%, plum 90%, lavender 100%);
+    }
+    .green-gradient {
+      background: seagreen;
+      background: linear-gradient(90deg, seagreen 50%, mediumturquoise 90%, turquoise 100%);
+    }
+    .pink-gradient {
+      background: pink;
+      background: linear-gradient(90deg, pink 50%, lightsalmon 90%, wheat 100%);
+    }
+    .yellow-gradient {
+      background: gold;
+      background: linear-gradient(90deg, gold 50%, goldenrod 90%, darkgoldenrod 100%);
+    }
+    .orange-gradient {
+      background: peru;
+      background: linear-gradient(90deg, peru 50%, chocolate 90%, saddlebrown 100%);
+    }
+    .seafoam-gradient {
+      background: darkseagreen;
+      background: linear-gradient(90deg, darkseagreen 50%, lightseagreen 90%, MediumAquaMarine 100%);
+    }
+    .purple-gradient {
+      background: rebeccapurple;
+      background: linear-gradient(90deg, rebeccapurple 50%, mediumpurple 90%, mediumslateblue 100%);
+    }
+    .cyan-gradient {
+      background: darkcyan;
+      background: linear-gradient(90deg, darkcyan 50%, lightcyan 90%, white 100%);
+    }
+  </style>
+</head>
+<amp-inline-gallery>
+  <amp-base-carousel id="my-carousel">
+    <div class="red-gradient"></div>
+    <div class="blue-gradient"></div>
+    <div class="green-gradient"></div>
+    <div class="pink-gradient"></div>
+    <div class="yellow-gradient"></div>
+    <div class="orange-gradient"></div>
+    <div class="seafoam-gradient"></div>
+    <div class="purple-gradient"></div>
+    <div class="cyan-gradient"></div>
+  </amp-base-carousel>
+  <amp-inline-gallery-pagination>
+</amp-inline-gallery>
+<div class="buttons" style="margin-top: 8px;">
+  <button id='prev-button'>Go to previous page of slides</button>
+  <button id='next-button'>Go to next page of slides</button>
+  <button id='go-to-button'>Go to slide with green gradient</button>
+</div>
+<script>
+  (async () => {
+    const carousel = document.querySelector('#my-carousel');
+    await customElements.whenDefined('amp-base-carousel');
+    const api = await carousel.getApi();
+    // programatically advance to next slide
+    api.next();
+    // set up button actions
+    document.querySelector('#prev-button').onclick = () => api.prev();
+    document.querySelector('#next-button').onclick = () => api.next();
+    document.querySelector('#go-to-button').onclick = () => api.goToSlide(2);
+  })();
+</script>
+```
+
+[/example]
+
+#### Interactivity and API usage
+
+Bento enabled components in standalone use are highly interactive through their API. In Bento standalone use, the element's API replaces AMP Actions and events and [`amp-bind`](https://amp.dev/documentation/components/amp-bind/?format=websites).
+
+The `amp-inline-gallery` component is used in combination with `amp-base-carousel` and should access the [`amp-base-carousel` API](https://amp.dev/documentation/components/amp-base-carousel-v1.0/?format=websites) accordingly.
+
+#### Layout and style
+
+Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
+
+```html
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-inline-gallery-1.0.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-base-carousel-1.0.css">
+```
+
+Fully valid AMP pages use the AMP layout system to infer sizing of elements to create a page structure before downloading any remote resources. However, Bento use imports components into less controlled environments and AMP's layout system is inaccessible.
+
+**Container type**
+
+The `amp-inline-gallery-pagination` and `amp-inline-gallery-thumbnails` components have defined layout size types. To ensure the components render correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties):
+
+```css
+amp-inline-gallery-pagination {
+  height: 20px;
+}
+amp-inline-gallery-thumbnails {
+  aspect-ratio: 4/1
+}
+```
+
+[tip type="note"]
+Because this component composes with `amp-base-carousel`, be sure to also follow [`amp-base-carousel` styling recommendations](https://amp.dev/documentation/components/amp-base-carousel-v1.0/?format=websites#usage).
+[/tip]
 
 ### Include pagination indicators
 
@@ -86,7 +212,7 @@ The `<amp-inline-gallery-pagination>` component determines how a pagination idic
 
 The pagination indicator renders as dots when there are eight or fewer slides in the `amp-base-carousel`. For nine or more slides, the pagination indicator renders the current slide number and total number of slides, aligned to the right.
 
-The pagination indicator location defaults to underneath the carousel. Adding the inset attribute to the `<amp-inline-gallery-pagination>` tag will overlay the pagination indicator on the carousel. To use different styles for different screen sizes, use the media attribute:
+The pagination indicator location defaults to underneath the carousel. Adding the inset attribute to the `<amp-inline-gallery-pagination>` tag will overlay the pagination indicator on the carousel. To use different styles for different screen sizes, use the [media attribute](./../../spec/amp-html-responsive-attributes.md):
 
 ```html
 <amp-inline-gallery layout="container">
@@ -258,6 +384,11 @@ The example below demonstrates a gallery with thumbnails visible at larger resol
 
 #### `amp-inline-gallery-thumbnails` attributes
 
+##### Media Queries
+
+The attributes for `<amp-inline-gallery-thumbnails>` can be configured to use different
+options based on a [media query](./../../spec/amp-html-responsive-attributes.md).
+
 ##### `aspect-ratio` (optional)
 
 Specifies the aspect ratio expressed as `width / height`. The aspect radio defaults to match the slides in `<amp-base-carousel>`.
@@ -275,3 +406,12 @@ The `<amp-inline-gallery-thumbnails>` element includes <a href="https://amp.dev/
 ### common attributes
 
 This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.
+
+## Version notes
+
+Unlike `0.1`, the experimental `1.0` version of `amp-inline-gallery` includes the following changes:
+
+-   `amp-inline-gallery-pagination` with `inset` attribute positions the element with an overwritable `bottom: 0`.
+-   `amp-inline-gallery-thumbnails` takes `data-thumbnail-src` from slide elements (children of the `amp-base-carousel`) instead of `srcset`.
+-   `amp-inline-gallery-thumbnails` takes `aspect-ratio` as expressed by `width / height` instead of two separate attributes, `aspect-ratio-width` and `aspect-ratio-height`.
+-   `amp-inline-gallery-thumbnails` configuration for `loop` defaults to `"false"`.

@@ -21,10 +21,10 @@ const pageWidth = 800;
 const pageHeight = 600;
 
 describes.endtoend(
-  'AMP carousel autoadvance',
+  'amp-base-carousel - autoadvance',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/1.0/autoadvance.amp.html',
+    version: '1.0',
+    fixture: 'amp-base-carousel/1.0/autoadvance.amp.html',
     experiments: ['bento-carousel'],
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single', 'viewer-demo'],
@@ -43,7 +43,8 @@ describes.endtoend(
       await controller.switchToShadowRoot(carousel);
     });
 
-    it('should move forwards', async () => {
+    // TODO(wg-bento, #24195): getSlides does not always find elements in time.
+    it.skip('should move forwards', async () => {
       const slides = await getSlides(styles, controller);
 
       await expect(rect(slides[1])).to.include({x: 0});
@@ -51,7 +52,8 @@ describes.endtoend(
       await expect(rect(slides[0])).to.include({x: 0});
     });
 
-    it('should go to start and complete two full iterations only', async () => {
+    // TODO(wg-bento, #24195): getSlides does not always find elements in time.
+    it.skip('should go to start and complete two full iterations only', async () => {
       const slides = await getSlides(styles, controller);
 
       // first iteration

@@ -106,6 +106,7 @@ import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
 import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
+import {isPageAttachmentUiV2ExperimentOn} from './amp-story-open-page-attachment';
 import {parseQueryString} from '../../../src/url';
 import {
   removeAttributeInMutate,
@@ -164,11 +165,11 @@ const Attributes = {
 };
 
 /**
- * The duration of time (in milliseconds) to wait for a page to be loaded,
- * before the story becomes visible.
+ * The duration of time (in milliseconds) to wait for the Story initial content
+ * to be loaded before marking the story as loaded.
  * @const {number}
  */
-const PAGE_LOAD_TIMEOUT_MS = 5000;
+const INITIAL_CONTENT_LOAD_TIMEOUT_MS = 8000;
 
 /**
  * Single page ads may be injected later. If the original story contains 0 media
@@ -233,6 +234,11 @@ const SIDEBAR_OBSERVER_OPTIONS = {
  * @implements {./media-pool.MediaPoolRoot}
  */
 export class AmpStory extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -767,6 +773,15 @@ export class AmpStory extends AMP.BaseElement {
       this.onBookendStateUpdate_(isActive);
     });
 
+    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+      this.storeService_.subscribe(
+        StateProperty.PAGE_ATTACHMENT_STATE,
+        (isActive) => {
+          this.onAttachmentStateUpdate_(isActive);
+        }
+      );
+    }
+
     this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
       this.onPausedStateUpdate_(isPaused);
     });
@@ -827,6 +842,15 @@ export class AmpStory extends AMP.BaseElement {
       );
     });
 
+    // Listen for class mutations on the <body> element.
+    const bodyElObserver = new this.win.MutationObserver((mutations) =>
+      this.onBodyElMutation_(mutations)
+    );
+    bodyElObserver.observe(this.win.document.body, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
     this.installGestureRecognizers_();
 
@@ -834,10 +858,24 @@ export class AmpStory extends AMP.BaseElement {
     // there is a way to navigate to pages that does not involve using private
     // amp-story methods.
     this.viewer_.onMessage('selectPage', (data) => this.onSelectPage_(data));
+    this.viewer_.onMessage('rewind', () => this.onRewind_());
 
     if (this.viewerMessagingHandler_) {
       this.viewerMessagingHandler_.startListening();
     }
+  }
+
+  /** @private */
+  onBodyElMutation_(mutations) {
+    mutations.forEach((mutation) => {
+      const bodyEl = dev().assertElement(mutation.target);
+
+      // Updates presence of the `amp-mode-keyboard-active` class on the store.
+      this.storeService_.dispatch(
+        Action.TOGGLE_KEYBOARD_ACTIVE_STATE,
+        bodyEl.classList.contains('amp-mode-keyboard-active')
+      );
+    });
   }
 
   /** @private */
@@ -999,7 +1037,11 @@ export class AmpStory extends AMP.BaseElement {
           });
         }
       })
-      .then(() => this.switchTo_(initialPageId, NavigationDirection.NEXT))
+      .then(() =>
+        // We need to call this.getInitialPageId_() again because the initial
+        // page could've changed between the start of layoutStory_ and here.
+        this.switchTo_(this.getInitialPageId_(), NavigationDirection.NEXT)
+      )
       .then(() => {
         const shouldReOpenAttachmentForPageId = getHistoryState(
           this.win,
@@ -1024,7 +1066,9 @@ export class AmpStory extends AMP.BaseElement {
     // Do not block the layout callback on the completion of these promises, as
     // that prevents descendents from being laid out (and therefore loaded).
     storyLayoutPromise
-      .then(() => this.whenPagesLoaded_(PAGE_LOAD_TIMEOUT_MS))
+      .then(() =>
+        this.whenInitialContentLoaded_(INITIAL_CONTENT_LOAD_TIMEOUT_MS)
+      )
       .then(() => {
         this.markStoryAsLoaded_();
         this.initializeLiveStory_();
@@ -1040,7 +1084,7 @@ export class AmpStory extends AMP.BaseElement {
     );
     if (!this.getAmpDoc().hasBeenVisible()) {
       return whenUpgradedToCustomElement(initialPageEl).then(() => {
-        return initialPageEl.whenBuilt();
+        return initialPageEl.build();
       });
     }
 
@@ -1119,11 +1163,11 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * @param {number} timeoutMs The maximum amount of time to wait, in
    *     milliseconds.
-   * @return {!Promise} A promise that is resolved when the page is loaded or
-   *     the timeout has been exceeded, whichever happens first.
+   * @return {!Promise} A promise that is resolved when the initial content is
+   *     loaded or the timeout has been exceeded, whichever happens first.
    * @private
    */
-  whenPagesLoaded_(timeoutMs = 0) {
+  whenInitialContentLoaded_(timeoutMs = 0) {
     const pagesToWaitFor =
       this.storeService_.get(StateProperty.UI_STATE) === UIType.DESKTOP_PANELS
         ? [this.pages_[0], this.pages_[1]]
@@ -1131,7 +1175,7 @@ export class AmpStory extends AMP.BaseElement {
 
     const storyLoadPromise = Promise.all(
       pagesToWaitFor
-        .filter((page) => !!page)
+        .filter(Boolean)
         .map((page) =>
           page.element.signals().whenSignal(CommonSignals.LOAD_END)
         )
@@ -1274,11 +1318,6 @@ export class AmpStory extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.CONTAINER;
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @private */
@@ -2139,6 +2178,17 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
+   * @param {boolean} isActive
+   * @private
+   */
+  onAttachmentStateUpdate_(isActive) {
+    this.element.classList.toggle(
+      'i-amphtml-story-attachment-active',
+      isActive
+    );
+  }
+
+  /**
    * Toggles content when bookend is opened/closed.
    * @param {boolean} isActive
    * @private
@@ -2463,8 +2513,15 @@ export class AmpStory extends AMP.BaseElement {
    *     specified element, if any.
    */
   getPageContainingElement_(element) {
+    let startingElement = element;
+    // If the element is inside an iframe (most likely an ad), start from the
+    // containing iframe element.
+    if (element.ownerDocument !== this.win.document) {
+      startingElement = element.ownerDocument.defaultView.frameElement;
+    }
+
     const pageIndex = findIndex(this.pages_, (page) => {
-      const pageEl = closest(element, (el) => {
+      const pageEl = closest(startingElement, (el) => {
         return el === page.element;
       });
 
@@ -2620,6 +2677,16 @@ export class AmpStory extends AMP.BaseElement {
       Action.TOGGLE_STORY_HAS_PLAYBACK_UI,
       containsElementsWithPlayback || storyHasBackgroundAudio
     );
+  }
+
+  /**
+   * Handles the rewind viewer event.
+   * @private
+   */
+  onRewind_() {
+    this.signals()
+      .whenSignal(CommonSignals.LOAD_END)
+      .then(() => this.replay_());
   }
 
   /**

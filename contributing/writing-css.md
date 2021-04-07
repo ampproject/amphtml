@@ -1,8 +1,15 @@
 # Writing CSS For AMP Runtime?
 
+<!--
+  (Do not remove or edit this comment.)
+
+  This table-of-contents is automatically generated. To generate it, run:
+    amp markdown-toc --fix
+-->
+
 -   [Who should read this doc?](#who-should-read-this-doc)
 -   [What is Specificity?](#what-is-specificity)
-    -   [Example CSS selectors](#example-css-selectors)
+    -   [Example: CSS selectors](#example-css-selectors)
     -   [How to calculate Specificity](#how-to-calculate-specificity)
 -   [Writing CSS in AMP Runtime or Extensions](#writing-css-in-amp-runtime-or-extensions)
     -   [Creating a new Selector](#creating-a-new-selector)
@@ -11,7 +18,7 @@
     -   [Rule of thumb](#rule-of-thumb)
 -   [Case Studies](#case-studies)
     -   [AMP Selector CSS has high specificity](#amp-selector-css-has-high-specificity)
-    -   [AMP Accordion CSS Changes broke specificity](#amp-accordion-css-changes-broke-specificity)
+    -   [AMP Accordion CSS changes broke specificity](#amp-accordion-css-changes-broke-specificity)
 -   [Reading material](#reading-material)
 
 ## Who should read this doc?
@@ -49,7 +56,7 @@ of any of these and many more. For a comprehensive list of all CSS selectors, se
 In general, the order of the CSS selectors do not affect which rules get applied to your CSS,
 unless the selectors have the same specificity and apply to at least one element in common.
 Well-written CSS will work perfectly fine even when the selectors are re-ordered (for example, when reordering imports in a css file). In the real world, it's hard to achieve this, especially
-when we import CSS via gulp or third-party CSS (which can change at any time).
+when we import third-party CSS (which can change at any time).
 
 ### How to calculate Specificity
 

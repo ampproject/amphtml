@@ -17,10 +17,10 @@
 import {getSlides, getSpacers} from './helpers';
 
 describes.endtoend(
-  'amp-base-carousel test snap property',
+  'amp-base-carousel - snap property',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/snap-property.amp.html',
+    version: '0.1',
+    fixture: 'amp-base-carousel/snap-property.amp.html',
     environments: ['single'],
   },
   async function (env) {

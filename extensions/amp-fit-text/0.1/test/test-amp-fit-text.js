@@ -48,7 +48,7 @@ describes.realWin(
       ft.textContent = text;
       doc.body.appendChild(ft);
       return ft
-        .build()
+        .buildInternal()
         .then(() => ft.layoutCallback())
         .then(() => ft);
     }
@@ -65,10 +65,11 @@ describes.realWin(
 
     it('supports update of textContent', async () => {
       const ft = await getFitText('Lorem ipsum');
+      const impl = await ft.getImpl();
       const newText = 'updated';
       ft.textContent = newText;
       expect(ft.textContent).to.equal(newText);
-      await ft.implementation_.mutateElement(() => {});
+      await impl.mutateElement(() => {});
       const content = ft.querySelector('.i-amphtml-fit-text-content');
       expect(content.textContent).to.equal(newText);
     });
@@ -77,10 +78,8 @@ describes.realWin(
       const ft = await getFitText(
         'Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.'
       );
-      const updateFontSizeSpy = env.sandbox.spy(
-        ft.implementation_,
-        'updateFontSize_'
-      );
+      const impl = await ft.getImpl();
+      const updateFontSizeSpy = env.sandbox.spy(impl, 'updateFontSize_');
 
       // Wait for the resizeObserver recognize the changes
       // 90ms chosen so that the wait is less than the throttle value for the ResizeObserver.

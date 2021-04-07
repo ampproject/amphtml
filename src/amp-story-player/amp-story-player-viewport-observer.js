@@ -28,9 +28,8 @@ export class AmpStoryPlayerViewportObserver {
    * @param {!Window} win
    * @param {!Element} element
    * @param {function} viewportCb
-   * @param {number} distance Minimum of viewports away for triggering viewportCb
    */
-  constructor(win, element, viewportCb, distance = 0) {
+  constructor(win, element, viewportCb) {
     /** @private {!Window} */
     this.win_ = win;
 
@@ -39,9 +38,6 @@ export class AmpStoryPlayerViewportObserver {
 
     /** @private {function} */
     this.cb_ = viewportCb;
-
-    /** @private {number} */
-    this.viewportDistance_ = distance;
 
     /** @private {?function} */
     this.scrollHandler_ = null;
@@ -74,16 +70,14 @@ export class AmpStoryPlayerViewportObserver {
       });
     };
 
-    const observer = new this.win_.IntersectionObserver(inObCallback, {
-      rootMargin: `${this.viewportDistance_ * 100}%`,
-    });
+    const observer = new this.win_.IntersectionObserver(inObCallback);
 
     observer.observe(this.element_);
   }
 
   /**
    * Fallback for when IntersectionObserver is not supported. Calls
-   * layoutCallback on the element when it is close to the viewport.
+   * layoutPlayer on the element when it is close to the viewport.
    * @private
    */
   createInObFallback_() {
@@ -106,9 +100,8 @@ export class AmpStoryPlayerViewportObserver {
   checkIfVisibleFallback_() {
     const elTop = this.element_./*OK*/ getBoundingClientRect().top;
     const winInnerHeight = this.win_./*OK*/ innerHeight;
-    const multiplier = this.viewportDistance_ > 0 ? this.viewportDistance_ : 1;
 
-    if (winInnerHeight * multiplier > elTop) {
+    if (winInnerHeight > elTop) {
       this.cb_();
       this.win_.removeEventListener('scroll', this.scrollHandler_);
     }

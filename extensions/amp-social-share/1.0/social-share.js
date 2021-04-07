@@ -24,6 +24,7 @@ import {dict} from '../../../src/utils/object';
 import {getSocialConfig} from './social-share-config';
 import {openWindowDialog} from '../../../src/dom';
 import {useResourcesNotify} from '../../../src/preact/utils';
+import {useStyles} from './social-share.jss';
 
 const NAME = 'SocialShare';
 const DEFAULT_WIDTH = 60;
@@ -50,6 +51,7 @@ export function SocialShare({
   ...rest
 }) {
   useResourcesNotify();
+  const classes = useStyles();
   const checkPropsReturnValue = checkProps(
     type,
     endpoint,
@@ -83,6 +85,8 @@ export function SocialShare({
         height: checkedHeight,
         ...style,
       }}
+      part="button"
+      wrapperClassName={classes.button}
     >
       {processChildren(
         /** @type {string} */ (type),

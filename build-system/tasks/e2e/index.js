@@ -23,21 +23,21 @@ const dotsReporter = require('./mocha-dots-reporter');
 const fs = require('fs');
 const glob = require('glob');
 const http = require('http');
-const log = require('fancy-log');
 const Mocha = require('mocha');
 const path = require('path');
 const {
-  buildRuntime,
-  getFilesFromArgv,
-  installPackages,
-} = require('../../common/utils');
-const {cyan} = require('ansi-colors');
+  createCtrlcHandler,
+  exitCtrlcHandler,
+} = require('../../common/ctrlcHandler');
+const {buildRuntime, getFilesFromArgv} = require('../../common/utils');
+const {cyan} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
 const {isCiBuild} = require('../../common/ci');
+const {log} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
 const {reportTestStarted} = require('../report-test-status');
-const {watch} = require('gulp');
+const {watch} = require('chokidar');
 
 const SLOW_TEST_THRESHOLD_MS = 2500;
 const TEST_RETRIES = isCiBuild() ? 2 : 0;
@@ -51,9 +51,6 @@ const COV_OUTPUT_HTML = path.resolve(COV_OUTPUT_DIR, 'lcov-report/index.html');
  * @return {!Promise}
  */
 async function setUpTesting_() {
-  // install e2e-specific modules
-  installPackages(__dirname);
-
   require('@babel/register')({caller: {name: 'test'}});
   const {describes} = require('./helper');
   describes.configure({
@@ -165,7 +162,7 @@ async function runTests_() {
 
   await reportTestStarted();
 
-  // return promise to gulp that resolves when there's an error.
+  // return promise to amp that resolves when there's an error.
   return new Promise((resolve) => {
     mocha.run(async (failures) => {
       if (argv.coverage) {
@@ -194,17 +191,18 @@ async function runWatch_() {
     mocha.run();
   });
 
-  // return non-resolving promise to gulp.
+  // return non-resolving promise to amp.
   return new Promise(() => {});
 }
 
 /**
  * Entry-point to run e2e tests.
- * @return {!Promise}
  */
 async function e2e() {
+  const handlerProcess = createCtrlcHandler('e2e');
   await setUpTesting_();
-  return argv.watch ? runWatch_() : runTests_();
+  argv.watch ? await runWatch_() : await runTests_();
+  exitCtrlcHandler(handlerProcess);
 }
 
 module.exports = {
@@ -214,23 +212,25 @@ module.exports = {
 e2e.description = 'Runs e2e tests';
 e2e.flags = {
   'browsers':
-    '  Run only the specified browser tests. Options are ' +
+    'Run only the specified browser tests. Options are ' +
     '`chrome`, `firefox`, `safari`.',
   'config':
-    '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
-  'core_runtime_only': '  Builds only the core runtime.',
-  'nobuild':
-    '  Skips building the runtime via `gulp (build|dist) --fortesting`',
-  'extensions': '  Builds only the listed extensions.',
-  'compiled': '  Runs tests against minified JS',
-  'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
-  'testnames': '  Lists the name of each test being run',
-  'watch': '  Watches for changes in files, runs corresponding test(s)',
+    'Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
+  'core_runtime_only': 'Builds only the core runtime.',
+  'nobuild': 'Skips building the runtime via `amp (build|dist) --fortesting`',
+  'define_experiment_constant':
+    'Transforms tests with the EXPERIMENT constant set to true',
+  'experiment': 'Experiment being tested (used for status reporting)',
+  'extensions': 'Builds only the listed extensions.',
+  'compiled': 'Runs tests against minified JS',
+  'files': 'Run tests found in a specific path (ex: **/test-e2e/*.js)',
+  'testnames': 'Lists the name of each test being run',
+  'watch': 'Watches for changes in files, runs corresponding test(s)',
   'engine':
-    '  The automation engine that orchestrates the browser. ' +
+    'The automation engine that orchestrates the browser. ' +
     'Options are `puppeteer` or `selenium`. Default: `selenium`',
-  'headless': '  Runs the browser in headless mode',
-  'debug': '  Prints debugging information while running tests',
-  'report': '  Write test result report to a local file',
-  'coverage': '  Collect coverage data from instrumented code',
+  'headless': 'Runs the browser in headless mode',
+  'debug': 'Prints debugging information while running tests',
+  'report': 'Write test result report to a local file',
+  'coverage': 'Collect coverage data from instrumented code',
 };

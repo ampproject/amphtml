@@ -75,6 +75,23 @@ export const InsideAccordion = () => {
   );
 };
 
-Default.story = {
-  name: 'Default',
+export const InsideDetails = () => {
+  const videoid = text('videoid', 'IAvf-rkzNck');
+  const width = number('width', 300);
+  const height = number('height', 200);
+  const autoplay = boolean('autoplay', false);
+  return (
+    <details open>
+      <summary>YouTube Video</summary>
+      <amp-youtube
+        width={width}
+        height={height}
+        data-videoid={videoid}
+        autoplay={autoplay}
+        loop
+      ></amp-youtube>
+    </details>
+  );
 };
+
+Default.storyName = 'Default';

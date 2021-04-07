@@ -120,8 +120,8 @@ export class AmpList extends AMP.BaseElement {
     /** @private {?Array} */
     this.renderedItems_ = null;
 
-    /** @const {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(this.win);
+    /** @private {?../../../src/service/template-impl.Templates} */
+    this.templates_ = null;
 
     /**
      * Has layoutCallback() been called yet?
@@ -194,17 +194,29 @@ export class AmpList extends AMP.BaseElement {
   isLayoutSupported(layout) {
     if (layout === Layout.CONTAINER) {
       const doc = this.element.ownerDocument;
+      const isEmail = doc && isAmp4Email(doc);
+      const hasPlaceholder =
+        this.getPlaceholder() ||
+        (this.element.hasAttribute('diffable') &&
+          this.queryDiffablePlaceholder_());
+      if (isEmail) {
+        if (!hasPlaceholder) {
+          user().warn(
+            TAG,
+            'amp-list[layout=container] should have a placeholder to establish an initial size. ' +
+              'See https://go.amp.dev/c/amp-list/#placeholder-and-fallback. %s',
+            this.element
+          );
+        }
+        return (this.enableManagedResizing_ = true);
+      }
       userAssert(
-        (doc && isAmp4Email(doc)) ||
-          isExperimentOn(this.win, 'amp-list-layout-container'),
+        isExperimentOn(this.win, 'amp-list-layout-container'),
         'Experiment "amp-list-layout-container" is not turned on.'
       );
-      const hasDiffablePlaceholder =
-        this.element.hasAttribute('diffable') &&
-        this.queryDiffablePlaceholder_();
       userAssert(
-        this.getPlaceholder() || hasDiffablePlaceholder,
-        'amp-list[layout=container] requires a placeholder to establish an initial size. ' +
+        hasPlaceholder,
+        'amp-list[layout=container] should have a placeholder to establish an initial size. ' +
           'See https://go.amp.dev/c/amp-list/#placeholder-and-fallback. %s',
         this.element
       );
@@ -215,6 +227,7 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.templates_ = Services.templatesForDoc(this.element);
     this.action_ = Services.actionServiceForDoc(this.element);
     this.owners_ = Services.ownersForDoc(this.element);
     /** If the element is in an email document,
@@ -851,7 +864,8 @@ export class AmpList extends AMP.BaseElement {
         (response) => {
           userAssert(
             response,
-            'Error proxying amp-list templates, received no response.'
+            'Failed fetching JSON data: XHR Failed fetching ' +
+              `(${this.buildElidedUrl_(request)}): received no response.`
           );
           const init = response['init'];
           if (init) {
@@ -859,21 +873,28 @@ export class AmpList extends AMP.BaseElement {
             if (status >= 300) {
               /** HTTP status codes of 300+ mean redirects and errors. */
               throw user().createError(
-                'Error proxying amp-list templates with status: ',
+                `Failed fetching JSON data (${this.buildElidedUrl_(request)})` +
+                  ': HTTP error',
                 status
               );
             }
           }
           userAssert(
             typeof response['html'] === 'string',
-            'Expected response with format {html: <string>}. Received: ',
+            'Failed fetching JSON data: XHR Failed fetching ' +
+              `(${this.buildElidedUrl_(request)}): Expected response with ` +
+              'format {html: <string>}. Received: ',
             response
           );
           request.fetchOpt.responseType = 'application/json';
           return response;
         },
         (error) => {
-          throw user().createError('Error proxying amp-list templates', error);
+          throw user().createError(
+            'Failed fetching JSON data: XHR Failed fetching ' +
+              `(${this.buildElidedUrl_(request)})`,
+            error
+          );
         }
       )
       .then((data) => {
@@ -883,6 +904,17 @@ export class AmpList extends AMP.BaseElement {
         }
         return this.scheduleRender_(data, /* append */ false);
       });
+  }
+
+  /**
+   * Builds an elided, shortened URL suitable for display in error messages from
+   * the given request.
+   * @param {!FetchRequestDef} request
+   * @return {string}
+   */
+  buildElidedUrl_(request) {
+    const url = Services.urlForDoc(this.element).parse(request.xhrUrl);
+    return `${url.origin}/...`;
   }
 
   /**
@@ -1099,7 +1131,6 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   render_(elements, opt_append = false) {
-    dev().info(TAG, 'render:', this.element, elements);
     const container = dev().assertElement(this.container_);
 
     const renderAndResize = () => {

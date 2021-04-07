@@ -40,6 +40,11 @@ const Side = {
 const ANIMATION_TIMEOUT = 350;
 
 export class AmpNestedMenu extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -118,11 +123,6 @@ export class AmpNestedMenu extends AMP.BaseElement {
     // If support is added for other layouts, we should ensure that
     // lazy loading by sidebar does not cause FOUC when sidebar first opens.
     return layout == Layout.FILL;
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /**

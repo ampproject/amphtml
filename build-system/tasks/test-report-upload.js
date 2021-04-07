@@ -15,7 +15,7 @@
  */
 
 /**
- * @fileoverview This file implements the `gulp test-report-upload` task, which POSTs test result reports
+ * @fileoverview This file implements the `amp test-report-upload` task, which POSTs test result reports
  * to an API endpoint that stores them in the database.
  */
 
@@ -23,30 +23,31 @@
 
 const fetch = require('node-fetch');
 const fs = require('fs').promises;
-const log = require('fancy-log');
 const path = require('path');
 const {
-  ciBuildNumber,
+  ciBuildId,
   ciBuildUrl,
-  ciJobNumber,
+  ciJobId,
   ciJobUrl,
   ciCommitSha,
+  ciRepoSlug,
 } = require('../common/ci');
+const {log} = require('../common/logging');
 
-const {cyan, green, red, yellow} = require('ansi-colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 
 const REPORTING_API_URL = 'https://amp-test-cases.appspot.com/report';
 
 /**
  * Parses a test report file and adds build & job info to it.
  * @param {('unit' | 'integration' | 'e2e')} testType The type of the tests whose result we want to report.
- * @return {Object.<string,Object>|null} Object containing the build, job, and test results.
+ * @return {Promise<Object.<string,Object>|null>} Object containing the build, job, and test results.
  */
 async function getReport(testType) {
   try {
-    const report = await fs
-      .readFile(`result-reports/${testType}.json`)
-      .then(JSON.parse);
+    const report = JSON.parse(
+      await fs.readFile(`result-reports/${testType}.json`, 'utf-8')
+    );
 
     return addJobAndBuildInfo(testType, report);
   } catch (e) {
@@ -63,24 +64,25 @@ async function getReport(testType) {
  * @return {Object.<string,Object>} Object containing the build, job, and test results.
  */
 function addJobAndBuildInfo(testType, reportJson) {
-  const buildNumber = ciBuildNumber();
+  const buildId = ciBuildId();
   const commitSha = ciCommitSha();
-  const jobNumber = ciJobNumber();
+  const jobId = ciJobId();
 
-  if (!buildNumber || !commitSha || !jobNumber) {
+  if (!buildId || !commitSha || !jobId) {
     throw new ReferenceError('CI fields are not defined.');
   }
 
+  // (TODO ampproject/amp-github-apps/pull:1194) Update field names in database.
   return {
-    repository: process.env.GITHUB_REPOSITORY,
+    repository: ciRepoSlug(),
     results: reportJson,
     build: {
-      buildNumber,
+      buildId,
       commitSha,
       url: ciBuildUrl(),
     },
     job: {
-      jobNumber,
+      jobId,
       testSuiteType: testType,
       url: ciJobUrl(),
     },
@@ -118,7 +120,7 @@ async function sendCiKarmaReport(testType) {
       'failed to report results of type',
       cyan(testType),
       ': \n',
-      yellow(response.statusText)
+      yellow(await response.text())
     );
   }
 }

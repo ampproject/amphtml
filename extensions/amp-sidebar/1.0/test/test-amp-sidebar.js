@@ -16,9 +16,10 @@
 import '../amp-sidebar';
 import {ActionInvocation} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
+import {createElementWithAttributes} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {waitFor, whenCalled} from '../../../../testing/test-helper';
 
 describes.realWin(
   'amp-sidebar:1.0',
@@ -31,6 +32,10 @@ describes.realWin(
     async function waitForOpen(el, open) {
       const isOpenOrNot = () => el.hasAttribute('open') === open;
       await waitFor(isOpenOrNot, 'element open updated');
+    }
+
+    function isMounted(win, container) {
+      return win.getComputedStyle(container)['display'] !== 'none';
     }
 
     describe('basic actions', () => {
@@ -98,9 +103,9 @@ describes.realWin(
         `;
         element = fullHtml.firstElementChild;
         win.document.body.appendChild(fullHtml);
-        await element.build();
+        await element.buildInternal();
 
-        container = element.shadowRoot.firstElementChild;
+        container = element.shadowRoot.firstElementChild.firstElementChild;
         openButton = fullHtml.querySelector('#open');
         closeButton = fullHtml.querySelector('#close');
         toggleButton = fullHtml.querySelector('#toggle');
@@ -114,56 +119,106 @@ describes.realWin(
       it('open attribute is synced with component mounted', async () => {
         // sidebar is initially closed
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
 
         openButton.click();
         await waitForOpen(element, true);
 
         expect(element).to.have.attribute('open');
-        expect(container.children.length).to.not.equal(0);
+        expect(isMounted(win, container)).to.equal(true);
 
         closeButton.click();
         await waitForOpen(element, false);
 
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
       });
 
       it('should open and close when "open" attribute is set', async () => {
         // sidebar is initially closed
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
+        env.sandbox.stub(element, 'setAsContainerInternal');
+        env.sandbox.stub(element, 'removeAsContainerInternal');
+
+        // Sidebar has a child.
+        const child = createElementWithAttributes(win.document, 'amp-img', {
+          layout: 'nodisplay',
+        });
+        element.appendChild(child);
+        env.sandbox.stub(child, 'pause');
+        env.sandbox.stub(child, 'unmount');
 
         element.setAttribute('open', '');
         await waitForOpen(element, true);
 
         expect(element).to.have.attribute('open');
-        expect(container.children.length).to.not.equal(0);
+        expect(isMounted(win, container)).to.equal(true);
+
+        await whenCalled(element.setAsContainerInternal);
+        const sidebar = element.shadowRoot.querySelector('[part=sidebar]');
+        expect(sidebar).to.exist;
+        expect(element.setAsContainerInternal).to.be.calledOnce.calledWith(
+          sidebar
+        );
+        expect(element.removeAsContainerInternal).to.not.be.called;
 
         element.removeAttribute('open');
         await waitForOpen(element, false);
 
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
+
+        expect(element.removeAsContainerInternal).to.be.calledOnce;
+        expect(element.setAsContainerInternal).to.be.calledOnce; // no change.
+        expect(child.pause).to.be.calledOnce;
+        expect(child.unmount).to.not.be.called;
       });
 
       it('should close when the backdrop is clicked', async () => {
         element.enqueAction(invocation('open'));
         await waitForOpen(element, true);
 
-        expect(container.children.length).to.equal(2);
+        expect(isMounted(win, container)).to.equal(true);
         const backdrop = container.children[1];
         backdrop.click();
 
         await waitForOpen(element, false);
 
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
+      });
+
+      it('should close the sidebar when the esc key is pressed', async () => {
+        element.enqueAction(invocation('open'));
+        await waitForOpen(element, true);
+
+        // sidebar is opened, wait for eventListener to be attached
+        expect(isMounted(win, container)).to.equal(true);
+        const sidebar = container.children[0];
+        const doc = sidebar.ownerDocument;
+        const addListenerSpy = env.sandbox.spy(doc, 'addEventListener');
+
+        await waitFor(
+          () => addListenerSpy.callCount > 0,
+          'event listener attached'
+        );
+
+        // dispatch esc key event
+        const documentEl = sidebar.ownerDocument.documentElement;
+        documentEl.dispatchEvent(
+          new KeyboardEvent('keydown', {key: 'Escape', bubbles: true})
+        );
+
+        // verify sidebar is closed
+        await waitForOpen(element, false);
+        expect(element).to.not.have.attribute('open');
+        expect(isMounted(win, container)).to.equal(false);
       });
 
       it('should render all children of the sidebar', async () => {
         // closed sidebar should not render any content
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
 
         // open the sidebar
         openButton.click();
@@ -171,7 +226,7 @@ describes.realWin(
         expect(element).to.have.attribute('open');
 
         // confirm slot within the shadow root
-        expect(container.children.length).to.equal(2);
+        expect(isMounted(win, container)).to.equal(true);
         expect(container.children[0].firstElementChild).to.be.ok;
         expect(container.children[0].firstElementChild.firstElementChild).to.be
           .ok;
@@ -327,12 +382,97 @@ describes.realWin(
           </amp-sidebar>
         `;
         win.document.body.appendChild(noWarnSidebar);
-        await noWarnSidebar.build();
+        await noWarnSidebar.buildInternal();
 
         // the 'noWarnSidebar' above is appended directly to the body and
         // should not throw a warning
         // the stub should still only have been called once
         expect(consoleWarnSpy).to.be.calledOnce;
+      });
+
+      it('should default "left" or "right" based on document.dir when side not provided', async () => {
+        const documentDir = win.document.dir;
+
+        /**
+         * document.dir is not 'rtl' and side is not provided to the element
+         * so we should default to 'left'
+         */
+        win.document.dir = 'blah';
+        fullHtml = html`
+          <div>
+            <amp-sidebar id="sidebar2">
+              <div>Hello World!</div>
+            </amp-sidebar>
+            <div id="buttons">
+              <button id="open" on="tap:sidebar2.open()">open</button>
+            </div>
+          </div>
+        `;
+        element = fullHtml.firstElementChild;
+        win.document.body.appendChild(fullHtml);
+        await element.buildInternal();
+        container = element.shadowRoot.firstElementChild.firstElementChild;
+        openButton = fullHtml.querySelector('#open');
+
+        // open the sidebar
+        openButton.click();
+        await waitForOpen(element, true);
+        expect(element).to.have.attribute('open');
+        let sidebarElement = container.firstElementChild;
+
+        // defaults to left if document is not 'ltr'
+        expect(sidebarElement.className.includes('left')).to.be.true;
+
+        /**
+         * document.dir is 'rtl' and side is not provided to the element
+         * so we should default to 'right'
+         */
+        win.document.dir = 'rtl';
+        fullHtml = html`
+          <div>
+            <amp-sidebar id="sidebar3">
+              <div>Hello World!</div>
+            </amp-sidebar>
+            <div id="buttons">
+              <button id="open" on="tap:sidebar3.open()">open</button>
+            </div>
+          </div>
+        `;
+        element = fullHtml.firstElementChild;
+        win.document.body.appendChild(fullHtml);
+        await element.buildInternal();
+        container = element.shadowRoot.firstElementChild.firstElementChild;
+        openButton = fullHtml.querySelector('#open');
+
+        // open the sidebar
+        openButton.click();
+        await waitForOpen(element, true);
+        expect(element).to.have.attribute('open');
+        sidebarElement = container.firstElementChild;
+
+        // defaults to right if document is 'rtl'
+        expect(sidebarElement.className.includes('right')).to.be.true;
+
+        win.document.dir = documentDir;
+      });
+
+      it('should have `overscroll-behavior: none` to prevent background scrolling', async () => {
+        // open the sidebar
+        openButton.click();
+        await waitForOpen(element, true);
+        expect(element).to.have.attribute('open');
+
+        const {
+          firstElementChild: sidebarElement,
+          lastElementChild: backdropElement,
+        } = container;
+
+        expect(
+          win.getComputedStyle(sidebarElement).overscrollBehavior
+        ).to.equal('none');
+        expect(
+          win.getComputedStyle(backdropElement).overscrollBehavior
+        ).to.equal('none');
       });
 
       describe('programatic access to imperative API', () => {
@@ -481,9 +621,9 @@ describes.realWin(
         `;
         element = fullHtml.firstElementChild;
         win.document.body.appendChild(fullHtml);
-        await element.build();
+        await element.buildInternal();
 
-        container = element.shadowRoot.firstElementChild;
+        container = element.shadowRoot.firstElementChild.firstElementChild;
         openButton = fullHtml.querySelector('#open');
         closeButton = fullHtml.querySelector('#close');
       });
@@ -504,7 +644,7 @@ describes.realWin(
 
         // sidebar is initially closed
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
 
         openButton.click();
         await waitForOpen(element, true);
@@ -514,7 +654,7 @@ describes.realWin(
         animation.onfinish();
 
         expect(element).to.have.attribute('open');
-        expect(container.children.length).to.not.equal(0);
+        expect(isMounted(win, container)).to.equal(true);
       });
 
       it('should animate collapse', async () => {
@@ -523,7 +663,7 @@ describes.realWin(
 
         // sidebar is initially closed
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
 
         // synchronous open
         openButton.click();
@@ -543,12 +683,81 @@ describes.realWin(
 
         // still displayed while animating
         expect(element).to.have.attribute('open');
-        expect(container.children.length).to.not.equal(0);
+        expect(isMounted(win, container)).to.equal(true);
 
         animation.onfinish();
         await waitForOpen(element, false);
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
+      });
+
+      it('should reverse animations if closed while opening', async () => {
+        const animation = {
+          reverse: env.sandbox.spy(),
+        };
+        animateStub = env.sandbox.stub(Element.prototype, 'animate');
+        animateStub.returns(animation);
+
+        // sidebar is initially closed
+        expect(element).to.not.have.attribute('open');
+        expect(isMounted(win, container)).to.equal(false);
+
+        // begin open animation
+        openButton.click();
+        await waitForOpen(element, true);
+
+        // animate stub called once for backdrop, once for sidebar
+        expect(animateStub).to.be.calledTwice;
+
+        // close the sidebar and reverse the animation (mid animation)
+        closeButton.click();
+
+        // animation begins to reverse
+        await waitFor(
+          () => animation.reverse.callCount > 0,
+          'reverse animation has begun'
+        );
+        expect(animation.reverse).to.be.calledTwice;
+      });
+
+      it('should reverse animations if opened while closing', async () => {
+        const animateFunction = Element.prototype.animate;
+        Element.prototype.animate = null;
+
+        // sidebar is initially closed
+        expect(element).to.not.have.attribute('open');
+        expect(isMounted(win, container)).to.equal(false);
+
+        // synchronous open
+        openButton.click();
+        await waitForOpen(element, true);
+
+        // turn on animations
+        Element.prototype.animate = animateFunction;
+        const animation = {reverse: env.sandbox.spy()};
+        animateStub = env.sandbox.stub(Element.prototype, 'animate');
+        animateStub.returns(animation);
+
+        // sidebar is initially opened
+        expect(element).to.have.attribute('open');
+        expect(isMounted(win, container)).to.equal(true);
+
+        // begin close animation
+        closeButton.click();
+        await waitFor(() => animateStub.callCount > 0, 'animation has begun');
+
+        // animate stub called once for backdrop, once for sidebar
+        expect(animateStub).to.be.calledTwice;
+
+        // open the sidebar and reverse the animation (mid animation)
+        openButton.click();
+
+        // animation begins to reverse
+        await waitFor(
+          () => animation.reverse.callCount > 0,
+          'reverse animation has begun'
+        );
+        expect(animation.reverse).to.be.calledTwice;
       });
     });
   }

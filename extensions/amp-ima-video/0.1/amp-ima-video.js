@@ -33,9 +33,15 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isEnumValue, isObject, toArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {
+  observeContentSize,
+  unobserveContentSize,
+} from '../../../src/utils/size-observer';
 
 /** @const */
 const TAG = 'amp-ima-video';
+
+const TYPE = 'ima-video';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -77,6 +83,8 @@ class AmpImaVideo extends AMP.BaseElement {
 
     /** @private {!ImaPlayerData} */
     this.playerData_ = new ImaPlayerData();
+
+    this.onResized_ = this.onResized_.bind(this);
   }
 
   /** @override */
@@ -152,7 +160,7 @@ class AmpImaVideo extends AMP.BaseElement {
       preconnect.url(this.getAmpDoc(), this.preconnectTrack_);
     }
     preconnect.url(this.getAmpDoc(), element.getAttribute('data-tag'));
-    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
+    preloadBootstrap(this.win, TYPE, this.getAmpDoc(), preconnect);
   }
 
   /** @override */
@@ -176,7 +184,7 @@ class AmpImaVideo extends AMP.BaseElement {
       const iframe = getIframe(
         win,
         element,
-        'ima-video',
+        TYPE,
         {initialConsentState},
         {allowFullscreen: true}
       );
@@ -202,6 +210,7 @@ class AmpImaVideo extends AMP.BaseElement {
 
       installVideoManagerForDoc(element);
       Services.videoManagerForDoc(element).register(this);
+      observeContentSize(this.element, this.onResized_);
 
       return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
     });
@@ -216,6 +225,7 @@ class AmpImaVideo extends AMP.BaseElement {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
+    unobserveContentSize(this.element, this.onResized_);
 
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
@@ -223,12 +233,14 @@ class AmpImaVideo extends AMP.BaseElement {
     return true;
   }
 
-  /** @override */
-  onLayoutMeasure() {
+  /**
+   * @param {!../layout-rect.LayoutSizeDef} size
+   * @private
+   */
+  onResized_({width, height}) {
     if (!this.iframe_) {
       return;
     }
-    const {width, height} = this.getLayoutSize();
     this.sendCommand_('resize', {'width': width, 'height': height});
   }
 

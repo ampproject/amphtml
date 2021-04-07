@@ -87,17 +87,11 @@ export class InaboxResources {
     /** @private {boolean} */
     this.documentReady_ = false;
 
-    // TODO(#31776): cleanup when launched.
-    // eslint-disable-next-line no-undef
-    if (INABOX_RESOURCES_EAGER) {
-      this.ampdoc_.whenReady().then(() => {
-        this.documentReady_ = true;
-        this.buildReadyResources_();
-        this./*OK*/ schedulePass(1);
-      });
-    } else {
-      this.ampdoc_.whenReady().then(() => this./*OK*/ schedulePass(1));
-    }
+    this.ampdoc_.whenReady().then(() => {
+      this.documentReady_ = true;
+      this.buildReadyResources_();
+      this./*OK*/ schedulePass(1);
+    });
   }
 
   /** @override */
@@ -145,18 +139,8 @@ export class InaboxResources {
   /** @override */
   upgraded(element) {
     const resource = Resource.forElement(element);
-    // TODO(#31776): cleanup when launched.
-    // eslint-disable-next-line no-undef
-    if (INABOX_RESOURCES_EAGER) {
-      this.pendingBuildResources_.push(resource);
-      this.buildReadyResources_();
-    } else {
-      this.ampdoc_
-        .whenReady()
-        .then(resource.build.bind(resource))
-        .then(this.schedulePass.bind(this));
-      dev().fine(TAG, 'resource upgraded:', resource.debugid);
-    }
+    this.pendingBuildResources_.push(resource);
+    this.buildReadyResources_();
   }
 
   /** @override */
@@ -217,11 +201,6 @@ export class InaboxResources {
     return this.firstPassDone_.promise;
   }
 
-  /** @override */
-  isIntersectionExperimentOn() {
-    return false;
-  }
-
   /**
    * @private
    */
@@ -230,7 +209,7 @@ export class InaboxResources {
     dev().fine(TAG, 'doPass');
     // measure in a batch
     this.resources_.forEach((resource) => {
-      if (!resource.isLayoutPending()) {
+      if (!resource.isLayoutPending() || resource.element.V1()) {
         return;
       }
       resource.measure();
@@ -238,6 +217,7 @@ export class InaboxResources {
     // mutation in a batch
     this.resources_.forEach((resource) => {
       if (
+        !resource.element.V1() &&
         resource.getState() === ResourceState.READY_FOR_LAYOUT &&
         resource.isDisplayed()
       ) {

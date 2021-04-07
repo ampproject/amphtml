@@ -31,7 +31,7 @@ limitations under the License.
           }
         </script>
         <div id="pubtech-post-prompt">
-          <button on="tap:consent.prompt(consent=pubtech)" role="button">Privacy settings</button>
+          <button on="tap:consent.prompt(consent=pubtech)">Privacy settings</button>
         </div>
     </amp-consent>
 ```

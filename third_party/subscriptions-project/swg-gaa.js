@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+<<<<<<< HEAD
 /** Version: 0.1.22.155 */
+=======
+/** Version: 0.1.22.154 */
+>>>>>>> master
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *

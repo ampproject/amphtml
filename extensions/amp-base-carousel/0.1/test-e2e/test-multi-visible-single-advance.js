@@ -17,10 +17,10 @@
 import {getNextArrow, getPrevArrow, getSlides, sleep} from './helpers';
 
 describes.endtoend(
-  'AMP carousel advancing with multiple visible',
+  'amp-base-carousel - advancing with multiple visible slides',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/multi-visible-single-advance.amp.html',
+    version: '0.1',
+    fixture: 'amp-base-carousel/multi-visible-single-advance.amp.html',
     environments: ['single'],
   },
   async function (env) {

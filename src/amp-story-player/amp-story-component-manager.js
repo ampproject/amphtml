@@ -19,12 +19,6 @@ import {AmpStoryPlayer} from './amp-story-player-impl';
 import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
 import {initLogConstructor} from '../log';
 
-/**
- * Minimum amount of viewports away from the player to start prerendering.
- * @const {number}
- */
-const MIN_VIEWPORT_PRERENDER_DISTANCE = 2;
-
 export class AmpStoryComponentManager {
   /**
    * @param {!Window} win
@@ -36,17 +30,21 @@ export class AmpStoryComponentManager {
   }
 
   /**
-   * Calls layoutCallback on the element when it is close to the viewport.
-   * @param {!AmpStoryPlayer|!AmpStoryEntryPoint} elImpl
+   * Calls layoutPlayer on the element when it is close to the viewport.
+   * @param {!Element} element
    * @private
    */
-  layoutEl_(elImpl) {
-    new AmpStoryPlayerViewportObserver(
-      this.win_,
-      elImpl.getElement(),
-      elImpl.layoutCallback.bind(elImpl),
-      MIN_VIEWPORT_PRERENDER_DISTANCE
+  layoutEl_(element) {
+    new AmpStoryPlayerViewportObserver(this.win_, element, () =>
+      element.layoutPlayer()
     );
+
+    const scrollHandler = () => {
+      element.layoutPlayer();
+      this.win_.removeEventListener('scroll', scrollHandler);
+    };
+
+    this.win_.addEventListener('scroll', scrollHandler);
   }
 
   /**
@@ -60,7 +58,7 @@ export class AmpStoryComponentManager {
     for (let i = 0; i < players.length; i++) {
       const playerEl = players[i];
       const player = new AmpStoryPlayer(this.win_, playerEl);
-      player.buildCallback();
+      player.buildPlayer();
       this.layoutEl_(player);
     }
   }

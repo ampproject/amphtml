@@ -15,11 +15,12 @@
  */
 'use strict';
 
+const {mainBranch} = require('./main-branch');
+
 /**
  * @fileoverview Provides various kinds of CI state.
  *
  * References:
- * Travis: https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
  * GitHub Actions: https://docs.github.com/en/free-pro-team@latest/actions/reference/environment-variables#default-environment-variables
  * CircleCI: https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables
  */
@@ -27,10 +28,10 @@
 /**
  * Shorthand to extract an environment variable.
  * @param {string} key
- * @return {string|undefined}
+ * @return {string}
  */
 function env(key) {
-  return process.env[key];
+  return process.env[key] ?? '';
 }
 
 /**
@@ -39,14 +40,6 @@ function env(key) {
  */
 function isCiBuild() {
   return !!env('CI');
-}
-
-/**
- * Returns true if this is a Travis build.
- * @return {boolean}
- */
-function isTravisBuild() {
-  return !!env('TRAVIS');
 }
 
 /**
@@ -68,21 +61,29 @@ function isCircleciBuild() {
 /**
  * Constants for reduced code size.
  */
-const isTravis = isTravisBuild();
 const isGithubActions = isGithubActionsBuild();
 const isCircleci = isCircleciBuild();
+
+/**
+ * Used to filter CircleCI PR branches created directly on the amphtml repo
+ * (e.g.) PRs created from the GitHub web UI. Must match `push_builds_only`
+ * in .circleci/config.yml.
+ * @param {string} branchName
+ * @return {boolean}
+ */
+function isCircleciPushBranch(branchName) {
+  return branchName == mainBranch || /^amp-release-.*$/.test(branchName);
+}
 
 /**
  * Returns true if this is a PR build.
  * @return {boolean}
  */
 function isPullRequestBuild() {
-  return isTravis
-    ? env('TRAVIS_EVENT_TYPE') === 'pull_request'
-    : isGithubActions
+  return isGithubActions
     ? env('GITHUB_EVENT_NAME') === 'pull_request'
     : isCircleci
-    ? !!env('CIRCLE_PULL_REQUEST')
+    ? !isCircleciPushBranch(env('CIRCLE_BRANCH'))
     : false;
 }
 
@@ -91,12 +92,10 @@ function isPullRequestBuild() {
  * @return {boolean}
  */
 function isPushBuild() {
-  return isTravis
-    ? env('TRAVIS_EVENT_TYPE') === 'push'
-    : isGithubActions
+  return isGithubActions
     ? env('GITHUB_EVENT_NAME') === 'push'
     : isCircleci
-    ? !env('CIRCLE_PULL_REQUEST')
+    ? isCircleciPushBranch(env('CIRCLE_BRANCH'))
     : false;
 }
 
@@ -105,9 +104,7 @@ function isPushBuild() {
  * @return {string}
  */
 function ciPullRequestBranch() {
-  return isTravis
-    ? env('TRAVIS_PULL_REQUEST_BRANCH')
-    : isGithubActions
+  return isGithubActions
     ? env('GITHUB_HEAD_REF')
     : isCircleci
     ? env('CIRCLE_BRANCH')
@@ -119,9 +116,7 @@ function ciPullRequestBranch() {
  * @return {string}
  */
 function ciPullRequestSha() {
-  return isTravis
-    ? env('TRAVIS_PULL_REQUEST_SHA')
-    : isGithubActions
+  return isGithubActions
     ? require(env('GITHUB_EVENT_PATH')).pull_request.head.sha
     : isCircleci
     ? env('CIRCLE_SHA1')
@@ -133,9 +128,7 @@ function ciPullRequestSha() {
  * @return {string}
  */
 function ciPushBranch() {
-  return isTravis
-    ? env('TRAVIS_BRANCH')
-    : isGithubActions
+  return isGithubActions
     ? env('GITHUB_REF')
     : isCircleci
     ? env('CIRCLE_BRANCH')
@@ -147,9 +140,7 @@ function ciPushBranch() {
  * @return {string}
  */
 function ciCommitSha() {
-  return isTravis
-    ? env('TRAVIS_COMMIT')
-    : isGithubActions
+  return isGithubActions
     ? env('GITHUB_SHA')
     : isCircleci
     ? env('CIRCLE_SHA1')
@@ -157,16 +148,14 @@ function ciCommitSha() {
 }
 
 /**
- * Returns the number of the current build.
+ * Returns the ID of the current build.
  * @return {string}
  */
-function ciBuildNumber() {
-  return isTravis
-    ? env('TRAVIS_BUILD_NUMBER')
-    : isGithubActions
+function ciBuildId() {
+  return isGithubActions
     ? env('GITHUB_RUN_ID')
     : isCircleci
-    ? env('CIRCLE_BUILD_NUM')
+    ? env('CIRCLE_WORKFLOW_ID')
     : '';
 }
 
@@ -175,26 +164,22 @@ function ciBuildNumber() {
  * @return {string}
  */
 function ciBuildUrl() {
-  return isTravis
-    ? env('TRAVIS_BUILD_WEB_URL')
-    : isGithubActions
+  return isGithubActions
     ? `${env('GITHUB_SERVER_URL')}/${env('GITHUB_REPOSITORY')}/actions/runs/${env('GITHUB_RUN_ID')}` // prettier-ignore
     : isCircleci
-    ? env('CIRCLE_BUILD_URL')
+    ? `https://app.circleci.com/pipelines/workflows/${env('CIRCLE_WORKFLOW_ID')}` // prettier-ignore
     : '';
 }
 
 /**
- * Returns the number of the current job.
+ * Returns the ID of the current job.
  * @return {string}
  */
-function ciJobNumber() {
-  return isTravis
-    ? env('TRAVIS_JOB_NUMBER')
-    : isGithubActions
+function ciJobId() {
+  return isGithubActions
     ? env('GITHUB_RUN_NUMBER')
     : isCircleci
-    ? env('CIRCLE_NODE_INDEX')
+    ? env('CIRCLE_JOB')
     : '';
 }
 
@@ -203,14 +188,21 @@ function ciJobNumber() {
  * @return {string}
  */
 function ciJobUrl() {
-  return isTravis
-    ? env('TRAVIS_JOB_WEB_URL')
-    : isGithubActions
+  return isGithubActions
     ? // TODO(rsimha): Try to reverse engineer the GH Actions job URL from the build URL.
       `${env('GITHUB_SERVER_URL')}/${env('GITHUB_REPOSITORY')}/actions/runs/${env('GITHUB_RUN_ID')}` // prettier-ignore
     : isCircleci
-    ? env('CIRCLE_BUILD_URL') // TODO(rsimha): Test and modify if necessary.
+    ? env('CIRCLE_BUILD_URL')
     : '';
+}
+
+/**
+ * Returns the merge commit for a CircleCI PR build. CIRCLECI_MERGE_COMMIT is
+ * populated by .circleci/fetch_merge_commit.sh.
+ * @return {string}
+ */
+function circleciPrMergeCommit() {
+  return isCircleci ? env('CIRCLECI_MERGE_COMMIT') : '';
 }
 
 /**
@@ -218,29 +210,36 @@ function ciJobUrl() {
  * @return {string}
  */
 function ciRepoSlug() {
-  return isTravis
-    ? env('TRAVIS_REPO_SLUG')
-    : isGithubActions
+  return isGithubActions
     ? env('GITHUB_REPOSITORY')
     : isCircleci
     ? `${env('CIRCLE_PROJECT_USERNAME')}/${env('CIRCLE_PROJECT_REPONAME')}`
     : '';
 }
 
+/**
+ * Returns the commit SHA being tested by a push or PR build.
+ * @return {string}
+ */
+function ciBuildSha() {
+  return isPullRequestBuild() ? ciPullRequestSha() : ciCommitSha();
+}
+
 module.exports = {
-  ciBuildNumber,
+  ciBuildId,
+  ciBuildSha,
   ciBuildUrl,
   ciCommitSha,
-  ciJobNumber,
+  ciJobId,
   ciJobUrl,
   ciPullRequestBranch,
   ciPullRequestSha,
   ciPushBranch,
+  circleciPrMergeCommit,
   ciRepoSlug,
   isCiBuild,
   isCircleciBuild,
   isGithubActionsBuild,
   isPullRequestBuild,
   isPushBuild,
-  isTravisBuild,
 };

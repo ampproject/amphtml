@@ -31,7 +31,7 @@ describes.realWin('NameFrameRenderer', realWinConfig, (env) => {
   let context;
   let creativeData;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     context = {
       size: {width: '320', height: '50'},
       requestUrl: 'http://www.google.com',
@@ -48,10 +48,19 @@ describes.realWin('NameFrameRenderer', realWinConfig, (env) => {
     containerElement = env.win.document.createElement('div');
     containerElement.setAttribute('height', 50);
     containerElement.setAttribute('width', 320);
-    containerElement.getIntersectionChangeEntry = () => ({});
+    containerElement.getIntersectionChangeEntry = () => ({
+      time: null,
+      boundingClientRect: {},
+      rootBounds: {},
+      intersectionRect: {},
+    });
     env.win.document.body.appendChild(containerElement);
 
-    new NameFrameRenderer().render(context, containerElement, creativeData);
+    await new NameFrameRenderer().render(
+      context,
+      containerElement,
+      creativeData
+    );
   });
 
   it('should append iframe child', () => {

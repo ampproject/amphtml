@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {Services} from '../../src/services';
 import {adConfig} from '../../ads/_config';
 import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
@@ -32,8 +32,7 @@ describes.realWin('ad-cid', {amp: true}, (env) => {
 
   beforeEach(() => {
     win = env.win;
-    clock = lolex.install({
-      target: win,
+    clock = fakeTimers.withGlobal(win).install({
       toFake: ['Date', 'setTimeout', 'clearTimeout'],
     });
     element = env.win.document.createElement('amp-ad');

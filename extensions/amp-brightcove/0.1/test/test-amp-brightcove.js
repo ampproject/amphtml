@@ -16,6 +16,7 @@
 
 import '../amp-brightcove';
 import * as consent from '../../../../src/consent';
+import {BaseElement} from '../../../../src/base-element';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {CommonSignals} from '../../../../src/common-signals';
 import {VideoEvents} from '../../../../src/video-interface';
@@ -26,6 +27,7 @@ import {
 import {listenOncePromise} from '../../../../src/event-helper';
 import {macroTask} from '../../../../testing/yield';
 import {parseUrlDeprecated} from '../../../../src/url';
+import {user} from '../../../../src/log';
 
 describes.realWin(
   'amp-brightcove',
@@ -41,9 +43,16 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+
+      // make sync
+      env.sandbox
+        .stub(BaseElement.prototype, 'mutateElement')
+        .callsFake((mutator) => {
+          mutator();
+        });
     });
 
-    async function getBrightcove(attributes) {
+    async function getBrightcoveBuild(attributes) {
       const element = createElementWithAttributes(doc, 'amp-brightcove', {
         width: '111',
         height: '222',
@@ -53,6 +62,14 @@ describes.realWin(
       doc.body.appendChild(element);
 
       await whenUpgradedToCustomElement(element);
+      await element.whenBuilt();
+
+      return element;
+    }
+
+    async function getBrightcove(attributes) {
+      const element = await getBrightcoveBuild(attributes);
+      const impl = await element.getImpl(false);
 
       await element.signals().whenSignal(CommonSignals.LOAD_START);
 
@@ -60,7 +77,7 @@ describes.realWin(
       await macroTask();
 
       try {
-        fakePostMessage(element, {event: 'ready'});
+        fakePostMessage(impl, {event: 'ready'});
       } catch (_) {
         // This fails when the iframe is not available (after layoutCallback
         // fails) in which case awaiting the LOAD_END sigal below will throw.
@@ -71,13 +88,41 @@ describes.realWin(
       return element;
     }
 
-    function fakePostMessage(bc, info) {
-      bc.implementation_.handlePlayerMessage_({
+    function fakePostMessage(impl, info) {
+      impl.handlePlayerMessage_({
         origin: 'https://players.brightcove.net',
-        source: bc.querySelector('iframe').contentWindow,
+        source: impl.element.querySelector('iframe').contentWindow,
         data: JSON.stringify(info),
       });
     }
+
+    // https://go.amp.dev/issue/32706
+    it('should remove `dock`', async () => {
+      const warn = env.sandbox.spy(user(), 'warn');
+      const element = await getBrightcoveBuild({
+        'data-account': '1290862519001',
+        'data-video-id': 'ref:amp-test-video',
+        'dock': '',
+      });
+      expect(element.hasAttribute('dock')).to.be.false;
+      expect(
+        warn.withArgs(
+          env.sandbox.match.any,
+          env.sandbox.match(/`dock` has been disabled/)
+        )
+      ).to.have.been.calledOnce;
+    });
+
+    // https://go.amp.dev/issue/32706
+    it('should not warn without `dock`', async () => {
+      const warn = env.sandbox.spy(user(), 'warn');
+      const element = await getBrightcoveBuild({
+        'data-account': '1290862519001',
+        'data-video-id': 'ref:amp-test-video',
+      });
+      expect(element.hasAttribute('dock')).to.be.false;
+      expect(warn).to.not.have.been.called;
+    });
 
     it('renders', () => {
       return getBrightcove({
@@ -94,25 +139,17 @@ describes.realWin(
       });
     });
 
-    it('requires data-account', () => {
-      expectAsyncConsoleError(/The data-account attribute is required for/, 1);
-      return getBrightcove({}).should.eventually.be.rejectedWith(
-        /The data-account attribute is required for/
-      );
-    });
-
-    it('removes iframe after unlayoutCallback', () => {
-      return getBrightcove({
+    it('removes iframe after unlayoutCallback', async () => {
+      const bc = await getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
-      }).then((bc) => {
-        const iframe = bc.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        const obj = bc.implementation_;
-        obj.unlayoutCallback();
-        expect(bc.querySelector('iframe')).to.be.null;
-        expect(obj.iframe_).to.be.null;
       });
+      const obj = await bc.getImpl();
+      const iframe = bc.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      obj.unlayoutCallback();
+      expect(bc.querySelector('iframe')).to.be.null;
+      expect(obj.iframe_).to.be.null;
     });
 
     it('should pass data-param-* attributes to the iframe src', () => {
@@ -200,82 +237,82 @@ describes.realWin(
       });
     });
 
-    it('should forward events', () => {
-      return getBrightcove({
+    it('should forward events', async () => {
+      const bc = await getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
-      }).then((bc) => {
-        return Promise.resolve()
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.LOAD);
-            fakePostMessage(bc, {event: 'ready', muted: false, playing: false});
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.LOADEDMETADATA);
-            fakePostMessage(bc, {
-              event: 'loadedmetadata',
-              muted: false,
-              playing: false,
-            });
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.AD_START);
-            fakePostMessage(bc, {
-              event: 'ads-ad-started',
-              muted: false,
-              playing: false,
-            });
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.AD_END);
-            fakePostMessage(bc, {
-              event: 'ads-ad-ended',
-              muted: false,
-              playing: false,
-            });
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.PLAYING);
-            fakePostMessage(bc, {
-              event: 'playing',
-              muted: false,
-              playing: true,
-            });
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.MUTED);
-            fakePostMessage(bc, {
-              event: 'volumechange',
-              muted: true,
-              playing: true,
-            });
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.UNMUTED);
-            fakePostMessage(bc, {
-              event: 'volumechange',
-              muted: false,
-              playing: true,
-            });
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.PAUSE);
-            fakePostMessage(bc, {event: 'pause', muted: false, playing: false});
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.ENDED);
-            fakePostMessage(bc, {event: 'ended', muted: false, playing: false});
-            return p;
-          });
       });
+      const impl = await bc.getImpl();
+      return Promise.resolve()
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.LOAD);
+          fakePostMessage(impl, {event: 'ready', muted: false, playing: false});
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.LOADEDMETADATA);
+          fakePostMessage(impl, {
+            event: 'loadedmetadata',
+            muted: false,
+            playing: false,
+          });
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.AD_START);
+          fakePostMessage(impl, {
+            event: 'ads-ad-started',
+            muted: false,
+            playing: false,
+          });
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.AD_END);
+          fakePostMessage(impl, {
+            event: 'ads-ad-ended',
+            muted: false,
+            playing: false,
+          });
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.PLAYING);
+          fakePostMessage(impl, {
+            event: 'playing',
+            muted: false,
+            playing: true,
+          });
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.MUTED);
+          fakePostMessage(impl, {
+            event: 'volumechange',
+            muted: true,
+            playing: true,
+          });
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.UNMUTED);
+          fakePostMessage(impl, {
+            event: 'volumechange',
+            muted: false,
+            playing: true,
+          });
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.PAUSE);
+          fakePostMessage(impl, {event: 'pause', muted: false, playing: false});
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.ENDED);
+          fakePostMessage(impl, {event: 'ended', muted: false, playing: false});
+          return p;
+        });
     });
 
     it('should propagate consent state to iframe', () => {

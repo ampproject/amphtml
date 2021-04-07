@@ -18,6 +18,7 @@ import {
   ADSENSE_MCRSPV_TAG,
   getMatchedContentResponsiveHeightAndUpdatePubParams,
 } from '../../../ads/google/utils';
+import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
 import {
@@ -47,7 +48,12 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
+import {getExperimentBranch} from '../../../src/experiments';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {
+  intersectionEntryToJson,
+  measureIntersection,
+} from '../../../src/utils/intersection';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {
   observeWithSharedInOb,
@@ -144,6 +150,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
      * @private {boolean}
      */
     this.isFullWidthRequested_ = false;
+
+    /** @private {Promise<!IntersectionObserverEntry>} */
+    this.initialIntersectionPromise_ = null;
   }
 
   /** @override */
@@ -209,6 +218,13 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (this.isFullWidthRequested_) {
       return this.attemptFullWidthSizeChange_();
     }
+
+    const asyncIntersection =
+      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
+      ADS_INITIAL_INTERSECTION_EXP.experiment;
+    this.initialIntersectionPromise_ = asyncIntersection
+      ? measureIntersection(this.element)
+      : Promise.resolve(this.element.getIntersectionChangeEntry());
   }
 
   /**
@@ -243,12 +259,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   preconnectCallback(opt_onLayout) {
     const preconnect = Services.preconnectFor(this.win);
     // We always need the bootstrap.
-    preloadBootstrap(
-      this.win,
-      this.getAmpDoc(),
-      preconnect,
-      this.config.remoteHTMLDisabled
-    );
+    preloadBootstrap(this.win, this.type_, this.getAmpDoc(), preconnect);
     if (typeof this.config.prefetch == 'string') {
       preconnect.preload(this.getAmpDoc(), this.config.prefetch, 'script');
     } else if (this.config.prefetch) {
@@ -407,16 +418,21 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         // because both happen inside a cross-domain iframe.  Separating them
         // here, though, allows us to measure the impact of ad throttling via
         // incrementLoadingAds().
-        const iframe = getIframe(
-          toWin(this.element.ownerDocument.defaultView),
-          this.element,
-          this.type_,
-          opt_context,
-          {disallowCustom: this.config.remoteHTMLDisabled}
-        );
-        iframe.title = this.element.title || 'Advertisement';
-        this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
-        return this.xOriginIframeHandler_.init(iframe);
+
+        return this.initialIntersectionPromise_.then((intersection) => {
+          const iframe = getIframe(
+            toWin(this.element.ownerDocument.defaultView),
+            this.element,
+            this.type_,
+            opt_context,
+            {
+              initialIntersection: intersectionEntryToJson(intersection),
+            }
+          );
+          iframe.title = this.element.title || 'Advertisement';
+          this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
+          return this.xOriginIframeHandler_.init(iframe);
+        });
       })
       .then(() => {
         observeWithSharedInOb(this.element, (inViewport) =>

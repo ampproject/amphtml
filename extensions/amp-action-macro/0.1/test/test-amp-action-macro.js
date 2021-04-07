@@ -39,7 +39,7 @@ describes.realWin(
     function newActionMacro() {
       const actionMacro = doc.createElement('amp-action-macro');
       doc.body.appendChild(actionMacro);
-      return actionMacro.build().then(() => {
+      return actionMacro.buildInternal().then(() => {
         return actionMacro.layoutCallback();
       });
     }

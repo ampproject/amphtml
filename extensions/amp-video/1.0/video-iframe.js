@@ -61,12 +61,14 @@ function usePropRef(prop) {
 function VideoIframeWithRef(
   {
     loading,
+    unloadOnPause = false,
     sandbox = DEFAULT_SANDBOX,
     muted = false,
     controls = false,
     origin,
     onCanPlay,
     onMessage,
+    playerStateRef,
     makeMethodMessage: makeMethodMessageProp,
     onIframeLoad,
     ...rest
@@ -97,10 +99,25 @@ function VideoIframeWithRef(
   useImperativeHandle(
     ref,
     () => ({
+      get currentTime() {
+        return playerStateRef?.current?.['currentTime'] ?? NaN;
+      },
+      get duration() {
+        return playerStateRef?.current?.['duration'] ?? NaN;
+      },
       play: () => postMethodMessage('play'),
-      pause: () => postMethodMessage('pause'),
+      pause: () => {
+        if (unloadOnPause) {
+          const iframe = iframeRef.current;
+          if (iframe) {
+            iframe.src = iframe.src;
+          }
+        } else {
+          postMethodMessage('pause');
+        }
+      },
     }),
-    [postMethodMessage]
+    [playerStateRef, postMethodMessage, unloadOnPause]
   );
 
   // Keep `onMessage` in a ref to prevent re-listening on every render.

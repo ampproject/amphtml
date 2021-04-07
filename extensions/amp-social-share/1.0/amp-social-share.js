@@ -231,13 +231,17 @@ AmpSocialShare['Component'] = SocialShare;
 AmpSocialShare['layoutSizeDefined'] = true;
 
 /** @override */
-AmpSocialShare['passthroughNonEmpty'] = true;
+AmpSocialShare['delegatesFocus'] = true;
 
 /** @override */
 AmpSocialShare['props'] = {
+  'children': {passthroughNonEmpty: true},
   'tabIndex': {attr: 'tabindex'},
   'type': {attr: 'type'},
 };
+
+/** @override */
+AmpSocialShare['usesShadowDom'] = true;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpSocialShare, CSS);

@@ -15,28 +15,19 @@
  */
 
 import {ActionTrust, DEFAULT_ACTION} from '../../../src/action-constants';
-import {CSS as COMPONENT_CSS} from './lightbox.jss';
+import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-lightbox-1.0.css';
-import {Lightbox} from './lightbox';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {dict} from '../../../src/utils/object';
+import {Services} from '../../../src/services';
+import {createCustomEvent} from '../../../src/event-helper';
 import {isExperimentOn} from '../../../src/experiments';
-import {toggle} from '../../../src/style';
+import {toWin} from '../../../src/types';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
 
 /** @extends {PreactBaseElement<LightboxDef.Api>} */
-class AmpLightbox extends PreactBaseElement {
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-
-    /** @private {boolean} */
-    this.open_ = false;
-  }
-
+class AmpLightbox extends BaseElement {
   /** @override */
   init() {
     this.registerApiAction(
@@ -46,40 +37,25 @@ class AmpLightbox extends PreactBaseElement {
     );
     this.registerApiAction('open', (api) => api.open(), ActionTrust.LOW);
     this.registerApiAction('close', (api) => api.close(), ActionTrust.LOW);
-    return dict({
-      'onBeforeOpen': this.beforeOpen_.bind(this),
-      'onAfterClose': this.afterClose_.bind(this),
-    });
-  }
 
-  /**
-   * Setting hidden to false
-   * @private
-   */
-  beforeOpen_() {
-    this.open_ = true;
-    toggle(this.element, true);
-    this.element.setAttribute('open', '');
-  }
-
-  /**
-   * Setting hidden to true
-   * @private
-   */
-  afterClose_() {
-    this.open_ = false;
-    toggle(this.element, false);
-    this.element.removeAttribute('open');
+    return super.init();
   }
 
   /** @override */
-  mutationObserverCallback() {
-    const open = this.element.hasAttribute('open');
-    if (open === this.open_) {
-      return;
-    }
-    this.open_ = open;
-    open ? this.api().open() : this.api().close();
+  triggerEvent(element, eventName, detail) {
+    const event = createCustomEvent(
+      toWin(element.ownerDocument.defaultView),
+      `amp-lightbox.${eventName}`,
+      detail
+    );
+    Services.actionServiceForDoc(element).trigger(
+      element,
+      eventName,
+      event,
+      ActionTrust.HIGH
+    );
+
+    super.triggerEvent(element, eventName, detail);
   }
 
   /** @override */
@@ -92,22 +68,6 @@ class AmpLightbox extends PreactBaseElement {
     return super.isLayoutSupported(layout);
   }
 }
-
-/** @override */
-AmpLightbox['Component'] = Lightbox;
-
-/** @override */
-AmpLightbox['props'] = {
-  'animation': {attr: 'animation'},
-  'scrollable': {attr: 'scrollable', type: 'boolean'},
-  'id': {attr: 'id'},
-};
-
-/** @override */
-AmpLightbox['passthrough'] = true;
-
-/** @override */
-AmpLightbox['shadowCss'] = COMPONENT_CSS;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpLightbox, CSS);

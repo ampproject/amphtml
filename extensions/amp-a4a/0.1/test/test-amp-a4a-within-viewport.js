@@ -66,7 +66,7 @@ describes.realWin(
         <amp-a4a layout="fixed" width="100" height="100"></amp-a4a>
       `;
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       impl = await element.getImpl();
     });
 

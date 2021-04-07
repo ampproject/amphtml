@@ -81,14 +81,37 @@ Before creating a `<form>`, you must include the required script for the `<amp-f
 
 #### Allowed
 
+[filter formats="websites, ads"]
+
 -   Other form-related elements, including: `<textarea>`, `<select>`, `<option>`, `<fieldset>`, `<label>`, `<input type=text>`, `<input type=submit>`, and so on.
 -   `<input type=password>` and `<input type=file>` inside of `<form method=POST action-xhr>`.
 -   [`amp-selector`](https://amp.dev/documentation/components/amp-selector)
 
+[/filter]<!-- formats="websites, ads" -->
+
+[filter formats="email"]
+
+-   Other form-related elements, including: `<textarea>`, `<select>`, `<option>`, `<fieldset>`, `<label>`, `<input type=text>`, `<input type=submit>`, and so on.
+-   [`amp-selector`](https://amp.dev/documentation/components/amp-selector)
+
+[/filter]<!-- formats="email" -->
+
 #### Not Allowed
+
+[filter formats="websites, ads"]
 
 -   `<input type=button>`, `<input type=image>`
 -   Most of the form-related attributes on inputs including: `form`, `formaction`, `formtarget`, `formmethod` and others.
+
+[/filter]<!-- formats="websites, ads" -->
+
+[filter formats="email"]
+
+-   `<input type=button>`, `<input type=image>`
+-   `<input type=password>` and `<input type=file>`
+-   Most of the form-related attributes on inputs including: `form`, `formaction`, `formtarget`, `formmethod` and others.
+
+[/filter]<!-- formats="email" -->
 
 (Relaxing some of these rules might be reconsidered in the future - [please let us know](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#suggestions-and-feature-requests) if you require these and provide use cases).
 
@@ -463,6 +486,15 @@ Substitutions will happen on every subsequent submission. Read more about [varia
 
 [/filter]<!-- formats="websites, ads" -->
 
+### Autoexpand
+
+AMP Form provides an `autoexpand` attribute to `<textarea>` elements. This allows the textarea
+to expand and shrink to accomodate the user's rows of input, up to the field's maximum size. If the user manually resizes the field, the autoexpand behavior will be removed.
+
+```html
+<textarea autoexpand></textarea>
+```
+
 ### Polyfills
 
 The `amp-form` extension provide polyfills for behaviors and functionality missing from some browsers or being implemented in the next version of CSS.
@@ -482,13 +514,6 @@ The `amp-form` extension provides [classes](#classes-and-css-hooks) to polyfill 
 #### `<textarea>` validation
 
 Regular expression matching is a common validation feature supported natively on most input elements, except for `<textarea>`. We polyfill this functionality and support the `pattern` attribute on `<textarea>` elements.
-
-AMP Form provides an `autoexpand` attribute to `<textarea>` elements. This allows the textarea
-to expand and shrink to accomodate the user's rows of input, up to the field's maximum size. If the user manually resizes the field, the autoexpand behavior will be removed.
-
-```html
-<textarea autoexpand></textarea>
-```
 
 ### Security considerations
 

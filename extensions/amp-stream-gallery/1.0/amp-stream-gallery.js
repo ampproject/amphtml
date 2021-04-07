@@ -16,12 +16,14 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/base-carousel.jss';
+import {CSS} from '../../../build/amp-stream-gallery-1.0.css';
 import {CSS as GALLERY_CSS} from './stream-gallery.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {StreamGallery} from './stream-gallery';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
+import {dispatchCustomEvent} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
@@ -53,7 +55,8 @@ class AmpStreamGallery extends PreactBaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
-      isExperimentOn(this.win, 'bento-stream-gallery'),
+      isExperimentOn(this.win, 'bento-stream-gallery') ||
+        isExperimentOn(this.win, 'bento'),
       'expected global "bento" or specific "bento-stream-gallery" experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
@@ -70,13 +73,20 @@ class AmpStreamGallery extends PreactBaseElement {
  * @private
  */
 function fireSlideChangeEvent(win, el, index, trust) {
-  const name = 'slideChange';
+  const eventName = 'slideChange';
+  const data = dict({'index': index});
   const slideChangeEvent = createCustomEvent(
     win,
-    `amp-stream-gallery.${name}`,
-    dict({'index': index})
+    `amp-stream-gallery.${eventName}`,
+    data
   );
-  Services.actionServiceForDoc(el).trigger(el, name, slideChangeEvent, trust);
+  Services.actionServiceForDoc(el).trigger(
+    el,
+    eventName,
+    slideChangeEvent,
+    trust
+  );
+  dispatchCustomEvent(el, eventName, data);
 }
 
 /** @override */
@@ -86,26 +96,15 @@ AmpStreamGallery['Component'] = StreamGallery;
 AmpStreamGallery['layoutSizeDefined'] = true;
 
 /** @override */
-AmpStreamGallery['children'] = {
+AmpStreamGallery['props'] = {
   'arrowPrev': {
-    name: 'arrowPrev',
     selector: '[slot="prev-arrow"]',
     single: true,
   },
   'arrowNext': {
-    name: 'arrowNext',
     selector: '[slot="next-arrow"]',
     single: true,
   },
-  'children': {
-    name: 'children',
-    selector: '*', // This should be last as catch-all.
-    single: false,
-  },
-};
-
-/** @override */
-AmpStreamGallery['props'] = {
   'controls': {attr: 'controls', type: 'string', media: true},
   'extraSpace': {attr: 'extra-space', type: 'string', media: true},
   'loop': {attr: 'loop', type: 'boolean', media: true},
@@ -117,11 +116,18 @@ AmpStreamGallery['props'] = {
   'peek': {attr: 'peek', type: 'number', media: true},
   'slideAlign': {attr: 'slide-align', type: 'string', media: true},
   'snap': {attr: 'snap', type: 'boolean', media: true},
+  'children': {
+    selector: '*', // This should be last as catch-all.
+    single: false,
+  },
 };
+
+/** @override */
+AmpStreamGallery['usesShadowDom'] = true;
 
 /** @override */
 AmpStreamGallery['shadowCss'] = GALLERY_CSS + CAROUSEL_CSS;
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpStreamGallery);
+  AMP.registerElement(TAG, AmpStreamGallery, CSS);
 });

@@ -17,8 +17,7 @@
 describes.endtoend(
   'layoutCallback depends on updated viewport size after documentHeight change.',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp4email/viewport-size-race.html',
+    fixture: 'amp4email/viewport-size-race.html',
     environments: ['email-demo'],
   },
   async (env) => {
@@ -33,8 +32,7 @@ describes.endtoend(
 describes.endtoend(
   'layoutCallback depending on element remeasurement after documentHeight change.',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp4email/element-size-race.html',
+    fixture: 'amp4email/element-size-race.html',
     environments: ['email-demo'],
   },
   async (env) => {

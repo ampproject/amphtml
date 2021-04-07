@@ -26,7 +26,7 @@ import {
   dispatchCustomEvent,
 } from '../../../src/dom';
 import {computedStyle} from '../../../src/style';
-import {createCustomEvent, getDetail} from '../../../src/event-helper';
+import {createCustomEvent, getDetail, listen} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
@@ -42,6 +42,11 @@ const CarouselType = {
 };
 
 class AmpCarousel extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /**
    * @private
    */
@@ -124,16 +129,14 @@ class AmpCarousel extends AMP.BaseElement {
      * @private {boolean}
      */
     this.showControls_ = false;
+
+    /** If the ampdoc is in the Viewer */
+    this.isViewerEmbeded_ = Services.viewerForDoc(element).isEmbedded();
   }
 
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @override */
@@ -154,7 +157,7 @@ class AmpCarousel extends AMP.BaseElement {
       win,
       element,
       scrollContainer: dev().assertElement(this.scrollContainer_),
-      initialIndex: Number(this.element.getAttribute('slide')),
+      initialIndex: Number(this.element.getAttribute('slide') || '0'),
       runMutate: (cb) => this.mutateElement(cb),
     });
     this.configureCarousel_(slides);
@@ -175,6 +178,7 @@ class AmpCarousel extends AMP.BaseElement {
     );
     this.prevButton_.addEventListener('click', () => this.interactionPrev());
     this.nextButton_.addEventListener('click', () => this.interactionNext());
+    this.handlePropagationInViewer_();
 
     const owners = Services.ownersForDoc(element);
     this.childLayoutManager_ = new ChildLayoutManager({
@@ -630,6 +634,19 @@ class AmpCarousel extends AMP.BaseElement {
       actionSource == ActionSource.TOUCH ||
       actionSource == ActionSource.GENERIC_HIGH_TRUST
     );
+  }
+
+  /**
+   * Attach singal onto touchmove event to stop propagation to viewer
+   * to be handled at the viewer integration layer in bubble phase.
+   */
+  handlePropagationInViewer_() {
+    if (!this.isViewerEmbeded_) {
+      return;
+    }
+    listen(this.scrollContainer_, 'touchmove', (event) => {
+      event.shouldViewerCancelPropagation = true;
+    });
   }
 
   /**

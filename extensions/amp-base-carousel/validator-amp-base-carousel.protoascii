@@ -57,6 +57,11 @@ attr_lists: {
     value_regex: "([^,]+\\s+(\\d+),\\s*)*(\\d+)"
   }
   attrs: {
+    name: "controls"
+    # Media query / (always|auto|never)
+    value_regex: "([^,]+\\s+(always|auto|never),\\s*)*(always|auto|never)"
+  }
+  attrs: {
     name: "horizontal"
     # Media query / boolean pairs
     value_regex: "([^,]+\\s+(true|false),\\s*)*(true|false)"

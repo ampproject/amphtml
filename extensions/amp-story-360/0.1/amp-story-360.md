@@ -51,9 +51,9 @@ limitations under the License.
 -->
 
 <figure class="centered-fig">
-  <amp-anim alt="amp-story-player example" width="300" height="533" layout="fixed" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story-360/img/amp-story-360.gif">
+  <amp-anim alt="amp-story-360 example" width="300" height="533" layout="fixed" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story-360/img/amp-story-360.gif">
     <noscript>
-    <img alt="amp-story-player example" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story-360/img/amp-story-360.gif" />
+    <img alt="amp-story-360 example" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story-360/img/amp-story-360.gif" />
   </noscript>
   </amp-anim>
 </figure>
@@ -63,6 +63,10 @@ The `amp-story-360` component provides a way to embed 360 images and videos in [
 ## Usage
 
 Use the `amp-story-360` component to render 360 images and video. The component can animate between two points or be explorable via the device's gyroscope sensor. For best results, only use one element per [`amp-story-page`](https://amp.dev/documentation/components/amp-story-page/?format=stories).
+
+### Accessibility considerations
+
+Currently, the `amp-story-360` component does not provide any controls for mouse or keyboard users.
 
 ### Media Requirements
 

@@ -16,7 +16,7 @@
 import '../amp-accordion';
 import {ActionInvocation} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
-import {CanRender} from '../../../../src/contextprops';
+import {CanRender} from '../../../../src/core/contextprops';
 import {htmlFor} from '../../../../src/static-template';
 import {subscribe, unsubscribe} from '../../../../src/context';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -55,7 +55,6 @@ describes.realWin(
       win = env.win;
       html = htmlFor(win.document);
       toggleExperiment(win, 'bento-accordion', true, true);
-      toggleExperiment(win, 'amp-accordion-display-locking', true, true);
       element = html`
         <amp-accordion layout="fixed" width="300" height="200">
           <section expanded id="section1">
@@ -73,7 +72,7 @@ describes.realWin(
         </amp-accordion>
       `;
       win.document.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
     });
 
     it('should render expanded and collapsed sections', () => {
@@ -323,7 +322,7 @@ describes.realWin(
         </amp-accordion>
       `;
       win.document.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
 
       const sections = element.children;
       const {
@@ -363,6 +362,43 @@ describes.realWin(
       expect(header2.getAttribute('id')).to.equal(
         content2.getAttribute('aria-labelledby')
       );
+    });
+
+    it('should not overwrite existing role attributes', async () => {
+      element = html`
+        <amp-accordion layout="fixed" width="300" height="200">
+          <section expanded id="section1">
+            <h1 role="cat">header1</h1>
+            <div role="dog">content1</div>
+          </section>
+          <section>
+            <h1 id="h2">header2</h1>
+            <div>content2</div>
+          </section>
+        </amp-accordion>
+      `;
+      win.document.body.appendChild(element);
+      await element.buildInternal();
+
+      const sections = element.children;
+      const {
+        firstElementChild: header0,
+        lastElementChild: content0,
+      } = sections[0];
+      const {
+        firstElementChild: header1,
+        lastElementChild: content1,
+      } = sections[1];
+
+      expect(header0).to.have.attribute('role');
+      expect(header0.getAttribute('role')).to.equal('cat');
+      expect(content0).to.have.attribute('role');
+      expect(content0.getAttribute('role')).to.equal('dog');
+
+      expect(header1).to.have.attribute('role');
+      expect(header1.getAttribute('role')).to.equal('button');
+      expect(content1).to.have.attribute('role');
+      expect(content1.getAttribute('role')).to.equal('region');
     });
 
     it('should pick up new children', async () => {
@@ -407,7 +443,7 @@ describes.realWin(
           </amp-accordion>
         `;
         win.document.body.appendChild(element);
-        await element.build();
+        await element.buildInternal();
       });
 
       function invocation(method, args = {}) {
@@ -495,6 +531,64 @@ describes.realWin(
         expect(section2).to.not.have.attribute('expanded');
         expect(section3).to.have.attribute('expanded');
       });
+
+      it('should capture events in bento mode (w/o "on" attribute)', async () => {
+        const section1 = element.children[0];
+        const section3 = element.children[2];
+
+        // Set up section 1 to trigger expand of section 3 on expand
+        // and collapse of section 3 on collapse
+        const api = await element.getApi();
+        section1.addEventListener('expand', () => api.expand('section3'));
+        section1.addEventListener('collapse', () => api.collapse('section3'));
+
+        // initally both section 1 and 3 are collapsed
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+
+        // expand section 1
+        section1.firstElementChild.click();
+        await waitForExpanded(section1, true);
+
+        // both section 1 and 3 are expanded
+        expect(section1).to.have.attribute('expanded');
+        expect(section3).to.have.attribute('expanded');
+
+        // collapse section 1
+        section1.firstElementChild.click();
+        await waitForExpanded(section1, false);
+
+        // both section 1 and 3 are collapsed
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
+
+      it('should fire and listen for "expand" and "collapse" events', async () => {
+        const section1 = element.children[0];
+
+        // Add spy functions for expand and collapse
+        const spyE = env.sandbox.spy();
+        const spyC = env.sandbox.spy();
+        section1.addEventListener('expand', spyE);
+        section1.addEventListener('collapse', spyC);
+
+        expect(spyE).to.not.be.called;
+        expect(spyC).to.not.be.called;
+
+        // expand section 1
+        section1.firstElementChild.click();
+        await waitForExpanded(section1, true);
+
+        expect(spyE).to.be.calledOnce;
+        expect(spyC).to.not.be.called;
+
+        // collapse section 1
+        section1.firstElementChild.click();
+        await waitForExpanded(section1, false);
+
+        expect(spyE).to.be.calledOnce;
+        expect(spyC).to.be.calledOnce;
+      });
     });
 
     describe('animate', () => {
@@ -515,7 +609,7 @@ describes.realWin(
           </amp-accordion>
         `;
         win.document.body.appendChild(element);
-        await element.build();
+        await element.buildInternal();
       });
 
       it('should not animate on build', () => {
@@ -555,89 +649,6 @@ describes.realWin(
         animation.onfinish();
         await waitForExpanded(sections[0], false);
         expect(section.lastElementChild).to.have.display('none');
-      });
-    });
-
-    describe('display locking', () => {
-      let defaultCssSupports;
-      let defaultBeforeMatch;
-
-      beforeEach(async () => {
-        toggleExperiment(win, 'amp-accordion-display-locking', true);
-        element = html`
-          <amp-accordion>
-            <section>
-              <h2>Section 1</h2>
-              <div>Puppies are cute.</div>
-            </section>
-            <section expanded>
-              <h2>Section 2</h2>
-              <div>Kittens are furry.</div>
-            </section>
-            <section expanded>
-              <h2>Section 3</h2>
-              <div>Elephants have great memory.</div>
-            </section>
-          </amp-accordion>
-        `;
-        defaultCssSupports = win.CSS.supports;
-        defaultBeforeMatch = win.document.body.onbeforematch;
-      });
-
-      afterEach(() => {
-        win.CSS.supports = defaultCssSupports;
-        win.document.body.onbeforematch = defaultBeforeMatch;
-        toggleExperiment(win, 'amp-accordion-display-locking', false);
-      });
-
-      it('should expand collpased section with beforematch event', async () => {
-        win.document.body.appendChild(element);
-        win.CSS.supports = () => true;
-        win.document.body.onbeforematch = null;
-        await element.build();
-
-        const section1 = element.children[0];
-        const content1 = section1.lastElementChild;
-
-        expect(section1).not.to.have.attribute('expanded');
-        content1.dispatchEvent(new Event('beforematch'));
-        await waitForExpanded(section1, true);
-        expect(section1).to.have.attribute('expanded');
-      });
-
-      it('should not expand already expanded section', async () => {
-        win.document.body.appendChild(element);
-        win.CSS.supports = () => true;
-        win.document.body.onbeforematch = null;
-        await element.build();
-
-        const section2 = element.children[1];
-        const content2 = section2.lastElementChild;
-
-        expect(section2).to.have.attribute('expanded');
-        content2.dispatchEvent(new Event('beforematch'));
-
-        // Section should is already expanded and stays expanded
-        await waitForExpanded(section2, true);
-        expect(section2).to.have.attribute('expanded');
-      });
-
-      it('should not toggle section with two synchronous beforematch events', async () => {
-        win.document.body.appendChild(element);
-        win.CSS.supports = () => true;
-        win.document.body.onbeforematch = null;
-        await element.build();
-
-        const section1 = element.children[0];
-        const content1 = section1.lastElementChild;
-
-        expect(section1).not.to.have.attribute('expanded');
-        content1.dispatchEvent(new Event('beforematch'));
-        content1.dispatchEvent(new Event('beforematch'));
-
-        // Section should be expanded (not toggled opened then closed)
-        await waitForExpanded(section1, true);
-        expect(section1).to.have.attribute('expanded');
       });
     });
 
@@ -759,7 +770,7 @@ describes.realWin(
             </amp-accordion>
           `;
           win.document.body.appendChild(element);
-          await element.build();
+          await element.buildInternal();
 
           section1 = element.children[0];
           section2 = element.children[1];

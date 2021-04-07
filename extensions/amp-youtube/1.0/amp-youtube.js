@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {VideoBaseElement} from '../../amp-video/1.0/base-element';
-import {Youtube} from './youtube';
+import {BaseElement} from './base-element';
+import {CSS} from '../../../build/amp-youtube-1.0.css';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-youtube';
 
-class AmpYoutube extends VideoBaseElement {
+class AmpYoutube extends BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
@@ -34,21 +34,6 @@ class AmpYoutube extends VideoBaseElement {
   }
 }
 
-/** @override */
-AmpYoutube['Component'] = Youtube;
-
-/** @override */
-AmpYoutube['props'] = {
-  'autoplay': {attr: 'autoplay', type: 'boolean'},
-  'loop': {attr: 'loop', type: 'boolean'},
-  'controls': {attr: 'controls', type: 'boolean'},
-  'videoid': {attr: 'data-videoid'},
-  'liveChannelid': {attr: 'data-live-channelid'},
-  'dock': {attr: 'dock'},
-  'credentials': {attr: 'credentials'},
-  'params': {attrPrefix: 'data-param-'},
-};
-
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpYoutube);
+  AMP.registerElement(TAG, AmpYoutube, CSS);
 });

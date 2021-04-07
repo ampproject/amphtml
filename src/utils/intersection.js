@@ -35,20 +35,24 @@ function getInOb(win) {
   }
 
   if (!intersectionObservers.has(win)) {
-    const observer = createViewportObserver((entries) => {
-      const seen = new Set();
-      for (let i = entries.length - 1; i >= 0; i--) {
-        const {target} = entries[i];
-        if (seen.has(target)) {
-          continue;
-        }
-        seen.add(target);
+    const observer = createViewportObserver(
+      (entries) => {
+        const seen = new Set();
+        for (let i = entries.length - 1; i >= 0; i--) {
+          const {target} = entries[i];
+          if (seen.has(target)) {
+            continue;
+          }
+          seen.add(target);
 
-        observer.unobserve(target);
-        intersectionDeferreds.get(target).resolve(entries[i]);
-        intersectionDeferreds.delete(target);
-      }
-    }, win);
+          observer.unobserve(target);
+          intersectionDeferreds.get(target).resolve(entries[i]);
+          intersectionDeferreds.delete(target);
+        }
+      },
+      win,
+      {needsRootBounds: true}
+    );
     intersectionObservers.set(win, observer);
     return observer;
   }
@@ -86,9 +90,20 @@ export function measureIntersection(el) {
 export function intersectionEntryToJson(entry) {
   return {
     time: entry.time,
-    rootBounds: layoutRectFromDomRect(entry.rootBounds),
-    boundingClientRect: layoutRectFromDomRect(entry.boundingClientRect),
-    intersectionRect: layoutRectFromDomRect(entry.intersectionRect),
+    rootBounds: safeLayoutRectFromDomRect(entry.rootBounds),
+    boundingClientRect: safeLayoutRectFromDomRect(entry.boundingClientRect),
+    intersectionRect: safeLayoutRectFromDomRect(entry.intersectionRect),
     intersectionRatio: entry.intersectionRatio,
   };
+}
+
+/**
+ * @param {DOMRect} rect
+ * @return {DOMRect}
+ */
+function safeLayoutRectFromDomRect(rect) {
+  if (rect === null) {
+    return null;
+  }
+  return layoutRectFromDomRect(rect);
 }

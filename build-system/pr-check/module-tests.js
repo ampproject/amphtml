@@ -16,59 +16,53 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script builds and tests the AMP runtime in esm mode.
- * This is run during the CI stage = test; job = module tests.
+ * @fileoverview Script that tests the module AMP runtime during CI.
  */
 
-const colors = require('ansi-colors');
+const argv = require('minimist')(process.argv.slice(2));
 const {
-  printChangeSummary,
-  startTimer,
-  stopTimer,
-  timedExecOrDie: timedExecOrDieBase,
   downloadModuleOutput,
   downloadNomoduleOutput,
+  skipDependentJobs,
+  timedExecOrDie,
 } = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
-const {isPullRequestBuild} = require('../common/ci');
+const {buildTargetsInclude, Targets} = require('./build-targets');
+const {MINIFIED_TARGETS} = require('../tasks/helpers');
+const {runCiJob} = require('./ci-job');
 
-const FILENAME = 'module-tests.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd, unusedFileName) =>
-  timedExecOrDieBase(cmd, FILENAME);
+const jobName = 'module-tests.js';
 
-function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-
-  if (!isPullRequestBuild()) {
-    downloadNomoduleOutput(FILENAME);
-    downloadModuleOutput(FILENAME);
-    timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
-  } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST')
-    ) {
-      downloadNomoduleOutput(FILENAME);
-      downloadModuleOutput(FILENAME);
-      timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
-    } else {
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Module Tests'),
-        'because this commit does not affect the runtime, flag configs,',
-        'or integration tests.'
-      );
-    }
-  }
-
-  stopTimer(FILENAME, FILENAME, startTime);
+function prependConfig() {
+  const targets = MINIFIED_TARGETS.flatMap((target) => [
+    `dist/${target}.js`,
+    `dist/${target}.mjs`,
+  ]).join(',');
+  timedExecOrDie(
+    `amp prepend-global --${argv.config} --local_dev --fortesting --derandomize --target=${targets}`
+  );
 }
 
-main();
+function pushBuildWorkflow() {
+  downloadNomoduleOutput();
+  downloadModuleOutput();
+  prependConfig();
+  timedExecOrDie('amp integration --nobuild --compiled --headless --esm');
+}
+
+function prBuildWorkflow() {
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
+    downloadNomoduleOutput();
+    downloadModuleOutput();
+    prependConfig();
+    timedExecOrDie(
+      `amp integration --nobuild --compiled --headless --esm --config=${argv.config}`
+    );
+  } else {
+    skipDependentJobs(
+      jobName,
+      'this PR does not affect the runtime or integration tests'
+    );
+  }
+}
+
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

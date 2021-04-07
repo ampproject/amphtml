@@ -46,14 +46,16 @@ The `amp-subscriptions` component is similar to [`amp-access`](../amp-access/amp
 and in many features builds on top of `amp-access`. However, it's a much more
 specialized version of access/paywall protocol. Some of the key differences are:
 
-1. The `amp-subscriptions` entitlements response is similar to the amp-access
-   authorization, but it's strictly defined and standardized.
-2. The `amp-subscriptions` component allows multiple services to be configured
+1. The `amp-subscriptions` [authorization endpoint](#authorization-endpoint) is similar to the
+   [`amp-access` authorization endpoint](../amp-access/amp-access.md#authorization-endpoint) but its response is strictly defined and standardized.
+2. Instead of using `amp-access-hide` and `amp-access` attributes as described in [`amp-access` Access Content Markup](../amp-access/amp-access.md#access-content-markup), you'll need to use:
+    - [`subscription-section`](#subscriptions-section) to define sections of content for subscribers and non-subscribers.
+    - [`subscription-display`](#subscriptions-display) to display elements based on factors that are **not** related to the subscription that the user has.
+3. The `amp-subscriptions` component allows multiple [vendor services](#vendor-services) to be configured
    for the page to participate in access/paywall decisions. Services are executed
    concurrently and prioritized based on which service returns the positive response.
-3. AMP viewers are allowed to provide `amp-subscriptions` a signed authorization
+4. AMP viewers are allowed to provide `amp-subscriptions` a signed authorization
    response based on an independent agreement with publishers as a proof of access.
-4. In `amp-subscriptions` content markup is standardized allowing apps and crawlers to easily detect premium content sections.
 
 Because of standardization of markup, support for multiple providers, and improved viewer
 support it is recommended that new publisher and paywall provider implementations
@@ -413,9 +415,13 @@ By default, as the body, pingback POST request receives the entitlement object r
 
 To accurately identify the Reader, the Publisher should associate the [AMP Reader ID][1] with any Publisher cookies relevant to the Reader.
 
-![Process Diagram](images/reader-id-assoociation.png)
+<amp-img alt="reader id cookie association" layout="responsive" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-subscriptions/images/reader-id-assoociation.png">
+  <noscript>
+    <img alt="reader id cookie association" layout="responsive" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-subscriptions/images/reader-id-assoociation.png">
+  </noscript>
+</amp-img>
 
-**Note:** due to the way that the [AMP Reader ID][1] is created, there may be multiple [AMP Reader IDs][1] for the same the Reader so the Publisher should be able to handle that appropriately.
+**Note:** due to the way that the [AMP Reader ID][1] is created, there may be multiple [AMP Reader IDs][1] for the same the user across different devices and browsers so the Publisher must take care to handle that appropriately.
 
 #### "iframe" mode
 
@@ -674,7 +680,7 @@ For instance, you should include the premium article contents in the `content` s
 
 As well as showing/hiding premium and fallback content, there are more ways to customise the document using the `subscriptions-display` attribute which uses expressions for actions and dialogs. The value of `subscriptions-display` is a boolean expression defined in a SQL-like language. The grammar is defined in [amp-access Appendix A](../amp-access/amp-access.md#appendix-a-amp-access-expression-grammar).
 
-Values in the `data` object of an Entitlements response can be used to build expressions. In this example the values of `isLoggedIn` and `isSubscriber` are in the `data` object and are used to conditionally show UI for login and upgrading your account:
+Values in the `data` object of an Entitlements response can be used to build expressions. In this example the value of `isLoggedIn` is in the `data` object and is used to conditionally show UI for login and upgrading your account:
 
 ```html
 <section>

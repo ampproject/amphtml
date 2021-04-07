@@ -183,3 +183,27 @@ export const InsideAccordion = () => {
     </amp-accordion>
   );
 };
+
+export const InsideDetails = () => {
+  const width = number('width', 320);
+  const height = number('height', 180);
+  const autoplay = boolean('autoplay', false);
+
+  return (
+    <details open>
+      <summary>Video</summary>
+      <amp-video
+        autoplay={autoplay}
+        controls
+        loop
+        width={width}
+        height={height}
+      >
+        <source
+          type="video/mp4"
+          src="https://amp.dev/static/inline-examples/videos/kitten-playing.mp4"
+        ></source>
+      </amp-video>
+    </details>
+  );
+};

@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+<<<<<<< HEAD
 /** Version: 0.1.22.155 */
+=======
+/** Version: 0.1.22.154 */
+>>>>>>> master
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -4092,6 +4096,7 @@ const PropensityType = {
 
 /** @enum {string} */
 const PublisherEntitlementEvent = {
+<<<<<<< HEAD
   // Events indicating content could potentially be unlocked
   EVENT_SHOWCASE_METER_OFFERED: 'EVENT_SHOWCASE_METER_OFFERED', // This event is only required if the user can choose not to use a publisher meter
 
@@ -4109,6 +4114,18 @@ const PublisherEntitlementEvent = {
   EVENT_SHOWCASE_INELIGIBLE_PAYWALL: 'EVENT_SHOWCASE_INELIGIBLE_PAYWALL', // When the user is not eligible for showcase entitlements
   EVENT_SHOWCASE_NO_ENTITLEMENTS_PAYWALL:
     'EVENT_SHOWCASE_NO_ENTITLEMENTS_PAYWALL', // When the user has no remaining showcase entitlements
+=======
+  EVENT_SHOWCASE_UNLOCKED_BY_SUBSCRIPTION:
+    'EVENT_SHOWCASE_UNLOCKED_BY_SUBSCRIPTION', // Publisher managed subscriptions only
+  EVENT_SHOWCASE_METER_OFFERED: 'EVENT_SHOWCASE_METER_OFFERED', // This event is only required if the user can choose not to use a publisher meter
+  EVENT_SHOWCASE_UNLOCKED_BY_METER: 'EVENT_SHOWCASE_UNLOCKED_BY_METER', // Publisher managed meters only
+  EVENT_SHOWCASE_UNLOCKED_FREE_PAGE: 'EVENT_SHOWCASE_UNLOCKED_FREE_PAGE', // When the article is free for any reason (lead article, etc)
+
+  EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL:
+    'EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL', // When the user must register to view the article
+  EVENT_SHOWCASE_NO_ENTITLEMENTS_PAYWALL:
+    'EVENT_SHOWCASE_NO_ENTITLEMENTS_PAYWALL', // When the user must subscribe to view the article
+>>>>>>> master
 };
 
 /** @enum {string} */
@@ -4467,7 +4484,11 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
+<<<<<<< HEAD
     '_client': 'SwG 0.1.22.155',
+=======
+    '_client': 'SwG 0.1.22.154',
+>>>>>>> master
   });
 }
 
@@ -5645,7 +5666,11 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
+<<<<<<< HEAD
         '_client': 'SwG 0.1.22.155',
+=======
+        '_client': 'SwG 0.1.22.154',
+>>>>>>> master
         'supportsEventManager': true,
       },
       args || {}
@@ -6492,7 +6517,11 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
+<<<<<<< HEAD
     context.setClientVersion('SwG 0.1.22.155');
+=======
+    context.setClientVersion('SwG 0.1.22.154');
+>>>>>>> master
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -6724,6 +6753,83 @@ class AnalyticsService {
     this.fetcher_.sendBeacon(url, analyticsRequest);
   }
 }
+
+/**
+ * Copyright 2021 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Why is there a strings.js and a swg-strings.js, you ask? strings.js is a
+// generated file, currently used for gaa builds. This file is used for swg and
+// swg-basic builds, and is currently manually updated.
+// TODO(stellachui): Figure out if they should be merged without a large impact
+//   on binary size.
+
+const SWG_I18N_STRINGS = {
+  'SUBSCRIPTION_TITLE_LANG_MAP': {
+    'en': 'Subscribe with Google',
+    'ar': 'Google اشترك مع',
+    'de': 'Abonnieren mit Google',
+    'es': 'Suscríbete con Google',
+    'es-latam': 'Suscríbete con Google',
+    'es-latn': 'Suscríbete con Google',
+    'fr': "S'abonner avec Google",
+    'hi': 'Google के ज़रिये सदस्यता',
+    'id': 'Berlangganan dengan Google',
+    'it': 'Abbonati con Google',
+    'jp': 'Google で購読',
+    'ko': 'Google 을 통한구독',
+    'ms': 'Langgan dengan Google',
+    'nl': 'Abonneren via Google',
+    'no': 'Abonner med Google',
+    'pl': 'Subskrybuj z Google',
+    'pt': 'Subscrever com o Google',
+    'pt-br': 'Assine com o Google',
+    'ru': 'Подпиcка через Google',
+    'se': 'Prenumerera med Google',
+    'th': 'สมัครฟาน Google',
+    'tr': 'Google ile Abone Ol',
+    'uk': 'Підписатися через Google',
+    'zh-tw': '透過 Google 訂閱',
+  },
+  'CONTRIBUTION_TITLE_LANG_MAP': {
+    'en': 'Contribute with Google',
+    'ar': 'المساهمة باستخدام Google',
+    'de': 'Mit Google beitragen',
+    'es': '	Contribuye con Google',
+    'es-latam': 'Contribuir con Google',
+    'es-latn': 'Contribuye con Google',
+    'fr': 'Contribuer avec Google',
+    'hi': 'Google खाते की मदद से योगदान करें',
+    'id': 'Berkontribusi dengan Google',
+    'it': 'Contribuisci con Google',
+    'jp': 'Google を介して資金提供',
+    'ko': 'Google을 통해 참여하기',
+    'ms': 'Sumbangkan dengan Google',
+    'nl': 'Bijdragen met Google',
+    'no': 'Bidra med Google',
+    'pl': 'Wesprzyj publikację przez Google',
+    'pt': 'Contribuir com o Google',
+    'pt-br': 'Contribua com o Google',
+    'ru': 'Внести средства через Google',
+    'se': 'Bidra med Google',
+    'th': 'มีส่วนร่วมผ่าน Google',
+    'tr': 'Google ile Katkıda Bulun',
+    'uk': 'Зробити внесок через Google',
+    'zh-tw': '透過 Google 捐款',
+  },
+};
 
 /**
  * Copyright 2021 The Subscribe with Google Authors. All Rights Reserved.
@@ -7598,6 +7704,289 @@ class Callbacks {
       callback(data);
       this.resetCallback_(id);
     });
+  }
+}
+
+/**
+ * Copyright 2021 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Container for the auto prompt configuation details.
+ */
+class AutoPromptConfig {
+  /**
+   * @param {number|undefined} maxImpressionsPerWeek
+   */
+  constructor(
+    maxImpressionsPerWeek,
+    dismissalDelaySeconds,
+    backoffSeconds,
+    maxDismissalsPerWeek,
+    maxDismissalsResultingHideSeconds
+  ) {
+    /** @const {number|undefined} */
+    this.maxImpressionsPerWeek = maxImpressionsPerWeek;
+
+    /** @const {!ClientDisplayTrigger} */
+    this.clientDisplayTrigger = new ClientDisplayTrigger(dismissalDelaySeconds);
+
+    /** @const {!ExplicitDismissalConfig} */
+    this.explicitDismissalConfig = new ExplicitDismissalConfig(
+      backoffSeconds,
+      maxDismissalsPerWeek,
+      maxDismissalsResultingHideSeconds
+    );
+  }
+}
+
+/**
+ * Client side conditions to trigger the display of the auto prompt.
+ */
+class ClientDisplayTrigger {
+  /**
+   * @param {number|undefined} dismissalDelaySeconds
+   */
+  constructor(dismissalDelaySeconds) {
+    /** @const {number|undefined} */
+    this.dismissalDelaySeconds = dismissalDelaySeconds;
+  }
+}
+
+/**
+ * Configuration of explicit dismissal behavior and its effects.
+ */
+class ExplicitDismissalConfig {
+  /**
+   * @param {number|undefined} backoffSeconds
+   * @param {number|undefined} maxDismissalsPerWeek
+   * @param {number|undefined} maxDismissalsResultingHideSeconds
+   */
+  constructor(
+    backoffSeconds,
+    maxDismissalsPerWeek,
+    maxDismissalsResultingHideSeconds
+  ) {
+    /** @const {number|undefined} */
+    this.backoffSeconds = backoffSeconds;
+
+    /** @const {number|undefined} */
+    this.maxDismissalsPerWeek = maxDismissalsPerWeek;
+
+    /** @const {number|undefined} */
+    this.maxDismissalsResultingHideSeconds = maxDismissalsResultingHideSeconds;
+  }
+}
+
+/**
+ * Copyright 2021 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Container for the details relating to how the client should be configured.
+ */
+class ClientConfig {
+  /**
+   * @param {!./auto-prompt-config.AutoPromptConfig=} autoPromptConfig
+   * @param {string=} paySwgVersion
+   * @param {boolean=} useUpdatedOfferFlows
+   */
+  constructor(autoPromptConfig, paySwgVersion, useUpdatedOfferFlows) {
+    /** @const {!./auto-prompt-config.AutoPromptConfig|undefined} */
+    this.autoPromptConfig = autoPromptConfig;
+
+    /** @const {string|undefined} */
+    this.paySwgVersion = paySwgVersion;
+
+    /** @const {boolean} */
+    this.useUpdatedOfferFlows = useUpdatedOfferFlows || false;
+  }
+}
+
+/**
+ * Copyright 2020 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @enum {string} */
+const ClientTheme = {
+  LIGHT: 'light',
+  DARK: 'dark',
+};
+
+/**
+ * Copyright 2021 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Manager of how the client should be configured. Fetches and stores
+ * configuration details from the server.
+ */
+class ClientConfigManager {
+  /**
+   * @param {string} publicationId
+   * @param {!./fetcher.Fetcher} fetcher
+   * @param {!../api/basic-subscriptions.ClientOptions=} clientOptions
+   */
+  constructor(publicationId, fetcher, clientOptions) {
+    /** @private @const {!../api/basic-subscriptions.ClientOptions} */
+    this.clientOptions_ = clientOptions || {};
+
+    /** @private @const {string} */
+    this.publicationId_ = publicationId;
+
+    /** @private @const {!./fetcher.Fetcher} */
+    this.fetcher_ = fetcher;
+
+    /** @private {?Promise<!ClientConfig>} */
+    this.responsePromise_ = null;
+  }
+
+  /**
+   * Fetches the client config from the server.
+   * @return {!Promise<!ClientConfig>}
+   */
+  fetchClientConfig() {
+    if (!this.publicationId_) {
+      throw new Error('fetchClientConfig requires publicationId');
+    }
+    if (!this.responsePromise_) {
+      this.responsePromise_ = this.fetch_();
+    }
+    return this.responsePromise_;
+  }
+
+  /**
+   * Gets the client config, if already requested. Otherwise returns a Promise
+   * with an empty ClientConfig.
+   * @return {!Promise<!ClientConfig>}
+   */
+  getClientConfig() {
+    return this.responsePromise_ || Promise.resolve(new ClientConfig());
+  }
+
+  /**
+   * Convenience method for retrieving the auto prompt portion of the client
+   * configuration.
+   * @return {!Promise<!../model/auto-prompt-config.AutoPromptConfig|undefined>}
+   */
+  getAutoPromptConfig() {
+    if (!this.responsePromise_) {
+      this.fetchClientConfig();
+    }
+    return this.responsePromise_.then(
+      (clientConfig) => clientConfig.autoPromptConfig
+    );
+  }
+
+  /**
+   * Gets the language the UI should be displayed in. See
+   * src/api/basic-subscriptions.ClientOptions.lang. This
+   * @return {string}
+   */
+  getLanguage() {
+    return this.clientOptions_.lang || 'en';
+  }
+
+  /**
+   * Gets the theme the UI should be displayed in. See
+   * src/api/basic-subscriptions.ClientOptions.theme.
+   * @return {!../api/basic-subscriptions.ClientTheme}
+   */
+  getTheme() {
+    return this.clientOptions_.theme || ClientTheme.LIGHT;
+  }
+
+  /**
+   * Fetches the client config from the server.
+   * @return {!Promise<!ClientConfig>}
+   */
+  fetch_() {
+    const url = serviceUrl(
+      '/publication/' +
+        encodeURIComponent(this.publicationId_) +
+        '/clientconfiguration'
+    );
+    return this.fetcher_.fetchCredentialedJson(url).then((json) => {
+      if (json.errorMessages && json.errorMessages.length > 0) {
+        json.errorMessages.forEach((errorMessage) => {
+          warn('SwG ClientConfigManager: ' + errorMessage);
+        });
+      }
+      return this.parseClientConfig_(json);
+    });
+  }
+
+  /**
+   * Parses the fetched config into the ClientConfig container object.
+   * @param {!Object} json
+   * @return {!ClientConfig}
+   */
+  parseClientConfig_(json) {
+    const paySwgVersion = json['paySwgVersion'];
+    const autoPromptConfigJson = json['autoPromptConfig'];
+    let autoPromptConfig = undefined;
+    if (autoPromptConfigJson) {
+      autoPromptConfig = new AutoPromptConfig(
+        autoPromptConfigJson.maxImpressionsPerWeek,
+        autoPromptConfigJson.clientDisplayTrigger?.dismissalDelaySeconds,
+        autoPromptConfigJson.explicitDismissalConfig?.backoffSeconds,
+        autoPromptConfigJson.explicitDismissalConfig?.maxDismissalsPerWeek,
+        autoPromptConfigJson.explicitDismissalConfig?.maxDismissalsResultingHideSeconds
+      );
+    }
+    return new ClientConfig(
+      autoPromptConfig,
+      paySwgVersion,
+      json['useUpdatedOfferFlows']
+    );
   }
 }
 
@@ -9885,6 +10274,7 @@ const AnalyticsEventToPublisherEvent = {
 
 /** @const {!Object<string,?Array<AnalyticsEvent>>} */
 const ShowcaseEntitlemenntToAnalyticsEvents = {
+<<<<<<< HEAD
   // Events related to content being potentially unlockable
   [PublisherEntitlementEvent.EVENT_SHOWCASE_METER_OFFERED]: [
     AnalyticsEvent.EVENT_HAS_METERING_ENTITLEMENTS,
@@ -9892,6 +10282,8 @@ const ShowcaseEntitlemenntToAnalyticsEvents = {
   ],
 
   // Events related to content being unlocked
+=======
+>>>>>>> master
   [PublisherEntitlementEvent.EVENT_SHOWCASE_UNLOCKED_BY_SUBSCRIPTION]: [
     AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION,
   ],
@@ -9902,22 +10294,34 @@ const ShowcaseEntitlemenntToAnalyticsEvents = {
   [PublisherEntitlementEvent.EVENT_SHOWCASE_UNLOCKED_FREE_PAGE]: [
     AnalyticsEvent.EVENT_UNLOCKED_FREE_PAGE,
   ],
+<<<<<<< HEAD
 
   // Events requiring user action to unlock content
+=======
+>>>>>>> master
   [PublisherEntitlementEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL]: [
     AnalyticsEvent.EVENT_NO_ENTITLEMENTS,
     AnalyticsEvent.IMPRESSION_REGWALL,
     AnalyticsEvent.IMPRESSION_SHOWCASE_REGWALL,
   ],
+<<<<<<< HEAD
 
   // Events requiring subscription to unlock content
+=======
+>>>>>>> master
   [PublisherEntitlementEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_PAYWALL]: [
     AnalyticsEvent.EVENT_NO_ENTITLEMENTS,
     AnalyticsEvent.IMPRESSION_PAYWALL,
   ],
+<<<<<<< HEAD
   [PublisherEntitlementEvent.EVENT_SHOWCASE_INELIGIBLE_PAYWALL]: [
     // TODO(b/181690059): Create showcase ineligible AnalyticsEvent
     AnalyticsEvent.IMPRESSION_PAYWALL,
+=======
+  [PublisherEntitlementEvent.EVENT_SHOWCASE_METER_OFFERED]: [
+    AnalyticsEvent.EVENT_HAS_METERING_ENTITLEMENTS,
+    AnalyticsEvent.EVENT_OFFERED_METER,
+>>>>>>> master
   ],
 };
 

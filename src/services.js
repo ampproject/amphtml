@@ -481,7 +481,7 @@ export class Services {
   static storyVariableServiceForOrNull(win) {
     return (
       /** @type {!Promise<?../extensions/amp-story/1.0/variable-service.AmpStoryVariableService>} */
-      (getElementServiceIfAvailable(win, 'story-variable', 'amp-story'))
+      (getElementServiceIfAvailable(win, 'story-variable', 'amp-story', '1.0'))
     );
   }
 
@@ -505,7 +505,7 @@ export class Services {
   static storyStoreServiceForOrNull(win) {
     return (
       /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService>} */
-      (getElementServiceIfAvailable(win, 'story-store', 'amp-story'))
+      (getElementServiceIfAvailable(win, 'story-store', 'amp-story', '1.0'))
     );
   }
 
@@ -539,7 +539,7 @@ export class Services {
   static storyRequestServiceForOrNull(win) {
     return (
       /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService>} */
-      (getElementServiceIfAvailable(win, 'story-request', 'amp-story'))
+      (getElementServiceIfAvailable(win, 'story-request', 'amp-story', '1.0'))
     );
   }
 
@@ -595,7 +595,13 @@ export class Services {
   static storyAnalyticsServiceForOrNull(win) {
     return (
       /** @type {!Promise<?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService>} */
-      (getElementServiceIfAvailable(win, 'story-analytics', 'amp-story', true))
+      (getElementServiceIfAvailable(
+        win,
+        'story-analytics',
+        'amp-story',
+        '1.0',
+        true
+      ))
     );
   }
 
@@ -622,6 +628,17 @@ export class Services {
   }
 
   /**
+   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!Promise<RealTimeConfigManager>}
+   */
+  static realTimeConfigForDoc(elementOrAmpDoc) {
+    return /** @type {!Promise<RealTimeConfigManager>} */ (getServicePromiseForDoc(
+      elementOrAmpDoc,
+      'real-time-config'
+    ));
+  }
+
+  /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!./service/storage-impl.Storage>}
    */
@@ -633,12 +650,33 @@ export class Services {
   }
 
   /**
-   * @param {!Window} window
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!Promise<!./service/storage-impl.Storage>}
+   * TODO(dmanek): Add tests for this method.
+   */
+  static storageForTopLevelDoc(elementOrAmpDoc) {
+    const thisAmpdoc = Services.ampdoc(elementOrAmpDoc);
+    const ampdocService = Services.ampdocServiceFor(thisAmpdoc.win);
+    const topAmpdoc = ampdocService.isSingleDoc()
+      ? ampdocService.getSingleDoc()
+      : null;
+    // We need to verify that ampdocs are on the same origin, therefore
+    // we compare the windows of both.
+    const ampdoc =
+      topAmpdoc && topAmpdoc.win == thisAmpdoc.win ? topAmpdoc : thisAmpdoc;
+    return /** @type {!Promise<!./service/storage-impl.Storage>} */ (getServicePromiseForDoc(
+      ampdoc,
+      'storage'
+    ));
+  }
+
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/template-impl.Templates}
    */
-  static templatesFor(window) {
-    return /** @type {!./service/template-impl.Templates} */ (getService(
-      window,
+  static templatesForDoc(elementOrAmpDoc) {
+    return /** @type {!./service/template-impl.Templates} */ (getServiceForDoc(
+      elementOrAmpDoc,
       'templates'
     ));
   }
@@ -805,5 +843,27 @@ export class Services {
    */
   static xhrFor(window) {
     return /** @type {!./service/xhr-impl.Xhr} */ (getService(window, 'xhr'));
+  }
+
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!../extensions/amp-assistant-assistjs/0.1/assistjs-frame-service.AssistjsFrameService}
+   */
+  static assistjsFrameServiceForDoc(elementOrAmpDoc) {
+    return /** @type {!../extensions/amp-assistant-assistjs/0.1/assistjs-frame-service.AssistjsFrameService} */ (getServiceForDoc(
+      elementOrAmpDoc,
+      'assistjs-frame-service'
+    ));
+  }
+
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!../extensions/amp-assistant-assistjs/0.1/assistjs-config-service.AssistjsConfigService}
+   */
+  static assistjsConfigServiceForDoc(elementOrAmpDoc) {
+    return /** @type {!../extensions/amp-assistant-assistjs/0.1/assistjs-config-service.AssistjsConfigService} */ (getServiceForDoc(
+      elementOrAmpDoc,
+      'assistjs-config-service'
+    ));
   }
 }

@@ -197,7 +197,7 @@ Here, the `mask-output` output attribute is set to `alphanumeric`.
 />
 ```
 
-When `mask-output` is set to `raw`, the form will submit the `input` value as-is, and the form will add a hidden input. The hidden input will have the alphanumeric characters from the original input. Its `name` will be the original input's name with `-unmasked` appended. For example, if the input contains `+1 (800) 123-4567`, the form will submit the following values:
+When `mask-output` is set to `alphanumeric`, the form will submit the `input` value as-is, and the form will add a hidden input. The hidden input will have the alphanumeric characters from the original input. Its `name` will be the original input's name with `-unmasked` appended. For example, if the input contains `+1 (800) 123-4567`, the form will submit the following values:
 
 ```json
 {

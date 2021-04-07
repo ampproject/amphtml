@@ -17,9 +17,9 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const del = require('del');
-const log = require('fancy-log');
 const path = require('path');
-const {cyan} = require('ansi-colors');
+const {cyan} = require('kleur/colors');
+const {log} = require('../common/logging');
 
 const ROOT_DIR = path.resolve(__dirname, '../../');
 
@@ -28,9 +28,11 @@ const ROOT_DIR = path.resolve(__dirname, '../../');
  */
 async function clean() {
   const pathsToDelete = [
-    '.amp-build',
-    '.karma-cache',
+    '.amp-dep-check',
+    '.babel-cache',
+    '.css-cache',
     'build',
+    'extensions/**/dist',
     'build-system/server/new-server/transforms/dist',
     'deps.txt',
     'dist',
@@ -38,6 +40,7 @@ async function clean() {
     'dist.tools',
     'test-bin',
     'validator/**/dist',
+    'examples/storybook',
   ];
   if (argv.include_subpackages) {
     pathsToDelete.push('**/node_modules', '!node_modules');
@@ -60,7 +63,7 @@ module.exports = {
 
 clean.description = 'Cleans up various build and test artifacts';
 clean.flags = {
-  'dry_run': '  Does a dry run without actually deleting anything',
+  'dry_run': 'Does a dry run without actually deleting anything',
   'include_subpackages':
-    '  Also cleans up inner node_modules package directories',
+    'Also cleans up inner node_modules package directories',
 };

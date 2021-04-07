@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-video-1.0.css';
 import {VideoBaseElement} from './base-element';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
@@ -34,5 +35,5 @@ class AmpVideo extends VideoBaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpVideo);
+  AMP.registerElement(TAG, AmpVideo, CSS);
 });

@@ -16,79 +16,61 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script runs the unit and integration tests against minified code
- * on a local CI service VM.
- * This is run during the CI stage = test; job = nomodule tests.
+ * @fileoverview Script that tests the nomodule AMP runtime during CI.
  */
 
-const colors = require('ansi-colors');
+const argv = require('minimist')(process.argv.slice(2));
 const {
   downloadNomoduleOutput,
-  printChangeSummary,
-  startTimer,
-  stopTimer,
-  timedExecOrDie: timedExecOrDieBase,
-  timedExecOrThrow: timedExecOrThrowBase,
+  skipDependentJobs,
+  timedExecOrDie,
+  timedExecOrThrow,
 } = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
-const {isPullRequestBuild} = require('../common/ci');
+const {buildTargetsInclude, Targets} = require('./build-targets');
+const {MINIFIED_TARGETS} = require('../tasks/helpers');
+const {runCiJob} = require('./ci-job');
 
-const FILENAME = 'nomodule-tests.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
-const timedExecOrThrow = (cmd, msg) => timedExecOrThrowBase(cmd, FILENAME, msg);
+const jobName = 'nomodule-tests.js';
 
-function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-
-  if (!isPullRequestBuild()) {
-    downloadNomoduleOutput(FILENAME);
-    timedExecOrDie('gulp update-packages');
-
-    try {
-      timedExecOrThrow(
-        'gulp integration --nobuild --headless --compiled --report',
-        'Integration tests failed!'
-      );
-    } catch (e) {
-      if (e.status) {
-        process.exitCode = e.status;
-      }
-    } finally {
-      timedExecOrDie('gulp test-report-upload');
-    }
-  } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
-    if (
-      !buildTargets.has('RUNTIME') &&
-      !buildTargets.has('FLAG_CONFIG') &&
-      !buildTargets.has('INTEGRATION_TEST')
-    ) {
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Nomodule Tests'),
-        'because this commit not affect the runtime, flag configs,',
-        'or integration tests.'
-      );
-      stopTimer(FILENAME, FILENAME, startTime);
-      return;
-    }
-
-    downloadNomoduleOutput(FILENAME);
-    timedExecOrDie('gulp update-packages');
-
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST')
-    ) {
-      timedExecOrDie('gulp integration --nobuild --headless --compiled');
-    }
-  }
-
-  stopTimer(FILENAME, FILENAME, startTime);
+function prependConfig() {
+  const targets = MINIFIED_TARGETS.flatMap((target) => [
+    `dist/${target}.js`,
+  ]).join(',');
+  timedExecOrDie(
+    `amp prepend-global --${argv.config} --local_dev --fortesting --derandomize --target=${targets}`
+  );
 }
 
-main();
+function pushBuildWorkflow() {
+  downloadNomoduleOutput();
+  prependConfig();
+  try {
+    timedExecOrThrow(
+      `amp integration --nobuild --headless --compiled --report --config=${argv.config}`,
+      'Integration tests failed!'
+    );
+  } catch (e) {
+    if (e.status) {
+      process.exitCode = e.status;
+    }
+  } finally {
+    timedExecOrDie('amp test-report-upload');
+  }
+}
+
+function prBuildWorkflow() {
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
+    downloadNomoduleOutput();
+    prependConfig();
+    timedExecOrDie(
+      `amp integration --nobuild --compiled --headless --config=${argv.config}`
+    );
+  } else {
+    skipDependentJobs(
+      jobName,
+      'this PR does not affect the runtime or integration tests'
+    );
+  }
+}
+
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

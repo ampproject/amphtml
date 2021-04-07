@@ -47,6 +47,10 @@ test('transforming same exact file twice is fine (e.g. watch mode)', () => {
   babel.transformSync(fileContents, {filename, plugins, caller});
 });
 
+/**
+ * A stubs create-hash then calls the provided function.
+ * @param {Function} fn
+ */
 function stubCreateHash(fn) {
   const hash = require('../create-hash');
   const originalCreateHash = hash.createHash;

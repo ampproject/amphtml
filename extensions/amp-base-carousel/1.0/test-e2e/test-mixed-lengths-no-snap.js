@@ -21,11 +21,10 @@ const pageWidth = 800;
 const pageHeight = 600;
 
 describes.endtoend(
-  'AMP carousel mixed length slides',
+  'amp-base-carousel - mixed length slides without snapping',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/1.0/' +
-      'mixed-lengths-no-snap.amp.html',
+    version: '1.0',
+    fixture: 'amp-base-carousel/1.0/mixed-lengths-no-snap.amp.html',
     experiments: ['bento-carousel'],
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single', 'viewer-demo'],
@@ -49,7 +48,8 @@ describes.endtoend(
     describe('no snap', () => {
       const slideWidth = pageWidth * 0.75;
 
-      it('should have the correct initial slide positions', async () => {
+      // TODO(wg-components, #24195): Flaky during CI.
+      it.skip('should have the correct initial slide positions', async () => {
         const slideOne = await getSlide(styles, controller, 0);
         const slideTwo = await getSlide(styles, controller, 1);
 
@@ -62,7 +62,8 @@ describes.endtoend(
         });
       });
 
-      it('should scroll freely', async () => {
+      // TODO(wg-components, #24195): Flaky during CI.
+      it.skip('should scroll freely', async () => {
         const el = await getScrollingElement(styles, controller);
         const slideOne = await getSlide(styles, controller, 0);
 

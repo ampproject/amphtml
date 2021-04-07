@@ -44,15 +44,15 @@ export function install(win) {
  * @param {!Window} childWin
  */
 export function installForChildWin(parentWin, childWin) {
-  if (childWin.IntersectionObserver) {
-    fixEntry(childWin);
-  } else if (parentWin.IntersectionObserver) {
+  if (shouldLoadPolyfill(childWin)) {
     Object.defineProperties(childWin, {
       IntersectionObserver: {get: () => parentWin.IntersectionObserver},
       IntersectionObserverEntry: {
         get: () => parentWin.IntersectionObserverEntry,
       },
     });
+  } else {
+    fixEntry(childWin);
   }
 }
 

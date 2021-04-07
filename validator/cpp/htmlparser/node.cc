@@ -25,8 +25,8 @@
 
 namespace htmlparser {
 
-Node::Node(NodeType node_type, Atom atom) :
-    node_type_(node_type), atom_(atom) {}
+Node::Node(NodeType node_type, Atom atom, std::string name_space) :
+    node_type_(node_type), atom_(atom), name_space_(name_space) {}
 
 void Node::SetData(std::string_view data) {
   data_ = data;

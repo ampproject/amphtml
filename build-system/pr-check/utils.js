@@ -15,162 +15,181 @@
  */
 'use strict';
 
-const colors = require('ansi-colors');
+const fs = require('fs');
+const {
+  ciBuildSha,
+  ciPullRequestSha,
+  isCiBuild,
+  isCircleciBuild,
+} = require('../common/ci');
 const {
   gitBranchCreationPoint,
   gitBranchName,
   gitCommitHash,
   gitDiffCommitLog,
-  gitDiffStatMaster,
-  gitCiMasterBaseline,
+  gitDiffStatMain,
+  gitCiMainBaseline,
   shortSha,
 } = require('../common/git');
+const {cyan, green, yellow} = require('kleur/colors');
 const {execOrDie, execOrThrow, execWithError, exec} = require('../common/exec');
-const {isCiBuild, ciBuildNumber, ciPullRequestSha} = require('../common/ci');
-const {replaceUrls, signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
+const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
+const {mainBranch} = require('../common/main-branch');
+const {replaceUrls} = require('../tasks/pr-deploy-bot-utils');
 
-const UNMINIFIED_OUTPUT_FILE = isCiBuild()
-  ? `amp_unminified_${ciBuildNumber()}.zip`
-  : '';
-const NOMODULE_OUTPUT_FILE = isCiBuild()
-  ? `amp_nomodule_${ciBuildNumber()}.zip`
-  : '';
-const MODULE_OUTPUT_FILE = isCiBuild()
-  ? `amp_module_${ciBuildNumber()}.zip`
-  : '';
+const UNMINIFIED_OUTPUT_FILE = `amp_unminified_${ciBuildSha()}.zip`;
+const NOMODULE_OUTPUT_FILE = `amp_nomodule_${ciBuildSha()}.zip`;
+const MODULE_OUTPUT_FILE = `amp_module_${ciBuildSha()}.zip`;
+const EXPERIMENT_OUTPUT_FILE = (exp) => `amp_${exp}_${ciBuildSha()}.zip`;
 
 const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/';
-const APP_SERVING_DIRS = 'dist.tools/ examples/ test/manual/';
+const APP_SERVING_DIRS =
+  'dist.tools/ examples/ test/manual/ test/fixtures/e2e/';
 
 // TODO(rsimha, ampproject/amp-github-apps#1110): Update storage details.
-const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
-const OUTPUT_STORAGE_KEY_FILE = 'sa-travis-key.json';
-const OUTPUT_STORAGE_PROJECT_ID = 'amp-travis-build-storage';
-const OUTPUT_STORAGE_SERVICE_ACCOUNT =
-  'sa-travis@amp-travis-build-storage.iam.gserviceaccount.com';
-
-const GCLOUD_LOGGING_FLAGS = '--quiet --verbosity error';
+const GCLOUD_STORAGE_BUCKET = 'gs://amp-travis-builds';
 
 const GIT_BRANCH_URL =
   'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#create-a-git-branch';
 
 /**
  * Prints a summary of files changed by, and commits included in the PR.
- * @param {string} fileName
  */
-function printChangeSummary(fileName) {
-  const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
+function printChangeSummary() {
+  const loggingPrefix = getLoggingPrefix();
   let commitSha;
 
   if (isCiBuild()) {
-    console.log(
-      `${fileLogPrefix} Latest commit from ${colors.cyan('master')} included ` +
-        `in this build: ${colors.cyan(shortSha(gitCiMasterBaseline()))}`
+    logWithoutTimestamp(
+      `${loggingPrefix} Latest commit from ${cyan(mainBranch)} included ` +
+        `in this build: ${cyan(shortSha(gitCiMainBaseline()))}`
     );
     commitSha = ciPullRequestSha();
   } else {
     commitSha = gitCommitHash();
   }
-  console.log(
-    `${fileLogPrefix} Testing the following changes at commit ` +
-      `${colors.cyan(shortSha(commitSha))}`
+  logWithoutTimestamp(
+    `${loggingPrefix} Testing the following changes at commit ` +
+      `${cyan(shortSha(commitSha))}`
   );
 
-  const filesChanged = gitDiffStatMaster();
-  console.log(filesChanged);
+  const filesChanged = gitDiffStatMain();
+  logWithoutTimestamp(filesChanged);
 
   const branchCreationPoint = gitBranchCreationPoint();
   if (branchCreationPoint) {
-    console.log(
-      `${fileLogPrefix} Commit log since branch`,
-      `${colors.cyan(gitBranchName())} was forked from`,
-      `${colors.cyan('master')} at`,
-      `${colors.cyan(shortSha(branchCreationPoint))}:`
+    logWithoutTimestamp(
+      `${loggingPrefix} Commit log since branch`,
+      `${cyan(gitBranchName())} was forked from`,
+      `${cyan(mainBranch)} at`,
+      `${cyan(shortSha(branchCreationPoint))}:`
     );
-    console.log(gitDiffCommitLog() + '\n');
+    logWithoutTimestamp(gitDiffCommitLog() + '\n');
   } else {
-    console.error(
-      fileLogPrefix,
-      colors.yellow('WARNING:'),
+    logWithoutTimestamp(
+      loggingPrefix,
+      yellow('WARNING:'),
       'Could not find a common ancestor for',
-      colors.cyan(gitBranchName()),
+      cyan(gitBranchName()),
       'and',
-      colors.cyan('master') + '. (This can happen with older PR branches.)'
+      cyan(mainBranch) + '. (This can happen with older PR branches.)'
     );
-    console.error(
-      fileLogPrefix,
-      colors.yellow('NOTE 1:'),
+    logWithoutTimestamp(
+      loggingPrefix,
+      yellow('NOTE 1:'),
       'If this causes unexpected test failures, try rebasing the PR branch on',
-      colors.cyan('master') + '.'
+      cyan(mainBranch) + '.'
     );
-    console.error(
-      fileLogPrefix,
-      colors.yellow('NOTE 2:'),
+    logWithoutTimestamp(
+      loggingPrefix,
+      yellow('NOTE 2:'),
       "If rebasing doesn't work, you may have to recreate the branch. See",
-      colors.cyan(GIT_BRANCH_URL) + '.\n'
+      cyan(GIT_BRANCH_URL) + '.\n'
     );
   }
 }
 
 /**
- * Starts a timer to measure the execution time of the given function.
- * @param {string} functionName
- * @param {string} fileName
+ * Signal to dependent jobs that they should be skipped.
+ *
+ * Currently only relevant for CircleCI builds.
+ */
+function signalGracefulHalt() {
+  if (isCircleciBuild()) {
+    fs.closeSync(fs.openSync('/tmp/workspace/.CI_GRACEFULLY_HALT', 'w'));
+  }
+}
+
+/**
+ * Prints a message indicating why a job was skipped and mark its dependent jobs
+ * for skipping.
+ * @param {string} jobName
+ * @param {string} skipReason
+ */
+function skipDependentJobs(jobName, skipReason) {
+  const loggingPrefix = getLoggingPrefix();
+  logWithoutTimestamp(
+    `${loggingPrefix} Skipping ${cyan(jobName)} because ${skipReason}.`
+  );
+  signalGracefulHalt();
+}
+
+/**
+ * Starts a timer to measure the execution time of the given job / command.
+ * @param {string} jobNameOrCmd
  * @return {DOMHighResTimeStamp}
  */
-function startTimer(functionName, fileName) {
+function startTimer(jobNameOrCmd) {
   const startTime = Date.now();
-  const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
-  console.log(
-    '\n' + fileLogPrefix,
+  const loggingPrefix = getLoggingPrefix();
+  logWithoutTimestamp(
+    '\n' + loggingPrefix,
     'Running',
-    colors.cyan(functionName) + '...'
+    cyan(jobNameOrCmd) + '...'
   );
   return startTime;
 }
 
 /**
- * Stops the timer for the given function and prints the execution time.
- * @param {string} functionName
- * @param {string} fileName
+ * Stops the timer for the given job / command and prints the execution time.
+ * @param {string} jobNameOrCmd
  * @param {DOMHighResTimeStamp} startTime
- * @return {number}
  */
-function stopTimer(functionName, fileName, startTime) {
+function stopTimer(jobNameOrCmd, startTime) {
   const endTime = Date.now();
   const executionTime = endTime - startTime;
   const mins = Math.floor(executionTime / 60000);
   const secs = Math.floor((executionTime % 60000) / 1000);
-  const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
-  console.log(
-    fileLogPrefix,
+  const loggingPrefix = getLoggingPrefix();
+  logWithoutTimestamp(
+    loggingPrefix,
     'Done running',
-    colors.cyan(functionName),
+    cyan(jobNameOrCmd),
     'Total time:',
-    colors.green(mins + 'm ' + secs + 's')
+    green(mins + 'm ' + secs + 's')
   );
 }
 
 /**
- * Stops the Node process and timer
- * @param {string} fileName
- * @param {startTime} startTime
+ * Aborts the process after stopping the timer for a given job
+ * @param {string} jobName
+ * @param {number} startTime
  */
-function stopTimedJob(fileName, startTime) {
-  stopTimer(fileName, fileName, startTime);
+function abortTimedJob(jobName, startTime) {
+  stopTimer(jobName, startTime);
   process.exitCode = 1;
 }
 
 /**
  * Wraps an exec helper in a timer. Returns the result of the helper.
- * @param {!Function(string, string=): ?} execFn
- * @return {!Function(string, string=): ?}
+ * @param {function(string, string=): ?} execFn
+ * @return {function(string, string=): ?}
  */
 function timedExecFn(execFn) {
-  return (cmd, fileName, ...rest) => {
-    const startTime = startTimer(cmd, fileName);
+  return (cmd, ...rest) => {
+    const startTime = startTimer(cmd);
     const p = execFn(cmd, ...rest);
-    stopTimer(cmd, fileName, startTime);
+    stopTimer(cmd, startTime);
     return p;
   };
 }
@@ -179,7 +198,6 @@ function timedExecFn(execFn) {
  * Executes the provided command and times it. Errors, if any, are printed.
  * @function
  * @param {string} cmd
- * @param {string} fileName
  * @return {!Object} Node process
  */
 const timedExec = timedExecFn(exec);
@@ -188,7 +206,6 @@ const timedExec = timedExecFn(exec);
  * Executes the provided command and times it. Errors, if any, are returned.
  * @function
  * @param {string} cmd
- * @param {string} fileName
  * @return {!Object} Node process
  */
 const timedExecWithError = timedExecFn(execWithError);
@@ -198,7 +215,6 @@ const timedExecWithError = timedExecFn(execWithError);
  * failure.
  * @function
  * @param {string} cmd
- * @param {string} fileName
  */
 const timedExecOrDie = timedExecFn(execOrDie);
 
@@ -207,32 +223,29 @@ const timedExecOrDie = timedExecFn(execOrDie);
  * case of failure.
  * @function
  * @param {string} cmd
- * @param {string} fileName
  */
 const timedExecOrThrow = timedExecFn(execOrThrow);
 
 /**
  * Download output helper
- * @param {string} functionName
  * @param {string} outputFileName
  * @param {string} outputDirs
  * @private
  */
-function downloadOutput_(functionName, outputFileName, outputDirs) {
-  const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
-  const buildOutputDownloadUrl = `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`;
+function downloadOutput_(outputFileName, outputDirs) {
+  const loggingPrefix = getLoggingPrefix();
+  const buildOutputDownloadUrl = `${GCLOUD_STORAGE_BUCKET}/${outputFileName}`;
   const dirsToUnzip = outputDirs.split(' ');
 
-  console.log(
-    `${fileLogPrefix} Downloading build output from ` +
-      colors.cyan(buildOutputDownloadUrl) +
+  logWithoutTimestamp(
+    `${loggingPrefix} Downloading build output from ` +
+      cyan(buildOutputDownloadUrl) +
       '...'
   );
-  authenticateWithStorageLocation_();
-  execOrDie(`gsutil cp ${buildOutputDownloadUrl} ${outputFileName}`);
+  execOrDie(`gsutil -q cp ${buildOutputDownloadUrl} ${outputFileName}`);
 
-  console.log(
-    `${fileLogPrefix} Extracting ` + colors.cyan(outputFileName) + '...'
+  logWithoutTimestamp(
+    `${loggingPrefix} Extracting ` + cyan(outputFileName) + '...'
   );
   dirsToUnzip.forEach((dir) => {
     execOrDie(`unzip -q -o ${outputFileName} '${dir.replace('/', '/*')}'`);
@@ -242,140 +255,121 @@ function downloadOutput_(functionName, outputFileName, outputDirs) {
 
 /**
  * Upload output helper
- * @param {string} functionName
  * @param {string} outputFileName
  * @param {string} outputDirs
  * @private
  */
-function uploadOutput_(functionName, outputFileName, outputDirs) {
-  const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
+function uploadOutput_(outputFileName, outputDirs) {
+  const loggingPrefix = getLoggingPrefix();
 
-  console.log(
-    `\n${fileLogPrefix} Compressing ` +
-      colors.cyan(outputDirs.split(' ').join(', ')) +
+  logWithoutTimestamp(
+    `\n${loggingPrefix} Compressing ` +
+      cyan(outputDirs.split(' ').join(', ')) +
       ' into ' +
-      colors.cyan(outputFileName) +
+      cyan(outputFileName) +
       '...'
   );
   execOrDie(`zip -r -q ${outputFileName} ${outputDirs}`);
   execOrDie(`du -sh ${outputFileName}`);
 
-  console.log(
-    `${fileLogPrefix} Uploading ` +
-      colors.cyan(outputFileName) +
+  logWithoutTimestamp(
+    `${loggingPrefix} Uploading ` +
+      cyan(outputFileName) +
       ' to ' +
-      colors.cyan(OUTPUT_STORAGE_LOCATION) +
+      cyan(GCLOUD_STORAGE_BUCKET) +
       '...'
   );
-  authenticateWithStorageLocation_();
-  execOrDie(`gsutil -m cp -r ${outputFileName} ${OUTPUT_STORAGE_LOCATION}`);
-}
-
-function authenticateWithStorageLocation_() {
-  decryptTravisKey_();
-  execOrDie(
-    `gcloud auth activate-service-account --key-file ${OUTPUT_STORAGE_KEY_FILE} ${GCLOUD_LOGGING_FLAGS}`
-  );
-  execOrDie(
-    `gcloud config set account ${OUTPUT_STORAGE_SERVICE_ACCOUNT} ${GCLOUD_LOGGING_FLAGS}`
-  );
-  execOrDie(
-    `gcloud config set pass_credentials_to_gsutil true ${GCLOUD_LOGGING_FLAGS}`
-  );
-  execOrDie(
-    `gcloud config set project ${OUTPUT_STORAGE_PROJECT_ID} ${GCLOUD_LOGGING_FLAGS}`
-  );
+  execOrDie(`gsutil -q -m cp -r ${outputFileName} ${GCLOUD_STORAGE_BUCKET}`);
 }
 
 /**
  * Downloads and unzips build output from storage
- * @param {string} functionName
  */
-function downloadUnminifiedOutput(functionName) {
-  downloadOutput_(functionName, UNMINIFIED_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
+function downloadUnminifiedOutput() {
+  downloadOutput_(UNMINIFIED_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
 }
 
 /**
  * Downloads and unzips nomodule output from storage
- * @param {string} functionName
  */
-function downloadNomoduleOutput(functionName) {
-  downloadOutput_(functionName, NOMODULE_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
+function downloadNomoduleOutput() {
+  downloadOutput_(NOMODULE_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
 }
 
 /**
  * Downloads and unzips module output from storage
- * @param {string} functionName
  */
-function downloadModuleOutput(functionName) {
-  downloadOutput_(functionName, MODULE_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
+function downloadModuleOutput() {
+  downloadOutput_(MODULE_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
+}
+
+/**
+ * Downloads and unzips output for the given experiment from storage
+ * @param {string} exp
+ */
+function downloadExperimentOutput(exp) {
+  downloadOutput_(EXPERIMENT_OUTPUT_FILE(exp), BUILD_OUTPUT_DIRS);
 }
 
 /**
  * Zips and uploads the build output to a remote storage location
- * @param {string} functionName
  */
-function uploadUnminifiedOutput(functionName) {
-  uploadOutput_(functionName, UNMINIFIED_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
+function uploadUnminifiedOutput() {
+  uploadOutput_(UNMINIFIED_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
 }
 
 /**
  * Zips and uploads the nomodule output to a remote storage location
- * @param {string} functionName
  */
-function uploadNomoduleOutput(functionName) {
+function uploadNomoduleOutput() {
   const nomoduleOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
-  uploadOutput_(functionName, NOMODULE_OUTPUT_FILE, nomoduleOutputDirs);
+  uploadOutput_(NOMODULE_OUTPUT_FILE, nomoduleOutputDirs);
 }
 
 /**
  * Zips and uploads the module output to a remote storage location
- * @param {string} functionName
  */
-function uploadModuleOutput(functionName) {
+function uploadModuleOutput() {
   const moduleOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
-  uploadOutput_(functionName, MODULE_OUTPUT_FILE, moduleOutputDirs);
+  uploadOutput_(MODULE_OUTPUT_FILE, moduleOutputDirs);
+}
+
+/**
+ * Zips and uploads the output for the given experiment to a remote storage
+ * location
+ * @param {string} exp
+ */
+function uploadExperimentOutput(exp) {
+  const experimentOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
+  uploadOutput_(EXPERIMENT_OUTPUT_FILE(exp), experimentOutputDirs);
 }
 
 /**
  * Replaces URLS in HTML files, zips and uploads nomodule output,
  * and signals to the AMP PR Deploy bot that the upload is complete.
- * @param {string} functionName
  */
-async function processAndUploadNomoduleOutput(functionName) {
+async function processAndUploadNomoduleOutput() {
   await replaceUrls('test/manual');
   await replaceUrls('examples');
-  uploadNomoduleOutput(functionName);
-  await signalDistUpload('success');
-}
-
-/**
- * Decrypts key used by storage service account
- */
-function decryptTravisKey_() {
-  // -md sha256 is required due to encryption differences between
-  // openssl 1.1.1a, which was used to encrypt the key, and
-  // openssl 1.0.2g, which is used by Travis to decrypt.
-  execOrDie(
-    `openssl aes-256-cbc -md sha256 -k ${process.env.GCP_TOKEN} -in ` +
-      `build-system/common/sa-travis-key.json.enc -out ` +
-      `${OUTPUT_STORAGE_KEY_FILE} -d`
-  );
+  uploadNomoduleOutput();
 }
 
 module.exports = {
+  abortTimedJob,
+  downloadExperimentOutput,
   downloadUnminifiedOutput,
   downloadNomoduleOutput,
   downloadModuleOutput,
   printChangeSummary,
+  skipDependentJobs,
   processAndUploadNomoduleOutput,
   startTimer,
   stopTimer,
-  stopTimedJob,
   timedExec,
   timedExecOrDie,
   timedExecWithError,
   timedExecOrThrow,
+  uploadExperimentOutput,
   uploadUnminifiedOutput,
   uploadNomoduleOutput,
   uploadModuleOutput,

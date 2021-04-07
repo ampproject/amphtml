@@ -147,9 +147,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected {?Promise<?InteractiveResponseType|?JsonObject|undefined>} */
     this.backendDataPromise_ = null;
 
-    /** @protected {?Promise<!../../../src/service/cid-impl.CidDef>} */
-    this.clientIdService_ = Services.cidForDoc(this.element);
-
     /** @protected {?Promise<JsonObject>} */
     this.clientIdPromise_ = null;
 
@@ -183,8 +180,8 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
-    /** @protected {../../../src/service/url-impl.Url} */
-    this.urlService_ = Services.urlForDoc(this.element);
+    /** @protected {?../../../src/service/url-impl.Url} */
+    this.urlService_ = null;
 
     /** @protected {?../../amp-story/1.0/variable-service.AmpStoryVariableService} */
     this.variableService_ = null;
@@ -250,6 +247,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     devAssert(this.element.children.length == 0, 'Too many children');
 
     // Initialize all the services before proceeding, and update store with state
+    this.urlService_ = Services.urlForDoc(this.element);
     return Promise.all([
       Services.storyVariableServiceForOrNull(this.win).then((service) => {
         this.variableService_ = service;
@@ -395,7 +393,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    */
   getClientId_() {
     if (!this.clientIdPromise_) {
-      this.clientIdPromise_ = this.clientIdService_.then((data) => {
+      this.clientIdPromise_ = Services.cidForDoc(this.element).then((data) => {
         return data.get(
           {scope: 'amp-story', createCookieIfNotPresent: true},
           /* consent */ Promise.resolve()
@@ -544,7 +542,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @protected @abstract
    * @param {!Array<!InteractiveOptionType>} unusedOptionsData
    */
-  updateOptionPercentages_(unusedOptionsData) {
+  displayOptionsData(unusedOptionsData) {
     // Subclass must implement
   }
 
@@ -794,8 +792,11 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
     if (this.optionsData_) {
       this.rootEl_.classList.add('i-amphtml-story-interactive-has-data');
-      this.updateOptionPercentages_(this.optionsData_);
+      this.displayOptionsData(this.optionsData_);
     }
+    this.getOptionElements().forEach((el) => {
+      el.setAttribute('tabindex', -1);
+    });
   }
 
   /**
@@ -816,9 +817,16 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @param {boolean} toggle
    */
   toggleTabbableElements_(toggle) {
-    // TODO: Revise tabbable elements on components when considering #31747.
     this.rootEl_.querySelectorAll('button, a').forEach((el) => {
-      el.setAttribute('tabindex', toggle ? 0 : -1);
+      // Disable tabbing through options if already selected.
+      if (
+        el.classList.contains('i-amphtml-story-interactive-option') &&
+        this.hasUserSelection_
+      ) {
+        el.setAttribute('tabindex', -1);
+      } else {
+        el.setAttribute('tabindex', toggle ? 0 : -1);
+      }
     });
   }
 }

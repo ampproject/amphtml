@@ -16,62 +16,34 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script builds the AMP runtime.
- * This is run during the CI stage = build; job = unminified build.
+ * @fileoverview Script that builds the unminified AMP runtime during CI.
  */
 
-const colors = require('ansi-colors');
 const {
-  printChangeSummary,
-  startTimer,
-  stopTimer,
-  stopTimedJob,
-  timedExecOrDie: timedExecOrDieBase,
+  skipDependentJobs,
+  timedExecOrDie,
   uploadUnminifiedOutput,
 } = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
-const {isPullRequestBuild} = require('../common/ci');
-const {runNpmChecks} = require('./npm-checks');
+const {buildTargetsInclude, Targets} = require('./build-targets');
+const {runCiJob} = require('./ci-job');
 
-const FILENAME = 'unminified-build.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const jobName = 'unminified-build.js';
 
-function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-  if (!runNpmChecks(FILENAME)) {
-    stopTimedJob(FILENAME, startTime);
-    return;
-  }
-
-  if (!isPullRequestBuild()) {
-    timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp build --fortesting');
-    uploadUnminifiedOutput(FILENAME);
-  } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST') ||
-      buildTargets.has('UNIT_TEST')
-    ) {
-      timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp build --fortesting');
-      uploadUnminifiedOutput(FILENAME);
-    } else {
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Unminified Build'),
-        'because this commit does not affect the runtime, flag configs,',
-        'or integration tests.'
-      );
-    }
-  }
-
-  stopTimer(FILENAME, FILENAME, startTime);
+function pushBuildWorkflow() {
+  timedExecOrDie('amp build --fortesting');
+  uploadUnminifiedOutput();
 }
 
-main();
+function prBuildWorkflow() {
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
+    timedExecOrDie('amp build --fortesting');
+    uploadUnminifiedOutput();
+  } else {
+    skipDependentJobs(
+      jobName,
+      'this PR does not affect the runtime or integration tests'
+    );
+  }
+}
+
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

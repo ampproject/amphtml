@@ -19,10 +19,11 @@ import {
   CreativeMetaDataDef,
   NO_CONTENT_RESPONSE,
 } from '../../amp-a4a/0.1/amp-a4a';
-import {AmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
 import {AmpTemplateCreativeDef} from '../../amp-a4a/0.1/amp-ad-type-defs';
 import {dev, devAssert} from '../../../src/log';
+import {getAmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
 import {getMode} from '../../../src/mode';
+import {mergeExtensionsMetadata} from '../../amp-a4a/0.1/amp-ad-utils';
 import {tryParseJson} from '../../../src/json';
 import {tryResolve} from '../../../src/utils/promise';
 import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
@@ -32,9 +33,6 @@ const TAG = 'amp-ad-network-adzerk-impl';
 
 /** @visibleForTesting @type {string} */
 export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-template-amp-creative';
-
-/** @private {?AmpAdTemplateHelper} */
-let ampAdTemplateHelper;
 
 /**
  * Fast Fetch implementation for AdZerk network that allows AMP creative
@@ -66,9 +64,6 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
 
     /** @private {?../../amp-a4a/0.1/amp-ad-type-defs.AmpTemplateCreativeDef} */
     this.ampCreativeJson_ = null;
-
-    ampAdTemplateHelper =
-      ampAdTemplateHelper || new AmpAdTemplateHelper(this.win);
   }
 
   /**
@@ -99,6 +94,8 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
 
   /** @override */
   maybeValidateAmpCreative(bytes, headers) {
+    // TODO(wg-monetization): this header name has been deprecated elsewhere,
+    // and is never returned by dev server.
     if (headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'amp-mustache') {
       return /**@type {!Promise<(ArrayBuffer|null)>}*/ (Promise.resolve(null));
     }
@@ -110,6 +107,7 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
         body
       ) || {});
       // TODO(keithwrightbos): macro value validation?  E.g. http invalid?
+      const ampAdTemplateHelper = getAmpAdTemplateHelper(this.element);
       return ampAdTemplateHelper
         .fetch(this.ampCreativeJson_.templateUrl)
         .then((parsedTemplate) => {
@@ -169,12 +167,19 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
       this.creativeMetadata_['customElementExtensions'],
       'amp-mustache'
     );
+    this.creativeMetadata_['extensions'] =
+      this.creativeMetadata_['extensions'] || [];
+    mergeExtensionsMetadata(
+      this.creativeMetadata_['extensions'],
+      this.creativeMetadata_['customElementExtensions']
+    );
     return /**@type {?CreativeMetaDataDef}*/ (this.creativeMetadata_);
   }
 
   /** @override */
   onCreativeRender(unusedMetadata) {
     if (this.ampCreativeJson_ && this.ampCreativeJson_.data) {
+      const ampAdTemplateHelper = getAmpAdTemplateHelper(this.element);
       ampAdTemplateHelper
         .render(
           this.ampCreativeJson_.data,

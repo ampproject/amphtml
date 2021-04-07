@@ -32,7 +32,7 @@ describes.realWin(
     let element;
 
     const waitForRender = async () => {
-      await element.build();
+      await element.buildInternal();
       const loadPromise = element.layoutCallback();
       const shadow = element.shadowRoot;
       await waitFor(() => shadow.querySelector('iframe'), 'iframe mounted');
@@ -92,10 +92,8 @@ describes.realWin(
       doc.body.appendChild(element);
       await waitForRender();
 
-      const forceChangeHeightStub = env.sandbox.stub(
-        element.implementation_,
-        'forceChangeHeight'
-      );
+      const impl = await element.getImpl(false);
+      const forceChangeHeightStub = env.sandbox.stub(impl, 'forceChangeHeight');
 
       const mockEvent = new CustomEvent('message');
       mockEvent.origin = 'https://www.instagram.com';

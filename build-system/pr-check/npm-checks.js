@@ -22,41 +22,43 @@
  */
 
 const checkDependencies = require('check-dependencies');
-const colors = require('ansi-colors');
+const fs = require('fs-extra');
+const {cyan, red} = require('kleur/colors');
+const {exec} = require('../common/exec');
+const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {gitDiffColor, gitDiffNameOnly} = require('../common/git');
+const {mainBranch} = require('../common/main-branch');
 
 /**
  * Makes sure package.json and package-lock.json are in sync.
- * @param {string} fileName
  * @return {boolean}
  */
-function isPackageLockFileInSync(fileName) {
-  const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
+function isPackageLockFileInSync() {
+  const loggingPrefix = getLoggingPrefix();
   const results = checkDependencies.sync({
     verbose: true,
     log: () => {},
     error: console.log,
   });
   if (!results.depsWereOk) {
-    console.error(
-      fileLogPrefix,
-      colors.red('ERROR:'),
+    logWithoutTimestamp(
+      loggingPrefix,
+      red('ERROR:'),
       'Updates to',
-      colors.cyan('package.json'),
+      cyan('package.json'),
       'must be accompanied by a corresponding update to',
-      colors.cyan('package-lock.json')
+      cyan('package-lock.json')
     );
-    console.error(
-      fileLogPrefix,
-      colors.yellow('NOTE:'),
-      'To update',
-      colors.cyan('package-lock.json'),
+    logWithoutTimestamp(
+      loggingPrefix,
+      '⤷ To update',
+      cyan('package-lock.json'),
       'after changing',
-      colors.cyan('package.json') + ',',
+      cyan('package.json') + ',',
       'run',
-      '"' + colors.cyan('npm install') + '"',
+      '"' + cyan('npm install') + '"',
       'and include the updated',
-      colors.cyan('package-lock.json'),
+      cyan('package-lock.json'),
       'in your PR.'
     );
     return false;
@@ -65,31 +67,48 @@ function isPackageLockFileInSync(fileName) {
 }
 
 /**
- * Makes sure that package-lock.json was properly updated.
- * @param {string} fileName
+ * Makes sure that package-lock.json was properly updated in two steps:
+ * 1. First make sure it was generated with a compatible version of npm.
+ * 2. Then run `npm i` and check for missing changes (required because `npm ci`
+ *    doesn't update the lockfile).
  * @return {boolean}
  */
-function isPackageLockFileProperlyUpdated(fileName) {
-  const filesChanged = gitDiffNameOnly();
-  const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
+function isPackageLockFileProperlyUpdated() {
+  const loggingPrefix = getLoggingPrefix();
+  if (fs.readJsonSync('package-lock.json').lockfileVersion != 1) {
+    logWithoutTimestamp(
+      loggingPrefix,
+      red('ERROR:'),
+      cyan('package-lock.json'),
+      'was generated with an incorrect version of',
+      cyan('npm') + '.'
+    );
+    logWithoutTimestamp(
+      loggingPrefix,
+      '⤷ To fix this, make sure you are using the version of',
+      cyan('npm'),
+      'that came pre-installed with the latest LTS version of',
+      cyan('node') + '.'
+    );
+  }
 
+  exec('npm install', {'stdio': 'ignore'});
+  const filesChanged = gitDiffNameOnly();
   if (filesChanged.includes('package-lock.json')) {
-    console.error(
-      fileLogPrefix,
-      colors.red('ERROR:'),
+    logWithoutTimestamp(
+      loggingPrefix,
+      red('ERROR:'),
       'This PR did not properly update',
-      colors.cyan('package-lock.json') + '.'
+      cyan('package-lock.json') + '.'
     );
-    console.error(
-      fileLogPrefix,
-      colors.yellow('NOTE:'),
-      'To fix this, sync your branch to',
-      colors.cyan('upstream/master') + ', run',
-      colors.cyan('gulp update-packages') +
-        ', and push a new commit containing the changes.'
+    logWithoutTimestamp(
+      loggingPrefix,
+      '⤷ To fix this, sync your branch to',
+      cyan(`ampproject/amphtml:${mainBranch}`) + ', run',
+      cyan('npm install') + ', and push a new commit containing the changes.'
     );
-    console.error(fileLogPrefix, 'Expected changes:');
-    console.log(gitDiffColor());
+    logWithoutTimestamp(loggingPrefix, 'Expected changes:');
+    logWithoutTimestamp(gitDiffColor());
     return false;
   }
   return true;
@@ -97,14 +116,12 @@ function isPackageLockFileProperlyUpdated(fileName) {
 
 /**
  * Runs both npm checks, and returns false if either one fails.
- * @param {string} filename
  * @return {boolean}
  */
-function runNpmChecks(filename) {
-  return (
-    isPackageLockFileInSync(filename) &&
-    isPackageLockFileProperlyUpdated(filename)
-  );
+function runNpmChecks() {
+  const loggingPrefix = getLoggingPrefix();
+  logWithoutTimestamp(loggingPrefix, 'Running', cyan('npm'), 'checks...');
+  return isPackageLockFileInSync() && isPackageLockFileProperlyUpdated();
 }
 
 module.exports = {

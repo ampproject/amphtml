@@ -34,6 +34,7 @@
 }
 
 .i-amphtml-story-interactive-quiz-option {
+  font-family: inherit !important;
   position: relative !important;
   display: flex !important;
   justify-items: start !important;
@@ -55,6 +56,9 @@
   line-height: 1.25em !important;
   overflow: hidden !important;
   z-index: 0 !important;
+  border: none !important;
+  outline: none !important;
+  text-align: start !important;
 }
 
 [dir='rtl'] .i-amphtml-story-interactive-quiz-option {
@@ -181,10 +185,16 @@
 .i-amphtml-story-interactive-quiz-option::before {
   content: '' !important;
   position: absolute !important;
+  left: 0px !important;
   width: 100% !important;
   height: 100% !important;
   border-radius: var(--i-amphtml-interactive-chip-radius) !important;
   line-height: 1.25em !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-quiz-option:focus::before {
+    background: var(--i-amphtml-interactive-theme-shading) !important;
 }
 
 .i-amphtml-story-interactive-post-selection:not(.i-amphtml-story-interactive-has-data)

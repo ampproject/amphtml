@@ -70,7 +70,7 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
     }
 
     win.document.body.appendChild(element);
-    return element.build().then(() => element.implementation_);
+    return element.buildInternal().then(() => element.getImpl());
   }
 
   function updateIntersection(target, intersectionRatio) {
@@ -173,8 +173,8 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
         );
       });
 
-      it('should update visibility from viewer', function* () {
-        const anim = yield createAnim({}, {duration: 1001});
+      it('should update visibility from viewer', async () => {
+        const anim = await createAnim({}, {duration: 1001});
         expect(anim.visible_).to.be.false;
 
         viewer.setVisibilityState_('visible');

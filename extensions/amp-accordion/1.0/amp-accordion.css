@@ -14,6 +14,47 @@
  * limitations under the License.
  */
 
+/*
+ * Pre-upgrade:
+ * - display:block element
+ * - contain:layout element
+ */
+amp-accordion {
+  display: block;
+  contain: layout;
+}
+
+amp-accordion,
+amp-accordion > section,
+amp-accordion > section > :first-child {
+  margin: 0;
+}
+
+/* Display the first 2 elements (heading and content) */
+amp-accordion > section > * {
+  display: block;
+  float: none;
+  overflow: hidden; /* clearfix */
+  position: relative;
+}
+
+/**
+ * This media query is used instead of @supports due to low compatibility.
+ * At the time of this change (4/6/2021) no version of Webkit support @supports queries.
+ *
+ * Note! This is a new CSS incompatible with older browsers. It provides
+ * low-specificity UI styles. The same styles are later set for older browsers
+ * via the `i-amphtml-accordion-header` class.
+ */
+@media (min-width: 1px) {
+  :where(amp-accordion > section) > :first-child {
+    cursor: pointer;
+    background-color: #efefef;
+    padding-right: 20px;
+    border: 1px solid #dfdfdf;
+  }
+}
+
 /* heading
  * TODO(#30445): update these styles after team agrees on styling
  */
@@ -21,32 +62,14 @@
   cursor: pointer;
   background-color: #efefef;
   padding-right: 20px;
-  border: solid 1px #dfdfdf;
-  margin: 0;
+  border: 1px solid #dfdfdf;
 }
 
-.i-amphtml-accordion-content {
-  margin: 0;
-}
-
+/* Collapse content by default. */
 amp-accordion > section:not([expanded]) > :last-child:not(.i-amphtml-animating),
 amp-accordion
   > section:not([expanded])
   > :last-child:not(.i-amphtml-animating)
   * {
   display: none !important;
-}
-
-/* TODO: This CSS is duplicated from ./accordion.jss.js for purposes of display
- * locking.  Look into de-duping once experiment is launched.
- */
-amp-accordion.i-amphtml-display-locking
-  > section:not([expanded])
-  > :last-child:not(.i-amphtml-animating),
-amp-accordion.i-amphtml-display-locking
-  > section:not([expanded])
-  > :last-child:not(.i-amphtml-animating)
-  * {
-  content-visibility: hidden-matchable !important;
-  display: block !important;
 }

@@ -15,7 +15,12 @@
  */
 
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
-import {getAmpAdMetadata} from '../amp-ad-utils';
+import {
+  extensionsHasElement,
+  getAmpAdMetadata,
+  getExtensionsFromMetadata,
+  mergeExtensionsMetadata,
+} from '../amp-ad-utils';
 
 describe('getAmpAdMetadata', () => {
   it('should parse metadata successfully', () => {
@@ -54,5 +59,97 @@ describe('getAmpAdMetadata', () => {
       data.reserializedMissingScriptTag
     );
     expect(creativeMetadata).to.be.null;
+  });
+});
+
+describe('mergeExtensionsMetadata', () => {
+  it('should add els that exist in customElementExtensions but not extensions', () => {
+    const customElementExtensions = ['amp-analytics'];
+    const extensions = [];
+    mergeExtensionsMetadata(extensions, customElementExtensions);
+    expect(extensions).to.have.lengthOf(1);
+    expect(extensions).to.deep.include({
+      'custom-element': 'amp-analytics',
+      'src': 'https://cdn.ampproject.org/v0/amp-analytics-0.1.js',
+    });
+  });
+
+  it('should ignore elements that already exist in extensions', () => {
+    const customElementExtensions = ['amp-analytics', 'amp-foo'];
+    const extensions = [
+      {
+        'custom-element': 'amp-analytics',
+        'src': 'https://cdn.ampproject.org/v0/amp-analytics-latest.js',
+      },
+    ];
+    mergeExtensionsMetadata(extensions, customElementExtensions);
+    expect(extensions).to.have.lengthOf(2);
+    expect(extensions).to.deep.include({
+      'custom-element': 'amp-analytics',
+      'src': 'https://cdn.ampproject.org/v0/amp-analytics-latest.js',
+    });
+    expect(extensions).to.deep.include({
+      'custom-element': 'amp-foo',
+      'src': 'https://cdn.ampproject.org/v0/amp-foo-0.1.js',
+    });
+  });
+});
+
+describe('extensionsHasElement', () => {
+  it('should return true if containing extension', () => {
+    const extensions = [
+      {
+        'custom-element': 'amp-cats',
+        src: 'https://cdn.ampproject.org/v0/amp-cats-0.1.js',
+      },
+    ];
+    expect(extensionsHasElement(extensions, 'amp-cats')).to.be.true;
+  });
+
+  it('should return false if it does not contain extension', () => {
+    const extensions = [
+      {
+        'custom-element': 'amp-cats',
+        src: 'https://cdn.ampproject.org/v0/amp-cats-0.1.js',
+      },
+    ];
+    expect(extensionsHasElement(extensions, 'amp-dogs')).to.be.false;
+  });
+
+  it('should return false if empty array', () => {
+    const extensions = [];
+    expect(extensionsHasElement(extensions, 'amp-dogs')).to.be.false;
+  });
+});
+
+describe('getExtensionsFromMetadata', () => {
+  it('should return extension name and version', () => {
+    const metadata = {
+      extensions: [
+        {
+          'custom-element': 'amp-analytics',
+          'src': 'https://cdn.ampproject.org/v0/amp-analytics-0.1.js',
+        },
+        {
+          'custom-element': 'amp-mustache',
+          'src': 'https://cdn.ampproject.org/v0/amp-mustache-1.0.js',
+        },
+      ],
+    };
+    const extensions = getExtensionsFromMetadata(metadata);
+    expect(extensions).to.deep.include({
+      extensionId: 'amp-analytics',
+      extensionVersion: '0.1',
+    });
+    expect(extensions).to.deep.include({
+      extensionId: 'amp-mustache',
+      extensionVersion: '1.0',
+    });
+  });
+
+  it('should handle no `extensions` key in metadata', () => {
+    const metadata = {};
+    const extensions = getExtensionsFromMetadata(metadata);
+    expect(extensions).to.eql([]);
   });
 });

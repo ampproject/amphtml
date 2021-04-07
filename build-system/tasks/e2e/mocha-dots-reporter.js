@@ -15,8 +15,8 @@
  */
 'use strict';
 
-const log = require('fancy-log');
 const Mocha = require('mocha');
+const {log, logWithoutTimestamp} = require('../../common/logging');
 const {
   EVENT_RUN_BEGIN,
   EVENT_RUN_END,
@@ -25,8 +25,11 @@ const {
   EVENT_TEST_PENDING,
 } = Mocha.Runner.constants;
 const {Base} = Mocha.reporters;
-const {green, red, yellow} = require('ansi-colors');
-const {icon, nbDotsPerLine} = require('../karma.conf').superDotsReporter;
+const {
+  icon,
+  nbDotsPerLine,
+} = require('../../test-configs/karma.conf').superDotsReporter;
+const {green, red, yellow} = require('kleur/colors');
 const {reportTestFinished} = require('../report-test-status');
 
 /**
@@ -35,6 +38,9 @@ const {reportTestFinished} = require('../report-test-status');
  * @param {*} runner
  */
 class MochaDotsReporter extends Base {
+  /**
+   * @param {*} runner
+   */
   constructor(runner) {
     super(runner);
 
@@ -63,7 +69,7 @@ class MochaDotsReporter extends Base {
       .once(EVENT_RUN_END, () => {
         Base.list(this.failures);
         const {passes, pending, failures, tests} = runner.stats;
-        console.log(
+        logWithoutTimestamp(
           `Executed ${failures + passes} of ${tests}`,
           `(Skipped ${pending})`,
           failures == 0 ? green('SUCCESS') : red(`${failures} FAILED`)

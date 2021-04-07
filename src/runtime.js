@@ -39,7 +39,6 @@ import {
 } from './service/extensions-impl';
 import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn, toggleExperiment} from './experiments';
-import {registerExtendedTemplate} from './service/template-impl';
 import {reportErrorForWin} from './error';
 import {scheduleUpgradeIfNeeded as scheduleInObUpgradeIfNeeded} from './polyfillstub/intersection-observer-stub';
 import {scheduleUpgradeIfNeeded as scheduleResObUpgradeIfNeeded} from './polyfillstub/resize-observer-stub';
@@ -136,9 +135,7 @@ function adoptShared(global, callback) {
    * @param {string} name
    * @param {typeof ./base-template.BaseTemplate} implementationClass
    */
-  global.AMP.registerTemplate = function (name, implementationClass) {
-    registerExtendedTemplate(global, name, implementationClass);
-  };
+  global.AMP.registerTemplate = extensions.addTemplate.bind(extensions);
 
   /**
    * Registers an ampdoc service.
@@ -171,7 +168,6 @@ function adoptShared(global, callback) {
    * @param {function(string,?string=,number=)} unusedFn
    * @param {function()=} opt_flush
    * @deprecated
-   * @export
    */
   global.AMP.setTickFunction = (unusedFn, opt_flush) => {};
 
@@ -187,21 +183,18 @@ function adoptShared(global, callback) {
         if (typeof fnOrStruct == 'function') {
           fnOrStruct(global.AMP, global.AMP._);
         } else {
-          extensions.registerExtension(fnOrStruct.n, fnOrStruct.f, global.AMP);
+          extensions.registerExtension(
+            fnOrStruct.n,
+            fnOrStruct.ev,
+            fnOrStruct.l,
+            fnOrStruct.f,
+            global.AMP
+          );
         }
       });
     };
 
-    // We support extension declarations which declare they have an
-    // "intermediate" dependency that needs to be loaded before they
-    // can execute.
-    if (!(typeof fnOrStruct == 'function') && fnOrStruct.i) {
-      preloadDeps(extensions, fnOrStruct).then(function () {
-        return startRegisterOrChunk(global, fnOrStruct, register);
-      });
-    } else {
-      startRegisterOrChunk(global, fnOrStruct, register);
-    }
+    startRegisterOrChunk(global, fnOrStruct, register);
   }
 
   // Handle high priority extensions now, and if necessary issue
@@ -273,31 +266,6 @@ function adoptShared(global, callback) {
   scheduleResObUpgradeIfNeeded(global);
 
   return iniPromise;
-}
-
-/**
- * @param {!./service/extensions-impl.Extensions} extensions
- * @param {function(!Object, !Object)|!ExtensionPayload} fnOrStruct
- * @return {!Promise}
- */
-function preloadDeps(extensions, fnOrStruct) {
-  // Allow a single string as the intermediate dependency OR allow
-  // for an array if intermediate dependencies that needs to be
-  // resolved first before executing this current extension.
-  if (Array.isArray(fnOrStruct.i)) {
-    const promises = fnOrStruct.i.map((dep) => {
-      return extensions.preloadExtension(dep);
-    });
-    return Promise.all(promises);
-  } else if (typeof fnOrStruct.i == 'string') {
-    return extensions.preloadExtension(fnOrStruct.i);
-  }
-  dev().error(
-    'RUNTIME',
-    'dependency is neither an array or a string',
-    fnOrStruct.i
-  );
-  return Promise.resolve();
 }
 
 /**
@@ -394,7 +362,12 @@ function adoptServicesAndResources(global) {
  */
 function adoptMultiDocDeps(global) {
   global.AMP.installAmpdocServices = installAmpdocServices.bind(null);
-  global.AMP.combinedCss = ampDocCss + ampSharedCss;
+  if (IS_ESM) {
+    const style = global.document.querySelector('style[amp-runtime]');
+    global.AMP.combinedCss = style ? style.textContent : '';
+  } else {
+    global.AMP.combinedCss = ampDocCss + ampSharedCss;
+  }
 }
 
 /**
@@ -484,7 +457,11 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   if (internalRuntimeVersion() == v) {
     return false;
   }
-  Services.extensionsFor(win).reloadExtension(fnOrStruct.n);
+  Services.extensionsFor(win).reloadExtension(
+    fnOrStruct.n,
+    fnOrStruct.ev,
+    fnOrStruct.l
+  );
   return true;
 }
 

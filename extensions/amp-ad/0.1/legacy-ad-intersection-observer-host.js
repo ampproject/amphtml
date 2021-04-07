@@ -17,96 +17,8 @@
 import {MessageType} from '../../../src/3p-frame-messaging';
 import {Services} from '../../../src/services';
 import {SubscriptionApi} from '../../../src/iframe-helper';
-import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {
-  layoutRectLtwh,
-  moveLayoutRect,
-  rectIntersection,
-} from '../../../src/layout-rect';
-
-/**
- * The structure that defines the rectangle used in intersection observers.
- *
- * @typedef {{
- *   top: number,
- *   bottom: number,
- *   left: number,
- *   right: number,
- *   width: number,
- *   height: number,
- *   x: number,
- *   y: number,
- * }}
- */
-export let DOMRect;
-
-/**
- * Returns the ratio of the smaller box's area to the larger box's area.
- * @param {!../../../src/layout-rect.LayoutRectDef} smaller
- * @param {!../../../src/layout-rect.LayoutRectDef} larger
- * @return {number}
- */
-function intersectionRatio(smaller, larger) {
-  return (smaller.width * smaller.height) / (larger.width * larger.height);
-}
-
-/**
- * Produces a change entry for that should be compatible with
- * IntersectionObserverEntry.
- *
- * Mutates passed in rootBounds to have x and y according to spec.
- *
- * @param {!../../../src/layout-rect.LayoutRectDef} element The element's layout rectangle
- * @param {?../../../src/layout-rect.LayoutRectDef} owner The owner's layout rect, if
- *     there is an owner.
- * @param {!../../../src/layout-rect.LayoutRectDef} viewport The viewport's layout rect.
- * @return {!IntersectionObserverEntry} A change entry.
- * @private
- * @visibleForTesting
- */
-export function getIntersectionChangeEntry(element, owner, viewport) {
-  devAssert(
-    element.width >= 0 && element.height >= 0,
-    'Negative dimensions in element.'
-  );
-  // Building an IntersectionObserverEntry.
-
-  let intersectionRect = element;
-  if (owner) {
-    intersectionRect =
-      rectIntersection(owner, element) ||
-      // No intersection.
-      layoutRectLtwh(0, 0, 0, 0);
-  }
-  intersectionRect =
-    rectIntersection(viewport, intersectionRect) ||
-    // No intersection.
-    layoutRectLtwh(0, 0, 0, 0);
-
-  // The element is relative to (0, 0), while the viewport moves. So, we must
-  // adjust.
-  const boundingClientRect = moveLayoutRect(
-    element,
-    -viewport.left,
-    -viewport.top
-  );
-  intersectionRect = moveLayoutRect(
-    intersectionRect,
-    -viewport.left,
-    -viewport.top
-  );
-  // Now, move the viewport to (0, 0)
-  const rootBounds = moveLayoutRect(viewport, -viewport.left, -viewport.top);
-
-  return /** @type {!IntersectionObserverEntry} */ ({
-    time: Date.now(),
-    rootBounds,
-    boundingClientRect,
-    intersectionRect,
-    intersectionRatio: intersectionRatio(intersectionRect, element),
-  });
-}
+import {intersectionEntryToJson} from '../../../src/utils/intersection';
 
 /**
  * LegacyAdIntersectionObserverHost exists for backward compatibility to support
@@ -268,6 +180,15 @@ export class LegacyAdIntersectionObserverHost {
    */
   sendElementIntersection_(entry) {
     const change = intersectionEntryToJson(entry);
+    // rootBounds is always null in 3p iframe (e.g. Viewer).
+    // See https://github.com/w3c/IntersectionObserver/issues/79
+    //
+    // Since before using a real InOb we used to provide rootBounds,
+    // we are temporarily continuing to do so now.
+    // TODO: determine if consumers rely on this functionality and remove if not.
+    if (change.rootBounds === null) {
+      change.rootBounds = this.baseElement_.getViewport().getRect();
+    }
 
     if (
       this.pendingChanges_.length > 0 &&
@@ -318,35 +239,4 @@ export class LegacyAdIntersectionObserverHost {
     this.unlistenOnOutViewport_();
     this.postMessageApi_.destroy();
   }
-}
-
-/**
- * Convert a DOMRect to a regular object to make it serializable.
- *
- * @param {!DOMRect} domRect
- * @return {!DOMRect}
- */
-function domRectToJson(domRect) {
-  if (domRect == null) {
-    return domRect;
-  }
-
-  const {x, y, width, height, top, right, bottom, left} = domRect;
-  return {x, y, width, height, top, right, bottom, left};
-}
-
-/**
- * Convert an IntersectionObserverEntry to a regular object to make it serializable.
- *
- * @param {!IntersectionObserverEntry} entry
- * @return {!IntersectionObserverEntry}
- */
-function intersectionEntryToJson(entry) {
-  return {
-    time: entry.time,
-    rootBounds: domRectToJson(entry.rootBounds),
-    boundingClientRect: domRectToJson(entry.boundingClientRect),
-    intersectionRect: domRectToJson(entry.intersectionRect),
-    intersectionRatio: entry.intersectionRatio,
-  };
 }

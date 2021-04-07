@@ -19,6 +19,7 @@ import * as imaVideoObj from '../../../../ads/google/imaVideo';
 
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {Services} from '../../../../src/services';
+import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
 
 describes.realWin(
   'amp-ima-video',
@@ -39,6 +40,7 @@ describes.realWin(
       win.context = {};
       doc = win.document;
       timer = Services.timerFor(env.win);
+      installResizeObserverStub(env.sandbox, win);
     });
 
     function getVideoPlayerMock() {
@@ -329,7 +331,9 @@ describes.realWin(
         mockAdsManager,
         'addEventListener'
       );
-      const mockVideoPlayer = {};
+      const mockVideoPlayer = {
+        play() {},
+      };
       imaVideoObj.setVideoPlayerForTesting(mockVideoPlayer);
       imaVideoObj.setMuteAdsManagerOnLoadedForTesting(false);
 
@@ -391,7 +395,9 @@ describes.realWin(
         'addEventListener'
       );
       const setVolumeSpy = env.sandbox.spy(mockAdsManager, 'setVolume');
-      const mockVideoPlayer = {};
+      const mockVideoPlayer = {
+        play() {},
+      };
       imaVideoObj.setVideoPlayerForTesting(mockVideoPlayer);
       imaVideoObj.setMuteAdsManagerOnLoadedForTesting(true);
 

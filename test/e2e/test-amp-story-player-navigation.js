@@ -30,8 +30,7 @@ function timeout(ms) {
 describes.endtoend(
   'story player navigation',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-story-player/navigation.html',
+    fixture: 'amp-story-player/navigation.html',
     initialRect: {width: VIEWPORT.WIDTH, height: VIEWPORT.HEIGHT},
     environments: ['single'],
   },
@@ -68,7 +67,7 @@ describes.endtoend(
         'paused'
       );
 
-      await timeout(500);
+      await timeout(800);
       await expect(isVideoPaused).to.eql(false);
     });
 
@@ -76,7 +75,7 @@ describes.endtoend(
       // Navigate to next story.
       await controller.click(player);
 
-      await timeout(500);
+      await timeout(800);
 
       const shadowHost = await controller.findElement(
         'div.i-amphtml-story-player-shadow-root-intermediary'
@@ -93,7 +92,7 @@ describes.endtoend(
         'paused'
       );
 
-      await timeout(500);
+      await timeout(800);
       await expect(isVideoPaused).to.eql(true);
     });
   }

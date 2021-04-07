@@ -1,9 +1,16 @@
 # Release Schedule
 
+<!--
+  (Do not remove or edit this comment.)
+
+  This table-of-contents is automatically generated. To generate it, run:
+    amp markdown-toc --fix
+-->
+
 -   [Release Channels](#release-channels)
     -   [Nightly](#nightly)
     -   [Weekly](#weekly)
-        -   [Experimental and Beta channels](#experimental-and-beta-channels)
+        -   [Beta and Experimental channels](#beta-and-experimental-channels)
     -   [Long-Term Stable (lts)](#long-term-stable-lts)
 -   [Determining if your change is in a release](#determining-if-your-change-is-in-a-release)
 -   [Release Cadence](#release-cadence)
@@ -11,6 +18,8 @@
     -   [Release Freezes](#release-freezes)
 
 A new release of AMP is pushed to all AMP pages every week on Tuesday. **Once a change in AMP is merged into the master branch of the amphtml repository, it will typically take 1-2 weeks for the change to be live for all users.**
+
+The [AMPHTML Validator](https://github.com/ampproject/amphtml/tree/master/validator#amp-html--validator) has it's own [Release Schedule](validator-release-schedule.md)
 
 ## Release Channels
 
@@ -85,7 +94,8 @@ After considering all of these factors, we have arrived at the 1-2 week push cyc
 
 We try to stick to this schedule as closely as possible, though complications may cause delays. You can track the latest status about any release in the [_Type: Release_ GitHub issues](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) and the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)).
 
--   Tuesday @ [11am Pacific](https://www.google.com/search?q=11am+pacific+in+current+time+zone): new **experimental** and **beta** release builds are created from the [latest master build that passes all of our tests](https://travis-ci.com/ampproject/amphtml/branches) and are pushed to users who opted into the [AMP Experimental Channel](#amp-experimental-and-beta-channels) or [AMP Beta Channel](#amp-experimental-and-beta-channels), respectively.
+-   Every weeknight: a new **nightly** build is automatically cut and released to the [AMP Nightly Channel](#nightly).
+-   Tuesday @ [11am Pacific](https://www.google.com/search?q=11am+pacific+in+current+time+zone): new **experimental** and **beta** release builds are created from a recent known-good nightly channel release and are pushed to users who opted into the [AMP Experimental Channel](#amp-experimental-and-beta-channels) or [AMP Beta Channel](#amp-experimental-and-beta-channels), respectively.
 -   Wednesday: we check bug reports for _Experimental Channel_ and _Beta Channel_ users and if everything looks fine, we push the **beta** to 1% of AMP pages
 -   Thursday-Monday: we continue to monitor error rates and bug reports for _Experimental Channel_ and _Beta Channel_ users and the 1% of pages with the **experimental**/**beta** builds
 -   Tuesday the following week: the **beta** build is fully promoted to **stable** (i.e. all AMP pages will now use this build)

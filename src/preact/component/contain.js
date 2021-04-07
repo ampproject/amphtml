@@ -58,8 +58,10 @@ function ContainWrapperWithRef(
     paint = false,
     wrapperClassName,
     wrapperStyle,
+    contentAs: ContentComp = 'div',
     contentRef,
     contentClassName,
+    contentProps,
     contentStyle,
     children,
     'className': className,
@@ -81,7 +83,8 @@ function ContainWrapperWithRef(
         contain: CONTAIN[containIndex],
       }}
     >
-      <div
+      <ContentComp
+        {...contentProps}
         ref={contentRef}
         className={contentClassName}
         style={{
@@ -91,7 +94,7 @@ function ContainWrapperWithRef(
         }}
       >
         {children}
-      </div>
+      </ContentComp>
     </Comp>
   );
 }

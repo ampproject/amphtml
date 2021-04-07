@@ -209,8 +209,13 @@ export class ViewportImpl {
     // https://github.com/ampproject/amphtml/issues/30838 for more details.
     // The solution is to make a "fake" scrolling API call.
     const isIframedIos = Services.platformFor(win).isIos() && isIframed(win);
-    if (isIframedIos) {
-      this.ampdoc.whenReady().then(() => win./*OK*/ scrollTo(-0.1, 0));
+    // We dont want to scroll if we're in a shadow doc, so check that we're
+    // in a single doc. Fix for
+    // https://github.com/ampproject/amphtml/issues/32165.
+    if (isIframedIos && this.ampdoc.isSingleDoc()) {
+      this.ampdoc.whenReady().then(() => {
+        win./*OK*/ scrollTo(-0.1, 0);
+      });
     }
   }
 
@@ -349,14 +354,14 @@ export class ViewportImpl {
   }
 
   /** @override */
-  getLayoutRect(el, opt_premeasuredRect) {
+  getLayoutRect(el) {
     const scrollLeft = this.getScrollLeft();
     const scrollTop = this.getScrollTop();
 
     // Go up the window hierarchy through friendly iframes.
     const frameElement = getParentWindowFrameElement(el, this.ampdoc.win);
     if (frameElement) {
-      const b = this.binding_.getLayoutRect(el, 0, 0, opt_premeasuredRect);
+      const b = this.binding_.getLayoutRect(el, 0, 0);
       const c = this.binding_.getLayoutRect(
         frameElement,
         scrollLeft,
@@ -370,12 +375,7 @@ export class ViewportImpl {
       );
     }
 
-    return this.binding_.getLayoutRect(
-      el,
-      scrollLeft,
-      scrollTop,
-      opt_premeasuredRect
-    );
+    return this.binding_.getLayoutRect(el, scrollLeft, scrollTop);
   }
 
   /** @override */

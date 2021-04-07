@@ -14,31 +14,28 @@
 // limitations under the license.
 //
 
-#include <fstream>
+#include "grammar/tablebuilder.h"
+
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 
 #include "defer.h"
 #include "fileutil.h"
-#include "grammar/tablebuilder.h"
 #include "strings.h"
 
 namespace htmlparser::grammar {
 
 constexpr std::string_view BOLD_RED_BEGIN = "\033[1;31m";
 constexpr std::string_view BOLD_RED_END = "\033[0m";
-std::string PrintChar(char c);
 
 TableBuilder::TableBuilder(std::string_view grammar_file_path,
-                           OutputFileOptions options) :
-  grammar_file_path_(grammar_file_path),
-  header_options_(options) {
-}
+                           OutputFileOptions options)
+    : grammar_file_path_(grammar_file_path), header_options_(options) {}
 
 bool TableBuilder::ParseRulesAndGenerateTable() {
   if (!std::filesystem::exists(grammar_file_path_)) {
-    std::cerr << BOLD_RED_BEGIN << "Cannot read file: "
-              << grammar_file_path_
+    std::cerr << BOLD_RED_BEGIN << "Cannot read file: " << grammar_file_path_
               << BOLD_RED_END << "\n";
     return false;
   }
@@ -61,11 +58,12 @@ bool TableBuilder::ParseRulesAndGenerateTable() {
   }
 
   std::set<std::string> unused_states;
-  std::set_difference(
-      declared_states.begin(), declared_states.end(),
-      transition_states.begin(), transition_states.end(),
-      std::inserter(unused_states, unused_states.begin()));
+  std::set_difference(declared_states.begin(), declared_states.end(),
+                      transition_states.begin(), transition_states.end(),
+                      std::inserter(unused_states, unused_states.begin()));
 
+  unused_states.erase("PUSH");
+  unused_states.erase("POP");
   if (!unused_states.empty()) {
     std::cerr << BOLD_RED_BEGIN << "Following states defined but not used: \n";
     for (auto& us : unused_states) {
@@ -81,6 +79,8 @@ bool TableBuilder::ParseRulesAndGenerateTable() {
       declared_states.begin(), declared_states.end(),
       std::inserter(undefined_states, undefined_states.begin()));
 
+  undefined_states.erase("PUSH");
+  undefined_states.erase("POP");
   if (!undefined_states.empty()) {
     std::cerr << BOLD_RED_BEGIN << "Following states not defined: \n";
     for (auto& us : undefined_states) {
@@ -99,11 +99,9 @@ bool TableBuilder::ParseRulesAndGenerateTable() {
 
   declared_states.erase("PUSH");
   declared_states.erase("POP");
-
   if (declared_states.size() > 256) {
-    std::cerr << "Maximum 256 states supported. "
-              << declared_states.size() << " declared."
-              << std::endl;
+    std::cerr << "Maximum 256 states supported. " << declared_states.size()
+              << " declared." << std::endl;
     return false;
   }
 
@@ -177,7 +175,7 @@ bool TableBuilder::OutputHeaderFile(
     const std::array<int, 127>& tokenindexes,
     const std::map<uint8_t, std::vector<uint32_t>>& table) {
   std::ofstream fd(header_options_.output_file_path);
-  htmlparser::Defer ____([&]() {fd.close();});
+  htmlparser::Defer ____([&]() { fd.close(); });
 
   fd << "// -*- C++ -*-\n";
 
@@ -233,20 +231,14 @@ inline static bool HasPopBit(uint32_t code);
   fd << "constexpr std::array<int, 127> kTokenIndexes {\n    ";
   for (int i = 0; i < tokenindexes.size(); i++) {
     fd << tokenindexes[i];
-    if (tokenindexes[i] < charset_.size()) {
-      fd << " /* " << PrintChar(
-          *(std::next(charset_.begin(), tokenindexes[i]))) << " */";
-    }
-    fd << (i > 0 && ((i + 1) % 6 == 0) ? ",\n    " : ", ");
+    fd << (i > 0 && ((i + 1) % 8 == 0) ? ",\n    " : ", ");
   }
   fd << "};\n\n";
 
-  if (charset_.find(0x80) == charset_.end())
-    charset_.insert(0x80);
+  if (charset_.find(0x80) == charset_.end()) charset_.insert(0x80);
 
   fd << "constexpr std::array<std::array<uint32_t, " << charset_.size() + 1
-     << ">, "
-     << declared_states.size() << "> kParseStates {{\n";
+     << ">, " << declared_states.size() << "> kParseStates {{\n";
 
   for (auto& [k, v] : table) {
     fd << "    // " << *std::next(declared_states.begin(), k) << "\n";
@@ -254,10 +246,8 @@ inline static bool HasPopBit(uint32_t code);
     fd << "    {";
     for (int i = 0; i < v.size(); i++) {
       fd << "0x" << std::hex << v[i];
-      fd << " /* " << PrintChar(*(std::next(charset_.begin(), i)))
-         << " */";
       if (i < v.size() - 1) {
-        fd << (i > 0 && ((i + 1) % 4 == 0) ? ",\n     " : ", ");
+        fd << (i > 0 && ((i + 1) % 8 == 0) ? ",\n     " : ", ");
       }
     }
 
@@ -292,9 +282,6 @@ inline static bool HasPopBit(uint32_t code) {
   return ((code & 0x40) >> 6) == 1;
 }
 
-// TODO: In follow up change modify the signature to accept a unicode
-// character, that is char32_t and based on the charset for this state return
-// the code from second last or last column accordingly.
 inline static uint32_t CodeForToken(unsigned char c, uint8_t state) {
   if (c > 127) {
 )";
@@ -319,43 +306,20 @@ inline static uint32_t CodeForToken(unsigned char c, uint8_t state) {
 
 std::optional<uint32_t> TableBuilder::ComputeState(uint8_t row, Rule r) {
   if (r.transition.size() == 3) {
-    return ComputeStateBits(
-        0,
-        state_codes_[r.transition[2]],
-        state_codes_[r.transition[0]],
-        true,
-        false);
+    return ComputeStateBits(0, state_codes_[r.transition[2]],
+                            state_codes_[r.transition[0]], true, false);
   } else if (r.transition.size() == 2) {
     if (r.transition[0] == "PUSH") {
-      return ComputeStateBits(
-            0,
-            state_codes_[r.transition[2]],
-            0,
-            true,
-            false);
+      return ComputeStateBits(0, state_codes_[r.transition[2]], 0, true, false);
     } else if (r.transition[1] == "PUSH") {
-      return ComputeStateBits(
-          0,
-          0,
-          state_codes_[r.transition[2]],
-          true,
-          false);
+      return ComputeStateBits(0, 0, state_codes_[r.transition[2]], true, false);
     }
   } else if (r.transition.size() == 1) {
     if (r.transition[0] == "POP") {
-      return ComputeStateBits(
-          0,
-          0,
-          0,
-          false,
-          true);
+      return ComputeStateBits(0, 0, 0, false, true);
     } else {
-      return ComputeStateBits(
-          0,
-          0,
-          state_codes_[r.transition[0]],
-          false,
-          false);
+      return ComputeStateBits(0, 0, state_codes_[r.transition[0]], false,
+                              false);
     }
   }
 
@@ -370,9 +334,7 @@ bool TableBuilder::ParseGrammarFile() {
       htmlparser::FileReadOptions::LineTransforms::StripWhitespace();
   bool valid_rule = true;
   htmlparser::FileUtil::ReadFileLines(
-      options,
-      grammar_file_path_,
-      [&](std::string_view line, int line_number) {
+      options, grammar_file_path_, [&](std::string_view line, int line_number) {
         auto rule = ReadRule(line, line_number);
         if (!rule.has_value()) {
           valid_rule = false;
@@ -428,8 +390,8 @@ std::optional<Rule> TableBuilder::ReadRule(std::string_view line,
       line.remove_prefix(1);
       input.push_back(c);
     } else {
-      std::cerr << "Invalid input declaration at: " <<
-                line_no << ":" << line_size - line.size() << std::endl;
+      std::cerr << "Invalid input declaration at: " << line_no << ":"
+                << line_size - line.size() << std::endl;
       return std::nullopt;
     }
   } else if (c == '"') {
@@ -529,7 +491,7 @@ std::optional<Rule> TableBuilder::ReadRule(std::string_view line,
             input.push_back(i);
           }
 
-          line.remove_prefix(3);  /* .. and char */
+          line.remove_prefix(3); /* .. and char */
           previous_char = 0;
           continue;
         }
@@ -538,9 +500,8 @@ std::optional<Rule> TableBuilder::ReadRule(std::string_view line,
       if (c == '"') {
         line.remove_prefix(1);
         if (line.front() != ' ') {
-          std::cerr << "Invalid syntax. Expecting whitespace at: "
-                    << line_no << ":" << line_size - line.size()
-                    << std::endl;
+          std::cerr << "Invalid syntax. Expecting whitespace at: " << line_no
+                    << ":" << line_size - line.size() << std::endl;
           return std::nullopt;
         }
         break;
@@ -554,8 +515,8 @@ std::optional<Rule> TableBuilder::ReadRule(std::string_view line,
     line.remove_prefix(1);
     c = line.front();
     if (c != '*') {
-      std::cerr << "Invalid char. Exepcting .* at : "
-                << line_no << ":" << line_size - line.size() << std::endl;
+      std::cerr << "Invalid char. Exepcting .* at : " << line_no << ":"
+                << line_size - line.size() << std::endl;
       return std::nullopt;
     }
     line.remove_prefix(1);
@@ -568,7 +529,7 @@ std::optional<Rule> TableBuilder::ReadRule(std::string_view line,
   std::string transition(line.substr(0, line.find_first_of(';')));
   if (transition.find(' ') != std::string::npos) {
     std::cerr << "Invalid syntax at line: " << line_no << ":"
-              << line_size - line.size() << std::endl;;
+              << line_size - line.size() << std::endl;
     return std::nullopt;
   }
 
@@ -590,66 +551,36 @@ std::optional<Rule> TableBuilder::ReadRule(std::string_view line,
     return std::nullopt;
   }
 
-  if (transition_states.size() == 3 &&
-      transition_states[1] != "PUSH") {
-    std::cerr << "PUSH must be followed by push state at: "
-              << line_no << ":" << line_size - line.size() << std::endl;
+  if (transition_states.size() == 3 && transition_states[1] != "PUSH") {
+    std::cerr << "PUSH must be followed by push state at: " << line_no << ":"
+              << line_size - line.size() << std::endl;
     return std::nullopt;
-  } else if (transition_states.size() == 2 &&
-             transition_states[0] != "PUSH" &&
+  } else if (transition_states.size() == 2 && transition_states[0] != "PUSH" &&
              transition_states[1] != "PUSH") {
-    std::cerr << "Missing PUSH identifier for multiple states at: "
-              << line_no << ":" << line_size - line.size() << std::endl;
+    std::cerr << "Missing PUSH identifier for multiple states at: " << line_no
+              << ":" << line_size - line.size() << std::endl;
     return std::nullopt;
-  } else if (transition_states.size() == 1 &&
-             transition_states[0] == "PUSH") {
-    std::cerr << "Missing push state with PUSH identifier at: "
-              << line_no << ":" << line_size - line.size() << std::endl;
+  } else if (transition_states.size() == 1 && transition_states[0] == "PUSH") {
+    std::cerr << "Missing push state with PUSH identifier at: " << line_no
+              << ":" << line_size - line.size() << std::endl;
     return std::nullopt;
   }
 
-  return Rule{.state = state,
-              .input = {.exclude = exclude,
-                        .charset{input.begin(), input.end()}},
-              .transition = transition_states};
+  return Rule{
+      .state = state,
+      .input = {.exclude = exclude, .charset{input.begin(), input.end()}},
+      .transition = transition_states};
 }
 
 std::optional<uint32_t> TableBuilder::ComputeStateBits(
-    uint8_t callback_code,
-    uint8_t push_state_code,
-    uint8_t current_state_code,
-    bool push,
-    bool pop) {
+    uint8_t callback_code, uint8_t push_state_code, uint8_t current_state_code,
+    bool push, bool pop) {
   uint32_t result = callback_code << 24;
   result |= (push_state_code << 16);
   result |= (current_state_code << 8);
   if (push) result |= (1 << 7);
   if (pop) result |= (1 << 6);
   return result;
-}
-
-std::string PrintChar(char c) {
-  switch (c) {
-    case '\r':
-      return "CR";
-    case '\t':
-      return "TAB";
-    case '\f':
-      return "FF";
-    case '\b':
-      return "BKSPC";
-    case '\n':
-      return "LF";
-    case 0x80:
-      return "\\u";
-    default: {
-      if (static_cast<int>(c) > 126) {
-        return ".*";
-      } else {
-        return std::string({c});
-      }
-    }
-  }
 }
 
 }  // namespace htmlparser::grammar

@@ -78,6 +78,11 @@ const TAG = 'amp-stream-gallery';
  * - Does not support autoplay
  */
 class AmpStreamGallery extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -271,11 +276,6 @@ class AmpStreamGallery extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @override */

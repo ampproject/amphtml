@@ -21,11 +21,10 @@ const pageWidth = 800;
 const pageHeight = 600;
 
 describes.endtoend(
-  'Non-looping AMP carousel',
+  'amp-base-carousel - non-looping',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/1.0/' +
-      'non-looping.amp.html',
+    version: '1.0',
+    fixture: 'amp-base-carousel/non-looping.amp.html',
     experiments: ['bento-carousel'],
     environments: ['single', 'viewer-demo'],
     initialRect: {width: pageWidth, height: pageHeight},
@@ -46,13 +45,15 @@ describes.endtoend(
       await controller.switchToShadowRoot(carousel);
     });
 
-    it('should render correctly', async () => {
+    // TODO(wg-components, #24195): Flaky during CI.
+    it.skip('should render correctly', async () => {
       const el = await getScrollingElement(styles, controller);
 
       await expect(prop(el, 'scrollWidth')).to.equal(pageWidth * SLIDE_COUNT);
     });
 
-    it('should snap when scrolling', async () => {
+    // TODO(wg-bento, #24195): getScrollingElement does not always find element in time.
+    it.skip('should snap when scrolling', async () => {
       const el = await getScrollingElement(styles, controller);
       const firstSlide = await getSlide(styles, controller, 0);
 
@@ -67,7 +68,8 @@ describes.endtoend(
       await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
     });
 
-    it('should have the correct scroll position when resizing', async () => {
+    // TODO(wg-bento, #24195): Flaky
+    it.skip('should have the correct scroll position when resizing', async () => {
       // Note: 513 seems to be the smallest settable width.
       await controller.setWindowRect({
         width: 800,

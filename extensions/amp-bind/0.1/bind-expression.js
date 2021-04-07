@@ -184,7 +184,8 @@ function generateFunctionAllowlist() {
       const func = functionsForType[name];
       if (func) {
         devAssert(
-          !func.name || name === func.name,
+          // Partial match to account for bundlers adding a suffix to the name.
+          !func.name || func.name.startsWith(name),
           'Listed function name ' +
             `"${name}" doesn't match name property "${func.name}".`
         );

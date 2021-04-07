@@ -16,99 +16,52 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script runs the unit and integration tests locally on a VM.
- * This is run during the CI stage = test; job = unminified tests.
+ * @fileoverview Script that tests the unminified AMP runtime during CI.
  */
 
-const colors = require('ansi-colors');
 const {
   downloadUnminifiedOutput,
-  printChangeSummary,
-  startTimer,
-  stopTimer,
-  timedExecOrDie: timedExecOrDieBase,
-  timedExecOrThrow: timedExecOrThrowBase,
+  skipDependentJobs,
+  timedExecOrDie,
+  timedExecOrThrow,
 } = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
-const {isPullRequestBuild} = require('../common/ci');
+const {buildTargetsInclude, Targets} = require('./build-targets');
+const {runCiJob} = require('./ci-job');
 
-const FILENAME = 'unminified-tests.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
-const timedExecOrThrow = (cmd, msg) => timedExecOrThrowBase(cmd, FILENAME, msg);
+const jobName = 'unminified-tests.js';
 
-function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
+function pushBuildWorkflow() {
+  downloadUnminifiedOutput();
 
-  if (!isPullRequestBuild()) {
-    downloadUnminifiedOutput(FILENAME);
-    timedExecOrDie('gulp update-packages');
-
-    try {
-      timedExecOrThrow(
-        'gulp integration --nobuild --headless --coverage --report',
-        'Integration tests failed! Skipping remaining tests.'
-      );
-      timedExecOrThrow(
-        'gulp unit --nobuild --headless --coverage --report',
-        'Unit tests failed!'
-      );
-      timedExecOrThrow(
-        'gulp codecov-upload',
-        'Failed to upload code coverage to Codecov!'
-      );
-    } catch (e) {
-      if (e.status) {
-        process.exitCode = e.status;
-      }
-    } finally {
-      timedExecOrDie('gulp test-report-upload');
+  try {
+    timedExecOrThrow(
+      'amp integration --nobuild --headless --coverage --report',
+      'Integration tests failed!'
+    );
+    timedExecOrThrow(
+      'amp codecov-upload',
+      'Failed to upload code coverage to Codecov!'
+    );
+  } catch (e) {
+    if (e.status) {
+      process.exitCode = e.status;
     }
-  } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
-    if (
-      !buildTargets.has('RUNTIME') &&
-      !buildTargets.has('FLAG_CONFIG') &&
-      !buildTargets.has('UNIT_TEST') &&
-      !buildTargets.has('INTEGRATION_TEST')
-    ) {
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Unminified Tests'),
-        'because this commit not affect the runtime, flag configs,',
-        'unit tests, or integration tests.'
-      );
-      stopTimer(FILENAME, FILENAME, startTime);
-      return;
-    }
-
-    downloadUnminifiedOutput(FILENAME);
-    timedExecOrDie('gulp update-packages');
-
-    if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-      timedExecOrDie('gulp unit --nobuild --headless --local_changes');
-    }
-
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST')
-    ) {
-      timedExecOrDie('gulp integration --nobuild --headless --coverage');
-    }
-
-    if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-      timedExecOrDie('gulp unit --nobuild --headless --coverage');
-    }
-
-    if (buildTargets.has('RUNTIME')) {
-      timedExecOrDie('gulp codecov-upload');
-    }
+  } finally {
+    timedExecOrDie('amp test-report-upload');
   }
-
-  stopTimer(FILENAME, FILENAME, startTime);
 }
 
-main();
+function prBuildWorkflow() {
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
+    downloadUnminifiedOutput();
+    timedExecOrDie('amp integration --nobuild --headless --coverage');
+    timedExecOrDie('amp codecov-upload');
+  } else {
+    skipDependentJobs(
+      jobName,
+      'this PR does not affect the runtime or integration tests'
+    );
+  }
+}
+
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

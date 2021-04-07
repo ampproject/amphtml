@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {Services} from '../../src/services';
 import {WindowInterface} from '../../src/window-interface';
 import {dev, user} from '../../src/log';
@@ -95,7 +95,7 @@ describes.realWin('impression', {amp: true}, (env) => {
       .stub(viewer, 'sendMessageAwaitResponse')
       .callsFake(() => new Promise(() => {}));
 
-    const clock = lolex.install({target: window});
+    const clock = fakeTimers.withGlobal(window).install();
     maybeTrackImpression(window);
     clock.tick(8001);
     const promise = getTrackImpressionPromise();
@@ -204,7 +204,7 @@ describes.realWin('impression', {amp: true}, (env) => {
         })
       );
       const {href} = window.location;
-      const clock = lolex.install({target: window});
+      const clock = fakeTimers.withGlobal(window).install();
       maybeTrackImpression(window);
       clock.tick(8001);
       const promise = getTrackImpressionPromise();

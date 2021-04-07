@@ -130,6 +130,14 @@ export class DomTransformStream {
     this.shouldTransfer_ = true;
     this.targetBodyResolver_(targetBody);
 
+    this.headPromise_.then(() => {
+      const attrs = this.detachedBody_.attributes;
+      for (let i = 0; i < attrs.length; i++) {
+        const {name, value} = attrs[i];
+        targetBody.setAttribute(name, value);
+      }
+    });
+
     this.transferBodyChunk_();
 
     return this.bodyTransferPromise_;

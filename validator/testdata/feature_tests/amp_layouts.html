@@ -43,6 +43,12 @@
   <!-- valid: layout=fixed-height -->
   <amp-img layout="fixed-height" height="200"  src="itshappening.gif"></amp-img>
 
+  <!-- invalid: layout value must be lower case -->
+  <amp-img layout="FIXED-HEIGHT" height="200"  src="itshappening.gif"></amp-img>
+
+  <!-- invalid: layout value must use hyphen rather than underscore -->
+  <amp-img layout="fixed_height" height="200"  src="itshappening.gif"></amp-img>
+
   <!-- valid: layout=fixed-height, with width=auto -->
   <amp-img layout="fixed-height" height="200" width="auto"
            src="itshappening.gif"></amp-img>

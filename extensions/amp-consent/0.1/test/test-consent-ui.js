@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {
   CONSENT_ITEM_STATE,
+  PURPOSE_CONSENT_STATE,
   constructConsentInfo,
   constructMetadata,
 } from '../consent-info';
@@ -30,6 +31,7 @@ import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service';
+import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
 import {whenCalled} from '../../../../testing/test-helper.js';
 
@@ -47,6 +49,7 @@ describes.realWin(
     let consentUI;
     let mockInstance;
     let parent;
+    let ownersStubs;
 
     beforeEach(() => {
       doc = env.win.document;
@@ -84,7 +87,12 @@ describes.realWin(
           return Promise.resolve();
         },
       };
-      Services.ownersForDoc(doc).scheduleLayout = env.sandbox.mock();
+      const owners = Services.ownersForDoc(doc);
+      ownersStubs = {
+        scheduleLayout: env.sandbox.stub(owners, 'scheduleLayout'),
+        schedulePause: env.sandbox.stub(owners, 'schedulePause'),
+        scheduleResume: env.sandbox.stub(owners, 'scheduleResume'),
+      };
       resetServiceForTesting(win, 'consentStateManager');
       registerServiceBuilder(win, 'consentStateManager', function () {
         return Promise.resolve({
@@ -93,7 +101,8 @@ describes.realWin(
               constructConsentInfo(
                 CONSENT_ITEM_STATE.ACCEPTED,
                 'test',
-                constructMetadata(CONSENT_STRING_TYPE.TCF_V2, '1~1.10.12.103')
+                constructMetadata(CONSENT_STRING_TYPE.TCF_V2, '1~1.10.12.103'),
+                {'abc': PURPOSE_CONSENT_STATE.ACCEPTED}
               )
             );
           },
@@ -158,9 +167,32 @@ describes.realWin(
         consentUI.show(false);
         expect(parent.classList.contains('amp-active')).to.be.true;
         expect(parent).to.not.have.display('none');
+        expect(ownersStubs.scheduleLayout).to.be.calledOnce;
+        expect(ownersStubs.scheduleResume).to.be.calledOnce;
         consentUI.hide();
         expect(parent.classList.contains('amp-active')).to.be.false;
         expect(parent.classList.contains('amp-hidden')).to.be.true;
+        expect(ownersStubs.schedulePause).to.be.calledOnce;
+      });
+
+      it('should support pause/resume lifecycle', () => {
+        const config = dict({
+          'promptUI': 'test1',
+        });
+        consentUI = new ConsentUI(mockInstance, config);
+        consentUI.show(false);
+        expect(ownersStubs.scheduleLayout).to.be.calledOnce;
+        expect(ownersStubs.scheduleResume).to.be.calledOnce;
+
+        consentUI.pause();
+        expect(ownersStubs.schedulePause).to.be.calledOnce;
+        expect(ownersStubs.scheduleLayout).to.be.calledOnce; // no change.
+        expect(ownersStubs.scheduleResume).to.be.calledOnce; // no change.
+
+        consentUI.resume();
+        expect(ownersStubs.scheduleLayout).to.be.calledTwice;
+        expect(ownersStubs.scheduleResume).to.be.calledTwice;
+        expect(ownersStubs.schedulePause).to.be.calledOnce; // no change.
       });
 
       it('append/remove iframe', async () => {
@@ -168,7 +200,7 @@ describes.realWin(
           'promptUISrc': 'https://promptUISrc',
         });
         consentUI = new ConsentUI(mockInstance, config);
-        const clock = lolex.install({target: win});
+        const clock = fakeTimers.withGlobal(win).install();
 
         // Append iframe, and remove iframe after 1sec timeout
         expect(elementByTag(parent, 'iframe')).to.be.null;
@@ -343,6 +375,39 @@ describes.realWin(
         );
       });
 
+      // TODO(micajuineho): consolidate w/ test above after exp done
+      it('should pass purpose consents to the iframe', async () => {
+        toggleExperiment(win, 'amp-consent-granular-consent', true);
+        const config = dict({
+          'promptUISrc': 'https://promptUISrc',
+          'clientConfig': {
+            'test': 'ABC',
+          },
+        });
+        consentUI = new ConsentUI(mockInstance, config);
+        consentUI.show(false);
+        await macroTask();
+
+        expect(consentUI.ui_.getAttribute('name')).to.deep.equal(
+          JSON.stringify({
+            'clientConfig': {
+              'test': 'ABC',
+            },
+            'consentState': 'accepted',
+            'consentStateValue': 'accepted',
+            'consentMetadata': constructMetadata(
+              CONSENT_STRING_TYPE.TCF_V2,
+              '1~1.10.12.103'
+            ),
+            'consentString': 'test',
+            'promptTrigger': 'load',
+            'isDirty': false,
+            'purposeConsents': {'abc': 1},
+          })
+        );
+        toggleExperiment(win, 'amp-consent-granular-consent', false);
+      });
+
       it('should pass the promptTrigger reason to the iframe', function* () {
         const config = dict({
           'promptUISrc': 'https://promptUISrc',
@@ -394,7 +459,7 @@ describes.realWin(
           consentUI = new ConsentUI(mockInstance, {
             'promptUISrc': 'https://promptUISrc',
           });
-          const clock = lolex.install({target: win});
+          const clock = fakeTimers.withGlobal(win).install();
           consentUI.show(false);
           consentUI.iframeReady_.resolve();
           await macroTask();

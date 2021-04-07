@@ -64,7 +64,7 @@ body {
  * is only possible in this case, and (b) we'd like to preserve pinch-zoom.
  */
 html.i-amphtml-singledoc.i-amphtml-embedded {
-  touch-action: pan-y;
+  touch-action: pan-y pinch-zoom;
 }
 
 /**
@@ -92,21 +92,6 @@ html.i-amphtml-fie:not(.i-amphtml-inabox) > body {
 
 
 /**
- * Set `body {overflow-x: hidden}` for iOS WebView. This is b/c iOS WebView
- * does NOT respect `html {overflow-x: hidden}`.
- * Note! For all other natural cases body's style is `body {overflow: visible}`
- * to avoid visibility issues with iframes.
- */
-html.i-amphtml-webview > body {
-  overflow-x: hidden !important;
-  overflow-y: visible !important;
-  /* A <body> height of 0 will be hidden due to "overflow-x: hidden". */
-  /* Prevent this by setting min-height to 100vh. See b/74541306. */
-  min-height: 100vh !important;
-}
-
-
-/**
  * iOS-Embed mode (iOS <= 8). The `body` itself is scrollable.
  */
 html.i-amphtml-ios-embed-legacy > body {
@@ -124,7 +109,7 @@ html.i-amphtml-ios-embed {
   position: static;
 }
 
-/** Wrapper for iOS Embed Wrapper mode. */
+/** Wrapper for iOS Embed Wrapper mode (iOS <= 12). */
 #i-amphtml-wrapper {
   overflow-x: hidden !important;
   overflow-y: auto !important;

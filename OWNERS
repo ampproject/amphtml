@@ -9,6 +9,7 @@
         {name: 'cramforce', requestReviews: false},
         {name: 'dvoytenko', requestReviews: false},
         {name: 'jridgewell', requestReviews: false},
+        {name: 'kristoferbaxter', requestReviews: false},
       ],
     },
     {
@@ -20,11 +21,11 @@
       owners: [{name: '*'}],
     },
     {
-      pattern: '{.*,gulpfile.js}',
+      pattern: '{.*,amp.js,gulp-deprecated.js}',
       owners: [{name: 'ampproject/wg-infra'}],
     },
     {
-      pattern: '{babel.config.js,package.json,package-lock.json}',
+      pattern: '{babel.config.js,package.json,package-lock.json,package-scripts.js}',
       owners: [
         {name: 'ampproject/wg-infra'},
         {name: 'ampproject/wg-performance'},

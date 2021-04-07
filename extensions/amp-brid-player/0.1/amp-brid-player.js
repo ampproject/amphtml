@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
@@ -32,6 +33,10 @@ import {
   isFullscreenElement,
   removeElement,
 } from '../../../src/dom';
+import {
+  getConsentPolicyInfo,
+  getConsentPolicyState,
+} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
@@ -122,6 +127,8 @@ class AmpBridPlayer extends AMP.BaseElement {
       feedType = this.element.getAttribute('data-dynamic');
     } else if (this.element.hasAttribute('data-playlist')) {
       feedType = 'playlist';
+    } else if (this.element.hasAttribute('data-carousel')) {
+      feedType = 'carousel';
     } else if (this.element.hasAttribute('data-outstream')) {
       feedType = 'outstream';
     }
@@ -164,8 +171,9 @@ class AmpBridPlayer extends AMP.BaseElement {
     this.feedID_ = userAssert(
       element.getAttribute('data-video') ||
         element.getAttribute('data-playlist') ||
+        element.getAttribute('data-carousel') ||
         element.getAttribute('data-outstream'),
-      'Either the data-video or the data-playlist or the data-outstream ' +
+      'Either the data-video, data-playlist, data-carousel or data-outstream ' +
         'attributes must be specified for <amp-brid-player> %s',
       element
     );
@@ -269,6 +277,52 @@ class AmpBridPlayer extends AMP.BaseElement {
   }
 
   /**
+   * Requests consent data from consent module
+   * and forwards information to player
+   * @private
+   */
+  getConsentData_() {
+    const consentPolicy = this.getConsentPolicy() || 'default';
+    const consentStatePromise = getConsentPolicyState(
+      this.element,
+      consentPolicy
+    );
+    const consentStringPromise = getConsentPolicyInfo(
+      this.element,
+      consentPolicy
+    );
+
+    return Promise.all([consentStatePromise, consentStringPromise]).then(
+      (consents) => {
+        let consentData;
+        switch (consents[0]) {
+          case CONSENT_POLICY_STATE.SUFFICIENT:
+            consentData = {
+              'gdprApplies': true,
+              'userConsent': 1,
+              'gdprString': consents[1],
+            };
+            break;
+          case CONSENT_POLICY_STATE.INSUFFICIENT:
+          case CONSENT_POLICY_STATE.UNKNOWN:
+            consentData = {
+              'gdprApplies': true,
+              'userConsent': 0,
+              'gdprString': consents[1],
+            };
+            break;
+          case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
+          default:
+            consentData = {
+              'gdprApplies': false,
+            };
+        }
+        this.sendCommand_('setAMPGDPR', JSON.stringify(consentData));
+      }
+    );
+  }
+
+  /**
    * @param {!Event} event
    * @private
    */
@@ -288,6 +342,9 @@ class AmpBridPlayer extends AMP.BaseElement {
     if (params[2] == 'trigger') {
       if (params[3] == 'ready') {
         this.playerReadyResolver_(this.iframe_);
+      }
+      if (params[3] == 'requestAMPGDPR') {
+        this.getConsentData_();
       }
       redispatch(element, params[3], {
         'ready': VideoEvents.LOAD,
@@ -325,8 +382,8 @@ class AmpBridPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  play(unusedIsAutoplay) {
-    this.sendCommand_('play');
+  play(isAutoplay) {
+    this.sendCommand_('play', isAutoplay ? 'auto' : '');
   }
 
   /** @override */
