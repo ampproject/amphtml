@@ -701,12 +701,11 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   it('should build the new default outlink page attachment UI', async () => {
     toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
 
-    const attachmentEl = win.document.createElement(
-      'amp-story-page-attachment'
+    const attachmentEl = createElementWithAttributes(
+      win.document,
+      'amp-story-page-attachment',
+      {'layout': 'nodisplay', 'href': 'www.google.com'}
     );
-
-    attachmentEl.setAttribute('layout', 'nodisplay');
-    attachmentEl.setAttribute('href', 'www.google.com');
     element.appendChild(attachmentEl);
 
     await page.buildCallback();

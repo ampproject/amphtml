@@ -174,8 +174,12 @@ const renderOutlinkPageAttachmentUI = (
   const openImgAttr = attachmentEl.getAttribute('cta-image');
 
   if (openImgAttr === 'none') {
-    chipEl.classList.add('i-amphtml-story-outlink-page-attachment-outlink-chip-no-image');
-    ctaLabelEl.classList.add('i-amphtml-story-outlink-page-attachment-label-no-image');
+    chipEl.classList.add(
+      'i-amphtml-story-outlink-page-attachment-outlink-chip-no-image'
+    );
+    ctaLabelEl.classList.add(
+      'i-amphtml-story-outlink-page-attachment-label-no-image'
+    );
   } else {
     const ctaImgEl = win.document.createElement('div');
     ctaImgEl.classList.add('i-amphtml-story-outlink-page-attachment-img');
