@@ -77,7 +77,7 @@ Example with video-id
 <amp-tiktok
   width="325"
   height="575"
-  data-src="6718335390845095173"
+  data-src="6948210747285441798"
 ></amp-tiktok>
 ```
 
@@ -91,7 +91,7 @@ Example with source url:
 <amp-tiktok
   width="325 "
   height="575"
-  data-src="https://www.tiktok.com/@scout2015/video/6718335390845095173"
+  data-src="https://www.tiktok.com/@scout2015/video/6948210747285441798"
 ></amp-tiktok>
 ```
 
@@ -110,49 +110,32 @@ To use this method copy the blockquote from the TikTok Embed code:
 
 ```html
 <amp-tiktok width="300" height="800">
-  <blockquote
-    placeholder
-    class="tiktok-embed"
-    cite="https://www.tiktok.com/@scout2015/video/6718335390845095173"
-    data-video-id="6718335390845095173"
-    style="max-width: 605px; min-width: 325px"
-  >
-    <section>
-      <a
-        target="_blank"
-        title="@scout2015"
-        href="https://www.tiktok.com/@scout2015"
-        >@scout2015</a
-      >
-      <p>
-        Scramble up ur name & I’ll try to guess it😍❤️
-        <a
-          title="foryoupage"
-          target="_blank"
-          href="https://www.tiktok.com/tag/foryoupage"
-          >#foryoupage</a
-        >
-        <a
-          title="petsoftiktok"
-          target="_blank"
-          href="https://www.tiktok.com/tag/petsoftiktok"
-          >#petsoftiktok</a
-        >
-        <a
-          title="aesthetic"
-          target="_blank"
-          href="https://www.tiktok.com/tag/aesthetic"
-          >#aesthetic</a
-        >
-      </p>
-      <a
-        target="_blank"
-        title="♬ original sound - tiff"
-        href="https://www.tiktok.com/music/original-sound-6689804660171082501"
-        >♬ original sound - tiff</a
-      >
-    </section>
-  </blockquote>
+<blockquote
+  placeholder
+  class="tiktok-embed"
+  cite="https://www.tiktok.com/@countingprimes/video/6948210747285441798"
+  data-video-id="6948210747285441798"
+>
+  <section>
+    <a
+      target="_blank"
+      title="@countingprimes"
+      href="https://www.tiktok.com/@countingprimes"
+      >@countingprimes</a
+    >
+    <p>
+      VIM is great.... right up until you start typing the commands into every
+      single text editor you see. I’d like to apologize for all my unneeded
+      “:wq”’s
+    </p>
+    <a
+      target="_blank"
+      title="♬ original sound - countingprimes"
+      href="https://www.tiktok.com/music/original-sound-6948210588145175302"
+      >♬ original sound - countingprimes</a
+    >
+  </section>
+</blockquote>
 </amp-tiktok>
 ```
 
