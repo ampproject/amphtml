@@ -19,7 +19,7 @@
  */
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {setImportantStyles} from '../../../src/style';
 
@@ -74,8 +74,8 @@ const buildOpenOutlinkAttachmentElement = (element) =>
          <span class="i-amphtml-story-outlink-page-open-attachment-bar-left"></span>
          <span class="i-amphtml-story-outlink-page-open-attachment-bar-right"></span>
        </span>
-       <div class="i-amphtml-story-outlink-page-attachment-outlink-chip">
-        <div class="i-amphtml-story-outlink-page-attachment-label"></div>
+       <div class="i-amphtml-story-outlink-page-attachment-outlink-chip" ref="chipEl">
+        <div class="i-amphtml-story-outlink-page-attachment-label" ref="ctaLabelEl"></div>
        </div>
      </a>`;
 
@@ -157,6 +157,9 @@ const renderOutlinkPageAttachmentUI = (
   // Setting theme
   openAttachmentEl.setAttribute('theme', attachmentEl.getAttribute('theme'));
 
+  // Getting elements
+  const {chipEl, ctaLabelEl} = htmlRefs(openAttachmentEl);
+
   // Appending text & aria-label.
   const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
   const openLabel = openLabelAttr
@@ -164,18 +167,11 @@ const renderOutlinkPageAttachmentUI = (
     : getLocalizationService(pageEl).getLocalizedString(
         LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
       );
-
-  const ctaLabelEl = openAttachmentEl.querySelector(
-    '.i-amphtml-story-outlink-page-attachment-label'
-  );
   ctaLabelEl.textContent = openLabel;
   openAttachmentEl.setAttribute('aria-label', openLabel);
 
   // Adding image.
   const openImgAttr = attachmentEl.getAttribute('cta-image');
-  const chipEl = openAttachmentEl.querySelector(
-    '.i-amphtml-story-outlink-page-attachment-outlink-chip'
-  );
 
   if (!attachmentEl.hasAttribute('cta-image') || openImgAttr !== 'none') {
     const ctaImgEl = win.document.createElement('div');
