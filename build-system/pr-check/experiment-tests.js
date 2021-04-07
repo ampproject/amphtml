@@ -20,7 +20,7 @@
  */
 
 const {
-  downloadExperimentOutput,
+  fetchBuildOutput,
   skipDependentJobs: skipDependentJobs,
   timedExecOrDie,
   timedExecOrThrow,
@@ -62,7 +62,7 @@ function runExperimentTests(config) {
 function pushBuildWorkflow() {
   const config = getExperimentConfig(experiment);
   if (config) {
-    downloadExperimentOutput(experiment);
+    fetchBuildOutput();
     runExperimentTests(config);
   } else {
     skipDependentJobs(

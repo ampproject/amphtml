@@ -21,7 +21,7 @@
 
 const atob = require('atob');
 const {
-  downloadNomoduleOutput,
+  fetchBuildOutput,
   skipDependentJobs,
   timedExecOrDie,
 } = require('./utils');
@@ -31,7 +31,7 @@ const {runCiJob} = require('./ci-job');
 const jobName = 'visual-diff-tests.js';
 
 function pushBuildWorkflow() {
-  downloadNomoduleOutput();
+  fetchBuildOutput();
   process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
   timedExecOrDie('amp visual-diff --nobuild --main');
 }
@@ -39,7 +39,7 @@ function pushBuildWorkflow() {
 function prBuildWorkflow() {
   process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
   if (buildTargetsInclude(Targets.RUNTIME, Targets.VISUAL_DIFF)) {
-    downloadNomoduleOutput();
+    fetchBuildOutput();
     timedExecOrDie('amp visual-diff --nobuild');
   } else {
     skipDependentJobs(

@@ -21,7 +21,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
-  downloadNomoduleOutput,
+  fetchBuildOutput,
   skipDependentJobs,
   timedExecOrDie,
   timedExecOrThrow,
@@ -42,7 +42,7 @@ function prependConfig() {
 }
 
 function pushBuildWorkflow() {
-  downloadNomoduleOutput();
+  fetchBuildOutput();
   prependConfig();
   try {
     timedExecOrThrow(
@@ -60,7 +60,7 @@ function pushBuildWorkflow() {
 
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
-    downloadNomoduleOutput();
+    fetchBuildOutput();
     prependConfig();
     timedExecOrDie(
       `amp integration --nobuild --compiled --headless --config=${argv.config}`

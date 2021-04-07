@@ -21,8 +21,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
-  downloadModuleOutput,
-  downloadNomoduleOutput,
+  fetchBuildOutput,
   skipDependentJobs,
   timedExecOrDie,
 } = require('./utils');
@@ -43,16 +42,14 @@ function prependConfig() {
 }
 
 function pushBuildWorkflow() {
-  downloadNomoduleOutput();
-  downloadModuleOutput();
+  fetchBuildOutput();
   prependConfig();
   timedExecOrDie('amp integration --nobuild --compiled --headless --esm');
 }
 
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
-    downloadNomoduleOutput();
-    downloadModuleOutput();
+    fetchBuildOutput();
     prependConfig();
     timedExecOrDie(
       `amp integration --nobuild --compiled --headless --esm --config=${argv.config}`

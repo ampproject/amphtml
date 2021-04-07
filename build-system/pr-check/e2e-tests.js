@@ -20,7 +20,7 @@
  */
 
 const {
-  downloadNomoduleOutput,
+  fetchBuildOutput,
   skipDependentJobs,
   timedExecOrDie,
   timedExecOrThrow,
@@ -31,7 +31,7 @@ const {runCiJob} = require('./ci-job');
 const jobName = 'e2e-tests.js';
 
 function pushBuildWorkflow() {
-  downloadNomoduleOutput();
+  fetchBuildOutput();
   try {
     timedExecOrThrow(
       'amp e2e --nobuild --headless --compiled --report',
@@ -48,7 +48,7 @@ function pushBuildWorkflow() {
 
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.E2E_TEST)) {
-    downloadNomoduleOutput();
+    fetchBuildOutput();
     timedExecOrDie('amp e2e --nobuild --headless --compiled');
   } else {
     skipDependentJobs(

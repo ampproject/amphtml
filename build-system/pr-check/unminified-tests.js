@@ -20,7 +20,7 @@
  */
 
 const {
-  downloadUnminifiedOutput,
+  fetchBuildOutput,
   skipDependentJobs,
   timedExecOrDie,
   timedExecOrThrow,
@@ -31,7 +31,7 @@ const {runCiJob} = require('./ci-job');
 const jobName = 'unminified-tests.js';
 
 function pushBuildWorkflow() {
-  downloadUnminifiedOutput();
+  fetchBuildOutput();
 
   try {
     timedExecOrThrow(
@@ -53,7 +53,7 @@ function pushBuildWorkflow() {
 
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
-    downloadUnminifiedOutput();
+    fetchBuildOutput();
     timedExecOrDie('amp integration --nobuild --headless --coverage');
     timedExecOrDie('amp codecov-upload');
   } else {
