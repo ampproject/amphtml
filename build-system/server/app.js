@@ -1462,23 +1462,6 @@ app.get('/dist/amp-inabox-host.(m?js)', (req, _res, next) => {
   next();
 });
 
-/*
- * Start Cache SW LOCALDEV section
- */
-
-app.get('/dist/diversions', (_req, res) => {
-  let n = nearestFiveMinutes();
-  n += 5 * 1000 * 60;
-  res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Date', new Date().toUTCString());
-  res.setHeader('Cache-Control', 'no-cache;max-age=150');
-  res.end(JSON.stringify(['98' + n]));
-});
-
-/*
- * End Cache SW LOCALDEV section
- */
-
 app.get('/mraid.js', (req, _res, next) => {
   req.url = req.url.replace('mraid.js', 'examples/mraid/mraid.js');
   next();
