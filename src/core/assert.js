@@ -21,19 +21,6 @@ import {
 import {isMinifiedMode} from './minified-mode';
 
 /**
- * Append an item to an array unless it's an empty string.
- * Importantly, this will exclude empty string but allow other falsey values
- * such as null or undefined.
- * @param {Array} arr
- * @param {any} item
- */
-function pushIfNonEmpty(arr, item) {
-  if (item !== '') {
-    arr.push(item);
-  }
-}
-
-/**
  * Throws an error if the second argument isn't trueish.
  *
  * Supports argument substitution into the message via %s placeholders.
@@ -67,19 +54,18 @@ function assertion(
   }
 
   // Skip the first 3 arguments to isolate format params
-  const messageArgs = Array.prototype.slice.call(arguments, 3);
+  // const messageArgs = Array.prototype.slice.call(arguments, 3);
+  // Index at which message args start
+  let i = 3;
   let firstElement;
-
-  const messageArray = [];
-  const pushMessage = pushIfNonEmpty.bind(null, messageArray);
 
   // Substitute provided values into format string in message
   const splitMessage = opt_message.split('%s');
   let message = splitMessage.shift();
-  pushMessage(message);
+  const messageArray = [message];
 
-  while (splitMessage.length > 0) {
-    let subValue = messageArgs.shift();
+  while (splitMessage.length) {
+    const subValue = arguments[i++];
     const nextConstant = splitMessage.shift();
 
     // If an element is provided, add it to the error object
@@ -88,19 +74,13 @@ function assertion(
       firstElement = subValue;
     }
 
-    // Past this point, we want any elements string-ified
-    subValue = elementStringOrPassThru(subValue);
-    message += subValue + nextConstant;
-
-    messageArray.push(subValue);
-    pushMessage(nextConstant.trim());
+    message += elementStringOrPassThru(subValue) + nextConstant;
+    messageArray.push(subValue, nextConstant.trim());
   }
 
   const error = new Error(message);
-  error.messageArray = messageArray;
-  if (firstElement) {
-    error.associatedElement = firstElement;
-  }
+  error.messageArray = messageArray.filter((x) => x !== '');
+  error.associatedElement = firstElement;
   throw error;
 }
 
