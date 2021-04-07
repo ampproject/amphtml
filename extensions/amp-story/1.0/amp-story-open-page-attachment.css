@@ -126,8 +126,10 @@
     both !important;
 }
 
-.i-amphtml-story-page-open-attachment-bar-left,
-.i-amphtml-story-page-open-attachment-bar-right {
+amp-story-page .i-amphtml-story-page-open-attachment-bar-left,
+amp-story-page .i-amphtml-story-page-open-attachment-bar-right,
+amp-story-page .i-amphtml-story-outlink-page-open-attachment-bar-left,
+amp-story-page .i-amphtml-story-outlink-page-open-attachment-bar-right {
   position: absolute !important;
   display: block !important;
   height: 3px !important;
@@ -153,6 +155,7 @@
 .i-amphtml-story-page-open-attachment-label {
   position: relative !important;
   padding: 12px 32px 20px 32px !important;
+  margin: 0 0 20px 0 !important;
   height: 16px !important;
   max-width: calc(100% - 64px) !important;
   color: #fff !important;
@@ -233,4 +236,64 @@
   max-width: 210px !important;
   margin-bottom: 20px !important;
   color: var(--i-amphtml-label-text-color) !important;
+}
+
+/** For amp-story-outlink-page-attachment-v2 experiment elements. */
+.i-amphtml-story-outlink-page-attachment-arrow {
+  display: block !important;
+  height: 32px !important;
+  width: 32px !important;
+  cursor: pointer !important;
+  position: relative;
+}
+
+.i-amphtml-story-outlink-page-open-attachment-bar-left {
+  background: white !important;
+  left: 6px !important;
+  animation: open-attachment-bar-left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+}
+
+.i-amphtml-story-outlink-page-open-attachment-bar-right {
+  background: white !important;
+  right: 6px !important;
+  animation: open-attachment-bar-right 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+}
+
+.i-amphtml-story-outlink-page-attachment-outlink-chip {
+  display: table !important;
+  position: relative !important;
+  padding: 7px 10px !important;
+  margin: 0 0 20px 0 !important;
+  height: 16px !important;
+  max-width: 243px !important;
+  border-radius: 30px !important;
+  background: white !important;
+  color: var(--cta-accent-color, black) !important;
+}
+
+.i-amphtml-story-outlink-page-attachment-content {
+  display: table-row !important;
+}
+
+.i-amphtml-story-outlink-page-attachment-label {
+  display: table-cell !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  letter-spacing: 0.3px;
+  line-height: 16px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  max-width: 210px !important;
+  vertical-align: middle;
+}
+
+.i-amphtml-story-outlink-page-attachment-img {
+  display: table-cell !important;
+  vertical-align: middle !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  border-radius: 50% !important;
 }
