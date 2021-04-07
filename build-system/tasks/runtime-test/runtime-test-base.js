@@ -178,6 +178,11 @@ function updateReporters(config) {
   }
 
   if (argv.report) {
+    if (isCiBuild()) {
+      config.reporters.push('junit');
+      config.junitReporter.outputFile = `result-reports/${config.testType}.xml`;
+    }
+
     config.reporters.push('json-result');
     config.jsonResultReporter = {
       outputFile: `result-reports/${config.testType}.json`,
