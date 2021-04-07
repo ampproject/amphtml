@@ -89,13 +89,14 @@ export const buildOpenInlineAttachmentElement = (element) =>
 export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
   const openImgAttr = attachmentEl.getAttribute('cta-image');
   const attachmentHref = attachmentEl.getAttribute('href');
-  if (isPageAttachmentUiV2ExperimentOn(win) && !attachmentHref && openImgAttr) {
-    return renderPageAttachmentUiWithImages(win, pageEl, attachmentEl);
-  } else if (isPageAttachmentUiV2ExperimentOn(win) && attachmentHref) {
-    return renderOutlinkPageAttachmentUI(win, pageEl, attachmentEl, attachmentHref);
-  } else {
-    return renderDefaultPageAttachmentUI(pageEl, attachmentEl);
+  if (isPageAttachmentUiV2ExperimentOn(win)) {
+    if (attachmentHref) {
+      return renderOutlinkPageAttachmentUI(win, pageEl, attachmentEl, attachmentHref);
+    } else if (openImgAttr) {
+      return renderPageAttachmentUiWithImages(win, pageEl, attachmentEl);
+    }
   }
+  return renderDefaultPageAttachmentUI(pageEl, attachmentEl);
 };
 
 /**
@@ -147,10 +148,7 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
   );
 
   // Setting theme  
-  const theme = attachmentEl.getAttribute('theme');
-  if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
-    openAttachmentEl.setAttribute('theme', AttachmentTheme.DARK);
-  }
+  openAttachmentEl.setAttribute('theme', attachmentEl.getAttribute('theme'));
 
   // Appending text & aria-label.
   const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
@@ -163,7 +161,7 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
   const ctaLabelEl = openAttachmentEl.querySelector(
     '.i-amphtml-story-outlink-page-attachment-label'
   );
-  ctaLabelEl.innerHTML = openLabel;
+  ctaLabelEl.textContent = openLabel;
   openAttachmentEl.setAttribute('aria-label', openLabel);
 
   // Adding image.
