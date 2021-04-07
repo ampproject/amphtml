@@ -15,7 +15,6 @@
  */
 import {Deferred} from './promise';
 import {createViewportObserver} from '../viewport-observer';
-import {layoutRectFromDomRect} from '../layout-rect';
 import {toWin} from '../types';
 
 /**

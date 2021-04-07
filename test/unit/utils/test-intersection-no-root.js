@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  measureIntersectionNoRoot,
-} from '../../../src/utils/intersection-no-root';
+import {measureIntersectionNoRoot} from '../../../src/utils/intersection-no-root';
 
 describes.fakeWin('utils/intersection', {}, (env) => {
   function getInObConstructorStub() {
