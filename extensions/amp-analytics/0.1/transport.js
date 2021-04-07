@@ -331,13 +331,13 @@ export class Transport {
   static forwardRequestToAmpScript(ampdoc, request) {
     userAssert(
       request.url.startsWith(AMP_SCRIPT_URI_SCHEME),
-      `[${TAG}]: "amp-script" URL must begin with "amp-script:"`
+      `[${TAG_}]: "amp-script" URL must begin with "amp-script:"`
     );
 
     const target = request.url.slice(AMP_SCRIPT_URI_SCHEME.length).split('.');
     userAssert(
       target.length === 2 && target[0].length > 0 && target[1].length > 0,
-      `[${TAG}]: "amp-script" target must be specified as "scriptId.functionIdentifier".`
+      `[${TAG_}]: "amp-script" target must be specified as "scriptId.functionIdentifier".`
     );
 
     const ampScriptId = target[0];
@@ -345,7 +345,7 @@ export class Transport {
     const ampScriptEl = ampdoc.getElementById(ampScriptId);
     userAssert(
       ampScriptEl && ampScriptEl.tagName === 'AMP-SCRIPT',
-      `[${TAG}]: could not find <amp-script> with ID "${ampScriptId}"`
+      `[${TAG_}]: could not find <amp-script> with ID "${ampScriptId}"`
     );
 
     ampScriptEl
