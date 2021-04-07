@@ -96,7 +96,16 @@ async function checkResponse(response, ...successMessages) {
  * @return {Promise<Response>}
  */
 async function postJson(url, body, options) {
-  return fetch(url, {...options, method: 'POST', body: JSON.stringify(body)});
+  return fetch(url, {
+    ...options,
+    headers: {
+      ...(options && options.headers),
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
 }
 
 /**

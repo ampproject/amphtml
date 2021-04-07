@@ -70,6 +70,10 @@ async function checkFile(file) {
   try {
     const response = await fetch(OWNERS_SYNTAX_CHECK_URI, {
       method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({path: file, contents}),
     });
 
