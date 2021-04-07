@@ -1963,6 +1963,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       const resourceState = this.getResource_().getState();
       // Do not show fallback before layout
       if (
+        !this.V1() &&
         show &&
         (resourceState == ResourceState.NOT_BUILT ||
           resourceState == ResourceState.NOT_LAID_OUT ||
@@ -1975,7 +1976,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       // the whole element, (b) some relayout is expected and (c) fallback
       // condition would be rare.
       this.classList.toggle('amp-notsupported', show);
-      if (show == true) {
+      if (show) {
         const fallbackElement = this.getFallback();
         if (fallbackElement) {
           Services.ownersForDoc(this.getAmpDoc()).scheduleLayout(

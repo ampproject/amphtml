@@ -19,6 +19,8 @@ import {Wrapper, useRenderer} from '../../../src/preact/component';
 import {useEffect, useState} from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
+const NOOP = () => {};
+
 /**
  * @param {!JsonObject} data
  * @return {string}
@@ -41,8 +43,8 @@ export function Render({
   src = '',
   getJson = DEFAULT_GET_JSON,
   render = DEFAULT_RENDER,
-  onLoad = () => {},
-  onError = () => {},
+  onLoad = NOOP,
+  onError = NOOP,
   ...rest
 }) {
   useResourcesNotify();
@@ -63,8 +65,8 @@ export function Render({
           onLoad();
         }
       })
-      .catch(() => {
-        onError();
+      .catch((e) => {
+        onError(e);
       });
     return () => {
       cancelled = true;
