@@ -206,6 +206,15 @@ function circleciPrMergeCommit() {
 }
 
 /**
+ * Returns an identifier that is unique to each CircleCI job. This is different
+ * from the workflow ID, which is common across all jobs in a workflow.
+ * @return {string}
+ */
+function circleciBuildNumber() {
+  return isCircleci ? env('CIRCLE_BUILD_NUM') : '';
+}
+
+/**
  * Returns the repo slug for the ongoing build.
  * @return {string}
  */
@@ -235,6 +244,7 @@ module.exports = {
   ciPullRequestBranch,
   ciPullRequestSha,
   ciPushBranch,
+  circleciBuildNumber,
   circleciPrMergeCommit,
   ciRepoSlug,
   isCiBuild,
