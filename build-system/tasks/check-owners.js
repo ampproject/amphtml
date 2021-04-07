@@ -22,15 +22,12 @@
 
 'use strict';
 
+const fetch = require('node-fetch');
 const fs = require('fs-extra');
 const JSON5 = require('json5');
-const request = require('request');
-const util = require('util');
 const {cyan, red, green} = require('kleur/colors');
 const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
 const {log, logLocalDev} = require('../common/logging');
-
-const requestPost = util.promisify(request.post);
 
 const OWNERS_SYNTAX_CHECK_URI =
   'http://ampproject-owners-bot.appspot.com/v0/syntax';
@@ -71,20 +68,23 @@ async function checkFile(file) {
   }
 
   try {
-    const response = await requestPost({
-      uri: OWNERS_SYNTAX_CHECK_URI,
-      json: true,
-      body: {path: file, contents},
+    const response = await fetch(OWNERS_SYNTAX_CHECK_URI, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({path: file, contents}),
     });
 
-    if (response.statusCode < 200 || response.statusCode >= 300) {
+    if (!response.ok) {
       log(red('ERROR:'), 'Could not reach the owners syntax check API');
       throw new Error(
-        `${response.statusCode} ${response.statusMessage}: ` + response.body
+        `${response.status} ${response.statusText}: ${await response.text()}`
       );
     }
 
-    const {requestErrors, fileErrors, rules} = response.body;
+    const {requestErrors, fileErrors, rules} = await response.json();
 
     if (requestErrors) {
       requestErrors.forEach((err) => log(red(err)));

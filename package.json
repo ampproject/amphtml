@@ -163,8 +163,6 @@
     "prettier": "2.2.1",
     "react": "17.0.1",
     "react-dom": "17.0.1",
-    "request": "2.88.2",
-    "request-promise": "4.2.6",
     "rocambole": "0.7.0",
     "semver": "7.3.5",
     "sinon": "9.2.4",
