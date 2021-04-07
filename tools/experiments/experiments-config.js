@@ -162,12 +162,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24165',
   },
   {
-    id: 'intersect-resources',
-    name: 'Use IntersectionObserver for resource scheduling.',
-    spec: 'https://github.com/ampproject/amphtml/issues/25428',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26233',
-  },
-  {
     id: 'amp-stream-gallery',
     name: 'Enables component',
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
@@ -219,5 +213,21 @@ export const EXPERIMENTS = [
     id: 'amp-consent-granular-consent',
     name: 'Client-side granular consent',
     spec: 'https://github.com/ampproject/amphtml/issues/31607',
+  },
+  {
+    id: 'amp-story-page-attachment-ui-v2',
+    name: 'New UI for all new page attachments in stories format',
+    spec: 'https://github.com/ampproject/amphtml/projects/123',
+  },
+  {
+    id: 'flexible-bitrate',
+    name:
+      'Adaptive bitrate algorithm for videos on documents from the AMPProject CDN',
+    spec: 'https://github.com/ampproject/amphtml/projects/111',
+  },
+  {
+    id: 'story-ad-placements',
+    name: 'Optimization of story ad placements',
+    spec: 'https://github.com/ampproject/amphtml/issues/33147',
   },
 ];

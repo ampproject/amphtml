@@ -855,6 +855,35 @@ class ParsedTagSpec {
     sortAndUniquify(this.mandatoryOneofs_);
     sortAndUniquify(this.mandatoryAnyofs_);
     sortAndUniquify(this.mandatoryAttrIds_);
+
+    /**
+     * @type {!Array<string>}
+     * @private
+     */
+    this.dispatchKeys_ = [];
+    for (const attrName of Object.keys(this.attrsByName_)) {
+      const attrId = this.attrsByName_[attrName];
+      if (attrId < 0)  // negative attr ids are simple attrs (only name set).
+        continue;
+      const parsedAttrSpec = parsedAttrSpecs.getByAttrSpecId(attrId);
+      const attrSpec = parsedAttrSpec.getSpec();
+      if (attrSpec.dispatchKey !== null) {
+        const mandatoryParent =
+            tagSpec.mandatoryParent !== null ? tagSpec.mandatoryParent : '';
+        if (attrSpec.value.length > 0) {
+          this.dispatchKeys_.push(makeDispatchKey(
+              attrSpec.dispatchKey, attrName, attrSpec.value[0].toLowerCase(),
+              mandatoryParent));
+        } else if (attrSpec.valueCasei.length > 0) {
+          this.dispatchKeys_.push(makeDispatchKey(
+              attrSpec.dispatchKey, attrName, attrSpec.valueCasei[0],
+              mandatoryParent));
+        } else {
+          this.dispatchKeys_.push(makeDispatchKey(
+              attrSpec.dispatchKey, attrName, '', mandatoryParent));
+        }
+      }
+    }
   }
 
   /**
@@ -892,7 +921,7 @@ class ParsedTagSpec {
       }
       if (spec.name === 'type' && spec.valueCasei.length > 0) {
         for (const v of spec.valueCasei) {
-          if ('application/json' === v) {
+          if (('application/json' === v) || ('application/ld+json' === v)) {
             this.isTypeJson_ = true;
             break;
           }
@@ -989,6 +1018,23 @@ class ParsedTagSpec {
     return isUsedForTypeIdentifiers(
         typeIdentifiers, this.spec_.enabledBy, this.spec_.disabledBy);
   }
+
+  /**
+   * Returns an array (typically empty) of all unique dispatch keys for this
+   * tagspec. A dispatch key is a combination of attribute name, attribute
+   * value, and / or tag parent. If multiple TagSpecs have the same dispatch
+   * key, then the Tagwith the first instance of that dispatch key is used.
+   * When an encounttag matches this dispatch key, it is validated first
+   * against that first TagSpec in order to improve validation performance and
+   * error message selection. Not all TagSpecs have a dispatch key. If the
+   * attribute value is used (either value or value_casei), uses the first
+   * value from the protoascii.
+   * @return {!Array<string>}
+   */
+  GetDispatchKeys() {
+    return this.dispatchKeys_;
+  }
+
 
   /**
    * A TagSpec may specify other tags to be required as well, when that
@@ -1995,9 +2041,10 @@ function isAtRuleValid(cssSpec, atRuleName) {
   for (const atRuleSpec of cssSpec.atRuleSpec) {
     // "-moz-document" is specified in the list of allowed rules with an
     // explicit vendor prefix. The idea here is that only this specific vendor
-    // prefix is allowed, not "-ms-document" or even "document". We first search
-    // the allowed list for the seen `at_rule_name` with stripped vendor prefix,
-    // then if not found, we search again without sripping the vendor prefix.
+    // prefix is allowed, not "-ms-document" or even "document". We first
+    // search the allowed list for the seen `at_rule_name` with stripped
+    // vendor prefix, then if not found, we search again without sripping the
+    // vendor prefix.
     if (atRuleSpec.name === parse_css.stripVendorPrefix(atRuleName) ||
         atRuleSpec.name === atRuleName) {
       return true;
@@ -2071,7 +2118,8 @@ class InvalidRuleVisitor extends parse_css.RuleVisitor {
         this.context.addError(
             generated.ValidationError.Code.CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
             new LineCol(declaration.line, declaration.col),
-            /* params */[getTagDescriptiveName(this.tagSpec), declaration.name],
+            /* params */
+            [getTagDescriptiveName(this.tagSpec), declaration.name],
             /* url */ '', this.result);
 
       } else {
@@ -2757,9 +2805,9 @@ class ExtensionsContext {
 }
 
 // If any script in the page uses a specific release version, then all scripts
-// must use that specific release version. This is used to record the first seen
-// script tag and ensure all following script tags follow the convention set by
-// it.
+// must use that specific release version. This is used to record the first
+// seen script tag and ensure all following script tags follow the convention
+// set by it.
 /** @enum {string} */
 const ScriptReleaseVersion = {
   UNKNOWN: 'unknown',
@@ -3826,8 +3874,9 @@ function parseLayout(layout) {
   if (layout === undefined) {
     return generated.AmpLayout.Layout.UNKNOWN;
   }
-  const normLayout = layout.toUpperCase().replace('-', '_');
-  const idx = generated.AmpLayout.Layout_NamesByIndex.indexOf(normLayout);
+  const idx = generated.AmpLayout.Layout_NamesByIndex.findIndex((name) => {
+    return name.toLowerCase().replace('_', '-') === layout;
+  });
   if (idx === -1) {
     return generated.AmpLayout.Layout.UNKNOWN;
   }
@@ -5928,16 +5977,20 @@ class ParsedValidatorRules {
 
     // For every tagspec that contains an ExtensionSpec, we add several
     // TagSpec fields corresponding to the data found in the ExtensionSpec.
-    // The addition of module/nomodule extensions happens in validator_gen_js.py
-    // and are built as proper JavaScript classes. They will also be expanded
-    // by this method.
+    // The addition of module/nomodule extensions happens in
+    // validator_gen_js.py and are built as proper JavaScript classes. They
+    // will also be expanded by this method.
     this.expandExtensionSpec_ = function() {
       const numTags = this.rules_.tags.length;
       for (let tagSpecId = 0; tagSpecId < numTags; ++tagSpecId) {
         let tagSpec = this.rules_.tags[tagSpecId];
         if (tagSpec.extensionSpec == null) continue;
+        let baseSpecName = tagSpec.extensionSpec.name;
+        if (tagSpec.extensionSpec.versionName !== null)
+          baseSpecName = tagSpec.extensionSpec.name + ' ' +
+              tagSpec.extensionSpec.versionName;
         if (tagSpec.specName === null)
-          tagSpec.specName = tagSpec.extensionSpec.name + ' extension script';
+          tagSpec.specName = baseSpecName + ' extension script';
         if (tagSpec.descriptiveName === null)
           tagSpec.descriptiveName = tagSpec.specName;
         tagSpec.mandatoryParent = 'HEAD';
@@ -6032,6 +6085,11 @@ class ParsedValidatorRules {
       for (const otherTag of tag.alsoRequiresTagWarning) {
         this.tagSpecIdsToTrack_[otherTag] = true;
       }
+      const parsed = new ParsedTagSpec(
+          this.parsedAttrSpecs_,
+          shouldRecordTagspecValidated(tag, tagSpecId, this.tagSpecIdsToTrack_),
+          tag, tagSpecId);
+      this.parsedTagSpecById_[tagSpecId] = parsed;
       if (tag.tagName !== '$REFERENCE_POINT') {
         if (!(tag.tagName in this.tagSpecByTagName_)) {
           this.tagSpecByTagName_[tag.tagName] = new TagSpecDispatch();
@@ -6047,11 +6105,12 @@ class ParsedValidatorRules {
               /** @type {string} */ (tag.extensionSpec.name), '');
           tagnameDispatch.registerDispatchKey(dispatchKey, tagSpecId);
         } else {
-          const dispatchKey = this.rules_.dispatchKeyByTagSpecId[tagSpecId];
-          if (dispatchKey === undefined) {
-            tagnameDispatch.registerTagSpec(tagSpecId);
+          const dispatchKeys = parsed.GetDispatchKeys();
+          if (dispatchKeys.length > 0) {
+            for (const dispatchKey of dispatchKeys)
+              tagnameDispatch.registerDispatchKey(dispatchKey, tagSpecId);
           } else {
-            tagnameDispatch.registerDispatchKey(dispatchKey, tagSpecId);
+            tagnameDispatch.registerTagSpec(tagSpecId);
           }
         }
       }
@@ -6254,8 +6313,8 @@ class ParsedValidatorRules {
         }
       }
     }
-    // If AMP Email format and not set to data-css-strict, then issue a warning
-    // that not having data-css-strict is deprecated. See b/179798751.
+    // If AMP Email format and not set to data-css-strict, then issue a
+    // warning that not having data-css-strict is deprecated. See b/179798751.
     if (hasEmailTypeIdentifier && !hasCssStrictTypeIdentifier) {
       context.addWarning(
           generated.ValidationError.Code.AMP_EMAIL_MISSING_STRICT_CSS_ATTR,
@@ -6264,7 +6323,8 @@ class ParsedValidatorRules {
           validationResult);
     }
     if (!hasMandatoryTypeIdentifier) {
-      // Missing mandatory type identifier (any AMP variant but "transformed").
+      // Missing mandatory type identifier (any AMP variant but
+      // "transformed").
       context.addError(
           generated.ValidationError.Code.MANDATORY_ATTR_MISSING,
           context.getLineCol(),
@@ -6673,18 +6733,7 @@ class ParsedValidatorRules {
    * @return {!ParsedTagSpec}
    */
   getByTagSpecId(id) {
-    let parsed = this.parsedTagSpecById_[id];
-    if (parsed !== undefined) {
-      return parsed;
-    }
-    const tag = this.rules_.tags[id];
-    asserts.assert(tag !== undefined);
-    parsed = new ParsedTagSpec(
-        this.parsedAttrSpecs_,
-        shouldRecordTagspecValidated(tag, id, this.tagSpecIdsToTrack_), tag,
-        id);
-    this.parsedTagSpecById_[id] = parsed;
-    return parsed;
+    return this.parsedTagSpecById_[id];
   }
 
   /**
@@ -6898,8 +6947,8 @@ const ValidationHandler =
   }
 
   /**
-   * Currently, the Javascript HTML parser considers Doctype to be another HTML
-   * tag, which is not technically accurate. We have special handling for
+   * Currently, the Javascript HTML parser considers Doctype to be another
+   * HTML tag, which is not technically accurate. We have special handling for
    * doctype in Javascript which applies to all AMP formats, as this is strict
    * handling for all HTML in general. Specifically "attributes" are not
    * allowed, even things like `data-foo`.
@@ -6913,10 +6962,10 @@ const ValidationHandler =
         encounteredTag.attrs()[0].name === 'html')
       return;
     // <!doctype html lang=...> OK
-    // This is technically invalid. The 'correct' way to do this is to emit the
-    // lang attribute on the `<html>` tag. However, we observe a number of
-    // websites incorrectly emitting `lang` as part of doctype, so this specific
-    // attribute is allowed to avoid breaking existing pages.
+    // This is technically invalid. The 'correct' way to do this is to emit
+    // the lang attribute on the `<html>` tag. However, we observe a number of
+    // websites incorrectly emitting `lang` as part of doctype, so this
+    // specific attribute is allowed to avoid breaking existing pages.
     if (encounteredTag.attrs().length === 2) {
       if (encounteredTag.attrs()[0].name === 'html' &&
           encounteredTag.attrs()[1].name === 'lang')
@@ -6951,9 +7000,9 @@ const ValidationHandler =
       this.validateDocType(
           encounteredTag, this.context_, this.validationResult_);
       // Even though validateDocType emits all necessary errors about the tag,
-      // we continue to process it further (validateTag and such) so that we can
-      // record the tag was present and record it as the root pseudo element for
-      // the document.
+      // we continue to process it further (validateTag and such) so that we
+      // can record the tag was present and record it as the root pseudo
+      // element for the document.
     }
     /** @type {?string} */
     const maybeDuplicateAttrName = encounteredTag.hasDuplicateAttrs();

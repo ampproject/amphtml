@@ -19,7 +19,7 @@ these players implement.
 <!--
   The following list is generated automatically:
 
-    gulp check-video-interface-list --fix
+    amp check-video-interface-list --fix
 
   Link check disabled to allow new extensions added in a pull request.
 -->

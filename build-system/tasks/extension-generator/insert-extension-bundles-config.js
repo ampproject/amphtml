@@ -25,10 +25,9 @@ const extensionBundlesJson =
  * @param {{
  *   name: string,
  *   version: string,
- *   latestVersion: (string|undefined)
+ *   latestVersion?: (string|undefined)
  *   options: ({hasCss: boolean}|undefined)
  * }} bundle
- * @return {string}
  */
 function insertExtensionBundlesConfig(bundle) {
   const extensionBundles = readJsonSync(extensionBundlesJson);
@@ -58,7 +57,10 @@ function insertExtensionBundlesConfig(bundle) {
     })
   );
 
-  execOrThrow(`npx prettier --write ${extensionBundlesJson}`);
+  execOrThrow(
+    `npx prettier --write ${extensionBundlesJson}`,
+    'Could not format extension bundle'
+  );
 }
 
 module.exports = {insertExtensionBundlesConfig};

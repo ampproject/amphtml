@@ -27,6 +27,7 @@ import {closest, isAmpElement} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
+import {isPageAttachmentUiV2ExperimentOn} from './amp-story-open-page-attachment';
 import {listen} from '../../../src/event-helper';
 import {resetStyles, setImportantStyles, toggle} from '../../../src/style';
 
@@ -119,6 +120,13 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     /** @private {number} Threshold in pixels above which the drawer opens itself. */
     this.openThreshold_ = Infinity;
+
+    /**
+     * For amp-story-page-attachment-ui-v2 experiment
+     * Used for offsetting drag.
+     * @protected {?number}
+     */
+    this.spacerElHeight_ = null;
   }
 
   /** @override */
@@ -135,7 +143,6 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.headerEl_ = getHeaderEl(this.element);
 
     createShadowRootWithStyle(headerShadowRootEl, this.headerEl_, CSS);
-    templateEl.insertBefore(headerShadowRootEl, templateEl.firstChild);
 
     this.containerEl_ = dev().assertElement(
       templateEl.querySelector('.i-amphtml-story-draggable-drawer-container')
@@ -145,6 +152,17 @@ export class DraggableDrawer extends AMP.BaseElement {
         '.i-amphtml-story-draggable-drawer-content'
       )
     );
+
+    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+      const spacerEl = this.win.document.createElement('div');
+      spacerEl.classList.add('i-amphtml-story-draggable-drawer-spacer');
+      this.containerEl_.insertBefore(spacerEl, this.contentEl_);
+      this.contentEl_.appendChild(headerShadowRootEl);
+      this.element.classList.add('amp-story-page-attachment-ui-v2');
+      this.headerEl_.classList.add('amp-story-page-attachment-ui-v2');
+    } else {
+      templateEl.insertBefore(headerShadowRootEl, templateEl.firstChild);
+    }
 
     this.element.appendChild(templateEl);
     this.element.setAttribute('aria-hidden', true);
@@ -181,6 +199,40 @@ export class DraggableDrawer extends AMP.BaseElement {
       },
       true /** callToInitialize */
     );
+
+    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+      const spacerEl = dev().assertElement(
+        this.element.querySelector('.i-amphtml-story-draggable-drawer-spacer')
+      );
+
+      // Handle click on spacer element to close.
+      spacerEl.addEventListener('click', () => {
+        this.close_();
+      });
+
+      // For displaying sticky header on mobile.
+      new this.win.IntersectionObserver((e) => {
+        this.headerEl_.classList.toggle(
+          'i-amphtml-story-draggable-drawer-header-stuck',
+          !e[0].isIntersecting
+        );
+      }).observe(spacerEl);
+
+      // Update spacerElHeight_ on resize for drag offset.
+      new this.win.ResizeObserver((e) => {
+        this.spacerElHeight_ = e[0].contentRect.height;
+      }).observe(spacerEl);
+
+      // Reset scroll position on end of close transiton.
+      this.element.addEventListener('transitionend', (e) => {
+        if (
+          e.propertyName === 'transform' &&
+          this.state_ === DrawerState.CLOSED
+        ) {
+          this.containerEl_./*OK*/ scrollTop = 0;
+        }
+      });
+    }
   }
 
   /**
@@ -189,9 +241,13 @@ export class DraggableDrawer extends AMP.BaseElement {
    * @protected
    */
   onUIStateUpdate_(uiState) {
-    uiState === UIType.MOBILE
+    const isMobile = uiState === UIType.MOBILE;
+
+    isMobile
       ? this.startListeningForTouchEvents_()
       : this.stopListeningForTouchEvents_();
+
+    this.headerEl_.toggleAttribute('desktop', !isMobile);
   }
 
   /**
@@ -467,7 +523,10 @@ export class DraggableDrawer extends AMP.BaseElement {
           return;
         }
         this.state_ = DrawerState.DRAGGING_TO_OPEN;
-        const drag = Math.max(deltaY, -this.dragCap_);
+        let drag = Math.max(deltaY, -this.dragCap_);
+        if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+          drag -= this.spacerElHeight_;
+        }
         translate = `translate3d(0, calc(100% + ${drag}px), 0)`;
         break;
       case DrawerState.OPEN:
@@ -484,6 +543,7 @@ export class DraggableDrawer extends AMP.BaseElement {
       setImportantStyles(this.element, {
         transform: translate,
         transition: 'none',
+        visibility: 'visible',
       });
     });
   }
@@ -503,7 +563,7 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     this.mutateElement(() => {
       this.element.setAttribute('aria-hidden', false);
-      resetStyles(this.element, ['transform', 'transition']);
+      resetStyles(this.element, ['transform', 'transition', 'visibility']);
 
       if (!shouldAnimate) {
         // Resets the 'transition' property, and removes this override in the

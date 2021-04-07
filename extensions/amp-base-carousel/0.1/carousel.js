@@ -155,7 +155,7 @@ export class Carousel {
    * }} config
    */
   constructor(config) {
-    const {win, element, scrollContainer, runMutate} = config;
+    const {win, element, scrollContainer, runMutate, initialIndex} = config;
     /** @private @const */
     this.win_ = win;
 
@@ -313,7 +313,7 @@ export class Carousel {
      * restingIndex to currentIndex.
      * @private {number}
      */
-    this.currentIndex_ = 0;
+    this.currentIndex_ = initialIndex || 0;
 
     /**
      * Whether or not looping is requested. Do not use directly, but rather use
@@ -613,13 +613,19 @@ export class Carousel {
    * @param {!Array<!Element>} slides
    */
   updateSlides(slides) {
-    if (!slides.length) {
+    const {length} = slides;
+    if (!length) {
       const TAG = this.element_.tagName.toUpperCase();
       dev().warn(TAG, 'No slides were found.');
+      return;
     }
     this.slides_ = slides;
+    // Normalize current index to updated slide length.
+    this.currentIndex_ = this.isLooping()
+      ? mod(this.currentIndex_, length)
+      : clamp(this.currentIndex_, 0, length - 1) || 0;
     this.carouselAccessibility_.updateSlides(slides);
-    // TODO(sparhami) Should need to call `this.updateUi()` here.
+    this.updateUi();
   }
 
   /**

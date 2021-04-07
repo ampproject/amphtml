@@ -25,6 +25,7 @@ const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
 const {runNpmChecks} = require('./npm-checks');
 const {setLoggingPrefix} = require('../common/logging');
+const {updatePackages} = require('../common/update-packages');
 
 /**
  * Helper used by all CI job scripts. Runs the PR / push build workflow.
@@ -35,6 +36,7 @@ const {setLoggingPrefix} = require('../common/logging');
 async function runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow) {
   setLoggingPrefix(jobName);
   const startTime = startTimer(jobName);
+  updatePackages();
   if (!runNpmChecks()) {
     abortTimedJob(jobName, startTime);
     return;

@@ -15,11 +15,16 @@
  */
 
 import {AdResponseType, Validator, ValidatorResult} from './amp-ad-type-defs';
-import {Services} from '../../../src/services';
-import {getAmpAdMetadata} from './amp-ad-utils';
+import {
+  extensionsHasElement,
+  getAmpAdMetadata,
+  getExtensionsFromMetadata,
+  mergeExtensionsMetadata,
+} from './amp-ad-utils';
 import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
-import {pushIfNotExist} from '../../../src/utils/array';
+import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
 import {tryParseJson} from '../../../src/json';
+import {urls} from '../../../src/config';
 import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @const {string} */
@@ -65,21 +70,31 @@ export class TemplateValidator extends Validator {
       .fetch(parsedResponseBody.templateUrl)
       .then((template) => {
         const creativeMetadata = getAmpAdMetadata(template);
-        if (parsedResponseBody.analytics) {
-          pushIfNotExist(
-            creativeMetadata['customElementExtensions'],
-            'amp-analytics'
-          );
+        creativeMetadata['extensions'] = creativeMetadata['extensions'] || [];
+        const extensions = creativeMetadata['extensions'];
+        mergeExtensionsMetadata(
+          extensions,
+          creativeMetadata['customElementExtensions']
+        );
+        if (
+          parsedResponseBody.analytics &&
+          !extensionsHasElement(extensions, 'amp-analytics')
+        ) {
+          extensions.push({
+            'custom-element': 'amp-analytics',
+            src: `${urls.cdn}/v0/amp-analytics-0.1.js`,
+          });
         }
-        pushIfNotExist(
-          creativeMetadata['customElementExtensions'],
-          'amp-mustache'
-        );
+        if (!extensionsHasElement(extensions, 'amp-mustache')) {
+          extensions.push({
+            'custom-element': 'amp-mustache',
+            src: `${urls.cdn}/v0/amp-mustache-latest.js`,
+          });
+        }
 
-        const extensions = Services.extensionsFor(context.win);
-        creativeMetadata.customElementExtensions.forEach((extensionId) =>
-          extensions./*OK*/ preloadExtension(extensionId)
-        );
+        const extensionsInfo = getExtensionsFromMetadata(creativeMetadata);
+        preloadFriendlyIframeEmbedExtensions(context.win, extensionsInfo);
+
         // TODO(levitzky) Add preload logic for fonts / images.
         return Promise.resolve(
           /** @type {!./amp-ad-type-defs.ValidatorOutput} */ ({

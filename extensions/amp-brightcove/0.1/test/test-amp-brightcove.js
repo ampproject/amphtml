@@ -16,6 +16,7 @@
 
 import '../amp-brightcove';
 import * as consent from '../../../../src/consent';
+import {BaseElement} from '../../../../src/base-element';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {CommonSignals} from '../../../../src/common-signals';
 import {VideoEvents} from '../../../../src/video-interface';
@@ -26,6 +27,7 @@ import {
 import {listenOncePromise} from '../../../../src/event-helper';
 import {macroTask} from '../../../../testing/yield';
 import {parseUrlDeprecated} from '../../../../src/url';
+import {user} from '../../../../src/log';
 
 describes.realWin(
   'amp-brightcove',
@@ -41,9 +43,16 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+
+      // make sync
+      env.sandbox
+        .stub(BaseElement.prototype, 'mutateElement')
+        .callsFake((mutator) => {
+          mutator();
+        });
     });
 
-    async function getBrightcove(attributes) {
+    async function getBrightcoveBuild(attributes) {
       const element = createElementWithAttributes(doc, 'amp-brightcove', {
         width: '111',
         height: '222',
@@ -53,7 +62,13 @@ describes.realWin(
       doc.body.appendChild(element);
 
       await whenUpgradedToCustomElement(element);
+      await element.whenBuilt();
 
+      return element;
+    }
+
+    async function getBrightcove(attributes) {
+      const element = await getBrightcoveBuild(attributes);
       const impl = await element.getImpl(false);
 
       await element.signals().whenSignal(CommonSignals.LOAD_START);
@@ -80,6 +95,34 @@ describes.realWin(
         data: JSON.stringify(info),
       });
     }
+
+    // https://go.amp.dev/issue/32706
+    it('should remove `dock`', async () => {
+      const warn = env.sandbox.spy(user(), 'warn');
+      const element = await getBrightcoveBuild({
+        'data-account': '1290862519001',
+        'data-video-id': 'ref:amp-test-video',
+        'dock': '',
+      });
+      expect(element.hasAttribute('dock')).to.be.false;
+      expect(
+        warn.withArgs(
+          env.sandbox.match.any,
+          env.sandbox.match(/`dock` has been disabled/)
+        )
+      ).to.have.been.calledOnce;
+    });
+
+    // https://go.amp.dev/issue/32706
+    it('should not warn without `dock`', async () => {
+      const warn = env.sandbox.spy(user(), 'warn');
+      const element = await getBrightcoveBuild({
+        'data-account': '1290862519001',
+        'data-video-id': 'ref:amp-test-video',
+      });
+      expect(element.hasAttribute('dock')).to.be.false;
+      expect(warn).to.not.have.been.called;
+    });
 
     it('renders', () => {
       return getBrightcove({

@@ -96,26 +96,15 @@ AmpStreamGallery['Component'] = StreamGallery;
 AmpStreamGallery['layoutSizeDefined'] = true;
 
 /** @override */
-AmpStreamGallery['children'] = {
+AmpStreamGallery['props'] = {
   'arrowPrev': {
-    name: 'arrowPrev',
     selector: '[slot="prev-arrow"]',
     single: true,
   },
   'arrowNext': {
-    name: 'arrowNext',
     selector: '[slot="next-arrow"]',
     single: true,
   },
-  'children': {
-    name: 'children',
-    selector: '*', // This should be last as catch-all.
-    single: false,
-  },
-};
-
-/** @override */
-AmpStreamGallery['props'] = {
   'controls': {attr: 'controls', type: 'string', media: true},
   'extraSpace': {attr: 'extra-space', type: 'string', media: true},
   'loop': {attr: 'loop', type: 'boolean', media: true},
@@ -127,7 +116,14 @@ AmpStreamGallery['props'] = {
   'peek': {attr: 'peek', type: 'number', media: true},
   'slideAlign': {attr: 'slide-align', type: 'string', media: true},
   'snap': {attr: 'snap', type: 'boolean', media: true},
+  'children': {
+    selector: '*', // This should be last as catch-all.
+    single: false,
+  },
 };
+
+/** @override */
+AmpStreamGallery['usesShadowDom'] = true;
 
 /** @override */
 AmpStreamGallery['shadowCss'] = GALLERY_CSS + CAROUSEL_CSS;

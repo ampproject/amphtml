@@ -19,6 +19,11 @@ const mocha = require('mocha');
 const MochaDotsReporter = require('./mocha-dots-reporter');
 const {Base} = mocha.reporters;
 
+/**
+ * @param {*} runner
+ * @param {*} options
+ * @return {MochaDotsReporter}
+ */
 function ciReporter(runner, options) {
   Base.call(this, runner, options);
   this._mochaDotsReporter = new MochaDotsReporter(runner, options);

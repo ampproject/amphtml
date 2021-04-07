@@ -123,20 +123,23 @@ URL pointing to the story.
 
 ## Programmatic Control
 
-Call the player's various methods to programmatically control the player. These methods are exposed on the HTML element, `const playerEl = document.querySelector('amp-story-player')` and on instances of the global class variable, `const player = new AmpStoryPlayer(window, playerEl)`.
+Call the player's various methods to programmatically control the player. These methods are exposed on the HTML element, `const playerEl = document.querySelector('amp-story-player')`.
 
 ### Methods
 
 #### load
 
-Will initialize the player manually. This can be useful when the player is dynamically.
+Will initialize the player manually. This can be useful when creating the player dynamically.
 
-Note that the element must be connected to the DOM before calling `load()`.
+Note that the amp-story-player JS will automatically do this when the player is already in the HTML markup, so only do this when you really need to.
+
+Also note that the element must be connected to the DOM before calling `load()`.
 
 ```javascript
-const playerEl = document.body.querySelector('amp-story-player');
-const player = new AmpStoryPlayer(window, playerEl);
-player.load();
+const playerEl = document.createElement('amp-story-player');
+new AmpStoryPlayer(window, playerEl);
+document.body.appendChild(playerEl);
+playerEl.load();
 ```
 
 #### go
@@ -393,7 +396,7 @@ The configuration will end up looking like the following:
          "position": "start"
        },
        {
-         "name": "skip-next"
+         "name": "skip-to-next"
        }
      ]
    }
@@ -420,11 +423,11 @@ The “close” control supports the following customizable properties:
 -   `backgroundImageUrl`: string with url or data string (escaped).
     -   Changes the icon image to the provided url or data string (for inline svgs).
 
-### Skip-next
+### Skip-to-next
 
 Skips to the next story inside the player (only available on desktop).
 
-The “skip-next” control supports the following customizable properties:
+The “skip-to-next” control supports the following customizable properties:
 
 -   `position`: “start” or “end”.
     -   Places the icon either on the left or right on LTR languages.
@@ -496,7 +499,7 @@ On desktop, you can now display a button that navigates from the current story t
    {
      "controls": [
        {
-         "name": "skip-next"
+         "name": "skip-to-next"
        }
      ],
    }
@@ -639,7 +642,7 @@ player.addEventListener('storyNavigation', (event) => {
 })
 ```
 
-### noNextStory
+#### noNextStory
 
 Dispatched when there is no next story. Note that this will not be dispatched when using [Circular wrapping](#Circular-wrapping).
 
@@ -649,7 +652,7 @@ player.addEventListener('noNextStory', (event) => {
 });
 ```
 
-### noPreviousStory
+#### noPreviousStory
 
 Dispatched when there is no next story. Note that this will not be dispatched when using [Circular wrapping](#Circular-wrapping).
 

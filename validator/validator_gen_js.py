@@ -457,8 +457,6 @@ def PrintClassFor(descriptor, msg_desc, out):
     out.Line('this.combinedDenyListedCdataRegex = null;')
   if msg_desc.full_name == 'amp.validator.ValidatorRules':
     out.Line('/** @type {!Array<!string>} */')
-    out.Line('this.dispatchKeyByTagSpecId = Array(tags.length);')
-    out.Line('/** @type {!Array<!string>} */')
     out.Line('this.internedStrings = [];')
     out.Line('/** @type {!Array<!AttrSpec>} */')
     out.Line('this.attrs = [];')
@@ -681,38 +679,6 @@ def PrintObject(descriptor, msg, registry, out):
               registry.InternString(combined_disallowed_cdata_regex)))
 
 
-def DispatchKeyForTagSpecOrNone(tag_spec):
-  """For a provided tag_spec, generates its dispatch key.
-
-  If the value (or value_casei) is used, uses the first value from the
-  protoascii.
-
-  Args:
-    tag_spec: an instance of type validator_pb2.TagSpec.
-
-  Returns:
-    a string indicating the dispatch key, or None.
-  """
-  for attr in tag_spec.attrs:
-    if attr.dispatch_key != attr.NONE_DISPATCH:
-      mandatory_parent = tag_spec.mandatory_parent or ''
-      attr_name = attr.name
-      if attr.dispatch_key == attr.NAME_DISPATCH:
-        return '%s' % attr_name
-      attr_value = None
-      if attr.value_casei:
-        attr_value = attr.value_casei[0]
-      elif attr.value:
-        attr_value = attr.value[0].lower()
-      assert attr_value is not None
-
-      if attr.dispatch_key == attr.NAME_VALUE_DISPATCH:
-        return '%s\\0%s' % (attr_name, attr_value)
-      if attr.dispatch_key == attr.NAME_VALUE_PARENT_DISPATCH:
-        return '%s\\0%s\\0%s' % (attr_name, attr_value, mandatory_parent)
-  return None
-
-
 # When importing the protocol buffer javascript module, we do so as
 # protoGenerated.foo();
 def ImportModuleName(module_name):
@@ -847,11 +813,16 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
 
             # Create module and nomodule extension tagspecs with spec_names
             module_tagspec = copy.deepcopy(tagspec)
-            module_tagspec.spec_name = tagspec.extension_spec.name + (
-                ' module extension script')
+            base_spec_name = module_tagspec.extension_spec.name
+            if module_tagspec.extension_spec.version_name:
+              base_spec_name = (
+                  module_tagspec.extension_spec.name + ' ' +
+                  module_tagspec.extension_spec.version_name)
+            module_tagspec.spec_name = base_spec_name + (' module extension '
+                                                         'script')
             nomodule_tagspec = copy.deepcopy(tagspec)
-            nomodule_tagspec.spec_name = tagspec.extension_spec.name + (
-                ' nomodule extension script')
+            nomodule_tagspec.spec_name = base_spec_name + (' nomodule extension'
+                                                           ' script')
 
             # Module extension specifics
             # Add requires/satisfies pair for module/nomodule
@@ -895,15 +866,6 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
 
     # We use this below to reference the variable holding the rules instance.
     rules_reference = registry.MessageReferenceForKey(MessageKey(rules))
-
-    # Add the dispatchKeyByTagSpecId array, for those tag specs that have
-    # a dispatch key.
-    for tag_spec in rules.tags:
-      tag_spec_id = registry.MessageIdForTagSpecName(TagSpecName(tag_spec))
-      dispatch_key = DispatchKeyForTagSpecOrNone(tag_spec)
-      if dispatch_key:
-        out.Line('%s.dispatchKeyByTagSpecId[%d]="%s";' %
-                 (rules_reference, tag_spec_id, dispatch_key))
 
     # Create a mapping from attr spec ids to AttrSpec instances, deduping the
     # AttrSpecs. Then sort by these ids, so now we get a dense array starting

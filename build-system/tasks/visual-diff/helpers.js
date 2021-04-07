@@ -16,8 +16,8 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const fancyLog = require('fancy-log');
 const {cyan, green, red, yellow} = require('kleur/colors');
+const {log: logBase} = require('../../common/logging');
 
 const CSS_SELECTOR_RETRY_MS = 200;
 const CSS_SELECTOR_RETRY_ATTEMPTS = 50;
@@ -48,27 +48,27 @@ function escapeHtml(html) {
  * Logs a message to the console.
  *
  * @param {string} mode
- * @param {!Array<string>} messages
+ * @param {!Array<*>} messages
  */
 function log(mode, ...messages) {
   switch (mode) {
     case 'verbose':
       if (argv.verbose) {
-        fancyLog.info(green('VERBOSE:'), ...messages);
+        logBase(green('VERBOSE:'), ...messages);
       }
       break;
     case 'info':
-      fancyLog.info(green('INFO:'), ...messages);
+      logBase(green('INFO:'), ...messages);
       break;
     case 'warning':
-      fancyLog.warn(yellow('WARNING:'), ...messages);
+      logBase(yellow('WARNING:'), ...messages);
       break;
     case 'error':
-      fancyLog.error(red('ERROR:'), ...messages);
+      logBase(red('ERROR:'), ...messages);
       break;
     case 'fatal':
       process.exitCode = 1;
-      fancyLog.error(red('FATAL:'), ...messages);
+      logBase(red('FATAL:'), ...messages);
       throw new Error(messages.join(' '));
   }
 }

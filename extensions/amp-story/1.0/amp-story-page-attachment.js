@@ -17,12 +17,15 @@
 import {Action, StateProperty} from './amp-story-store-service';
 import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {HistoryState, setHistoryState} from './history';
+import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {closest, removeElement} from '../../../src/dom';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
+import {getLocalizationService} from './amp-story-localization-service';
 import {getState} from '../../../src/history';
 import {htmlFor} from '../../../src/static-template';
+import {isPageAttachmentUiV2ExperimentOn} from './amp-story-open-page-attachment';
 import {toggle} from '../../../src/style';
 
 /** @const {string} */
@@ -105,21 +108,36 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildInline_() {
-    this.headerEl_.appendChild(
-      htmlFor(this.element)`
-          <span class="i-amphtml-story-page-attachment-close-button" aria-label="X"
+    const closeButtonEl = htmlFor(this.element)`
+          <button class="i-amphtml-story-page-attachment-close-button" aria-label="close"
               role="button">
-          </span>`
-    );
-    this.headerEl_.appendChild(
-      htmlFor(this.element)`
-          <span class="i-amphtml-story-page-attachment-title"></span>`
-    );
+          </button>`;
+    const localizationService = getLocalizationService(devAssert(this.element));
+
+    const titleEl = htmlFor(this.element)`
+    <span class="i-amphtml-story-page-attachment-title"></span>`;
+
+    if (localizationService) {
+      const localizedCloseString = localizationService.getLocalizedString(
+        LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
+      );
+      closeButtonEl.setAttribute('aria-label', localizedCloseString);
+    }
 
     if (this.element.hasAttribute('data-title')) {
-      this.headerEl_.querySelector(
-        '.i-amphtml-story-page-attachment-title'
-      ).textContent = this.element.getAttribute('data-title');
+      titleEl.textContent = this.element.getAttribute('data-title');
+    }
+
+    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+      const titleAndCloseWrapperEl = this.headerEl_.appendChild(
+        htmlFor(this.element)`
+            <div class="i-amphtml-story-draggable-drawer-header-title-and-close"></div>`
+      );
+      titleAndCloseWrapperEl.appendChild(closeButtonEl);
+      titleAndCloseWrapperEl.appendChild(titleEl);
+    } else {
+      this.headerEl_.appendChild(closeButtonEl);
+      this.headerEl_.appendChild(titleEl);
     }
 
     const templateEl = this.element.querySelector(

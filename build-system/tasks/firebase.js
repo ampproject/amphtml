@@ -22,6 +22,10 @@ const {doDist} = require('./dist');
 const {green} = require('kleur/colors');
 const {log} = require('../common/logging');
 
+/**
+ * @param {string} dest
+ * @return {Promise<string[]>}
+ */
 async function walk(dest) {
   const filelist = [];
   const files = await fs.readdir(dest);
@@ -37,6 +41,11 @@ async function walk(dest) {
   return filelist;
 }
 
+/**
+ * @param {string} src
+ * @param {string} dest
+ * @return {Promise<void>}
+ */
 async function copyAndReplaceUrls(src, dest) {
   await fs.copy(src, dest, {overwrite: true});
   // Recursively gets all the files within the directory and its children.
@@ -47,6 +56,9 @@ async function copyAndReplaceUrls(src, dest) {
   await Promise.all(promises);
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function firebase() {
   if (!argv.nobuild) {
     await clean();
@@ -80,6 +92,10 @@ async function firebase() {
   ]);
 }
 
+/**
+ * @param {string} filePath
+ * @return {Promise<void>}
+ */
 async function replaceUrls(filePath) {
   const data = await fs.readFile(filePath, 'utf8');
   let result = data.replace(
@@ -106,9 +122,9 @@ module.exports = {
 
 firebase.description = 'Generates firebase folder for deployment';
 firebase.flags = {
-  'file': '  File to deploy to firebase as index.html',
-  'compiled': '  Deploy from minified files',
-  'nobuild': '  Skips the gulp build|dist step.',
+  'file': 'File to deploy to firebase as index.html',
+  'compiled': 'Deploy from minified files',
+  'nobuild': 'Skips the amp build|dist step.',
   'fortesting':
-    '  Expects an env var AMP_TESTING_HOST and writes this to AMP_CONFIG',
+    'Expects an env var AMP_TESTING_HOST and writes this to AMP_CONFIG',
 };

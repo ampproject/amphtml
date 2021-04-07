@@ -18,7 +18,8 @@ import {Services} from '../../../src/services';
 import {getMode} from '../../../src/mode';
 import {includes} from '../../../src/string';
 import {map} from '../../../src/utils/object';
-import {parseExtensionUrl} from '../../../src/service/extension-location';
+import {parseExtensionUrl} from '../../../src/service/extension-script';
+import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
 import {removeElement, rootNodeFor} from '../../../src/dom';
 import {urls} from '../../../src/config';
 
@@ -101,8 +102,8 @@ export function processHead(win, adElement, head) {
     return null;
   }
 
-  const extensionService = Services.extensionsFor(win);
   const urlService = Services.urlForDoc(adElement);
+  /** @type {!Array<{extensionId: string, extensionVersion: string}>} */
   const extensions = [];
   const fonts = [];
   const images = [];
@@ -136,13 +137,13 @@ export function processHead(win, adElement, head) {
 
   // Load any extensions; do not wait on their promises as this
   // is just to prefetch.
-  extensions.forEach((extension) =>
-    extensionService.preloadExtension(extension.extensionId)
-  );
+  preloadFriendlyIframeEmbedExtensions(win, extensions);
+
   // Preload any fonts.
   fonts.forEach((fontUrl) =>
     Services.preconnectFor(win).preload(adElement.getAmpDoc(), fontUrl)
   );
+
   // Preload any AMP images.
   images.forEach(
     (imageUrl) =>
@@ -158,7 +159,7 @@ export function processHead(win, adElement, head) {
 
 /**
  * Allows json scripts and allowlisted amp elements while removing others.
- * @param {!Array} extensions
+ * @param {!Array<{extensionId: string, extensionVersion: string}>} extensions
  * @param {!Element} script
  */
 function handleScript(extensions, script) {
@@ -174,7 +175,7 @@ function handleScript(extensions, script) {
     (isTesting && includes(src, '/dist/'))
   ) {
     const extensionInfo = parseExtensionUrl(src);
-    if (EXTENSION_ALLOWLIST[extensionInfo.extensionId]) {
+    if (extensionInfo && EXTENSION_ALLOWLIST[extensionInfo.extensionId]) {
       extensions.push(extensionInfo);
     }
   }

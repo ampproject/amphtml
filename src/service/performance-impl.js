@@ -107,12 +107,10 @@ export class Performance {
     this.shiftScoresTicked_ = 0;
 
     /**
-     * The sum of all layout shift fractions triggered on the page from the
-     * Layout Instability API.
-     *
-     * @private {number}
+     * The collection of layout shift events from the Layout Instability API.
+     * @private {Array<LayoutShift>}
      */
-    this.aggregateShiftScore_ = 0;
+    this.layoutShifts_ = [];
 
     const supportedEntryTypes =
       (this.win.PerformanceObserver &&
@@ -360,8 +358,9 @@ export class Performance {
       } else if (entry.entryType === 'layout-shift') {
         // Ignore layout shift that occurs within 500ms of user input, as it is
         // likely in response to the user's action.
-        if (!entry.hadRecentInput) {
-          this.aggregateShiftScore_ += entry.value;
+        // 1000 here is a magic number to prevent unbounded growth. We don't expect it to be reached.
+        if (!entry.hadRecentInput && this.layoutShifts_.length < 1000) {
+          this.layoutShifts_.push(entry);
         }
       } else if (entry.entryType === 'largest-contentful-paint') {
         if (entry.loadTime) {
@@ -512,18 +511,35 @@ export class Performance {
    * amount of visibility into this metric.
    */
   tickLayoutShiftScore_() {
+    const cls = this.layoutShifts_.reduce((sum, entry) => sum + entry.value, 0);
+    const fcp = this.metrics_.get(TickLabel.FIRST_CONTENTFUL_PAINT) ?? 0; // fallback to 0, so that we never overcount.
+    const ofv = this.metrics_.get(TickLabel.ON_FIRST_VISIBLE) ?? 0;
+
+    // TODO(#33207): Remove after data collection
+    const clsBeforeFCP = this.layoutShifts_.reduce((sum, entry) => {
+      if (entry.startTime < fcp) {
+        return sum + entry.value;
+      }
+      return sum;
+    }, 0);
+    const clsBeforeOFV = this.layoutShifts_.reduce((sum, entry) => {
+      if (entry.startTime < ofv) {
+        return sum + entry.value;
+      }
+      return sum;
+    }, 0);
+
     if (this.shiftScoresTicked_ === 0) {
+      this.tick(TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_VISIBLE, clsBeforeOFV);
       this.tickDelta(
-        TickLabel.CUMULATIVE_LAYOUT_SHIFT,
-        this.aggregateShiftScore_
+        TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_FCP,
+        clsBeforeFCP
       );
+      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT, cls);
       this.flush();
       this.shiftScoresTicked_ = 1;
     } else if (this.shiftScoresTicked_ === 1) {
-      this.tickDelta(
-        TickLabel.CUMULATIVE_LAYOUT_SHIFT_2,
-        this.aggregateShiftScore_
-      );
+      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_2, cls);
       this.flush();
       this.shiftScoresTicked_ = 2;
 
@@ -684,7 +700,7 @@ export class Performance {
       data['value'] = this.timeOrigin_ + delta;
     }
 
-    // Emit events. Used by `gulp performance`.
+    // Emit events. Used by `amp performance`.
     this.win.dispatchEvent(
       createCustomEvent(
         this.win,

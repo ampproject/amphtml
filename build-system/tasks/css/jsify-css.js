@@ -15,16 +15,21 @@
  */
 'use strict';
 
-const autoprefixer = require('autoprefixer');
 const cssnano = require('cssnano');
-const fs = require('fs-extra');
+const fs = require('fs');
+const path = require('path');
 const postcss = require('postcss');
 const postcssImport = require('postcss-import');
+const {
+  TransformCache,
+  batchedRead,
+  md5,
+} = require('../../common/transform-cache');
 const {log} = require('../../common/logging');
 const {red} = require('kleur/colors');
 
 // NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
-const cssprefixer = autoprefixer({
+const browsersList = {
   overrideBrowserslist: [
     'last 5 ChromeAndroid versions',
     'last 5 iOS versions',
@@ -34,8 +39,10 @@ const cssprefixer = autoprefixer({
     'last 2 OperaMobile versions',
     'last 2 OperaMini versions',
   ],
-});
+};
 
+// See https://cssnano.co/docs/what-are-optimisations for full list.
+// We try and turn off any optimization that is marked unsafe.
 const cssNanoDefaultOptions = {
   autoprefixer: false,
   convertValues: false,
@@ -52,45 +59,50 @@ const cssNanoDefaultOptions = {
   },
 };
 
+const packageJsonPath = path.join(__dirname, '..', '..', '..', 'package.json');
+
+let environmentHash = null;
+
+/** @return {Promise<string>} */
+function getEnvironmentHash() {
+  if (environmentHash) {
+    return environmentHash;
+  }
+
+  // We want to set environmentHash to a promise synchronously s.t.
+  // we never end up with multiple calculations at the same time.
+  environmentHash = Promise.resolve().then(async () => {
+    const packageJsonHash = md5(await fs.promises.readFile(packageJsonPath));
+    const cssOptions = JSON.stringify({cssNanoDefaultOptions, browsersList});
+    return md5(packageJsonHash, cssOptions);
+  });
+  return environmentHash;
+}
+
+const CACHE_DIR = path.join(__dirname, '..', '..', '..', '.css-cache');
+
+/**
+ * Used to cache css transforms done by postcss.
+ * @const {!TransformCache}
+ */
+const transformCache = new TransformCache(CACHE_DIR, '.css');
+
+/**
+ * @typedef {{css: string, warnings: string[]}}:
+ */
+let CssTransformResultDef;
+
 /**
  * Transform a css string using postcss.
 
- * @param {string} cssStr the css text to transform
- * @param {!Object=} opt_cssnano cssnano options
+ * @param {string} contents the css text to transform
  * @param {!Object=} opt_filename the filename of the file being transformed. Used for sourcemaps generation.
- * @return {!Promise<string>} that resolves with the css content after
+ * @return {!Promise<CssTransformResultDef>} that resolves with the css content after
  *    processing
  */
-function transformCss(cssStr, opt_cssnano, opt_filename) {
-  opt_cssnano = opt_cssnano || Object.create(null);
-  // See http://cssnano.co/optimisations/ for full list.
-  // We try and turn off any optimization that is marked unsafe.
-  const cssnanoOptions = Object.assign(
-    Object.create(null),
-    cssNanoDefaultOptions,
-    opt_cssnano
-  );
-  const cssnanoTransformer = cssnano({preset: ['default', cssnanoOptions]});
-  const transformers = [postcssImport, cssprefixer, cssnanoTransformer];
-  return postcss(transformers).process(cssStr, {
-    'from': opt_filename,
-  });
-}
-
-/**
- * Transform a css file using postcss.
-
- * @param {string} filename css file
- * @param {!Object=} opt_cssnano cssnano options
- * @return {!Promise<string>} that resolves with the css content after
- *    processing
- */
-function transformCssFile(filename, opt_cssnano) {
-  return transformCss(
-    fs.readFileSync(filename, {encoding: 'utf8'}),
-    opt_cssnano,
-    filename
-  );
+async function transformCssString(contents, opt_filename) {
+  const hash = md5(contents);
+  return transformCss(contents, hash, opt_filename);
 }
 
 /**
@@ -102,17 +114,57 @@ function transformCssFile(filename, opt_cssnano) {
  * @return {!Promise<string>} that resolves with the css content after
  *    processing
  */
-function jsifyCssAsync(filename) {
-  return transformCssFile(filename).then(function (result) {
-    result.warnings().forEach(function (warn) {
-      log(red(warn.toString()));
-    });
-    const {css} = result;
-    return css + '\n/*# sourceURL=/' + filename + '*/';
+async function jsifyCssAsync(filename) {
+  const {contents, hash: filehash} = await batchedRead(filename);
+  const hash = md5(filehash, await getEnvironmentHash());
+  const result = await transformCss(contents, hash, filename);
+
+  result.warnings.forEach((warn) => log(red(warn)));
+  return result.css + '\n/*# sourceURL=/' + filename + '*/';
+}
+
+/**
+ * @param {string} contents
+ * @param {string} hash
+ * @param {string=} opt_filename
+ * @return {Promise<CssTransformResultDef>}
+ */
+async function transformCss(contents, hash, opt_filename) {
+  const cached = transformCache.get(hash);
+  if (cached) {
+    return JSON.parse((await cached).toString());
+  }
+
+  const transformed = transform(contents, opt_filename);
+  transformCache.set(
+    hash,
+    transformed.then((r) => JSON.stringify(r))
+  );
+  return transformed;
+}
+
+/**
+ * @param {string} contents
+ * @param {string=} opt_filename
+ * @return {Promise<CssTransformResultDef>}
+ */
+async function transform(contents, opt_filename) {
+  const cssnanoTransformer = cssnano({
+    preset: ['default', cssNanoDefaultOptions],
   });
+  const {default: autoprefixer} = await import('autoprefixer'); // Lazy-imported to speed up task loading.
+  const cssprefixer = autoprefixer(browsersList);
+  const transformers = [postcssImport, cssprefixer, cssnanoTransformer];
+  return postcss
+    .default(transformers)
+    .process(contents, {'from': opt_filename})
+    .then((result) => ({
+      css: result.css,
+      warnings: result.warnings().map((warning) => warning.toString()),
+    }));
 }
 
 module.exports = {
   jsifyCssAsync,
-  transformCss,
+  transformCssString,
 };

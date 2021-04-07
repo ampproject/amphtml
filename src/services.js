@@ -481,7 +481,7 @@ export class Services {
   static storyVariableServiceForOrNull(win) {
     return (
       /** @type {!Promise<?../extensions/amp-story/1.0/variable-service.AmpStoryVariableService>} */
-      (getElementServiceIfAvailable(win, 'story-variable', 'amp-story'))
+      (getElementServiceIfAvailable(win, 'story-variable', 'amp-story', '1.0'))
     );
   }
 
@@ -505,7 +505,7 @@ export class Services {
   static storyStoreServiceForOrNull(win) {
     return (
       /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService>} */
-      (getElementServiceIfAvailable(win, 'story-store', 'amp-story'))
+      (getElementServiceIfAvailable(win, 'story-store', 'amp-story', '1.0'))
     );
   }
 
@@ -539,7 +539,7 @@ export class Services {
   static storyRequestServiceForOrNull(win) {
     return (
       /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService>} */
-      (getElementServiceIfAvailable(win, 'story-request', 'amp-story'))
+      (getElementServiceIfAvailable(win, 'story-request', 'amp-story', '1.0'))
     );
   }
 
@@ -595,7 +595,13 @@ export class Services {
   static storyAnalyticsServiceForOrNull(win) {
     return (
       /** @type {!Promise<?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService>} */
-      (getElementServiceIfAvailable(win, 'story-analytics', 'amp-story', true))
+      (getElementServiceIfAvailable(
+        win,
+        'story-analytics',
+        'amp-story',
+        '1.0',
+        true
+      ))
     );
   }
 

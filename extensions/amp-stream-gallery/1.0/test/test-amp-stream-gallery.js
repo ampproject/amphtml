@@ -100,7 +100,7 @@ describes.realWin(
       const wrappers = await getSlideWrappersFromShadow();
       const slots = Array.from(wrappers)
         .map((wrapper) => wrapper.querySelector('slot'))
-        .filter((slot) => !!slot);
+        .filter(Boolean);
       return toArray(slots).reduce(
         (acc, slot) => acc.concat(slot.assignedElements()),
         []

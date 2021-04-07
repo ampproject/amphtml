@@ -69,8 +69,8 @@ CMP_CONFIG['sirdata'] = {
 
 CMP_CONFIG['Marfeel'] = {
   'consentInstanceId': 'Marfeel',
-  'checkConsentHref': 'https://live.mrf.io/cmp/consents/amp',
-  'promptUISrc': 'https://marfeel.mgr.consensu.org/amp/index.html',
+  'checkConsentHref': 'https://live.mrf.io/cmp/marfeel/amp/check-consent',
+  'promptUISrc': 'https://live.mrf.io/cmp/marfeel/amp/index.html',
 };
 
 CMP_CONFIG['Ogury'] = {

@@ -52,25 +52,16 @@ describe('amp-ad 3P', () => {
     let lastIO = null;
     const platform = Services.platformFor(fixture.win);
     return poll(
-      'frame to be in DOM',
+      'frame to be in DOM and context is available',
       () => {
-        return fixture.doc.querySelector('amp-ad > iframe');
+        iframe = fixture.doc.querySelector('amp-ad > iframe');
+        if (iframe) {
+          return iframe.contentWindow.context;
+        }
       },
       undefined,
       5000
     )
-      .then((iframeElement) => {
-        iframe = iframeElement;
-        return new Promise((resolve) => {
-          if (iframe.contentWindow.context) {
-            resolve(iframe.contentWindow.context);
-          }
-          iframe.onload = () => {
-            expect(iframe.contentWindow.document.getElementById('c')).to.exist;
-            resolve(iframe.contentWindow.context);
-          };
-        });
-      })
       .then((context) => {
         expect(context.canary).to.be.a('boolean');
         expect(context.canonicalUrl).to.equal(
@@ -126,7 +117,7 @@ describe('amp-ad 3P', () => {
         );
         expect(context.isMaster).to.exist;
         expect(context.computeInMasterFrame).to.exist;
-        expect(context.location).to.deep.equal({
+        expect(context.location).to.deep.include({
           hash: '',
           host: 'localhost:9876',
           hostname: 'localhost',

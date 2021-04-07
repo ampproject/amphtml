@@ -59,16 +59,6 @@ class AmpLightbox extends BaseElement {
   }
 
   /** @override */
-  mutationObserverCallback() {
-    const open = this.element.hasAttribute('open');
-    if (open === this.open_) {
-      return;
-    }
-    this.open_ = open;
-    open ? this.api().open() : this.api().close();
-  }
-
-  /** @override */
   isLayoutSupported(layout) {
     userAssert(
       isExperimentOn(this.win, 'bento') ||

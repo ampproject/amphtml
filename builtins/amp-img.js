@@ -16,6 +16,7 @@
 
 import {BaseElement} from '../src/base-element';
 import {Layout, isLayoutSizeDefined} from '../src/layout';
+import {ReadyState} from '../src/ready-state';
 import {Services} from '../src/services';
 import {dev} from '../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
@@ -46,8 +47,41 @@ const ATTRIBUTES_TO_PROPAGATE = [
 
 export class AmpImg extends BaseElement {
   /** @override @nocollapse */
+  static V1() {
+    return V1_IMG_DEFERRED_BUILD;
+  }
+
+  /** @override @nocollapse */
   static prerenderAllowed() {
     return true;
+  }
+
+  /** @override @nocollapse */
+  static usesLoading() {
+    return true;
+  }
+
+  /** @override @nocollapse */
+  static getPreconnects(element) {
+    const src = element.getAttribute('src');
+    if (src) {
+      return [src];
+    }
+
+    // NOTE(@wassgha): since parseSrcset is computationally expensive and can
+    // not be inside the `buildCallback`, we went with preconnecting to the
+    // `src` url if it exists or the first srcset url.
+    const srcset = element.getAttribute('srcset');
+    if (srcset) {
+      // We try to find the first url in the srcset
+      const srcseturl = /\S+/.exec(srcset);
+      // Connect to the first url if it exists
+      if (srcseturl) {
+        return [srcseturl[0]];
+      }
+    }
+
+    return null;
   }
 
   /** @param {!AmpElement} element */
@@ -106,6 +140,10 @@ export class AmpImg extends BaseElement {
       if (!IS_ESM) {
         guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
       }
+
+      if (AmpImg.V1() && !this.img_.complete) {
+        this.setReadyState(ReadyState.LOADING);
+      }
     }
   }
 
@@ -143,10 +181,11 @@ export class AmpImg extends BaseElement {
   /**
    * Create the actual image element and set up instance variables.
    * Called lazily in the first `#layoutCallback`.
+   * @return {!Image}
    */
   initialize_() {
     if (this.img_) {
-      return;
+      return this.img_;
     }
     // If this amp-img IS the fallback then don't allow it to have its own
     // fallback to stop from nested fallback abuse.
@@ -186,6 +225,7 @@ export class AmpImg extends BaseElement {
     propagateObjectFitStyles(this.element, this.img_);
 
     this.element.appendChild(this.img_);
+    return this.img_;
   }
 
   /**
@@ -196,6 +236,12 @@ export class AmpImg extends BaseElement {
    * @private
    */
   maybeGenerateSizes_(sync) {
+    if (V1_IMG_DEFERRED_BUILD) {
+      // The `getLayoutSize()` is not available for a V1 element. Skip this
+      // codepath. Also: is this feature at all useful? E.g. it doesn't even
+      // execute in the `i-amphtml-ssr` mode.
+      return;
+    }
     if (!this.img_) {
       return;
     }
@@ -261,6 +307,50 @@ export class AmpImg extends BaseElement {
   }
 
   /** @override */
+  mountCallback() {
+    const initialized = !!this.img_;
+    const img = this.initialize_();
+    if (!initialized) {
+      listen(img, 'load', () => {
+        this.setReadyState(ReadyState.COMPLETE);
+        this.firstLayoutCompleted();
+        this.hideFallbackImg_();
+      });
+      listen(img, 'error', (reason) => {
+        this.setReadyState(ReadyState.ERROR, reason);
+        this.onImgLoadingError_();
+      });
+    }
+    if (img.complete) {
+      this.setReadyState(ReadyState.COMPLETE);
+      this.firstLayoutCompleted();
+      this.hideFallbackImg_();
+    } else {
+      this.setReadyState(ReadyState.LOADING);
+    }
+  }
+
+  /** @override */
+  unmountCallback() {
+    // Interrupt retrieval of incomplete images to free network resources when
+    // navigating pages in a PWA. Opt for tiny dataURI image instead of empty
+    // src to prevent the viewer from detecting a load error.
+    const img = this.img_;
+    if (img && !img.complete) {
+      img.src =
+        'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=';
+      removeElement(img);
+      this.img_ = null;
+    }
+  }
+
+  /** @override */
+  ensureLoaded() {
+    const img = dev().assertElement(this.img_);
+    img.loading = 'eager';
+  }
+
+  /** @override */
   layoutCallback() {
     this.initialize_();
     const img = dev().assertElement(this.img_);
@@ -275,6 +365,12 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   unlayoutCallback() {
+    if (AmpImg.V1()) {
+      // TODO(#31915): Reconsider if this is still desired for V1. This helps
+      // with network interruption when a document is inactivated.
+      return;
+    }
+
     if (this.unlistenError_) {
       this.unlistenError_();
       this.unlistenError_ = null;
@@ -319,10 +415,8 @@ export class AmpImg extends BaseElement {
       !this.allowImgLoadFallback_ &&
       this.img_.classList.contains('i-amphtml-ghost')
     ) {
-      this.getVsync().mutate(() => {
-        this.img_.classList.remove('i-amphtml-ghost');
-        this.toggleFallback(false);
-      });
+      this.img_.classList.remove('i-amphtml-ghost');
+      this.toggleFallback(false);
     }
   }
 
@@ -332,13 +426,11 @@ export class AmpImg extends BaseElement {
    */
   onImgLoadingError_() {
     if (this.allowImgLoadFallback_) {
-      this.getVsync().mutate(() => {
-        this.img_.classList.add('i-amphtml-ghost');
-        this.toggleFallback(true);
-        // Hide placeholders, as browsers that don't support webp
-        // Would show the placeholder underneath a transparent fallback
-        this.togglePlaceholder(false);
-      });
+      this.img_.classList.add('i-amphtml-ghost');
+      this.toggleFallback(true);
+      // Hide placeholders, as browsers that don't support webp
+      // Would show the placeholder underneath a transparent fallback
+      this.togglePlaceholder(false);
       this.allowImgLoadFallback_ = false;
     }
   }

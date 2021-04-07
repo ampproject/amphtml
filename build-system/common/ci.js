@@ -15,6 +15,8 @@
  */
 'use strict';
 
+const {mainBranch} = require('./main-branch');
+
 /**
  * @fileoverview Provides various kinds of CI state.
  *
@@ -26,10 +28,10 @@
 /**
  * Shorthand to extract an environment variable.
  * @param {string} key
- * @return {string|undefined}
+ * @return {string}
  */
 function env(key) {
-  return process.env[key];
+  return process.env[key] ?? '';
 }
 
 /**
@@ -70,7 +72,7 @@ const isCircleci = isCircleciBuild();
  * @return {boolean}
  */
 function isCircleciPushBranch(branchName) {
-  return branchName == 'master' || /^amp-release-.*$/.test(branchName);
+  return branchName == mainBranch || /^amp-release-.*$/.test(branchName);
 }
 
 /**
@@ -177,7 +179,7 @@ function ciJobId() {
   return isGithubActions
     ? env('GITHUB_RUN_NUMBER')
     : isCircleci
-    ? env('CIRCLE_NODE_INDEX')
+    ? env('CIRCLE_JOB')
     : '';
 }
 
@@ -192,6 +194,15 @@ function ciJobUrl() {
     : isCircleci
     ? env('CIRCLE_BUILD_URL')
     : '';
+}
+
+/**
+ * Returns the merge commit for a CircleCI PR build. CIRCLECI_MERGE_COMMIT is
+ * populated by .circleci/fetch_merge_commit.sh.
+ * @return {string}
+ */
+function circleciPrMergeCommit() {
+  return isCircleci ? env('CIRCLECI_MERGE_COMMIT') : '';
 }
 
 /**
@@ -224,6 +235,7 @@ module.exports = {
   ciPullRequestBranch,
   ciPullRequestSha,
   ciPushBranch,
+  circleciPrMergeCommit,
   ciRepoSlug,
   isCiBuild,
   isCircleciBuild,

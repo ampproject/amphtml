@@ -36,16 +36,13 @@ const jobName = 'pr-check.js';
 /**
  * This file runs tests against the local workspace to mimic the CI build as
  * closely as possible.
- * @param {Function} cb
  */
-async function prCheck(cb) {
+async function prCheck() {
   setLoggingPrefix(jobName);
 
   const failTask = () => {
     stopTimer(jobName, startTime);
-    const err = new Error('Local PR check failed. See logs above.');
-    err.showStack = false;
-    cb(err);
+    throw new Error('Local PR check failed. See logs above.');
   };
 
   const runCheck = (cmd) => {
@@ -65,77 +62,77 @@ async function prCheck(cb) {
   determineBuildTargets();
 
   if (buildTargetsInclude(Targets.PRESUBMIT)) {
-    runCheck('gulp presubmit');
+    runCheck('amp presubmit');
   }
 
   if (buildTargetsInclude(Targets.LINT)) {
-    runCheck('gulp lint --local_changes');
+    runCheck('amp lint --local_changes');
   }
 
   if (buildTargetsInclude(Targets.PRETTIFY)) {
-    runCheck('gulp prettify --local_changes');
+    runCheck('amp prettify --local_changes');
   }
 
   if (buildTargetsInclude(Targets.AVA)) {
-    runCheck('gulp ava');
+    runCheck('amp ava');
   }
 
   if (buildTargetsInclude(Targets.BABEL_PLUGIN)) {
-    runCheck('gulp babel-plugin-tests');
+    runCheck('amp babel-plugin-tests');
   }
 
   if (buildTargetsInclude(Targets.CACHES_JSON)) {
-    runCheck('gulp caches-json');
+    runCheck('amp caches-json');
   }
 
   if (buildTargetsInclude(Targets.DOCS)) {
-    runCheck('gulp check-links --local_changes');
+    runCheck('amp check-links --local_changes');
   }
 
   if (buildTargetsInclude(Targets.DEV_DASHBOARD)) {
-    runCheck('gulp dev-dashboard-tests');
+    runCheck('amp dev-dashboard-tests');
   }
 
   if (buildTargetsInclude(Targets.OWNERS)) {
-    runCheck('gulp check-owners');
+    runCheck('amp check-owners');
   }
 
   if (buildTargetsInclude(Targets.PACKAGE_UPGRADE)) {
-    runCheck('gulp check-exact-versions');
+    runCheck('amp check-exact-versions');
   }
 
   if (buildTargetsInclude(Targets.RENOVATE_CONFIG)) {
-    runCheck('gulp check-renovate-config');
+    runCheck('amp check-renovate-config');
   }
 
   if (buildTargetsInclude(Targets.SERVER)) {
-    runCheck('gulp server-tests');
+    runCheck('amp server-tests');
   }
 
   if (buildTargetsInclude(Targets.RUNTIME)) {
-    runCheck('gulp dep-check');
-    runCheck('gulp check-types');
-    runCheck('gulp check-sourcemaps');
+    runCheck('amp dep-check');
+    runCheck('amp check-types');
+    runCheck('amp check-sourcemaps');
   }
 
   if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
-    runCheck('gulp unit --local_changes --headless');
+    runCheck('amp unit --local_changes --headless');
   }
 
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     if (!argv.nobuild) {
-      runCheck('gulp clean');
-      runCheck('gulp dist --fortesting');
+      runCheck('amp clean');
+      runCheck('amp dist --fortesting');
     }
-    runCheck('gulp integration --nobuild --compiled --headless');
+    runCheck('amp integration --nobuild --compiled --headless');
   }
 
   if (buildTargetsInclude(Targets.RUNTIME, Targets.VALIDATOR)) {
-    runCheck('gulp validator');
+    runCheck('amp validator');
   }
 
   if (buildTargetsInclude(Targets.VALIDATOR_WEBUI)) {
-    runCheck('gulp validator-webui');
+    runCheck('amp validator-webui');
   }
 
   stopTimer(jobName, startTime);
@@ -147,5 +144,5 @@ module.exports = {
 
 prCheck.description = 'Runs a subset of the CI checks against local changes.';
 prCheck.flags = {
-  'nobuild': '  Skips building the runtime via `gulp dist`.',
+  'nobuild': 'Skips building the runtime via `amp dist`.',
 };

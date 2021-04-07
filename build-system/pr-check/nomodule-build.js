@@ -21,7 +21,7 @@
 
 const {
   abortTimedJob,
-  printSkipMessage,
+  skipDependentJobs,
   processAndUploadNomoduleOutput,
   startTimer,
   timedExecWithError,
@@ -37,11 +37,13 @@ const {signalPrDeployUpload} = require('../tasks/pr-deploy-bot-utils');
 const jobName = 'nomodule-build.js';
 
 function pushBuildWorkflow() {
-  timedExecOrDie('gulp update-packages');
-  timedExecOrDie('gulp dist --fortesting');
+  timedExecOrDie('amp dist --fortesting');
   uploadNomoduleOutput();
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function prBuildWorkflow() {
   const startTime = startTimer(jobName);
   if (
@@ -52,8 +54,7 @@ async function prBuildWorkflow() {
       Targets.VISUAL_DIFF
     )
   ) {
-    timedExecOrDie('gulp update-packages');
-    const process = timedExecWithError('gulp dist --fortesting');
+    const process = timedExecWithError('amp dist --fortesting');
     if (process.status !== 0) {
       const message = process?.error
         ? process.error.message
@@ -62,12 +63,18 @@ async function prBuildWorkflow() {
       await signalPrDeployUpload('errored');
       return abortTimedJob(jobName, startTime);
     }
-    timedExecOrDie('gulp storybook --build');
+    timedExecOrDie('amp storybook --build');
     await processAndUploadNomoduleOutput();
     await signalPrDeployUpload('success');
   } else {
     await signalPrDeployUpload('skipped');
-    printSkipMessage(
+
+    // Special case for visual diffs - Percy is a required check and must pass,
+    // but we just called `skipDependentJobs` so the Visual Diffs job will not
+    // run. Instead, we create an empty, passing check on Percy here.
+    timedExecOrDie('amp visual-diff --empty');
+
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime, integration tests, end-to-end tests, or visual diff tests'
     );

@@ -15,27 +15,19 @@
  */
 
 const debounce = require('debounce');
-const file = require('gulp-file');
 const fs = require('fs-extra');
-const gulp = require('gulp');
-const {
-  endBuildStep,
-  mkdirSync,
-  toPromise,
-  watchDebounceDelay,
-} = require('../helpers');
+const globby = require('globby');
+const path = require('path');
 const {buildExtensions} = require('../extension-helpers');
+const {endBuildStep, watchDebounceDelay} = require('../helpers');
 const {jsifyCssAsync} = require('./jsify-css');
-const {maybeUpdatePackages} = require('../update-packages');
-const {watch} = require('gulp');
+const {watch} = require('chokidar');
 
 /**
- * Entry point for 'gulp css'
- * @return {!Promise}
+ * Entry point for 'amp css'
  */
 async function css() {
-  maybeUpdatePackages();
-  return compileCss();
+  await compileCss();
 }
 
 const cssEntryPoints = [
@@ -85,79 +77,80 @@ const cssEntryPoints = [
 ];
 
 /**
+ * Copies the css from the build folder to the dist folder
+ */
+async function copyCss() {
+  const startTime = Date.now();
+  await fs.ensureDir('dist/v0');
+  for (const {outCss} of cssEntryPoints) {
+    await fs.copy(`build/css/${outCss}`, `dist/${outCss}`);
+  }
+  const cssFiles = globby.sync('build/css/amp-*.css');
+  await Promise.all(
+    cssFiles.map((cssFile) => {
+      return fs.copy(cssFile, `dist/v0/${path.basename(cssFile)}`);
+    })
+  );
+  endBuildStep('Copied', 'build/css/*.css to dist/v0/*.css', startTime);
+}
+
+/**
+ * Writes CSS to build folder
+ *
+ * @param {string} css
+ * @param {string} jsFilename
+ * @param {string} cssFilename
+ * @param {boolean} append append CSS to existing file
+ */
+async function writeCss(css, jsFilename, cssFilename, append) {
+  await fs.ensureDir('build/css');
+  const jsContent = 'export const cssText = ' + JSON.stringify(css);
+  await fs.writeFile(`build/${jsFilename}`, jsContent);
+  if (append) {
+    await fs.appendFile(`build/css/${cssFilename}`, css);
+  } else {
+    await fs.writeFile(`build/css/${cssFilename}`, css);
+  }
+}
+
+/**
+ * @param {string} path
+ * @param {string} outJs
+ * @param {string} outCss
+ * @param {boolean} append
+ */
+async function writeCssEntryPoint(path, outJs, outCss, append) {
+  const css = await jsifyCssAsync(`css/${path}`);
+  await writeCss(css, outJs, outCss, append);
+}
+
+/**
  * Compile all the css and drop in the build folder
  *
  * @param {Object=} options
  * @return {!Promise}
  */
-function compileCss(options = {}) {
+async function compileCss(options = {}) {
   if (options.watch) {
-    const watchFunc = () => {
-      compileCss();
-    };
-    watch('css/**/*.css').on('change', debounce(watchFunc, watchDebounceDelay));
-  }
-
-  /**
-   * Writes CSS to build folder
-   *
-   * @param {string} css
-   * @param {string} jsFilename
-   * @param {string} cssFilename
-   * @param {boolean} append append CSS to existing file
-   * @return {Promise}
-   */
-  function writeCss(css, jsFilename, cssFilename, append) {
-    return toPromise(
-      file(jsFilename, 'export const cssText = ' + JSON.stringify(css), {
-        src: true,
-      })
-        .pipe(gulp.dest('build'))
-        .on('end', function () {
-          mkdirSync('build');
-          mkdirSync('build/css');
-          if (append) {
-            fs.appendFileSync(`build/css/${cssFilename}`, css);
-          } else {
-            fs.writeFileSync(`build/css/${cssFilename}`, css);
-          }
-        })
-    );
-  }
-
-  /**
-   * @param {string} path
-   * @param {string} outJs
-   * @param {string} outCss
-   * @param {boolean} append
-   * @return {!Promise}
-   */
-  function writeCssEntryPoint(path, outJs, outCss, append) {
-    return jsifyCssAsync(`css/${path}`).then((css) =>
-      writeCss(css, outJs, outCss, append)
+    watch('css/**/*.css').on(
+      'change',
+      debounce(compileCss, watchDebounceDelay)
     );
   }
 
   const startTime = Date.now();
-
-  let promise = Promise.resolve();
-
-  cssEntryPoints.forEach(({path, outJs, outCss, append}) => {
-    promise = promise.then(() =>
-      writeCssEntryPoint(path, outJs, outCss, append)
-    );
-  });
-
-  return promise
-    .then(() => buildExtensions({compileOnlyCss: true}))
-    .then(() => {
-      endBuildStep('Recompiled all CSS files into', 'build/', startTime);
-    });
+  // Must be in order because some iterations write while others append.
+  for (const {path, outJs, outCss, append} of cssEntryPoints) {
+    await writeCssEntryPoint(path, outJs, outCss, append);
+  }
+  await buildExtensions({compileOnlyCss: true});
+  endBuildStep('Recompiled all CSS files into', 'build/', startTime);
 }
 
 module.exports = {
   css,
   compileCss,
+  copyCss,
   cssEntryPoints,
 };
 

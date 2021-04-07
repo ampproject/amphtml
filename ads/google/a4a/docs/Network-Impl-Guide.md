@@ -9,7 +9,12 @@ be given preferential rendering.
     [bradfrizzell@google.com](mailto:bradfrizzell@google.com)_
 -   _Last Updated: 1-27-2016_
 
-## Contents
+<!--
+  (Do not remove or edit this comment.)
+
+  This table-of-contents is automatically generated. To generate it, run:
+    amp markdown-toc --fix
+-->
 
 -   [Background](#background)
 -   [Overview](#overview)

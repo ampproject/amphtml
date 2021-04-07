@@ -23,7 +23,7 @@ import {
   toggleAttribute,
   tryFocus,
 } from '../../../src/dom';
-import {pureDevAssert as devAssert} from '../../../src/assert';
+import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {toArray} from '../../../src/types';
 import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
@@ -276,6 +276,6 @@ BaseElement['props'] = {
   'multiple': {attr: 'multiple', type: 'boolean'},
   'name': {attr: 'name'},
   'role': {attr: 'role'},
-  'tabindex': {attr: 'tabindex'},
-  'keyboardSelectMode': {attr: 'keyboard-select-mode'},
+  'tabIndex': {attr: 'tabindex'},
+  'keyboardSelectMode': {attr: 'keyboard-select-mode', media: true},
 };

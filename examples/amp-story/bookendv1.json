@@ -20,7 +20,8 @@
       "type": "small",
       "title": "This is an example article",
       "url": "/article.html",
-      "image": "http://placehold.it/500x600"
+      "image": "http://placehold.it/500x600",
+      "alt": "Example alt text for the image. If alt is not specified it will default to an empty string."
     },
     {
       "type": "small",

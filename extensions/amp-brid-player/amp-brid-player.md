@@ -64,17 +64,22 @@ The Brid.tv player ID. Specific to every partner.
 
 ### `data-video`
 
-The Brid.tv video ID. Embed code must either have `video`, `playlist` or
-`outstream` attribute.
+The Brid.tv video ID. Embed code must either have `video`, `playlist`, `carousel`
+or `outstream` attribute.
 
 ### `data-playlist`
 
 The Brid.tv playlist ID or custom string value for dynamic playlists. Embed code
-must either have `video`, `playlist` or `outstream` attribute.
+must either have `video`, `playlist`, `carousel` or `outstream` attribute.
+
+### `data-carousel`
+
+The Brid.tv carousel ID. Embed code must either have `video`, `playlist`, `carousel`
+or `outstream` attribute.
 
 ### `data-outstream`
 
-The Brid.tv outstream unit ID. Embed code must either have `video`, `playlist`
+The Brid.tv outstream unit ID. Embed code must either have `video`, `playlist`, `carousel`
 or `outstream` attribute.
 
 ### `data-dynamic`
@@ -112,7 +117,7 @@ Mutes the video.
 
 Unmutes the video.
 
-### `fullscreencenter`
+### `fullscreenenter`
 
 Takes the video to fullscreen.
 

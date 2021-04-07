@@ -32,6 +32,7 @@ import {getConsentStateValue} from './consent-info';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {htmlFor} from '../../../src/static-template';
+import {isExperimentOn} from '../../../src/experiments';
 import {setImportantStyles, setStyles, toggle} from '../../../src/style';
 
 const TAG = 'amp-consent-ui';
@@ -182,6 +183,11 @@ export class ConsentUI {
     /** @private {?Promise<string>} */
     this.promptUISrcPromise_ = null;
 
+    this.isGranularConsentExperimentOn_ = isExperimentOn(
+      this.win_,
+      'amp-consent-granular-consent'
+    );
+
     this.init_(config, opt_postPromptUI);
   }
 
@@ -295,7 +301,7 @@ export class ConsentUI {
       // at build time. (see #18841).
       if (isAmpElement(this.ui_)) {
         whenUpgradedToCustomElement(this.ui_)
-          .then(() => this.ui_.whenBuilt())
+          .then(() => this.ui_.build())
           .then(() => show());
       } else {
         show();
@@ -536,7 +542,7 @@ export class ConsentUI {
       return consentStateManager
         .getLastConsentInstanceInfo()
         .then((consentInfo) => {
-          return dict({
+          const returnValue = dict({
             'clientConfig': this.clientConfig_,
             // consentState to be deprecated
             'consentState': getConsentStateValue(consentInfo['consentState']),
@@ -548,6 +554,10 @@ export class ConsentUI {
             'promptTrigger': this.isActionPromptTrigger_ ? 'action' : 'load',
             'isDirty': !!consentInfo['isDirty'],
           });
+          if (this.isGranularConsentExperimentOn_) {
+            returnValue['purposeConsents'] = consentInfo['purposeConsents'];
+          }
+          return returnValue;
         });
     });
   }

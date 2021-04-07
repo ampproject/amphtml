@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {USER_ERROR_SENTINEL} from './assert';
+import {
+  USER_ERROR_SENTINEL,
+  elementStringOrPassThru,
+} from './core/error-message-helpers';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
 import {isArray, isEnumValue} from './types';
@@ -122,7 +125,7 @@ const externalMessagesSimpleTableUrl = () =>
  * @return {string}
  */
 const messageArgToEncodedComponent = (arg) =>
-  encodeURIComponent(String(elementStringOrPassthru(arg)));
+  encodeURIComponent(String(elementStringOrPassThru(arg)));
 
 /**
  * Logging class. Use of sentinel string instead of a boolean to check user/dev
@@ -632,19 +635,7 @@ export class Log {
  * @return {string}
  */
 const stringOrElementString = (val) =>
-  /** @type {string} */ (elementStringOrPassthru(val));
-
-/**
- * @param {*} val
- * @return {*}
- */
-function elementStringOrPassthru(val) {
-  // Do check equivalent to `val instanceof Element` without cross-window bug
-  if (val && val.nodeType == 1) {
-    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
-  }
-  return val;
-}
+  /** @type {string} */ (elementStringOrPassThru(val));
 
 /**
  * @param {!Array} array
@@ -899,6 +890,15 @@ export function devAssert(
   if (getMode().minified) {
     return shouldBeTrueish;
   }
+  if (self.__AMP_ASSERTION_CHECK) {
+    // This will never execute regardless, but will be included on unminified
+    // builds. It will be DCE'd away from minified builds, and so can be used to
+    // validate that Babel is properly removing dev assertions in minified
+    // builds.
+    console /*OK*/
+      .log('__devAssert_sentinel__');
+  }
+
   return dev()./*Orig call*/ assert(
     shouldBeTrueish,
     opt_message,

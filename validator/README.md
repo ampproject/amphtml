@@ -59,7 +59,7 @@ around the edges. Below are instructions for Linux Ubuntu 14.
 Install these packages using apt-get:
 
 -   `npm`
--   `openjdk-7-jre`
+-   `default-jdk`
 -   `protobuf-compiler`
 -   `python3`
 -   `python3-pip`

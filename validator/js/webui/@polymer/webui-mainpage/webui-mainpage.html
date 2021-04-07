@@ -69,7 +69,7 @@
       '     here and the AMP Validator will re-check your document on the fly.\n' +
       '-->\n' +
       '\x3C!doctype html>\n' +
-      '\x3Chtml ⚡4email>\n' +
+      '\x3Chtml ⚡4email data-css-strict>\n' +
       '\x3Chead>\n' +
       '  \x3Cmeta charset="utf-8">\n' +
       '  \x3Cscript async src="https://cdn.ampproject.org/v0.js">\x3C/script>\n' +
@@ -105,10 +105,34 @@
         // The listbox has the errors at the bottom of the screen.
         var listbox = this.$.errorListBox;
 
+        var isValidatorReady = false;
+
+        if (amp.validator.init) {
+          // The AMP validator contains an initializer which loads some
+          // resources asynchronously.
+          amp.validator.init().then(function() {
+            isValidatorReady = true;
+            // In most times, the initilization of AMP validator is slower than
+            // the code that fills the minimal valid AMP doc as the default
+            // value in the input box. The `refreshEditorAndErrors` call
+            // triggered by input box default value returns early because
+            // `isValidatorReady` is `false` at that time. We need to call
+            // `refreshEditorAndErrors` again here to ensure that the validator
+            // runs on the default value in the input box
+            refreshEditorAndErrors();
+          });
+        } else {
+          isValidatorReady = true;
+        }
+
         // When the editor contents change, trigger validation (with a delay)
         // and propagate the validation errors into the editor (as line
         // widgets) and the listbox below the editor as clickable errors.
         var refreshEditorAndErrors = function() {
+          if (!isValidatorReady) {
+            return ;
+          }
+
           // Clear the list of errors below the editor, and the inline
           // messages.
           listbox.clearErrors();

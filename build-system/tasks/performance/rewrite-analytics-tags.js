@@ -21,13 +21,12 @@ const {
   getLocalVendorConfig,
   urlToCachePath,
 } = require('./helpers');
-const {JSDOM} = require('jsdom');
 
 /**
  * Return local vendor config.
  *
  * @param {string} vendor
- * @return {Object}
+ * @return {Promise<Object>}
  */
 async function getVendorConfig(vendor) {
   return JSON.parse(await getLocalVendorConfig(vendor));
@@ -41,11 +40,11 @@ async function getVendorConfig(vendor) {
  *
  * @param {Element} tag
  * @param {Object} script
- * @return {Object}
+ * @return {Promise<Object>}
  */
 async function maybeMergeAndRemoveVendorConfig(tag, script) {
-  if (tag.hasAttribute('type')) {
-    const vendor = tag.getAttribute('type');
+  const vendor = tag.getAttribute('type');
+  if (vendor) {
     tag.removeAttribute('type');
     const vendorConfig = await getVendorConfig(vendor);
     // TODO (micajuineho) replace with analytics/config.js merge objects
@@ -65,6 +64,7 @@ async function maybeMergeAndRemoveVendorConfig(tag, script) {
 async function alterAnalyticsTags(url, version, extraUrlParams) {
   const cachePath = urlToCachePath(url, version);
   const document = fs.readFileSync(cachePath);
+  const {JSDOM} = await import('jsdom'); // Lazy-imported to speed up task loading.
   const dom = new JSDOM(document);
 
   const analyticsTags = Array.from(

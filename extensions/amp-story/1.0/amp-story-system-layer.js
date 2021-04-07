@@ -29,11 +29,15 @@ import {
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
-import {createShadowRootWithStyle, shouldShowStoryUrlInfo} from './utils';
+import {closest, matches, scopedQuerySelector} from '../../../src/dom';
+import {
+  createShadowRootWithStyle,
+  shouldShowStoryUrlInfo,
+  triggerClickFromLightDom,
+} from './utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {matches, scopedQuerySelector} from '../../../src/dom';
 import {renderAsElement} from './simple-template';
 import {setImportantStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
@@ -57,7 +61,7 @@ const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
 const CLOSE_CLASS = 'i-amphtml-story-close-control';
 
 /** @private @const {string} */
-const SKIP_NEXT_CLASS = 'i-amphtml-story-skip-next';
+const SKIP_TO_NEXT_CLASS = 'i-amphtml-story-skip-to-next';
 
 /** @private @const {string} */
 const VIEWER_CUSTOM_CONTROL_CLASS = 'i-amphtml-story-viewer-custom-control';
@@ -92,6 +96,9 @@ const SIDEBAR_CLASS = 'i-amphtml-story-sidebar-control';
 /** @private @const {string} */
 const HAS_NEW_PAGE_ATTRIBUTE = 'i-amphtml-story-has-new-page';
 
+/** @private @const {string} */
+const ATTRIBUTION_CLASS = 'i-amphtml-story-story-attribution';
+
 /** @private @const {number} */
 const HIDE_MESSAGE_TIMEOUT_MS = 1500;
 
@@ -102,6 +109,36 @@ const TEMPLATE = {
     'class': 'i-amphtml-story-system-layer i-amphtml-story-system-reset',
   }),
   children: [
+    {
+      tag: 'a',
+      attrs: dict({
+        'class': ATTRIBUTION_CLASS,
+        'target': '_blank',
+      }),
+      children: [
+        {
+          tag: 'div',
+          attrs: dict({
+            'class': 'i-amphtml-story-attribution-logo-container',
+          }),
+          children: [
+            {
+              tag: 'img',
+              attrs: dict({
+                'alt': '',
+                'class': 'i-amphtml-story-attribution-logo',
+              }),
+            },
+          ],
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            'class': 'i-amphtml-story-attribution-text',
+          }),
+        },
+      ],
+    },
     {
       tag: 'div',
       attrs: dict({
@@ -226,10 +263,11 @@ const TEMPLATE = {
           tag: 'button',
           attrs: dict({
             'class':
-              SKIP_NEXT_CLASS +
+              SKIP_TO_NEXT_CLASS +
               ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
           }),
-          localizedLabelId: LocalizedStringId.AMP_STORY_SKIP_NEXT_BUTTON_LABEL,
+          localizedLabelId:
+            LocalizedStringId.AMP_STORY_SKIP_TO_NEXT_BUTTON_LABEL,
         },
         {
           tag: 'button',
@@ -275,7 +313,8 @@ const VIEWER_CONTROL_EVENT_NAME = '__AMP_VIEWER_CONTROL_EVENT_NAME__';
 const VIEWER_CONTROL_TYPES = {
   CLOSE: 'close',
   SHARE: 'share',
-  SKIP_NEXT: 'skip-next',
+  DEPRECATED_SKIP_NEXT: 'skip-next', // Deprecated in favor of SKIP_TO_NEXT.
+  SKIP_TO_NEXT: 'skip-to-next',
 };
 
 const VIEWER_CONTROL_DEFAULTS = {
@@ -285,8 +324,11 @@ const VIEWER_CONTROL_DEFAULTS = {
   [VIEWER_CONTROL_TYPES.CLOSE]: {
     'selector': `.${CLOSE_CLASS}`,
   },
-  [VIEWER_CONTROL_TYPES.SKIP_NEXT]: {
-    'selector': `.${SKIP_NEXT_CLASS}`,
+  [VIEWER_CONTROL_TYPES.DEPRECATED_SKIP_NEXT]: {
+    'selector': `.${SKIP_TO_NEXT_CLASS}`,
+  },
+  [VIEWER_CONTROL_TYPES.SKIP_TO_NEXT]: {
+    'selector': `.${SKIP_TO_NEXT_CLASS}`,
   },
 };
 
@@ -474,6 +516,11 @@ export class SystemLayer {
         )
       ) {
         this.onViewerControlClick_(dev().assertElement(event.target));
+      } else if (
+        matches(target, `.${ATTRIBUTION_CLASS}, .${ATTRIBUTION_CLASS} *`)
+      ) {
+        const anchorClicked = closest(target, (e) => matches(e, 'a[href]'));
+        triggerClickFromLightDom(anchorClicked, this.parentEl_);
       }
     });
 
@@ -553,6 +600,14 @@ export class SystemLayer {
       StateProperty.RTL_STATE,
       (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
+      },
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.KEYBOARD_ACTIVE_STATE,
+      (keyboardState) => {
+        this.onKeyboardActiveUpdate_(keyboardState);
       },
       true /** callToInitialize */
     );
@@ -875,6 +930,20 @@ export class SystemLayer {
       rtlState
         ? this.getShadowRoot().setAttribute('dir', 'rtl')
         : this.getShadowRoot().removeAttribute('dir');
+    });
+  }
+
+  /**
+   * Reacts to keyboard updates and updates the UI.
+   * @param {boolean} keyboardActive
+   * @private
+   */
+  onKeyboardActiveUpdate_(keyboardActive) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().classList.toggle(
+        'amp-mode-keyboard-active',
+        keyboardActive
+      );
     });
   }
 

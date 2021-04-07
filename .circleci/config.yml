@@ -17,6 +17,10 @@ push_builds_only: &push_builds_only
         - /^amp-release-.*$/
 
 executors:
+  amphtml-docker-small-executor:
+    docker:
+      - image: cimg/base:2020.12
+    resource_class: small
   amphtml-medium-executor:
     machine:
       image: ubuntu-2004:202010-01
@@ -31,30 +35,32 @@ executors:
     resource_class: xlarge
 
 commands:
-  save_karma_cache:
-    parameters:
-      cache_name:
-        type: string
+  save_merge_commit:
     steps:
       - save_cache:
-          name: 'Save Karma Cache'
-          key: karma-cache-<<parameters.cache_name>>-{{ checksum ".karma-cache-hash" }}
+          name: 'Save Merge Commit'
+          key: git-{{ .Branch }}-{{ .Revision }}
           paths:
-            - .karma-cache
-  restore_karma_cache:
-    parameters:
-      cache_name:
-        type: string
+            - .CIRCLECI_MERGE_COMMIT
+  restore_merge_commit:
     steps:
-      - run:
-          name: 'Compute Karma Cache Hash'
-          command: node ./build-system/common/compute-karma-cache-hash.js
       - restore_cache:
-          name: 'Restore Karma Cache'
-          key: karma-cache-<<parameters.cache_name>>-{{ checksum ".karma-cache-hash" }}
+          name: 'Restore Merge Commit'
+          key: git-{{ .Branch }}-{{ .Revision }}
+  maybe_gracefully_halt:
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: 'Maybe Gracefully Halt'
+          command: if [[ -f "/tmp/workspace/.CI_GRACEFULLY_HALT" ]]; then echo "Gracefully halting this job."; circleci-agent step halt; fi
   setup_vm:
     steps:
+      - run:
+          name: 'Create Workspace'
+          command: mkdir -p /tmp/workspace
       - checkout
+      - restore_merge_commit
       - run:
           name: 'Fetch Merge Commit'
           command: ./.circleci/fetch_merge_commit.sh
@@ -70,6 +76,12 @@ commands:
       - run:
           name: 'Install Dependencies'
           command: ./.circleci/install_dependencies.sh
+  teardown_vm:
+    steps:
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - workspace
   install_chrome:
     steps:
       - browser-tools/install-chrome:
@@ -82,252 +94,265 @@ commands:
           command: ./.circleci/fail_fast.sh
 
 jobs:
+  'Compute Merge Commit':
+    executor:
+      name: amphtml-docker-small-executor
+    steps:
+      - run:
+          name: 'Compute Merge Commit'
+          command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/master/.circleci/compute_merge_commit.sh | bash
+      - save_merge_commit
   'Checks':
     executor:
       name: amphtml-medium-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Checks'
           command: node build-system/pr-check/checks.js
       - fail_fast
+      - teardown_vm
   'Unminified Build':
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Unminified Build'
           command: node build-system/pr-check/unminified-build.js
       - fail_fast
+      - teardown_vm
   'Nomodule Build':
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Nomodule Build'
           command: node build-system/pr-check/nomodule-build.js
       - fail_fast
+      - teardown_vm
   'Module Build':
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Module Build'
           command: node build-system/pr-check/module-build.js
       - fail_fast
+      - teardown_vm
   'Bundle Size':
     executor:
-      name: amphtml-medium-executor
+      name: amphtml-xlarge-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Bundle Size'
           command: node build-system/pr-check/bundle-size.js
       - fail_fast
+      - teardown_vm
   'Validator Tests':
     executor:
-      name: amphtml-medium-executor
+      name: amphtml-xlarge-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - run:
-          name: 'Install Protobuf'
-          command: pip3 install --user protobuf
+          name: 'Install Validator Dependencies'
+          command: ./.circleci/install_validator_dependencies.sh
       - run:
           name: 'Validator Tests'
           command: node build-system/pr-check/validator-tests.js
       - fail_fast
+      - teardown_vm
   'Visual Diff Tests':
     executor:
       name: amphtml-large-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'Visual Diff Tests'
           command: node build-system/pr-check/visual-diff-tests.js
       - fail_fast
+      - teardown_vm
   'Unit Tests':
     executor:
       name: amphtml-large-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
-      - restore_karma_cache:
-          cache_name: unit
       - run:
           name: 'Unit Tests'
           command: node build-system/pr-check/unit-tests.js
-      - save_karma_cache:
-          cache_name: unit
       - fail_fast
+      - teardown_vm
   'Unminified Tests':
     executor:
       name: amphtml-large-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
-      - restore_karma_cache:
-          cache_name: unminified
       - run:
           name: 'Unminified Tests'
           command: node build-system/pr-check/unminified-tests.js
-      - save_karma_cache:
-          cache_name: unminified
       - fail_fast
+      - teardown_vm
   'Nomodule Tests':
     executor:
       name: amphtml-large-executor
+    parameters:
+      config:
+        description: 'Which config file to use'
+        type: enum
+        enum: ['prod', 'canary']
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
-      - restore_karma_cache:
-          cache_name: nomodule
       - run:
-          name: 'Nomodule Tests'
-          command: node build-system/pr-check/nomodule-tests.js
-      - save_karma_cache:
-          cache_name: nomodule
+          name: 'Nomodule Tests (<< parameters.config >>)'
+          command: node build-system/pr-check/nomodule-tests.js --config=<< parameters.config >>
       - fail_fast
+      - teardown_vm
   'Module Tests':
     executor:
       name: amphtml-large-executor
+    parameters:
+      config:
+        description: 'Which config file to use'
+        type: enum
+        enum: ['prod', 'canary']
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
-      - restore_karma_cache:
-          cache_name: module
       - run:
-          name: 'Module Tests'
-          command: node build-system/pr-check/module-tests.js
-      - save_karma_cache:
-          cache_name: module
+          name: 'Module Tests (<< parameters.config >>)'
+          command: node build-system/pr-check/module-tests.js --config=<< parameters.config >>
       - fail_fast
+      - teardown_vm
   'End-to-End Tests':
     executor:
       name: amphtml-large-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'End-to-End Tests'
           command: node build-system/pr-check/e2e-tests.js
       - fail_fast
+      - teardown_vm
   'Performance Tests':
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'Performance Tests'
           command: node build-system/pr-check/performance-tests.js
       - fail_fast
-  'Experiment A Build':
+      - teardown_vm
+  'Experiment Build':
     executor:
       name: amphtml-xlarge-executor
+    parameters:
+      exp:
+        description: 'Which of the three (A/B/C) experiments to use'
+        type: enum
+        enum: ['A', 'B', 'C']
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - run:
-          name: 'Experiment A Build'
-          command: node build-system/pr-check/experiment-build.js --experiment=experimentA
+          name: 'Experiment << parameters.exp >> Build'
+          command: node build-system/pr-check/experiment-build.js --experiment=experiment<< parameters.exp >>
       - fail_fast
-  'Experiment B Build':
-    executor:
-      name: amphtml-xlarge-executor
-    steps:
-      - setup_vm
-      - run:
-          name: 'Experiment B Build'
-          command: node build-system/pr-check/experiment-build.js --experiment=experimentB
-      - fail_fast
-  'Experiment C Build':
-    executor:
-      name: amphtml-xlarge-executor
-    steps:
-      - setup_vm
-      - run:
-          name: 'Experiment C Build'
-          command: node build-system/pr-check/experiment-build.js --experiment=experimentC
-      - fail_fast
-  'Experiment A Tests':
+      - teardown_vm
+  'Experiment Tests':
     executor:
       name: amphtml-large-executor
+    parameters:
+      exp:
+        description: 'Which of the three (A/B/C) experiments to use'
+        type: enum
+        enum: ['A', 'B', 'C']
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
-      - restore_karma_cache:
-          cache_name: experimentA
       - run:
-          name: 'Experiment A Tests'
-          command: node build-system/pr-check/experiment-tests.js --experiment=experimentA
-      - save_karma_cache:
-          cache_name: experimentA
+          name: 'Experiment << parameters.exp >> Tests'
+          command: node build-system/pr-check/experiment-tests.js --experiment=experiment<< parameters.exp >>
       - fail_fast
-  'Experiment B Tests':
-    executor:
-      name: amphtml-large-executor
-    steps:
-      - setup_vm
-      - install_chrome
-      - restore_karma_cache:
-          cache_name: experimentB
-      - run:
-          name: 'Experiment B Tests'
-          command: node build-system/pr-check/experiment-tests.js --experiment=experimentB
-      - save_karma_cache:
-          cache_name: experimentB
-      - fail_fast
-  'Experiment C Tests':
-    executor:
-      name: amphtml-large-executor
-    steps:
-      - setup_vm
-      - install_chrome
-      - restore_karma_cache:
-          cache_name: experimentC
-      - run:
-          name: 'Experiment C Tests'
-          command: node build-system/pr-check/experiment-tests.js --experiment=experimentC
-      - save_karma_cache:
-          cache_name: experimentC
-      - fail_fast
+      - teardown_vm
 
 workflows:
   'CircleCI':
     jobs:
+      - 'Compute Merge Commit':
+          <<: *push_and_pr_builds
       - 'Checks':
           <<: *push_and_pr_builds
+          requires:
+            - 'Compute Merge Commit'
       - 'Unminified Build':
           <<: *push_and_pr_builds
+          requires:
+            - 'Compute Merge Commit'
       - 'Nomodule Build':
           <<: *push_and_pr_builds
+          requires:
+            - 'Compute Merge Commit'
       - 'Module Build':
           <<: *push_and_pr_builds
+          requires:
+            - 'Compute Merge Commit'
       - 'Bundle Size':
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build'
-            - 'Module Build'
+            - 'Compute Merge Commit'
       - 'Validator Tests':
           <<: *push_and_pr_builds
+          requires:
+            - 'Compute Merge Commit'
       - 'Visual Diff Tests':
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build'
       - 'Unit Tests':
           <<: *push_and_pr_builds
+          requires:
+            - 'Compute Merge Commit'
       - 'Unminified Tests':
           <<: *push_and_pr_builds
           requires:
             - 'Unminified Build'
       - 'Nomodule Tests':
+          name: 'Nomodule Tests (<< matrix.config >>)'
+          matrix:
+            parameters:
+              config: ['prod', 'canary']
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build'
       - 'Module Tests':
+          name: 'Module Tests (<< matrix.config >>)'
+          matrix:
+            parameters:
+              config: ['prod', 'canary']
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build'
@@ -336,24 +361,22 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build'
-      - 'Experiment A Build':
-          <<: *push_and_pr_builds
-      - 'Experiment B Build':
-          <<: *push_and_pr_builds
-      - 'Experiment C Build':
-          <<: *push_and_pr_builds
-      - 'Experiment A Tests':
+      - 'Experiment Build':
+          name: 'Experiment << matrix.exp >> Build'
+          matrix:
+            parameters:
+              exp: ['A', 'B', 'C']
           <<: *push_and_pr_builds
           requires:
-            - 'Experiment A Build'
-      - 'Experiment B Tests':
+            - 'Compute Merge Commit'
+      - 'Experiment Tests':
+          name: 'Experiment << matrix.exp >> Tests'
+          matrix:
+            parameters:
+              exp: ['A', 'B', 'C']
           <<: *push_and_pr_builds
           requires:
-            - 'Experiment B Build'
-      - 'Experiment C Tests':
-          <<: *push_and_pr_builds
-          requires:
-            - 'Experiment C Build'
+            - 'Experiment << matrix.exp >> Build'
       # TODO(wg-performance, #12128): This takes 30 mins and fails regularly.
       # - 'Performance Tests':
       #     <<: *push_builds_only

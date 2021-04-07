@@ -40,8 +40,8 @@ import {rejectServicePromiseForDoc} from '../service';
 export function installAmpdocServicesForInabox(ampdoc) {
   // Order is important!
   installIframeMessagingClient(ampdoc.win); // this is an inabox-only service
-  installTemplatesServiceForDoc(ampdoc);
   installUrlForDoc(ampdoc);
+  installTemplatesServiceForDoc(ampdoc);
   installDocumentInfoServiceForDoc(ampdoc);
   installInaboxCidService(ampdoc);
   installInaboxViewerServiceForDoc(ampdoc);

@@ -27,6 +27,10 @@ const {getUnitTestsToRun} = require('./runtime-test/helpers-unit');
 const {maybePrintArgvMessages} = require('./runtime-test/helpers');
 
 class Runner extends RuntimeTestRunner {
+  /**
+   *
+   * @param {RuntimeTestConfig} config
+   */
   constructor(config) {
     super(config);
   }
@@ -39,10 +43,12 @@ class Runner extends RuntimeTestRunner {
   }
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function unit() {
   maybePrintArgvMessages();
-
-  if (argv.local_changes && !getUnitTestsToRun()) {
+  if (argv.local_changes && !(await getUnitTestsToRun())) {
     return;
   }
 
@@ -60,21 +66,21 @@ module.exports = {
 
 unit.description = 'Runs unit tests';
 unit.flags = {
-  'chrome_canary': '  Runs tests on Chrome Canary',
-  'chrome_flags': '  Uses the given flags to launch Chrome',
-  'coverage': '  Run tests in code coverage mode',
-  'edge': '  Runs tests on Edge',
-  'firefox': '  Runs tests on Firefox',
-  'files': '  Runs tests for specific files',
-  'grep': '  Runs tests that match the pattern',
-  'headless': '  Run tests in a headless Chrome window',
-  'ie': '  Runs tests on IE',
+  'chrome_canary': 'Runs tests on Chrome Canary',
+  'chrome_flags': 'Uses the given flags to launch Chrome',
+  'coverage': 'Run tests in code coverage mode',
+  'edge': 'Runs tests on Edge',
+  'firefox': 'Runs tests on Firefox',
+  'files': 'Runs tests for specific files',
+  'grep': 'Runs tests that match the pattern',
+  'headless': 'Run tests in a headless Chrome window',
+  'ie': 'Runs tests on IE',
   'local_changes':
-    '  Run unit tests directly affected by the files changed in the local branch',
-  'nohelp': '  Silence help messages that are printed prior to test run',
-  'report': '  Write test result report to a local file',
-  'safari': '  Runs tests on Safari',
-  'testnames': '  Lists the name of each test being run',
-  'verbose': '  With logging enabled',
-  'watch': '  Watches for changes in files, runs corresponding test(s)',
+    'Run unit tests directly affected by the files changed in the local branch',
+  'nohelp': 'Silence help messages that are printed prior to test run',
+  'report': 'Write test result report to a local file',
+  'safari': 'Runs tests on Safari',
+  'testnames': 'Lists the name of each test being run',
+  'verbose': 'With logging enabled',
+  'watch': 'Watches for changes in files, runs corresponding test(s)',
 };

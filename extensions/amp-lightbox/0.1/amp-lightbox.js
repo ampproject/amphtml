@@ -39,12 +39,9 @@ import {dict, hasOwn} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isInFie} from '../../../src/iframe-helper';
-import {
-  registerContainer,
-  unregisterContainer,
-} from '../../../src/utils/display-observer';
 import {toArray} from '../../../src/types';
 import {tryFocus} from '../../../src/dom';
+import {unmountAll} from '../../../src/utils/resource-container-helper';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
@@ -287,7 +284,6 @@ class AmpLightbox extends AMP.BaseElement {
       return;
     }
     this.initialize_();
-    registerContainer(this.element, this.container_);
     this.boundCloseOnEscape_ = /** @type {?function(this:AmpLightbox, Event)} */ (this.closeOnEscape_.bind(
       this
     ));
@@ -395,6 +391,8 @@ class AmpLightbox extends AMP.BaseElement {
     };
     element.addEventListener('transitionend', onAnimationEnd);
     element.addEventListener('animationend', onAnimationEnd);
+
+    this.setAsContainer();
 
     // TODO: instead of laying out children all at once, layout children based
     // on visibility.
@@ -562,7 +560,6 @@ class AmpLightbox extends AMP.BaseElement {
     if (!this.active_) {
       return;
     }
-    unregisterContainer(this.element);
     if (this.isScrollable_) {
       setStyle(this.element, 'webkitOverflowScrolling', '');
     }
@@ -621,6 +618,12 @@ class AmpLightbox extends AMP.BaseElement {
     this.boundFocusin_ = null;
 
     this.untieCloseButton_();
+
+    this.removeAsContainer();
+
+    // Unmount all children when the lightbox is closed. They will automatically
+    // remount when the lightbox is opened again.
+    unmountAll(this.element, /* includeSelf */ false);
 
     Services.ownersForDoc(this.element).schedulePause(
       this.element,

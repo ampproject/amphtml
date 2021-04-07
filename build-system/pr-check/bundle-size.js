@@ -19,34 +19,26 @@
  * @fileoverview Script that runs the bundle-size checks during CI.
  */
 
-const {
-  downloadModuleOutput,
-  downloadNomoduleOutput,
-  printSkipMessage,
-  timedExecOrDie,
-} = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {runCiJob} = require('./ci-job');
+const {skipDependentJobs, timedExecOrDie} = require('./utils');
 
 const jobName = 'bundle-size.js';
 
 function pushBuildWorkflow() {
-  downloadNomoduleOutput();
-  downloadModuleOutput();
-  timedExecOrDie('gulp bundle-size --on_push_build');
+  timedExecOrDie('amp dist --noconfig --esm');
+  timedExecOrDie('amp dist --noconfig');
+  timedExecOrDie('amp bundle-size --on_push_build');
 }
 
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME)) {
-    downloadNomoduleOutput();
-    downloadModuleOutput();
-    timedExecOrDie('gulp bundle-size --on_pr_build');
+    timedExecOrDie('amp dist --noconfig --esm');
+    timedExecOrDie('amp dist --noconfig');
+    timedExecOrDie('amp bundle-size --on_pr_build');
   } else {
-    timedExecOrDie('gulp bundle-size --on_skipped_build');
-    printSkipMessage(
-      jobName,
-      'this PR does not affect the runtime or flag configs'
-    );
+    timedExecOrDie('amp bundle-size --on_skipped_build');
+    skipDependentJobs(jobName, 'this PR does not affect the runtime');
   }
 }
 

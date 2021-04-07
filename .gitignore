@@ -1,13 +1,15 @@
 .DS_Store
 .g4ignore
+.CIRCLECI_MERGE_COMMIT
+.babel-cache/
 build/
-.karma-cache*
 .amp-dep-check
+extensions/**/dist/**
 c
+.css-cache/
 /dist
 dist.3p
 dist.tools
-test-bin
 /release
 examples.min
 node_modules

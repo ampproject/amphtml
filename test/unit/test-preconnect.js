@@ -53,7 +53,7 @@ describes.sandboxed('preconnect', {}, (env) => {
       const platform = {
         isSafari: () => !!isSafari,
       };
-      iframe.win.__AMP_SERVICES['platform'] = {obj: platform};
+      iframe.win.__AMP_SERVICES['platform'] = {obj: platform, ctor: Object};
       sandbox.stub(Services, 'platformFor').returns(platform);
 
       installPreconnectService(iframe.win);

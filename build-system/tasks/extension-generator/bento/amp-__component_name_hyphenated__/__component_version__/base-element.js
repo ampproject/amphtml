@@ -24,15 +24,17 @@ export class BaseElement extends PreactBaseElement {}
 BaseElement['Component'] = __component_name_pascalcase__;
 
 /** @override */
-BaseElement['props'] = {};
-
-/** @override */
-BaseElement['passthrough'] = true;
-// BaseElement['passthroughNonEmpty'] = true;
-// BaseElement['children'] = {};
+BaseElement['props'] = {
+  'children': {passthrough: true},
+  // 'children': {passthroughNonEmpty: true},
+  // 'children': {selector: '...'},
+};
 
 /** @override */
 BaseElement['layoutSizeDefined'] = true;
+
+/** @override */
+BaseElement['usesShadowDom'] = true;
 
 /** @override */
 BaseElement['shadowCss'] = COMPONENT_CSS;

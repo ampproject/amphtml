@@ -15,32 +15,36 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
-const babel = require('@babel/core');
-const crypto = require('crypto');
 const debounce = require('debounce');
-const del = require('del');
 const esbuild = require('esbuild');
+/** @type {Object} */
 const experimentDefines = require('../global-configs/experiments-const.json');
-const file = require('gulp-file');
 const fs = require('fs-extra');
-const gulp = require('gulp');
-const MagicString = require('magic-string');
+const magicstring = require('magic-string');
 const open = require('open');
 const path = require('path');
-const remapping = require('@ampproject/remapping');
+const Remapping = require('@ampproject/remapping');
+const terser = require('terser');
 const wrappers = require('../compile/compile-wrappers');
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
+const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {green, red, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
+const {removeFromClosureBabelCache} = require('../compile/pre-closure-babel');
 const {thirdPartyFrames} = require('../test-configs/config');
-const {transpileTs} = require('../compile/typescript');
 const {watch: fileWatch} = require('chokidar');
+
+/** @type {Remapping.default} */
+const remapping = /** @type {*} */ (Remapping);
+
+/** @type {magicstring.default} */
+const MagicString = /** @type {*} */ (magicstring);
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -64,6 +68,9 @@ const EXTENSION_BUNDLE_MAP = {
   ],
   'amp-inputmask.js': ['third_party/inputmask/bundle.js'],
   'amp-date-picker.js': ['third_party/react-dates/bundle.js'],
+  'amp-shadow-dom-polyfill.js': [
+    'node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd.install.js',
+  ],
 };
 
 /**
@@ -87,10 +94,10 @@ const hostname3p = argv.hostname3p || '3p.ampproject.net';
 const watchDebounceDelay = 1000;
 
 /**
- * Used to cache babel transforms done by esbuild.
- * @private @const {!Map<string, File>}
+ * Stores esbuild's watch mode rebuilders.
+ * @private @const {!Map<string, {rebuild: function():!Promise<void>}>}
  */
-const cache = new Map();
+const watchedTargets = new Map();
 
 /**
  * @param {!Object} jsBundles
@@ -108,7 +115,9 @@ function doBuildJs(jsBundles, name, extraOptions) {
       {...target.options, ...extraOptions}
     );
   } else {
-    return Promise.reject(red('Error:'), 'Could not find', cyan(name));
+    return Promise.reject(
+      [red('Error:'), 'Could not find', cyan(name)].join(' ')
+    );
   }
 }
 
@@ -119,16 +128,10 @@ function doBuildJs(jsBundles, name, extraOptions) {
  */
 async function bootstrapThirdPartyFrames(options) {
   const startTime = Date.now();
-  const promises = [];
-  thirdPartyFrames.forEach((frameObject) => {
-    promises.push(
-      thirdPartyBootstrap(frameObject.max, frameObject.min, options)
-    );
-  });
   if (options.watch) {
     thirdPartyFrames.forEach((frameObject) => {
-      const watchFunc = () => {
-        thirdPartyBootstrap(frameObject.max, frameObject.min, options);
+      const watchFunc = async () => {
+        await thirdPartyBootstrap(frameObject.max, frameObject.min, options);
       };
       fileWatch(frameObject.max).on(
         'change',
@@ -136,7 +139,11 @@ async function bootstrapThirdPartyFrames(options) {
       );
     });
   }
-  await Promise.all(promises);
+  await Promise.all(
+    thirdPartyFrames.map(async (frameObject) => {
+      await thirdPartyBootstrap(frameObject.max, frameObject.min, options);
+    })
+  );
   endBuildStep(
     'Bootstrapped 3p frames into',
     `dist.3p/${options.minify ? internalRuntimeVersion : 'current'}/`,
@@ -148,24 +155,35 @@ async function bootstrapThirdPartyFrames(options) {
  * Compile and optionally minify the core runtime.
  *
  * @param {!Object} options
+ * @return {Promise<void>}
  */
 async function compileCoreRuntime(options) {
-  async function watchFunc() {
-    const bundleComplete = await doBuildJs(jsBundles, 'amp.js', {
-      ...options,
-      watch: false,
-    });
-    if (options.onWatchBuild) {
-      options.onWatchBuild(bundleComplete);
-    }
-  }
-
   if (options.watch) {
-    const debouncedRebuild = debounce(watchFunc, watchDebounceDelay);
-    fileWatch('src/**/*.js').on('change', debouncedRebuild);
+    /** @return {Promise<void>} */
+    async function watchFunc() {
+      if (options.minify) {
+        removeFromClosureBabelCache('src');
+      }
+      const bundleComplete = await doBuildJs(jsBundles, 'amp.js', {
+        ...options,
+        continueOnError: true,
+        watch: false,
+      });
+      if (options.onWatchBuild) {
+        options.onWatchBuild(bundleComplete);
+      }
+    }
+    fileWatch('src/**/*.js').on(
+      'change',
+      debounce(watchFunc, watchDebounceDelay)
+    );
   }
 
-  await doBuildJs(jsBundles, 'amp.js', {...options, watch: false});
+  await doBuildJs(jsBundles, 'amp.js', {
+    ...options,
+    // Pass {watch:true} for the initial esbuild call, but not for Closure.
+    watch: options.watch && !argv.compiled,
+  });
 }
 
 /**
@@ -187,7 +205,6 @@ async function compileAllJs(options) {
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', options),
     doBuildJs(jsBundles, 'alp.max.js', options),
     doBuildJs(jsBundles, 'examiner.max.js', options),
-    doBuildJs(jsBundles, 'ww.max.js', options),
     doBuildJs(jsBundles, 'integration.js', options),
     doBuildJs(jsBundles, 'ampcontext-lib.js', options),
     doBuildJs(jsBundles, 'iframe-transport-client-lib.js', options),
@@ -224,9 +241,17 @@ function combineWithCompiledFile(srcFilename, destFilePath, options) {
   });
   // We need to inject the code _inside_ the extension wrapper
   const destFileName = path.basename(destFilePath);
-  const contents = new MagicString(fs.readFileSync(destFilePath, 'utf8'), {
-    filename: destFileName,
-  });
+  /**
+   * TODO (rileyajones) This should be import('magic-string').MagicStringOptions but
+   * is invalid until https://github.com/Rich-Harris/magic-string/pull/183
+   * is merged.
+   * @type {Object}
+   */
+  const mapMagicStringOptions = {filename: destFileName};
+  const contents = new MagicString(
+    fs.readFileSync(destFilePath, 'utf8'),
+    mapMagicStringOptions
+  );
   const map = JSON.parse(fs.readFileSync(`${destFilePath}.map`, 'utf8'));
   const {sourceRoot} = map;
   map.sourceRoot = undefined;
@@ -243,7 +268,14 @@ function combineWithCompiledFile(srcFilename, destFilePath, options) {
   bundle.addSource(wrapperOpen);
   for (const bundleFile of bundleFiles) {
     const contents = fs.readFileSync(bundleFile, 'utf8');
-    bundle.addSource(new MagicString(contents, {filename: bundleFile}));
+    /**
+     * TODO (rileyajones) This should be import('magic-string').MagicStringOptions but
+     * is invalid until https://github.com/Rich-Harris/magic-string/pull/183
+     * is merged.
+     * @type {Object}
+     */
+    const bundleMagicStringOptions = {filename: bundleFile};
+    bundle.addSource(new MagicString(contents, bundleMagicStringOptions));
     bundle.append(MODULE_SEPARATOR);
   }
   bundle.addSource(remainingContents);
@@ -252,6 +284,7 @@ function combineWithCompiledFile(srcFilename, destFilePath, options) {
     file: destFileName,
     hires: true,
   });
+
   const remapped = remapping(
     bundledMap,
     (file) => {
@@ -268,10 +301,18 @@ function combineWithCompiledFile(srcFilename, destFilePath, options) {
   fs.writeFileSync(`${destFilePath}.map`, remapped.toString(), 'utf8');
 }
 
+/**
+ * @param {string} name
+ * @return {string}
+ */
 function toEsmName(name) {
   return name.replace(/\.js$/, '.mjs');
 }
 
+/**
+ * @param {string} name
+ * @return {string}
+ */
 function maybeToEsmName(name) {
   return argv.esm ? toEsmName(name) : name;
 }
@@ -290,15 +331,22 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
   const minifiedName = maybeToEsmName(options.minifiedName);
 
   if (options.watch) {
-    const watchFunc = async () => {
+    async function watchFunc() {
+      if (options.minify) {
+        removeFromClosureBabelCache(entryPoint);
+      }
       const compileDone = await doCompileMinifiedJs(/* continueOnError */ true);
       if (options.onWatchBuild) {
         options.onWatchBuild(compileDone);
       }
-    };
+    }
     fileWatch(entryPoint).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
+  /**
+   * @param {boolean} continueOnError
+   * @return {Promise<void>}
+   */
   async function doCompileMinifiedJs(continueOnError) {
     options.continueOnError = continueOnError;
     options.errored = false;
@@ -345,6 +393,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
  * @param {string} destFilename
  */
 function handleBundleError(err, continueOnError, destFilename) {
+  /** @type {Error|string} */
   let message = err;
   if (err.stack) {
     // Drop the node_modules call stack, which begins with '    at'.
@@ -355,33 +404,54 @@ function handleBundleError(err, continueOnError, destFilename) {
   if (continueOnError) {
     log(red('ERROR:'), reasonMessage);
   } else {
-    const reason = new Error(reasonMessage);
-    reason.showStack = false;
-    throw reason;
+    throw new Error(reasonMessage);
   }
 }
 
 /**
- * Performs the final steps after a JS file is bundled with esbuild and babel
+ * Performs the final steps after a JS file is bundled and optionally minified
+ * with esbuild and babel.
  * @param {string} srcFilename
  * @param {string} destDir
  * @param {string} destFilename
  * @param {?Object} options
+ * @param {number} startTime
  */
-function finishBundle(srcFilename, destDir, destFilename, options) {
+async function finishBundle(
+  srcFilename,
+  destDir,
+  destFilename,
+  options,
+  startTime
+) {
   combineWithCompiledFile(
     srcFilename,
     path.join(destDir, destFilename),
     options
   );
 
-  if (options.latestName) {
-    // "amp-foo-latest.js" -> "amp-foo-latest.max.js"
-    const latestMaxName = options.latestName.split('.js')[0] + '.max.js';
-    // Copy amp-foo-0.1.js to amp-foo-latest.max.js.
+  const logPrefix = options.minify ? 'Minified' : 'Compiled';
+  let {latestName} = options;
+  if (latestName) {
+    if (!options.minify) {
+      latestName = latestName.replace(/\.js$/, '.max.js');
+    }
     fs.copySync(
       path.join(destDir, options.toName),
-      path.join(destDir, latestMaxName)
+      path.join(destDir, latestName)
+    );
+    endBuildStep(logPrefix, `${destFilename} → ${latestName}`, startTime);
+  } else {
+    endBuildStep(logPrefix, destFilename, startTime);
+  }
+
+  const targets = options.minify ? MINIFIED_TARGETS : UNMINIFIED_TARGETS;
+  const target = path.basename(destFilename, path.extname(destFilename));
+  if (targets.includes(target)) {
+    await applyAmpConfig(
+      path.join(destDir, destFilename),
+      /* localDev */ true,
+      /* fortesting */ options.fortesting
     );
   }
 }
@@ -401,44 +471,9 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const destFilename = options.toName || srcFilename;
   const destFile = path.join(destDir, destFilename);
 
-  if (options.watch) {
-    const watchFunc = async () => {
-      const bundleDone = await performBundle(/* continueOnError */ true);
-      if (options.onWatchBuild) {
-        options.onWatchBuild(bundleDone);
-      }
-    };
-    fileWatch(entryPoint).on('change', debounce(watchFunc, watchDebounceDelay));
+  if (watchedTargets.has(entryPoint)) {
+    return watchedTargets.get(entryPoint).rebuild();
   }
-
-  /**
-   * Babel plugin for esbuild
-   */
-  const esbuildBabelPlugin = {
-    name: 'babel',
-    async setup(build) {
-      const transformContents = async ({file, contents}) => {
-        const babelOptions = babel.loadOptions({
-          caller: {name: 'unminified'},
-          filename: file.path,
-          sourceFileName: path.relative(process.cwd(), file.path),
-        });
-        const result = await babel.transformAsync(contents, babelOptions);
-        return {contents: result.code};
-      };
-
-      build.onLoad({filter: /.*/, namespace: ''}, async (file) => {
-        const contents = await fs.promises.readFile(file.path, 'utf-8');
-        const hash = crypto.createHash('sha1').update(contents).digest('hex');
-        if (cache.has(hash)) {
-          return {contents: cache.get(hash)};
-        }
-        const transformed = await transformContents({file, contents});
-        cache.set(hash, transformed.contents);
-        return transformed;
-      });
-    },
-  };
 
   /**
    * Splits up the wrapper to compute the banner and footer
@@ -449,66 +484,190 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     const sentinel = '<%= contents %>';
     const start = wrapper.indexOf(sentinel);
     return {
-      banner: wrapper.slice(0, start),
-      footer: wrapper.slice(start + sentinel.length),
+      banner: {js: wrapper.slice(0, start)},
+      footer: {js: wrapper.slice(start + sentinel.length)},
     };
   }
 
-  /**
-   * Bundles an entry point with all its imports and applies babel transforms.
-   * @param {boolean} continueOnError
-   */
-  async function performBundle(continueOnError) {
-    const {banner, footer} = splitWrapper();
-    await esbuild
-      .build({
-        entryPoints: [entryPoint],
-        bundle: true,
-        sourcemap: true,
-        define: experimentDefines,
-        outfile: destFile,
-        plugins: [esbuildBabelPlugin],
-        banner,
-        footer,
-      })
-      .catch((err) => handleBundleError(err, continueOnError, destFilename));
-    finishBundle(srcFilename, destDir, destFilename, options);
-    let name = destFilename;
-    if (options.latestName) {
-      const latestMaxName = options.latestName.split('.js')[0] + '.max.js';
-      name = `${name} → ${latestMaxName}`;
-    }
-    endBuildStep('Compiled', name, startTime);
-    const target = path.basename(destFilename, path.extname(destFilename));
-    if (UNMINIFIED_TARGETS.includes(target)) {
-      await applyAmpConfig(
-        destFile,
-        /* localDev */ true,
-        /* fortesting */ options.fortesting
-      );
-    }
-  }
+  const {banner, footer} = splitWrapper();
+  const babelPlugin = getEsbuildBabelPlugin(
+    'unminified',
+    /* enableCache */ true
+  );
+  const buildResult = await esbuild
+    .build({
+      entryPoints: [entryPoint],
+      bundle: true,
+      sourcemap: true,
+      define: experimentDefines,
+      outfile: destFile,
+      plugins: [babelPlugin],
+      banner,
+      footer,
+      incremental: !!options.watch,
+      logLevel: 'silent',
+    })
+    .then((result) => {
+      finishBundle(srcFilename, destDir, destFilename, options, startTime);
+      return result;
+    })
+    .catch((err) => handleBundleError(err, !!options.watch, destFilename));
 
-  await performBundle(options.continueOnError);
+  if (options.watch) {
+    watchedTargets.set(entryPoint, {
+      rebuild: async () => {
+        const time = Date.now();
+        const buildPromise = buildResult
+          .rebuild()
+          .then(() =>
+            finishBundle(srcFilename, destDir, destFilename, options, time)
+          )
+          .catch((err) =>
+            handleBundleError(err, /* continueOnError */ true, destFilename)
+          );
+        options?.onWatchBuild(buildPromise);
+        await buildPromise;
+      },
+    });
+  }
 }
 
 /**
- * Transpiles from TypeScript into intermediary files before compilation and
- * deletes them afterwards.
- *
- * @param {string} srcDir Path to the src directory
- * @param {string} srcFilename Name of the JS source file
- * @param {string} destDir Destination folder for output script
+ * Transforms a given JavaScript file entry point with esbuild and babel, and
+ * watches it for changes (if required).
+ * Used by 3p iframe vendors.
+ * @param {string} srcDir
+ * @param {string} srcFilename
+ * @param {string} destDir
  * @param {?Object} options
  * @return {!Promise}
  */
-async function compileTs(srcDir, srcFilename, destDir, options) {
-  options = options || {};
+async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
   const startTime = Date.now();
-  await transpileTs(srcDir, srcFilename);
-  endBuildStep('Transpiled', srcFilename, startTime);
-  await compileJs(srcDir, srcFilename, destDir, options);
-  del.sync(path.join(srcDir, '**/*.js'));
+  const entryPoint = path.join(srcDir, srcFilename);
+  const destFilename = maybeToEsmName(
+    options.minify ? options.minifiedName : options.toName
+  );
+  const destFile = path.join(destDir, destFilename);
+
+  if (watchedTargets.has(entryPoint)) {
+    return watchedTargets.get(entryPoint).rebuild();
+  }
+
+  const babelPlugin = getEsbuildBabelPlugin(
+    options.minify ? 'minified' : 'unminified',
+    /* enableCache */ true
+  );
+  const plugins = [babelPlugin];
+
+  if (options.remapDependencies) {
+    plugins.unshift(remapDependenciesPlugin());
+  }
+
+  let result = null;
+
+  /**
+   * @param {number} time
+   */
+  async function build(time) {
+    if (!result) {
+      result = await esbuild.build({
+        entryPoints: [entryPoint],
+        bundle: true,
+        sourcemap: true,
+        outfile: destFile,
+        plugins,
+        minify: options.minify,
+        format: options.outputFormat || undefined,
+        target: argv.esm ? 'es6' : 'es5',
+        incremental: !!options.watch,
+        logLevel: 'silent',
+        external: options.externalDependencies,
+      });
+    } else {
+      result = await result.rebuild();
+    }
+    await minifyWithTerser(destDir, destFilename, options);
+    await finishBundle(srcFilename, destDir, destFilename, options, time);
+  }
+
+  function remapDependenciesPlugin() {
+    const remapDependencies = {__proto__: null, ...options.remapDependencies};
+    const external = options.externalDependencies;
+    return {
+      name: 'remap-dependencies',
+      setup(build) {
+        build.onResolve({filter: /.*/}, (args) => {
+          const dep = args.path;
+          const remap = remapDependencies[dep];
+          if (remap) {
+            const isExternal = external.includes(remap);
+            return {
+              path: isExternal ? remap : require.resolve(remap),
+              external: isExternal,
+            };
+          }
+        });
+      },
+    };
+  }
+
+  await build(startTime).catch((err) =>
+    handleBundleError(err, !!options.watch, destFilename)
+  );
+
+  if (options.watch) {
+    watchedTargets.set(entryPoint, {
+      rebuild: async () => {
+        const time = Date.now();
+        const buildPromise = build(time).catch((err) =>
+          handleBundleError(err, !!options.watch, destFilename)
+        );
+        if (options.onWatchBuild) {
+          options.onWatchBuild(buildPromise);
+        }
+        await buildPromise;
+      },
+    });
+  }
+}
+
+/**
+ * Minify the code with Terser. Only used by the ESBuild.
+ *
+ * @param {string} destDir
+ * @param {string} destFilename
+ * @param {?Object} options
+ * @return {!Promise}
+ */
+async function minifyWithTerser(destDir, destFilename, options) {
+  if (!options.minify) {
+    return;
+  }
+
+  const filename = path.join(destDir, destFilename);
+  const terserOptions = {
+    mangle: true,
+    compress: true,
+    output: {
+      beautify: !!argv.pretty_print,
+      comments: /\/*/,
+      // eslint-disable-next-line google-camelcase/google-camelcase
+      keep_quoted_props: true,
+    },
+    sourceMap: true,
+  };
+  const minified = await terser.minify(
+    fs.readFileSync(filename, 'utf8'),
+    terserOptions
+  );
+  const remapped = remapping(
+    [minified.map, fs.readFileSync(`${filename}.map`, 'utf8')],
+    () => null,
+    !argv.full_sourcemaps
+  );
+  fs.writeFileSync(filename, minified.code);
+  fs.writeFileSync(`${filename}.map`, remapped.toString());
 }
 
 /**
@@ -525,7 +684,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
   if (options.minify) {
     return compileMinifiedJs(srcDir, srcFilename, destDir, options);
   } else {
-    return await compileUnminifiedJs(srcDir, srcFilename, destDir, options);
+    return compileUnminifiedJs(srcDir, srcFilename, destDir, options);
   }
 }
 
@@ -585,7 +744,7 @@ function printNobuildHelp() {
         green('runs, use'),
         cyan('--nobuild'),
         green('with your'),
-        cyan(`gulp ${task}`),
+        cyan(`amp ${task}`),
         green('command.')
       );
       return;
@@ -597,7 +756,7 @@ function printNobuildHelp() {
  * @param {string=} covPath
  * @return {!Promise}
  */
-async function maybePrintCoverageMessage(covPath) {
+async function maybePrintCoverageMessage(covPath = '') {
   if (!argv.coverage || isCiBuild()) {
     return;
   }
@@ -609,7 +768,7 @@ async function maybePrintCoverageMessage(covPath) {
 
 /**
  * Writes AMP_CONFIG to a runtime file. Optionally enables localDev mode and
- * fortesting mode. Called by "gulp build" and "gulp dist" while building
+ * fortesting mode. Called by "amp build" and "amp dist" while building
  * various runtime files.
  *
  * @param {string} targetFile File to which the config is to be written.
@@ -629,7 +788,7 @@ async function applyAmpConfig(targetFile, localDev, fortesting) {
       baseConfigFile,
       /* opt_localDev */ localDev,
       /* opt_localBranch */ true,
-      /* opt_branch */ false,
+      /* opt_branch */ undefined,
       /* opt_fortesting */ fortesting
     );
   });
@@ -644,10 +803,14 @@ async function applyAmpConfig(targetFile, localDev, fortesting) {
  * @param {!Object} options
  * @return {!Promise}
  */
-function thirdPartyBootstrap(input, outputName, options) {
+async function thirdPartyBootstrap(input, outputName, options) {
   const {minify, fortesting} = options;
+  const destDir = `dist.3p/${minify ? internalRuntimeVersion : 'current'}`;
+  await fs.ensureDir(destDir);
+
   if (!minify) {
-    return toPromise(gulp.src(input).pipe(gulp.dest('dist.3p/current')));
+    await fs.copy(input, `${destDir}/${path.basename(input)}`);
+    return;
   }
 
   // By default we use an absolute URL, that is independent of the
@@ -661,21 +824,12 @@ function thirdPartyBootstrap(input, outputName, options) {
   const html = fs
     .readFileSync(input, 'utf8')
     .replace(/\.\/integration\.js/g, integrationJs);
-  return toPromise(
-    file(outputName, html, {src: true})
-      .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion))
-      .on('end', function () {
-        const aliasToLatestBuild = 'dist.3p/current-min';
-        if (fs.existsSync(aliasToLatestBuild)) {
-          fs.unlinkSync(aliasToLatestBuild);
-        }
-        fs.symlinkSync(
-          './' + internalRuntimeVersion,
-          aliasToLatestBuild,
-          'dir'
-        );
-      })
-  );
+  await fs.writeFile(`${destDir}/${outputName}`, html);
+  const aliasToLatestBuild = 'dist.3p/current-min';
+  if (fs.existsSync(aliasToLatestBuild)) {
+    fs.unlinkSync(aliasToLatestBuild);
+  }
+  fs.symlinkSync('./' + internalRuntimeVersion, aliasToLatestBuild, 'dir');
 }
 
 /**
@@ -693,18 +847,6 @@ function mkdirSync(path) {
   }
 }
 
-/**
- * Returns a promise for readable
- *
- * @param {*} readable
- * @return {Promise}
- */
-function toPromise(readable) {
-  return new Promise(function (resolve, reject) {
-    readable.on('error', reject).on('end', resolve);
-  });
-}
-
 module.exports = {
   MINIFIED_TARGETS,
   applyAmpConfig,
@@ -712,14 +854,14 @@ module.exports = {
   compileAllJs,
   compileCoreRuntime,
   compileJs,
-  compileTs,
+  compileJsWithEsbuild,
   doBuildJs,
   endBuildStep,
+  compileUnminifiedJs,
   maybePrintCoverageMessage,
   maybeToEsmName,
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,
-  toPromise,
   watchDebounceDelay,
 };

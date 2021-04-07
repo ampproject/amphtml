@@ -22,9 +22,11 @@ import {
 import {AdvancementMode} from './story-analytics';
 import {CommonSignals} from '../../../src/common-signals';
 import {EventType, dispatch} from './events';
+import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {dev, devAssert} from '../../../src/log';
 
+import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
 
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */
@@ -36,13 +38,13 @@ const BackButtonStates = {
     className: 'i-amphtml-story-back-close-bookend',
     action: Action.TOGGLE_BOOKEND,
     data: false,
-    label: 'Close bookend',
+    label: LocalizedStringId.AMP_STORY_CLOSE_BOOKEND,
   },
   HIDDEN: {className: 'i-amphtml-story-button-hidden'},
   PREVIOUS_PAGE: {
     className: 'i-amphtml-story-back-prev',
     triggers: EventType.PREVIOUS_PAGE,
-    label: 'Previous page',
+    label: LocalizedStringId.AMP_STORY_PREVIOUS_PAGE,
   },
 };
 
@@ -52,19 +54,23 @@ const ForwardButtonStates = {
   NEXT_PAGE: {
     className: 'i-amphtml-story-fwd-next',
     triggers: EventType.NEXT_PAGE,
-    // TODO: Here and other labels: i18n.
-    label: 'Next page',
+    label: LocalizedStringId.AMP_STORY_NEXT_PAGE,
+  },
+  NEXT_STORY: {
+    className: 'i-amphtml-story-fwd-next',
+    triggers: EventType.NEXT_PAGE,
+    label: LocalizedStringId.AMP_STORY_NEXT_STORY,
   },
   REPLAY: {
     className: 'i-amphtml-story-fwd-replay',
     triggers: EventType.REPLAY,
-    label: 'Replay',
+    label: LocalizedStringId.AMP_STORY_REPLAY,
   },
   SHOW_BOOKEND: {
     className: 'i-amphtml-story-fwd-more',
     action: Action.TOGGLE_BOOKEND,
     data: true,
-    label: 'Show bookend',
+    label: LocalizedStringId.AMP_STORY_SHOW_BOOKEND,
   },
 };
 
@@ -114,9 +120,15 @@ class PaginationButton {
       this.element.querySelector('button')
     );
 
+    /** @private @const {!../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = getLocalizationService(doc);
+
     this.element.classList.add(initialState.className);
     initialState.label &&
-      this.buttonElement_.setAttribute('aria-label', initialState.label);
+      this.buttonElement_.setAttribute(
+        'aria-label',
+        this.localizationService_.getLocalizedString(initialState.label)
+      );
     this.element.addEventListener('click', (e) => this.onClick_(e));
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
@@ -134,7 +146,10 @@ class PaginationButton {
     this.element.classList.remove(this.state_.className);
     this.element.classList.add(state.className);
     state.label
-      ? this.buttonElement_.setAttribute('aria-label', state.label)
+      ? this.buttonElement_.setAttribute(
+          'aria-label',
+          this.localizationService_.getLocalizedString(state.label)
+        )
       : this.buttonElement_.removeAttribute('aria-label');
 
     this.state_ = state;
@@ -335,7 +350,7 @@ export class PaginationButtons {
         const viewer = Services.viewerForDoc(this.ampStory_.element);
         if (!hasBookend) {
           if (viewer.hasCapability('swipe')) {
-            this.forwardButton_.updateState(ForwardButtonStates.NEXT_PAGE);
+            this.forwardButton_.updateState(ForwardButtonStates.NEXT_STORY);
           } else {
             this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
           }

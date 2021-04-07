@@ -44,7 +44,8 @@ describes.endtoend(
     });
 
     // Test mixed lengths with snapping.
-    describe('snap', () => {
+    // TODO(wg-bento, #24195): getSlide/getScrollingElement do not always find element in time.
+    describe.skip('snap', () => {
       const slideWidth = pageWidth * 0.75;
 
       it('should have the correct initial slide positions', async function () {
@@ -62,8 +63,7 @@ describes.endtoend(
         });
       });
 
-      // TODO(wg-bento): getScrollingElement does not always find element in time.
-      it.skip('should snap on the center point', async function () {
+      it('should snap on the center point', async function () {
         const el = await getScrollingElement(styles, controller);
         const slideTwo = await getSlide(styles, controller, 1);
         const scrollAmount = 1;

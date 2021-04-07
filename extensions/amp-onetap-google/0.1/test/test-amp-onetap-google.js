@@ -20,6 +20,9 @@ import {AmpDoc} from '../../../../src/service/ampdoc-impl';
 import {BaseElement} from '../../../../src/base-element';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes, waitForChild} from '../../../../src/dom';
+import {loadPromise} from '../../../../src/event-helper';
+import {macroTask} from '../../../../testing/yield';
+import {user} from '../../../../src/log';
 
 const TAG = 'amp-onetap-google';
 
@@ -56,16 +59,23 @@ describes.realWin(
       return methods;
     }
 
-    function fakePostMessage(element, iframe, data) {
+    async function fakePostMessage(element, iframe, data) {
       const origin = 'https://fake.localhost';
-      return element.getImpl().then((impl) => {
-        impl.handleIntermediateIframeMessage_(origin, {
-          origin,
-          data,
-          source: iframe.contentWindow,
-        });
-        return iframe;
+
+      await loadPromise(iframe); // so we have access to a contentWindow
+
+      const impl = await element.getImpl();
+      impl.handleIntermediateIframeMessage_(origin, {
+        origin,
+        data,
+        source: iframe.contentWindow,
       });
+
+      // some tasks are async, so it's nice to ensure they're completed before
+      // resolving the message as sent.
+      await macroTask();
+
+      return iframe;
     }
 
     beforeEach(() => {
@@ -130,7 +140,10 @@ describes.realWin(
 
       const iframe = await whenSelectedAvailable(element, 'iframe');
 
-      env.sandbox./*OK*/ stub(iframe.contentWindow, 'postMessage');
+      const postMessage = env.sandbox.stub(
+        await element.getImpl(),
+        'postMessage_'
+      );
 
       const nonce = 'chilaquiles';
 
@@ -141,7 +154,8 @@ describes.realWin(
       });
 
       expect(
-        iframe.contentWindow.postMessage.withArgs(
+        postMessage.withArgs(
+          iframe.contentWindow,
           env.sandbox.match({command: 'parent_frame_ready', nonce})
         )
       ).to.have.been.calledOnce;
@@ -204,7 +218,26 @@ describes.realWin(
       });
     });
 
+    it('warns when there are no entitlements to refresh on ACTIONS.DONE', async () => {
+      const warn = env.sandbox.spy(user(), 'warn');
+
+      const element = createElementWithAttributes(document, TAG, defaultAttrs);
+      document.body.appendChild(element);
+
+      const iframe = await whenSelectedAvailable(element, 'iframe');
+
+      await fakePostMessage(element, iframe, {
+        sentinel: SENTINEL,
+        command: ACTIONS.DONE,
+      });
+
+      expect(warn.withArgs(TAG, env.sandbox.match(/no entitlements/))).to.have
+        .been.calledOnce;
+    });
+
     it('refreshes amp-access on ACTIONS.DONE', async () => {
+      const warn = env.sandbox.spy(user(), 'warn');
+
       const {execute} = stubServiceMethods('actionServiceForDoc', {
         execute: env.sandbox.spy(),
       });
@@ -225,6 +258,7 @@ describes.realWin(
         command: ACTIONS.DONE,
       });
 
+      expect(warn).to.not.have.been.called;
       expect(execute.withArgs(accessElement, 'refresh')).to.have.been
         .calledOnce;
     });
@@ -245,6 +279,47 @@ describes.realWin(
       });
 
       expect(execute).to.not.have.been.called;
+    });
+
+    it('refreshes amp-subscriptions on ACTIONS.DONE', async () => {
+      const warn = env.sandbox.spy(user(), 'warn');
+      const resetPlatforms = env.sandbox.spy();
+
+      env.sandbox
+        .stub(Services, 'subscriptionsServiceForDocOrNull')
+        .resolves({resetPlatforms});
+
+      const element = createElementWithAttributes(document, TAG, defaultAttrs);
+      document.body.appendChild(element);
+
+      const iframe = await whenSelectedAvailable(element, 'iframe');
+
+      await fakePostMessage(element, iframe, {
+        sentinel: SENTINEL,
+        command: ACTIONS.DONE,
+      });
+
+      expect(warn).to.not.have.been.called;
+      expect(resetPlatforms).to.have.been.calledOnce;
+    });
+
+    it('does not refresh amp-subscriptions on ACTIONS.DONE if unavailable', async () => {
+      env.sandbox
+        .stub(Services, 'subscriptionsServiceForDocOrNull')
+        .resolves(null);
+
+      const element = createElementWithAttributes(document, TAG, defaultAttrs);
+      document.body.appendChild(element);
+
+      const iframe = await whenSelectedAvailable(element, 'iframe');
+
+      await fakePostMessage(element, iframe, {
+        sentinel: SENTINEL,
+        command: ACTIONS.DONE,
+      });
+
+      // should have been removed by now
+      expect(iframe.parentNode).to.be.null;
     });
 
     it('sets classname on SET_UI_MODE', async () => {

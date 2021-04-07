@@ -18,6 +18,10 @@ let url;
 let variableSubstitution;
 let variables;
 
+/**
+ * @param {*} req require('express').Request
+ * @param {*} res require('express').Response
+ */
 function saveVariables(req, res) {
   const requestVariables = {};
   // For when a JSON is entered
@@ -52,6 +56,10 @@ function saveVariables(req, res) {
   return;
 }
 
+/**
+ * @param {*} req require('express').Request
+ * @param {*} res require('express').Response
+ */
 function runVariableSubstitution(req, res) {
   variables = variables || {};
   // Don't include the incremented number sent in to make a new request
@@ -105,6 +113,10 @@ function runVariableSubstitution(req, res) {
     </html>`);
 }
 
+/**
+ * @param {*} req require('express').Request
+ * @param {*} res require('express').Response
+ */
 function saveVariableRequest(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -114,6 +126,10 @@ function saveVariableRequest(req, res) {
   url = req.originalUrl;
 }
 
+/**
+ * @param {*} _req require('express').Request
+ * @param {*} res require('express').Response
+ */
 function getVariableRequest(_req, res) {
   res.json({'Results': variableSubstitution, 'URL': url});
   return;

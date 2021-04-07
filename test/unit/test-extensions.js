@@ -19,13 +19,14 @@ import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
 import {Extensions} from '../../src/service/extensions-impl';
 import {Services} from '../../src/services';
+import {dev} from '../../src/log';
+import {dispatchCustomEvent} from '../../src/dom';
 import {getServiceForDoc} from '../../src/service';
 import {
   getTemplateClassForTesting,
   installTemplatesServiceForDoc,
 } from '../../src/service/template-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {user} from '../../src/log';
 
 class AmpTest extends BaseElement {}
 class AmpTestSub extends BaseElement {}
@@ -60,6 +61,8 @@ describes.sandboxed('Extensions', {}, () => {
       let currentHolder;
       extensions.registerExtension(
         'amp-ext',
+        '0.1',
+        true,
         (arg) => {
           expect(factoryExecuted).to.be.false;
           expect(arg).to.equal(amp);
@@ -83,15 +86,30 @@ describes.sandboxed('Extensions', {}, () => {
       expect(holder.scriptPresent).to.be.undefined;
 
       // However, the promise is created lazily.
-      return extensions.waitForExtension(win, 'amp-ext').then((extension) => {
+      return extensions.waitForExtension('amp-ext', '0.1').then((extension) => {
         expect(extension).to.exist;
         expect(extension.elements).to.exist;
       });
     });
 
+    it('should register only once', () => {
+      const amp = {};
+      const factoryStub = env.sandbox.stub();
+      extensions.registerExtension('amp-ext', '0.1', true, factoryStub, amp);
+      expect(factoryStub).to.be.calledOnce;
+      const holder1 = extensions.extensions_['amp-ext'];
+      expect(extensions.getExtensionHolder_('amp-ext')).to.equal(holder1);
+
+      // Try register again.
+      extensions.registerExtension('amp-ext', '0.1', true, factoryStub, amp);
+      expect(factoryStub).to.be.calledOnce; // no change.
+      const holder2 = extensions.extensions_['amp-ext'];
+      expect(holder2).to.equal(holder1);
+    });
+
     it('should register successfully with promise', () => {
-      const promise = extensions.waitForExtension(win, 'amp-ext');
-      extensions.registerExtension('amp-ext', () => {}, {});
+      const promise = extensions.waitForExtension('amp-ext', '0.1');
+      extensions.registerExtension('amp-ext', '0.1', true, () => {}, {});
       expect(extensions.currentExtensionId_).to.be.null;
 
       const holder = extensions.extensions_['amp-ext'];
@@ -111,6 +129,8 @@ describes.sandboxed('Extensions', {}, () => {
       expect(() => {
         extensions.registerExtension(
           'amp-ext',
+          '0.1',
+          true,
           () => {
             throw new Error('intentional');
           },
@@ -129,7 +149,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(holder.promise).to.be.undefined;
 
       // However, the promise is created lazily.
-      return extensions.waitForExtension(win, 'amp-ext').then(
+      return extensions.waitForExtension('amp-ext', '0.1').then(
         () => {
           throw new Error('must have been rejected');
         },
@@ -140,10 +160,12 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should fail registration with promise', () => {
-      const promise = extensions.waitForExtension(win, 'amp-ext');
+      const promise = extensions.waitForExtension('amp-ext', '0.1');
       expect(() => {
         extensions.registerExtension(
           'amp-ext',
+          '0.1',
+          true,
           () => {
             throw new Error('intentional');
           },
@@ -161,7 +183,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(holder.promise).to.exist;
       expect(promise).to.eventually.equal(holder.promise);
 
-      return extensions.waitForExtension(win, 'amp-ext').then(
+      return extensions.waitForExtension('amp-ext', '0.1').then(
         () => {
           throw new Error('must have been rejected');
         },
@@ -173,7 +195,7 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should fail on timeout', () => {
       timeoutCallback = null;
-      const promise = extensions.waitForExtension(win, 'amp-ext');
+      const promise = extensions.waitForExtension('amp-ext', '0.1');
       expect(timeoutCallback).to.be.a('function');
       timeoutCallback();
 
@@ -189,14 +211,17 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should add element in registration', () => {
       const ctor = function () {};
+      ctor.requiresShadowDom = () => false;
       extensions.registerExtension(
         'amp-ext',
+        '0.1',
+        true,
         () => {
           extensions.addElement('e1', ctor);
         },
         {}
       );
-      return extensions.waitForExtension(win, 'amp-ext').then((extension) => {
+      return extensions.waitForExtension('amp-ext', '0.1').then((extension) => {
         expect(extension.elements['e1']).to.exist;
         expect(extension.elements['e1'].implementationClass).to.equal(ctor);
       });
@@ -221,12 +246,14 @@ describes.sandboxed('Extensions', {}, () => {
       const ctor = function () {};
       extensions.registerExtension(
         'amp-ext',
+        '0.1',
+        true,
         () => {
           extensions.addTemplate('e1', ctor);
         },
         {}
       );
-      await extensions.waitForExtension(win, 'amp-ext');
+      await extensions.waitForExtension('amp-ext', '0.1');
 
       const holder = extensions.getExtensionHolder_('amp-ext');
       expect(holder.docFactories).to.have.length(1);
@@ -253,6 +280,8 @@ describes.sandboxed('Extensions', {}, () => {
       const ctor = function () {};
       extensions.registerExtension(
         'amp-test',
+        '0.1',
+        true,
         () => {
           extensions.addTemplate('amp-test', ctor);
         },
@@ -287,6 +316,8 @@ describes.sandboxed('Extensions', {}, () => {
       // Resolve the promise.
       extensions.registerExtension(
         'amp-test',
+        '0.1',
+        true,
         () => {
           extensions.addElement('amp-test', AmpTest);
           extensions.addElement('amp-test-sub', AmpTestSub);
@@ -316,6 +347,8 @@ describes.sandboxed('Extensions', {}, () => {
       // Resolve the promise.
       extensions.registerExtension(
         'amp-test',
+        '0.1',
+        true,
         () => {
           extensions.addElement('amp-test', AmpTest);
           extensions.addElement('amp-test-sub', AmpTestSub);
@@ -335,7 +368,7 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should install declared elements for single-doc', () => {
       const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
-      ampdoc.declareExtension('amp-test');
+      ampdoc.declareExtension('amp-test', '0.1');
       expect(
         win.__AMP_EXTENDED_ELEMENTS && win.__AMP_EXTENDED_ELEMENTS['amp-test']
       ).to.be.undefined;
@@ -349,6 +382,8 @@ describes.sandboxed('Extensions', {}, () => {
       // Resolve the promise.
       extensions.registerExtension(
         'amp-test',
+        '0.1',
+        true,
         () => {
           extensions.addElement('amp-test', AmpTest);
           extensions.addElement('amp-test-sub', AmpTestSub);
@@ -363,7 +398,7 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should install non-auto declared elements for single-doc', () => {
       const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
-      ampdoc.declareExtension('amp-test');
+      ampdoc.declareExtension('amp-test', '0.1');
       expect(
         win.__AMP_EXTENDED_ELEMENTS && win.__AMP_EXTENDED_ELEMENTS['amp-test']
       ).to.be.undefined;
@@ -379,6 +414,8 @@ describes.sandboxed('Extensions', {}, () => {
       // Resolve the promise.
       extensions.registerExtension(
         'amp-test',
+        '0.1',
+        true,
         () => {
           extensions.addElement('amp-test', AmpTest);
           extensions.addElement('amp-test-sub', AmpTestSub);
@@ -407,6 +444,8 @@ describes.sandboxed('Extensions', {}, () => {
       // Resolve the promise.
       extensions.registerExtension(
         'amp-test',
+        '0.1',
+        true,
         () => {
           extensions.addElement('amp-test', AmpTest);
           extensions.addElement('amp-test-sub', AmpTestSub);
@@ -442,6 +481,8 @@ describes.sandboxed('Extensions', {}, () => {
       const factory = function () {};
       extensions.registerExtension(
         'amp-ext',
+        '0.1',
+        true,
         () => {
           extensions.addDocFactory(factory);
         },
@@ -476,6 +517,8 @@ describes.sandboxed('Extensions', {}, () => {
       const factory3 = env.sandbox.spy();
       extensions.registerExtension(
         'amp-ext',
+        '0.1',
+        true,
         () => {
           extensions.addDocFactory(factory1);
           extensions.addDocFactory(factory2);
@@ -500,6 +543,8 @@ describes.sandboxed('Extensions', {}, () => {
       const factory = function () {};
       extensions.registerExtension(
         'amp-ext',
+        '0.1',
+        true,
         () => {
           extensions.addService('service1', factory);
         },
@@ -544,6 +589,8 @@ describes.sandboxed('Extensions', {}, () => {
       // Resolve the promise.
       extensions.registerExtension(
         'amp-test',
+        '0.1',
+        true,
         () => {
           extensions.addService('service1', factory1);
           extensions.addService('service2', factory2);
@@ -568,6 +615,8 @@ describes.sandboxed('Extensions', {}, () => {
       // Resolve the promise.
       extensions.registerExtension(
         'amp-test',
+        '0.1',
+        true,
         () => {
           extensions.addService('service1', factory1);
           extensions.addService('service2', factory2);
@@ -589,7 +638,7 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should install declared services for single-doc', () => {
       const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
-      ampdoc.declareExtension('amp-test');
+      ampdoc.declareExtension('amp-test', '0.1');
 
       const factory1Spy = env.sandbox.spy();
       const factory2Spy = env.sandbox.spy();
@@ -605,6 +654,8 @@ describes.sandboxed('Extensions', {}, () => {
       // Resolve the promise.
       extensions.registerExtension(
         'amp-test',
+        '0.1',
+        true,
         () => {
           extensions.addService('service1', factory1);
           extensions.addService('service2', factory2);
@@ -631,6 +682,8 @@ describes.sandboxed('Extensions', {}, () => {
       const factory3 = env.sandbox.spy();
       extensions.registerExtension(
         'amp-ext',
+        '0.1',
+        true,
         () => {
           extensions.addService('service1', factory1);
           extensions.addService('service2', factory2);
@@ -655,8 +708,11 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should load extension class via load extension', () => {
       const ctor = function () {};
+      ctor.requiresShadowDom = () => false;
       extensions.registerExtension(
         'amp-ext',
+        '0.1',
+        true,
         () => {
           extensions.addElement('amp-ext', ctor);
         },
@@ -680,10 +736,10 @@ describes.sandboxed('Extensions', {}, () => {
       const initialPromise = extensions.preloadExtension('amp-ext');
 
       // Reload the extension. E.g. due to the version mismatch.
-      const reloadPromise = extensions.reloadExtension('amp-ext');
+      const reloadPromise = extensions.reloadExtension('amp-ext', '0.1', true);
 
       // Register extension.
-      extensions.registerExtension('amp-ext', () => {}, {});
+      extensions.registerExtension('amp-ext', '0.1', true, () => {}, {});
 
       return reloadPromise.then((reloadedExtension) => {
         expect(reloadedExtension).to.exist;
@@ -708,57 +764,54 @@ describes.sandboxed('Extensions', {}, () => {
       env.sandbox.stub(Services, 'ampdocServiceFor').returns(null);
       extensions = new Extensions(win);
       env.sandbox.stub(extensions, 'preloadExtension');
-      env.sandbox.stub(user(), 'error');
+      env.sandbox.stub(dev(), 'expectedError');
     });
 
     describe('regular scripts', () => {
-      it('should devAssert if script cannot be found', () => {
-        extensions.reloadExtension('amp-list');
-
-        expect(user().error).to.be.calledWith(
-          'reloadExtension',
-          'Extension script for "%s" is missing or was already reloaded.',
-          'amp-list'
-        );
-        expect(extensions.preloadExtension).to.not.be.called;
-      });
-
-      it('should ignore inserted scripts', () => {
+      it('should support [custom-element] script', () => {
         const list = document.createElement('script');
         list.setAttribute('custom-element', 'amp-list');
         list.setAttribute(
           'src',
-          'https://cdn.ampproject.org/v0/amp-list-0.1.js'
-        );
-        list.setAttribute('i-amphtml-inserted', '');
-        win.document.head.appendChild(list);
-
-        extensions.reloadExtension('amp-list');
-
-        expect(user().error).to.be.calledWith(
-          'reloadExtension',
-          'Extension script for "%s" is missing or was already reloaded.',
-          'amp-list'
-        );
-        expect(list.hasAttribute('i-amphtml-loaded-new-version')).to.be.false;
-        expect(extensions.preloadExtension).to.not.be.called;
-      });
-
-      it('should support [custom-element] scripts', () => {
-        const list = document.createElement('script');
-        list.setAttribute('custom-element', 'amp-list');
-        list.setAttribute(
-          'src',
-          'https://cdn.ampproject.org/v0/amp-list-0.1.js'
+          'https://cdn.ampproject.org/v0/amp-list-0.2.js'
         );
         win.document.head.appendChild(list);
 
-        extensions.reloadExtension('amp-list');
+        extensions.reloadExtension('amp-list', '0.2', true);
 
         expect(list.getAttribute('i-amphtml-loaded-new-version')).to.equal(
           'amp-list'
         );
-        expect(extensions.preloadExtension).to.be.calledWith('amp-list', '0.1');
+        expect(extensions.preloadExtension).to.be.calledWith('amp-list', '0.2');
+      });
+
+      it('should only support [custom-element] script of the right version', () => {
+        const list1 = document.createElement('script');
+        list1.setAttribute('custom-element', 'amp-list');
+        list1.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-list-0.2.js'
+        );
+        win.document.head.appendChild(list1);
+
+        const list2 = document.createElement('script');
+        list2.setAttribute('custom-element', 'amp-list');
+        list2.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-list-0.1.js'
+        );
+        win.document.head.appendChild(list2);
+
+        extensions.reloadExtension('amp-list', '0.2', true);
+
+        expect(list1.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-list'
+        );
+        expect(list2.getAttribute('i-amphtml-loaded-new-version')).to.be.null;
+        expect(extensions.preloadExtension).to.be.calledOnce.calledWith(
+          'amp-list',
+          '0.2'
+        );
       });
 
       it('should support "latest" version scripts', () => {
@@ -770,15 +823,12 @@ describes.sandboxed('Extensions', {}, () => {
         );
         win.document.head.appendChild(list);
 
-        extensions.reloadExtension('amp-list');
+        extensions.reloadExtension('amp-list', '0.1', true);
 
         expect(list.getAttribute('i-amphtml-loaded-new-version')).to.equal(
           'amp-list'
         );
-        expect(extensions.preloadExtension).to.be.calledWith(
-          'amp-list',
-          'latest'
-        );
+        expect(extensions.preloadExtension).to.be.calledWith('amp-list', '0.1');
       });
 
       it('should support [custom-template] scripts', () => {
@@ -790,7 +840,7 @@ describes.sandboxed('Extensions', {}, () => {
         );
         win.document.head.appendChild(mustache);
 
-        extensions.reloadExtension('amp-mustache');
+        extensions.reloadExtension('amp-mustache', '0.2', true);
 
         expect(mustache.getAttribute('i-amphtml-loaded-new-version')).to.equal(
           'amp-mustache'
@@ -809,7 +859,7 @@ describes.sandboxed('Extensions', {}, () => {
         );
         win.document.head.appendChild(viewer);
 
-        extensions.reloadExtension('amp-viewer-integration');
+        extensions.reloadExtension('amp-viewer-integration', '0.1', true);
 
         expect(viewer.getAttribute('i-amphtml-loaded-new-version')).to.equal(
           'amp-viewer-integration'
@@ -822,50 +872,6 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     describe('module/nomdule script pairs', () => {
-      it('should devAssert if script cannot be found', () => {
-        extensions.reloadExtension('amp-list');
-
-        expect(user().error).to.be.calledWith(
-          'reloadExtension',
-          'Extension script for "%s" is missing or was already reloaded.',
-          'amp-list'
-        );
-        expect(extensions.preloadExtension).to.not.be.called;
-      });
-
-      it('should ignore inserted scripts', () => {
-        const mod = document.createElement('script');
-        mod.setAttribute('custom-element', 'amp-list');
-        mod.setAttribute(
-          'src',
-          'https://cdn.ampproject.org/v0/amp-list-0.1.mjs'
-        );
-        mod.setAttribute('i-amphtml-inserted', '');
-        mod.setAttribute('type', 'module');
-        win.document.head.appendChild(mod);
-
-        const nomod = document.createElement('script');
-        nomod.setAttribute('custom-element', 'amp-list');
-        nomod.setAttribute(
-          'src',
-          'https://cdn.ampproject.org/v0/amp-list-0.1.js'
-        );
-        nomod.setAttribute('i-amphtml-inserted', '');
-        nomod.setAttribute('nomodule', '');
-        win.document.head.appendChild(nomod);
-
-        extensions.reloadExtension('amp-list');
-
-        expect(user().error).to.be.calledWith(
-          'reloadExtension',
-          'Extension script for "%s" is missing or was already reloaded.',
-          'amp-list'
-        );
-        expect(mod.hasAttribute('i-amphtml-loaded-new-version')).to.be.false;
-        expect(nomod.hasAttribute('i-amphtml-loaded-new-version')).to.be.false;
-        expect(extensions.preloadExtension).to.not.be.called;
-      });
-
       it('should support [custom-element] scripts', () => {
         const mod = document.createElement('script');
         mod.setAttribute('custom-element', 'amp-list');
@@ -885,7 +891,7 @@ describes.sandboxed('Extensions', {}, () => {
         nomod.setAttribute('nomodule', '');
         win.document.head.appendChild(nomod);
 
-        extensions.reloadExtension('amp-list');
+        extensions.reloadExtension('amp-list', '0.1', true);
 
         expect(mod.getAttribute('i-amphtml-loaded-new-version')).to.equal(
           'amp-list'
@@ -916,7 +922,7 @@ describes.sandboxed('Extensions', {}, () => {
         nomod.setAttribute('nomodule', '');
         win.document.head.appendChild(nomod);
 
-        extensions.reloadExtension('amp-list');
+        extensions.reloadExtension('amp-list', '0.1', true);
 
         expect(mod.getAttribute('i-amphtml-loaded-new-version')).to.equal(
           'amp-list'
@@ -925,10 +931,7 @@ describes.sandboxed('Extensions', {}, () => {
           'amp-list'
         );
         expect(extensions.preloadExtension).to.be.calledOnce;
-        expect(extensions.preloadExtension).to.be.calledWith(
-          'amp-list',
-          'latest'
-        );
+        expect(extensions.preloadExtension).to.be.calledWith('amp-list', '0.1');
       });
 
       it('should support [custom-template] scripts', () => {
@@ -950,7 +953,7 @@ describes.sandboxed('Extensions', {}, () => {
         nomod.setAttribute('nomodule', '');
         win.document.head.appendChild(nomod);
 
-        extensions.reloadExtension('amp-mustache');
+        extensions.reloadExtension('amp-mustache', '0.2', true);
 
         expect(mod.getAttribute('i-amphtml-loaded-new-version')).to.equal(
           'amp-mustache'
@@ -982,7 +985,7 @@ describes.sandboxed('Extensions', {}, () => {
         nomod.setAttribute('nomodule', '');
         win.document.head.appendChild(nomod);
 
-        extensions.reloadExtension('amp-viewer-integration');
+        extensions.reloadExtension('amp-viewer-integration', '0.1', true);
 
         expect(mod.getAttribute('i-amphtml-loaded-new-version')).to.equal(
           'amp-viewer-integration'
@@ -1023,6 +1026,29 @@ describes.sandboxed('Extensions', {}, () => {
         expect(
           doc.head.querySelectorAll('[custom-element="amp-test"]')
         ).to.have.length(1);
+        expect(
+          doc.head
+            .querySelector('[custom-element="amp-test"]')
+            .getAttribute('src')
+        ).to.contain('-0.1');
+        expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+        expect(win.customElements.elements['amp-test']).to.be.undefined;
+      });
+
+      it('should insert extension script with the specified version', () => {
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(0);
+        expect(extensions.extensions_['amp-test']).to.be.undefined;
+        extensions.preloadExtension('amp-test', '0.2');
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(1);
+        expect(
+          doc.head
+            .querySelector('[custom-element="amp-test"]')
+            .getAttribute('src')
+        ).to.contain('-0.2');
         expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
         expect(win.customElements.elements['amp-test']).to.be.undefined;
       });
@@ -1102,6 +1128,31 @@ describes.sandboxed('Extensions', {}, () => {
         ).to.have.length(1);
       });
 
+      it('should only insert script once with the right version', () => {
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(0);
+        expect(extensions.extensions_['amp-test']).to.be.undefined;
+
+        extensions.preloadExtension('amp-test');
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(1);
+        expect(
+          doc.head
+            .querySelector('[custom-element="amp-test"]')
+            .getAttribute('src')
+        ).to.contain('-0.1');
+        expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+
+        extensions.preloadExtension('amp-test', '0.1');
+        expect(
+          doc.head
+            .querySelector('[custom-element="amp-test"]')
+            .getAttribute('src')
+        ).to.contain('-0.1');
+      });
+
       it('should not insert when script exists in head', () => {
         const ampTestScript = doc.createElement('script');
         ampTestScript.setAttribute('custom-element', 'amp-test');
@@ -1166,6 +1217,69 @@ describes.sandboxed('Extensions', {}, () => {
     }
   );
 
+  describes.fakeWin(
+    'importUnwrapped',
+    {
+      amp: true,
+      fakeRegisterElement: true,
+    },
+    (env) => {
+      let win, doc, extensions;
+
+      beforeEach(() => {
+        win = env.win;
+        doc = win.document;
+        extensions = env.extensions;
+      });
+
+      it('should insert extension script correctly', () => {
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(0);
+        const promise = extensions.importUnwrapped(win, 'amp-test');
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(1);
+
+        const script = doc.head.querySelector('[custom-element="amp-test"]');
+        dispatchCustomEvent(script, 'load', null, {bubbles: false});
+        return promise;
+      });
+
+      it('should only insert script once', () => {
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(0);
+
+        const promise1 = extensions.importUnwrapped(win, 'amp-test');
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(1);
+
+        const promise2 = extensions.importUnwrapped(win, 'amp-test');
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(1);
+        expect(promise2).to.equal(promise1);
+      });
+
+      it('should give script correct attributes', () => {
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(0);
+        extensions.importUnwrapped(win, 'amp-test');
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(1);
+
+        const script = doc.head.querySelector('[custom-element="amp-test"]');
+        expect(script.getAttribute('data-script')).to.equal('amp-test');
+        expect(script.getAttribute('async')).to.equal('');
+        expect(script.getAttribute('crossorigin')).to.equal('anonymous');
+      });
+    }
+  );
+
   describes.realWin(
     'installExtensionForDoc',
     {
@@ -1190,10 +1304,61 @@ describes.sandboxed('Extensions', {}, () => {
         expect(extensions.extensions_['amp-test']).to.be.undefined;
         extensions.installExtensionForDoc(ampdoc, 'amp-test');
         expect(loadSpy).to.be.calledOnce;
-        expect(loadSpy).to.be.calledWithExactly('amp-test', undefined);
+        expect(loadSpy).to.be.calledWithExactly('amp-test', '0.1');
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"][src*="-0.1"]')
+        ).to.have.length(1);
+        expect(
+          doc.head
+            .querySelector('[custom-element="amp-test"]')
+            .getAttribute('src')
+        ).to.contain('-0.1');
+        expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+        expect(win.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
+      });
+
+      it('should insert extension script correctly for non-default version', () => {
+        const loadSpy = env.sandbox.spy(extensions, 'preloadExtension');
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(0);
+        expect(extensions.extensions_['amp-test']).to.be.undefined;
+        extensions.installExtensionForDoc(ampdoc, 'amp-test', '0.2');
+
+        // Extension is declared immediately.
+        expect(ampdoc.declaresExtension('amp-test', '0.2')).to.be.true;
+
+        expect(loadSpy).to.be.calledOnce;
+        expect(loadSpy).to.be.calledWithExactly('amp-test', '0.2');
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"][src*="-0.2"]')
+        ).to.have.length(1);
+        expect(
+          doc.head
+            .querySelector('[custom-element="amp-test"]')
+            .getAttribute('src')
+        ).to.contain('-0.2');
+        expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+        expect(win.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
+      });
+
+      it('should insert extension script with a specified version', () => {
+        const loadSpy = env.sandbox.spy(extensions, 'preloadExtension');
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(0);
+        expect(extensions.extensions_['amp-test']).to.be.undefined;
+        extensions.installExtensionForDoc(ampdoc, 'amp-test', '0.2');
+        expect(loadSpy).to.be.calledOnce;
+        expect(loadSpy).to.be.calledWithExactly('amp-test', '0.2');
         expect(
           doc.head.querySelectorAll('[custom-element="amp-test"]')
         ).to.have.length(1);
+        expect(
+          doc.head
+            .querySelector('[custom-element="amp-test"]')
+            .getAttribute('src')
+        ).to.contain('-0.2');
         expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
         expect(win.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
       });
@@ -1203,7 +1368,9 @@ describes.sandboxed('Extensions', {}, () => {
         extHolder.scriptPresent = true;
         expect(ampdoc.declaresExtension('amp-test')).to.be.false;
         const promise = extensions.installExtensionForDoc(ampdoc, 'amp-test');
-        expect(ampdoc.declaresExtension('amp-test')).to.be.false;
+
+        // Extension is declared immediately.
+        expect(ampdoc.declaresExtension('amp-test', '0.1')).to.be.true;
 
         // Stubbed immediately.
         expect(win.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
@@ -1213,6 +1380,8 @@ describes.sandboxed('Extensions', {}, () => {
         // Resolve the promise.
         extensions.registerExtension(
           'amp-test',
+          '0.1',
+          true,
           (AMP) => {
             // Main extension with CSS.
             AMP.registerElement('amp-test', AmpTest, 'a{}');
@@ -1227,8 +1396,6 @@ describes.sandboxed('Extensions', {}, () => {
           expect(win.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.equal(
             AmpTestSub
           );
-          // Extension is now declared.
-          expect(ampdoc.declaresExtension('amp-test')).to.be.true;
         });
       });
 
@@ -1242,7 +1409,7 @@ describes.sandboxed('Extensions', {}, () => {
         expect(loadSpy).to.be.calledOnce;
 
         // Resolve.
-        extensions.registerExtension('amp-test', () => {}, {});
+        extensions.registerExtension('amp-test', '0.1', true, () => {}, {});
         return promise1.then(() => {
           const promise3 = extensions.installExtensionForDoc(
             ampdoc,
@@ -1270,7 +1437,9 @@ describes.sandboxed('Extensions', {}, () => {
         extHolder.scriptPresent = true;
         expect(ampdoc.declaresExtension('amp-test')).to.be.false;
         const promise = extensions.installExtensionForDoc(ampdoc, 'amp-test');
-        expect(ampdoc.declaresExtension('amp-test')).to.be.false;
+
+        // Extension is declared immediately.
+        expect(ampdoc.declaresExtension('amp-test', '0.1')).to.be.true;
 
         // Services do not exist yet.
         allowConsoleError(() => {
@@ -1287,6 +1456,8 @@ describes.sandboxed('Extensions', {}, () => {
         // Resolve the promise.
         extensions.registerExtension(
           'amp-test',
+          '0.1',
+          true,
           (AMP) => {
             AMP.registerServiceForDoc('service1', factory1);
             AMP.registerServiceForDoc('service2', factory2);
@@ -1327,6 +1498,8 @@ describes.sandboxed('Extensions', {}, () => {
         const promise = extensions.installExtensionForDoc(ampdoc, 'amp-test');
         extensions.registerExtension(
           'amp-test',
+          '0.1',
+          true,
           (AMP) => {
             AMP.registerServiceForDoc('service1', factory1);
             AMP.registerServiceForDoc('service2', factory2);

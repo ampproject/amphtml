@@ -57,6 +57,11 @@
   },
   {"name": "amp-ad-network-nws-impl", "version": "0.1", "latestVersion": "0.1"},
   {
+    "name": "amp-ad-network-valueimpression-impl",
+    "version": "0.1",
+    "latestVersion": "0.1"
+  },
+  {
     "name": "amp-addthis",
     "version": "0.1",
     "latestVersion": "0.1",
@@ -104,6 +109,7 @@
     "latestVersion": "0.1",
     "options": {"hasCss": true}
   },
+  {"name": "amp-cache-url", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-call-tracking", "version": "0.1", "latestVersion": "0.1"},
   {
     "name": "amp-carousel",
@@ -134,8 +140,7 @@
     "name": "amp-date-picker",
     "version": "0.1",
     "latestVersion": "0.1",
-    "options": {"hasCss": true},
-    "postPrepend": ["third_party/react-dates/bundle.js"]
+    "options": {"hasCss": true}
   },
   {
     "name": "amp-delight-player",
@@ -152,9 +157,23 @@
   {"name": "amp-facebook-page", "version": "0.1", "latestVersion": "0.1"},
   {
     "name": "amp-fit-text",
-    "version": ["0.1", "1.0"],
+    "version": "0.1",
     "latestVersion": "0.1",
     "options": {"hasCss": true}
+  },
+  {
+    "name": "amp-fit-text",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": {
+        "component.js": {
+          "preact": "component-preact.js",
+          "react": "component-react.js"
+        }
+      }
+    }
   },
   {"name": "amp-font", "version": "0.1", "latestVersion": "0.1"},
   {
@@ -239,8 +258,7 @@
   {
     "name": "amp-inputmask",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "postPrepend": ["third_party/inputmask/bundle.js"]
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-instagram",
@@ -364,6 +382,7 @@
   },
   {"name": "amp-redbull-player", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-reddit", "version": "0.1", "latestVersion": "0.1"},
+  {"name": "amp-render", "version": "1.0", "latestVersion": "1.0"},
   {
     "name": "amp-resize-observer-polyfill",
     "version": "0.1",
@@ -381,6 +400,12 @@
     "version": ["0.1", "1.0"],
     "latestVersion": "0.1",
     "options": {"hasCss": true}
+  },
+  {
+    "name": "amp-shadow-dom-polyfill",
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {"noWrapper": true}
   },
   {
     "name": "amp-sidebar",
@@ -430,6 +455,7 @@
         "amp-story-draggable-drawer-header",
         "amp-story-hint",
         "amp-story-info-dialog",
+        "amp-story-open-page-attachment",
         "amp-story-share",
         "amp-story-share-menu",
         "amp-story-system-layer",
@@ -454,6 +480,7 @@
       "cssBinaries": [
         "amp-story-auto-ads-ad-badge",
         "amp-story-auto-ads-attribution",
+        "amp-story-auto-ads-cta-button",
         "amp-story-auto-ads-inabox",
         "amp-story-auto-ads-shared"
       ]
@@ -570,12 +597,7 @@
     "name": "amp-viz-vega",
     "version": "0.1",
     "latestVersion": "0.1",
-    "options": {"hasCss": true},
-    "postPrepend": [
-      "third_party/d3/d3.js",
-      "third_party/d3-geo-projection/d3-geo-projection.js",
-      "third_party/vega/vega.js"
-    ]
+    "options": {"hasCss": true}
   },
   {"name": "amp-vk", "version": "0.1", "latestVersion": "0.1"},
   {

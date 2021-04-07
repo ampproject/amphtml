@@ -150,6 +150,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
      * @private {boolean}
      */
     this.isFullWidthRequested_ = false;
+
+    /** @private {Promise<!IntersectionObserverEntry>} */
+    this.initialIntersectionPromise_ = null;
   }
 
   /** @override */
@@ -215,6 +218,13 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (this.isFullWidthRequested_) {
       return this.attemptFullWidthSizeChange_();
     }
+
+    const asyncIntersection =
+      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
+      ADS_INITIAL_INTERSECTION_EXP.experiment;
+    this.initialIntersectionPromise_ = asyncIntersection
+      ? measureIntersection(this.element)
+      : Promise.resolve(this.element.getIntersectionChangeEntry());
   }
 
   /**
@@ -249,7 +259,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   preconnectCallback(opt_onLayout) {
     const preconnect = Services.preconnectFor(this.win);
     // We always need the bootstrap.
-    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
+    preloadBootstrap(this.win, this.type_, this.getAmpDoc(), preconnect);
     if (typeof this.config.prefetch == 'string') {
       preconnect.preload(this.getAmpDoc(), this.config.prefetch, 'script');
     } else if (this.config.prefetch) {
@@ -409,13 +419,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         // here, though, allows us to measure the impact of ad throttling via
         // incrementLoadingAds().
 
-        const asyncIntersection =
-          getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
-          ADS_INITIAL_INTERSECTION_EXP.experiment;
-        const intersectionPromise = asyncIntersection
-          ? measureIntersection(this.element)
-          : Promise.resolve(this.element.getIntersectionChangeEntry());
-        return intersectionPromise.then((intersection) => {
+        return this.initialIntersectionPromise_.then((intersection) => {
           const iframe = getIframe(
             toWin(this.element.ownerDocument.defaultView),
             this.element,
