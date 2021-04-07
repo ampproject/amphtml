@@ -37,7 +37,7 @@ async function checkTypes() {
   cleanupBuildDir();
   maybeInitializeExtensions();
   typecheckNewServer();
-  const compileSrcs = [
+  const srcFiles = [
     'src/amp.js',
     'src/amp-shadow.js',
     'src/inabox/amp-inabox.js',
@@ -54,18 +54,20 @@ async function checkTypes() {
   log('Checking types...');
   displayLifecycleDebugging();
   await Promise.all([
-    closureCompile(
-      compileSrcs.concat(extensionSrcs),
-      './dist',
-      'check-types.js',
-      {
-        include3pDirectories: true,
-        includePolyfills: true,
-        extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
-        typeCheckOnly: true,
-        warningLevel: 'QUIET', // TODO(amphtml): Make this 'DEFAULT'
-      }
-    ),
+    closureCompile(srcFiles, './dist', 'src-check-types.js', {
+      include3pDirectories: true,
+      includePolyfills: true,
+      extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
+      typeCheckOnly: true,
+      warningLevel: 'QUIET', // TODO(amphtml): Make this 'DEFAULT'
+    }),
+    closureCompile(extensionSrcs, './dist', 'extensions-check-types.js', {
+      include3pDirectories: true,
+      includePolyfills: true,
+      extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
+      typeCheckOnly: true,
+      warningLevel: 'QUIET', // TODO(amphtml): Make this 'DEFAULT'
+    }),
     // Type check 3p/ads code.
     closureCompile(
       ['3p/integration.js'],
