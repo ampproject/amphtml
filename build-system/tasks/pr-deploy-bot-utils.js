@@ -59,14 +59,7 @@ async function replace(filePath) {
   const data = await fs.readFile(filePath, 'utf8');
   const hostName = getBaseUrl();
   const inabox = false;
-  const storyV1 = true;
-  const result = replaceUrlsAppUtil(
-    'compiled',
-    data,
-    hostName,
-    inabox,
-    storyV1
-  );
+  const result = replaceUrlsAppUtil('compiled', data, hostName, inabox);
 
   await fs.writeFile(filePath, result, 'utf8');
 }
