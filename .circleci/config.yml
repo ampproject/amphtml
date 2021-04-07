@@ -205,9 +205,6 @@ jobs:
       - run:
           name: 'Unit Tests'
           command: node build-system/pr-check/unit-tests.js
-          environment:
-            JUNIT_REPORT_PATH: result-reports/
-            JUNIT_REPORT_NAME: unit.xml
       - fail_fast
       - teardown_vm
       - store_artifacts:
