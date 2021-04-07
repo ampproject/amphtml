@@ -71,7 +71,7 @@ describes.realWin(
     }
 
     it('renders with videoId', async () => {
-      const videoId = '6718335390845095173';
+      const videoId = '6948210747285441798';
       const player = await getTiktok({'data-src': videoId});
       const iframe = player.querySelector('iframe');
       expect(iframe).to.not.be.null;
@@ -80,7 +80,7 @@ describes.realWin(
     });
 
     it('renders with videoId', async () => {
-      const videoId = '6718335390845095173';
+      const videoId = '6948210747285441798';
       const videoSrc =
         'https://www.tiktok.com/@scout2015/video/6718335390845095173';
       const player = await getTiktok({'data-src': videoSrc});
@@ -91,7 +91,7 @@ describes.realWin(
     });
 
     it('renders with videoId and locale', async () => {
-      const videoId = '6718335390845095173';
+      const videoId = '6948210747285441798';
       const player = await getTiktok({
         'data-src': videoId,
         'data-locale': 'fr-FR',
@@ -103,7 +103,7 @@ describes.realWin(
     });
 
     it('resizes using the fallback mechanism when no messages are received', async () => {
-      const videoId = '6718335390845095173';
+      const videoId = '6948210747285441798';
       const player = await getTiktok({'data-src': videoId});
       const impl = await player.getImpl(false);
       env.sandbox.stub(impl, 'handleTiktokMessages_');
@@ -119,7 +119,7 @@ describes.realWin(
     });
 
     it('removes iframe after unlayoutCallback', async () => {
-      const videoId = '6718335390845095173';
+      const videoId = '6948210747285441798';
       const player = await getTiktok({'data-src': videoId});
       const playerIframe = player.querySelector('iframe');
       expect(playerIframe).to.not.be.null;
