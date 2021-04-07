@@ -1496,21 +1496,6 @@ app.use('/mraid/', (req, res) => {
 });
 
 /**
- * Get the current time rounded down to the nearest 5 minutes.
- * @return {number}
- */
-function nearestFiveMinutes() {
-  const date = new Date();
-  // Round down to the nearest 5 minutes.
-  const time =
-    Number(date) -
-    (date.getMinutes() % 5) * 1000 * 60 +
-    date.getSeconds() * 1000 +
-    date.getMilliseconds();
-  return time;
-}
-
-/**
  * @param {string} ampJsVersionString
  * @param {string} file
  * @return {string}
