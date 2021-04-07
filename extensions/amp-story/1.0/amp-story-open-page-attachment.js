@@ -173,7 +173,7 @@ const renderOutlinkPageAttachmentUI = (
   // Adding image.
   const openImgAttr = attachmentEl.getAttribute('cta-image');
 
-  if (!attachmentEl.hasAttribute('cta-image') || openImgAttr !== 'none') {
+  if (!openImgAttr || openImgAttr !== 'none') {
     const ctaImgEl = win.document.createElement('div');
     ctaImgEl.classList.add('i-amphtml-story-outlink-page-attachment-img');
     if (!attachmentEl.hasAttribute('cta-image')) {
