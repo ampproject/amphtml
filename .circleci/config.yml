@@ -53,7 +53,7 @@ commands:
           at: /tmp
       - run:
           name: 'Maybe Gracefully Halt'
-          command: if [[ -f "/tmp/workspace/.CI_GRACEFULLY_HALT" ]]; then echo "Gracefully halting this job."; circleci-agent step halt; fi
+          command: if ls .CI_GRACEFULLY_HALT_* 1>/dev/null 2>&1; then echo "Gracefully halting this job."; circleci-agent step halt; fi
   setup_vm:
     steps:
       - run:
