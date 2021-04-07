@@ -82,7 +82,7 @@ describes.realWin(
     it('renders with videoId', async () => {
       const videoId = '6948210747285441798';
       const videoSrc =
-        'https://www.tiktok.com/@scout2015/video/6718335390845095173';
+        'https://www.tiktok.com/@scout2015/video/6948210747285441798';
       const player = await getTiktok({'data-src': videoSrc});
       const iframe = player.querySelector('iframe');
       expect(iframe).to.not.be.null;
@@ -105,6 +105,7 @@ describes.realWin(
     it('resizes using the fallback mechanism when no messages are received', async () => {
       const videoId = '6948210747285441798';
       const player = await getTiktok({'data-src': videoId});
+      const playerIframe = player.querySelector('iframe');
       const impl = await player.getImpl(false);
       env.sandbox.stub(impl, 'handleTiktokMessages_');
 
@@ -115,7 +116,7 @@ describes.realWin(
         }, 1100);
       });
 
-      expect(computedStyle(win, player).height).to.equal('775px');
+      expect(computedStyle(win, playerIframe).height).to.equal('775px');
     });
 
     it('removes iframe after unlayoutCallback', async () => {
