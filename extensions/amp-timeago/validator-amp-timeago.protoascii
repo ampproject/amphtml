@@ -20,6 +20,7 @@ tags: {  # amp-timeago
   extension_spec: {
     name: "amp-timeago"
     version: "0.1"
+    version: "1.0"
     version: "latest"
   }
   attr_lists: "common-extension-attrs"
