@@ -149,7 +149,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     script.callFunction('fetchData', true);
     expect(script.workerDom_.callFunction).not.called;
 
-    script.initialize_.resolve();
+    await script.initialize_.resolve();
     expect(script.workerDom_.callFunction).calledWithExactly('fetchData', true);
   });
 
