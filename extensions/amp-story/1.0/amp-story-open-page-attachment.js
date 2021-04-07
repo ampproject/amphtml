@@ -181,6 +181,9 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
       '.i-amphtml-story-outlink-page-attachment-content'
     );
     contentEl.prepend(ctaImgEl);
+    setImportantStyles(ctaLabelEl, {
+      'padding-left': '10px',
+    });
   } else if (openImgAttr !== 'none') {
     const ctaImgEl = win.document.createElement('div');
     ctaImgEl.classList.add('i-amphtml-story-outlink-page-attachment-img');
@@ -191,6 +194,9 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
       '.i-amphtml-story-outlink-page-attachment-content'
     );
     contentEl.prepend(ctaImgEl);
+    setImportantStyles(ctaLabelEl, {
+      'padding-left': '10px',
+    });
   }
 
   return openAttachmentEl;
