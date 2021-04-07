@@ -32,7 +32,7 @@ import {
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
-import {measure} from './measure';
+import {measureIntersectionNoRoot} from '../../../src/utils/intersection-no-root';
 import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
 
@@ -443,13 +443,16 @@ export function runCandidates(ampdoc, candidates) {
       if (candidate.signals().get(CommonSignals.UNLOAD)) {
         return;
       }
-      return measure(ampdoc, candidate).then(({width, height}) => {
-        if (!Criteria.meetsAll(candidate, width, height)) {
-          return;
+      return measureIntersectionNoRoot(candidate).then(
+        ({boundingClientRect}) => {
+          const {width, height} = boundingClientRect;
+          if (!Criteria.meetsAll(candidate, width, height)) {
+            return;
+          }
+          dev().info(TAG, 'apply', candidate);
+          return apply(ampdoc, candidate);
         }
-        dev().info(TAG, 'apply', candidate);
-        return apply(ampdoc, candidate);
-      });
+      );
     }, NOOP)
   );
 }
