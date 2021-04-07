@@ -30,6 +30,16 @@ import {
 
 const DEFAULT_MATCHES_MESSAGING_ORIGIN = () => false;
 const ABOUT_BLANK = 'about:blank';
+
+/**
+ * iframe.src = iframe.src forces an iframe reload,
+ * EXCEPT when the iframe.src contains a fragment.
+ * With a fragment it just thinks it's a hash change.
+ * @param {string} src
+ * @return {boolean}
+ * */
+const canResetSrc = (src) => src && src != ABOUT_BLANK && !src.includes('#');
+
 /**
  * @param {!IframeEmbedDef.Props} props
  * @param {{current: (!IframeEmbedDef.Api|null)}} ref
@@ -105,7 +115,7 @@ export function IframeEmbedWithRef(
       // Resetting the `src` will reset the iframe and pause it. It will force
       // the reload of the whole iframe. But it's the only reliable option
       // to force pause.
-      if (src && src != ABOUT_BLANK && !src.includes('#')) {
+      if (canResetSrc(src)) {
         iframe.src = iframe.src;
       } else {
         const parent = iframe.parentNode;
