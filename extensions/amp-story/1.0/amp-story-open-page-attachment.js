@@ -173,10 +173,13 @@ const renderOutlinkPageAttachmentUI = (
   // Adding image.
   const openImgAttr = attachmentEl.getAttribute('cta-image');
 
-  if (!openImgAttr || openImgAttr !== 'none') {
+  if (openImgAttr === 'none') {
+    chipEl.classList.add('i-amphtml-story-outlink-page-attachment-outlink-chip-no-image');
+    ctaLabelEl.classList.add('i-amphtml-story-outlink-page-attachment-label-no-image');
+  } else {
     const ctaImgEl = win.document.createElement('div');
     ctaImgEl.classList.add('i-amphtml-story-outlink-page-attachment-img');
-    if (!attachmentEl.hasAttribute('cta-image')) {
+    if (!openImgAttr) {
       ctaImgEl.classList.add(
         'i-amphtml-story-outlink-page-attachment-default-img'
       );
@@ -186,13 +189,6 @@ const renderOutlinkPageAttachmentUI = (
       });
     }
     chipEl.prepend(ctaImgEl);
-    setImportantStyles(ctaLabelEl, {
-      'padding-left': '6px',
-    });
-  } else {
-    setImportantStyles(chipEl, {
-      'padding-left': '14px',
-    });
   }
 
   return openAttachmentEl;

@@ -292,6 +292,15 @@
   white-space: nowrap !important;
   max-width: 210px !important;
   vertical-align: middle;
+  padding-left: 6px !important;
+}
+
+.i-amphtml-story-outlink-page-attachment-outlink-chip-no-image {
+  padding-left: 14px !important;
+}
+
+.i-amphtml-story-outlink-page-attachment-label-no-image {
+  padding-left: 0px !important;
 }
 
 .i-amphtml-story-outlink-page-attachment-default-img {
