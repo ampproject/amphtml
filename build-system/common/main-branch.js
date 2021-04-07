@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {tryResolve} from '../../../../src/utils/promise';
 
-export const resolveFalse = () => tryResolve(() => false);
-export const resolveTrue = () => tryResolve(() => true);
+/**
+ * TODO(rsimha, #32195): Change this to main when branch is renamed, and delete
+ * this file once the dust settles.
+ */
+const mainBranch = 'master';
+
+module.exports = {
+  mainBranch,
+};
