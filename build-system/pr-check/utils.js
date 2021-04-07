@@ -119,11 +119,11 @@ function printChangeSummary() {
  */
 function signalGracefulHalt() {
   if (isCircleciBuild()) {
-    fs.closeSync(
-      fs.openSync(
-        `/tmp/workspace/.CI_GRACEFULLY_HALT_${circleciBuildNumber()}`,
-        'w'
-      )
+    const loggingPrefix = getLoggingPrefix();
+    const sentinelFile = `/tmp/workspace/.CI_GRACEFULLY_HALT_${circleciBuildNumber()}`;
+    fs.closeSync(fs.openSync(sentinelFile, 'w'));
+    logWithoutTimestamp(
+      `${loggingPrefix} Created ${cyan(sentinelFile)} to signal graceful halt.`
     );
   }
 }
