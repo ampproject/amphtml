@@ -210,6 +210,10 @@ jobs:
             JUNIT_REPORT_NAME: unit.xml
       - fail_fast
       - teardown_vm
+      - store_artifacts:
+          path: result-reports
+      - store_test_results:
+          path: result-reports
   'Unminified Tests':
     executor:
       name: amphtml-large-executor
