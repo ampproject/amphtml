@@ -537,8 +537,6 @@ async function proxyToAmpProxy(req, res, mode) {
     // <base> href pointing to the proxy, so that images, etc. still work.
     .replace('<head>', '<head><base href="https://cdn.ampproject.org/">');
   const inabox = req.query['inabox'];
-  // TODO(ccordry): Remove this when story v01 is depricated.
-  const storyV1 = req.query['story_v'] === '1';
   const urlPrefix = getUrlPrefix(req);
   if (req.query['mraid']) {
     body = body
@@ -561,7 +559,7 @@ async function proxyToAmpProxy(req, res, mode) {
           ' </script>'
       );
   }
-  body = replaceUrls(mode, body, urlPrefix, inabox, storyV1);
+  body = replaceUrls(mode, body, urlPrefix, inabox);
   if (inabox) {
     // Allow CORS requests for A4A.
     const origin = req.headers.origin || urlPrefix;
