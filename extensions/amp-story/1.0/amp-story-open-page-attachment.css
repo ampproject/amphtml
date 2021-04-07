@@ -126,10 +126,10 @@
     both !important;
 }
 
-amp-story-page .i-amphtml-story-page-open-attachment-bar-left,
-amp-story-page .i-amphtml-story-page-open-attachment-bar-right,
-amp-story-page .i-amphtml-story-outlink-page-open-attachment-bar-left,
-amp-story-page .i-amphtml-story-outlink-page-open-attachment-bar-right {
+.i-amphtml-story-page-open-attachment-bar-left,
+.i-amphtml-story-page-open-attachment-bar-right,
+.i-amphtml-story-outlink-page-open-attachment-bar-left,
+.i-amphtml-story-outlink-page-open-attachment-bar-right {
   position: absolute !important;
   display: block !important;
   height: 3px !important;

@@ -92,10 +92,13 @@ export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
   const openImgAttr = attachmentEl.getAttribute('cta-image');
   const attachmentHref = attachmentEl.getAttribute('href');
   if (isPageAttachmentUiV2ExperimentOn(win) && !attachmentHref && openImgAttr) {
+    console.log("inline");
     return renderPageAttachmentUiWithImages(win, pageEl, attachmentEl);
   } else if (isPageAttachmentUiV2ExperimentOn(win) && attachmentHref) {
+    console.log("outlink");
     return renderOutlinkPageAttachmentUI(win, pageEl, attachmentEl, attachmentHref);
   } else {
+    console.log("default");
     return renderDefaultPageAttachmentUI(pageEl, attachmentEl);
   }
 };
@@ -139,7 +142,11 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
  const renderOutlinkPageAttachmentUI = (win, pageEl, attachmentEl, attachmentHref) => {
   const openAttachmentEl = buildOpenOutlinkAttachmentElement(pageEl);
 
-  openAttachmentEl.setAttribute('href', attachmentHref);
+  // Copy href to the element so it can be previewed on hover and long press.
+  if (attachmentHref) {
+    openAttachmentEl.setAttribute('href', attachmentHref);
+  }
+  
   openAttachmentEl.addEventListener('click', () =>
     openAttachmentEl.openAttachment()
   );
