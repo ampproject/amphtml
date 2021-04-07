@@ -25,7 +25,7 @@ amp-accordion > section[expanded] > :last-child {
   display: block !important;
 }
 
-/* heading/clontent */
+/* heading/content */
 .i-amphtml-accordion-header,
 .i-amphtml-accordion-content {
   margin: 0;
@@ -39,15 +39,6 @@ amp-accordion > section[expanded] > :last-child {
   background-color: #efefef;
   padding-right: 20px;
   border: solid 1px #dfdfdf;
-}
-
-amp-accordion.i-amphtml-display-locking > section:not([expanded]) > :last-child,
-amp-accordion.i-amphtml-display-locking
-  > section:not([expanded])
-  > :last-child
-  * {
-  content-visibility: hidden-matchable !important;
-  display: block !important;
 }
 
 /* Media should never play when a section is collapsed */
