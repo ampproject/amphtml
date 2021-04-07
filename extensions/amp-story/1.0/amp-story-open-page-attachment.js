@@ -181,11 +181,7 @@ const renderOutlinkPageAttachmentUI = (
   } else {
     const ctaImgEl = win.document.createElement('div');
     ctaImgEl.classList.add('i-amphtml-story-outlink-page-attachment-img');
-    if (!openImgAttr) {
-      ctaImgEl.classList.add(
-        'i-amphtml-story-outlink-page-attachment-default-img'
-      );
-    } else {
+    if (openImgAttr) {
       setImportantStyles(ctaImgEl, {
         'background-image': 'url(' + openImgAttr + ')',
       });
