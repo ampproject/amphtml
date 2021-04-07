@@ -20,6 +20,7 @@ tags: {  # amp-date-display
   extension_spec: {
     name: "amp-date-display"
     version: "0.1"
+    version: "1.0"
     version: "latest"
   }
   attr_lists: "common-extension-attrs"

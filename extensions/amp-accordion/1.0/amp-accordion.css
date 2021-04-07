@@ -38,12 +38,15 @@ amp-accordion > section > * {
   position: relative;
 }
 
-/*
+/**
+ * This media query is used instead of @supports due to low compatibility.
+ * At the time of this change (4/6/2021) no version of Webkit support @supports queries.
+ *
  * Note! This is a new CSS incompatible with older browsers. It provides
  * low-specificity UI styles. The same styles are later set for older browsers
  * via the `i-amphtml-accordion-header` class.
  */
-@supports selector(:where(A)) {
+@media (min-width: 1px) {
   :where(amp-accordion > section) > :first-child {
     cursor: pointer;
     background-color: #efefef;
@@ -69,18 +72,4 @@ amp-accordion
   > :last-child:not(.i-amphtml-animating)
   * {
   display: none !important;
-}
-
-/* TODO: This CSS is duplicated from ./accordion.jss.js for purposes of display
- * locking.  Look into de-duping once experiment is launched.
- */
-amp-accordion.i-amphtml-display-locking
-  > section:not([expanded])
-  > :last-child:not(.i-amphtml-animating),
-amp-accordion.i-amphtml-display-locking
-  > section:not([expanded])
-  > :last-child:not(.i-amphtml-animating)
-  * {
-  content-visibility: hidden-matchable !important;
-  display: block !important;
 }
