@@ -36,7 +36,7 @@ const {cyan, green, red, yellow} = require('kleur/colors');
 const {dotWrappingWidth} = require('../../common/logging');
 const {getEsbuildBabelPlugin} = require('../../common/esbuild-babel');
 const {getFilesFromArgv} = require('../../common/utils');
-const {isCiBuild} = require('../../common/ci');
+const {isCiBuild, isCircleciBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
 const {reportTestStarted} = require('../report-test-status');
 const {SERVER_TRANSFORM_PATH} = require('../../server/typescript-compile');
@@ -173,7 +173,7 @@ function updateReporters(config) {
     config.reporters = ['mocha'];
   }
 
-  if (isCiBuild()) {
+  if (isCircleciBuild()) {
     config.reporters.push('junit');
     config.junitReporter.outputFile = `result-reports/${config.testType}.xml`;
   }
