@@ -49,7 +49,7 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS =
  *  verboseLogging?: boolean,
  *  typeCheckOnly?: boolean,
  *  skipUnknownDepsCheck?: boolean,
- *  warningLevel?: boolean,
+ *  warningLevel?: string,
  * }}
  */
 let OptionsDef;
