@@ -167,7 +167,7 @@ async function skipBundleSize() {
         bundleSizeAppBaseUrl,
         path.join('commit', commitHash, 'skip')
       );
-      const response = await postJson(requestUrl, {});
+      const response = await fetch(requestUrl, {method: 'POST'});
       await checkResponse(
         response,
         'Successfully skipped bundle size reporting.'
