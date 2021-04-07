@@ -16,7 +16,7 @@
 
 import {computeInMasterFrame, loadScript, validateData} from '../../3p/3p';
 import {parseJson} from '../../src/json';
-import {setStyles} from '../../src/style';
+import {setStyle, setStyles} from '../../src/style';
 
 /*
  * How to develop:
@@ -72,6 +72,23 @@ export function handlePosition(element, center, dimensions) {
 }
 
 /**
+ * @param {!MessageEvent} e
+ * @param {!Element} element
+ */
+export function handlePositionResponsive(e, element) {
+  try {
+    const {height} = JSON.parse(e.data);
+    if (height) {
+      handlePosition(element, true, {
+        height: `${height}px`,
+      });
+    }
+  } catch (e) {
+    // no-op
+  }
+}
+
+/**
  * @param {number} availableWidth
  * @param {!Object} data
  * @return {?Object}
@@ -82,6 +99,16 @@ export function sizeAgainstWindow(availableWidth, data) {
     const newHeight = data.height / (data.width / availableWidth);
     return {width: newWidth, height: newHeight};
   }
+}
+
+/**
+ * @param {!Element} element
+ */
+export function forceElementReflow(element) {
+  // force reflow
+  setStyle(element, 'display', 'none');
+  element./*OK*/ offsetHeight;
+  setStyle(element, 'display', 'block');
 }
 
 /**
@@ -100,11 +127,13 @@ export function ssp(global, data) {
     if (position['id'] === undefined) {
       position = {id: -1};
     }
-  } catch (error) {}
+  } catch (error) {
+    global.context.noContentAvailable();
+    return;
+  }
 
   if (position['id'] === -1) {
     global.context.noContentAvailable();
-
     return;
   }
 
@@ -132,7 +161,6 @@ export function ssp(global, data) {
         // Script will inject "sssp" object on Window
         if (!global['sssp']) {
           done(false);
-
           return;
         }
 
@@ -143,7 +171,7 @@ export function ssp(global, data) {
           site: data.site || global.context.canonicalUrl,
         });
 
-        // propagate SSP and running XHR across all ad units
+        // propagate relevant data across all ad units
         mW.sssp = sssp;
         mW.fetchingSSPs = {};
 
@@ -153,7 +181,6 @@ export function ssp(global, data) {
     (loaded) => {
       if (!loaded) {
         global.context.noContentAvailable();
-
         return;
       }
 
@@ -181,16 +208,14 @@ export function ssp(global, data) {
             // listen to message with "height" property -> for responsive ads (111x111) -> set new height / center
             if (ad.responsive) {
               global.addEventListener('message', (e) => {
-                try {
-                  const {height} = JSON.parse(e.data);
-                  if (height) {
-                    handlePosition(parentElement, true, {
-                      height: `${height}px`,
-                    });
-                  }
-                } catch (e) {
-                  // no-op
-                }
+                handlePositionResponsive(e, parentElement);
+              });
+            }
+
+            // listen to intersections and force element reflow (external DSPs)
+            if (['APPNEXUS', 'PUBMATIC'].includes(ad.dsp)) {
+              global.context.observeIntersection(() => {
+                forceElementReflow(parentElement);
               });
             }
 
