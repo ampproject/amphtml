@@ -20,13 +20,12 @@ import {
   ProxyIframeEmbed,
 } from '../../../src/preact/component/3p-frame';
 import {deserializeMessage} from '../../../src/3p-frame-messaging';
-import {dict} from '../../../src/utils/object';
 import {forwardRef} from '../../../src/preact/compat';
 import {useCallback, useState} from '../../../src/preact';
 
 /** @const {string} */
 const TYPE = 'twitter';
-const NO_HEIGHT_STYLE = dict({'height': '100%'});
+const FULL_HEIGHT = '100%';
 const MATCHES_MESSAGING_ORIGIN = () => true;
 
 /**
@@ -35,7 +34,7 @@ const MATCHES_MESSAGING_ORIGIN = () => true;
  * @return {PreactDef.Renderable}
  */
 function TwitterWithRef({requestResize, title, ...rest}, ref) {
-  const [heightStyle, setHeightStyle] = useState(NO_HEIGHT_STYLE);
+  const [height, setHeight] = useState(FULL_HEIGHT);
   const messageHandler = useCallback(
     (event) => {
       const data = deserializeMessage(event.data);
@@ -43,9 +42,9 @@ function TwitterWithRef({requestResize, title, ...rest}, ref) {
         const height = data['height'];
         if (requestResize) {
           requestResize(height);
-          setHeightStyle(NO_HEIGHT_STYLE);
+          setHeight(FULL_HEIGHT);
         } else {
-          setHeightStyle({height});
+          setHeight(height);
         }
       }
     },
@@ -62,7 +61,7 @@ function TwitterWithRef({requestResize, title, ...rest}, ref) {
       matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
       messageHandler={messageHandler}
       type={TYPE}
-      wrapperStyle={heightStyle}
+      wrapperStyle={{height}}
     />
   );
 }
