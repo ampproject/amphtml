@@ -92,13 +92,10 @@ export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
   const openImgAttr = attachmentEl.getAttribute('cta-image');
   const attachmentHref = attachmentEl.getAttribute('href');
   if (isPageAttachmentUiV2ExperimentOn(win) && !attachmentHref && openImgAttr) {
-    console.log("inline");
     return renderPageAttachmentUiWithImages(win, pageEl, attachmentEl);
   } else if (isPageAttachmentUiV2ExperimentOn(win) && attachmentHref) {
-    console.log("outlink");
     return renderOutlinkPageAttachmentUI(win, pageEl, attachmentEl, attachmentHref);
   } else {
-    console.log("default");
     return renderDefaultPageAttachmentUI(pageEl, attachmentEl);
   }
 };
@@ -174,13 +171,26 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
   // Adding image.
   const openImgAttr = attachmentEl.getAttribute('cta-image');
 
-  if (openImgAttr) {
+  if (!attachmentEl.hasAttribute('cta-image')) {
+    const ctaImgEl = win.document.createElement('div');
+    ctaImgEl.classList.add('i-amphtml-story-outlink-page-attachment-img');
+    ctaImgEl.classList.add(
+      'i-amphtml-story-outlink-page-attachment-default-img'
+    );
+    const contentEl = openAttachmentEl.querySelector(
+      '.i-amphtml-story-outlink-page-attachment-content'
+    );
+    contentEl.prepend(ctaImgEl);
+  } else if (openImgAttr !== 'none') {
     const ctaImgEl = win.document.createElement('div');
     ctaImgEl.classList.add('i-amphtml-story-outlink-page-attachment-img');
     setImportantStyles(ctaImgEl, {
       'background-image': 'url(' + openImgAttr + ')',
     });
-    ctaLabelEl.parentNode.insertBefore(ctaImgEl, ctaLabelEl.nextSibling);
+    const contentEl = openAttachmentEl.querySelector(
+      '.i-amphtml-story-outlink-page-attachment-content'
+    );
+    contentEl.prepend(ctaImgEl);
   }
 
   return openAttachmentEl;
