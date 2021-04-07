@@ -669,7 +669,6 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
         '.i-amphtml-story-inline-page-attachment-img'
       )
     ).to.exist;
-    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', false);
   });
 
   it('should build the inline page attachment UI with two images', async () => {
@@ -697,7 +696,6 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
         '.i-amphtml-story-inline-page-attachment-img'
       ).length
     ).to.equal(2);
-    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', false);
   });
 
   it('should build the new default outlink page attachment UI', async () => {
@@ -711,7 +709,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     attachmentEl.setAttribute('href', 'www.google.com');
     element.appendChild(attachmentEl);
 
-    page.buildCallback();
+    await page.buildCallback();
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
 
@@ -724,7 +722,6 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
         '.i-amphtml-story-outlink-page-attachment-outlink-chip'
       )
     ).to.exist;
-    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', false);
   });
 
   it('should build the open attachment UI with custom CTA label', async () => {
