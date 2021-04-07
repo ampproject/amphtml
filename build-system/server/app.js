@@ -1433,9 +1433,6 @@ window.addEventListener('beforeunload', (evt) => {
   });
 }
 
-/**
- * Serve entry point script url
- */
 app.get('/dist/ww.(m?js)', async (req, res, next) => {
   // Special case for entry point script url. Use compiled for testing
   const mode = SERVE_MODE;
