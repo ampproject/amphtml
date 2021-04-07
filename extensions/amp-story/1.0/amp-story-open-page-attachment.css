@@ -259,25 +259,21 @@
 }
 
 .i-amphtml-story-outlink-page-attachment-outlink-chip {
-  display: table !important;
+  display: flex !important;
   position: relative !important;
-  padding: 7px 10px !important;
+  padding: 10px 14px 10px 6px !important;
   margin: 0 0 20px 0 !important;
   height: 16px !important;
   max-width: 243px !important;
   border-radius: 30px !important;
   background: white !important;
   color: var(--cta-accent-color, black) !important;
-}
-
-.i-amphtml-story-outlink-page-attachment-content {
-  display: table-row !important;
+  place-items: center !important;
 }
 
 .i-amphtml-story-outlink-page-attachment-img {
   height: 24px !important;
   width: 24px !important;
-  display: table-cell !important;
   vertical-align: middle !important;
   background-size: contain !important;
   background-repeat: no-repeat !important;
@@ -286,7 +282,6 @@
 }
 
 .i-amphtml-story-outlink-page-attachment-label {
-  display: table-cell !important;
   font-family: 'Roboto', sans-serif !important;
   font-size: 16px !important;
   font-weight: bold !important;
@@ -300,7 +295,5 @@
 }
 
 .i-amphtml-story-outlink-page-attachment-default-img {
-  height: 24px !important;
-  width: 24px !important;
   background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="24" height="24" rx="12" fill="#E8EAED"/><path d="M10 18s0 0 0 0l2-1 2-2s0 0 0 0h-1l-2 1a3 3 0 01-3 0 3 3 0 010-3l1-2v-1s0 0 0 0l-2 2a4 4 0 000 5l3 1zM11 9l2-1a3 3 0 013 0 3 3 0 010 3l-1 2v1a1 1 0 000 0l2-2a4 4 0 000-5l-3-1s0 0 0 0l-2 1-2 2s0 0 0 0h1z" fill="#000" stroke="#000" stroke-width=".3"/><path d="M15 9h-1l-5 5a1 1 0 001 1s0 0 0 0l5-5V9z" fill="#000" stroke="#000" stroke-width=".3"/></svg>') !important;
 }

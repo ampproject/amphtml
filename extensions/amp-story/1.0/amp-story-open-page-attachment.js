@@ -75,9 +75,7 @@ export const buildOpenInlineAttachmentElement = (element) =>
          <span class="i-amphtml-story-outlink-page-open-attachment-bar-right"></span>
        </span>
        <div class="i-amphtml-story-outlink-page-attachment-outlink-chip">
-        <div class="i-amphtml-story-outlink-page-attachment-content">
-          <div class="i-amphtml-story-outlink-page-attachment-label"></div>
-        </div>
+        <div class="i-amphtml-story-outlink-page-attachment-label"></div>
        </div>
      </a>`;
 
@@ -170,6 +168,9 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
 
   // Adding image.
   const openImgAttr = attachmentEl.getAttribute('cta-image');
+  const chipEl = openAttachmentEl.querySelector(
+    '.i-amphtml-story-outlink-page-attachment-outlink-chip'
+  );
 
   if (!attachmentEl.hasAttribute('cta-image') || openImgAttr !== 'none') {
     const ctaImgEl = win.document.createElement('div');
@@ -182,12 +183,13 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
         'background-image': 'url(' + openImgAttr + ')',
       });
     }
-    const contentEl = openAttachmentEl.querySelector(
-      '.i-amphtml-story-outlink-page-attachment-content'
-    );
-    contentEl.prepend(ctaImgEl);
+    chipEl.prepend(ctaImgEl);
     setImportantStyles(ctaLabelEl, {
-      'padding-left': '10px',
+      'padding-left': '6px',
+    });
+  } else {
+    setImportantStyles(chipEl, {
+      'padding-left': '14px',
     });
   }
 
