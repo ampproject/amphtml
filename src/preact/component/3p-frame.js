@@ -80,16 +80,15 @@ function ProxyIframeEmbedWithRef(
   }, [type]);
   const [name, setName] = useState(nameProp);
   const src = useRef(null);
-  const win = contentRef.current?.ownerDocument?.defaultView;
-  src.current = srcProp ?? (win ? getDefaultBootstrapBaseUrl(win) : null);
 
   useLayoutEffect(() => {
     const win = contentRef.current?.ownerDocument?.defaultView;
-    if (!win) {
-      return;
-    }
+    src.current = srcProp ?? (win ? getDefaultBootstrapBaseUrl(win) : null);
     if (nameProp) {
       setName(nameProp);
+      return;
+    }
+    if (!win) {
       return;
     }
     const attrs = dict({
@@ -118,7 +117,7 @@ function ProxyIframeEmbedWithRef(
         })
       )
     );
-  }, [count, nameProp, options, title, type]);
+  }, [count, nameProp, options, srcProp, title, type]);
 
   return (
     <IframeEmbed
