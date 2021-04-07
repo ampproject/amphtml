@@ -700,6 +700,33 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     toggleExperiment(win, 'amp-story-page-attachment-ui-v2', false);
   });
 
+  it('should build the new default outlink page attachment UI', async () => {
+    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
+
+    const attachmentEl = win.document.createElement(
+      'amp-story-page-attachment'
+    );
+
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    attachmentEl.setAttribute('href', 'www.google.com');
+    element.appendChild(attachmentEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    expect(
+      openAttachmentEl.querySelector(
+        '.i-amphtml-story-outlink-page-attachment-outlink-chip'
+      )
+    ).to.exist;
+    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', false);
+  });
+
   it('should build the open attachment UI with custom CTA label', async () => {
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
