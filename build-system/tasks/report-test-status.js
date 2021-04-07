@@ -16,7 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const requestPromise = require('request-promise');
+const fetch = require('node-fetch');
 const {
   isCircleciBuild,
   isPullRequestBuild,
@@ -126,17 +126,17 @@ async function postReport(type, action) {
     const commitHash = gitCommitHash();
 
     try {
-      const body = await requestPromise({
+      const url = `${reportBaseUrl}/${commitHash}/${type}/${action}`;
+      const response = await fetch(url, {
         method: 'POST',
-        uri: `${reportBaseUrl}/${commitHash}/${type}/${action}`,
         body: JSON.stringify({
           ciJobUrl: ciJobUrl(),
         }),
         headers: {
           'Content-Type': 'application/json',
         },
-        // Do not use `json: true` because the response is a string, not JSON.
       });
+      const body = await response.text();
 
       log('Reported', cyan(`${type}/${action}`), 'to GitHub');
       if (body.length > 0) {
