@@ -173,12 +173,10 @@ const renderOutlinkPageAttachmentUI = (
   // Adding image.
   const openImgAttr = attachmentEl.getAttribute('cta-image');
 
+  // Removes image if attribute is explicitly set to "none".
   if (openImgAttr === 'none') {
     chipEl.classList.add(
       'i-amphtml-story-outlink-page-attachment-outlink-chip-no-image'
-    );
-    ctaLabelEl.classList.add(
-      'i-amphtml-story-outlink-page-attachment-label-no-image'
     );
   } else {
     const ctaImgEl = win.document.createElement('div');
