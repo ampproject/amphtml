@@ -127,6 +127,7 @@ t.run('Viewer Visibility State', () => {
             img.setAttribute('width', 100);
             img.setAttribute('height', 100);
             img.setAttribute('layout', 'fixed');
+            // TODO(#31915): Cleanup when V1_IMG_DEFERRED_BUILD is complete.
             if (!V1_IMG_DEFERRED_BUILD) {
               win.document.body.appendChild(img);
             }
