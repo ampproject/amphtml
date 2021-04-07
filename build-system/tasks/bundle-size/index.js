@@ -136,14 +136,16 @@ async function storeBundleSize() {
   const commitHash = gitCommitHash();
   log('Storing bundle sizes for commit', cyan(shortSha(commitHash)) + '...');
   try {
-    const requestUrl = url.resolve(
-      bundleSizeAppBaseUrl,
-      path.join('commit', commitHash, 'store')
+    const response = await postJson(
+      url.resolve(
+        bundleSizeAppBaseUrl,
+        path.join('commit', commitHash, 'store')
+      ),
+      {
+        token: process.env.BUNDLE_SIZE_TOKEN,
+        bundleSizes: await getBrotliBundleSizes(),
+      }
     );
-    const response = await postJson(requestUrl, {
-      token: process.env.BUNDLE_SIZE_TOKEN,
-      bundleSizes: await getBrotliBundleSizes(),
-    });
     await checkResponse(response, 'Successfully stored bundle sizes.');
   } catch (error) {
     log(yellow('WARNING:'), 'Could not store bundle sizes');
@@ -204,15 +206,17 @@ async function reportBundleSize() {
       cyan(shortSha(mergeSha)) + '...'
     );
     try {
-      const requestUrl = url.resolve(
-        bundleSizeAppBaseUrl,
-        path.join('commit', headSha, 'report')
+      const response = await postJson(
+        url.resolve(
+          bundleSizeAppBaseUrl,
+          path.join('commit', headSha, 'report')
+        ),
+        {
+          baseSha,
+          mergeSha,
+          bundleSizes: await getBrotliBundleSizes(),
+        }
       );
-      const response = await postJson(requestUrl, {
-        baseSha,
-        mergeSha,
-        bundleSizes: await getBrotliBundleSizes(),
-      });
       await checkResponse(response, 'Successfully reported bundle sizes.');
     } catch (error) {
       log(
