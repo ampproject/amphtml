@@ -142,10 +142,6 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
   if (attachmentHref) {
     openAttachmentEl.setAttribute('href', attachmentHref);
   }
-  
-  openAttachmentEl.addEventListener('click', () =>
-    openAttachmentEl.openAttachment()
-  );
 
   // Setting theme  
   openAttachmentEl.setAttribute('theme', attachmentEl.getAttribute('theme'));
