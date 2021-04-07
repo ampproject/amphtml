@@ -16,6 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const fetch = require('node-fetch');
 const globby = require('globby');
 const path = require('path');
 const url = require('url');
@@ -88,14 +89,13 @@ async function checkResponse(response, ...successMessages) {
 }
 
 /**
- * Helper that lazily imports node-fetch, and does a JSON POST request.
+ * Does a JSON POST request.
  * @param {string} url
  * @param {*} body
  * @param {?Object=} options
  * @return {Promise<Response>}
  */
 async function postJson(url, body, options) {
-  const fetch = await import('node-fetch');
   return fetch(url, {...options, method: 'POST', body: JSON.stringify(body)});
 }
 
