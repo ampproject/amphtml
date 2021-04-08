@@ -162,11 +162,11 @@ git remote add upstream git@github.com:ampproject/amphtml.git
 
 Now run `git remote -v` again and notice that you have set up your upstream alias.
 
-Each branch of your local Git repository can track a branch of a remote repository. Right now, your local `master` branch is tracking `origin/master`, which corresponds to the `master` branch of your GitHub fork. You don't actually want this, though; the upstream `master` branch is constantly being updated, and your fork's `master` branch will rapidly become outdated. Instead, it's best to make your local `master` branch track the upstream `master` branch. You can do this like so:
+Each branch of your local Git repository can track a branch of a remote repository. Right now, your local `main` branch is tracking `origin/main`, which corresponds to the `main` branch of your GitHub fork. You don't actually want this, though; the upstream `main` branch is constantly being updated, and your fork's `main` branch will rapidly become outdated. Instead, it's best to make your local `main` branch track the upstream `main` branch. You can do this like so:
 
 ```sh
-git fetch upstream master
-git branch -u upstream/master master
+git fetch upstream main
+git branch -u upstream/main main
 ```
 
 # Building AMP and starting a local server
@@ -233,17 +233,17 @@ You may have noticed that the files in your local repository are editable which 
 
 Branches let you work on multiple different things in your repository in parallel. For example you can have one branch where you're fixing a bug, another branch where you're implementing a new feature and yet another branch where you're just doing some exploratory work. These branches co-exist in the same repository so there's no need to go through the forking and cloning steps described earlier every time you want to make a change.
 
-By default you'll have a branch named _master_. You can see this if you run the command `git branch` which lists the branches in your local repository.
+By default you'll have a branch named _main_. You can see this if you run the command `git branch` which lists the branches in your local repository.
 
-Although you could do work on the master branch, most people choose to leave the master branch unchanged and create other branches to actually do work in. Creating a branch is easy; simply run:
+Although you could do work on the main branch, most people choose to leave the main branch unchanged and create other branches to actually do work in. Creating a branch is easy; simply run:
 
 ```sh
-git checkout -b <branch_name> master
+git checkout -b <branch_name> main
 ```
 
-This will move you to the new branch, which uses `master` as its start point, meaning that it will start out containing the same files as `master`. You can then start working in the new branch.
+This will move you to the new branch, which uses `main` as its start point, meaning that it will start out containing the same files as `main`. You can then start working in the new branch.
 
-(You can use a different branch as a start point, like if you want to make one branch based on another. Generally, though, you want `master` as your start point. If you omit the start point, Git will use whichever branch you're currently on.)
+(You can use a different branch as a start point, like if you want to make one branch based on another. Generally, though, you want `main` as your start point. If you omit the start point, Git will use whichever branch you're currently on.)
 
 Whenever you want to move to a different branch, run the checkout command:
 
@@ -263,11 +263,11 @@ Note that currently the branch you just created only exists in your local reposi
 
 Since your local repository is just a copy of the amphtml repository it can quickly become out of date if other people make changes to the amphtml repository. Before you start making changes you'll want to make sure you have the latest version of the code; you'll also want to do this periodically during development, before sending your code for review, etc.
 
-In the workflow we will be using you'll go to the master branch on your local repository and pull the latest changes in from the remote amphtml repository's master branch. (Remember that you set up the alias _upstream_ to refer to the remote amphtml repository, and you set your local `master` branch to track `upstream/master`.)
+In the workflow we will be using you'll go to the main branch on your local repository and pull the latest changes in from the remote amphtml repository's main branch. (Remember that you set up the alias _upstream_ to refer to the remote amphtml repository, and you set your local `main` branch to track `upstream/main`.)
 
 ```sh
-# make sure you are in your local repo's master branch
-git checkout master
+# make sure you are in your local repo's main branch
+git checkout main
 
 # pull in the latest changes from the remote amphtml repository
 git pull
@@ -275,17 +275,17 @@ git pull
 
 If there have been any changes you'll see the details of what changed, otherwise you'll see a message like `Already up-to-date`.
 
-After running that `git pull` command your local master branch has the latest files, but your other local branches won't get automatically updated. To get a local branch in sync:
+After running that `git pull` command your local main branch has the latest files, but your other local branches won't get automatically updated. To get a local branch in sync:
 
 ```sh
 # go to the branch you want to sync
 git checkout <branch name>
 
-# bring the latest changes from your master branch into this branch
-git merge master
+# bring the latest changes from your main branch into this branch
+git merge main
 ```
 
-Since you just ran the `git pull` in your master branch it has the latest changes from the remote amphtml repository so running `git merge master` in your other branch effectively brings the latest changes from the remote amphtml repository to this other branch.
+Since you just ran the `git pull` in your main branch it has the latest changes from the remote amphtml repository so running `git merge main` in your other branch effectively brings the latest changes from the remote amphtml repository to this other branch.
 
 If there are changes that conflict with changes on your branch (e.g. someone modified a file that you're working on) you'll be prompted to resolve them at this point.
 
@@ -338,7 +338,7 @@ Since you're done with changes to that file, go ahead and create a commit:
 git commit -m "<a brief description of your commit>"
 ```
 
-Now run `git status` again, and you'll see the message `nothing to commit` and `your branch is ahead of 'origin/master' by 1 commit`.
+Now run `git status` again, and you'll see the message `nothing to commit` and `your branch is ahead of 'origin/main' by 1 commit`.
 
 Note that you can optionally skip using `git add` commands and just use the `git commit -a` flag to say "add all of the modified/deleted files to this commit," e.g.
 
@@ -467,10 +467,10 @@ Up to this point you've been making changes in a branch on your local repository
 Before pushing your changes, make sure you have the latest changes in the amphtml repository on your branch by running the commands we described above:
 
 ```sh
-git checkout master
+git checkout main
 git pull
 git checkout <branch name>
-git merge master
+git merge main
 ```
 
 Now push your changes to `origin` (the alias for your GitHub fork):
@@ -515,7 +515,7 @@ Once your code is ready for a review, go to [https://github.com/ampproject/ampht
 On the "Open a pull request" page, you will see dropdowns at the top indicating the proposed merge. It will look something like:
 
 ```sh
-amproject/amphtml / master … <username>/amphtml / <branch name>
+amproject/amphtml / main … <username>/amphtml / <branch name>
 ```
 
 Below this are text boxes where you can provide a title and description for your pull request. Please follow the guidelines in the template for providing a good title and description.
@@ -561,8 +561,8 @@ Creating, deleting and moving between branches in Git is cheap. Reusing branches
 GitHub offers a convenient "Delete branch" button on the PR page after the changes in your branch have been merged into the amphtml repository. You can click this button to delete your branch in the GitHub fork if you prefer, but you will also want to delete the branch in your local repository:
 
 ```sh
-# go back to the master branch
-git checkout master
+# go back to the main branch
+git checkout main
 
 # delete the branch in your local repository
 git branch -D <branch name>
