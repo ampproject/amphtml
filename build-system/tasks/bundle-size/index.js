@@ -37,7 +37,6 @@ const {
 } = require('../../compile/internal-version');
 const {cyan, red, yellow} = require('kleur/colors');
 const {log, logWithoutTimestamp} = require('../../common/logging');
-const {mainBranch} = require('../../common/main-branch');
 const {report, NoTTYReport} = require('@ampproject/filesize');
 
 const filesizeConfigPath = require.resolve('./filesize.json');
@@ -113,7 +112,7 @@ async function postJson(url, body, options) {
  * repository to the passed value.
  */
 async function storeBundleSize() {
-  if (!isPushBuild() || ciPushBranch() !== mainBranch) {
+  if (!isPushBuild() || ciPushBranch() !== 'main') {
     log(
       yellow('Skipping'),
       cyan('--on_push_build') + ':',

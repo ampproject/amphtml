@@ -22,7 +22,6 @@ const fs = require('fs');
 const path = require('path');
 const util = require('util');
 const {log} = require('../../common/logging');
-const {mainBranch} = require('../../common/main-branch');
 
 const exec = util.promisify(childProcess.exec);
 
@@ -69,7 +68,7 @@ async function fetchConfigFromBranch_(filename, opt_localBranch, opt_branch) {
   if (opt_localBranch) {
     return fs.promises.readFile(filename, 'utf8');
   }
-  const branch = opt_branch || `origin/${mainBranch}`;
+  const branch = opt_branch || 'origin/main';
   return (await exec(`git show ${branch}:${filename}`)).stdout;
 }
 
