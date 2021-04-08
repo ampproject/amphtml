@@ -145,7 +145,3 @@ To use this method copy the blockquote from the TikTok Embed code:
 
 If the user provides an `aria-label` then that label will be propogated to the `iframe`.
 Otherwise the `aria-label` will default to 'TikTok'.
-
-## Validation
-
-See [amp-tiktok rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-tiktok/validator-amp-tiktok.protoascii) in the AMP validator specification.
