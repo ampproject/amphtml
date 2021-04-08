@@ -98,9 +98,8 @@ export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
     );
   } else if (isPageAttachmentUiV2ExperimentOn(win) && openImgAttr) {
     return renderPageAttachmentUiWithImages(win, pageEl, attachmentEl);
-  } else {
-    return renderDefaultPageAttachmentUI(pageEl, attachmentEl);
   }
+  return renderDefaultPageAttachmentUI(pageEl, attachmentEl);
 };
 
 /**
