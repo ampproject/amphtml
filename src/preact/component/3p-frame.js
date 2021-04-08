@@ -118,7 +118,7 @@ function ProxyIframeEmbedWithRef(
       ),
       src,
     });
-  }, [count, nameProp, options, src, srcProp, title, type]);
+  }, [count, nameProp, options, srcProp, title, type]);
 
   return (
     <IframeEmbed
