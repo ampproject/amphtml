@@ -264,7 +264,6 @@ export function shouldShowStoryUrlInfo(viewer) {
  * @param {string} attribute
  * @param {string=} warn
  * @return {?string}
- * @private
  */
 export function getStoryAttributeSrc(element, attribute, warn = false) {
   const storyEl = dev().assertElement(
