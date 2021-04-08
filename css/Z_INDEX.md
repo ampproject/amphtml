@@ -58,7 +58,6 @@
 `.i-amphtml-story-page-error` | 10000 | [extensions/amp-story/1.0/amp-story.css](/extensions/amp-story/1.0/amp-story.css)
 `.i-amphtml-story-page-play-button` | 10000 | [extensions/amp-story/1.0/amp-story.css](/extensions/amp-story/1.0/amp-story.css)
 `.i-amphtml-image-lightbox-trans` | 1001 | [extensions/amp-image-lightbox/0.1/amp-image-lightbox.css](/extensions/amp-image-lightbox/0.1/amp-image-lightbox.css)
-`.i-amphtml-jank-meter` | 1000 | [css/ampdoc.css](/css/ampdoc.css)
 `amp-image-lightbox` | 1000 | [extensions/amp-image-lightbox/0.1/amp-image-lightbox.css](/extensions/amp-image-lightbox/0.1/amp-image-lightbox.css)
 `amp-lightbox` | 1000 | [extensions/amp-lightbox/0.1/amp-lightbox.css](/extensions/amp-lightbox/0.1/amp-lightbox.css)
 `i-amphtml-ad-close-header` | 1000 | [extensions/amp-lightbox/0.1/amp-lightbox.css](/extensions/amp-lightbox/0.1/amp-lightbox.css)
