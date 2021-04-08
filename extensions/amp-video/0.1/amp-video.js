@@ -261,7 +261,7 @@ export class AmpVideo extends AMP.BaseElement {
     this.hasBitrateSources_ =
       !!this.element.querySelector('source[data-bitrate]') ||
       this.hasAnyCachedSources_() ||
-      this.element.hasAttribute('enable-google-video-cache');
+      this.element.hasAttribute('cache');
 
     installVideoManagerForDoc(element);
 
@@ -269,7 +269,7 @@ export class AmpVideo extends AMP.BaseElement {
 
     // Add cache sources if opted-in and it's sources are not already cached.
     if (
-      this.element.hasAttribute('enable-google-video-cache') &&
+      this.element.hasAttribute('cache') &&
       !this.element.querySelector('source[amp-orig-src]')
     ) {
       return addCacheSources(this.element, this.win);

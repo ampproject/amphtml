@@ -143,7 +143,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
 
   function createVideo(children) {
     const videoEl = createElementWithAttributes(env.win.document, 'amp-video', {
-      'enable-google-video-cache': '',
+      'cache': 'google',
       'layout': 'fill',
     });
     children.forEach((childJson) => {
