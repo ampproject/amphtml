@@ -243,7 +243,7 @@
   height: 32px !important;
   width: 32px !important;
   cursor: pointer !important;
-  position: relative;
+  position: relative !important;
 }
 
 .i-amphtml-story-outlink-page-open-attachment-bar-left {
@@ -275,11 +275,11 @@
   height: 24px !important;
   width: 24px !important;
   vertical-align: middle !important;
-  background-size: contain !important;
+  background-size: cover !important;
   background-repeat: no-repeat !important;
   background-position: center !important;
   border-radius: 50% !important;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="24" height="24" rx="12" fill="#E8EAED"/><path d="M10 18s0 0 0 0l2-1 2-2s0 0 0 0h-1l-2 1a3 3 0 01-3 0 3 3 0 010-3l1-2v-1s0 0 0 0l-2 2a4 4 0 000 5l3 1zM11 9l2-1a3 3 0 013 0 3 3 0 010 3l-1 2v1a1 1 0 000 0l2-2a4 4 0 000-5l-3-1s0 0 0 0l-2 1-2 2s0 0 0 0h1z" fill="#000" stroke="#000" stroke-width=".3"/><path d="M15 9h-1l-5 5a1 1 0 001 1s0 0 0 0l5-5V9z" fill="#000" stroke="#000" stroke-width=".3"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <rect width="24" height="24" rx="12" fill="#E8EAED"/> <path d="M9.63108 18.0003C9.63887 18.0003 9.63887 18.0003 9.63108 18.0003C10.6051 18.0003 11.5245 17.6183 12.2102 16.9321L13.6829 15.4507C13.8933 15.2402 13.8933 14.8893 13.6829 14.6788C13.4725 14.4683 13.1219 14.4683 12.9115 14.6788L11.4388 16.1602C10.9557 16.6436 10.3168 16.9087 9.63887 16.9087C8.96097 16.9087 8.32202 16.6436 7.83892 16.1602C7.35581 15.6768 7.09088 15.0374 7.09088 14.3591C7.09088 13.6808 7.35581 13.0414 7.83892 12.558L9.3194 11.0843C9.52979 10.8738 9.53758 10.523 9.3194 10.3124C9.10122 10.1019 8.75838 10.0941 8.54799 10.3124L7.06751 11.7861C6.38181 12.4722 6 13.3845 6 14.3591C6 15.3337 6.37402 16.246 7.06751 16.9321C7.7532 17.6183 8.66487 18.0003 9.63108 18.0003Z" fill="black" stroke="black" stroke-width="0.25"/> <path d="M11.0882 9.31374L12.5609 7.8323C13.044 7.34889 13.683 7.08379 14.3609 7.08379C15.0388 7.08379 15.6777 7.34889 16.1608 7.8323C16.6439 8.31572 16.9089 8.95508 16.9089 9.63342C16.9089 10.3118 16.6439 10.9511 16.1608 11.4345L14.6804 12.9082C14.47 13.1187 14.4622 13.4696 14.6804 13.6801C14.7894 13.7892 14.9297 13.8438 15.07 13.8438C15.2102 13.8438 15.3505 13.7892 15.4518 13.6879L16.9323 12.2142C17.6179 11.5281 17.9998 10.6158 17.9998 9.64122C17.9998 8.66659 17.6257 7.75433 16.9323 7.06819C16.2466 6.38205 15.3349 6 14.3609 6C14.3609 6 14.3609 6 14.3531 6C13.3791 6 12.4674 6.38205 11.7817 7.06819L10.309 8.54963C10.0986 8.76015 10.0986 9.11102 10.309 9.32154C10.5272 9.53206 10.8779 9.53206 11.0882 9.31374Z" fill="black" stroke="black" stroke-width="0.25"/> <path d="M14.6259 9.36883C14.4155 9.15831 14.0649 9.15831 13.8545 9.36883L9.3741 13.8521C9.16371 14.0626 9.16371 14.4135 9.3741 14.624C9.48319 14.7332 9.62344 14.7878 9.75591 14.7878C9.88837 14.7878 10.0364 14.7332 10.1377 14.624L14.6181 10.1407C14.8363 9.93021 14.8363 9.57935 14.6259 9.36883Z" fill="black" stroke="black" stroke-width="0.25"/> </svg>') !important;
 }
 
 .i-amphtml-story-outlink-page-attachment-label {
@@ -292,7 +292,6 @@
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
   max-width: 210px !important;
-  vertical-align: middle;
   padding-left: 6px !important;
 }
 
