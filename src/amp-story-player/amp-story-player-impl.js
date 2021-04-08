@@ -1724,9 +1724,9 @@ export class AmpStoryPlayer {
       return;
     }
 
-    const {appearance} = this.playerConfig_;
+    const {display} = this.playerConfig_;
 
-    if (appearance && appearance.attribution === 'auto') {
+    if (display && display.attribution === 'auto') {
       this.attribution_ = 'auto';
     }
   }
