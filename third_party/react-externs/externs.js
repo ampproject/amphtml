@@ -507,7 +507,6 @@ React.ReactAtrribute.onScroll;
 React.ReactAtrribute.onWheel;
 
 /**
- * @type {Object}
  * @const
  */
 React.DOM = {};
@@ -1546,7 +1545,7 @@ React.ChainableTypeChecker.isRequired;
 React.ChainableTypeChecker.isRequired.weak;
 
 /**
- * @type {Object}
+ * @const
  */
 React.PropTypes = {
   /** @type {React.ChainableTypeChecker} */
@@ -1603,9 +1602,9 @@ React.PropTypes = {
 };
 
 /**
- * @type {Object}
+ * @const
  */
-React.Children;
+React.Children = {};
 
 /**
  * @param {Object} children Children tree container.
@@ -1635,7 +1634,7 @@ React.Children.count;
 React.Children.only;
 
 /**
- * @type {Object}
+ * @const
  */
 React.addons;
 
@@ -1652,7 +1651,7 @@ React.addons.classSet;
 React.addons.CSSTransitionGroup;
 
 /**
- * @type {Object}
+ * @const
  */
 React.addons.Perf;
 
