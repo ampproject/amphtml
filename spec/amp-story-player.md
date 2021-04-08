@@ -121,32 +121,6 @@ Use a poster image as a placeholder to display to users while the story loads. T
 
 URL pointing to the story.
 
-## Display Story Attribution
-
-The story attribution displays the entity or publisher's name along with its logo. When clicked, it will navigate the user to either the entity's URL or the publisher's canonical domain.
-
-To display the attribution on the stories, use the player's `display` and `attribution` options. See the JSON configuration below.
-
-The information will come from the `entity`, `entity-logo-src` and `entity-url` from the `<amp-story>` element to display the name, logo, and navigate to the user to the given URL respectively. If these attributes are not provided, the `publisher`, `publisher-logo-src` and canonical domain will be used instead.
-
-### JSON Configuration
-
-Here's the JSON configuration to display the story attribution:
-
-```html
-<amp-story-player>
-  <script type="application/json">
-  {
-    "display": {
-      "attribution": "auto"
-    }
-  }
-</script>
- <a href="./story1.html"> ... </a>
- <a href="./story2.html"> ... </a>
-  ...
-```
-
 ## Programmatic Control
 
 Call the player's various methods to programmatically control the player. These methods are exposed on the HTML element, `const playerEl = document.querySelector('amp-story-player')`.
