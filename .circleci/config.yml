@@ -35,18 +35,6 @@ executors:
     resource_class: xlarge
 
 commands:
-  save_merge_commit:
-    steps:
-      - save_cache:
-          name: 'Save Merge Commit'
-          key: git-{{ .Branch }}-{{ .Revision }}
-          paths:
-            - .CIRCLECI_MERGE_COMMIT
-  restore_merge_commit:
-    steps:
-      - restore_cache:
-          name: 'Restore Merge Commit'
-          key: git-{{ .Branch }}-{{ .Revision }}
   maybe_gracefully_halt:
     steps:
       - attach_workspace:
@@ -67,7 +55,6 @@ commands:
           name: 'Create Workspace'
           command: mkdir -p /tmp/workspace
       - checkout
-      - restore_merge_commit
       - run:
           name: 'Fetch Merge Commit'
           command: ./.circleci/fetch_merge_commit.sh
@@ -108,7 +95,9 @@ jobs:
       - run:
           name: 'Compute Merge Commit'
           command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/main/.circleci/compute_merge_commit.sh | bash
-      - save_merge_commit
+      - run:
+          name: 'Save Merge Commit'
+          command: mv .CIRCLECI_MERGE_COMMIT /tmp/workspace/.CIRCLECI_MERGE_COMMIT
   'Checks':
     executor:
       name: amphtml-medium-executor
