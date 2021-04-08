@@ -228,10 +228,10 @@ export class ViewportBindingNatural_ {
     const style = computedStyle(this.win, content);
     return (
       top +
-      parseInt(style['marginTop'], 10) +
+      parseInt(style.marginTop, 10) +
       rect.height +
       childMarginBottom +
-      parseInt(style['marginBottom'], 10)
+      parseInt(style.marginBottom, 10)
     );
   }
 

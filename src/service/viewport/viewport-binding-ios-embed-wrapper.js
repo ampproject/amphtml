@@ -260,11 +260,11 @@ export class ViewportBindingIosEmbedWrapper_ {
 
     const style = computedStyle(this.win, content);
     return (
-      parseInt(style['marginTop'], 10) +
+      parseInt(style.marginTop, 10) +
       this.paddingTop_ +
       height +
       childMarginBottom +
-      parseInt(style['marginBottom'], 10)
+      parseInt(style.marginBottom, 10)
     );
   }
 
