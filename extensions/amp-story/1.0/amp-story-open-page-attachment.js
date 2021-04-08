@@ -154,11 +154,33 @@ const renderOutlinkPageAttachmentUI = (
     openAttachmentEl.setAttribute('href', attachmentHref);
   }
 
-  // Setting theme
-  openAttachmentEl.setAttribute('theme', attachmentEl.getAttribute('theme'));
-
   // Getting elements
-  const {chipEl, ctaLabelEl} = htmlRefs(openAttachmentEl);
+  let {chipEl, ctaLabelEl} = htmlRefs(openAttachmentEl);
+
+  // Setting theme
+  const themeAttribute = attachmentEl.getAttribute('theme');
+  openAttachmentEl.setAttribute('theme', themeAttribute);
+
+  if (themeAttribute === "custom") {
+    const accentColor = attachmentEl.getAttribute('cta-accent-color');
+    const contrastColor = 'black'; // TODO: calculates whether second color should be black or white to optimize contrast with accent color.
+
+    if (attachmentEl.getAttribute('cta-accent-element') === "background") {
+      setImportantStyles(ctaLabelEl, {
+        'color': contrastColor
+      });
+      setImportantStyles(chipEl, {
+        'background-color': accentColor
+      });
+    } else {
+      setImportantStyles(ctaLabelEl, {
+        'color': accentColor
+      });
+      setImportantStyles(chipEl, {
+        'background-color': contrastColor
+      });
+    }
+  }
 
   // Appending text & aria-label.
   const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
