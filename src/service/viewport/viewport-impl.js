@@ -138,7 +138,7 @@ export class ViewportImpl {
     /** @private @const {!Observable<!./viewport-interface.ViewportResizedEventDef>} */
     this.resizeObservable_ = new Observable();
 
-    /** @private {?Element|undefined} */
+    /** @private {?HTMLMetaElement|undefined} */
     this.viewportMeta_ = undefined;
 
     /** @private {string|undefined} */
@@ -741,7 +741,7 @@ export class ViewportImpl {
     // is so that we do not cause content to shift when we disable scroll on
     // platforms that have a width-taking scrollbar.
     this.vsync_.measure(() => {
-      const existingMargin = computedStyle(win, documentElement).marginRight;
+      const existingMargin = computedStyle(win, documentElement)['marginRight'];
       const scrollbarWidth = getVerticalScrollbarWidth(this.ampdoc.win);
 
       requestedMarginRight = parseInt(existingMargin, 10) + scrollbarWidth;
@@ -858,7 +858,7 @@ export class ViewportImpl {
   }
 
   /**
-   * @return {?Element}
+   * @return {?HTMLMetaElement}
    * @private
    */
   getViewportMeta_() {

@@ -221,11 +221,11 @@ export function marginBottomOfLastChild(win, element) {
     const r = n./*OK*/ getBoundingClientRect();
     if (r.height > 0) {
       const s = computedStyle(win, n);
-      if (s.position == 'static' || s.position == 'relative') {
+      if (s['position'] == 'static' || s['position'] == 'relative') {
         style = s;
         break;
       }
     }
   }
-  return style ? parseInt(style.marginBottom, 10) : 0;
+  return style ? parseInt(style['marginBottom'], 10) : 0;
 }
