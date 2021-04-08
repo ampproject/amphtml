@@ -143,7 +143,7 @@ export function whenContentIniLoadInOb(elementOrAmpDoc, opt_prerenderableOnly) {
           // We generally always want `root: document` here. However, in
           // many browsers this is still polyfilled and `{root: null}` is
           // a lot faster.
-          root: isIframed(win) ? win.document : null,
+          root: isIframed(win) ? /** @type {?} */ (win.document) : null,
           threshold: 0.01,
         }
       );

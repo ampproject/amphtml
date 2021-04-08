@@ -703,7 +703,7 @@ export class GlobalVariableSource extends VariableSource {
         'param is required'
     );
     userAssert(typeof param == 'string', 'param should be a string');
-    const hash = this.ampdoc.win.location.originalHash;
+    const hash = this.ampdoc.win.location['originalHash'];
     const params = parseQueryString(hash);
     return params[param] === undefined ? defaultValue : params[param];
   }

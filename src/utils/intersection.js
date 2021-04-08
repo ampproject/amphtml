@@ -18,15 +18,15 @@ import {createViewportObserver} from '../viewport-observer';
 import {layoutRectFromDomRect} from '../layout-rect';
 import {toWin} from '../types';
 
-/** @type {WeakMap<!Element, Deferred>} */
+/** @type {!WeakMap<!Element, !Deferred>|undefined} */
 let intersectionDeferreds;
 
-/** @type {WeakMap<!Window, IntersectionObserver>} */
+/** @type {!WeakMap<!Window, !IntersectionObserver>|undefined} */
 let intersectionObservers;
 
 /**
  * @param {!Window} win
- * @return {!IntersectionObserve}
+ * @return {!IntersectionObserver}
  */
 function getInOb(win) {
   if (!intersectionDeferreds) {
@@ -65,8 +65,8 @@ function getInOb(win) {
  * If multiple measures for the same element occur very quickly, they will
  * dedupe to the same promise.
  *
- * @param {Element} el
- * @return {!Promise<IntersectionObserverEntry>}
+ * @param {!Element} el
+ * @return {!Promise<!IntersectionObserverEntry>}
  */
 export function measureIntersection(el) {
   if (intersectionDeferreds && intersectionDeferreds.has(el)) {
@@ -98,8 +98,8 @@ export function intersectionEntryToJson(entry) {
 }
 
 /**
- * @param {DOMRect} rect
- * @return {DOMRect}
+ * @param {?DOMRect} rect
+ * @return {?../layout-rect.LayoutRectDef}
  */
 function safeLayoutRectFromDomRect(rect) {
   if (rect === null) {

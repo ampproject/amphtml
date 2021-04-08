@@ -38,7 +38,7 @@ export class Scheduler {
     this.observer_ = new win.IntersectionObserver((e) => this.observed_(e), {
       // Root bounds are not important, so we can use the `root:null` for a
       // top-level window.
-      root: isIframed(win) ? win.document : null,
+      root: isIframed(win) ? /** @type {?} */ (win.document) : null,
       rootMargin: ROOT_MARGIN,
     });
 

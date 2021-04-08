@@ -80,8 +80,7 @@ class CSSSupportsRule {
 }
 
 /**
+ * @see https://developers.google.com/web/updates/2018/10/animation-worklet
+ * @type {!Worklet|undefined}
  */
-CSS.animationWorklet = {
-  /** @param {string} module */
-  addModule: function(module) {}
-};
+CSS.animationWorklet;

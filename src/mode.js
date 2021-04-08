@@ -24,12 +24,13 @@ import {parseQueryString_} from './url-parse-query-string';
  *   minified: boolean,
  *   lite: boolean,
  *   test: boolean,
+ *   examiner: boolean,
  *   log: (string|undefined),
  *   version: string,
  *   rtvVersion: string,
  *   runtime: (null|string|undefined),
  *   a4aId: (null|string|undefined),
- *   esm: (boolean|undefined)
+ *   esm: (boolean|undefined),
  * }}
  */
 export let ModeDef;
@@ -76,7 +77,7 @@ function getMode_(win) {
   const hashQuery = parseQueryString_(
     // location.originalHash is set by the viewer when it removes the fragment
     // from the URL.
-    win.location.originalHash || win.location.hash
+    win.location['originalHash'] || win.location.hash
   );
 
   const searchQuery = parseQueryString_(win.location.search);

@@ -35,7 +35,7 @@ let intersectionObservers;
 
 /**
  * @param {!Window} win
- * @return {!IntersectionObserve}
+ * @return {!IntersectionObserver}
  */
 function getInOb(win) {
   if (!intersectionDeferreds) {

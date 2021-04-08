@@ -21,7 +21,7 @@ import {removeNoScriptElements} from './dom-writer';
 export class DomTransformStream {
   /**
    * @param {!Window} win
-   * @param {function=} opt_transferThrottleFunc
+   * @param {(function(!Function):!Promise)=} opt_transferThrottleFunc
    */
   constructor(win, opt_transferThrottleFunc) {
     const headDefer = new Deferred();
@@ -65,9 +65,9 @@ export class DomTransformStream {
     this.shouldTransfer_ = false;
 
     /**
-     * @param {!function} cb
-     * @const @private {!function}
+     * @param {!Function} cb
      * @return {!Promise}
+     * @const @private {function(!Function):!Promise}
      */
     this.transferThrottle_ =
       opt_transferThrottleFunc || ((cb) => Promise.resolve(cb()));
@@ -156,8 +156,8 @@ export class DomTransformStream {
       this.targetBodyPromise_,
       this.headPromise_,
     ]).then((resolvedElements) => {
-      const tranferThrottle = this.transferThrottle_;
-      return tranferThrottle(() => {
+      const transferThrottle = this.transferThrottle_;
+      return transferThrottle(() => {
         this.currentChunkTransferPromise_ = null;
         const targetBody = resolvedElements[0];
         removeNoScriptElements(dev().assertElement(this.detachedBody_));
