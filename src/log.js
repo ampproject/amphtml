@@ -22,6 +22,7 @@ import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
 import {isArray, isEnumValue} from './types';
 import {once} from './utils/function';
+import {pureDevAssert, pureUserAssert} from './core/assert';
 import {urls} from './config';
 
 const noop = () => {};
@@ -390,7 +391,6 @@ export class Log {
    * @closurePrimitive {asserts.truthy}
    */
   assert(shouldBeTrueish, opt_message, var_args) {
-    let firstElement;
     if (isArray(opt_message)) {
       return this.assert.apply(
         this,
@@ -399,34 +399,16 @@ export class Log {
         )
       );
     }
-    if (!shouldBeTrueish) {
-      const message = opt_message || 'Assertion failed';
-      const splitMessage = message.split('%s');
-      const first = splitMessage.shift();
-      let formatted = first;
-      const messageArray = [];
-      let i = 2;
-      pushIfNonEmpty(messageArray, first);
-      while (splitMessage.length > 0) {
-        const nextConstant = splitMessage.shift();
-        const val = arguments[i++];
-        if (val && val.tagName) {
-          firstElement = val;
-        }
-        messageArray.push(val);
-        pushIfNonEmpty(messageArray, nextConstant.trim());
-        formatted += stringOrElementString(val) + nextConstant;
-      }
-      const e = new Error(formatted);
-      e.fromAssert = true;
-      e.associatedElement = firstElement;
-      e.messageArray = messageArray;
+
+    try {
+      const assertion = this == logs.user ? pureUserAssert : pureDevAssert;
+      return assertion.apply(null, arguments);
+    } catch (e) {
       this.prepareError_(e);
       // __AMP_REPORT_ERROR is installed globally per window in the entry point.
       self.__AMP_REPORT_ERROR(e);
       throw e;
     }
-    return shouldBeTrueish;
   }
 
   /**
@@ -627,23 +609,6 @@ export class Log {
     } else {
       this.assert(assertion, `${opt_message || defaultMessage}: %s`, subject);
     }
-  }
-}
-
-/**
- * @param {string|!Element} val
- * @return {string}
- */
-const stringOrElementString = (val) =>
-  /** @type {string} */ (elementStringOrPassThru(val));
-
-/**
- * @param {!Array} array
- * @param {*} val
- */
-function pushIfNonEmpty(array, val) {
-  if (val != '') {
-    array.push(val);
   }
 }
 
