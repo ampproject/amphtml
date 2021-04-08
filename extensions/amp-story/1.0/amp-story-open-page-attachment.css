@@ -261,7 +261,7 @@
 .i-amphtml-story-outlink-page-attachment-outlink-chip {
   display: flex !important;
   position: relative !important;
-  padding: 10px 14px 10px 6px !important;
+  padding: 10px 6px 10px 6px !important;
   margin: 0 0 20px 0 !important;
   height: 16px !important;
   max-width: 243px !important;
@@ -283,6 +283,7 @@
 }
 
 .i-amphtml-story-outlink-page-attachment-label {
+  display: flex !important;
   font-family: 'Roboto', sans-serif !important;
   font-size: 16px !important;
   font-weight: bold !important;
@@ -292,14 +293,15 @@
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
   max-width: 210px !important;
-  padding-left: 6px !important;
+  padding-inline-start: 6px !important;
+  padding-inline-end: 8px !important;
 }
 
 .i-amphtml-story-outlink-page-attachment-outlink-chip-no-image {
-  padding-left: 14px !important;
+  padding-inline-start: 14px !important;
 }
 
 .i-amphtml-story-outlink-page-attachment-outlink-chip-no-image > * {
-  padding-left: 0px !important;
+  padding-inline-start: 0px !important;
 }
 
