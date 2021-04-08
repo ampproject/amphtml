@@ -58,7 +58,9 @@ export function maybeValidate(win) {
  * @return {!Promise}
  */
 export function loadScript(doc, url) {
-  const script = doc.createElement('script');
+  const script = /** @type {!HTMLScriptElement} */ (doc.createElement(
+    'script'
+  ));
   script.src = url;
 
   // Propagate nonce to all generated script tags.

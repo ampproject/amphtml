@@ -1,3 +1,4 @@
+/** @nocompile */
 export function installResizeObserver(global) {
 (function (global, factory) {
     (global.ResizeObserver = factory());

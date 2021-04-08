@@ -24,12 +24,13 @@ import {parseQueryString_} from './url-parse-query-string';
  *   minified: boolean,
  *   lite: boolean,
  *   test: boolean,
+ *   examiner: boolean,
  *   log: (string|undefined),
  *   version: string,
  *   rtvVersion: string,
  *   runtime: (null|string|undefined),
  *   a4aId: (null|string|undefined),
- *   esm: (boolean|undefined)
+ *   esm: (boolean|undefined),
  * }}
  */
 export let ModeDef;
