@@ -384,7 +384,6 @@ describe('Logging', () => {
       }
       expect(error).to.be.instanceof(Error);
       expect(error.associatedElement).to.equal(div);
-      expect(error.fromAssert).to.equal(true);
     });
 
     it('should recognize asserts', () => {

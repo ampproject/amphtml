@@ -364,7 +364,6 @@ describe('getErrorReportData', () => {
       location: {},
     };
     const e = new Error('XYZ');
-    e.fromAssert = true;
     const data = getErrorReportData(
       undefined,
       undefined,
@@ -382,7 +381,6 @@ describe('getErrorReportData', () => {
       canary: true,
     };
     const e = new Error('XYZ');
-    e.fromAssert = true;
     const data = getErrorReportData(
       undefined,
       undefined,
