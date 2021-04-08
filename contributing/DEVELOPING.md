@@ -90,7 +90,7 @@ We also recommend scanning the [spec](../spec/). The non-element part should hel
 
 ## Builds and releases
 
--   The [AMP Build On-duty](build-on-duty.md) helps ensure that AMP's builds remain green (i.e. everything builds and all of the tests pass). If you run into issues with builds that seem unrelated to your changes see if the issue is present on [CircleCI](https://app.circleci.com/pipelines/github/ampproject/amphtml?branch=master) and send a message to the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN) channel on Slack ([sign up for Slack](https://bit.ly/amp-slack-signup)).
+-   The [AMP Build On-duty](build-on-duty.md) helps ensure that AMP's builds remain green (i.e. everything builds and all of the tests pass). If you run into issues with builds that seem unrelated to your changes see if the issue is present on [CircleCI](https://app.circleci.com/pipelines/github/ampproject/amphtml?branch=main) and send a message to the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN) channel on Slack ([sign up for Slack](https://bit.ly/amp-slack-signup)).
 -   Understanding the [AMP release process](release-schedule.md) is useful for understanding when a change in AMP will make it into production and what to do if things go wrong during the rollout of a change.
 
 ### Opting in to pre-release channels

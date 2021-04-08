@@ -244,7 +244,7 @@ describes.realWin(
       });
     });
 
-    // TODO(jasonpang): This fails on master under headless Chrome.
+    // TODO(jasonpang): This fails during CI under headless Chrome.
     it.skip('should receive reply from helper iframe for permission query', () => {
       return setupHelperIframe()
         .then(() => {

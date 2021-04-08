@@ -1,6 +1,6 @@
 # AMP Build On-Duty
 
-The AMP build on-duty is responsible for ensuring that the [master build](https://app.circleci.com/pipelines/github/ampproject/amphtml?branch=master) remains green. The AMP build on-duty responsibility rotates between members of the community.
+The AMP build on-duty is responsible for ensuring that the [main branch build](https://app.circleci.com/pipelines/github/ampproject/amphtml?branch=main) remains green. The AMP build on-duty responsibility rotates between members of the community.
 
 Make sure you are a member of the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN) channel on Slack while you are build on-duty.
 
@@ -9,7 +9,7 @@ Make sure you are a member of the [#contributing](https://amphtml.slack.com/mess
 
 ## Build On-Duty Tasks
 
-1. Ensure the [master build](https://app.circleci.com/pipelines/github/ampproject/amphtml?branch=master) remains green. Your goal is to keep the build from being red for more than an hour.
+1. Ensure the [main branch build](https://app.circleci.com/pipelines/github/ampproject/amphtml?branch=main) remains green. Your goal is to keep the build from being red for more than an hour.
     1. Note that yellow builds are in the process of being created/tested so you do not need to do anything special with them.
     2. Keep an eye out for emails sent to an address starting with amp-build-on-duty. **You are encouraged to set up a filter so that these emails will stand out to you.**
     3. You will need to investigate whether a red build is due to a flake or due to a real issue.
