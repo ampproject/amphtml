@@ -180,4 +180,4 @@ See [documentation](https://dev.poool.tech/doc/sdk#context) for more information
 
 ## Validation
 
-See [`amp-access-poool` rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access-poool/validator-amp-access-poool.protoascii) in the AMP validator specification.
+See [`amp-access-poool` rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-access-poool/validator-amp-access-poool.protoascii) in the AMP validator specification.

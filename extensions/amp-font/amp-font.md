@@ -111,4 +111,4 @@ The `layout` attribute must be set to `nodisplay`.
 
 ## Validation
 
-See [amp-font rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-font/validator-amp-font.protoascii) in the AMP validator specification.
+See [amp-font rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-font/validator-amp-font.protoascii) in the AMP validator specification.

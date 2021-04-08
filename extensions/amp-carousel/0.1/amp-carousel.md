@@ -275,4 +275,4 @@ For an accessible and smooth user experience, it is generally good practice when
 
 ## Validation
 
-See [amp-carousel rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/validator-amp-carousel.protoascii) in the AMP validator specification.
+See [amp-carousel rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-carousel/validator-amp-carousel.protoascii) in the AMP validator specification.
