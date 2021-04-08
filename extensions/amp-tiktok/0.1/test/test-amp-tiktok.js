@@ -116,7 +116,7 @@ describes.realWin(
         }, 1100);
       });
 
-      expect(computedStyle(win, playerIframe).height).to.equal('775px');
+      expect(computedStyle(win, playerIframe).height).to.equal('775.25px');
     });
 
     it('removes iframe after unlayoutCallback', async () => {
