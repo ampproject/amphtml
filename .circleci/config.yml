@@ -13,7 +13,7 @@ push_builds_only: &push_builds_only
   filters:
     branches:
       only:
-        - master
+        - main
         - /^amp-release-.*$/
 
 executors:
@@ -100,7 +100,7 @@ jobs:
     steps:
       - run:
           name: 'Compute Merge Commit'
-          command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/master/.circleci/compute_merge_commit.sh | bash
+          command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/main/.circleci/compute_merge_commit.sh | bash
       - save_merge_commit
   'Checks':
     executor:
