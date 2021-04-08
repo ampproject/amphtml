@@ -19,11 +19,11 @@ You can optionally join the [design review Google Group](https://groups.google.c
 
 Because AMP contributors are located all over the world we rotate the design review times to accommodate people in different time zones. The time and date for a design review will be specified in that design review's issue.
 
-If none of the design review times are convenient for you and you have a design you would like to discuss please reach out to mrjoro on [Slack](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#discussion-channels).
+If none of the design review times are convenient for you and you have a design you would like to discuss please reach out to mrjoro on [Slack](https://github.com/ampproject/amphtml/blob/main/CONTRIBUTING.md#discussion-channels).
 
 ## Bringing your design to a design review
 
-Design reviews are a great way to discuss and refine your designs with knowledgeable people in the community. Not every feature/change has to be brought to a design review. For smaller changes a design review is completely optional; for larger changes covered by the [code and feature contribution process](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md) work with your reviewer to determine if a design review makes sense.
+Design reviews are a great way to discuss and refine your designs with knowledgeable people in the community. Not every feature/change has to be brought to a design review. For smaller changes a design review is completely optional; for larger changes covered by the [code and feature contribution process](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md) work with your reviewer to determine if a design review makes sense.
 
 The process for bringing a design to the design review is:
 
@@ -61,7 +61,7 @@ For larger design topics (e.g. new features, or a significant change), the use o
     -   The [W3C TAG Explainer document](https://w3ctag.github.io/explainers) describes what an explainer should contain and a recommended template. [Design docs at Google](https://www.industrialempathy.com/posts/design-docs-at-google/) also has tips on documenting a design.
     -   An explainer does not need to be "final" before being merged in. You may merge in a draft copy and handle updates through issues/PRs as needed.
     -   Explainers (whether as an md file or in a Google document) should be visible to the public, and any member of the community should be able to comment on it. The explainer should not link to non-public information except in extraordinary circumstances, and the non-public nature of the link and the reason for it not being public should be detailed.
--   See the ["Using React/Preact to implement AMP elements" explainer](https://github.com/ampproject/wg-bento/blob/master/react/explainer.md) for an example.
+-   See the ["Using React/Preact to implement AMP elements" explainer](https://github.com/ampproject/wg-bento/blob/main/react/explainer.md) for an example.
 -   Add this license text to the top of your design doc before sharing it with anyone else in the community (updating the year if necessary):
 
     ```

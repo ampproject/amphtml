@@ -127,4 +127,4 @@ Represents the motion of the device around the y axis. This represents a left to
 
 ## Validation
 
-See [amp-orientation-observer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-orientation-observer/validator-amp-orientation-observer.protoascii) in the AMP validator specification.
+See [amp-orientation-observer rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-orientation-observer/validator-amp-orientation-observer.protoascii) in the AMP validator specification.

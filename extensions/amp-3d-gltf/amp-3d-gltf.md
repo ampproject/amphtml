@@ -134,5 +134,5 @@ Here are a few things to keep in mind for style:
 
 ## Validation
 
-See [amp-3d-gltf rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-3d-gltf/validator-amp-3d-gltf.protoascii)
+See [amp-3d-gltf rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-3d-gltf/validator-amp-3d-gltf.protoascii)
 in the AMP validator specification.

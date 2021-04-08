@@ -159,4 +159,4 @@ The value must be an URL on the same origin as the AMP document itself.
 
 ## Validation
 
-See [amp-install-serviceworker rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-install-serviceworker/validator-amp-install-serviceworker.protoascii) in the AMP validator specification.
+See [amp-install-serviceworker rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-install-serviceworker/validator-amp-install-serviceworker.protoascii) in the AMP validator specification.

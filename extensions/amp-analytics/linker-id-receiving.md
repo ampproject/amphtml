@@ -94,7 +94,7 @@ Note: The following key values are reserved, and cannot be used as cookie names.
 
 Each cookie to write is defined by an object, where the value is defined by the required `value` field.
 
-Two macros are supported for the `value` field. [`QUERY_PARAM`](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md#query-parameter) and [`LINKER_PARAM`](#linker-param).
+Two macros are supported for the `value` field. [`QUERY_PARAM`](https://github.com/ampproject/amphtml/blob/main/spec/amp-var-substitutions.md#query-parameter) and [`LINKER_PARAM`](#linker-param).
 
 If there's error resoving the value, or the value is resolved to empty string. Nothing will be written to the cookie.
 

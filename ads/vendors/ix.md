@@ -16,7 +16,7 @@ limitations under the License.
 
 # Index Exchange AMP RTC
 
-Index Exchange (IX) supports [AMP Real Time Config (RTC)](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-publisher-implementation-guide.md) which allows Publishers to augment their ad requests with targeting information that is retrieved at runtime. This document provides instructions on adding IX as a vendor to AMP pages.
+Index Exchange (IX) supports [AMP Real Time Config (RTC)](https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/rtc-publisher-implementation-guide.md) which allows Publishers to augment their ad requests with targeting information that is retrieved at runtime. This document provides instructions on adding IX as a vendor to AMP pages.
 
 ## Configuration
 
@@ -29,7 +29,7 @@ Each [amp-ad](https://amp.dev/documentation/components/amp-ad/) element that use
 
 -   `data-slot`: Required. Data attributes to serve ads.
 
--   `data-multi-size`: Optional. A string of comma separated sizes, which if present, forces the tag to request an ad with all of the given sizes, including the primary size. The `width` and `height` attributes are always included as one of the valid sizes, unless overridden by `data-override-width` and `data-override-height` attributes which change the size of creatives eligible for the slot. For details refer to the [Multi-size Ad documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/multi-size.md).
+-   `data-multi-size`: Optional. A string of comma separated sizes, which if present, forces the tag to request an ad with all of the given sizes, including the primary size. The `width` and `height` attributes are always included as one of the valid sizes, unless overridden by `data-override-width` and `data-override-height` attributes which change the size of creatives eligible for the slot. For details refer to the [Multi-size Ad documentation](https://github.com/ampproject/amphtml/blob/main/extensions/amp-ad-network-doubleclick-impl/multi-size.md).
 
 -   `data-multi-size-validation`: Optional. If set to false, this allows secondary sizes specified in the `data-multi-size` attribute to be less than 2/3rds of the corresponding primary size. By default, this is assumed to be true.
 
@@ -109,6 +109,6 @@ The value of `rtc-config` must conform to the following specification:
 </amp-ad>
 ```
 
-Additional parameters including JSON are passed through in the resulting call to GAM. For details refer to the [Google Ad Manager documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/amp-ad-network-doubleclick-impl-internal.md).
+Additional parameters including JSON are passed through in the resulting call to GAM. For details refer to the [Google Ad Manager documentation](https://github.com/ampproject/amphtml/blob/main/extensions/amp-ad-network-doubleclick-impl/amp-ad-network-doubleclick-impl-internal.md).
 
 To learn about the required Google Ad Manager (GAM) configuration, refer to [Index Exchange Knowledge Base](https://kb.indexexchange.com/Mobile/About_AMP.htm).

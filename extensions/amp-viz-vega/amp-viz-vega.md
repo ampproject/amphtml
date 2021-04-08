@@ -134,7 +134,7 @@ to learn more and play with samples.
   and/or horizontal scrolling to be fully viewable. But they can be used in certain
   cases where it may not be possible for the visualization to scale to fit the given
   width and height. For example, the <em>World Map</em> visualization in the
-  <a href="https://github.com/ampproject/amphtml/blob/master/examples/viz-vega.amp.html">examples</a>
+  <a href="https://github.com/ampproject/amphtml/blob/main/examples/viz-vega.amp.html">examples</a>
   can not realistically scale to the given width and still be usable so it <code>use-data-width</code>
   and allows user to scroll horizontally.</p></td>
   </tr>

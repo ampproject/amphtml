@@ -2,9 +2,9 @@
 
 <table>
   <tr>
-    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/carousel-cards-entry-point.png?raw=true"></td>
-    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/player-in-recipe.png?raw=true"></td>
-<td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/lightbox-close-button.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/carousel-cards-entry-point.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/player-in-recipe.png?raw=true"></td>
+<td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/lightbox-close-button.png?raw=true"></td>
   </tr>
 </table>
 
@@ -44,7 +44,7 @@ Beyond this, you’ll also find:
 
 ## Player setup
 
-If you need a refresher on how to set up the amp-story-player, including what scripts to import and how to add stories, visit the [documentation](https://github.com/ampproject/amphtml/blob/master/spec/amp-story-player.md).
+If you need a refresher on how to set up the amp-story-player, including what scripts to import and how to add stories, visit the [documentation](https://github.com/ampproject/amphtml/blob/main/spec/amp-story-player.md).
 
 ## Navigating between stories
 
@@ -55,10 +55,10 @@ To navigate between stories on desktop, there are a couple of options:
 <table>
   <tr>
     <td>1. Opt-in to the “skip-to-next button” using the “controls” API (more on that below on the “Customizing position & visibility of story UI controls” section).</td>
-    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/skip-next-desktop.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/skip-next-desktop.png?raw=true"></td>
   </tr>
   <tr>
-    <td>2. Use the Javascript APIs to implement your own navigational buttons.  If you want to use the Javascript APIs, you can use the <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-story-player.md#go">go() method</a> (see documentation for more details) as shown in the following example:</td>
+    <td>2. Use the Javascript APIs to implement your own navigational buttons.  If you want to use the Javascript APIs, you can use the <a href="https://github.com/ampproject/amphtml/blob/main/spec/amp-story-player.md#go">go() method</a> (see documentation for more details) as shown in the following example:</td>
     <td>
 
 ```javascript
@@ -98,15 +98,15 @@ There are many ways in which you can use the player on your own surfaces. Below 
 <tbody>
   <tr>
     <td><strong>Carousel with circle avatars</strong> <br>In this codepen, we provide an example of how to create a carousel entry point and how to link it to your player. <br> <a href="https://codepen.io/maenrique/pen/wvWjNYr" target="_blank" rel="noopener noreferrer">https://codepen.io/maenrique/pen/wvWjNYr</a><br><br><strong>Demo</strong>  <br>This demo showcases a more complex implementation with a horizontally scrollable carousel and the player being opened in a lightbox. <br><a href="https://web-player-cards-carousel.web.app/examples/amp-story/player-entry-point-circular.html" target="_blank" rel="noopener noreferrer">https://web-player-cards-carousel.web.app/examples/amp-story/player-entry-point-circular.html</a><br></td>
-    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/carousel-circuclar-entry-point.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/carousel-circuclar-entry-point.png?raw=true"></td>
   </tr>
   <tr>
     <td><strong>Carousel with cards</strong><br>In this codepen, we provide an example of how to create a simple card carousel entry point and how to link it to your player.<br><a href="https://codepen.io/maenrique/pen/MWeGxqY" target="_blank" rel="noopener noreferrer">https://codepen.io/maenrique/pen/MWeGxqY</a><br><br><strong>Demo</strong> <br>This demo showcases a more complex implementation with a horizontally scrollable carousel and the player being opened in a lightbox. <br> <a href="https://web-player-cards-carousel.web.app/examples/amp-story/player-entry-point-cards.html" target="_blank" rel="noopener noreferrer">https://web-player-cards-carousel.web.app/examples/amp-story/player-entry-point-cards.html</a><br><br></td>
-    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/carousel-cards-entry-point.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/carousel-cards-entry-point.png?raw=true"></td>
   </tr>
   <tr>
     <td>Embedding directly into some text<br>The simplest way to use the player is to directly embed the player in your platform.<br><a href="https://web-player-cards-carousel.web.app/examples/amp-story/player-blog.html" target="_blank" rel="noopener noreferrer">Demo</a><br></td>
-    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/embed-in-blog.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/embed-in-blog.png?raw=true"></td>
   </tr>
 </tbody>
 </table>
@@ -208,9 +208,9 @@ See [examples](#Example-#1---Close-button-on-the-start-position) below to get an
 
 <table>
   <tr>
-    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/close-button-left.png?raw=true"></td>
-    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/close-and-skip-next.png?raw=true"></td>
-<td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/close-button-custom-background.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/close-button-left.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/close-and-skip-next.png?raw=true"></td>
+<td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/close-button-custom-background.png?raw=true"></td>
   </tr>
 </table>
 
@@ -317,7 +317,7 @@ Since by default the close button will be placed to the end, all we have to do i
 </amp-story-player>
       </pre>
     </td>
-    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/lightbox-close-button.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/lightbox-close-button.png?raw=true"></td>
   </tr>
 </table>
 
@@ -343,7 +343,7 @@ On desktop, you can now display a button that navigates from the current story t
 </amp-story-player>
       </pre>
     </td>
-    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/skip-next-desktop.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/skip-next-desktop.png?raw=true"></td>
   </tr>
 </table>
 
@@ -369,13 +369,13 @@ On desktop, you can now display a button that navigates from the current story t
 </amp-story-player>
       </pre>
     </td>
-    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/close-button-custom-background.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/close-button-custom-background.png?raw=true"></td>
   </tr>
 </table>
 
 ## Custom Events
 
-We’ve recently introduced some new events that the player will dispatch and that you can listen to. To see the existing events, refer to the documentation of [Custom Events](https://github.com/ampproject/amphtml/blob/master/spec/amp-story-player.md#custom-events).
+We’ve recently introduced some new events that the player will dispatch and that you can listen to. To see the existing events, refer to the documentation of [Custom Events](https://github.com/ampproject/amphtml/blob/main/spec/amp-story-player.md#custom-events).
 
 ### noNextStory
 
@@ -450,10 +450,10 @@ Yes! These features have been merged to the main repository, but since there is 
 
 ### I want the bleeding-edge and latest features, how can I get them?
 
-AMP provides some channels that you can opt-in to get the latest changes. To opt-in, visit the [AMP Project Experiments page](https://cdn.ampproject.org/experiments.html) and select a channel. More information about the [AMP Release Channels](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#amp-experimental-and-beta-channels).
+AMP provides some channels that you can opt-in to get the latest changes. To opt-in, visit the [AMP Project Experiments page](https://cdn.ampproject.org/experiments.html) and select a channel. More information about the [AMP Release Channels](https://github.com/ampproject/amphtml/blob/main/contributing/release-schedule.md#amp-experimental-and-beta-channels).
 
 ### I have found a bug or have questions / comments / issues, how do I contact you?
 
 If you have found a bug or have an issue request, file a [Github issue](https://github.com/ampproject/amphtml/issues?q=is%3Aissue+is%3Aopen+label%3A%22WG%3A+stories%22+) and tag the @ampproject/wg-stories working group.
 
-For questions / disscusion, join the [amp-story slack channel](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#discussion-channels) and ping us!.
+For questions / disscusion, join the [amp-story slack channel](https://github.com/ampproject/amphtml/blob/main/CONTRIBUTING.md#discussion-channels) and ping us!.

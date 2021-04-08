@@ -2119,7 +2119,7 @@ func (m *CdataSpec) GetDocCssBytes() bool {
 // Specifies which AMP Layouts are supported by a given element.
 // For the purpose of the validator, this specifies which
 // values for layout, height, and width attributes are allowed. Also see
-// https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
+// https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md
 // TODO(johannes): Make the error messages around layouts better. This
 // may require revamping the documentation for elements and/or the above spec,
 // so that a user gets more clearly informed about which layouts are
@@ -2131,7 +2131,7 @@ type AmpLayout struct {
 	SupportedLayouts []AmpLayout_Layout `protobuf:"varint,1,rep,name=supported_layouts,json=supportedLayouts,enum=amp.validator.AmpLayout_Layout" json:"supported_layouts,omitempty"`
 	// Specifies whether this element has default dimensions. This corresponds
 	// to being allowlisted in naturalDimensions_ in
-	// https://github.com/ampproject/amphtml/blob/master/src/layout.js.
+	// https://github.com/ampproject/amphtml/blob/main/src/layout.js.
 	DefinesDefaultWidth  *bool    `protobuf:"varint,2,opt,name=defines_default_width,json=definesDefaultWidth" json:"defines_default_width,omitempty"`
 	DefinesDefaultHeight *bool    `protobuf:"varint,3,opt,name=defines_default_height,json=definesDefaultHeight" json:"defines_default_height,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`

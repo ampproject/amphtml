@@ -189,4 +189,4 @@ If `side=left`, then the functionalities of `LEFT` and `RIGHT` arrow keys are re
 
 ## Validation
 
-See [amp-nested-menu rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-nested-menu/validator-amp-nested-menu.protoascii) in the AMP validator specification.
+See [amp-nested-menu rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-nested-menu/validator-amp-nested-menu.protoascii) in the AMP validator specification.

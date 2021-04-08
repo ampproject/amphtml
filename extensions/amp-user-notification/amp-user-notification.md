@@ -101,7 +101,7 @@ When specified, AMP will make a CORS GET request with credentials to the specifi
 on the `data-show-if-href` attribute (see [#1228](https://github.com/ampproject/amphtml/issues/1228) on why this is a GET instead of a POST).
 
 As a best practice to not let the browser cache the GET response values, you should add
-a [`TIMESTAMP` url replacement](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md) value to the `data-show-if-href` attribute value.
+a [`TIMESTAMP` url replacement](https://github.com/ampproject/amphtml/blob/main/spec/amp-var-substitutions.md) value to the `data-show-if-href` attribute value.
 You can add it as a query string field (e.g.,
 `data-show-if-href="https://foo.com/api/show-api?timestamp=TIMESTAMP"`).
 
@@ -303,4 +303,4 @@ amp-user-notification.amp-active {
 
 ## Validation
 
-See [amp-user-notification rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-notification/validator-amp-user-notification.protoascii) in the AMP validator specification.
+See [amp-user-notification rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-user-notification/validator-amp-user-notification.protoascii) in the AMP validator specification.

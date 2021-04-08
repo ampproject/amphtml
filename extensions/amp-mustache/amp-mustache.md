@@ -189,4 +189,4 @@ Workarounds include replacing strings like {% raw %}`{{`{% endraw %} with differ
 
 ## Validation
 
-See [amp-mustache rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mustache/validator-amp-mustache.protoascii) in the AMP validator specification.
+See [amp-mustache rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-mustache/validator-amp-mustache.protoascii) in the AMP validator specification.

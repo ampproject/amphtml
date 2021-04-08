@@ -144,4 +144,4 @@ For details on the available options, see Twitter's docs <a href="https://develo
 
 ## Validation
 
-See [amp-twitter rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/validator-amp-twitter.protoascii) in the AMP validator specification.
+See [amp-twitter rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-twitter/validator-amp-twitter.protoascii) in the AMP validator specification.

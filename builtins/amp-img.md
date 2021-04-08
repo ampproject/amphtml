@@ -369,5 +369,5 @@ component with the `on` action.
 
 ## Validation
 
-See [`amp-img` rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii)
+See [`amp-img` rules](https://github.com/ampproject/amphtml/blob/main/validator/validator-main.protoascii)
 in the AMP validator specification.

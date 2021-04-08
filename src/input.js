@@ -92,7 +92,7 @@ export class Input {
   }
 
   /**
-   * See https://github.com/ampproject/amphtml/blob/master/spec/amp-css-classes.md#input-mode-classes
+   * See https://github.com/ampproject/amphtml/blob/main/spec/amp-css-classes.md#input-mode-classes
    * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    */
   setupInputModeClasses(ampdoc) {

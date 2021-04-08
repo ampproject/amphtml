@@ -41,10 +41,10 @@ A Vine simple embed has equal width and height:
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>See <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-vine/validator-amp-vine.protoascii">amp-vine rules</a> in the AMP validator specification.</td>
+    <td>See <a href="https://github.com/ampproject/amphtml/blob/main/extensions/amp-vine/validator-amp-vine.protoascii">amp-vine rules</a> in the AMP validator specification.</td>
   </tr>
 </table>
 
 ## Validation
 
-See [amp-vine rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vine/validator-amp-vine.protoascii) in the AMP validator specification.
+See [amp-vine rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-vine/validator-amp-vine.protoascii) in the AMP validator specification.

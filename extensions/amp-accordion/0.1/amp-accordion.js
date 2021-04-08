@@ -93,7 +93,7 @@ class AmpAccordion extends AMP.BaseElement {
       userAssert(
         section.tagName.toLowerCase() == 'section',
         'Sections should be enclosed in a <section> tag, ' +
-          'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
+          'See https://github.com/ampproject/amphtml/blob/main/extensions/' +
           'amp-accordion/amp-accordion.md. Found in: %s',
         this.element
       );
@@ -101,7 +101,7 @@ class AmpAccordion extends AMP.BaseElement {
       userAssert(
         sectionComponents.length == 2,
         'Each section must have exactly two children. ' +
-          'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
+          'See https://github.com/ampproject/amphtml/blob/main/extensions/' +
           'amp-accordion/amp-accordion.md. Found in: %s',
         this.element
       );

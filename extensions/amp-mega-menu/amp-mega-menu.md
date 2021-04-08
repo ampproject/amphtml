@@ -362,4 +362,4 @@ More information on this topic can be found in the [Accessibility Developer Guid
 
 ## Validation
 
-See [amp-mega-menu rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mega-menu/validator-amp-mega-menu.protoascii) in the AMP validator specification.
+See [amp-mega-menu rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-mega-menu/validator-amp-mega-menu.protoascii) in the AMP validator specification.

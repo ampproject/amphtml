@@ -80,7 +80,7 @@ The value of `rtc-config` must conform to the following specification:
     -   Optional parameter
     -   Type: Object
         -   Key is the name of the vendor to use.
-            -   Vendor to use must appear as a key in [callout-vendors.js](https://github.com/ampproject/amphtml/blob/master/src/service/real-time-config/callout-vendors.js)
+            -   Vendor to use must appear as a key in [callout-vendors.js](https://github.com/ampproject/amphtml/blob/main/src/service/real-time-config/callout-vendors.js)
         -   Value is a mapping of macros to values.
     -   Macros for a given vendor URL are specified by that particular vendor.
         -   For example, in the Example 1 above, VendorA has specified the macro SLOT_ID in their callout URL (see [Vendor URL Specification](#vendor-url-specification)). The RTC config specifies the value "1" to substitute for SLOT_ID in the callout URL. You may also set the value of a macro as a JSON object or array. This JSON object will be stringified automatically prior to replacement in the URL.
@@ -100,7 +100,7 @@ While all three parameters of rtc-config are optional, either "vendors" or "urls
 
 ### Vendor URL Specification
 
-To spare publishers the details of having to construct URLs for external vendors, vendors may register a URL with macros in a central file called [callout-vendors.js](https://github.com/ampproject/amphtml/blob/master/src/service/real-time-config/callout-vendors.js), which maps unique vendor names to an object which includes a URL and a list of allowed macros that can be substituted into `url`. Vendors may include these macros in their URLs, which publishers can then specify the value for. Additionally, vendors may specify an `errorReportingUrl`. This errorReportingUrl will be sent 1% sampled-per-page errors from callouts to their RTC endpoint. For instance:
+To spare publishers the details of having to construct URLs for external vendors, vendors may register a URL with macros in a central file called [callout-vendors.js](https://github.com/ampproject/amphtml/blob/main/src/service/real-time-config/callout-vendors.js), which maps unique vendor names to an object which includes a URL and a list of allowed macros that can be substituted into `url`. Vendors may include these macros in their URLs, which publishers can then specify the value for. Additionally, vendors may specify an `errorReportingUrl`. This errorReportingUrl will be sent 1% sampled-per-page errors from callouts to their RTC endpoint. For instance:
 
 ```text
 /** amp-a4a/0.1/callout-vendors.js */
@@ -164,7 +164,7 @@ RTC callout requests are sent from the AMP runtime with the following headers:
 
 Additionally, query string parameters are optionally sent as per the specification of the URL.
 
-RTC requests are sent using the [fetchJson method defined in xhr-impl.js.](https://github.com/ampproject/amphtml/blob/master/src/service/xhr-impl.js#L213) For RTC, in practice this is a GET request.
+RTC requests are sent using the [fetchJson method defined in xhr-impl.js.](https://github.com/ampproject/amphtml/blob/main/src/service/xhr-impl.js#L213) For RTC, in practice this is a GET request.
 
 RTC requests are only sent to HTTPS endpoints.
 
@@ -179,7 +179,7 @@ The RTC callout endpoint must use HTTPS. HTTP requests are forbidden.
 The RTC Response to a GET request must meet the following requirements:
 
 -   Status Code = 200
--   See [here for Required Headers](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#ensuring-secure-responses) and note that Access-Control-Allow-Credentials: true must be present for cookies to be included in the request.
+-   See [here for Required Headers](https://github.com/ampproject/amphtml/blob/main/spec/amp-cors-requests.md#ensuring-secure-responses) and note that Access-Control-Allow-Credentials: true must be present for cookies to be included in the request.
 -   Body of response is a JSON object of targeting information such as:
     -   **<code>{"targeting": {"sport":["rugby","cricket"]}}</code>**</strong>
     -   The response body must be JSON, but the actual structure of that data need not match the structure here. Refer to Fast Fetch Network specific documentation for the required spec. (for example, if using DoubleClick, refer to DoubleClick docs).
@@ -228,14 +228,14 @@ In both cases, the requirements for an errorReportingUrl are the same:
 -   errorReportingUrl must use HTTPS.
 -   Response should be an empty 200.
 -   errorReportingUrl may utilize two available macros that will be substituted in:
-    -   **ERROR_TYPE** - Will be sent as an enum value that corresponds to values in `RTC_ERROR_ENUM` found in [real-time-config-impl.js](https://github.com/ampproject/amphtml/blob/master/src/service/real-time-config/real-time-config-impl.js).
+    -   **ERROR_TYPE** - Will be sent as an enum value that corresponds to values in `RTC_ERROR_ENUM` found in [real-time-config-impl.js](https://github.com/ampproject/amphtml/blob/main/src/service/real-time-config/real-time-config-impl.js).
     -   **HREF** - The actual full URL of the page. Equivalent to historical value of AMP's window.context.location.href.
 
-The error ping will be sent by creating an image pixel in the document. See `sendErrorMessage` in [real-time-config-impl.js](https://github.com/ampproject/amphtml/blob/master/src/service/real-time-config/real-time-config-impl.js) for implementation details.
+The error ping will be sent by creating an image pixel in the document. See `sendErrorMessage` in [real-time-config-impl.js](https://github.com/ampproject/amphtml/blob/main/src/service/real-time-config/real-time-config-impl.js) for implementation details.
 
 ### AMP Consent Integration
 
-The AMP-Consent extension provides publishers the ability to collect and store a user's consent through a UI control, while also providing the ability to block other AMP components based on the user's consent. See [here for documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md).
+The AMP-Consent extension provides publishers the ability to collect and store a user's consent through a UI control, while also providing the ability to block other AMP components based on the user's consent. See [here for documentation](https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/amp-consent.md).
 
 Real Time Config supports integration with AMP-Consent. If the AMP-consent response is neither `SUFFICIENT` nor `UNKNOWN_NOT_REQUIRED`, then by default all RTC callouts are suppressed. However, you may optionally modify this setting, to allow specific RTC callouts that should be sent regardless of the consent state. A publisher can modify this across all RTC requests for a given ad slot or on a per-RTC-callout basis. A publisher also may either permit all consent states, or only specific consent states, using the RTC Config attribute `sendRegardlessOfConsentState`.
 
@@ -401,7 +401,7 @@ Next, let's take an example where the page consent-state is `UNKNOWN`. The callo
 
 ### Blocking RTC
 
-The `block-rtc` provides a way to utilize the `<amp-geo>` component to detect user's geo location to decide if a RTC callout should be prevented. The value of `block-rtc` should be a comma delimited string of geo group codes which are defined in `<amp-geo>` (details [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md)). If no `<amp-geo>` element is found or no valid value for this attribute, then the RTC callout will occur as normal.
+The `block-rtc` provides a way to utilize the `<amp-geo>` component to detect user's geo location to decide if a RTC callout should be prevented. The value of `block-rtc` should be a comma delimited string of geo group codes which are defined in `<amp-geo>` (details [here](https://github.com/ampproject/amphtml/blob/main/extensions/amp-geo/amp-geo.md)). If no `<amp-geo>` element is found or no valid value for this attribute, then the RTC callout will occur as normal.
 
 ```html
 <amp-ad
@@ -442,7 +442,7 @@ RTC supports macro substitution for building callout URLs. These macros can be s
 
 #### Vendor Defined Macros
 
-A vendor can specify macros for substitution in their URL. The only requirement to do this is to include text in their URL in [callout-vendors.js](https://github.com/ampproject/amphtml/blob/master/src/service/real-time-config/callout-vendors.js) that is intended to be replaced.
+A vendor can specify macros for substitution in their URL. The only requirement to do this is to include text in their URL in [callout-vendors.js](https://github.com/ampproject/amphtml/blob/main/src/service/real-time-config/callout-vendors.js) that is intended to be replaced.
 
 **Example**
 
@@ -481,7 +481,7 @@ The resulting RTC callout URL will then be, after macro expansion:
 
 #### Fast Fetch Implementation Defined Macros
 
-In addition to vendor-defined macros, with publishers specifying the values for substitution, there is also the ability to utilize macros defined by the Fast Fetch implementation. For example, imagine if there is a property, **fooProp,** of the element **fooEl** that is only calculated at runtime. A Fast Fetch network that wants to support optionally adding the value of fooProp to RTC callout URLs that it sends can do so by overriding the method [getCustomRealTimeConfigMacros on AmpA4a ](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/amp-a4a.js)in their Fast Fetch implementation. The method should return a mapping of macros to values or functions that resolve to a value.
+In addition to vendor-defined macros, with publishers specifying the values for substitution, there is also the ability to utilize macros defined by the Fast Fetch implementation. For example, imagine if there is a property, **fooProp,** of the element **fooEl** that is only calculated at runtime. A Fast Fetch network that wants to support optionally adding the value of fooProp to RTC callout URLs that it sends can do so by overriding the method [getCustomRealTimeConfigMacros on AmpA4a ](https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/0.1/amp-a4a.js)in their Fast Fetch implementation. The method should return a mapping of macros to values or functions that resolve to a value.
 
 ##### Example 3: Fast Fetch implementation defined macros
 
@@ -509,7 +509,7 @@ It is possible for a vendor to specify macros in their URL into which the Fast F
 
 ###### Example 4
 
-Vendor1 wants to allow publishers to substitute in the value of the slot_id, and allow the Fast Fetch network implementation to substitute in the start time. Thus, they define their URL in [callout-vendors.js](https://github.com/ampproject/amphtml/blob/master/src/service/real-time-config/callout-vendors.js) as follows. Note, the vendor only lists SLOT_ID in the macros array, even though SLOT_ID and START are both macros in their URL. The macros array is a list of macros that can be utilized by the publisher. Fast Fetch will always attempt to substitute in network-defined macros, regardless of whether they are defined in the macros array.
+Vendor1 wants to allow publishers to substitute in the value of the slot_id, and allow the Fast Fetch network implementation to substitute in the start time. Thus, they define their URL in [callout-vendors.js](https://github.com/ampproject/amphtml/blob/main/src/service/real-time-config/callout-vendors.js) as follows. Note, the vendor only lists SLOT_ID in the macros array, even though SLOT_ID and START are both macros in their URL. The macros array is a list of macros that can be utilized by the publisher. Fast Fetch will always attempt to substitute in network-defined macros, regardless of whether they are defined in the macros array.
 
 ```js
 /** amp-a4a/0.1/callout-vendors.js */
@@ -590,7 +590,7 @@ The merging of the results of the RTC callouts into the ad request URL is determ
 
 ### Error Cases
 
-Listed below are the most prominent error cases in RTC. For usage of the following error cases, see [real-time-config-impl.js](https://github.com/ampproject/amphtml/blob/master/src/service/real-time-config/real-time-config-impl.js)
+Listed below are the most prominent error cases in RTC. For usage of the following error cases, see [real-time-config-impl.js](https://github.com/ampproject/amphtml/blob/main/src/service/real-time-config/real-time-config-impl.js)
 
 ##### Misconfigured RTC Config
 

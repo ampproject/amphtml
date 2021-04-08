@@ -82,7 +82,7 @@ not already have a fragment.</td>
     <td width="40%"><strong>autoplay</strong></td>
     <td>If this attribute is present, and the browser supports autoplay, the video will be automatically
 played as soon as it becomes visible. There are some conditions that the component needs to meet
-to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</td>
+to be played, <a href="https://github.com/ampproject/amphtml/blob/main/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
@@ -177,7 +177,7 @@ The `src` and `poster` URLs are appended with [`data-param-*` attributes as quer
 
 The `/amp-video-iframe` document bootstraps the [integration script](#integration-inside-the-frame) so that the AMP document can coordinate with the player.
 
-Note: If you're a vendor hosting an integration document, feel free to [contribute a code sample to this page,](https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-iframe/amp-video-iframe.md) specifying your provided
+Note: If you're a vendor hosting an integration document, feel free to [contribute a code sample to this page,](https://github.com/ampproject/amphtml/blob/main/extensions/amp-video-iframe/amp-video-iframe.md) specifying your provided
 `src` and usable `data-param-*` attributes.
 
 ## Integration inside the frame
@@ -432,10 +432,10 @@ Note: If you only require to block the iframe from loading when consent is not g
 
 The `callback` passed to the function will be executed with an object containing the following properties:
 
--   [**`consentMetadata`**](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#on-consent-metadata)
--   [**`consentString`**](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#on-consent-string)
--   [**`consentPolicyState`**](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#on-consent-state)
--   [**`consentPolicySharedData`**](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#on-related-information)
+-   [**`consentMetadata`**](https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#on-consent-metadata)
+-   [**`consentString`**](https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#on-consent-string)
+-   [**`consentPolicyState`**](https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#on-consent-state)
+-   [**`consentPolicySharedData`**](https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#on-related-information)
 
 ```json
 {

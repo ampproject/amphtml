@@ -43,26 +43,26 @@ Step-by-step instructions for the contributor to follow as they work through the
 ### Step by step
 
 -   [ ] Claim this issue by adding a comment below. Please only claim this bug if you plan on starting work in the next day or so. (If you [join the ampproject GitHub org](https://goo.gl/forms/T65peVtfQfEoDWeD3) we'll be able to assign this issue to you after you've claimed it.)
--   [ ] If you aren't too familiar with Git/GitHub, see the [Getting Started End-to-End Guide](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md) for [an intro to Git & GitHub,](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#intro-to-git-and-github) and [how to get a copy of the code](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#get-a-copy-of-the-amphtml-code). You can also refer to the [Quick Start Guide](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md) for the necessary setup steps with less explanation than the End-to-End guide.
--   [ ] Follow the instructions for [building AMP](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#building-amp-and-starting-a-local-server).
--   [ ] [Create a Git branch](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#create-a-git-branch) for making your changes.
--   [ ] [Sign the Contributor License Agreement](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#contributor-license-agreement) before creating a Pull Request. (If you are contributing code on behalf of a corporation start this process as early as possible.)
+-   [ ] If you aren't too familiar with Git/GitHub, see the [Getting Started End-to-End Guide](https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md) for [an intro to Git & GitHub,](https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md#intro-to-git-and-github) and [how to get a copy of the code](https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md#get-a-copy-of-the-amphtml-code). You can also refer to the [Quick Start Guide](https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-quick.md) for the necessary setup steps with less explanation than the End-to-End guide.
+-   [ ] Follow the instructions for [building AMP](https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md#building-amp-and-starting-a-local-server).
+-   [ ] [Create a Git branch](https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md#create-a-git-branch) for making your changes.
+-   [ ] [Sign the Contributor License Agreement](https://github.com/ampproject/amphtml/blob/main/CONTRIBUTING.md#contributor-license-agreement) before creating a Pull Request. (If you are contributing code on behalf of a corporation start this process as early as possible.)
 <!--
 Add steps that are specific to the issue here, e.g. perhaps they should edit a test, run `amp unit` or `amp integration` to see it fails, change a file and then run test again to see that the new test succeeds?  Adjust the level of detail for the background you indicated the contributor should have.
 -->
--   [ ] [Commit your changes](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#edit-files-and-commit-them) frequently.
--   [ ] [Push your changes to GitHub](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#push-your-changes-to-your-github-fork).
+-   [ ] [Commit your changes](https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md#edit-files-and-commit-them) frequently.
+-   [ ] [Push your changes to GitHub](https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md#push-your-changes-to-your-github-fork).
 <!--
 Ideally suggest a reviewer for the Pull Request; not knowing who to set as the reviewer can be confusing for new contributors.
 -->
--   [ ] [Create a Pull Request](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#send-a-pull-request-ie-request-a-code-review). Mention `closes Issue <this issue number>` in the description.
--   [ ] [Respond to your reviewer's comments](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#respond-to-pull-request-comments) (if any).
+-   [ ] [Create a Pull Request](https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md#send-a-pull-request-ie-request-a-code-review). Mention `closes Issue <this issue number>` in the description.
+-   [ ] [Respond to your reviewer's comments](https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md#respond-to-pull-request-comments) (if any).
 
 <!--
 If this issue is a change that won't go out with a push (e.g. a doc change, a fix to the build, etc.) update the sentence about how to see their change is live.
 -->
 
-Once approved, your changes will be merged. **⚡⚡⚡Congrats on making your first contribution to AMP!⚡⚡⚡** You'll be able to see it [live across the web soon](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md)!
+Once approved, your changes will be merged. **⚡⚡⚡Congrats on making your first contribution to AMP!⚡⚡⚡** You'll be able to see it [live across the web soon](https://github.com/ampproject/amphtml/blob/main/contributing/release-schedule.md)!
 
 Thanks, and we hope to see more contributions from you soon.
 
@@ -72,4 +72,4 @@ Thanks, and we hope to see more contributions from you soon.
 Ideally provide a specific contact to @mention here as well
 -->
 
-If you have questions ask in this issue or on your Pull Request (if you've created one) or see the [How to get help](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#how-to-get-help) section of the Getting Started guide.
+If you have questions ask in this issue or on your Pull Request (if you've created one) or see the [How to get help](https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md#how-to-get-help) section of the Getting Started guide.

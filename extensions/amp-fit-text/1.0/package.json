@@ -23,7 +23,7 @@
     "url": "https://github.com/ampproject/amphtml.git",
     "directory": "extensions/amp-fit-text/1.0"
   },
-  "homepage": "https://github.com/ampproject/amphtml/tree/master/extensions/amp-fit-text/1.0",
+  "homepage": "https://github.com/ampproject/amphtml/tree/main/extensions/amp-fit-text/1.0",
   "peerDependencies": {
     "preact": "^10.2.1",
     "react": "^17.0.0"

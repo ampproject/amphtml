@@ -390,5 +390,5 @@ Both the default recommendation box and default separator are keyboard-focusable
 
 ## Validation
 
-See [amp-next-page rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-next-page/validator-amp-next-page.protoascii)
+See [amp-next-page rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-next-page/validator-amp-next-page.protoascii)
 in the AMP validator specification.

@@ -158,7 +158,7 @@ describe
           return new Promise((resolve) => {
             // Listening to the "amp:visibilitychange" string literal because it's
             // part of the public API.
-            // https://github.com/ampproject/amphtml/blob/master/ads/README.md#page-visibility
+            // https://github.com/ampproject/amphtml/blob/main/ads/README.md#page-visibility
             iframe.contentWindow.addEventListener(
               'amp:visibilitychange',
               resolve

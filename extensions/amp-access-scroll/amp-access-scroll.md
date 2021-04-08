@@ -59,4 +59,4 @@ Learn more at [https://developer.scroll.com/amp](https://developer.scroll.com/am
 
 ## Validation
 
-See [`amp-access-scroll` rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access-scroll/validator-amp-access-scroll.protoascii) in the AMP validator specification.
+See [`amp-access-scroll` rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-access-scroll/validator-amp-access-scroll.protoascii) in the AMP validator specification.

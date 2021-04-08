@@ -20,7 +20,7 @@ Custom does not represent a specific network. Rather, it provides a way for
 a site to display simple ads on a self-service basis. You must provide
 your own ad server to deliver the ads in json format as shown below.
 
-Each ad must contain a [mustache](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mustache/amp-mustache.md)
+Each ad must contain a [mustache](https://github.com/ampproject/amphtml/blob/main/extensions/amp-mustache/amp-mustache.md)
 template.
 
 Each ad must contain the URL that will be used to fetch data from the server.
@@ -222,7 +222,7 @@ If no slot was specified, the server returns a single template rather than an ar
 }
 ```
 
-The ad server must enforce [AMP CORS](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#cors-security-in-amp).
+The ad server must enforce [AMP CORS](https://github.com/ampproject/amphtml/blob/main/spec/amp-cors-requests.md#cors-security-in-amp).
 Here is an example set of the relevant response headers:
 
 ```html
@@ -231,7 +231,7 @@ Access-Control-Allow-Origin:https://my--ad--server-com.cdn.ampproject.org
 
 ## Analytics
 
-To get analytics of how your ads are performing, use the [amp-analytics](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md) tag.
+To get analytics of how your ads are performing, use the [amp-analytics](https://github.com/ampproject/amphtml/blob/main/extensions/amp-analytics/amp-analytics.md) tag.
 
 Here is an example of how to make it work with Google Analytics events. Note that the variables can be set either by the code
 that displays the page (as in `eventAction`) or in variables passed back by the ad server (as in `eventCategory` and `eventLabel`).

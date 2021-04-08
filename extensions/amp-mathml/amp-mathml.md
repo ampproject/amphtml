@@ -78,4 +78,4 @@ Define a `title` attribute for the component to propagate to the underlying `<if
 
 ## Validation
 
-See [amp-mathml rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mathml/validator-amp-mathml.protoascii) in the AMP validator specification.
+See [amp-mathml rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-mathml/validator-amp-mathml.protoascii) in the AMP validator specification.

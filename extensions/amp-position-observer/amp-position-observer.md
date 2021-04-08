@@ -218,4 +218,4 @@ The presence of the attribute represents the `true` value and the absence of the
 
 ## Validation
 
-See [amp-position-observer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-position-observer/validator-amp-position-observer.protoascii) in the AMP validator specification.
+See [amp-position-observer rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-position-observer/validator-amp-position-observer.protoascii) in the AMP validator specification.

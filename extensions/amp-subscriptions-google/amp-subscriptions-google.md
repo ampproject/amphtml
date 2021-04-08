@@ -132,7 +132,7 @@ If `subscribe.google.com` is the "winning" service, the request to the `pingback
 }
 ```
 
-Where `data` matches the [entitlements response](https://github.com/subscriptions-project/swg-js/blob/master/docs/entitlements-flow.md#entitlement-response) format.
+Where `data` matches the [entitlements response](https://github.com/subscriptions-project/swg-js/blob/main/docs/entitlements-flow.md#entitlement-response) format.
 
 ## Example with markup
 

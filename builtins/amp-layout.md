@@ -56,4 +56,4 @@ The `amp-layout` component includes [common attributes](https://amp.dev/document
 
 ## Validation
 
-See [amp-layout rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii) in the AMP validator specification.
+See [amp-layout rules](https://github.com/ampproject/amphtml/blob/main/validator/validator-main.protoascii) in the AMP validator specification.

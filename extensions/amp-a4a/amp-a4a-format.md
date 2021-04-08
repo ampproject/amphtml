@@ -93,7 +93,7 @@ In addition, creatives must obey the following rules:
 
 ### Boilerplate
 
-AMPHTML ad creatives require a different, and considerably simpler, boilerplate style line than [general AMP documents do](https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md):
+AMPHTML ad creatives require a different, and considerably simpler, boilerplate style line than [general AMP documents do](https://github.com/ampproject/amphtml/blob/main/spec/amp-boilerplate.md):
 
 ```html
 <style amp4ads-boilerplate>
@@ -118,7 +118,7 @@ Finally, the AMPHTML ad boilerplate uses `amp-a4a-boilerplate` rather than
 more accurate error messages to help developers.
 
 Note that the same rules about mutations to the boilerplate text apply as in
-the [general AMP boilerplate](https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md).
+the [general AMP boilerplate](https://github.com/ampproject/amphtml/blob/main/spec/amp-boilerplate.md).
 
 ### CSS
 
@@ -277,7 +277,7 @@ _Example:_ `<amp-iframe>` is omitted from this list. It is disallowed
 because ads could use it to execute arbitrary Javascript and load arbitrary
 content. Ads wanting to use such capabilities should return `false` from
 their
-[a4aRegistry](https://github.com/ampproject/amphtml/blob/master/ads/_a4a-config.js#L40)
+[a4aRegistry](https://github.com/ampproject/amphtml/blob/main/ads/_a4a-config.js#L40)
 entry and use the existing '3p iframe' ad rendering mechanism.
 
 _Example:_ `<amp-facebook>`, `<amp-instagram>`, `<amp-twitter>`, and

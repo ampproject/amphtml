@@ -68,4 +68,4 @@ With responsive layout the width and height from the example should yield correc
 
 ## Validation
 
-See [amp-izlesene rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-izlesene/validator-amp-izlesene.protoascii) in the AMP validator specification.
+See [amp-izlesene rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-izlesene/validator-amp-izlesene.protoascii) in the AMP validator specification.

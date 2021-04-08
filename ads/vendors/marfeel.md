@@ -38,7 +38,7 @@ For additional details and support, please contact [Marfeel](https://marfeel.com
 
 ## Consent Support
 
-When [user consent](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#blocking-behaviors) is required, Marfeel ad approaches user consent in the following ways:
+When [user consent](https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/amp-consent.md#blocking-behaviors) is required, Marfeel ad approaches user consent in the following ways:
 
 -   `CONSENT_POLICY_STATE.SUFFICIENT`: Marfeel amp-ad will display a personalized ad to the user.
 -   `CONSENT_POLICY_STATE.INSUFFICIENT`: Marfeel amp-ad will display a non-personalized ad to the user.

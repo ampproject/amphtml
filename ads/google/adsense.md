@@ -34,7 +34,7 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see [ad network documentation](https://support.google.com/adsense/answer/7183212?hl=en). For AdSense for Search and AdSense for Shopping, please see the [CSA AMP ad type](https://github.com/ampproject/amphtml/blob/master/ads/vendors/csa.md).
+For semantics of configuration, please see [ad network documentation](https://support.google.com/adsense/answer/7183212?hl=en). For AdSense for Search and AdSense for Shopping, please see the [CSA AMP ad type](https://github.com/ampproject/amphtml/blob/main/ads/vendors/csa.md).
 
 Supported parameters:
 

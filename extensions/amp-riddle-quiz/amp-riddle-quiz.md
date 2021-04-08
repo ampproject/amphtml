@@ -55,4 +55,4 @@ This component embeds [Riddle](https://www.riddle.com/) content (e.g., quiz, lis
 
 ## Validation
 
-See [amp-riddle-quiz rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-riddle-quiz/validator-amp-riddle-quiz.protoascii) in the AMP validator specification.
+See [amp-riddle-quiz rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-riddle-quiz/validator-amp-riddle-quiz.protoascii) in the AMP validator specification.

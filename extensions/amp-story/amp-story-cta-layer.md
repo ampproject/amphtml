@@ -51,18 +51,18 @@ Both `amp-story-cta-layer` and `amp-story-page-attachment`(amp-story-page-attach
 ```
 
 <amp-img alt="CTA Layer" layout="fixed"
-    src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-cta-layer.png"
+    src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-story/img/layers-cta-layer.png"
     width="404" height="678">
 <noscript>
 <img width="404" height="678"
-         src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-cta-layer.png" />
+         src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-story/img/layers-cta-layer.png" />
 </noscript>
 </amp-img>
 
-[Complete example found in the examples directory](https://github.com/ampproject/amphtml/blob/master/examples/amp-story/cta-layer-outlink.html)
+[Complete example found in the examples directory](https://github.com/ampproject/amphtml/blob/main/examples/amp-story/cta-layer-outlink.html)
 
 ### Valid children
 
 The `amp-story-cta-layer` allows mostly the same descendants as `amp-story-grid-layer`, and additionally allows `<a>` and `<button>` tags.
 
-For an updated list of supported children, be sure to take a look at the [amp-story-cta-layer-allowed-descendants](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/validator-amp-story.protoascii) field in the validation rules.
+For an updated list of supported children, be sure to take a look at the [amp-story-cta-layer-allowed-descendants](https://github.com/ampproject/amphtml/blob/main/extensions/amp-story/validator-amp-story.protoascii) field in the validation rules.

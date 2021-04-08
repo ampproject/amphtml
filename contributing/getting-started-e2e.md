@@ -112,7 +112,7 @@ If you are new to Git it may seem surprising that there are three different repo
 
 Note that each of these repositories has a complete copy of the entire amphtml codebase. If your local repository is on your computer and you lose your internet connection you'll still be able to make changes to any file in your local repository. Part of the workflow for Git that we'll go through is how you keep these three repositories in sync.
 
-One thing that might put your mind at ease: if you aren't in a [role](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#roles) that lets you make changes to the amphtml repository directly any changes you make will only affect you. So go ahead and try out different Git commands without worrying you're going to break things for other people!
+One thing that might put your mind at ease: if you aren't in a [role](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md#roles) that lets you make changes to the amphtml repository directly any changes you make will only affect you. So go ahead and try out different Git commands without worrying you're going to break things for other people!
 
 ## Creating your GitHub fork and your local repository
 
@@ -456,7 +456,7 @@ For more help, see [How to get help](#how-to-get-help).
 
 # Perform manual tests
 
-Beyond technical/automated tests, manually test your changes and make sure that they work as expected, and that they follow AMP's [design principles](https://github.com/ampproject/amphtml/blob/master/contributing/DESIGN_PRINCIPLES.md). In particular, make sure that your changes are accessible - see [W3C WAI Easy Checks](https://www.w3.org/WAI/test-evaluate/preliminary/) for an initial set of suggested manual tests. Some aspects of manual testing can be semi-automated, using tools such as [Lighthouse](https://developers.google.com/web/tools/lighthouse) (which includes an accessibility audit report) and [Microsoft's Accessibility Insights](https://accessibilityinsights.io/).
+Beyond technical/automated tests, manually test your changes and make sure that they work as expected, and that they follow AMP's [design principles](https://github.com/ampproject/amphtml/blob/main/contributing/DESIGN_PRINCIPLES.md). In particular, make sure that your changes are accessible - see [W3C WAI Easy Checks](https://www.w3.org/WAI/test-evaluate/preliminary/) for an initial set of suggested manual tests. Some aspects of manual testing can be semi-automated, using tools such as [Lighthouse](https://developers.google.com/web/tools/lighthouse) (which includes an accessibility audit report) and [Microsoft's Accessibility Insights](https://accessibilityinsights.io/).
 
 Note that for more extensive automated accessibility testing, there are further options available that integrate directly within existing test/integration workflows, such as [Deque's axe-core](https://github.com/dequelabs/axe-core).
 
@@ -507,7 +507,7 @@ Note that you _can_ edit files in your branch directly on GitHub using the web U
 
 # Send a Pull Request (i.e. request a code review)
 
-In order for your changes to become part of the amphtml repository, you will need to get your [code reviewed](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#code-review-and-approval) via a Pull Request (PR). In fact you won't actually merge your code into the amphtml repository directly; after your code has been reviewed [someone with the permission to modify the amphtml repository](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#roles) will handle the merge for you.
+In order for your changes to become part of the amphtml repository, you will need to get your [code reviewed](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md#code-review-and-approval) via a Pull Request (PR). In fact you won't actually merge your code into the amphtml repository directly; after your code has been reviewed [someone with the permission to modify the amphtml repository](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md#roles) will handle the merge for you.
 
 Once your code is ready for a review, go to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and click on the "Compare & pull request" button on the "recently pushed branches" banner. If that banner isn't visible, go to your GitHub fork at
 `https://github.com/<username>/amphtml`, use the Branch dropdown to select the branch that contains the changes you want reviewed and press the "New pull request" button.
@@ -522,9 +522,9 @@ Below this are text boxes where you can provide a title and description for your
 
 In your PR description or comments refer to any GitHub issues that your PR is addressing. This will let people reviewing your PR know what issue your change is addressing and let anyone watching the issue know that there's a PR for it. You can do this by including the text `issue #<your issue number>` in the description/comment. If your PR completely fixes the issue, make this `fixes #<your issue number>` instead, which will also cause the issue to be closed once your PR is merged.
 
-You will need to find a [Reviewer and Owner](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#code-review-and-approval) to review your code and approve it. When you find someone to review your code, cc them on the Pull Request (by adding a line "/cc @username", e.g. "/cc @mrjoro").
+You will need to find a [Reviewer and Owner](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md#code-review-and-approval) to review your code and approve it. When you find someone to review your code, cc them on the Pull Request (by adding a line "/cc @username", e.g. "/cc @mrjoro").
 
-When you're new to contributing to AMP it can be tricky to figure out who should review your code. In general if you've been working with someone in the community on your change, they can likely review your code or know who can review it. The [people who previously changed the files you're changing](https://help.github.com/en/articles/tracking-changes-in-a-file) are also good candidates for reviewing your change. If you aren't sure who to ask to review your code, the steps for [finding a guide](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#find-a-guide) can also work for finding a reviewer for your change.
+When you're new to contributing to AMP it can be tricky to figure out who should review your code. In general if you've been working with someone in the community on your change, they can likely review your code or know who can review it. The [people who previously changed the files you're changing](https://help.github.com/en/articles/tracking-changes-in-a-file) are also good candidates for reviewing your change. If you aren't sure who to ask to review your code, the steps for [finding a guide](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md#find-a-guide) can also work for finding a reviewer for your change.
 
 When you're done click "Create pull request." This will bring you to your Pull Request page where you can track progress, add comments, etc.
 
@@ -599,7 +599,7 @@ If you're looking for ideas on your next contribution feel free to reach out to 
 
 This end-to-end guide provided enough details to get a basic understanding of a typical workflow for contributing code to the AMP open source project. If you find yourself wanting to know more there are a lot of resources available. Here are a few:
 
--   The ["Building an AMP Extension" guide](https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md) provides step-by-step instructions for a common type of code contribution to AMP. Even if your project involves modifying an existing AMP component, this guide will give you an overview of how AMP components work.
+-   The ["Building an AMP Extension" guide](https://github.com/ampproject/amphtml/blob/main/contributing/building-an-amp-extension.md) provides step-by-step instructions for a common type of code contribution to AMP. Even if your project involves modifying an existing AMP component, this guide will give you an overview of how AMP components work.
 -   GitHub has a lot of helpful introductory material, including:
     -   a [Hello World tutorial](https://guides.github.com/activities/hello-world/) that's a bit less in depth than this guide, but it covers things like creating a new repository and merging in code after a pull request
     -   the [Git cheat sheet](https://services.github.com/on-demand/downloads/github-git-cheat-sheet.pdf) from GitHub provides a quick reference to some common commands, including many we didn't cover in this guide (such as [diff](https://www.git-tower.com/learn/git/ebook/en/command-line/advanced-topics/diffs) and [log](https://git-scm.com/book/en/v2/Git-Basics-Viewing-the-Commit-History))

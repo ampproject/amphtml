@@ -1317,7 +1317,7 @@ app.use('/subscription/pingback', (req, res) => {
     },
     // Associate this ID with the registration. Use it to look up metering state
     // for future entitlements requests
-    // https://github.com/ampproject/amphtml/blob/master/extensions/amp-subscriptions/amp-subscriptions.md#combining-the-amp-reader-id-with-publisher-cookies
+    // https://github.com/ampproject/amphtml/blob/main/extensions/amp-subscriptions/amp-subscriptions.md#combining-the-amp-reader-id-with-publisher-cookies
     "ampReaderId": "amp-s0m31d3nt1f13r"
   }
 

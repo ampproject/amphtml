@@ -72,5 +72,5 @@ that are extended to all AMP components.
 
 ## Validation
 
-See [amp-3q-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-3q-player/validator-amp-3q-player.protoascii)
+See [amp-3q-player rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-3q-player/validator-amp-3q-player.protoascii)
 in the AMP validator specification.

@@ -30,7 +30,7 @@ const {red, cyan} = colors;
 
 // custom-config.json overlays the active config. It is not part of checked-in
 // source (.gitignore'd). See:
-// https://github.com/ampproject/amphtml/blob/master/build-system/global-configs/README.md#custom-configjson
+// https://github.com/ampproject/amphtml/blob/main/build-system/global-configs/README.md#custom-configjson
 const customConfigFile = 'build-system/global-configs/custom-config.json';
 
 /**

@@ -73,7 +73,7 @@ For more details, see [documentation on the docking extension itself](https://am
 If this attribute is present, and the browser supports autoplay, the video will
 be automatically played as soon as it becomes visible. There are some conditions
 that the component needs to meet to be played,
-[which are outlined in the Video in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay).
+[which are outlined in the Video in AMP spec](https://github.com/ampproject/amphtml/blob/main/spec/amp-video-interface.md#autoplay).
 
 ### Common attributes
 

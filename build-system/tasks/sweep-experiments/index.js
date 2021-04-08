@@ -296,7 +296,7 @@ const checklistMarkdown = (list) =>
  * @return {string}
  */
 const readmeMdGithubLink = () =>
-  `https://github.com/ampproject/amphtml/blob/master/${path.relative(
+  `https://github.com/ampproject/amphtml/blob/main/${path.relative(
     process.cwd(),
     __dirname
   )}/README.md`;
