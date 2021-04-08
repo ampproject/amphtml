@@ -83,8 +83,8 @@ const setupMeasurement = (page) =>
   });
 
 /**
- * Intecepts requests for default extensions made by runtime,
- * and returns cached version (master and local).
+ * Intecepts requests for default extensions made by runtime and returns a
+ * cached version.
  * @param {Request} interceptedRequest
  * @param {string} version
  * @return {!Promise<boolean>}

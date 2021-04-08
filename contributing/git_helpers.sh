@@ -10,7 +10,7 @@ git_track() {
       echo "You must specify the name of the branch to create."
       return
   fi
-  git branch --track $1 origin/master
+  git branch --track $1 origin/main
   echo "Checking out $1"
   git checkout $1
 }
@@ -24,31 +24,31 @@ git_delete_branch() {
       echo "You must specify the name of the branch to delete."
       return
   fi
-  git checkout master
+  git checkout main
   git branch -D $1
   echo "Deleted local branch $1"
   git push origin --delete $1
   echo "Deleted remote branch origin:$1 (if it existed)"
 }
 
-# Syncs your local master branch to the HEAD of the "upstream" repository,
-# then pushes the updates to your remote master branch and the local
+# Syncs your local main branch to the HEAD of the "upstream" repository,
+# then pushes the updates to your remote main branch and the local
 # branch you ran this command from.
 git_sync() {
   local branch_name=$(git symbolic-ref -q HEAD)
   branch_name=${branch_name##refs/heads/}
   branch_name=${branch_name:-HEAD}
-  echo "Checking out your master branch"
-  git checkout master
-  echo "Updating your local master branch with the latest changes (pulling upstream/master)"
-  git pull --rebase upstream master
+  echo "Checking out your main branch"
+  git checkout main
+  echo "Updating your local main branch with the latest changes (pulling upstream/main)"
+  git pull --rebase upstream main
   git rebase -i
-  echo "Updating your remote repository with the latest changes (pushing origin/master)"
-  git push origin master -f
+  echo "Updating your remote repository with the latest changes (pushing origin/main)"
+  git push origin main -f
   echo "Checking out $branch_name"
   git checkout $branch_name
   echo "Updating your local $branch_name branch"
-  git rebase master
+  git rebase main
 }
 
 # Pushes your changes from the current branch to your remote repository.
