@@ -512,19 +512,10 @@ HTML-native `img` tag which will be out of AMP resource management.
 
 #### Loading indicators
 
-Consider showing a loading indicator if your element is expected to take
-a long time to load (for example, loading a GIF, video or iframe). AMP
-has a built-in mechanism to show a loading indicator simply by
-listing your element so it's allowed to show it. You can do that inside the `layout.js`
-file in the `LOADING_ELEMENTS_` object.
+Loading indicators are displayed for all component elements that have either of these properties:
 
-```javascript
-export const LOADING_ELEMENTS_ = {
-  ...
-  'AMP-YOUTUBE': true,
-  'AMP-MY-ELEMENT': true,
-}
-```
+-   its `layout` attribute is **not** `container` or `nodisplay`
+-   it has a `loadable` attribute
 
 ### Destroying heavyweight resources
 

@@ -18,8 +18,20 @@ import {CSS} from '../../../build/amp-loader-0.1.css';
 import {Services} from '../../../src/services';
 import {htmlFor} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {isIframeVideoPlayerComponent} from '../../../src/layout';
 import {setImportantStyles, setStyle} from '../../../src/style';
+
+const videoPlayerTagNameRe = /^amp\-(video|.+player)|AMP-BRIGHTCOVE|AMP-DAILYMOTION|AMP-YOUTUBE|AMP-VIMEO|AMP-IMA-VIDEO/i;
+
+/**
+ * @param {string} tagName
+ * @return {boolean}
+ */
+function isIframeVideoPlayerComponent(tagName) {
+  if (tagName == 'AMP-VIDEO') {
+    return false;
+  }
+  return videoPlayerTagNameRe.test(tagName);
+}
 
 /**
  * @fileoverview This file implements the new AMP loader as an extension. This

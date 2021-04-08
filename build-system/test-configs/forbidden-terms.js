@@ -793,7 +793,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-intersection-observer-polyfill.js',
       'test/unit/test-json.js',
       'test/unit/test-layout-rect.js',
-      'test/unit/test-layout.js',
       'test/unit/test-log.js',
       'test/unit/test-mode.js',
       'test/unit/test-motion.js',

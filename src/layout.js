@@ -87,37 +87,6 @@ export const naturalDimensions_ = {
 };
 
 /**
- * Elements that the progress can be shown for. This set has to be externalized
- * since the element's implementation may not be downloaded yet.
- * This list does not include video players which are found via regex later.
- * @enum {boolean}
- * @private  Visible for testing only!
- */
-export const LOADING_ELEMENTS_ = {
-  'AMP-AD': true,
-  'AMP-ANIM': true,
-  'AMP-EMBED': true,
-  'AMP-FACEBOOK': true,
-  'AMP-FACEBOOK-COMMENTS': true,
-  'AMP-FACEBOOK-PAGE': true,
-  'AMP-GOOGLE-DOCUMENT-EMBED': true,
-  'AMP-IFRAME': true,
-  'AMP-IMG': true,
-  'AMP-INSTAGRAM': true,
-  'AMP-LIST': true,
-  'AMP-PINTEREST': true,
-  'AMP-PLAYBUZZ': true,
-  'AMP-TWITTER': true,
-};
-/**
- * All video player components must either have a) "video" or b) "player" in
- * their name. A few components don't follow this convention for historical
- * reasons, so they are listed individually.
- * @private @const {!RegExp}
- */
-const videoPlayerTagNameRe = /^amp\-(video|.+player)|AMP-BRIGHTCOVE|AMP-DAILYMOTION|AMP-YOUTUBE|AMP-VIMEO|AMP-IMA-VIDEO/i;
-
-/**
  * Whether aspect-ratio CSS can be used to implement responsive layouts.
  * @type {?boolean}
  */
@@ -309,22 +278,11 @@ export function getNaturalDimensions(element) {
  * @return {boolean}
  */
 export function isLoadingAllowed(element) {
-  const tagName = element.tagName.toUpperCase();
-  return LOADING_ELEMENTS_[tagName] || isIframeVideoPlayerComponent(tagName);
-}
-
-/**
- * All video player components must either have a) "video" or b) "player" in
- * their name. A few components don't follow this convention for historical
- * reasons, so they're present in the LOADING_ELEMENTS_ allowlist.
- * @param {string} tagName
- * @return {boolean}
- */
-export function isIframeVideoPlayerComponent(tagName) {
-  if (tagName == 'AMP-VIDEO') {
-    return false;
-  }
-  return videoPlayerTagNameRe.test(tagName);
+  return (
+    element.getAttribute('layout') !== Layout.CONTAINER ||
+    element.getAttribute('layout') !== Layout.NODISPLAY ||
+    element.hasAttribute('loadable')
+  );
 }
 
 /**

@@ -26,9 +26,10 @@ import {
   parseLength,
   resetShouldUseAspectRatioCssForTesting,
 } from '../../src/layout';
+import {createElementWithAttributes} from '../../src/dom';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 
-describe('Layout', () => {
+describes.realWin('Layout', {}, (env) => {
   let div;
   let aspectRatioEnabled;
 
@@ -62,56 +63,29 @@ describe('Layout', () => {
   });
 
   it('are loading components allowed', () => {
-    const el = {
-      tagName: 'hold',
-    };
-    const elementsValidTagNames = [
-      // in allowlist.
-      'AMP-AD',
-      'AMP-ANIM',
-      'AMP-EMBED',
-      'AMP-FACEBOOK',
-      'AMP-FACEBOOK-COMMENTS',
-      'AMP-FACEBOOK-PAGE',
-      'AMP-GOOGLE-DOCUMENT-EMBED',
-      'AMP-IFRAME',
-      'AMP-IMG',
-      'AMP-INSTAGRAM',
-      'AMP-LIST',
-      'AMP-PINTEREST',
-      'AMP-PLAYBUZZ',
-      'AMP-TWITTER',
+    for (const layout of [Layout.NODISPLAY, Layout.CONTAINER]) {
+      it(`is disallowed when layout="${layout}"`, () => {
+        const element = createElementWithAttributes(env.win.document, 'div', {
+          layout,
+        });
+        expect(isLoadingAllowed(element)).to.be.false;
+      });
+    }
 
-      // matched by video player naming convention (fake)
-      'AMP-FOO-PLAYER',
-      'AMP-VIDEO-FOO',
+    for (const layout of [Layout.FIXED, Layout.INTRINSIC, Layout.RESPONSIVE]) {
+      it(`is allowed when layout="${layout}"`, () => {
+        const element = createElementWithAttributes(env.win.document, 'div', {
+          layout,
+        });
+        expect(isLoadingAllowed(element)).to.be.true;
+      });
+    }
 
-      // matched by video player naming convention (actual)
-      'AMP-JWPLAYER',
-      'AMP-OOYALA-PLAYER',
-      'AMP-VIDEO-IFRAME',
-      'AMP-YOUTUBE',
-      'AMP-VIMEO',
-      'AMP-BRIGHTCOVE',
-      'AMP-DAILYMOTION',
-    ];
-    elementsValidTagNames.forEach(function (tag) {
-      el.tagName = tag;
-      expect(isLoadingAllowed(el)).to.be.true;
-    });
-
-    // This isn't an exhaustive list of elements that aren't allowed
-    // to have loading indicators.
-    const elementsInvalidTagNames = [
-      'AMP-POSITION-OBSERVER',
-      'AMP-BODYMOVIN-ANIMATION',
-      'AMP-VIDEO',
-      'AMP-REDDIT',
-      'AMP-GITHUB',
-    ];
-    elementsInvalidTagNames.forEach(function (tag) {
-      el.tagName = tag;
-      expect(isLoadingAllowed(el)).to.be.false;
+    it('is allowed when loadable', () => {
+      const element = createElementWithAttributes(env.win.document, 'div', {
+        loadable: '',
+      });
+      expect(isLoadingAllowed(element)).to.be.true;
     });
   });
 
