@@ -17,6 +17,7 @@ import {addParamsToUrl} from '../../../src/url';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {measureIntersection} from '../../../src/utils/intersection';
 import {omit} from '../../../src/utils/object';
 import {setStyle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
@@ -140,10 +141,6 @@ export class AmpIframely extends AMP.BaseElement {
     this.iframe_ = this.element.ownerDocument.createElement('iframe');
     setStyle(this.iframe_, 'border', '0px');
     this.iframe_.setAttribute(
-      'allow',
-      'encrypted-media *; accelerometer *; gyroscope *; picture-in-picture *; camera *; microphone *;'
-    );
-    this.iframe_.setAttribute(
       'sandbox',
       'allow-scripts allow-same-origin allow-popups allow-forms allow-presentation'
     );
@@ -170,7 +167,7 @@ export class AmpIframely extends AMP.BaseElement {
     if (!data) {
       return;
     }
-    if (data.method === 'resize') {
+    if (data.method === 'resize' && data.height > 50) {
       /** Set the size of the card according to the message from Iframely */
       me.attemptChangeHeight(data['height']).catch(() => {});
     }
@@ -178,19 +175,22 @@ export class AmpIframely extends AMP.BaseElement {
       /** apply Iframely card styles if present */
       const media = data['data']['media'] || null;
       if (media && media['aspect-ratio']) {
-        let height;
-        const box = me.element.getLayoutBox();
-        if (media['padding-bottom']) {
-          /** Apply height for media with updated "aspect-ratio" and "padding-bottom". */
-          height = box.width / media['aspect-ratio'] + media['padding-bottom'];
-          me.attemptChangeHeight(height).catch(() => {});
-        } else {
-          height = box.width / media['aspect-ratio'];
-          if (Math.abs(box.height - height) > 1) {
-            /** Apply new height for updated "aspect-ratio". */
-            me.attemptChangeHeight(height).catch(() => {});
+        const intersection = measureIntersection(me.element);
+        intersection.then(function onFulfilled(box) {
+          if (media['padding-bottom']) {
+            /** Apply height for media with updated "aspect-ratio" and "padding-bottom". */
+            const height =
+              box.boundingClientRect.width / media['aspect-ratio'] +
+              media['padding-bottom'];
+            me.attemptChangeHeight(Math.round(height)).catch(() => {});
+          } else {
+            const height = box.boundingClientRect.width / media['aspect-ratio'];
+            if (Math.abs(box.boundingClientRect.height - height) > 1) {
+              /** Apply new height for updated "aspect-ratio". */
+              me.attemptChangeHeight(Math.round(height)).catch(() => {});
+            }
           }
-        }
+        });
       }
     }
     if (data.method === 'cancelWidget') {
