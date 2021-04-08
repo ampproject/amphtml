@@ -49,9 +49,10 @@ const LOADER_BACKGROUND_TAGS = {
 /**
  * All video player components must either have a) "video" or b) "player" in
  * their name.
+ * (An unfortunate exception is `amp-story-player` which is not a video player.)
  * @private @const {!RegExp}
  */
-const VIDEO_PLAYER_TAG_PATTERN = /\-(video|player)/i;
+const VIDEO_PLAYER_TAG_PATTERN = /\-(video|(?<!story-)player)/i;
 
 /**
  * A few components don't follow the previous convention for historical
