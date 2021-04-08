@@ -859,7 +859,7 @@ tags: {  # <amp-story-page-attachment> with href
   }
   attrs: {
     name: "cta-accent-color"
-    value_regex_casei: "#+[0-9]"
+    value: ""
   }
   attrs: {
     name: "cta-accent-element"

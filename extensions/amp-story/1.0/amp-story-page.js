@@ -42,6 +42,8 @@ import {
   EXPANDABLE_COMPONENTS,
   expandableElementsSelectors,
 } from './amp-story-embedded-component';
+import {computedStyle, setImportantStyles} from '../../../src/style';
+import {getRGBFromCssColorValue, getTextColorForRGB} from './utils';
 import {AnimationManager, hasAnimations} from './animation';
 import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
@@ -1740,16 +1742,44 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
+   * Applying cta-accent-color as a style to a placeholder element
+   * So that contrast calculations can be performed on the rgb
+   * @private
+   */
+  saveCtaContrastColor_() {
+    const ctaColorHolder = this.win.document.createElement('div');
+    ctaColorHolder.classList.add('i-amphtml-cta-color-holder');
+    const pageAttachmentEl = this.element.querySelector(
+      'amp-story-page-attachment'
+    );
+    setImportantStyles(ctaColorHolder, {
+      'color': pageAttachmentEl.getAttribute('cta-accent-color')
+    });
+
+    this.element.appendChild(ctaColorHolder);
+    console.log(this.element.querySelector('i-amphtml-cta-color-holder'));
+  }
+
+  /**
    * Renders the open attachment UI affordance.
    * @private
    */
   renderOpenAttachmentUI_() {
+    this.saveCtaContrastColor_();
+    console.log(this.element.querySelector('i-amphtml-cta-color-holder')); // null??
+
     const attachmentEl = this.element.querySelector(
       'amp-story-page-attachment'
     );
     if (!attachmentEl) {
       return;
     }
+
+    setImportantStyles(this.element, {
+      'color': attachmentEl.getAttribute('cta-accent-color')
+    });
+    const styles = computedStyle(this.win, this.element);
+    console.log(styles['background-color']);
 
     if (!this.openAttachmentEl_) {
       this.openAttachmentEl_ = renderPageAttachmentUI(
