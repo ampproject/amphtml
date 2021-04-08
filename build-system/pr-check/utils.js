@@ -15,6 +15,14 @@
  */
 'use strict';
 
+const fs = require('fs');
+const {
+  ciBuildSha,
+  ciPullRequestSha,
+  circleciBuildNumber,
+  isCiBuild,
+  isCircleciBuild,
+} = require('../common/ci');
 const {
   gitBranchCreationPoint,
   gitBranchName,
@@ -24,7 +32,6 @@ const {
   gitCiMainBaseline,
   shortSha,
 } = require('../common/git');
-const {ciBuildSha, ciPullRequestSha, isCiBuild} = require('../common/ci');
 const {cyan, green, yellow} = require('kleur/colors');
 const {execOrDie, execOrThrow, execWithError, exec} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
@@ -104,15 +111,35 @@ function printChangeSummary() {
 }
 
 /**
- * Prints a message indicating why a job was skipped.
+ * Signal to dependent jobs that they should be skipped. Uses an identifier that
+ * corresponds to the current job to eliminate conflicts if a parallel job also
+ * signals the same thing.
+ *
+ * Currently only relevant for CircleCI builds.
+ */
+function signalGracefulHalt() {
+  if (isCircleciBuild()) {
+    const loggingPrefix = getLoggingPrefix();
+    const sentinelFile = `/tmp/workspace/.CI_GRACEFULLY_HALT_${circleciBuildNumber()}`;
+    fs.closeSync(fs.openSync(sentinelFile, 'w'));
+    logWithoutTimestamp(
+      `${loggingPrefix} Created ${cyan(sentinelFile)} to signal graceful halt.`
+    );
+  }
+}
+
+/**
+ * Prints a message indicating why a job was skipped and mark its dependent jobs
+ * for skipping.
  * @param {string} jobName
  * @param {string} skipReason
  */
-function printSkipMessage(jobName, skipReason) {
+function skipDependentJobs(jobName, skipReason) {
   const loggingPrefix = getLoggingPrefix();
   logWithoutTimestamp(
     `${loggingPrefix} Skipping ${cyan(jobName)} because ${skipReason}.`
   );
+  signalGracefulHalt();
 }
 
 /**
@@ -342,7 +369,7 @@ module.exports = {
   downloadNomoduleOutput,
   downloadModuleOutput,
   printChangeSummary,
-  printSkipMessage,
+  skipDependentJobs,
   processAndUploadNomoduleOutput,
   startTimer,
   stopTimer,
