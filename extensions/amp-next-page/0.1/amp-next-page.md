@@ -223,5 +223,5 @@ Both of the `triggers` provide the variables `fromUrl` and `toUrl` referring to 
 ## Validation
 
 See
-[amp-next-page rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-next-page/validator-amp-next-page.protoascii)
+[amp-next-page rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-next-page/validator-amp-next-page.protoascii)
 in the AMP validator specification.

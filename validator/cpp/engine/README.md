@@ -17,7 +17,7 @@ limitations under the License.
 # AMPHTML Validator
 
 A C++ AMPHTML Validator for the
-[AMPHTML format](https://github.com/ampproject/amphtml/blob/master/README.md).
+[AMPHTML format](https://github.com/ampproject/amphtml/blob/main/README.md).
 
 ## Maintainers
 

@@ -99,7 +99,7 @@ export const urls = {
    * propagating the referrer. If you believe your domain should be here,
    * file the issue on GitHub to discuss. The process will be similar
    * (but somewhat more stringent) to the one described in the [3p/README.md](
-   * https://github.com/ampproject/amphtml/blob/master/3p/README.md)
+   * https://github.com/ampproject/amphtml/blob/main/3p/README.md)
    *
    * {!Array<!RegExp>}
    */

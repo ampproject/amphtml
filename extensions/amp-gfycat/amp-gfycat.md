@@ -97,4 +97,4 @@ extended to AMP components.
 
 ## Validation
 
-See [amp-gfycat rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-gfycat/validator-amp-gfycat.protoascii) in the AMP validator specification.
+See [amp-gfycat rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-gfycat/validator-amp-gfycat.protoascii) in the AMP validator specification.

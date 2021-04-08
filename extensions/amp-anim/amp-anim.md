@@ -104,5 +104,5 @@ a grey background placeholder:
 
 ## Validation
 
-See [`amp-anim` rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/validator-amp-anim.protoascii)
+See [`amp-anim` rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-anim/validator-amp-anim.protoascii)
 in the AMP validator specification.

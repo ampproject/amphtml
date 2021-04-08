@@ -264,4 +264,4 @@ Information on version differences and migration notes.
 
 ## Validation
 
-See [amp-__component_name_hyphenated__ rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-__component_name_hyphenated__/validator-amp-__component_name_hyphenated__.protoascii) in the AMP validator specification.
+See [amp-__component_name_hyphenated__ rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-__component_name_hyphenated__/validator-amp-__component_name_hyphenated__.protoascii) in the AMP validator specification.

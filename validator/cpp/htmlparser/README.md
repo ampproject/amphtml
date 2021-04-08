@@ -18,7 +18,7 @@ limitations under the License.
 
 This is an HTML5 compliant parser written in C++. It was created to be used by
 the
-[AMPHTML Validator](https://github.com/ampproject/amphtml/tree/master/validator)
+[AMPHTML Validator](https://github.com/ampproject/amphtml/tree/main/validator)
 to standardize how AMPHTML documents should be parsed for AMP validation.
 
 ## Maintainers

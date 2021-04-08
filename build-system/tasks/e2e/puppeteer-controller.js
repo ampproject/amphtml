@@ -32,7 +32,7 @@ const {dirname, join} = require('path');
 
 /**
  * For a list of all possible key strings, see
- * {@link https://github.com/GoogleChrome/puppeteer/blob/master/lib/USKeyboardLayout.js}
+ * {@link https://github.com/puppeteer/puppeteer/blob/main/src/common/USKeyboardLayout.ts}
  * @enum {string}
  */
 const KeyToPuppeteerMap = {

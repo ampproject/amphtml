@@ -838,5 +838,5 @@ Cancels the animation.
 
 ## Validation
 
-See [`amp-animation` rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-animation/validator-amp-animation.protoascii)
+See [`amp-animation` rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-animation/validator-amp-animation.protoascii)
 in the AMP validator specification.

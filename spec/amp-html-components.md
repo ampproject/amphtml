@@ -141,13 +141,13 @@ The collection of official AMP components is open-source and open to contributio
 -   Have a fixed, known aspect ratio at initial page load, except if placed at the bottom of the page.
 -   Not attempt to access or manipulate objects outside of the component's immediate ownership - e.g. elements that are not specified by or children of the component.
 -   Not cause an AMP file to become invalid as per the AMP specification
--   The author of the component must sign the [Contributor License Agreement](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#contributor-license-agreement).
+-   The author of the component must sign the [Contributor License Agreement](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md#contributor-license-agreement).
 
 In the near-term, implementation will focus on the core components, before prioritizing extensibility. The long-term goal of the runtime though is to support this extensibility.
 
 #### Contributing Components
 
-Components may be contributed using the [process for significant changes to AMP](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#process-for-significant-changes).
+Components may be contributed using the [process for significant changes to AMP](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md#process-for-significant-changes).
 
 #### Service-specific Components
 

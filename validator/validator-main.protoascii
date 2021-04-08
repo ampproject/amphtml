@@ -544,7 +544,7 @@ tags: {
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
 }
 # AMP & AMP4ADS metadata, name=amp-experiments-opt-in
-# https://github.com/lannka/amphtml/blob/master/tools/experiments/README.md
+# https://github.com/ampproject/amphtml/blob/main/tools/experiments/README.md
 tags: {
   html_format: AMP
   html_format: AMP4ADS

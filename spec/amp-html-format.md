@@ -272,7 +272,7 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
   <tr>
     <td width="30%">meta</td>
-    <td>The <code>http-equiv</code> attribute may be used for specific allowable values; see the <a href="https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii">AMP validator specification</a> for details.</td>
+    <td>The <code>http-equiv</code> attribute may be used for specific allowable values; see the <a href="https://github.com/ampproject/amphtml/blob/main/validator/validator-main.protoascii">AMP validator specification</a> for details.</td>
   </tr>
   <tr>
     <td width="30%"><code><a name="ancr"></a>a</code></td>

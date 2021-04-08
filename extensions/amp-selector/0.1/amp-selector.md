@@ -176,4 +176,4 @@ Tapping disabled options does not trigger the `select` event.
 
 ## Validation
 
-See [amp-selector rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-selector/validator-amp-selector.protoascii) in the AMP validator specification.
+See [amp-selector rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-selector/validator-amp-selector.protoascii) in the AMP validator specification.

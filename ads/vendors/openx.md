@@ -50,7 +50,7 @@ Display an OpenX Ad Unit.
 
 ### OpenX Bidder
 
-OpenX header bidding. Parameters noted in the DoubleClick amp-ad [documentation](https://github.com/ampproject/amphtml/blob/master/ads/google/doubleclick.md) can be forwarded to DoubleClick by the following rules:
+OpenX header bidding. Parameters noted in the DoubleClick amp-ad [documentation](https://github.com/ampproject/amphtml/blob/main/ads/google/doubleclick.md) can be forwarded to DoubleClick by the following rules:
 
 1. Parameters like `data-dfp-{name}` will be converted to `data-{name}` and passed to DoubleClick
 2. Everything under the json "dfp" key will be passed to DoubleClick

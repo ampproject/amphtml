@@ -58,4 +58,4 @@ Example:
 
 ## Validation
 
-See [amp-reach-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-reach-player/validator-amp-reach-player.protoascii) in the AMP validator specification.
+See [amp-reach-player rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-reach-player/validator-amp-reach-player.protoascii) in the AMP validator specification.

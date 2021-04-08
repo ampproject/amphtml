@@ -91,4 +91,4 @@ The value for this attribute is the Megaphone.fm ID of a playlist.</td>
 
 ## Validation
 
-See [amp-megaphone rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-megaphone/validator-amp-megaphone.protoascii) in the AMP validator specification.
+See [amp-megaphone rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-megaphone/validator-amp-megaphone.protoascii) in the AMP validator specification.

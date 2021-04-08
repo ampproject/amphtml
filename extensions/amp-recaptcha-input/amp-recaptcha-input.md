@@ -92,4 +92,4 @@ By default, the iframe loads the recaptcha api script using the `www.google.com`
 
 ## Validation
 
-See [`<amp-recaptcha-input>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-recaptcha-input/validator-amp-recaptcha-input.protoascii) rules in the AMP validator specification.
+See [`<amp-recaptcha-input>`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-recaptcha-input/validator-amp-recaptcha-input.protoascii) rules in the AMP validator specification.

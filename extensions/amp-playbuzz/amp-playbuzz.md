@@ -100,4 +100,4 @@ With optional parameters (info, share-buttons, comments):
 
 ## Validation
 
-See [amp-playbuzz rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-playbuzz/validator-amp-playbuzz.protoascii) in the AMP validator specification.
+See [amp-playbuzz rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-playbuzz/validator-amp-playbuzz.protoascii) in the AMP validator specification.

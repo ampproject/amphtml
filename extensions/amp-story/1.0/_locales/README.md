@@ -1,6 +1,6 @@
 # Supported languages
 
-To see a list of the supported languages, see the list of `*.js` files in the [`_locales` directory](https://github.com/ampproject/amphtml/tree/master/extensions/amp-story/1.0/_locales).
+To see a list of the supported languages, see the list of `*.js` files in the [`_locales` directory](https://github.com/ampproject/amphtml/tree/main/extensions/amp-story/1.0/_locales).
 
 # Language fallbacks
 
@@ -20,8 +20,8 @@ You can view the translations provided for each language in [this spreadsheet](h
 
 # Adding new strings (English)
 
-1. Add a new string ID in [`LocalizedStringId`](https://github.com/ampproject/amphtml/blob/master/src/localized-strings.js#L31). Keep the `LocalizedStringId` list in alphabetical order, and make sure your ID's name is clear about what it represents semantically.
-2. Open the [`en.js` file](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/1.0/_locales/en.js)
+1. Add a new string ID in [`LocalizedStringId`](https://github.com/ampproject/amphtml/blob/main/src/localized-strings.js#L31). Keep the `LocalizedStringId` list in alphabetical order, and make sure your ID's name is clear about what it represents semantically.
+2. Open the [`en.js` file](https://github.com/ampproject/amphtml/blob/main/extensions/amp-story/1.0/_locales/en.js)
 3. Add a new object key with the `LocalizedStringId` as the key, and an object containing the string and its description as its value. For example:
 
 ```javascript
@@ -40,7 +40,7 @@ You can view the translations provided for each language in [this spreadsheet](h
 # Adding new translations (non-English strings)
 
 1. Find which string(s) are missing by looking at [the string spreadsheet](https://bit.ly/amp-story-strings).
-2. Open the `*.js` file from the [`_locales` directory](https://github.com/ampproject/amphtml/tree/master/extensions/amp-story/1.0/_locales) for the language for which you would like to add a translation.
+2. Open the `*.js` file from the [`_locales` directory](https://github.com/ampproject/amphtml/tree/main/extensions/amp-story/1.0/_locales) for the language for which you would like to add a translation.
 3. Add a new object key with the `LocalizedStringId` as the key, and an object containing the string as its value. For example:
 
 ```javascript

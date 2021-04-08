@@ -79,7 +79,7 @@ Example:
     <td width="40%"><strong>autoplay</strong></td>
     <td>If this attribute is present, and the browser supports autoplay, the video will be automatically
 played as soon as it becomes visible. There are some conditions that the component needs to meet
-to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</td>
+to be played, <a href="https://github.com/ampproject/amphtml/blob/main/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
@@ -89,4 +89,4 @@ to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/am
 
 ## Validation
 
-See [amp-powr-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-powr-player/validator-amp-powr-player.protoascii) in the AMP validator specification.
+See [amp-powr-player rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-powr-player/validator-amp-powr-player.protoascii) in the AMP validator specification.

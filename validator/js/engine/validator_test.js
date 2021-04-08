@@ -1553,7 +1553,7 @@ describe('ValidatorRulesMakeSense', () => {
         (tagSpec.htmlFormat.indexOf(generated.HtmlFormat.Code.AMP4ADS) !==
          -1)) {
       // AMP4ADS format lists approved extensions.
-      // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
+      // https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
       // Changes to the following map must be approved by the Ads Working
       // Group, @wg-monetization.
       const approvedAmp4AdsExtensions = {

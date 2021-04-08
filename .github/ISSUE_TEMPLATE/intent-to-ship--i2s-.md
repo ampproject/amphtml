@@ -1,7 +1,7 @@
 ---
 name: Intent-to-ship (I2S)
 about: Proposes launching a significant change/update to AMP that has already been
-  implemented. https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md
+  implemented. https://github.com/ampproject/amphtml/blob/main/CONTRIBUTING.md
 title: 'I2S: <your change/update>'
 labels: INTENT TO SHIP
 assignees: ''
@@ -12,7 +12,7 @@ assignees: ''
 Replace/remove all of the text in brackets, including this text.
 
 Use an Intent-to-ship (I2S) issue to request the launch of a significant change/update to AMP, generally those that required an Intent-to-implement (I2I) issue.
-See https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md for more information.
+See https://github.com/ampproject/amphtml/blob/main/CONTRIBUTING.md for more information.
 -->
 
 ## Summary

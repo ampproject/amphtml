@@ -84,4 +84,4 @@ When using the <code>amp-yotpo</code> extension, for each corresponding Yotpo at
 
 ## Validation
 
-See [amp-yotpo rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-yotpo/validator-amp-yotpo.protoascii) in the AMP validator specification.
+See [amp-yotpo rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-yotpo/validator-amp-yotpo.protoascii) in the AMP validator specification.

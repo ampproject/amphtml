@@ -1,1 +1,1 @@
-See https://github.com/ampproject/meta/blob/master/GOVERNANCE.md
+See https://github.com/ampproject/meta/blob/main/GOVERNANCE.md

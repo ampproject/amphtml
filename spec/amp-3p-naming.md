@@ -51,4 +51,4 @@ The URL that these components embed is interchangeable, since their src attribut
 
 ### <a id="no-player-suffix"></a> <sup>2</sup> Why is `<amp-youtube>` not suffixed like `<amp-youtube-player>`?
 
-Several media player components names lack the -player prefix, like `<amp-youtube>` and all those the apply in the [video player list](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md). These were historically created before this guideline.
+Several media player components names lack the -player prefix, like `<amp-youtube>` and all those the apply in the [video player list](https://github.com/ampproject/amphtml/blob/main/spec/amp-video-interface.md). These were historically created before this guideline.

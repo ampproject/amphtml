@@ -162,7 +162,7 @@ CssLength CalculateWidth(AmpLayout::Layout input_layout,
        input_layout == AmpLayout::FIXED) &&
       !input_width.is_set) {
     // These values come from AMP's external runtime and can be found in
-    // https://github.com/ampproject/amphtml/blob/master/src/layout.js#L70
+    // https://github.com/ampproject/amphtml/blob/main/src/layout.js#L70
     // Note that amp-audio is absent due to it not having explicit dimensions
     // (the dimensions are determined at runtime and are specific to the
     // particular device/browser/etc).
@@ -190,7 +190,7 @@ CssLength CalculateHeight(AmpLayout::Layout input_layout,
        input_layout == AmpLayout::FIXED_HEIGHT) &&
       !input_height.is_set) {
     // These values come from AMP's external runtime and can be found in
-    // https://github.com/ampproject/amphtml/blob/master/src/layout.js#L70
+    // https://github.com/ampproject/amphtml/blob/main/src/layout.js#L70
     // Note that amp-audio is absent due to it not having explicit dimensions
     // (the dimensions are determined at runtime and are specific to the
     // particular device/browser/etc).

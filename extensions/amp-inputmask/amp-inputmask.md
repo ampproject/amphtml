@@ -208,4 +208,4 @@ When `mask-output` is set to `alphanumeric`, the form will submit the `input` va
 
 ## Validation
 
-See [amp-inputmask rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-inputmask/validator-amp-inputmask.protoascii) in the AMP validator specification.
+See [amp-inputmask rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-inputmask/validator-amp-inputmask.protoascii) in the AMP validator specification.
