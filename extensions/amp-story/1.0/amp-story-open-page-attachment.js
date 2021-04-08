@@ -89,17 +89,17 @@ const buildOpenOutlinkAttachmentElement = (element) =>
 export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
   const openImgAttr = attachmentEl.getAttribute('cta-image');
   const attachmentHref = attachmentEl.getAttribute('href');
-  if (!isPageAttachmentUiV2ExperimentOn(win)) {
-    return renderDefaultPageAttachmentUI(pageEl, attachmentEl);
-  } else if (attachmentHref) {
+  if (isPageAttachmentUiV2ExperimentOn(win) && attachmentHref) {
     return renderOutlinkPageAttachmentUI(
       win,
       pageEl,
       attachmentEl,
       attachmentHref
     );
-  } else {
+  } else if (isPageAttachmentUiV2ExperimentOn(win) && openImgAttr) {
     return renderPageAttachmentUiWithImages(win, pageEl, attachmentEl);
+  } else {
+    return renderDefaultPageAttachmentUI(pageEl, attachmentEl);
   }
 };
 
