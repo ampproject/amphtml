@@ -218,7 +218,7 @@ export class NextPageService {
       // Observe the host page's visibility
       this.visibilityObserver_.observeHost(this.getHost_(), (position) => {
         this.hostPage_.relativePos = position;
-        this.updateVisibility();
+        this.updateVisibility(); // XXX
       });
     });
 
@@ -294,8 +294,8 @@ export class NextPageService {
         .fetch()
         .then(() => {
           if (nextPage.is(PageState.FAILED)) {
-            // Silently skip this page
-            this.setLastFetchedPage(nextPage);
+            // Silently skip this page         // WTF - is this comment a lie?
+            this.setLastFetchedPage(nextPage); // WTF - if page state is failed, why are we storing it? plus we're not silently failing
           }
         })
         .then(
