@@ -18,7 +18,6 @@ import {CSS} from '../../../build/amp-loader-0.1.css';
 import {Services} from '../../../src/services';
 import {htmlFor} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {isIframeVideoPlayerComponent} from '../../../src/layout';
 import {setImportantStyles, setStyle} from '../../../src/style';
 
 /**
@@ -46,6 +45,39 @@ const LOADER_BACKGROUND_TAGS = {
   'AMP-INSTAGRAM': true,
   'AMP-GOOGLE-DOCUMENT-EMBED': true,
 };
+
+/**
+ * All video player components must either have a) "video" or b) "player" in
+ * their name.
+ * (An unfortunate exception is `amp-story-player` which is not a video player.)
+ * @private @const {!RegExp}
+ */
+const VIDEO_PLAYER_TAG_PATTERN = /\-(video|(?<!story-)player)/i;
+
+/**
+ * A few components don't follow the previous convention for historical
+ * reasons, so they are listed individually.
+ * @private @enum {boolean}
+ */
+const VIDEO_PLAYER_TAGS_LEGACY = {
+  'AMP-BRIGHTCOVE': true,
+  'AMP-DAILYMOTION': true,
+  'AMP-YOUTUBE': true,
+  'AMP-VIMEO': true,
+};
+
+/**
+ * @param {string} tagName
+ * @return {boolean}
+ */
+function isIframeVideoPlayerComponent(tagName) {
+  const tagNameUppercase = tagName.toUpperCase();
+  return (
+    tagNameUppercase !== 'AMP-VIDEO' &&
+    (VIDEO_PLAYER_TAGS_LEGACY[tagNameUppercase] ||
+      VIDEO_PLAYER_TAG_PATTERN.test(tagName))
+  );
+}
 
 /**
  * Used to cache the loader DOM once created, so we do not need to recreate it

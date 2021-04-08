@@ -19,7 +19,7 @@ import {AmpEvents} from '../../src/amp-events';
 import {BaseElement} from '../../src/base-element';
 import {CommonSignals} from '../../src/common-signals';
 import {ElementStub} from '../../src/element-stub';
-import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
+import {Layout} from '../../src/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {Services} from '../../src/services';
 import {chunkInstanceForTesting} from '../../src/chunk';
@@ -2127,7 +2127,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         ElementClass = createAmpElementForTesting(win, TestElement);
         win.customElements.define('amp-test-loader', ElementClass);
         win.__AMP_EXTENDED_ELEMENTS['amp-test-loader'] = TestElement;
-        LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = true;
         resources = Services.resourcesForDoc(doc);
         resources.isBuildOn_ = true;
         resourcesMock = env.sandbox.mock(resources);
@@ -2177,12 +2176,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
         it('should disable when explicitly disabled by the attribute', () => {
           element.setAttribute('noloading', '');
-          element.toggleLoading(true);
-          expect(loadingIndicatorServiceStub.track).to.not.be.called;
-        });
-
-        it('should disable when element is not allowlisted', () => {
-          LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = false;
           element.toggleLoading(true);
           expect(loadingIndicatorServiceStub.track).to.not.be.called;
         });

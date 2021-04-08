@@ -183,7 +183,7 @@ AMP.extension('amp-my-element', '0.1', (AMP) => {
     create a lightweight placeholder. This gets called only if the element
     doesn't already have a publisher-provided placeholder (through [the
     placeholder
-    attribute](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#placeholder)).
+    attribute](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/#placeholder)).
 -   **Usage**: Create placeholder DOM and return it. For example,
     amp-instagram uses this to create a placeholder dynamically by creating
     an amp-img placeholder instead of loading the iframe, leaving the iframe
@@ -446,7 +446,7 @@ placeholder for itself (in case a placeholder wasn't provided by the
 developer/publisher who is using your element). This allows elements to
 display content as fast as possible and allow prerendering that
 placeholder. Learn [more about placeholder
-elements](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#placeholder).
+elements](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/#placeholder).
 
 NOTE: Make sure not to request external resources in the pre-render
 phase. Requests to the publisher's origin itself are OK. If in doubt,
@@ -512,19 +512,20 @@ HTML-native `img` tag which will be out of AMP resource management.
 
 #### Loading indicators
 
-Consider showing a loading indicator if your element is expected to take
-a long time to load (for example, loading a GIF, video or iframe). AMP
-has a built-in mechanism to show a loading indicator simply by
-listing your element so it's allowed to show it. You can do that inside the `layout.js`
-file in the `LOADING_ELEMENTS_` object.
+Loading indicators are displayed while a component's [`layoutCallback`](#layoutcallback) resolves, **except** when its [layout](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/#layout) is `container` or `nodisplay`.
 
-```javascript
-export const LOADING_ELEMENTS_ = {
-  ...
-  'AMP-YOUTUBE': true,
-  'AMP-MY-ELEMENT': true,
-}
+```html
+<amp-video layout="responsive"></amp-video> <!-- enabled -->
+<amp-fit-text layout="container"></amp-fit-text> <!-- disabled -->
 ```
+
+Document authors may disable this indicator by setting the [`noloading` attribute](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes/#noloading).
+
+```html
+<amp-video layout="responsive" noloading></amp-video> <!-- disabled -->
+```
+
+A component may optionally provide a `createLoaderLogoCallback`, returning an icon or a third-party logo that's displayed on the indicator. See [`amp-twitter.js`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/0.1/amp-twitter.js) for an example.
 
 ### Destroying heavyweight resources
 
@@ -599,9 +600,9 @@ AMP defines different layouts that elements can choose whether or not to
 support Your element needs to announce which layouts it supports through
 overriding the `isLayoutSupported(layout)` callback and returning true
 if the element supports that layout. [Read more about AMP Layout
-System](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md)
+System](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/)
 and [Layout
-Types](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#layout).
+Types](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/#layout).
 
 ### What layout should your element support?
 
