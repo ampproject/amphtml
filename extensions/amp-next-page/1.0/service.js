@@ -198,6 +198,8 @@ export class NextPageService {
 
     // Create a reference to the host page
     this.hostPage_ = this.createHostPage();
+    this.currentTitlePage_ = this.hostPage_;
+
     this.toggleHiddenAndReplaceableElements(this.doc_);
     // Have the recommendation box be always visible
     insertAtStart(this.host_, this.recBox_);
