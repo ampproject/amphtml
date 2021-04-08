@@ -23,15 +23,23 @@ import {toWin} from './types';
  *
  * @param {function(!Array<!IntersectionObserverEntry>)} ioCallback
  * @param {!Window} win
- * @param {{threshold: (number|!Array<number>)=, needsRootBounds: boolean=}=} opts
- *
+ * @param {{
+ *   threshold: (number|!Array<number>|undefined),
+ *   needsRootBounds: (boolean|undefined),
+ * }=} opts
  * @return {!IntersectionObserver}
  */
 export function createViewportObserver(ioCallback, win, opts = {}) {
   const {threshold, needsRootBounds} = opts;
+  // The Document -> Element type conversion is necessary to satisfy the
+  // `IntersectionObserver` constructor extern that only accepts `Element`.
+  const root =
+    isIframed(win) && needsRootBounds
+      ? /** @type {?} */ (win.document)
+      : undefined;
   return new win.IntersectionObserver(ioCallback, {
     threshold,
-    root: isIframed(win) && needsRootBounds ? win.document : undefined,
+    root,
   });
 }
 

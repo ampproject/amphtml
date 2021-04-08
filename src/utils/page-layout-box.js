@@ -30,7 +30,7 @@ export function getPageLayoutBoxBlocking(element) {
     left += n./*OK*/ offsetLeft;
     top += n./*OK*/ offsetTop;
   }
-  const {offsetWidth, offsetHeight} = element;
+  const {offsetWidth, offsetHeight} = /** @type {!HTMLElement} */ (element);
   return layoutRectLtwh(left, top, offsetWidth, offsetHeight);
 }
 

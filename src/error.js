@@ -635,7 +635,7 @@ export function getErrorReportData(
   }
   data['r'] = self.document ? self.document.referrer : '';
   data['ae'] = accumulatedErrorMessages.join(',');
-  data['fr'] = self.location.originalHash || self.location.hash;
+  data['fr'] = self.location['originalHash'] || self.location.hash;
 
   // TODO(https://github.com/ampproject/error-tracker/issues/129): Remove once
   // all clients are serving a version with pre-throttling.

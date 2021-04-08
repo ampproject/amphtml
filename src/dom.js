@@ -778,7 +778,7 @@ export function isAmpElement(element) {
  * Return a promise that resolve when an AMP element upgrade from HTMLElement
  * to CustomElement
  * @param {!Element} element
- * @return {!Promise<!Element>}
+ * @return {!Promise<!AmpElement>}
  */
 export function whenUpgradedToCustomElement(element) {
   devAssert(isAmpElement(element), 'element is not AmpElement');

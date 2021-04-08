@@ -83,6 +83,9 @@ var InternalJsonLiteralTypeDef;
  */
 Element.prototype.dataset;
 
+/** Needed for partial shadow DOM polyfill used in shadow docs. */
+Element.prototype.__AMP_SHADOW_ROOT;
+
 /**
  * - n is the name.
  * - f is the function body of the extension.
@@ -216,12 +219,16 @@ window.sf_.cfg;
 window.draw3p;
 
 // AMP's globals
+window.testLocation;
+window.Location.originalHash;
 window.__AMP_SERVICES;
 window.__AMP_TEST;
 window.__AMP_TEST_IFRAME;
 window.__AMP_TAG;
 window.__AMP_TOP;
 window.__AMP_PARENT;
+window.__AMP_WEAKREF_ID;
+window.__AMP_URL_CACHE;
 window.AMP = {};
 window.AMP._ = {};
 window.AMP.push;
@@ -432,6 +439,8 @@ IntersectionObserverEntry.prototype.rootBounds;
 window.PerformancePaintTiming;
 window.PerformanceObserver;
 Object.prototype.entryTypes;
+Window.prototype.origin;
+HTMLAnchorElement.prototype.origin;
 
 /** @typedef {number}  */
 var time;
@@ -444,12 +453,24 @@ var UnlistenDef;
 
 /**
  * Just an element, but used with AMP custom elements..
- * @typedef {!Element}
+ * @constructor @extends {Element}
  */
-var AmpElement;
+var AmpElement = function () {};
+
+/** @return {boolean} */
+AmpElement.prototype.V1 = function () {};
 
 /** @return {!Signals} */
 AmpElement.prototype.signals = function () {};
+
+/** */
+AmpElement.prototype.pause = function () {};
+
+/** */
+AmpElement.prototype.unmount = function () {};
+
+/** @return {!Promise} */
+AmpElement.prototype.ensureLoaded = function () {};
 
 var Signals = class {};
 /**
@@ -926,6 +947,9 @@ class FeaturePolicy {
  */
 HTMLIFrameElement.prototype.featurePolicy;
 
+/** @type {boolean} */
+HTMLVideoElement.prototype.playsInline;
+
 /**
  * Going through the standardization process now.
  *
@@ -934,3 +958,23 @@ HTMLIFrameElement.prototype.featurePolicy;
  * @param {string} cssText
  */
 CSSStyleSheet.prototype.replaceSync = function (cssText) {};
+
+/**
+ * @constructor @struct
+ */
+function ResizeObserverSize() {}
+
+/** @type {number} */
+ResizeObserverSize.prototype.inlineSize;
+
+/** @type {number} */
+ResizeObserverSize.prototype.blockSize;
+
+/** @type {!Array<!ResizeObserverSize>|undefined} */
+ResizeObserverEntry.prototype.borderBoxSize;
+
+/** @type {?function(!MediaQueryListEvent)} */
+MediaQueryList.prototype.onchange;
+
+/** @type {!Array<!CSSStyleSheet>|undefined} */
+ShadowRoot.prototype.adoptedStyleSheets;
