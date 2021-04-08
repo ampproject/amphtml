@@ -204,7 +204,11 @@ const targetMatchers = {
     if (isOwnersFile(file)) {
       return false;
     }
-    return lintFiles.includes(file);
+    return (
+      lintFiles.includes(file) ||
+      file == 'build-system/tasks/lint.js' ||
+      file.startsWith('build-system/test-configs')
+    );
   },
   [Targets.OWNERS]: (file) => {
     return isOwnersFile(file) || file == 'build-system/tasks/check-owners.js';
@@ -216,7 +220,11 @@ const targetMatchers = {
     if (isOwnersFile(file)) {
       return false;
     }
-    return presubmitFiles.includes(file);
+    return (
+      presubmitFiles.includes(file) ||
+      file == 'build-system/tasks/presubmit-checks.js' ||
+      file.startsWith('build-system/test-configs')
+    );
   },
   [Targets.PRETTIFY]: (file) => {
     // OWNERS files can be prettified.
