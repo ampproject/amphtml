@@ -30,6 +30,11 @@ import {px, resetStyles, setStyles} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 
 let id = 0;
+const NAME_PREFIX = '__tt_embed__v';
+const PLAYER_WIDTH = 325;
+const ASPECT_RATIO = 1.77;
+const COMMENT_HEIGHT = 200;
+
 export class AmpTiktok extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -56,7 +61,7 @@ export class AmpTiktok extends AMP.BaseElement {
      * by the video aspect ratio (13:23 or 1.77) and adding 200px to account
      * for the height of the caption.
      */
-    this.fallbackHeight_ = 775;
+    this.fallbackHeight_ = PLAYER_WIDTH * ASPECT_RATIO + COMMENT_HEIGHT;
 
     this.resizeOuter_ = (height) => {
       resetStyles(this.iframe_, [
@@ -158,7 +163,7 @@ export class AmpTiktok extends AMP.BaseElement {
           // resize to the fallbackHeight value.
           this.resizeOuter_(this.fallbackHeight_);
           setStyles(this.iframe_, {
-            'width': px('325'),
+            'width': px(PLAYER_WIDTH),
             'height': px(this.fallbackHeight_),
           });
         });
@@ -216,14 +221,13 @@ export class AmpTiktok extends AMP.BaseElement {
    * @return {string}
    */
   getIframeNameString_() {
-    const namePrefix = '__tt_embed__v';
     let idString = (id++).toString();
     // The id is padded to 17 digits because that is what TikTok requires
     // in order to recieve messages correctly.
     while (idString.length < 17) {
       idString = '0' + idString;
     }
-    return namePrefix + idString;
+    return NAME_PREFIX + idString;
   }
 }
 
