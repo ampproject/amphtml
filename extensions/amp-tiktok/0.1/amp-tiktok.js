@@ -24,7 +24,6 @@ import {
 } from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
 import {getData, listen} from '../../../src/event-helper';
-import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {px, resetStyles, setStyles} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
