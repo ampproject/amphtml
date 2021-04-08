@@ -57,11 +57,7 @@ describes.realWin(
         {
           layout: 'responsive',
           width: '325px',
-<<<<<<< HEAD
-          height: '500px',
-=======
           height: '730px',
->>>>>>> f8ba4a462affe59c83ae77c358dc514b121669a8
           ...attrs,
         }
       );
@@ -108,10 +104,7 @@ describes.realWin(
       const playerIframe = player.querySelector('iframe');
       const impl = await player.getImpl(false);
       env.sandbox.stub(impl, 'handleTiktokMessages_');
-<<<<<<< HEAD
-=======
 
->>>>>>> f8ba4a462affe59c83ae77c358dc514b121669a8
       // Wait 1100ms for resize fallback to be invoked.
       await new Promise((resolve) => {
         setTimeout(() => {
