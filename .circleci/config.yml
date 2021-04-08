@@ -54,7 +54,9 @@ commands:
       - run:
           name: 'Maybe Gracefully Halt'
           command: |
-            mv /tmp/workspace /tmp/restored-workspace
+            if [[ -d /tmp/workspace ]]; then
+              mv /tmp/workspace /tmp/restored-workspace
+            fi
             if ls /tmp/restored-workspace/.CI_GRACEFULLY_HALT_* 1>/dev/null 2>&1; then
               echo "Gracefully halting this job."
               circleci-agent step halt
