@@ -26,14 +26,10 @@ const http = require('http');
 const Mocha = require('mocha');
 const path = require('path');
 const {
-  buildRuntime,
-  getFilesFromArgv,
-  installPackages,
-} = require('../../common/utils');
-const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../../common/ctrlcHandler');
+const {buildRuntime, getFilesFromArgv} = require('../../common/utils');
 const {cyan} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
@@ -55,9 +51,6 @@ const COV_OUTPUT_HTML = path.resolve(COV_OUTPUT_DIR, 'lcov-report/index.html');
  * @return {!Promise}
  */
 async function setUpTesting_() {
-  // install e2e-specific modules
-  await installPackages(__dirname);
-
   require('@babel/register')({caller: {name: 'test'}});
   const {describes} = require('./helper');
   describes.configure({

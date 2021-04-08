@@ -19,7 +19,7 @@ import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
 import {LinkReplacementCache} from './link-replacement-cache';
 import {Observable} from '../../../../src/observable';
 import {TwoStepsResponse} from './two-steps-response';
-import {pureUserAssert as userAssert} from '../../../../src/core/assert';
+import {userAssert} from '../../../../src/log';
 
 /** @typedef {!Array<{anchor: !HTMLElement, replacementUrl: ?string}>}} */
 export let AnchorReplacementList;

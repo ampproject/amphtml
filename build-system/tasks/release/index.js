@@ -33,8 +33,7 @@ const BASE_FLAVOR_CONFIG = {
   flavorType: 'base',
   name: 'base',
   rtvPrefixes: ['00', '01', '02', '03', '04', '05'],
-  // TODO(#28168, erwinmombay): relace with single `--module --nomodule` command.
-  command: 'amp dist --noconfig --esm && amp dist --noconfig',
+  command: 'amp dist --noconfig',
   environment: 'AMP',
 };
 
@@ -101,18 +100,12 @@ const CHANNEL_CONFIGS = {
   '25': {type: 'experimentC', configBase: 'prod'}, // Spec name: 'inabox-experimentC'
 };
 
-// Mapping of entry file names to a dictionary of AMP_CONFIG additions.
-const TARGETS_TO_CONFIG = MINIFIED_TARGETS.flatMap((minifiedTarget) => [
-  {file: `${minifiedTarget}.js`, config: {}},
-  {file: `${minifiedTarget}.mjs`, config: {esm: 1}},
-]);
-
 function logSeparator_() {
   log('---\n\n');
 }
 
 /**
- * Prepares output and temp directories, and ensures dependencies are installed.
+ * Prepares output and temp directories.
  *
  * @param {string} outputDir full directory path to emplace artifacts in.
  * @param {string} tempDir full directory path to temporary working directory.
@@ -120,9 +113,6 @@ function logSeparator_() {
 async function prepareEnvironment_(outputDir, tempDir) {
   await fs.emptyDir(outputDir);
   await fs.emptyDir(tempDir);
-  logSeparator_();
-
-  execOrDie('amp update-packages');
   logSeparator_();
 }
 
@@ -144,7 +134,7 @@ function discoverDistFlavors_() {
       )
       .map(([flavorType, experimentConfig]) => ({
         // TODO(#28168, erwinmombay): relace with single `--module --nomodule` command.
-        command: `amp dist --noconfig --esm --define_experiment_constant ${experimentConfig.define_experiment_constant} && amp dist --noconfig --define_experiment_constant ${experimentConfig.define_experiment_constant}`,
+        command: `amp dist --noconfig --define_experiment_constant ${experimentConfig.define_experiment_constant}`,
         flavorType,
         rtvPrefixes: [
           EXPERIMENTAL_RTV_PREFIXES[experimentConfig.environment][flavorType],
@@ -178,7 +168,14 @@ function discoverDistFlavors_() {
  * @param {string} tempDir full directory path to temporary working directory.
  */
 async function compileDistFlavors_(distFlavors, tempDir) {
-  for (const {flavorType, command} of distFlavors) {
+  for (const {flavorType, command: baseCommand} of distFlavors) {
+    // TODO(danielrozenberg): remove undefined case when the release automation platform explicitly handles it.
+    const command =
+      argv.esm === undefined
+        ? `${baseCommand} --esm && ${baseCommand}`
+        : argv.esm
+        ? `${baseCommand} --esm`
+        : baseCommand;
     log('Compiling flavor', green(flavorType), 'using', cyan(command));
 
     execOrDie('amp clean');
@@ -195,7 +192,7 @@ async function compileDistFlavors_(distFlavors, tempDir) {
     );
 
     log('Copying static files...');
-    await Promise.all([
+    const staticFilesPromise = Promise.all([
       // Directory-to-directory copy from the ./static sub-directory.
       fs.copy(STATIC_FILES_DIR, path.join(flavorTempDistDir, 'dist')),
       // Individual files to copy from the Git repository.
@@ -205,14 +202,20 @@ async function compileDistFlavors_(distFlavors, tempDir) {
           path.join(flavorTempDistDir, 'dist', path.basename(staticFilePath))
         )
       ),
-      // Individual files to copy from the resulting build artifacts.
-      ...Object.entries(POST_BUILD_MOVES).map(([from, to]) =>
-        fs.copy(
-          path.join(flavorTempDistDir, from),
-          path.join(flavorTempDistDir, to)
-        )
-      ),
     ]);
+    const postBuildMovesPromise = !argv.esm
+      ? Promise.all([
+          // Individual files to copy from the resulting build artifacts.
+          // This is only relevant for nomodule builds.
+          ...Object.entries(POST_BUILD_MOVES).map(([from, to]) =>
+            fs.copy(
+              path.join(flavorTempDistDir, from),
+              path.join(flavorTempDistDir, to)
+            )
+          ),
+        ])
+      : Promise.resolve();
+    await Promise.all([staticFilesPromise, postBuildMovesPromise]);
 
     logSeparator_();
   }
@@ -358,9 +361,23 @@ async function prependConfig_(outputDir) {
       type: channelConfig.type,
       ...require(`../../global-configs/${channelConfig.configBase}-config.json`),
     };
+    // Mapping of entry file names to a dictionary of AMP_CONFIG additions.
+    const targetsToConfig = MINIFIED_TARGETS.flatMap((minifiedTarget) => {
+      const targets = [];
+      // TODO(danielrozenberg): remove undefined case when the release automation platform explicitly handles it.
+      if (!argv.esm) {
+        // For explicit --no-esm or when no ESM flag is passed.
+        targets.push({file: `${minifiedTarget}.js`, config: {}});
+      }
+      if (argv.esm === undefined || argv.esm) {
+        // For explicit --esm or when no ESM flag is passed.
+        targets.push({file: `${minifiedTarget}.mjs`, config: {esm: 1}});
+      }
+      return targets;
+    });
 
     allPrependPromises.push(
-      ...TARGETS_TO_CONFIG.map(async (target) => {
+      ...targetsToConfig.map(async (target) => {
         const targetPath = path.join(rtvPath, target.file);
         const channelConfig = JSON.stringify({
           ...channelPartialConfig,
@@ -463,4 +480,7 @@ release.flags = {
     'Directory path to emplace release files (defaults to "./release")',
   'flavor':
     'Limit this release build to a single flavor. Can be used to split the release work between multiple build machines.',
+  'esm':
+    // TODO(danielrozenberg): remove undefined case when the release automation platform explicitly handles it.
+    'True to compile with --esm, false to compile without; Do not set to compile both.',
 };

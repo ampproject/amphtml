@@ -18,13 +18,7 @@
 const {
   createTask,
   finalizeRunner,
-  initializeRunner,
 } = require('./build-system/tasks/amp-task-runner');
-
-/**
- * Initialize the task runner before any task is created.
- */
-initializeRunner();
 
 /**
  * All the AMP tasks. Keep this list alphabetized.
@@ -41,6 +35,8 @@ createTask('build', 'build', 'build');
 createTask('bundle-size', 'bundleSize', 'bundle-size');
 createTask('caches-json', 'cachesJson', 'caches-json');
 createTask('check-analytics-vendors-list', 'checkAnalyticsVendorsList', 'check-analytics-vendors-list'); // prettier-ignore
+createTask('check-asserts', 'checkAsserts', 'check-asserts'); // prettier-ignore
+createTask('check-build-system', 'checkBuildSystem', 'check-build-system');
 createTask('check-exact-versions', 'checkExactVersions','check-exact-versions'); // prettier-ignore
 createTask('check-links', 'checkLinks', 'check-links');
 createTask('check-owners', 'checkOwners', 'check-owners');
@@ -78,7 +74,6 @@ createTask('storybook', 'storybook', 'storybook');
 createTask('sweep-experiments', 'sweepExperiments', 'sweep-experiments');
 createTask('test-report-upload', 'testReportUpload', 'test-report-upload');
 createTask('unit', 'unit', 'unit');
-createTask('update-packages', 'updatePackages', 'update-packages');
 createTask('validator', 'validator', 'validator');
 createTask('validator-cpp', 'validatorCpp', 'validator');
 createTask('validator-webui', 'validatorWebui', 'validator');

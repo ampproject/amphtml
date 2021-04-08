@@ -8,8 +8,13 @@ handlers:
   secure: always
 
 - url: /$
-  static_files: index.html
-  upload: index.html
+  static_files: index_wasm.html
+  upload: index_wasm\.html
+  secure: always
+
+- url: /index_wasm\.html$
+  static_files: index_wasm.html
+  upload: index_wasm\.html
   secure: always
 
 - url: /amp_favicon.png$

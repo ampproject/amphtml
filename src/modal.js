@@ -1,4 +1,4 @@
-import {pureDevAssert as devAssert} from './core/assert';
+import {devAssert} from './log';
 import {isConnectedNode, rootNodeFor} from './dom';
 import {toArray} from './types';
 

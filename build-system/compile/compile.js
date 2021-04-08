@@ -49,6 +49,7 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS =
  *  verboseLogging?: boolean,
  *  typeCheckOnly?: boolean,
  *  skipUnknownDepsCheck?: boolean,
+ *  warningLevel?: string,
  * }}
  */
 let OptionsDef;
@@ -208,10 +209,12 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     'third_party/amp-toolbox-cache-url/',
     'third_party/caja/',
     'third_party/closure-library/sha384-generated.js',
+    'third_party/closure-responding-channel',
     'third_party/d3/',
     'third_party/inputmask/',
     'third_party/mustache/',
     'third_party/react-dates/',
+    'third_party/resize-observer-polyfill/',
     'third_party/set-dom/',
     'third_party/subscriptions-project/',
     'third_party/vega/',
@@ -272,8 +275,8 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     jscomp_off: [],
     define,
     hide_warnings_for: hideWarningsFor,
-    // TODO(amphtml): Change 'QUIET' to 'DEFAULT' after #32875 is merged.
-    warning_level: argv.warning_level || 'QUIET',
+    // TODO(amphtml): Change 'QUIET' to 'DEFAULT'.
+    warning_level: argv.warning_level ?? options.warningLevel ?? 'QUIET',
   };
   if (argv.pseudo_names) {
     // Some optimizations get turned off when pseudo_names is on.

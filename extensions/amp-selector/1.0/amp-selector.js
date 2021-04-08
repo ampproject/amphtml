@@ -22,7 +22,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-selector';

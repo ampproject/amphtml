@@ -47,8 +47,18 @@ commands:
       - restore_cache:
           name: 'Restore Merge Commit'
           key: git-{{ .Branch }}-{{ .Revision }}
+  maybe_gracefully_halt:
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: 'Maybe Gracefully Halt'
+          command: if ls /tmp/workspace/.CI_GRACEFULLY_HALT_* 1>/dev/null 2>&1; then echo "Gracefully halting this job."; circleci-agent step halt; fi
   setup_vm:
     steps:
+      - run:
+          name: 'Create Workspace'
+          command: mkdir -p /tmp/workspace
       - checkout
       - restore_merge_commit
       - run:
@@ -66,6 +76,12 @@ commands:
       - run:
           name: 'Install Dependencies'
           command: ./.circleci/install_dependencies.sh
+  teardown_vm:
+    steps:
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - workspace
   install_chrome:
     steps:
       - browser-tools/install-chrome:
@@ -90,51 +106,62 @@ jobs:
     executor:
       name: amphtml-medium-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Checks'
           command: node build-system/pr-check/checks.js
       - fail_fast
+      - teardown_vm
   'Unminified Build':
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Unminified Build'
           command: node build-system/pr-check/unminified-build.js
       - fail_fast
+      - teardown_vm
   'Nomodule Build':
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Nomodule Build'
           command: node build-system/pr-check/nomodule-build.js
       - fail_fast
+      - teardown_vm
   'Module Build':
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Module Build'
           command: node build-system/pr-check/module-build.js
       - fail_fast
+      - teardown_vm
   'Bundle Size':
     executor:
-      name: amphtml-medium-executor
+      name: amphtml-xlarge-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Bundle Size'
           command: node build-system/pr-check/bundle-size.js
       - fail_fast
+      - teardown_vm
   'Validator Tests':
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Install Validator Dependencies'
@@ -143,36 +170,43 @@ jobs:
           name: 'Validator Tests'
           command: node build-system/pr-check/validator-tests.js
       - fail_fast
+      - teardown_vm
   'Visual Diff Tests':
     executor:
       name: amphtml-large-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'Visual Diff Tests'
           command: node build-system/pr-check/visual-diff-tests.js
       - fail_fast
+      - teardown_vm
   'Unit Tests':
     executor:
       name: amphtml-large-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'Unit Tests'
           command: node build-system/pr-check/unit-tests.js
       - fail_fast
+      - teardown_vm
   'Unminified Tests':
     executor:
       name: amphtml-large-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'Unminified Tests'
           command: node build-system/pr-check/unminified-tests.js
       - fail_fast
+      - teardown_vm
   'Nomodule Tests':
     executor:
       name: amphtml-large-executor
@@ -182,12 +216,14 @@ jobs:
         type: enum
         enum: ['prod', 'canary']
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'Nomodule Tests (<< parameters.config >>)'
           command: node build-system/pr-check/nomodule-tests.js --config=<< parameters.config >>
       - fail_fast
+      - teardown_vm
   'Module Tests':
     executor:
       name: amphtml-large-executor
@@ -197,32 +233,38 @@ jobs:
         type: enum
         enum: ['prod', 'canary']
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'Module Tests (<< parameters.config >>)'
           command: node build-system/pr-check/module-tests.js --config=<< parameters.config >>
       - fail_fast
+      - teardown_vm
   'End-to-End Tests':
     executor:
       name: amphtml-large-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'End-to-End Tests'
           command: node build-system/pr-check/e2e-tests.js
       - fail_fast
+      - teardown_vm
   'Performance Tests':
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'Performance Tests'
           command: node build-system/pr-check/performance-tests.js
       - fail_fast
+      - teardown_vm
   'Experiment Build':
     executor:
       name: amphtml-xlarge-executor
@@ -232,11 +274,13 @@ jobs:
         type: enum
         enum: ['A', 'B', 'C']
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Experiment << parameters.exp >> Build'
           command: node build-system/pr-check/experiment-build.js --experiment=experiment<< parameters.exp >>
       - fail_fast
+      - teardown_vm
   'Experiment Tests':
     executor:
       name: amphtml-large-executor
@@ -246,12 +290,14 @@ jobs:
         type: enum
         enum: ['A', 'B', 'C']
     steps:
+      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'Experiment << parameters.exp >> Tests'
           command: node build-system/pr-check/experiment-tests.js --experiment=experiment<< parameters.exp >>
       - fail_fast
+      - teardown_vm
 
 workflows:
   'CircleCI':
@@ -277,8 +323,7 @@ workflows:
       - 'Bundle Size':
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build'
-            - 'Module Build'
+            - 'Compute Merge Commit'
       - 'Validator Tests':
           <<: *push_and_pr_builds
           requires:

@@ -30,7 +30,9 @@ async function clean() {
   const pathsToDelete = [
     '.amp-dep-check',
     '.babel-cache',
+    '.css-cache',
     'build',
+    'extensions/**/dist',
     'build-system/server/new-server/transforms/dist',
     'deps.txt',
     'dist',

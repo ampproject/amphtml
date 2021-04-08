@@ -22,7 +22,6 @@ const {cyan} = require('kleur/colors');
 const {defaultTask: runAmpDevBuildServer} = require('../default-task');
 const {exec, execScriptAsync} = require('../../common/exec');
 const {getBaseUrl} = require('../pr-deploy-bot-utils');
-const {installPackages} = require('../../common/utils');
 const {isCiBuild} = require('../../common/ci');
 const {isPullRequestBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
@@ -76,8 +75,7 @@ function buildEnv(env) {
       // dynamic value. This prevents XSS and other types of garbling.
       `// DO NOT${' '}SUBMIT.
        // This preview.js file was generated for a specific PR build.
-       import {addParameters} from '@storybook/preact';
-       addParameters(${JSON.stringify({
+       export const parameters = (${JSON.stringify({
          ampBaseUrlOptions: [`${getBaseUrl()}/dist`],
        })});`
     );
@@ -107,7 +105,6 @@ async function storybook() {
   if (!build && envs.includes('amp')) {
     await runAmpDevBuildServer();
   }
-  await installPackages(__dirname);
   if (!build) {
     createCtrlcHandler('storybook');
   }
