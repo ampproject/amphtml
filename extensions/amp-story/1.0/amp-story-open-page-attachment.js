@@ -84,9 +84,10 @@ const buildOpenOutlinkAttachmentElement = (element) =>
  * @param {!Window} win
  * @param {!Element} pageEl
  * @param {!Element} attachmentEl
+ * @param  {string} contrastColor '#FFF' or '#000'
  * @return {!Element}
  */
-export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
+export const renderPageAttachmentUI = (win, pageEl, attachmentEl, contrastColor) => {
   const openImgAttr = attachmentEl.getAttribute('cta-image');
   const attachmentHref = attachmentEl.getAttribute('href');
   if (isPageAttachmentUiV2ExperimentOn(win)) {
@@ -95,7 +96,8 @@ export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
         win,
         pageEl,
         attachmentEl,
-        attachmentHref
+        attachmentHref,
+        contrastColor
       );
     } else if (openImgAttr) {
       return renderPageAttachmentUiWithImages(win, pageEl, attachmentEl);
@@ -139,13 +141,15 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
  * @param {!Element} pageEl
  * @param {!Element} attachmentEl
  * @param {!Element} attachmentHref
+ * @param  {string} contrastColor '#FFF' or '#000'
  * @return {!Element}
  */
 const renderOutlinkPageAttachmentUI = (
   win,
   pageEl,
   attachmentEl,
-  attachmentHref
+  attachmentHref,
+  contrastColor
 ) => {
   const openAttachmentEl = buildOpenOutlinkAttachmentElement(pageEl);
 
@@ -163,8 +167,6 @@ const renderOutlinkPageAttachmentUI = (
 
   if (themeAttribute === "custom") {
     const accentColor = attachmentEl.getAttribute('cta-accent-color');
-    const contrastColor = 'black'; // TODO: calculates whether second color should be black or white to optimize contrast with accent color.
-
     if (attachmentEl.getAttribute('cta-accent-element') === "background") {
       setImportantStyles(ctaLabelEl, {
         'color': contrastColor

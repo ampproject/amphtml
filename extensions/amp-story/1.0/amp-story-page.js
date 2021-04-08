@@ -1742,32 +1742,10 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Applying cta-accent-color as a style to a placeholder element
-   * So that contrast calculations can be performed on the rgb
-   * @private
-   */
-  saveCtaContrastColor_() {
-    const ctaColorHolder = this.win.document.createElement('div');
-    ctaColorHolder.classList.add('i-amphtml-cta-color-holder');
-    const pageAttachmentEl = this.element.querySelector(
-      'amp-story-page-attachment'
-    );
-    setImportantStyles(ctaColorHolder, {
-      'color': pageAttachmentEl.getAttribute('cta-accent-color')
-    });
-
-    this.element.appendChild(ctaColorHolder);
-    console.log(this.element.querySelector('i-amphtml-cta-color-holder'));
-  }
-
-  /**
    * Renders the open attachment UI affordance.
    * @private
    */
   renderOpenAttachmentUI_() {
-    this.saveCtaContrastColor_();
-    console.log(this.element.querySelector('i-amphtml-cta-color-holder')); // null??
-
     const attachmentEl = this.element.querySelector(
       'amp-story-page-attachment'
     );
@@ -1775,17 +1753,24 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    setImportantStyles(this.element, {
-      'color': attachmentEl.getAttribute('cta-accent-color')
-    });
-    const styles = computedStyle(this.win, this.element);
-    console.log(styles['background-color']);
+    // Calculating contrast color (black or white) needed for outlink CTA UI.
+    const ctaAccentColor = attachmentEl.getAttribute('cta-accent-color');
+    let contrastColor = null;
+    if (ctaAccentColor) {
+      setImportantStyles(this.element, {
+        'background-color': attachmentEl.getAttribute('cta-accent-color')
+      });
+      const styles = computedStyle(this.win, this.element);
+      const rgb = getRGBFromCssColorValue(styles['background-color']);
+      contrastColor = getTextColorForRGB(rgb);
+    }
 
     if (!this.openAttachmentEl_) {
       this.openAttachmentEl_ = renderPageAttachmentUI(
         this.win,
         this.element,
-        attachmentEl
+        attachmentEl,
+        contrastColor
       );
 
       const container = this.win.document.createElement('div');
