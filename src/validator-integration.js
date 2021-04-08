@@ -35,7 +35,7 @@ export function maybeValidate(win) {
   let validator = false;
   if (getMode().development) {
     const hash = parseQueryString(
-      win.location.originalHash || win.location.hash
+      win.location['originalHash'] || win.location.hash
     );
     validator = hash['validate'] !== '0';
   }

@@ -77,7 +77,7 @@ function getMode_(win) {
   const hashQuery = parseQueryString_(
     // location.originalHash is set by the viewer when it removes the fragment
     // from the URL.
-    win.location.originalHash || win.location.hash
+    win.location['originalHash'] || win.location.hash
   );
 
   const searchQuery = parseQueryString_(win.location.search);
