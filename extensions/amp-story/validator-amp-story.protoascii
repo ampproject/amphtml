@@ -859,7 +859,6 @@ tags: {  # <amp-story-page-attachment> with href
   }
   attrs: {
     name: "cta-accent-color"
-    value: ""
   }
   attrs: {
     name: "cta-accent-element"
