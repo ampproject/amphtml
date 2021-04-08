@@ -97,7 +97,10 @@ jobs:
           command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/main/.circleci/compute_merge_commit.sh | bash
       - run:
           name: 'Save Merge Commit'
-          command: mv .CIRCLECI_MERGE_COMMIT /tmp/workspace/.CIRCLECI_MERGE_COMMIT
+          command: |
+            mkdir -p /tmp/workspace
+            mv .CIRCLECI_MERGE_COMMIT /tmp/workspace/.CIRCLECI_MERGE_COMMIT
+      - teardown_vm
   'Checks':
     executor:
       name: amphtml-medium-executor
