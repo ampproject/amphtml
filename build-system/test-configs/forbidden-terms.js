@@ -42,6 +42,17 @@ const realiasGetMode =
  *   checkInTestFolder?: (undefined|boolean),
  *   checkProse?: (undefined|boolean),
  * }}
+ * - message:
+ *   a message optionally displayed with a matching term
+ *
+ * - allowlist:
+ *   optional list of filepaths that are allowed to use a term
+ *
+ * - checkInTestFolder:
+ *   check term in files whose path includes /test/ (false by default)
+ *
+ * - checkProse:
+ *   check term in comments and documentation (.md) (false by default)
  */
 let ForbiddenTermDef;
 
