@@ -1101,7 +1101,6 @@ const forbiddenTermsSrcInclusive = {
       'src/service/resources-impl.js',
       'src/service/video-manager-impl.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
-      'extensions/amp-auto-lightbox/0.1/amp-auto-lightbox.js',
       'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
       'extensions/amp-script/0.1/amp-script.js',
       'extensions/amp-story/1.0/amp-story-page.js',

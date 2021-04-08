@@ -19,6 +19,7 @@ const fs = require('fs');
 const {
   ciBuildSha,
   ciPullRequestSha,
+  circleciBuildNumber,
   isCiBuild,
   isCircleciBuild,
 } = require('../common/ci');
@@ -110,13 +111,20 @@ function printChangeSummary() {
 }
 
 /**
- * Signal to dependent jobs that they should be skipped.
+ * Signal to dependent jobs that they should be skipped. Uses an identifier that
+ * corresponds to the current job to eliminate conflicts if a parallel job also
+ * signals the same thing.
  *
  * Currently only relevant for CircleCI builds.
  */
 function signalGracefulHalt() {
   if (isCircleciBuild()) {
-    fs.closeSync(fs.openSync('/tmp/workspace/.CI_GRACEFULLY_HALT', 'w'));
+    const loggingPrefix = getLoggingPrefix();
+    const sentinelFile = `/tmp/workspace/.CI_GRACEFULLY_HALT_${circleciBuildNumber()}`;
+    fs.closeSync(fs.openSync(sentinelFile, 'w'));
+    logWithoutTimestamp(
+      `${loggingPrefix} Created ${cyan(sentinelFile)} to signal graceful halt.`
+    );
   }
 }
 
