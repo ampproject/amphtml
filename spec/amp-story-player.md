@@ -125,11 +125,11 @@ URL pointing to the story.
 
 <img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/story-attribution.png?raw=true">
 
-The story attribution displays the entity or publisher's name along with its logo. When clicked, it will navigate the user to either the entity's URL or the publisher's canonical domain.
+The story attribution displays the entity or publisher's name and logo. When clicked, it will navigate the user to either the entity's URL or the publisher's canonical domain.
 
 To display the attribution on the stories, use the player's `display` and `attribution` options. See the JSON configuration below.
 
-The information will come from the `entity`, `entity-logo-src` and `entity-url` from the `<amp-story>` element to display the name, logo, and navigate to the user to the given URL respectively. If these attributes are not provided, the `publisher`, `publisher-logo-src` and canonical domain will be used instead.
+The information will come from the `entity`, `entity-logo-src` and `entity-url` attributes on the `<amp-story>` element in the story. They will be used to display the name, logo, and navigate the user to the given URL respectively. If these attributes are not provided, the `publisher`, `publisher-logo-src` and canonical domain will be used instead.
 
 ### JSON Configuration
 
