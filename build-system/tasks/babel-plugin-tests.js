@@ -29,7 +29,9 @@ async function babelPluginTests() {
     coveragePathIgnorePatterns: ['/node_modules/'],
     detectOpenHandles: true,
     modulePathIgnorePatterns: ['/test/fixtures/', '<rootDir>/build/'],
-    reporters: [isCiBuild() ? 'jest-silent-reporter' : 'jest-dot-reporter'],
+    reporters: [
+      isCiBuild() ? 'jest-silent-reporter' : 'jest-progress-bar-reporter',
+    ],
     setupFiles: ['./build-system/babel-plugins/testSetupFile.js'],
     testEnvironment: 'node',
     testPathIgnorePatterns: ['/node_modules/'],
