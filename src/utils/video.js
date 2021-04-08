@@ -46,6 +46,7 @@ function isAutoplaySupportedImpl(win, isLiteViewer) {
 
   detectionElement.muted = true;
   detectionElement.playsInline = true;
+  detectionElement['playsinline'] = true;
   detectionElement['webkitPlaysinline'] = true;
 
   setStyles(detectionElement, {
