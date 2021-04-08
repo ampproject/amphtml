@@ -463,6 +463,12 @@ Adds support for Pinpoll. Configuration details can be found at [pinpoll.com](ht
 
 Type attribute value: `piStats`
 
+### PPAS analytics
+
+Type attribute value: `ppasanalytics`
+
+Adds support for PPAS analytics. Configuration details can be found at [piwik.pro](https://developers.piwik.pro/).
+
 ### Pressboard
 
 Type attribute value: `pressboard`
