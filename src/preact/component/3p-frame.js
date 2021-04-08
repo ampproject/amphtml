@@ -78,14 +78,14 @@ function ProxyIframeEmbedWithRef(
     }
     return countGenerators[type]();
   }, [type]);
-  const [name, setName] = useState(nameProp);
-  const src = useRef(null);
 
+  const [{name, src}, setNameAndSrc] = useState({name: nameProp, src: srcProp});
   useLayoutEffect(() => {
     const win = contentRef.current?.ownerDocument?.defaultView;
-    src.current = srcProp ?? (win ? getDefaultBootstrapBaseUrl(win) : null);
+    const src =
+      srcProp ?? (win ? getDefaultBootstrapBaseUrl(win) : 'about:blank');
     if (nameProp) {
-      setName(nameProp);
+      setNameAndSrc({name: nameProp, src});
       return;
     }
     if (!win) {
@@ -104,10 +104,10 @@ function ProxyIframeEmbedWithRef(
     for (const key in options) {
       attrs[key] = options[key];
     }
-    setName(
-      JSON.stringify(
+    setNameAndSrc({
+      name: JSON.stringify(
         dict({
-          'host': parseUrlDeprecated(src.current).hostname,
+          'host': parseUrlDeprecated(src).hostname,
           'bootstrap': getBootstrapUrl(type, win),
           'type': type,
           // "name" must be unique across iframes, so we add a count.
@@ -115,9 +115,10 @@ function ProxyIframeEmbedWithRef(
           'count': count,
           'attributes': attrs,
         })
-      )
-    );
-  }, [count, nameProp, options, srcProp, title, type]);
+      ),
+      src,
+    });
+  }, [count, nameProp, options, src, srcProp, title, type]);
 
   return (
     <IframeEmbed
@@ -128,7 +129,7 @@ function ProxyIframeEmbedWithRef(
       ref={ref}
       ready={!!name}
       sandbox={sandbox}
-      src={src.current}
+      src={src}
       title={title}
       {...rest}
     />
