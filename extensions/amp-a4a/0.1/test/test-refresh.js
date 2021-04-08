@@ -69,7 +69,7 @@ describe('refresh', () => {
         )
       ).to.be.null;
     });
-    
+
     it('should get null refreshInterval when disabled via data attr', () => {
       mockA4a.element.setAttribute(DATA_ATTR_NAME, false);
       expect(
