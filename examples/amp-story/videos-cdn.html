@@ -27,6 +27,7 @@
   <script>
     (self.AMP = self.AMP || []).push(function(AMP) {
       AMP.toggleExperiment('flexible-bitrate', true);
+      AMP.toggleExperiment('flexible-bitrate-debug', true);
     });
 </script>
 </head>
@@ -42,7 +43,9 @@
             height="750"
             poster="img-city1.jpeg#1"
             layout="fill">
-            <source src="https://amp-dev.cdn.ampproject.org/c/s/amp.dev/static/samples/video/tokyo.mp4" amp-orig-src="https://amp.dev/static/samples/video/tokyo.mp4" type="video/mp4">
+            <source src="/examples/av/ForBiggerJoyrides-short.mp4#high" type="video/mp4" data-bitrate="2000">
+            <source src="/examples/av/ForBiggerJoyrides-short.mp4#med" type="video/mp4" data-bitrate="720">
+            <source src="/examples/av/ForBiggerJoyrides-short.mp4#low" type="video/mp4" data-bitrate="400">
           </amp-video>
 				</amp-story-grid-layer>
 				<amp-story-grid-layer><span class="page-num">1</span></amp-story-grid-layer>

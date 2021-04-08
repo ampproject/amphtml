@@ -15,13 +15,19 @@
  */
 
 import {DomBasedWeakRef} from '../../../src/utils/dom-based-weakref';
-import {childElement, childElementsByTag} from '../../../src/dom';
+import {
+  childElement,
+  childElementsByTag,
+  createElementWithAttributes,
+} from '../../../src/dom';
 import {dev, devAssert} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {toArray} from '../../../src/types';
 
 const TAG = 'amp-video';
+
+const DEBUG_FIELD = 'flexible-bitrate-debug';
 
 /** @const {!Object<string, number>} */
 const BITRATE_BY_EFFECTIVE_TYPE = {
@@ -84,6 +90,25 @@ export class BitrateManager {
 
     /** @private {!Array<!WeakRef<!Element>|!../../../src/utils/dom-based-weakref.DomBasedWeakRef<!Element>>} */
     this.videos_ = [];
+
+    // eslint-disable-next-line local/is-experiment-on
+    if (isExperimentOn(this.win, DEBUG_FIELD)) {
+      const field = createElementWithAttributes(this.win.document, 'input', {
+        [DEBUG_FIELD]: '',
+        'style': 'position:absolute;top:0',
+      });
+      this.win.document.body.appendChild(field);
+      field.addEventListener('keyup', (e) => {
+        if (e.key === 'd') {
+          this.videos_.forEach((v) => {
+            const video = v.deref();
+            if (!video.paused) {
+              video.dispatchEvent(new Event('downgrade'));
+            }
+          });
+        }
+      });
+    }
   }
 
   /**
@@ -298,6 +323,7 @@ function onNontrivialWait(video, callback) {
       callback();
     }, 100);
   });
+  listen(video, 'downgrade', () => callback());
 }
 
 /**
