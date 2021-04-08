@@ -13,8 +13,8 @@ requirement: {
   type: BANNED_PROPERTY_READ
   error_message: 'Use getStyle, setStyle, or setStyles in src/style.js'
   value: 'Element.prototype.style'
-  whitelist: 'src/style.js'
-  whitelist: 'src/layout.js'
+  allowlist: 'src/style.js'
+  allowlist: 'src/layout.js'
 }
 
 requirement: {
@@ -27,7 +27,7 @@ requirement: {
   type: BANNED_PROPERTY_CALL
   error_message: 'Use closestAncestorElementBySelector in src/dom.js'
   value: 'Element.prototype.closest'
-  whitelist: 'src/dom.js'
+  allowlist: 'src/dom.js'
 }
 
 # CSSStyleDeclaration
@@ -36,7 +36,7 @@ requirement: {
   type: BANNED_PROPERTY_CALL
   error_message: 'Use setStyle or setStyles in src/style.js'
   value: 'CSSStyleDeclaration.prototype.setProperty'
-  whitelist: 'src/style.js'
+  allowlist: 'src/style.js'
 }
 
 # History
@@ -45,8 +45,8 @@ requirement: {
   type: BANNED_PROPERTY
   error_message: 'History.p.state is broken in IE11. Please use the helper methods provided in src/history.js'
   value: 'History.prototype.state'
-  whitelist: 'src/history.js'
-  whitelist: 'extensions/amp-story/1.0/amp-story-viewer-messaging-handler.js'
+  allowlist: 'src/history.js'
+  allowlist: 'extensions/amp-story/1.0/amp-story-viewer-messaging-handler.js'
 }
 
 # Strings
@@ -104,7 +104,7 @@ requirement: {
   error_message: 'string.prototype.trimStart is not allowed'
   value: 'string.prototype.trimStart'
   value: 'string.prototype.trimLeft'
-  whitelist: 'src/string.js'
+  allowlist: 'src/string.js'
 }
 
 requirement: {
@@ -112,7 +112,7 @@ requirement: {
   error_message: 'string.prototype.trimEnd is not allowed'
   value: 'string.prototype.trimEnd'
   value: 'string.prototype.trimRight'
-  whitelist: 'src/string.js'
+  allowlist: 'src/string.js'
 }
 
 requirement: {
@@ -381,52 +381,52 @@ requirement: {
 
 requirement: {
   type: BANNED_NAME
-  error_message: 'Use parseJson instead. Usage in 3p ads can be whitelisted for now.'
+  error_message: 'Use parseJson instead. Usage in 3p ads can be allowlisted for now.'
   value: 'JSON.parse'
-  whitelist: 'ads/vendors/adfox.js'
-  whitelist: 'ads/vendors/adincube.js'
-  whitelist: 'ads/vendors/imedia.js'
-  whitelist: 'ads/vendors/kargo.js'
-  whitelist: 'ads/vendors/mads.js'
-  whitelist: 'ads/google/imaVideo.js'
-  whitelist: 'ads/vendors/zen.js'
-  whitelist: 'extensions/amp-viewer-integration/0.1/messaging/messaging.js' # published as standalone library
-  whitelist: 'src/json.js' # Where parseJson itself is implemented.
-  whitelist_regexp: '.*\\.jss\\.js'
+  allowlist: 'ads/vendors/adfox.js'
+  allowlist: 'ads/vendors/adincube.js'
+  allowlist: 'ads/vendors/imedia.js'
+  allowlist: 'ads/vendors/kargo.js'
+  allowlist: 'ads/vendors/mads.js'
+  allowlist: 'ads/google/imaVideo.js'
+  allowlist: 'ads/vendors/zen.js'
+  allowlist: 'extensions/amp-viewer-integration/0.1/messaging/messaging.js' # published as standalone library
+  allowlist: 'src/json.js' # Where parseJson itself is implemented.
+  allowlist_regexp: '.*\\.jss\\.js'
 }
 
 requirement: {
   type: BANNED_PROPERTY_READ
-  error_message: 'Use eventHelper#getData to read the data property. OK to whitelist 3p ads for now.'
+  error_message: 'Use eventHelper#getData to read the data property. OK to allowlist 3p ads for now.'
   value: 'Event.prototype.data'
   value: 'MessageEvent.prototype.data'
-  whitelist: 'src/event-helper.js' # getData is implemented here
-  whitelist: 'src/web-worker/amp-worker.js' # OK to use in version bound worker
-  whitelist: 'src/web-worker/web-worker.js' # OK to use in version bound worker
+  allowlist: 'src/event-helper.js' # getData is implemented here
+  allowlist: 'src/web-worker/amp-worker.js' # OK to use in version bound worker
+  allowlist: 'src/web-worker/web-worker.js' # OK to use in version bound worker
 
   # 3p ads are OK
-  whitelist: 'ads/vendors/adfox.js'
-  whitelist: 'ads/vendors/google/imaVideo.js'
-  whitelist: 'ads/vendors/netletix.js'
-  whitelist: 'ads/vendors/yandex.js'
-  whitelist: 'extensions/amp-access/0.1/amp-access-iframe.js' # False-positive
-  whitelist: 'extensions/amp-access/0.1/iframe-api/messenger.js' # 3p-intent
-  whitelist: 'src/service/history-impl.js' # False-positive
-  whitelist: 'extensions/amp-viewer-integration/0.1/messaging/messaging.js' # published as standalone library
+  allowlist: 'ads/vendors/adfox.js'
+  allowlist: 'ads/vendors/google/imaVideo.js'
+  allowlist: 'ads/vendors/netletix.js'
+  allowlist: 'ads/vendors/yandex.js'
+  allowlist: 'extensions/amp-access/0.1/amp-access-iframe.js' # False-positive
+  allowlist: 'extensions/amp-access/0.1/iframe-api/messenger.js' # 3p-intent
+  allowlist: 'src/service/history-impl.js' # False-positive
+  allowlist: 'extensions/amp-viewer-integration/0.1/messaging/messaging.js' # published as standalone library
 }
 
 requirement: {
   type: BANNED_PROPERTY_READ
-  error_message: 'Use eventHelper#getDetail to read the detail property. OK to whitelist 3p ads for now.'
+  error_message: 'Use eventHelper#getDetail to read the detail property. OK to allowlist 3p ads for now.'
   value: 'Event.prototype.detail'
   value: 'MessageEvent.prototype.detail'
-  whitelist: 'src/event-helper.js' # getDetail is implemented here
+  allowlist: 'src/event-helper.js' # getDetail is implemented here
 
   # 3p ads are OK
-  whitelist: 'ads/vendors/adhese.js'
-  whitelist: 'ads/vendors/loka.js'
-  whitelist: 'ads/vendors/nativery.js'
-  whitelist: 'ads/vendors/xlift.js'
+  allowlist: 'ads/vendors/adhese.js'
+  allowlist: 'ads/vendors/loka.js'
+  allowlist: 'ads/vendors/nativery.js'
+  allowlist: 'ads/vendors/xlift.js'
 }
 
 requirement: {
@@ -434,12 +434,12 @@ requirement: {
   error_message: 'postMessage must be called with a string or a JsonObject'
   value: 'Window.prototype.postMessage:function((string|?JsonObject), string, (Array|Transferable)=)'
   # Guaranteed same version call
-  whitelist: 'src/web-worker/web-worker.js'
+  allowlist: 'src/web-worker/web-worker.js'
   # Allowing violations in ads code for now.
   # We would have to fix this to property obfuscated the 3p frame code.
-  whitelist: '3p/iframe-messaging-client.js'
-  whitelist: 'ads/google/deprecated_doubleclick.js'
-  whitelist: 'ads/google/imaVideo.js'
+  allowlist: '3p/iframe-messaging-client.js'
+  allowlist: 'ads/google/deprecated_doubleclick.js'
+  allowlist: 'ads/google/imaVideo.js'
 }
 
 requirement: {
@@ -450,7 +450,7 @@ requirement: {
   value: 'JSON.stringify:function((?JsonObject|AmpViewerMessage|string|number|boolean|undefined|Array),!Function=)'
   # Allowing violations in ads code for now.
   # We would have to fix this to property obfuscated the 3p frame code.
-  whitelist: 'ads/google/deprecated_doubleclick.js'
+  allowlist: 'ads/google/deprecated_doubleclick.js'
 }
 
 # Cookies
@@ -459,7 +459,7 @@ requirement: {
   type: BANNED_PROPERTY
   error_message: 'Use cookies#getCookie or cookies#setCookie to read or write cookies. Note that usage of cookies requires dedicated review due to being privacy sensitive. Please file an issue asking for permission to use if you have not yet done so'
   value: 'Document.prototype.cookie'
-  whitelist: 'src/cookies.js'
+  allowlist: 'src/cookies.js'
 }
 
 requirement: {
@@ -467,11 +467,11 @@ requirement: {
   error_message: 'Usage of cookies requires dedicated review due to being privacy sensitive. Please file an issue asking for permission to use if you have not yet done so'
   value: 'module$src$cookies.getCookie'
   value: 'module$src$cookies.setCookie'
-  whitelist: 'src/cookies.js'
-  whitelist: 'src/experiments.js'
-  whitelist: 'src/service/cid-api.js'
-  whitelist: 'src/service/cid-impl.js'
-  whitelist: 'extensions/amp-analytics/0.1/cookie-writer.js'
+  allowlist: 'src/cookies.js'
+  allowlist: 'src/experiments.js'
+  allowlist: 'src/service/cid-api.js'
+  allowlist: 'src/service/cid-impl.js'
+  allowlist: 'extensions/amp-analytics/0.1/cookie-writer.js'
 }
 
 # Function
@@ -497,7 +497,7 @@ requirement: {
   value: 'DocumentType.prototype.remove'
   value: 'Element.prototype.remove'
   value: 'CharacterData.prototype.remove'
-  whitelist: 'extensions/amp-inputmask/0.1/mask-impl.js'
+  allowlist: 'extensions/amp-inputmask/0.1/mask-impl.js'
 }
 
 requirement: {
