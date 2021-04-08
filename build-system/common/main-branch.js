@@ -15,10 +15,9 @@
  */
 
 /**
- * TODO(rsimha, #32195): Change this to main when branch is renamed, and delete
- * this file once the dust settles.
+ * TODO(rsimha, #32195): Delete this file once the dust settles.
  */
-const mainBranch = 'master';
+const mainBranch = 'main';
 
 module.exports = {
   mainBranch,

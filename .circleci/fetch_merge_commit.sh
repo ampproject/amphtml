@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 
-# This script fetches the merge commit of a PR branch with master to make sure
-# PRs are tested against all the latest changes on CircleCI.
+# This script fetches the merge commit of a PR branch with the main branch to
+# make sure PRs are tested against all the latest changes on CircleCI.
 
 set -e
 err=0
@@ -51,9 +51,9 @@ echo $(GREEN "Fetching merge commit $CIRCLECI_MERGE_COMMIT...")
 # If a clean merge is not possible, do not proceed with the build. GitHub's UI
 # will show an error indicating there was a merge conflict.
 if [[ "$err" -ne "0" ]]; then
-  echo $(RED "Detected a merge conflict between $CIRCLE_BRANCH and master.")
+  echo $(RED "Detected a merge conflict between $CIRCLE_BRANCH and the main branch.")
   echo $(RED "Please rebase your PR branch.")
   exit $err
 fi
 
-echo $(GREEN "Successfully fetched merge commit of $CIRCLE_BRANCH with master.")
+echo $(GREEN "Successfully fetched merge commit of $CIRCLE_BRANCH with the main branch.")

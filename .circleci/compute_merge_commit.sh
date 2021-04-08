@@ -23,7 +23,7 @@ err=0
 GREEN() { echo -e "\n\033[0;32m$1\033[0m"; }
 
 # Try to determine the PR number.
-curl -sS https://raw.githubusercontent.com/ampproject/amphtml/master/.circleci/get_pr_number.sh | bash
+curl -sS https://raw.githubusercontent.com/ampproject/amphtml/main/.circleci/get_pr_number.sh | bash
 if [[ -f "$BASH_ENV" ]]; then
   source $BASH_ENV
 fi
@@ -34,8 +34,8 @@ if [[ -z "$PR_NUMBER" ]]; then
 fi
 
 # GitHub provides refs/pull/<PR_NUMBER>/merge, an up-to-date merge branch for
-# every PR branch that can be cleanly merged to master. For more details, see:
-# https://discuss.circleci.com/t/show-test-results-for-prospective-merge-of-a-github-pr/1662
+# every PR branch that can be cleanly merged to the main branch. For more
+# details, see: https://discuss.circleci.com/t/show-test-results-for-prospective-merge-of-a-github-pr/1662
 MERGE_BRANCH="refs/pull/$PR_NUMBER/merge"
 echo $(GREEN "Computing merge SHA of $MERGE_BRANCH...")
 CIRCLE_MERGE_SHA="$(git ls-remote https://github.com/ampproject/amphtml.git "$MERGE_BRANCH" | awk '{print $1}')"

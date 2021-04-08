@@ -25,7 +25,7 @@ YELLOW() { echo -e "\n\033[0;33m$1\033[0m"; }
 # For push builds, continue in spite of failures so that other jobs like
 # bundle-size and visual-diff can establish their baselines for this commit.
 # Without this, our custom bots will not be able to function correctly.
-if [[ "$CIRCLE_BRANCH" == "master" || "$CIRCLE_BRANCH" =~ ^amp-release-* ]]; then
+if [[ "$CIRCLE_BRANCH" == "main" || "$CIRCLE_BRANCH" =~ ^amp-release-* ]]; then
   echo $(YELLOW "Not canceling build in spite of failures because $CIRCLE_BRANCH is not a PR branch.")
   exit 0
 fi

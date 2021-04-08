@@ -23,8 +23,8 @@ err=0
 GREEN() { echo -e "\n\033[0;32m$1\033[0m"; }
 YELLOW() { echo -e "\n\033[0;33m$1\033[0m"; }
 
-# Push builds are only run against master and amp-release branches.
-if [[ "$CIRCLE_BRANCH" == "master" || "$CIRCLE_BRANCH" =~ ^amp-release-* ]]; then
+# Push builds are only run against the main branch and amp-release branches.
+if [[ "$CIRCLE_BRANCH" == "main" || "$CIRCLE_BRANCH" =~ ^amp-release-* ]]; then
   echo $(GREEN "Nothing to do because $CIRCLE_BRANCH is not a PR branch.")
   # Warn if the build is linked to a PR on a different repo (known CircleCI bug).
   if [[ -n "$CIRCLE_PULL_REQUEST" && ! "$CIRCLE_PULL_REQUEST" =~ ^https://github.com/ampproject/amphtml* ]]; then
