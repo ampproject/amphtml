@@ -242,10 +242,6 @@ async function createDesignReviewIssue() {
   }
 
   const repo = env('GITHUB_REPOSITORY');
-  if (repo !== 'ampproject/amphtml') {
-    // don't run on forks.
-    return;
-  }
   const {title, 'html_url': htmlUrl} = await postGithubIssue(
     env('GITHUB_TOKEN'),
     repo,
