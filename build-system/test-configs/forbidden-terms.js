@@ -40,8 +40,19 @@ const realiasGetMode =
  *   message?: (undefined|string),
  *   allowlist?: (undefined|Array<string>),
  *   checkInTestFolder?: (undefined|boolean),
- *   checkComments?: (undefined|boolean),
+ *   checkProse?: (undefined|boolean),
  * }}
+ * - message:
+ *   a message optionally displayed with a matching term
+ *
+ * - allowlist:
+ *   optional list of filepaths that are allowed to use a term
+ *
+ * - checkInTestFolder:
+ *   check term in files whose path includes /test/ (false by default)
+ *
+ * - checkProse:
+ *   check term in comments and documentation (.md) (false by default)
  */
 let ForbiddenTermDef;
 
@@ -51,19 +62,19 @@ let ForbiddenTermDef;
  */
 const forbiddenTermsGlobal = {
   'DO NOT SUBMIT': {
-    checkComments: true,
+    checkProse: true,
   },
   'whitelist|white-list': {
     message: 'Please use the term allowlist instead',
-    checkComments: true,
+    checkProse: true,
   },
   'blacklist|black-list': {
     message: 'Please use the term denylist instead',
-    checkComments: true,
+    checkProse: true,
   },
   'grandfather|grandfathered': {
     message: 'Please use the term legacy instead',
-    checkComments: true,
+    checkProse: true,
   },
   '(^-amp-|\\W-amp-)': {
     message: 'Switch to new internal class form',
@@ -1200,7 +1211,7 @@ function matchForbiddenTerms(srcFile, contents, terms) {
         message,
         allowlist = null,
         checkInTestFolder = false,
-        checkComments = false,
+        checkProse = false,
       } =
         typeof messageOrDef === 'string'
           ? {message: messageOrDef}
@@ -1209,7 +1220,8 @@ function matchForbiddenTerms(srcFile, contents, terms) {
       // if needed but that might be too permissive.
       if (
         (Array.isArray(allowlist) && allowlist.indexOf(srcFile) != -1) ||
-        (isInTestFolder(srcFile) && !checkInTestFolder)
+        (isInTestFolder(srcFile) && !checkInTestFolder) ||
+        (srcFile.endsWith('.md') && !checkProse)
       ) {
         return [];
       }
@@ -1220,13 +1232,13 @@ function matchForbiddenTerms(srcFile, contents, terms) {
       // original term to get the possible fix value. This is ok as the
       // presubmit doesn't have to be blazing fast and this is most likely
       // negligible.
-      const regex = new RegExp(term, 'gm' + (checkComments ? 'i' : ''));
+      const regex = new RegExp(term, 'gm' + (checkProse ? 'i' : ''));
       let index = 0;
       let line = 1;
       let column = 0;
       const start = {line: -1, column: -1};
 
-      const subject = checkComments ? contents : contentsWithoutComments;
+      const subject = checkProse ? contents : contentsWithoutComments;
       let result;
       while ((result = regex.exec(subject))) {
         const [match] = result;
