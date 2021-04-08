@@ -22,7 +22,7 @@ import {
 import {Layout} from '../../../src/layout';
 import {closest, copyChildren, removeChildren} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {getStorySrcAttribute} from './utils';
+import {getStoryAttributeSrc} from './utils';
 import {htmlFor} from '../../../src/static-template';
 import {isArray, isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
@@ -215,7 +215,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
       case Type.BLOCKING:
         const drawerEl = getBlockingTemplate(this.element);
 
-        const logoSrc = getStorySrcAttribute(
+        const logoSrc = getStoryAttributeSrc(
           this.element,
           'publisher-logo-src',
           /* warn */ true

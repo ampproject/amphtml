@@ -262,11 +262,11 @@ export function shouldShowStoryUrlInfo(viewer) {
  * Retrieves an attribute src from the <amp-story> element.
  * @param {!Element} element
  * @param {string} attribute
- * @param {=string} warn
+ * @param {string=} warn
  * @return {?string}
  * @private
  */
-export function getStorySrcAttribute(element, attribute, warn = false) {
+export function getStoryAttributeSrc(element, attribute, warn = false) {
   const storyEl = dev().assertElement(
     closestAncestorElementBySelector(element, 'AMP-STORY')
   );

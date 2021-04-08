@@ -32,7 +32,7 @@ import {Services} from '../../../src/services';
 import {closest, matches, scopedQuerySelector} from '../../../src/dom';
 import {
   createShadowRootWithStyle,
-  getStorySrcAttribute,
+  getStoryAttributeSrc,
   shouldShowStoryUrlInfo,
   triggerClickFromLightDom,
 } from './utils';
@@ -478,29 +478,29 @@ export class SystemLayer {
 
   /** @private */
   maybeBuildAttribution_() {
-    if (this.viewer_ && this.viewer_.getParam('attribution') === 'auto') {
-      this.systemLayerEl_.querySelector(
-        '.i-amphtml-story-attribution-logo'
-      ).src =
-        getStorySrcAttribute(this.parentEl_, 'entity-logo-src') ??
-        getStorySrcAttribute(this.parentEl_, 'publisher-logo-src');
-
-      const anchorEl = this.systemLayerEl_.querySelector(
-        `.${escapeCssSelectorIdent(ATTRIBUTION_CLASS)}`
-      );
-
-      anchorEl.href =
-        getStorySrcAttribute(this.parentEl_, 'entity-url') ??
-        getSourceOrigin(Services.documentInfoForDoc(this.parentEl_).sourceUrl);
-
-      this.systemLayerEl_.querySelector(
-        '.i-amphtml-story-attribution-text'
-      ).textContent =
-        this.parentEl_.getAttribute('entity') ??
-        this.parentEl_.getAttribute('publisher');
-
-      anchorEl.classList.add('i-amphtml-story-attribution-visible');
+    if (!this.viewer_ || this.viewer_.getParam('attribution') !== 'auto') {
+      return;
     }
+
+    this.systemLayerEl_.querySelector('.i-amphtml-story-attribution-logo').src =
+      getStoryAttributeSrc(this.parentEl_, 'entity-logo-src') ||
+      getStoryAttributeSrc(this.parentEl_, 'publisher-logo-src');
+
+    const anchorEl = this.systemLayerEl_.querySelector(
+      `.${escapeCssSelectorIdent(ATTRIBUTION_CLASS)}`
+    );
+
+    anchorEl.href =
+      getStoryAttributeSrc(this.parentEl_, 'entity-url') ||
+      getSourceOrigin(Services.documentInfoForDoc(this.parentEl_).sourceUrl);
+
+    this.systemLayerEl_.querySelector(
+      '.i-amphtml-story-attribution-text'
+    ).textContent =
+      this.parentEl_.getAttribute('entity') ||
+      this.parentEl_.getAttribute('publisher');
+
+    anchorEl.classList.add('i-amphtml-story-attribution-visible');
   }
 
   /**
