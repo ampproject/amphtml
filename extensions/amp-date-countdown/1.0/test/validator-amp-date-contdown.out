@@ -265,6 +265,8 @@ amp-date-countdown/1.0/test/validator-amp-date-contdown.html:252:4 Attribute 'te
 |
 |      <!-- Should allow `count-up` attribute. -->
 |      <amp-date-countdown
+>>     ^~~~~~~~~
+amp-date-countdown/1.0/test/validator-amp-date-contdown.html:264:4 The attribute 'count-up' may not appear in tag 'amp-date-countdown'. (see https://amp.dev/documentation/components/amp-date-countdown)
 |        count-up
 |        timestamp-seconds="1521880470"
 |        offset-seconds="1521880470"
@@ -279,7 +281,7 @@ amp-date-countdown/1.0/test/validator-amp-date-contdown.html:252:4 Attribute 'te
 |      <!-- Should error if `count-up` attribute is given a non-empty value. -->
 |      <amp-date-countdown
 >>     ^~~~~~~~~
-amp-date-countdown/1.0/test/validator-amp-date-contdown.html:277:4 The attribute 'count-up' in tag 'amp-date-countdown' is set to the invalid value 'true'. (see https://amp.dev/documentation/components/amp-date-countdown)
+amp-date-countdown/1.0/test/validator-amp-date-contdown.html:277:4 The attribute 'count-up' may not appear in tag 'amp-date-countdown'. (see https://amp.dev/documentation/components/amp-date-countdown)
 |        count-up="true"
 |        timestamp-seconds="1521880470"
 |        offset-seconds="1521880470"
