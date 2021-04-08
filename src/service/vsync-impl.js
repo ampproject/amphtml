@@ -15,7 +15,6 @@
  */
 
 import {Deferred} from '../utils/promise';
-import {JankMeter} from './jank-meter';
 import {Pass} from '../pass';
 import {Services} from '../services';
 import {
@@ -153,9 +152,6 @@ export class Vsync {
         this.boundOnVisibilityChanged_
       );
     }
-
-    /** @private {!JankMeter} */
-    this.jankMeter_ = new JankMeter(this.win);
   }
 
   /** @override */
@@ -382,7 +378,6 @@ export class Vsync {
     }
     // Schedule actual animation frame and then run tasks.
     this.scheduled_ = true;
-    this.jankMeter_.onScheduled();
     this.forceSchedule_();
   }
 
@@ -405,7 +400,6 @@ export class Vsync {
   runScheduledTasks_() {
     this.backupPass_.cancel();
     this.scheduled_ = false;
-    this.jankMeter_.onRun();
 
     const {tasks_: tasks, states_: states, nextFrameResolver_: resolver} = this;
     this.nextFrameResolver_ = null;
