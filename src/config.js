@@ -61,7 +61,21 @@ function getMetaUrl(name) {
   return (metaEl && metaEl.getAttribute('content')) || null;
 }
 
-/** @type {!Object<string, string|boolean|RegExp|Array<RegExp>>} */
+/**
+ * @typedef {{
+ *   thirdParty: string,
+ *   thirdPartyFrameHost: string,
+ *   thirdPartyFrameRegex: !RegExp,
+ *   cdn: string,
+ *   cdnProxyRegex: !RegExp,
+ *   localhostRegex: !RegExp,
+ *   errorReporting: string,
+ *   betaErrorReporting: string,
+ *   localDev: boolean,
+ *   trustedViewerHosts: !Array<!RegExp>,
+ *   geoApi: ?string,
+ * }}
+ */
 export const urls = {
   thirdParty: env['thirdPartyUrl'] || 'https://3p.ampproject.net',
   thirdPartyFrameHost: env['thirdPartyFrameHost'] || 'ampproject.net',
