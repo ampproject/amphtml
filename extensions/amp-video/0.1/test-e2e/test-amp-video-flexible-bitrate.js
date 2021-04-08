@@ -84,6 +84,9 @@ describes.endtoend(
 
     it('should lower quality on other videos when video is downgraded', async () => {
       await downgradeCurrentVideo(50);
+      await controller.click(story);
+      await controller.findElement('amp-story-page#page-2[active]');
+
       const video2El = await controller.findElement('#video2 video');
 
       await expect(
@@ -121,7 +124,11 @@ describes.endtoend(
 
       await controller.findElement('amp-story-page#page-4[active]');
 
-      const video4El = await controller.findElement('#video4 video');
+      await sleep(100);
+
+      const video4El = await controller.findElement(
+        '#video4 video.i-amphtml-pool-video'
+      );
 
       await expect(
         await controller.getElementProperty(video4El, 'currentSrc')

@@ -90,25 +90,6 @@ export class BitrateManager {
 
     /** @private {!Array<!WeakRef<!Element>|!../../../src/utils/dom-based-weakref.DomBasedWeakRef<!Element>>} */
     this.videos_ = [];
-
-    // eslint-disable-next-line local/is-experiment-on
-    if (isExperimentOn(this.win, DEBUG_FIELD)) {
-      const field = createElementWithAttributes(this.win.document, 'input', {
-        [DEBUG_FIELD]: '',
-        'style': 'position:absolute;top:0',
-      });
-      this.win.document.body.appendChild(field);
-      field.addEventListener('keyup', (e) => {
-        if (e.key === 'd') {
-          this.videos_.forEach((v) => {
-            const video = v.deref();
-            if (!video.paused) {
-              video.dispatchEvent(new Event('downgrade'));
-            }
-          });
-        }
-      });
-    }
   }
 
   /**
@@ -127,20 +108,27 @@ export class BitrateManager {
     if (video.changedSources) {
       return;
     }
-    onNontrivialWait(video, () => {
-      const current = currentSource(video);
-      const newBitrate = current.bitrate_ - 1;
-      if (newBitrate >= this.acceptableBitrate_) {
-        return;
-      }
-      this.acceptableBitrate_ = newBitrate;
-      this.switchToLowerBitrate_(video, current.bitrate_);
-      this.updateOtherManagedAndPausedVideos_();
-    });
+    onNontrivialWait(video, this.downgradeVideo_);
+    listen(video, 'downgrade', () => this.downgradeVideo_(video));
     video.changedSources = () => {
       this.sortSources_(video);
     };
     this.videos_.push(DomBasedWeakRef.make(this.win, video));
+  }
+
+  /**
+   * Callback to try downgrade a video when it doesn't load properly.
+   * @param {!Element} video
+   */
+  downgradeVideo_(video) {
+    const current = currentSource(video);
+    const newBitrate = current.bitrate_ - 1;
+    if (newBitrate >= this.acceptableBitrate_) {
+      return;
+    }
+    this.acceptableBitrate_ = newBitrate;
+    this.switchToLowerBitrate_(video, current.bitrate_);
+    this.updateOtherManagedAndPausedVideos_();
   }
 
   /**
@@ -323,7 +311,6 @@ function onNontrivialWait(video, callback) {
       callback();
     }, 100);
   });
-  listen(video, 'downgrade', () => callback());
 }
 
 /**
