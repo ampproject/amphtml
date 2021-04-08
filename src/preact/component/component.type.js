@@ -66,7 +66,6 @@ var IframeEmbedDef = {};
  *   manageMessageHandler: (function({current: HTMLIFrameElement}, function):function|undefined),
  *   name: (string|undefined),
  *   onReadyState: (function(string)|undefined),
- *   options: (Object|undefined)
  *   ready: (boolean|undefined),
  *   sandbox: (string|undefined),
  *   src: (string|undefined),

@@ -61,7 +61,6 @@ const DEFAULT_SANDBOX =
 function ProxyIframeEmbedWithRef(
   {
     name: nameProp,
-    options = {},
     messageHandler,
     sandbox = DEFAULT_SANDBOX,
     src: srcProp,
@@ -101,9 +100,6 @@ function ProxyIframeEmbedWithRef(
         'sentinel': generateSentinel(win),
       }),
     });
-    for (const key in options) {
-      attrs[key] = options[key];
-    }
     setNameAndSrc({
       name: JSON.stringify(
         dict({
@@ -118,7 +114,7 @@ function ProxyIframeEmbedWithRef(
       ),
       src,
     });
-  }, [count, nameProp, options, srcProp, title, type]);
+  }, [count, nameProp, srcProp, title, type]);
 
   return (
     <IframeEmbed
