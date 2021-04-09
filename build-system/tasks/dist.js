@@ -294,7 +294,7 @@ async function postBuildWebPushPublisherFilesVersion() {
       await fs.outputFile(`dist/v0/${fileName}.html`, minifiedHtml);
     }
   }
-} 
+}
 
 /**
  * Precompilation steps required to build experiment js binaries.

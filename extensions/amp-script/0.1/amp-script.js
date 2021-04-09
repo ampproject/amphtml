@@ -30,6 +30,7 @@ import {getMode} from '../../../src/mode';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {tryParseJson} from '../../../src/json';
+import {urls} from '../../../src/config';
 import {utf8Encode} from '../../../src/utils/bytes';
 
 /** @const {string} */
@@ -304,7 +305,7 @@ export class AmpScript extends AMP.BaseElement {
       sandbox: this.sandboxed_ && {
         iframeUrl: getMode().localDev
           ? '/dist.3p/current/amp-script-proxy-iframe.html'
-          : `https://3p.ampproject.net/${
+          : `${urls.thirdParty}${
               getMode().rtvVersion
             }/amp-script-proxy-iframe.html`,
       },
