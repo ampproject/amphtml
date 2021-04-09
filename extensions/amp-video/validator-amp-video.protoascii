@@ -182,9 +182,9 @@ tags: {  # <amp-video> in amp-story
     mandatory: true
   }
   attrs: {
-    name: "enable-google-video-cache"
+    name: "cache"
     requires_extension: "amp-cache-url"
-    value: ""
+    value: "google"
   }
   attr_lists: "extended-amp-global"
   attr_lists: "amp-video-common"
