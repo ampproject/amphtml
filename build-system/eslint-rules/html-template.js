@@ -23,12 +23,9 @@ const {
 
 /**
  * @param {*} context
- * @return {{
- *   CallExpression: {Function(node: CompilerNode): void}
- *   TaggedTemplateExpression: {Function(node: CompilerNode): void}
- * }}
+ * @return {!Object<string, function(CompilerNode):void>}
  */
-module.exports = function (context) {
+function create(context) {
   /**
    * @param {CompilerNode} node
    */
@@ -47,16 +44,11 @@ module.exports = function (context) {
   /**
    * @param {CompilerNode} node
    */
-  function factoryUsage(node) {
+  function shouldBeAssignedToTagHelper(node) {
     const {parent} = node;
     const {name} = node.callee;
 
     const expectedTagName = staticTemplateFactories[name];
-
-    if (parent.type === 'TaggedTemplateExpression' && parent.tag === node) {
-      tagUsage(parent, `${name}()`);
-      return;
-    }
 
     if (
       parent.type === 'VariableDeclarator' &&
@@ -78,24 +70,20 @@ module.exports = function (context) {
 
     context.report({
       node,
-      message:
-        `${name} result must be stored into a variable named ` +
-        `"${expectedTagName}", or used as the tag of a tagged template ` +
-        'literal.',
+      message: `${name} result must be stored into a helper constant named "${expectedTagName}".`,
     });
   }
 
   /**
    * @param {CompilerNode} node
-   * @param {string} opt_name
    */
-  function tagUsage(node, opt_name) {
+  function tagContentShouldBeStatic(node) {
     const {quasi, tag} = node;
     if (quasi.expressions.length !== 0) {
       context.report({
         node,
         message:
-          `The ${opt_name || tag.name} template tag CANNOT accept expression.` +
+          `The ${tag.name} template tag CANNOT accept expression.` +
           ' The template MUST be static only.',
       });
     }
@@ -159,32 +147,146 @@ module.exports = function (context) {
     return matches;
   }
 
+  function cannotImplicitlyReturnCalls(node) {
+    context.report({
+      node,
+      message: `Do not implicitly return ${node.tag.callee.name}()\`...\`, since it requires a helper constant in function scope.`,
+      fix: function* (fixer) {
+        yield fixer.insertTextBefore(node, `{\nreturn (`);
+        yield fixer.insertTextAfter(node, `);\n}`);
+      },
+    });
+  }
+
+  const checkedScopeBlocks = new Set();
+  function tagMustBeHelperConstant(node) {
+    const {name} = node.tag.callee;
+    // Fixer inserts constant when required:
+    //   const html = htmlFor(...);
+    const helperConstName = staticTemplateFactories[name];
+    context.report({
+      node,
+      message: `Do not use ${name}() call directly as template tag. Store its result in a helper constant named "${helperConstName}", and use that as the template tag. This enforces code format, and enables syntax highlighting in some editors.`,
+      fix: function* (fixer) {
+        let scope = context.getScope();
+        // Find the highest scope within the same function block that calls this
+        // factory function, so that the helper is shared.
+        while (
+          scope.type !== 'function' &&
+          scope.upper &&
+          scope.upper.references.filter(
+            ({identifier}) => identifier && identifier.name === name
+          ).length > 0
+        ) {
+          scope = scope.upper;
+        }
+        // A scope's block may not take children directly, we need to insert
+        // it as part of its body field.
+        let insertionBlock = scope.block;
+        insertionBlock =
+          insertionBlock.body && !Array.isArray(insertionBlock.body)
+            ? insertionBlock.body
+            : insertionBlock;
+        if (!checkedScopeBlocks.has(insertionBlock)) {
+          checkedScopeBlocks.add(insertionBlock);
+          if (!scope.set.get(helperConstName)) {
+            // Insert const as close as possible above the node, while also
+            // being a direct child of the selected scope's block.
+            let insertBeforeNode = node;
+            while (insertBeforeNode.parent !== insertionBlock) {
+              insertBeforeNode = insertBeforeNode.parent;
+            }
+            const helperConstInit = context.getSourceCode().getText(node.tag);
+            yield fixer.insertTextBefore(
+              insertBeforeNode,
+              `const ${helperConstName} = ${helperConstInit};\n`
+            );
+          }
+        }
+
+        // htmlFor(...)`...` to html`...`
+        yield fixer.replaceText(node.tag, helperConstName);
+
+        // Prettier formats this in a silly way unless the quasi's content
+        // starts and ends with newlines.
+        const {quasi} = node;
+        const quasiText = context.getSourceCode().getText(quasi);
+        if (!/^`\s*\n/.test(quasiText)) {
+          yield fixer.replaceTextRange([quasi.start, quasi.start + 1], '`\n');
+        }
+        if (!/\n\s*`$/.test(quasiText)) {
+          yield fixer.replaceTextRange([quasi.end - 1, quasi.end], '\n`');
+        }
+      },
+    });
+  }
+
+  function isTestFile() {
+    return /test-/.test(context.getFilename());
+  }
+
+  const fns = Array.from(staticTemplateFactoryFns);
+  const tags = Array.from(staticTemplateTags);
+
   return {
-    CallExpression(node) {
-      if (/test-/.test(context.getFilename())) {
-        return;
-      }
-
-      const {callee} = node;
-      if (callee.type !== 'Identifier') {
-        return;
-      }
-
-      if (staticTemplateTags.has(callee.name)) {
-        return tagCannotBeCalled(node);
-      }
-      if (staticTemplateFactoryFns.has(callee.name)) {
-        return factoryUsage(node);
+    // html(...)
+    [tags
+      .map(
+        (name) =>
+          'CallExpression' +
+          '[callee.type="Identifier"]' +
+          `[callee.name="${name}"]`
+      )
+      .join(',')]: function (node) {
+      if (!isTestFile()) {
+        tagCannotBeCalled(node);
       }
     },
 
-    TaggedTemplateExpression(node) {
-      const {tag} = node;
-      if (tag.type !== 'Identifier' || !staticTemplateTags.has(tag.name)) {
-        return;
+    // html`...`
+    [tags
+      .map(
+        (name) =>
+          'TaggedTemplateExpression' +
+          '[tag.type="Identifier"]' +
+          `[tag.name="${name}"]`
+      )
+      .join(',')]: function (node) {
+      if (!isTestFile()) {
+        tagContentShouldBeStatic(node);
       }
+    },
 
-      tagUsage(node);
+    // htmlFor(...)
+    [fns.map(
+      (name) =>
+        'CallExpression' +
+        '[callee.type="Identifier"]' +
+        `[callee.name="${name}"]`
+    )]: function (node) {
+      const {parent} = node;
+      if (parent.type === 'TaggedTemplateExpression' && parent.tag === node) {
+        // We first wrap implicit returns if required like:
+        // () => { return htmlFor(...)`...` }
+        // Fixes are applied recursively, so the helper constant is inserted
+        // after wrapping.
+        if (parent.parent.type === 'ArrowFunctionExpression') {
+          cannotImplicitlyReturnCalls(parent);
+        } else {
+          tagMustBeHelperConstant(parent);
+        }
+      }
+      // Test files may do forbidden calls like htmlFor(...)(...), which is fine.
+      // However, if they actually do create trees like htmlFor(...)`...` then
+      // we would like to enforce the helper constant style above.
+      else if (!isTestFile()) {
+        shouldBeAssignedToTagHelper(node);
+      }
     },
   };
+}
+
+module.exports = {
+  meta: {fixable: 'code'},
+  create,
 };
