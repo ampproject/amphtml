@@ -50,7 +50,7 @@ export function getScopeElements(ampDoc, configOpts) {
  * @param {!Object} configOpts
  * @return {*} TODO(#23582): Specify return type
  */
-function hasAttributeValues(htmlElement, configOpts) {
+export function hasAttributeValues(htmlElement, configOpts) {
   const anchorAttr = configOpts.attribute;
   const attrKeys = Object.keys(anchorAttr);
 

@@ -17,7 +17,7 @@
 import {Services} from '../../../src/services';
 import {getConfigOpts} from './config-options';
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {getScopeElements} from './scope';
+import {getScopeElements, hasAttributeValues} from './scope';
 
 const WL_ANCHOR_ATTR = ['href', 'id', 'rel', 'rev'];
 const PREFIX_DATA_ATTR = /^vars(.+)/;
@@ -64,6 +64,10 @@ export class LinkRewriter {
     this.rewrittenUrl_ = this.configOpts_.output;
 
     if (this.isRewritten_(anchor)) {
+      return;
+    }
+
+    if (!hasAttributeValues(anchor, this.configOpts_)) {
       return;
     }
 
