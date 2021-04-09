@@ -16,6 +16,7 @@
 
 import {
   areEqualOrdered,
+  arrayOrSingleItemToArray,
   findIndex,
   fromIterator,
   pushIfNotExist,
@@ -62,6 +63,32 @@ describe('toArray', () => {
     expect(arr[0]).to.equal(parent.options[0]);
     expect(arr.length).to.equal(4);
     expect(Array.isArray(arr)).to.be.true;
+  });
+});
+
+describe('arrayOrSingleItemToArray', () => {
+  it('should return empty array for an empty array', () => {
+    const input = [];
+    const result = arrayOrSingleItemToArray(input);
+    expect(result).to.deep.equal([]);
+    expect(result).to.equal(input);
+  });
+
+  it('should return the array array as specified', () => {
+    const input = [1, 2, 3];
+    const result = arrayOrSingleItemToArray(input);
+    expect(result).to.deep.equal([1, 2, 3]);
+    expect(result).to.equal(input);
+  });
+
+  it('should return the item as an array', () => {
+    const result = arrayOrSingleItemToArray(1);
+    expect(result).to.deep.equal([1]);
+  });
+
+  it('should return a null as an array', () => {
+    const result = arrayOrSingleItemToArray(null);
+    expect(result).to.deep.equal([null]);
   });
 });
 

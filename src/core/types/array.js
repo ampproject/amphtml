@@ -25,6 +25,19 @@ export function toArray(arrayLike) {
 }
 
 /**
+ * If the specified argument is an array, it's returned as is. If it's a
+ * single item, the array containing this item is created and returned.
+ * @param {!Array<T>|T} arrayOrSingleItem
+ * @return {!Array<T>}
+ * @template T
+ */
+export function arrayOrSingleItemToArray(arrayOrSingleItem) {
+  return Array.isArray(arrayOrSingleItem)
+    ? /** @type {!Array<T>} */ (arrayOrSingleItem)
+    : [arrayOrSingleItem];
+}
+
+/**
  * Compares if two arrays contains exactly same elements of same number
  * of same order. Note that it does NOT handle NaN case as expected.
  *
