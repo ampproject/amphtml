@@ -31,10 +31,11 @@ WORKSPACE_DIR=$(if [[ -d /tmp/restored-workspace ]]; then echo "/tmp/restored-wo
 if [[ -d "${WORKSPACE_DIR}/builds" ]]; then
   echo $(GREEN "Restoring build output from workspace")
   for CONTAINER_DIR in ${WORKSPACE_DIR}/builds/*; do
+  echo "Restoring" $(CYAN "${CONTAINER_DIR}") "builds:"
     for OUTPUT_DIR in MERGABLE_OUTPUT_DIRS; do
       RESTORED_DIR="${WORKSPACE_DIR}/builds/${CONTAINER_DIR}/${OUTPUT_DIR}"
       if [[ -d "${WORKSPACE_DIR}/builds/${CONTAINER_DIR}/${OUTPUT_DIR}" ]]; then
-        echo $(GREEN "Merging") $(CYAN "${RESTORED_DIR}") $(GREEN "into") $(CYAN "./${OUTPUT_DIR}")
+        echo "*" $(GREEN "Merging") $(CYAN "${RESTORED_DIR}") $(GREEN "into") $(CYAN "./${OUTPUT_DIR}")
         rsync -a "${RESTORED_DIR}/" "./${OUTPUT_DIR}"
       fi
     done
