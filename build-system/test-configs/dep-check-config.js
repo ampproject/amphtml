@@ -87,6 +87,7 @@ exports.rules = [
       '3p/**->src/utils/object.js',
       '3p/**->src/utils/promise.js',
       '3p/**->src/log.js',
+      '3p/**->src/core/types/array.js',
       '3p/**->src/types.js',
       '3p/**->src/string.js',
       '3p/**->src/style.js',
@@ -125,6 +126,7 @@ exports.rules = [
       'ads/**->src/mode.js',
       'ads/**->src/url.js',
       'ads/**->src/types.js',
+      'ads/**->src/core/types/array.js',
       'ads/**->src/string.js',
       'ads/**->src/style.js',
       'ads/**->src/consent-state.js',
@@ -427,6 +429,7 @@ exports.rules = [
     allowlist: [
       'src/polyfills/fetch.js->src/log.js',
       'src/polyfills/fetch.js->src/types.js',
+      'src/polyfills/fetch.js->src/core/types/array.js',
       'src/polyfills/fetch.js->src/json.js',
       'src/polyfills/fetch.js->src/utils/object.js',
       'src/polyfills/fetch.js->src/utils/bytes.js',

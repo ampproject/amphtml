@@ -24,7 +24,7 @@ import {
 } from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {isArray} from '../../../src/types';
+import {isArray} from '../../../src/core/types/array';
 import {isExperimentOn} from '../../../src/experiments';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';

@@ -32,7 +32,7 @@ import {closest, domOrderComparator, matches} from '../dom';
 import {dev, user} from '../log';
 import {endsWith} from '../string';
 import {getMode} from '../mode';
-import {remove} from '../utils/array';
+import {remove} from '../core/types/array';
 
 const TAG = 'FixedLayer';
 

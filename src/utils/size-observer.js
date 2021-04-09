@@ -15,7 +15,7 @@
  */
 
 import {computedStyle} from '../style';
-import {remove} from './array';
+import {remove} from '../core/types/array';
 import {rethrowAsync} from '../log';
 import {toWin} from '../types';
 

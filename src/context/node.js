@@ -15,9 +15,9 @@
  */
 
 import {Values} from './values';
-import {devAssert} from '../log';
+import {pureDevAssert as devAssert} from '../core/assert';
 import {getMode} from '../mode';
-import {pushIfNotExist, removeItem} from '../utils/array';
+import {pushIfNotExist, removeItem} from '../core/types/array';
 import {throttleTail} from './scheduler';
 
 // Properties set on the DOM nodes to track the context state.

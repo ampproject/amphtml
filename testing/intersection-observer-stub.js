@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {areEqualOrdered} from '../src/utils/array';
+import {areEqualOrdered} from '../src/core/types/array';
 
 /**
  * @param {!Object} sandbox

@@ -21,7 +21,7 @@ import {dev, devAssert, user} from '../../../src/log';
 import {iterateCursor, removeElement} from '../../../src/dom';
 import {listen, listenOncePromise} from '../../../src/event-helper';
 import {throttle} from '../../../src/utils/rate-limit';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 const AMP_FORM_TEXTAREA_EXPAND_ATTR = 'autoexpand';
 

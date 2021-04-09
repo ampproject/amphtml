@@ -22,7 +22,7 @@ import {installVideoManagerForDoc} from '../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../src/layout';
 import {listenOncePromise} from '../../src/event-helper';
 import {runVideoPlayerIntegrationTests} from './test-video-players-helper';
-import {toArray} from '../../src/types';
+import {toArray} from '../../src/core/types/array';
 
 // TODO(dvoytenko): These tests time out when run with the prod AMP config.
 // See #11588.

@@ -16,7 +16,7 @@
 
 import '../amp-truncate-text';
 import {setStyles} from '../../../../src/style';
-import {toArray} from '../../../../src/types';
+import {toArray} from '../../../../src/core/types/array';
 import {toggleExperiment} from '../../../../src/experiments';
 
 // Lint complains about a template string due to lines being too long.

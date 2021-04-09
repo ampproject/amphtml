@@ -32,7 +32,7 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 /**
  * The selector of children to update the progress on as the gallery's carousel

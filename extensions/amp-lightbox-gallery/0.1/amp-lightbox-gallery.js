@@ -53,7 +53,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {prepareImageAnimation} from '@ampproject/animations';
 import {reportError} from '../../../src/error';
 import {setStyle, setStyles, toggle} from '../../../src/style';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const */

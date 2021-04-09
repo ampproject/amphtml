@@ -18,7 +18,7 @@ import {LruCache} from './utils/lru-cache';
 import {dict, hasOwn} from './utils/object';
 import {endsWith} from './string';
 import {getMode} from './mode';
-import {isArray} from './types';
+import {isArray} from './core/types/array';
 import {parseQueryString_} from './url-parse-query-string';
 import {tryDecodeUriComponent_} from './url-try-decode-uri-component';
 import {urls} from './config';

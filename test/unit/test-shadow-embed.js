@@ -31,7 +31,7 @@ import {
   setShadowDomStreamingSupportedForTesting,
 } from '../../src/shadow-embed';
 import {installStylesForDoc} from '../../src/style-installer';
-import {toArray} from '../../src/types';
+import {toArray} from '../../src/core/types/array';
 
 describes.sandboxed('shadow-embed', {}, () => {
   afterEach(() => {

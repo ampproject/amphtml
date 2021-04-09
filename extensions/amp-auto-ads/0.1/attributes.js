@@ -15,7 +15,8 @@
  */
 
 import {dict} from '../../../src/utils/object';
-import {isArray, isObject} from '../../../src/types';
+import {isArray} from '../../../src/core/types/array';
+import {isObject} from '../../../src/types';
 import {user} from '../../../src/log';
 
 /** @const */

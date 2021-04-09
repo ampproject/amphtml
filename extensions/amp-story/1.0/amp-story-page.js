@@ -79,7 +79,7 @@ import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attac
 import {px, toggle} from '../../../src/style';
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 import {upgradeBackgroundAudio} from './audio';
 
 /**

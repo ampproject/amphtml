@@ -22,7 +22,7 @@ import {
 } from '../url';
 
 import {getRandomString64} from './cid-impl';
-import {isArray} from '../types';
+import {isArray} from '../core/types/array';
 import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 

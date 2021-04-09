@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {toArray} from '../../src/types';
+import {toArray} from '../../src/core/types/array';
 import {validateData, writeScript} from '../../3p/3p';
 
 /**

@@ -17,7 +17,7 @@
 import {VisibilityState} from '../visibility-state';
 import {containsNotSelf} from '../dom';
 import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
-import {pushIfNotExist, removeItem} from './array';
+import {pushIfNotExist, removeItem} from '../core/types/array';
 import {rethrowAsync} from '../log';
 
 const SERVICE_ID = 'DisplayObserver';

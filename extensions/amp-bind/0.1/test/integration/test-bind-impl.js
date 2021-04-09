@@ -28,7 +28,7 @@ import {RAW_OBJECT_ARGS_KEY} from '../../../../../src/action-constants';
 import {Services} from '../../../../../src/services';
 import {chunkInstanceForTesting} from '../../../../../src/chunk';
 import {dev, user} from '../../../../../src/log';
-import {toArray} from '../../../../../src/types';
+import {toArray} from '../../../../../src/core/types/array';
 
 /**
  * @param {!Object} env

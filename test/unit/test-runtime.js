@@ -33,7 +33,7 @@ import {installPlatformService} from '../../src/service/platform-impl';
 import {installTemplatesServiceForDoc} from '../../src/service/template-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
-import {toArray} from '../../src/types';
+import {toArray} from '../../src/core/types/array';
 import {vsyncForTesting} from '../../src/service/vsync-impl';
 
 describes.fakeWin(

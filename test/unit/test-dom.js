@@ -20,7 +20,7 @@ import {createAmpElementForTesting} from '../../src/custom-element';
 import {loadPromise} from '../../src/event-helper';
 import {setScopeSelectorSupportedForTesting} from '../../src/css';
 import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
-import {toArray} from '../../src/types';
+import {toArray} from '../../src/core/types/array';
 
 describes.sandboxed('DOM', {}, (env) => {
   afterEach(() => {

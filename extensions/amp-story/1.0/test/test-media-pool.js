@@ -15,7 +15,7 @@
  */
 import {MediaPool, MediaType} from '../media-pool';
 import {Services} from '../../../../src/services';
-import {findIndex} from '../../../../src/utils/array';
+import {findIndex} from '../../../../src/core/types/array';
 
 const NOOP = () => {};
 

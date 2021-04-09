@@ -16,11 +16,81 @@
 
 import {
   areEqualOrdered,
+  arrayOrSingleItemToArray,
   findIndex,
   fromIterator,
   pushIfNotExist,
   remove,
-} from '../../../src/utils/array';
+  toArray,
+} from '../../../src/core/types/array';
+
+describe('toArray', () => {
+  it('should return empty array if null is passed', () => {
+    expect(toArray(null).length).to.equal(0);
+    expect(toArray(undefined).length).to.equal(0);
+  });
+
+  it('should convert NodeList to array', () => {
+    const parent = document.createElement('div');
+    parent.appendChild(document.createElement('p'));
+    parent.appendChild(document.createElement('span'));
+    parent.appendChild(document.createElement('div'));
+    const arr = toArray(parent.childNodes);
+    expect(arr[0]).to.equal(parent.childNodes[0]);
+    expect(arr.length).to.equal(3);
+    expect(Array.isArray(arr)).to.be.true;
+  });
+
+  it('should convert HTMLCollection to array', () => {
+    const parent = document.createElement('div');
+    parent.appendChild(document.createElement('form'));
+    parent.appendChild(document.createElement('form'));
+    document.body.appendChild(parent);
+    const arr = toArray(document.forms);
+    expect(arr[0]).to.equal(document.forms[0]);
+    expect(arr.length).to.equal(2);
+    expect(Array.isArray(arr)).to.be.true;
+    document.body.removeChild(parent);
+  });
+
+  it('should convert HTMLOptionsCollection to array', () => {
+    const parent = document.createElement('select');
+    parent.appendChild(document.createElement('option'));
+    parent.appendChild(document.createElement('option'));
+    parent.appendChild(document.createElement('option'));
+    parent.appendChild(document.createElement('option'));
+    const arr = toArray(parent.options);
+    expect(arr[0]).to.equal(parent.options[0]);
+    expect(arr.length).to.equal(4);
+    expect(Array.isArray(arr)).to.be.true;
+  });
+});
+
+describe('arrayOrSingleItemToArray', () => {
+  it('should return empty array for an empty array', () => {
+    const input = [];
+    const result = arrayOrSingleItemToArray(input);
+    expect(result).to.deep.equal([]);
+    expect(result).to.equal(input);
+  });
+
+  it('should return the array array as specified', () => {
+    const input = [1, 2, 3];
+    const result = arrayOrSingleItemToArray(input);
+    expect(result).to.deep.equal([1, 2, 3]);
+    expect(result).to.equal(input);
+  });
+
+  it('should return the item as an array', () => {
+    const result = arrayOrSingleItemToArray(1);
+    expect(result).to.deep.equal([1]);
+  });
+
+  it('should return a null as an array', () => {
+    const result = arrayOrSingleItemToArray(null);
+    expect(result).to.deep.equal([null]);
+  });
+});
 
 describe('areEqualOrdered', function () {
   it('should return true on empty arrays', () => {
