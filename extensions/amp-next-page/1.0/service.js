@@ -198,6 +198,10 @@ export class NextPageService {
 
     // Create a reference to the host page
     this.hostPage_ = this.createHostPage();
+
+    // Set the current title page as the host page so we don't do replaceState and
+    // trigger `amp-next-page-scroll` event (in `setPageTitle` method) when
+    // next page is not even displayed (issue #33404).
     this.currentTitlePage_ = this.hostPage_;
 
     this.toggleHiddenAndReplaceableElements(this.doc_);
@@ -220,7 +224,7 @@ export class NextPageService {
       // Observe the host page's visibility
       this.visibilityObserver_.observeHost(this.getHost_(), (position) => {
         this.hostPage_.relativePos = position;
-        this.updateVisibility(); // XXX
+        this.updateVisibility();
       });
     });
 
@@ -296,8 +300,8 @@ export class NextPageService {
         .fetch()
         .then(() => {
           if (nextPage.is(PageState.FAILED)) {
-            // Silently skip this page         // WTF - is this comment a lie?
-            this.setLastFetchedPage(nextPage); // WTF - if page state is failed, why are we storing it? plus we're not silently failing
+            // Silently skip this page
+            this.setLastFetchedPage(nextPage);
           }
         })
         .then(
