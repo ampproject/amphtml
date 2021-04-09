@@ -20,7 +20,7 @@ import {setStyle, setStyles} from '../../src/style';
 
 /*
  * How to develop:
- * https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md
+ * https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md
  */
 
 /**
@@ -145,13 +145,13 @@ export function ssp(global, data) {
 
   parentElement.id = position['id'];
 
-  // https://github.com/ampproject/amphtml/tree/master/ads#the-iframe-sandbox
+  // https://github.com/ampproject/amphtml/tree/main/ads#the-iframe-sandbox
   global.document.getElementById('c').appendChild(parentElement);
 
   // validate dimensions against available space (window)
   const sizing = sizeAgainstWindow(parentElement./*OK*/ clientWidth, data);
 
-  // https://github.com/ampproject/amphtml/blob/master/3p/3p.js#L186
+  // https://github.com/ampproject/amphtml/blob/main/3p/3p.js#L186
   computeInMasterFrame(
     global,
     'ssp-load',

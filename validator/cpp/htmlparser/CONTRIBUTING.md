@@ -25,4 +25,4 @@ information on using pull requests.
 ## Community Guidelines
 
 By participating in this project, you agree to abide by the
-[AMP Code of Conduct](https://github.com/ampproject/meta/blob/master/CODE_OF_CONDUCT.md).
+[AMP Code of Conduct](https://github.com/ampproject/meta/blob/main/CODE_OF_CONDUCT.md).

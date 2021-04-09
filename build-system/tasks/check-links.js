@@ -25,7 +25,7 @@ const {linkCheckGlobs} = require('../test-configs/config');
 const {log, logLocalDev} = require('../common/logging');
 
 const LARGE_REFACTOR_THRESHOLD = 20;
-const GITHUB_BASE_PATH = 'https://github.com/ampproject/amphtml/blob/master/';
+const GITHUB_BASE_PATH = 'https://github.com/ampproject/amphtml/blob/main/';
 
 let filesIntroducedByPr;
 

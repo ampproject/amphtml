@@ -266,4 +266,4 @@ This element includes <a href="https://amp.dev/documentation/guides-and-tutorial
 
 ## Validation
 
-See [amp-inline-gallery rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-inline-gallery/validator-amp-inline-gallery.protoascii) in the AMP validator specification.
+See [amp-inline-gallery rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-inline-gallery/validator-amp-inline-gallery.protoascii) in the AMP validator specification.
