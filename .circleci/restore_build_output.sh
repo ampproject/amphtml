@@ -25,12 +25,15 @@ CYAN() { echo -e "\033[0;36m$1\033[0m"; }
 
 MERGABLE_OUTPUT_DIRS="build dist dist.3p dist.tools examples test/manual test/fixtures/e2e"
 
-if [[ -d /tmp/restored-workspace/builds ]]; then
+# TODO(danielrozenberg): remove conditional after #33708 is merged.
+WORKSPACE_DIR=$(if [[ -d /tmp/restored-workspace ]]; then echo "/tmp/restored-workspace"; else echo "/tmp/workspace"; fi)
+
+if [[ -d "${WORKSPACE_DIR}/builds" ]]; then
   echo $(GREEN "Restoring build output from workspace")
-  for CONTAINER_DIR in /tmp/restored-workspace/builds/*; do
+  for CONTAINER_DIR in ${WORKSPACE_DIR}/builds/*; do
     for OUTPUT_DIR in MERGABLE_OUTPUT_DIRS; do
-      RESTORED_DIR="/tmp/restored-workspace/builds/${CONTAINER_DIR}/${OUTPUT_DIR}"
-      if [[ -d "/tmp/restored-workspace/builds/${CONTAINER_DIR}/${OUTPUT_DIR}" ]]; then
+      RESTORED_DIR="${WORKSPACE_DIR}/builds/${CONTAINER_DIR}/${OUTPUT_DIR}"
+      if [[ -d "${WORKSPACE_DIR}/builds/${CONTAINER_DIR}/${OUTPUT_DIR}" ]]; then
         echo $(GREEN "Merging") $(CYAN "${RESTORED_DIR}") $(GREEN "into") $(CYAN "./${OUTPUT_DIR}")
         rsync -a "${RESTORED_DIR}/" "./${OUTPUT_DIR}"
       fi
