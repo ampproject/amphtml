@@ -547,6 +547,12 @@
     "latestVersion": "0.1",
     "options": {"hasCss": true}
   },
+  {
+    "name": "amp-tiktok",
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {"hasCss": true}
+  },
   {"name": "amp-timeago", "version": ["0.1", "1.0"], "latestVersion": "0.1"},
   {
     "name": "amp-truncate-text",

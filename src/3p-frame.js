@@ -116,7 +116,7 @@ export function getIframe(
   // This name attribute may be overwritten if this frame is chosen to
   // be the master frame. That is ok, as we will read the name off
   // for our uses before that would occur.
-  // @see https://github.com/ampproject/amphtml/blob/master/3p/integration.js
+  // @see https://github.com/ampproject/amphtml/blob/main/3p/integration.js
   const name = JSON.stringify(
     dict({
       'host': host,
@@ -179,7 +179,7 @@ export function addDataAndJsonAttributes_(element, attributes) {
   const {dataset} = element;
   for (const name in dataset) {
     // data-vars- is reserved for amp-analytics
-    // see https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute
+    // see https://github.com/ampproject/amphtml/blob/main/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute
     if (!name.startsWith('vars')) {
       attributes[name] = dataset[name];
     }
@@ -386,7 +386,7 @@ function getCustomBootstrapBaseUrl(
       parsed.origin != parseUrlDeprecated(parentWindow.location.href).origin,
     '3p iframe url must not be on the same origin as the current document ' +
       '%s (%s) in element %s. See https://github.com/ampproject/amphtml' +
-      '/blob/master/spec/amp-iframe-origin-policy.md for details.',
+      '/blob/main/spec/amp-iframe-origin-policy.md for details.',
     url,
     parsed.origin,
     meta

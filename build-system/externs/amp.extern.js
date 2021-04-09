@@ -31,7 +31,8 @@
  * @see https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch
  *
  * @typedef {{
- *   body: (!JsonObject|!FormData|!FormDataWrapperInterface|undefined|string),
+ *   responseType: (string|undefined),
+ *   body: (!JsonObject|!FormData|!FormDataWrapperInterface|!Array|string|undefined|null),
  *   cache: (string|undefined),
  *   credentials: (string|undefined),
  *   headers: (!JsonObject|undefined),
@@ -85,6 +86,9 @@ Element.prototype.dataset;
 
 /** Needed for partial shadow DOM polyfill used in shadow docs. */
 Element.prototype.__AMP_SHADOW_ROOT;
+
+/** @type {?ShadowRoot} */
+Element.prototype.shadowRoot;
 
 /**
  * - n is the name.
@@ -433,6 +437,7 @@ window.AMP.dependencies.inputmaskFactory = function (unusedElement) {};
 
 // Should have been defined in the closure compiler's extern file for
 // IntersectionObserverEntry, but appears to have been omitted.
+/** @type {?ClientRect} */
 IntersectionObserverEntry.prototype.rootBounds;
 
 // TODO (remove after we update closure compiler externs)
@@ -469,8 +474,108 @@ AmpElement.prototype.pause = function () {};
 /** */
 AmpElement.prototype.unmount = function () {};
 
+/**
+ * @param {number=} opt_parentPriority
+ * @return {!Promise}
+ */
+AmpElement.prototype.ensureLoaded = function (opt_parentPriority) {};
+
+/** @return {?Element} */
+AmpElement.prototype.getPlaceholder = function () {};
+
+/** @param {boolean} show */
+AmpElement.prototype.togglePlaceholder = function (show) {};
+
+/** @return {{width: number, height: number}} */
+AmpElement.prototype.getLayoutSize = function () {};
+
 /** @return {!Promise} */
-AmpElement.prototype.ensureLoaded = function () {};
+AmpElement.prototype.buildInternal = function () {};
+
+/** @return {!Promise} */
+AmpElement.prototype.mountInternal = function () {};
+
+/** @return {boolean} */
+AmpElement.prototype.isBuilt = function () {};
+
+/** @return {boolean} */
+AmpElement.prototype.isBuilding = function () {};
+
+/** @return {number} */
+AmpElement.prototype.getLayoutPriority = function () {};
+
+/** @return {boolean} */
+AmpElement.prototype.isRelayoutNeeded = function () {};
+
+/** @return {boolean|number} */
+AmpElement.prototype.renderOutsideViewport = function () {};
+
+/** @return {boolean|number} */
+AmpElement.prototype.idleRenderOutsideViewport = function () {};
+
+/** @type {number|undefined} */
+AmpElement.prototype.layoutScheduleTime;
+
+/** @return {!Promise} */
+AmpElement.prototype.layoutCallback = function () {};
+
+/** */
+AmpElement.prototype.unlayoutCallback = function () {};
+
+/** @return {!Promise} */
+AmpElement.prototype.whenLoaded = function () {};
+
+/** @param {boolean} pretendDisconnected */
+AmpElement.prototype.disconnect = function (pretendDisconnected) {};
+
+/** @return {boolean} */
+AmpElement.prototype.reconstructWhenReparented = function () {};
+
+/** @return {boolean} */
+AmpElement.prototype.isBuildRenderBlocking = function () {};
+
+/** @return {boolean} */
+AmpElement.prototype.prerenderAllowed = function () {};
+
+/** @return {string} */
+AmpElement.prototype.getLayout = function () {};
+
+/**
+ * @param {{width: number, height: number, top: number, bottom: number}} layoutBox
+ * @param {boolean=} opt_sizeChanged
+ */
+AmpElement.prototype.updateLayoutBox = function (layoutBox, opt_sizeChanged) {};
+
+/** */
+AmpElement.prototype.collapsedCallback = function () {};
+
+/** @return {boolean} */
+AmpElement.prototype.isUpgraded = function () {};
+
+/** @return {number} */
+AmpElement.prototype.getUpgradeDelayMs = function () {};
+
+/**
+ * @param {boolean} overflown
+ * @param {number|undefined} requestedHeight
+ * @param {number|undefined} requestedWidth
+ */
+AmpElement.prototype.overflowCallback = function (
+  overflown,
+  requestedHeight,
+  requestedWidth
+) {};
+
+/**
+ * @param {number|undefined} newHeight
+ * @param {number|undefined} newWidth
+ * @param {?} opt_newMargins
+ */
+AmpElement.prototype.applySize = function (
+  newHeight,
+  newWidth,
+  opt_newMargins
+) {};
 
 var Signals = class {};
 /**

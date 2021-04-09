@@ -19,12 +19,12 @@ module.exports = [
     'name': 'Developing',
     'href':
       'https://' +
-      'github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md',
+      'github.com/ampproject/amphtml/blob/main/contributing/DEVELOPING.md',
   },
   {
     'divider': true,
     'name': 'Contributing',
-    'href': 'https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md',
+    'href': 'https://github.com/ampproject/amphtml/blob/main/CONTRIBUTING.md',
   },
   {
     'name': 'Github',
@@ -32,12 +32,12 @@ module.exports = [
   },
   {
     'name': 'Find File',
-    'href': 'https://github.com/ampproject/amphtml/find/master',
+    'href': 'https://github.com/ampproject/amphtml/find/main',
   },
   {
     'name': 'CircleCI',
     'href':
-      'https://app.circleci.com/pipelines/github/ampproject/amphtml?branch=master',
+      'https://app.circleci.com/pipelines/github/ampproject/amphtml?branch=main',
   },
   {
     'name': 'Percy',

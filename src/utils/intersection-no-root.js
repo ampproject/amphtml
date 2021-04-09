@@ -43,8 +43,9 @@ function getInOb(win) {
     intersectionObservers = new WeakMap();
   }
 
-  if (!intersectionObservers.has(win)) {
-    const observer = createViewportObserver(
+  let observer = intersectionObservers.get(win);
+  if (!observer) {
+    observer = createViewportObserver(
       (entries) => {
         const seen = new Set();
         for (let i = entries.length - 1; i >= 0; i--) {
@@ -63,9 +64,8 @@ function getInOb(win) {
       {needsRootBounds: false}
     );
     intersectionObservers.set(win, observer);
-    return observer;
   }
-  return intersectionObservers.get(win);
+  return observer;
 }
 
 /**

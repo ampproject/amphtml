@@ -25,7 +25,7 @@ Yieldbot can be configured as a demand source by using the Real Time Config (RTC
 | **`YB_PSN`**  | Yieldbot publisher site number |
 | **`YB_SLOT`** | Yieldbot slot identifier       |
 
-For further information on RTC please see the [RTC Publisher Implementation Guide](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-publisher-implementation-guide.md) and see the example Doubleclick configuration below.
+For further information on RTC please see the [RTC Publisher Implementation Guide](https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/rtc-publisher-implementation-guide.md) and see the example Doubleclick configuration below.
 
 ## Doubleclick RTC Configuration
 
