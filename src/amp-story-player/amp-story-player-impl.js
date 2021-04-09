@@ -37,11 +37,11 @@ import {isJsonScriptTag, tryFocus} from '../dom';
 // Source for this constant is css/amp-story-player-iframe.css
 import {cssText} from '../../build/amp-story-player-iframe.css';
 import {dev} from '../log';
-import {findIndex} from '../core/types/array';
+import {findIndex, toArray} from '../core/types/array';
 import {getMode} from '../../src/mode';
 import {parseJson} from '../json';
 import {resetStyles, setStyle, setStyles} from '../style';
-import {toArray} from '../types';
+
 import {urls} from '../config';
 
 /** @enum {string} */

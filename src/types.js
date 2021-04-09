@@ -36,16 +36,6 @@ export function isArray(value) {
 }
 
 /**
- * Converts an array-like object to an array.
- * @param {?IArrayLike<T>|string} arrayLike
- * @return {!Array<T>}
- * @template T
- */
-export function toArray(arrayLike) {
-  return arrayLike ? Array.prototype.slice.call(arrayLike) : [];
-}
-
-/**
  * If the specified argument is an array, it's returned as is. If it's a
  * single item, the array containing this item is created and returned.
  * @param {!Array<T>|T} arrayOrSingleItem

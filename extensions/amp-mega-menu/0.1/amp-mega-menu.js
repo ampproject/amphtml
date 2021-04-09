@@ -31,7 +31,7 @@ import {
 import {dev, userAssert} from '../../../src/log';
 import {mod} from '../../../src/utils/math';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 /** @const {string} */
 const TAG = 'amp-mega-menu';

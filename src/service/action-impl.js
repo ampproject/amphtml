@@ -29,10 +29,11 @@ import {getDetail} from '../event-helper';
 import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
 import {isAmp4Email} from '../format';
-import {isArray, isFiniteNumber, toArray, toWin} from '../types';
+import {isArray, isFiniteNumber, toWin} from '../types';
 import {isEnabled} from '../dom';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
+import {toArray} from '../core/types/array';
 
 /** @const {string} */
 const TAG_ = 'Action';

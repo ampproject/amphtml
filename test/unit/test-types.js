@@ -17,48 +17,6 @@
 import * as types from '../../src/types';
 
 describe('Types', () => {
-  describe('toArray', () => {
-    it('should return empty array if null is passed', () => {
-      expect(types.toArray(null).length).to.equal(0);
-      expect(types.toArray(undefined).length).to.equal(0);
-    });
-
-    it('should convert NodeList to array', () => {
-      const parent = document.createElement('div');
-      parent.appendChild(document.createElement('p'));
-      parent.appendChild(document.createElement('span'));
-      parent.appendChild(document.createElement('div'));
-      const arr = types.toArray(parent.childNodes);
-      expect(arr[0]).to.equal(parent.childNodes[0]);
-      expect(arr.length).to.equal(3);
-      expect(Array.isArray(arr)).to.be.true;
-    });
-
-    it('should convert HTMLCollection to array', () => {
-      const parent = document.createElement('div');
-      parent.appendChild(document.createElement('form'));
-      parent.appendChild(document.createElement('form'));
-      document.body.appendChild(parent);
-      const arr = types.toArray(document.forms);
-      expect(arr[0]).to.equal(document.forms[0]);
-      expect(arr.length).to.equal(2);
-      expect(Array.isArray(arr)).to.be.true;
-      document.body.removeChild(parent);
-    });
-
-    it('should convert HTMLOptionsCollection to array', () => {
-      const parent = document.createElement('select');
-      parent.appendChild(document.createElement('option'));
-      parent.appendChild(document.createElement('option'));
-      parent.appendChild(document.createElement('option'));
-      parent.appendChild(document.createElement('option'));
-      const arr = types.toArray(parent.options);
-      expect(arr[0]).to.equal(parent.options[0]);
-      expect(arr.length).to.equal(4);
-      expect(Array.isArray(arr)).to.be.true;
-    });
-  });
-
   describe('arrayOrSingleItemToArray', () => {
     it('should return empty array for an empty array', () => {
       const input = [];

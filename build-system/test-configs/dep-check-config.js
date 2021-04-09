@@ -125,6 +125,7 @@ exports.rules = [
       'ads/**->src/mode.js',
       'ads/**->src/url.js',
       'ads/**->src/types.js',
+      'ads/**->src/core/types/array.js',
       'ads/**->src/string.js',
       'ads/**->src/style.js',
       'ads/**->src/consent-state.js',

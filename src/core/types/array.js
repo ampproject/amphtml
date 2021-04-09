@@ -15,6 +15,16 @@
  */
 
 /**
+ * Converts an array-like object to an array.
+ * @param {?IArrayLike<T>|string} arrayLike
+ * @return {!Array<T>}
+ * @template T
+ */
+export function toArray(arrayLike) {
+  return arrayLike ? Array.prototype.slice.call(arrayLike) : [];
+}
+
+/**
  * Compares if two arrays contains exactly same elements of same number
  * of same order. Note that it does NOT handle NaN case as expected.
  *

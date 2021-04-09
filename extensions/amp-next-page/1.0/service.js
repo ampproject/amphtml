@@ -34,7 +34,7 @@ import {
 } from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {findIndex} from '../../../src/core/types/array';
+import {findIndex, toArray} from '../../../src/core/types/array';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
@@ -43,7 +43,7 @@ import {
   parseSchemaImage,
 } from '../../../src/mediasession-helper';
 import {setStyles, toggle} from '../../../src/style';
-import {toArray} from '../../../src/types';
+
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryParseJson} from '../../../src/json';
 import {validatePage, validateUrl} from './utils';
