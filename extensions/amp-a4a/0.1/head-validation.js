@@ -76,7 +76,7 @@ const EXTENSION_ALLOWLIST = map({
 });
 
 const EXTENSION_URL_PREFIX = new RegExp(
-  urls.cdn.replace(/\./g, '\\.') + '/v0/'
+  '^' + urls.cdn.replace(/\./g, '\\.') + '/(rtv/\\d*/)?v0/'
 );
 
 /**
