@@ -84,7 +84,6 @@ PASS
 |          >
 |        </amp-story-page-attachment>
 |      </amp-story-page>
-<<<<<<< HEAD
 |      <amp-story-page id="outlink-cta-button-custom-theme">
 |        <amp-story-grid-layer template="vertical">
 |          <h1>fill</h1>
@@ -101,8 +100,6 @@ PASS
 |          >
 |        </amp-story-page-attachment>
 |      </amp-story-page>
-=======
->>>>>>> main
 |    </amp-story>
 |  </body>
 |  </html>
