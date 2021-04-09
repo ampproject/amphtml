@@ -27,15 +27,6 @@ function toString(value) {
 }
 
 /**
- * Determines if value is actually an Array.
- * @param {*} value
- * @return {boolean}
- */
-export function isArray(value) {
-  return Array.isArray(value);
-}
-
-/**
  * Determines if value is actually an Object.
  * @param {*} value
  * @return {boolean}

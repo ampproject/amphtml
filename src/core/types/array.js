@@ -25,6 +25,15 @@ export function toArray(arrayLike) {
 }
 
 /**
+ * Determines if value is actually an Array.
+ * @param {*} value
+ * @return {boolean}
+ */
+export function isArray(value) {
+  return Array.isArray(value);
+}
+
+/**
  * If the specified argument is an array, it's returned as is. If it's a
  * single item, the array containing this item is created and returned.
  * @param {!Array<T>|T} arrayOrSingleItem

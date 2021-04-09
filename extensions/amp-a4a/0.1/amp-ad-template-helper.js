@@ -24,7 +24,7 @@ import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
-import {isArray} from '../../../src/types';
+import {isArray} from '../../../src/core/types/array';
 import {parseUrlDeprecated} from '../../../src/url';
 import {urls} from '../../../src/config';
 

@@ -35,7 +35,8 @@ import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
-import {isArray, isFiniteNumber} from '../../../src/types';
+import {isArray} from '../../../src/core/types/array';
+import {isFiniteNumber} from '../../../src/types';
 import {isInFie} from '../../../src/iframe-helper';
 import {linkerReaderServiceFor} from './linker-reader';
 

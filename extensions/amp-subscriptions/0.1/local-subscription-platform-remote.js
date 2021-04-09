@@ -20,7 +20,7 @@ import {Services} from '../../../src/services';
 import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {isArray} from '../../../src/types';
+import {isArray} from '../../../src/core/types/array';
 
 /**
  * Implments the remotel local subscriptions platform which uses

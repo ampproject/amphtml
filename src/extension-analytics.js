@@ -19,7 +19,8 @@ import {Services} from './services';
 import {createElementWithAttributes, removeElement} from './dom';
 import {devAssert} from './log';
 import {dict} from './utils/object';
-import {isArray, toWin} from './types';
+import {isArray} from './core/types/array';
+import {toWin} from './types';
 import {triggerAnalyticsEvent} from './analytics';
 
 /**
