@@ -96,7 +96,6 @@ jobs:
       - run:
           name: 'Compute Merge Commit'
           command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/main/.circleci/compute_merge_commit.sh | bash
-      - run:
       - teardown_vm
   'Checks':
     executor:
