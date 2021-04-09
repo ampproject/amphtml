@@ -39,7 +39,7 @@ Supported parameters:
 
 ## User Consent Integration
 
-When [user consent](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#blocking-behaviors) is required, Teads ad approaches user consent in the following ways:
+When [user consent](https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/amp-consent.md#blocking-behaviors) is required, Teads ad approaches user consent in the following ways:
 
 -   `CONSENT_POLICY_STATE.SUFFICIENT`: Serve a personalized ad to the user.
 -   `CONSENT_POLICY_STATE.INSUFFICIENT`: Serve a non-personalized ad to the user.

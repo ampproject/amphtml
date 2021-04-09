@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-/**
- * TODO(rsimha, #32195): Change this to main when branch is renamed, and delete
- * this file once the dust settles.
- */
-const mainBranch = 'master';
+.i-amphtml-tiktok-centered {
+    height: 100%;
+    left: 50%;
+    width: 325px;
+    transform: translateX(-50%);
+    position: absolute;
+}
 
-module.exports = {
-  mainBranch,
-};
+.i-amphtml-tiktok-unresolved {
+    position: fixed;
+    opacity: 0;
+    pointer-events: none;
+    width: 325px;
+    height: 500px;
+}

@@ -27,9 +27,9 @@ limitations under the License.
 [Web stories](https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/?format=stories) are an immersive, tappable and easily shareable storytelling format. Web stories are built using the AMP Framework. The `amp-story` component provides the AMP story subset of AMP. It is the base technology for web stories.
 
 <figure class="centered-fig">
-  <amp-anim width="300" height="533" layout="fixed" alt="AMP Story Example" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story.gif">
+  <amp-anim width="300" height="533" layout="fixed" alt="AMP Story Example" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story.gif">
     <noscript>
-    <img alt="AMP Story Example" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story.gif" />
+    <img alt="AMP Story Example" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story.gif" />
   </noscript>
   </amp-anim>
 </figure>
@@ -47,11 +47,11 @@ As of 2018-07-16, version 0.1 is considered deprecated, and will be deleted on 2
 
 ## AMP story format
 
-An [AMP story](#story:-amp-story) is a complete AMP HTML document that is comprised of [pages](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story-page.md), within the pages are [layers](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story-grid-layer.md), within the layers are AMP & HTML elements, like media, analytics, text, and so on.
+An [AMP story](#story:-amp-story) is a complete AMP HTML document that is comprised of [pages](https://github.com/ampproject/amphtml/blob/main/extensions/amp-story/amp-story-page.md), within the pages are [layers](https://github.com/ampproject/amphtml/blob/main/extensions/amp-story/amp-story-grid-layer.md), within the layers are AMP & HTML elements, like media, analytics, text, and so on.
 
-<amp-img alt="An illustration of the nested markup structure of an amp-story: an amp-story element, which contains two amp-story-page blocks, which in turn contain an amp-story-grid-layer, which then contains the actual content elements" layout="responsive" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" width="591" height="358">
+<amp-img alt="An illustration of the nested markup structure of an amp-story: an amp-story element, which contains two amp-story-page blocks, which in turn contain an amp-story-grid-layer, which then contains the actual content elements" layout="responsive" src="https://github.com/ampproject/amp.dev/raw/legacy-production/assets/img/docs/amp-story-tag-hierarchy.png" width="591" height="358">
   <noscript>
-    <img alt="An illustration of the nested markup structure of an amp-story: an amp-story element, which contains two amp-story-page blocks, which in turn contain an amp-story-grid-layer, which then contains the actual content elements" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" />
+    <img alt="An illustration of the nested markup structure of an amp-story: an amp-story element, which contains two amp-story-page blocks, which in turn contain an amp-story-grid-layer, which then contains the actual content elements" src="https://github.com/ampproject/amp.dev/raw/legacy-production/assets/img/docs/amp-story-tag-hierarchy.png" />
   </noscript>
 </amp-img>
 
@@ -195,9 +195,9 @@ The AMP story HTML format follows the [same markup requirements as a valid AMP H
 The `amp-story` component represents an entire story. The component itself implements the UI shell, including handling gestures and navigation, and inserting the application shell UI (controls, progress bar, etc).
 
 <figure class="centered-fig">
-  <amp-anim alt="amp-story example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story.gif">
+  <amp-anim alt="amp-story example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story.gif">
     <noscript>
-    <img alt="amp-story example" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story.gif" />
+    <img alt="amp-story example" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story.gif" />
   </noscript>
   </amp-anim>
 </figure>
@@ -242,7 +242,7 @@ These guidelines apply to the publisher logo image:
       <amp-img alt="Logo with blue text on white background"
           layout="fixed"
           width="107" height="112"
-          src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-1.png" >
+          src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/publisher-logo-1.png" >
         <noscript>
           <img alt="Logo with blue text on white background" src="img/publisher-logo-1.png" />
         </noscript>
@@ -253,7 +253,7 @@ These guidelines apply to the publisher logo image:
       <amp-img alt="Logo with white text on blue background"
           layout="fixed"
           width="107" height="101"
-          src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-2.png" >
+          src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/publisher-logo-2.png" >
         <noscript>
           <img alt="Logo with white text on blue background" src="img/publisher-logo-2.png" />
         </noscript>
@@ -264,7 +264,7 @@ These guidelines apply to the publisher logo image:
       <amp-img alt="Logo with blue text on blue background"
           layout="fixed"
           width="103" height="102"
-          src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-3.png" >
+          src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/publisher-logo-3.png" >
         <noscript>
           <img alt="Logo with blue text on blue background" src="img/publisher-logo-3.png" />
         </noscript>
@@ -314,21 +314,21 @@ Usage: `<amp-story ... supports-landscape>...</amp-story>`
 
 <figure class="centered-fig">
   <span class="special-char">Before:</span>
-  <amp-anim alt="Desktop three panels experience" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-three-panels.gif" width="400" height="299">
-  <noscript><img width="400" alt="Desktop three panels experience" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-three-panels.gif" /></noscript>
+  <amp-anim alt="Desktop three panels experience" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-story/img/amp-story-desktop-three-panels.gif" width="400" height="299">
+  <noscript><img width="400" alt="Desktop three panels experience" src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-story/img/amp-story-desktop-three-panels.gif" /></noscript>
   </amp-anim>
   <span class="special-char">After:</span>
-  <amp-anim alt="Desktop full bleed experience" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-full-bleed.gif" width="400" height="299">
-  <noscript><img width="400" alt="Desktop full bleed experience" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-full-bleed.gif" /></noscript>
+  <amp-anim alt="Desktop full bleed experience" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-story/img/amp-story-desktop-full-bleed.gif" width="400" height="299">
+  <noscript><img width="400" alt="Desktop full bleed experience" src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-story/img/amp-story-desktop-full-bleed.gif" /></noscript>
   </amp-anim>
 </figure>
 
 ### Live story
 
 <figure class="centered-fig">
-  <amp-anim alt="Live story example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/live-stories-gif.gif">
+  <amp-anim alt="Live story example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/live-stories-gif.gif">
   <noscript>
-    <img alt="Live story example" width="200" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/live-stories-gif.gif" />
+    <img alt="Live story example" width="200" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/live-stories-gif.gif" />
   </noscript>
   </amp-anim>
 </figure>
@@ -374,7 +374,7 @@ As long as the `live-story` attribute is present on the `<amp-story>` element, t
 
 ### Children (of amp-story)
 
-The `<amp-story>` component contains one or more [`<amp-story-page>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story-page.md) components, containing each of the individual screens of the story. The first page specified in the document order is the first page shown in the story.
+The `<amp-story>` component contains one or more [`<amp-story-page>`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-story/amp-story-page.md) components, containing each of the individual screens of the story. The first page specified in the document order is the first page shown in the story.
 
 #### Optional customization
 
@@ -386,9 +386,9 @@ This attribute accepts any value accepted by the `object-position` CSS property.
 
 Example:
 
-<amp-img alt="Custom crop on amp-img and amp-video assets" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-object-position.gif" width="600" height="689">
+<amp-img alt="Custom crop on amp-img and amp-video assets" layout="fixed" src="https://github.com/ampproject/amphtml/blob/main/extensions/amp-story/img/amp-story-object-position.gif" width="600" height="689">
   <noscript>
-    <img alt="Custom crop on amp-img and amp-video assets" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-object-position.gif" />
+    <img alt="Custom crop on amp-img and amp-video assets" src="https://github.com/ampproject/amphtml/blob/main/extensions/amp-story/img/amp-story-object-position.gif" />
   </noscript>
 </amp-img>
 
@@ -403,9 +403,9 @@ This same image can be used for both mobile portrait and landscape desktop using
 The `data-text-background-color` attribute highlights the text of the element with a specified color. To highlight the entire block, add this attribute directly to the text element. To only highlight the text, add the attribute and text to an inner <span>. Note that works anywhere inside an `<amp-story-page>`, not just in `<amp-story-grid-layer>`.
 
 Example:
-<amp-img alt="text background color only example" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-1.png" width="145" height="255">
+<amp-img alt="text background color only example" layout="fixed" src="https://github.com/ampproject/amphtml/blob/main/extensions/amp-story/img/text-background-color-ex-1.png" width="145" height="255">
 <noscript>
-<img alt="text background color only example" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-1.png" />
+<img alt="text background color only example" src="https://github.com/ampproject/amphtml/blob/main/extensions/amp-story/img/text-background-color-ex-1.png" />
 </noscript>
 </amp-img>
 
@@ -421,9 +421,9 @@ Example:
 ```
 
 Example:
-<amp-img alt="text background color full example" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-2.png" width="145" height="255">
+<amp-img alt="text background color full example" layout="fixed" src="https://github.com/ampproject/amphtml/blob/main/extensions/amp-story/img/text-background-color-ex-2.png" width="145" height="255">
 <noscript>
-<img alt="text background color full example" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-2.png" />
+<img alt="text background color full example" src="https://github.com/ampproject/amphtml/blob/main/extensions/amp-story/img/text-background-color-ex-2.png" />
 </noscript>
 </amp-img>
 
@@ -446,8 +446,8 @@ Example:
 
 <figure class="centered-fig">
   <span class="special-char">Example:</span>
-  <amp-anim alt="Embedded component example" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-tooltip.gif" width="300" height="553">
-  <noscript><img width="300"  alt="Embedded component example" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-tooltip.gif" /></noscript>
+  <amp-anim alt="Embedded component example" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-story/img/amp-story-tooltip.gif" width="300" height="553">
+  <noscript><img width="300"  alt="Embedded component example" src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-story/img/amp-story-tooltip.gif" /></noscript>
   </amp-anim>
 </figure>
 
@@ -887,4 +887,4 @@ Additionally, for right-to-left languages, you may include the `dir="rtl"` attri
 
 ## Validation
 
-See [amp-story rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/validator-amp-story.protoascii) in the AMP validator specification.
+See [amp-story rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-story/validator-amp-story.protoascii) in the AMP validator specification.

@@ -864,6 +864,14 @@ tags: {  # <amp-story-page-attachment> with href
       protocol: "https"
     }
   }
+  attrs: {
+    name: "cta-image"
+    value_url: {
+      # protocol: "http"  # TODO(honeybaderdontcare): readd once transformers in prod
+      protocol: "https"
+      allow_relative: false  # TODO(honeybaderdontcare): remove once transformers in prod
+    }
+  }
   child_tags: {
     mandatory_num_child_tags: 0
   }

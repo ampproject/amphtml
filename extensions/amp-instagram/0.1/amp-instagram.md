@@ -70,4 +70,4 @@ For example, in https://instagram.com/p/fBwFP, <code>fBwFP</code> is the data-sh
 
 ## Validation
 
-See [amp-instagram rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/validator-amp-instagram.protoascii) in the AMP validator specification.
+See [amp-instagram rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-instagram/validator-amp-instagram.protoascii) in the AMP validator specification.

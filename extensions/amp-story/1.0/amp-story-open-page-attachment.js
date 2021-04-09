@@ -19,7 +19,7 @@
  */
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {setImportantStyles} from '../../../src/style';
 
@@ -63,6 +63,23 @@ export const buildOpenInlineAttachmentElement = (element) =>
     </a>`;
 
 /**
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildOpenOutlinkAttachmentElement = (element) =>
+  htmlFor(element)`
+     <a class="i-amphtml-story-page-open-attachment"
+         role="button">
+       <span class="i-amphtml-story-outlink-page-attachment-arrow">
+         <span class="i-amphtml-story-outlink-page-open-attachment-bar-left"></span>
+         <span class="i-amphtml-story-outlink-page-open-attachment-bar-right"></span>
+       </span>
+       <div class="i-amphtml-story-outlink-page-attachment-outlink-chip" ref="chipEl">
+        <div class="i-amphtml-story-outlink-page-attachment-label" ref="ctaLabelEl"></div>
+       </div>
+     </a>`;
+
+/**
  * Determines which open attachment UI to render.
  * @param {!Window} win
  * @param {!Element} pageEl
@@ -72,11 +89,17 @@ export const buildOpenInlineAttachmentElement = (element) =>
 export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
   const openImgAttr = attachmentEl.getAttribute('cta-image');
   const attachmentHref = attachmentEl.getAttribute('href');
-  if (isPageAttachmentUiV2ExperimentOn(win) && !attachmentHref && openImgAttr) {
+  if (isPageAttachmentUiV2ExperimentOn(win) && attachmentHref) {
+    return renderOutlinkPageAttachmentUI(
+      win,
+      pageEl,
+      attachmentEl,
+      attachmentHref
+    );
+  } else if (isPageAttachmentUiV2ExperimentOn(win) && openImgAttr) {
     return renderPageAttachmentUiWithImages(win, pageEl, attachmentEl);
-  } else {
-    return renderDefaultPageAttachmentUI(pageEl, attachmentEl);
   }
+  return renderDefaultPageAttachmentUI(pageEl, attachmentEl);
 };
 
 /**
@@ -105,6 +128,65 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
     );
 
   textEl.textContent = openLabel;
+  return openAttachmentEl;
+};
+
+/**
+ * Renders inline page attachment UI.
+ * @param {!Window} win
+ * @param {!Element} pageEl
+ * @param {!Element} attachmentEl
+ * @param {!Element} attachmentHref
+ * @return {!Element}
+ */
+const renderOutlinkPageAttachmentUI = (
+  win,
+  pageEl,
+  attachmentEl,
+  attachmentHref
+) => {
+  const openAttachmentEl = buildOpenOutlinkAttachmentElement(pageEl);
+
+  // Copy href to the element so it can be previewed on hover and long press.
+  if (attachmentHref) {
+    openAttachmentEl.setAttribute('href', attachmentHref);
+  }
+
+  // Setting theme
+  openAttachmentEl.setAttribute('theme', attachmentEl.getAttribute('theme'));
+
+  // Getting elements
+  const {chipEl, ctaLabelEl} = htmlRefs(openAttachmentEl);
+
+  // Appending text & aria-label.
+  const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
+  const openLabel = openLabelAttr
+    ? openLabelAttr.trim()
+    : getLocalizationService(pageEl).getLocalizedString(
+        LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
+      );
+  ctaLabelEl.textContent = openLabel;
+  openAttachmentEl.setAttribute('aria-label', openLabel);
+
+  // Adding image.
+  const openImgAttr = attachmentEl.getAttribute('cta-image');
+
+  // Removes image if attribute is explicitly set to "none".
+  if (openImgAttr === 'none') {
+    chipEl.classList.add(
+      'i-amphtml-story-outlink-page-attachment-outlink-chip-no-image'
+    );
+  } else {
+    const ctaImgEl = win.document.createElement('div');
+    ctaImgEl.classList.add('i-amphtml-story-outlink-page-attachment-img');
+    if (openImgAttr) {
+      setImportantStyles(ctaImgEl, {
+        'background-image': 'url(' + openImgAttr + ')',
+      });
+    }
+    chipEl.prepend(ctaImgEl);
+  }
+
   return openAttachmentEl;
 };
 
