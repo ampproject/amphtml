@@ -16,18 +16,19 @@
 
 import {Services} from '../../../src/services';
 import {
-  closestAncestorElementBySelector,
-  scopedQuerySelectorAll,
-} from '../../../src/dom';
-import {createShadowRoot} from '../../../src/shadow-embed';
-import {getMode} from '../../../src/mode';
-import {
+  assertHttpsUrl,
   getSourceOrigin,
   isProxyOrigin,
   resolveRelativeUrl,
 } from '../../../src/url';
+import {
+  closestAncestorElementBySelector,
+  scopedQuerySelectorAll,
+} from '../../../src/dom';
+import {createShadowRoot} from '../../../src/shadow-embed';
+import {dev, user, userAssert} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {setStyle, toggle} from '../../../src/style';
-import {user, userAssert} from '../../../src/log';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)
@@ -255,6 +256,28 @@ export function resolveImgSrc(win, url) {
 export function shouldShowStoryUrlInfo(viewer) {
   const showStoryUrlInfo = viewer.getParam('showStoryUrlInfo');
   return showStoryUrlInfo ? showStoryUrlInfo !== '0' : viewer.isEmbedded();
+}
+
+/**
+ * Retrieves an attribute src from the <amp-story> element.
+ * @param {!Element} element
+ * @param {string} attribute
+ * @param {string=} warn
+ * @return {?string}
+ */
+export function getStoryAttributeSrc(element, attribute, warn = false) {
+  const storyEl = dev().assertElement(
+    closestAncestorElementBySelector(element, 'AMP-STORY')
+  );
+  const attrSrc = storyEl && storyEl.getAttribute(attribute);
+
+  if (attrSrc) {
+    assertHttpsUrl(attrSrc, storyEl, attribute);
+  } else if (warn) {
+    user().warn('AMP-STORY', `Expected ${attribute} attribute on <amp-story>`);
+  }
+
+  return attrSrc;
 }
 
 /**
