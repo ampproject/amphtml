@@ -18,6 +18,12 @@ import {Deferred} from './promise';
 import {dev, devAssert} from '../log';
 import {removeNoScriptElements} from './dom-writer';
 
+/**
+ * @param {!Function} cb
+ * @return {!Promise}
+ */
+const DEFAULT_TRANSFER_THROTTLE_FUNC = (cb) => Promise.resolve(cb());
+
 export class DomTransformStream {
   /**
    * @param {!Window} win
@@ -64,13 +70,9 @@ export class DomTransformStream {
     /** @private {boolean} */
     this.shouldTransfer_ = false;
 
-    /**
-     * @param {!Function} cb
-     * @return {!Promise}
-     * @const @private {function(!Function):!Promise}
-     */
+    /** @private @const */
     this.transferThrottle_ =
-      opt_transferThrottleFunc || ((cb) => Promise.resolve(cb()));
+      opt_transferThrottleFunc || DEFAULT_TRANSFER_THROTTLE_FUNC;
   }
 
   /**

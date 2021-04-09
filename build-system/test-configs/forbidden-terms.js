@@ -158,6 +158,7 @@ const forbiddenTermsGlobal = {
   '\\.buildInternal': {
     message: 'can only be called by the framework',
     allowlist: [
+      'build-system/externs/amp.extern.js',
       'src/custom-element.js',
       'src/service/resource.js',
       'testing/iframe.js',
@@ -165,7 +166,10 @@ const forbiddenTermsGlobal = {
   },
   '\\.mountInternal': {
     message: 'can only be called by the framework',
-    allowlist: ['src/service/scheduler.js'],
+    allowlist: [
+      'build-system/externs/amp.extern.js',
+      'src/service/scheduler.js',
+    ],
   },
   'getSchedulerForDoc': {
     message: 'can only be used by the runtime',
@@ -659,6 +663,7 @@ const forbiddenTermsGlobal = {
       'This is a protected API. Please only override it the element is ' +
       'render blocking',
     allowlist: [
+      'build-system/externs/amp.extern.js',
       'src/service/resources-impl.js',
       'src/service/resource.js',
       'src/custom-element.js',
@@ -1104,6 +1109,7 @@ const forbiddenTermsSrcInclusive = {
   '\\.getLayoutSize': {
     message: measurementApiDeprecated,
     allowlist: [
+      'build-system/externs/amp.extern.js',
       'builtins/amp-img.js',
       'src/base-element.js',
       'src/custom-element.js',
