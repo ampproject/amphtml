@@ -138,7 +138,9 @@ export class TouchHandler {
    * @private
    */
   forwardEvent_(e) {
-    if (e && e.shouldViewerCancelPropagation) {
+    // Check if an AMP component is signaling that we should
+    // stop propagation of the event from bubbling up to the viewer
+    if (e?.shouldViewerCancelPropagation) {
       e.stopImmediatePropagation();
       return;
     }
