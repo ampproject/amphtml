@@ -55,7 +55,7 @@
   opacity: 0 !important;
 }
 
-.i-amphtml-story-story-attribution {
+.i-amphtml-story-attribution {
   top: 0 !important;
   border: none !important;
   pointer-events: auto !important;
@@ -69,13 +69,17 @@
   visibility: hidden !important;
 }
 
-[desktop] .i-amphtml-story-story-attribution {
+.i-amphtml-story-attribution-visible {
+  visibility: visible !important;
+}
+
+[desktop] .i-amphtml-story-attribution {
   padding: 6px 6px 0 !important;
   left: 0 !important;
   right: 0 !important;
 }
 
-.i-amphtml-story-story-attribution > * {
+.i-amphtml-story-attribution > * {
   margin: 0px 3px !important;
 }
 
@@ -164,7 +168,7 @@
 }
 
 [ad-showing] .i-amphtml-story-progress-bar,
-[ad-showing] .i-amphtml-story-story-attribution {
+[ad-showing] .i-amphtml-story-attribution {
   visibility: hidden !important;
 }
 
@@ -504,7 +508,7 @@
 
 .i-amphtml-story-desktop-panels.i-amphtml-story-system-layer .i-amphtml-story-system-layer-buttons,
 .i-amphtml-story-desktop-panels.i-amphtml-story-system-layer .i-amphtml-story-system-layer-buttons-start-position,
-.i-amphtml-story-desktop-panels.i-amphtml-story-system-layer .i-amphtml-story-story-attribution
+.i-amphtml-story-desktop-panels.i-amphtml-story-system-layer .i-amphtml-story-attribution
  {
   position: fixed !important;
   top: 0 !important;
