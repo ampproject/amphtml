@@ -33,7 +33,9 @@ if [[ -d "${WORKSPACE_DIR}/builds" ]]; then
   for CONTAINER_DIR in ${WORKSPACE_DIR}/builds/*; do
     for OUTPUT_DIR in MERGABLE_OUTPUT_DIRS; do
       RESTORED_DIR="${CONTAINER_DIR}/${OUTPUT_DIR}"
-      if [[ -d "${CONTAINER_DIR}/${OUTPUT_DIR}" ]]; then
+      echo $RESTORED_DIR
+      ls "${RESTORED_DIR}"
+      if [[ -d "${RESTORED_DIR}" ]]; then
         echo "*" $(GREEN "Merging") $(CYAN "${RESTORED_DIR}") $(GREEN "into") $(CYAN "./${OUTPUT_DIR}")
         rsync -a "${RESTORED_DIR}/" "./${OUTPUT_DIR}"
       fi
