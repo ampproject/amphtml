@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "amp e2e",
   "devDependencies": {
-    "@babel/register": "7.13.8",
+    "@babel/register": "7.13.14",
     "babel-regenerator-runtime": "6.5.0",
     "chromedriver": "89.0.0",
     "puppeteer": "8.0.0",
