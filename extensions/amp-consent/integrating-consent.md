@@ -17,12 +17,12 @@ To add your consent management service to AMP runtime, it is expected that you:
     -   Enforce the size of the stored consent information, when the page is served from a cache that supports the [Storage API](./../../spec/amp-localstorage.md#Storage-API). 1200 character length including storage key, consent string and additional metadata is the limit. Please [file an issue](https://github.com/ampproject/amphtml/issues/new) if you find that not sufficient.
         -   NOTE: You can detect if the page is being served from the origin from the `checkConsentHref` request header or via `window.location.ancestorOrigin` within the iframe. Additionally, if the page is served from the cache, there is no guarantee that the LocalStorage API is supported by the viewer, and the consent information might not be persisted.
 -   Understand that including `<amp-consent type='yourName'></amp-consent>` on the page won't block any components by default. **Please make sure to inform your service users to block AMP components either by the `<meta name="amp-consent-blocking">` metaTag, or the `data-block-on-consent` attribute.**
--   Understand that AMP Consent doesn't attempt to interpret the consent info string from the CMP. Vendors can access the consent info string from CMPs via [provided APIs](https://github.com/ampproject/amphtml/blob/master/ads/README.md#amp-consent-integration). It's up to the CMP and service provider vendors to agree on the format of the consent info string.
+-   Understand that AMP Consent doesn't attempt to interpret the consent info string from the CMP. Vendors can access the consent info string from CMPs via [provided APIs](https://github.com/ampproject/amphtml/blob/main/ads/README.md#amp-consent-integration). It's up to the CMP and service provider vendors to agree on the format of the consent info string.
 -   Create an [Intent-To-Implement issue](../../CONTRIBUTING.md#contributing-features) stating that you'll be adding support to your CMP service to AMP. A great start point is to follow the `_ping_` CMP service implementation that the AMP team creates for testing purpose.
 
 ## Add remote endpoint support
 
-A remote endpoint is expected to tell the AMP runtime whether the user consent is required. It can also pass extra information via AMP to third party vendors. More information on the remote endpoint can be found [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#checkconsenthref).
+A remote endpoint is expected to tell the AMP runtime whether the user consent is required. It can also pass extra information via AMP to third party vendors. More information on the remote endpoint can be found [here](https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/amp-consent.md#checkconsenthref).
 
 ## Prompt UI Iframe
 
@@ -80,7 +80,7 @@ Action `'enter-fullscreen'` requests the AMP runtime to expand the iframe to ful
 
 #### Informing Consent response
 
-Iframes can send a `consent-response` message to the parent AMP page to inform the user [actions](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#prompt-actions) along with additional consent information.
+Iframes can send a `consent-response` message to the parent AMP page to inform the user [actions](https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/amp-consent.md#prompt-actions) along with additional consent information.
 
 -   The user action is always required by AMP runtime. It allows the user to block/unblock any AMP component by user consent, not only components that read the additional consent information string.
 
@@ -171,7 +171,7 @@ info = JSON.parse(window.name);
 Once you have the remote endpoint and prompt UI iframe ready, you are ready to add your configuration to the AMP runtime.
 
 1. Develop a patch that implements the following:
-    1. Add a new configuration object to amp-consent component. The current CMP configurations are all placed [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/0.1/cmps.js).
+    1. Add a new configuration object to amp-consent component. The current CMP configurations are all placed [here](https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/0.1/cmps.js).
     1. Within your configuration, make sure to specify all the required fields that includes:
         1. `consentInstanceId`: The localStorage key to store/retrieve the user consent response.
         1. `checkConsentHref`: Your remote endpoint destination.

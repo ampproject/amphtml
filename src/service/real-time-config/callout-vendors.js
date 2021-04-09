@@ -45,8 +45,8 @@ const RTC_VENDORS = jsonConfiguration({
   //  If you are adding a new vendor config object to this object,  //
   //  make sure to also update the RTC documentation in these two   //
   //  files under "supported vendors".                              //
-  // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-documentation.md
-  // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-publisher-implementation-guide.md
+  // https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/rtc-documentation.md
+  // https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/rtc-publisher-implementation-guide.md
   ////////////////////////////////////////////////////////////////////
 
   // Add vendors here

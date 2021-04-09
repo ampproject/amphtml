@@ -17,6 +17,7 @@
 import {computedStyle} from '../style';
 import {remove} from './array';
 import {rethrowAsync} from '../log';
+import {toWin} from '../types';
 
 /** @enum {number} */
 const Type = {
@@ -214,16 +215,19 @@ function computeAndCall(type, callback, entry) {
       if (borderBoxSizeArray.length > 0) {
         borderBoxSize = borderBoxSizeArray[0];
       } else {
-        borderBoxSize = {inlineSize: 0, blockSize: 0};
+        borderBoxSize = /** @type {!ResizeObserverSize} */ ({
+          inlineSize: 0,
+          blockSize: 0,
+        });
       }
     } else {
       // `borderBoxSize` is not supported: polyfill it via blocking measures.
       const {target} = entry;
-      const win = target.ownerDocument.defaultView;
+      const win = toWin(target.ownerDocument.defaultView);
       const isVertical = VERTICAL_RE.test(
-        computedStyle(win, target).writingMode
+        computedStyle(win, target)['writing-mode']
       );
-      const {offsetWidth, offsetHeight} = target;
+      const {offsetWidth, offsetHeight} = /** @type {!HTMLElement} */ (target);
       let inlineSize, blockSize;
       if (isVertical) {
         blockSize = offsetWidth;
@@ -232,7 +236,10 @@ function computeAndCall(type, callback, entry) {
         inlineSize = offsetWidth;
         blockSize = offsetHeight;
       }
-      borderBoxSize = {inlineSize, blockSize};
+      borderBoxSize = /** @type {!ResizeObserverSize} */ ({
+        inlineSize,
+        blockSize,
+      });
     }
     callCallbackNoInline(callback, borderBoxSize);
   }
