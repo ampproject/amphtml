@@ -10,18 +10,15 @@
     "type": "git",
     "url": "https://github.com/ampproject/amphtml.git"
   },
-  "bin": {
-    "amp": "./amp.js"
-  },
   "scripts": {
     "preinstall": "node build-system/common/check-package-manager.js",
-    "postinstall": "node build-system/common/install-task-runner.js"
+    "postinstall": "node build-system/task-runner/install-task-runner.js"
   },
   "dependencies": {
     "@ampproject/animations": "0.2.2",
     "@ampproject/toolbox-cache-url": "2.7.2",
     "@ampproject/viewer-messaging": "1.1.2",
-    "@ampproject/worker-dom": "0.28.0",
+    "@ampproject/worker-dom": "0.29.0",
     "@webcomponents/webcomponentsjs": "2.5.0",
     "dompurify": "2.2.6",
     "google-closure-library": "20210202.0.0",
@@ -117,7 +114,7 @@
     "html-minifier": "4.0.0",
     "ignore": "5.1.8",
     "istanbul-middleware": "0.2.2",
-    "jest-dot-reporter": "1.0.12",
+    "jest-progress-bar-reporter": "1.0.20",
     "jest-silent-reporter": "0.5.0",
     "jison": "0.4.18",
     "jscodeshift": "0.11.0",
@@ -163,8 +160,6 @@
     "prettier": "2.2.1",
     "react": "17.0.1",
     "react-dom": "17.0.1",
-    "request": "2.88.2",
-    "request-promise": "4.2.6",
     "rocambole": "0.7.0",
     "semver": "7.3.5",
     "sinon": "9.2.4",

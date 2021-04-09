@@ -127,7 +127,7 @@ export class AmpSlideScroll extends BaseSlides {
 
     /** @private @const {boolean} */
     this.isIos_ = platform.isIos();
-    
+
     /** @private @const {boolean} */
     this.isSafari_ = platform.isSafari();
 
