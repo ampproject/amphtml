@@ -37,9 +37,9 @@ const {execOrDie, execOrThrow, execWithError, exec} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {replaceUrls} = require('../tasks/pr-deploy-bot-utils');
 
-const UNMINIFIED_CONTAINER_DIRECTORY = `unminified`;
-const NOMODULE_CONTAINER_DIRECTORY = `nomodule`;
-const MODULE_CONTAINER_DIRECTORY = `module`;
+const UNMINIFIED_CONTAINER_DIRECTORY = 'unminified';
+const NOMODULE_CONTAINER_DIRECTORY = 'nomodule';
+const MODULE_CONTAINER_DIRECTORY = 'module';
 
 const UNMINIFIED_GCLOUD_OUTPUT_FILE = `amp_unminified_${ciBuildSha()}.zip`;
 const NOMODULE_GCLOUD_OUTPUT_FILE = `amp_nomodule_${ciBuildSha()}.zip`;
