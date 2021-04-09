@@ -628,11 +628,11 @@ export class Services {
   }
 
   /**
-   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<RealTimeConfigManager>}
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!Promise<!./service/real-time-config/real-time-config-impl.RealTimeConfigManager>}
    */
   static realTimeConfigForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<RealTimeConfigManager>} */ (getServicePromiseForDoc(
+    return /** @type {!Promise<!./service/real-time-config/real-time-config-impl.RealTimeConfigManager>} */ (getServicePromiseForDoc(
       elementOrAmpDoc,
       'real-time-config'
     ));
@@ -847,10 +847,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!../extensions/amp-assistant-assistjs/0.1/assistjs-frame-service.AssistjsFrameService}
+   * @return {!../extensions/amp-google-assistant-assistjs/0.1/assistjs-frame-service.AssistjsFrameService}
    */
   static assistjsFrameServiceForDoc(elementOrAmpDoc) {
-    return /** @type {!../extensions/amp-assistant-assistjs/0.1/assistjs-frame-service.AssistjsFrameService} */ (getServiceForDoc(
+    return /** @type {!../extensions/amp-google-assistant-assistjs/0.1/assistjs-frame-service.AssistjsFrameService} */ (getServiceForDoc(
       elementOrAmpDoc,
       'assistjs-frame-service'
     ));
@@ -858,10 +858,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!../extensions/amp-assistant-assistjs/0.1/assistjs-config-service.AssistjsConfigService}
+   * @return {!../extensions/amp-google-assistant-assistjs/0.1/assistjs-config-service.AssistjsConfigService}
    */
   static assistjsConfigServiceForDoc(elementOrAmpDoc) {
-    return /** @type {!../extensions/amp-assistant-assistjs/0.1/assistjs-config-service.AssistjsConfigService} */ (getServiceForDoc(
+    return /** @type {!../extensions/amp-google-assistant-assistjs/0.1/assistjs-config-service.AssistjsConfigService} */ (getServiceForDoc(
       elementOrAmpDoc,
       'assistjs-config-service'
     ));

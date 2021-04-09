@@ -82,7 +82,7 @@ export function createShadowRoot(hostElement) {
 
   if (!isShadowCssSupported()) {
     const rootId = `i-amphtml-sd-${win.Math.floor(win.Math.random() * 10000)}`;
-    shadowRoot.id = rootId;
+    shadowRoot['id'] = rootId;
     shadowRoot.host.classList.add(rootId);
 
     // CSS isolation.
@@ -178,7 +178,7 @@ export function importShadowBody(shadowRoot, body, deep) {
     }
   }
   setStyle(resultBody, 'position', 'relative');
-  const oldBody = shadowRoot.body;
+  const oldBody = shadowRoot['body'];
   if (oldBody) {
     shadowRoot.removeChild(oldBody);
   }
@@ -213,7 +213,7 @@ export function transformShadowCss(shadowRoot, css) {
  * @visibleForTesting
  */
 export function scopeShadowCss(shadowRoot, css) {
-  const id = devAssert(shadowRoot.id);
+  const id = devAssert(shadowRoot['id']);
   const doc = shadowRoot.ownerDocument;
   let rules = null;
   // Try to use a separate document.
@@ -280,12 +280,12 @@ function rootSelectorPrefixer(match, name, pos, selector) {
  * @return {?CSSRuleList}
  */
 function getStylesheetRules(doc, css) {
-  const style = doc.createElement('style');
+  const style = /** @type {!HTMLStyleElement} */ (doc.createElement('style'));
   style./*OK*/ textContent = css;
   try {
     (doc.head || doc.documentElement).appendChild(style);
     if (style.sheet) {
-      return style.sheet.cssRules;
+      return /** @type {!CSSStyleSheet} */ (style.sheet).cssRules;
     }
     return null;
   } finally {

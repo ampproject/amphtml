@@ -35,6 +35,19 @@ export const MIN_VISIBILITY_RATIO_FOR_AUTOPLAY = 0.5;
  */
 export class VideoInterface {
   /**
+   * See `BaseElement`.
+   * @return {!./utils/signals.Signals}
+   */
+  signals() {}
+
+  /**
+   * See `BaseElement`.
+   * @param {function()} unusedMutator
+   * @return {!Promise}
+   */
+  mutateElementSkipRemeasure(unusedMutator) {}
+
+  /**
    * Whether the component supports video playback in the current platform.
    * If false, component will be not treated as a video component.
    * @return {boolean}
@@ -184,6 +197,12 @@ export class VideoInterface {
    */
   seekTo(unusedTimeSeconds) {}
 }
+
+/** @type {!AmpElement} */
+VideoInterface.prototype.element;
+
+/** @type {!Window} */
+VideoInterface.prototype.win;
 
 /**
  * Attributes

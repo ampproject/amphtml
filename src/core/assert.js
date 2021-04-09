@@ -135,7 +135,7 @@ export function pureUserAssert(
  * Throws an error if the first argument isn't trueish. Mirrors devAssert in
  * src/log.js.
  * @param {T} shouldBeTruthy
- * @param {string} opt_message
+ * @param {string=} opt_message
  * @param {*=} opt_1 Optional argument (var arg as individual params for better
  * @param {*=} opt_2 Optional argument inlining)
  * @param {*=} opt_3 Optional argument
