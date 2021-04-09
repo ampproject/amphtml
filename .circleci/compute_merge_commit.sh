@@ -46,5 +46,5 @@ echo "$CIRCLE_MERGE_SHA" > .CIRCLECI_MERGE_COMMIT
 mkdir -p /tmp/workspace
 cp .CIRCLECI_MERGE_COMMIT /tmp/workspace/.CIRCLECI_MERGE_COMMIT
 
-echo $(GREEN "Stored merge SHA $CIRCLE_MERGE_SHA in .CIRCLECI_MERGE_COMMIT.")
+echo $(GREEN "Stored merge SHA $CIRCLE_MERGE_SHA in /tmp/workspace/.CIRCLECI_MERGE_COMMIT.")
 exit 0
