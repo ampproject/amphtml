@@ -91,10 +91,11 @@ export function forAllWithin(
  */
 function forAllWithinInternal(container, includeSelf, deep, callback) {
   if (includeSelf && container.classList.contains(AMP_CLASS)) {
-    callCallback(callback, container);
+    const ampContainer = /** @type {!AmpElement} */ (container);
+    callCallback(callback, ampContainer);
     if (!deep) {
       // Also schedule amp-element that is a placeholder for the element.
-      const placeholder = container.getPlaceholder();
+      const placeholder = ampContainer.getPlaceholder();
       if (placeholder) {
         forAllWithinInternal(
           placeholder,
@@ -110,7 +111,7 @@ function forAllWithinInternal(container, includeSelf, deep, callback) {
   const descendants = container.getElementsByClassName(AMP_CLASS);
   let seen = null;
   for (let i = 0; i < descendants.length; i++) {
-    const descendant = descendants[i];
+    const descendant = /** @type {!AmpElement} */ (descendants[i]);
     if (deep) {
       // In deep search all elements will be covered.
       callCallback(callback, descendant);

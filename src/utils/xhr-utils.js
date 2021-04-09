@@ -79,7 +79,7 @@ const allowedJsonBodyTypes_ = [isArray, isObject];
  *     cloneable request.
  */
 export function toStructuredCloneable(input, init) {
-  const newInit = {...init};
+  const newInit = /** @type {!FetchInitDef} */ ({...init});
   if (isFormDataWrapper(init.body)) {
     const wrapper = /** @type {!FormDataWrapperInterface} */ (init.body);
     newInit.headers['Content-Type'] = 'multipart/form-data;charset=utf-8';
@@ -382,10 +382,10 @@ export function assertSuccess(response) {
 
     const {status} = response;
     const err = user().createError(`HTTP error ${status}`);
-    err.retriable = isRetriable(status);
+    err['retriable'] = isRetriable(status);
     // TODO(@jridgewell, #9448): Callers who need the response should
     // skip processing.
-    err.response = response;
+    err['response'] = response;
     throw err;
   });
 }

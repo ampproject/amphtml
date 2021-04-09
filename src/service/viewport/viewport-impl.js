@@ -138,7 +138,7 @@ export class ViewportImpl {
     /** @private @const {!Observable<!./viewport-interface.ViewportResizedEventDef>} */
     this.resizeObservable_ = new Observable();
 
-    /** @private {?Element|undefined} */
+    /** @private {?HTMLMetaElement|undefined} */
     this.viewportMeta_ = undefined;
 
     /** @private {string|undefined} */
@@ -858,7 +858,7 @@ export class ViewportImpl {
   }
 
   /**
-   * @return {?Element}
+   * @return {?HTMLMetaElement}
    * @private
    */
   getViewportMeta_() {

@@ -428,7 +428,8 @@ export class GlobalVariableSource extends VariableSource {
       const nav = win.navigator;
       return (
         nav.language ||
-        nav.userLanguage ||
+        // Only used on IE.
+        nav['userLanguage'] ||
         nav.browserLanguage ||
         ''
       ).toLowerCase();
@@ -609,11 +610,14 @@ export class GlobalVariableSource extends VariableSource {
    * @private
    */
   addReplaceParamsIfMissing_(orig) {
-    const {replaceParams} = /** @type {!Object} */ (this.getDocInfo_());
+    const {replaceParams} = this.getDocInfo_();
     if (!replaceParams) {
       return orig;
     }
-    return addMissingParamsToUrl(removeAmpJsParamsFromUrl(orig), replaceParams);
+    return addMissingParamsToUrl(
+      removeAmpJsParamsFromUrl(orig),
+      /** @type {!JsonObject} */ (replaceParams)
+    );
   }
 
   /**
@@ -731,7 +735,7 @@ export class GlobalVariableSource extends VariableSource {
 
   /**
    * Resolves the value via geo service.
-   * @param {function(Object<string, string>)} getter
+   * @param {function(!../../extensions/amp-geo/0.1/amp-geo.GeoDef)} getter
    * @param {string} expr
    * @return {!Promise<Object<string,(string|Array<string>)>>}
    * @template T
@@ -980,6 +984,7 @@ export class UrlReplacements {
    */
   maybeExpandLink(element, defaultUrlParams) {
     devAssert(element.tagName == 'A');
+    const aElement = /** @type {!HTMLAnchorElement} */ (element);
     const supportedReplacements = {
       'CLIENT_ID': true,
       'QUERY_PARAM': true,
@@ -988,9 +993,9 @@ export class UrlReplacements {
       'NAV_TIMING': true,
     };
     let additionalUrlParameters =
-      element.getAttribute('data-amp-addparams') || '';
+      aElement.getAttribute('data-amp-addparams') || '';
     const allowlist = this.getAllowlistForElement_(
-      element,
+      aElement,
       supportedReplacements
     );
 
@@ -1001,11 +1006,11 @@ export class UrlReplacements {
     // We set this to the original value before doing any work and use it
     // on subsequent replacements, so that each run gets a fresh value.
     let href = dev().assertString(
-      element[ORIGINAL_HREF_PROPERTY] || element.getAttribute('href')
+      aElement[ORIGINAL_HREF_PROPERTY] || aElement.getAttribute('href')
     );
     const url = parseUrlDeprecated(href);
-    if (element[ORIGINAL_HREF_PROPERTY] == null) {
-      element[ORIGINAL_HREF_PROPERTY] = href;
+    if (aElement[ORIGINAL_HREF_PROPERTY] == null) {
+      aElement[ORIGINAL_HREF_PROPERTY] = href;
     }
 
     const isAllowedOrigin = this.isAllowedOrigin_(url);
@@ -1026,7 +1031,7 @@ export class UrlReplacements {
           href
         );
       }
-      return (element.href = href);
+      return (aElement.href = href);
     }
 
     // Note that defaultUrlParams is treated differently than
@@ -1051,7 +1056,7 @@ export class UrlReplacements {
 
     href = this.expandSyncIfAllowedList_(href, allowlist);
 
-    return (element.href = href);
+    return (aElement.href = href);
   }
 
   /**

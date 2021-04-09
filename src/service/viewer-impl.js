@@ -890,7 +890,7 @@ export class ViewerImpl {
         getSourceOrigin(url) == getSourceOrigin(replaceUrl)
       ) {
         this.win.history.replaceState({}, '', replaceUrl.href);
-        this.win.location.originalHref = url.href;
+        this.win.location['originalHref'] = url.href;
         dev().fine(TAG_, 'replace url:' + replaceUrl.href);
       }
     } catch (e) {

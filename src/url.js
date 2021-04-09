@@ -121,7 +121,7 @@ export function parseUrlDeprecated(url, opt_nocache) {
 export function parseUrlWithA(a, url, opt_cache) {
   if (IS_ESM) {
     a.href = '';
-    return /** @type {!Location} */ (new URL(url, a.href));
+    return /** @type {?} */ (new URL(url, a.href));
   }
 
   if (opt_cache && opt_cache.has(url)) {
