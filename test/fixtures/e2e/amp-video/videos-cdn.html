@@ -17,16 +17,25 @@
       AMP.toggleExperiment('flexible-bitrate-debug', true);
     });
     window.onload = () => {
+      // randomize video urls to force load from origin.
+      const sources = document.body.querySelectorAll('source');
+      const time = Date.now();
+      sources.forEach((source, index) => {
+        source.src += time + index;
+        console.log(source);
+      });
+      
       const debugField = document.createElement('input');
       debugField.setAttribute('flexible-bitrate-debug', '');
       debugField.setAttribute('style', 'position: absolute; right: 0; top: 0');
       document.body.appendChild(debugField);
+      console.log(debugField)
       debugField.addEventListener('keydown', (e) => {
         if (e.key === 'd') {
           const activeVideo = document.body.querySelector('amp-story-page[active] video');
           activeVideo.dispatchEvent(new Event('downgrade'));
         }
-      })
+      });
     }
 </script>
 </head>

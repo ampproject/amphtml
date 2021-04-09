@@ -27,8 +27,6 @@ import {toArray} from '../../../src/types';
 
 const TAG = 'amp-video';
 
-const DEBUG_FIELD = 'flexible-bitrate-debug';
-
 /** @const {!Object<string, number>} */
 const BITRATE_BY_EFFECTIVE_TYPE = {
   // We assign low values to 2G in general. None of these will likely be able

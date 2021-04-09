@@ -64,13 +64,13 @@ describes.endtoend(
     });
 
     it('should keep the currentTime when video is downgraded', async () => {
-      const videoEl = await controller.findElement('#video1 video');
+      const video1El = await controller.findElement('#video1 video');
 
       // Pass some time so currentTime is not 0
       await sleep(100);
 
       const currentTime = await controller.getElementProperty(
-        videoEl,
+        video1El,
         'currentTime'
       );
 
@@ -78,7 +78,7 @@ describes.endtoend(
 
       // Check that currentTime in new source is passed from old source.
       await expect(
-        await controller.getElementProperty(videoEl, 'currentTime')
+        await controller.getElementProperty(video1El, 'currentTime')
       ).to.be.gte(currentTime);
     });
 
@@ -109,7 +109,9 @@ describes.endtoend(
 
       await controller.findElement('amp-story-page#page-4[active]');
 
-      const video4El = await controller.findElement('#video4 video');
+      const video4El = await controller.findElement(
+        '#video4 video.i-amphtml-replaced-content'
+      );
 
       await expect(
         await controller.getElementProperty(video4El, 'currentSrc')
@@ -117,7 +119,7 @@ describes.endtoend(
     });
 
     it('should load lower bitrate video far away when advancing to the last page after a downgrade', async () => {
-      downgradeCurrentVideo();
+      await downgradeCurrentVideo();
       await controller.click(story);
       await controller.click(story);
       await controller.click(story);
@@ -133,6 +135,20 @@ describes.endtoend(
       await expect(
         await controller.getElementProperty(video4El, 'currentSrc')
       ).contains('#med');
+    });
+
+    it('should work when called downgrade past lower bitrate', async () => {
+      await downgradeCurrentVideo(100);
+      await downgradeCurrentVideo(100);
+      await downgradeCurrentVideo(100);
+
+      const video1El = await controller.findElement(
+        '#video1 video.i-amphtml-pool-video'
+      );
+
+      await expect(
+        await controller.getElementProperty(video1El, 'currentSrc')
+      ).contains('#low');
     });
 
     function sleep(ms) {
