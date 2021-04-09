@@ -13,5 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const IS_DEV = false;
-const IS_EXPANDED = false;
+
+/**
+ * Changes the value of IS_FORTESTING to false.
+ * The above variable is in src/mode.js.
+ * @param {{types: string}} options
+ * @return {!Object}
+ */
+module.exports = function ({types: t}) {
+  return {
+    visitor: {
+      VariableDeclarator(path) {
+        const {node} = path;
+        const {id, init} = node;
+        if (
+          t.isIdentifier(id, {name: 'IS_FORTESTING'}) &&
+          t.isBooleanLiteral(init, {value: true})
+        ) {
+          node.init = t.booleanLiteral(false);
+        }
+      },
+    },
+  };
+};

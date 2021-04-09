@@ -138,9 +138,9 @@ const forbiddenTermsGlobal = {
     message: realiasGetMode,
     allowlist: ['src/mode-object.js', 'src/iframe-attributes.js'],
   },
-  '(?:var|let|const) +IS_DEV +=': {
+  '(?:var|let|const) +IS_FORTESTING +=': {
     message:
-      'IS_DEV local var only allowed in mode.js and ' +
+      'IS_FORTESTING local var only allowed in mode.js and ' +
       'dist.3p/current/integration.js',
     allowlist: ['src/mode.js'],
   },
