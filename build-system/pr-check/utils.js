@@ -19,6 +19,7 @@ const fs = require('fs');
 const {
   ciBuildSha,
   ciPullRequestSha,
+  circleciBuildNumber,
   isCiBuild,
   isCircleciBuild,
 } = require('../common/ci');
@@ -34,7 +35,6 @@ const {
 const {cyan, green, yellow} = require('kleur/colors');
 const {execOrDie, execOrThrow, execWithError, exec} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
-const {mainBranch} = require('../common/main-branch');
 const {replaceUrls} = require('../tasks/pr-deploy-bot-utils');
 
 const UNMINIFIED_OUTPUT_FILE = `amp_unminified_${ciBuildSha()}.zip`;
@@ -50,7 +50,7 @@ const APP_SERVING_DIRS =
 const GCLOUD_STORAGE_BUCKET = 'gs://amp-travis-builds';
 
 const GIT_BRANCH_URL =
-  'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#create-a-git-branch';
+  'https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md#create-a-git-branch';
 
 /**
  * Prints a summary of files changed by, and commits included in the PR.
@@ -61,7 +61,7 @@ function printChangeSummary() {
 
   if (isCiBuild()) {
     logWithoutTimestamp(
-      `${loggingPrefix} Latest commit from ${cyan(mainBranch)} included ` +
+      `${loggingPrefix} Latest commit from ${cyan('main')} included ` +
         `in this build: ${cyan(shortSha(gitCiMainBaseline()))}`
     );
     commitSha = ciPullRequestSha();
@@ -81,7 +81,7 @@ function printChangeSummary() {
     logWithoutTimestamp(
       `${loggingPrefix} Commit log since branch`,
       `${cyan(gitBranchName())} was forked from`,
-      `${cyan(mainBranch)} at`,
+      `${cyan('main')} at`,
       `${cyan(shortSha(branchCreationPoint))}:`
     );
     logWithoutTimestamp(gitDiffCommitLog() + '\n');
@@ -92,13 +92,13 @@ function printChangeSummary() {
       'Could not find a common ancestor for',
       cyan(gitBranchName()),
       'and',
-      cyan(mainBranch) + '. (This can happen with older PR branches.)'
+      cyan('main') + '. (This can happen with older PR branches.)'
     );
     logWithoutTimestamp(
       loggingPrefix,
       yellow('NOTE 1:'),
       'If this causes unexpected test failures, try rebasing the PR branch on',
-      cyan(mainBranch) + '.'
+      cyan('main') + '.'
     );
     logWithoutTimestamp(
       loggingPrefix,
@@ -110,13 +110,20 @@ function printChangeSummary() {
 }
 
 /**
- * Signal to dependent jobs that they should be skipped.
+ * Signal to dependent jobs that they should be skipped. Uses an identifier that
+ * corresponds to the current job to eliminate conflicts if a parallel job also
+ * signals the same thing.
  *
  * Currently only relevant for CircleCI builds.
  */
 function signalGracefulHalt() {
   if (isCircleciBuild()) {
-    fs.closeSync(fs.openSync('/tmp/workspace/.CI_GRACEFULLY_HALT', 'w'));
+    const loggingPrefix = getLoggingPrefix();
+    const sentinelFile = `/tmp/workspace/.CI_GRACEFULLY_HALT_${circleciBuildNumber()}`;
+    fs.closeSync(fs.openSync(sentinelFile, 'w'));
+    logWithoutTimestamp(
+      `${loggingPrefix} Created ${cyan(sentinelFile)} to signal graceful halt.`
+    );
   }
 }
 

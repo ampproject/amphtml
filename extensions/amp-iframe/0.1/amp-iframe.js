@@ -163,7 +163,7 @@ export class AmpIframe extends AMP.BaseElement {
         (origin != containerUrl.origin && protocol != 'data:'),
       'Origin of <amp-iframe> must not be equal to container %s' +
         ' if allow-same-origin is set. See https://github.com/ampproject/' +
-        'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.',
+        'amphtml/blob/main/spec/amp-iframe-origin-policy.md for details.',
       element
     );
     userAssert(
@@ -188,7 +188,7 @@ export class AmpIframe extends AMP.BaseElement {
         'of the viewport or 600px from the top (whichever is smaller): %s ' +
         ' Current position %s. Min: %s' +
         "Positioning rules don't apply for iframes that use `placeholder`." +
-        'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'See https://github.com/ampproject/amphtml/blob/main/extensions/' +
         'amp-iframe/amp-iframe.md#iframe-with-placeholder for details.',
       this.element,
       pos.top,

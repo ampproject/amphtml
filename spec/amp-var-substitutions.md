@@ -40,25 +40,25 @@ The following table lists the features that enable variable substitutions, as we
     <th width="25%"><strong>Restrictions</strong></th>
   </tr>
   <tr>
-    <td width="25%"><code>amp-analytics</code><br><a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md#vars">Detailed documentation</a></td>
+    <td width="25%"><code>amp-analytics</code><br><a href="https://github.com/ampproject/amphtml/blob/main/extensions/amp-analytics/amp-analytics.md#vars">Detailed documentation</a></td>
     <td width="25%">Requests must be HTTPS URLs (not a requirement specific to variable substitutions)</td>
     <td width="25%">No</td>
     <td width="25%">None</td>
   </tr>
   <tr>
-    <td width="25%"><code>amp-list</code><br><a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md#substitutions">Detailed documentation</a></td>
+    <td width="25%"><code>amp-list</code><br><a href="https://github.com/ampproject/amphtml/blob/main/extensions/amp-list/amp-list.md#substitutions">Detailed documentation</a></td>
     <td width="25%">Requests must be HTTPS URLs (not a requirement specific to variable substitutions)</td>
     <td width="25%">Yes, if fetching cross-origin resources via <code>[src]</code> <a href="https://amp.dev/documentation/components/amp-bind#element-specific-attributes">attribute binding</a>. Otherwise, no. Read more about <a href="#per-use-opt-in">per-use opt-in</a></td>
     <td width="25%">None</td>
   </tr>
   <tr>
-    <td width="25%"><code>amp-pixel</code><br><a href="https://github.com/ampproject/amphtml/blob/master/builtins/amp-pixel.md#substitutions">Detailed documentation</a></td>
+    <td width="25%"><code>amp-pixel</code><br><a href="https://github.com/ampproject/amphtml/blob/main/builtins/amp-pixel.md#substitutions">Detailed documentation</a></td>
     <td width="25%">Requests must be HTTPS URLs (not a requirement specific to variable substitutions)</td>
     <td width="25%">No</td>
     <td width="25%">None</td>
   </tr>
   <tr>
-    <td width="25%"><code>amp-state</code><br><a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-bind/amp-bind.md#attributes">Detailed documentation</a></td>
+    <td width="25%"><code>amp-state</code><br><a href="https://github.com/ampproject/amphtml/blob/main/extensions/amp-bind/amp-bind.md#attributes">Detailed documentation</a></td>
     <td width="25%">Requests must be HTTPS URLs (not a requirement specific to variable substitutions)</td>
     <td width="25%">Yes, if fetching cross-origin resources via <code>[src]</code> <a href="https://amp.dev/documentation/components/amp-bind#element-specific-attributes">attribute binding</a>. Otherwise, no. Read more about <a href="#per-use-opt-in">per-use opt-in</a></td>
     <td width="25%">None</td>
@@ -77,7 +77,7 @@ The following table lists the features that enable variable substitutions, as we
     <td width="25%">Only these variables are supported: <code>CLIENT_ID</code> and <code>QUERY_PARAM</code>.<br>See the section on <a href="#substitution-timing">"substitution timing"</a> for further notes</td>
   </tr>
   <tr>
-    <td width="25%">Form inputs<br><a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md#variable-substitutions">Detailed documentation</a></td>
+    <td width="25%">Form inputs<br><a href="https://github.com/ampproject/amphtml/blob/main/extensions/amp-form/amp-form.md#variable-substitutions">Detailed documentation</a></td>
     <td width="25%">Requests must be HTTPS URLs (not a requirement specific to variable substitutions)</td>
     <td width="25%">Yes, via space-delimited attribute <code>data-amp-replace</code>. Read more about <a href="#per-use-opt-in">per-use opt-in</a></td>
     <td width="25%">See the section on <a href="#substitution-timing">"substitution timing"</a> for further notes</td>
@@ -269,11 +269,11 @@ The tables below list the available URL variables grouped by type of usage. Furt
 
 ### AMP Components
 
-| Variable Name                    | Platform Variable | amp-analytics Variable | Required AMP Components                                                                                             |
-| -------------------------------- | ----------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| [Variant](#experiment-variant)   | `VARIANT`         | N/A                    | [`<amp-experiment>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-experiment/amp-experiment.md) |
-| [Variants](#experiment-variants) | `VARIANTS`        | N/A                    | [`<amp-experiment>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-experiment/amp-experiment.md) |
-| [Geolocation](#geolocation)      | `AMP_GEO`         | `${ampGeo}`            | [`<amp-geo>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md)                      |
+| Variable Name                    | Platform Variable | amp-analytics Variable | Required AMP Components                                                                                           |
+| -------------------------------- | ----------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| [Variant](#experiment-variant)   | `VARIANT`         | N/A                    | [`<amp-experiment>`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-experiment/amp-experiment.md) |
+| [Variants](#experiment-variants) | `VARIANTS`        | N/A                    | [`<amp-experiment>`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-experiment/amp-experiment.md) |
+| [Geolocation](#geolocation)      | `AMP_GEO`         | `${ampGeo}`            | [`<amp-geo>`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-geo/amp-geo.md)                      |
 
 ### Analytics Advanced Variable Syntax
 

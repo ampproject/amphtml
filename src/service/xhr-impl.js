@@ -109,7 +109,7 @@ export class Xhr {
         throw user().createExpectedError(
           'XHR',
           `Failed fetching (${targetOrigin}/...):`,
-          reason && reason.message
+          reason && /** @type {!Error} */ (reason).message
         );
       }
     );
