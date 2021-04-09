@@ -49,7 +49,7 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS =
  *  verboseLogging?: boolean,
  *  typeCheckOnly?: boolean,
  *  skipUnknownDepsCheck?: boolean,
- *  warningLevel?: boolean,
+ *  warningLevel?: string,
  * }}
  */
 let OptionsDef;
@@ -209,10 +209,12 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     'third_party/amp-toolbox-cache-url/',
     'third_party/caja/',
     'third_party/closure-library/sha384-generated.js',
+    'third_party/closure-responding-channel',
     'third_party/d3/',
     'third_party/inputmask/',
     'third_party/mustache/',
     'third_party/react-dates/',
+    'third_party/resize-observer-polyfill/',
     'third_party/set-dom/',
     'third_party/subscriptions-project/',
     'third_party/vega/',
@@ -280,7 +282,7 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     // Some optimizations get turned off when pseudo_names is on.
     // This causes some errors caused by the babel transformations
     // that we apply like unreachable code because we turn a conditional
-    // falsey. (ex. is IS_DEV transformation which causes some conditionals
+    // falsey. (ex. is IS_FORTESTING transformation which causes some conditionals
     // to be unreachable/suspicious code since the whole expression is
     // falsey)
     compilerOptions.jscomp_off.push('uselessCode', 'externsValidation');

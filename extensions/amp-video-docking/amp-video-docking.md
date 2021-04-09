@@ -46,7 +46,7 @@ Currently, the supported players are:
 -   [`amp-brid-player`](https://amp.dev/documentation/components/amp-brid-player)
 -   [`amp-brightcove`](https://amp.dev/documentation/components/amp-brightcove)
 -   [`amp-dailymotion`](https://amp.dev/documentation/components/amp-dailymotion)
--   [`amp-delight-player`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-delight-player/amp-delight-player.md)
+-   [`amp-delight-player`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-delight-player/amp-delight-player.md)
 -   [`amp-ima-video`](https://amp.dev/documentation/components/amp-ima-video)
 -   [`amp-video`](https://amp.dev/documentation/components/amp-video)
 -   [`amp-video-iframe`](https://amp.dev/documentation/components/amp-video-iframe)

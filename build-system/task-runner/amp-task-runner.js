@@ -22,6 +22,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const commander = require('commander');
 const fs = require('fs-extra');
+const os = require('os');
 const path = require('path');
 const {
   updatePackages,
@@ -62,7 +63,7 @@ function startAtRepoRoot() {
   const repoRoot = path.resolve(__dirname, '..', '..');
   if (repoRoot != process.cwd()) {
     process.chdir(repoRoot);
-    log('Working directory changed to', magenta('amphtml'));
+    log('Working directory changed to', magenta(path.basename(repoRoot)));
   }
 }
 
@@ -87,7 +88,8 @@ async function maybeUpdateSubpackages(taskSourceFilePath) {
  * @return {Promise<void>}
  */
 async function runTask(taskName, taskSourceFilePath, taskFunc) {
-  log('Using task file', magenta(path.join('amphtml', 'amp.js')));
+  const taskFile = path.relative(os.homedir(), 'amp.js');
+  log('Using task file', magenta(taskFile));
   const start = Date.now();
   try {
     log(`Starting '${cyan(taskName)}'...`);
@@ -112,7 +114,8 @@ async function runTask(taskName, taskSourceFilePath, taskFunc) {
  * @param {string} taskSourceFileName
  */
 function createTask(taskName, taskFuncName, taskSourceFileName) {
-  const taskSourceFilePath = path.join(__dirname, taskSourceFileName);
+  const tasksDir = path.join(__dirname, '..', 'tasks');
+  const taskSourceFilePath = path.join(tasksDir, taskSourceFileName);
   const isInvokedTask = argv._.includes(taskName); // `amp <task>`
   const isDefaultTask =
     argv._.length === 0 && taskName == 'default' && !isHelpTask; // `amp`

@@ -130,7 +130,7 @@ const lintGlobs = [
  *  - forbidden terms: local/no-forbidden-terms
  */
 const presubmitGlobs = [
-  '**/*.{css,go}',
+  '**/*.{css,go,md}',
   '!{node_modules,build,dist,dist.tools,' +
     'dist.3p/[0-9]*,dist.3p/current,dist.3p/current-min}/**/*.*',
   '!out/**/*.*',

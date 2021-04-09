@@ -207,7 +207,7 @@ Below is an example of a "local" service configuration:
 
 #### URL variables
 
-When configuring the URLs for various endpoints, the Publisher can use substitution variables. The full list of these variables are defined in the [HTML URL Variable Substitutions](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md).
+When configuring the URLs for various endpoints, the Publisher can use substitution variables. The full list of these variables are defined in the [HTML URL Variable Substitutions](https://github.com/ampproject/amphtml/blob/main/spec/amp-var-substitutions.md).
 
 [`amp-access`](../amp-access/amp-access.md) added the following subscriptions-specific variables:
 
@@ -415,9 +415,9 @@ By default, as the body, pingback POST request receives the entitlement object r
 
 To accurately identify the Reader, the Publisher should associate the [AMP Reader ID][1] with any Publisher cookies relevant to the Reader.
 
-<amp-img alt="reader id cookie association" layout="responsive" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-subscriptions/images/reader-id-assoociation.png">
+<amp-img alt="reader id cookie association" layout="responsive" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-subscriptions/images/reader-id-assoociation.png">
   <noscript>
-    <img alt="reader id cookie association" layout="responsive" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-subscriptions/images/reader-id-assoociation.png">
+    <img alt="reader id cookie association" layout="responsive" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-subscriptions/images/reader-id-assoociation.png">
   </noscript>
 </amp-img>
 
