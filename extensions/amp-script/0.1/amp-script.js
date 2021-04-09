@@ -387,7 +387,7 @@ export class AmpScript extends AMP.BaseElement {
           id
         );
         const text = local.textContent;
-        if (this.development_) {
+        if (this.development_ || this.sandboxed_) {
           return Promise.resolve(text);
         } else {
           return this.service_.checkSha384(text, debugId).then(() => text);
