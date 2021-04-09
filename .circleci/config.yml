@@ -114,6 +114,7 @@ jobs:
     executor:
       name: amphtml-medium-executor
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - run:
@@ -125,6 +126,7 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - run:
@@ -136,6 +138,7 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - run:
@@ -147,6 +150,7 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - run:
@@ -158,6 +162,7 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - run:
@@ -169,6 +174,7 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - run:
@@ -183,6 +189,7 @@ jobs:
     executor:
       name: amphtml-large-executor
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - install_chrome
@@ -195,6 +202,7 @@ jobs:
     executor:
       name: amphtml-large-executor
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - install_chrome
@@ -207,6 +215,7 @@ jobs:
     executor:
       name: amphtml-large-executor
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - install_chrome
@@ -224,6 +233,7 @@ jobs:
         type: enum
         enum: ['prod', 'canary']
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - install_chrome
@@ -241,6 +251,7 @@ jobs:
         type: enum
         enum: ['prod', 'canary']
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - install_chrome
@@ -253,6 +264,7 @@ jobs:
     executor:
       name: amphtml-large-executor
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - install_chrome
@@ -265,6 +277,7 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - install_chrome
@@ -282,6 +295,7 @@ jobs:
         type: enum
         enum: ['A', 'B', 'C']
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - run:
@@ -298,6 +312,7 @@ jobs:
         type: enum
         enum: ['A', 'B', 'C']
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - install_chrome
