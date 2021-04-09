@@ -80,6 +80,9 @@ export function getPublisherSpecifiedRefreshInterval(element, unusedWin) {
  * @return {?number}
  */
 function checkAndSanitizeRefreshInterval(refreshInterval) {
+  if (refreshInterval === 'false') {
+    return null;
+  }
   const refreshIntervalNum = Number(refreshInterval);
   if (isNaN(refreshIntervalNum) || refreshIntervalNum < MIN_REFRESH_INTERVAL) {
     user().warn(
