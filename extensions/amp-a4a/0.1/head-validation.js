@@ -75,8 +75,18 @@ const EXTENSION_ALLOWLIST = map({
   'amp-video': true,
 });
 
+/**
+ * Escape any regex chars from given string.
+ * https://developer.cdn.mozilla.net/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#escaping
+ * @param {string} string
+ * @return {string}
+ */
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
 const EXTENSION_URL_PREFIX = new RegExp(
-  '^' + urls.cdn.replace(/\./g, '\\.') + '/(rtv/\\d*/)?v0/'
+  '^' + escapeRegExp(urls.cdn) + '/(rtv/\\d+/)?v0/'
 );
 
 /**
