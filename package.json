@@ -18,7 +18,7 @@
     "@ampproject/animations": "0.2.2",
     "@ampproject/toolbox-cache-url": "2.7.2",
     "@ampproject/viewer-messaging": "1.1.2",
-    "@ampproject/worker-dom": "0.29.0",
+    "@ampproject/worker-dom": "0.29.1",
     "@webcomponents/webcomponentsjs": "2.5.0",
     "dompurify": "2.2.6",
     "google-closure-library": "20210202.0.0",
