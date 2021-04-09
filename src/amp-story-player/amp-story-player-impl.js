@@ -41,7 +41,6 @@ import {findIndex, toArray} from '../core/types/array';
 import {getMode} from '../../src/mode';
 import {parseJson} from '../json';
 import {resetStyles, setStyle, setStyles} from '../style';
-
 import {urls} from '../config';
 
 /** @enum {string} */
