@@ -138,22 +138,15 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
  * @param {!Element} pageEl
  * @param {!Element} attachmentEl
  * @param {!Element} attachmentHref
-<<<<<<< HEAD
  * @param  {string} contrastColor '#FFF' or '#000'
-=======
->>>>>>> main
  * @return {!Element}
  */
 const renderOutlinkPageAttachmentUI = (
   win,
   pageEl,
   attachmentEl,
-<<<<<<< HEAD
   attachmentHref,
   contrastColor
-=======
-  attachmentHref
->>>>>>> main
 ) => {
   const openAttachmentEl = buildOpenOutlinkAttachmentElement(pageEl);
 
@@ -162,7 +155,6 @@ const renderOutlinkPageAttachmentUI = (
     openAttachmentEl.setAttribute('href', attachmentHref);
   }
 
-<<<<<<< HEAD
   // Getting elements
   let {chipEl, ctaLabelEl} = htmlRefs(openAttachmentEl);
 
@@ -188,13 +180,6 @@ const renderOutlinkPageAttachmentUI = (
       });
     }
   }
-=======
-  // Setting theme
-  openAttachmentEl.setAttribute('theme', attachmentEl.getAttribute('theme'));
-
-  // Getting elements
-  const {chipEl, ctaLabelEl} = htmlRefs(openAttachmentEl);
->>>>>>> main
 
   // Appending text & aria-label.
   const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
