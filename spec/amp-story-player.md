@@ -129,7 +129,13 @@ The story attribution displays the entity or publisher's name and logo. When cli
 
 To display the attribution on the stories, use the player's `display` and `attribution` options. See the JSON configuration below.
 
-The information will come from the `entity`, `entity-logo-src` and `entity-url` attributes on the `<amp-story>` element in the story. They will be used to display the name, logo, and navigate the user to the given URL respectively. If these attributes are not provided, the `publisher`, `publisher-logo-src` and canonical domain will be used instead.
+The data will come from the `<amp-story>`'s metadata attributes in the story's document as described:
+
+-   For the logo: the `entity-logo-src` attribute (if provided), otherwise the `publisher-logo-src` attribute.
+-   For the string of text: the `entity` attribute (if provided), otherwise the `publisher` attribute.
+-   When the attribution is clicked, it will navigate the user to a URL. This will come from `entity-url` attribute if provided, otherwise we will use the story's canonical domain.
+
+Read more about these attibutes on the [Metadata Guidelines of `amp-story`.](https://github.com/ampproject/amphtml/blob/main/extensions/amp-story/amp-story.md#metadata-guidelines)
 
 ### JSON Configuration
 
