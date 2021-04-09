@@ -20,6 +20,7 @@
 set -e
 
 GREEN() { echo -e "\033[0;32m$1\033[0m"; }
+YELLOW() { echo -e "\033[0;33m$1\033[0m"; }
 CYAN() { echo -e "\033[0;36m$1\033[0m"; }
 
 MERGABLE_OUTPUT_DIRS="build dist dist.3p dist.tools examples test/manual test/fixtures/e2e"
@@ -35,4 +36,6 @@ if [[ -d /tmp/restored-workspace/builds ]]; then
       fi
     done
   done
+else
+  echo $(YELLOW "Workspace does not contain any build outputs to restore")
 fi
