@@ -17,7 +17,7 @@
 
 const {
   printGulpDeprecationNotice,
-} = require('./build-system/tasks/amp-task-runner');
+} = require('./build-system/task-runner/amp-task-runner');
 
 /**
  * Print a deprecation notice and fall back to the amp task runner.

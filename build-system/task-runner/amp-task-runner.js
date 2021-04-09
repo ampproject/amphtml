@@ -114,7 +114,8 @@ async function runTask(taskName, taskSourceFilePath, taskFunc) {
  * @param {string} taskSourceFileName
  */
 function createTask(taskName, taskFuncName, taskSourceFileName) {
-  const taskSourceFilePath = path.join(__dirname, taskSourceFileName);
+  const tasksDir = path.join(__dirname, '..', 'tasks');
+  const taskSourceFilePath = path.join(tasksDir, taskSourceFileName);
   const isInvokedTask = argv._.includes(taskName); // `amp <task>`
   const isDefaultTask =
     argv._.length === 0 && taskName == 'default' && !isHelpTask; // `amp`

@@ -24,36 +24,57 @@
 const fs = require('fs-extra');
 const path = require('path');
 const {cyan, green, yellow} = require('kleur/colors');
-const {isCiBuild} = require('./ci');
-const {logWithoutTimestamp} = require('./logging');
-const {printGulpDeprecationNotice} = require('../tasks/amp-task-runner');
-const {spawnProcess, getStdout} = require('./process');
+const {getStdout} = require('../common/process');
+const {isCiBuild} = require('../common/ci');
+const {logWithoutTimestamp} = require('../common/logging');
+const {printGulpDeprecationNotice} = require('./amp-task-runner');
 
 const npmBinDir = getStdout('npm bin --global').trim();
 
 /**
+ * Installs a runner to the npm bin directory and points it to the given target.
+ * @param {string} runnerName
+ * @param {string} runnerTarget
+ */
+async function installCliRunner(runnerName, runnerTarget) {
+  logWithoutTimestamp(
+    yellow('Installing'),
+    cyan(runnerName),
+    yellow('task runner...')
+  );
+  const runnerBinary = path.join(npmBinDir, runnerName);
+  const runnerContents = (
+    await fs.readFile('build-system/task-runner/cli-runner.js', 'utf-8')
+  ).replace('__RUNNER_TARGET__', runnerTarget);
+  await fs.remove(runnerBinary);
+  await fs.outputFile(runnerBinary, runnerContents, {mode: 0o755});
+  logWithoutTimestamp(
+    green('Installed'),
+    cyan(runnerName),
+    green('task runner.\n')
+  );
+}
+
+/**
  * Installs the `amp` task runner to the npm bin directory if it hasn't already
- * been installed.
+ * been installed. Ensures that the binary exists and is a node runner script.
  */
 async function installAmpRunner() {
   const ampBinary = path.join(npmBinDir, 'amp');
-  const isAmpInstalled = await fs.pathExists(ampBinary);
-  if (isAmpInstalled) {
-    logWithoutTimestamp(green('Detected'), cyan('amp'), green('task runner.'));
-  } else {
-    printGulpDeprecationNotice(/* withTimeStamps */ false);
-    logWithoutTimestamp(
-      yellow('Installing'),
-      cyan('amp'),
-      yellow('task runner...')
-    );
-    spawnProcess('npm install --global --ignore-scripts', {'stdio': 'inherit'});
-    logWithoutTimestamp(
-      green('Installed'),
-      cyan('amp'),
-      green('task runner.\n')
-    );
+  const ampBinaryExists = await fs.pathExists(ampBinary);
+  if (ampBinaryExists) {
+    const ampBinaryIsAScript = !(await fs.lstat(ampBinary)).isSymbolicLink();
+    if (ampBinaryIsAScript) {
+      logWithoutTimestamp(
+        green('Detected'),
+        cyan('amp'),
+        green('task runner.')
+      );
+      return;
+    }
   }
+  printGulpDeprecationNotice(/* withTimeStamps */ false);
+  await installCliRunner('amp', 'amp.js');
 }
 
 /**
@@ -63,7 +84,7 @@ async function installAmpRunner() {
 function printGlobalGulpWarning(globalGulp) {
   logWithoutTimestamp(
     yellow('\nWARNING:'),
-    'Cannot install fallback',
+    'Cannot install',
     cyan('gulp'),
     'task runner due to the presence of a global',
     cyan(globalGulp) + '.'
@@ -85,46 +106,31 @@ function printGlobalGulpWarning(globalGulp) {
 /**
  * Looks for a global `gulp-cli` and prints a warning if found. If not, installs
  * a fallback `gulp` task runner to the npm bin directory if it hasn't already
- * been installed so that `gulp` commands do not abruptly stop working.
+ * been installed so that `gulp` commands do not abruptly stop working. Ensures
+ * that the binary exists and is a node runner script.
  * TODO(amphtml): Remove this function after a month or so.
  */
 async function installGulpRunner() {
   const gulpBinary = path.join(npmBinDir, 'gulp');
-  const isGulpInstalled = await fs.pathExists(gulpBinary);
-  if (isGulpInstalled) {
-    const gulpTarget = await fs.readlink(gulpBinary);
-    if (gulpTarget.includes('gulp-deprecated')) {
+  const gulpBinaryExists = await fs.pathExists(gulpBinary);
+  if (gulpBinaryExists) {
+    const gulpBinaryIsAScript = !(await fs.lstat(gulpBinary)).isSymbolicLink();
+    if (gulpBinaryIsAScript) {
       logWithoutTimestamp(
-        green('Detected fallback'),
+        green('Detected'),
         cyan('gulp'),
         green('task runner.\n')
       );
-    } else {
+      return;
+    }
+    const gulpTarget = await fs.readlink(gulpBinary);
+    if (!gulpTarget.includes('gulp-deprecated')) {
       const globalGulp = gulpTarget.includes('gulp-cli') ? 'gulp-cli' : 'gulp';
       printGlobalGulpWarning(globalGulp);
-    }
-  } else {
-    logWithoutTimestamp(
-      yellow('Installing fallback'),
-      cyan('gulp'),
-      yellow('task runner...')
-    );
-    const gulpRunner = path.resolve(process.cwd(), 'gulp-deprecated.js');
-    try {
-      await fs.ensureSymlink(gulpRunner, gulpBinary);
-      logWithoutTimestamp(
-        green('Installed fallback'),
-        cyan('gulp'),
-        green('task runner.\n')
-      );
-    } catch (err) {
-      logWithoutTimestamp(
-        yellow('WARNING: Could not create fallback'),
-        cyan('gulp'),
-        yellow('task runner.\n')
-      );
+      return;
     }
   }
+  await installCliRunner('gulp', 'gulp-deprecated.js');
 }
 
 async function installTaskRunner() {
