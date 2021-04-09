@@ -40,7 +40,8 @@ import {dict, hasOwn} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
 import {getMode} from '../../../src/mode';
 import {installLinkerReaderService} from './linker-reader';
-import {isArray, isEnumValue} from '../../../src/types';
+import {isArray} from '../../../src/core/types/array';
+import {isEnumValue} from '../../../src/types';
 import {isIframed} from '../../../src/dom';
 import {isInFie} from '../../../src/iframe-helper';
 

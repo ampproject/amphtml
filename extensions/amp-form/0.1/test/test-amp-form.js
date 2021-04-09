@@ -38,7 +38,7 @@ import {
   createFormDataWrapper,
   isFormDataWrapper,
 } from '../../../../src/form-data-wrapper';
-import {fromIterator} from '../../../../src/utils/array';
+import {fromIterator} from '../../../../src/core/types/array';
 import {parseQueryString} from '../../../../src/url.js';
 import {
   setCheckValiditySupportedForTesting,

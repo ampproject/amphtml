@@ -36,7 +36,7 @@ import {
 import {dev, devAssert, userAssert} from '../../../../src/log';
 import {map} from '../../../../src/utils/object';
 import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
-import {toArray} from '../../../../src/types';
+import {toArray} from '../../../../src/core/types/array';
 
 const LIGHTBOX_ELIGIBLE_TAGS = {
   'AMP-IMG': true,

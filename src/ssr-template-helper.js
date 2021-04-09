@@ -15,7 +15,7 @@
  */
 
 import {dict} from './utils/object';
-import {isArray} from './types';
+import {isArray} from './core/types/array';
 import {toStructuredCloneable} from './utils/xhr-utils';
 import {userAssert} from './log';
 

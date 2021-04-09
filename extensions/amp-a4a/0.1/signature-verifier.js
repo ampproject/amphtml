@@ -17,7 +17,7 @@
 import {Services} from '../../../src/services';
 import {base64DecodeToBytes} from '../../../src/utils/base64';
 import {dev, devAssert, user} from '../../../src/log';
-import {isArray} from '../../../src/types';
+import {isArray} from '../../../src/core/types/array';
 
 /** @visibleForTesting */
 export const AMP_SIGNATURE_HEADER = 'AMP-Fast-Fetch-Signature';

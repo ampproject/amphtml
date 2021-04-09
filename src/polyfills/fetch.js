@@ -15,7 +15,8 @@
  */
 import {dev, devAssert, user} from '../log';
 import {hasOwn, map} from '../utils/object';
-import {isArray, isObject} from '../types';
+import {isArray} from '../core/types/array';
+import {isObject} from '../types';
 import {parseJson} from '../json';
 import {utf8Encode} from '../utils/bytes';
 

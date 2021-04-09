@@ -19,7 +19,7 @@ import {applyStaticLayout} from '../../src/layout';
 import {createElementWithAttributes} from '../../src/dom';
 import {createIframePromise} from '../../testing/iframe';
 import {installImg} from '../../builtins/amp-img';
-import {toArray} from '../../src/types';
+import {toArray} from '../../src/core/types/array';
 
 describes.sandboxed('amp-img layout intrinsic', {}, () => {
   let fixture;

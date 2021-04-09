@@ -20,7 +20,7 @@ import {dev, devAssert} from './log';
 import {dict} from './utils/object';
 import {getData} from './event-helper';
 import {parseUrlDeprecated} from './url';
-import {remove} from './utils/array';
+import {remove} from './core/types/array';
 import {setStyle} from './style';
 import {tryParseJson} from './json';
 

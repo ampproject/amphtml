@@ -16,7 +16,7 @@
 
 import {LoadingIndicatorImpl} from '../../src/service/loading-indicator';
 import {Services} from '../../src/services';
-import {pushIfNotExist, removeItem} from '../../src/utils/array';
+import {pushIfNotExist, removeItem} from '../../src/core/types/array';
 
 describes.realWin('LoadingIndicatorImpl', {amp: true}, (env) => {
   let ampdoc;

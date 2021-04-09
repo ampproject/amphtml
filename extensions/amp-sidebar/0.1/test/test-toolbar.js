@@ -19,7 +19,7 @@ import {Services} from '../../../../src/services';
 import {Toolbar} from '../toolbar';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
-import {toArray} from '../../../../src/types';
+import {toArray} from '../../../../src/core/types/array';
 
 adopt(window);
 

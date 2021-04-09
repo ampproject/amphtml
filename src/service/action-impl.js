@@ -29,8 +29,9 @@ import {getDetail} from '../event-helper';
 import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
 import {isAmp4Email} from '../format';
-import {isArray, isFiniteNumber, toArray, toWin} from '../types';
+import {isArray, toArray} from '../core/types/array';
 import {isEnabled} from '../dom';
+import {isFiniteNumber, toWin} from '../types';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
 

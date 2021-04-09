@@ -18,7 +18,8 @@ import {AstNodeType} from './bind-expr-defines';
 import {devAssert, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {isArray, isObject} from '../../../src/types';
+import {isArray} from '../../../src/core/types/array';
+import {isObject} from '../../../src/types';
 import {bindParser as parser} from '../../../build/parsers/bind-expr-impl';
 
 const TAG = 'amp-bind';

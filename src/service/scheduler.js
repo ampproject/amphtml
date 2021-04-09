@@ -19,7 +19,7 @@ import {READY_SCAN_SIGNAL} from './resources-interface';
 import {VisibilityState} from '../visibility-state';
 import {containsNotSelf, hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
-import {removeItem} from '../utils/array';
+import {removeItem} from '../core/types/array';
 
 const ID = 'scheduler';
 

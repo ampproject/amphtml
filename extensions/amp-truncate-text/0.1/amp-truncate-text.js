@@ -25,7 +25,7 @@ import {createShadowRoot} from './shadow-utils';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 import {truncateText} from './truncate-text';
 
 /**

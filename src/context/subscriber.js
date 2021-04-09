@@ -15,7 +15,7 @@
  */
 
 import {ContextNode} from './node';
-import {arrayOrSingleItemToArray} from '../types';
+import {arrayOrSingleItemToArray} from '../core/types/array';
 import {throttleTail, tryCallback} from './scheduler';
 
 const EMPTY_ARRAY = [];

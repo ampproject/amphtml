@@ -28,7 +28,7 @@ import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
-import {isArray} from '../../../src/types';
+import {isArray} from '../../../src/core/types/array';
 import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */

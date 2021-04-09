@@ -16,7 +16,7 @@
 
 import {Deferred} from '../../src/utils/promise';
 import {Services} from '../../src/services';
-import {removeItem} from '../../src/utils/array';
+import {removeItem} from '../../src/core/types/array';
 import {
   whenContentIniLoadInOb,
   whenContentIniLoadMeasure,

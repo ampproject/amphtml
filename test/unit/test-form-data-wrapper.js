@@ -19,7 +19,7 @@ import {
   createFormDataWrapper,
 } from '../../src/form-data-wrapper';
 import {Services} from '../../src/services';
-import {fromIterator} from '../../src/utils/array';
+import {fromIterator} from '../../src/core/types/array';
 
 describes.realWin('FormDataWrapper', {}, (env) => {
   describe('entries', () => {

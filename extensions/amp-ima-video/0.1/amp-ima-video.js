@@ -31,12 +31,13 @@ import {getConsentPolicyState} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isEnumValue, isObject, toArray} from '../../../src/types';
+import {isEnumValue, isObject} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {
   observeContentSize,
   unobserveContentSize,
 } from '../../../src/utils/size-observer';
+import {toArray} from '../../../src/core/types/array';
 
 /** @const */
 const TAG = 'amp-ima-video';

@@ -15,7 +15,7 @@
  */
 
 import {install} from '../../src/polyfills/domtokenlist';
-import {toArray} from '../../src/types';
+import {toArray} from '../../src/core/types/array';
 
 describes.fakeWin(
   'DOMTokenList.toggle/add on non-IE',
