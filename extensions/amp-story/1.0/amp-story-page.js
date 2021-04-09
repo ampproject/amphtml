@@ -1762,7 +1762,9 @@ export class AmpStoryPage extends AMP.BaseElement {
       });
       const styles = computedStyle(this.win, this.element);
       const rgb = getRGBFromCssColorValue(styles['background-color']);
+      console.log(rgb);
       contrastColor = getTextColorForRGB(rgb);
+      console.log(contrastColor);
     }
 
     if (!this.openAttachmentEl_) {

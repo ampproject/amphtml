@@ -95,7 +95,8 @@ export const renderPageAttachmentUI = (win, pageEl, attachmentEl, contrastColor)
       win,
       pageEl,
       attachmentEl,
-      attachmentHref
+      attachmentHref,
+      contrastColor
     );
   } else if (isPageAttachmentUiV2ExperimentOn(win) && openImgAttr) {
     return renderPageAttachmentUiWithImages(win, pageEl, attachmentEl);
@@ -164,6 +165,8 @@ const renderOutlinkPageAttachmentUI = (
 
   if (themeAttribute === "custom") {
     const accentColor = attachmentEl.getAttribute('cta-accent-color');
+    console.log(accentColor);
+    console.log(contrastColor);
     if (attachmentEl.getAttribute('cta-accent-element') === "background") {
       setImportantStyles(ctaLabelEl, {
         'color': contrastColor
