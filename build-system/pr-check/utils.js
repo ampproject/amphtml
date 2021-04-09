@@ -243,39 +243,6 @@ const timedExecOrDie = timedExecFn(execOrDie);
 const timedExecOrThrow = timedExecFn(execOrThrow);
 
 /**
- * Fetches and merges build outputs from previous jobs.
- */
-function fetchBuildOutput() {
-  const loggingPrefix = getLoggingPrefix();
-
-  logWithoutTimestamp(
-    `\n${loggingPrefix} Fetching and merging the following builds from the workspace:`
-  );
-  for (const containerDir of fs.readdirSync('/tmp/workspace/builds')) {
-    logWithoutTimestamp('*', cyan(containerDir));
-  }
-
-  if (isCircleciBuild()) {
-    for (const containerDir of fs.readdirSync('/tmp/workspace/builds')) {
-      for (const outputDir of APP_SERVING_DIRS) {
-        if (
-          !fs.pathExistsSync(
-            `/tmp/workspace/builds/${containerDir}/${outputDir}`
-          )
-        ) {
-          continue;
-        }
-        fs.ensureDirSync(`./${outputDir}`);
-        execOrThrow(
-          `rsync -a /tmp/workspace/builds/${containerDir}/${outputDir}/ ./${outputDir}`,
-          'Failed to merge directories'
-        );
-      }
-    }
-  }
-}
-
-/**
  * Upload output helper
  * @param {string} containerDirectory
  * @param {string} gcloudOutputFileName
@@ -373,7 +340,6 @@ async function processAndUploadNomoduleOutput() {
 
 module.exports = {
   abortTimedJob,
-  fetchBuildOutput,
   printChangeSummary,
   skipDependentJobs,
   processAndUploadNomoduleOutput,

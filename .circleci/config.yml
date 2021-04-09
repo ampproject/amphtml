@@ -73,6 +73,9 @@ commands:
       - run:
           name: 'Install Dependencies'
           command: ./.circleci/install_dependencies.sh
+      - run:
+          name: 'Restore Build Output'
+          command: ./.circleci/restore_build_output.sh
   teardown_vm:
     steps:
       - persist_to_workspace:
