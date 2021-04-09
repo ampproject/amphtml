@@ -199,11 +199,11 @@ amp-carousel[i-amphtml-carousel-hide-buttons] .amp-carousel-button-next {
 }
 
 .i-amphtml-slidescroll-no-snap.i-amphtml-slides-container {
-  scroll-snap-type: none;
+  scroll-snap-type: none !important;
 }
 
 .i-amphtml-slidescroll-no-snap .i-amphtml-slide-item {
-  scroll-snap-align: none;
+  scroll-snap-align: none !important;
 }
 
 .i-amphtml-slidescroll-no-snap.i-amphtml-slides-container.i-amphtml-no-scroll {

@@ -634,6 +634,30 @@ describes.realWin(
       impl.handleCustomElasticScroll_(405);
       expect(customSnapSpy).to.have.been.calledWith(405);
     });
+    
+    it('should not elastic scroll on iOS scrolling', async () => {
+      const ampSlideScroll = await getAmpSlideScroll();
+      const impl = await ampSlideScroll.getImpl();
+      impl.isIos_ = true;
+
+      const customSnapSpy = env.sandbox
+        .spy(impl, 'handleCustomElasticScroll_')
+        
+      impl.scrollHandler_();
+      expect(customSnapSpy).to.not.be.called;
+    });
+    
+    it('should not elastic scroll on Safari scrolling', async () => {
+      const ampSlideScroll = await getAmpSlideScroll();
+      const impl = await ampSlideScroll.getImpl();
+      impl.isSafari_ = true;
+
+      const customSnapSpy = env.sandbox
+        .spy(impl, 'handleCustomElasticScroll_')
+        
+      impl.scrollHandler_();
+      expect(customSnapSpy).to.not.be.called;
+    });
 
     it('should handle layout measures (orientation changes)', async () => {
       const ampSlideScroll = await getAmpSlideScroll();
@@ -1371,7 +1395,7 @@ describes.realWin(
         platform = Services.platformFor(win);
       });
 
-      it('shoud add disabled CSS snap class for iOS 10.3', async () => {
+      it('should add disabled CSS snap class for iOS 10.3', async () => {
         env.sandbox.stub(platform, 'isIos').returns(true);
         env.sandbox.stub(platform, 'getIosVersionString').returns('10.3');
         const el = await getAmpSlideScroll(false, 3);
