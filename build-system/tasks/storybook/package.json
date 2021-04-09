@@ -6,7 +6,7 @@
   "devDependencies": {
     "@ampproject/storybook-addon": "1.1.9",
     "@babel/core": "7.13.10",
-    "@babel/preset-react": "7.12.13",
+    "@babel/preset-react": "7.13.13",
     "@babel/runtime-corejs3": "7.13.10",
     "@storybook/addon-a11y": "6.2.3",
     "@storybook/addon-knobs": "6.2.3",
