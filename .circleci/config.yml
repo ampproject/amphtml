@@ -93,7 +93,7 @@ commands:
           name: 'Fail Fast'
           when: on_fail
           command: ./.circleci/fail_fast.sh
-  save_artifacts:
+  store_test_output:
     steps:
       - store_artifacts:
           path: result-reports
@@ -185,7 +185,7 @@ jobs:
       - run:
           name: 'Validator Tests'
           command: node build-system/pr-check/validator-tests.js
-      - save_artifacts
+      - store_test_output
       - fail_fast
       - teardown_vm
   'Visual Diff Tests':
@@ -199,7 +199,7 @@ jobs:
       - run:
           name: 'Visual Diff Tests'
           command: node build-system/pr-check/visual-diff-tests.js
-      - save_artifacts
+      - store_test_output
       - fail_fast
       - teardown_vm
   'Unit Tests':
@@ -213,7 +213,7 @@ jobs:
       - run:
           name: 'Unit Tests'
           command: node build-system/pr-check/unit-tests.js
-      - save_artifacts
+      - store_test_output
       - fail_fast
       - teardown_vm
   'Unminified Tests':
@@ -227,7 +227,7 @@ jobs:
       - run:
           name: 'Unminified Tests'
           command: node build-system/pr-check/unminified-tests.js
-      - save_artifacts
+      - store_test_output
       - fail_fast
       - teardown_vm
   'Nomodule Tests':
@@ -246,7 +246,7 @@ jobs:
       - run:
           name: 'Nomodule Tests (<< parameters.config >>)'
           command: node build-system/pr-check/nomodule-tests.js --config=<< parameters.config >>
-      - save_artifacts
+      - store_test_output
       - fail_fast
       - teardown_vm
   'Module Tests':
@@ -265,7 +265,7 @@ jobs:
       - run:
           name: 'Module Tests (<< parameters.config >>)'
           command: node build-system/pr-check/module-tests.js --config=<< parameters.config >>
-      - save_artifacts
+      - store_test_output
       - fail_fast
       - teardown_vm
   'End-to-End Tests':
@@ -279,7 +279,7 @@ jobs:
       - run:
           name: 'End-to-End Tests'
           command: node build-system/pr-check/e2e-tests.js
-      - save_artifacts
+      - store_test_output
       - fail_fast
       - teardown_vm
   'Performance Tests':
@@ -293,7 +293,7 @@ jobs:
       - run:
           name: 'Performance Tests'
           command: node build-system/pr-check/performance-tests.js
-      - save_artifacts
+      - store_test_output
       - fail_fast
       - teardown_vm
   'Experiment Build':
@@ -330,6 +330,7 @@ jobs:
       - run:
           name: 'Experiment << parameters.exp >> Tests'
           command: node build-system/pr-check/experiment-tests.js --experiment=experiment<< parameters.exp >>
+      - store_test_output
       - fail_fast
       - teardown_vm
 

@@ -80,10 +80,6 @@ module.exports = {
     },
   },
 
-  junitReporter: {
-    useBrowserName: false,
-  },
-
   port: 9876,
 
   colors: true,

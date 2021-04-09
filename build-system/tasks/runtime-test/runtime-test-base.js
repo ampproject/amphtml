@@ -175,7 +175,10 @@ function updateReporters(config) {
 
   if (isCircleciBuild()) {
     config.reporters.push('junit');
-    config.junitReporter.outputFile = `result-reports/${config.testType}.xml`;
+    config.junitReporter = {
+      outputFile: `result-reports/${config.testType}.xml`,
+      useBrowserName: false,
+    };
   }
 
   if (argv.coverage) {
