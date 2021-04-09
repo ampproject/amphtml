@@ -686,10 +686,22 @@ async function buildExtensionJs(extDir, name, version, latestVersion, options) {
     copyWorkerDomResources(version);
 
     // Create the proxy iframe for sandboxed worker.
-    await doBuildJs(jsBundles, 'amp-script-proxy-iframe.js', options);
-    const proxyScript = await fs.readFile('dist.3p/amp-script-proxy-iframe.js');
+    await doBuildJs(jsBundles, 'amp-script-proxy-iframe.js', {});
+    const dist3pDir = path.join(
+      __dirname,
+      '..',
+      '..',
+      'dist.3p',
+      `current${options.minified ? '-min' : ''}`
+    );
+    const proxyScript = await fs.readFile(
+      path.join(dist3pDir, 'amp-script-proxy-iframe.js')
+    );
     const proxyIframe = `<html><script>${proxyScript}</script></html>`;
-    await fs.outputFile('dist.3p/amp-script-proxy-iframe.html', proxyIframe);
+    await fs.outputFile(
+      path.join(dist3pDir, 'amp-script-proxy-iframe.html'),
+      proxyIframe
+    );
   }
 }
 

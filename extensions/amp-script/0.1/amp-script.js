@@ -302,8 +302,11 @@ export class AmpScript extends AMP.BaseElement {
         dev().info(TAG, 'From worker:', data);
       },
       sandbox: this.sandboxed_ && {
-        // QQQQ: Must get the correct RTVed version of this HTML.
-        iframeUrl: 'cdn.ampproject.net/TODO/amp-script-proxy-iframe.html',
+        iframeUrl: getMode().localDev
+          ? '/dist.3p/current/amp-script-proxy-iframe.html'
+          : `https://3p.ampproject.net/${
+              getMode().rtvVersion
+            }/amp-script-proxy-iframe.html`,
       },
     };
 
