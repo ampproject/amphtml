@@ -47,20 +47,21 @@ commands:
       - restore_cache:
           name: 'Restore Merge Commit'
           key: git-{{ .Branch }}-{{ .Revision }}
-  maybe_gracefully_halt:
+  restore_workspace:
     steps:
       - attach_workspace:
           at: /tmp
       - run:
-          name: 'Maybe Gracefully Halt'
+          name: 'Rename Restored Workspace'
           command: |
             if [[ -d /tmp/workspace ]]; then
               mv /tmp/workspace /tmp/restored-workspace
             fi
-            if ls /tmp/restored-workspace/.CI_GRACEFULLY_HALT_* 1>/dev/null 2>&1; then
-              echo "Gracefully halting this job."
-              circleci-agent step halt
-            fi
+  maybe_gracefully_halt:
+    steps:
+      - run:
+          name: 'Maybe Gracefully Halt'
+          command: curl -sS https://raw.githubusercontent.com/danielrozenberg/amphtml/workspace-split/.circleci/maybe_gracefully_halt.sh | bash
   setup_vm:
     steps:
       - run:
