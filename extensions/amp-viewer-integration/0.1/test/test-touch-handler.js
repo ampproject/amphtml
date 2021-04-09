@@ -17,7 +17,7 @@
 import {Messaging} from '../messaging/messaging';
 import {TouchHandler} from '../touch-handler';
 
-function fakeTouchEvent(type) {
+function getFakeTouchEvent(type) {
   return {
     type,
     'pageX': 10,
@@ -37,6 +37,7 @@ function fakeTouchEvent(type) {
     ],
     cancelable: true,
     preventDefault() {},
+    stopImmediatePropagation() {},
   };
 }
 
@@ -100,15 +101,16 @@ describes.fakeWin('TouchHandler', {}, (env) => {
 
     afterEach(() => {
       touchHandler = null;
+      env.sandbox.restore();
     });
 
     it('should only forward supported events', () => {
-      touchHandler.handleEvent_(fakeTouchEvent('notasupportedevent'));
+      touchHandler.handleEvent_(getFakeTouchEvent('notasupportedevent'));
       expect(messages).to.have.length(0);
 
-      touchHandler.handleEvent_(fakeTouchEvent('touchstart'));
-      touchHandler.handleEvent_(fakeTouchEvent('touchmove'));
-      touchHandler.handleEvent_(fakeTouchEvent('touchend'));
+      touchHandler.handleEvent_(getFakeTouchEvent('touchstart'));
+      touchHandler.handleEvent_(getFakeTouchEvent('touchmove'));
+      touchHandler.handleEvent_(getFakeTouchEvent('touchend'));
       expect(messages).to.have.length(3);
       expect(messages[0].data.data.type).to.equal('touchstart');
       expect(messages[0].data.data.type).to.equal('touchstart');
@@ -118,8 +120,8 @@ describes.fakeWin('TouchHandler', {}, (env) => {
       let event, event2;
 
       beforeEach(() => {
-        event = fakeTouchEvent('touchmove');
-        event2 = fakeTouchEvent('touchmove');
+        event = getFakeTouchEvent('touchmove');
+        event2 = getFakeTouchEvent('touchmove');
         event.stopImmediatePropagation = env.sandbox.spy();
         event2.stopImmediatePropagation = env.sandbox.spy();
       });
@@ -174,7 +176,7 @@ describes.fakeWin('TouchHandler', {}, (env) => {
       expect(listeners).to.have.length(3);
       expect(listeners[0].options.passive).to.be.true;
       expect(listeners[0].options.capture).to.be.false;
-      const fakeEvent = fakeTouchEvent('touchstart');
+      const fakeEvent = getFakeTouchEvent('touchstart');
       const preventDefaultStub = env.sandbox.stub(fakeEvent, 'preventDefault');
       const copyTouchEventStub = env.sandbox.stub(
         touchHandler,
@@ -202,7 +204,7 @@ describes.fakeWin('TouchHandler', {}, (env) => {
     });
 
     it('should only cancel touch event when cancelable', () => {
-      const fakeEvent = fakeTouchEvent('touchstart');
+      const fakeEvent = getFakeTouchEvent('touchstart');
       fakeEvent.cancelable = false;
       const preventDefaultStub = env.sandbox.stub(fakeEvent, 'preventDefault');
       env.sandbox.stub(touchHandler, 'copyTouchEvent_');
@@ -215,7 +217,7 @@ describes.fakeWin('TouchHandler', {}, (env) => {
 
     it('should copy events correctly', () => {
       const eventType = 'touchstart';
-      const fakeEvent = fakeTouchEvent(eventType);
+      const fakeEvent = getFakeTouchEvent(eventType);
       const copiedEvent = touchHandler.copyTouchEvent_(fakeEvent);
       expect(copiedEvent).to.deep.equal({
         'pageX': 10,
