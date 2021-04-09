@@ -56,7 +56,6 @@ module.exports = {
         './core/contextprops.js',
         './context/node.js',
         './context/scheduler.js',
-        './context/subscriber.js',
         './context/values.js',
       ],
       'rules': {'import/no-restricted-paths': isCiBuild() ? 0 : 1},
