@@ -20,7 +20,9 @@
  * @return {!Array<T>}
  * @template T
  */
-export const toArray = Array.prototype.slice.call;
+export function toArray(arrayLike) {
+  return arrayLike ? Array.prototype.slice.call(arrayLike) : [];
+}
 
 /**
  * Determines if value is actually an Array.
