@@ -15,5 +15,5 @@
  */
 
 
-const IS_DEV = true;
+const IS_FORTESTING = true;
 const IS_EXPANDED = false;
