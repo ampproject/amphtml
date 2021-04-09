@@ -75,7 +75,7 @@ function getMinifiedConfig() {
         ],
     argv.fortesting
       ? null
-      : './build-system/babel-plugins/babel-plugin-is_dev-constant-transformer',
+      : './build-system/babel-plugins/babel-plugin-is_fortesting-constant-transformer',
   ].filter(Boolean);
   const presetEnv = [
     '@babel/preset-env',

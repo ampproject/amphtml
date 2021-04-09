@@ -13,26 +13,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/**
- * Changes the values of IS_DEV to false and IS_MINIFIED to true.
- * The above said variables are in src/mode.js file.
- * @param {{types: string}} options
- * @return {!Object}
- */
-module.exports = function ({types: t}) {
-  return {
-    visitor: {
-      VariableDeclarator(path) {
-        const {node} = path;
-        const {id, init} = node;
-        if (
-          t.isIdentifier(id, {name: 'IS_DEV'}) &&
-          t.isBooleanLiteral(init, {value: true})
-        ) {
-          node.init = t.booleanLiteral(false);
-        }
-      },
-    },
-  };
-};
+const IS_FORTESTING = false;
+const IS_EXPANDED = false;
