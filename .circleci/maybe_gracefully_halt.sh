@@ -20,9 +20,9 @@
 
 set -e
 
-CYAN() { echo -e "\033[0;36m$1\033[0m"; }
+GREEN() { echo -e "\n\033[0;32m$1\033[0m"; }
 
 if ls /tmp/restored-workspace/.CI_GRACEFULLY_HALT_* 1>/dev/null 2>&1; then
-  echo $(CYAN "Gracefully halting this job.")
+  echo $(GREEN "Gracefully halting this job.")
   circleci-agent step halt
 fi
