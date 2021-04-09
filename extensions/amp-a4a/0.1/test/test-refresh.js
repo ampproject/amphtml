@@ -70,6 +70,17 @@ describe('refresh', () => {
       ).to.be.null;
     });
 
+    it('should get null refreshInterval when disabled via data attr', () => {
+      mockA4a.element.setAttribute(DATA_ATTR_NAME, false);
+      expect(
+        getPublisherSpecifiedRefreshInterval(
+          mockA4a.element,
+          window,
+          'doubleclick'
+        )
+      ).to.be.null;
+    });
+
     it('should get refreshInterval from slot', () => {
       expect(
         getPublisherSpecifiedRefreshInterval(

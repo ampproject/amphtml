@@ -243,7 +243,7 @@
   height: 32px !important;
   width: 32px !important;
   cursor: pointer !important;
-  position: relative;
+  position: relative !important;
 }
 
 .i-amphtml-story-outlink-page-open-attachment-bar-left {
@@ -261,10 +261,10 @@
 .i-amphtml-story-outlink-page-attachment-outlink-chip {
   display: flex !important;
   position: relative !important;
-  padding: 10px 14px 10px 6px !important;
+  padding: 10px 6px 10px 6px !important;
   margin: 0 0 20px 0 !important;
   height: 16px !important;
-  max-width: 243px !important;
+  max-width: calc(100% - 64px) !important;
   border-radius: 30px !important;
   background: white !important;
   color: var(--cta-accent-color, black) !important;
@@ -279,7 +279,7 @@
   height: 24px !important;
   width: 24px !important;
   vertical-align: middle !important;
-  background-size: contain !important;
+  background-size: cover !important;
   background-repeat: no-repeat !important;
   background-position: center !important;
   border-radius: 50% !important;
@@ -300,8 +300,8 @@
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
   max-width: 210px !important;
-  vertical-align: middle;
-  padding-left: 6px !important;
+  padding-inline-start: 6px !important;
+  padding-inline-end: 8px !important;
 }
 
 [theme="dark"] .i-amphtml-story-outlink-page-attachment-label {
@@ -309,10 +309,10 @@
 }
 
 .i-amphtml-story-outlink-page-attachment-outlink-chip-no-image {
-  padding-left: 14px !important;
+  padding-inline-start: 14px !important;
 }
 
 .i-amphtml-story-outlink-page-attachment-outlink-chip-no-image > * {
-  padding-left: 0px !important;
+  padding-inline-start: 0px !important;
 }
 

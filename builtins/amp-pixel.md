@@ -104,4 +104,4 @@ This element includes [common attributes](https://amp.dev/documentation/guides-a
 
 ## Validation
 
-See [amp-pixel rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii) in the AMP validator specification.
+See [amp-pixel rules](https://github.com/ampproject/amphtml/blob/main/validator/validator-main.protoascii) in the AMP validator specification.

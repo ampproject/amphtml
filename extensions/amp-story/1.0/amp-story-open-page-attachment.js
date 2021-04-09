@@ -90,18 +90,15 @@ const buildOpenOutlinkAttachmentElement = (element) =>
 export const renderPageAttachmentUI = (win, pageEl, attachmentEl, contrastColor) => {
   const openImgAttr = attachmentEl.getAttribute('cta-image');
   const attachmentHref = attachmentEl.getAttribute('href');
-  if (isPageAttachmentUiV2ExperimentOn(win)) {
-    if (attachmentHref) {
-      return renderOutlinkPageAttachmentUI(
-        win,
-        pageEl,
-        attachmentEl,
-        attachmentHref,
-        contrastColor
-      );
-    } else if (openImgAttr) {
-      return renderPageAttachmentUiWithImages(win, pageEl, attachmentEl);
-    }
+  if (isPageAttachmentUiV2ExperimentOn(win) && attachmentHref) {
+    return renderOutlinkPageAttachmentUI(
+      win,
+      pageEl,
+      attachmentEl,
+      attachmentHref
+    );
+  } else if (isPageAttachmentUiV2ExperimentOn(win) && openImgAttr) {
+    return renderPageAttachmentUiWithImages(win, pageEl, attachmentEl);
   }
   return renderDefaultPageAttachmentUI(pageEl, attachmentEl);
 };
@@ -141,15 +138,22 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
  * @param {!Element} pageEl
  * @param {!Element} attachmentEl
  * @param {!Element} attachmentHref
+<<<<<<< HEAD
  * @param  {string} contrastColor '#FFF' or '#000'
+=======
+>>>>>>> main
  * @return {!Element}
  */
 const renderOutlinkPageAttachmentUI = (
   win,
   pageEl,
   attachmentEl,
+<<<<<<< HEAD
   attachmentHref,
   contrastColor
+=======
+  attachmentHref
+>>>>>>> main
 ) => {
   const openAttachmentEl = buildOpenOutlinkAttachmentElement(pageEl);
 
@@ -158,6 +162,7 @@ const renderOutlinkPageAttachmentUI = (
     openAttachmentEl.setAttribute('href', attachmentHref);
   }
 
+<<<<<<< HEAD
   // Getting elements
   let {chipEl, ctaLabelEl} = htmlRefs(openAttachmentEl);
 
@@ -183,6 +188,13 @@ const renderOutlinkPageAttachmentUI = (
       });
     }
   }
+=======
+  // Setting theme
+  openAttachmentEl.setAttribute('theme', attachmentEl.getAttribute('theme'));
+
+  // Getting elements
+  const {chipEl, ctaLabelEl} = htmlRefs(openAttachmentEl);
+>>>>>>> main
 
   // Appending text & aria-label.
   const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
