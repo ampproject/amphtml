@@ -23,7 +23,7 @@ import {
   unobserveBorderBoxSize,
   unobserveContentSize,
 } from '../../../src/utils/size-observer';
-import {removeItem} from '../../../src/utils/array';
+import {removeItem} from '../../../src/core/types/array';
 
 describes.realWin('size-observer', {}, (env) => {
   let win, doc;

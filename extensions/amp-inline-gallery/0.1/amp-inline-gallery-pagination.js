@@ -22,7 +22,7 @@ import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {scopedQuerySelectorAll} from '../../../src/dom';
 import {setImportantStyles} from '../../../src/style.js';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 /**
  * The maximum number of dots to show before converting to a count.
