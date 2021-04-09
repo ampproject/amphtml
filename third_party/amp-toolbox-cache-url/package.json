@@ -48,6 +48,6 @@
     "rollup-plugin-node-builtins": "2.1.2",
     "rollup-plugin-node-resolve": "5.2.0",
     "rollup-plugin-serve": "1.1.0",
-    "semver": "7.3.4"
+    "semver": "7.3.5"
   }
 }
