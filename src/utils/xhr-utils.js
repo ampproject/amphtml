@@ -17,7 +17,7 @@
 import {Services} from '../services';
 import {devAssert, user, userAssert} from '../log';
 import {dict, map} from './object';
-import {fromIterator} from './array';
+import {fromIterator} from '../core/types/array';
 import {
   getCorsUrl,
   getWinOrigin,
