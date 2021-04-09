@@ -25,7 +25,7 @@ import {
   stripUserError,
 } from '../log';
 import {endsWith} from '../string';
-import {findIndex} from '../utils/array';
+import {findIndex} from '../core/types/array';
 import {
   getSourceOrigin,
   isProxyOrigin,

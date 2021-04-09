@@ -33,7 +33,7 @@ import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
 import {deepMerge, dict, map} from '../../../src/utils/object';
 import {dev, devAssert, user} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {findIndex, remove} from '../../../src/utils/array';
+import {findIndex, remove} from '../../../src/core/types/array';
 import {getMode} from '../../../src/mode';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isAmp4Email} from '../../../src/format';

@@ -19,7 +19,7 @@ import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-selector-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
-import {areEqualOrdered} from '../../../src/utils/array';
+import {areEqualOrdered} from '../../../src/core/types/array';
 import {
   closestAncestorElementBySelector,
   isRTL,

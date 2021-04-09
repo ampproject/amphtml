@@ -15,7 +15,7 @@
  */
 
 import {ExpansionOptions, variableServiceForDoc} from './variables';
-import {findIndex} from '../../../src/utils/array';
+import {findIndex} from '../../../src/core/types/array';
 import {isObject} from '../../../src/types';
 import {user} from '../../../src/log';
 

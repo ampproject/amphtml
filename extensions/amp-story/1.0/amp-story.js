@@ -98,7 +98,7 @@ import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {endsWith} from '../../../src/string';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {findIndex, lastItem} from '../../../src/utils/array';
+import {findIndex, lastItem} from '../../../src/core/types/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getLocalizationService} from './amp-story-localization-service';
