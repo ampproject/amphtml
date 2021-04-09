@@ -10,12 +10,9 @@
     "type": "git",
     "url": "https://github.com/ampproject/amphtml.git"
   },
-  "bin": {
-    "amp": "./amp.js"
-  },
   "scripts": {
     "preinstall": "node build-system/common/check-package-manager.js",
-    "postinstall": "node build-system/common/install-task-runner.js"
+    "postinstall": "node build-system/task-runner/install-task-runner.js"
   },
   "dependencies": {
     "@ampproject/animations": "0.2.2",
