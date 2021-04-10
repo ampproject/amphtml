@@ -79,6 +79,39 @@ describes.realWin('head validation', {amp: true}, (env) => {
       expect(preloadStub.secondCall).calledWith('amp-video');
     });
 
+    it('registers extensions with RTV', () => {
+      const preloadStub = env.sandbox.stub(
+        Services.extensionsFor(env.win),
+        'preloadExtension'
+      );
+      head.innerHTML = `
+        <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/rtv/012104070150000/v0/amp-analytics-0.1.js"></script>
+      `;
+      const validated = processHead(env.win, adElement, head);
+      expect(validated.head.querySelector('script')).not.to.exist;
+      expect(validated.extensions).to.have.length(1);
+      expect(preloadStub).calledOnce;
+      expect(validated.extensions[0].extensionId).to.equal('amp-analytics');
+      expect(preloadStub.firstCall).calledWith('amp-analytics');
+    });
+
+    it('ignores v0 scripts (versioned & unversioned)', () => {
+      const preloadStub = env.sandbox.stub(
+        Services.extensionsFor(env.win),
+        'preloadExtension'
+      );
+      head.innerHTML = `
+        <script async src="https://cdn.ampproject.org/v0.js"></script>
+        <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+        <script async src="https://cdn.ampproject.org/rtv/012104070150000/v0.js"></script>
+        <script async src="https://cdn.ampproject.org/rtv/012104070150000/amp4ads-v0.js"></script>
+      `;
+      const validated = processHead(env.win, adElement, head);
+      expect(validated.head.querySelector('script')).not.to.exist;
+      expect(validated.extensions).to.have.length(0);
+      expect(preloadStub).not.to.be.called;
+    });
+
     it('removes non-allowlisted amp elements scripts', () => {
       const preloadStub = env.sandbox.stub(
         Services.extensionsFor(env.win),
