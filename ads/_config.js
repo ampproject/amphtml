@@ -24,7 +24,6 @@ import {jsonConfiguration} from '../src/json';
  *   clientIdScope: (string|undefined),
  *   clientIdCookieName: (string|undefined),
  *   consentHandlingOverride: (boolean|undefined),
- *   remoteHTMLDisabled: (boolean|undefined),
  *   fullWidthHeightRatio: (number|undefined),
  * }}
  */
@@ -419,6 +418,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'digiteka': {
+    renderStartImplemented: true,
+  },
+
   'directadvert': {
     renderStartImplemented: true,
   },
@@ -498,6 +501,8 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'finative': {},
+
   'firstimpression': {
     prefetch: 'https://ecdn.firstimpression.io/static/js/fiamp.js',
     preconnect: 'https://cdn.firstimpression.io',
@@ -508,9 +513,10 @@ const adConfig = jsonConfiguration({
   'flite': {},
 
   'fluct': {
+    prefetch: ['https://pdn.adingo.jp/p.js'],
     preconnect: [
       'https://cdn-fluct.sh.adingo.jp',
-      'https://s.sh.adingo.jp',
+      'https://sh.adingo.jp',
       'https://i.adingo.jp',
     ],
   },
@@ -625,6 +631,8 @@ const adConfig = jsonConfiguration({
 
   'kargo': {},
 
+  'ketshwa': {},
+
   'kiosked': {
     renderStartImplemented: true,
   },
@@ -691,8 +699,20 @@ const adConfig = jsonConfiguration({
   },
 
   'marfeel': {
-    prefetch: 'https://www.googletagservices.com/tag/js/gpt.js',
-    preconnect: 'https://live.mrf.io',
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: [
+      'https://live.mrf.io',
+      'https://tpc.googlesyndication.com',
+      'https://fastlane.rubiconproject.com',
+      'https://htlb.casalemedia.com',
+      'https://prg.smartadserver.com',
+      'https://ib.adnxs.com',
+      'https://bidder.criteo.com',
+      'https://marfeel-d.openx.net',
+      'https://ice.360yield.com',
+      'https://mbid.marfeelrev.com',
+      'https://adservice.google.com',
+    ],
     consentHandlingOverride: true,
   },
 
@@ -1226,6 +1246,12 @@ const adConfig = jsonConfiguration({
 
   'vdoai': {
     prefetch: 'https://a.vdo.ai/core/dependencies_amp/vdo.min.js',
+    renderStartImplemented: true,
+  },
+
+  'verizonmedia': {
+    prefetch: 'https://jac.yahoosandbox.com/amp/jac.js',
+    preconnect: ['https://jill.fc.yahoo.com'],
     renderStartImplemented: true,
   },
 

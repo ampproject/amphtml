@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "absl/flags/flag.h"
 #include "atomutil.h"
 #include "defer.h"
 #include "fileutil.h"

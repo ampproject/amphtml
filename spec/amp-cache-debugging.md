@@ -41,7 +41,7 @@ If you still have a problem after following these steps, check the table below.
     <tr>
       <td rowspan="2">Assets (e.g., fonts and images) do not appear</td>
       <td>The assets are served with the incorrect MIME type.</td>
-      <td>Specify an <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-cache-guidelines.md#guidelines-accepted-mime-types">acceptable MIME type</a>.</td>
+      <td>Specify an <a href="https://github.com/ampproject/amphtml/blob/main/spec/amp-cache-guidelines.md#guidelines-accepted-mime-types">acceptable MIME type</a>.</td>
     </tr>
     <tr>
       <td>The AMP Cache cannot access the assets.</td>

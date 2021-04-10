@@ -6,13 +6,13 @@ This implementation guide is intended for publishers who wish to use Real Time C
 
 ## Background
 
-For full details and background, please refer to the [RTC Documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-documentation.md) and the generic [RTC Publisher Implementation Guide](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-publisher-implementation-guide.md). This guide is intended to highlight some of the details of Google Ad Manager's implementation of RTC.
+For full details and background, please refer to the [RTC Documentation](https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/rtc-documentation.md) and the generic [RTC Publisher Implementation Guide](https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/rtc-publisher-implementation-guide.md). This guide is intended to highlight some of the details of Google Ad Manager's implementation of RTC.
 
 AMP Real Time Config (RTC) is a feature of Fast Fetch that allows Publishers to augment ad requests with targeting information that is retrieved at runtime. This dynamic targeting data can be applied in addition to any existing statically-defined data on each amp-ad element. RTC allows 5 callouts to targeting servers for each individual ad slot, the results of which can be added to the ad request. To use RTC with Google Ad Manager, you must simply setup the rtc-config on each amp-ad element.
 
 ## Setting Up RTC-Config
 
-For instructions on how to set the rtc-config attribute on the amp-ad, refer to [Setting Up RTC-Config](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-publisher-implementation-guide.md#setting-up-rtc-config) in the Publisher Implementation Guide.
+For instructions on how to set the rtc-config attribute on the amp-ad, refer to [Setting Up RTC-Config](https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/rtc-publisher-implementation-guide.md#setting-up-rtc-config) in the Publisher Implementation Guide.
 
 ## Available URL Macros
 
@@ -29,13 +29,13 @@ Google Ad Manager's RTC implementation has made many macros available for RTC ur
 -   **ATTR(data-multi-size-validation)** - data-multi-size-validation attribute of the amp-ad element
 -   **ATTR(data-override-width)** - data-override-width attribute of the amp-ad element
 -   **ATTR(data-override-height)** - data-override-height attribute of the amp-ad element
--   **ATTR(data-json)** - data-json attribute of the amp-ad element
+-   **ATTR(json)** - json attribute of the amp-ad element
 -   **ELEMENT_POS** - Offset of the element from document's top
 -   **SCROLL_TOP** - Number of pixels that the user scrolled from the document's top
 -   **PAGE_HEIGHT** - Height of the amp-doc
 -   **BKG_STATE** - Current visibility state of the amp-doc
 -   **ADCID** - adClientId
--   **TGT** - Just the targeting piece of data-json
+-   **TGT** - Just the targeting piece of json
 -   **CANONICAL_URL** - The canonical URL of the page
 
 -   **TIMEOUT** - The publisher-specified timeout for the RTC callout.
@@ -49,7 +49,7 @@ The requirements for an RTC endpoint to be used with Google Ad Manager are the s
 The RTC Response to a GET must meet the following requirements:
 
 -   Status Code = 200
--   See [here for Required Headers](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#ensuring-secure-responses) and note that Access-Control-Allow-Credentials: true must be present for cookies to be included in the request.
+-   See [here for Required Headers](https://github.com/ampproject/amphtml/blob/main/spec/amp-cors-requests.md#ensuring-secure-responses) and note that Access-Control-Allow-Credentials: true must be present for cookies to be included in the request.
 -   Body of response is a JSON object of targeting information such as:
     -   **<code>{"targeting": {"sport":["rugby","cricket"]}}</code>**</strong>
     -   The response body must be JSON, but the actual structure of that data need not match the structure here. Refer to Fast Fetch Network specific documentation for the required spec. (for example, if using Google Ad Manager, refer to Google Ad Manager docs).

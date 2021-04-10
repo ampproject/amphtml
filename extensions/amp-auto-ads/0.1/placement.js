@@ -213,7 +213,7 @@ export class Placement {
           return (
             whenUpgradedToCustomElement(this.getAdElement())
               // Responsive ads set their own size when built.
-              .then(() => this.getAdElement().whenBuilt())
+              .then(() => this.getAdElement().build())
               .then(() => {
                 const resized = !this.getAdElement().classList.contains(
                   'i-amphtml-layout-awaiting-size'
@@ -231,7 +231,7 @@ export class Placement {
           // synchronously. So we explicitly wait for CustomElement to be
           // ready.
           return whenUpgradedToCustomElement(this.getAdElement())
-            .then(() => this.getAdElement().whenBuilt())
+            .then(() => this.getAdElement().build())
             .then(() => {
               return this.mutator_.requestChangeSize(
                 this.getAdElement(),

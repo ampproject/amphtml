@@ -212,7 +212,7 @@ The `<amp-inline-gallery-pagination>` component determines how a pagination idic
 
 The pagination indicator renders as dots when there are eight or fewer slides in the `amp-base-carousel`. For nine or more slides, the pagination indicator renders the current slide number and total number of slides, aligned to the right.
 
-The pagination indicator location defaults to underneath the carousel. Adding the inset attribute to the `<amp-inline-gallery-pagination>` tag will overlay the pagination indicator on the carousel. To use different styles for different screen sizes, use the media attribute:
+The pagination indicator location defaults to underneath the carousel. Adding the inset attribute to the `<amp-inline-gallery-pagination>` tag will overlay the pagination indicator on the carousel. To use different styles for different screen sizes, use the [media attribute](./../../spec/amp-html-responsive-attributes.md):
 
 ```html
 <amp-inline-gallery layout="container">
@@ -383,6 +383,11 @@ The example below demonstrates a gallery with thumbnails visible at larger resol
 [/example]
 
 #### `amp-inline-gallery-thumbnails` attributes
+
+##### Media Queries
+
+The attributes for `<amp-inline-gallery-thumbnails>` can be configured to use different
+options based on a [media query](./../../spec/amp-html-responsive-attributes.md).
 
 ##### `aspect-ratio` (optional)
 

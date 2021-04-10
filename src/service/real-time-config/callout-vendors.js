@@ -45,11 +45,26 @@ const RTC_VENDORS = jsonConfiguration({
   //  If you are adding a new vendor config object to this object,  //
   //  make sure to also update the RTC documentation in these two   //
   //  files under "supported vendors".                              //
-  // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-documentation.md
-  // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-publisher-implementation-guide.md
+  // https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/rtc-documentation.md
+  // https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/rtc-publisher-implementation-guide.md
   ////////////////////////////////////////////////////////////////////
 
   // Add vendors here
+  newspassid: {
+    url:
+      'https://bidder.newspassid.com/openrtb2/amp?tag_id=TAG_ID&placement_id=PLACEMENT_ID&gdpr_consent=CONSENT_STRING&ad_unit_code=AD_UNIT_CODE&site_id=SITE_ID&publisher_id=PUBLISHER_ID&custom_data=TGT&pubcid=PUBCID&adcid=ADCID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&curl=CANONICAL_URL&timeout=TIMEOUT&purl=HREF',
+    macros: [
+      'TAG_ID',
+      'PLACEMENT_ID',
+      'SITE_ID',
+      'PUBLISHER_ID',
+      'AD_UNIT_CODE',
+      'PUBCID',
+    ],
+    errorReportingUrl:
+      'https://bidder.newspassid.com/amp_error?err=ERROR_TYPE&url=HREF',
+    disableKeyAppend: true,
+  },
   ozone: {
     url:
       'https://elb.the-ozone-project.com/openrtb2/amp?tag_id=TAG_ID&placement_id=PLACEMENT_ID&gdpr_consent=CONSENT_STRING&ad_unit_code=AD_UNIT_CODE&site_id=SITE_ID&publisher_id=PUBLISHER_ID&custom_data=TGT&pubcid=PUBCID&adcid=ADCID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&curl=CANONICAL_URL&timeout=TIMEOUT&purl=HREF',
@@ -149,7 +164,7 @@ const RTC_VENDORS = jsonConfiguration({
   },
   criteo: {
     url:
-      'https://bidder.criteo.com/amp/rtc?zid=ZONE_ID&nid=NETWORK_ID&psubid=PUBLISHER_SUB_ID&lir=LINE_ITEM_RANGES&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&timeout=TIMEOUT&curl=CANONICAL_URL&href=HREF&cst=CONSENT_STATE&cst_str=CONSENT_STRING',
+      'https://bidder.criteo.com/amp/rtc?zid=ZONE_ID&nid=NETWORK_ID&psubid=PUBLISHER_SUB_ID&lir=LINE_ITEM_RANGES&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&timeout=TIMEOUT&curl=CANONICAL_URL&href=HREF&cst=CONSENT_STATE&cst_str=CONSENT_STRING&cst_type=CONSENT_METADATA(consentStringType)',
     macros: [
       'ZONE_ID',
       'NETWORK_ID',
@@ -205,8 +220,8 @@ const RTC_VENDORS = jsonConfiguration({
   },
   freestar: {
     url:
-      'https://prebid-amp.pub.network/openrtb2/amp?tag_id=TAG_ID&gdpr_consent=CONSENT_STRING',
-    macros: ['TAG_ID', 'CONSENT_STRING'],
+      'https://prebid-amp.pub.network/openrtb2/amp?tag_id=TAG_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adc=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING&account=ACCOUNT_ID',
+    macros: ['TAG_ID', 'CONSENT_STRING', 'ACCOUNT_ID'],
     disableKeyAppend: true,
   },
   hubvisor: {
@@ -248,6 +263,12 @@ const RTC_VENDORS = jsonConfiguration({
     url:
       'https://prebid.openx.net/openrtb2/amp?tag_id=REQUEST_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adc=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING&account=ACCOUNT_ID',
     macros: ['REQUEST_ID', 'CONSENT_STRING', 'ACCOUNT_ID'],
+    disableKeyAppend: true,
+  },
+  highfivve: {
+    url:
+      'https://prebid-server.h5v.eu/openrtb2/amp?tag_id=TAG_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adc=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING&account=ACCOUNT_ID',
+    macros: ['TAG_ID', 'CONSENT_STRING', 'ACCOUNT_ID'],
     disableKeyAppend: true,
   },
 });

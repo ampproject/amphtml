@@ -50,13 +50,15 @@ import {
   maybeAppendErrorParameter,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
 } from './flexible-ad-slot-utils';
-import {INTERSECT_RESOURCES_EXP} from '../../../src/experiments/intersect-resources-exp';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
 import {RTC_VENDORS} from '../../../src/service/real-time-config/callout-vendors';
@@ -76,6 +78,7 @@ import {
 import {WindowInterface} from '../../../src/window-interface';
 import {
   addAmpExperimentIdToElement,
+  addExperimentIdToElement,
   extractUrlExperimentId,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
@@ -111,6 +114,7 @@ import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 
 import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
+import {StoryAdPlacements} from '../../../src/experiments/story-ad-placements';
 import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isArray} from '../../../src/types';
@@ -512,20 +516,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.experimentIds.push(moduleNomoduleExpId);
     }
 
-    const intersectResourcesExpId = getExperimentBranch(
-      this.win,
-      INTERSECT_RESOURCES_EXP.id
-    );
-    if (intersectResourcesExpId) {
-      this.experimentIds.push(intersectResourcesExpId);
-    }
-
     const ssrExpIds = this.getSsrExpIds_();
     for (let i = 0; i < ssrExpIds.length; i++) {
       addAmpExperimentIdToElement(ssrExpIds[i], this.element);
     }
     if (setExps[ZINDEX_EXP] == ZINDEX_EXP_BRANCHES.HOLDBACK) {
       this.inZIndexHoldBack_ = true;
+    }
+
+    const storyAdPlacementsExpId = getExperimentBranch(
+      this.win,
+      StoryAdPlacements.ID
+    );
+    if (storyAdPlacementsExpId) {
+      addExperimentIdToElement(storyAdPlacementsExpId, this.element);
     }
   }
 
@@ -637,7 +641,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getPageParameters(consentTuple, instances) {
     instances = instances || [this];
     const tokens = getPageviewStateTokensForAdRequest(instances);
-    const {consentString, gdprApplies} = consentTuple;
+    const {
+      consentString,
+      gdprApplies,
+      consentStringType,
+      additionalConsent,
+    } = consentTuple;
 
     return {
       'ptt': 13,
@@ -653,7 +662,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'gct': this.getLocationQueryParameterValue('google_preview') || null,
       'psts': tokens.length ? tokens : null,
       'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
-      'gdpr_consent': consentString,
+      'gdpr_consent':
+        consentStringType != CONSENT_STRING_TYPE.US_PRIVACY_STRING
+          ? consentString
+          : null,
+      'addtl_consent': additionalConsent,
+      'us_privacy':
+        consentStringType == CONSENT_STRING_TYPE.US_PRIVACY_STRING
+          ? consentString
+          : null,
     };
   }
 
@@ -970,6 +987,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const allowlist = {
       'height': true,
       'width': true,
+      'json': true,
       'data-slot': true,
       'data-multi-size': true,
       'data-multi-size-validation': true,
@@ -996,7 +1014,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         ),
       ATTR: (name) => {
         if (!allowlist[name.toLowerCase()]) {
-          dev().warn('TAG', `Invalid attribute ${name}`);
+          dev().warn(TAG, `Invalid attribute ${name}`);
         } else {
           return this.element.getAttribute(name);
         }

@@ -6,13 +6,22 @@ Bento AMP is a project that allows you to take AMP components and use them in ot
 
 Read this document to learn how to create a new Bento AMP component.
 
+<!--
+  (Do not remove or edit this comment.)
+
+  This table-of-contents is automatically generated. To generate it, run:
+    amp markdown-toc --fix
+-->
+
+<!-- {"maxdepth": 2} -->
+
 -   [Getting started](#getting-started)
 -   [Naming](#naming)
 -   [Directory structure](#directory-structure)
 -   [Extend AMP.PreactBaseElement](#extend-amppreactbaseelement)
     -   [Element and Component classes](#element-and-component-classes)
     -   [PreactBaseElement callbacks](#preactbaseelement-callbacks)
-    -   [AMP/Preact Bridge](#amp-preact-bridge)
+    -   [AMP/Preact Bridge](#amppreact-bridge)
 -   [Element styling](#element-styling)
 -   [Register element with AMP](#register-element-with-amp)
 -   [Actions and events](#actions-and-events)
@@ -20,7 +29,7 @@ Read this document to learn how to create a new Bento AMP component.
 -   [Performance considerations](#performance-considerations)
     -   [Loading external resources](#loading-external-resources)
 -   [Layouts supported in your element](#layouts-supported-in-your-element)
-    -   [What layout should your element support?](#what-layout-should-your-element-support-)
+    -   [What layout should your element support?](#what-layout-should-your-element-support)
 -   [Experiments](#experiments)
     -   [Enabling and removing your experiment](#enabling-and-removing-your-experiment)
 -   [Documenting your extended Bento component](#documenting-your-extended-bento-component)
@@ -40,7 +49,7 @@ The first step to creating a new Bento AMP component is familiarizing yourself w
 To bootstrap the creation of a new component (or the Bento version of an existing component), the following command will create the directory structure and boilerplate code for you:
 
 ```shell
-$ gulp make-extension --bento --name=amp-my-element
+$ amp make-extension --bento --name=amp-my-element
 ```
 
 ## Naming
@@ -81,7 +90,7 @@ In most cases you'll only create the required (req'd) files. If your element doe
 
 ## Extend AMP.PreactBaseElement
 
-Most AMP component extend `AMP.BaseElement`. `AMP.BaseElement` provides hookups and callbacks needed to implement and customize behavior. Callback explanations are in the BaseElement Callbacks section of [Building an AMP Extension](https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md), and inlined in the [BaseElement](https://github.com/ampproject/amphtml/blob/master/src/base-element.js)
+Most AMP component extend `AMP.BaseElement`. `AMP.BaseElement` provides hookups and callbacks needed to implement and customize behavior. Callback explanations are in the BaseElement Callbacks section of [Building an AMP Extension](https://github.com/ampproject/amphtml/blob/main/contributing/building-an-amp-extension.md), and inlined in the [BaseElement](https://github.com/ampproject/amphtml/blob/main/src/base-element.js)
 class.
 
 Important: Bento-enabled AMP components built upon a Preact component must also be usable in insolation in React development contexts.
@@ -91,7 +100,7 @@ All Preact-based Bento AMP extensions extend `AMP.PreactBaseElement`, which buil
 callbacks. Bento AMP extensions differ from AMP extensions because they are self-managing and independent, and therefore usable in a wider range of contexts beyond AMP pages, while still being fully integrated with the AMP environment
 in a fully AMP document.
 
-The configurations which bridge the Preact implementation of the component and its custom element counterpart in an HTML or AMP document are explained in the [AMP/Preact Bridge](#amp/preact-bridge) section, and the callbacks which handle AMP- and DOM- specific mutability traits are explained in the [PreactBaseElement Callbacks](#preactbaseelement-callbacks) section. All of these are also explained inline in the [PreactBaseElement](https://github.com/ampproject/amphtml/blob/master/src/preact/base-element.js) class.
+The configurations which bridge the Preact implementation of the component and its custom element counterpart in an HTML or AMP document are explained in the [AMP/Preact Bridge](#amppreact-bridge) section, and the callbacks which handle AMP- and DOM- specific mutability traits are explained in the [PreactBaseElement Callbacks](#preactbaseelement-callbacks) section. All of these are also explained inline in the [PreactBaseElement](https://github.com/ampproject/amphtml/blob/main/src/preact/base-element.js) class.
 
 ### Element and Component classes
 
@@ -146,7 +155,9 @@ export class BaseElement extends PreactBaseElement;
 
 BaseElement['Component'] = MyElement;            // Component definition.
 
-BaseElement['props'] = {  // Map DOM attributes to Preact Component props.
+BaseElement['props'] = {  // Map DOM attributes and children to Preact Component props.
+  'button': {selector: 'button', clone: true} // All <button> children.
+  'children': {passthrough: true} // All remaining children excluding <button>s, which have already been distributed.
   'propName1': {attr: 'attr-name-1'},
   'propName2': {attr: 'attr-name-2', type: 'number'},
 };
@@ -221,7 +232,7 @@ export function MyElement({propName1, propName2, ...rest}) {
 
 -   **Default**: Optional.
 -   **Override**: Almost always.
--   **Usage**: Define the mapping of Preact prop to AmpElement DOM attributes. These will update and re-render the component on DOM mutation.
+-   **Usage**: Define the mapping of Preact prop to AmpElement DOM attributes and children. These will update and re-render the component on DOM mutation.
 -   **Example Usage**: `amp-base-carousel`, `amp-lightbox`
 
 #### PreactBaseElement['staticProps']
@@ -259,6 +270,13 @@ export function MyElement({propName1, propName2, ...rest}) {
 -   **Usage**: Define the CSS for shadow stylesheets.
 -   **Example Usage**: `amp-lightbox`, `amp-sidebar`
 
+#### PreactBaseElement['usesShadowDom']
+
+-   **Default**: Optional.
+-   **Override**: Rarely.
+-   **Usage**: Notify when the element uses the Shadow DOM.
+-   **Example Usage**: `amp-social-share`, `amp-youtube`
+
 #### PreactBaseElement['usesTemplate']
 
 -   **Default**: Optional.
@@ -274,27 +292,6 @@ export function MyElement({propName1, propName2, ...rest}) {
 -   **Override**: Sometimes.
 -   **Usage**: The tag name used when rendering into the light DOM. Used when children contents are overwritten.
 -   **Example Usage**: `amp-date-countdown`, `amp-date-display`
-
-##### PreactBaseElement['passthrough']
-
--   **Default**: Optional.
--   **Override**: Sometimes.
--   **Usage**: Define if requiring user-supplied children to the Preact component, but shape and structure does not matter.
--   **Example Usage**: `amp-fit-text`, `amp-sidebar`
-
-##### PreactBaseElement['passthroughNonEmpty']
-
--   **Default**: Optional.
--   **Override**: Sometimes.
--   **Usage**: Define if user-supplied children are needed **only when present** by the Preact component but their shape and structure does not matter. If no children are given to the component, the component may render something entirely different.
--   **Example Usage**: `amp-social-share`, `amp-timeago`
-
-##### PreactBaseElement['children']
-
--   **Default**: Optional.
--   **Override**: Sometimes.
--   **Usage**: Define if user-supplied children of a certain shape and structure do matter, and targeted for more specified props than `children` alone.
--   **Example Usage**: `amp-base-carousel`
 
 ##### PreactBaseElement['detached']
 
@@ -340,7 +337,7 @@ AmpMyElement['shadowCss'] = CSS;
 ## Actions and events
 
 AMP provides a framework for [elements to fire their own
-events](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md)
+events](https://github.com/ampproject/amphtml/blob/main/spec/amp-actions-and-events.md)
 to allow users of that element to listen and react to the events. For
 example, the `amp-base-carousel` extension fires a `slideChange` event.
 This allow publishers to listen to that event and react to it, for example, by updating an `amp-selector` state to match the current slide shown.
@@ -383,13 +380,13 @@ this.registerApiAction('close', (api) => api.close());
 
 Your element can choose to override the default `activate` method inherited from BaseElement. For example `amp-lightbox` overrides `activate` to define the `open` default case.
 
-You must document your element's actions and events in its own reference documentation and in [`AMP Actions and Events`](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md).
+You must document your element's actions and events in its own reference documentation and in [`AMP Actions and Events`](https://github.com/ampproject/amphtml/blob/main/spec/amp-actions-and-events.md).
 
 ## Allowing proper validation
 
-One of AMP's features is documentation validation checks to confirm it's valid AMP. When you implement your element, you must update the [AMP Validator](https://github.com/ampproject/amphtml/blob/master/validator/README.md)
+One of AMP's features is documentation validation checks to confirm it's valid AMP. When you implement your element, you must update the [AMP Validator](https://github.com/ampproject/amphtml/blob/main/validator/README.md)
 to include rules for your element. Otherwise documents using your extended component become invalid. Create your own rules by following the directions at
-[Contributing Component Validator Rules](https://github.com/ampproject/amphtml/blob/master/contributing/component-validator-rules.md).
+[Contributing Component Validator Rules](https://github.com/ampproject/amphtml/blob/main/contributing/component-validator-rules.md).
 
 ## Performance considerations
 
@@ -400,7 +397,7 @@ You may need to add third party integration for extended components that need to
 extension PR for examples of third party integration.
 
 Read about [Inclusion of third party software, embeds and services into
-AMP](https://github.com/ampproject/amphtml/blob/master/3p/README.md).
+AMP](https://github.com/ampproject/amphtml/blob/main/3p/README.md).
 
 For contrast, take a look at `amp-instagram` which does NOT require an SDK to embed a post. Instead, it provides an iframe-based embedding that allows `amp-instagram` to use a normal iframe with no third party integrations. `amp-youtube` and others work similarly.
 
@@ -410,9 +407,9 @@ AMP defines different layouts that elements can choose whether or not to
 support. Your element needs to announce which layouts it supports through
 overriding the `isLayoutSupported(layout)` callback and returning true
 if the element supports that layout. [Read more about AMP Layout
-System](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md)
+System](https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md)
 and [Layout
-Types](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#layout).
+Types](https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md#layout).
 
 ### What layout should your element support?
 
@@ -454,7 +451,7 @@ AmpBaseCarousel['layoutSizeDefined'] = true;
 ## Experiments
 
 Most newly created elements are initially launched as
-[experiments](https://github.com/ampproject/amphtml/blob/master/tools/experiments/README.md).
+[experiments](https://github.com/ampproject/amphtml/blob/main/tools/experiments/README.md).
 This allows people to experiment with using the new element and provide
 the author(s) with feedback. It also provides the AMP Team with the
 opportunity to monitor for any potential errors. This is especially required if the validator isn't updated with your extended component rules. Without your rules in the validator, documents using the component in production are invalid.
@@ -471,7 +468,7 @@ const EXPERIMENTS = [
     id: 'bento-my-element',
     name: 'AMP My Element',
     spec:
-      'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+      'https://github.com/ampproject/amphtml/blob/main/extensions/' +
       'amp-my-element/amp-my-element.md',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/XXXYYY',
   },
@@ -527,7 +524,7 @@ Create a `.md` file that serves as the main documentation for your element. This
 -   Attributes to specify (optional and required)
 -   Validation
 
-For samples of element documentation, see: [`amp-accordion`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-accordion/amp-accordion.md), [`amp-instagram`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md), [`amp-stream-gallery`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
+For samples of element documentation, see: [`amp-accordion`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-accordion/amp-accordion.md), [`amp-instagram`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-instagram/amp-instagram.md), [`amp-stream-gallery`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-stream-gallery/amp-stream-gallery.md)
 
 You must add a migration notes section for upgrades of existing AMP extended component. It should detail any differences between the new Bento and prior versions. For an example, reference the issue filed for [`amp-fit-text`](https://github.com/ampproject/amphtml/issues/28281).
 
@@ -597,7 +594,7 @@ To speed up development and testing of components, we recommend using the Storyb
 To run these environments and explore existing components, run:
 
 ```
-gulp storybook
+amp storybook
 ```
 
 ## Unit tests
@@ -614,23 +611,23 @@ For faster testing during development, consider using --files argument
 to only run your extensions' tests.
 
 ```shell
-$ gulp unit --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
+$ amp unit --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
 ```
 
-Please also reference [Testing in AMP HTML](https://github.com/ampproject/amphtml/blob/master/contributing/TESTING.md) for the full range of testing commands available.
+Please also reference [Testing in AMP HTML](https://github.com/ampproject/amphtml/blob/main/contributing/TESTING.md) for the full range of testing commands available.
 
 ## Linting and formatting
 
 Run the following command to validates JS files against the ESLint linter.
 
 ```shell
-$ gulp lint --local_changes
+$ amp lint --local_changes
 ```
 
 Run the following command to validate non-JS files using Prettier.
 
 ```shell
-$ gulp prettify --local_changes
+$ amp prettify --local_changes
 ```
 
 ## Type checking
@@ -660,7 +657,7 @@ var MyElementProps;
 Run the following command to ensure no type violations are introduced by your extension.
 
 ```shell
-$ gulp check-types
+$ amp check-types
 ```
 
 ## Example PRs

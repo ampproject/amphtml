@@ -24,6 +24,7 @@ const COMMON_GLOBS = [
   'third_party/amp-toolbox-cache-url/**/*.js',
   'third_party/caja/html-sanitizer.js',
   'third_party/closure-library/sha384-generated.js',
+  'third_party/closure-responding-channel/closure-bundle.js',
   'third_party/css-escape/css-escape.js',
   'third_party/d3/**/*.js',
   'third_party/fuzzysearch/index.js',
@@ -48,6 +49,8 @@ const COMMON_GLOBS = [
   'node_modules/promise-pjs/package.json',
   'node_modules/promise-pjs/promise.mjs',
   'node_modules/rrule/dist/es5/rrule.js',
+  'node_modules/timeago.js/package.json',
+  'node_modules/timeago.js/**/*.js',
   'node_modules/web-animations-js/package.json',
   'node_modules/web-animations-js/web-animations.install.js',
   'node_modules/web-activities/package.json',
@@ -62,6 +65,7 @@ const COMMON_GLOBS = [
   'node_modules/@ampproject/worker-dom/dist/amp-production/main.mjs',
   'node_modules/preact/package.json',
   'node_modules/preact/dist/*.js',
+  'node_modules/preact/dom/*.js',
   'node_modules/preact/hooks/package.json',
   'node_modules/preact/hooks/dist/*.js',
   'node_modules/preact/compat/package.json',
@@ -110,13 +114,14 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-animation/**/*.js',
   // Needed for amp-carousel 0.2, amp-inline-gallery, amp-stream-gallery
   'extensions/amp-base-carousel/**/*.js',
+  // Needed for carousel autolightbox
+  'extensions/amp-lightbox-gallery/1.0/*.js',
+  // Needed for amp-lightbox-gallery using amp-lightbox
+  'extensions/amp-lightbox/1.0/*.js',
   // For amp-bind in the web worker (ww.js).
   'extensions/amp-bind/**/*.js',
   // Needed to access to Variant interface from other extensions
   'extensions/amp-experiment/**/*.js',
-  // TODO(#32523) Remove this when Bento experiment is done.
-  // Needed to access across versions
-  'extensions/amp-fit-text/1.0/*.js',
   // Needed to access form impl from other extensions
   'extensions/amp-form/**/*.js',
   // Needed by amp-facebook-* for the loader logo
@@ -153,18 +158,10 @@ const CLOSURE_SRC_GLOBS = [
   // Not sure what these files are, but they seem to duplicate code
   // one level below and confuse the compiler.
   '!node_modules/core-js/modules/library/**.js',
+  '!extensions/**/dist/**/*.js',
 ].concat(COMMON_GLOBS);
-
-/**
- * NOTE: 3p code is generally excluded from the transform process.
- * The globs here are force-transformed anyway.
- */
-const THIRD_PARTY_TRANSFORM_GLOBS = [
-  // JSX syntax should undergo usual transforms
-];
 
 module.exports = {
   BABEL_SRC_GLOBS,
   CLOSURE_SRC_GLOBS,
-  THIRD_PARTY_TRANSFORM_GLOBS,
 };

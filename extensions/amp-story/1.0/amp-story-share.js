@@ -98,20 +98,32 @@ const SHARE_ITEM_TEMPLATE = {
   attrs: dict({'class': 'i-amphtml-story-share-item'}),
 };
 
-/** @private @const {!./simple-template.ElementDef} */
-const LINK_SHARE_ITEM_TEMPLATE = {
-  tag: 'div',
-  attrs: dict({
-    'class': 'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
-  }),
-  children: [
-    {
-      tag: 'span',
-      attrs: dict({'class': 'i-amphtml-story-share-label'}),
-      localizedStringId: LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK,
-    },
-  ],
-};
+/**
+ * @private
+ * @param {!Element} el
+ * @return {./simple-template-ElementDef}
+ */
+function buildLinkShareItemTemplate(el) {
+  return {
+    tag: 'div',
+    attrs: dict({
+      'class': 'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
+      'tabindex': 0,
+      'role': 'button',
+      'aria-label': getLocalizationService(el).getLocalizedString(
+        LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK
+      ),
+    }),
+    children: [
+      {
+        tag: 'span',
+        attrs: dict({'class': 'i-amphtml-story-share-label'}),
+        localizedStringId:
+          LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK,
+      },
+    ],
+  };
+}
 
 /** @private @const {string} */
 const SCROLLABLE_CLASSNAME = 'i-amphtml-story-share-widget-scrollable';
@@ -268,7 +280,7 @@ export class ShareWidget {
 
     const linkShareButton = renderAsElement(
       this.win.document,
-      LINK_SHARE_ITEM_TEMPLATE
+      buildLinkShareItemTemplate(this.storyEl)
     );
 
     this.add_(linkShareButton);
@@ -276,6 +288,14 @@ export class ShareWidget {
     listen(linkShareButton, 'click', (e) => {
       e.preventDefault();
       this.copyUrlToClipboard_();
+    });
+    listen(linkShareButton, 'keyup', (e) => {
+      const code = e.charCode || e.keyCode;
+      // Check if pressed Space or Enter to trigger button.
+      if (code === 32 || code === 13) {
+        e.preventDefault();
+        this.copyUrlToClipboard_();
+      }
     });
   }
 
@@ -340,7 +360,7 @@ export class ShareWidget {
   loadProviders() {
     this.loadRequiredExtensions();
 
-    this.requestService_.loadBookendConfig().then((config) => {
+    this.requestService_.loadShareConfig().then((config) => {
       const providers =
         config &&
         (config[SHARE_PROVIDERS_KEY] || config[DEPRECATED_SHARE_PROVIDERS_KEY]);

@@ -56,12 +56,14 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-import {getExperimentBranch} from '../../../src/experiments';
+import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
+import {getExtensionsFromMetadata} from './amp-ad-utils';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   installFriendlyIframeEmbed,
   isSrcdocSupported,
+  preloadFriendlyIframeEmbedExtensions,
 } from '../../../src/friendly-iframe-embed';
 import {installRealTimeConfigServiceForDoc} from '../../../src/service/real-time-config/real-time-config-impl';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
@@ -160,7 +162,9 @@ export let CreativeMetaDataDef;
 /** @typedef {{
       consentState: (?CONSENT_POLICY_STATE|undefined),
       consentString: (?string|undefined),
+      consentStringType: (?CONSENT_STRING_TYPE|boolean),
       gdprApplies: (?boolean|undefined),
+      additionalConsent: (?string|undefined),
     }} */
 export let ConsentTupleDef;
 
@@ -299,6 +303,9 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @private {?../../../src/layout-rect.LayoutSizeDef} */
     this.originalSlotSize_ = null;
+
+    /** @private {Promise<!IntersectionObserverEntry>} */
+    this.initialIntersectionPromise_ = null;
 
     /**
      * Note(keithwrightbos) - ensure the default here is null so that ios
@@ -448,6 +455,13 @@ export class AmpA4A extends AMP.BaseElement {
     }
 
     this.isSinglePageStoryAd = this.element.hasAttribute('amp-story');
+
+    const asyncIntersection =
+      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
+      ADS_INITIAL_INTERSECTION_EXP.experiment;
+    this.initialIntersectionPromise_ = asyncIntersection
+      ? measureIntersection(this.element)
+      : Promise.resolve(this.element.getIntersectionChangeEntry());
   }
 
   /** @override */
@@ -777,11 +791,23 @@ export class AmpA4A extends AMP.BaseElement {
         const gdprApplies = consentMetadata
           ? consentMetadata['gdprApplies']
           : consentMetadata;
+        const additionalConsent = consentMetadata
+          ? consentMetadata['additionalConsent']
+          : consentMetadata;
+        const consentStringType = consentMetadata
+          ? consentMetadata['consentStringType']
+          : consentMetadata;
 
         return /** @type {!Promise<?string>} */ (this.getServeNpaSignal().then(
           (npaSignal) =>
             this.getAdUrl(
-              {consentState, consentString, gdprApplies},
+              {
+                consentState,
+                consentString,
+                consentStringType,
+                gdprApplies,
+                additionalConsent,
+              },
               this.tryExecuteRealTimeConfig_(
                 consentState,
                 consentString,
@@ -910,8 +936,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {boolean}
    */
   isInNoSigningExp() {
-    // eslint-disable-next-line no-undef
-    return !!NO_SIGNING_RTV;
+    return NO_SIGNING_RTV;
   }
 
   /**
@@ -937,16 +962,20 @@ export class AmpA4A extends AMP.BaseElement {
       return Promise.reject(NO_CONTENT_RESPONSE);
     }
 
-    if (this.skipClientSideValidation(httpResponse.headers)) {
+    // Extract size will also parse x-ampanalytics header for some subclasses.
+    const size = this.extractSize(httpResponse.headers);
+    this.creativeSize_ = size || this.creativeSize_;
+
+    if (
+      !isPlatformSupported(this.win) ||
+      this.skipClientSideValidation(httpResponse.headers)
+    ) {
       return this.handleFallback_(httpResponse, checkStillCurrent);
     }
 
-    // Duplicating httpResponse stream as safeframe/nameframe rending will need the
+    // Duplicating httpResponse stream as safeframe/nameframe rendering will need the
     // unaltered httpResponse content.
     const fallbackHttpResponse = httpResponse.clone();
-
-    const size = this.extractSize(httpResponse.headers);
-    this.creativeSize_ = size || this.creativeSize_;
 
     // This transformation consumes the detached DOM chunks and
     // exposes our waitForHead and transferBody methods.
@@ -1095,7 +1124,9 @@ export class AmpA4A extends AMP.BaseElement {
           // via #validateAdResponse_.  See GitHub issue
           // https://github.com/ampproject/amphtml/issues/4187
           let creativeMetaDataDef;
+
           if (
+            !isPlatformSupported(this.win) ||
             !creativeDecoded ||
             !(creativeMetaDataDef = this.getAmpAdMetadata(creativeDecoded))
           ) {
@@ -1109,12 +1140,12 @@ export class AmpA4A extends AMP.BaseElement {
 
           // Update priority.
           this.updateLayoutPriority(LayoutPriority.CONTENT);
+
           // Load any extensions; do not wait on their promises as this
           // is just to prefetch.
-          const extensions = Services.extensionsFor(this.win);
-          creativeMetaDataDef.customElementExtensions.forEach((extensionId) =>
-            extensions.preloadExtension(extensionId)
-          );
+          const extensions = getExtensionsFromMetadata(creativeMetaDataDef);
+          preloadFriendlyIframeEmbedExtensions(this.win, extensions);
+
           // Preload any fonts.
           (creativeMetaDataDef.customStylesheets || []).forEach((font) =>
             Services.preconnectFor(this.win).preload(
@@ -1785,7 +1816,14 @@ export class AmpA4A extends AMP.BaseElement {
       height,
       width
     );
-    this.applyFillContent(this.iframe);
+    divertStickyAdTransition(this.win);
+    if (
+      !this.uiHandler.isStickyAd() ||
+      getExperimentBranch(this.win, STICKY_AD_TRANSITION_EXP.id) !==
+        STICKY_AD_TRANSITION_EXP.experiment
+    ) {
+      this.applyFillContent(this.iframe);
+    }
 
     let body = '';
     const transferComplete = new Deferred();
@@ -1811,13 +1849,9 @@ export class AmpA4A extends AMP.BaseElement {
       body
     );
 
-    // TODO(ccordry): FIE does not handle extension versioning, but we have
-    // it accessible here.
-    const extensionIds = extensions.map((extension) => extension.extensionId);
-
     const fieInstallPromise = this.installFriendlyIframeEmbed_(
       secureDoc,
-      extensionIds,
+      extensions,
       fonts,
       true // skipHtmlMerge
     );
@@ -1831,6 +1865,7 @@ export class AmpA4A extends AMP.BaseElement {
       }
     );
 
+    const extensionIds = extensions.map((extension) => extension.extensionId);
     return fieInstallPromise.then((friendlyIframeEmbed) => {
       checkStillCurrent();
       this.makeFieVisible_(
@@ -1877,8 +1912,9 @@ export class AmpA4A extends AMP.BaseElement {
     ));
     divertStickyAdTransition(this.win);
     if (
+      !this.uiHandler.isStickyAd() ||
       getExperimentBranch(this.win, STICKY_AD_TRANSITION_EXP.id) !==
-      STICKY_AD_TRANSITION_EXP.experiment
+        STICKY_AD_TRANSITION_EXP.experiment
     ) {
       this.applyFillContent(this.iframe);
     }
@@ -1892,10 +1928,11 @@ export class AmpA4A extends AMP.BaseElement {
       });
     }
     const checkStillCurrent = this.verifyStillCurrent();
-    const {minifiedCreative, customElementExtensions} = creativeMetaData;
+    const {minifiedCreative} = creativeMetaData;
+    const extensions = getExtensionsFromMetadata(creativeMetaData);
     return this.installFriendlyIframeEmbed_(
       minifiedCreative,
-      customElementExtensions,
+      extensions,
       fontsArray || [],
       false // skipHtmlMerge
     ).then((friendlyIframeEmbed) =>
@@ -1910,12 +1947,12 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Convert the iframe to FIE impl and append to DOM.
    * @param {string} html
-   * @param {!Array<string>} extensionIds
+   * @param {!Array<{extensionId: string, extensionVersion: string}>} extensions
    * @param {!Array<string>} fonts
    * @param {boolean} skipHtmlMerge
    * @return {!Promise<!../../../src/friendly-iframe-embed.FriendlyIframeEmbed>}
    */
-  installFriendlyIframeEmbed_(html, extensionIds, fonts, skipHtmlMerge) {
+  installFriendlyIframeEmbed_(html, extensions, fonts, skipHtmlMerge) {
     return installFriendlyIframeEmbed(
       devAssert(this.iframe),
       this.element,
@@ -1924,7 +1961,7 @@ export class AmpA4A extends AMP.BaseElement {
         // Need to guarantee that this is no longer null
         url: devAssert(this.adUrl_),
         html,
-        extensionIds,
+        extensions,
         fonts,
         skipHtmlMerge,
       },
@@ -2070,14 +2107,7 @@ export class AmpA4A extends AMP.BaseElement {
       this.sentinel
     );
 
-    const asyncIntersection =
-      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
-      ADS_INITIAL_INTERSECTION_EXP.experiment;
-    const intersectionPromise = asyncIntersection
-      ? measureIntersection(this.element)
-      : Promise.resolve(this.element.getIntersectionChangeEntry());
-
-    return intersectionPromise.then((intersection) => {
+    return this.initialIntersectionPromise_.then((intersection) => {
       contextMetadata['_context'][
         'initialIntersection'
       ] = intersectionEntryToJson(intersection);
@@ -2154,13 +2184,7 @@ export class AmpA4A extends AMP.BaseElement {
         this.getAdditionalContextMetadata(method == XORIGIN_MODE.SAFEFRAME)
       );
 
-      const asyncIntersection =
-        getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
-        ADS_INITIAL_INTERSECTION_EXP.experiment;
-      const intersectionPromise = asyncIntersection
-        ? measureIntersection(this.element)
-        : Promise.resolve(this.element.getIntersectionChangeEntry());
-      return intersectionPromise.then((intersection) => {
+      return this.initialIntersectionPromise_.then((intersection) => {
         contextMetadata['initialIntersection'] = intersectionEntryToJson(
           intersection
         );
@@ -2246,6 +2270,9 @@ export class AmpA4A extends AMP.BaseElement {
         }
       } else {
         metaData.customElementExtensions = [];
+      }
+      if (metaDataObj['extensions']) {
+        metaData.extensions = metaDataObj['extensions'];
       }
       if (metaDataObj['customStylesheets']) {
         // Expect array of objects with at least one key being 'href' whose
@@ -2555,4 +2582,29 @@ export function signatureVerifierFor(win) {
     win[propertyName] ||
     (win[propertyName] = new SignatureVerifier(win, signingServerURLs))
   );
+}
+
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ * @visibleForTesting
+ */
+export function isPlatformSupported(win) {
+  // Require Shadow DOM support for a4a.
+  if (
+    !isNative(win.Element.prototype.attachShadow) &&
+    isExperimentOn(win, 'disable-a4a-non-sd')
+  ) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Returns `true` if the passed function exists and is native to the browser.
+ * @param {Function|undefined} func
+ * @return {boolean}
+ */
+function isNative(func) {
+  return !!func && func.toString().indexOf('[native code]') != -1;
 }

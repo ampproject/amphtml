@@ -67,4 +67,4 @@ limitations under the License.
 
 ## Validation
 
-See [amp-ooyala-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ooyala-player/validator-amp-ooyala-player.protoascii) in the AMP validator specification.
+See [amp-ooyala-player rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-ooyala-player/validator-amp-ooyala-player.protoascii) in the AMP validator specification.

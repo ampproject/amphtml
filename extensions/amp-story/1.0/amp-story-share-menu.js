@@ -27,12 +27,14 @@ import {
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-share-menu-1.0.css';
 import {Keys} from '../../../src/utils/key-codes';
+import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {ShareWidget} from './amp-story-share';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {getAmpdoc} from '../../../src/service';
+import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
 import {setStyles} from '../../../src/style';
 
@@ -48,9 +50,9 @@ const getTemplate = (element) => {
   return htmlFor(element)`
     <div class="i-amphtml-story-share-menu i-amphtml-story-system-reset" aria-hidden="true" role="alert">
       <div class="i-amphtml-story-share-menu-container">
-        <span class="i-amphtml-story-share-menu-close-button" role="button">
+        <button class="i-amphtml-story-share-menu-close-button" aria-label="close" role="button">
           &times;
-        </span>
+        </button>
       </div>
     </div>`;
 };
@@ -78,6 +80,9 @@ export class ShareMenu {
 
     /** @private {?Element} */
     this.element_ = null;
+
+    /** @private {?Element} */
+    this.closeButton_ = null;
 
     /** @private {?Element} */
     this.innerContainerEl_ = null;
@@ -164,6 +169,19 @@ export class ShareMenu {
 
     this.element_ = getTemplate(this.parentEl_);
     createShadowRootWithStyle(root, this.element_, CSS);
+
+    this.closeButton_ = dev().assertElement(
+      this.element_.querySelector('.i-amphtml-story-share-menu-close-button')
+    );
+    const localizationService = getLocalizationService(
+      devAssert(this.parentEl_)
+    );
+    if (localizationService) {
+      const localizedCloseString = localizationService.getLocalizedString(
+        LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
+      );
+      this.closeButton_.setAttribute('aria-label', localizedCloseString);
+    }
 
     this.initializeListeners_();
 
@@ -252,7 +270,7 @@ export class ShareMenu {
   onShareMenuClick_(event) {
     const el = dev().assertElement(event.target);
 
-    if (el.classList.contains('i-amphtml-story-share-menu-close-button')) {
+    if (el === this.closeButton_) {
       this.close_();
     }
 

@@ -418,6 +418,11 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
   }
 
   /** @override */
+  isLayoutSupported() {
+    return true;
+  }
+
+  /** @override */
   buildCallback() {
     this.storyUrl_ = this.element.getAttribute('data-story-url');
     this.element.classList.add('i-amphtml-story-dev-tools-tab');

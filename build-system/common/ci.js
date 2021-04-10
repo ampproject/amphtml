@@ -26,10 +26,10 @@
 /**
  * Shorthand to extract an environment variable.
  * @param {string} key
- * @return {string|undefined}
+ * @return {string}
  */
 function env(key) {
-  return process.env[key];
+  return process.env[key] ?? '';
 }
 
 /**
@@ -70,7 +70,7 @@ const isCircleci = isCircleciBuild();
  * @return {boolean}
  */
 function isCircleciPushBranch(branchName) {
-  return branchName == 'master' || /^amp-release-.*$/.test(branchName);
+  return branchName == 'main' || /^amp-release-.*$/.test(branchName);
 }
 
 /**
@@ -177,7 +177,7 @@ function ciJobId() {
   return isGithubActions
     ? env('GITHUB_RUN_NUMBER')
     : isCircleci
-    ? env('CIRCLE_NODE_INDEX')
+    ? env('CIRCLE_JOB')
     : '';
 }
 
@@ -192,6 +192,24 @@ function ciJobUrl() {
     : isCircleci
     ? env('CIRCLE_BUILD_URL')
     : '';
+}
+
+/**
+ * Returns the merge commit for a CircleCI PR build. CIRCLECI_MERGE_COMMIT is
+ * populated by .circleci/fetch_merge_commit.sh.
+ * @return {string}
+ */
+function circleciPrMergeCommit() {
+  return isCircleci ? env('CIRCLECI_MERGE_COMMIT') : '';
+}
+
+/**
+ * Returns an identifier that is unique to each CircleCI job. This is different
+ * from the workflow ID, which is common across all jobs in a workflow.
+ * @return {string}
+ */
+function circleciBuildNumber() {
+  return isCircleci ? env('CIRCLE_BUILD_NUM') : '';
 }
 
 /**
@@ -224,6 +242,8 @@ module.exports = {
   ciPullRequestBranch,
   ciPullRequestSha,
   ciPushBranch,
+  circleciBuildNumber,
+  circleciPrMergeCommit,
   ciRepoSlug,
   isCiBuild,
   isCircleciBuild,

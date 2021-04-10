@@ -6,11 +6,20 @@ We hope you'll become an ongoing participant in our open source community but we
 
 How would you like to help?
 
+<!--
+  (Do not remove or edit this comment.)
+
+  This table-of-contents is automatically generated. To generate it, run:
+    amp markdown-toc --fix
+-->
+
+<!-- {"maxdepth": 1} -->
+
 -   [Report a bug](#report-a-bug)
 -   [Make a suggestion](#make-a-suggestion)
 -   [Contribute code/features](#contribute-codefeatures)
 -   [Get started with open source](#get-started-with-open-source)
--   [Participate in ongoing discussions](#ongoing-participation)
+-   [Ongoing participation](#ongoing-participation)
 
 If you have questions about _using_ AMP or are _encountering problems using AMP_ on your site please visit our [support page](SUPPORT.md) for help.
 
@@ -62,7 +71,7 @@ Technical issues, designs, etc. are discussed using several different channels:
 
 ### Working groups
 
-Most of the day-to-day work in building AMP happens in AMP's [Working Groups (WGs)](https://github.com/ampproject/meta/tree/master/working-groups). Getting involved in a WG is a great way to contribute to AMP.
+Most of the day-to-day work in building AMP happens in AMP's [Working Groups (WGs)](https://github.com/ampproject/meta/tree/main/working-groups). Getting involved in a WG is a great way to contribute to AMP.
 
 Most working groups post approximately bi-weekly [Status Update GitHub issues](https://github.com/search?q=org%3Aampproject+label%3A%22Type%3A+Status+Update%22&type=Issues).
 

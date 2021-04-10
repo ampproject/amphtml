@@ -24,8 +24,10 @@ import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial
 import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {INTERSECT_RESOURCES_EXP} from '../../../src/experiments/intersect-resources-exp';
+import {
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '../../../src/consent-state';
 import {Navigation} from '../../../src/service/navigation';
 import {
   QQID_HEADER,
@@ -47,6 +49,7 @@ import {
 import {ResponsiveState} from './responsive-state';
 import {STICKY_AD_TRANSITION_EXP} from '../../../ads/google/a4a/sticky-ad-transition-exp';
 import {Services} from '../../../src/services';
+import {StoryAdPlacements} from '../../../src/experiments/story-ad-placements';
 import {
   addAmpExperimentIdToElement,
   addExperimentIdToElement,
@@ -257,16 +260,18 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (moduleNomoduleExpId) {
       addExperimentIdToElement(moduleNomoduleExpId, this.element);
     }
-    const intersectResourcesExpId = getExperimentBranch(
-      this.win,
-      INTERSECT_RESOURCES_EXP.id
-    );
-    if (intersectResourcesExpId) {
-      addExperimentIdToElement(intersectResourcesExpId, this.element);
-    }
+
     const ssrExpIds = this.getSsrExpIds_();
     for (let i = 0; i < ssrExpIds.length; i++) {
       addAmpExperimentIdToElement(ssrExpIds[i], this.element);
+    }
+
+    const storyAdPlacementsExpId = getExperimentBranch(
+      this.win,
+      StoryAdPlacements.ID
+    );
+    if (storyAdPlacementsExpId) {
+      addExperimentIdToElement(storyAdPlacementsExpId, this.element);
     }
   }
 
@@ -289,10 +294,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     let consentState = undefined;
     let consentString = undefined;
     let gdprApplies = undefined;
+    let additionalConsent = undefined;
+    let consentStringType = undefined;
     if (consentTuple) {
       consentState = consentTuple.consentState;
       consentString = consentTuple.consentString;
       gdprApplies = consentTuple.gdprApplies;
+      additionalConsent = consentTuple.additionalConsent;
+      consentStringType = consentTuple.consentStringType;
     }
     if (
       consentState == CONSENT_POLICY_STATE.UNKNOWN &&
@@ -386,7 +395,15 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           ? this.responsiveState_.getRafmtParam()
           : null,
       'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
-      'gdpr_consent': consentString,
+      'gdpr_consent':
+        consentStringType != CONSENT_STRING_TYPE.US_PRIVACY_STRING
+          ? consentString
+          : null,
+      'addtl_consent': additionalConsent,
+      'us_privacy':
+        consentStringType == CONSENT_STRING_TYPE.US_PRIVACY_STRING
+          ? consentString
+          : null,
       'pfx': pfx ? '1' : '0',
       'aanf': /^(true|false)$/i.test(this.element.getAttribute('data-no-fill'))
         ? this.element.getAttribute('data-no-fill')

@@ -86,6 +86,16 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
   }
 
   /**
+   * @param {!MessageEventSource} source
+   * @param {*} message
+   * @param {string} origin
+   * @private
+   */
+  postMessage_(source, message, origin) {
+    source./*OK*/ postMessage(message, origin);
+  }
+
+  /**
    * @param {string} origin
    * @param {Event} event
    * @private
@@ -107,7 +117,8 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
         if (!nonce) {
           return;
         }
-        event.source./*OK*/ postMessage(
+        this.postMessage_(
+          event.source,
           dict({
             'sentinel': SENTINEL,
             'command': 'parent_frame_ready',
@@ -165,10 +176,27 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
 
   /** @private */
   refreshAccess_() {
+    Promise.all([
+      this.refreshAmpAccess_(),
+      this.refreshAmpSubscriptions_(),
+    ]).then((refreshed) => {
+      if (!refreshed.reduce((a, b) => a || b)) {
+        user().warn(
+          TAG,
+          'Sign-in was completed, but there were no entitlements to refresh. Please include amp-access or amp-subscriptions.'
+        );
+      }
+    });
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  refreshAmpAccess_() {
     const accessElement = this.getAmpDoc().getElementById('amp-access');
     if (!accessElement) {
-      user().warn(TAG, 'No <script id="amp-access"> to refresh');
-      return;
+      return false;
     }
     Services.actionServiceForDoc(this.element).execute(
       accessElement,
@@ -178,6 +206,23 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
       /* caller */ null,
       /* event */ null,
       ActionTrust.DEFAULT
+    );
+    return true;
+  }
+
+  /**
+   * @return {!Promise<boolean>}
+   * @private
+   */
+  refreshAmpSubscriptions_() {
+    return Services.subscriptionsServiceForDocOrNull(this.element).then(
+      (subscriptions) => {
+        if (!subscriptions) {
+          return false;
+        }
+        subscriptions.resetPlatforms();
+        return true;
+      }
     );
   }
 
@@ -189,7 +234,7 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
     if (this.iframe_) {
       return;
     }
-    this.iframe_ = this.getAmpDoc().getRootNode().createElement('iframe');
+    this.iframe_ = this.getAmpDoc().win.document.createElement('iframe');
 
     // Don't insert <iframe> until URL has been expanded.
     // Likewise, don't display the UI until then.

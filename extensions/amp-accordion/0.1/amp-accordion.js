@@ -27,7 +27,6 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getStyle, setImportantStyles, setStyles} from '../../../src/style';
-import {isExperimentOn} from '../../../src/experiments';
 import {
   numeric,
   px,
@@ -41,10 +40,6 @@ const MAX_TRANSITION_DURATION = 500; // ms
 const MIN_TRANSITION_DURATION = 200; // ms
 const EXPAND_CURVE_ = bezierCurve(0.47, 0, 0.745, 0.715);
 const COLLAPSE_CURVE_ = bezierCurve(0.39, 0.575, 0.565, 1);
-
-const isDisplayLockingEnabledForAccordion = (win) =>
-  isExperimentOn(win, 'amp-accordion-display-locking') &&
-  win.document.body.onbeforematch !== undefined;
 
 class AmpAccordion extends AMP.BaseElement {
   /** @override @nocollapse */
@@ -98,7 +93,7 @@ class AmpAccordion extends AMP.BaseElement {
       userAssert(
         section.tagName.toLowerCase() == 'section',
         'Sections should be enclosed in a <section> tag, ' +
-          'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
+          'See https://github.com/ampproject/amphtml/blob/main/extensions/' +
           'amp-accordion/amp-accordion.md. Found in: %s',
         this.element
       );
@@ -106,7 +101,7 @@ class AmpAccordion extends AMP.BaseElement {
       userAssert(
         sectionComponents.length == 2,
         'Each section must have exactly two children. ' +
-          'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
+          'See https://github.com/ampproject/amphtml/blob/main/extensions/' +
           'amp-accordion/amp-accordion.md. Found in: %s',
         this.element
       );
@@ -162,7 +157,9 @@ class AmpAccordion extends AMP.BaseElement {
 
       const isExpanded = section.hasAttribute('expanded');
       header.classList.add('i-amphtml-accordion-header');
-      header.setAttribute('role', 'button');
+      if (!header.hasAttribute('role')) {
+        header.setAttribute('role', 'button');
+      }
       header.setAttribute('aria-controls', contentId);
       header.setAttribute('aria-expanded', String(isExpanded));
       if (!header.hasAttribute('tabindex')) {
@@ -170,7 +167,9 @@ class AmpAccordion extends AMP.BaseElement {
       }
       this.headers_.push(header);
       content.setAttribute('aria-labelledby', headerId);
-      content.setAttribute('role', 'region');
+      if (!content.hasAttribute('role')) {
+        content.setAttribute('role', 'region');
+      }
 
       userAssert(
         this.action_.hasAction(header, 'tap', section) == false,
@@ -179,13 +178,6 @@ class AmpAccordion extends AMP.BaseElement {
 
       header.addEventListener('click', this.clickHandler_.bind(this));
       header.addEventListener('keydown', this.keyDownHandler_.bind(this));
-
-      if (isDisplayLockingEnabledForAccordion(this.win)) {
-        this.element.classList.add('i-amphtml-display-locking');
-        content.addEventListener('beforematch', () => {
-          this.toggle_(section, ActionTrust.HIGH, /* force expand */ true);
-        });
-      }
     });
   }
 

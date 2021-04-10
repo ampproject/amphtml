@@ -1,0 +1,57 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "lib": ["dom", "esnext"],
+    "outDir": "dist",
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "target": "ES2020",
+    "module": "CommonJS",
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strictNullChecks": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "incremental": true,
+    "esModuleInterop": true,
+    "declaration": true
+  },
+  "include": [
+    "./*",
+    "./common/**/*.js",
+    "./server/**/*.js",
+    "./tasks/*",
+    "./tasks/bundle-size/*",
+    "./tasks/coverage-map/*",
+    "./tasks/create-golden-css/*",
+    "./tasks/css/*",
+    // "./tasks/e2e/*", // 253 remaining type errors.
+    "./tasks/extension-generator/*",
+    "./tasks/get-zindex/*",
+    "./tasks/markdown-toc/*",
+    // "./tasks/performance/*", // 35 remaining type errors.
+    "./tasks/prepend-global/*",
+    "./tasks/release/*",
+    "./tasks/runtime-test/*",
+    "./tasks/storybook/*",
+    "./tasks/sweep-experiments/*",
+    // "./tasks/visual-diff/*", // 12 errors due to async imports.
+    "./test-configs/**/*"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/*.test.js",
+    "tasks/dep-check.js", // JSDoc private used inside a function confuses TS.
+    "tasks/runtime-test/runtime-test-base.js", // TS does not like Object.assign.
+    "common/check-package-manager.js",
+    "server/app-index/test/test-html.js",
+    "server/app-index/test/test-amphtml-helpers.js",
+    "server/new-server/transforms/dist",
+    "server/typescript-compile.js",
+    "test-configs/dep-check-config.js"
+  ]
+}

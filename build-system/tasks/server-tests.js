@@ -37,7 +37,7 @@ let failed = 0;
  * Extracts the input for a test from its input file.
  *
  * @param {string} inputFile
- * @return {string}
+ * @return {Promise<string>}
  */
 async function getInput(inputFile) {
   return fs.promises.readFile(inputFile, 'utf8');
@@ -90,7 +90,7 @@ function getTestPath(inputFile) {
  * Extracts the expected output for a test from its output file.
  *
  * @param {string} inputFile
- * @return {string}
+ * @return {Promise<string>}
  */
 async function getExpectedOutput(inputFile) {
   const expectedOutputFile = inputFile.replace('input.html', 'output.html');
@@ -101,7 +101,7 @@ async function getExpectedOutput(inputFile) {
  * Extracts the JS transform for a test from its transform file.
  * @param {string} inputFile
  * @param {!Object} extraOptions
- * @return {string}
+ * @return {Promise<string>}
  */
 async function getTransform(inputFile, extraOptions) {
   const transformDir = getTransformerDir(inputFile);
@@ -116,7 +116,7 @@ async function getTransform(inputFile, extraOptions) {
  *
  * @param {string} transform
  * @param {string} input
- * @return {string}
+ * @return {Promise<string>}
  */
 async function getOutput(transform, input) {
   return (await posthtml(transform).process(input)).html;
@@ -162,9 +162,7 @@ function reportResult() {
     `(${cyan(passed)} passed, ${cyan(failed)} failed).`;
   if (failed > 0) {
     log(red('ERROR:'), result);
-    const err = new Error('Tests failed');
-    err.showStack = false;
-    throw err;
+    throw new Error('Tests failed');
   } else {
     log(green('SUCCESS:'), result);
   }
@@ -195,10 +193,10 @@ async function runTest(inputFile) {
 }
 
 /**
- * Tests for AMP server custom transforms. Entry point for `gulp server-tests`.
+ * Tests for AMP server custom transforms. Entry point for `amp server-tests`.
  */
 async function serverTests() {
-  buildNewServer();
+  await buildNewServer();
   const inputFiles = globby.sync(inputPaths);
   for (const inputFile of inputFiles) {
     await runTest(inputFile);

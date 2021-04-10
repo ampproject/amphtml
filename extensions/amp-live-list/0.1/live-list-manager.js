@@ -17,10 +17,10 @@
 import {Poller} from './poller';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
+import {extensionScriptsInNode} from '../../../src/service/extension-script';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {toArray} from '../../../src/types';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -312,16 +312,15 @@ export class LiveListManager {
    * @param {!Document} doc
    */
   installExtensionsForDoc_(doc) {
-    const extensions = toArray(
-      doc.querySelectorAll('script[custom-element], script[custom-template]')
-    );
-    extensions.forEach((script) => {
-      const extensionName =
-        script.getAttribute('custom-element') ||
-        script.getAttribute('custom-template');
+    const extensions = extensionScriptsInNode(doc);
+    extensions.forEach(({extensionId, extensionVersion}) => {
       // This is a cheap operation if extension is already installed so no need
       // to over optimize checks.
-      this.extensions_.installExtensionForDoc(this.ampdoc, extensionName);
+      this.extensions_.installExtensionForDoc(
+        this.ampdoc,
+        extensionId,
+        extensionVersion
+      );
     });
   }
 

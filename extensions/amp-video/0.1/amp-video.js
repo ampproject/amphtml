@@ -15,6 +15,7 @@
  */
 
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {VisibilityState} from '../../../src/visibility-state';
@@ -37,12 +38,8 @@ import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {listen} from '../../../src/event-helper';
+import {listen, listenOncePromise} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
-import {
-  observeDisplay,
-  unobserveDisplay,
-} from '../../../src/utils/display-observer';
 import {
   propagateObjectFitStyles,
   setImportantStyles,
@@ -62,10 +59,11 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
   'crossorigin',
   'disableremoteplayback',
   'controlsList',
+  'title',
 ];
 
-/** @private {!Map<string, number>} the bitrate in Kb/s of amp_quality for videos in the ampproject cdn */
-const AMP_QUALITY_BITRATES = {
+/** @private {!Map<string, number>} the bitrate in Kb/s of amp_video_quality for videos in the ampproject cdn */
+const AMP_VIDEO_QUALITY_BITRATES = {
   'high': 2000,
   'medium': 720,
   'low': 400,
@@ -165,10 +163,11 @@ export class AmpVideo extends AMP.BaseElement {
     /** @visibleForTesting {?Element} */
     this.posterDummyImageForTesting_ = null;
 
-    /** @private {boolean} */
-    this.isPlaying_ = false;
+    /** @private {?boolean} whether there are sources that will use a BitrateManager */
+    this.hasBitrateSources_ = null;
 
-    this.onDisplay_ = this.onDisplay_.bind(this);
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -221,12 +220,6 @@ export class AmpVideo extends AMP.BaseElement {
     this.configure_();
 
     this.video_ = element.ownerDocument.createElement('video');
-    // Manage video if the sources contain bitrate or amp-orig-src will be expanded to multiple bitrates.
-    if (
-      this.element.querySelector('source[data-bitrate], source[amp-orig-src]')
-    ) {
-      getBitrateManager(this.win).manage(this.video_);
-    }
 
     const poster = element.getAttribute('poster');
     if (!poster && getMode().development) {
@@ -239,6 +232,7 @@ export class AmpVideo extends AMP.BaseElement {
     this.video_.setAttribute('webkit-playsinline', '');
     // Disable video preload in prerender mode.
     this.video_.setAttribute('preload', 'none');
+    this.checkA11yAttributeText_();
     this.propagateAttributes(
       ATTRS_TO_PROPAGATE_ON_BUILD,
       this.video_,
@@ -262,9 +256,27 @@ export class AmpVideo extends AMP.BaseElement {
       'artwork': [{'src': artwork || poster || ''}],
     };
 
+    // Cached so mediapool operations (eg: swapping sources) don't interfere with this bool.
+    this.hasBitrateSources_ =
+      !!this.element.querySelector('source[data-bitrate]') ||
+      this.hasAnyCachedSources_();
+
     installVideoManagerForDoc(element);
 
     Services.videoManagerForDoc(element).register(this);
+  }
+
+  /**
+   * @private
+   * Overrides aria-label with alt if aria-label or title is not specified.
+   */
+  checkA11yAttributeText_() {
+    const altText = this.element.getAttribute('alt');
+    const hasTitle = this.element.hasAttribute('title');
+    const hasAriaLabel = this.element.hasAttribute('aria-label');
+    if (altText && !hasTitle && !hasAriaLabel) {
+      this.element.setAttribute('aria-label', altText);
+    }
   }
 
   /** @override */
@@ -479,17 +491,17 @@ export class AmpVideo extends AMP.BaseElement {
     sources.forEach((source) => {
       if (isCachedByCdn(source, this.element)) {
         source.remove();
-        const qualities = Object.keys(AMP_QUALITY_BITRATES);
+        const qualities = Object.keys(AMP_VIDEO_QUALITY_BITRATES);
         const origType = source.getAttribute('type');
         const origSrc = source.getAttribute('amp-orig-src');
         qualities.forEach((quality, index) => {
           const cachedSource = addParamsToUrl(source.src, {
-            'amp_quality': quality,
+            'amp_video_quality': quality,
           });
           const currSource = this.createSourceElement_(
             cachedSource,
             origType,
-            AMP_QUALITY_BITRATES[quality]
+            AMP_VIDEO_QUALITY_BITRATES[quality]
           );
           // Keep src of amp-orig only in last one so it adds the orig source after it.
           if (index === qualities.length - 1) {
@@ -577,6 +589,22 @@ export class AmpVideo extends AMP.BaseElement {
 
   /**
    * @private
+   * @return {boolean}
+   */
+  hasAnyCachedSources_() {
+    const {element} = this;
+    const sources = toArray(childElementsByTag(element, 'source'));
+    sources.push(element);
+    for (let i = 0; i < sources.length; i++) {
+      if (isCachedByCdn(sources[i])) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * @private
    */
   installEventHandlers_() {
     const video = dev().assertElement(this.video_);
@@ -632,11 +660,21 @@ export class AmpVideo extends AMP.BaseElement {
       childElementByTag(this.element, 'video'),
       'Tried to reset amp-video without an underlying <video>.'
     );
-
     this.uninstallEventHandlers_();
     this.installEventHandlers_();
+    if (this.hasBitrateSources_) {
+      getBitrateManager(this.win).manage(this.video_);
+    }
     // When source changes, video needs to trigger loaded again.
-    this.loadPromise(this.video_).then(() => this.onVideoLoaded_());
+    if (this.video_.readyState >= 1) {
+      this.onVideoLoaded_();
+      return;
+    }
+    // Video might not have the sources yet, so instead of loadPromise (which would fail),
+    // we listen for loadedmetadata.
+    listenOncePromise(this.video_, 'loadedmetadata').then(() =>
+      this.onVideoLoaded_()
+    );
   }
 
   /** @private */
@@ -644,27 +682,19 @@ export class AmpVideo extends AMP.BaseElement {
     dispatchCustomEvent(this.element, VideoEvents.LOAD);
   }
 
+  /** @override */
+  pauseCallback() {
+    if (this.video_) {
+      this.video_.pause();
+    }
+  }
+
   /** @private */
   updateIsPlaying_(isPlaying) {
     if (this.isManagedByPool_()) {
       return;
     }
-    if (isPlaying === this.isPlaying_) {
-      return;
-    }
-    this.isPlaying_ = isPlaying;
-    if (isPlaying) {
-      observeDisplay(this.element, this.onDisplay_);
-    } else {
-      unobserveDisplay(this.element, this.onDisplay_);
-    }
-  }
-
-  /** @private */
-  onDisplay_(isDisplayed) {
-    if (!isDisplayed && this.video_) {
-      this.video_.pause();
-    }
+    this.pauseHelper_.updatePlaying(isPlaying);
   }
 
   /** @private */

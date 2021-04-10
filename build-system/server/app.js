@@ -17,22 +17,23 @@
 
 /**
  * @fileoverview Creates an http server to handle static
- * files and list directories for use with the gulp live server
+ * files and list directories for use with the amp live server
  */
-const app = require('express')();
 const argv = require('minimist')(process.argv.slice(2));
 const bacon = require('baconipsum');
 const bodyParser = require('body-parser');
 const cors = require('./amp-cors');
 const devDashboard = require('./app-index/index');
+const express = require('express');
+const fetch = require('node-fetch');
 const formidable = require('formidable');
 const fs = require('fs');
 const jsdom = require('jsdom');
 const path = require('path');
-const request = require('request');
 const upload = require('multer')();
 const pc = process;
 const autocompleteEmailData = require('./autocomplete-test-data');
+const header = require('connect-header');
 const runVideoTestBench = require('./app-video-testbench');
 const {
   getVariableRequest,
@@ -46,18 +47,45 @@ const {
 } = require('./recaptcha-router');
 const {getServeMode} = require('./app-utils');
 const {logWithoutTimestamp} = require('../common/logging');
+const {log} = require('../common/logging');
+const {red} = require('kleur/colors');
 const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls, isRtvMode} = require('./app-utils');
 
+/**
+ * Respond with content received from a URL when SERVE_MODE is "cdn".
+ * @param {express.Response} res
+ * @param {string} cdnUrl
+ * @return {Promise<boolean>}
+ */
+async function passthroughServeModeCdn(res, cdnUrl) {
+  if (SERVE_MODE !== 'cdn') {
+    return false;
+  }
+  try {
+    const response = await fetch(cdnUrl);
+    res.status(response.status);
+    res.send(await response.text());
+  } catch (e) {
+    log(red('ERROR:'), e);
+    res.status(500);
+    res.end();
+  }
+  return true;
+}
+
+const app = express();
 const TEST_SERVER_PORT = argv.port || 8000;
 let SERVE_MODE = getServeMode();
 
+app.use(bodyParser.json());
 app.use(bodyParser.text());
 
 // Middleware is executed in order, so this must be at the top.
 // TODO(#24333): Migrate all server URL handlers to new-server/router and
-// deprecate this file.
-if (argv.new_server) {
+// deprecate app.js.
+// TODO(erwinmombay, #32865): Make visual diff tests use the new server
+if (!argv._.includes('visual-diff')) {
   app.use(require('./new-server/router'));
 }
 
@@ -69,6 +97,9 @@ app.use('/test', require('./routes/test'));
 if (argv.coverage) {
   app.use('/coverage', require('istanbul-middleware').createHandler());
 }
+
+// Built binaries should be fetchable from other origins, i.e. Storybook.
+app.use(header({'Access-Control-Allow-Origin': '*'}));
 
 // Append ?csp=1 to the URL to turn on the CSP header.
 // TODO: shall we turn on CSP all the time?
@@ -82,6 +113,11 @@ app.use((req, res, next) => {
   next();
 });
 
+/**
+ *
+ * @param {string} serveMode
+ * @return {boolean}
+ */
 function isValidServeMode(serveMode) {
   return (
     ['default', 'compiled', 'cdn', 'esm'].includes(serveMode) ||
@@ -89,6 +125,10 @@ function isValidServeMode(serveMode) {
   );
 }
 
+/**
+ *
+ * @param {string} serveMode
+ */
 function setServeMode(serveMode) {
   SERVE_MODE = serveMode;
 }
@@ -169,32 +209,22 @@ app.get('/proxy', async (req, res, next) => {
  * @param {string=} protocol 'https' or 'http'. 'https' retries using 'http'.
  * @return {!Promise<string>}
  */
-function requestAmphtmlDocUrl(urlSuffix, protocol = 'https') {
+async function requestAmphtmlDocUrl(urlSuffix, protocol = 'https') {
   const defaultUrl = `${protocol}://${urlSuffix}`;
   logWithoutTimestamp(`Fetching URL: ${defaultUrl}`);
-  return new Promise((resolve, reject) => {
-    request(defaultUrl, (error, response, body) => {
-      if (
-        error ||
-        (response && (response.statusCode < 200 || response.statusCode >= 300))
-      ) {
-        if (protocol == 'https') {
-          return requestAmphtmlDocUrl(urlSuffix, 'http');
-        }
-        return reject(new Error(error || `Status: ${response.statusCode}`));
-      }
-      const {window} = new jsdom.JSDOM(body);
-      const linkRelAmphtml = window.document.querySelector('link[rel=amphtml]');
-      if (!linkRelAmphtml) {
-        return resolve(defaultUrl);
-      }
-      const amphtmlUrl = linkRelAmphtml.getAttribute('href');
-      if (!amphtmlUrl) {
-        return resolve(defaultUrl);
-      }
-      return resolve(amphtmlUrl);
-    });
-  });
+
+  const response = await fetch(defaultUrl);
+  if (!response.ok) {
+    if (protocol == 'https') {
+      return requestAmphtmlDocUrl(urlSuffix, 'http');
+    }
+    throw new Error(`Status: ${response.status}`);
+  }
+
+  const {window} = new jsdom.JSDOM(await response.text());
+  const linkRelAmphtml = window.document.querySelector('link[rel=amphtml]');
+  const amphtmlUrl = linkRelAmphtml && linkRelAmphtml.getAttribute('href');
+  return amphtmlUrl || defaultUrl;
 }
 
 /*
@@ -252,13 +282,13 @@ app.use('/pwa', (req, res) => {
   });
 });
 
-app.use('/api/show', (req, res) => {
+app.use('/api/show', (_req, res) => {
   res.json({
     showNotification: true,
   });
 });
 
-app.use('/api/dont-show', (req, res) => {
+app.use('/api/dont-show', (_req, res) => {
   res.json({
     showNotification: false,
   });
@@ -273,7 +303,7 @@ app.use('/api/echo/post', (req, res) => {
   res.end(req.body);
 });
 
-app.use('/api/ping', (req, res) => {
+app.use('/api/ping', (_req, res) => {
   res.status(204).end();
 });
 
@@ -281,7 +311,7 @@ app.use('/form/html/post', (req, res) => {
   cors.assertCors(req, res, ['POST']);
 
   const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields) => {
+  form.parse(req, (_err, fields) => {
     res.setHeader('Content-Type', 'text/html');
     if (fields['email'] == 'already@subscribed.com') {
       res.statusCode = 500;
@@ -324,7 +354,7 @@ app.use('/form/echo-json/post', (req, res) => {
     }
     fields[realName].push(value);
   });
-  form.parse(req, (unusedErr) => {
+  form.parse(req, () => {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     if (fields['email'] == 'already@subscribed.com') {
       res.statusCode = 500;
@@ -366,7 +396,6 @@ app.use('/form/json/poll1', (req, res) => {
 app.post('/form/json/upload', upload.fields([{name: 'myFile'}]), (req, res) => {
   cors.assertCors(req, res, ['POST']);
 
-  /** @type {!Array<!File>|undefined} */
   const myFile = req.files['myFile'];
 
   if (!myFile) {
@@ -379,7 +408,7 @@ app.post('/form/json/upload', upload.fields([{name: 'myFile'}]), (req, res) => {
   res.json({message: contents});
 });
 
-app.use('/form/search-html/get', (req, res) => {
+app.use('/form/search-html/get', (_req, res) => {
   res.setHeader('Content-Type', 'text/html');
   res.end(`
      <h1>Here's results for your search<h1>
@@ -425,7 +454,7 @@ app.use('/form/autocomplete/query', (req, res) => {
   }
 });
 
-app.use('/form/autocomplete/error', (req, res) => {
+app.use('/form/autocomplete/error', (_req, res) => {
   res.status(500).end();
 });
 
@@ -445,7 +474,7 @@ app.use('/form/mention/query', (req, res) => {
 app.use('/form/verify-search-json/post', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields) => {
+  form.parse(req, (_err, fields) => {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
     const errors = [];
@@ -483,56 +512,60 @@ app.use('/form/verify-search-json/post', (req, res) => {
   });
 });
 
-// Fetches an AMP document from the AMP proxy and replaces JS
-// URLs, so that they point to localhost.
-function proxyToAmpProxy(req, res, mode) {
+/**
+ * Fetches an AMP document from the AMP proxy and replaces JS
+ * URLs, so that they point to localhost.
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {string} mode
+ */
+async function proxyToAmpProxy(req, res, mode) {
   const url =
     'https://cdn.ampproject.org/' +
     (req.query['amp_js_v'] ? 'v' : 'c') +
     req.url;
   logWithoutTimestamp('Fetching URL: ' + url);
-  request(url, function (error, response, body) {
+  const urlResponse = await fetch(url);
+  let body = await urlResponse.text();
+  body = body
+    // Unversion URLs.
+    .replace(
+      /https\:\/\/cdn\.ampproject\.org\/rtv\/\d+\//g,
+      'https://cdn.ampproject.org/'
+    )
+    // <base> href pointing to the proxy, so that images, etc. still work.
+    .replace('<head>', '<head><base href="https://cdn.ampproject.org/">');
+  const inabox = req.query['inabox'];
+  const urlPrefix = getUrlPrefix(req);
+  if (req.query['mraid']) {
     body = body
-      // Unversion URLs.
       .replace(
-        /https\:\/\/cdn\.ampproject\.org\/rtv\/\d+\//g,
-        'https://cdn.ampproject.org/'
+        '</head>',
+        '<script async host-service="amp-mraid" src="https://cdn.ampproject.org/v0/amp-mraid-0.1.js">' +
+          '</script>' +
+          '</head>'
       )
-      // <base> href pointing to the proxy, so that images, etc. still work.
-      .replace('<head>', '<head><base href="https://cdn.ampproject.org/">');
-    const inabox = req.query['inabox'];
-    // TODO(ccordry): Remove this when story v01 is depricated.
-    const storyV1 = req.query['story_v'] === '1';
-    const urlPrefix = getUrlPrefix(req);
-    if (req.query['mraid']) {
-      body = body
-        .replace(
-          '</head>',
-          '<script async host-service="amp-mraid" src="https://cdn.ampproject.org/v0/amp-mraid-0.1.js">' +
-            '</script>' +
-            '</head>'
-        )
-        // Change cdnUrl from the default so amp-mraid requests the (mock)
-        // mraid.js from the local server. In a real environment this doesn't
-        // matter as the local environment would intercept this request.
-        .replace(
-          '<head>',
-          ' <head>' +
-            ' <script>' +
-            ' window.AMP_CONFIG = {' +
-            `   cdnUrl: "${urlPrefix}",` +
-            ' };' +
-            ' </script>'
-        );
-    }
-    body = replaceUrls(mode, body, urlPrefix, inabox, storyV1);
-    if (inabox) {
-      // Allow CORS requests for A4A.
-      const origin = req.headers.origin || urlPrefix;
-      cors.enableCors(req, res, origin);
-    }
-    res.status(response.statusCode).send(body);
-  });
+      // Change cdnUrl from the default so amp-mraid requests the (mock)
+      // mraid.js from the local server. In a real environment this doesn't
+      // matter as the local environment would intercept this request.
+      .replace(
+        '<head>',
+        ' <head>' +
+          ' <script>' +
+          ' window.AMP_CONFIG = {' +
+          `   cdnUrl: "${urlPrefix}",` +
+          ' };' +
+          ' </script>'
+      );
+  }
+  body = replaceUrls(mode, body, urlPrefix, inabox);
+  if (inabox) {
+    // Allow CORS requests for A4A.
+    const origin = req.headers.origin || urlPrefix;
+    cors.enableCors(req, res, origin);
+  }
+  res.status(urlResponse.status).send(body);
 }
 
 let itemCtr = 2;
@@ -606,24 +639,38 @@ app.use('/examples/live-list-update(-reverse)?.amp.html', (req, res, next) => {
   res.send(`${doctype}${outerHTML}`);
 });
 
+/**
+ * @param {Element} item
+ */
 function liveListReplace(item) {
-  item.setAttribute('data-update-time', Date.now());
+  item.setAttribute('data-update-time', Date.now().toString());
   const itemContents = item.querySelectorAll('.content');
-  itemContents[0].textContent = Math.floor(Math.random() * 10);
-  itemContents[1].textContent = Math.floor(Math.random() * 10);
+  itemContents[0].textContent = Math.floor(Math.random() * 10).toString();
+  itemContents[1].textContent = Math.floor(Math.random() * 10).toString();
 }
 
+/**
+ * @param {Element} liveList
+ * @param {Element} node
+ */
 function liveListInsert(liveList, node) {
   const iterCount = Math.floor(Math.random() * 2) + 1;
   logWithoutTimestamp(`inserting ${iterCount} item(s)`);
   for (let i = 0; i < iterCount; i++) {
-    const child = node.cloneNode(true);
+    /**
+     * TODO(#28387) this type cast may be hiding a bug.
+     * @type {Element}
+     */
+    const child = /** @type {*} */ (node.cloneNode(true));
     child.setAttribute('id', `list-item-${itemCtr++}`);
     child.setAttribute('data-sort-time', Date.now());
-    liveList.querySelector('[items]').appendChild(child);
+    liveList.querySelector('[items]')?.appendChild(child);
   }
 }
 
+/**
+ * @param {Element} liveList
+ */
 function liveListTombstone(liveList) {
   const tombstoneId = Math.floor(Math.random() * itemCtr);
   logWithoutTimestamp(`trying to tombstone #list-item-${tombstoneId}`);
@@ -637,8 +684,14 @@ function liveListTombstone(liveList) {
   }
 }
 
-// Generate a random number between min and max
-// Value is inclusive of both min and max values.
+/**
+ * Generate a random number between min and max
+ * Value is inclusive of both min and max values.
+ *
+ * @param {number} min
+ * @param {number} max
+ * @return {number}
+ */
 function range(min, max) {
   const values = Array.apply(null, new Array(max - min + 1)).map(
     (_, i) => min + i
@@ -646,11 +699,18 @@ function range(min, max) {
   return values[Math.round(Math.random() * (max - min))];
 }
 
-// Returns the result of a coin flip, true or false
+/**
+ * Returns the result of a coin flip, true or false
+ *
+ * @return {boolean}
+ */
 function flip() {
   return !!Math.floor(Math.random() * 2);
 }
 
+/**
+ * @return {string}
+ */
 function getLiveBlogItem() {
   const now = Date.now();
   // Generate a 3 to 7 worded headline
@@ -689,7 +749,9 @@ function getLiveBlogItem() {
             </p>
             <p class="brand">PublisherName News Reporter<p>
             <p><span itemscope itemtype="http://schema.org/Date"
-                itemprop="Date">${Date(now).replace(/ GMT.*$/, '')}<span></p>
+                itemprop="Date">
+                ${new Date(now).toString().replace(/ GMT.*$/, '')}
+                <span></p>
           </div>
         </div>
         <div class="article-body">${body}</div>
@@ -706,6 +768,9 @@ function getLiveBlogItem() {
     </amp-live-list></body></html>`;
 }
 
+/**
+ * @return {string}
+ */
 function getLiveBlogItemWithBindAttributes() {
   const now = Date.now();
   // Generate a 3 to 7 worded headline
@@ -840,10 +905,7 @@ app.post('/check-consent', (req, res) => {
 // Proxy with local JS.
 // Example:
 // http://localhost:8000/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-app.use('/proxy/', (req, res) => {
-  const mode = SERVE_MODE;
-  proxyToAmpProxy(req, res, mode);
-});
+app.use('/proxy/', (req, res) => proxyToAmpProxy(req, res, SERVE_MODE));
 
 // Nest the response in an iframe.
 // Example:
@@ -920,7 +982,7 @@ app.get('/iframe-echo-message', (req, res) => {
  * <script async custom-element="amp-form"
  *    src="https://cdn.ampproject.org/v0/amp-form-0.1.js?sleep=5"></script>
  */
-app.use(['/dist/v0/amp-*.(m?js)', '/dist/amp*.(m?js)'], (req, res, next) => {
+app.use(['/dist/v0/amp-*.(m?js)', '/dist/amp*.(m?js)'], (req, _res, next) => {
   const sleep = parseInt(req.query.sleep || 0, 10) * 1000;
   setTimeout(next, sleep);
 });
@@ -928,7 +990,7 @@ app.use(['/dist/v0/amp-*.(m?js)', '/dist/amp*.(m?js)'], (req, res, next) => {
 /**
  * Disable caching for extensions if the --no_caching_extensions flag is used.
  */
-app.get(['/dist/v0/amp-*.(m?js)'], (req, res, next) => {
+app.get(['/dist/v0/amp-*.(m?js)'], (_req, res, next) => {
   if (argv.no_caching_extensions) {
     res.header('Cache-Control', 'no-store');
   }
@@ -1000,9 +1062,10 @@ app.get(
 
         // Extract amp-ad for the given 'type' specified in URL query.
         if (req.path.indexOf('/examples/ads.amp.html') == 0 && req.query.type) {
-          const ads = file.match(
-            elementExtractor('(amp-ad|amp-embed)', req.query.type)
-          );
+          const ads =
+            file.match(
+              elementExtractor('(amp-ad|amp-embed)', req.query.type)
+            ) ?? [];
           file = file.replace(
             /<body>[\s\S]+<\/body>/m,
             '<body>' + ads.join('') + '</body>'
@@ -1014,9 +1077,8 @@ app.get(
           req.path.indexOf('/examples/analytics-vendors.amp.html') == 0 &&
           req.query.type
         ) {
-          const analytics = file.match(
-            elementExtractor('amp-analytics', req.query.type)
-          );
+          const analytics =
+            file.match(elementExtractor('amp-analytics', req.query.type)) ?? [];
           file = file.replace(
             /<div id="container">[\s\S]+<\/div>/m,
             '<div id="container">' + analytics.join('') + '</div>'
@@ -1028,9 +1090,8 @@ app.get(
           req.path.indexOf('/examples/amp-consent/cmp-vendors.amp.html') == 0 &&
           req.query.type
         ) {
-          const consent = file.match(
-            elementExtractor('amp-consent', req.query.type)
-          );
+          const consent =
+            file.match(elementExtractor('amp-consent', req.query.type)) ?? [];
           file = file.replace(
             /<div id="container">[\s\S]+<\/div>/m,
             '<div id="container">' + consent.join('') + '</div>'
@@ -1064,10 +1125,19 @@ app.get(
   }
 );
 
+/**
+ * @param {string} string
+ * @return {string}
+ */
 function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+/**
+ * @param {string} tagName
+ * @param {string} type
+ * @return {RegExp}
+ */
 function elementExtractor(tagName, type) {
   type = escapeRegExp(type);
   return new RegExp(
@@ -1149,20 +1219,60 @@ app.use('/bind/ecommerce/sizes', (req, res) => {
   }, 1000); // Simulate network delay.
 });
 
-// Simulated subscription entitlement
+/**
+ * Simulates a publisher's metering state store.
+ * (amp-subscriptions)
+ * @type {{[ampReaderId: string]: {}}}
+ */
+const meteringStateStore = {};
+
+// Simulate a publisher's entitlements API.
+// (amp-subscriptions)
 app.use('/subscription/:id/entitlements', (req, res) => {
   cors.assertCors(req, res, ['GET']);
-  res.json({
-    source: 'local' + req.params.id,
-    granted: req.params.id > 0 ? true : false,
-    grantedReason: 'NOT_SUBSCRIBED',
+
+  // Create entitlements response.
+  const source = 'local' + req.params.id;
+  const granted = req.params.id > 0;
+  const grantReason = granted ? 'SUBSCRIBER' : 'NOT_SUBSCRIBER';
+  const decryptedDocumentKey = decryptDocumentKey(req.query.crypt);
+  const response = {
+    source,
+    granted,
+    grantReason,
     data: {
       login: true,
     },
-    decryptedDocumentKey: decryptDocumentKey(req.query.crypt),
-  });
+    decryptedDocumentKey,
+  };
+
+  // Store metering state, if possible.
+  const ampReaderId = req.query.rid;
+  if (ampReaderId && req.query.meteringState) {
+    // Parse metering state from encoded Base64 string.
+    const encodedMeteringState = req.query.meteringState;
+    const decodedMeteringState = Buffer.from(
+      encodedMeteringState,
+      'base64'
+    ).toString();
+    const meteringState = JSON.parse(decodedMeteringState);
+
+    // Store metering state.
+    meteringStateStore[ampReaderId] = meteringState;
+  }
+
+  // Add metering state to response, if possible.
+  if (meteringStateStore[ampReaderId]) {
+    response.metering = {
+      state: meteringStateStore[ampReaderId],
+    };
+  }
+
+  res.json(response);
 });
 
+// Simulate a publisher's SKU map API.
+// (amp-subscriptions)
 app.use('/subscriptions/skumap', (req, res) => {
   cors.assertCors(req, res, ['GET']);
   res.json({
@@ -1179,10 +1289,71 @@ app.use('/subscriptions/skumap', (req, res) => {
   });
 });
 
+// Simulate a publisher's pingback API.
+// (amp-subscriptions)
 app.use('/subscription/pingback', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   res.json({
     done: true,
+  });
+});
+
+/*
+  Simulate a publisher's account registration API.
+
+  The `amp-subscriptions-google` extension sends this API a POST request.
+  The request body looks like:
+
+  {
+    "googleSignInDetails": {
+      // This signed JWT contains information from Google Sign-In
+      "idToken": "...JWT from Google Sign-In...",
+      // Some useful fields from the `idToken`, pre-parsed for convenience
+      "name": "Jane Smith",
+      "givenName": "Jane",
+      "familyName": "Smith",
+      "imageUrl": "https://imageurl",
+      "email": "janesmith@example.com"
+    },
+    // Associate this ID with the registration. Use it to look up metering state
+    // for future entitlements requests
+    // https://github.com/ampproject/amphtml/blob/main/extensions/amp-subscriptions/amp-subscriptions.md#combining-the-amp-reader-id-with-publisher-cookies
+    "ampReaderId": "amp-s0m31d3nt1f13r"
+  }
+
+  (amp-subscriptions-google)
+*/
+app.use('/subscription/register', (req, res) => {
+  cors.assertCors(req, res, ['POST']);
+
+  // Generate a new ID for this metering state.
+  const meteringStateId = 'ppid' + Math.round(Math.random() * 99999999);
+
+  // Define registration timestamp.
+  //
+  // For demo purposes, set timestamp to 30 seconds ago.
+  // This causes Metering Toast to show immediately,
+  // which helps engineers test metering.
+  const registrationTimestamp = Math.round(Date.now() / 1000) - 30000;
+
+  // Store metering state.
+  //
+  // For demo purposes, just save this in memory.
+  // Production systems should persist this.
+  meteringStateStore[req.body.ampReaderId] = {
+    id: meteringStateId,
+    standardAttributes: {
+      // eslint-disable-next-line google-camelcase/google-camelcase
+      registered_user: {
+        timestamp: registrationTimestamp, // In seconds.
+      },
+    },
+  };
+
+  res.json({
+    metering: {
+      state: meteringStateStore[req.body.ampReaderId],
+    },
   });
 });
 
@@ -1222,21 +1393,11 @@ app.get('/dist/*.mjs', (req, res, next) => {
  */
 app.get(
   ['/dist/rtv/*/v0/*.(m?js)', '/dist/rtv/*/v0/*.(m?js).map'],
-  (req, res, next) => {
+  async (req, res, next) => {
     const mode = SERVE_MODE;
     const fileName = path.basename(req.path).replace('.max.', '.');
     let filePath = 'https://cdn.ampproject.org/v0/' + fileName;
-    if (mode == 'cdn') {
-      // This will not be useful until extension-location.js change in prod
-      // Require url from cdn
-      request(filePath, (error, response) => {
-        if (error) {
-          res.status(404);
-          res.end();
-        } else {
-          res.send(response);
-        }
-      });
+    if (await passthroughServeModeCdn(res, filePath)) {
       return;
     }
     const isJsMap = filePath.endsWith('.map');
@@ -1278,22 +1439,11 @@ window.addEventListener('beforeunload', (evt) => {
  */
 app.get(
   ['/dist/sw.(m?js)', '/dist/sw-kill.(m?js)', '/dist/ww.(m?js)'],
-  (req, res, next) => {
+  async (req, res, next) => {
     // Special case for entry point script url. Use compiled for testing
     const mode = SERVE_MODE;
     const fileName = path.basename(req.path);
-    if (mode == 'cdn') {
-      // This will not be useful until extension-location.js change in prod
-      // Require url from cdn
-      const filePath = 'https://cdn.ampproject.org/' + fileName;
-      request(filePath, function (error, response) {
-        if (error) {
-          res.status(404);
-          res.end();
-        } else {
-          res.send(response);
-        }
-      });
+    if (await passthroughServeModeCdn(res, fileName)) {
       return;
     }
     if (mode == 'default') {
@@ -1303,12 +1453,12 @@ app.get(
   }
 );
 
-app.get('/dist/iframe-transport-client-lib.(m?js)', (req, res, next) => {
+app.get('/dist/iframe-transport-client-lib.(m?js)', (req, _res, next) => {
   req.url = req.url.replace(/dist/, 'dist.3p/current');
   next();
 });
 
-app.get('/dist/amp-inabox-host.(m?js)', (req, res, next) => {
+app.get('/dist/amp-inabox-host.(m?js)', (req, _res, next) => {
   const mode = SERVE_MODE;
   if (mode != 'default') {
     req.url = req.url.replace('amp-inabox-host', 'amp4ads-host-v0');
@@ -1324,12 +1474,7 @@ app.get('/dist/sw(.max)?.(m?js)', (req, res, next) => {
   fs.promises
     .readFile(pc.cwd() + filePath, 'utf8')
     .then((file) => {
-      let n = new Date();
-      // Round down to the nearest 5 minutes.
-      n -=
-        (n.getMinutes() % 5) * 1000 * 60 +
-        n.getSeconds() * 1000 +
-        n.getMilliseconds();
+      const n = nearestFiveMinutes();
       file =
         'self.AMP_CONFIG = {v: "99' +
         n +
@@ -1374,12 +1519,7 @@ app.get(['/dist/cache-sw.html'], (req, res, next) => {
   fs.promises
     .readFile(pc.cwd() + filePath, 'utf8')
     .then((file) => {
-      let n = new Date();
-      // Round down to the nearest 5 minutes.
-      n -=
-        (n.getMinutes() % 5) * 1000 * 60 +
-        n.getSeconds() * 1000 +
-        n.getMilliseconds();
+      let n = nearestFiveMinutes();
       const percent = parseFloat(req.query.canary) || 0.01;
       let env = '99';
       if (Math.random() < percent) {
@@ -1395,13 +1535,8 @@ app.get(['/dist/cache-sw.html'], (req, res, next) => {
     .catch(next);
 });
 
-app.get('/dist/diversions', (req, res) => {
-  let n = new Date();
-  // Round down to the nearest 5 minutes.
-  n -=
-    (n.getMinutes() % 5) * 1000 * 60 +
-    n.getSeconds() * 1000 +
-    n.getMilliseconds();
+app.get('/dist/diversions', (_req, res) => {
+  let n = nearestFiveMinutes();
   n += 5 * 1000 * 60;
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Date', new Date().toUTCString());
@@ -1413,18 +1548,7 @@ app.get('/dist/diversions', (req, res) => {
  * End Cache SW LOCALDEV section
  */
 
-/**
- * Web worker binary.
- */
-app.get('/dist/ww(.max)?.(m?js)', (req, res) => {
-  fs.promises.readFile(pc.cwd() + req.path).then((file) => {
-    res.setHeader('Content-Type', 'text/javascript');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.end(file);
-  });
-});
-
-app.get('/mraid.js', (req, res, next) => {
+app.get('/mraid.js', (req, _res, next) => {
   req.url = req.url.replace('mraid.js', 'examples/mraid/mraid.js');
   next();
 });
@@ -1458,12 +1582,27 @@ app.use('/mraid/', (req, res) => {
 });
 
 /**
- * @param {string} ampJsVersion
+ * Get the current time rounded down to the nearest 5 minutes.
+ * @return {number}
+ */
+function nearestFiveMinutes() {
+  const date = new Date();
+  // Round down to the nearest 5 minutes.
+  const time =
+    Number(date) -
+    (date.getMinutes() % 5) * 1000 * 60 +
+    date.getSeconds() * 1000 +
+    date.getMilliseconds();
+  return time;
+}
+
+/**
+ * @param {string} ampJsVersionString
  * @param {string} file
  * @return {string}
  */
-function addViewerIntegrationScript(ampJsVersion, file) {
-  ampJsVersion = parseFloat(ampJsVersion);
+function addViewerIntegrationScript(ampJsVersionString, file) {
+  const ampJsVersion = parseFloat(ampJsVersionString);
   if (!ampJsVersion) {
     return file;
   }
@@ -1489,10 +1628,18 @@ function addViewerIntegrationScript(ampJsVersion, file) {
   return file;
 }
 
+/**
+ * @param {express.Request} req
+ * @return {string}
+ */
 function getUrlPrefix(req) {
   return req.protocol + '://' + req.headers.host;
 }
 
+/**
+ * @param {string} filePath
+ * @return {string}
+ */
 function generateInfo(filePath) {
   const mode = SERVE_MODE;
   filePath = filePath.substr(0, filePath.length - 9) + '.html';
@@ -1515,6 +1662,10 @@ function generateInfo(filePath) {
   );
 }
 
+/**
+ * @param {string} encryptedDocumentKey
+ * @return {string|null}
+ */
 function decryptDocumentKey(encryptedDocumentKey) {
   if (!encryptedDocumentKey) {
     return null;
@@ -1533,36 +1684,29 @@ function decryptDocumentKey(encryptedDocumentKey) {
 }
 
 // serve local vendor config JSON files
-app.use('(/dist)?/rtv/*/v0/analytics-vendors/:vendor.json', (req, res) => {
-  const {vendor} = req.params;
-  const serveMode = SERVE_MODE;
+app.use(
+  '(/dist)?/rtv/*/v0/analytics-vendors/:vendor.json',
+  async (req, res) => {
+    const {vendor} = req.params;
+    const serveMode = SERVE_MODE;
 
-  if (serveMode === 'cdn') {
-    const vendorUrl = `https://cdn.ampproject.org/v0/analytics-vendors/${vendor}.json`;
-    request(vendorUrl, (error, response) => {
-      if (error) {
-        res.status(404);
-        res.end();
-      } else {
-        res.send(response);
-      }
-    });
-    return;
-  }
+    const cdnUrl = `https://cdn.ampproject.org/v0/analytics-vendors/${vendor}.json`;
+    if (await passthroughServeModeCdn(res, cdnUrl)) {
+      return;
+    }
 
-  const max = serveMode === 'default' ? '.max' : '';
-  const localVendorConfigPath = `${pc.cwd()}/dist/v0/analytics-vendors/${vendor}${max}.json`;
+    const max = serveMode === 'default' ? '.max' : '';
+    const localPath = `${pc.cwd()}/dist/v0/analytics-vendors/${vendor}${max}.json`;
 
-  fs.promises
-    .readFile(localVendorConfigPath)
-    .then((file) => {
+    try {
+      const file = await fs.promises.readFile(localPath);
       res.setHeader('Content-Type', 'application/json');
       res.end(file);
-    })
-    .catch(() => {
+    } catch (_) {
       res.status(404);
-      res.end('Not found: ' + localVendorConfigPath);
-    });
-});
+      res.end('Not found: ' + localPath);
+    }
+  }
+);
 
 module.exports = app;

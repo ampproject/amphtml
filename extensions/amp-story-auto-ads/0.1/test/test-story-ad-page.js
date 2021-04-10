@@ -23,6 +23,7 @@ import {
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 import {CommonSignals} from '../../../../src/common-signals';
+import {Gestures} from '../../../../src/gesture';
 import {StoryAdAnalytics} from '../story-ad-analytics';
 import {StoryAdLocalization} from '../story-ad-localization';
 import {StoryAdPage} from '../story-ad-page';
@@ -215,6 +216,24 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
       storyAdPage.toggleVisibility();
       expect(altBody).not.to.have.attribute('amp-story-visible');
     });
+
+    it('should add/remove the cta-active signal', async () => {
+      const pageElement = storyAdPage.build();
+      // Stub delegateVideoAutoplay.
+      pageElement.getImpl = () => Promise.resolve(pageImplMock);
+      doc.body.appendChild(pageElement);
+
+      const ampAdElement = doc.querySelector('amp-ad');
+      ampAdElement.setAttribute('data-vars-ctaurl', 'https://cats.example');
+      ampAdElement.setAttribute('data-vars-ctatype', 'INSTALL');
+      await storyAdPage.maybeCreateCta();
+
+      const anchor = doc.querySelector('.i-amphtml-story-ad-link');
+      expect(anchor).to.exist;
+      expect(anchor).not.to.have.attribute('cta-active');
+      storyAdPage.toggleVisibility();
+      expect(anchor).to.have.attribute('cta-active');
+    });
   });
 
   describe('#maybeCreateCta', () => {
@@ -239,8 +258,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
 
       const ctaLayer = doc.querySelector('amp-story-cta-layer');
       expect(ctaLayer).to.exist;
-      const anchor = ctaLayer.firstChild;
-      expect(anchor.tagName).to.equal('A');
+      const anchor = ctaLayer.querySelector('a');
       expect(anchor.target).to.equal('_blank');
       expect(anchor.href).to.equal('https://amp.dev/');
       expect(anchor).to.have.attribute(
@@ -260,8 +278,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
 
       const ctaLayer = doc.querySelector('amp-story-cta-layer');
       expect(ctaLayer).to.exist;
-      const anchor = ctaLayer.firstChild;
-      expect(anchor.tagName).to.equal('A');
+      const anchor = ctaLayer.querySelector('a');
       expect(anchor.target).to.equal('_blank');
       expect(anchor.href).to.equal('https://amp.dev/');
       expect(anchor).to.have.attribute(
@@ -496,6 +513,26 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
       );
     });
 
+    it('should fire "story-ad-swipe" upon ad swipe', async () => {
+      const onGestureStub = env.sandbox.stub(Gestures.prototype, 'onGesture');
+      const pageElement = storyAdPage.build();
+      doc.body.appendChild(pageElement);
+      // Stub delegateVideoAutoplay.
+      pageElement.getImpl = () => Promise.resolve(pageImplMock);
+
+      expect(fireEventStub).not.to.be.called;
+      const gestureHandler = onGestureStub.lastCall.args[1];
+      // Fake X swipe.
+      gestureHandler();
+      await macroTask();
+      expect(fireEventStub).to.be.calledWithExactly(
+        pageElement,
+        1, // adIndex
+        'story-ad-swipe',
+        {swipeTime: window.sandbox.match.number}
+      );
+    });
+
     it('should fire "story-ad-click" upon ad click', async () => {
       const pageElement = storyAdPage.build();
       doc.body.appendChild(pageElement);
@@ -513,6 +550,8 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
       cta.target = '_self';
       cta.click();
 
+      // In real world the shadow host element will be the click target.
+      expect(cta.parentElement.getAttribute('role')).to.equal('button');
       await macroTask();
       expect(fireEventStub).to.be.calledWithExactly(
         pageElement,

@@ -18,15 +18,15 @@ import * as Preact from '../../../src/preact/index';
 import {
   WithAmpContext,
   useAmpContext,
-  useLoad,
+  useLoading,
 } from '../../../src/preact/context';
 import {mount} from 'enzyme';
 
 describes.sandboxed('preact/context', {}, () => {
   function Component(props) {
     const context = useAmpContext();
-    const load = useLoad(props.loading, props.unloadOnPause);
-    return <ContextReader {...context} load={load} />;
+    const loading = useLoading(props.loading);
+    return <ContextReader {...context} computedLoading={loading} />;
   }
 
   function ContextReader() {
@@ -43,7 +43,7 @@ describes.sandboxed('preact/context', {}, () => {
       renderable: true,
       playable: true,
       loading: 'auto',
-      load: true,
+      computedLoading: 'auto',
     });
   });
 
@@ -57,7 +57,7 @@ describes.sandboxed('preact/context', {}, () => {
       renderable: false,
       playable: false,
       loading: 'lazy',
-      load: false,
+      computedLoading: 'lazy',
     });
   });
 
@@ -71,21 +71,7 @@ describes.sandboxed('preact/context', {}, () => {
       renderable: true,
       playable: false,
       loading: 'auto',
-      load: true,
-    });
-  });
-
-  it('should disable loading when not playable and unloadOnPause', () => {
-    const wrapper = mount(
-      <WithAmpContext playable={false}>
-        <Component unloadOnPause={true} />
-      </WithAmpContext>
-    );
-    expect(wrapper.find(ContextReader).props()).to.contain({
-      renderable: true,
-      playable: false,
-      loading: 'auto',
-      load: false,
+      computedLoading: 'auto',
     });
   });
 
@@ -99,7 +85,7 @@ describes.sandboxed('preact/context', {}, () => {
       renderable: true,
       playable: true,
       loading: 'lazy',
-      load: false,
+      computedLoading: 'lazy',
     });
   });
 
@@ -113,7 +99,7 @@ describes.sandboxed('preact/context', {}, () => {
       renderable: true,
       playable: true,
       loading: 'eager',
-      load: true,
+      computedLoading: 'eager',
     });
   });
 
@@ -127,7 +113,7 @@ describes.sandboxed('preact/context', {}, () => {
       renderable: true,
       playable: true,
       loading: 'eager',
-      load: false,
+      computedLoading: 'unload',
     });
   });
 
@@ -139,13 +125,13 @@ describes.sandboxed('preact/context', {}, () => {
     );
     expect(wrapper.find(ContextReader).props()).to.contain({
       loading: 'auto',
-      load: true,
+      computedLoading: 'auto',
     });
 
     wrapper.setProps({loading: 'lazy'});
     expect(wrapper.find(ContextReader).props()).to.contain({
       loading: 'lazy',
-      load: true,
+      computedLoading: 'lazy',
     });
   });
 
@@ -157,13 +143,13 @@ describes.sandboxed('preact/context', {}, () => {
     );
     expect(wrapper.find(ContextReader).props()).to.contain({
       loading: 'auto',
-      load: true,
+      computedLoading: 'auto',
     });
 
     wrapper.setProps({loading: 'unload'});
     expect(wrapper.find(ContextReader).props()).to.contain({
       loading: 'unload',
-      load: false,
+      computedLoading: 'unload',
     });
   });
 });

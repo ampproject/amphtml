@@ -36,6 +36,7 @@ import {userAssert} from '../../../../../src/log';
  *   title: string,
  *   url: string,
  *   image: (string|undefined),
+ *   alt: string,
  *   domainName: string,
  * }}
  */
@@ -77,6 +78,7 @@ export class ArticleComponent {
       domainName,
       type: articleJson['type'],
       title: articleJson['title'],
+      alt: articleJson['alt'],
     };
 
     if (articleJson['image']) {
@@ -138,6 +140,10 @@ export class ArticleComponent {
         image,
         dict({'src': resolveImgSrc(win, articleData.image)})
       );
+
+      addAttributesToElement(image, {
+        'alt': articleData.alt ? articleData.alt : '',
+      });
 
       el.appendChild(imgEl);
     }

@@ -146,6 +146,9 @@ export class AmpSlideScroll extends BaseSlides {
       ? false
       : !isExperimentOn(this.win, 'amp-carousel-chrome-scroll-snap');
 
+    /** @private {boolean} */
+    this.hasFirstResizedOccured_ = false;
+
     this.onResized_ = this.onResized_.bind(this);
   }
 
@@ -331,6 +334,7 @@ export class AmpSlideScroll extends BaseSlides {
    */
   onResized_(size) {
     this.slideWidth_ = size.width;
+    this.hasFirstResizedOccured_ = true;
   }
 
   /** @override */
@@ -347,6 +351,12 @@ export class AmpSlideScroll extends BaseSlides {
     );
     if (isScaled) {
       return Promise.resolve();
+    }
+
+    // Account for race when onResized_ has not fired before layoutCallback,
+    // since we need slideWidth_ to proceed.
+    if (!this.hasFirstResizedOccured_) {
+      this.slideWidth_ = this.slidesContainer_./*OK*/ clientWidth;
     }
 
     if (this.slideIndex_ === null) {
@@ -521,6 +531,11 @@ export class AmpSlideScroll extends BaseSlides {
    * @return {number} a number representing the next slide index.
    */
   getNextSlideIndex_(currentScrollLeft) {
+    // Addresses race where slideWidth is 0, due to being hidden
+    // while snapping is occuring.
+    if (!currentScrollLeft && !this.slideWidth_) {
+      return 0;
+    }
     // This can be only 0, 1 or 2, since only a max of 3 slides are shown at
     // a time.
     const scrolledSlideIndex = Math.round(currentScrollLeft / this.slideWidth_);

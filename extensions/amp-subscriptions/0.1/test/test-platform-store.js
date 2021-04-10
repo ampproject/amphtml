@@ -1008,4 +1008,20 @@ describes.realWin('Platform store', {}, (env) => {
       }
     );
   });
+
+  describe('resetPlatform', () => {
+    const platformKey = 'local';
+    let platform;
+
+    beforeEach(() => {
+      platform = new SubscriptionPlatform();
+      env.sandbox.stub(platform, 'reset');
+      platformStore.resolvePlatform('local', platform);
+    });
+
+    it('should reset a given platform', () => {
+      platformStore.resetPlatform(platformKey);
+      expect(platform.reset).to.be.calledOnce;
+    });
+  });
 });

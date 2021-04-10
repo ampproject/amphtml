@@ -17,7 +17,9 @@ import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {isArray, isObject} from '../../../src/types';
 import {isSecureUrlDeprecated} from '../../../src/url';
+import {parseExtensionUrl} from '../../../src/service/extension-script';
 import {parseJson} from '../../../src/json';
+import {urls} from '../../../src/config';
 
 const TAG = 'amp-ad-util';
 
@@ -159,4 +161,56 @@ export function getAmpAdMetadata(creative) {
     );
     return null;
   }
+}
+
+/**
+ * Merges any elements from customElementExtensions array into extensions array if
+ * the element is not present.
+ * @param {!Array<{custom-element: string, 'src': string}} extensions
+ * @param {!Array<string>} customElementExtensions
+ */
+export function mergeExtensionsMetadata(extensions, customElementExtensions) {
+  for (let i = 0; i < customElementExtensions.length; i++) {
+    const extensionId = customElementExtensions[i];
+    if (!extensionsHasElement(extensions, extensionId)) {
+      extensions.push({
+        'custom-element': extensionId,
+        // The default version is 0.1. To specify a specific version,
+        // use metadata['extensions'] field instead.
+        src: `${urls.cdn}/v0/${extensionId}-0.1.js`,
+      });
+    }
+  }
+}
+
+/**
+ * Determine if parsed extensions metadata contains given element id.
+ * @param {!Array<{custom-element: string, src: string}>} extensions
+ * @param {string} id
+ * @return {boolean}
+ */
+export function extensionsHasElement(extensions, id) {
+  return extensions.some((entry) => entry['custom-element'] === id);
+}
+
+/**
+ * Parses extension urls from given metadata to retrieve name and version.
+ * @param {!./amp-ad-type-defs.CreativeMetaDataDef} creativeMetadata
+ * @return {!Array<?{extensionId: string, extensionVersion: string}>}
+ */
+export function getExtensionsFromMetadata(creativeMetadata) {
+  const parsedExtensions = [];
+  const {extensions} = creativeMetadata;
+  if (!extensions || !isArray(extensions)) {
+    return parsedExtensions;
+  }
+
+  for (let i = 0; i < extensions.length; i++) {
+    const extension = extensions[i];
+    const extensionData = parseExtensionUrl(extension.src);
+    if (extensionData) {
+      parsedExtensions.push(extensionData);
+    }
+  }
+  return parsedExtensions;
 }

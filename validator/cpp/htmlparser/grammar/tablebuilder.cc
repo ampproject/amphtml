@@ -28,7 +28,6 @@ namespace htmlparser::grammar {
 
 constexpr std::string_view BOLD_RED_BEGIN = "\033[1;31m";
 constexpr std::string_view BOLD_RED_END = "\033[0m";
-std::string PrintChar(char c);
 
 TableBuilder::TableBuilder(std::string_view grammar_file_path,
                            OutputFileOptions options)
@@ -63,6 +62,8 @@ bool TableBuilder::ParseRulesAndGenerateTable() {
                       transition_states.begin(), transition_states.end(),
                       std::inserter(unused_states, unused_states.begin()));
 
+  unused_states.erase("PUSH");
+  unused_states.erase("POP");
   if (!unused_states.empty()) {
     std::cerr << BOLD_RED_BEGIN << "Following states defined but not used: \n";
     for (auto& us : unused_states) {
@@ -78,6 +79,8 @@ bool TableBuilder::ParseRulesAndGenerateTable() {
       declared_states.begin(), declared_states.end(),
       std::inserter(undefined_states, undefined_states.begin()));
 
+  undefined_states.erase("PUSH");
+  undefined_states.erase("POP");
   if (!undefined_states.empty()) {
     std::cerr << BOLD_RED_BEGIN << "Following states not defined: \n";
     for (auto& us : undefined_states) {
@@ -96,7 +99,6 @@ bool TableBuilder::ParseRulesAndGenerateTable() {
 
   declared_states.erase("PUSH");
   declared_states.erase("POP");
-
   if (declared_states.size() > 256) {
     std::cerr << "Maximum 256 states supported. " << declared_states.size()
               << " declared." << std::endl;
@@ -229,11 +231,7 @@ inline static bool HasPopBit(uint32_t code);
   fd << "constexpr std::array<int, 127> kTokenIndexes {\n    ";
   for (int i = 0; i < tokenindexes.size(); i++) {
     fd << tokenindexes[i];
-    if (tokenindexes[i] < charset_.size()) {
-      fd << " /* " << PrintChar(*(std::next(charset_.begin(), tokenindexes[i])))
-         << " */";
-    }
-    fd << (i > 0 && ((i + 1) % 6 == 0) ? ",\n    " : ", ");
+    fd << (i > 0 && ((i + 1) % 8 == 0) ? ",\n    " : ", ");
   }
   fd << "};\n\n";
 
@@ -248,9 +246,8 @@ inline static bool HasPopBit(uint32_t code);
     fd << "    {";
     for (int i = 0; i < v.size(); i++) {
       fd << "0x" << std::hex << v[i];
-      fd << " /* " << PrintChar(*(std::next(charset_.begin(), i))) << " */";
       if (i < v.size() - 1) {
-        fd << (i > 0 && ((i + 1) % 4 == 0) ? ",\n     " : ", ");
+        fd << (i > 0 && ((i + 1) % 8 == 0) ? ",\n     " : ", ");
       }
     }
 
@@ -584,30 +581,6 @@ std::optional<uint32_t> TableBuilder::ComputeStateBits(
   if (push) result |= (1 << 7);
   if (pop) result |= (1 << 6);
   return result;
-}
-
-std::string PrintChar(char c) {
-  switch (c) {
-    case '\r':
-      return "CR";
-    case '\t':
-      return "TAB";
-    case '\f':
-      return "FF";
-    case '\b':
-      return "BKSPC";
-    case '\n':
-      return "LF";
-    case 0x80:
-      return "\\u";
-    default: {
-      if (static_cast<int>(c) > 126) {
-        return ".*";
-      } else {
-        return std::string({c});
-      }
-    }
-  }
 }
 
 }  // namespace htmlparser::grammar

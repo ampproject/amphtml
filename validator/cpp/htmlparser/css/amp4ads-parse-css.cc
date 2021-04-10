@@ -68,13 +68,13 @@ class Amp4AdsVisitor : public RuleVisitor {
 
   void VisitQualifiedRule(const QualifiedRule& qualified_rule) override {
     for (const unique_ptr<Declaration>& decl : qualified_rule.declarations()) {
-      string_view name = StripVendorPrefix(decl->name());
+      auto name = StripVendorPrefix(decl->name());
 
       // The name of the property may identify a transition. The only
       // properties that may be transitioned are opacity and transform.
       if (name == "transition") {
         std::string transitioned_property = FirstIdent(decl->value());
-        string_view transitioned_property_stripped =
+        auto transitioned_property_stripped =
             StripVendorPrefix(transitioned_property);
 
         if (transitioned_property_stripped != "opacity" &&

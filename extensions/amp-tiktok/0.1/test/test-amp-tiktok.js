@@ -15,31 +15,115 @@
  */
 
 import '../amp-tiktok';
-import {createElementWithAttributes} from '../../../../src/dom';
+import * as dom from '../../../../src/dom';
+import {computedStyle} from '../../../../src/style';
+import {isAmpElement} from '../../../../src/dom';
+
+const VIDEOID = '6948210747285441798';
 
 describes.realWin(
   'amp-tiktok',
   {
     amp: {
-      runtimeOn: true,
       extensions: ['amp-tiktok'],
     },
   },
   (env) => {
     let win;
-    let element;
+    let doc;
+    let createElementWithAttributes;
 
     beforeEach(() => {
       win = env.win;
-      element = createElementWithAttributes(win.document, 'amp-tiktok', {
-        layout: 'responsive',
-      });
-      win.document.body.appendChild(element);
+      doc = win.document;
+      createElementWithAttributes = dom.createElementWithAttributes;
+
+      env.sandbox
+        .stub(dom, 'createElementWithAttributes')
+        .callsFake((document, tagName, attributes) => {
+          if (tagName === 'iframe' && attributes.src) {
+            // Serve a blank page, since these tests don't require an actual page.
+            // hash # at the end so path is not affected by param concat
+            attributes.src = `http://localhost:${location.port}/test/fixtures/served/blank.html#${attributes.src}`;
+          }
+          return createElementWithAttributes(document, tagName, attributes);
+        });
     });
 
-    it('should contain "hello world" when built', async () => {
-      await element.whenBuilt();
-      expect(element.querySelector('div').textContent).to.equal('hello world');
+    async function getTiktok(attrs = {}) {
+      const tiktok = dom.createElementWithAttributes(
+        win.document,
+        'amp-tiktok',
+        {
+          layout: 'responsive',
+          width: '325px',
+          height: '730px',
+          ...attrs,
+        }
+      );
+      doc.body.appendChild(tiktok);
+      return tiktok
+        .buildInternal()
+        .then(() => {
+          return tiktok.layoutCallback();
+        })
+        .then(() => tiktok);
+    }
+
+    it('renders with videoId', async () => {
+      const player = await getTiktok({'data-src': VIDEOID});
+      const iframe = player.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.getAttribute('src')).to.contain(VIDEOID);
+      expect(iframe.getAttribute('src')).to.contain('en-US');
+    });
+
+    it('renders with videoId', async () => {
+      const videoSrc =
+        'https://www.tiktok.com/@scout2015/video/6948210747285441798';
+      const player = await getTiktok({'data-src': videoSrc});
+      const iframe = player.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.getAttribute('src')).to.contain(VIDEOID);
+      expect(iframe.getAttribute('src')).to.contain('en-US');
+    });
+
+    it('renders with videoId and locale', async () => {
+      const player = await getTiktok({
+        'data-src': VIDEOID,
+        'data-locale': 'fr-FR',
+      });
+      const iframe = player.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.getAttribute('src')).to.contain(VIDEOID);
+      expect(iframe.getAttribute('src')).to.contain('fr-FR');
+    });
+
+    it('resizes using the fallback mechanism when no messages are received', async () => {
+      const player = await getTiktok({'data-src': VIDEOID});
+      const playerIframe = player.querySelector('iframe');
+      const impl = await player.getImpl(false);
+      env.sandbox.stub(impl, 'handleTiktokMessages_');
+
+      // Wait 1100ms for resize fallback to be invoked.
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, 1100);
+      });
+
+      expect(computedStyle(win, playerIframe).height).to.equal('775.25px');
+    });
+
+    it('removes iframe after unlayoutCallback', async () => {
+      const player = await getTiktok({'data-src': VIDEOID});
+      const playerIframe = player.querySelector('iframe');
+      expect(playerIframe).to.not.be.null;
+
+      const impl = await player.getImpl(false);
+      impl.unlayoutCallback();
+      expect(player.querySelector('iframe')).to.be.null;
+      expect(impl.iframe_).to.be.null;
     });
   }
 );

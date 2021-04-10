@@ -31,6 +31,7 @@ import {
 } from '../../../../src/dom';
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service';
+import {toggleExperiment} from '../../../../src/experiments';
 
 const extensions = ['amp-story:1.0', 'amp-audio'];
 
@@ -250,6 +251,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     const fiePromise = installFriendlyIframeEmbed(iframe, gridLayerEl, {
       url: 'https://amp.dev',
       html: '<video src="https://example.com/video.mp3"></video>',
+      extensions: [],
     });
     env.sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
 
@@ -630,6 +632,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
     );
+    attachmentEl.setAttribute('layout', 'nodisplay');
     element.appendChild(attachmentEl);
 
     page.buildCallback();
@@ -642,10 +645,89 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(openAttachmentEl).to.exist;
   });
 
+  it('should build the inline page attachment UI with one image', async () => {
+    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
+
+    const attachmentEl = win.document.createElement(
+      'amp-story-page-attachment'
+    );
+
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    attachmentEl.setAttribute('cta-image', 'nodisplay');
+    element.appendChild(attachmentEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    expect(
+      openAttachmentEl.querySelector(
+        '.i-amphtml-story-inline-page-attachment-img'
+      )
+    ).to.exist;
+  });
+
+  it('should build the inline page attachment UI with two images', async () => {
+    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
+
+    const attachmentEl = win.document.createElement(
+      'amp-story-page-attachment'
+    );
+
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    attachmentEl.setAttribute('cta-image', 'nodisplay');
+    attachmentEl.setAttribute('cta-image-2', 'nodisplay');
+    element.appendChild(attachmentEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    expect(
+      openAttachmentEl.querySelectorAll(
+        '.i-amphtml-story-inline-page-attachment-img'
+      ).length
+    ).to.equal(2);
+  });
+
+  it('should build the new default outlink page attachment UI', async () => {
+    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
+
+    const attachmentEl = createElementWithAttributes(
+      win.document,
+      'amp-story-page-attachment',
+      {'layout': 'nodisplay', 'href': 'www.google.com'}
+    );
+    element.appendChild(attachmentEl);
+
+    await page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    expect(
+      openAttachmentEl.querySelector(
+        '.i-amphtml-story-outlink-page-attachment-outlink-chip'
+      )
+    ).to.exist;
+  });
+
   it('should build the open attachment UI with custom CTA label', async () => {
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
     );
+    attachmentEl.setAttribute('layout', 'nodisplay');
     attachmentEl.setAttribute('data-cta-text', 'Custom label');
     element.appendChild(attachmentEl);
 

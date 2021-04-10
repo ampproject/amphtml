@@ -25,7 +25,17 @@ export default {
   decorators: [withA11y, withKnobs],
 };
 
-const LOCALES = ['en-US', 'en-GB', 'fr', 'ru', 'ar', 'he', 'ja'];
+const LOCALES = [
+  'en-US',
+  'en-GB',
+  'fr',
+  'ru',
+  'ar',
+  'he',
+  'ja',
+  'ZhTw',
+  'zH-Tw',
+];
 
 export const _default = () => {
   const dateTime = date('Date/time', new Date());

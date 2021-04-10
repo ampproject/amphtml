@@ -138,6 +138,12 @@ export class TouchHandler {
    * @private
    */
   forwardEvent_(e) {
+    // Check if an AMP component is signaling that we should
+    // stop propagation of the event from bubbling up to the viewer
+    if (e?.shouldViewerCancelPropagation) {
+      e.stopImmediatePropagation();
+      return;
+    }
     if (e && e.type) {
       const msg = this.copyTouchEvent_(e);
       this.messaging_.sendRequest(e.type, msg, false);

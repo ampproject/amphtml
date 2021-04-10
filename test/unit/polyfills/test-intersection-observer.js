@@ -242,6 +242,28 @@ describes.fakeWin('installForChildWin', {}, (env) => {
     expect(win.IntersectionObserverEntry).to.equal(IntersectionObserverEntry2);
   });
 
+  it('should install IntersectionObserverStub when native does not support document root', () => {
+    const {win} = env;
+    win.IntersectionObserver = function (callback, opts) {
+      if (opts && opts.root && opts.root.nodeType !== 1) {
+        throw new TypeError('Root must be an Element');
+      }
+    };
+    const parentWin = {
+      IntersectionObserver: IntersectionObserver1,
+      IntersectionObserverEntry: IntersectionObserverEntry1,
+    };
+    installForChildWin(parentWin, win);
+    expect(win.IntersectionObserver).to.equal(IntersectionObserver1);
+    expect(win.IntersectionObserverEntry).to.equal(IntersectionObserverEntry1);
+
+    // Change parent.
+    parentWin.IntersectionObserver = IntersectionObserver2;
+    parentWin.IntersectionObserverEntry = IntersectionObserverEntry2;
+    expect(win.IntersectionObserver).to.equal(IntersectionObserver2);
+    expect(win.IntersectionObserverEntry).to.equal(IntersectionObserverEntry2);
+  });
+
   it('should keep native when available', () => {
     const {win} = env;
     const native = function () {};

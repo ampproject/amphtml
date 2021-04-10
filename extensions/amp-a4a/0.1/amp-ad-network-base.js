@@ -172,7 +172,12 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
         response.headers.get('AMP-Ad-Response-Type') || 'default';
       devAssert(this.validators_[validatorType], 'Validator never registered!');
       return this.validators_[validatorType]
-        .validate(this.context_, unvalidatedBytes, response.headers)
+        .validate(
+          this.context_,
+          this.element,
+          unvalidatedBytes,
+          response.headers
+        )
         .catch((err) =>
           Promise.reject({type: FailureType.VALIDATOR_ERROR, msg: err})
         );

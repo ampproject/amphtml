@@ -63,7 +63,9 @@ CssLength::CssLength()
       is_fluid(false),
       numeral(std::numeric_limits<double>::quiet_NaN()),
       unit(kUnitPx) {}
-CssLength::CssLength(string_view input, bool allow_auto, bool allow_fluid)
+CssLength::CssLength(
+    re2::StringPiece input,
+    bool allow_auto, bool allow_fluid)
     : is_valid(false),
       is_set(false),
       is_auto(false),
@@ -160,7 +162,7 @@ CssLength CalculateWidth(AmpLayout::Layout input_layout,
        input_layout == AmpLayout::FIXED) &&
       !input_width.is_set) {
     // These values come from AMP's external runtime and can be found in
-    // https://github.com/ampproject/amphtml/blob/master/src/layout.js#L70
+    // https://github.com/ampproject/amphtml/blob/main/src/layout.js#L70
     // Note that amp-audio is absent due to it not having explicit dimensions
     // (the dimensions are determined at runtime and are specific to the
     // particular device/browser/etc).
@@ -188,7 +190,7 @@ CssLength CalculateHeight(AmpLayout::Layout input_layout,
        input_layout == AmpLayout::FIXED_HEIGHT) &&
       !input_height.is_set) {
     // These values come from AMP's external runtime and can be found in
-    // https://github.com/ampproject/amphtml/blob/master/src/layout.js#L70
+    // https://github.com/ampproject/amphtml/blob/main/src/layout.js#L70
     // Note that amp-audio is absent due to it not having explicit dimensions
     // (the dimensions are determined at runtime and are specific to the
     // particular device/browser/etc).

@@ -25,7 +25,6 @@
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
-#include "absl/strings/strip.h"
 #include "absl/types/variant.h"
 #include "css/parse-css.pb.h"
 #include "strings.h"
@@ -39,6 +38,32 @@ using std::unique_ptr;
 using std::vector;
 
 namespace htmlparser::css {
+
+namespace internal {
+std::string_view StripVendorPrefix(absl::string_view prefixed_string) {
+  // Checking for '-' is an optimization.
+  if (!prefixed_string.empty() && prefixed_string[0] == '-') {
+    // ConsumePrefix returns true if anything is consumed. This slightly
+    // strange syntax will cause us to exit early if we find a match.
+    if (absl::ConsumePrefix(&prefixed_string, "-o-")) {
+    } else if (absl::ConsumePrefix(&prefixed_string, "-moz-")) {
+    } else if (absl::ConsumePrefix(&prefixed_string, "-ms-")) {
+    } else if (absl::ConsumePrefix(&prefixed_string, "-webkit-")) {
+    }
+  }
+  return prefixed_string.data();
+}
+
+std::string_view StripMinMaxPrefix(absl::string_view prefixed_string) {
+  // We could just consume 'min-' and then 'max-, but then we'd allow 'min-max-'
+  // but not 'max-min-' which is both wrong and weird.
+  if (!absl::ConsumePrefix(&prefixed_string, "min-")) {
+    absl::ConsumePrefix(&prefixed_string, "max-");
+  }
+  return prefixed_string.data();
+}
+}  // namespace internal
+
 namespace {
 // Sets |dest| to be a JSON array of the ->ToJson() results of the
 // elements contained within |container|.
@@ -978,29 +1003,6 @@ unique_ptr<Token> TokenStream::ReleaseCurrentOrCreateEof() {
     return std::move(tokens_[pos_]);
   }
   return CreateEOFTokenAt(*eof_);
-}
-
-absl::string_view StripVendorPrefix(absl::string_view prefixed_string) {
-  // Checking for '-' is an optimization.
-  if (!prefixed_string.empty() && prefixed_string[0] == '-') {
-    // ConsumePrefix returns true if anything is consumed. This slightly
-    // strange syntax will cause us to exit early if we find a match.
-    if (absl::ConsumePrefix(&prefixed_string, "-o-")) {
-    } else if (absl::ConsumePrefix(&prefixed_string, "-moz-")) {
-    } else if (absl::ConsumePrefix(&prefixed_string, "-ms-")) {
-    } else if (absl::ConsumePrefix(&prefixed_string, "-webkit-")) {
-    }
-  }
-  return prefixed_string;
-}
-
-absl::string_view StripMinMaxPrefix(absl::string_view prefixed_string) {
-  // We could just consume 'min-' and then 'max-, but then we'd allow 'min-max-'
-  // but not 'max-min-' which is both wrong and weird.
-  if (!absl::ConsumePrefix(&prefixed_string, "min-")) {
-    absl::ConsumePrefix(&prefixed_string, "max-");
-  }
-  return prefixed_string;
 }
 
 //

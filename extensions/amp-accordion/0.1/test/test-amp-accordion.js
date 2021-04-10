@@ -26,7 +26,6 @@ import {
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
 import {poll} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
   'amp-accordion',
@@ -199,25 +198,6 @@ describes.realWin(
 
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.false;
       expect(headerElements[1].getAttribute('aria-expanded')).to.equal('false');
-    });
-
-    it('should expand when beforematch event is triggered on a collapsed section', async () => {
-      // Enable display locking feature.
-      toggleExperiment(win, 'amp-accordion-display-locking', true);
-      doc.body.onbeforematch = null;
-      await getAmpAccordion();
-      const section = doc.querySelector('section:not([expanded])');
-      const header = section.firstElementChild;
-      const content = section.children[1];
-      expect(section.hasAttribute('expanded')).to.be.false;
-      expect(header.getAttribute('aria-expanded')).to.equal('false');
-      content.dispatchEvent(new Event('beforematch'));
-      expect(section.hasAttribute('expanded')).to.be.true;
-      expect(header.getAttribute('aria-expanded')).to.equal('true');
-
-      // Reset display locking feature
-      toggleExperiment(win, 'amp-accordion-display-locking', false);
-      doc.body.onbeforematch = undefined;
     });
 
     it(
@@ -795,6 +775,69 @@ describes.realWin(
       expect(content2).to.have.attribute('aria-labelledby');
       expect(content2.getAttribute('id')).to.equal('test2');
       expect(content2.getAttribute('role')).to.equal('region');
+      expect(header2.getAttribute('aria-controls')).to.equal(
+        content2.getAttribute('id')
+      );
+      expect(header2.getAttribute('id')).to.equal(
+        content2.getAttribute('aria-labelledby')
+      );
+    });
+
+    it('should respect pre-existing a11y related attributes', async () => {
+      const contents = [0, 1, 2].map((i) => {
+        return (
+          '<h2 role="header" tabindex="0">' +
+          `Section ${i}<span>nested stuff<span>` +
+          `</h2><div id='test${i}' role="comment">Lorem ipsum</div>`
+        );
+      });
+      await getAmpAccordionWithContents(contents);
+
+      const sectionElements = doc.querySelectorAll('section');
+      expect(sectionElements.length).to.equal(3);
+
+      const section0 = sectionElements[0];
+      const section1 = sectionElements[1];
+      const section2 = sectionElements[2];
+      const {firstElementChild: header0, lastElementChild: content0} = section0;
+      const {firstElementChild: header1, lastElementChild: content1} = section1;
+      const {firstElementChild: header2, lastElementChild: content2} = section2;
+
+      expect(header0).to.have.attribute('id');
+      expect(header0.getAttribute('aria-controls')).to.equal('test0');
+      expect(header0.getAttribute('tabindex')).to.equal('0');
+      expect(header0.getAttribute('role')).to.equal('header');
+      expect(content0).to.have.attribute('aria-labelledby');
+      expect(content0.getAttribute('id')).to.equal('test0');
+      expect(content0.getAttribute('role')).to.equal('comment');
+      expect(header0.getAttribute('aria-controls')).to.equal(
+        content0.getAttribute('id')
+      );
+      expect(header0.getAttribute('id')).to.equal(
+        content0.getAttribute('aria-labelledby')
+      );
+
+      expect(header1).to.have.attribute('id');
+      expect(header1.getAttribute('aria-controls')).to.equal('test1');
+      expect(header1.getAttribute('tabindex')).to.equal('0');
+      expect(header1.getAttribute('role')).to.equal('header');
+      expect(content1).to.have.attribute('aria-labelledby');
+      expect(content1.getAttribute('id')).to.equal('test1');
+      expect(content1.getAttribute('role')).to.equal('comment');
+      expect(header1.getAttribute('aria-controls')).to.equal(
+        content1.getAttribute('id')
+      );
+      expect(header1.getAttribute('id')).to.equal(
+        content1.getAttribute('aria-labelledby')
+      );
+
+      expect(header2).to.have.attribute('id');
+      expect(header2.getAttribute('aria-controls')).to.equal('test2');
+      expect(header2.getAttribute('tabindex')).to.equal('0');
+      expect(header2.getAttribute('role')).to.equal('header');
+      expect(content2).to.have.attribute('aria-labelledby');
+      expect(content2.getAttribute('id')).to.equal('test2');
+      expect(content2.getAttribute('role')).to.equal('comment');
       expect(header2.getAttribute('aria-controls')).to.equal(
         content2.getAttribute('id')
       );

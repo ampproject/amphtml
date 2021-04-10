@@ -15,7 +15,7 @@
  */
 
 import {Deferred} from '../utils/promise';
-import {getService, registerServiceBuilder} from '../service';
+import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
 import {rootNodeFor, scopedQuerySelector} from '../dom';
 import {userAssert} from '../log';
 
@@ -37,10 +37,10 @@ const EMPTY_FUNC = () => {};
 /**
  */
 export class Templates {
-  /** @param {!Window} win */
-  constructor(win) {
-    /** @private @const {!Window} */
-    this.win_ = win;
+  /** @param {!AmpDoc} ampdoc */
+  constructor(ampdoc) {
+    /** @private @const */
+    this.ampdoc_ = ampdoc;
 
     /**
      * A map from template type to template's class promise.
@@ -255,7 +255,7 @@ export class Templates {
       (templateClass) => {
         // This is ugly workaround for https://github.com/google/closure-compiler/issues/2630.
         const Constr = /** @type {function(new:Object, !Element, !Window)} */ (templateClass);
-        const impl = (element[PROP_] = new Constr(element, this.win_));
+        const impl = (element[PROP_] = new Constr(element, this.ampdoc_.win));
         delete element[PROP_PROMISE_];
         return impl;
       }
@@ -326,21 +326,31 @@ export class Templates {
 }
 
 /**
- * @param {!Window} win
+ * @param {!AmpDoc} ampdoc
  */
-export function installTemplatesService(win) {
-  registerServiceBuilder(win, 'templates', Templates);
+export function installTemplatesServiceForDoc(ampdoc) {
+  registerServiceBuilderForDoc(ampdoc, 'templates', Templates);
 }
 
 /**
  * Registers an extended template. This function should typically be called
  * through the registerTemplate method on the AMP runtime.
- * @param {!Window} win
+ * @param {!AmpDoc} ampdoc
  * @param {string} type
  * @param {typeof ../base-template.BaseTemplate} templateClass
  * @return {undefined}
  */
-export function registerExtendedTemplate(win, type, templateClass) {
-  const templatesService = getService(win, 'templates');
+export function registerExtendedTemplateForDoc(ampdoc, type, templateClass) {
+  const templatesService = getServiceForDoc(ampdoc, 'templates');
   return templatesService.registerTemplate_(type, templateClass);
+}
+
+/**
+ * @param {!Templates} templates
+ * @param {string} type
+ * @return {!Promise<typeof ../base-template.BaseTemplate>|undefined}
+ * @visibleForTesting
+ */
+export function getTemplateClassForTesting(templates, type) {
+  return templates.templateClassMap_[type];
 }

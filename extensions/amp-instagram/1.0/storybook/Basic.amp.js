@@ -51,7 +51,7 @@ export const _default = () => {
 };
 
 export const InsideAccordion = () => {
-  const shortcode = text('shortcode', 'B8QaZW4AQY_');
+  const shortcode = text('shortcode', 'Bp4I3hRhd_v');
   const width = number('width', 300);
   const height = number('height', 200);
   return (
@@ -67,5 +67,21 @@ export const InsideAccordion = () => {
         </div>
       </section>
     </amp-accordion>
+  );
+};
+
+export const InsideDetails = () => {
+  const shortcode = text('shortcode', 'Bp4I3hRhd_v');
+  const width = number('width', 300);
+  const height = number('height', 200);
+  return (
+    <details open>
+      <summary>Post</summary>
+      <amp-instagram
+        data-shortcode={shortcode}
+        width={width}
+        height={height}
+      ></amp-instagram>
+    </details>
   );
 };

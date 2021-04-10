@@ -21,7 +21,7 @@ import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Purifier} from '../../../src/purifier/purifier';
 import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
-import {calculateExtensionScriptUrl} from '../../../src/service/extension-location';
+import {calculateExtensionScriptUrl} from '../../../src/service/extension-script';
 import {cancellation} from '../../../src/error';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
@@ -197,15 +197,17 @@ export class AmpScript extends AMP.BaseElement {
     return this.userActivation_;
   }
 
+  // * @param {Array<*>} args
+
   /**
    * Calls the specified function on this amp-script's worker-dom instance.
    *
-   * @param {string} functionIdentifier
+   * @param {string} unused - function identifier
    * @return {!Promise<*>}
    */
-  callFunction(functionIdentifier) {
+  callFunction(unused /*, ...args */) {
     return this.initialize_.promise.then(() => {
-      return this.workerDom_.callFunction(functionIdentifier);
+      return this.workerDom_.callFunction.apply(this.workerDom_, arguments);
     });
   }
 

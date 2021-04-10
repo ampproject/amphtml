@@ -57,7 +57,7 @@ if (argv.coverage) {
 /**
  * TODO(cvializ): Firefox now experimentally supports puppeteer.
  * When it's more mature we might want to support it.
- * {@link https://github.com/GoogleChrome/puppeteer/blob/master/experimental/puppeteer-firefox/README.md}
+ * {@link https://github.com/puppeteer/puppeteer/blob/main/experimental/puppeteer-firefox/README.md}
  */
 const PUPPETEER_BROWSERS = new Set(['chrome']);
 
@@ -327,32 +327,53 @@ envPresets['ampdoc-amp4ads-preset'] = envPresets['ampdoc-preset'].concat(
  * it.configure().skipViewerDemo().skipShadowDemo().run('Should ...', ...);
  */
 class ItConfig {
+  /**
+   * @param {Function} it
+   * @param {Object} env
+   */
   constructor(it, env) {
     this.it = it;
     this.env = env;
     this.skip = false;
   }
 
+  /**
+   * @return {ItConfig}
+   */
   skipShadowDemo() {
     this.skip = this.skip ? this.skip : this.env.environment == 'shadow-demo';
     return this;
   }
 
+  /**
+   * @return {ItConfig}
+   */
   skipSingle() {
     this.skip = this.skip ? this.skip : this.env.environment == 'single';
     return this;
   }
 
+  /**
+   * @return {ItConfig}
+   */
   skipViewerDemo() {
     this.skip = this.skip ? this.skip : this.env.environment == 'viewer-demo';
     return this;
   }
 
+  /**
+   * @return {ItConfig}
+   */
   skipA4aFie() {
     this.skip = this.skip ? this.skip : this.env.environment == 'a4a-fie';
     return this;
   }
 
+  /**
+   * @param {string} name
+   * @param {Function} fn
+   * @return {ItConfig}
+   */
   run(name, fn) {
     if (this.skip) {
       return this.it.skip(name, fn);
@@ -436,6 +457,9 @@ function describeEnv(factory) {
         });
     }
 
+    /**
+     * @return {Set<string>}
+     */
     function getAllowedBrowsers() {
       const {engine, browsers} = getConfig();
 
@@ -462,6 +486,9 @@ function describeEnv(factory) {
       return allowedBrowsers;
     }
 
+    /**
+     * @param {string} browserName
+     */
     function createVariantDescribe(browserName) {
       for (const name in variants) {
         it.configure = function () {
@@ -478,7 +505,13 @@ function describeEnv(factory) {
       createBrowserDescribe();
     });
 
-    function doTemplate(name, variant, browserName) {
+    /**
+     *
+     * @param {string} _name
+     * @param {Object} variant
+     * @param {string} browserName
+     */
+    function doTemplate(_name, variant, browserName) {
       const env = Object.create(variant);
       this.timeout(TEST_TIMEOUT);
       beforeEach(async function () {
@@ -618,6 +651,10 @@ class EndToEndFixture {
     }
   }
 
+  /**
+   * @param {!Object} env
+   * @return {Promise<void>}
+   */
   async teardown(env) {
     const {controller} = env;
     if (controller && controller.driver) {
@@ -668,6 +705,16 @@ function getDriver(
   }
 }
 
+/**
+ *
+ * @param {{
+ *  environment: *,
+ *  ampDriver: *,
+ *  controller: *,
+ * }} param0
+ * @param {TestSpec} param1
+ * @return {Promise<void>}
+ */
 async function setUpTest(
   {environment, ampDriver, controller},
   {testUrl, version, experiments = [], initialRect}

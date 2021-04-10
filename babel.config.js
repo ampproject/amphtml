@@ -25,33 +25,27 @@
 
 'use strict';
 
-const {
-  getDepCheckConfig,
-  getPostClosureConfig,
-  getPreClosureConfig,
-  getTestConfig,
-  getUnminifiedConfig,
-  getEslintConfig,
-} = require('./build-system/babel-config');
 const {cyan, yellow} = require('kleur/colors');
 const {log} = require('./build-system/common/logging');
 
 /**
- * Mapping of babel transform callers to their corresponding babel configs.
+ * Mapping of each babel transform caller to the name of the function that
+ * returns its config.
  */
 const babelTransforms = new Map([
-  ['babel-jest', {}],
-  ['dep-check', getDepCheckConfig()],
-  ['post-closure', getPostClosureConfig()],
-  ['pre-closure', getPreClosureConfig()],
-  ['test', getTestConfig()],
-  ['unminified', getUnminifiedConfig()],
-  ['@babel/eslint-parser', getEslintConfig()],
+  ['babel-jest', 'getEmptyConfig'],
+  ['post-closure', 'getPostClosureConfig'],
+  ['pre-closure', 'getPreClosureConfig'],
+  ['test', 'getTestConfig'],
+  ['unminified', 'getUnminifiedConfig'],
+  ['minified', 'getMinifiedConfig'],
+  ['@babel/eslint-parser', 'getEslintConfig'],
 ]);
 
 /**
- * Main entry point. Returns babel config corresponding to the caller, or a
- * blank config if the caller is unrecognized.
+ * Main entry point. Returns babel config corresponding to the caller, or an
+ * empty object if the caller is unrecognized. Configs are lazy-required when
+ * requested so we don't unnecessarily compute the entire set for all callers.
  *
  * @param {!Object} api
  * @return {!Object}
@@ -61,7 +55,8 @@ module.exports = function (api) {
     return callerObj ? callerObj.name : '<unnamed>';
   });
   if (callerName && babelTransforms.has(callerName)) {
-    return babelTransforms.get(callerName);
+    const configFunctionName = babelTransforms.get(callerName);
+    return require('./build-system/babel-config')[configFunctionName]();
   } else {
     log(
       yellow('WARNING:'),

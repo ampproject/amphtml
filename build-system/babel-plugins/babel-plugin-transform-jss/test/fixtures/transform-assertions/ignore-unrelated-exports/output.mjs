@@ -2,6 +2,7 @@
 var _classes = {
   floatLeft: "float-left-07984bd"
 };
+export const $floatLeft = "float-left-07984bd";
 
 /**
  * Copyright 2020 The AMP HTML Authors. All Rights Reserved.

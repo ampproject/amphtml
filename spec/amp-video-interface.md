@@ -1,6 +1,6 @@
 # Video in AMP
 
-Most video player components in AMP implement the [`VideoInterface`](https://github.com/ampproject/amphtml/blob/master/src/video-interface.js) API. This means
+Most video player components in AMP implement the [`VideoInterface`](https://github.com/ampproject/amphtml/blob/main/src/video-interface.js) API. This means
 that a set of features is available in all of these components, either completely
 or partially.
 
@@ -16,6 +16,16 @@ these players implement.
 
 ### For 3rd party services
 
+<!--
+  The following list is generated automatically:
+
+    amp check-video-interface-list --fix
+
+  Link check disabled to allow new extensions added in a pull request.
+-->
+
+<!-- markdown-link-check-disable -->
+
 -   [amp-3q-player](https://amp.dev/documentation/components/amp-3q-player)
 -   [amp-brid-player](https://amp.dev/documentation/components/amp-brid-player)
 -   [amp-brightcove](https://amp.dev/documentation/components/amp-brightcove)
@@ -23,21 +33,26 @@ these players implement.
 -   [amp-delight-player](https://amp.dev/documentation/components/amp-delight-player)
 -   [amp-gfycat](https://amp.dev/documentation/components/amp-gfycat)
 -   [amp-ima-video](https://amp.dev/documentation/components/amp-ima-video)
+-   [amp-jwplayer](https://amp.dev/documentation/components/amp-jwplayer)
 -   [amp-minute-media-player](https://amp.dev/documentation/components/amp-minute-media-player)
 -   [amp-mowplayer](https://amp.dev/documentation/components/amp-mowplayer)
 -   [amp-nexxtv-player](https://amp.dev/documentation/components/amp-nexxtv-player)
 -   [amp-ooyala-player](https://amp.dev/documentation/components/amp-ooyala-player)
 -   [amp-powr-player](https://amp.dev/documentation/components/amp-powr-player)
+-   [amp-redbull-player](https://amp.dev/documentation/components/amp-redbull-player)
 -   [amp-vimeo](https://amp.dev/documentation/components/amp-vimeo)
 -   [amp-viqeo-player](https://amp.dev/documentation/components/amp-viqeo-player)
 -   [amp-wistia-player](https://amp.dev/documentation/components/amp-wistia-player)
 -   [amp-youtube](https://amp.dev/documentation/components/amp-youtube)
+-   [amp-foo](https://amp.dev/documentation/components/amp-foo)
+
+<!-- markdown-link-check-enable -->
 
 <a id="analytics"></a>
 
 ## Analytics
 
-See [video analytics](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-video-analytics.md).
+See [video analytics](https://github.com/ampproject/amphtml/blob/main/extensions/amp-analytics/amp-video-analytics.md).
 
 <a id="autoplay"></a>
 

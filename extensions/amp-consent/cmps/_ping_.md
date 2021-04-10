@@ -24,7 +24,6 @@ A fake cmp type that is only used for local development.
 <amp-consent id="ABC" layout="nodisplay" type="_ping_">
   <script type="application/json">
     {
-      "consents": {},
       "postPromptUI": "postPromptUI",
       "clientConfig": {
         "CMP_id": "test_id",

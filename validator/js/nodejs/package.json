@@ -13,7 +13,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ampproject/amphtml/tree/master/validator/js/nodejs/"
+    "url": "https://github.com/ampproject/amphtml/tree/main/validator/js/nodejs/"
   },
   "bin": {
     "amphtml-validator": "./cli.js"
@@ -24,6 +24,6 @@
     "promise": "8.0.1"
   },
   "devDependencies": {
-    "jasmine": "3.6.4"
+    "jasmine": "3.7.0"
   }
 }

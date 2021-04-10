@@ -20,7 +20,7 @@ import {setStyles} from '../../src/style';
 
 /*
  * How to develop:
- * https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md
+ * https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md
  */
 
 /**
@@ -116,13 +116,13 @@ export function ssp(global, data) {
 
   parentElement.id = position['id'];
 
-  // https://github.com/ampproject/amphtml/tree/master/ads#the-iframe-sandbox
+  // https://github.com/ampproject/amphtml/tree/main/ads#the-iframe-sandbox
   global.document.getElementById('c').appendChild(parentElement);
 
   // validate dimensions against available space (window)
   const sizing = sizeAgainstWindow(parentElement./*OK*/ clientWidth, data);
 
-  // https://github.com/ampproject/amphtml/blob/master/3p/3p.js#L186
+  // https://github.com/ampproject/amphtml/blob/main/3p/3p.js#L186
   computeInMasterFrame(
     global,
     'ssp-load',
@@ -178,11 +178,27 @@ export function ssp(global, data) {
           if (!ad || ['error', 'empty'].includes(ad.type)) {
             noContent();
           } else {
+            // listen to message with "height" property -> for responsive ads (111x111) -> set new height / center
+            if (ad.responsive) {
+              global.addEventListener('message', (e) => {
+                try {
+                  const {height} = JSON.parse(e.data);
+                  if (height) {
+                    handlePosition(parentElement, true, {
+                      height: `${height}px`,
+                    });
+                  }
+                } catch (e) {
+                  // no-op
+                }
+              });
+            }
+
             // SSP need parentElement as value in "position.id"
             mW.sssp.writeAd(ad, {...position, id: parentElement});
 
             // init dimensions / centering
-            const d = ad.responsive ? {width: '100%', height: 'auto'} : null;
+            const d = ad.responsive ? {width: '100%', height: '100%'} : null;
             handlePosition(parentElement, true, d);
             global.context.renderStart(sizing);
           }

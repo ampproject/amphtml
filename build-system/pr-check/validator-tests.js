@@ -20,14 +20,15 @@
  */
 
 const {buildTargetsInclude, Targets} = require('./build-targets');
-const {printSkipMessage, timedExecOrDie} = require('./utils');
 const {runCiJob} = require('./ci-job');
+const {skipDependentJobs, timedExecOrDie} = require('./utils');
 
 const jobName = 'validator-tests.js';
 
 function pushBuildWorkflow() {
-  timedExecOrDie('gulp validator');
-  timedExecOrDie('gulp validator-webui');
+  timedExecOrDie('amp validator-webui');
+  timedExecOrDie('amp validator');
+  timedExecOrDie('amp validator-cpp');
 }
 
 function prBuildWorkflow() {
@@ -38,19 +39,23 @@ function prBuildWorkflow() {
       Targets.VALIDATOR_WEBUI
     )
   ) {
-    printSkipMessage(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime, validator, or validator web UI'
     );
     return;
   }
 
-  if (buildTargetsInclude(Targets.RUNTIME, Targets.VALIDATOR)) {
-    timedExecOrDie('gulp validator');
+  if (buildTargetsInclude(Targets.VALIDATOR_WEBUI)) {
+    timedExecOrDie('amp validator-webui');
   }
 
-  if (buildTargetsInclude(Targets.VALIDATOR_WEBUI)) {
-    timedExecOrDie('gulp validator-webui');
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.VALIDATOR)) {
+    timedExecOrDie('amp validator');
+  }
+
+  if (buildTargetsInclude(Targets.VALIDATOR)) {
+    timedExecOrDie('amp validator-cpp');
   }
 }
 

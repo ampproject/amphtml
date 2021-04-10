@@ -25,7 +25,7 @@ const killSuffix = process.platform == 'win32' ? '>NUL' : '';
 
 /**
  * Creates an async child process that handles Ctrl + C and immediately cancels
- * the ongoing `gulp` task.
+ * the ongoing `amp` task.
  *
  * @param {string} command
  * @return {number}
@@ -61,7 +61,7 @@ exports.createCtrlcHandler = function (command) {
 /**
  * Exits the Ctrl C handler process.
  *
- * @param {string} handlerProcess
+ * @param {string|number} handlerProcess
  */
 exports.exitCtrlcHandler = function (handlerProcess) {
   const exitCmd = killCmd + ' ' + handlerProcess + ' ' + killSuffix;

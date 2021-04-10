@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Lightbox} from '../lightbox';
+import {Lightbox} from '../component';
 import {boolean, select, text, withKnobs} from '@storybook/addon-knobs';
 import {useRef} from '../../../../src/preact';
 import {withA11y} from '@storybook/addon-a11y';
@@ -34,9 +34,16 @@ function LightboxWithActions({children, ...rest}) {
   const ref = useRef();
   return (
     <section>
-      <Lightbox ref={ref} {...rest}>
+      <Lightbox
+        closeButtonAs={(props) => (
+          <button {...props} aria-label="My custom close button">
+            close
+          </button>
+        )}
+        ref={ref}
+        {...rest}
+      >
         {children}
-        <button onClick={() => ref.current.close()}>close</button>
       </Lightbox>
       <div style={{marginTop: 8}}>
         <button onClick={() => ref.current.open()}>open</button>

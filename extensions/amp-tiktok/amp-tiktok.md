@@ -1,21 +1,13 @@
 ---
-$category@: presentation
+$category@: social
 formats:
   - websites
 teaser:
-  text: Fill this in with teaser text to improve SEO. Use the component description.
+  text: Displays a TikTok video embed.
+experimental: true
 ---
 
-<!--
-  All documentation starts with frontmatter. Front matter organizes documentation on amp.dev
-  and improves SEO.
-  * Include the relevant category(ies): ads-analytics, dynamic-content, layout, media, presentation, social, personalization
-  * List applicable format(s): websites, ads, stories, email
-  * Do not include markdown formatting in the frontmatter - plain text and punctionation only!
-  * Remove this comment!
--->
-
-<!--
+<!---
 Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,132 +25,123 @@ limitations under the License.
 
 # amp-tiktok
 
-<!--
-  If the component is relevant for more than one format and operates differently between these
-  formats, include and filter multiple content blocks and code samples.
--->
-
 ## Usage
 
-One to three paragraphs explaining the component usage. List important functionality. Explain why developers care about it.
+The `amp-tiktok` component embeds a [TikTok](https://www.tiktok.com/about) video on your page.
 
-[filter formats=“websites”]
+```html
+<amp-tiktok
+  width="325"
+  height="575"
+  data-src="6718335390845095173"
+></amp-tiktok>
+```
 
-Below is an example for websites.
+### Behavior
+
+The `amp-tiktok` component displays the TikTok video in an iframe. You may specify the `width`, `height` and `data-src` attributes. `amp-tiktok` does not support autoplay and requires user interaction to play videos.
+
+## Avoiding Layout shift
+
+Prevent layout shift by matching the `width` and `height` attributes on the `amp-tiktok` element to the size of the video player.
+
+By default, the width of the `amp-tiktok` iframe is 325px, resulting in a hight of roughly 575px. The default height of the embedded TikTok video player depends on the length and content of the TikTok caption. To show the entire video, the `amp-tiktok` component resizes to match the player height. You can avoid this by defining the width and height to match the video player.
 
 [example preview="inline" playground="true" imports="amp-tiktok"]
 
 ```html
-<amp-tiktok required-attribute>
-  I am a hello world inline executable code sample for websites!
-</amp-tiktok>
-```
-
-[/example][/filter]
-
-<!--
-  * [Read more about filtering sections](https://amp.dev/documentation/guides-and-tutorials/contribute/contribute-documentation/formatting/?format=websites#filtering-sections)
-  * [Read more about executable code samples](https://amp.dev/documentation/guides-and-tutorials/contribute/contribute-documentation/formatting/?format=websites#preview-code-samples)
- -->
-
-[filter formats=“ads”]
-
-Below is an example for ads.
-
-[example preview=“inline” playground=“true” imports="amp-tiktok"]
-
-```html
-<amp-tiktok required-attribute>
-  I am a hello world inline executable code sample for ads!
-</amp-tiktok>
-```
-
-[/example][/filter]
-
-### Behavior users should be aware of (optional)
-
-What to do if they want behavior. How to work around it.
-
-```html
-<amp-tiktok required-attribute>
-  Code sample of behavior or behavior workaround.
-</amp-tiktok>
-```
-
-### Behavior restrictions
-
-What is allowed, what isn't.
-
-## Attributes
-
-### `attribute-name`
-
-Description of attribute. Use cases for this attribute.
-
--   `attribute-value-option-one` (default): `attribute-option-one-value` does this to `amp-tiktok`.
--   `attribute-value-option-two`: `attribute-option-two-value` does this to `amp-tiktok`.
-
-### `optional-attribute-name` (optional)
-
-Here, I write what `optional-attribute-name` will do to `amp-tiktok`.
-
-## Actions (optional)
-
-### `action-name`
-
-Description of action. Use cases of `action-name`. Include all the nuances, such as: `amp-tiktok` needs to be identified with an `id` to work.
-
-## Events (optional)
-
-### `event-name`
-
-Description of event. Use cases of event-name. Include all the nuances, such as: `amp-tiktok` needs to be identified with an `id` to work.
-
-[example preview=”top-frame” playground=”true”]
-
-```html
-<head>
-  <script
-    custom-element="amp-tiktok"
-    async
-    src="https://cdn.ampproject.org/v0/amp-tiktok-latest.js"
-  ></script>
-</head>
-<body>
-  <amp-tiktok
-    required-attribute
-    on="event-name: my-button.show"
-  >
-    Hello World!
-  </amp-tiktok>
-  <button id="my-button" hidden>
-    Here I am!
-  </button>
-</body>
+<amp-tiktok
+  width="325"
+  height="731"
+  data-src="6718335390845095173"
+></amp-tiktok>
 ```
 
 [/example]
 
-## Styling (optional)
+If you choose to set the width to a value which is greater than 325px, the `iframe` will remain 325px and will be horizontally centered in that space. The surrounding space will be empty.
 
-Explain how to style the element.
+If you choose to set the height of to a value which is which is greater than the height the height will remain the height of the `iframe`.
 
-## Analytics (optional)
+## Attributes
 
-Explain analytics.
+### `data-src`
+
+The `data-src` attribute can contain one of two values: a **video id** or a **full URL** to a TikTok detail page.
+
+Example with video-id
+
+[example preview="inline" playground="true" imports="amp-tiktok"]
 
 ```html
-"configuration": {}
+<amp-tiktok
+  width="325"
+  height="575"
+  data-src="6948210747285441798"
+></amp-tiktok>
 ```
 
-## Accessibility (optional)
+[\example]
 
-Accessibility information related to `amp-tiktok`.
+Example with source url:
 
-## Version notes (optional)
+[example preview="inline" playground="true" imports="amp-tiktok"]
 
-Information on version differences and migration notes.
+```html
+<amp-tiktok
+  width="325 "
+  height="575"
+  data-src="https://www.tiktok.com/@scout2015/video/6948210747285441798"
+></amp-tiktok>
+```
 
-## Validation
+[\example]
 
-See [amp-tiktok rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-tiktok/validator-amp-tiktok.protoascii) in the AMP validator specification.
+In liu of the `data-src` attribute, `amp-tiktok` also allows the use of the TikTok generated embed code to display.
+
+To use this method copy the blockquote from the TikTok Embed code:
+
+1. Refer to the (TikTok embed documentation)[https://developers.tiktok.com/doc/Embed] to find the embed code for your TikTok.
+2. Copy the embed code and add it as a child element of the `amp-tiktok` element.
+3. Add the `placeholder` attribute to the `blockquote`.
+4. Remove the `style` attribute from the `blockquote`.
+
+[example preview="inline" playground="true" imports="amp-tiktok"]
+
+```html
+<amp-tiktok width="300" height="800">
+<blockquote
+  placeholder
+  class="tiktok-embed"
+  cite="https://www.tiktok.com/@countingprimes/video/6948210747285441798"
+  data-video-id="6948210747285441798"
+>
+  <section>
+    <a
+      target="_blank"
+      title="@countingprimes"
+      href="https://www.tiktok.com/@countingprimes"
+      >@countingprimes</a
+    >
+    <p>
+      VIM is great.... right up until you start typing the commands into every
+      single text editor you see. I’d like to apologize for all my unneeded
+      “:wq”’s
+    </p>
+    <a
+      target="_blank"
+      title="♬ original sound - countingprimes"
+      href="https://www.tiktok.com/music/original-sound-6948210588145175302"
+      >♬ original sound - countingprimes</a
+    >
+  </section>
+</blockquote>
+</amp-tiktok>
+```
+
+[\example]
+
+## Accessibility
+
+If the user provides an `aria-label` then that label will be propogated to the `iframe`.
+Otherwise the `aria-label` will default to 'TikTok'.

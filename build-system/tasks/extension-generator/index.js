@@ -21,7 +21,7 @@ const path = require('path');
 const {
   insertExtensionBundlesConfig,
 } = require('./insert-extension-bundles-config');
-const {cyan, green, red} = require('kleur/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {execOrThrow} = require('../../common/exec');
 const {log} = require('../../common/logging');
 const {makeBentoExtension} = require('./bento');
@@ -29,7 +29,10 @@ const {makeBentoExtension} = require('./bento');
 const year = new Date().getFullYear();
 
 /*eslint "max-len": 0*/
-
+/**
+ * @param {string} str
+ * @return {string}
+ */
 function pascalCase(str) {
   return (
     str[0].toUpperCase() +
@@ -39,6 +42,10 @@ function pascalCase(str) {
   );
 }
 
+/**
+ * @param {string} name
+ * @return {string}
+ */
 function getValidatorFile(name) {
   return `#
 # Copyright ${year} The AMP HTML Authors. All Rights Reserved.
@@ -107,6 +114,10 @@ const getAmpCssFile = async (name) => {
     .replace(/__do_not_submit__/g, dns);
 };
 
+/**
+ * @param {string} name
+ * @return {string}
+ */
 function getJsTestExtensionFile(name) {
   return `/**
  * Copyright ${year} The AMP HTML Authors. All Rights Reserved.
@@ -156,6 +167,10 @@ describes.realWin(
 `;
 }
 
+/**
+ * @param {string} name
+ * @return {string}
+ */
 function getJsExtensionFile(name) {
   const className = pascalCase(name);
   return `/**
@@ -209,8 +224,27 @@ AMP.extension('${name}', '0.1', AMP => {
 `;
 }
 
+/**
+ * @param {string} name
+ * @return {string}
+ */
 function getExamplesFile(name) {
-  return `<!doctype html>
+  return `<!--
+  Copyright ${year} The AMP HTML Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the license.
+-->
+<!doctype html>
 <html ⚡>
 <head>
   <meta charset="utf-8">
@@ -233,6 +267,15 @@ function getExamplesFile(name) {
 `;
 }
 
+/**
+ * @return {Promise<{
+ *   name: *,
+ *   version: *,
+ *   options: {
+ *        hasCss: boolean,
+ *   },
+ * }>}
+ */
 async function makeAmpExtension() {
   if (!argv.name) {
     log(red('Error! Please pass in the "--name" flag with a value'));
@@ -270,7 +313,10 @@ async function makeAmpExtension() {
   const filenames = Object.keys(fileContent)
     // Don't format .html because AMP boilerplate would expand into multiple lines.
     .filter((filename) => !filename.endsWith('.html'));
-  execOrThrow(`npx prettier --ignore-unknown --write ${filenames.join(' ')}`);
+  execOrThrow(
+    `npx prettier --ignore-unknown --write ${filenames.join(' ')}`,
+    'Could not format files'
+  );
 
   // Return the resulting extension bundle config.
   return {
@@ -280,10 +326,17 @@ async function makeAmpExtension() {
   };
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function makeExtension() {
   const bundleConfig = await (argv.bento
     ? makeBentoExtension()
     : makeAmpExtension());
+  if (!bundleConfig) {
+    log(yellow('WARNING:'), 'Could not write extension files.');
+    return;
+  }
 
   // Update bundles.config.js with an entry for the new component
   insertExtensionBundlesConfig(bundleConfig);
@@ -297,9 +350,9 @@ module.exports = {
 
 makeExtension.description = 'Create an extension skeleton';
 makeExtension.flags = {
-  name: '  The name of the extension. Preferably prefixed with `amp-*`',
-  bento: '  Generate a Bento component',
-  version: '  Sets the version number (default: 0.1; or 1.0 with --bento)',
+  name: 'The name of the extension. Preferably prefixed with `amp-*`',
+  bento: 'Generate a Bento component',
+  version: 'Sets the version number (default: 0.1; or 1.0 with --bento)',
   overwrite:
-    '  Overwrites existing files at the destination, if present; --bento only',
+    'Overwrites existing files at the destination, if present; --bento only',
 };

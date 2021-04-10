@@ -17,6 +17,7 @@
 import {AmpStoryComponentManager} from '../../src/amp-story-player/amp-story-component-manager';
 import {AmpStoryPlayer} from '../../src/amp-story-player/amp-story-player-impl';
 import {Messaging} from '@ampproject/viewer-messaging';
+import {PageScroller} from '../../src/amp-story-player/page-scroller';
 
 describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   let win;
@@ -53,14 +54,31 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     manager = new AmpStoryComponentManager(win);
   }
 
+  function swipeDown() {
+    const startEvent = {touches: [{screenX: 200, screenY: 100}]};
+    fireHandler['touchstart']('touchstart', startEvent);
+
+    let moveEvent = {touches: [{screenX: 200, screenY: 200}]};
+    fireHandler['touchmove']('touchmove', moveEvent);
+
+    moveEvent = {touches: [{screenX: 200, screenY: 205}]};
+    fireHandler['touchmove']('touchmove', moveEvent);
+
+    const endEvent = {touches: [{screenX: 200, screenY: 205}]};
+    fireHandler['touchend']('touchend', endEvent);
+  }
+
   function swipeLeft() {
     const touchStartEvent = {touches: [{screenX: 200, screenY: 100}]};
     fireHandler['touchstart']('touchstart', touchStartEvent);
 
-    const touchMove = {touches: [{screenX: 100, screenY: 100}]};
+    let touchMove = {touches: [{screenX: 100, screenY: 100}]};
     fireHandler['touchmove']('touchmove', touchMove);
 
-    const touchEndEvent = {touches: [{screenX: 100, screenY: 100}]};
+    touchMove = {touches: [{screenX: 95, screenY: 100}]};
+    fireHandler['touchmove']('touchmove', touchMove);
+
+    const touchEndEvent = {touches: [{screenX: 95, screenY: 100}]};
     fireHandler['touchend']('touchend', touchEndEvent);
   }
 
@@ -102,6 +120,17 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     configEl.textContent = JSON.stringify({
       'behavior': {
         'autoplay': autoplay,
+      },
+    });
+    configEl.setAttribute('type', 'application/json');
+    return configEl;
+  }
+
+  function buildPageScrollConfig(pageScroll) {
+    const configEl = document.createElement('script');
+    configEl.textContent = JSON.stringify({
+      'behavior': {
+        'pageScroll': pageScroll,
       },
     });
     configEl.setAttribute('type', 'application/json');
@@ -355,6 +384,49 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     expect(noNextSpy).to.not.have.been.called;
   });
 
+  it('should scroll the page when pageScroll is enabled (default)', async () => {
+    buildStoryPlayer(1);
+
+    const touchStartSpy = env.sandbox.spy(
+      PageScroller.prototype,
+      'onTouchStart'
+    );
+    const touchMoveSpy = env.sandbox.spy(PageScroller.prototype, 'onTouchMove');
+    const touchEndSpy = env.sandbox.spy(PageScroller.prototype, 'onTouchEnd');
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    swipeDown();
+    await nextTick();
+
+    expect(touchStartSpy).to.have.been.called;
+    expect(touchMoveSpy).to.have.been.called;
+    expect(touchEndSpy).to.have.been.called;
+  });
+
+  it('should not scroll the page when pageScroll option is off', async () => {
+    buildStoryPlayer(1);
+    playerEl.appendChild(buildPageScrollConfig(/* pageScroll */ false));
+
+    const touchStartSpy = env.sandbox.spy(
+      PageScroller.prototype,
+      'onTouchStart'
+    );
+    const touchMoveSpy = env.sandbox.spy(PageScroller.prototype, 'onTouchMove');
+    const touchEndSpy = env.sandbox.spy(PageScroller.prototype, 'onTouchEnd');
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    swipeDown();
+    await nextTick();
+
+    expect(touchStartSpy).to.not.have.been.called;
+    expect(touchMoveSpy).to.not.have.been.called;
+    expect(touchEndSpy).to.not.have.been.called;
+  });
+
   it('should not play first story when autoplay is off', async () => {
     buildStoryPlayer(1);
     playerEl.appendChild(buildAutoplayConfig(/* autoplay */ false));
@@ -441,6 +513,88 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     fireHandler['selectDocument']('selectDocument', {previous: true});
 
     expect(noPreviousSpy).to.not.have.been.called;
+  });
+
+  it('should dispatch amp-story-player-touchstart event', async () => {
+    buildStoryPlayer(1);
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    const touchSpy = env.sandbox.spy();
+    playerEl.addEventListener('amp-story-player-touchstart', touchSpy);
+
+    await swipeDown();
+    await nextTick();
+
+    expect(touchSpy).to.have.been.called;
+  });
+
+  it('should dispatch amp-story-player-touchmove event when navigating', async () => {
+    buildStoryPlayer(1);
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    const touchSpy = env.sandbox.spy();
+    playerEl.addEventListener('amp-story-player-touchmove', touchSpy);
+
+    await swipeLeft();
+    await nextTick();
+
+    expect(touchSpy).to.have.been.calledWithMatch({
+      type: 'amp-story-player-touchmove',
+      detail: {
+        touches: [
+          {
+            screenX: 95,
+            screenY: 100,
+          },
+        ],
+        isNavigationalSwipe: true,
+      },
+    });
+  });
+
+  it('should dispatch amp-story-player-touchmove event when not navigating', async () => {
+    buildStoryPlayer(1);
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    const touchSpy = env.sandbox.spy();
+    playerEl.addEventListener('amp-story-player-touchmove', touchSpy);
+
+    await swipeDown();
+    await nextTick();
+
+    expect(touchSpy).to.have.been.calledWithMatch({
+      type: 'amp-story-player-touchmove',
+      detail: {
+        touches: [
+          {
+            screenX: 200,
+            screenY: 205,
+          },
+        ],
+        isNavigationalSwipe: false,
+      },
+    });
+  });
+
+  it('should dispatch amp-story-player-touchend events', async () => {
+    buildStoryPlayer(1);
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    const touchSpy = env.sandbox.spy();
+    playerEl.addEventListener('amp-story-player-touchend', touchSpy);
+
+    await swipeDown();
+    await nextTick();
+
+    expect(touchSpy).to.have.been.called;
   });
 
   it('should navigate when swiping', async () => {
@@ -643,6 +797,57 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       expect(storyIframes[2].getAttribute('src')).to.include(
         'https://example.com/story2.html#visibilityState=prerender'
       );
+    });
+
+    it('rewind() callback should rewind current story', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      attachPlayerWithStories(playerEl, 1);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
+      player.rewind('https://example.com/story0.html');
+
+      await nextTick();
+
+      expect(sendRequestSpy).to.have.been.calledWith('rewind', {});
+    });
+
+    it('rewind() throws when invalid url is provided', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      attachPlayerWithStories(playerEl, 1);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      return expect(() =>
+        player.rewind('https://example.com/story6.html')
+      ).to.throw(
+        'Story URL not found in the player: https://example.com/story6.html'
+      );
+    });
+
+    it('rewind() callback should eventually rewind story when it gets connected', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      attachPlayerWithStories(playerEl, 3);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
+      player.rewind('https://example.com/story2.html');
+
+      await player.go(2);
+      await nextTick();
+
+      expect(sendRequestSpy).to.have.been.calledWith('rewind', {});
     });
 
     // TODO(proyectoramirez): delete once add() is implemented.

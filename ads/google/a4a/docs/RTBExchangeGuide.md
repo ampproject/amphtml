@@ -20,9 +20,9 @@ Exchanges will need to indicate in the RTB bid request whether a page is built i
 
 A new field is added to the `Site` object of the OpenRTB standard to indicate whether a webpage is built on AMP. In OpenRTB 2.5, this is section 3.2.13.
 
-| Field | Scope    | Type    | Default | Description                                                                                                                                 |
-| ----- | -------- | ------- | :-----: | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `amp` | optional | integer |    -    | Whether the request is for an Accelerated Mobile Page. 0 = page is non-AMP, 1 = page is built with AMP HTML. AMP status unknown if omitted. |
+| Field | Scope    | Type    | Default | Description                                                                                                                      |
+| ----- | -------- | ------- | :-----: | -------------------------------------------------------------------------------------------------------------------------------- |
+| `amp` | optional | integer |    -    | Whether the request is for an AMP Document. 0 = page is non-AMP, 1 = page is built with AMP HTML. AMP status unknown if omitted. |
 
 **`Imp` Object additional field: `ampad`**
 
@@ -75,8 +75,8 @@ SSPs will need to provide a new field in the bid response to allow bidders to re
 ## Background Docs
 
 -   [AMPHTML Ads for AMP Pages (Github)](https://github.com/ampproject/amphtml/issues/3133)
--   [AMPHTML Ad Creative Format Spec (Github)](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md)
--   [AMPHTML Ads Overview (Github)](https://github.com/ampproject/amphtml/blob/master/ads/google/a4a/docs/a4a-readme.md)
+-   [AMPHTML Ad Creative Format Spec (Github)](https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/amp-a4a-format.md)
+-   [AMPHTML Ads Overview (Github)](https://github.com/ampproject/amphtml/blob/main/ads/google/a4a/docs/a4a-readme.md)
 -   [AMPHTML Ads Website from amp.dev](https://amp.dev/community/platform-and-vendor-partners)
 -   [Example AMPHTML Ads](https://amp.dev/documentation/examples/)
 -   [Speed comparison](https://amp.dev/documentation/examples/advertising-analytics/amphtml_ads_vs_non_amp_ads/?format=websites): see how fast an AMP Ad loads in comparison to a regular ad. Best viewed on a 3G connection.

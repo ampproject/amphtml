@@ -15,6 +15,7 @@
  */
 import {Deferred} from '../../../src/utils/promise';
 import {InaboxResources} from '../../../src/inabox/inabox-resources';
+import {ResourceState} from '../../../src/service/resource';
 import {macroTask} from '../../../testing/yield';
 import {toggleExperiment} from '../../../src/experiments';
 
@@ -118,18 +119,18 @@ describes.realWin('inabox-resources', {amp: true}, (env) => {
     resources.add(element1);
     resources.add(element2);
 
-    env.sandbox.stub(element1, 'pauseCallback');
-    env.sandbox.stub(element1, 'resumeCallback');
-    env.sandbox.stub(element2, 'pauseCallback');
-    env.sandbox.stub(element2, 'resumeCallback');
+    env.sandbox.stub(element1, 'pause');
+    env.sandbox.stub(element1, 'resume');
+    env.sandbox.stub(element2, 'pause');
+    env.sandbox.stub(element2, 'resume');
 
     env.ampdoc.overrideVisibilityState('paused');
-    expect(element1.pauseCallback).to.be.calledOnce;
-    expect(element2.pauseCallback).to.be.calledOnce;
+    expect(element1.pause).to.be.calledOnce;
+    expect(element2.pause).to.be.calledOnce;
 
     env.ampdoc.overrideVisibilityState('visible');
-    expect(element1.resumeCallback).to.be.calledOnce;
-    expect(element2.resumeCallback).to.be.calledOnce;
+    expect(element1.resume).to.be.calledOnce;
+    expect(element2.resume).to.be.calledOnce;
   });
 
   it('should unload all resources on dispose', async () => {
@@ -146,5 +147,45 @@ describes.realWin('inabox-resources', {amp: true}, (env) => {
     resources.dispose();
     expect(resource1.unload).to.be.calledOnce;
     expect(resource2.unload).to.be.calledOnce;
+  });
+
+  it('should ignore V1 resources for layout pass', async () => {
+    const element1 = env.createAmpElement('amp-foo');
+    const element2 = env.createAmpElement('amp-bar');
+    env.sandbox.stub(element2, 'V1').returns(true);
+
+    win.document.body.appendChild(element1);
+    win.document.body.appendChild(element2);
+    resources.add(element1);
+    resources.add(element2);
+
+    const resource1 = resources.get()[0];
+    const resource2 = resources.get()[1];
+    env.sandbox.stub(resource1, 'measure');
+    env.sandbox.stub(resource2, 'measure');
+    env.sandbox.stub(resource1, 'startLayout');
+    env.sandbox.stub(resource2, 'startLayout');
+
+    env.sandbox.stub(resource1, 'build').resolves();
+    env.sandbox.stub(resource2, 'build').resolves();
+    env.sandbox
+      .stub(resource1, 'getState')
+      .returns(ResourceState.READY_FOR_LAYOUT);
+    env.sandbox
+      .stub(resource2, 'getState')
+      .returns(ResourceState.READY_FOR_LAYOUT);
+    env.sandbox.stub(resource1, 'isDisplayed').returns(true);
+    env.sandbox.stub(resource2, 'isDisplayed').returns(true);
+    resources.upgraded(element1);
+
+    resources.schedulePass(0);
+    await new Promise(setTimeout);
+    await new Promise(setTimeout);
+
+    expect(resource1.measure).to.be.called;
+    expect(resource2.measure).to.not.be.called;
+
+    expect(resource1.startLayout).to.be.called;
+    expect(resource2.startLayout).to.not.be.called;
   });
 });

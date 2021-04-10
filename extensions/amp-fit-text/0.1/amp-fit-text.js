@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import {BaseElement as BentoFitText} from '../../amp-fit-text/1.0/base-element';
 import {CSS} from '../../../build/amp-fit-text-0.1.css';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
-import {isAmphtml} from '../../../src/format';
 import {px, setStyle, setStyles} from '../../../src/style';
 import {throttle} from '../../../src/utils/rate-limit';
 
@@ -59,18 +57,6 @@ class AmpFitText extends AMP.BaseElement {
      * @private {string}
      */
     this.textContent_ = '';
-  }
-
-  /** @override */
-  upgradeCallback() {
-    if (
-      BENTO_AUTO_UPGRADE &&
-      typeof Element.prototype.attachShadow == 'function' &&
-      isAmphtml(this.element.ownerDocument)
-    ) {
-      return new BentoFitText(this.element);
-    }
-    return null;
   }
 
   /** @override */

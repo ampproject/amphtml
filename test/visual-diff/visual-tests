@@ -745,7 +745,6 @@
     },
     {
       // TODO(#28975, @ampproject/wg-monetization): see https://percy.io/ampproject/amphtml/builds-next/8494289/changed/482844300
-      "flaky": true,
       "url": "examples/visual-tests/amphtml-ads/amp-fie-static.html",
       "name": "amphtml-ads: friendly iframe static",
       "interactive_tests": "examples/visual-tests/amphtml-ads/static.js",
@@ -782,21 +781,24 @@
       "name": "amp-video-docking (left-to-right)",
       "viewport": {"width": 800, "height": 600},
       "interactive_tests": "examples/visual-tests/amp-video-docking/amp-video-docking.js",
-      "loading_complete_selectors": [".i-amphtml-video-interface"]
+      "loading_complete_selectors": [".i-amphtml-video-interface"],
+      "no_base_test": true
     },
     {
       "url": "examples/visual-tests/amp-video-docking/rtl.html",
       "name": "amp-video-docking (right-to-left)",
       "viewport": {"width": 800, "height": 600},
       "interactive_tests": "examples/visual-tests/amp-video-docking/amp-video-docking.js",
-      "loading_complete_selectors": [".i-amphtml-video-interface"]
+      "loading_complete_selectors": [".i-amphtml-video-interface"],
+      "no_base_test": true
     },
     {
       "url": "examples/visual-tests/amp-video-docking/slot.html",
       "name": "amp-video-docking (slot)",
       "viewport": {"width": 800, "height": 600},
       "interactive_tests": "examples/visual-tests/amp-video-docking/amp-video-docking.js",
-      "loading_complete_selectors": [".i-amphtml-video-interface"]
+      "loading_complete_selectors": [".i-amphtml-video-interface"],
+      "no_base_test": true
     },
     {
       "url": "examples/visual-tests/amp-story-player/back-button.html",
@@ -822,6 +824,14 @@
       "no_base_test": true
     },
     {
+      "url": "examples/visual-tests/amp-story-player/player-amp-version.html",
+      "name": "amp-story-player AMP version",
+      "interactive_tests": "examples/visual-tests/amp-story-player/player-amp-version.js",
+      "viewport": {"width": 400, "height": 800},
+      "loading_complete_delay_ms": 2000,
+      "no_base_test": true
+    },
+    {
       "url": "examples/visual-tests/amp-carousel/amp-carousel.html",
       "name": "amp-carousel",
       "loading_complete_delay_ms": 2000,
@@ -842,6 +852,17 @@
       "name": "amp-story-360: 360 image rendering",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [".i-amphtml-story-360-loaded"]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-inline-page-attachment-dark-theme.html",
+      "name": "amp-story-inline-page-attachment-dark-theme: displays new inline CTA button with dark theme",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+        "amp-story-page#cover[active]"
+      ],
+      // for page navigation
+      "loading_complete_delay_ms": 500
     }
   ]
 }

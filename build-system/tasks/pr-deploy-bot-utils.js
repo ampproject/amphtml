@@ -15,9 +15,9 @@
  */
 'use strict';
 
+const fetch = require('node-fetch');
 const fs = require('fs-extra');
 const path = require('path');
-const request = require('request-promise');
 const {ciBuildSha} = require('../common/ci');
 const {cyan} = require('kleur/colors');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
@@ -25,6 +25,10 @@ const {replaceUrls: replaceUrlsAppUtil} = require('../server/app-utils');
 
 const hostNamePrefix = 'https://storage.googleapis.com/amp-test-website-1';
 
+/**
+ * @param {string} dest
+ * @return {Promise<string[]>}
+ */
 async function walk(dest) {
   const filelist = [];
   const files = await fs.readdir(dest);
@@ -40,26 +44,30 @@ async function walk(dest) {
   return filelist;
 }
 
+/**
+ * @return {string}
+ */
 function getBaseUrl() {
   return `${hostNamePrefix}/amp_nomodule_${ciBuildSha()}`;
 }
 
+/**
+ * @param {string} filePath
+ * @return {Promise<void>}
+ */
 async function replace(filePath) {
   const data = await fs.readFile(filePath, 'utf8');
   const hostName = getBaseUrl();
   const inabox = false;
-  const storyV1 = true;
-  const result = replaceUrlsAppUtil(
-    'compiled',
-    data,
-    hostName,
-    inabox,
-    storyV1
-  );
+  const result = replaceUrlsAppUtil('compiled', data, hostName, inabox);
 
   await fs.writeFile(filePath, result, 'utf8');
 }
 
+/**
+ * @param {string} dir
+ * @return {Promise<void>}
+ */
 async function replaceUrls(dir) {
   const files = await walk(dir);
   const promises = files
@@ -68,6 +76,10 @@ async function replaceUrls(dir) {
   await Promise.all(promises);
 }
 
+/**
+ * @param {string} result
+ * @return {Promise<void>}
+ */
 async function signalPrDeployUpload(result) {
   const loggingPrefix = getLoggingPrefix();
   logWithoutTimestamp(
@@ -78,7 +90,7 @@ async function signalPrDeployUpload(result) {
   const sha = ciBuildSha();
   const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
   const url = `${baseUrl}headshas/${sha}/${result}`;
-  await request.post(url);
+  await fetch(url, {method: 'POST'});
 }
 
 module.exports = {

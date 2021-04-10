@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-tiktok-0.1.css';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {
   childElementByTag,
@@ -24,8 +24,15 @@ import {
 } from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
 import {getData, listen} from '../../../src/event-helper';
-import {resetStyles, setStyle, setStyles} from '../../../src/style';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {px, resetStyles, setStyles} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
+
+let id = 0;
+const NAME_PREFIX = '__tt_embed__v';
+const PLAYER_WIDTH = 325;
+const ASPECT_RATIO = 1.77;
+const COMMENT_HEIGHT = 200;
 
 export class AmpTiktok extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -47,20 +54,39 @@ export class AmpTiktok extends AMP.BaseElement {
     /** @private {Promise} */
     this.oEmbedResponsePromise_ = null;
 
-    this.resizeOuter_ = debounce(
+    /** @private {?Promise} */
+    this.resolveReceivedFirstMessage_ = null;
+
+    /** @private {string} */
+    this.iframeNameString_ = this.getIframeNameString_();
+
+    /**
+     * @private {number}
+     * This value is calculated by multiplying our fixed width (325px)
+     * by the video aspect ratio (13:23 or 1.77) and adding 200px to account
+     * for the height of the caption.
+     */
+    this.fallbackHeight_ = PLAYER_WIDTH * ASPECT_RATIO + COMMENT_HEIGHT;
+
+    this.resizeOuter_ = (height) => {
+      resetStyles(this.iframe_, [
+        'width',
+        'height',
+        'position',
+        'opacity',
+        'pointer-events',
+      ]);
+      this.iframe_.removeAttribute('aria-hidden');
+      this.iframe_.setAttribute('aria-label', 'Tiktok');
+      this.iframe_.classList.remove('i-amphtml-tiktok-unresolved');
+      this.iframe_.classList.add('i-amphtml-tiktok-centered');
+      this.forceChangeHeight(height);
+    };
+
+    this.resizeOuterDebounced_ = debounce(
       this.win,
       (height) => {
-        resetStyles(this.iframe_, [
-          'width',
-          'height',
-          'position',
-          'opacity',
-          'pointer-event',
-        ]);
-        this.iframe_.removeAttribute('aria-hidden');
-        this.iframe_.setAttribute('aria-title', 'Tiktok');
-        this.applyFillContent(this.iframe_);
-        this.forceChangeHeight(height);
+        this.resizeOuter_(height);
       },
       1000
     );
@@ -71,8 +97,9 @@ export class AmpTiktok extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    //See
-    //https://developers.tiktok.com/doc/Embed
+    /**
+     * @see {@link https://developers.tiktok.com/doc/Embed}
+     */
     Services.preconnectFor(this.win).url(
       this.getAmpDoc(),
       'https://www.tiktok.com',
@@ -84,15 +111,20 @@ export class AmpTiktok extends AMP.BaseElement {
   buildCallback() {
     const {src} = this.element.dataset;
     if (src) {
-      this.videoId_ = src.replace(/^((.+\/)?)(\d+)\/?$/, (_, _1, _2, id) => id);
+      // If the user provides a src attribute extract the video id from the src
+      const videoIdRegex = /^((.+\/)?)(\d+)\/?$/;
+      this.videoId_ = src.replace(videoIdRegex, '$3');
       this.oEmbedRequestUrl_ = this.videoId_ !== src ? src : null;
     } else {
+      // If the user provides a blockquote element use the blockquote videoId as video id
       const blockquoteOrNull = childElementByTag(this.element, 'blockquote');
       if (
         !blockquoteOrNull ||
         !blockquoteOrNull.hasAttribute('placeholder') ||
         !blockquoteOrNull.dataset.videoId
       ) {
+        // If the blockquote is not a placeholder or it does not contain a videoId
+        // exit early and do not set this.videoId to this value.
         return;
       }
       this.videoId_ = blockquoteOrNull.dataset.videoId;
@@ -102,10 +134,22 @@ export class AmpTiktok extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = this.element.ownerDocument.createElement('iframe');
+    const {locale = 'en-US'} = this.element.dataset;
     const src = `https://www.tiktok.com/embed/v2/${encodeURIComponent(
       this.videoId_
     )}?lang=${encodeURIComponent(locale)}`;
+
+    const iframe = createElementWithAttributes(
+      this.element.ownerDocument,
+      'iframe',
+      {
+        'src': src,
+        'name': this.iframeNameString_,
+        'aria-hidden': 'true',
+        'frameborder': '0',
+        'class': 'i-amphtml-tiktok-unresolved',
+      }
+    );
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
@@ -114,20 +158,6 @@ export class AmpTiktok extends AMP.BaseElement {
       this.handleTiktokMessages_.bind(this)
     );
 
-    const {locale} = this.element.dataset;
-
-    this.iframe_.src = src;
-    this.iframe_.setAttribute('name', '__tt_embed__v$');
-    this.iframe_.setAttribute('aria-hidden', 'true');
-    this.iframe_.setAttribute('frameborder', '0');
-    this.iframe_.setAttribute('class', 'i-amphtml-tiktok-centered');
-    setStyles(this.iframe_, {
-      'position': 'fixed',
-      'opacity': '0',
-      'pointer-events': 'none',
-      'width': '325px',
-    });
-
     Promise.resolve(this.oEmbedResponsePromise_).then((data) => {
       if (data && data.title) {
         iframe.setAttribute('aria-title', `TikTok: ${data.title}`);
@@ -135,7 +165,22 @@ export class AmpTiktok extends AMP.BaseElement {
     });
 
     this.element.appendChild(iframe);
-    return this.loadPromise(iframe);
+    return this.loadPromise(iframe).then(() => {
+      const {promise, resolve} = new Deferred();
+
+      this.resolveRecievedFirstMessage_ = resolve;
+      Services.timerFor(this.win)
+        .timeoutPromise(1000, promise)
+        .catch(() => {
+          // If no resize messages are recieved the fallback is to
+          // resize to the fallbackHeight value.
+          this.resizeOuter_(this.fallbackHeight_);
+          setStyles(this.iframe_, {
+            'width': px(PLAYER_WIDTH),
+            'height': px(this.fallbackHeight_),
+          });
+        });
+    });
   }
 
   /**
@@ -150,13 +195,18 @@ export class AmpTiktok extends AMP.BaseElement {
       return;
     }
     const data = tryParseJson(getData(event));
-    if (data === undefined) {
+    if (!data) {
       return;
     }
     if (data['height']) {
-      this.resizeOuter_(data['height']);
-      setStyle(this.iframe_, 'width', `${data['width']}px`);
-      setStyle(this.iframe_, 'height', `${data['height']}px`);
+      if (this.resolveReceivedFirstMessage_) {
+        this.resolveReceivedFirstMessage_();
+      }
+      this.resizeOuterDebounced_(data['height']);
+      setStyles(this.iframe_, {
+        'width': px(data['width']),
+        'height': px(data['height']),
+      });
     }
   }
 
@@ -196,7 +246,6 @@ export class AmpTiktok extends AMP.BaseElement {
             placeholder.appendChild(imageContainer);
           }
         }
-        console.log('thumbnail: ' + thumbnailUrl);
         return data;
       });
 
@@ -212,12 +261,28 @@ export class AmpTiktok extends AMP.BaseElement {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
-    return true; // layout again
+    return true;
   }
 
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
+  }
+
+  /**
+   * Return unique name with the appropriate prefix.
+   * This name is defined by tiktok but is not documented on their site.
+   * @private
+   * @return {string}
+   */
+  getIframeNameString_() {
+    let idString = (id++).toString();
+    // The id is padded to 17 digits because that is what TikTok requires
+    // in order to recieve messages correctly.
+    while (idString.length < 17) {
+      idString = '0' + idString;
+    }
+    return NAME_PREFIX + idString;
   }
 }
 

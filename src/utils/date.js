@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {pureDevAssert, pureUserAssert} from '../pure-assert';
+import {
+  pureDevAssert as devAssert,
+  pureUserAssert as userAssert,
+} from '../core/assert';
 
 /**
  * Parses the date using the `Date.parse()` rules. Additionally supports the
@@ -57,9 +60,9 @@ export function getDate(value) {
 /** Map from attribute names to their parsers. */
 const dateAttrParsers = {
   'datetime': (datetime) =>
-    pureUserAssert(parseDate(datetime), `Invalid date: ${datetime}`),
+    userAssert(parseDate(datetime), 'Invalid date: %s', datetime),
   'end-date': (datetime) =>
-    pureUserAssert(parseDate(datetime), `Invalid date: ${datetime}`),
+    userAssert(parseDate(datetime), 'Invalid date: %s', datetime),
   'timeleft-ms': (timeleftMs) => Date.now() + Number(timeleftMs),
   'timestamp-ms': (ms) => Number(ms),
   'timestamp-seconds': (timestampSeconds) => 1000 * Number(timestampSeconds),
@@ -71,9 +74,10 @@ const dateAttrParsers = {
  * @return {?number}
  */
 export function parseDateAttrs(element, dateAttrs) {
-  const epoch = pureUserAssert(
+  const epoch = userAssert(
     parseEpoch(element, dateAttrs),
-    `One of [${dateAttrs.join(', ')}] is required`
+    'One of attributes [%s] is required',
+    dateAttrs.join(', ')
   );
 
   const offsetSeconds =
@@ -93,9 +97,10 @@ function parseEpoch(element, dateAttrs) {
   // invalid attr is provided, even if that attribute isn't present on the
   // element.
   const parsers = dateAttrs.map((attrName) =>
-    pureDevAssert(
+    devAssert(
       dateAttrParsers[attrName],
-      `Invalid date attribute "${attrName}"`
+      'Invalid date attribute "%s"',
+      attrName
     )
   );
 

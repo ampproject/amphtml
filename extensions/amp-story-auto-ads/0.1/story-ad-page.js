@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import {
   A4AVarNames,
+  START_CTA_ANIMATION_ATTR,
   createCta,
   getStoryAdMetadataFromDoc,
   getStoryAdMetadataFromElement,
@@ -28,10 +28,12 @@ import {
   STORY_AD_ANALYTICS,
 } from './story-ad-analytics';
 import {CommonSignals} from '../../../src/common-signals';
+import {Gestures} from '../../../src/gesture';
 import {
   StateProperty,
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
+import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {
   createElementWithAttributes,
@@ -111,6 +113,9 @@ export class StoryAdPage {
     /** @private {?Element} */
     this.adChoicesIcon_ = null;
 
+    /** @private {?Element} */
+    this.ctaAnchor_ = null;
+
     /** @private {?Document} */
     this.adDoc_ = null;
 
@@ -179,6 +184,9 @@ export class StoryAdPage {
    */
   toggleVisibility() {
     this.viewed_ = true;
+    this.ctaAnchor_ &&
+      toggleAttribute(this.ctaAnchor_, START_CTA_ANIMATION_ATTR);
+
     // TODO(calebcordry): Properly handle visible attribute for custom ads.
     if (this.adDoc_) {
       toggleAttribute(
@@ -215,6 +223,7 @@ export class StoryAdPage {
     this.pageElement_.appendChild(paneGridLayer);
 
     this.listenForAdLoadSignals_();
+    this.listenForSwipes_();
 
     this.analyticsEvent_(AnalyticsEvents.AD_REQUESTED, {
       [AnalyticsVars.AD_REQUESTED]: Date.now(),
@@ -352,6 +361,23 @@ export class StoryAdPage {
   }
 
   /**
+   * Listen for any horizontal swipes, and fire an analytics event if it happens.
+   */
+  listenForSwipes_() {
+    const gestures = Gestures.get(
+      this.pageElement_,
+      true /* shouldNotPreventDefault */,
+      false /* shouldStopPropogation */
+    );
+    gestures.onGesture(SwipeXRecognizer, () => {
+      this.analyticsEvent_(AnalyticsEvents.AD_SWIPED, {
+        [AnalyticsVars.AD_SWIPED]: Date.now(),
+      });
+      gestures.cleanup();
+    });
+  }
+
+  /**
    * Returns the iframe containing the creative if it exists.
    * @return {?HTMLIFrameElement}
    */
@@ -373,6 +399,7 @@ export class StoryAdPage {
     // Ensures the video-manager does not follow the autoplay attribute on
     // amp-video tags, which would play the ad in the background before it is
     // displayed.
+    // TODO(ccordry): do we still need this? Its a pain to always stub in tests.
     this.pageElement_.getImpl().then((impl) => impl.delegateVideoAutoplay());
 
     // Remove loading attribute once loaded so that desktop CSS will position
@@ -407,6 +434,7 @@ export class StoryAdPage {
       uiMetadata
     ).then((anchor) => {
       if (anchor) {
+        this.ctaAnchor_ = anchor;
         // Click listener so that we can fire `story-ad-click` analytics trigger at
         // the appropriate time.
         anchor.addEventListener('click', () => {

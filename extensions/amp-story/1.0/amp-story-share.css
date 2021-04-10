@@ -128,14 +128,9 @@
   background-position: 5px 5px !important;
 }
 
-.i-amphtml-story-share-icon:active,
 .i-amphtml-story-share-icon:focus {
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-.i-amphtml-story-share-icon:active::before {
-  background-color: #787878 !important;
+  outline: 2px solid #0389ff !important;
+  outline-offset: 2px !important;
 }
 
 .i-amphtml-story-share-icon[type=email] {

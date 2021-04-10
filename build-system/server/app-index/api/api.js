@@ -19,13 +19,20 @@
 'use strict';
 
 const assert = require('assert');
-const Fuse = require('fuse.js');
+const fuse = require('fuse.js');
 const path = require('path');
 const {getListing} = require('../util/listing');
+/** @type {fuse.default} */
+const Fuse = /** @type {*} */ (fuse);
 
 // Sitting on /build-system/server/app-index/api, so we go back four times for the root.
 const root = path.join(__dirname, '../../../../');
 
+/**
+ * @param {string[]} fileSet
+ * @param {string} opt_searchQuery
+ * @return {Array<string>}
+ */
 function searchListing(fileSet, opt_searchQuery) {
   if (!opt_searchQuery) {
     return fileSet;
@@ -40,6 +47,11 @@ function searchListing(fileSet, opt_searchQuery) {
   return fuse.search(opt_searchQuery).map(({item}) => item);
 }
 
+/**
+ * @param {*} param0 require('express').Request
+ * @param {*} res require('express').Response
+ * @return {Promise<void>}
+ */
 async function handleListingRequest({query: {path, search}}, res) {
   try {
     assert(path);
@@ -55,6 +67,9 @@ async function handleListingRequest({query: {path, search}}, res) {
   }
 }
 
+/**
+ * @param {*} app require('express')
+ */
 function installExpressMiddleware(app) {
   app.get('/dashboard/api/listing', handleListingRequest);
 }

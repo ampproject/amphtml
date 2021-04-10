@@ -289,7 +289,7 @@ ValidatorTestCase.prototype.run = function() {
   message += 'expected:\n' + this.expectedOutput + '\nsaw:\n' + observed;
   if (this.expectedOutputFile !== null) {
     message += '\n\nIf validator/' + absolutePathFor(this.expectedOutputFile) +
-        ' is incorrect, please run `gulp validator --update_tests` to ' +
+        ' is incorrect, please run `amp validator --update_tests` to ' +
         'regenerate it based on its corresponding .html file.';
   }
   asserts.fail(message);
@@ -485,35 +485,33 @@ describe('Validator.ScriptLength', () => {
   const inlineScriptBlob = 'alert(\'\');';
   assertStrictEqual(10, inlineScriptBlob.length);
 
-  it('accepts 10000 bytes of inline style',
-     () => {
-       const inlineScript = Array(1001).join(inlineScriptBlob);
-       assertStrictEqual(10000, inlineScript.length);
-       const test = new ValidatorTestCase('feature_tests/inline_script_length.html');
-       test.inlineOutput = false;
-       test.ampHtmlFileContents =
-           test.ampHtmlFileContents
-               .replace('replace_inline_script', inlineScript);
-       test.expectedOutput = 'PASS';
-       test.run();
-     });
+  it('accepts 10000 bytes of inline style', () => {
+    const inlineScript = Array(1001).join(inlineScriptBlob);
+    assertStrictEqual(10000, inlineScript.length);
+    const test =
+        new ValidatorTestCase('feature_tests/inline_script_length.html');
+    test.inlineOutput = false;
+    test.ampHtmlFileContents =
+        test.ampHtmlFileContents.replace('replace_inline_script', inlineScript);
+    test.expectedOutput = 'PASS';
+    test.run();
+  });
 
-  it('will not accept 10010 bytes in inline script',
-     () => {
-       const inlineScript = Array(1001).join(inlineScriptBlob) + ' ';
-       assertStrictEqual(10001, inlineScript.length);
-       const test = new ValidatorTestCase('feature_tests/inline_script_length.html');
-       test.inlineOutput = false;
-       test.ampHtmlFileContents =
-           test.ampHtmlFileContents
-               .replace('replace_inline_script', inlineScript);
-       test.expectedOutputFile = null;
-       test.expectedOutput = 'FAIL\n' +
-           'feature_tests/inline_script_length.html:35:2 The inline script ' +
-           'is 10001 bytes, which exceeds the limit of 10000 bytes. ' +
-           '(see https://amp.dev/documentation/components/amp-script/#faq)';
-       test.run();
-     });
+  it('will not accept 10010 bytes in inline script', () => {
+    const inlineScript = Array(1001).join(inlineScriptBlob) + ' ';
+    assertStrictEqual(10001, inlineScript.length);
+    const test =
+        new ValidatorTestCase('feature_tests/inline_script_length.html');
+    test.inlineOutput = false;
+    test.ampHtmlFileContents =
+        test.ampHtmlFileContents.replace('replace_inline_script', inlineScript);
+    test.expectedOutputFile = null;
+    test.expectedOutput = 'FAIL\n' +
+        'feature_tests/inline_script_length.html:35:2 The inline script ' +
+        'is 10001 bytes, which exceeds the limit of 10000 bytes. ' +
+        '(see https://amp.dev/documentation/components/amp-script/#faq)';
+    test.run();
+  });
 });
 
 describe('Validator.CssLength', () => {
@@ -1340,8 +1338,8 @@ function attrRuleShouldMakeSense(attrSpec, tagSpec, rules) {
   // dispatch_key
   if (attrSpec.dispatchKey !== null && attrSpec.dispatchKey) {
     it('mandatory must be true when dispatch_key is true', () => {
-      expect(attrSpec.mandatory).toBeDefined();
-      expect(attrSpec.mandatory).toBe(true);
+      expect(attrSpec.mandatory === true || attrSpec.mandatoryOneof !== null)
+          .toBe(true);
     });
   }
   // Value property names must be unique.
@@ -1524,7 +1522,8 @@ describe('ValidatorRulesMakeSense', () => {
         expect(specNameIsUnique.hasOwnProperty(tagSpec.specName)).toBe(false);
         specNameIsUnique[tagSpec.specName] = 0;
       } else if (tagSpec.extensionSpec !== null) {
-        const specName = tagSpec.extensionSpec.name + ' extension script';
+        const specName = tagSpec.extensionSpec.name + ' ' +
+            tagSpec.extensionSpec.versionName + ' extension script';
 
         expect(specNameIsUnique.hasOwnProperty(specName)).toBe(false);
         specNameIsUnique[specName] = 0;
@@ -1554,7 +1553,7 @@ describe('ValidatorRulesMakeSense', () => {
         (tagSpec.htmlFormat.indexOf(generated.HtmlFormat.Code.AMP4ADS) !==
          -1)) {
       // AMP4ADS format lists approved extensions.
-      // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
+      // https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
       // Changes to the following map must be approved by the Ads Working
       // Group, @wg-monetization.
       const approvedAmp4AdsExtensions = {
@@ -1683,7 +1682,6 @@ describe('ValidatorRulesMakeSense', () => {
     }
 
     // attr_specs within tag.
-    let seenDispatchKey = false;
     const attrNameIsUnique = {};
     for (const attrSpecId of tagSpec.attrs) {
       if (attrSpecId < 0) {
@@ -1722,14 +1720,6 @@ describe('ValidatorRulesMakeSense', () => {
            () => {
              expect(attrSpec.value.length > 0 || attrSpec.valueRegex !== null)
                  .toBe(true);
-           });
-      }
-      if (attrSpec.dispatchKey) {
-        it('tag_spec ' + tagSpecName +
-               ' can not have more than one dispatch_key',
-           () => {
-             expect(seenDispatchKey).toBe(false);
-             seenDispatchKey = true;
            });
       }
     }
@@ -1863,6 +1853,7 @@ describe('ValidatorRulesMakeSense', () => {
         let hasTextPlain = false;
         let hasOctetStream = false;
         let hasCiphertext = false;
+        let hasAmpOnerror = false;
         for (const attrSpecId of tagSpec.attrs) {
           if (attrSpecId < 0) {
             continue;
@@ -1888,13 +1879,16 @@ describe('ValidatorRulesMakeSense', () => {
               }
             }
           }
+          if (attrSpec.name === 'amp-onerror') {
+            hasAmpOnerror = true;
+          }
         }
         it('script tags must have either a src attribute or type json, ' +
                'octet-stream (during SwG encryption), or text/plain',
            () => {
              expect(
                  hasSrc || hasJson || hasTextPlain ||
-                 (hasOctetStream && hasCiphertext))
+                 (hasOctetStream && hasCiphertext) || hasAmpOnerror)
                  .toBe(true);
            });
       }

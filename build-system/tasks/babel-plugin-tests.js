@@ -19,7 +19,7 @@ const jest = require('@jest/core');
 const {isCiBuild} = require('../common/ci');
 
 /**
- * Entry point for `gulp babel-plugin-tests`. Runs the jest-based tests for
+ * Entry point for `amp babel-plugin-tests`. Runs the jest-based tests for
  * AMP's custom babel plugins.
  */
 async function babelPluginTests() {
@@ -29,7 +29,9 @@ async function babelPluginTests() {
     coveragePathIgnorePatterns: ['/node_modules/'],
     detectOpenHandles: true,
     modulePathIgnorePatterns: ['/test/fixtures/', '<rootDir>/build/'],
-    reporters: [isCiBuild() ? 'jest-silent-reporter' : 'jest-dot-reporter'],
+    reporters: [
+      isCiBuild() ? 'jest-silent-reporter' : 'jest-progress-bar-reporter',
+    ],
     setupFiles: ['./build-system/babel-plugins/testSetupFile.js'],
     testEnvironment: 'node',
     testPathIgnorePatterns: ['/node_modules/'],

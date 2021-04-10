@@ -1,11 +1,14 @@
 # Output directories
 build/**
+extensions/**/dist/**
 dist/**
 dist.3p/**
 dist.tools/**
 firebase/**
 out/**
 test/coverage/**
+.babel-cache/**
+.css-cache/**
 
 # Code directories
 build-system/tasks/visual-diff/snippets/*.js

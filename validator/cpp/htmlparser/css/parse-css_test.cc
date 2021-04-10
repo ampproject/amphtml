@@ -46,6 +46,7 @@ namespace htmlparser::css {
 namespace {
 
 TEST(ParseCssTest, StripVendorPrefix) {
+  // char*
   EXPECT_EQ("foo", StripVendorPrefix("-moz-foo"));
   EXPECT_EQ("foo", StripVendorPrefix("-ms-foo"));
   EXPECT_EQ("foo", StripVendorPrefix("-o-foo"));
@@ -56,6 +57,23 @@ TEST(ParseCssTest, StripVendorPrefix) {
   EXPECT_EQ("foo-foo", StripVendorPrefix("foo-foo"));
   EXPECT_EQ("-d-foo-foo", StripVendorPrefix("-d-foo-foo"));
   EXPECT_EQ("-foo", StripVendorPrefix("-foo"));
+
+  // std::string.
+  std::string param("-moz-foo");
+  EXPECT_EQ("foo", StripVendorPrefix(param));
+
+  // std::string_view.
+  std::string_view param_std_view("-moz-foo");
+  EXPECT_EQ("foo", StripVendorPrefix(param_std_view));
+
+  // absl::string_view
+  absl::string_view param_absl_view("-moz-foo");
+  EXPECT_EQ("foo", StripVendorPrefix(param_absl_view));
+
+  // Any other type, won't compile.
+  // std::vector<std::string> vec;
+  // EXPECT_EQ("foo", StripVendorPrefix(vec));
+  // EXPECT_EQ("foo", StripVendorPrefix(100));
 }
 
 TEST(ParseCssTest, Tokenize_GeneratesTokensForSimpleExample) {

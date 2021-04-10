@@ -181,7 +181,9 @@ export class ViewportBindingNatural_ {
       this.getScrollingElement()./*OK*/ scrollTop ||
       this.win./*OK*/ pageYOffset;
     const {host} = this.ampdoc.getRootNode();
-    return host ? pageScrollTop - host./*OK*/ offsetTop : pageScrollTop;
+    return host
+      ? pageScrollTop - /** @type {!HTMLElement} */ (host)./*OK*/ offsetTop
+      : pageScrollTop;
   }
 
   /** @override */
@@ -239,8 +241,8 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
-  getLayoutRect(el, opt_scrollLeft, opt_scrollTop, opt_premeasuredRect) {
-    const b = opt_premeasuredRect || el./*OK*/ getBoundingClientRect();
+  getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
+    const b = el./*OK*/ getBoundingClientRect();
     const scrollTop =
       opt_scrollTop != undefined ? opt_scrollTop : this.getScrollTop();
     const scrollLeft =

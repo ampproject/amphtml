@@ -51,7 +51,7 @@
           "image": true
         },
         "requests": {
-          "endpoint": "https://www.example.com",
+          "endpoint": "https://www.cool.example",
           "base": "${endpoint}?id=${adId}zx=${timestamp}"
         },
         "triggers": {
@@ -74,6 +74,11 @@
             "on": "story-ad-view",
             "request": "base",
             "extraUrlParams": {"amp_stads": "view"}
+          },
+          "storyAdSwipe": {
+            "on": "story-ad-swipe",
+            "request": "base",
+            "extraUrlParams": {"amp_stads": "swipe"}
           },
           "storyAdClick": {
             "on": "story-ad-click",

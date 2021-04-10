@@ -20,7 +20,7 @@
  */
 
 const {
-  printSkipMessage,
+  skipDependentJobs,
   timedExecOrDie,
   uploadModuleOutput,
 } = require('./utils');
@@ -30,8 +30,7 @@ const {runCiJob} = require('./ci-job');
 const jobName = 'module-build.js';
 
 function pushBuildWorkflow() {
-  timedExecOrDie('gulp update-packages');
-  timedExecOrDie('gulp dist --esm --fortesting');
+  timedExecOrDie('amp dist --esm --fortesting');
   uploadModuleOutput();
 }
 
@@ -40,11 +39,10 @@ function prBuildWorkflow() {
   // found in pr-check/nomodule-build.js as we turn on the systems that
   // run against the module build. (ex. visual diffs, e2e, etc.)
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
-    timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp dist --esm --fortesting');
+    timedExecOrDie('amp dist --esm --fortesting');
     uploadModuleOutput();
   } else {
-    printSkipMessage(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime or integration tests'
     );

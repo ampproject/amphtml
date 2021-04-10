@@ -2,6 +2,7 @@
 $category@: presentation
 formats:
   - stories
+deprecated: true
 teaser:
   text: The end screen of an AMP story, showcasing sharing and related content.
 ---
@@ -22,14 +23,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# amp-story-bookend
+# amp-story-bookend (deprecated)
 
 The `amp-story-bookend` is the last screen of the story. It contains related links, sharing options, call to action links, and more.
 
 <figure class="centered-fig">
-  <amp-anim alt="related article example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/related-articles.gif">
+  <amp-anim alt="related article example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/related-articles.gif">
     <noscript>
-    <img alt="related article example" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/related-articles.gif" />
+    <img alt="related article example" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/related-articles.gif" />
   </noscript>
   </amp-anim>
 </figure>
@@ -102,7 +103,7 @@ The `heading` component has a `text` field, which can be used to append a title 
 ```
 
 <amp-img alt="Bookend heading component" layout="fixed"
-src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-heading.png" width="386" height="123">
+src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-bookend-component-heading.png" width="386" height="123">
 <noscript>
 <img alt="Bookend heading component" src="img/amp-story-bookend-component-heading.png" />
 </noscript>
@@ -110,19 +111,20 @@ src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/a
 
 #### small
 
-The `small` component can be used to link to related articles. This component requires the following fields: `title`, `url`, and optionally an `image`.
+The `small` component can be used to link to related articles. This component requires the following fields: `title`, `url`, and optionally an `image` with `image-alt-text`.
 
 ```json
 {
   "type": "small",
   "title": "This is India an the best places you should go",
   "url": "http://example.com/article.html",
-  "image": "http://placehold.it/256x128"
+  "image": "http://placehold.it/256x128",
+  "image-alt-text": "Example alt text for the image. If alt is not specified it will default to an empty string."
 }
 ```
 
 <amp-img alt="Bookend small component" layout="fixed"
-src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-small.png" width="379" height="192">
+src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-bookend-component-small.png" width="379" height="192">
 <noscript>
 <img alt="Bookend small component" src="img/amp-story-bookend-component-small.png" />
 </noscript>
@@ -130,7 +132,7 @@ src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/a
 
 #### landscape
 
-The `landscape` component can be used for alternative formats of content, like videos. This component requires the following fields: `title`, `url`, and `image`. Optionally, you can add a `category` field, which displays a subheading above the title.
+The `landscape` component can be used for alternative formats of content, like videos. This component requires the following fields: `title`, `url`, and `image` with `image-alt-text`. Optionally, you can add a `category` field, which displays a subheading above the title.
 
 ```json
 {
@@ -138,12 +140,13 @@ The `landscape` component can be used for alternative formats of content, like v
   "title": "TRAPPIST-1 Planets May Still Be Wet Enough for Life",
   "url": "http://example.com/article.html",
   "category": "astronomy",
-  "image": "http://placehold.it/256x128"
+  "image": "http://placehold.it/256x128",
+  "image-alt-text": "Example alt text for the image. If alt is not specified it will default to an empty string."
 }
 ```
 
 <amp-img alt="Bookend landscape component" layout="fixed"
-src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-landscape.png" width="388" height="410">
+src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-bookend-component-landscape.png" width="388" height="410">
 <noscript>
 <img alt="Bookend landscape component" src="img/amp-story-bookend-component-landscape.png" />
 </noscript>
@@ -151,7 +154,7 @@ src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/a
 
 #### portrait
 
-The `portrait` component can be used to link to other stories. This component requires the following fields: `title`, `url`, and `image`. Optionally, you can add a `category` field, which displays a subheading above the title.
+The `portrait` component can be used to link to other stories. This component requires the following fields: `title`, `url`, and `image` with `image-alt-text`. Optionally, you can add a `category` field, which displays a subheading above the title.
 
 ```json
 {
@@ -159,12 +162,13 @@ The `portrait` component can be used to link to other stories. This component re
   "category": "Science",
   "title": "New discovery found",
   "url": "http://example.com/article.html",
-  "image": "http://placehold.it/312x416"
+  "image": "http://placehold.it/312x416",
+  "image-alt-text": "Example alt text for the image. If alt is not specified it will default to an empty string."
 }
 ```
 
 <amp-img alt="Bookend portrait component" layout="fixed"
-src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-portrait.png" width="382" height="522">
+src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-bookend-component-portrait.png" width="382" height="522">
 <noscript>
 <img alt="Bookend portrait component" src="img/amp-story-bookend-component-portrait.png" />
 </noscript>
@@ -191,7 +195,7 @@ The `cta-link` component lets you specify links for call to actions (e.g., `Read
 ```
 
 <amp-img alt="Bookend cta-links component" layout="fixed"
-src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-cta-links.png" width="381" height="81">
+src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-bookend-component-cta-links.png" width="381" height="81">
 <noscript>
 <img alt="Bookend cta-links component" src="img/amp-story-bookend-component-cta-links.png" />
 </noscript>
@@ -214,7 +218,7 @@ The `textbox` component lets you specify text inside the bookend (for example, p
 ```
 
 <amp-img alt="Bookend textbox component" layout="fixed"
-src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-textbox.png" width="591" height="358">
+src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-bookend-component-textbox.png" width="591" height="358">
 <noscript>
 <img alt="Bookend textbox component" src="img/amp-story-bookend-component-textbox.png" />
 </noscript>

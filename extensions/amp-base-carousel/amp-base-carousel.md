@@ -247,20 +247,7 @@ addition, when changing `visible-slides`, you likely want to change
 ### Media Queries
 
 The attributes for `<amp-base-carousel>` can be configured to use different
-options based on a media query. You can also use a value without any media
-queries. The format looks like:
-
-```html
-<amp-base-carousel
-  attr-name="(min-width: 1000px) valueOne, (min-width: 600px) valueTwo, defaultValue"
-></amp-base-carousel>
-```
-
-The media queries are evaluated from left to right, with the first matching
-media query being used. A default value (without a media query) is required. In
-this case, if the page has a screen width of 1000px or more, `valueOne` is used.
-If the width is between 999px and 600px, `valueTwo` is used. When it is 599px or
-smaller, `defaultValue` is used.
+options based on a [media query](./../../spec/amp-html-responsive-attributes.md).
 
 ### Configuration Options
 
@@ -327,7 +314,7 @@ carousel.
 ##### snap-by
 
 A number, defaults to `1`. This determines the granularity of snapping and is
-useful when using `visible-count`. This
+useful when using `visible-count`.
 
 #### Miscellaneous
 

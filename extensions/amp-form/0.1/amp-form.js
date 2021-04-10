@@ -136,32 +136,32 @@ export class AmpForm {
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
 
-    /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacement_ = Services.urlReplacementsForDoc(element);
-
-    /** @private {?Promise} */
-    this.dependenciesPromise_ = null;
-
     /** @const @private {!HTMLFormElement} */
     this.form_ = element;
 
     /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc}  */
     this.ampdoc_ = Services.ampdoc(this.form_);
 
+    /** @private {?Promise} */
+    this.dependenciesPromise_ = null;
+
+    /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
+    this.urlReplacement_ = Services.urlReplacementsForDoc(this.ampdoc_);
+
     /** @const @private {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(this.win_);
+    this.templates_ = Services.templatesForDoc(this.ampdoc_);
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(this.win_);
 
     /** @const @private {!../../../src/service/action-impl.ActionService} */
-    this.actions_ = Services.actionServiceForDoc(this.form_);
+    this.actions_ = Services.actionServiceForDoc(this.ampdoc_);
 
     /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
-    this.mutator_ = Services.mutatorForDoc(this.form_);
+    this.mutator_ = Services.mutatorForDoc(this.ampdoc_);
 
     /** @const @private {!../../../src/service/viewer-interface.ViewerInterface}  */
-    this.viewer_ = Services.viewerForDoc(this.form_);
+    this.viewer_ = Services.viewerForDoc(this.ampdoc_);
 
     /**
      * @const {!../../../src/ssr-template-helper.SsrTemplateHelper}
@@ -257,7 +257,7 @@ export class AmpForm {
   getXhrUrl_(attribute) {
     const url = this.form_.getAttribute(attribute);
     if (url) {
-      const urlService = Services.urlForDoc(this.form_);
+      const urlService = Services.urlForDoc(this.ampdoc_);
       urlService.assertHttpsUrl(url, this.form_, attribute);
       userAssert(
         !urlService.isProxyOrigin(url),
@@ -399,7 +399,7 @@ export class AmpForm {
       EXTERNAL_DEPS.join(',')
     );
     // Wait for an element to be built to make sure it is ready.
-    const promises = toArray(depElements).map((el) => el.whenBuilt());
+    const promises = toArray(depElements).map((el) => el.build());
     return (this.dependenciesPromise_ = this.waitOnPromisesOrTimeout_(
       promises,
       2000
@@ -476,7 +476,7 @@ export class AmpForm {
 
   /** @private */
   installInputMasking_() {
-    Services.inputmaskServiceForDocOrNull(this.form_).then(
+    Services.inputmaskServiceForDocOrNull(this.ampdoc_).then(
       (inputmaskService) => {
         if (inputmaskService) {
           inputmaskService.install();
@@ -1177,7 +1177,7 @@ export class AmpForm {
         this.form_
       );
       try {
-        const urlService = Services.urlForDoc(this.form_);
+        const urlService = Services.urlForDoc(this.ampdoc_);
         urlService.assertAbsoluteHttpOrHttpsUrl(redirectTo);
         urlService.assertHttpsUrl(redirectTo, 'AMP-Redirect-To', 'Url');
       } catch (e) {
@@ -1188,7 +1188,7 @@ export class AmpForm {
           redirectTo
         );
       }
-      const navigator = Services.navigationForDoc(this.form_);
+      const navigator = Services.navigationForDoc(this.ampdoc_);
       navigator.navigateTo(this.win_, redirectTo, REDIRECT_TO_HEADER);
     }
   }

@@ -19,7 +19,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const {getReplacePlugin} = require('./helpers');
 
 /**
- * Gets the config for babel transforms run during `gulp build`.
+ * Gets the config for babel transforms run during `amp build`.
  *
  * @return {!Object}
  */
@@ -32,13 +32,16 @@ function getUnminifiedConfig() {
       useSpread: true,
     },
   ];
+
+  const targets =
+    argv.esm || argv.sxg ? {esmodules: true} : {browsers: ['Last 2 versions']};
   const presetEnv = [
     '@babel/preset-env',
     {
       bugfixes: true,
       modules: 'commonjs',
       loose: true,
-      targets: {'browsers': ['Last 2 versions']},
+      targets,
     },
   ];
   const replacePlugin = getReplacePlugin();

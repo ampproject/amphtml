@@ -125,6 +125,7 @@ tags: {  # <amp-story>
     child_tag_name_oneof: "AMP-STORY-AUTO-ANALYTICS"
     child_tag_name_oneof: "AMP-STORY-BOOKEND"
     child_tag_name_oneof: "AMP-STORY-PAGE"
+    child_tag_name_oneof: "AMP-STORY-SOCIAL-SHARE"
   }
 }
 tags: {  # <amp-story-page>
@@ -408,6 +409,46 @@ tags: {  # amp-story-bookend (json)
   spec_name: "amp-story-bookend extension .json script"
   requires_extension: "amp-story"
   mandatory_parent: "AMP-STORY-BOOKEND"
+  unique: true
+  mandatory_last_child: true
+  siblings_disallowed: true
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attr_lists: "nonce-attr"
+}
+tags: {  # <amp-story-social-share>
+  html_format: AMP
+  tag_name: "AMP-STORY-SOCIAL-SHARE"
+  mandatory_ancestor: "AMP-STORY"
+  mandatory_last_child: true
+  descendant_tag_list: "amp-story-social-share-allowed-descendants"
+  attrs: {
+    name: "layout"
+    mandatory: true
+    value: "nodisplay"
+  }
+  attrs: {
+    name: "src"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+}
+descendant_tag_list: {
+  name: "amp-story-social-share-allowed-descendants"
+  tag: "SCRIPT"
+}
+tags: {  # amp-story-social-share (json)
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-story-social-share extension .json script"
+  requires_extension: "amp-story"
+  mandatory_parent: "AMP-STORY-SOCIAL-SHARE"
   unique: true
   mandatory_last_child: true
   siblings_disallowed: true
@@ -823,6 +864,14 @@ tags: {  # <amp-story-page-attachment> with href
       protocol: "https"
     }
   }
+  attrs: {
+    name: "cta-image"
+    value_url: {
+      # protocol: "http"  # TODO(honeybaderdontcare): readd once transformers in prod
+      protocol: "https"
+      allow_relative: false  # TODO(honeybaderdontcare): remove once transformers in prod
+    }
+  }
   child_tags: {
     mandatory_num_child_tags: 0
   }
@@ -834,6 +883,22 @@ tags: {  # <amp-story-page-attachment> with no href
   mandatory_ancestor: "AMP-STORY-PAGE"
   descendant_tag_list: "amp-story-page-attachment-allowed-descendants"
   mandatory_last_child: true
+  attrs: {
+    name: "cta-image"
+    value_url: {
+      # protocol: "http"  # TODO(honeybaderdontcare): readd once transformers in prod
+      protocol: "https"
+      allow_relative: false  # TODO(honeybaderdontcare): remove once transformers in prod
+    }
+  }
+  attrs: {
+    name: "cta-image-2"
+    value_url: {
+      # protocol: "http"  # TODO(honeybaderdontcare): readd once transformers in prod
+      protocol: "https"
+      allow_relative: false  # TODO(honeybaderdontcare): remove once transformers in prod
+    }
+  }
   attrs: {
     name: "layout"
     mandatory: true
