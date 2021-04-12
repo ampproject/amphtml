@@ -18,7 +18,7 @@
 const fetch = require('node-fetch');
 const fs = require('fs-extra');
 const path = require('path');
-const {ciBuildSha} = require('../common/ci');
+const {ciBuildSha, circleciBuildNumber} = require('../common/ci');
 const {cyan} = require('kleur/colors');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {replaceUrls: replaceUrlsAppUtil} = require('../server/app-utils');
@@ -89,7 +89,10 @@ async function signalPrDeployUpload(result) {
   );
   const sha = ciBuildSha();
   const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
-  const url = `${baseUrl}headshas/${sha}/${result}`;
+  let url = `${baseUrl}headshas/${sha}/${result}`;
+  if (result == 'success') {
+    url += `/${circleciBuildNumber()}`;
+  }
   await fetch(url, {method: 'POST'});
 }
 

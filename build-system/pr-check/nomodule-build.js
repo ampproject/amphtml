@@ -23,11 +23,12 @@ const atob = require('atob');
 const {
   abortTimedJob,
   skipDependentJobs,
-  processAndUploadNomoduleOutput,
+  storeBuildToArtifacts,
   startTimer,
   timedExecWithError,
   timedExecOrDie,
-  uploadNomoduleOutput,
+  storeNomoduleBuildToWorkspace,
+  createEmptyBuildArtifactsFile,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {log} = require('../common/logging');
@@ -39,7 +40,7 @@ const jobName = 'nomodule-build.js';
 
 function pushBuildWorkflow() {
   timedExecOrDie('amp dist --fortesting');
-  uploadNomoduleOutput();
+  storeNomoduleBuildToWorkspace();
 }
 
 /**
@@ -65,9 +66,10 @@ async function prBuildWorkflow() {
       return abortTimedJob(jobName, startTime);
     }
     timedExecOrDie('amp storybook --build');
-    await processAndUploadNomoduleOutput();
+    await storeBuildToArtifacts();
     await signalPrDeployUpload('success');
   } else {
+    createEmptyBuildArtifactsFile();
     await signalPrDeployUpload('skipped');
 
     // Special case for visual diffs - Percy is a required check and must pass,
