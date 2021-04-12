@@ -274,10 +274,7 @@ export class BitrateManager {
         this.videos_.splice(i, 1);
         return;
       }
-      if (
-        !video.paused ||
-        getBufferedPercentage(video) > BUFFERED_THRESHOLD_PERCENTAGE
-      ) {
+      if (!video.paused || isVideoLoaded(video)) {
         return;
       }
       const hasChanges = this.sortSources_(video);
@@ -354,4 +351,16 @@ function getBufferedPercentage(videoEl) {
     bufferedSum += videoEl.buffered.end(i) - videoEl.buffered.start(i);
   }
   return bufferedSum / videoEl.duration;
+}
+
+/**
+ * Whether the video is loaded (so it should not be downgraded)
+ * @param {!Element} videoEl
+ * @return {boolean}
+ */
+function isVideoLoaded(videoEl) {
+  if (videoEl.hasAttribute('i-amphtml-video-buffered-debug')) {
+    return videoEl.getAttribute('i-amphtml-video-buffered-debug') === 'true';
+  }
+  return getBufferedPercentage(videoEl) > BUFFERED_THRESHOLD_PERCENTAGE;
 }

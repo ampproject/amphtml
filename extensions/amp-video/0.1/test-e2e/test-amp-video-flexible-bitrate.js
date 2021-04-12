@@ -19,6 +19,12 @@ const VIEWPORT = {
   WIDTH: 1024,
 };
 
+const VIDEO_EVENTS = {
+  DOWNGRADE: 'd',
+  LOAD: 'l',
+  UNLOAD: 'u',
+};
+
 describes.endtoend(
   'amp-video flexible bitrate',
   {
@@ -54,9 +60,10 @@ describes.endtoend(
     });
 
     it('should play a lower bitrate when video is downgraded', async () => {
-      const video1El = await controller.findElement('#video1 video');
+      await forceEventOnVideo(VIDEO_EVENTS.UNLOAD, 1);
+      await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
 
-      await downgradeCurrentVideo();
+      const video1El = await controller.findElement('#video1 video');
 
       await expect(
         await controller.getElementProperty(video1El, 'currentSrc')
@@ -74,7 +81,7 @@ describes.endtoend(
         'currentTime'
       );
 
-      await downgradeCurrentVideo(50);
+      await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
 
       // Check that currentTime in new source is passed from old source.
       await expect(
@@ -83,7 +90,7 @@ describes.endtoend(
     });
 
     it('should lower quality on other videos when video is downgraded', async () => {
-      await downgradeCurrentVideo(50);
+      await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
       await controller.click(story);
       await controller.findElement('amp-story-page#page-2[active]');
 
@@ -102,7 +109,6 @@ describes.endtoend(
     });
 
     it('should load video far away when advancing to the last page', async () => {
-      sleep(50);
       await controller.click(story);
       await controller.click(story);
       await controller.click(story);
@@ -119,7 +125,8 @@ describes.endtoend(
     });
 
     it('should load lower bitrate video far away when advancing to the last page after a downgrade', async () => {
-      await downgradeCurrentVideo();
+      await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
+      await forceEventOnVideo(VIDEO_EVENTS.UNLOAD, 4);
       await controller.click(story);
       await controller.click(story);
       await controller.click(story);
@@ -138,9 +145,10 @@ describes.endtoend(
     });
 
     it('should work when called downgrade past lower bitrate', async () => {
-      await downgradeCurrentVideo(100);
-      await downgradeCurrentVideo(100);
-      await downgradeCurrentVideo(100);
+      await forceEventOnVideo(VIDEO_EVENTS.UNLOAD, 1);
+      await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
+      await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
+      await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
 
       const video1El = await controller.findElement(
         '#video1 video.i-amphtml-pool-video'
@@ -155,8 +163,8 @@ describes.endtoend(
       return new Promise((res) => setTimeout(res, ms));
     }
 
-    async function downgradeCurrentVideo(delayMs = 50) {
-      await controller.type(debugField, 'd');
+    async function forceEventOnVideo(videoEvent, videoId, delayMs = 50) {
+      await controller.type(debugField, videoId + videoEvent);
       await sleep(delayMs);
     }
   }

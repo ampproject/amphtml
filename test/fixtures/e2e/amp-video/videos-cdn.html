@@ -17,24 +17,38 @@
       AMP.toggleExperiment('flexible-bitrate-debug', true);
     });
     window.onload = () => {
-      // randomize video urls to force load from origin.
-      const sources = document.body.querySelectorAll('source');
-      const time = Date.now();
-      sources.forEach((source, index) => {
-        source.src += time + index;
-        console.log(source);
-      });
-      
       const debugField = document.createElement('input');
       debugField.setAttribute('flexible-bitrate-debug', '');
       debugField.setAttribute('style', 'position: absolute; right: 0; top: 0');
       document.body.appendChild(debugField);
       console.log(debugField)
-      debugField.addEventListener('keydown', (e) => {
+      debugField.addEventListener('keyup', (e) => {
         if (e.key === 'd') {
-          const activeVideo = document.body.querySelector('amp-story-page[active] video');
-          activeVideo.dispatchEvent(new Event('downgrade'));
+          // Downgrade active video
+          const number = debugField.value.substr(0, 1);
+          const videoEl = document.querySelector(`amp-story-video#video${number} video`);
+          if (videoEl) {
+            activeVideo.dispatchEvent(new Event('downgrade'));
+          }
+        } else if (e.key === 'l') {
+          // Load active video
+          const number = debugField.value.substr(0, 1);
+          const videoEl = document.querySelector(`amp-story-video#video${number} video`);
+          if (videoEl) {
+            videoEl.setAttribute('i-amphtml-video-buffered-debug', 'true');
+          }
+        } else if (e.key === 'u') {
+          // Unload active video
+          const number = debugField.value.substr(0, 1);
+          const videoEl = document.querySelector(`amp-story-video#video${number} video`);
+          if (videoEl) {
+            videoEl.setAttribute('i-amphtml-video-buffered-debug', 'false');
+          }
+        } else {
+          return;
         }
+        // If key was command, clean field.
+        debugField.value = '';
       });
     }
 </script>
