@@ -465,6 +465,9 @@ var AmpElement = function () {};
 /** @return {boolean} */
 AmpElement.prototype.V1 = function () {};
 
+/** @return {boolean} */
+AmpElement.prototype.deferredMount = function () {};
+
 /** @return {!Signals} */
 AmpElement.prototype.signals = function () {};
 
@@ -489,6 +492,12 @@ AmpElement.prototype.togglePlaceholder = function (show) {};
 /** @return {{width: number, height: number}} */
 AmpElement.prototype.getLayoutSize = function () {};
 
+/**
+ * @param {boolean=} opt_waitForBuild
+ * @return {!Promise<!AMP.BaseElement>}
+ */
+AmpElement.prototype.getImpl = function (opt_waitForBuild) {};
+
 /** @return {!Promise} */
 AmpElement.prototype.buildInternal = function () {};
 
@@ -500,6 +509,9 @@ AmpElement.prototype.isBuilt = function () {};
 
 /** @return {boolean} */
 AmpElement.prototype.isBuilding = function () {};
+
+/** @return {number} */
+AmpElement.prototype.getBuildPriority = function () {};
 
 /** @return {number} */
 AmpElement.prototype.getLayoutPriority = function () {};
@@ -576,6 +588,12 @@ AmpElement.prototype.applySize = function (
   newWidth,
   opt_newMargins
 ) {};
+
+/** */
+AmpElement.prototype.expand = function () {};
+
+/** */
+AmpElement.prototype.collapse = function () {};
 
 var Signals = class {};
 /**

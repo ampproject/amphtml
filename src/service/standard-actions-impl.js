@@ -124,12 +124,14 @@ export class StandardActions {
       return null;
     }
     const {node, method, args} = invocation;
-    const win = (node.ownerDocument || node).defaultView;
+    const win = getWin(node);
     switch (method) {
       case 'pushState':
       case 'setState':
         const element =
-          node.nodeType === Node.DOCUMENT_NODE ? node.documentElement : node;
+          node.nodeType === Node.DOCUMENT_NODE
+            ? /** @type {!Document} */ (node).documentElement
+            : dev().assertElement(node);
         return Services.bindForDocOrNull(element).then((bind) => {
           userAssert(bind, 'AMP-BIND is not installed.');
           return bind.invoke(invocation);
@@ -177,11 +179,12 @@ export class StandardActions {
    */
   handleNavigateTo_(invocation) {
     const {node, caller, method, args} = invocation;
-    const win = (node.ownerDocument || node).defaultView;
+    const win = getWin(node);
     // Some components have additional constraints on allowing navigation.
     let permission = Promise.resolve();
     if (caller.tagName.startsWith('AMP-')) {
-      permission = caller.getImpl().then((impl) => {
+      const ampElement = /** @type {!AmpElement} */ (caller);
+      permission = ampElement.getImpl().then((impl) => {
         if (typeof impl.throwIfCannotNavigate == 'function') {
           impl.throwIfCannotNavigate();
         }
@@ -197,7 +200,7 @@ export class StandardActions {
         );
       },
       /* onrejected */ (e) => {
-        user().error(TAG, e.message);
+        user().error(TAG, e);
       }
     );
   }
@@ -215,7 +218,7 @@ export class StandardActions {
    */
   handleCloseOrNavigateTo_(invocation) {
     const {node} = invocation;
-    const win = (node.ownerDocument || node).defaultView;
+    const win = getWin(node);
 
     // Don't allow closing if embedded in iframe or does not have an opener or
     // embedded in a multi-doc shadowDOM case.
@@ -298,9 +301,10 @@ export class StandardActions {
     const target = dev().assertElement(invocation.node);
 
     if (target.classList.contains('i-amphtml-element')) {
+      const ampElement = /** @type {!AmpElement} */ (target);
       this.mutator_.mutateElement(
-        target,
-        () => target./*OK*/ collapse(),
+        ampElement,
+        () => ampElement./*OK*/ collapse(),
         // It is safe to skip measuring, because `mutator-impl.collapseElement`
         // will set the size of the element as well as trigger a remeasure of
         // everything below the collapsed element.
@@ -370,7 +374,8 @@ export class StandardActions {
    */
   handleShowSync_(target, autofocusElOrNull) {
     if (target.classList.contains('i-amphtml-element')) {
-      target./*OK*/ expand();
+      const ampElement = /** @type {!AmpElement} */ (target);
+      ampElement./*OK*/ expand();
     } else {
       toggle(target, true);
     }
@@ -425,6 +430,16 @@ export class StandardActions {
 
     return null;
   }
+}
+
+/**
+ * @param {!Node} node
+ * @return {!Window}
+ */
+function getWin(node) {
+  return toWin(
+    (node.ownerDocument || /** @type {!Document} */ (node)).defaultView
+  );
 }
 
 /**
