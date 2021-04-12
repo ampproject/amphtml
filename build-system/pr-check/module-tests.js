@@ -20,15 +20,10 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
-const {
-  downloadModuleOutput,
-  downloadNomoduleOutput,
-  skipDependentJobs,
-  timedExecOrDie,
-} = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {MINIFIED_TARGETS} = require('../tasks/helpers');
 const {runCiJob} = require('./ci-job');
+const {skipDependentJobs, timedExecOrDie} = require('./utils');
 
 const jobName = 'module-tests.js';
 
@@ -43,16 +38,12 @@ function prependConfig() {
 }
 
 function pushBuildWorkflow() {
-  downloadNomoduleOutput();
-  downloadModuleOutput();
   prependConfig();
   timedExecOrDie('amp integration --nobuild --compiled --headless --esm');
 }
 
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
-    downloadNomoduleOutput();
-    downloadModuleOutput();
     prependConfig();
     timedExecOrDie(
       `amp integration --nobuild --compiled --headless --esm --config=${argv.config}`
