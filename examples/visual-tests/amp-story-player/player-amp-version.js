@@ -23,6 +23,11 @@ module.exports = {
       iframe.src = '';
       iframe.srcdoc = contents;
     });
+
+    await page.$eval('html', (html) => {
+      html.style.removeProperty('overflow');
+    });
+
     await page.waitForTimeout(2000);
   },
 };
