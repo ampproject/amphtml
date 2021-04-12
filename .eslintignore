@@ -9,6 +9,7 @@ out/**
 test/coverage/**
 .babel-cache/**
 .css-cache/**
+result-reports/**
 
 # Code directories
 build-system/tasks/visual-diff/snippets/*.js
