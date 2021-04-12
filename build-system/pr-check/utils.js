@@ -299,6 +299,9 @@ async function storeBuildToArtifacts() {
         cyan(ARTIFACT_FILE_NAME) +
         '...'
     );
+    execOrDie(
+      `zip -r -q ${ARTIFACT_FILE_NAME} ${APP_SERVING_DIRS.join('/ ')}/`
+    );
     execOrDie(`du -sh ${ARTIFACT_FILE_NAME}`);
   }
 }
