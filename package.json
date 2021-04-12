@@ -55,7 +55,7 @@
     "@jest/core": "26.6.3",
     "@jridgewell/doctrine": "3.0.2",
     "@sinonjs/fake-timers": "7.0.4",
-    "@types/eslint": "7.2.8",
+    "@types/eslint": "7.2.9",
     "@types/minimist": "1.2.1",
     "@types/mocha": "8.2.2",
     "@types/node": "14.14.37",
