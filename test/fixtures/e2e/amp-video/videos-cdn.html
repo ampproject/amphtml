@@ -21,26 +21,25 @@
       debugField.setAttribute('flexible-bitrate-debug', '');
       debugField.setAttribute('style', 'position: absolute; right: 0; top: 0');
       document.body.appendChild(debugField);
-      console.log(debugField)
       debugField.addEventListener('keyup', (e) => {
         if (e.key === 'd') {
           // Downgrade active video
           const number = debugField.value.substr(0, 1);
-          const videoEl = document.querySelector(`amp-story-video#video${number} video`);
+          const videoEl = document.querySelector(`amp-video#video${number} video`);
           if (videoEl) {
-            activeVideo.dispatchEvent(new Event('downgrade'));
+            videoEl.dispatchEvent(new Event('downgrade'));
           }
         } else if (e.key === 'l') {
           // Load active video
           const number = debugField.value.substr(0, 1);
-          const videoEl = document.querySelector(`amp-story-video#video${number} video`);
+          const videoEl = document.querySelector(`amp-video#video${number} video`);
           if (videoEl) {
             videoEl.setAttribute('i-amphtml-video-buffered-debug', 'true');
           }
         } else if (e.key === 'u') {
           // Unload active video
           const number = debugField.value.substr(0, 1);
-          const videoEl = document.querySelector(`amp-story-video#video${number} video`);
+          const videoEl = document.querySelector(`amp-video#video${number} video`);
           if (videoEl) {
             videoEl.setAttribute('i-amphtml-video-buffered-debug', 'false');
           }

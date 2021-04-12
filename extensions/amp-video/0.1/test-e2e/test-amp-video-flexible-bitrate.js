@@ -90,6 +90,7 @@ describes.endtoend(
     });
 
     it('should lower quality on other videos when video is downgraded', async () => {
+      await forceEventOnVideo(VIDEO_EVENTS.UNLOAD, 2);
       await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
       await controller.click(story);
       await controller.findElement('amp-story-page#page-2[active]');
@@ -116,7 +117,7 @@ describes.endtoend(
       await controller.findElement('amp-story-page#page-4[active]');
 
       const video4El = await controller.findElement(
-        '#video4 video.i-amphtml-replaced-content'
+        '#video4 video.i-amphtml-pool-media'
       );
 
       await expect(
