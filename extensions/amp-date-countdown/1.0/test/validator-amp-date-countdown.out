@@ -251,9 +251,9 @@ FAIL
 |
 |      <!-- Should error if the `template` referent is missing. -->
 |      <amp-date-countdown
-|        timestamp-ms="1521880470000"
 >>     ^~~~~~~~~
-amp-date-countdown/1.0/test/validator-amp-date-countdown.html:253:4 Attribute 'template' in tag 'amp-date-countdown' contains a value that does not match any other tags on the page. (see https://amp.dev/documentation/components/amp-date-countdown)
+amp-date-countdown/1.0/test/validator-amp-date-countdown.html:252:4 Attribute 'template' in tag 'amp-date-countdown' contains a value that does not match any other tags on the page. (see https://amp.dev/documentation/components/amp-date-countdown)
+|        timestamp-ms="1521880470000"
 |        offset-seconds="1521880470"
 |        when-ended="stop"
 |        locale="zh-tw"
@@ -278,9 +278,9 @@ amp-date-countdown/1.0/test/validator-amp-date-countdown.html:253:4 Attribute 't
 |
 |      <!-- Should error if `count-up` attribute is given a non-empty value. -->
 |      <amp-date-countdown
-|        count-up="true"
 >>     ^~~~~~~~~
-amp-date-countdown/1.0/test/validator-amp-date-countdown.html:278:4 The attribute 'count-up' in tag 'amp-date-countdown' is set to the invalid value 'true'. (see https://amp.dev/documentation/components/amp-date-countdown)
+amp-date-countdown/1.0/test/validator-amp-date-countdown.html:277:4 The attribute 'count-up' in tag 'amp-date-countdown' is set to the invalid value 'true'. (see https://amp.dev/documentation/components/amp-date-countdown)
+|        count-up="true"
 |        timestamp-seconds="1521880470"
 |        offset-seconds="1521880470"
 |        when-ended="continue"
