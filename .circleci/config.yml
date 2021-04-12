@@ -63,20 +63,26 @@ commands:
           name: 'Check Config'
           command: ./.circleci/check_config.sh
       - run:
-          name: 'Setup Google Cloud Storage'
-          command: ./.circleci/setup_storage.sh
-      - run:
           name: 'Configure Hosts'
           command: cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
       - run:
           name: 'Install Dependencies'
           command: ./.circleci/install_dependencies.sh
+      - run:
+          name: 'Restore Build Output'
+          command: ./.circleci/restore_build_output.sh
   teardown_vm:
     steps:
       - persist_to_workspace:
           root: /tmp
           paths:
             - workspace
+  setup_gcloud_storage:
+    # TODO(danielrozenberg): remove this after deploy-bot can use CircleCI artifacts.
+    steps:
+      - run:
+          name: 'Setup Google Cloud Storage'
+          command: ./.circleci/setup_storage.sh
   install_chrome:
     steps:
       - browser-tools/install-chrome:
@@ -116,6 +122,7 @@ jobs:
       - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
+      - setup_gcloud_storage
       - run:
           name: 'Unminified Build'
           command: node build-system/pr-check/unminified-build.js
@@ -128,6 +135,7 @@ jobs:
       - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
+      - setup_gcloud_storage
       - run:
           name: 'Nomodule Build'
           command: node build-system/pr-check/nomodule-build.js
@@ -140,6 +148,7 @@ jobs:
       - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
+      - setup_gcloud_storage
       - run:
           name: 'Module Build'
           command: node build-system/pr-check/module-build.js
@@ -285,6 +294,7 @@ jobs:
       - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
+      - setup_gcloud_storage
       - run:
           name: 'Experiment << parameters.exp >> Build'
           command: node build-system/pr-check/experiment-build.js --experiment=experiment<< parameters.exp >>
