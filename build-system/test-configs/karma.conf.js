@@ -162,6 +162,7 @@ module.exports = {
     'karma-html2js-preprocessor',
     'karma-ie-launcher',
     'karma-structured-json-reporter',
+    'karma-junit-reporter',
     'karma-mocha',
     'karma-mocha-reporter',
     'karma-safarinative-launcher',
