@@ -345,11 +345,11 @@ export function googlePageParameters(a4a, startTime) {
       'loc': win.location.href == canonicalUrl ? null : win.location.href,
       'ref': referrer || null,
       'bdt': domLoading ? startTime - domLoading : null,
-      'uach_platform': uaDataValues?.platform,
-      'uach_platform_version': uaDataValues?.platformVersion,
-      'uach_architecture': uaDataValues?.architecture,
-      'uach_model': uaDataValues?.model,
-      'uach_full_version': uaDataValues?.uaFullVersion,
+      'uap': uaDataValues?.platform,
+      'uapv': uaDataValues?.platformVersion,
+      'uaa': uaDataValues?.architecture,
+      'uam': uaDataValues?.model,
+      'uafv': uaDataValues?.uaFullVersion,
     };
   });
 }

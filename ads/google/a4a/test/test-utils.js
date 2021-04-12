@@ -651,7 +651,7 @@ describe('Google A4A utils', () => {
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', Date.now(), [], []).then((url) => {
             expect(url).to.match(
-              /[&?]uach_platform=Windows&uach_platform_version=10&uach_architecture=x86&uach_model=Pixel&uach_full_version=3.14159[&$]/
+              /[&?]uap=Windows&uapv=10&uaa=x86&uam=Pixel&uafv=3.14159[&$]/
             );
           });
         });
