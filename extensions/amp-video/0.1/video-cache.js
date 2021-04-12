@@ -49,8 +49,9 @@ export function addCacheSources(videoEl, win) {
       const requestUrl = cacheUrl.replace('/c/', '/mbv/');
       return Services.xhrFor(win).fetch(requestUrl);
     })
-    .then((response) =>
-      applySourcesToVideo(videoEl, response.json()['sources'])
+    .then((response) => response.json())
+    .then((jsonResponse) =>
+      applySourcesToVideo(videoEl, jsonResponse['sources'])
     )
     .catch(() => {
       // If cache fails, video should still load properly.
