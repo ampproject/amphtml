@@ -241,7 +241,6 @@ app.get(
     '/examples/*.(min|max).html',
     '/test/manual/*.(min|max).html',
     '/test/fixtures/e2e/*/*.(min|max).html',
-    '/dist/cache-sw.(min|max).html',
   ],
   (req, res) => {
     const filePath = req.url;
@@ -1434,24 +1433,18 @@ window.addEventListener('beforeunload', (evt) => {
   });
 }
 
-/**
- * Serve entry point script url
- */
-app.get(
-  ['/dist/sw.(m?js)', '/dist/sw-kill.(m?js)', '/dist/ww.(m?js)'],
-  async (req, res, next) => {
-    // Special case for entry point script url. Use compiled for testing
-    const mode = SERVE_MODE;
-    const fileName = path.basename(req.path);
-    if (await passthroughServeModeCdn(res, fileName)) {
-      return;
-    }
-    if (mode == 'default') {
-      req.url = req.url.replace(/\.(m?js)$/, '.max.$1');
-    }
-    next();
+app.get('/dist/ww.(m?js)', async (req, res, next) => {
+  // Special case for entry point script url. Use compiled for testing
+  const mode = SERVE_MODE;
+  const fileName = path.basename(req.path);
+  if (await passthroughServeModeCdn(res, fileName)) {
+    return;
   }
-);
+  if (mode == 'default') {
+    req.url = req.url.replace(/\.(m?js)$/, '.max.$1');
+  }
+  next();
+});
 
 app.get('/dist/iframe-transport-client-lib.(m?js)', (req, _res, next) => {
   req.url = req.url.replace(/dist/, 'dist.3p/current');
@@ -1465,88 +1458,6 @@ app.get('/dist/amp-inabox-host.(m?js)', (req, _res, next) => {
   }
   next();
 });
-
-/*
- * Start Cache SW LOCALDEV section
- */
-app.get('/dist/sw(.max)?.(m?js)', (req, res, next) => {
-  const filePath = req.path;
-  fs.promises
-    .readFile(pc.cwd() + filePath, 'utf8')
-    .then((file) => {
-      const n = nearestFiveMinutes();
-      file =
-        'self.AMP_CONFIG = {v: "99' +
-        n +
-        '",' +
-        'cdnUrl: "http://localhost:8000/dist"};' +
-        file;
-      res.setHeader('Content-Type', 'application/javascript');
-      res.setHeader('Date', new Date().toUTCString());
-      res.setHeader('Cache-Control', 'no-cache;max-age=150');
-      res.end(file);
-    })
-    .catch(next);
-});
-
-app.get('/dist/rtv/9[89]*/*.(m?js)', (req, res, next) => {
-  res.setHeader('Content-Type', 'application/javascript');
-  res.setHeader('Date', new Date().toUTCString());
-  res.setHeader('Cache-Control', 'no-cache;max-age=31536000');
-
-  setTimeout(() => {
-    // Cause a delay, to show the "stale-while-revalidate"
-    if (req.path.includes('v0.js') || req.path.includes('v0.mjs')) {
-      const path = req.path.replace(/rtv\/\d+/, '');
-      return fs.promises
-        .readFile(pc.cwd() + path, 'utf8')
-        .then((file) => {
-          res.end(file);
-        })
-        .catch(next);
-    }
-
-    res.end(`
-      const li = document.createElement('li');
-      li.textContent = '${req.path}';
-      loaded.appendChild(li);
-    `);
-  }, 2000);
-});
-
-app.get(['/dist/cache-sw.html'], (req, res, next) => {
-  const filePath = '/test/manual/cache-sw.html';
-  fs.promises
-    .readFile(pc.cwd() + filePath, 'utf8')
-    .then((file) => {
-      let n = nearestFiveMinutes();
-      const percent = parseFloat(req.query.canary) || 0.01;
-      let env = '99';
-      if (Math.random() < percent) {
-        env = '98';
-        n += 5 * 1000 * 60;
-      }
-      file = file.replace(/dist\/v0/g, `dist/rtv/${env}${n}/v0`);
-      file = file.replace(/CURRENT_RTV/, env + n);
-
-      res.setHeader('Content-Type', 'text/html');
-      res.end(file);
-    })
-    .catch(next);
-});
-
-app.get('/dist/diversions', (_req, res) => {
-  let n = nearestFiveMinutes();
-  n += 5 * 1000 * 60;
-  res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Date', new Date().toUTCString());
-  res.setHeader('Cache-Control', 'no-cache;max-age=150');
-  res.end(JSON.stringify(['98' + n]));
-});
-
-/*
- * End Cache SW LOCALDEV section
- */
 
 app.get('/mraid.js', (req, _res, next) => {
   req.url = req.url.replace('mraid.js', 'examples/mraid/mraid.js');
@@ -1580,21 +1491,6 @@ app.use('/shadow/', (req, res) => {
 app.use('/mraid/', (req, res) => {
   res.redirect(req.url + '?inabox=1&mraid=1');
 });
-
-/**
- * Get the current time rounded down to the nearest 5 minutes.
- * @return {number}
- */
-function nearestFiveMinutes() {
-  const date = new Date();
-  // Round down to the nearest 5 minutes.
-  const time =
-    Number(date) -
-    (date.getMinutes() % 5) * 1000 * 60 +
-    date.getSeconds() * 1000 +
-    date.getMilliseconds();
-  return time;
-}
 
 /**
  * @param {string} ampJsVersionString
