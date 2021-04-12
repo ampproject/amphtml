@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-export {ContainWrapper} from './contain';
-export {Wrapper} from './wrapper';
-export {useRenderer} from './renderer';
-export {useValueRef} from './value-ref';
-export {useDOMHandle} from './dom-handle';
+import {useImperativeHandle} from '../';
+
+/**
+ * @param {{current: (T|null)}} ref
+ * @param {T} node
+ * @template T
+ */
+export function useDOMHandle(ref, node) {
+  useImperativeHandle(ref, () => node, [node]);
+}
