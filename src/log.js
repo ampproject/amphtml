@@ -20,7 +20,8 @@ import {
 } from './core/error-message-helpers';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
-import {isArray, isEnumValue} from './types';
+import {isArray} from './core/types/array';
+import {isEnumValue} from './types';
 import {once} from './utils/function';
 import {pureDevAssert, pureUserAssert} from './core/assert';
 import {urls} from './config';

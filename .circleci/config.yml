@@ -35,32 +35,27 @@ executors:
     resource_class: xlarge
 
 commands:
-  save_merge_commit:
-    steps:
-      - save_cache:
-          name: 'Save Merge Commit'
-          key: git-{{ .Branch }}-{{ .Revision }}
-          paths:
-            - .CIRCLECI_MERGE_COMMIT
-  restore_merge_commit:
-    steps:
-      - restore_cache:
-          name: 'Restore Merge Commit'
-          key: git-{{ .Branch }}-{{ .Revision }}
-  maybe_gracefully_halt:
+  restore_workspace:
     steps:
       - attach_workspace:
           at: /tmp
       - run:
+          name: 'Rename Restored Workspace'
+          command: |
+            if [[ -d /tmp/workspace ]]; then
+              mv /tmp/workspace /tmp/restored-workspace
+            fi
+  maybe_gracefully_halt:
+    steps:
+      - run:
           name: 'Maybe Gracefully Halt'
-          command: if ls /tmp/workspace/.CI_GRACEFULLY_HALT_* 1>/dev/null 2>&1; then echo "Gracefully halting this job."; circleci-agent step halt; fi
+          command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/main/.circleci/maybe_gracefully_halt.sh | bash
   setup_vm:
     steps:
       - run:
           name: 'Create Workspace'
           command: mkdir -p /tmp/workspace
       - checkout
-      - restore_merge_commit
       - run:
           name: 'Fetch Merge Commit'
           command: ./.circleci/fetch_merge_commit.sh
@@ -68,20 +63,26 @@ commands:
           name: 'Check Config'
           command: ./.circleci/check_config.sh
       - run:
-          name: 'Setup Google Cloud Storage'
-          command: ./.circleci/setup_storage.sh
-      - run:
           name: 'Configure Hosts'
           command: cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
       - run:
           name: 'Install Dependencies'
           command: ./.circleci/install_dependencies.sh
+      - run:
+          name: 'Restore Build Output'
+          command: ./.circleci/restore_build_output.sh
   teardown_vm:
     steps:
       - persist_to_workspace:
           root: /tmp
           paths:
             - workspace
+  setup_gcloud_storage:
+    # TODO(danielrozenberg): remove this after deploy-bot can use CircleCI artifacts.
+    steps:
+      - run:
+          name: 'Setup Google Cloud Storage'
+          command: ./.circleci/setup_storage.sh
   install_chrome:
     steps:
       - browser-tools/install-chrome:
@@ -92,6 +93,12 @@ commands:
           name: 'Fail Fast'
           when: on_fail
           command: ./.circleci/fail_fast.sh
+  store_test_output:
+    steps:
+      - store_artifacts:
+          path: result-reports
+      - store_test_results:
+          path: result-reports
 
 jobs:
   'Compute Merge Commit':
@@ -101,11 +108,12 @@ jobs:
       - run:
           name: 'Compute Merge Commit'
           command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/main/.circleci/compute_merge_commit.sh | bash
-      - save_merge_commit
+      - teardown_vm
   'Checks':
     executor:
       name: amphtml-medium-executor
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - run:
@@ -117,8 +125,10 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
+      - setup_gcloud_storage
       - run:
           name: 'Unminified Build'
           command: node build-system/pr-check/unminified-build.js
@@ -128,8 +138,10 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
+      - setup_gcloud_storage
       - run:
           name: 'Nomodule Build'
           command: node build-system/pr-check/nomodule-build.js
@@ -139,8 +151,10 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
+      - setup_gcloud_storage
       - run:
           name: 'Module Build'
           command: node build-system/pr-check/module-build.js
@@ -150,6 +164,7 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - run:
@@ -161,6 +176,7 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - run:
@@ -169,42 +185,49 @@ jobs:
       - run:
           name: 'Validator Tests'
           command: node build-system/pr-check/validator-tests.js
+      - store_test_output
       - fail_fast
       - teardown_vm
   'Visual Diff Tests':
     executor:
       name: amphtml-large-executor
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'Visual Diff Tests'
           command: node build-system/pr-check/visual-diff-tests.js
+      - store_test_output
       - fail_fast
       - teardown_vm
   'Unit Tests':
     executor:
       name: amphtml-large-executor
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'Unit Tests'
           command: node build-system/pr-check/unit-tests.js
+      - store_test_output
       - fail_fast
       - teardown_vm
   'Unminified Tests':
     executor:
       name: amphtml-large-executor
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'Unminified Tests'
           command: node build-system/pr-check/unminified-tests.js
+      - store_test_output
       - fail_fast
       - teardown_vm
   'Nomodule Tests':
@@ -216,12 +239,14 @@ jobs:
         type: enum
         enum: ['prod', 'canary']
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'Nomodule Tests (<< parameters.config >>)'
           command: node build-system/pr-check/nomodule-tests.js --config=<< parameters.config >>
+      - store_test_output
       - fail_fast
       - teardown_vm
   'Module Tests':
@@ -233,18 +258,21 @@ jobs:
         type: enum
         enum: ['prod', 'canary']
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'Module Tests (<< parameters.config >>)'
           command: node build-system/pr-check/module-tests.js --config=<< parameters.config >>
+      - store_test_output
       - fail_fast
       - teardown_vm
   'End-to-End Tests':
     executor:
       name: amphtml-large-executor
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - install_chrome
@@ -257,12 +285,14 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'Performance Tests'
           command: node build-system/pr-check/performance-tests.js
+      - store_test_output
       - fail_fast
       - teardown_vm
   'Experiment Build':
@@ -274,8 +304,10 @@ jobs:
         type: enum
         enum: ['A', 'B', 'C']
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
+      - setup_gcloud_storage
       - run:
           name: 'Experiment << parameters.exp >> Build'
           command: node build-system/pr-check/experiment-build.js --experiment=experiment<< parameters.exp >>
@@ -290,12 +322,14 @@ jobs:
         type: enum
         enum: ['A', 'B', 'C']
     steps:
+      - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
           name: 'Experiment << parameters.exp >> Tests'
           command: node build-system/pr-check/experiment-tests.js --experiment=experiment<< parameters.exp >>
+      - store_test_output
       - fail_fast
       - teardown_vm
 

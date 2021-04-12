@@ -121,6 +121,40 @@ Use a poster image as a placeholder to display to users while the story loads. T
 
 URL pointing to the story.
 
+## Display Story Attribution
+
+<img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/story-attribution.png?raw=true">
+
+The story attribution displays the entity or publisher's name and logo. When clicked, it will navigate the user to either the entity's URL or the publisher's canonical domain.
+
+To display the attribution on the stories, use the player's `display` and `attribution` options. See the JSON configuration below.
+
+The data will come from the `<amp-story>`'s metadata attributes in the story's document as described:
+
+-   For the logo: the `entity-logo-src` attribute (if provided), otherwise the `publisher-logo-src` attribute.
+-   For the string of text: the `entity` attribute (if provided), otherwise the `publisher` attribute.
+-   When the attribution is clicked, it will navigate the user to a URL. This will come from `entity-url` attribute if provided, otherwise it will use the story's canonical domain.
+
+Read more about these attibutes on the [Metadata Guidelines of `amp-story`.](https://github.com/ampproject/amphtml/blob/main/extensions/amp-story/amp-story.md#metadata-guidelines)
+
+### JSON Configuration
+
+Here's the JSON configuration to display the story attribution:
+
+```html
+<amp-story-player>
+  <script type="application/json">
+  {
+    "display": {
+      "attribution": "auto"
+    }
+  }
+</script>
+ <a href="./story1.html"> ... </a>
+ <a href="./story2.html"> ... </a>
+  ...
+```
+
 ## Programmatic Control
 
 Call the player's various methods to programmatically control the player. These methods are exposed on the HTML element, `const playerEl = document.querySelector('amp-story-player')`.
