@@ -142,6 +142,7 @@ jobs:
           command: node build-system/pr-check/nomodule-build.js
       - store_artifacts:
           path: /tmp/artifacts/amp_nomodule_build.zip
+          destination: .
       - fail_fast
       - teardown_vm
   'Module Build':
