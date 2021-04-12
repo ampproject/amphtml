@@ -23,7 +23,7 @@ GREEN() { echo -e "\033[0;32m$1\033[0m"; }
 YELLOW() { echo -e "\033[0;33m$1\033[0m"; }
 CYAN() { echo -e "\033[0;36m$1\033[0m"; }
 
-MERGABLE_OUTPUT_DIRS="build dist dist.3p dist.tools examples test/manual test/fixtures/e2e"
+MERGABLE_OUTPUT_DIRS="build dist dist.3p dist.tools"
 
 # TODO(danielrozenberg): remove conditional after #33708 is merged.
 WORKSPACE_DIR=$(if [[ -d /tmp/restored-workspace ]]; then echo "/tmp/restored-workspace"; else echo "/tmp/workspace"; fi)
@@ -39,7 +39,6 @@ if [[ -d "${WORKSPACE_DIR}/builds" ]]; then
       fi
     done
   done
-  ls -lR .
 else
   echo $(YELLOW "Workspace does not contain any build outputs to restore")
 fi
