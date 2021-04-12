@@ -146,10 +146,17 @@ async function doDist(extraArgs = {}) {
   }
   await buildExtensions(options);
 
-  if (!argv.core_runtime_only) {
+  // Steps that are to be run only during a full `amp dist`.
+  if (
+    !argv.core_runtime_only &&
+    !argv.extensions &&
+    !argv.extensions_from &&
+    !argv.noextensions
+  ) {
     await buildVendorConfigs(options);
     await formatExtractedMessages();
   }
+
   if (!argv.watch) {
     exitCtrlcHandler(handlerProcess);
   }
