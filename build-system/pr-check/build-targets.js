@@ -21,6 +21,7 @@
  * determine which tasks are required to run for pull request builds.
  */
 const config = require('../test-configs/config');
+const fs = require('fs');
 const globby = require('globby');
 const minimatch = require('minimatch');
 const path = require('path');
@@ -311,10 +312,25 @@ function determineBuildTargets() {
     return buildTargets;
   }
   buildTargets = new Set();
+
   lintFiles = globby.sync(config.lintGlobs);
   presubmitFiles = globby.sync(config.presubmitGlobs);
   prettifyFiles = globby.sync(config.prettifyGlobs);
   const filesChanged = gitDiffNameOnlyMain();
+
+  // To assist with debugging CircleCI jobs, add a file called
+  // .FORCE_BUILD_TARGETS with the target names that you want to force (See
+  // Targets class above) to the root directory, one per line.
+  if (filesChanged.indexOf('.FORCE_BUILD_TARGETS') >= 0) {
+    fs.readFileSync('.FORCE_BUILD_TARGETS', 'utf-8')
+      .trim()
+      .split('\n')
+      .forEach((target) => {
+        buildTargets.add(target);
+      });
+    return buildTargets;
+  }
+
   for (const file of filesChanged) {
     let isRuntimeFile = true;
     Object.keys(targetMatchers).forEach((target) => {
