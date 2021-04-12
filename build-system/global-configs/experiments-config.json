@@ -3,7 +3,7 @@
     "name": "A4A No Signing RTV Experiment",
     "environment": "AMP",
     "issue": "https://github.com/ampproject/amphtml/issues/27189",
-    "expiration_date_utc": "2021-04-11",
+    "expiration_date_utc": "2021-06-30",
     "define_experiment_constant": "NO_SIGNING_RTV"
   },
   "experimentB": {

@@ -49,7 +49,7 @@ commands:
     steps:
       - run:
           name: 'Maybe Gracefully Halt'
-          command: curl -sS https://raw.githubusercontent.com/danielrozenberg/amphtml/early-skip-experiments/.circleci/maybe_gracefully_halt.sh | bash
+          command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/main/.circleci/maybe_gracefully_halt.sh | bash
   setup_vm:
     steps:
       - run:
