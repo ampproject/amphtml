@@ -279,7 +279,6 @@ jobs:
       - run:
           name: 'End-to-End Tests'
           command: node build-system/pr-check/e2e-tests.js
-      - store_test_output
       - fail_fast
       - teardown_vm
   'Performance Tests':
