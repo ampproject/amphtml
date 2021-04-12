@@ -24,6 +24,7 @@ module.exports = {
       iframe.srcdoc = contents;
     });
 
+    // Removes scrollbar that appears sometimes causing flaky tests.
     await page.$eval('html', (html) => {
       html.style.removeProperty('overflow');
     });
