@@ -16,6 +16,8 @@
 
 # This script early-exits CircleCI PR builds when one of its jobs fails.
 # Reference: https://support.circleci.com/hc/en-us/articles/360052058811-Exit-build-early-if-any-test-fails
+# In case of the `main` or a release branch, it emails the build/release-on-duty
+# team using Twilio SendGrid: https://sendgrid.com/
 
 set -e
 
