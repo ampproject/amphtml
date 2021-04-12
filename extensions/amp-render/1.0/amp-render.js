@@ -158,6 +158,15 @@ export class AmpRender extends BaseElement {
 
   /** @override */
   init() {
+    // this.registerAction('refresh', () => {
+    //   if (this.layoutCompleted_) {
+    //     this.resetIfNecessary_();
+    //     return this.fetchList_({refresh: true});
+    //   }
+    // });
+
+    this.registerApiAction('refresh', (api) => api./*OK*/ refresh());
+
     return dict({
       'getJson': getJsonFn(this.element),
     });

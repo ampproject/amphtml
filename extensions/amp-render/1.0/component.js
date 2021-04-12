@@ -64,6 +64,28 @@ export function Render({
     };
   }, [src, getJson]);
 
+  const refresh = () => {
+    console.log('refreshhh');
+  };
+
+  // const toggle = useCallback(
+  //   (id) => {
+  //     if (id) {
+  //       if (id in expandedMap) {
+  //         toggleExpanded(id);
+  //       }
+  //     } else {
+  //       // Toggle all should do nothing when expandSingleSection is true
+  //       if (!expandSingleSection) {
+  //         for (const k in expandedMap) {
+  //           toggleExpanded(k);
+  //         }
+  //       }
+  //     }
+  //   },
+  //   [expandedMap, toggleExpanded, expandSingleSection]
+  // );
+
   const rendered = useRenderer(render, data);
   const isHtml =
     rendered && typeof rendered == 'object' && '__html' in rendered;
