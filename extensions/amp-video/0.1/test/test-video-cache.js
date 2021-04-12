@@ -117,13 +117,12 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
   describe('end to end', () => {
     it('should create the sources from the request with the correct attributes', async () => {
       env.sandbox.stub(xhrService, 'fetch').resolves({
-        json: () => {
-          return {
+        json: () =>
+          Promise.resolve({
             sources: [
               {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
             ],
-          };
-        },
+          }),
       });
 
       const videoEl = createVideo([{src: 'video.mp4'}]);
