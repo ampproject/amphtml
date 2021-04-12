@@ -47,7 +47,7 @@ if [[ $CIRCLE_JOB == Experiment* ]]; then
 
   CURRENT_TIMESTAMP=$(date --utc +'%s')
   EXPERIMENT_EXPIRATION_TIMESTAMP=$(date --utc --date $(echo "${EXPERIMENT_JSON}" | jq -er '.expiration_date_utc') +'%s')
-  if [[ $CURRENT_TIMESTAMP -lt $EXPERIMENT_EXPIRATION_TIMESTAMP ]]; then
+  if [[ $CURRENT_TIMESTAMP -gt $EXPERIMENT_EXPIRATION_TIMESTAMP ]]; then
     echo $(YELLOW "Experiment ${EXP} is expired.")
     echo $(GREEN "Gracefully halting this job")
     circleci-agent step halt
