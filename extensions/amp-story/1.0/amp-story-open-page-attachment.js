@@ -158,14 +158,21 @@ const renderOutlinkPageAttachmentUI = (
 
   // Getting elements
   let {barLeft, barRight, chipEl, ctaLabelEl} = htmlRefs(openAttachmentEl);
+  let labelTextColor = contrastColor;
 
   // Setting theme
   const themeAttribute = attachmentEl.getAttribute('theme');
   openAttachmentEl.setAttribute('theme', themeAttribute);
+  if (themeAttribute === "dark") {
+    labelTextColor = "white";
+  } else {
+    labelTextColor = "black";
+  }
 
   const accentColor = attachmentEl.getAttribute('cta-accent-color');
   if (themeAttribute === "custom") {
     if (attachmentEl.getAttribute('cta-accent-element') === "background") {
+      labelTextColor = contrastColor;
       setImportantStyles(ctaLabelEl, {
         'color': contrastColor
       });
@@ -179,6 +186,7 @@ const renderOutlinkPageAttachmentUI = (
         'background-color': accentColor
       });
     } else {
+      labelTextColor = accentColor;
       setImportantStyles(ctaLabelEl, {
         'color': accentColor
       });
@@ -213,16 +221,16 @@ const renderOutlinkPageAttachmentUI = (
       'i-amphtml-story-outlink-page-attachment-outlink-chip-no-image'
     );
   } else {
-    const ctaImgEl = win.document.createElement('div');
-    ctaImgEl.classList.add('i-amphtml-story-outlink-page-attachment-img');
     if (openImgAttr) {
+      const ctaImgEl = win.document.createElement('div');
+      ctaImgEl.classList.add('i-amphtml-story-outlink-page-attachment-img');
       setImportantStyles(ctaImgEl, {
         'background-image': 'url(' + openImgAttr + ')',
       });
+      chipEl.prepend(ctaImgEl);
     } else {
-      console.log("set SVG img here");
+      chipEl.prepend(buildLinkIconSvg(win, labelTextColor));
     }
-    chipEl.prepend(ctaImgEl);
   }
 
   return openAttachmentEl;
@@ -286,20 +294,48 @@ const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
 };
 
 /**
+ * Generates link icon SVG based on CTA button theme colors.
+ * @param {!Window} win
+ * @param {!String} linkIconColor
+ * @return {!Element}
+ */
+ export const buildLinkIconSvg = (win, linkIconColor) => {
+  const linkSvg = win.document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  linkSvg.setAttribute("width", "24");
+  linkSvg.setAttribute("height", "24");
+  linkSvg.setAttribute("fill", "none");
+
+  let linkImgBackground = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+  linkImgBackground.setAttribute("width", "24");
+  linkImgBackground.setAttribute("height", "24");
+  linkImgBackground.setAttribute("fill", linkIconColor);
+  linkImgBackground.setAttribute("fill-opacity", "0.1");
+  linkImgBackground.setAttribute("rx", "12");
+
+  let linkStroke1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  linkStroke1.setAttribute("fill", linkIconColor);
+  linkStroke1.setAttribute("stroke", linkIconColor);
+  linkStroke1.setAttribute("stroke-width", ".25");
+  linkStroke1.setAttribute("d", "M9.63 18s0 0 0 0c.98 0 1.9-.38 2.58-1.07l1.47-1.48a.55.55 0 000-.77.55.55 0 00-.77 0l-1.47 1.48a2.53 2.53 0 01-3.6 0 2.53 2.53 0 010-3.6l1.48-1.48a.54.54 0 000-.77.54.54 0 00-.77 0L7.07 11.8a3.62 3.62 0 000 5.14A3.6 3.6 0 009.63 18zM11.09 9.31l1.47-1.48a2.53 2.53 0 013.6 0 2.53 2.53 0 010 3.6l-1.48 1.48a.54.54 0 000 .77.55.55 0 00.77 0l1.48-1.47a3.62 3.62 0 000-5.14A3.61 3.61 0 0014.36 6s0 0 0 0c-.98 0-1.9.38-2.58 1.07l-1.47 1.48a.55.55 0 000 .77c.22.21.57.21.78 0z");
+
+  let linkStroke2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  linkStroke2.setAttribute("fill", linkIconColor);
+  linkStroke2.setAttribute("stroke", linkIconColor);
+  linkStroke2.setAttribute("stroke-width", ".25");
+  linkStroke2.setAttribute("d", "M14.63 9.37a.55.55 0 00-.78 0l-4.48 4.48a.55.55 0 00.39.94c.13 0 .28-.06.38-.17l4.48-4.48a.54.54 0 000-.77z");
+
+  linkSvg.appendChild(linkImgBackground);
+  linkSvg.appendChild(linkStroke1);
+  linkSvg.appendChild(linkStroke2);
+
+  return linkSvg;
+};
+
+/**
  * Returns true if new inline attachment UI is enabled.
  * @param {!Window} win
  * @return {boolean}
  */
 export const isPageAttachmentUiV2ExperimentOn = (win) => {
   return isExperimentOn(win, 'amp-story-page-attachment-ui-v2');
-};
-
-/**
- * Generates the correct link image SVG based on the CTA chip colors.
- * Link icon is the same color as the CTA label text.
- * Link icon background is 10% opacity of the icon color.
- * @return {String}
- */
- export const linkSvg = () => {
-  return "";
 };
