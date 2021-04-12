@@ -17,7 +17,7 @@
 import {Services} from '../../../src/services';
 import {getConfigOpts} from './config-options';
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {getScopeElements, hasAttributeValues} from './scope';
+import {hasAttributeValues, isBelongsToContainer} from './scope';
 
 const WL_ANCHOR_ATTR = ['href', 'id', 'rel', 'rev'];
 const PREFIX_DATA_ATTR = /^vars(.+)/;
@@ -39,9 +39,6 @@ export class LinkRewriter {
 
     /** @private {?Object} */
     this.configOpts_ = getConfigOpts(ampElement);
-
-    /** @private {Array<!Element>} */
-    this.listElements_ = getScopeElements(this.ampDoc_, this.configOpts_);
 
     /** @private {string} */
     this.referrer_ = referrer;
@@ -67,11 +64,10 @@ export class LinkRewriter {
       return;
     }
 
-    if (!hasAttributeValues(anchor, this.configOpts_)) {
+    if (!isBelongsToContainer(anchor, this.configOpts_)) {
       return;
     }
-
-    if (!this.isListed_(anchor)) {
+    if (!hasAttributeValues(anchor, this.configOpts_)) {
       return;
     }
     const sourceTrimmedDomain = Services.documentInfoForDoc(
@@ -105,26 +101,6 @@ export class LinkRewriter {
       anchor.href.match(REG_DOMAIN_URL)[1] ===
       this.rewrittenUrl_.match(REG_DOMAIN_URL)[1]
     );
-  }
-
-  /**
-   * @param {!Element} anchor
-   * @return {boolean}
-   */
-  isListed_(anchor) {
-    if (this.listElements_ === null || this.listElements_.length === 0) {
-      return true;
-    }
-
-    const filtered = this.listElements_.filter((element) => {
-      return element === anchor;
-    });
-
-    if (filtered.length > 0) {
-      return true;
-    }
-
-    return false;
   }
 
   /**
