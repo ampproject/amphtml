@@ -28,7 +28,6 @@ const {
   timedExecWithError,
   timedExecOrDie,
   storeNomoduleBuildToWorkspace,
-  createEmptyBuildArtifactsFile,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {log} = require('../common/logging');
@@ -69,7 +68,6 @@ async function prBuildWorkflow() {
     await storeBuildToArtifacts();
     await signalPrDeployUpload('success');
   } else {
-    createEmptyBuildArtifactsFile();
     await signalPrDeployUpload('skipped');
 
     // Special case for visual diffs - Percy is a required check and must pass,

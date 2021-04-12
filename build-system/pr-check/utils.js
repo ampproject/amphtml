@@ -303,13 +303,6 @@ async function storeBuildToArtifacts() {
   }
 }
 
-/**
- * Creates an empty zip file for the build artifacts so that CircleCI pass.
- */
-function createEmptyBuildArtifactsFile() {
-  fs.closeSync(fs.openSync(ARTIFACT_FILE_NAME, 'w'));
-}
-
 module.exports = {
   abortTimedJob,
   printChangeSummary,
@@ -325,5 +318,4 @@ module.exports = {
   storeModuleBuildToWorkspace,
   storeExperimentBuildToWorkspace,
   storeBuildToArtifacts,
-  createEmptyBuildArtifactsFile,
 };
