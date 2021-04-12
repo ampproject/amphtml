@@ -17,7 +17,12 @@
 import * as Preact from '../../../src/preact';
 import {Wrapper, useRenderer} from '../../../src/preact/component';
 import {forwardRef} from '../../../src/preact/compat';
-import {useEffect, useImperativeHandle, useState} from '../../../src/preact';
+import {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
 /**
@@ -64,9 +69,20 @@ export function RenderWithRef(
     };
   }, [src, getJson]);
 
-  const refresh = () => {
-    console.log('refreshhh');
-  };
+  const refresh = useCallback(() => {
+    if (src.startsWith('amp-script:') || src.startsWith('amp-state:')) {
+      return;
+    }
+    let cancelled = false;
+    getJson(src).then((data) => {
+      if (!cancelled) {
+        setData(data);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [getJson, src]);
 
   useImperativeHandle(
     ref,
@@ -77,34 +93,12 @@ export function RenderWithRef(
     [refresh]
   );
 
-  // const toggle = useCallback(
-  //   (id) => {
-  //     if (id) {
-  //       if (id in expandedMap) {
-  //         toggleExpanded(id);
-  //       }
-  //     } else {
-  //       // Toggle all should do nothing when expandSingleSection is true
-  //       if (!expandSingleSection) {
-  //         for (const k in expandedMap) {
-  //           toggleExpanded(k);
-  //         }
-  //       }
-  //     }
-  //   },
-  //   [expandedMap, toggleExpanded, expandSingleSection]
-  // );
-
   const rendered = useRenderer(render, data);
   const isHtml =
     rendered && typeof rendered == 'object' && '__html' in rendered;
 
   return (
-    <Wrapper
-      {...rest}
-      dangerouslySetInnerHTML={isHtml ? rendered : null}
-      ref={ref}
-    >
+    <Wrapper {...rest} dangerouslySetInnerHTML={isHtml ? rendered : null}>
       {isHtml ? null : rendered}
     </Wrapper>
   );
