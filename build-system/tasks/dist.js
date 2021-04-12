@@ -135,7 +135,7 @@ async function doDist(extraArgs = {}) {
   printDistHelp(options);
   await runPreDistSteps(options);
 
-  // Steps that use closure compiler. Small ones before large (parallel) ones.
+  // These steps use closure compiler. Small ones before large (parallel) ones.
   if (argv.core_runtime_only) {
     await compileCoreRuntime(options);
   } else {
@@ -144,9 +144,11 @@ async function doDist(extraArgs = {}) {
     await buildWebPushPublisherFiles();
     await compileAllJs(options);
   }
+
+  // This step internally parses the various extension* flags.
   await buildExtensions(options);
 
-  // Steps that are to be run only during a full `amp dist`.
+  // This step is to be run only during a full `amp dist`.
   if (
     !argv.core_runtime_only &&
     !argv.extensions &&
@@ -154,6 +156,10 @@ async function doDist(extraArgs = {}) {
     !argv.noextensions
   ) {
     await buildVendorConfigs(options);
+  }
+
+  // This step is required no matter which extensions are built.
+  if (!argv.core_runtime_only) {
     await formatExtractedMessages();
   }
 
