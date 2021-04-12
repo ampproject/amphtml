@@ -158,10 +158,8 @@ async function doDist(extraArgs = {}) {
     await buildVendorConfigs(options);
   }
 
-  // This step is required no matter which extensions are built.
-  if (!argv.core_runtime_only) {
-    await formatExtractedMessages();
-  }
+  // This step is required no matter which binaries are built.
+  await formatExtractedMessages();
 
   if (!argv.watch) {
     exitCtrlcHandler(handlerProcess);
