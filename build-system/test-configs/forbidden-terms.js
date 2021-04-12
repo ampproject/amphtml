@@ -1117,7 +1117,6 @@ const forbiddenTermsSrcInclusive = {
       'src/iframe-helper.js',
       'src/service/mutator-impl.js',
       'src/service/resources-impl.js',
-      'src/service/video-manager-impl.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
       'extensions/amp-script/0.1/amp-script.js',
