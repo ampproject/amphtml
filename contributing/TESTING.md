@@ -282,7 +282,7 @@ Percy DOES NOT by default run JavaScript, so the same DOM snapshot will be used 
 
 #### One-time Setup
 
-First create a free Percy account at [https://percy.io](https://percy.io), create a project, and set the `PERCY_TOKEN` environment variable using the unique value you find at `https://percy.io/<org>/<project>/integrations`:
+First create a [free BrowserStack account](https://www.browserstack.com/), use it to log into [https://percy.io](https://percy.io), create a project, and set the `PERCY_TOKEN` environment variable using the unique value you find at `https://percy.io/<org>/<project>/integrations`:
 
 ```sh
 export PERCY_TOKEN="<unique-percy-token>"
