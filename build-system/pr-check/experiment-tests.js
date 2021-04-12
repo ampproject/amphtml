@@ -20,8 +20,7 @@
  */
 
 const {
-  downloadExperimentOutput,
-  skipDependentJobs: skipDependentJobs,
+  skipDependentJobs,
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
@@ -62,7 +61,6 @@ function runExperimentTests(config) {
 function pushBuildWorkflow() {
   const config = getExperimentConfig(experiment);
   if (config) {
-    downloadExperimentOutput(experiment);
     runExperimentTests(config);
   } else {
     skipDependentJobs(
