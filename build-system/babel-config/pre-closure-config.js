@@ -81,7 +81,7 @@ function getPreClosureConfig() {
         ]
       : null,
     !(isFortesting || isCheckTypes)
-      ? './build-system/babel-plugins/babel-plugin-is_dev-constant-transformer'
+      ? './build-system/babel-plugins/babel-plugin-is_fortesting-constant-transformer'
       : null,
   ].filter(Boolean);
   const presetEnv = [

@@ -13,5 +13,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const IS_DEV = false;
+const IS_FORTESTING = false;
 const IS_EXPANDED = false;
