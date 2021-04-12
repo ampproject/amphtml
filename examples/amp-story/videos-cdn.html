@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <title>10 videos with flexible bitrate</title>
-
   <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
   <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
 
@@ -23,6 +22,11 @@
 		background-color: white;
 		border-radius: 50%;
 	}
+  input[flexible-bitrate-debug] {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
 	</style>
   <script>
     (self.AMP = self.AMP || []).push(function(AMP) {
@@ -32,30 +36,21 @@
     window.onload = () => {
       const debugField = document.createElement('input');
       debugField.setAttribute('flexible-bitrate-debug', '');
-      debugField.setAttribute('style', 'position: absolute; right: 0; top: 0');
       document.body.appendChild(debugField);
       debugField.addEventListener('keyup', (e) => {
+        const number = debugField.value.slice(0, -1);
+        const videoEl = document.querySelector(`amp-video#video${number} video`);
+        if (!videoEl) {
+          return;
+        }
         if (e.key === 'd') {
-          // Downgrade active video
-          const number = debugField.value.substr(0, 1);
-          const videoEl = document.querySelector(`amp-video#video${number} video`);
-          if (videoEl) {
-            videoEl.dispatchEvent(new Event('downgrade'));
-          }
+          videoEl.dispatchEvent(new Event('downgrade'));
         } else if (e.key === 'l') {
-          // Load active video
-          const number = debugField.value.substr(0, 1);
-          const videoEl = document.querySelector(`amp-video#video${number} video`);
-          if (videoEl) {
-            videoEl.setAttribute('i-amphtml-video-buffered-debug', 'true');
-          }
+          videoEl.setAttribute('i-amphtml-video-buffered-debug', 'true');
         } else if (e.key === 'u') {
-          // Unload active video
-          const number = debugField.value.substr(0, 1);
-          const videoEl = document.querySelector(`amp-video#video${number} video`);
-          if (videoEl) {
-            videoEl.setAttribute('i-amphtml-video-buffered-debug', 'false');
-          }
+          videoEl.setAttribute('i-amphtml-video-buffered-debug', 'false');
+        } else if (e.key === 'i') {
+          alert(`Current source for ${videoEl.id}: ${videoEl.currentSrc}`);
         } else {
           return;
         }

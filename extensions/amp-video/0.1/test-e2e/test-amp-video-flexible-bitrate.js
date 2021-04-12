@@ -43,9 +43,9 @@ describes.endtoend(
 
       story = await controller.findElement('amp-story.i-amphtml-story-loaded');
       await controller.findElement('amp-story-page#page-1[active]');
-      await controller.findElement(
-        '#video1 video.i-amphtml-replaced-content source'
-      );
+      // await controller.findElement(
+      //   '#video1 video.i-amphtml-replaced-content source'
+      // );
 
       debugField = await controller.findElement(
         'input[flexible-bitrate-debug]'
@@ -81,6 +81,7 @@ describes.endtoend(
         'currentTime'
       );
 
+      await forceEventOnVideo(VIDEO_EVENTS.UNLOAD, 1);
       await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
 
       // Check that currentTime in new source is passed from old source.
@@ -145,7 +146,20 @@ describes.endtoend(
       ).contains('#med');
     });
 
-    it('should work when called downgrade past lower bitrate', async () => {
+    it('should not downgrade video that is already loaded when other video downgrades', async () => {
+      await forceEventOnVideo(VIDEO_EVENTS.LOAD, 2);
+      await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
+
+      const video4El = await controller.findElement(
+        '#video2 video.i-amphtml-pool-video'
+      );
+
+      await expect(
+        await controller.getElementProperty(video4El, 'currentSrc')
+      ).contains('#high');
+    });
+
+    it('should keep playing video when called downgrade past lower bitrate', async () => {
       await forceEventOnVideo(VIDEO_EVENTS.UNLOAD, 1);
       await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
       await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
@@ -158,6 +172,8 @@ describes.endtoend(
       await expect(
         await controller.getElementProperty(video1El, 'currentSrc')
       ).contains('#low');
+      await expect(await controller.getElementProperty(video1El, 'paused')).is
+        .false;
     });
 
     function sleep(ms) {

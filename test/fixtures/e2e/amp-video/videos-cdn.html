@@ -11,6 +11,13 @@
   <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
 
 	<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    input[flexible-bitrate-debug] {
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+    </style>
   <script>
     (self.AMP = self.AMP || []).push(function(AMP) {
       AMP.toggleExperiment('flexible-bitrate', true);
@@ -19,30 +26,21 @@
     window.onload = () => {
       const debugField = document.createElement('input');
       debugField.setAttribute('flexible-bitrate-debug', '');
-      debugField.setAttribute('style', 'position: absolute; right: 0; top: 0');
       document.body.appendChild(debugField);
       debugField.addEventListener('keyup', (e) => {
+        const number = debugField.value.slice(0, -1);
+        const videoEl = document.querySelector(`amp-video#video${number} video`);
+        if (!videoEl) {
+          return;
+        }
         if (e.key === 'd') {
-          // Downgrade active video
-          const number = debugField.value.substr(0, 1);
-          const videoEl = document.querySelector(`amp-video#video${number} video`);
-          if (videoEl) {
-            videoEl.dispatchEvent(new Event('downgrade'));
-          }
+          videoEl.dispatchEvent(new Event('downgrade'));
         } else if (e.key === 'l') {
-          // Load active video
-          const number = debugField.value.substr(0, 1);
-          const videoEl = document.querySelector(`amp-video#video${number} video`);
-          if (videoEl) {
-            videoEl.setAttribute('i-amphtml-video-buffered-debug', 'true');
-          }
+          videoEl.setAttribute('i-amphtml-video-buffered-debug', 'true');
         } else if (e.key === 'u') {
-          // Unload active video
-          const number = debugField.value.substr(0, 1);
-          const videoEl = document.querySelector(`amp-video#video${number} video`);
-          if (videoEl) {
-            videoEl.setAttribute('i-amphtml-video-buffered-debug', 'false');
-          }
+          videoEl.setAttribute('i-amphtml-video-buffered-debug', 'false');
+        } else if (e.key === 'i') {
+          alert(`Current source for ${videoEl.id}: ${videoEl.currentSrc}`);
         } else {
           return;
         }
