@@ -39,6 +39,7 @@ if [[ -d "${WORKSPACE_DIR}/builds" ]]; then
       fi
     done
   done
+  ls -lR .
 else
   echo $(YELLOW "Workspace does not contain any build outputs to restore")
 fi
