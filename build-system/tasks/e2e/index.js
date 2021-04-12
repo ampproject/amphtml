@@ -24,14 +24,12 @@ const fs = require('fs');
 const glob = require('glob');
 const http = require('http');
 const Mocha = require('mocha');
-const MochaJUnitReporter = require('mocha-junit-reporter');
 const path = require('path');
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../../common/ctrlcHandler');
 const {buildRuntime, getFilesFromArgv} = require('../../common/utils');
-const {createMultiplexedReporter} = require('./mocha-report-multiplexer');
 const {cyan} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
@@ -82,7 +80,7 @@ function createMocha_() {
   let reporter;
   if (argv.testnames || argv.watch) {
     reporter = '';
-  } else if (argv.report) {
+  } else if (argv.report || isCircleciBuild()) {
     reporter = ciReporter;
   } else {
     reporter = dotsReporter;
@@ -98,10 +96,6 @@ function createMocha_() {
   };
 
   if (isCircleciBuild()) {
-    options.reporter = createMultiplexedReporter([
-      options.reporter,
-      MochaJUnitReporter,
-    ]);
     options.reporterOptions = {
       mochaFile: 'result-reports/e2e.xml',
     };
