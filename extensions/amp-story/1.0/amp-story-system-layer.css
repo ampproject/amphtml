@@ -60,7 +60,7 @@
   border: none !important;
   pointer-events: auto !important;
   cursor: pointer !important;
-  padding: 6px 3px 0 !important;
+  padding: 6px 8px 0 !important;
   height: 48px !important;
   place-items: center !important;
   display: flex !important;
@@ -80,7 +80,7 @@
 }
 
 .i-amphtml-story-attribution > * {
-  margin: 0px 3px !important;
+  margin: 0px 4px !important;
 }
 
 .i-amphtml-story-attribution-logo-container {
@@ -91,10 +91,10 @@
 .i-amphtml-story-attribution-logo {
   border-radius: 100% !important;
   border: 1px solid #D4D4D4 !important;
-  width: 32px !important;
-  height: 32px !important;
+  width: 28px !important;
+  height: 28px !important;
   object-fit: cover !important;
-  box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
+  box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.12) !important;
 }
 
 .i-amphtml-story-attribution-text {
@@ -103,7 +103,7 @@
   text-overflow: ellipsis !important;
   font-size: 13px !important;
   font-weight: 500 !important;
-  text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
+  text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.16) !important;
   color: #FFFF !important;
 }
 
