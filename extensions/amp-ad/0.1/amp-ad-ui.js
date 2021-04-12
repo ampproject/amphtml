@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-import {
-  STICKY_AD_TRANSITION_EXP,
-  divertStickyAdTransition,
-} from '../../../ads/google/a4a/sticky-ad-transition-exp';
 import {Services} from '../../../src/services';
 import {
   ancestorElementsByTag,
@@ -346,15 +342,7 @@ export class AmpAdUIHandler {
       .attemptChangeSize(newHeight, newWidth, event)
       .then(
         () => {
-          divertStickyAdTransition(this.baseInstance_.win);
-          if (
-            getExperimentBranch(
-              this.baseInstance_.win,
-              STICKY_AD_TRANSITION_EXP.id
-            ) === STICKY_AD_TRANSITION_EXP.experiment
-          ) {
-            this.setSize_(this.element_.querySelector('iframe'), height, width);
-          }
+          this.setSize_(this.element_.querySelector('iframe'), height, width);
           return resizeInfo;
         },
         () => {
