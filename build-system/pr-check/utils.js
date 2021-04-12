@@ -40,7 +40,7 @@ const UNMINIFIED_CONTAINER_DIRECTORY = 'unminified';
 const NOMODULE_CONTAINER_DIRECTORY = 'nomodule';
 const MODULE_CONTAINER_DIRECTORY = 'module';
 
-const ARTIFACT_FILE_NAME = '/tmp/artifacts/amp_nomodule_build.zip';
+const ARTIFACT_FILE_NAME = '/tmp/artifacts/amp_nomodule_build.tar.gz';
 
 const BUILD_OUTPUT_DIRS = ['build', 'dist', 'dist.3p'];
 const APP_SERVING_DIRS = [
@@ -282,8 +282,7 @@ function storeExperimentBuildToWorkspace(exp) {
 }
 
 /**
- * Replaces URLS in HTML files, zips and stores nomodule output in CI artifacts.
- * Signals to the AMP PR Deploy bot that the upload is complete.
+ * Replaces URLS in HTML files, compresses and stores nomodule build in CI artifacts.
  */
 async function storeBuildToArtifacts() {
   await replaceUrls('test/manual');
@@ -299,9 +298,7 @@ async function storeBuildToArtifacts() {
         cyan(ARTIFACT_FILE_NAME) +
         '...'
     );
-    execOrDie(
-      `zip -r -q ${ARTIFACT_FILE_NAME} ${APP_SERVING_DIRS.join('/ ')}/`
-    );
+    execOrDie(`tar -czf ${ARTIFACT_FILE_NAME} ${APP_SERVING_DIRS.join('/ ')}/`);
     execOrDie(`du -sh ${ARTIFACT_FILE_NAME}`);
   }
 }
