@@ -14,32 +14,24 @@
  * limitations under the License.
  */
 
-import {iterateCursor} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/dom';
 
 /**
+ * Check if the element have a parent container specified in config.
  *
- * @param {?../../../src/service/ampdoc-impl.AmpDoc} ampDoc
+ * @param {!Node} htmlElement
  * @param {!Object} configOpts
- * @return {!Array<!Element>}
+ * @return {boolean}
  */
-export function getScopeElements(ampDoc, configOpts) {
-  const doc = ampDoc.getRootNode();
-  let cssSelector = configOpts.section.join(' a, ');
-  let selection = doc.querySelectorAll('a');
-  const filteredSelection = [];
-
-  if (configOpts.section.length !== 0) {
-    cssSelector = cssSelector + ' a';
-    selection = doc.querySelectorAll(cssSelector);
+export function isBelongsToContainer(htmlElement, configOpts) {
+  if (configOpts.section.length === 0) {
+    return true;
   }
 
-  iterateCursor(selection, (element) => {
-    if (hasAttributeValues(element, configOpts)) {
-      filteredSelection.push(element);
-    }
-  });
-
-  return filteredSelection;
+  return !!closestAncestorElementBySelector(
+    htmlElement,
+    configOpts.section.join(',')
+  );
 }
 
 /**
