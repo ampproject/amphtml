@@ -86,22 +86,19 @@ function createMocha_() {
     reporter = dotsReporter;
   }
 
-  const options = {
+  return new Mocha({
     // e2e tests have a different standard for when a test is too slow,
     // so we set a non-default threshold.
     slow: SLOW_TEST_THRESHOLD_MS,
     reporter,
     retries: TEST_RETRIES,
     fullStackTrace: true,
-  };
-
-  if (isCircleciBuild()) {
-    options.reporterOptions = {
-      mochaFile: 'result-reports/e2e.xml',
-    };
-  }
-
-  return new Mocha(options);
+    reporterOptions: isCiBuild()
+      ? {
+          mochaFile: 'result-reports/e2e.xml',
+        }
+      : null,
+  });
 }
 
 /**
