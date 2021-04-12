@@ -4797,8 +4797,12 @@ void ParsedValidatorRules::ExpandExtensionSpec(ValidatorRules* rules) const {
     TagSpec* tagspec = rules->mutable_tags(ii);
     if (!tagspec->has_extension_spec()) continue;
     const ExtensionSpec& extension_spec = tagspec->extension_spec();
+    std::string base_spec_name = extension_spec.name();
+    if (extension_spec.has_version_name())
+      base_spec_name =
+          StrCat(extension_spec.name(), " ", extension_spec.version_name());
     if (!tagspec->has_spec_name())
-      tagspec->set_spec_name(extension_spec.name() + " extension script");
+      tagspec->set_spec_name(StrCat(base_spec_name, " extension script"));
     if (!tagspec->has_descriptive_name())
       tagspec->set_descriptive_name(tagspec->spec_name());
     tagspec->set_mandatory_parent("HEAD");
@@ -4826,13 +4830,11 @@ void ParsedValidatorRules::ExpandExtensionSpec(ValidatorRules* rules) const {
 
         // Expand module script tagspec.
         TagSpec module_tagspec = basic_tagspec;
-        ExpandModuleExtensionSpec(&module_tagspec,
-                                  tagspec->extension_spec().name());
+        ExpandModuleExtensionSpec(&module_tagspec, base_spec_name);
         new_tagspecs.push_back(module_tagspec);
         // Expand nomodule script tagspec.
         TagSpec nomodule_tagspec = basic_tagspec;
-        ExpandNomoduleExtensionSpec(&nomodule_tagspec,
-                                    tagspec->extension_spec().name());
+        ExpandNomoduleExtensionSpec(&nomodule_tagspec, base_spec_name);
         new_tagspecs.push_back(nomodule_tagspec);
       }
     }
