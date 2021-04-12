@@ -24,16 +24,18 @@ const fs = require('fs');
 const glob = require('glob');
 const http = require('http');
 const Mocha = require('mocha');
+const MochaJUnitReporter = require('mocha-junit-reporter');
 const path = require('path');
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../../common/ctrlcHandler');
 const {buildRuntime, getFilesFromArgv} = require('../../common/utils');
+const {createMultiplexedReporter} = require('./mocha-report-multiplexer');
 const {cyan} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
-const {isCiBuild} = require('../../common/ci');
+const {isCiBuild, isCircleciBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
 const {reportTestStarted} = require('../report-test-status');
@@ -86,14 +88,26 @@ function createMocha_() {
     reporter = dotsReporter;
   }
 
-  return new Mocha({
+  const options = {
     // e2e tests have a different standard for when a test is too slow,
     // so we set a non-default threshold.
     slow: SLOW_TEST_THRESHOLD_MS,
     reporter,
     retries: TEST_RETRIES,
     fullStackTrace: true,
-  });
+  };
+
+  if (isCircleciBuild()) {
+    options.reporter = createMultiplexedReporter([
+      options.reporter,
+      MochaJUnitReporter,
+    ]);
+    options.reporterOptions = {
+      mochaFile: 'result-reports/e2e.xml',
+    };
+  }
+
+  return new Mocha(options);
 }
 
 /**
