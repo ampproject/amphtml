@@ -133,10 +133,14 @@ export class LoadingIndicatorImpl {
       startTime
     );
 
-    const container = htmlFor(this.ampdoc_.win.document)`
-        <div slot="i-amphtml-svc" class="i-amphtml-svc i-amphtml-loading-container i-amphtml-fill-content
-            amp-hidden"></div>
-      `;
+    const html = htmlFor(this.ampdoc_.win.document);
+    const container = html`
+      <div
+        slot="i-amphtml-svc"
+        class="i-amphtml-svc i-amphtml-loading-container i-amphtml-fill-content
+            amp-hidden"
+      ></div>
+    `;
     container.appendChild(loader);
     element.appendChild(container);
 

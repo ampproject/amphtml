@@ -46,20 +46,20 @@ describes.realWin(
      * @param {Object} opt_attributes
      */
     function getPanZoom(opt_attributes) {
-      el = htmlFor(doc)`
-      <amp-pan-zoom layout="fixed" width ="300" height="400">
-      </amp-pan-zoom>
-    `;
+      const html = htmlFor(doc);
+      el = html`
+        <amp-pan-zoom layout="fixed" width="300" height="400"> </amp-pan-zoom>
+      `;
 
       for (const key in opt_attributes) {
         el.setAttribute(key, opt_attributes[key]);
       }
 
-      svg = htmlFor(doc)`
-      <svg width="100" height="100">
-        <rect width="100" height="100" fill="#95B3D7"></rect>
-      </svg>
-    `;
+      svg = html`
+        <svg width="100" height="100">
+          <rect width="100" height="100" fill="#95B3D7"></rect>
+        </svg>
+      `;
 
       el.appendChild(svg);
       doc.body.appendChild(el);

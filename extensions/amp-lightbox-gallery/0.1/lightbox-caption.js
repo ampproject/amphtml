@@ -36,13 +36,17 @@ export class LightboxCaption {
    * @return {!LightboxCaption} A LightboxCaption instance.
    */
   static build(doc, measureMutateElement) {
-    const el = htmlFor(doc)`
+    const html = htmlFor(doc);
+    const el = html`
       <div class="i-amphtml-lbg-caption">
         <div class="i-amphtml-lbg-caption-scroll">
-          <div class="i-amphtml-lbg-caption-text amp-lightbox-gallery-caption"></div>
+          <div
+            class="i-amphtml-lbg-caption-text amp-lightbox-gallery-caption"
+          ></div>
         </div>
         <div class="i-amphtml-lbg-caption-mask"></div>
-      </div>`;
+      </div>
+    `;
     return new LightboxCaption(
       el,
       dev().assertElement(el.querySelector('.i-amphtml-lbg-caption-scroll')),

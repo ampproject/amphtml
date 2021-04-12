@@ -51,7 +51,8 @@ describes.realWin(
       doc.body.appendChild(element);
 
       [1, 2, 3, 4].forEach((i) => {
-        const item = htmlFor(doc)`
+        const html = htmlFor(doc);
+        const item = html`
           <li>
             <button amp-nested-submenu-open></button>
             <div amp-nested-submenu>

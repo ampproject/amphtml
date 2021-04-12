@@ -750,7 +750,8 @@ export class AmpVideo extends AMP.BaseElement {
     if (element.querySelector('i-amphtml-poster')) {
       return;
     }
-    const poster = htmlFor(element)`<i-amphtml-poster></i-amphtml-poster>`;
+    const html = htmlFor(element);
+    const poster = html` <i-amphtml-poster></i-amphtml-poster> `;
     const src = element.getAttribute('poster');
     setInitialDisplay(poster, 'block');
     setStyles(poster, {

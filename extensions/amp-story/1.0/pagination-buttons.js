@@ -78,11 +78,14 @@ const ForwardButtonStates = {
  * @param {!Element} element
  * @return {!Element}
  */
-const buildPaginationButton = (element) =>
-  htmlFor(element)`
-      <div class="i-amphtml-story-button-container">
-        <button class="i-amphtml-story-button-move"></button>
-      </div>`;
+const buildPaginationButton = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <div class="i-amphtml-story-button-container">
+      <button class="i-amphtml-story-button-move"></button>
+    </div>
+  `;
+};
 
 /**
  * @param {!Element} hoverEl

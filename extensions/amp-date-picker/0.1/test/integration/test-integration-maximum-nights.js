@@ -48,18 +48,20 @@ config.run('amp-date-picker', function () {
           now: new Date('2018-01-01T08:00:00Z'),
         });
 
-        doc.body.appendChild(htmlFor(doc)`
-      <div>
-        <amp-date-picker
-          layout="fixed-height"
-          height="360"
-          type="range"
-          id="picker"
-          min="0"
-          date="2018-01-01"
-          maximum-nights="3"
-        ></amp-date-picker>
-      </div>`);
+        const html = htmlFor(doc);
+        doc.body.appendChild(html`
+          <div>
+            <amp-date-picker
+              layout="fixed-height"
+              height="360"
+              type="range"
+              id="picker"
+              min="0"
+              date="2018-01-01"
+              maximum-nights="3"
+            ></amp-date-picker>
+          </div>
+        `);
         const picker = doc.getElementById('picker');
         const impl = await picker.getImpl(false);
         await impl.buildCallback();

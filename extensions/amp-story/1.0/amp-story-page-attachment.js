@@ -108,14 +108,19 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildInline_() {
-    const closeButtonEl = htmlFor(this.element)`
-          <button class="i-amphtml-story-page-attachment-close-button" aria-label="close"
-              role="button">
-          </button>`;
+    const html = htmlFor(this.element);
+    const closeButtonEl = html`
+      <button
+        class="i-amphtml-story-page-attachment-close-button"
+        aria-label="close"
+        role="button"
+      ></button>
+    `;
     const localizationService = getLocalizationService(devAssert(this.element));
 
-    const titleEl = htmlFor(this.element)`
-    <span class="i-amphtml-story-page-attachment-title"></span>`;
+    const titleEl = html`
+      <span class="i-amphtml-story-page-attachment-title"></span>
+    `;
 
     if (localizationService) {
       const localizedCloseString = localizationService.getLocalizedString(
@@ -130,8 +135,11 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     if (isPageAttachmentUiV2ExperimentOn(this.win)) {
       const titleAndCloseWrapperEl = this.headerEl_.appendChild(
-        htmlFor(this.element)`
-            <div class="i-amphtml-story-draggable-drawer-header-title-and-close"></div>`
+        html`
+          <div
+            class="i-amphtml-story-draggable-drawer-header-title-and-close"
+          ></div>
+        `
       );
       titleAndCloseWrapperEl.appendChild(closeButtonEl);
       titleAndCloseWrapperEl.appendChild(titleEl);
@@ -166,11 +174,13 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     );
     this.element.classList.add('i-amphtml-story-page-attachment-remote');
     // Use an anchor element to make this a real link in vertical rendering.
-    const link = htmlFor(this.element)`
-    <a class="i-amphtml-story-page-attachment-remote-content" target="_blank">
-      <span class="i-amphtml-story-page-attachment-remote-title"></span>
-      <span class="i-amphtml-story-page-attachment-remote-icon"></span>
-    </a>`;
+    const html = htmlFor(this.element);
+    const link = html`
+      <a class="i-amphtml-story-page-attachment-remote-content" target="_blank">
+        <span class="i-amphtml-story-page-attachment-remote-title"></span>
+        <span class="i-amphtml-story-page-attachment-remote-icon"></span>
+      </a>
+    `;
     link.setAttribute('href', this.element.getAttribute('href'));
     this.contentEl_.appendChild(link);
 

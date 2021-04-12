@@ -177,10 +177,11 @@ export class AmpStoryDevToolsTabDebug extends AMP.BaseElement {
   buildDebugTitle_(errorCount) {
     const statusIcon = buildStatusIcon(this.element, errorCount == 0);
     statusIcon.classList.add('i-amphtml-story-dev-tools-log-status-icon');
-    const title = htmlFor(
-      this.element
-    )`<div class="i-amphtml-story-dev-tools-log-status-title"></div>`;
-    const statusText = htmlFor(this.element)`<span></span>`;
+    const html = htmlFor(this.element);
+    const title = html`
+      <div class="i-amphtml-story-dev-tools-log-status-title"></div>
+    `;
+    const statusText = html` <span></span> `;
     statusText.textContent = errorCount
       ? `Failed - ${errorCount} errors`
       : 'Passed';

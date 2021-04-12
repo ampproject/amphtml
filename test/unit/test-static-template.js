@@ -19,7 +19,8 @@ import {htmlFor, htmlRefs} from '../../src/static-template';
 describe('Static Template', () => {
   describe('html', () => {
     it('generates static html tree', () => {
-      const div = htmlFor(document)`<div attr="test"><p class="er"></p></div>`;
+      const html = htmlFor(document);
+      const div = html` <div attr="test"><p class="er"></p></div> `;
 
       expect(div.tagName).to.equal('DIV');
       expect(div.getAttribute('attr')).to.equal('test');
@@ -57,8 +58,11 @@ describe('Static Template', () => {
       let div = html` <div></div> `;
       expect(div.ownerDocument).to.equal(document);
 
-      div = htmlFor(iDoc)`<div></div>`;
-      expect(div.ownerDocument).to.equal(iDoc);
+      (() => {
+        const html = htmlFor(document);
+        div = html` <div></div> `;
+        expect(div.ownerDocument).to.equal(iDoc);
+      })();
 
       div = html` <div></div> `;
       expect(div.ownerDocument).to.equal(iDoc);
@@ -68,19 +72,31 @@ describe('Static Template', () => {
     });
 
     it('ignores text before first element', () => {
-      const div = htmlFor(document)`test<div></div>`;
+      const html = htmlFor(document);
+      const div = html`
+        test
+        <div></div>
+      `;
       expect(div.outerHTML).to.not.include('test');
     });
 
     it('ignores text after first element', () => {
-      const div = htmlFor(document)`<div></div>test`;
+      const html = htmlFor(document);
+      const div = html`
+        <div></div>
+        test
+      `;
       expect(div.outerHTML).to.not.include('test');
     });
 
     it('rejects multiple root elements', () => {
       expect(() => {
         allowConsoleError(() => {
-          htmlFor(document)`<div></div><div></div>`;
+          const html = htmlFor(document);
+          html`
+            <div></div>
+            <div></div>
+          `;
         });
       }).to.throw('template');
     });
@@ -88,7 +104,8 @@ describe('Static Template', () => {
     it('rejects non-existent root', () => {
       expect(() => {
         allowConsoleError(() => {
-          htmlFor(document)``;
+          const html = htmlFor(document);
+          html``;
         });
       }).to.throw('template');
     });
@@ -96,7 +113,8 @@ describe('Static Template', () => {
     it('rejects dynamic templates', () => {
       expect(() => {
         allowConsoleError(() => {
-          htmlFor(document)`<div>${'text'}</div>`;
+          const html = htmlFor(document);
+          html` <div>${'text'}</div> `;
         });
       }).to.throw('template');
     });
@@ -118,13 +136,15 @@ describe('Static Template', () => {
     });
 
     it('ignores element if it has ref attribute', () => {
-      const el = htmlFor(document)`<div ref="test"></div>`;
+      const html = htmlFor(document);
+      const el = html` <div ref="test"></div> `;
       const refs = htmlRefs(el);
       expect(refs).to.deep.equal({});
     });
 
     it('rejects empty ref attribute', () => {
-      const el = htmlFor(document)`<div><div ref=""></div></div>`;
+      const html = htmlFor(document);
+      const el = html` <div><div ref=""></div></div> `;
       expect(() => {
         allowConsoleError(() => {
           htmlRefs(el);
@@ -133,10 +153,13 @@ describe('Static Template', () => {
     });
 
     it('rejects duplicate ref attribute', () => {
-      const el = htmlFor(document)`<div>
-            <div ref="test"></div>
-            <div ref="test"</div>
-          </div>`;
+      const html = htmlFor(document);
+      const el = html`
+        <div>
+          <div ref="test"></div>
+          <div ref="test"></div>
+        </div>
+      `;
       expect(() => {
         allowConsoleError(() => {
           htmlRefs(el);

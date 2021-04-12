@@ -35,49 +35,71 @@ const AttachmentTheme = {
  * @param {!Element} element
  * @return {!Element}
  */
-export const buildOpenDefaultAttachmentElement = (element) =>
-  htmlFor(element)`
-    <a class="
+export const buildOpenDefaultAttachmentElement = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <a
+      class="
         i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
-        role="button">
+      role="button"
+    >
       <span class="i-amphtml-story-page-open-attachment-icon">
         <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
         <span class="i-amphtml-story-page-open-attachment-bar-right"></span>
       </span>
       <span class="i-amphtml-story-page-open-attachment-label"></span>
-    </a>`;
+    </a>
+  `;
+};
 
 /**
  * @param {!Element} element
  * @return {!Element}
  */
-export const buildOpenInlineAttachmentElement = (element) =>
-  htmlFor(element)`
-    <a class="
+export const buildOpenInlineAttachmentElement = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <a
+      class="
         i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
-        role="button">
+      role="button"
+    >
       <div class="i-amphtml-story-inline-page-attachment-chip">
         <div class="i-amphtml-story-inline-page-attachment-img"></div>
         <div class="i-amphtml-story-inline-page-attachment-arrow"></div>
       </div>
-    </a>`;
+    </a>
+  `;
+};
 
 /**
  * @param {!Element} element
  * @return {!Element}
  */
-const buildOpenOutlinkAttachmentElement = (element) =>
-  htmlFor(element)`
-     <a class="i-amphtml-story-page-open-attachment"
-         role="button">
-       <span class="i-amphtml-story-outlink-page-attachment-arrow">
-         <span class="i-amphtml-story-outlink-page-open-attachment-bar-left"></span>
-         <span class="i-amphtml-story-outlink-page-open-attachment-bar-right"></span>
-       </span>
-       <div class="i-amphtml-story-outlink-page-attachment-outlink-chip" ref="chipEl">
-        <div class="i-amphtml-story-outlink-page-attachment-label" ref="ctaLabelEl"></div>
-       </div>
-     </a>`;
+const buildOpenOutlinkAttachmentElement = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <a class="i-amphtml-story-page-open-attachment" role="button">
+      <span class="i-amphtml-story-outlink-page-attachment-arrow">
+        <span
+          class="i-amphtml-story-outlink-page-open-attachment-bar-left"
+        ></span>
+        <span
+          class="i-amphtml-story-outlink-page-open-attachment-bar-right"
+        ></span>
+      </span>
+      <div
+        class="i-amphtml-story-outlink-page-attachment-outlink-chip"
+        ref="chipEl"
+      >
+        <div
+          class="i-amphtml-story-outlink-page-attachment-label"
+          ref="ctaLabelEl"
+        ></div>
+      </div>
+    </a>
+  `;
+};
 
 /**
  * Determines which open attachment UI to render.

@@ -470,7 +470,8 @@ class AmpYoutube extends AMP.BaseElement {
     }
 
     const {element: el} = this;
-    const imgPlaceholder = htmlFor(el)`<img placeholder referrerpolicy=origin>`;
+    const html = htmlFor(el);
+    const imgPlaceholder = html` <img placeholder referrerpolicy="origin" /> `;
     const videoid = dev().assertString(this.videoid_);
 
     setStyles(imgPlaceholder, {

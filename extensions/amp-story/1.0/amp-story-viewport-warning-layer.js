@@ -43,9 +43,12 @@ const RESIZE_THROTTLE_MS = 300;
  * @return {!Element}
  */
 const getTemplate = (element) => {
-  return htmlFor(element)`
-    <div class="
-        i-amphtml-story-no-rotation-overlay i-amphtml-story-system-reset">
+  const html = htmlFor(element);
+  return html`
+    <div
+      class="
+        i-amphtml-story-no-rotation-overlay i-amphtml-story-system-reset"
+    >
       <div class="i-amphtml-overlay-container">
         <div class="i-amphtml-story-overlay-icon"></div>
         <div class="i-amphtml-story-overlay-text"></div>

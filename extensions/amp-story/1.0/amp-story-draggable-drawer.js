@@ -50,12 +50,14 @@ export const DrawerState = {
  * @return {!Element}
  */
 const getTemplateEl = (element) => {
-  return htmlFor(element)`
+  const html = htmlFor(element);
+  return html`
     <div class="i-amphtml-story-draggable-drawer">
       <div class="i-amphtml-story-draggable-drawer-container">
         <div class="i-amphtml-story-draggable-drawer-content"></div>
       </div>
-    </div>`;
+    </div>
+  `;
 };
 
 /**
@@ -64,8 +66,8 @@ const getTemplateEl = (element) => {
  * @return {!Element}
  */
 const getHeaderEl = (element) => {
-  return htmlFor(element)`
-    <div class="i-amphtml-story-draggable-drawer-header"></div>`;
+  const html = htmlFor(element);
+  return html` <div class="i-amphtml-story-draggable-drawer-header"></div> `;
 };
 
 /**

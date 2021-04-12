@@ -48,26 +48,28 @@ config.run('amp-date-picker', function () {
           now: new Date('2018-01-01T08:00:00Z'),
         });
 
-        document.body.appendChild(htmlFor(document)`
-      <div>
-        <input id="today-explicit-date">
-        <amp-date-picker
-          layout="fixed-height"
-          height="360"
-          id="today-explicit"
-          date="2018-01-01"
-          input-selector="#today-explicit-date"
-        ></amp-date-picker>
+        const html = htmlFor(document);
+        document.body.appendChild(html`
+          <div>
+            <input id="today-explicit-date" />
+            <amp-date-picker
+              layout="fixed-height"
+              height="360"
+              id="today-explicit"
+              date="2018-01-01"
+              input-selector="#today-explicit-date"
+            ></amp-date-picker>
 
-        <input id="today-duration-date">
-        <amp-date-picker
-          layout="fixed-height"
-          height="360"
-          id="today-duration"
-          date="P0D"
-          input-selector="#today-duration-date"
-        ></amp-date-picker>
-      </div>`);
+            <input id="today-duration-date" />
+            <amp-date-picker
+              layout="fixed-height"
+              height="360"
+              id="today-duration"
+              date="P0D"
+              input-selector="#today-duration-date"
+            ></amp-date-picker>
+          </div>
+        `);
       });
 
       after(() => {

@@ -61,9 +61,12 @@ export class LoadMoreService {
     if (this.loadMoreButton_) {
       this.loadMoreButton_.classList.add('amp-visible');
     } else {
-      this.loadMoreButton_ = htmlFor(this.ampListElement_)`
-        <amp-list-load-more load-more-button
-          class="amp-visible i-amphtml-default-ui">
+      const html = htmlFor(this.ampListElement_);
+      this.loadMoreButton_ = html`
+        <amp-list-load-more
+          load-more-button
+          class="amp-visible i-amphtml-default-ui"
+        >
           <button load-more-clickable class="i-amphtml-list-load-more-button">
             <label>See More</label>
           </button>
@@ -89,7 +92,8 @@ export class LoadMoreService {
     );
 
     if (!this.loadMoreLoadingElement_) {
-      this.loadMoreLoadingElement_ = htmlFor(this.ampListElement_)`
+      const html = htmlFor(this.ampListElement_);
+      this.loadMoreLoadingElement_ = html`
         <amp-list-load-more load-more-loading class="i-amphtml-default-ui">
           <div class="i-amphtml-list-load-more-spinner"></div>
         </amp-list-load-more>
@@ -143,12 +147,14 @@ export class LoadMoreService {
     );
 
     if (!this.loadMoreFailedElement_) {
-      this.loadMoreFailedElement_ = htmlFor(this.ampListElement_)`
+      const html = htmlFor(this.ampListElement_);
+      this.loadMoreFailedElement_ = html`
         <amp-list-load-more load-more-failed class="i-amphtml-default-ui">
           <div class="i-amphtml-list-load-more-message">
             Unable to Load More
           </div>
-          <button load-more-clickable
+          <button
+            load-more-clickable
             class="i-amphtml-list-load-more-button
                   i-amphtml-list-load-more-button-has-icon
                   i-amphtml-list-load-more-button-small"

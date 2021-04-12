@@ -235,12 +235,18 @@ class AmpBridPlayer extends AMP.BaseElement {
 
     const {partnerID_: partnerID, feedID_: feedID} = this;
 
-    const placeholder = htmlFor(element)`
-      <amp-img referrerpolicy=origin layout=fill placeholder>
-        <amp-img referrerpolicy=origin layout=fill fallback
-            src="https://cdn.brid.tv/live/default/defaultSnapshot.png">
+    const html = htmlFor(element);
+    const placeholder = html`
+      <amp-img referrerpolicy="origin" layout="fill" placeholder>
+        <amp-img
+          referrerpolicy="origin"
+          layout="fill"
+          fallback
+          src="https://cdn.brid.tv/live/default/defaultSnapshot.png"
+        >
         </amp-img>
-      </amp-img>`;
+      </amp-img>
+    `;
 
     this.propagateAttributes(['aria-label'], placeholder);
     this.applyFillContent(placeholder);
