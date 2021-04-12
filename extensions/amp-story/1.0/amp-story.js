@@ -98,7 +98,7 @@ import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {endsWith} from '../../../src/string';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {findIndex, lastItem} from '../../../src/utils/array';
+import {findIndex, lastItem, toArray} from '../../../src/core/types/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getLocalizationService} from './amp-story-localization-service';
@@ -106,13 +106,14 @@ import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
 import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
+import {isPageAttachmentUiV2ExperimentOn} from './amp-story-open-page-attachment';
 import {parseQueryString} from '../../../src/url';
 import {
   removeAttributeInMutate,
   setAttributeInMutate,
   shouldShowStoryUrlInfo,
 } from './utils';
-import {toArray} from '../../../src/types';
+
 import {upgradeBackgroundAudio} from './audio';
 import LocalizedStringsAr from './_locales/ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsDe from './_locales/de.json' assert {type: 'json'}; // lgtm[js/syntax-error]
@@ -772,6 +773,15 @@ export class AmpStory extends AMP.BaseElement {
       this.onBookendStateUpdate_(isActive);
     });
 
+    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+      this.storeService_.subscribe(
+        StateProperty.PAGE_ATTACHMENT_STATE,
+        (isActive) => {
+          this.onAttachmentStateUpdate_(isActive);
+        }
+      );
+    }
+
     this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
       this.onPausedStateUpdate_(isPaused);
     });
@@ -832,6 +842,15 @@ export class AmpStory extends AMP.BaseElement {
       );
     });
 
+    // Listen for class mutations on the <body> element.
+    const bodyElObserver = new this.win.MutationObserver((mutations) =>
+      this.onBodyElMutation_(mutations)
+    );
+    bodyElObserver.observe(this.win.document.body, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
     this.installGestureRecognizers_();
 
@@ -844,6 +863,19 @@ export class AmpStory extends AMP.BaseElement {
     if (this.viewerMessagingHandler_) {
       this.viewerMessagingHandler_.startListening();
     }
+  }
+
+  /** @private */
+  onBodyElMutation_(mutations) {
+    mutations.forEach((mutation) => {
+      const bodyEl = dev().assertElement(mutation.target);
+
+      // Updates presence of the `amp-mode-keyboard-active` class on the store.
+      this.storeService_.dispatch(
+        Action.TOGGLE_KEYBOARD_ACTIVE_STATE,
+        bodyEl.classList.contains('amp-mode-keyboard-active')
+      );
+    });
   }
 
   /** @private */
@@ -2143,6 +2175,17 @@ export class AmpStory extends AMP.BaseElement {
   onBookendStateUpdate_(isActive) {
     this.toggleElementsOnBookend_(/* display */ isActive);
     this.element.classList.toggle('i-amphtml-story-bookend-active', isActive);
+  }
+
+  /**
+   * @param {boolean} isActive
+   * @private
+   */
+  onAttachmentStateUpdate_(isActive) {
+    this.element.classList.toggle(
+      'i-amphtml-story-attachment-active',
+      isActive
+    );
   }
 
   /**

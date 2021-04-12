@@ -15,10 +15,10 @@
  */
 import {LocalizedStringId} from '../../../src/localized-strings'; // eslint-disable-line no-unused-vars
 import {createElementWithAttributes} from '../../../src/dom';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
+import {devAssert} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';
 import {hasOwn} from '../../../src/utils/object';
-import {isArray} from '../../../src/types';
+import {isArray} from '../../../src/core/types/array';
 
 /**
  * @typedef {{

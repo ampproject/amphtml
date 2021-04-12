@@ -53,7 +53,7 @@ import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
 import {getValueForExpr} from '../../../src/json';
 import {isAmp4Email} from '../../../src/format';
-import {isArray, toArray} from '../../../src/types';
+import {isArray, toArray} from '../../../src/core/types/array';
 import {isExperimentOn} from '../../../src/experiments';
 import {px, setImportantStyles, setStyles, toggle} from '../../../src/style';
 import {setDOM} from '../../../third_party/set-dom/set-dom';
@@ -1095,19 +1095,21 @@ export class AmpList extends AMP.BaseElement {
 
     // binding=refresh: Only do render-blocking update after initial render.
     if (binding && binding.startsWith('refresh')) {
-      // Don't bother using bindForDocOrNull() since the Bind service must be available after first mutate.
-      const afterFirstMutate =
-        this.bind_ && this.bind_.signals().get('FIRST_MUTATE');
-      if (afterFirstMutate) {
+      // Bind service must be available after first mutation, so don't
+      // wait on the async service getter.
+      if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
         return updateWith(this.bind_);
       } else {
-        // This must be initial render, so do a non-blocking scan for bindings only.
-        // [diffable] is a special case that is handled later in render_(), see comment there.
-        if (!this.element.hasAttribute('diffable')) {
-          this.scanForBindings_(elements, []);
-        }
-
-        // Don't block render and return synchronously.
+        // On initial render, do a non-blocking scan and don't update.
+        Services.bindForDocOrNull(this.element).then((bind) => {
+          if (bind) {
+            const evaluate = binding == 'refresh-evaluate';
+            bind.rescan(elements, [], {
+              'fast': true,
+              'update': evaluate ? 'evaluate' : false,
+            });
+          }
+        });
         return Promise.resolve(elements);
       }
     }
@@ -1118,32 +1120,6 @@ export class AmpList extends AMP.BaseElement {
         return updateWith(bind);
       } else {
         return Promise.resolve(elements);
-      }
-    });
-  }
-
-  /**
-   * Scans for bindings in `addedElements` and removes bindings in `removedElements`.
-   * Unlike updateBindings(), does NOT apply bindings or update DOM.
-   * Should only be used for binding="refresh" or binding="refresh-evaluate".
-   * @param {!Array<!Element>} addedElements
-   * @param {!Array<!Element>} removedElements
-   * @private
-   */
-  scanForBindings_(addedElements, removedElements) {
-    const binding = this.element.getAttribute('binding');
-    if (!binding || !binding.startsWith('refresh')) {
-      return;
-    }
-    Services.bindForDocOrNull(this.element).then((bind) => {
-      if (bind) {
-        // For binding="refresh-evaluate", we scan for bindings, evaluate+cache expressions, but skip DOM update.
-        // For binding="refresh", we only scan for bindings.
-        const update = binding == 'refresh-evaluate' ? 'evaluate' : false;
-        bind.rescan(addedElements, removedElements, {
-          'fast': true,
-          'update': update,
-        });
       }
     });
   }
@@ -1164,14 +1140,6 @@ export class AmpList extends AMP.BaseElement {
         // TODO:(wg-performance)(#28781) Ensure owners_.scheduleUnlayout() is
         // called for diff elements that are removed
         this.diff_(container, elements);
-
-        // For diffable amp-list, we have to wait until DOM diffing is done here to scan for new bindings
-        // (vs. asynchronously in updateBindings()), and scan the entire container (vs. just `elements`).
-        //
-        // This is because instead of replacing the entire DOM subtree, the diffing process removes
-        // select children from `elements` and inserts them into the container. This results in a race
-        // between diff_() and Bind.rescan(), which we avoid by delaying the latter until now.
-        this.scanForBindings_([container], [container]);
       } else {
         if (!opt_append) {
           this.owners_./*OK*/ scheduleUnlayout(this.element, container);

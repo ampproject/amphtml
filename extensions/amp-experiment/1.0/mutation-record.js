@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {isObject, toArray} from '../../../src/types';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {isObject} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
+import {userAssert} from '../../../src/log';
 
 /**
  * Types of possibile mutations

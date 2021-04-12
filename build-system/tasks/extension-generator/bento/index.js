@@ -15,7 +15,7 @@
  */
 
 /**
- * @fileoverview This file implements the `gulp test-report-upload` task, which POSTs test result reports
+ * @fileoverview This file implements the `amp test-report-upload` task, which POSTs test result reports
  * to an API endpoint that stores them in the database.
  */
 
@@ -41,7 +41,7 @@ function dashToPascalCase(name) {
 
 /**
  * Create a mutator function from a map of keys/values to replace.
- * @param {Map<string, string>} replaceMap
+ * @param {Object<string, string>} replaceMap
  * @return {function(string): string}
  */
 function makeReplacementFn(replaceMap) {
@@ -70,11 +70,11 @@ async function* walkDir(dir) {
 }
 
 /**
- * @return {!{
+ * @return {Promise<{
  *   name: string,
  *   version,
  *   options: {hasCss: true},
- * }}
+ * }|void>}
  */
 async function makeBentoExtension() {
   const componentName = (argv.name || '').replace(/^amp-/, '');
@@ -85,7 +85,7 @@ async function makeBentoExtension() {
   }
 
   const doReplacements = makeReplacementFn({
-    '__current_year__': new Date().getFullYear(),
+    '__current_year__': `${new Date().getFullYear()}`,
     '__component_version__': version,
     '__component_version_snakecase__': version.replace(/\./g, '_'),
     '__component_name_hyphenated__': componentName,
@@ -146,12 +146,12 @@ ${green('FINISHED:')} Boilerplate for your new ${cyan(
 
 You can run tests on your new component with the following command:
     ${cyan(
-      `gulp unit --files=extensions/amp-${componentName}/1.0/test/test-amp-${componentName}.js`
+      `amp unit --files=extensions/amp-${componentName}/1.0/test/test-amp-${componentName}.js`
     )}
 If the component was generated successfully, the example test should pass.
 
 You may also view the component during development in storybook:
-    ${cyan(`gulp storybook`)}`);
+    ${cyan(`amp storybook`)}`);
 
   // Return the resulting extension bundle config.
   return {

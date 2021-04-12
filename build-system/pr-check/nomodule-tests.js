@@ -22,7 +22,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const {
   downloadNomoduleOutput,
-  printSkipMessage,
+  skipDependentJobs,
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
@@ -32,27 +32,21 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'nomodule-tests.js';
 
-/**
- * @return {void}
- */
 function prependConfig() {
   const targets = MINIFIED_TARGETS.flatMap((target) => [
     `dist/${target}.js`,
   ]).join(',');
   timedExecOrDie(
-    `gulp prepend-global --${argv.config} --local_dev --fortesting --derandomize --target=${targets}`
+    `amp prepend-global --${argv.config} --local_dev --fortesting --derandomize --target=${targets}`
   );
 }
 
-/**
- * @return {void}
- */
 function pushBuildWorkflow() {
   downloadNomoduleOutput();
   prependConfig();
   try {
     timedExecOrThrow(
-      `gulp integration --nobuild --headless --compiled --report --config=${argv.config}`,
+      `amp integration --nobuild --headless --compiled --report --config=${argv.config}`,
       'Integration tests failed!'
     );
   } catch (e) {
@@ -60,22 +54,19 @@ function pushBuildWorkflow() {
       process.exitCode = e.status;
     }
   } finally {
-    timedExecOrDie('gulp test-report-upload');
+    timedExecOrDie('amp test-report-upload');
   }
 }
 
-/**
- * @return {void}
- */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     downloadNomoduleOutput();
     prependConfig();
     timedExecOrDie(
-      `gulp integration --nobuild --compiled --headless --config=${argv.config}`
+      `amp integration --nobuild --compiled --headless --config=${argv.config}`
     );
   } else {
-    printSkipMessage(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime or integration tests'
     );

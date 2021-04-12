@@ -40,7 +40,8 @@ import {dict, hasOwn} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
 import {getMode} from '../../../src/mode';
 import {installLinkerReaderService} from './linker-reader';
-import {isArray, isEnumValue} from '../../../src/types';
+import {isArray} from '../../../src/core/types/array';
+import {isEnumValue} from '../../../src/types';
 import {isIframed} from '../../../src/dom';
 import {isInFie} from '../../../src/iframe-helper';
 
@@ -209,14 +210,13 @@ export class AmpAnalytics extends AMP.BaseElement {
       return this.iniPromise_;
     }
 
-    this.iniPromise_ = this.getAmpDoc()
+    const ampdoc = this.getAmpDoc();
+    this.iniPromise_ = ampdoc
       .whenFirstVisible()
       // Rudimentary "idle" signal.
       .then(() => Services.timerFor(this.win).promise(1))
       .then(() => this.consentPromise_)
-      .then(() => Services.ampdocServiceFor(this.win))
-      .then((ampDocService) => ampDocService.getAmpDoc(this.element))
-      .then((ampdoc) =>
+      .then(() =>
         Promise.all([
           instrumentationServicePromiseForDoc(ampdoc),
           variableServicePromiseForDoc(ampdoc),
@@ -245,7 +245,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       })
       .then(() => {
         this.transport_ = new Transport(
-          this.win,
+          this.getAmpDoc(),
           this.config_['transport'] || {}
         );
       })
@@ -647,7 +647,14 @@ export class AmpAnalytics extends AMP.BaseElement {
         return;
       }
       this.expandAndSendRequest_(request, trigger, event);
-      this.expandAndPostMessage_(trigger, event);
+
+      const shouldSendToAmpAd =
+        trigger['parentPostMessage'] &&
+        this.allowParentPostMessage_() &&
+        isIframed(this.win);
+      if (shouldSendToAmpAd) {
+        this.expandAndPostMessage_(trigger, event);
+      }
     });
   }
 
@@ -674,10 +681,6 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   expandAndPostMessage_(trigger, event) {
     const msg = trigger['parentPostMessage'];
-    if (!msg || !this.allowParentPostMessage_()) {
-      // Only send message for AMP ad with parentPostMessage specified.
-      return;
-    }
     const expansionOptions = this.expansionOptions_(event, trigger);
     expandPostMessage(
       this.getAmpDoc(),
@@ -687,10 +690,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       expansionOptions,
       this.element
     ).then((message) => {
-      if (isIframed(this.win)) {
-        // Only post message with explict `parentPostMessage`
-        this.win.parent./*OK*/ postMessage(message, '*');
-      }
+      this.win.parent./*OK*/ postMessage(message, '*');
     });
   }
 

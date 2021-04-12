@@ -33,7 +33,7 @@ import {installPlatformService} from '../../src/service/platform-impl';
 import {installTemplatesServiceForDoc} from '../../src/service/template-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
-import {toArray} from '../../src/types';
+import {toArray} from '../../src/core/types/array';
 import {vsyncForTesting} from '../../src/service/vsync-impl';
 
 describes.fakeWin(
@@ -609,7 +609,7 @@ describes.fakeWin(
         });
         runChunks(win.document);
 
-        await extensions.waitForExtension(win, 'amp-ext');
+        await extensions.waitForExtension('amp-ext', '0.1');
 
         // Extension is added immediately. Can't find for micro-tasks here.
         const extHolder = extensions.extensions_['amp-ext'];
@@ -651,7 +651,7 @@ describes.fakeWin(
         });
         runChunks(win.document);
 
-        yield extensions.waitForExtension(win, 'amp-ext');
+        yield extensions.waitForExtension('amp-ext', '0.1');
 
         // Extension is added immediately. Can't find for micro-tasks here.
         const ext = extensions.extensions_['amp-ext'].extension;
@@ -670,7 +670,7 @@ describes.fakeWin(
 
         // Service and extensions are resolved.
         yield Promise.all([
-          extensions.waitForExtension(win, 'amp-ext'),
+          extensions.waitForExtension('amp-ext', '0.1'),
           servicePromise,
         ]);
       });
@@ -698,7 +698,7 @@ describes.fakeWin(
         runChunks(win.document);
 
         // Extension is added immediately. Can't find for micro-tasks here.
-        yield extensions.waitForExtension(win, 'amp-ext');
+        yield extensions.waitForExtension('amp-ext', '0.1');
         const ext = extensions.extensions_['amp-ext'].extension;
         expect(ext.elements['amp-ext']).exist;
         expect(ext.elements['amp-ext'].implementationClass).to.equal(
@@ -724,7 +724,7 @@ describes.fakeWin(
 
         // Service and extensions are resolved.
         yield Promise.all([
-          extensions.waitForExtension(win, 'amp-ext'),
+          extensions.waitForExtension('amp-ext', '0.1'),
           servicePromise,
         ]);
       });
@@ -746,7 +746,7 @@ describes.fakeWin(
         runChunks(win.document);
 
         // No factories
-        yield extensions.waitForExtension(win, 'amp-ext');
+        yield extensions.waitForExtension('amp-ext', '0.1');
         const extHolder = extensions.extensions_['amp-ext'];
         expect(extHolder.docFactories).to.have.length(1);
 
@@ -778,7 +778,7 @@ describes.fakeWin(
         runChunks(win.document);
 
         // No factories
-        yield extensions.waitForExtension(win, 'amp-ext');
+        yield extensions.waitForExtension('amp-ext', '0.1');
         const extHolder = extensions.extensions_['amp-ext'];
         expect(extHolder.docFactories).to.have.length(1);
 
@@ -831,7 +831,7 @@ describes.fakeWin(
         runChunks(win.document);
 
         // Extension is added immediately. Can't find for micro-tasks here.
-        yield extensions.waitForExtension(win, 'amp-ext');
+        yield extensions.waitForExtension('amp-ext', '0.1');
         const extHolder = extensions.extensions_['amp-ext'];
         const ext = extHolder.extension;
         expect(ext.elements['amp-ext']).exist;
@@ -855,7 +855,7 @@ describes.fakeWin(
 
         // Service and extensions are resolved.
         yield Promise.all([
-          extensions.waitForExtension(win, 'amp-ext'),
+          extensions.waitForExtension('amp-ext', '0.1'),
           servicePromise,
         ]);
       });
@@ -881,7 +881,7 @@ describes.fakeWin(
         runChunks(win.document);
 
         // Extension is added immediately. Can't find for micro-tasks here.
-        yield extensions.waitForExtension(win, 'amp-ext');
+        yield extensions.waitForExtension('amp-ext', '0.1');
         const extHolder = extensions.extensions_['amp-ext'];
         const ext = extHolder.extension;
         expect(ext.elements['amp-ext']).exist;
@@ -915,7 +915,7 @@ describes.fakeWin(
 
         // Service and extensions are resolved.
         yield Promise.all([
-          extensions.waitForExtension(win, 'amp-ext'),
+          extensions.waitForExtension('amp-ext', '0.1'),
           servicePromise,
         ]);
       });
@@ -934,7 +934,7 @@ describes.fakeWin(
         runChunks(win.document);
 
         // Factory recorded.
-        yield extensions.waitForExtension(win, 'amp-ext');
+        yield extensions.waitForExtension('amp-ext', '0.1');
         const extHolder = extensions.extensions_['amp-ext'];
         expect(extHolder.docFactories).to.have.length(1);
 
@@ -1053,7 +1053,7 @@ describes.realWin(
         await ampdoc.whenExtensionsKnown();
 
         // Factories have been applied.
-        await extensions.waitForExtension(win, 'amp-ext');
+        await extensions.waitForExtension('amp-ext', '0.1');
         expect(getServiceForDoc(ampdoc, 'service1')).to.be.instanceOf(Service1);
       });
 
@@ -1481,7 +1481,7 @@ describes.realWin(
           await ampdoc.whenExtensionsKnown();
 
           // Factories have been applied.
-          await extensions.waitForExtension(win, 'amp-ext');
+          await extensions.waitForExtension('amp-ext', '0.1');
           expect(getServiceForDoc(ampdoc, 'service1')).to.be.instanceOf(
             Service1
           );

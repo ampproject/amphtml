@@ -65,6 +65,7 @@ const COMMON_GLOBS = [
   'node_modules/@ampproject/worker-dom/dist/amp-production/main.mjs',
   'node_modules/preact/package.json',
   'node_modules/preact/dist/*.js',
+  'node_modules/preact/dom/*.js',
   'node_modules/preact/hooks/package.json',
   'node_modules/preact/hooks/dist/*.js',
   'node_modules/preact/compat/package.json',
@@ -121,9 +122,6 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-bind/**/*.js',
   // Needed to access to Variant interface from other extensions
   'extensions/amp-experiment/**/*.js',
-  // TODO(#32523) Remove this when Bento experiment is done.
-  // Needed to access across versions
-  'extensions/amp-fit-text/1.0/*.js',
   // Needed to access form impl from other extensions
   'extensions/amp-form/**/*.js',
   // Needed by amp-facebook-* for the loader logo
@@ -160,18 +158,10 @@ const CLOSURE_SRC_GLOBS = [
   // Not sure what these files are, but they seem to duplicate code
   // one level below and confuse the compiler.
   '!node_modules/core-js/modules/library/**.js',
+  '!extensions/**/dist/**/*.js',
 ].concat(COMMON_GLOBS);
-
-/**
- * NOTE: 3p code is generally excluded from the transform process.
- * The globs here are force-transformed anyway.
- */
-const THIRD_PARTY_TRANSFORM_GLOBS = [
-  // JSX syntax should undergo usual transforms
-];
 
 module.exports = {
   BABEL_SRC_GLOBS,
   CLOSURE_SRC_GLOBS,
-  THIRD_PARTY_TRANSFORM_GLOBS,
 };

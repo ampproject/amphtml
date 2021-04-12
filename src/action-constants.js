@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {pureDevAssert as devAssert} from './core/assert';
+import {devAssert} from './log';
 
 /**
  * Key string in an action arguments map for an unparsed object literal string.

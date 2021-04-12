@@ -23,10 +23,10 @@ import {
 } from './component';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {childElementsByTag, toggleAttribute} from '../../../src/dom';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
+import {devAssert} from '../../../src/log';
 import {dict, memo} from '../../../src/utils/object';
 import {forwardRef} from '../../../src/preact/compat';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 import {
   useImperativeHandle,
   useLayoutEffect,

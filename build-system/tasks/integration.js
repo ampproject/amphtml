@@ -56,30 +56,30 @@ module.exports = {
 
 integration.description = 'Runs integration tests';
 integration.flags = {
-  'chrome_canary': '  Runs tests on Chrome Canary',
-  'chrome_flags': '  Uses the given flags to launch Chrome',
-  'compiled': '  Runs tests against minified JS',
+  'chrome_canary': 'Runs tests on Chrome Canary',
+  'chrome_flags': 'Uses the given flags to launch Chrome',
+  'compiled': 'Runs tests against minified JS',
   'config':
-    '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
-  'coverage': '  Run tests in code coverage mode',
+    'Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
+  'coverage': 'Run tests in code coverage mode',
   'debug':
-    '  Allow debug statements by auto opening devtools. NOTE: This only ' +
+    'Allow debug statements by auto opening devtools. NOTE: This only ' +
     'works in non headless mode.',
-  'edge': '  Runs tests on Edge',
-  'esm': '  Runs against module(esm) build',
+  'edge': 'Runs tests on Edge',
+  'esm': 'Runs against module(esm) build',
   'define_experiment_constant':
-    '  Transforms tests with the EXPERIMENT constant set to true',
-  'experiment': '  Experiment being tested (used for status reporting)',
-  'firefox': '  Runs tests on Firefox',
-  'files': '  Runs tests for specific files',
-  'grep': '  Runs tests that match the pattern',
-  'headless': '  Run tests in a headless Chrome window',
-  'ie': '  Runs tests on IE',
-  'nobuild': '  Skips build step',
-  'nohelp': '  Silence help messages that are printed prior to test run',
-  'report': '  Write test result report to a local file',
-  'safari': '  Runs tests on Safari',
-  'testnames': '  Lists the name of each test being run',
-  'verbose': '  With logging enabled',
-  'watch': '  Watches for changes in files, runs corresponding test(s)',
+    'Transforms tests with the EXPERIMENT constant set to true',
+  'experiment': 'Experiment being tested (used for status reporting)',
+  'firefox': 'Runs tests on Firefox',
+  'files': 'Runs tests for specific files',
+  'grep': 'Runs tests that match the pattern',
+  'headless': 'Run tests in a headless Chrome window',
+  'ie': 'Runs tests on IE',
+  'nobuild': 'Skips build step',
+  'nohelp': 'Silence help messages that are printed prior to test run',
+  'report': 'Write test result report to a local file',
+  'safari': 'Runs tests on Safari',
+  'testnames': 'Lists the name of each test being run',
+  'verbose': 'With logging enabled',
+  'watch': 'Watches for changes in files, runs corresponding test(s)',
 };

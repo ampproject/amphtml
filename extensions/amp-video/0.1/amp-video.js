@@ -15,6 +15,7 @@
  */
 
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {VisibilityState} from '../../../src/visibility-state';
@@ -40,16 +41,12 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen, listenOncePromise} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {
-  observeContentSize,
-  unobserveContentSize,
-} from '../../../src/utils/size-observer';
-import {
   propagateObjectFitStyles,
   setImportantStyles,
   setInitialDisplay,
   setStyles,
 } from '../../../src/style';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 const TAG = 'amp-video';
 
@@ -166,13 +163,11 @@ export class AmpVideo extends AMP.BaseElement {
     /** @visibleForTesting {?Element} */
     this.posterDummyImageForTesting_ = null;
 
-    /** @private {boolean} */
-    this.isPlaying_ = false;
-
     /** @private {?boolean} whether there are sources that will use a BitrateManager */
     this.hasBitrateSources_ = null;
 
-    this.pauseWhenNoSize_ = this.pauseWhenNoSize_.bind(this);
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -699,26 +694,7 @@ export class AmpVideo extends AMP.BaseElement {
     if (this.isManagedByPool_()) {
       return;
     }
-    if (isPlaying === this.isPlaying_) {
-      return;
-    }
-    this.isPlaying_ = isPlaying;
-    if (isPlaying) {
-      observeContentSize(this.element, this.pauseWhenNoSize_);
-    } else {
-      unobserveContentSize(this.element, this.pauseWhenNoSize_);
-    }
-  }
-
-  /**
-   * @param {!../../../src/layout-rect.LayoutSizeDef} size
-   * @private
-   */
-  pauseWhenNoSize_({width, height}) {
-    const hasSize = width > 0 && height > 0;
-    if (!hasSize && this.video_) {
-      this.video_.pause();
-    }
+    this.pauseHelper_.updatePlaying(isPlaying);
   }
 
   /** @private */

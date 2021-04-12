@@ -60,5 +60,5 @@ is applied to the Apester Media loading image.
 
 ## Validation
 
-See [`amp-apester-media` rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-apester-media/validator-amp-apester-media.protoascii)
+See [`amp-apester-media` rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-apester-media/validator-amp-apester-media.protoascii)
 in the AMP validator specification.

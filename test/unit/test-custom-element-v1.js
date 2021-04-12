@@ -26,7 +26,7 @@ import {
   getImplClassSyncForTesting,
   getImplSyncForTesting,
 } from '../../src/custom-element';
-import {getBuilderForDoc} from '../../src/service/builder';
+import {getSchedulerForDoc} from '../../src/service/scheduler';
 
 describes.realWin('CustomElement V1', {amp: true}, (env) => {
   let win, doc, ampdoc;
@@ -59,7 +59,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
     resourcesMock = env.sandbox.mock(resources);
     resourcesMock.expects('upgraded').never();
 
-    builder = getBuilderForDoc(ampdoc);
+    builder = getSchedulerForDoc(ampdoc);
     builderMock = env.sandbox.mock(builder);
   });
 
@@ -140,6 +140,51 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       doc.body.appendChild(element);
       expect(element.readyState).to.equal('building');
     });
+
+    it('should reschedule build when re-attached after build', async () => {
+      const element = new ElementClass();
+
+      builderMock.expects('schedule').withExactArgs(element).twice();
+      builderMock.expects('unschedule').withExactArgs(element).once();
+
+      doc.body.appendChild(element);
+      expect(element.readyState).to.equal('building');
+
+      const promise = element.buildInternal();
+      expect(element.readyState).to.equal('building');
+
+      await promise;
+      expect(element.readyState).to.equal('mounting');
+
+      doc.body.removeChild(element);
+      expect(element.readyState).to.equal('mounting');
+
+      doc.body.appendChild(element);
+      expect(element.readyState).to.equal('mounting');
+    });
+
+    it('should reschedule build when re-attached after build with usesLoading', async () => {
+      env.sandbox.stub(TestElement, 'usesLoading').returns(true);
+      const element = new ElementClass();
+
+      builderMock.expects('schedule').withExactArgs(element).twice();
+      builderMock.expects('unschedule').withExactArgs(element).once();
+
+      doc.body.appendChild(element);
+      expect(element.readyState).to.equal('building');
+
+      const promise = element.buildInternal();
+      expect(element.readyState).to.equal('building');
+
+      await promise;
+      expect(element.readyState).to.equal('mounting');
+
+      doc.body.removeChild(element);
+      expect(element.readyState).to.equal('mounting');
+
+      doc.body.appendChild(element);
+      expect(element.readyState).to.equal('loading');
+    });
   });
 
   describe('preconnect', () => {
@@ -180,11 +225,16 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
 
   describe('buildInternal', () => {
     let buildCallbackStub;
+    let mountCallbackStub;
 
     beforeEach(() => {
       buildCallbackStub = env.sandbox.stub(
         TestElement.prototype,
         'buildCallback'
+      );
+      mountCallbackStub = env.sandbox.stub(
+        TestElement.prototype,
+        'mountCallback'
       );
       builderMock.expects('schedule').atLeast(0);
     });
@@ -213,6 +263,40 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       doc.body.appendChild(element);
 
       const promise = element.buildInternal();
+      expect(element.isBuilding()).to.be.true;
+      expect(getImplSyncForTesting(element)).to.be.null;
+      expect(element.isUpgraded()).to.be.false;
+      expect(element.isBuilt()).to.be.false;
+      expect(element.readyState).to.equal('building');
+      expect(element).to.have.class('i-amphtml-notbuilt');
+      expect(element).to.have.class('amp-notbuilt');
+      expect(element).to.not.have.class('i-amphtml-built');
+      expect(element.signals().get(CommonSignals.BUILT)).to.be.null;
+      expect(attachedCallbackStub).to.not.be.called;
+
+      await promise;
+      expect(getImplSyncForTesting(element)).to.be.instanceOf(TestElement);
+      expect(buildCallbackStub).to.be.calledOnce;
+      expect(element.isUpgraded()).to.be.true;
+      expect(element.isBuilt()).to.be.true;
+      expect(element.readyState).to.equal('mounting');
+      expect(element).to.not.have.class('i-amphtml-notbuilt');
+      expect(element).to.not.have.class('amp-notbuilt');
+      expect(element).to.have.class('i-amphtml-built');
+      expect(element.signals().get(CommonSignals.BUILT)).to.exist;
+      expect(attachedCallbackStub).to.be.calledOnce;
+    });
+
+    it('should mount a pre-upgraded element', async () => {
+      const attachedCallbackStub = env.sandbox.stub(
+        TestElement.prototype,
+        'attachedCallback'
+      );
+
+      const element = new ElementClass();
+      doc.body.appendChild(element);
+
+      const promise = element.mountInternal();
       expect(element.isBuilding()).to.be.true;
       expect(getImplSyncForTesting(element)).to.be.null;
       expect(element.isUpgraded()).to.be.false;
@@ -260,6 +344,37 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(buildCallbackStub).to.be.calledOnce;
       expect(element.isUpgraded()).to.be.true;
       expect(element.isBuilt()).to.be.true;
+      expect(element.readyState).to.equal('mounting');
+      expect(element).to.not.have.class('i-amphtml-notbuilt');
+      expect(element).to.not.have.class('amp-notbuilt');
+      expect(element).to.have.class('i-amphtml-built');
+      expect(element.signals().get(CommonSignals.BUILT)).to.exist;
+      expect(attachedCallbackStub).to.be.calledOnce;
+    });
+
+    it('should mount an element after upgrade', async () => {
+      const attachedCallbackStub = env.sandbox.stub(
+        TestElement.prototype,
+        'attachedCallback'
+      );
+
+      const element = new StubElementClass();
+      doc.body.appendChild(element);
+      element.upgrade(TestElement);
+
+      const promise = element.mountInternal();
+      expect(element.isBuilding()).to.be.true;
+      expect(getImplSyncForTesting(element)).to.be.null;
+      expect(element.isUpgraded()).to.be.false;
+      expect(element.isBuilt()).to.be.false;
+      expect(element.readyState).to.equal('building');
+      expect(attachedCallbackStub).to.not.be.called;
+
+      await promise;
+      expect(getImplSyncForTesting(element)).to.be.instanceOf(TestElement);
+      expect(buildCallbackStub).to.be.calledOnce;
+      expect(element.isUpgraded()).to.be.true;
+      expect(element.isBuilt()).to.be.true;
       expect(element.readyState).to.equal('complete');
       expect(element).to.not.have.class('i-amphtml-notbuilt');
       expect(element).to.not.have.class('amp-notbuilt');
@@ -268,7 +383,18 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(attachedCallbackStub).to.be.calledOnce;
     });
 
-    it('should continue in loading state if buildCallback requests it', async () => {
+    it('should continue in loading state for usesLoading', async () => {
+      env.sandbox.stub(TestElement, 'usesLoading').returns(true);
+
+      const element = new ElementClass();
+      doc.body.appendChild(element);
+
+      await element.mountInternal();
+      expect(buildCallbackStub).to.be.calledOnce;
+      expect(element.readyState).to.equal('loading');
+    });
+
+    it('should continue in a state if modified by buildCallback', async () => {
       buildCallbackStub.callsFake(function () {
         this.setReadyState('loading');
       });
@@ -279,6 +405,34 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       await element.buildInternal();
       expect(buildCallbackStub).to.be.calledOnce;
       expect(element.readyState).to.equal('loading');
+    });
+
+    it('should continue in a state if modified by buildCallback with usesLoading', async () => {
+      env.sandbox.stub(TestElement, 'usesLoading').returns(true);
+      buildCallbackStub.callsFake(function () {
+        this.setReadyState('complete');
+      });
+
+      const element = new ElementClass();
+      doc.body.appendChild(element);
+
+      await element.buildInternal();
+      expect(buildCallbackStub).to.be.calledOnce;
+      expect(element.readyState).to.equal('complete');
+    });
+
+    it('should continue in a state if modified by mountCallback with usesLoading', async () => {
+      env.sandbox.stub(TestElement, 'usesLoading').returns(true);
+      mountCallbackStub.callsFake(function () {
+        this.setReadyState('complete');
+      });
+
+      const element = new ElementClass();
+      doc.body.appendChild(element);
+
+      await element.mountInternal();
+      expect(buildCallbackStub).to.be.calledOnce;
+      expect(element.readyState).to.equal('complete');
     });
 
     it('should set the failing state if buildCallback fails', async () => {
@@ -317,6 +471,26 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element.readyState).to.equal('error');
     });
 
+    it('should set the failing state if mountCallback fails', async () => {
+      expectAsyncConsoleError(/intentional/);
+      mountCallbackStub.throws(new Error('intentional'));
+
+      const element = new ElementClass();
+      doc.body.appendChild(element);
+
+      try {
+        await element.mountInternal();
+        throw new Error('must have failed');
+      } catch (e) {
+        expect(e.toString()).to.match(/intentional/);
+      }
+      expect(element.readyState).to.equal('error');
+      expect(element.signals().get(CommonSignals.MOUNTED)).to.exist;
+      expect(element.signals().get(CommonSignals.MOUNTED).toString()).to.match(
+        /intentional/
+      );
+    });
+
     it('should only execute build once', async () => {
       const element = new ElementClass();
       doc.body.appendChild(element);
@@ -340,7 +514,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
 
       await element.buildInternal();
       expect(buildCallbackStub).to.be.calledOnce;
-      expect(element.readyState).to.equal('complete');
+      expect(element.readyState).to.equal('mounting');
     });
 
     describe('consent', () => {
@@ -362,7 +536,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
 
         await element.buildInternal();
         expect(buildCallbackStub).to.be.calledOnce;
-        expect(element.readyState).to.equal('complete');
+        expect(element.readyState).to.equal('mounting');
       });
 
       it('should not build on consent insufficient', async () => {
@@ -452,17 +626,274 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
     });
   });
 
+  describe('mount/unmount', () => {
+    let mountCallbackStub, unmountCallbackStub;
+
+    beforeEach(() => {
+      mountCallbackStub = env.sandbox.stub(
+        TestElement.prototype,
+        'mountCallback'
+      );
+      unmountCallbackStub = env.sandbox.stub(
+        TestElement.prototype,
+        'unmountCallback'
+      );
+    });
+
+    it('should only execute mount once', async () => {
+      const element = new ElementClass();
+      doc.body.appendChild(element);
+
+      builderMock.expects('scheduleAsap').never();
+      builderMock.expects('schedule').never();
+
+      const promise = element.mountInternal();
+      const promise2 = element.mount();
+      expect(promise2).to.equal(promise);
+
+      await promise;
+      await promise2;
+      const promise3 = element.mount();
+      expect(promise3).to.equal(promise);
+
+      await element.whenMounted();
+    });
+
+    it('should wait until the element is upgraded', async () => {
+      const element = new StubElementClass();
+
+      builderMock.expects('scheduleAsap').withExactArgs(element).once();
+
+      const promise = element.mount();
+
+      doc.body.appendChild(element);
+      element.upgrade(TestElement);
+
+      await element.mountInternal();
+      await promise;
+      expect(mountCallbackStub).to.be.calledOnce;
+
+      await element.whenMounted();
+    });
+
+    it('should consider element loading if mountCallback has no result', async () => {
+      env.sandbox.stub(TestElement, 'usesLoading').returns(true);
+
+      const element = new ElementClass();
+      doc.body.appendChild(element);
+
+      await element.mountInternal();
+      expect(mountCallbackStub).to.be.calledOnce;
+      expect(element.readyState).to.equal('loading');
+    });
+
+    it('should consider element completed if mountCallback returns promise', async () => {
+      env.sandbox.stub(TestElement, 'usesLoading').returns(true);
+      mountCallbackStub.resolves();
+
+      const element = new ElementClass();
+      doc.body.appendChild(element);
+
+      await element.mountInternal();
+      expect(mountCallbackStub).to.be.calledOnce;
+      expect(element.readyState).to.equal('complete');
+    });
+
+    it('should mount -> unmount -> mount when connected', async () => {
+      const element = new ElementClass();
+      doc.body.appendChild(element);
+
+      builderMock.expects('scheduleAsap').never();
+
+      const scheduleStub = env.sandbox.stub(builder, 'schedule');
+      const unscheduleStub = env.sandbox.stub(builder, 'unschedule');
+
+      // Mount.
+      await element.mountInternal();
+      expect(mountCallbackStub).to.be.calledOnce;
+      expect(element.signals().get('mounted')).to.exist;
+      expect(element.readyState).to.equal('complete');
+
+      // Unmount.
+      element.unmount();
+      expect(unmountCallbackStub).to.be.calledOnce;
+      expect(unscheduleStub).to.be.calledOnce;
+      expect(scheduleStub).to.be.calledOnce;
+      expect(element.signals().get('mounted')).to.not.exist;
+      expect(element.readyState).to.equal('mounting');
+
+      // Remount.
+      await element.mountInternal();
+      expect(mountCallbackStub).to.be.calledTwice;
+      expect(element.signals().get('mounted')).to.exist;
+      expect(element.readyState).to.equal('complete');
+
+      await element.whenMounted();
+    });
+
+    it('should mount -> unmount -> mount with usesLoading', async () => {
+      env.sandbox.stub(TestElement, 'usesLoading').returns(true);
+      mountCallbackStub.resolves();
+
+      const element = new ElementClass();
+      doc.body.appendChild(element);
+
+      builderMock.expects('scheduleAsap').never();
+
+      const scheduleStub = env.sandbox.stub(builder, 'schedule');
+      const unscheduleStub = env.sandbox.stub(builder, 'unschedule');
+
+      // Mount.
+      await element.mountInternal();
+      expect(mountCallbackStub).to.be.calledOnce;
+      expect(element.signals().get('mounted')).to.exist;
+      expect(element.readyState).to.equal('complete');
+
+      // Unmount.
+      element.unmount();
+      expect(unmountCallbackStub).to.be.calledOnce;
+      expect(unscheduleStub).to.be.calledOnce;
+      expect(scheduleStub).to.be.calledOnce;
+      expect(element.signals().get('mounted')).to.not.exist;
+      expect(element.readyState).to.equal('loading');
+
+      // Remount.
+      await element.mountInternal();
+      expect(mountCallbackStub).to.be.calledTwice;
+      expect(element.signals().get('mounted')).to.exist;
+      expect(element.readyState).to.equal('complete');
+
+      await element.whenMounted();
+    });
+
+    it('should unmount on disconnect', async () => {
+      const element = new ElementClass();
+      doc.body.appendChild(element);
+
+      builderMock.expects('scheduleAsap').never();
+
+      const scheduleStub = env.sandbox.stub(builder, 'schedule');
+      const unscheduleStub = env.sandbox.stub(builder, 'unschedule');
+
+      // Mount.
+      await element.mountInternal();
+      expect(mountCallbackStub).to.be.calledOnce;
+      expect(element.signals().get('mounted')).to.exist;
+
+      // Disconnect
+      element.remove();
+      expect(unmountCallbackStub).to.be.calledOnce;
+      expect(unscheduleStub).to.be.calledOnce;
+
+      // Not rescheduled.
+      expect(scheduleStub).to.not.be.called;
+      expect(element.signals().get('mounted')).to.not.exist;
+    });
+
+    it('should NOT call unmountCallback if was not mounted before', async () => {
+      const element = new ElementClass();
+      doc.body.appendChild(element);
+
+      builderMock.expects('scheduleAsap').never();
+
+      const scheduleStub = env.sandbox.stub(builder, 'schedule');
+      const unscheduleStub = env.sandbox.stub(builder, 'unschedule');
+
+      // Unmount.
+      element.unmount();
+      expect(unmountCallbackStub).to.not.be.called;
+      expect(unscheduleStub).to.be.calledOnce;
+      expect(scheduleStub).to.be.calledOnce;
+      expect(element.signals().get('mounted')).to.not.exist;
+    });
+
+    it('should cancel mount', async () => {
+      const element = new ElementClass();
+      doc.body.appendChild(element);
+
+      builderMock.expects('scheduleAsap').never();
+
+      const scheduleStub = env.sandbox.stub(builder, 'schedule');
+      const unscheduleStub = env.sandbox.stub(builder, 'unschedule');
+
+      // Mount and unmount in the same task.
+      const promise = element.mountInternal();
+      element.unmount();
+      expect(unscheduleStub).to.be.calledOnce;
+      expect(scheduleStub).to.be.calledOnce;
+
+      await new Promise(setTimeout);
+      expect(mountCallbackStub).to.not.be.called;
+
+      try {
+        await promise;
+      } catch (e) {
+        expect(() => {
+          throw e;
+        }).to.throw(/CANCELLED/);
+      }
+
+      // Mount again.
+      await element.mountInternal();
+      expect(mountCallbackStub).to.be.calledOnce;
+    });
+
+    it('should pause on unmount when connected', async () => {
+      const element = new ElementClass();
+      doc.body.appendChild(element);
+
+      const pauseStub = env.sandbox.stub(element, 'pause');
+      element.unmount();
+      expect(pauseStub).to.be.calledOnce;
+    });
+
+    it('should NOT pause on disconnect', async () => {
+      const element = new ElementClass();
+      doc.body.appendChild(element);
+
+      const pauseStub = env.sandbox.stub(element, 'pause');
+      element.remove();
+      expect(pauseStub).to.not.be.called;
+    });
+  });
+
+  describe('pause', () => {
+    let pauseCallbackStub;
+
+    beforeEach(() => {
+      pauseCallbackStub = env.sandbox.stub(
+        TestElement.prototype,
+        'pauseCallback'
+      );
+    });
+
+    it('should NOT pause an unbuilt element', () => {
+      const element = new StubElementClass();
+      doc.body.appendChild(element);
+
+      element.pause();
+      expect(pauseCallbackStub).to.not.be.called;
+    });
+
+    it('should pause a built element', async () => {
+      const element = new ElementClass();
+      doc.body.appendChild(element);
+
+      await element.buildInternal();
+      element.pause();
+      expect(pauseCallbackStub).to.be.calledOnce;
+    });
+  });
+
   describe('ensureLoaded', () => {
     let element;
-    let buildCallbackStub;
+    let usesLoadingStub;
     let ensureLoadedStub;
 
     beforeEach(() => {
       element = new StubElementClass();
-      buildCallbackStub = env.sandbox.stub(
-        TestElement.prototype,
-        'buildCallback'
-      );
+      usesLoadingStub = env.sandbox.stub(TestElement, 'usesLoading');
+      usesLoadingStub.returns(true);
       ensureLoadedStub = env.sandbox.stub(
         TestElement.prototype,
         'ensureLoaded'
@@ -472,22 +903,20 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
     });
 
     it('should force build and wait for whenLoaded even if not marked as loading', async () => {
+      usesLoadingStub.returns(false);
       const promise = element.ensureLoaded();
 
       doc.body.appendChild(element);
       element.upgrade(TestElement);
 
-      await element.buildInternal();
+      await element.mountInternal();
       await promise;
-      expect(ensureLoadedStub).to.be.calledOnce;
+      expect(ensureLoadedStub).to.not.be.called;
 
       await element.whenLoaded();
     });
 
     it('should force build and ensureLoaded if loading', async () => {
-      buildCallbackStub.callsFake(function () {
-        this.setReadyState('loading');
-      });
       ensureLoadedStub.callsFake(function () {
         this.setReadyState('complete');
       });
@@ -497,11 +926,47 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       doc.body.appendChild(element);
       element.upgrade(TestElement);
 
-      await element.buildInternal();
+      await element.mountInternal();
       await promise;
       expect(ensureLoadedStub).to.be.calledOnce;
 
       await element.whenLoaded();
+    });
+  });
+
+  describe('setAsContainerInternal', () => {
+    let element, scroller, impl;
+
+    beforeEach(async () => {
+      builderMock.expects('schedule').atLeast(0);
+
+      element = new ElementClass();
+      doc.body.appendChild(element);
+      impl = await element.getImpl();
+
+      scroller = doc.createElement('div');
+      element.appendChild(scroller);
+    });
+
+    it('should propagate setAsContainerInternal without scroller', () => {
+      builderMock
+        .expects('setContainer')
+        .withExactArgs(element, undefined)
+        .once();
+      impl.setAsContainer();
+    });
+
+    it('should propagate setAsContainerInternal with scroller', () => {
+      builderMock
+        .expects('setContainer')
+        .withExactArgs(element, scroller)
+        .once();
+      impl.setAsContainer(scroller);
+    });
+
+    it('should propagate removeAsContainerInternal', () => {
+      builderMock.expects('removeContainer').withExactArgs(element).once();
+      impl.removeAsContainer();
     });
   });
 
@@ -549,6 +1014,8 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element.readyState).equal('complete');
       expect(element.toggleLoading).to.be.calledOnce.calledWith(false);
       expect(element.signals().get(CommonSignals.LOAD_END)).to.exist;
+      expect(element.signals().get(CommonSignals.LOAD_START)).to.exist;
+      expect(element.signals().get(CommonSignals.UNLOAD)).to.not.exist;
       expect(element).to.have.class('i-amphtml-layout');
       expect(loadEventSpy).to.be.calledOnce;
       expect(loadEventSpy.firstCall.firstArg.bubbles).to.be.false;
@@ -588,9 +1055,11 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element.readyState).equal('complete');
       expect(element.signals().get(CommonSignals.LOAD_END)).to.exist;
 
+      element.signals().reset(CommonSignals.LOAD_START);
       element.setReadyStateInternal('loading');
       expect(element.readyState).equal('loading');
       expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
+      expect(element.signals().get(CommonSignals.LOAD_START)).to.exist;
     });
   });
 

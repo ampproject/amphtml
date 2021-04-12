@@ -35,7 +35,8 @@ import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
-import {isArray, isFiniteNumber} from '../../../src/types';
+import {isArray} from '../../../src/core/types/array';
+import {isFiniteNumber} from '../../../src/types';
 import {isInFie} from '../../../src/iframe-helper';
 import {linkerReaderServiceFor} from './linker-reader';
 
@@ -182,6 +183,41 @@ function matchMacro(string, matchPattern, opt_matchingGroupIndexStr) {
 }
 
 /**
+ * This macro function allows arithmetic operations over other analytics variables.
+ *
+ * @param {string} leftOperand
+ * @param {string} rightOperand
+ * @param {string} operation
+ * @param {string} round If this flag is truthy the result will be rounded
+ * @return {number}
+ */
+function calcMacro(leftOperand, rightOperand, operation, round) {
+  const left = Number(leftOperand);
+  const right = Number(rightOperand);
+  userAssert(!isNaN(left), 'CALC macro - left operand must be a number');
+  userAssert(!isNaN(right), 'CALC macro - right operand must be a number');
+  let result = 0;
+  switch (operation) {
+    case 'add':
+      result = left + right;
+      break;
+    case 'subtract':
+      result = left - right;
+      break;
+    case 'multiply':
+      result = left * right;
+      break;
+    case 'divide':
+      userAssert(right, 'CALC macro - cannot divide by 0');
+      result = left / right;
+      break;
+    default:
+      user().error(TAG, 'CALC macro - Invalid operation');
+  }
+  return stringToBool(round) ? Math.round(result) : result;
+}
+
+/**
  * If given an experiment name returns the branch id if a branch is selected.
  * If no branch name given, it returns a comma separated list of active branch
  * experiment ids and their names or an empty string if none exist.
@@ -230,6 +266,7 @@ export class VariableService {
     );
     this.register_('$REPLACE', replaceMacro);
     this.register_('$MATCH', matchMacro);
+    this.register_('$CALC', calcMacro);
     this.register_(
       '$EQUALS',
       (firstValue, secValue) => firstValue === secValue

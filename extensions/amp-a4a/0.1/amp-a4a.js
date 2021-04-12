@@ -72,7 +72,8 @@ import {
   measureIntersection,
 } from '../../../src/utils/intersection';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {isArray, isEnumValue, isObject} from '../../../src/types';
+import {isArray} from '../../../src/core/types/array';
+import {isEnumValue, isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
 import {
   observeWithSharedInOb,
@@ -162,6 +163,7 @@ export let CreativeMetaDataDef;
 /** @typedef {{
       consentState: (?CONSENT_POLICY_STATE|undefined),
       consentString: (?string|undefined),
+      consentStringType: (?CONSENT_STRING_TYPE|boolean),
       gdprApplies: (?boolean|undefined),
       additionalConsent: (?string|undefined),
     }} */
@@ -302,6 +304,9 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @private {?../../../src/layout-rect.LayoutSizeDef} */
     this.originalSlotSize_ = null;
+
+    /** @private {Promise<!IntersectionObserverEntry>} */
+    this.initialIntersectionPromise_ = null;
 
     /**
      * Note(keithwrightbos) - ensure the default here is null so that ios
@@ -451,6 +456,13 @@ export class AmpA4A extends AMP.BaseElement {
     }
 
     this.isSinglePageStoryAd = this.element.hasAttribute('amp-story');
+
+    const asyncIntersection =
+      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
+      ADS_INITIAL_INTERSECTION_EXP.experiment;
+    this.initialIntersectionPromise_ = asyncIntersection
+      ? measureIntersection(this.element)
+      : Promise.resolve(this.element.getIntersectionChangeEntry());
   }
 
   /** @override */
@@ -783,11 +795,20 @@ export class AmpA4A extends AMP.BaseElement {
         const additionalConsent = consentMetadata
           ? consentMetadata['additionalConsent']
           : consentMetadata;
+        const consentStringType = consentMetadata
+          ? consentMetadata['consentStringType']
+          : consentMetadata;
 
         return /** @type {!Promise<?string>} */ (this.getServeNpaSignal().then(
           (npaSignal) =>
             this.getAdUrl(
-              {consentState, consentString, gdprApplies, additionalConsent},
+              {
+                consentState,
+                consentString,
+                consentStringType,
+                gdprApplies,
+                additionalConsent,
+              },
               this.tryExecuteRealTimeConfig_(
                 consentState,
                 consentString,
@@ -1796,7 +1817,14 @@ export class AmpA4A extends AMP.BaseElement {
       height,
       width
     );
-    this.applyFillContent(this.iframe);
+    divertStickyAdTransition(this.win);
+    if (
+      !this.uiHandler.isStickyAd() ||
+      getExperimentBranch(this.win, STICKY_AD_TRANSITION_EXP.id) !==
+        STICKY_AD_TRANSITION_EXP.experiment
+    ) {
+      this.applyFillContent(this.iframe);
+    }
 
     let body = '';
     const transferComplete = new Deferred();
@@ -1885,8 +1913,9 @@ export class AmpA4A extends AMP.BaseElement {
     ));
     divertStickyAdTransition(this.win);
     if (
+      !this.uiHandler.isStickyAd() ||
       getExperimentBranch(this.win, STICKY_AD_TRANSITION_EXP.id) !==
-      STICKY_AD_TRANSITION_EXP.experiment
+        STICKY_AD_TRANSITION_EXP.experiment
     ) {
       this.applyFillContent(this.iframe);
     }
@@ -2079,14 +2108,7 @@ export class AmpA4A extends AMP.BaseElement {
       this.sentinel
     );
 
-    const asyncIntersection =
-      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
-      ADS_INITIAL_INTERSECTION_EXP.experiment;
-    const intersectionPromise = asyncIntersection
-      ? measureIntersection(this.element)
-      : Promise.resolve(this.element.getIntersectionChangeEntry());
-
-    return intersectionPromise.then((intersection) => {
+    return this.initialIntersectionPromise_.then((intersection) => {
       contextMetadata['_context'][
         'initialIntersection'
       ] = intersectionEntryToJson(intersection);
@@ -2163,13 +2185,7 @@ export class AmpA4A extends AMP.BaseElement {
         this.getAdditionalContextMetadata(method == XORIGIN_MODE.SAFEFRAME)
       );
 
-      const asyncIntersection =
-        getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
-        ADS_INITIAL_INTERSECTION_EXP.experiment;
-      const intersectionPromise = asyncIntersection
-        ? measureIntersection(this.element)
-        : Promise.resolve(this.element.getIntersectionChangeEntry());
-      return intersectionPromise.then((intersection) => {
+      return this.initialIntersectionPromise_.then((intersection) => {
         contextMetadata['initialIntersection'] = intersectionEntryToJson(
           intersection
         );

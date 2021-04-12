@@ -55,7 +55,6 @@ module.exports = function (context) {
    * @param {*} node
    * @param {string} modulePath
    * @param {*} mods
-   * @return {void}
    */
   function ImportSpecifier(node, modulePath, mods) {
     const {imported, local} = node;

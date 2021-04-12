@@ -18,12 +18,15 @@ const debounce = require('debounce');
 const globby = require('globby');
 const {compileJsWithEsbuild} = require('./helpers');
 const {endBuildStep} = require('./helpers');
+const {red, cyan} = require('kleur/colors');
 const {VERSION} = require('../compile/internal-version');
 const {watchDebounceDelay} = require('./helpers');
 const {watch} = require('chokidar');
 
+const SRCPATH = ['3p/vendors/*.js'];
+
 /**
- * Entry point for 'gulp ad-vendor-configs'
+ * Entry point for 'amp ad-vendor-configs'
  * Compile all the vendor configs and drop in the dist folder
  * @param {!Object} options
  * @return {!Promise}
@@ -31,13 +34,7 @@ const {watch} = require('chokidar');
 async function buildVendorConfigs(options) {
   options = options || {};
 
-  const srcPath = ['3p/vendors/*.js'];
   const destPath = 'dist.3p/';
-
-  // ignore test JS if not fortesting or build.
-  if (!options.fortesting) {
-    srcPath.push('!3p/vendors/_ping_.js');
-  }
 
   if (options.watch) {
     // Do not set watchers again when we get called by the watcher.
@@ -45,12 +42,85 @@ async function buildVendorConfigs(options) {
     const watchFunc = () => {
       buildVendorConfigs(copyOptions);
     };
-    watch(srcPath).on('change', debounce(watchFunc, watchDebounceDelay));
+    watch(SRCPATH).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
   const startTime = Date.now();
+  const bundles = generateBundles();
 
-  const filesToBuild = globby.sync(srcPath);
+  await Promise.all(
+    Object.values(bundles).map((bundle) =>
+      compileJsWithEsbuild(
+        bundle.srcDir,
+        bundle.srcFilename,
+        options.minify ? bundle.minifiedDestDir : bundle.destDir,
+        {...bundle.options, ...options}
+      )
+    )
+  );
+
+  endBuildStep(
+    (options.minify ? 'Minified' : 'Compiled') +
+      ' all 3p iframe vendor configs into',
+    destPath,
+    startTime
+  );
+}
+
+/**
+ * Build the JavaScript for the vendor specified for lazy building.
+ *
+ * @param {!Object} jsBundles
+ * @param {string} name
+ * @param {?Object} options
+ * @return {!Promise}
+ */
+async function doBuild3pVendor(jsBundles, name, options) {
+  const target = jsBundles[name];
+  if (target) {
+    return compileJsWithEsbuild(
+      target.srcDir,
+      target.srcFilename,
+      options.minify ? target.minifiedDestDir : target.destDir,
+      {...target.options, ...options}
+    );
+  } else {
+    return Promise.reject(
+      [red('Error:'), 'Could not find', cyan(name)].join(' ')
+    );
+  }
+}
+
+/**
+ * Generate bundles for all 3p vendors to be built.
+ * @return {Object}
+ */
+function generateBundles() {
+  const bundles = {};
+  listVendors().forEach((vendor) => {
+    bundles[`${vendor}`] = {
+      srcDir: './3p/vendors/',
+      srcFilename: `${vendor}.js`,
+      destDir: './dist.3p/current/vendor/',
+      minifiedDestDir: `./dist.3p/${VERSION}/vendor/`,
+      options: {
+        include3pDirectories: true,
+        includePolyfills: true,
+        externs: ['./ads/ads.extern.js'],
+        toName: `${vendor}.max.js`,
+        minifiedName: `${vendor}.js`,
+      },
+    };
+  });
+  return bundles;
+}
+
+/**
+ * Return all 3p iframe vendors' names.
+ * @return {!Array<string>}
+ */
+function listVendors() {
+  const filesToBuild = globby.sync(SRCPATH);
   const srcMatcher = /^3p\/vendors\/(.*)\.js/;
   const results = [];
 
@@ -63,46 +133,13 @@ async function buildVendorConfigs(options) {
 
     // Extract vendor file name
     const name = match[1];
-    results.push(buildVendor(name, options));
+    results.push(name);
   }
-  await Promise.all(results);
-
-  endBuildStep(
-    (options.minify ? 'Minified' : 'Compiled') +
-      ' all 3p iframe vendor configs into',
-    destPath,
-    startTime
-  );
-}
-
-/**
- * Build the JavaScript for the vendor specified
- *
- * @param {string} name Name of the extension. Must be the sub directory in
- *     the extensions directory and the name of the JS and optional CSS file.
- * @param {!Object} options
- * @return {!Promise}
- */
-async function buildVendor(name, options) {
-  await compileJsWithEsbuild(
-    './3p/vendors/',
-    name + '.js',
-    './dist.3p/',
-    Object.assign(options, {
-      include3pDirectories: true,
-      includePolyfills: true,
-      externs: ['./ads/ads.extern.js'],
-      toName: `current/vendor/${name}.max.js`,
-      minifiedName: `${VERSION}/vendor/${name}.js`,
-    })
-  );
-
-  // If an incremental watch build fails, simply return.
-  if (options.errored) {
-    return;
-  }
+  return results;
 }
 
 module.exports = {
   buildVendorConfigs,
+  doBuild3pVendor,
+  generateBundles,
 };

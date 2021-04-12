@@ -29,14 +29,21 @@ import {
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
-import {createShadowRootWithStyle, shouldShowStoryUrlInfo} from './utils';
+import {closest, matches, scopedQuerySelector} from '../../../src/dom';
+import {
+  createShadowRootWithStyle,
+  getStoryAttributeSrc,
+  shouldShowStoryUrlInfo,
+  triggerClickFromLightDom,
+} from './utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {getMode} from '../../../src/mode';
-import {matches, scopedQuerySelector} from '../../../src/dom';
+import {getSourceOrigin} from '../../../src/url';
 import {renderAsElement} from './simple-template';
 import {setImportantStyles} from '../../../src/style';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
@@ -92,6 +99,9 @@ const SIDEBAR_CLASS = 'i-amphtml-story-sidebar-control';
 /** @private @const {string} */
 const HAS_NEW_PAGE_ATTRIBUTE = 'i-amphtml-story-has-new-page';
 
+/** @private @const {string} */
+const ATTRIBUTION_CLASS = 'i-amphtml-story-attribution';
+
 /** @private @const {number} */
 const HIDE_MESSAGE_TIMEOUT_MS = 1500;
 
@@ -102,6 +112,36 @@ const TEMPLATE = {
     'class': 'i-amphtml-story-system-layer i-amphtml-story-system-reset',
   }),
   children: [
+    {
+      tag: 'a',
+      attrs: dict({
+        'class': ATTRIBUTION_CLASS,
+        'target': '_blank',
+      }),
+      children: [
+        {
+          tag: 'div',
+          attrs: dict({
+            'class': 'i-amphtml-story-attribution-logo-container',
+          }),
+          children: [
+            {
+              tag: 'img',
+              attrs: dict({
+                'alt': '',
+                'class': 'i-amphtml-story-attribution-logo',
+              }),
+            },
+          ],
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            'class': 'i-amphtml-story-attribution-text',
+          }),
+        },
+      ],
+    },
     {
       tag: 'div',
       attrs: dict({
@@ -429,9 +469,38 @@ export class SystemLayer {
       this.getShadowRoot().removeAttribute(HAS_INFO_BUTTON_ATTRIBUTE);
     }
 
+    this.maybeBuildAttribution_();
+
     this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
     this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, 'noshow');
     return this.getRoot();
+  }
+
+  /** @private */
+  maybeBuildAttribution_() {
+    if (!this.viewer_ || this.viewer_.getParam('attribution') !== 'auto') {
+      return;
+    }
+
+    this.systemLayerEl_.querySelector('.i-amphtml-story-attribution-logo').src =
+      getStoryAttributeSrc(this.parentEl_, 'entity-logo-src') ||
+      getStoryAttributeSrc(this.parentEl_, 'publisher-logo-src');
+
+    const anchorEl = this.systemLayerEl_.querySelector(
+      `.${escapeCssSelectorIdent(ATTRIBUTION_CLASS)}`
+    );
+
+    anchorEl.href =
+      getStoryAttributeSrc(this.parentEl_, 'entity-url') ||
+      getSourceOrigin(Services.documentInfoForDoc(this.parentEl_).sourceUrl);
+
+    this.systemLayerEl_.querySelector(
+      '.i-amphtml-story-attribution-text'
+    ).textContent =
+      this.parentEl_.getAttribute('entity') ||
+      this.parentEl_.getAttribute('publisher');
+
+    anchorEl.classList.add('i-amphtml-story-attribution-visible');
   }
 
   /**
@@ -479,6 +548,11 @@ export class SystemLayer {
         )
       ) {
         this.onViewerControlClick_(dev().assertElement(event.target));
+      } else if (
+        matches(target, `.${ATTRIBUTION_CLASS}, .${ATTRIBUTION_CLASS} *`)
+      ) {
+        const anchorClicked = closest(target, (e) => matches(e, 'a[href]'));
+        triggerClickFromLightDom(anchorClicked, this.parentEl_);
       }
     });
 
@@ -558,6 +632,14 @@ export class SystemLayer {
       StateProperty.RTL_STATE,
       (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
+      },
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.KEYBOARD_ACTIVE_STATE,
+      (keyboardState) => {
+        this.onKeyboardActiveUpdate_(keyboardState);
       },
       true /** callToInitialize */
     );
@@ -880,6 +962,20 @@ export class SystemLayer {
       rtlState
         ? this.getShadowRoot().setAttribute('dir', 'rtl')
         : this.getShadowRoot().removeAttribute('dir');
+    });
+  }
+
+  /**
+   * Reacts to keyboard updates and updates the UI.
+   * @param {boolean} keyboardActive
+   * @private
+   */
+  onKeyboardActiveUpdate_(keyboardActive) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().classList.toggle(
+        'amp-mode-keyboard-active',
+        keyboardActive
+      );
     });
   }
 

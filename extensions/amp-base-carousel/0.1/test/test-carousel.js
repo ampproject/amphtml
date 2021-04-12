@@ -20,7 +20,7 @@
 import {Carousel} from '../carousel';
 import {dev} from '../../../../src/log';
 import {setInitialDisplay, setStyle, setStyles} from '../../../../src/style';
-import {toArray} from '../../../../src/types';
+import {toArray} from '../../../../src/core/types/array';
 
 describes.realWin('carousel implementation', {}, (env) => {
   let win;
@@ -301,12 +301,12 @@ describes.realWin('carousel implementation', {}, (env) => {
       expect(carousel.isAtStart()).to.be.true;
     });
 
-    it('should start at slide 0 with initialIndex that is greater than number of slides', async () => {
+    it('should clamp to last index with initialIndex that is greater than last slide index', async () => {
       const carousel = await createCarousel({
         slideCount: 3,
         initialIndex: 4,
       });
-      expect(carousel.isAtStart()).to.be.true;
+      expect(carousel.isAtEnd()).to.be.true;
     });
 
     it('should start at slide 0 with invalid initialIndex', async () => {
@@ -335,7 +335,7 @@ describes.realWin('carousel implementation', {}, (env) => {
       expect(carousel.getCurrentIndex()).to.equal(2);
     });
 
-    it('should normalize slide with initialIndex that is greater than number of slides when looping', async () => {
+    it('should normalize slide with initialIndex that is greater than last slide index when looping', async () => {
       const carousel = await createCarousel({
         slideCount: 3,
         initialIndex: 4,

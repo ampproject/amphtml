@@ -37,11 +37,10 @@ import {isJsonScriptTag, tryFocus} from '../dom';
 // Source for this constant is css/amp-story-player-iframe.css
 import {cssText} from '../../build/amp-story-player-iframe.css';
 import {dev} from '../log';
-import {findIndex} from '../utils/array';
+import {findIndex, toArray} from '../core/types/array';
 import {getMode} from '../../src/mode';
 import {parseJson} from '../json';
 import {resetStyles, setStyle, setStyles} from '../style';
-import {toArray} from '../types';
 import {urls} from '../config';
 
 /** @enum {string} */
@@ -199,12 +198,6 @@ export class AmpStoryPlayer {
     /** @private {?Element} */
     this.rootEl_ = null;
 
-    /** @private {boolean} */
-    this.isLaidOut_ = false;
-
-    /** @private {boolean} */
-    this.isBuilt_ = false;
-
     /** @private {number} */
     this.currentIdx_ = 0;
 
@@ -241,6 +234,11 @@ export class AmpStoryPlayer {
 
     /** @private {boolean} */
     this.autoplay_ = true;
+
+    /** @private {?string} */
+    this.attribution_ = null;
+
+    return this.element_;
   }
 
   /**
@@ -248,6 +246,9 @@ export class AmpStoryPlayer {
    * @private
    */
   attachCallbacksToElement_() {
+    this.element_.buildPlayer = this.buildPlayer.bind(this);
+    this.element_.layoutPlayer = this.layoutPlayer.bind(this);
+    this.element_.getElement = this.getElement.bind(this);
     this.element_.getStories = this.getStories.bind(this);
     this.element_.load = this.load.bind(this);
     this.element_.show = this.show.bind(this);
@@ -271,8 +272,11 @@ export class AmpStoryPlayer {
         `[${TAG}] element must be connected to the DOM before calling load().`
       );
     }
-    this.buildCallback();
-    this.layoutCallback();
+    if (!!this.element_.isBuilt_) {
+      throw new Error(`[${TAG}] calling load() on an already loaded element.`);
+    }
+    this.buildPlayer();
+    this.layoutPlayer();
   }
 
   /**
@@ -363,8 +367,8 @@ export class AmpStoryPlayer {
   }
 
   /** @public */
-  buildCallback() {
-    if (this.isBuilt_) {
+  buildPlayer() {
+    if (!!this.element_.isBuilt_) {
       return;
     }
 
@@ -375,10 +379,11 @@ export class AmpStoryPlayer {
     this.readPlayerConfig_();
     this.maybeFetchMoreStories_(this.stories_.length - this.currentIdx_ - 1);
     this.initializeAutoplay_();
+    this.initializeAttribution_();
     this.initializePageScroll_();
     this.initializeCircularWrapping_();
     this.signalReady_();
-    this.isBuilt_ = true;
+    this.element_.isBuilt_ = true;
   }
 
   /**
@@ -680,8 +685,8 @@ export class AmpStoryPlayer {
   /**
    * @public
    */
-  layoutCallback() {
-    if (this.isLaidOut_) {
+  layoutPlayer() {
+    if (!!this.element_.isLaidOut_) {
       return;
     }
 
@@ -691,7 +696,7 @@ export class AmpStoryPlayer {
 
     this.render_();
 
-    this.isLaidOut_ = true;
+    this.element_.isLaidOut_ = true;
   }
 
   /**
@@ -1186,6 +1191,10 @@ export class AmpStoryPlayer {
       'storyPlayer': 'v0',
       'cap': 'swipe',
     };
+
+    if (this.attribution_ === 'auto') {
+      playerFragmentParams['attribution'] = 'auto';
+    }
 
     const originalFragmentString = getFragment(href);
     const originalFragments = parseQueryString(originalFragmentString);
@@ -1705,6 +1714,19 @@ export class AmpStoryPlayer {
 
     if (behavior && typeof behavior.autoplay === 'boolean') {
       this.autoplay_ = behavior.autoplay;
+    }
+  }
+
+  /** @private */
+  initializeAttribution_() {
+    if (!this.playerConfig_) {
+      return;
+    }
+
+    const {display} = this.playerConfig_;
+
+    if (display && display.attribution === 'auto') {
+      this.attribution_ = 'auto';
     }
   }
 

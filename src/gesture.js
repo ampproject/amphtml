@@ -16,8 +16,8 @@
 
 import {Observable} from './observable';
 import {Pass} from './pass';
-import {pureDevAssert as devAssert} from './core/assert';
-import {findIndex} from './utils/array';
+import {devAssert} from './log';
+import {findIndex} from './core/types/array';
 import {supportsPassiveEventListener} from './event-helper-listen';
 import {toWin} from './types';
 

@@ -26,7 +26,7 @@ min_validator_revision_required: 475
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 1159
+spec_file_revision: 1165
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed"
@@ -223,6 +223,7 @@ tags: {
         "components|"
         "import|"
         "manifest|"  # Handled separately below, has specific requirements.
+        "modulepreload|"  # Handled separately below, has specific requirements.
         "preload|"  # Handled separately below, has specific requirements.
         "serviceworker|"
         "stylesheet|"  # Handled separately below, has specific requirements.
@@ -286,6 +287,35 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
   attr_lists: "common-link-attrs"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
+}
+tags: {
+  html_format: AMP
+  tag_name: "LINK"
+  spec_name: "link rel=modulepreload"
+  descriptive_name: "link rel=modulepreload"
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "as"
+    mandatory: true
+    value: "script"
+  }
+  attrs: {
+    name: "crossorigin"
+    mandatory: true
+    value: "anonymous"
+  }
+  attrs: {
+    name: "href"
+    mandatory: true
+    value_regex: ".*\\.mjs$"
+  }
+  attrs: {
+    name: "rel"
+    mandatory: true
+    value_casei: "modulepreload"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
 }
 tags: {
@@ -514,7 +544,7 @@ tags: {
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
 }
 # AMP & AMP4ADS metadata, name=amp-experiments-opt-in
-# https://github.com/lannka/amphtml/blob/master/tools/experiments/README.md
+# https://github.com/ampproject/amphtml/blob/main/tools/experiments/README.md
 tags: {
   html_format: AMP
   html_format: AMP4ADS

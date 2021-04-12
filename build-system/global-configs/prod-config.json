@@ -4,17 +4,18 @@
   "canary": 0,
   "a4aProfilingRate": 0.01,
   "adsense-ad-size-optimization": 1,
-  "amp-accordion-display-locking": 1,
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
   "expand-json-targeting": 1,
   "flexAdSlots": 0.05,
-  "intersect-resources": 0,
   "ios-fixed-no-transfer": 0,
   "visibility-trigger-improvements": 1,
   "layout-aspect-ratio-css": 0,
   "sticky-ad-transition": 0.02,
   "disable-a4a-non-sd": 1,
   "tcf-post-message-proxy-api": 1,
-  "amp-cid-backup": 1
+  "amp-consent-granular-consent": 1,
+  "amp-cid-backup": 1,
+  "3p-vendor-split": 0.01,
+  "story-ad-placements": 0.01
 }

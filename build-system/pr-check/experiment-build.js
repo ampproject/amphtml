@@ -20,37 +20,31 @@
  */
 
 const {
-  getExperimentConfig,
-  printSkipMessage,
+  skipDependentJobs: skipDependentJobs,
   timedExecOrDie,
   uploadExperimentOutput,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {experiment} = require('minimist')(process.argv.slice(2));
+const {getExperimentConfig} = require('../common/utils');
 const {runCiJob} = require('./ci-job');
 
 const jobName = `${experiment}-build.js`;
 
-/**
- * @return {void}
- */
 function pushBuildWorkflow() {
   const config = getExperimentConfig(experiment);
   if (config) {
     const defineFlag = `--define_experiment_constant ${config.define_experiment_constant}`;
-    timedExecOrDie(`gulp dist --fortesting ${defineFlag}`);
+    timedExecOrDie(`amp dist --fortesting ${defineFlag}`);
     uploadExperimentOutput(experiment);
   } else {
-    printSkipMessage(
+    skipDependentJobs(
       jobName,
       `${experiment} is expired, misconfigured, or does not exist`
     );
   }
 }
 
-/**
- * @return {void}
- */
 function prBuildWorkflow() {
   if (
     buildTargetsInclude(
@@ -61,7 +55,7 @@ function prBuildWorkflow() {
   ) {
     pushBuildWorkflow();
   } else {
-    printSkipMessage(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime, integration tests, or end-to-end tests'
     );

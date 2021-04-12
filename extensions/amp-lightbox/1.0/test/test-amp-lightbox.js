@@ -19,6 +19,7 @@ import {ActionTrust, DEFAULT_ACTION} from '../../../../src/action-constants';
 import {htmlFor} from '../../../../src/static-template';
 import {poll} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';
+import {whenCalled} from '../../../../testing/test-helper';
 
 describes.realWin(
   'amp-lightbox:1.0',
@@ -87,6 +88,9 @@ describes.realWin(
       }
 
       it('should open with default action', async () => {
+        env.sandbox.stub(element, 'setAsContainerInternal');
+        env.sandbox.stub(element, 'removeAsContainerInternal');
+
         expect(element.hasAttribute('open')).to.be.false;
         expect(element.hasAttribute('hidden')).to.be.true;
 
@@ -105,9 +109,18 @@ describes.realWin(
         expect(contentEls[0].textContent).to.equal('Hello World');
 
         expect(eventSpy).to.be.calledOnce;
+
+        await whenCalled(element.setAsContainerInternal);
+        const scroller = element.shadowRoot.querySelector('[part=scroller]');
+        expect(scroller).to.exist;
+        expect(element.setAsContainerInternal).to.be.calledWith(scroller);
+        expect(element.removeAsContainerInternal).to.not.be.called;
       });
 
       it('should open and close', async () => {
+        env.sandbox.stub(element, 'setAsContainerInternal');
+        env.sandbox.stub(element, 'removeAsContainerInternal');
+
         expect(element.hasAttribute('open')).to.be.false;
         expect(element.hasAttribute('hidden')).to.be.true;
 
@@ -139,6 +152,8 @@ describes.realWin(
 
         expect(openSpy).to.be.calledOnce;
         expect(closeSpy).to.be.calledOnce;
+        expect(element.setAsContainerInternal).to.not.be.called;
+        expect(element.removeAsContainerInternal).to.be.calledOnce;
       });
     });
   }

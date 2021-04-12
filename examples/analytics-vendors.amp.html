@@ -103,6 +103,7 @@
       <option>piano</option>
       <option>pinpoll</option>
       <option>piStats</option>
+      <option>ppasanalytics</option>
       <option>pressboard</option>
       <option>quantcast</option>
       <option>rakam</option>
@@ -114,6 +115,7 @@
       <option>shinystat</option>
       <option>snowplow</option>
       <option>snowplow_v2</option>
+      <option>taboola</option>
       <option>tail</option>
       <option>teaanalytics</option>
       <option>tealiumcollect</option>
@@ -135,7 +137,7 @@
 
 <div id="container">
 Container for analytics tags. Positioned far away from top to make sure that doesn't matter.
-  
+
 <!-- Acquia Lift example -->
 <amp-analytics type="acquialift" id="acquialift">
 <script type="application/json">
@@ -1350,6 +1352,26 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End piStats example -->
 
+<!-- PPAS analytics tracking -->
+<amp-analytics type="ppasanalytics">
+  <script type="application/json">
+  {
+    "vars": {
+      "host": "analytics.example.com",
+      "website_id": "123-456-789-012",
+      "website_hash": "foobar"
+    },
+    "triggers": {
+      "trackPageview": {
+        "on": "visible",
+        "request": "pageview"
+      }
+    }
+  }
+  </script>
+</amp-analytics>
+<!-- End PPAS analytics example -->
+
 <!-- Pressboard tracking. Ensure you replace &media value with a valid media-id, and &ref value with an html-encoded URL of a pressboard sponsored story related to the used media-id -->
 <amp-analytics type="pressboard" id="pressboard" config="https://adserver.pressboard.ca/amp/config?media=5&ref=http%3A%2F%2Fwww.pressboardmedia.com%2Fnative-advertising-advice-from-the-co-founder-of-stackadapt%2F">
   <script type="application/json">
@@ -1651,6 +1673,18 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Snowplow Analytics example -->
+
+<!-- Taboola Example
+-->
+<amp-analytics type="taboola" id="taboola">
+  <script type="application/json">
+    {
+      "vars": {
+        "aid": "1"
+      }
+    }
+  </script>
+</amp-analytics>
 
 <!-- Tail Analytics Example
     Ensure you replace account with your account id.

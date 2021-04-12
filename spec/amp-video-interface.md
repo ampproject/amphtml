@@ -1,6 +1,6 @@
 # Video in AMP
 
-Most video player components in AMP implement the [`VideoInterface`](https://github.com/ampproject/amphtml/blob/master/src/video-interface.js) API. This means
+Most video player components in AMP implement the [`VideoInterface`](https://github.com/ampproject/amphtml/blob/main/src/video-interface.js) API. This means
 that a set of features is available in all of these components, either completely
 or partially.
 
@@ -19,7 +19,7 @@ these players implement.
 <!--
   The following list is generated automatically:
 
-    gulp check-video-interface-list --fix
+    amp check-video-interface-list --fix
 
   Link check disabled to allow new extensions added in a pull request.
 -->
@@ -52,7 +52,7 @@ these players implement.
 
 ## Analytics
 
-See [video analytics](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-video-analytics.md).
+See [video analytics](https://github.com/ampproject/amphtml/blob/main/extensions/amp-analytics/amp-video-analytics.md).
 
 <a id="autoplay"></a>
 

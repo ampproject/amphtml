@@ -17,22 +17,6 @@
 
 /*eslint "max-len": 0*/
 
-/**
- * - type - Is assumed to be "forbidden" if not provided.
- * - filesMatching - Is assumed to be all files if not provided.
- * - mustNotDependOn - If type is "forbidden" (default) then the files
- *     matched must not match the glob(s) provided.
- * - allowlist - Skip rule if this particular dependency is found.
- *     Syntax: fileAGlob->fileB where -> reads "depends on"
- * @typedef {{
- *   type: (string|undefined),
- *   filesMatching: (string|!Array<string>|undefined),
- *   mustNotDependOn: (string|!Array<string>|undefined),
- *   allowlist: (string|!Array<string>|undefined),
- * }}
- */
-let RuleConfigDef;
-
 // It is often OK to add things to the allowlist, but make sure to highlight
 // this in review.
 exports.rules = [
@@ -102,8 +86,8 @@ exports.rules = [
       '3p/**->src/utils/function.js',
       '3p/**->src/utils/object.js',
       '3p/**->src/utils/promise.js',
-      '3p/**->src/core/assert.js',
       '3p/**->src/log.js',
+      '3p/**->src/core/types/array.js',
       '3p/**->src/types.js',
       '3p/**->src/string.js',
       '3p/**->src/style.js',
@@ -138,11 +122,11 @@ exports.rules = [
       'ads/**->src/utils/dom-fingerprint.js',
       'ads/**->src/utils/object.js',
       'ads/**->src/utils/rate-limit.js',
-      'ads/**->src/core/assert.js',
       'ads/**->src/log.js',
       'ads/**->src/mode.js',
       'ads/**->src/url.js',
       'ads/**->src/types.js',
+      'ads/**->src/core/types/array.js',
       'ads/**->src/string.js',
       'ads/**->src/style.js',
       'ads/**->src/consent-state.js',
@@ -212,6 +196,7 @@ exports.rules = [
       'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/template-validator.js',
       'extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js->extensions/amp-a4a/0.1/amp-ad-template-helper.js',
       'extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js->extensions/amp-a4a/0.1/amp-ad-type-defs.js',
+      'extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js->extensions/amp-a4a/0.1/amp-ad-utils.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/refresh-manager.js',
       'extensions/amp-ad-network-valueimpression-impl/0.1/amp-ad-network-valueimpression-impl.js->extensions/amp-a4a/0.1/refresh-manager.js',
 
@@ -263,9 +248,6 @@ exports.rules = [
       'extensions/amp-youtube/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
       'extensions/amp-youtube/1.0/component.js->extensions/amp-video/1.0/video-wrapper.js',
 
-      // Bento amp-fit-text
-      'extensions/amp-fit-text/0.1/amp-fit-text.js->extensions/amp-fit-text/1.0/base-element.js',
-
       // Amp geo in group enum
       'extensions/amp-a4a/0.1/amp-a4a.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
       'extensions/amp-consent/0.1/consent-config.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
@@ -279,8 +261,11 @@ exports.rules = [
       // AMP Story Panning Media
       'extensions/amp-story-panning-media/0.1/amp-story-panning-media.js->extensions/amp-story/1.0/amp-story-store-service.js',
       // Story ads
+      'extensions/amp-story-auto-ads/0.1/algorithm-count-pages.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-auto-ads/0.1/algorithm-predetermined.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-auto-ads/0.1/story-ad-page.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-auto-ads/0.1/story-ad-page-manager.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/events.js',
       // TODO(#24080) Remove this when story ads have full ad network support.
       'extensions/amp-story-auto-ads/0.1/story-ad-page.js->extensions/amp-ad-exit/0.1/config.js',
@@ -373,8 +358,6 @@ exports.rules = [
         'src/service/video-manager-impl.js',
       'extensions/amp-delight-player/0.1/amp-delight-player.js->' +
         'src/service/video-manager-impl.js',
-      'extensions/amp-analytics/0.1/iframe-transport.js->' +
-        'src/service/jank-meter.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
         'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
@@ -446,12 +429,12 @@ exports.rules = [
     allowlist: [
       'src/polyfills/fetch.js->src/log.js',
       'src/polyfills/fetch.js->src/types.js',
+      'src/polyfills/fetch.js->src/core/types/array.js',
       'src/polyfills/fetch.js->src/json.js',
       'src/polyfills/fetch.js->src/utils/object.js',
       'src/polyfills/fetch.js->src/utils/bytes.js',
       'src/polyfills/intersection-observer.js->src/polyfillstub/intersection-observer-stub.js',
       'src/polyfills/resize-observer.js->src/polyfillstub/resize-observer-stub.js',
-      'src/polyfills/promise.js->node_modules/promise-pjs/promise.js',
       'src/polyfills/custom-elements.js->src/resolved-promise.js',
     ],
   },

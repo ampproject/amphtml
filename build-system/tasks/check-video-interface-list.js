@@ -33,7 +33,7 @@ const grepJsFiles = 'extensions/**/*.js';
 /**
  * Returns a formatted list entry.
  * @param {string} name
- * @return {name}
+ * @return {string}
  */
 const entry = (name) =>
   `-   [${name}](https://amp.dev/documentation/components/${name}.md)\n`;
@@ -49,7 +49,7 @@ const generateList = () =>
     .trim()
     .split('\n')
     .reduce((list, path) => {
-      const name = path.substr('extensions/'.length).split('/').shift();
+      const name = path.substr('extensions/'.length).split('/').shift() ?? '';
       return list + (excludeGeneric.includes(name) ? '' : entry(name));
     }, '');
 
@@ -83,5 +83,5 @@ module.exports = {
 checkVideoInterfaceList.description = `Checks or updates 3rd party video player list on ${filepath}`;
 
 checkVideoInterfaceList.flags = {
-  'fix': '  Write to file',
+  'fix': 'Write to file',
 };

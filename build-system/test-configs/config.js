@@ -28,7 +28,8 @@ const initTestsPath = ['test/_init_tests.js'];
 
 const karmaHtmlFixturesPath = 'test/fixtures/*.html';
 
-const fixturesExamplesPaths = [karmaHtmlFixturesPath].concat([
+const fixturesExamplesPaths = [
+  karmaHtmlFixturesPath,
   {
     pattern: 'test/fixtures/served/*.html',
     included: false,
@@ -41,7 +42,7 @@ const fixturesExamplesPaths = [karmaHtmlFixturesPath].concat([
     nocache: false,
     watched: true,
   },
-]);
+];
 
 const builtRuntimePaths = [
   {
@@ -116,40 +117,31 @@ const e2eTestPaths = ['test/e2e/*.js', 'extensions/**/test-e2e/*.js'];
 
 const devDashboardTestPaths = ['build-system/server/app-index/test/**/*.js'];
 
-const jisonPaths = ['extensions/**/*.jison'];
+const jisonPath = 'extensions/**/*.jison';
 
 const lintGlobs = [
   '**/*.js',
   // To ignore a file / directory, add it to .eslintignore.
 ];
 
+/**
+ * This should not include .js files, since those are handled by eslint:
+ *  - required terms: notice/notice
+ *  - forbidden terms: local/no-forbidden-terms
+ */
 const presubmitGlobs = [
-  '**/*.{css,js,go}',
-  // This does match dist.3p/current, so we run presubmit checks on the
-  // built 3p binary. This is done, so we make sure our special 3p checks
-  // run against the entire transitive closure of deps.
+  '**/*.{css,go,md}',
   '!{node_modules,build,dist,dist.tools,' +
     'dist.3p/[0-9]*,dist.3p/current,dist.3p/current-min}/**/*.*',
-  '!dist.3p/current/**/ampcontext-lib.js',
-  '!dist.3p/current/**/iframe-transport-client-lib.js',
   '!out/**/*.*',
   '!validator/validator.pb.go',
   '!validator/dist/**/*.*',
   '!validator/htmlparser/**/*.*',
-  '!validator/js/chromeextension/*.*',
-  '!validator/js/webui/dist/**/*.*',
-  '!build-system/server/new-server/transforms/dist/**/*.*',
   '!build-system/tasks/performance/cache/**/*.*',
-  '!build-system/tasks/presubmit-checks.js',
   '!build-system/runner/build/**/*.*',
-  '!build-system/tasks/visual-diff/snippets/*.js',
-  '!build/polyfills.js',
-  '!build/polyfills/*.js',
   '!third_party/**/*.*',
   '!**/node_modules/**/*.*',
-  // Files in this testdata dir are machine-generated and are not part
-  // of the AMP runtime, so shouldn't be checked.
-  '!extensions/amp-a4a/*/test/testdata/*.js',
+  '!extensions/**/dist/*',
   '!examples/**/*',
   '!examples/visual-tests/**/*',
   '!test/coverage/**/*.*',
@@ -157,7 +149,7 @@ const presubmitGlobs = [
 ];
 
 /**
- * List of non-JS files to be checked by `gulp prettify` (using prettier).
+ * List of non-JS files to be checked by `amp prettify` (using prettier).
  * NOTE: When you add a new filename / glob to this list:
  * 1. Make sure its formatting options are specified in .prettierrc
  * 2. Make sure it is listed in .vscode/settings.json (for auto-fix-on-save)
@@ -175,13 +167,10 @@ const prettifyGlobs = [
   '**/*.json',
   '**/OWNERS',
   '**/*.md',
-  '!**/package*.json',
-  '!.github/ISSUE_TEMPLATE/**',
-  '!**/{node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
 
 /**
- * List of markdown files that may be checked by `gulp check-links` (using
+ * List of markdown files that may be checked by `amp check-links` (using
  * markdown-link-check).
  */
 const linkCheckGlobs = [
@@ -227,7 +216,7 @@ module.exports = {
   devDashboardTestPaths,
   e2eTestPaths,
   integrationTestPaths,
-  jisonPaths,
+  jisonPath,
   karmaHtmlFixturesPath,
   karmaJsPaths,
   linkCheckGlobs,

@@ -1,7 +1,6 @@
 {
-  "BENTO_AUTO_UPGRADE": false,
-  "INI_LOAD_INOB": false,
-  "NO_SIGNING_RTV": true,
+  "INI_LOAD_INOB": true,
+  "NO_SIGNING_RTV": false,
   "V1_IMG_DEFERRED_BUILD": false,
   "WITHIN_VIEWPORT_INOB": false
 }

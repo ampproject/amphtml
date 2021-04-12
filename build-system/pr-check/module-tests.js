@@ -23,7 +23,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const {
   downloadModuleOutput,
   downloadNomoduleOutput,
-  printSkipMessage,
+  skipDependentJobs,
   timedExecOrDie,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
@@ -32,42 +32,33 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'module-tests.js';
 
-/**
- * @return {void}
- */
 function prependConfig() {
   const targets = MINIFIED_TARGETS.flatMap((target) => [
     `dist/${target}.js`,
     `dist/${target}.mjs`,
   ]).join(',');
   timedExecOrDie(
-    `gulp prepend-global --${argv.config} --local_dev --fortesting --derandomize --target=${targets}`
+    `amp prepend-global --${argv.config} --local_dev --fortesting --derandomize --target=${targets}`
   );
 }
 
-/**
- * @return {void}
- */
 function pushBuildWorkflow() {
   downloadNomoduleOutput();
   downloadModuleOutput();
   prependConfig();
-  timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
+  timedExecOrDie('amp integration --nobuild --compiled --headless --esm');
 }
 
-/**
- * @return {void}
- */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     downloadNomoduleOutput();
     downloadModuleOutput();
     prependConfig();
     timedExecOrDie(
-      `gulp integration --nobuild --compiled --headless --esm --config=${argv.config}`
+      `amp integration --nobuild --compiled --headless --esm --config=${argv.config}`
     );
   } else {
-    printSkipMessage(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime or integration tests'
     );

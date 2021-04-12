@@ -778,7 +778,7 @@ export function isAmpElement(element) {
  * Return a promise that resolve when an AMP element upgrade from HTMLElement
  * to CustomElement
  * @param {!Element} element
- * @return {!Promise<!Element>}
+ * @return {!Promise<!AmpElement>}
  */
 export function whenUpgradedToCustomElement(element) {
   devAssert(isAmpElement(element), 'element is not AmpElement');
@@ -979,4 +979,15 @@ export function dispatchCustomEvent(node, name, opt_data, opt_options) {
   const {bubbles, cancelable} = opt_options || DEFAULT_CUSTOM_EVENT_OPTIONS;
   event.initEvent(name, bubbles, cancelable);
   node.dispatchEvent(event);
+}
+
+/**
+ * Ensures the child is contained by the parent, but not the parent itself.
+ *
+ * @param {!Node} parent
+ * @param {!Node} child
+ * @return {boolean}
+ */
+export function containsNotSelf(parent, child) {
+  return child !== parent && parent.contains(child);
 }

@@ -138,7 +138,7 @@ export class ViewportImpl {
     /** @private @const {!Observable<!./viewport-interface.ViewportResizedEventDef>} */
     this.resizeObservable_ = new Observable();
 
-    /** @private {?Element|undefined} */
+    /** @private {?HTMLMetaElement|undefined} */
     this.viewportMeta_ = undefined;
 
     /** @private {string|undefined} */
@@ -354,14 +354,14 @@ export class ViewportImpl {
   }
 
   /** @override */
-  getLayoutRect(el, opt_premeasuredRect) {
+  getLayoutRect(el) {
     const scrollLeft = this.getScrollLeft();
     const scrollTop = this.getScrollTop();
 
     // Go up the window hierarchy through friendly iframes.
     const frameElement = getParentWindowFrameElement(el, this.ampdoc.win);
     if (frameElement) {
-      const b = this.binding_.getLayoutRect(el, 0, 0, opt_premeasuredRect);
+      const b = this.binding_.getLayoutRect(el, 0, 0);
       const c = this.binding_.getLayoutRect(
         frameElement,
         scrollLeft,
@@ -375,12 +375,7 @@ export class ViewportImpl {
       );
     }
 
-    return this.binding_.getLayoutRect(
-      el,
-      scrollLeft,
-      scrollTop,
-      opt_premeasuredRect
-    );
+    return this.binding_.getLayoutRect(el, scrollLeft, scrollTop);
   }
 
   /** @override */
@@ -863,7 +858,7 @@ export class ViewportImpl {
   }
 
   /**
-   * @return {?Element}
+   * @return {?HTMLMetaElement}
    * @private
    */
   getViewportMeta_() {
@@ -1204,7 +1199,7 @@ const ViewportType = {
    * that AMP sets when Viewer has requested "natural" viewport on a iOS
    * device.
    * See:
-   * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
+   * https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md
    */
   NATURAL_IOS_EMBED: 'natural-ios-embed',
 };

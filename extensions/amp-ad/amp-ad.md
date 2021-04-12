@@ -152,7 +152,7 @@ Enforcing origins can be done with the 3rd argument to `draw3p` and must additio
 
 This is completely optional: It is sometimes desired to enhance the ad request before making the ad request to the ad server.
 
-If your ad network supports [fast fetch](https://amp.dev/documentation/guides-and-tutorials/contribute/adnetwork_integration#creating-an-amp-ad-implementation), then please use [Real Time Config](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-documentation.md) (RTC). (e.g. DoubleClick and AdSense integrations both support fast fetch and RTC)
+If your ad network supports [fast fetch](https://amp.dev/documentation/guides-and-tutorials/contribute/adnetwork_integration#creating-an-amp-ad-implementation), then please use [Real Time Config](https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/rtc-documentation.md) (RTC). (e.g. DoubleClick and AdSense integrations both support fast fetch and RTC)
 
 If your ad network uses delayed fetch, you can pass a callback to the `draw3p` function call in the [remote.html](../../3p/remote.html) file. The callback receives the incoming configuration as first argument and then receives another callback as second argument (Called `done` in the example below). This callback must be called with the updated config in order for ad rendering to proceed.
 
@@ -190,7 +190,7 @@ on which attributes can be used.
 ### `data-vars-foo-bar`
 
 Attributes starting with `data-vars–` are reserved for
-[`amp-analytics` vars](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute).
+[`amp-analytics` vars](https://github.com/ampproject/amphtml/blob/main/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute).
 
 ### `src` (optional)
 
@@ -325,6 +325,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Content.ad](../../ads/vendors/contentad.md)
 -   [Criteo](../../ads/vendors/criteo.md)
 -   [CSA](../../ads/vendors/csa.md)
+-   [Digiteka](../../ads/vendors/digiteka.md)
 -   [Directadvert](../../ads/vendors/directadvert.md)
 -   [DistroScale](../../ads/vendors/distroscale.md)
 -   [Dot and Media](../../ads/vendors/dotandads.md)
@@ -351,7 +352,6 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [GumGum](../../ads/vendors/gumgum.md)
 -   [Holder](../../ads/vendors/holder.md)
 -   [iBillboard](../../ads/vendors/ibillboard.md)
--   [Idealmedia](../../ads/vendors/idealmedia.md)
 -   [I-Mobile](../../ads/vendors/imobile.md)
 -   [Imonomy](../../ads/vendors/imonomy.md)
 -   [Imedia](../../ads/vendors/imedia.md)
@@ -368,7 +368,6 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Kiosked](../../ads/vendors/kiosked.md)
 -   [Kixer](../../ads/vendors/kixer.md)
 -   [Kuadio](../../ads/vendors/kuadio.md)
--   [Lentainform](../../ads/vendors/lentainform.md)
 -   [Ligatus](../../ads/vendors/ligatus.md)
 -   [LockerDome](../../ads/vendors/lockerdome.md)
 -   [LOGLY](../../ads/vendors/logly.md)
@@ -383,7 +382,6 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Mediavine](../../ads/vendors/mediavine.md)
 -   [Medyanet](../../ads/vendors/medyanet.md)
 -   [Meg](../../ads/vendors/meg.md)
--   [Mgid](../../ads/vendors/mgid.md)
 -   [MicroAd](../../ads/vendors/microad.md)
 -   [MixiMedia](../../ads/vendors/miximedia.md)
 -   [Mixpo](../../ads/vendors/mixpo.md)
@@ -500,8 +498,11 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Dable](../../ads/vendors/dable.md)
 -   [Engageya](../../ads/vendors/engageya.md)
 -   [Epeex](../../ads/vendors/epeex.md)
+-   [Idealmedia](../../ads/vendors/idealmedia.md)
 -   [Insticator](../../ads/vendors/insticator.md)
 -   [Jubna](../../ads/vendors/jubna.md)
+-   [Lentainform](../../ads/vendors/lentainform.md)
+-   [Mgid](../../ads/vendors/mgid.md)
 -   [Outbrain](../../ads/vendors/outbrain.md)
 -   [Postquare](../../ads/vendors/postquare.md)
 -   [PubExchange](../../ads/vendors/pubexchange.md)

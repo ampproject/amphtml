@@ -51,7 +51,7 @@ In rare cases, it may be necessary to remove an existing feature or API. Such br
 
 Deprecations must be publicly discussed and provide significant user benefit that justifies additional work for page developers.
 
-The process for deprecations is similar to the [process for significant changes](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#process-for-significant-changes), but has some unique requirements:
+The process for deprecations is similar to the [process for significant changes](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md#process-for-significant-changes), but has some unique requirements:
 
 -   [File](https://github.com/ampproject/amphtml/issues/new/choose) an [Intent-to-Deprecate (I2D) issue](https://github.com/ampproject/amphtml/labels/INTENT%20TO%20DEPRECATE) describing the feature that is being deprecated, the motivation for deprecating it, and the plan for deprecating/removing the feature.
     -   If you intend to remove the feature immediately after the warning period described below you may make your Intent-to-Deprecate issue an Intent-to-Deprecate-and-Remove issue (by modifying the title and adding the [INTENT TO REMOVE label](https://github.com/ampproject/amphtml/labels/INTENT%20TO%20REMOVE) to it).

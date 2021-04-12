@@ -22,9 +22,6 @@ let installed;
 let lastExpectError;
 let networkLogger;
 
-/**
- * @return {void}
- */
 function clearLastExpectError() {
   lastExpectError = null;
 }
@@ -65,7 +62,7 @@ const ChaiType = {
  * Not all chai properties need to be overwritten, like those that set
  * flags or are only language chains e.g. `not` or 'to'
  * See the Chai implementation for the original definitions:
- * {@link https://github.com/chaijs/chai/blob/master/lib/chai/core/assertions.js}
+ * {@link https://github.com/chaijs/chai/blob/main/lib/chai/core/assertions.js}
  */
 const chaiMethodsAndProperties = [
   {name: 'a', type: ChaiType.CHAINABLE_METHOD},
@@ -141,7 +138,6 @@ const chaiMethodsAndProperties = [
 /**
  * @param {Chai.ChaiStatic} chai
  * @param {Chai.ChaiUtils} utils
- * @return {void}
  */
 function installWrappers(chai, utils) {
   const {METHOD, PROPERTY, CHAINABLE_METHOD} = ChaiType;
@@ -260,7 +256,6 @@ function overwriteUnsupported(_super) {
 
 /**
  * @param {*} _networkLogger
- * @return {void}
  */
 function installBrowserAssertions(_networkLogger) {
   networkLogger = _networkLogger;
@@ -271,7 +266,6 @@ function installBrowserAssertions(_networkLogger) {
  *
  * @param {Chai.ChaiStatic} chai
  * @param {Chai.ChaiUtils} utils
- * @return {void}
  */
 function installBrowserWrappers(chai, utils) {
   const {Assertion} = chai;

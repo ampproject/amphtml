@@ -17,7 +17,7 @@
 import {Services} from '../../../src/services';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setIsMediaComponent} from '../../../src/video-interface';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 class AmpSpringboardPlayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -124,6 +124,16 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
     this.element.appendChild(iframe);
     return this.loadPromise(iframe);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    return true;
   }
 
   /** @override */

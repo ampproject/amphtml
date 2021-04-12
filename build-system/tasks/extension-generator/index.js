@@ -21,7 +21,7 @@ const path = require('path');
 const {
   insertExtensionBundlesConfig,
 } = require('./insert-extension-bundles-config');
-const {cyan, green, red} = require('kleur/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {execOrThrow} = require('../../common/exec');
 const {log} = require('../../common/logging');
 const {makeBentoExtension} = require('./bento');
@@ -313,7 +313,10 @@ async function makeAmpExtension() {
   const filenames = Object.keys(fileContent)
     // Don't format .html because AMP boilerplate would expand into multiple lines.
     .filter((filename) => !filename.endsWith('.html'));
-  execOrThrow(`npx prettier --ignore-unknown --write ${filenames.join(' ')}`);
+  execOrThrow(
+    `npx prettier --ignore-unknown --write ${filenames.join(' ')}`,
+    'Could not format files'
+  );
 
   // Return the resulting extension bundle config.
   return {
@@ -330,6 +333,10 @@ async function makeExtension() {
   const bundleConfig = await (argv.bento
     ? makeBentoExtension()
     : makeAmpExtension());
+  if (!bundleConfig) {
+    log(yellow('WARNING:'), 'Could not write extension files.');
+    return;
+  }
 
   // Update bundles.config.js with an entry for the new component
   insertExtensionBundlesConfig(bundleConfig);
@@ -343,9 +350,9 @@ module.exports = {
 
 makeExtension.description = 'Create an extension skeleton';
 makeExtension.flags = {
-  name: '  The name of the extension. Preferably prefixed with `amp-*`',
-  bento: '  Generate a Bento component',
-  version: '  Sets the version number (default: 0.1; or 1.0 with --bento)',
+  name: 'The name of the extension. Preferably prefixed with `amp-*`',
+  bento: 'Generate a Bento component',
+  version: 'Sets the version number (default: 0.1; or 1.0 with --bento)',
   overwrite:
-    '  Overwrites existing files at the destination, if present; --bento only',
+    'Overwrites existing files at the destination, if present; --bento only',
 };

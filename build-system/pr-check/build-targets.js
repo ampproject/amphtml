@@ -26,7 +26,7 @@ const minimatch = require('minimatch');
 const path = require('path');
 const {cyan} = require('kleur/colors');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
-const {gitDiffNameOnlyMaster} = require('../common/git');
+const {gitDiffNameOnlyMain} = require('../common/git');
 const {isCiBuild} = require('../common/ci');
 
 /**
@@ -99,7 +99,7 @@ function isOwnersFile(file) {
 }
 
 /**
- * Checks if the given file is of the form validator-.*\.(html|out|protoascii)
+ * Checks if the given file is of the form validator-.*\.(html|out|out.cpponly|protoascii)
  *
  * @param {string} file
  * @return {boolean}
@@ -109,6 +109,7 @@ function isValidatorFile(file) {
   return (
     name.startsWith('validator-') &&
     (name.endsWith('.out') ||
+      name.endsWith('.out.cpponly') ||
       name.endsWith('.html') ||
       name.endsWith('.protoascii'))
   );
@@ -203,7 +204,11 @@ const targetMatchers = {
     if (isOwnersFile(file)) {
       return false;
     }
-    return lintFiles.includes(file);
+    return (
+      lintFiles.includes(file) ||
+      file == 'build-system/tasks/lint.js' ||
+      file.startsWith('build-system/test-configs')
+    );
   },
   [Targets.OWNERS]: (file) => {
     return isOwnersFile(file) || file == 'build-system/tasks/check-owners.js';
@@ -215,7 +220,11 @@ const targetMatchers = {
     if (isOwnersFile(file)) {
       return false;
     }
-    return presubmitFiles.includes(file);
+    return (
+      presubmitFiles.includes(file) ||
+      file == 'build-system/tasks/presubmit-checks.js' ||
+      file.startsWith('build-system/test-configs')
+    );
   },
   [Targets.PRETTIFY]: (file) => {
     // OWNERS files can be prettified.
@@ -305,7 +314,7 @@ function determineBuildTargets() {
   lintFiles = globby.sync(config.lintGlobs);
   presubmitFiles = globby.sync(config.presubmitGlobs);
   prettifyFiles = globby.sync(config.prettifyGlobs);
-  const filesChanged = gitDiffNameOnlyMaster();
+  const filesChanged = gitDiffNameOnlyMain();
   for (const file of filesChanged) {
     let isRuntimeFile = true;
     Object.keys(targetMatchers).forEach((target) => {

@@ -131,4 +131,4 @@ You can also hide these buttons entirely and create your own using the `transfor
 
 ## Validation
 
-See [amp-pan-zoom rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-pan-zoom/validator-amp-pan-zoom.protoascii) in the AMP validator specification.
+See [amp-pan-zoom rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-pan-zoom/validator-amp-pan-zoom.protoascii) in the AMP validator specification.

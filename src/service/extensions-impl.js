@@ -179,14 +179,15 @@ export class Extensions {
   /**
    * Waits for the previously included extension to complete
    * loading/registration.
-   * @param {!Window} win
    * @param {string} extensionId
+   * @param {string} version
    * @param {number=} opt_timeout
    * @return {!Promise<?ExtensionDef>}
    */
-  waitForExtension(win, extensionId, opt_timeout) {
+  waitForExtension(extensionId, version, opt_timeout) {
+    // TODO(#33020): Wait for the specified version.
     return /** @type {!Promise<?ExtensionDef>} */ (Services.timerFor(
-      win
+      this.win
     ).timeoutPromise(
       opt_timeout || LOAD_TIMEOUT,
       this.waitFor_(this.getExtensionHolder_(extensionId, /* auto */ false)),
@@ -227,6 +228,7 @@ export class Extensions {
     if (extLoaders[extensionId]) {
       return extLoaders[extensionId];
     }
+    ampdoc.declareExtension(extensionId, version);
     stubElementIfNotKnown(ampdoc.win, extensionId);
     return (extLoaders[extensionId] = this.preloadExtension(
       extensionId,

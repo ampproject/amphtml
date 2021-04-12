@@ -57,7 +57,7 @@ if (argv.coverage) {
 /**
  * TODO(cvializ): Firefox now experimentally supports puppeteer.
  * When it's more mature we might want to support it.
- * {@link https://github.com/GoogleChrome/puppeteer/blob/master/experimental/puppeteer-firefox/README.md}
+ * {@link https://github.com/puppeteer/puppeteer/blob/main/experimental/puppeteer-firefox/README.md}
  */
 const PUPPETEER_BROWSERS = new Set(['chrome']);
 
@@ -445,9 +445,6 @@ function describeEnv(factory) {
       spec.browsers = ['chrome'];
     }
 
-    /**
-     * @return {void}
-     */
     function createBrowserDescribe() {
       const allowedBrowsers = getAllowedBrowsers();
 
@@ -491,7 +488,6 @@ function describeEnv(factory) {
 
     /**
      * @param {string} browserName
-     * @return {void}
      */
     function createVariantDescribe(browserName) {
       for (const name in variants) {

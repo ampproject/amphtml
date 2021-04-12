@@ -4,7 +4,7 @@
   (Do not remove or edit this comment.)
 
   This table-of-contents is automatically generated. To generate it, run:
-    gulp markdown-toc --fix
+    amp markdown-toc --fix
 -->
 
 -   [Who should read this doc?](#who-should-read-this-doc)
@@ -56,7 +56,7 @@ of any of these and many more. For a comprehensive list of all CSS selectors, se
 In general, the order of the CSS selectors do not affect which rules get applied to your CSS,
 unless the selectors have the same specificity and apply to at least one element in common.
 Well-written CSS will work perfectly fine even when the selectors are re-ordered (for example, when reordering imports in a css file). In the real world, it's hard to achieve this, especially
-when we import CSS via gulp or third-party CSS (which can change at any time).
+when we import third-party CSS (which can change at any time).
 
 ### How to calculate Specificity
 

@@ -51,7 +51,7 @@ const isSpecialCannotBeRemoved = (id) =>
 
 /**
  * @param {string} cmd
- * @return {?string}
+ * @return {string}
  */
 function getStdoutThrowOnError(cmd) {
   const {stdout, stderr} = getOutput(cmd);
@@ -259,8 +259,8 @@ const findConfigBitCommits = (
       tokens.pop();
     }
     return {
-      hash: tokens.shift(),
-      authorDate: tokens.shift(),
+      hash: /** @type {string} */ (tokens.shift()),
+      authorDate: /** @type {string} */ (tokens.shift()),
       subject: tokens.join(' '),
     };
   });
@@ -286,7 +286,7 @@ function issueUrlToNumberOrUrl(url) {
 }
 
 /**
- * @param {string} list
+ * @param {string[]} list
  * @return {string}
  */
 const checklistMarkdown = (list) =>
@@ -296,14 +296,14 @@ const checklistMarkdown = (list) =>
  * @return {string}
  */
 const readmeMdGithubLink = () =>
-  `https://github.com/ampproject/amphtml/blob/master/${path.relative(
+  `https://github.com/ampproject/amphtml/blob/main/${path.relative(
     process.cwd(),
     __dirname
   )}/README.md`;
 
 /**
  * @param {{
- *   removed: string,
+ *   removed: string[],
  *   cleanupIssues: Array<Object>,
  *   cutoffDateFormatted: string,
  *   modifiedSourceFiles: Array<string>,
@@ -366,9 +366,9 @@ function summaryCommitMessage({
  * @param {!Object<string, *>} canaryConfig
  * @param {string} cutoffDateFormatted
  * @param {string=} removeExperiment
- * @return {!{
- *   include: Object<string, {percentage: number, previousHistory: Array}>,
- *   exclude: Object<string, {percentage: number, previousHistory: Array}>
+ * @return {{
+ *   include?: Object<string, {percentage: number, previousHistory: Array}>,
+ *   exclude?: Object<string, {percentage: number, previousHistory: Array}>
  * }}
  */
 function collectWork(
@@ -388,13 +388,16 @@ function collectWork(
       removeExperiment,
       percentage
     );
+    /** @type {Object<string, {percentage: number, previousHistory: Array}>} */
     const entries = {[removeExperiment]: {percentage, previousHistory}};
     return isSpecialCannotBeRemoved(removeExperiment)
       ? {exclude: entries}
       : {include: entries};
   }
 
+  /** @type {Object<string, {percentage: number, previousHistory: Array}>} */
   const include = {};
+  /** @type {Object<string, {percentage: number, previousHistory: Array}>} */
   const exclude = {};
   for (const [experiment, percentage] of Object.entries(prodConfig)) {
     if (
@@ -421,7 +424,7 @@ function collectWork(
 }
 
 /**
- * Entry point to gulp sweep-experiments.
+ * Entry point to amp sweep-experiments.
  * See README.md for usage.
  */
 async function sweepExperiments() {
@@ -434,7 +437,7 @@ async function sweepExperiments() {
     argv.experiment ? 0 : argv.days_ago || 365
   ).toISOString();
 
-  const {exclude, include} = collectWork(
+  const {exclude, include = {}} = collectWork(
     prodConfig,
     canaryConfig,
     cutoffDateFormatted,
@@ -536,8 +539,8 @@ sweepExperiments.description =
 
 sweepExperiments.flags = {
   'days_ago':
-    '  How old experiment configuration flips must be for an experiment to be removed. Default is 365 days. This is ignored when using --experiment.',
+    'How old experiment configuration flips must be for an experiment to be removed. Default is 365 days. This is ignored when using --experiment.',
   'dry_run':
-    "  Don't write, but only list the experiments that would be removed by this command.",
-  'experiment': '  Remove a specific experiment id.',
+    "Don't write, but only list the experiments that would be removed by this command.",
+  'experiment': 'Remove a specific experiment id.',
 };

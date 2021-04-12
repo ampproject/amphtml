@@ -7,13 +7,13 @@ Sweeps experiments by id, or when they were last flipped before a certain cutoff
 By default, removes experiments whose [production launch value](../../global-configs/prod-config.json) was last set to either `1` or `0` over a year ago:
 
 ```sh
-gulp sweep-experiments
+amp sweep-experiments
 ```
 
 The tool can also sweep a specific experiment by id, regardless of its launch value:
 
 ```sh
-gulp sweep-experiments --experiment=my-experiment
+amp sweep-experiments --experiment=my-experiment
 ```
 
 For all available options, see the [exported flags.](./index.js)

@@ -16,7 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const requestPromise = require('request-promise');
+const fetch = require('node-fetch');
 const {
   isCircleciBuild,
   isPullRequestBuild,
@@ -25,14 +25,15 @@ const {
 const {ciJobUrl} = require('../common/ci');
 const {cyan, yellow} = require('kleur/colors');
 const {determineBuildTargets, Targets} = require('../pr-check/build-targets');
+const {getValidExperiments} = require('../common/utils');
 const {gitCommitHash} = require('../common/git');
 const {log} = require('../common/logging');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 
-const IS_GULP_INTEGRATION = argv._[0] === 'integration';
-const IS_GULP_UNIT = argv._[0] === 'unit';
-const IS_GULP_E2E = argv._[0] === 'e2e';
+const IS_AMP_INTEGRATION = argv._[0] === 'integration';
+const IS_AMP_UNIT = argv._[0] === 'unit';
+const IS_AMP_E2E = argv._[0] === 'e2e';
 
 const TEST_TYPE_SUBTYPES = isGithubActionsBuild()
   ? new Map([
@@ -50,13 +51,11 @@ const TEST_TYPE_SUBTYPES = isGithubActionsBuild()
           'nomodule-canary',
           'module-prod',
           'module-canary',
-          'experimentA',
-          'experimentB',
-          'experimentC',
+          ...getValidExperiments(),
         ],
       ],
       ['unit', ['unminified', 'local-changes']],
-      ['e2e', ['nomodule', 'experimentA', 'experimentB', 'experimentC']],
+      ['e2e', ['nomodule', ...getValidExperiments()]],
     ])
   : new Map([]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
@@ -66,19 +65,19 @@ const TEST_TYPE_BUILD_TARGETS = new Map([
 ]);
 
 /**
- * @return {string|null}
+ * @return {string}
  */
 function inferTestType() {
   // Determine type (early exit if there's no match).
-  const type = IS_GULP_E2E
+  const type = IS_AMP_E2E
     ? 'e2e'
-    : IS_GULP_INTEGRATION
+    : IS_AMP_INTEGRATION
     ? 'integration'
-    : IS_GULP_UNIT
+    : IS_AMP_UNIT
     ? 'unit'
     : null;
   if (type == null) {
-    return null;
+    throw new Error('No valid test type was inferred');
   }
 
   // Determine subtype (more specific cases come first).
@@ -127,19 +126,19 @@ async function postReport(type, action) {
     const commitHash = gitCommitHash();
 
     try {
-      const body = await requestPromise({
+      const url = `${reportBaseUrl}/${commitHash}/${type}/${action}`;
+      const response = await fetch(url, {
         method: 'POST',
-        uri: `${reportBaseUrl}/${commitHash}/${type}/${action}`,
         body: JSON.stringify({
           ciJobUrl: ciJobUrl(),
         }),
         headers: {
           'Content-Type': 'application/json',
         },
-        // Do not use `json: true` because the response is a string, not JSON.
       });
+      const body = await response.text();
 
-      log('Reported', cyan(`${type}/${action}`, 'to GitHub'));
+      log('Reported', cyan(`${type}/${action}`), 'to GitHub');
       if (body.length > 0) {
         log('Response was', cyan(body.substr(0, 100)));
       }
@@ -192,6 +191,11 @@ async function reportAllExpectedTests() {
   const buildTargets = determineBuildTargets();
   for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {
     const testTypeBuildTargets = TEST_TYPE_BUILD_TARGETS.get(type);
+    if (testTypeBuildTargets === undefined) {
+      throw new Error(
+        `Undefined test type ${type} for build targets ${buildTargets}`
+      );
+    }
     const action = testTypeBuildTargets.some((target) =>
       buildTargets.has(target)
     )
@@ -206,10 +210,9 @@ async function reportAllExpectedTests() {
 /**
  * Callback to the Karma.Server on('run_complete') event for simple test types.
  *
- * @param {!any} browsers
  * @param {!Karma.TestResults} results
  */
-async function reportTestRunComplete(browsers, results) {
+async function reportTestRunComplete(results) {
   if (results.error) {
     await reportTestErrored();
   } else {
