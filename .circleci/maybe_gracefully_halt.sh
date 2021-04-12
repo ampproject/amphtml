@@ -21,8 +21,36 @@
 set -e
 
 GREEN() { echo -e "\n\033[0;32m$1\033[0m"; }
+YELLOW() { echo -e "\n\033[0;33m$1\033[0m"; }
 
 if ls /tmp/restored-workspace/.CI_GRACEFULLY_HALT_* 1>/dev/null 2>&1; then
   echo $(GREEN "Gracefully halting this job.")
   circleci-agent step halt
+  exit 0
 fi
+
+if [[ $CIRCLE_JOB == Experiment* ]]; then
+  EXP=$(echo $CIRCLE_JOB | awk '{print $2}')
+  if [[ -f /tmp/restored-workspace/.CIRCLECI_MERGE_COMMIT ]]; then
+    COMMIT_SHA="$(cat /tmp/restored-workspace/.CIRCLECI_MERGE_COMMIT)"
+  else
+    COMMIT_SHA="${CIRCLE_SHA1}"
+  fi
+
+  EXPERIMENT_JSON=$(curl -sS "https://raw.githubusercontent.com/ampproject/amphtml/${COMMIT_SHA}/build-system/global-configs/experiments-config.json" | jq ".experiment${EXP}")
+  if ! echo "${EXPERIMENT_JSON}" | jq -e '.name,.define_experiment_constant,.expiration_date_utc'; then
+    echo $(YELLOW "Experiment ${EXP} is misconfigured, or does not exist.")
+    echo $(GREEN "Gracefully halting this job")
+    circleci-agent step halt
+    exit 0
+  fi
+
+  CURRENT_TIMESTAMP=$(date --utc +'%s')
+  EXPERIMENT_EXPIRATION_TIMESTAMP=$(date --utc --date $(echo "${EXPERIMENT_JSON}" | jq -er '.expiration_date_utc') +'%s')
+  if [[ $CURRENT_TIMESTAMP -lt $EXPERIMENT_EXPIRATION_TIMESTAMP ]]; then
+    echo $(YELLOW "Experiment ${EXP} is expired.")
+    echo $(GREEN "Gracefully halting this job")
+    circleci-agent step halt
+    exit 0
+  fi
+fi  
