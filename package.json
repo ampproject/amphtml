@@ -158,7 +158,7 @@
     "plugin-error": "1.0.1",
     "postcss": "8.2.10",
     "postcss-import": "14.0.1",
-    "posthtml": "0.15.1",
+    "posthtml": "0.15.2",
     "prettier": "2.2.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
