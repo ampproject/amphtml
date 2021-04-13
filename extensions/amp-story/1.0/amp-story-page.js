@@ -42,8 +42,6 @@ import {
   EXPANDABLE_COMPONENTS,
   expandableElementsSelectors,
 } from './amp-story-embedded-component';
-import {computedStyle, setImportantStyles} from '../../../src/style';
-import {getRGBFromCssColorValue, getTextColorForRGB} from './utils';
 import {AnimationManager, hasAnimations} from './animation';
 import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
@@ -62,7 +60,18 @@ import {
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
-import {createShadowRootWithStyle, setTextBackgroundColor} from './utils';
+import {
+  computedStyle,
+  px,
+  setImportantStyles,
+  toggle,
+} from '../../../src/style';
+import {
+  createShadowRootWithStyle,
+  getRGBFromCssColorValue,
+  getTextColorForRGB,
+  setTextBackgroundColor,
+} from './utils';
 import {debounce} from '../../../src/utils/rate-limit';
 import {delegateAutoplay} from '../../../src/video-interface';
 import {dev} from '../../../src/log';
@@ -73,12 +82,13 @@ import {getLocalizationService} from './amp-story-localization-service';
 import {getLogEntries} from './logging';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {getMode} from '../../../src/mode';
+
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen} from '../../../src/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
-import {px, toggle} from '../../../src/style';
+
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
 import {toArray} from '../../../src/core/types/array';
@@ -1758,7 +1768,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     let contrastColor = null;
     if (ctaAccentColor) {
       setImportantStyles(this.element, {
-        'background-color': attachmentEl.getAttribute('cta-accent-color')
+        'background-color': attachmentEl.getAttribute('cta-accent-color'),
       });
       const styles = computedStyle(this.win, this.element);
       const rgb = getRGBFromCssColorValue(styles['background-color']);

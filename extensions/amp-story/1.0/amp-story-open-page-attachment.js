@@ -87,7 +87,12 @@ const buildOpenOutlinkAttachmentElement = (element) =>
  * @param  {string} contrastColor '#FFF' or '#000'
  * @return {!Element}
  */
-export const renderPageAttachmentUI = (win, pageEl, attachmentEl, contrastColor) => {
+export const renderPageAttachmentUI = (
+  win,
+  pageEl,
+  attachmentEl,
+  contrastColor
+) => {
   const openImgAttr = attachmentEl.getAttribute('cta-image');
   const attachmentHref = attachmentEl.getAttribute('href');
   if (isPageAttachmentUiV2ExperimentOn(win) && attachmentHref) {
@@ -157,31 +162,33 @@ const renderOutlinkPageAttachmentUI = (
   }
 
   // Getting elements
-  let {chipEl, ctaLabelEl} = htmlRefs(openAttachmentEl);
-  let labelTextColor = contrastColor;
+  const {chipEl, ctaLabelEl} = htmlRefs(openAttachmentEl);
 
   // Setting theme
   const themeAttribute = attachmentEl.getAttribute('theme');
   openAttachmentEl.setAttribute('theme', themeAttribute);
-  if (themeAttribute === "dark") {
-    labelTextColor = "white";
-  } else {
-    labelTextColor = "black";
-  }
+  let labelTextColor = themeAttribute === 'dark' ? 'white' : 'black';
 
   const accentColor = attachmentEl.getAttribute('cta-accent-color');
-  if (themeAttribute === "custom") {
-    if (attachmentEl.getAttribute('cta-accent-element') === "background") {
+  if (themeAttribute === 'custom') {
+    if (attachmentEl.getAttribute('cta-accent-element') === 'background') {
       labelTextColor = contrastColor;
-      openAttachmentEl.style.cssText = '--i-amphtml-outlink-cta-background-color: ' + accentColor; // ??
-      openAttachmentEl.style.setProperty('--i-amphtml-outlink-cta-text-color', contrastColor); // ??
+      setImportantStyles(openAttachmentEl, {
+        '--i-amphtml-outlink-cta-background-color': accentColor,
+      });
+      setImportantStyles(openAttachmentEl, {
+        '--i-amphtml-outlink-cta-text-color': contrastColor,
+      });
     } else {
       labelTextColor = accentColor;
-      openAttachmentEl.style.setProperty('--i-amphtml-outlink-cta-background-color', contrastColor); // ??
-      openAttachmentEl.style.setProperty('--i-amphtml-outlink-cta-text-color', accentColor); // ??
+      setImportantStyles(openAttachmentEl, {
+        '--i-amphtml-outlink-cta-background-color': contrastColor,
+      });
+      setImportantStyles(openAttachmentEl, {
+        '--i-amphtml-outlink-cta-text-color': accentColor,
+      });
     }
   }
-  console.log(labelTextColor);
 
   // Appending text & aria-label.
   const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
@@ -211,10 +218,12 @@ const renderOutlinkPageAttachmentUI = (
       chipEl.prepend(ctaImgEl);
     } else {
       const ctaLinkImageEl = win.document.createElement('div');
-      const linkImage = htmlFor(ctaLinkImageEl)`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
-          <rect stroke-width="0" width="24" height="24" fill-opacity="0.1" rx="12"/>
-          <path stroke-width=".25" d="M9.63 18s0 0 0 0c.98 0 1.9-.38 2.58-1.07l1.47-1.48a.55.55 0 000-.77.55.55 0 00-.77 0l-1.47 1.48a2.53 2.53 0 01-3.6 0 2.53 2.53 0 010-3.6l1.48-1.48a.54.54 0 000-.77.54.54 0 00-.77 0L7.07 11.8a3.62 3.62 0 000 5.14A3.6 3.6 0 009.63 18zM11.09 9.31l1.47-1.48a2.53 2.53 0 013.6 0 2.53 2.53 0 010 3.6l-1.48 1.48a.54.54 0 000 .77.55.55 0 00.77 0l1.48-1.47a3.62 3.62 0 000-5.14A3.61 3.61 0 0014.36 6s0 0 0 0c-.98 0-1.9.38-2.58 1.07l-1.47 1.48a.55.55 0 000 .77c.22.21.57.21.78 0z"/>
-          <path stroke-width=".25" d="M14.63 9.37a.55.55 0 00-.78 0l-4.48 4.48a.55.55 0 00.39.94c.13 0 .28-.06.38-.17l4.48-4.48a.54.54 0 000-.77z"/>
+      const linkImage = htmlFor(
+        ctaLinkImageEl
+      )`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+          <rect stroke-width="0" width="24" height="24" fill-opacity="0.1" rx="12"></rect>
+          <path stroke-width=".25" d="M9.63 18s0 0 0 0c.98 0 1.9-.38 2.58-1.07l1.47-1.48a.55.55 0 000-.77.55.55 0 00-.77 0l-1.47 1.48a2.53 2.53 0 01-3.6 0 2.53 2.53 0 010-3.6l1.48-1.48a.54.54 0 000-.77.54.54 0 00-.77 0L7.07 11.8a3.62 3.62 0 000 5.14A3.6 3.6 0 009.63 18zM11.09 9.31l1.47-1.48a2.53 2.53 0 013.6 0 2.53 2.53 0 010 3.6l-1.48 1.48a.54.54 0 000 .77.55.55 0 00.77 0l1.48-1.47a3.62 3.62 0 000-5.14A3.61 3.61 0 0014.36 6s0 0 0 0c-.98 0-1.9.38-2.58 1.07l-1.47 1.48a.55.55 0 000 .77c.22.21.57.21.78 0z"></path>
+          <path stroke-width=".25" d="M14.63 9.37a.55.55 0 00-.78 0l-4.48 4.48a.55.55 0 00.39.94c.13 0 .28-.06.38-.17l4.48-4.48a.54.54 0 000-.77z"></path>
         </svg>`;
 
       chipEl.prepend(linkImage);
