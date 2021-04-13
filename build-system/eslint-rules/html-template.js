@@ -215,8 +215,7 @@ function create(context) {
           context
             .getSourceCode()
             .getText(quasi)
-            .replace(/^`([^\s])/gm, '` $1')
-            .replace(/([^\s])`$/gm, '$1 `')
+            .replace(/^(`)([^\s])|([^\s])(`)$/gm, '$1$3 $2$4')
         );
       },
     });
