@@ -49,6 +49,7 @@ if [[ $CIRCLE_JOB == Experiment* ]]; then
     exit 0
   fi
 
+  # Do not proceed if the experiment is expired (config date is in the past).
   CURRENT_TIMESTAMP=$(date --utc +'%s')
   EXPERIMENT_EXPIRATION_TIMESTAMP=$(date --utc --date $(echo "${EXPERIMENT_JSON}" | jq -er '.expiration_date_utc') +'%s')
   if [[ $CURRENT_TIMESTAMP -gt $EXPERIMENT_EXPIRATION_TIMESTAMP ]]; then
