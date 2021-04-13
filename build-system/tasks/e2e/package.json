@@ -9,7 +9,7 @@
     "chromedriver": "89.0.0",
     "puppeteer": "8.0.0",
     "geckodriver": "1.22.3",
-    "selenium-webdriver": "4.0.0-beta.2"
+    "selenium-webdriver": "4.0.0-beta.3"
   },
   "resolutions": {
     "**/**/minimist": "^1.2.3"
