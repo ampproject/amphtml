@@ -541,9 +541,9 @@ export class Log {
   prepareError_(error) {
     error = duplicateErrorIfNecessary(error);
 
-    // error.associatedElement is used to add the i-amphtml-error class; in
-    // `#development=1`` mode, it also adds `i-amphtml-element-error` to the
-    // element and sets the `error-message`` attribute.
+    // `associatedElement` is used to add the i-amphtml-error class; in
+    // `#development=1` mode, it also adds `i-amphtml-element-error` to the
+    // element and sets the `error-message` attribute.
     error.associatedElement = error.messageArray?.find((item) => item?.tagName);
     if (this.suffix_) {
       if (!error.message) {

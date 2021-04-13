@@ -57,7 +57,6 @@ function assertion(
   // const messageArgs = Array.prototype.slice.call(arguments, 3);
   // Index at which message args start
   let i = 3;
-  let firstElement;
 
   // Substitute provided values into format string in message
   const splitMessage = opt_message.split('%s');
