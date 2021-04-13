@@ -110,10 +110,14 @@ async function runTask(taskName, taskSourceFilePath, taskFunc) {
  * - When a task is actually run, update root packages, load the entry point,
  *   validate usage, update task-specific packages, and run the task.
  * @param {string} taskName
- * @param {string} taskFuncName
- * @param {string} taskSourceFileName
+ * @param {string=} taskFuncName
+ * @param {string=} taskSourceFileName
  */
-function createTask(taskName, taskFuncName, taskSourceFileName) {
+function createTask(
+  taskName,
+  taskFuncName = taskName,
+  taskSourceFileName = taskName
+) {
   const tasksDir = path.join(__dirname, '..', 'tasks');
   const taskSourceFilePath = path.join(tasksDir, taskSourceFileName);
   const isInvokedTask = argv._.includes(taskName); // `amp <task>`
