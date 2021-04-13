@@ -202,7 +202,15 @@ export function reportError(error, opt_associatedElement) {
     ) {
       const output = console.error || console.log;
       if (error.messageArray) {
-        output.apply(console, error.messageArray);
+        let i = 1;
+        // This outputs a log message where non-string values are preserved but
+        // appear  inline
+        const prettyMessageArray = error.messageArray[0]
+          .split(/(?<=%s)|(?=%s)/) // Split at each %s, leave them in the array
+          .map((substr) =>
+            substr == '%s' ? error.messageArray[i++] : substr.trim()
+          );
+        output.apply(console, prettyMessageArray);
       } else {
         if (element) {
           output.call(console, error.message, element);

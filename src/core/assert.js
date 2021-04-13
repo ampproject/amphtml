@@ -54,32 +54,22 @@ function assertion(
   const messageArgs = isArray(opt_messageArray)
     ? opt_messageArray
     : // opt_messageArray instead contains the message format string; everything
-      // after that belongs to the actual messageArray.
+      // after that is a format argument.
       Array.prototype.slice.call(arguments, 2);
-  let messageFmt = messageArgs[0];
 
   // Include the sentinel string if provided and not already present
-  if (sentinel && !messageFmt.includes(sentinel)) {
-    messageFmt += sentinel;
+  if (sentinel && !messageArgs[0].includes(sentinel)) {
+    messageArgs[0] += sentinel;
   }
 
   // Substitute provided values into format string in message
-  const splitMessage = messageFmt.split('%s');
-  let message = splitMessage.shift();
-
-  const messageArray = [];
-  // Index at which message args start
   let i = 1;
-  while (splitMessage.length) {
-    const subValue = messageArgs[i++];
-    const nextConstant = splitMessage.shift();
-
-    message += elementStringOrPassThru(subValue) + nextConstant;
-    messageArray.push(subValue, nextConstant.trim());
-  }
+  const message = messageArgs[0].replace(/%s/g, () =>
+    elementStringOrPassThru(messageArgs[i++])
+  );
 
   const error = new Error(message);
-  error.messageArray = remove(messageArray, (x) => x !== '');
+  error.messageArray = messageArgs.slice(0, i);
   throw error;
 }
 
