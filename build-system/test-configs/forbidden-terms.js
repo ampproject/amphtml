@@ -127,7 +127,7 @@ const forbiddenTermsGlobal = {
     allowlist: [
       'build-system/common/check-package-manager.js',
       'build-system/common/logging.js',
-      'build-system/task-runner/cli-runner.js',
+      'build-system/task-runner/amp-cli-runner.js',
       'src/purifier/noop.js',
       'validator/js/engine/validator-in-browser.js',
       'validator/js/engine/validator.js',

@@ -17,9 +17,9 @@
 'use strict';
 
 /**
- * @fileoverview This is the amphtml CLI runner executable that is installed to
- * the global node directory. It invokes the repo-local `amp` or `gulp` runner,
- * and makes it possible for multiple local repo copies to share one globally
+ * @fileoverview This is the `amp` CLI runner executable that is installed to
+ * the global node directory. It invokes the repo-local `amp` task runner, and
+ * makes it possible for multiple local repo copies to share one globally
  * installed runner executable.
  */
 
@@ -41,16 +41,15 @@ function getRepoRoot() {
 }
 
 /**
- * Invokes the repo-local runner if we are inside a git repository. The runner
- * target is set to either `amp.js` or gulp-deprecated.js` at install time.
+ * Invokes the repo-local `amp` task runner if we are inside a git repository.
  */
-function invokeRunner() {
+function invokeAmpTaskRunner() {
   const repoRoot = getRepoRoot();
   if (repoRoot) {
-    require(path.join(repoRoot, '__RUNNER_TARGET__'));
+    require(path.join(repoRoot, 'amp.js'));
   } else {
     console.log('\x1b[31mERROR:\x1b[0m Not inside a git repo');
   }
 }
 
-invokeRunner();
+invokeAmpTaskRunner();
