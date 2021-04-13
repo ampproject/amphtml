@@ -285,22 +285,24 @@ function storeExperimentBuildToWorkspace(exp) {
  * Replaces URLS in HTML files, compresses and stores nomodule build in CI artifacts.
  */
 async function processAndStoreBuildToArtifacts() {
+  if (!isCircleciBuild()) {
+    return;
+  }
+
   await replaceUrls('test/manual');
   await replaceUrls('examples');
 
-  if (isCircleciBuild()) {
-    const loggingPrefix = getLoggingPrefix();
+  const loggingPrefix = getLoggingPrefix();
 
-    logWithoutTimestamp(
-      `\n${loggingPrefix} Compressing ` +
-        cyan(APP_SERVING_DIRS.join(', ')) +
-        ' into ' +
-        cyan(ARTIFACT_FILE_NAME) +
-        '...'
-    );
-    execOrDie(`tar -czf ${ARTIFACT_FILE_NAME} ${APP_SERVING_DIRS.join('/ ')}/`);
-    execOrDie(`du -sh ${ARTIFACT_FILE_NAME}`);
-  }
+  logWithoutTimestamp(
+    `\n${loggingPrefix} Compressing ` +
+      cyan(APP_SERVING_DIRS.join(', ')) +
+      ' into ' +
+      cyan(ARTIFACT_FILE_NAME) +
+      '...'
+  );
+  execOrDie(`tar -czf ${ARTIFACT_FILE_NAME} ${APP_SERVING_DIRS.join('/ ')}/`);
+  execOrDie(`du -sh ${ARTIFACT_FILE_NAME}`);
 }
 
 module.exports = {
