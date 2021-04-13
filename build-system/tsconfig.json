@@ -30,7 +30,7 @@
     "./tasks/create-golden-css/*",
     "./tasks/css/*",
     // "./tasks/e2e/*", // 253 remaining type errors.
-    "./tasks/extension-generator/*",
+    "./tasks/make-extension/*",
     "./tasks/get-zindex/*",
     "./tasks/markdown-toc/*",
     // "./tasks/performance/*", // 35 remaining type errors.
