@@ -17,8 +17,11 @@
 tags: {  # amp-accordion for websites
   html_format: AMP
   tag_name: "SCRIPT"
+  satisfies: "amp-accordion 1.0"
+  excludes: "amp-accordion 0.1"
   extension_spec: {
     name: "amp-accordion"
+    version_name: "v1.0"
     version: "1.0"
   }
   attr_lists: "common-extension-attrs"
@@ -27,8 +30,11 @@ tags: {  # amp-accordion for ads
   html_format: AMP
   html_format: AMP4ADS
   tag_name: "SCRIPT"
+  satisfies: "amp-accordion 0.1"
+  excludes: "amp-accordion 1.0"
   extension_spec: {
     name: "amp-accordion"
+    version_name: "v0.1"
     version: "0.1"
     version: "latest"
     requires_usage: EXEMPTED
