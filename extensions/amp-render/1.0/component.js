@@ -70,18 +70,9 @@ export function RenderWithRef(
   }, [src, getJson]);
 
   const refresh = useCallback(() => {
-    if (src.startsWith('amp-script:') || src.startsWith('amp-state:')) {
-      return;
-    }
-    let cancelled = false;
     getJson(src).then((data) => {
-      if (!cancelled) {
-        setData(data);
-      }
+      setData(data);
     });
-    return () => {
-      cancelled = true;
-    };
   }, [getJson, src]);
 
   useImperativeHandle(
