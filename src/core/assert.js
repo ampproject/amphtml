@@ -18,7 +18,7 @@ import {
   USER_ERROR_SENTINEL,
   elementStringOrPassThru,
 } from './error-message-helpers';
-import {isArray, remove} from './types/array';
+import {isArray} from './types/array';
 import {isMinifiedMode} from './minified-mode';
 
 /**
