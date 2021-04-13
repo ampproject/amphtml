@@ -723,6 +723,36 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     ).to.exist;
   });
 
+  it('should build the new outlink page attachment UI with icon based on custom theme color', async () => {
+    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
+
+    const attachmentEl = createElementWithAttributes(
+      win.document,
+      'amp-story-page-attachment',
+      {
+        'layout': 'nodisplay',
+        'href': 'www.google.com',
+        'theme': 'custom',
+        'cta-accent-color': 'pink',
+        'cta-accent-element': 'text',
+      }
+    );
+    element.appendChild(attachmentEl);
+
+    await page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    const linkIconEl = openAttachmentEl.querySelector(
+      '.i-amphtml-story-page-open-attachment-link-icon'
+    );
+    expect(linkIconEl.style.fill).to.equal('pink');
+  });
+
   it('should build the open attachment UI with custom CTA label', async () => {
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
