@@ -383,7 +383,7 @@ describe('Logging', () => {
         error = e;
       }
       expect(error).to.be.instanceof(Error);
-      expect(error.associatedElement).to.equal(div);
+      expect(error.messageArray[0]).to.equal(div);
     });
 
     it('should recognize asserts', () => {

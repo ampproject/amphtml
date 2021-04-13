@@ -611,10 +611,7 @@ export function getErrorReportData(
   data['exps'] = exps.join(',');
 
   if (error) {
-    const tagName = error.associatedElement
-      ? error.associatedElement.tagName
-      : 'u'; // Unknown
-    data['el'] = tagName;
+    data['el'] = error.associatedElement?.tagName || 'u'; // Unknown
 
     if (error.args) {
       data['args'] = JSON.stringify(error.args);

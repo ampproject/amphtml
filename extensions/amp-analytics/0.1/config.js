@@ -22,8 +22,9 @@ import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
 import {dev, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getMode} from '../../../src/mode';
-import {isArray, isObject, toWin} from '../../../src/types';
+import {isArray} from '../../../src/core/types/array';
 import {isCanary} from '../../../src/experiments';
+import {isObject, toWin} from '../../../src/types';
 import {variableServiceForDoc} from './variables';
 
 const TAG = 'amp-analytics/config';

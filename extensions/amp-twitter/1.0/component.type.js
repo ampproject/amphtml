@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
@@ -15,13 +14,23 @@
  * limitations under the License.
  */
 
-const {
-  printGulpDeprecationNotice,
-} = require('./build-system/task-runner/amp-task-runner');
+/** @externs */
+
+/** @const */
+var TwitterDef = {};
 
 /**
- * Print a deprecation notice and fall back to the amp task runner.
- * TODO(amphtml): Remove this script after a month or so.
+ * @typedef {{
+ *   loading: (string|undefined),
+ *   onReadyState: (function(string, *=)|undefined),
+ *   requestResize: (function(number):*|undefined),
+ *   title: (string|undefined),
+ * }}
  */
-printGulpDeprecationNotice(/* withTimeStamps */ true);
-require('./amp');
+TwitterDef.Props;
+
+/** @constructor */
+TwitterDef.Api = function () {};
+
+/** @type {string} */
+TwitterDef.Api.prototype.readyState;
