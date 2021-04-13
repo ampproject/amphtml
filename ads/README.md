@@ -289,7 +289,7 @@ This triggers prefetch/preconnect when the ad is first seen, so that loads are f
 
 ### Ad markup
 
-Ads are loaded using the `<amp-ad>` tag containing the specified `type` for the ad netowkr, and name value pairs of configuration.
+Ads are loaded using the `<amp-ad>` tag containing the specified `type` for the ad network, and name value pairs of configuration.
 
 This is an example for the A9 network:
 

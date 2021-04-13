@@ -532,7 +532,7 @@
   {
     "name": "amp-stream-gallery",
     "version": ["0.1", "1.0"],
-    "latestVersion": "0.1",
+    "latestVersion": "1.0",
     "options": {"hasCss": true}
   },
   {
@@ -563,7 +563,7 @@
       "cssBinaries": ["amp-truncate-text", "amp-truncate-text-shadow"]
     }
   },
-  {"name": "amp-twitter", "version": "0.1", "latestVersion": "0.1"},
+  {"name": "amp-twitter", "version": ["0.1", "1.0"], "latestVersion": "0.1"},
   {
     "name": "amp-user-notification",
     "version": "0.1",
