@@ -19,6 +19,9 @@ import '../../../amp-mustache/0.2/amp-mustache';
 import '../../../amp-script/0.1/amp-script';
 import '../amp-render';
 import * as BatchedJsonModule from '../../../../src/batched-json';
+import * as Preact from '../../../../src/preact';
+import {ActionInvocation} from '../../../../src/service/action-impl';
+import {ActionTrust} from '../../../../src/action-constants';
 import {htmlFor} from '../../../../src/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';
@@ -53,6 +56,22 @@ describes.realWin(
     async function getRenderedData() {
       const wrapper = await waitRendered();
       return wrapper.textContent;
+    }
+
+    function invocation(method, args = {}) {
+      const source = null;
+      const caller = null;
+      const event = null;
+      const trust = ActionTrust.DEFAULT;
+      return new ActionInvocation(
+        element,
+        method,
+        args,
+        source,
+        caller,
+        event,
+        trust
+      );
     }
 
     beforeEach(async function () {
@@ -162,6 +181,46 @@ describes.realWin(
 
       const text = await getRenderedData();
       expect(text).to.equal('Hello ');
+    });
+
+    it.only('refreshes', async () => {
+      const fetchJsonStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+      fetchJsonStub.resolves({name: 'Joe'});
+
+      fetchJsonStub.onCall(0).resolves({name: 'Joe'});
+      fetchJsonStub.onCall(1).resolves({name: 'Mike'});
+
+      element = html`
+        <amp-render
+          id="my-amp-render"
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      const button = html`
+        <button on="tap:my-amp-render.refresh">Refresh list</button>;
+      `;
+      doc.body.appendChild(element);
+      doc.body.appendChild(button);
+
+      // const api = await element.getApi();
+      // console.log(Object.keys(api));
+      // const refreshStub = env.sandbox.stub(api, 'refresh');
+
+      let text = await getRenderedData();
+      expect(text).to.equal('Hello Joe');
+
+      element.enqueAction(invocation('refresh'));
+      text = await getRenderedData();
+      expect(fetchJsonStub).to.have.been.calledTwice;
+      // expect(text).to.equal('Hello Mike');
     });
   }
 );
