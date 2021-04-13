@@ -119,8 +119,7 @@ export function IframeEmbedWithRef(
         iframe.src = iframe.src;
       } else {
         const parent = iframe.parentNode;
-        parent.removeChild(iframe);
-        parent.appendChild(iframe);
+        parent.insertBefore(iframe, iframe.nextSibling);
       }
     }
   }, [playable]);
