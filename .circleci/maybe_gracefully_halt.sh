@@ -30,7 +30,10 @@ if ls /tmp/restored-workspace/.CI_GRACEFULLY_HALT_* 1>/dev/null 2>&1; then
 fi
 
 if [[ $CIRCLE_JOB == Experiment* ]]; then
+  # Extract the experiment name from the job name in `config.yml`.
   EXP=$(echo $CIRCLE_JOB | awk '{print $2}')
+  
+  # Extract the commit SHA. For PR jobs, this is written to .CIRCLECI_MERGE_COMMIT.
   if [[ -f /tmp/restored-workspace/.CIRCLECI_MERGE_COMMIT ]]; then
     COMMIT_SHA="$(cat /tmp/restored-workspace/.CIRCLECI_MERGE_COMMIT)"
   else
