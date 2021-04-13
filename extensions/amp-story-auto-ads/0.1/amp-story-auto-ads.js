@@ -318,7 +318,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.adBadgeContainer_ = this.doc_.createElement('aside');
     this.adBadgeContainer_.className = 'i-amphtml-ad-overlay-container';
 
-    const badge = this.doc_.createElement('p');
+    const badge = this.doc_.createElement('div');
     badge.className = 'i-amphtml-story-ad-badge';
 
     this.adBadgeContainer_.appendChild(badge);
