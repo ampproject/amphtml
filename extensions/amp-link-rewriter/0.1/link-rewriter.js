@@ -17,7 +17,7 @@
 import {Services} from '../../../src/services';
 import {getConfigOpts} from './config-options';
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {hasAttributeValues, isBelongsToContainer} from './scope';
+import {getScopeElements, isElementOnScope} from './scope';
 
 const WL_ANCHOR_ATTR = ['href', 'id', 'rel', 'rev'];
 const PREFIX_DATA_ATTR = /^vars(.+)/;
@@ -39,6 +39,9 @@ export class LinkRewriter {
 
     /** @private {?Object} */
     this.configOpts_ = getConfigOpts(ampElement);
+
+    /** @private {Array<!Element>} */
+    this.listElements_ = getScopeElements(this.ampDoc_, this.configOpts_);
 
     /** @private {string} */
     this.referrer_ = referrer;
@@ -63,11 +66,7 @@ export class LinkRewriter {
     if (this.isRewritten_(anchor)) {
       return;
     }
-
-    if (!isBelongsToContainer(anchor, this.configOpts_)) {
-      return;
-    }
-    if (!hasAttributeValues(anchor, this.configOpts_)) {
+    if (!this.isNotFiltered_(anchor)) {
       return;
     }
     const sourceTrimmedDomain = Services.documentInfoForDoc(
@@ -101,6 +100,39 @@ export class LinkRewriter {
       anchor.href.match(REG_DOMAIN_URL)[1] ===
       this.rewrittenUrl_.match(REG_DOMAIN_URL)[1]
     );
+  }
+
+  /**
+   * @param {!Element} anchor
+   * @return {boolean}
+   * @private
+   */
+  isNotFiltered_(anchor) {
+    if (!this.configOpts_.scopeDocument) {
+      return isElementOnScope(anchor, this.configOpts_);
+    }
+
+    return this.isListed_(anchor);
+  }
+
+  /**
+   * @param {!Element} anchor
+   * @return {boolean}
+   */
+  isListed_(anchor) {
+    if (this.listElements_ === null || this.listElements_.length === 0) {
+      return true;
+    }
+
+    const filtered = this.listElements_.filter((element) => {
+      return element === anchor;
+    });
+
+    if (filtered.length > 0) {
+      return true;
+    }
+
+    return false;
   }
 
   /**

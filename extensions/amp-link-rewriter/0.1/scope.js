@@ -14,7 +14,48 @@
  * limitations under the License.
  */
 
-import {closestAncestorElementBySelector} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  iterateCursor,
+} from '../../../src/dom';
+
+/**
+ *
+ * @param {?../../../src/service/ampdoc-impl.AmpDoc} ampDoc
+ * @param {!Object} configOpts
+ * @return {!Array<!Element>}
+ */
+export function getScopeElements(ampDoc, configOpts) {
+  const doc = ampDoc.getRootNode();
+  let cssSelector = configOpts.section.join(' a, ');
+  let selection = doc.querySelectorAll('a');
+  const filteredSelection = [];
+
+  if (configOpts.section.length !== 0) {
+    cssSelector = cssSelector + ' a';
+    selection = doc.querySelectorAll(cssSelector);
+  }
+
+  iterateCursor(selection, (element) => {
+    if (hasAttributeValues(element, configOpts)) {
+      filteredSelection.push(element);
+    }
+  });
+
+  return filteredSelection;
+}
+
+/**
+ * @param {!Node} htmlElement
+ * @param {?Object} configOpts
+ * @return {boolean}
+ */
+export function isElementOnScope(htmlElement, configOpts) {
+  return (
+    !!hasAttributeValues(htmlElement, configOpts) &&
+    isBelongsToContainer(htmlElement, configOpts)
+  );
+}
 
 /**
  * Check if the element have a parent container specified in config.
@@ -23,7 +64,7 @@ import {closestAncestorElementBySelector} from '../../../src/dom';
  * @param {!Object} configOpts
  * @return {boolean}
  */
-export function isBelongsToContainer(htmlElement, configOpts) {
+function isBelongsToContainer(htmlElement, configOpts) {
   if (configOpts.section.length === 0) {
     return true;
   }
@@ -42,7 +83,7 @@ export function isBelongsToContainer(htmlElement, configOpts) {
  * @param {!Object} configOpts
  * @return {*} TODO(#23582): Specify return type
  */
-export function hasAttributeValues(htmlElement, configOpts) {
+function hasAttributeValues(htmlElement, configOpts) {
   const anchorAttr = configOpts.attribute;
   const attrKeys = Object.keys(anchorAttr);
 
