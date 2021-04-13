@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
+
+import {useImperativeHandle} from '../';
 
 /**
- * @fileoverview Script that runs the performance tests during CI.
+ * @param {{current: (T|null)}} ref
+ * @param {T} node
+ * @template T
  */
-
-const {runCiJob} = require('./ci-job');
-const {timedExecOrDie} = require('./utils');
-
-const jobName = 'performance-tests.js';
-
-function pushBuildWorkflow() {
-  timedExecOrDie('amp performance --nobuild --quiet --headless');
+export function useDOMHandle(ref, node) {
+  useImperativeHandle(ref, () => node, [node]);
 }
-
-runCiJob(jobName, pushBuildWorkflow, () => {});

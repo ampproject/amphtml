@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
-/**
- * @fileoverview Script that runs the performance tests during CI.
- */
+import * as Preact from '../../../../src/preact';
+import {Twitter} from '../component';
+import {withA11y} from '@storybook/addon-a11y';
+import {withKnobs} from '@storybook/addon-knobs';
 
-const {runCiJob} = require('./ci-job');
-const {timedExecOrDie} = require('./utils');
+export default {
+  title: 'Twitter',
+  component: Twitter,
+  decorators: [withKnobs, withA11y],
+};
 
-const jobName = 'performance-tests.js';
-
-function pushBuildWorkflow() {
-  timedExecOrDie('amp performance --nobuild --quiet --headless');
-}
-
-runCiJob(jobName, pushBuildWorkflow, () => {});
+export const _default = () => {
+  return (
+    <Twitter style={{width: 300, height: 200}} tweetId="638793490521001985" />
+  );
+};

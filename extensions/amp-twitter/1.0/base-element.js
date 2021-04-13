@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
-/**
- * @fileoverview Script that runs the performance tests during CI.
- */
+import {PreactBaseElement} from '../../../src/preact/base-element';
+import {Twitter} from './component';
 
-const {runCiJob} = require('./ci-job');
-const {timedExecOrDie} = require('./utils');
+export class BaseElement extends PreactBaseElement {}
 
-const jobName = 'performance-tests.js';
+/** @override */
+BaseElement['Component'] = Twitter;
 
-function pushBuildWorkflow() {
-  timedExecOrDie('amp performance --nobuild --quiet --headless');
-}
+/** @override */
+BaseElement['props'] = {
+  'title': {attr: 'title'}, // Needed for Preact component
+  'options': {attrPrefix: 'data-'}, // Needed to render componoent upon mutation
+};
 
-runCiJob(jobName, pushBuildWorkflow, () => {});
+/** @override */
+BaseElement['layoutSizeDefined'] = true;
+
+/** @override */
+BaseElement['usesShadowDom'] = true;
