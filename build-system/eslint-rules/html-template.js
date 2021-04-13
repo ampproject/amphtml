@@ -210,13 +210,14 @@ function create(context) {
         // Prettier formats this in a silly way unless the quasi's content is
         // wrapped in whitespace.
         const {quasi} = node;
-        const quasiText = context.getSourceCode().getText(quasi);
-        if (!/^`[\s\n]/.test(quasiText)) {
-          yield fixer.replaceTextRange([quasi.start, quasi.start + 1], '` ');
-        }
-        if (!/[\s\n]`$/.test(quasiText)) {
-          yield fixer.replaceTextRange([quasi.end - 1, quasi.end], ' `');
-        }
+        yield fixer.replaceText(
+          quasi,
+          context
+            .getSourceCode()
+            .getText(quasi)
+            .replace(/^`([^\s])/gm, '` $1')
+            .replace(/([^\s])`$/gm, '$1 `')
+        );
       },
     });
   }
