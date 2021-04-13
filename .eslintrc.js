@@ -325,7 +325,6 @@ module.exports = {
         '**/.eslintrc.js',
         'amp.js',
         'babel.config.js',
-        'gulp-deprecated.js',
         'package-scripts.js',
       ],
       'globals': {

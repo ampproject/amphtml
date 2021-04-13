@@ -21,7 +21,7 @@
       owners: [{name: '*'}],
     },
     {
-      pattern: '{.*,amp.js,gulp-deprecated.js}',
+      pattern: '{.*,amp.js}',
       owners: [{name: 'ampproject/wg-infra'}],
     },
     {
