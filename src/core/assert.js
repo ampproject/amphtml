@@ -35,7 +35,6 @@ import {isMinifiedMode} from './minified-mode';
  * @param {string} sentinel
  * @param {T} shouldBeTruthy
  * @param {string} opt_message
- * @param opt_messageArray
  * @param {...*} var_args Arguments substituted into %s in the message
  * @return {T}
  * @throws {Error} when shouldBeTruthy is not truthy.
@@ -43,19 +42,16 @@ import {isMinifiedMode} from './minified-mode';
 function assertion(
   sentinel,
   shouldBeTruthy,
-  opt_messageArray = 'Assertion failed',
+  opt_message = 'Assertion failed',
   var_args
 ) {
   if (shouldBeTruthy) {
     return shouldBeTruthy;
   }
 
-  // TODO(#33631): Eventually allow only the array format
-  const messageArgs = isArray(opt_messageArray)
-    ? opt_messageArray
-    : // opt_messageArray instead contains the message format string; everything
-      // after that is a format argument.
-      Array.prototype.slice.call(arguments, 2);
+  // opt_message instead contains the message format string; everything after it
+  // is a format argument.
+  const messageArgs = Array.prototype.slice.call(arguments, 2);
 
   // Include the sentinel string if provided and not already present
   if (sentinel && !messageArgs[0].includes(sentinel)) {
