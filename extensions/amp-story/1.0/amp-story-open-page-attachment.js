@@ -70,7 +70,7 @@ export const buildOpenInlineAttachmentElement = (element) =>
  */
 const buildOpenOutlinkAttachmentElement = (element) =>
   htmlFor(element)`
-     <a class="i-amphtml-story-page-open-attachment"
+     <a class="i-amphtml-story-page-open-attachment i-amphtml-story-outlink-page-attachment"
          role="button">
        <span class="i-amphtml-story-outlink-page-attachment-arrow">
          <span class="i-amphtml-story-outlink-page-open-attachment-bar-left"></span>
