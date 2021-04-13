@@ -284,7 +284,7 @@ function storeExperimentBuildToWorkspace(exp) {
 /**
  * Replaces URLS in HTML files, compresses and stores nomodule build in CI artifacts.
  */
-async function storeBuildToArtifacts() {
+async function processAndStoreBuildToArtifacts() {
   await replaceUrls('test/manual');
   await replaceUrls('examples');
 
@@ -317,5 +317,5 @@ module.exports = {
   storeNomoduleBuildToWorkspace,
   storeModuleBuildToWorkspace,
   storeExperimentBuildToWorkspace,
-  storeBuildToArtifacts,
+  processAndStoreBuildToArtifacts,
 };

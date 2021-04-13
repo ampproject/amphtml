@@ -23,7 +23,7 @@ const atob = require('atob');
 const {
   abortTimedJob,
   skipDependentJobs,
-  storeBuildToArtifacts,
+  processAndStoreBuildToArtifacts,
   startTimer,
   timedExecWithError,
   timedExecOrDie,
@@ -65,7 +65,7 @@ async function prBuildWorkflow() {
       return abortTimedJob(jobName, startTime);
     }
     timedExecOrDie('amp storybook --build');
-    await storeBuildToArtifacts();
+    await processAndStoreBuildToArtifacts();
     await signalPrDeployUpload('success');
   } else {
     await signalPrDeployUpload('skipped');
