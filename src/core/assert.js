@@ -19,6 +19,7 @@ import {
   elementStringOrPassThru,
 } from './error-message-helpers';
 import {isMinifiedMode} from './minified-mode';
+import {remove} from './types/array';
 
 /**
  * Throws an error if the second argument isn't trueish.
@@ -72,7 +73,7 @@ function assertion(
   }
 
   const error = new Error(message);
-  error.messageArray = messageArray.filter((x) => x !== '');
+  error.messageArray = remove(messageArray, (x) => x !== '');
   throw error;
 }
 
