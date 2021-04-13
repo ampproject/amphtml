@@ -53,3 +53,29 @@ var RendererFunctionResponseType;
  * @typedef {function(!JsonObject):(?RendererFunctionResponseType|!Promise<?RendererFunctionResponseType>)}
  */
 var RendererFunctionType;
+
+/** @const */
+var IframeEmbedDef = {};
+
+/**
+ * @typedef {{
+ *   allow: (string|undefined),
+ *   allowFullScreen: (boolean|undefined),
+ *   allowTransparency: (boolean|undefined),
+ *   loading: (string),
+ *   manageMessageHandler: (function({current: HTMLIFrameElement}, function):function|undefined),
+ *   name: (string|undefined),
+ *   onReadyState: (function(string)|undefined),
+ *   ready: (boolean|undefined),
+ *   sandbox: (string|undefined),
+ *   src: (string|undefined),
+ *   title: (string|undefined),
+ * }}
+ */
+IframeEmbedDef.Props;
+
+/** @constructor */
+IframeEmbedDef.Api = function () {};
+
+/** @type {string} */
+IframeEmbedDef.Api.prototype.readyState;
