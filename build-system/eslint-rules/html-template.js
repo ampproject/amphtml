@@ -207,15 +207,15 @@ function create(context) {
         // htmlFor(...)`...` to html`...`
         yield fixer.replaceText(node.tag, helperConstName);
 
-        // Prettier formats this in a silly way unless the quasi's content
-        // starts and ends with newlines.
+        // Prettier formats this in a silly way unless the quasi's content is
+        // wrapped in whitespace.
         const {quasi} = node;
         const quasiText = context.getSourceCode().getText(quasi);
-        if (!/^`\s*\n/.test(quasiText)) {
-          yield fixer.replaceTextRange([quasi.start, quasi.start + 1], '`\n');
+        if (!/^`[\s\n]+/.test(quasiText)) {
+          yield fixer.replaceTextRange([quasi.start, quasi.start + 1], '` ');
         }
-        if (!/\n\s*`$/.test(quasiText)) {
-          yield fixer.replaceTextRange([quasi.end - 1, quasi.end], '\n`');
+        if (!/[\s\n]+`$/.test(quasiText)) {
+          yield fixer.replaceTextRange([quasi.end - 1, quasi.end], ' `');
         }
       },
     });
