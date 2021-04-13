@@ -532,7 +532,7 @@
   {
     "name": "amp-stream-gallery",
     "version": ["0.1", "1.0"],
-    "latestVersion": "0.1",
+    "latestVersion": "1.0",
     "options": {"hasCss": true}
   },
   {
