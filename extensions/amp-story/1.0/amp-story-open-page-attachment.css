@@ -280,7 +280,6 @@
   max-width: calc(100% - 64px) !important;
   border-radius: 30px !important;
   background: var(--i-amphtml-outlink-cta-background-color) !important;
-  color: var(--i-amphtml-outlink-cta-text-color) !important;
   place-items: center !important;
 }
 

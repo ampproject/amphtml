@@ -71,8 +71,8 @@ const buildOpenOutlinkAttachmentElement = (element) =>
      <a class="i-amphtml-story-page-open-attachment"
          role="button">
        <span class="i-amphtml-story-outlink-page-attachment-arrow">
-         <span class="i-amphtml-story-outlink-page-open-attachment-bar-left" ref="barLeft"></span>
-         <span class="i-amphtml-story-outlink-page-open-attachment-bar-right" ref="barRight"></span>
+         <span class="i-amphtml-story-outlink-page-open-attachment-bar-left"></span>
+         <span class="i-amphtml-story-outlink-page-open-attachment-bar-right"></span>
        </span>
        <div class="i-amphtml-story-outlink-page-attachment-outlink-chip" ref="chipEl">
         <div class="i-amphtml-story-outlink-page-attachment-label" ref="ctaLabelEl"></div>

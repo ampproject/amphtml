@@ -82,13 +82,11 @@ import {getLocalizationService} from './amp-story-localization-service';
 import {getLogEntries} from './logging';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {getMode} from '../../../src/mode';
-
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen} from '../../../src/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
-
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
 import {toArray} from '../../../src/core/types/array';
