@@ -54,9 +54,7 @@ module.exports = {
         './preact/base-element.js',
         './preact/slot.js',
         './core/contextprops.js',
-        './context/subscriber.js',
         './context/node.js',
-        './context/prop.js',
         './context/scheduler.js',
         './context/values.js',
         // TEMPORARY, follow tracking issue #33631

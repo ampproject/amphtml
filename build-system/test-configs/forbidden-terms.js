@@ -127,6 +127,7 @@ const forbiddenTermsGlobal = {
     allowlist: [
       'build-system/common/check-package-manager.js',
       'build-system/common/logging.js',
+      'build-system/task-runner/cli-runner.js',
       'src/purifier/noop.js',
       'validator/js/engine/validator-in-browser.js',
       'validator/js/engine/validator.js',
@@ -137,9 +138,9 @@ const forbiddenTermsGlobal = {
     message: realiasGetMode,
     allowlist: ['src/mode-object.js', 'src/iframe-attributes.js'],
   },
-  '(?:var|let|const) +IS_DEV +=': {
+  '(?:var|let|const) +IS_FORTESTING +=': {
     message:
-      'IS_DEV local var only allowed in mode.js and ' +
+      'IS_FORTESTING local var only allowed in mode.js and ' +
       'dist.3p/current/integration.js',
     allowlist: ['src/mode.js'],
   },
@@ -1116,7 +1117,6 @@ const forbiddenTermsSrcInclusive = {
       'src/iframe-helper.js',
       'src/service/mutator-impl.js',
       'src/service/resources-impl.js',
-      'src/service/video-manager-impl.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
       'extensions/amp-script/0.1/amp-script.js',

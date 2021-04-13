@@ -41,7 +41,7 @@ import {
 } from './utils';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
-import {isArray} from '../../../src/types';
+import {isArray} from '../../../src/core/types/array';
 import {parseJson} from '../../../src/json';
 import {renderAsElement} from './simple-template';
 
