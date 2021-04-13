@@ -238,6 +238,11 @@
 }
 
 /** For amp-story-outlink-page-attachment-v2 experiment elements. */
+.i-amphtml-story-page-open-attachment {
+  --i-amphtml-outlink-cta-background-color: white !important;
+  --i-amphtml-outlink-cta-text-color: black !important;
+}
+
 .i-amphtml-story-outlink-page-attachment-arrow {
   display: block !important;
   height: 32px !important;
@@ -246,8 +251,12 @@
   position: relative !important;
 }
 
+.i-amphtml-story-outlink-page-open-attachment-bar-left,
+.i-amphtml-story-outlink-page-open-attachment-bar-right {
+  background-color: var(--i-amphtml-outlink-cta-background-color) !important;
+}
+
 .i-amphtml-story-outlink-page-open-attachment-bar-left {
-  background: white !important;
   left: 6px !important;
   animation: open-attachment-bar-left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
 }
@@ -258,7 +267,6 @@
 }
 
 .i-amphtml-story-outlink-page-open-attachment-bar-right {
-  background: white !important;
   right: 6px !important;
   animation: open-attachment-bar-right 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
 }
@@ -271,7 +279,7 @@
   height: 16px !important;
   max-width: calc(100% - 64px) !important;
   border-radius: 30px !important;
-  background: white !important;
+  background: var(--i-amphtml-outlink-cta-background-color) !important;
   color: var(--cta-accent-color, black) !important;
   place-items: center !important;
 }
@@ -302,6 +310,7 @@
   max-width: 210px !important;
   padding-inline-start: 6px !important;
   padding-inline-end: 8px !important;
+  color: var(--i-amphtml-outlink-cta-text-color) !important;
 }
 
 [theme="dark"] .i-amphtml-story-outlink-page-attachment-label {

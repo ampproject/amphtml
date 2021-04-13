@@ -157,7 +157,7 @@ const renderOutlinkPageAttachmentUI = (
   }
 
   // Getting elements
-  let {barLeft, barRight, chipEl, ctaLabelEl} = htmlRefs(openAttachmentEl);
+  let {chipEl, ctaLabelEl} = htmlRefs(openAttachmentEl);
   let labelTextColor = contrastColor;
 
   // Setting theme
@@ -173,34 +173,15 @@ const renderOutlinkPageAttachmentUI = (
   if (themeAttribute === "custom") {
     if (attachmentEl.getAttribute('cta-accent-element') === "background") {
       labelTextColor = contrastColor;
-      setImportantStyles(ctaLabelEl, {
-        'color': contrastColor
-      });
-      setImportantStyles(chipEl, {
-        'background-color': accentColor
-      });
-      setImportantStyles(barLeft, {
-        'background-color': accentColor
-      });
-      setImportantStyles(barRight, {
-        'background-color': accentColor
-      });
+      openAttachmentEl.style.cssText = '--i-amphtml-outlink-cta-background-color: ' + accentColor; // ??
+      openAttachmentEl.style.setProperty('--i-amphtml-outlink-cta-text-color', contrastColor); // ??
     } else {
       labelTextColor = accentColor;
-      setImportantStyles(ctaLabelEl, {
-        'color': accentColor
-      });
-      setImportantStyles(chipEl, {
-        'background-color': contrastColor
-      });
-      setImportantStyles(barLeft, {
-        'background-color': contrastColor
-      });
-      setImportantStyles(barRight, {
-        'background-color': contrastColor
-      });
+      openAttachmentEl.style.setProperty('--i-amphtml-outlink-cta-background-color', contrastColor); // ??
+      openAttachmentEl.style.setProperty('--i-amphtml-outlink-cta-text-color', accentColor); // ??
     }
   }
+  console.log(labelTextColor);
 
   // Appending text & aria-label.
   const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
@@ -229,7 +210,19 @@ const renderOutlinkPageAttachmentUI = (
       });
       chipEl.prepend(ctaImgEl);
     } else {
-      chipEl.prepend(buildLinkIconSvg(win, labelTextColor));
+      const ctaLinkImageEl = win.document.createElement('div');
+      const linkImage = htmlFor(ctaLinkImageEl)`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+          <rect stroke-width="0" width="24" height="24" fill-opacity="0.1" rx="12"/>
+          <path stroke-width=".25" d="M9.63 18s0 0 0 0c.98 0 1.9-.38 2.58-1.07l1.47-1.48a.55.55 0 000-.77.55.55 0 00-.77 0l-1.47 1.48a2.53 2.53 0 01-3.6 0 2.53 2.53 0 010-3.6l1.48-1.48a.54.54 0 000-.77.54.54 0 00-.77 0L7.07 11.8a3.62 3.62 0 000 5.14A3.6 3.6 0 009.63 18zM11.09 9.31l1.47-1.48a2.53 2.53 0 013.6 0 2.53 2.53 0 010 3.6l-1.48 1.48a.54.54 0 000 .77.55.55 0 00.77 0l1.48-1.47a3.62 3.62 0 000-5.14A3.61 3.61 0 0014.36 6s0 0 0 0c-.98 0-1.9.38-2.58 1.07l-1.47 1.48a.55.55 0 000 .77c.22.21.57.21.78 0z"/>
+          <path stroke-width=".25" d="M14.63 9.37a.55.55 0 00-.78 0l-4.48 4.48a.55.55 0 00.39.94c.13 0 .28-.06.38-.17l4.48-4.48a.54.54 0 000-.77z"/>
+        </svg>`;
+
+      chipEl.prepend(linkImage);
+
+      setImportantStyles(linkImage, {
+        'fill': labelTextColor,
+        'stroke': labelTextColor,
+      });
     }
   }
 
@@ -291,44 +284,6 @@ const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
   }
 
   return openAttachmentEl;
-};
-
-/**
- * Generates link icon SVG based on CTA button theme colors.
- * @param {!Window} win
- * @param {!String} linkIconColor
- * @return {!Element}
- */
- export const buildLinkIconSvg = (win, linkIconColor) => {
-  const linkSvg = win.document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  linkSvg.setAttribute("width", "24");
-  linkSvg.setAttribute("height", "24");
-  linkSvg.setAttribute("fill", "none");
-
-  let linkImgBackground = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-  linkImgBackground.setAttribute("width", "24");
-  linkImgBackground.setAttribute("height", "24");
-  linkImgBackground.setAttribute("fill", linkIconColor);
-  linkImgBackground.setAttribute("fill-opacity", "0.1");
-  linkImgBackground.setAttribute("rx", "12");
-
-  let linkStroke1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  linkStroke1.setAttribute("fill", linkIconColor);
-  linkStroke1.setAttribute("stroke", linkIconColor);
-  linkStroke1.setAttribute("stroke-width", ".25");
-  linkStroke1.setAttribute("d", "M9.63 18s0 0 0 0c.98 0 1.9-.38 2.58-1.07l1.47-1.48a.55.55 0 000-.77.55.55 0 00-.77 0l-1.47 1.48a2.53 2.53 0 01-3.6 0 2.53 2.53 0 010-3.6l1.48-1.48a.54.54 0 000-.77.54.54 0 00-.77 0L7.07 11.8a3.62 3.62 0 000 5.14A3.6 3.6 0 009.63 18zM11.09 9.31l1.47-1.48a2.53 2.53 0 013.6 0 2.53 2.53 0 010 3.6l-1.48 1.48a.54.54 0 000 .77.55.55 0 00.77 0l1.48-1.47a3.62 3.62 0 000-5.14A3.61 3.61 0 0014.36 6s0 0 0 0c-.98 0-1.9.38-2.58 1.07l-1.47 1.48a.55.55 0 000 .77c.22.21.57.21.78 0z");
-
-  let linkStroke2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  linkStroke2.setAttribute("fill", linkIconColor);
-  linkStroke2.setAttribute("stroke", linkIconColor);
-  linkStroke2.setAttribute("stroke-width", ".25");
-  linkStroke2.setAttribute("d", "M14.63 9.37a.55.55 0 00-.78 0l-4.48 4.48a.55.55 0 00.39.94c.13 0 .28-.06.38-.17l4.48-4.48a.54.54 0 000-.77z");
-
-  linkSvg.appendChild(linkImgBackground);
-  linkSvg.appendChild(linkStroke1);
-  linkSvg.appendChild(linkStroke2);
-
-  return linkSvg;
 };
 
 /**
