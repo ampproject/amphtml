@@ -211,10 +211,10 @@ function create(context) {
         // wrapped in whitespace.
         const {quasi} = node;
         const quasiText = context.getSourceCode().getText(quasi);
-        if (!/^`[\s\n]+/.test(quasiText)) {
+        if (!/^`[\s\n]/.test(quasiText)) {
           yield fixer.replaceTextRange([quasi.start, quasi.start + 1], '` ');
         }
-        if (!/[\s\n]+`$/.test(quasiText)) {
+        if (!/[\s\n]`$/.test(quasiText)) {
           yield fixer.replaceTextRange([quasi.end - 1, quasi.end], ' `');
         }
       },
