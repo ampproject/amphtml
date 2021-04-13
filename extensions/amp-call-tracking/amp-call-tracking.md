@@ -3,7 +3,7 @@ $category@: ads-analytics
 formats:
   - websites
 teaser:
-  text: Displays GL Transmission Format (gITF) 3D models.
+  text: Dynamically replaces a phone number in a hyperlink to enable call tracking. 
 ---
 
 <!---
