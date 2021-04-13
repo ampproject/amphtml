@@ -83,17 +83,17 @@ async function maybeUpdateSubpackages(taskSourceFilePath) {
 /**
  * Runs an AMP task with logging and timing after installing its subpackages.
  * @param {string} taskName
- * @param {string} taskSourceFilePath
+ * @param {string} taskSourceFileName
  * @param {Function()} taskFunc
  * @return {Promise<void>}
  */
-async function runTask(taskName, taskSourceFilePath, taskFunc) {
+async function runTask(taskName, taskSourceFileName, taskFunc) {
   const taskFile = path.relative(os.homedir(), 'amp.js');
   log('Using task file', magenta(taskFile));
   const start = Date.now();
   try {
     log(`Starting '${cyan(taskName)}'...`);
-    await maybeUpdateSubpackages(taskSourceFilePath);
+    await maybeUpdateSubpackages(getTaskSourceFilePath(taskSourceFileName));
     await taskFunc();
     log('Finished', `'${cyan(taskName)}'`, 'after', magenta(getTime(start)));
   } catch (err) {
@@ -101,6 +101,60 @@ async function runTask(taskName, taskSourceFilePath, taskFunc) {
     log(err);
     process.exit(1);
   }
+}
+
+/**
+ * Prints an error if the task file and / or function are invalid, and exits.
+ * @param {string} taskSourceFileName
+ * @param {string?} taskFuncName
+ */
+function handleInvalidTaskError(taskSourceFileName, taskFuncName) {
+  log(
+    red('ERROR:'),
+    'Could not find' + (taskFuncName ? ` ${cyan(taskFuncName + '()')} in` : ''),
+    cyan(path.join('build-system', 'tasks', taskSourceFileName)) + '.'
+  );
+  log(
+    '⤷ Please check the arguments to',
+    cyan('createTask()'),
+    'in',
+    cyan('amp.js') + '.'
+  );
+  process.exit(1);
+}
+
+/**
+ * Returns a task's source file path after making sure it is either a valid JS
+ * file or a valid dir.
+ * @param {string} taskSourceFileName
+ * @return {string}
+ */
+function getTaskSourceFilePath(taskSourceFileName) {
+  const tasksDir = path.join(__dirname, '..', 'tasks');
+  const taskSourceFilePath = path.join(tasksDir, taskSourceFileName);
+  const isValidSourceFilePath =
+    fs.pathExistsSync(`${taskSourceFilePath}.js`) || // Task lives in a JS file.
+    fs.pathExistsSync(taskSourceFilePath); // Task lives in a directory.
+  if (!isValidSourceFilePath) {
+    handleInvalidTaskError(taskSourceFileName);
+  }
+  return taskSourceFilePath;
+}
+
+/**
+ * Returns a task function after making sure it is valid.
+ * @param {string} taskSourceFileName
+ * @param {string} taskFuncName
+ * @return {Function():any}
+ */
+function getTaskFunc(taskSourceFileName, taskFuncName) {
+  const taskSourceFilePath = getTaskSourceFilePath(taskSourceFileName);
+  const taskFunc = require(taskSourceFilePath)[taskFuncName];
+  const isValidFunc = typeof taskFunc == 'function';
+  if (!isValidFunc) {
+    handleInvalidTaskError(taskSourceFileName, taskFuncName);
+  }
+  return taskFunc;
 }
 
 /**
@@ -118,8 +172,6 @@ function createTask(
   taskFuncName = taskName,
   taskSourceFileName = taskName
 ) {
-  const tasksDir = path.join(__dirname, '..', 'tasks');
-  const taskSourceFilePath = path.join(tasksDir, taskSourceFileName);
   const isInvokedTask = argv._.includes(taskName); // `amp <task>`
   const isDefaultTask =
     argv._.length === 0 && taskName == 'default' && !isHelpTask; // `amp`
@@ -127,7 +179,7 @@ function createTask(
     (isInvokedTask || isDefaultTask) && argv.hasOwnProperty('help'); // `amp <task> --help`
 
   if (isHelpTask) {
-    const taskFunc = require(taskSourceFilePath)[taskFuncName];
+    const taskFunc = getTaskFunc(taskSourceFileName, taskFuncName);
     const task = commander.command(cyan(taskName));
     task.description(taskFunc.description);
   }
@@ -136,7 +188,7 @@ function createTask(
       startAtRepoRoot();
       updatePackages();
     }
-    const taskFunc = require(taskSourceFilePath)[taskFuncName];
+    const taskFunc = getTaskFunc(taskSourceFileName, taskFuncName);
     const task = commander.command(taskName, {isDefault: isDefaultTask});
     task.description(green(taskFunc.description));
     task.allowUnknownOption(); // Fall through to validateUsage()
@@ -147,7 +199,7 @@ function createTask(
     }
     task.action(async () => {
       validateUsage(task, taskName, taskFunc);
-      await runTask(taskName, taskSourceFilePath, taskFunc);
+      await runTask(taskName, taskSourceFileName, taskFunc);
     });
   }
 }
