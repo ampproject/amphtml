@@ -19,6 +19,7 @@ import {
   elementStringOrPassThru,
 } from './error-message-helpers';
 import {isMinifiedMode} from './minified-mode';
+import {remove} from './types/array';
 
 /**
  * Throws an error if the second argument isn't trueish.
@@ -57,7 +58,6 @@ function assertion(
   // const messageArgs = Array.prototype.slice.call(arguments, 3);
   // Index at which message args start
   let i = 3;
-  let firstElement;
 
   // Substitute provided values into format string in message
   const splitMessage = opt_message.split('%s');
@@ -68,19 +68,12 @@ function assertion(
     const subValue = arguments[i++];
     const nextConstant = splitMessage.shift();
 
-    // If an element is provided, add it to the error object
-    if (!firstElement && subValue?.tagName) {
-      // Here we want the actual element
-      firstElement = subValue;
-    }
-
     message += elementStringOrPassThru(subValue) + nextConstant;
     messageArray.push(subValue, nextConstant.trim());
   }
 
   const error = new Error(message);
-  error.messageArray = messageArray.filter((x) => x !== '');
-  error.associatedElement = firstElement;
+  error.messageArray = remove(messageArray, (x) => x !== '');
   throw error;
 }
 

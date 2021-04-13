@@ -862,8 +862,7 @@ export class Resource {
         'currently: ',
         this.state_
       );
-      err.associatedElement = this.element;
-      reportError(err);
+      reportError(err, this.element);
       return Promise.reject(err);
     }
 
