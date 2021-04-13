@@ -68,19 +68,12 @@ function assertion(
     const subValue = arguments[i++];
     const nextConstant = splitMessage.shift();
 
-    // If an element is provided, add it to the error object
-    if (!firstElement && subValue?.tagName) {
-      // Here we want the actual element
-      firstElement = subValue;
-    }
-
     message += elementStringOrPassThru(subValue) + nextConstant;
     messageArray.push(subValue, nextConstant.trim());
   }
 
   const error = new Error(message);
   error.messageArray = messageArray.filter((x) => x !== '');
-  error.associatedElement = firstElement;
   throw error;
 }
 
