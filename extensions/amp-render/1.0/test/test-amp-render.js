@@ -113,9 +113,12 @@ describes.realWin(
     });
 
     it('renders json from src', async () => {
-      env.sandbox
-        .stub(BatchedJsonModule, 'batchFetchJsonFor')
-        .resolves({name: 'Joe'});
+      const fetchStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+
+      fetchStub.resolves({name: 'Joe'});
 
       element = html`
         <amp-render
@@ -131,6 +134,7 @@ describes.realWin(
 
       const text = await getRenderedData();
       expect(text).to.equal('Hello Joe');
+      expect(fetchStub).to.have.been.calledOnce;
     });
 
     it('renders from amp-script', async () => {
@@ -183,15 +187,12 @@ describes.realWin(
       expect(text).to.equal('Hello ');
     });
 
-    it.only('refreshes', async () => {
+    it('re-fetches json on refresh action', async () => {
       const fetchJsonStub = env.sandbox.stub(
         BatchedJsonModule,
         'batchFetchJsonFor'
       );
       fetchJsonStub.resolves({name: 'Joe'});
-
-      fetchJsonStub.onCall(0).resolves({name: 'Joe'});
-      fetchJsonStub.onCall(1).resolves({name: 'Mike'});
 
       element = html`
         <amp-render
@@ -210,17 +211,11 @@ describes.realWin(
       doc.body.appendChild(element);
       doc.body.appendChild(button);
 
-      // const api = await element.getApi();
-      // console.log(Object.keys(api));
-      // const refreshStub = env.sandbox.stub(api, 'refresh');
-
-      let text = await getRenderedData();
-      expect(text).to.equal('Hello Joe');
+      await getRenderedData();
 
       element.enqueAction(invocation('refresh'));
-      text = await getRenderedData();
+      await getRenderedData();
       expect(fetchJsonStub).to.have.been.calledTwice;
-      // expect(text).to.equal('Hello Mike');
     });
   }
 );
