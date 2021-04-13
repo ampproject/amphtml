@@ -29,7 +29,7 @@ export const buildGtagConfig = (gtagId) => ({
   },
   'triggers': {
     'storyPageCount': {
-      'on': 'pageview',
+      'on': 'visible',
       'vars': {
         'event_name': 'custom',
         'event_action': 'story_page_count',
