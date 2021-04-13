@@ -18,8 +18,8 @@ import {
   USER_ERROR_SENTINEL,
   elementStringOrPassThru,
 } from './error-message-helpers';
+import {isArray, remove} from './types/array';
 import {isMinifiedMode} from './minified-mode';
-import {remove} from './types/array';
 
 /**
  * Throws an error if the second argument isn't trueish.
@@ -35,6 +35,7 @@ import {remove} from './types/array';
  * @param {string} sentinel
  * @param {T} shouldBeTruthy
  * @param {string} opt_message
+ * @param opt_messageArray
  * @param {...*} var_args Arguments substituted into %s in the message
  * @return {T}
  * @throws {Error} when shouldBeTruthy is not truthy.
@@ -42,30 +43,35 @@ import {remove} from './types/array';
 function assertion(
   sentinel,
   shouldBeTruthy,
-  opt_message = 'Assertion failed',
+  opt_messageArray = 'Assertion failed',
   var_args
 ) {
   if (shouldBeTruthy) {
     return shouldBeTruthy;
   }
 
+  // TODO(#33631): Eventually allow only the array format
+  const messageArgs = isArray(opt_messageArray)
+    ? opt_messageArray
+    : // opt_messageArray instead contains the message format string; everything
+      // after that belongs to the actual messageArray.
+      Array.prototype.slice.call(arguments, 2);
+  let messageFmt = messageArgs[0];
+
   // Include the sentinel string if provided and not already present
-  if (sentinel && !opt_message.includes(sentinel)) {
-    opt_message += sentinel;
+  if (sentinel && !messageFmt.includes(sentinel)) {
+    messageFmt += sentinel;
   }
 
-  // Skip the first 3 arguments to isolate format params
-  // const messageArgs = Array.prototype.slice.call(arguments, 3);
-  // Index at which message args start
-  let i = 3;
-
   // Substitute provided values into format string in message
-  const splitMessage = opt_message.split('%s');
+  const splitMessage = messageFmt.split('%s');
   let message = splitMessage.shift();
-  const messageArray = [message];
 
+  const messageArray = [];
+  // Index at which message args start
+  let i = 1;
   while (splitMessage.length) {
-    const subValue = arguments[i++];
+    const subValue = messageArgs[i++];
     const nextConstant = splitMessage.shift();
 
     message += elementStringOrPassThru(subValue) + nextConstant;
