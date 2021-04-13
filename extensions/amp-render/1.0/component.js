@@ -41,7 +41,7 @@ const DEFAULT_GET_JSON = (url) => {
 
 /**
  * @param {!RenderDef.Props} props
- * @param ref
+ * @param {{current: (!RenderDef.RenderApi|null)}} ref
  * @return {PreactDef.Renderable}
  */
 export function RenderWithRef(
