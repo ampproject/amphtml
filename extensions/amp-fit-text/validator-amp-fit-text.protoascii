@@ -14,23 +14,27 @@
 # limitations under the license.
 #
 
-tags: {  # amp-fit-text in websites
+tags: {  # amp-fit-text 1.0
   html_format: AMP
   tag_name: "SCRIPT"
+  satisfies: "amp-fit-text 1.0"
+  excludes: "amp-fit-text 0.1"
   extension_spec: {
     name: "amp-fit-text"
-    version: "0.1"
+    version_name: "v1.0"
     version: "1.0"
-    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # amp-fit-text in ads
+tags: {  # amp-fit-text 0.1 and latest
+  html_format: AMP
   html_format: AMP4ADS
   tag_name: "SCRIPT"
-  spec_name: "SCRIPT[custom-element=amp-fit-text] (AMP4ADS)"
+  satisfies: "amp-fit-text 0.1"
+  excludes: "amp-fit-text 1.0"
   extension_spec: {
     name: "amp-fit-text"
+    version_name: "v0.1"
     version: "0.1"
     version: "latest"
     requires_usage: EXEMPTED
@@ -45,6 +49,7 @@ tags: {  # amp-fit-text (AMP4EMAIL)
   extension_spec: {
     name: "amp-fit-text"
     # AMP4EMAIL doesn't allow version: "latest".
+    version_name: "v0.1"
     version: "0.1"
     requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
