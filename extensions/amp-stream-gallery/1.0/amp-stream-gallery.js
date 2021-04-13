@@ -21,6 +21,7 @@ import {CSS as GALLERY_CSS} from './stream-gallery.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {StreamGallery} from './stream-gallery';
+import {cloneElement} from '../../../src/preact';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {dispatchCustomEvent} from '../../../src/dom';
@@ -64,19 +65,12 @@ class AmpStreamGallery extends PreactBaseElement {
 
   /** @override */
   updatePropsForRendering(props) {
-    if (props['arrowPrev']) {
-      const Comp = props['arrowPrev'];
-      props['arrowPrevAs'] = (props) => {
-        Comp.props = {...Comp.props, ...props};
-        return Comp;
-      };
+    const {arrowPrev, arrowNext} = props;
+    if (arrowPrev) {
+      props['arrowPrevAs'] = (props) => cloneElement(arrowPrev, props);
     }
-    if (props['arrowNext']) {
-      const Comp = props['arrowNext'];
-      props['arrowNextAs'] = (props) => {
-        Comp.props = {...Comp.props, ...props};
-        return Comp;
-      };
+    if (arrowNext) {
+      props['arrowNextAs'] = (props) => cloneElement(arrowNext, props);
     }
   }
 }
