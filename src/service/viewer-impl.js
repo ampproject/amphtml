@@ -36,7 +36,7 @@ import {
 } from '../url';
 import {isIframed} from '../dom';
 import {listen} from '../event-helper';
-import {map} from '../utils/object';
+import {map} from '../core/types/object';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
 import {urls} from '../config';

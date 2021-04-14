@@ -20,7 +20,7 @@ import {asyncStringReplace} from '../../../src/core/types/string';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {cookieReader} from './cookie-reader';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   getActiveExperimentBranches,
   getExperimentBranch,

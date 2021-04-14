@@ -43,7 +43,7 @@ import {Expander} from './url-expander/expander';
 import {Services} from '../services';
 import {WindowInterface} from '../window-interface';
 import {getTrackImpressionPromise} from '../impression.js';
-import {hasOwn} from '../utils/object';
+import {hasOwn} from '../core/types/object';
 import {internalRuntimeVersion} from '../internal-version';
 
 /** @private @const {string} */

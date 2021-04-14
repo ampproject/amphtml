@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/utils/object';
-import {isArray} from '../../../src/core/types';
-import {isObject} from '../../../src/types';
+import {dict} from '../../../src/core/types/object';
+import {isArray, isObject} from '../../../src/core/types';
+
 import {user} from '../../../src/log';
 
 /** @const */

@@ -15,8 +15,8 @@
  */
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
-import {isArray} from '../../../src/core/types';
-import {isObject} from '../../../src/types';
+import {isArray, isObject} from '../../../src/core/types';
+
 import {isSecureUrlDeprecated} from '../../../src/url';
 import {parseExtensionUrl} from '../../../src/service/extension-script';
 import {parseJson} from '../../../src/json';

@@ -20,7 +20,7 @@ import {PositionObserverFidelity} from '../../../src/service/position-observer/p
 import {Services} from '../../../src/services';
 import {VisibilityState} from '../../../src/visibility-state';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getAmpdoc} from '../../../src/service';
 import {installPositionObserverServiceForDoc} from '../../../src/service/position-observer/position-observer-impl';
 import {installStylesForDoc} from '../../../src/style-installer';

@@ -15,7 +15,7 @@
  */
 
 import {IntegrationAmpContext} from './ampcontext-integration';
-import {dict} from '../src/utils/object.js';
+import {dict} from '../src/core/types/object';
 import {endsWith} from '../src/core/types/string';
 import {getAmpConfig, getEmbedType, getLocation} from './frame-metadata';
 import {getSourceUrl, isProxyOrigin, parseUrlDeprecated} from '../src/url';

@@ -19,7 +19,7 @@ import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base'
 import {Services} from '../../../src/services';
 import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
 import {devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {isArray} from '../../../src/core/types';
 
 /**

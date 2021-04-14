@@ -17,7 +17,7 @@ import {LocalizedStringId} from '../../../src/localized-strings'; // eslint-disa
 import {createElementWithAttributes} from '../../../src/dom';
 import {devAssert} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';
-import {hasOwn} from '../../../src/utils/object';
+import {hasOwn} from '../../../src/core/types/object';
 import {isArray} from '../../../src/core/types';
 
 /**

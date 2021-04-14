@@ -21,7 +21,7 @@ import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {getMode} from '../../../src/mode';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject} from '../../../src/types';
+import {isObject} from '../../../src/core/types';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';

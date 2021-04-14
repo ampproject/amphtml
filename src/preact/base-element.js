@@ -42,7 +42,7 @@ import {
 } from '../dom';
 import {dashToCamelCase} from '../core/types/string';
 import {devAssert} from '../log';
-import {dict, hasOwn, map} from '../utils/object';
+import {dict, hasOwn, map} from '../core/types/object';
 import {getDate} from '../utils/date';
 import {getMode} from '../mode';
 import {hydrate, render} from './index';
