@@ -47,23 +47,6 @@ export function isFiniteNumber(value) {
 }
 
 /**
- * Checks whether `s` is a valid value of `enumObj`.
- *
- * @param {!Object<T>} enumObj
- * @param {T} s
- * @return {boolean}
- * @template T
- */
-export function isEnumValue(enumObj, s) {
-  for (const k in enumObj) {
-    if (enumObj[k] === s) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
  * Externs declare that access `defaultView` from `document` or
  * `ownerDocument` is of type `(Window|null)` but most of our parameter types
  * assume that it is never null. This is OK in practice as we ever only get
