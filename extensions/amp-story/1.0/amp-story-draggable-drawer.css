@@ -151,13 +151,13 @@ amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-dragg
 }
 
 amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-spacer {
+  /* Removes default button background. */
+  background: none !important;
   /* This placeholder element takes up all available space when drawer-content is less than 80vh. */
   display: block !important;
   height: calc(var(--story-page-vh) * 100) !important;
   /* Sets the minimum size of the placeholder element */
   min-height: calc(var(--story-page-vh) * 20) !important;
-  /* removes default button background */
-  background: none !important;
 }
 
 amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-content {
@@ -169,4 +169,4 @@ amp-story:not([desktop]) .amp-story-page-attachment-ui-v2.i-amphtml-story-dragga
   padding-top: 0 !important;
   background: none !important;
 }
- */
+
