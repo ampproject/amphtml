@@ -24,7 +24,6 @@ const {
 } = require('./functional-test-controller');
 const {ControllerPromise} = require('./controller-promise');
 const {dirname, join} = require('path');
-const {promisify} = require('util');
 
 /**
  * For a list of all possible key strings, see

@@ -79,12 +79,14 @@ class ControllerPromise {
  * Wrap the given wait function with the given mutation function,
  * while still allowing it to be mutated again in the future by
  * the inner opt_mutate function.
- * @param {function(TYPE1, function(TYPE1): ?TYPE1): Promise<TYPE3>} wait
- * @param {function(TYPE1): TYPE1} mutate
- * @return {function(function(TYPE1): ?TYPE1, function(TYPE1): TYPE2): Promise<TYPE3>}
- * @template TYPE1
- * @template TYPE2
- * @template TYPE3
+ * @param {function(CONDITION, function(VALUE): ?DERIVED): Promise<RES>} wait
+ * @param {function(VALUE): MUTANT} mutate
+ * @return {function(CONDITION, function(MUTANT): ?DERIVED): Promise<RES>}
+ * @template CONDITION
+ * @template MUTANT
+ * @template DERIVED
+ * @template VALUE
+ * @template RES
  */
 function wrapWait(wait, mutate) {
   return (condition, opt_mutate) => {
