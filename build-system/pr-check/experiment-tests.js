@@ -59,15 +59,9 @@ function runExperimentTests(config) {
 }
 
 function pushBuildWorkflow() {
+  // Note that if config is invalid, this build would have been skipped by CircleCI.
   const config = getExperimentConfig(experiment);
-  if (config) {
-    runExperimentTests(config);
-  } else {
-    skipDependentJobs(
-      jobName,
-      `${experiment} is expired, misconfigured, or does not exist`
-    );
-  }
+  runExperimentTests(config);
 }
 
 function prBuildWorkflow() {

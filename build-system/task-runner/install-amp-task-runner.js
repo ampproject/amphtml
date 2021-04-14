@@ -44,9 +44,8 @@ async function installAmpTaskRunner() {
     }
   }
   log(yellow('Installing'), cyan('amp'), yellow('task runner...'));
-  const runnerBinary = path.join(npmBinDir, 'amp');
-  await fs.remove(runnerBinary);
-  await fs.copy(ampCliRunner, runnerBinary);
+  await fs.remove(ampBinary);
+  await fs.copy(ampCliRunner, ampBinary);
   log(green('Installed'), cyan('amp'), green('task runner.\n'));
 }
 
