@@ -150,6 +150,10 @@ amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-dragg
   flex-direction: column !important;
 }
 
+/* amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-container {
+  display: none;
+} */
+
 amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-spacer {
   /* Removes default button background. */
   background: none !important;
