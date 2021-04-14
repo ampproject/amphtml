@@ -111,10 +111,6 @@
   opacity: 0 !important;
 }
 
-:not([desktop]).amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header .i-amphtml-story-draggable-drawer-header-title-and-close:focus-within {
-  opacity: 1 !important;
-}
-
 :not([desktop]).amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header.i-amphtml-story-draggable-drawer-header-stuck .i-amphtml-story-draggable-drawer-header-title-and-close {
   opacity: 1 !important;
 }

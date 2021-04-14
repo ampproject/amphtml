@@ -1,4 +1,4 @@
-/**
+/* /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -156,6 +156,8 @@ amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-dragg
   height: calc(var(--story-page-vh) * 100) !important;
   /* Sets the minimum size of the placeholder element */
   min-height: calc(var(--story-page-vh) * 20) !important;
+  /* removes default button background */
+  background: none !important;
 }
 
 amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-content {
@@ -167,4 +169,4 @@ amp-story:not([desktop]) .amp-story-page-attachment-ui-v2.i-amphtml-story-dragga
   padding-top: 0 !important;
   background: none !important;
 }
-
+ */
