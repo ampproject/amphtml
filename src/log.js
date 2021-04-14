@@ -189,12 +189,87 @@ export class Log {
         });
     });
 
+    // Provide the AMP assertion function, including prepareError_ and error
+    // reporting calls, to each of the derived assertion helpers.
     const assertFn = this.assert.bind(this);
     const wrap = (typeAssertFn) => typeAssertFn.bind(null, assertFn);
+    /**
+     * Throws an error if the first argument isn't an Element.
+     *
+     * For more details see `assert`.
+     *
+     * @function
+     * @param {!AssertionFunction} assertFn
+     * @param {*} shouldBeElement
+     * @param {Array|string=} opt_message The assertion message
+     * @return {!Element} The value of shouldBeTrueish.
+     * @throws {Error} when shouldBeElement is not an Element
+     * @closurePrimitive {asserts.matchesReturn}
+     */
     this.assertElement = wrap(baseAssertElement);
+
+    /**
+     * Throws an error if the first argument isn't a string. The string can
+     * be empty.
+     *
+     * For more details see `assert`.
+     *
+     * @function
+     * @param {!AssertionFunction} assertFn
+     * @param {*} shouldBeString
+     * @param {Array|string=} opt_message The assertion message
+     * @return {string} The string value. Can be an empty string.
+     * @throws {Error} when shouldBeString is not an String
+     * @closurePrimitive {asserts.matchesReturn}
+     */
     this.assertString = wrap(baseAssertString);
+
+    /**
+     * Throws an error if the first argument isn't a number. The allowed values
+     * include `0` and `NaN`.
+     *
+     * For more details see `assert`.
+     *
+     * @function
+     * @param {!AssertionFunction} assertFn
+     * @param {*} shouldBeNumber
+     * @param {Array|string=} opt_message The assertion message
+     * @return {number} The number value. The allowed values include `0`
+     *   and `NaN`.
+     * @throws {Error} when shouldBeNumber is not an Number
+     * @closurePrimitive {asserts.matchesReturn}
+     */
     this.assertNumber = wrap(baseAssertNumber);
+
+    /**
+     * Throws an error if the first argument is not an array.
+     * The array can be empty.
+     *
+     * For more details see `assert`.
+     *
+     * @function
+     * @param {!AssertionFunction} assertFn
+     * @param {*} shouldBeArray
+     * @param {Array|string=} opt_message The assertion message
+     * @return {!Array} The array value
+     * @throws {Error} when shouldBeArray is not an Array
+     * @closurePrimitive {asserts.matchesReturn}
+     */
     this.assertArray = wrap(baseAssertArray);
+
+    /**
+     * Throws an error if the first argument isn't a boolean.
+     *
+     * For more details see `assert`.
+     *
+     * @function
+     * @param {!AssertionFunction} assertFn
+     * @param {*} shouldBeBoolean
+     * @param {Array|string=} opt_message The assertion message
+     * @return {boolean} The boolean value.
+     * @throws {Error} when shouldBeBoolean is not an Boolean
+     * @closurePrimitive {asserts.matchesReturn}
+     */
     this.assertBoolean = wrap(baseAssertBoolean);
   }
 

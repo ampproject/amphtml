@@ -24,23 +24,25 @@ import {isMinifiedMode} from './minified-mode';
 /**
  * Throws an error if the second argument isn't trueish.
  *
- * Supports argument substitution into the message via %s placeholders.
+ * Supports argument substitution into the message via %s placeholders. It does
+ * not yet support array-based "id"-contracted messages.
  *
- * Throws an error object that has two extra properties:
- * - associatedElement: This is the first element provided in the var args.
- *   It can be used for improved display of error messages.
+ * Throws an error object that has one extra properties:
  * - messageArray: The elements of the substituted message as non-stringified
- *   elements in an array. When e.g. passed to console.error this yields
- *   native displays of things like HTML elements.
- * @param {string} sentinel
+ *   elements in an array. When e.g. passed to console.error this applies the
+ *   arguments to the format string.
+ * @typedef {function} AssertionFunction
+ * @param {string} opt_sentinel optional marker to indicate user errors
  * @param {T} shouldBeTruthy
  * @param {string} opt_message
  * @param {...*} var_args Arguments substituted into %s in the message
  * @return {T}
+ * @template {T}
  * @throws {Error} when shouldBeTruthy is not truthy.
+ * @closurePrimitive {asserts.truthy}
  */
 export function baseAssert(
-  sentinel,
+  opt_sentinel,
   shouldBeTruthy,
   opt_message = 'Assertion failed',
   var_args
@@ -50,8 +52,8 @@ export function baseAssert(
   }
 
   // Include the sentinel string if provided and not already present
-  if (sentinel && !opt_message.includes(sentinel)) {
-    opt_message += sentinel;
+  if (opt_sentinel && !opt_message.includes(opt_sentinel)) {
+    opt_message += opt_sentinel;
   }
 
   // Substitute provided values into format string in message
@@ -62,6 +64,8 @@ export function baseAssert(
   );
 
   const error = new Error(message);
+  // This slice ensures inlined calls that pass multiple "undefined" values
+  // don't get picked up in the resulting array.
   error.messageArray = messageArgs.slice(0, i);
   throw error;
 }
@@ -72,12 +76,15 @@ export function baseAssert(
  * It understands array-based "id"-contracted messages.
  *
  * Otherwise creates a sprintf syntax string containing the optional message or the
- * default. An interpolation token is added at the end to include the `subject`.
- * @param {!function} assertFn underlying assertion function to call
- * @param {*} subject
- * @param shouldBeTruthy
+ * default. The `subject` of the assertion is added at the end.
+ *
+ * @param {!AssertionFunction} assertFn underlying assertion function to call
+ * @param {T} subject
+ * @param {*} shouldBeTruthy
  * @param {string} defaultMessage
- * @param {!Array|string=} opt_message
+ * @param {Array|string=} opt_message
+ * @return {T}
+ * @template {T}
  * @private
  */
 function baseAssertType_(
@@ -97,15 +104,15 @@ function baseAssertType_(
 }
 
 /**
- * Throws an error if the first argument isn't an Element
+ * Throws an error if the first argument isn't an Element.
  *
- * Otherwise see `assert` for usage
+ * For more details see `assert`.
  *
- * @param assertFn
+ * @param {!AssertionFunction} assertFn
  * @param {*} shouldBeElement
- * @param {!Array|string=} opt_message The assertion message
+ * @param {Array|string=} opt_message The assertion message
  * @return {!Element} The value of shouldBeTrueish.
- * @template TTTT
+ * @throws {Error} when shouldBeElement is not an Element
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function baseAssertElement(assertFn, shouldBeElement, opt_message) {
@@ -124,10 +131,11 @@ export function baseAssertElement(assertFn, shouldBeElement, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param assertFn
+ * @param {!AssertionFunction} assertFn
  * @param {*} shouldBeString
- * @param {!Array|string=} opt_message The assertion message
+ * @param {Array|string=} opt_message The assertion message
  * @return {string} The string value. Can be an empty string.
+ * @throws {Error} when shouldBeString is not an String
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function baseAssertString(assertFn, shouldBeString, opt_message) {
@@ -146,11 +154,12 @@ export function baseAssertString(assertFn, shouldBeString, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param assertFn
+ * @param {!AssertionFunction} assertFn
  * @param {*} shouldBeNumber
- * @param {!Array|string=} opt_message The assertion message
+ * @param {Array|string=} opt_message The assertion message
  * @return {number} The number value. The allowed values include `0`
  *   and `NaN`.
+ * @throws {Error} when shouldBeNumber is not an Number
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function baseAssertNumber(assertFn, shouldBeNumber, opt_message) {
@@ -167,10 +176,13 @@ export function baseAssertNumber(assertFn, shouldBeNumber, opt_message) {
  * Throws an error if the first argument is not an array.
  * The array can be empty.
  *
- * @param assertFn
+ * For more details see `assert`.
+ *
+ * @param {!AssertionFunction} assertFn
  * @param {*} shouldBeArray
- * @param {!Array|string=} opt_message The assertion message
+ * @param {Array|string=} opt_message The assertion message
  * @return {!Array} The array value
+ * @throws {Error} when shouldBeArray is not an Array
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function baseAssertArray(assertFn, shouldBeArray, opt_message) {
@@ -188,10 +200,11 @@ export function baseAssertArray(assertFn, shouldBeArray, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param assertFn
+ * @param {!AssertionFunction} assertFn
  * @param {*} shouldBeBoolean
- * @param {!Array|string=} opt_message The assertion message
+ * @param {Array|string=} opt_message The assertion message
  * @return {boolean} The boolean value.
+ * @throws {Error} when shouldBeBoolean is not an Boolean
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function baseAssertBoolean(assertFn, shouldBeBoolean, opt_message) {
@@ -310,32 +323,6 @@ export function pureDevAssert(
     opt_9
   );
 }
-
-/**
- * Given an assertion function, produces the type assertion variants. Allows
- * AMP Log to use its own wrapped assertion method.
- * @param {!function} assertFn
-//  * @return {!Object}
-//  */
-// export function typeAssertions(assertFn) {
-//   return {
-//     assertElement: baseAssertElement.bind(null, assertFn),
-//     assertString: baseAssertString.bind(null, assertFn),
-//     assertNumber: baseAssertNumber.bind(null, assertFn),
-//     assertArray: baseAssertArray.bind(null, assertFn),
-//     assertBoolean: baseAssertBoolean.bind(null, assertFn),
-//   };
-// }
-
-// /**
-//  * Creates a set of assertions using the provided sentinel string, if any.
-//  * @param {string|undefined} sentinel
-//  * @return {!Object}
-//  */
-// function Assertions(sentinel) {
-//   const assert = baseAssert.bind(null, sentinel);
-//   return {assert, ...typeAssertions(assert)};
-// }
 
 export const userAsserts = {
   assert: pureUserAssert,
