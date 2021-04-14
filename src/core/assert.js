@@ -18,6 +18,7 @@ import {
   USER_ERROR_SENTINEL,
   elementStringOrPassThru,
 } from './error-message-helpers';
+import {isArray} from './types/array';
 import {isMinifiedMode} from './minified-mode';
 
 /**
@@ -48,24 +49,160 @@ export function baseAssert(
     return shouldBeTruthy;
   }
 
-  // opt_message instead contains the message format string; everything after it
-  // is a format argument.
-  const messageArgs = Array.prototype.slice.call(arguments, 2);
-
   // Include the sentinel string if provided and not already present
-  if (sentinel && !messageArgs[0].includes(sentinel)) {
-    messageArgs[0] += sentinel;
+  if (sentinel && !opt_message.includes(sentinel)) {
+    opt_message += sentinel;
   }
 
   // Substitute provided values into format string in message
+  const messageArgs = Array.prototype.slice.call(arguments, 2);
   let i = 1;
-  const message = messageArgs[0].replace(/%s/g, () =>
+  const message = opt_message.replace(/%s/g, () =>
     elementStringOrPassThru(messageArgs[i++])
   );
 
   const error = new Error(message);
   error.messageArray = messageArgs.slice(0, i);
   throw error;
+}
+
+/**
+ * Asserts types, backbone of `assertNumber`, `assertString`, etc.
+ *
+ * It understands array-based "id"-contracted messages.
+ *
+ * Otherwise creates a sprintf syntax string containing the optional message or the
+ * default. An interpolation token is added at the end to include the `subject`.
+ * @param {!function} assertFn underlying assertion function to call
+ * @param {*} subject
+ * @param {*} assertion
+ * @param shouldBeTruthy
+ * @param {string} defaultMessage
+ * @param {!Array|string=} opt_message
+ * @private
+ */
+function baseAssertType_(
+  assertFn,
+  subject,
+  shouldBeTruthy,
+  defaultMessage,
+  opt_message
+) {
+  if (isArray(opt_message)) {
+    assertFn(shouldBeTruthy, opt_message.concat(subject));
+  } else {
+    assertFn(shouldBeTruthy, `${opt_message || defaultMessage}: %s`, subject);
+  }
+
+  return subject;
+}
+
+/**
+ * Throws an error if the first argument isn't an Element
+ *
+ * Otherwise see `assert` for usage
+ *
+ * @param assertFn
+ * @param {*} shouldBeElement
+ * @param {!Array|string=} opt_message The assertion message
+ * @return {!Element} The value of shouldBeTrueish.
+ * @template TTTT
+ * @closurePrimitive {asserts.matchesReturn}
+ */
+export function baseAssertElement(assertFn, shouldBeElement, opt_message) {
+  return baseAssertType_(
+    assertFn,
+    shouldBeElement,
+    shouldBeElement?.nodeType == 1,
+    'Element expected',
+    opt_message
+  );
+}
+
+/**
+ * Throws an error if the first argument isn't a string. The string can
+ * be empty.
+ *
+ * For more details see `assert`.
+ *
+ * @param assertFn
+ * @param {*} shouldBeString
+ * @param {!Array|string=} opt_message The assertion message
+ * @return {string} The string value. Can be an empty string.
+ * @closurePrimitive {asserts.matchesReturn}
+ */
+export function baseAssertString(assertFn, shouldBeString, opt_message) {
+  return baseAssertType_(
+    assertFn,
+    shouldBeString,
+    typeof shouldBeString == 'string',
+    'String expected',
+    opt_message
+  );
+}
+
+/**
+ * Throws an error if the first argument isn't a number. The allowed values
+ * include `0` and `NaN`.
+ *
+ * For more details see `assert`.
+ *
+ * @param assertFn
+ * @param {*} shouldBeNumber
+ * @param {!Array|string=} opt_message The assertion message
+ * @return {number} The number value. The allowed values include `0`
+ *   and `NaN`.
+ * @closurePrimitive {asserts.matchesReturn}
+ */
+export function baseAssertNumber(assertFn, shouldBeNumber, opt_message) {
+  return baseAssertType_(
+    assertFn,
+    shouldBeNumber,
+    typeof shouldBeNumber == 'number',
+    'Number expected',
+    opt_message
+  );
+}
+
+/**
+ * Throws an error if the first argument is not an array.
+ * The array can be empty.
+ *
+ * @param assertFn
+ * @param {*} shouldBeArray
+ * @param {!Array|string=} opt_message The assertion message
+ * @return {!Array} The array value
+ * @closurePrimitive {asserts.matchesReturn}
+ */
+export function baseAssertArray(assertFn, shouldBeArray, opt_message) {
+  return baseAssertType_(
+    assertFn,
+    shouldBeArray,
+    isArray(shouldBeArray),
+    'Array expected',
+    opt_message
+  );
+}
+
+/**
+ * Throws an error if the first argument isn't a boolean.
+ *
+ * For more details see `assert`.
+ *
+ * @param assertFn
+ * @param {*} shouldBeBoolean
+ * @param {!Array|string=} opt_message The assertion message
+ * @return {boolean} The boolean value.
+ * @closurePrimitive {asserts.matchesReturn}
+ */
+export function baseAssertBoolean(assertFn, shouldBeBoolean, opt_message) {
+  return baseAssertType_(
+    assertFn,
+    shouldBeBoolean,
+    !!shouldBeBoolean === shouldBeBoolean,
+    'Boolean expected',
+    opt_message
+  );
 }
 
 /**

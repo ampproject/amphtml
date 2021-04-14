@@ -18,7 +18,14 @@ import {
   USER_ERROR_SENTINEL,
   elementStringOrPassThru,
 } from './core/error-message-helpers';
-import {baseAssert} from './core/assert';
+import {
+  baseAssert,
+  baseAssertArray,
+  baseAssertBoolean,
+  baseAssertElement,
+  baseAssertNumber,
+  baseAssertString,
+} from './core/assert';
 import {findIndex, isArray} from './core/types/array';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
@@ -181,6 +188,13 @@ export class Log {
           }
         });
     });
+
+    const assertFn = this.assert.bind(this);
+    this.assertElement = baseAssertElement.bind(null, assertFn);
+    this.assertString = baseAssertString.bind(null, assertFn);
+    this.assertNumber = baseAssertNumber.bind(null, assertFn);
+    this.assertArray = baseAssertArray.bind(null, assertFn);
+    this.assertBoolean = baseAssertBoolean.bind(null, assertFn);
   }
 
   /**
@@ -370,21 +384,6 @@ export class Log {
     return error;
   }
 
-  wrapAssertFn_(assertFn) {
-    const logger = this;
-    const assertion = assertFn.bind(null, logger.opt_suffix);
-    return function (var_args) {
-      try {
-        return assertion.apply(null, arguments);
-      } catch (e) {
-        logger.prepareError_(e);
-        // __AMP_REPORT_ERROR is installed globally per window in the entry point.
-        self.__AMP_REPORT_ERROR(e);
-        throw e;
-      }
-    };
-  }
-
   /**
    * Throws an error if the first argument isn't trueish.
    *
@@ -407,130 +406,20 @@ export class Log {
    * @closurePrimitive {asserts.truthy}
    */
   assert(shouldBeTrueish, opt_message, var_args) {
-    if (isArray(opt_message)) {
-      return this.assert.apply(
-        this,
-        [shouldBeTrueish].concat(
+    const callArgs = isArray(opt_message)
+      ? [shouldBeTrueish].concat(
           this.expandMessageArgs_(/** @type {!Array} */ (opt_message))
         )
-      );
+      : Array.prototype.slice.call(arguments);
+
+    try {
+      return baseAssert.apply(null, [this.suffix_].concat(callArgs));
+    } catch (e) {
+      this.prepareError_(e);
+      // __AMP_REPORT_ERROR is installed globally per window in the entry point.
+      self.__AMP_REPORT_ERROR(e);
+      throw e;
     }
-
-    // const assertion = this == logs.user ? pureUserAssert : pureDevAssert;
-    return this.wrapAssertFn_(baseAssert).apply(null, arguments);
-    // try {
-    //   const assertion = this == logs.user ? pureUserAssert : pureDevAssert;
-    //   return assertion.apply(null, arguments);
-    // } catch (e) {
-    //   this.prepareError_(e);
-    //   // __AMP_REPORT_ERROR is installed globally per window in the entry point.
-    //   self.__AMP_REPORT_ERROR(e);
-    //   throw e;
-    // }
-  }
-
-  /**
-   * Throws an error if the first argument isn't an Element
-   *
-   * Otherwise see `assert` for usage
-   *
-   * @param {*} shouldBeElement
-   * @param {!Array|string=} opt_message The assertion message
-   * @return {!Element} The value of shouldBeTrueish.
-   * @template T
-   * @closurePrimitive {asserts.matchesReturn}
-   */
-  assertElement(shouldBeElement, opt_message) {
-    const shouldBeTrueish = shouldBeElement && shouldBeElement.nodeType == 1;
-    this.assertType_(
-      shouldBeElement,
-      shouldBeTrueish,
-      'Element expected',
-      opt_message
-    );
-    return /** @type {!Element} */ (shouldBeElement);
-  }
-
-  /**
-   * Throws an error if the first argument isn't a string. The string can
-   * be empty.
-   *
-   * For more details see `assert`.
-   *
-   * @param {*} shouldBeString
-   * @param {!Array|string=} opt_message The assertion message
-   * @return {string} The string value. Can be an empty string.
-   * @closurePrimitive {asserts.matchesReturn}
-   */
-  assertString(shouldBeString, opt_message) {
-    this.assertType_(
-      shouldBeString,
-      typeof shouldBeString == 'string',
-      'String expected',
-      opt_message
-    );
-    return /** @type {string} */ (shouldBeString);
-  }
-
-  /**
-   * Throws an error if the first argument isn't a number. The allowed values
-   * include `0` and `NaN`.
-   *
-   * For more details see `assert`.
-   *
-   * @param {*} shouldBeNumber
-   * @param {!Array|string=} opt_message The assertion message
-   * @return {number} The number value. The allowed values include `0`
-   *   and `NaN`.
-   * @closurePrimitive {asserts.matchesReturn}
-   */
-  assertNumber(shouldBeNumber, opt_message) {
-    this.assertType_(
-      shouldBeNumber,
-      typeof shouldBeNumber == 'number',
-      'Number expected',
-      opt_message
-    );
-    return /** @type {number} */ (shouldBeNumber);
-  }
-
-  /**
-   * Throws an error if the first argument is not an array.
-   * The array can be empty.
-   *
-   * @param {*} shouldBeArray
-   * @param {!Array|string=} opt_message The assertion message
-   * @return {!Array} The array value
-   * @closurePrimitive {asserts.matchesReturn}
-   */
-  assertArray(shouldBeArray, opt_message) {
-    this.assertType_(
-      shouldBeArray,
-      isArray(shouldBeArray),
-      'Array expected',
-      opt_message
-    );
-    return /** @type {!Array} */ (shouldBeArray);
-  }
-
-  /**
-   * Throws an error if the first argument isn't a boolean.
-   *
-   * For more details see `assert`.
-   *
-   * @param {*} shouldBeBoolean
-   * @param {!Array|string=} opt_message The assertion message
-   * @return {boolean} The boolean value.
-   * @closurePrimitive {asserts.matchesReturn}
-   */
-  assertBoolean(shouldBeBoolean, opt_message) {
-    this.assertType_(
-      shouldBeBoolean,
-      !!shouldBeBoolean === shouldBeBoolean,
-      'Boolean expected',
-      opt_message
-    );
-    return /** @type {boolean} */ (shouldBeBoolean);
   }
 
   /**
@@ -616,27 +505,6 @@ export class Log {
       return [this.messages_[id]].concat(parts);
     }
     return [`More info at ${externalMessageUrl(id, parts)}`];
-  }
-
-  /**
-   * Asserts types, backbone of `assertNumber`, `assertString`, etc.
-   *
-   * It understands array-based "id"-contracted messages.
-   *
-   * Otherwise creates a sprintf syntax string containing the optional message or the
-   * default. An interpolation token is added at the end to include the `subject`.
-   * @param {*} subject
-   * @param {*} assertion
-   * @param {string} defaultMessage
-   * @param {!Array|string=} opt_message
-   * @private
-   */
-  assertType_(subject, assertion, defaultMessage, opt_message) {
-    if (isArray(opt_message)) {
-      this.assert(assertion, opt_message.concat(subject));
-    } else {
-      this.assert(assertion, `${opt_message || defaultMessage}: %s`, subject);
-    }
   }
 }
 
