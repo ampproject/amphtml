@@ -105,10 +105,7 @@ export class BitrateManager {
     onNontrivialWait(video, () => {
       const current = currentSource(video);
       const newBitrate = current.bitrate_ - 1;
-      if (
-        newBitrate >= this.acceptableBitrate_ ||
-        getBufferedPercentage(video) > BUFFERED_THRESHOLD_PERCENTAGE
-      ) {
+      if (newBitrate >= this.acceptableBitrate_) {
         return;
       }
       this.acceptableBitrate_ = newBitrate;
@@ -288,8 +285,8 @@ export class BitrateManager {
  */
 function onNontrivialWait(video, callback) {
   listen(video, 'waiting', () => {
-    // Do not trigger downgrade if not loaded metadata yet.
-    if (video.readyState < 1) {
+    // Do not trigger downgrade if not loaded metadata yet, or if video is fully loaded (eg: replay).
+    if (video.readyState < 1 || getBufferedPercentage(video) === 1) {
       return;
     }
     let timer = null;
