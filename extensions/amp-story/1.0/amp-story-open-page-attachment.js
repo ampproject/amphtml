@@ -169,8 +169,8 @@ const renderOutlinkPageAttachmentUI = (
   openAttachmentEl.setAttribute('theme', themeAttribute);
   let labelTextColor = themeAttribute === 'dark' ? 'white' : 'black';
 
-  const accentColor = attachmentEl.getAttribute('cta-accent-color');
   if (themeAttribute === 'custom') {
+    const accentColor = attachmentEl.getAttribute('cta-accent-color');
     if (attachmentEl.getAttribute('cta-accent-element') === 'background') {
       labelTextColor = contrastColor;
       setImportantStyles(openAttachmentEl, {
@@ -183,8 +183,6 @@ const renderOutlinkPageAttachmentUI = (
       labelTextColor = accentColor;
       setImportantStyles(openAttachmentEl, {
         '--i-amphtml-outlink-cta-background-color': contrastColor,
-      });
-      setImportantStyles(openAttachmentEl, {
         '--i-amphtml-outlink-cta-text-color': accentColor,
       });
     }
@@ -214,6 +212,9 @@ const renderOutlinkPageAttachmentUI = (
       ctaImgEl.classList.add('i-amphtml-story-outlink-page-attachment-img');
       setImportantStyles(ctaImgEl, {
         'background-image': 'url(' + openImgAttr + ')',
+        'border-width': '1px',
+        'border-style': 'solid',
+        'border-color': 'var(--i-amphtml-outlink-cta-background-color)',
       });
       chipEl.prepend(ctaImgEl);
     } else {
