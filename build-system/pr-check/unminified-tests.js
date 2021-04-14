@@ -20,8 +20,7 @@
  */
 
 const {
-  downloadUnminifiedOutput,
-  printSkipMessage,
+  skipDependentJobs,
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
@@ -31,8 +30,6 @@ const {runCiJob} = require('./ci-job');
 const jobName = 'unminified-tests.js';
 
 function pushBuildWorkflow() {
-  downloadUnminifiedOutput();
-
   try {
     timedExecOrThrow(
       'amp integration --nobuild --headless --coverage --report',
@@ -53,11 +50,10 @@ function pushBuildWorkflow() {
 
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
-    downloadUnminifiedOutput();
     timedExecOrDie('amp integration --nobuild --headless --coverage');
     timedExecOrDie('amp codecov-upload');
   } else {
-    printSkipMessage(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime or integration tests'
     );

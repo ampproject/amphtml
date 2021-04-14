@@ -9,6 +9,7 @@ out/**
 test/coverage/**
 .babel-cache/**
 .css-cache/**
+result-reports/**
 
 # Code directories
 build-system/tasks/visual-diff/snippets/*.js
@@ -20,4 +21,4 @@ src/purifier/noop.js
 testing/local-amp-chrome-extension/**
 third_party/**
 validator/**
-build-system/tasks/extension-generator/bento/amp-__component_name_hyphenated__/**/*
+build-system/tasks/make-extension/bento/amp-__component_name_hyphenated__/**/*

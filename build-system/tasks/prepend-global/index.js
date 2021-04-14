@@ -22,7 +22,6 @@ const fs = require('fs');
 const path = require('path');
 const util = require('util');
 const {log} = require('../../common/logging');
-const {mainBranch} = require('../../common/main-branch');
 
 const exec = util.promisify(childProcess.exec);
 
@@ -30,7 +29,7 @@ const {red, cyan} = colors;
 
 // custom-config.json overlays the active config. It is not part of checked-in
 // source (.gitignore'd). See:
-// https://github.com/ampproject/amphtml/blob/master/build-system/global-configs/README.md#custom-configjson
+// https://github.com/ampproject/amphtml/blob/main/build-system/global-configs/README.md#custom-configjson
 const customConfigFile = 'build-system/global-configs/custom-config.json';
 
 /**
@@ -69,7 +68,7 @@ async function fetchConfigFromBranch_(filename, opt_localBranch, opt_branch) {
   if (opt_localBranch) {
     return fs.promises.readFile(filename, 'utf8');
   }
-  const branch = opt_branch || `origin/${mainBranch}`;
+  const branch = opt_branch || 'origin/main';
   return (await exec(`git show ${branch}:${filename}`)).stdout;
 }
 
