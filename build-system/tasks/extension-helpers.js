@@ -20,21 +20,22 @@ const fs = require('fs-extra');
 const path = require('path');
 const wrappers = require('../compile/compile-wrappers');
 const {
+  compileJs,
+  compileJsWithEsbuild,
+  doBuildJs,
+  endBuildStep,
+  maybeToEsmName,
+  mkdirSync,
+  watchDebounceDelay,
+} = require('./helpers');
+const {
   extensionAliasBundles,
   extensionBundles,
   verifyExtensionBundles,
   jsBundles,
 } = require('../compile/bundles.config');
-const {
-  maybeToEsmName,
-  compileJs,
-  compileJsWithEsbuild,
-  mkdirSync,
-  doBuildJs,
-} = require('./helpers');
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
 const {compileJison} = require('./compile-jison');
-const {endBuildStep, watchDebounceDelay} = require('./helpers');
 const {green, red, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
