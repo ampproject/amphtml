@@ -44,7 +44,7 @@ import {
   user,
   userAssert,
 } from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
@@ -72,9 +72,8 @@ import {
   measureIntersection,
 } from '../../../src/utils/intersection';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {isArray, isEnumValue} from '../../../src/core/types';
+import {isArray, isEnumValue, isObject} from '../../../src/core/types';
 
-import {isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
 import {
   observeWithSharedInOb,

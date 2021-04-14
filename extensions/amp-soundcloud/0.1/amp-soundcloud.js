@@ -29,7 +29,7 @@
 
 import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';

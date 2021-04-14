@@ -15,7 +15,7 @@
  */
 
 import {LruCache} from './utils/lru-cache';
-import {dict, hasOwn} from './utils/object';
+import {dict, hasOwn} from './core/types/object';
 import {endsWith} from './core/types/string';
 import {getMode} from './mode';
 import {isArray} from './core/types';

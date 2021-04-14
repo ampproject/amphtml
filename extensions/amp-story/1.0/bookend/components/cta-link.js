@@ -20,7 +20,7 @@ import {
   BookendComponentInterface,
 } from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
-import {dict} from '../../../../../src/utils/object';
+import {dict} from '../../../../../src/core/types/object';
 import {getSourceUrl, resolveRelativeUrl} from '../../../../../src/url';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {isArray} from '../../../../../src/core/types';

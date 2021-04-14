@@ -21,7 +21,7 @@ import {
   prependSelectorsWith,
 } from './css';
 import {dev, devAssert} from './log';
-import {dict} from './utils/object';
+import {dict} from './core/types/object';
 import {includes} from './core/types/string';
 import {toWin} from './types';
 

@@ -24,8 +24,8 @@ import {closest, copyChildren, removeChildren} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {getStoryAttributeSrc} from './utils';
 import {htmlFor} from '../../../src/static-template';
-import {isArray} from '../../../src/core/types';
-import {isObject} from '../../../src/types';
+import {isArray, isObject} from '../../../src/core/types';
+
 import {parseJson} from '../../../src/json';
 import {setImportantStyles} from '../../../src/style';
 

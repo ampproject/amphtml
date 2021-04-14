@@ -92,7 +92,7 @@ import {
   isRTL,
   removeElement,
 } from '../../../src/dom';
-import {deepMerge, dict} from '../../../src/utils/object';
+import {deepMerge, dict} from '../../../src/core/types/object';
 import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {escapeCssSelectorIdent} from '../../../src/css';

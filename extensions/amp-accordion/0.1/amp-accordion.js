@@ -25,7 +25,7 @@ import {clamp} from '../../../src/utils/math';
 import {closest, dispatchCustomEvent, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getStyle, setImportantStyles, setStyles} from '../../../src/style';
 import {
   numeric,

@@ -22,7 +22,7 @@ import {
   VideoAnalyticsEvents,
   videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
-import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
+import {deepMerge, dict, hasOwn} from '../../../src/core/types/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes, isAmpElement} from '../../../src/dom';

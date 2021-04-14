@@ -46,13 +46,13 @@ import {
   resolveRelativeUrl,
 } from '../../../src/url';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/core/types/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {isArray, isEnumValue} from '../../../src/core/types';
+import {isArray, isEnumValue, isObject} from '../../../src/core/types';
 
 import {isExperimentOn} from '../../../src/experiments';
-import {isObject} from '../../../src/types';
+
 import {toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';

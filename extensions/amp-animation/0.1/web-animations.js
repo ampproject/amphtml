@@ -48,9 +48,9 @@ import {getMode} from '../../../src/mode';
 import {isArray, toArray} from '../../../src/core/types/array';
 import {isExperimentOn} from '../../../src/experiments';
 import {isInFie} from '../../../src/iframe-helper';
-import {isObject} from '../../../src/types';
+import {isObject} from '../../../src/core/types';
 import {layoutRectLtwh} from '../../../src/layout-rect';
-import {map} from '../../../src/utils/object';
+import {map} from '../../../src/core/types/object';
 import {parseCss} from './parsers/css-expr';
 
 /** @const {string} */

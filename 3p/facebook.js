@@ -15,7 +15,7 @@
  */
 
 import {dashToUnderline} from '../src/core/types/string';
-import {dict} from '../src/utils/object';
+import {dict} from '../src/core/types/object';
 import {loadScript} from './3p';
 import {setStyle} from '../src/style';
 import {userAssert} from '../src/log';

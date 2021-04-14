@@ -35,7 +35,7 @@ import {StoryAnalyticsEvent, getAnalyticsService} from '../story-analytics';
 import {closest, closestAncestorElementBySelector} from '../../../../src/dom';
 import {createShadowRootWithStyle} from '../utils';
 import {dev, devAssert, user, userAssert} from '../../../../src/log';
-import {dict} from '../../../../src/utils/object';
+import {dict} from '../../../../src/core/types/object';
 import {getAmpdoc} from '../../../../src/service';
 import {getJsonLd} from '../jsonld';
 import {getLocalizationService} from '../amp-story-localization-service';

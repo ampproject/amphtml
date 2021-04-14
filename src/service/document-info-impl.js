@@ -23,7 +23,7 @@ import {
 
 import {getRandomString64} from './cid-impl';
 import {isArray} from '../core/types';
-import {map} from '../utils/object';
+import {map} from '../core/types/object';
 import {registerServiceBuilderForDoc} from '../service';
 
 /** @private @const {!Array<string>} */

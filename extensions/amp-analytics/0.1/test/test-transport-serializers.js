@@ -15,7 +15,7 @@
  */
 
 import {TransportSerializers} from '../transport-serializer';
-import {dict} from '../../../../src/utils/object';
+import {dict} from '../../../../src/core/types/object';
 import {isArray} from '../../../../src/core/types';
 
 /**
