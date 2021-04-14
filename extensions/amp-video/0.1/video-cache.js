@@ -18,7 +18,7 @@ import {Services} from '../../../src/services';
 import {createElementWithAttributes, matches} from '../../../src/dom';
 import {extensionScriptsInNode} from '../../../src/service/extension-script';
 import {resolveRelativeUrl} from '../../../src/url';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 import {user} from '../../../src/log';
 
 /**
