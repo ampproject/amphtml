@@ -206,7 +206,8 @@ export function reportError(error, opt_associatedElement) {
         // This outputs a log message where non-string values are preserved but
         // appear  inline
         const prettyMessageArray = error.messageArray[0]
-          .split(/(?<=%s)|(?=%s)/) // Split at each %s, leave them in the array
+          .split(/(%s)/) // Split at each %s, leave them in the array
+          .filter((s) => s !== '')
           .map((substr) =>
             substr == '%s' ? error.messageArray[i++] : substr.trim()
           );
