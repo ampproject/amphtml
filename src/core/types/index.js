@@ -18,3 +18,4 @@
 export {isArray} from './array';
 export {isEnumValue} from './enum';
 export {isString} from './string';
+export {isObject} from './object';

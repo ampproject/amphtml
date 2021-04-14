@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as object from '../../src/utils/object';
+import * as object from '../../../../src/core/types/object';
 
 describe('Object', () => {
   it('hasOwn', () => {
