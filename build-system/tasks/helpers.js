@@ -38,7 +38,7 @@ const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
 const {removeFromClosureBabelCache} = require('../compile/pre-closure-babel');
 const {thirdPartyFrames} = require('../test-configs/config');
-const {watch: fileWatch} = require('chokidar');
+const {watch: fileWatch, watch} = require('chokidar');
 
 /** @type {Remapping.default} */
 const remapping = /** @type {*} */ (Remapping);
@@ -158,32 +158,7 @@ async function bootstrapThirdPartyFrames(options) {
  * @return {Promise<void>}
  */
 async function compileCoreRuntime(options) {
-  if (options.watch) {
-    /** @return {Promise<void>} */
-    async function watchFunc() {
-      if (options.minify) {
-        removeFromClosureBabelCache('src');
-      }
-      const bundleComplete = await doBuildJs(jsBundles, 'amp.js', {
-        ...options,
-        continueOnError: true,
-        watch: false,
-      });
-      if (options.onWatchBuild) {
-        options.onWatchBuild(bundleComplete);
-      }
-    }
-    fileWatch('src/**/*.js').on(
-      'change',
-      debounce(watchFunc, watchDebounceDelay)
-    );
-  }
-
-  await doBuildJs(jsBundles, 'amp.js', {
-    ...options,
-    // Pass {watch:true} for the initial esbuild call, but not for Closure.
-    watch: options.watch && !argv.compiled,
-  });
+  await doBuildJs(jsBundles, 'amp.js', options);
 }
 
 /**
@@ -330,60 +305,37 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
   const entryPoint = path.join(srcDir, srcFilename);
   const minifiedName = maybeToEsmName(options.minifiedName);
 
-  if (options.watch) {
-    async function watchFunc() {
-      if (options.minify) {
-        removeFromClosureBabelCache(entryPoint);
-      }
-      const compileDone = await doCompileMinifiedJs(/* continueOnError */ true);
-      if (options.onWatchBuild) {
-        options.onWatchBuild(compileDone);
-      }
-    }
-    fileWatch(entryPoint).on('change', debounce(watchFunc, watchDebounceDelay));
+  options.errored = false;
+  await closureCompile(entryPoint, destDir, minifiedName, options, timeInfo);
+  // If an incremental watch build fails, simply return.
+  if (options.watch && options.errored) {
+    return;
   }
 
-  /**
-   * @param {boolean} continueOnError
-   * @return {Promise<void>}
-   */
-  async function doCompileMinifiedJs(continueOnError) {
-    options.continueOnError = continueOnError;
-    options.errored = false;
-    await closureCompile(entryPoint, destDir, minifiedName, options, timeInfo);
-
-    // If an incremental watch build fails, simply return.
-    if (options.errored) {
-      return;
-    }
-
-    const destPath = path.join(destDir, minifiedName);
-    combineWithCompiledFile(srcFilename, destPath, options);
-    fs.writeFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
-    if (options.latestName) {
-      fs.copySync(
-        destPath,
-        path.join(destDir, maybeToEsmName(options.latestName))
-      );
-    }
-
-    let name = minifiedName;
-    if (options.latestName) {
-      name += ` → ${maybeToEsmName(options.latestName)}`;
-    }
-    endBuildStep('Minified', name, timeInfo.startTime);
-
-    const target = path.basename(minifiedName, path.extname(minifiedName));
-    if (!argv.noconfig && MINIFIED_TARGETS.includes(target)) {
-      await applyAmpConfig(
-        maybeToEsmName(`${destDir}/${minifiedName}`),
-        /* localDev */ options.fortesting,
-        /* fortesting */ options.fortesting
-      );
-    }
+  const destPath = path.join(destDir, minifiedName);
+  combineWithCompiledFile(srcFilename, destPath, options);
+  fs.writeFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
+  if (options.latestName) {
+    fs.copySync(
+      destPath,
+      path.join(destDir, maybeToEsmName(options.latestName))
+    );
   }
 
-  return doCompileMinifiedJs(options.continueOnError);
+  let name = minifiedName;
+  if (options.latestName) {
+    name += ` → ${maybeToEsmName(options.latestName)}`;
+  }
+  endBuildStep('Minified', name, timeInfo.startTime);
+
+  const target = path.basename(minifiedName, path.extname(minifiedName));
+  if (!argv.noconfig && MINIFIED_TARGETS.includes(target)) {
+    await applyAmpConfig(
+      maybeToEsmName(`${destDir}/${minifiedName}`),
+      /* localDev */ options.fortesting,
+      /* fortesting */ options.fortesting
+    );
+  }
 }
 
 /**
@@ -494,6 +446,7 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     'unminified',
     /* enableCache */ true
   );
+
   const buildResult = await esbuild
     .build({
       entryPoints: [entryPoint],
@@ -681,11 +634,27 @@ async function minifyWithTerser(destDir, destFilename, options) {
  */
 async function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
-  if (options.minify) {
-    return compileMinifiedJs(srcDir, srcFilename, destDir, options);
-  } else {
-    return compileUnminifiedJs(srcDir, srcFilename, destDir, options);
+
+  async function compile(modifiedFile) {
+    if (options.minified && modifiedFile) {
+      removeFromClosureBabelCache(modifiedFile);
+    }
+
+    const buildResult = options.minify
+      ? compileMinifiedJs(srcDir, srcFilename, destDir, options)
+      : compileUnminifiedJs(srcDir, srcFilename, destDir, options);
+    if (options.onWatchBuild) {
+      options.onWatchBuild(buildResult);
+    }
   }
+
+  if (options.watch) {
+    const entryPoint = path.join(srcDir, srcFilename);
+    const deps = await getDependencies(entryPoint);
+    watch(deps).on('change', debounce(compile, watchDebounceDelay));
+  }
+
+  compile();
 }
 
 /**
@@ -847,6 +816,22 @@ function mkdirSync(path) {
   }
 }
 
+/**
+ * Returns the list of dependencies for a given JS entrypoint.
+ * @param {string} entryPoint
+ * @return {Promise<Array<string>>}
+ */
+async function getDependencies(entryPoint) {
+  const result = await esbuild.build({
+    entryPoints: [entryPoint],
+    bundle: true,
+    write: false,
+    metafile: true,
+  });
+
+  return Object.keys(result.metafile?.inputs);
+}
+
 module.exports = {
   MINIFIED_TARGETS,
   applyAmpConfig,
@@ -857,6 +842,7 @@ module.exports = {
   compileJsWithEsbuild,
   doBuildJs,
   endBuildStep,
+  getDependencies,
   compileUnminifiedJs,
   maybePrintCoverageMessage,
   maybeToEsmName,
