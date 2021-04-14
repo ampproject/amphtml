@@ -22,7 +22,7 @@ import {
   pushIfNotExist,
   remove,
   toArray,
-} from '../../../src/core/types/array';
+} from '../../../../src/core/types/array';
 
 describe('toArray', () => {
   it('should return empty array if null is passed', () => {
