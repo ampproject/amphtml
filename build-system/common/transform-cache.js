@@ -22,19 +22,19 @@ const path = require('path');
  * Cache for storing transformed files on both memory and on disk.
  */
 class TransformCache {
-  constructor(cacheDir, fileExtension) {
+  constructor(cacheName, fileExtension) {
     /** @type {string} */
     this.fileExtension = fileExtension;
 
     /** @type {string} */
-    this.cacheDir = cacheDir;
-    fs.ensureDirSync(cacheDir);
+    this.cacheDir = path.resolve(__dirname, '..', '..', cacheName);
+    fs.ensureDirSync(this.cacheDir);
 
     /** @type {Map<string, Promise<Buffer|string>>} */
     this.transformMap = new Map();
 
     /** @type {Set<string>} */
-    this.fsCache = new Set(fs.readdirSync(cacheDir));
+    this.fsCache = new Set(fs.readdirSync(this.cacheDir));
   }
 
   /**
