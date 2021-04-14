@@ -30,6 +30,7 @@ const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
+const {batchedRead} = require('../common/transform-cache');
 const {closureCompile} = require('../compile/compile');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {green, red, cyan} = require('kleur/colors');
@@ -823,11 +824,24 @@ function mkdirSync(path) {
  * @return {Promise<Array<string>>}
  */
 async function getDependencies(entryPoint) {
+  const stripImportAssertionPlugin = {
+    name: 'stripImportAssertion',
+    setup(build) {
+      build.onLoad({filter: /\.[cm]?js$/, namespace: ''}, async (file) => {
+        const filename = file.path;
+        const contents = (await batchedRead(filename)).contents.toString();
+        const stripped = contents.replace(/assert {type: 'json'}/g, '');
+        return {contents: stripped};
+      });
+    },
+  };
+
   const result = await esbuild.build({
     entryPoints: [entryPoint],
     bundle: true,
     write: false,
     metafile: true,
+    plugins: [stripImportAssertionPlugin],
   });
 
   return Object.keys(result.metafile?.inputs);
