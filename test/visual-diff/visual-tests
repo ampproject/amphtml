@@ -850,6 +850,14 @@
       "no_base_test": true
     },
     {
+      "url": "examples/visual-tests/amp-story-player/story-attribution.html",
+      "name": "amp-story-player story attribution",
+      "interactive_tests": "examples/visual-tests/amp-story-player/story-loaded.js",
+      "loading_incomplete_selectors": [".i-amphtml-story-player-loading"],
+      "viewport": {"width": 400, "height": 800},
+      "no_base_test": true
+    },
+    {
       "url": "examples/visual-tests/amp-carousel/amp-carousel.html",
       "name": "amp-carousel",
       "loading_complete_delay_ms": 2000,
