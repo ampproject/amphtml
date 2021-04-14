@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {logging} from 'selenium-webdriver';
+import selenium from 'selenium-webdriver';
+
+const {logging} = selenium;
 
 /** @enum {string} */
 const PerformanceMethods = {
@@ -26,17 +28,16 @@ const PerformanceMethods = {
   'WINDOW_OPEN': 'Network.windowOpen',
 };
 
-class NetworkLogger {
-  /** @param {!WebDriver} driver */
+export class NetworkLogger {
+  /** @param {!selenium.WebDriver} driver */
   constructor(driver) {
-    /** @type {WebDriver} */
+    /** @type {selenium.WebDriver} */
     this.driver_ = driver;
   }
 
   /**
-   *
    * @param {PerformanceMethods} networkMethod
-   * @return {Promise<string[]>}
+   * @return {Promise<logging.Entry[]>}
    */
   async getEntries_(networkMethod) {
     const entries = await this.driver_
@@ -54,7 +55,7 @@ class NetworkLogger {
   /**
    * Gets sent requests with an optional url to filter by.
    * @param {string=} url
-   * @return {Array<logging.Entry>}
+   * @return {Promise<Array<logging.Entry>>}
    */
   async getSentRequests(url) {
     const entries = await this.getEntries_(
@@ -66,7 +67,3 @@ class NetworkLogger {
     return entries;
   }
 }
-
-module.exports = {
-  NetworkLogger,
-};

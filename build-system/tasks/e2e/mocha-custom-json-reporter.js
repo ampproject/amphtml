@@ -28,8 +28,7 @@ const {Base} = require('mocha').reporters;
 const {inherits} = require('mocha').utils;
 
 /**
- *
- * @param {!Object} output
+ * @param {Object} output
  * @param {string} filename
  * @return {Promise<void>}
  */

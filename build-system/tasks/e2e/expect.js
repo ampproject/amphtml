@@ -136,8 +136,8 @@ const chaiMethodsAndProperties = [
 ];
 
 /**
- * @param {Chai.ChaiStatic} chai
- * @param {Chai.ChaiUtils} utils
+ * @param {chai.ChaiStatic} chai
+ * @param {chai.ChaiUtils} utils
  */
 function installWrappers(chai, utils) {
   const {METHOD, PROPERTY, CHAINABLE_METHOD} = ChaiType;
@@ -263,9 +263,8 @@ function installBrowserAssertions(_networkLogger) {
 }
 
 /**
- *
- * @param {Chai.ChaiStatic} chai
- * @param {Chai.ChaiUtils} utils
+ * @param {chai.ChaiStatic} chai
+ * @param {chai.ChaiUtils} utils
  */
 function installBrowserWrappers(chai, utils) {
   const {Assertion} = chai;
