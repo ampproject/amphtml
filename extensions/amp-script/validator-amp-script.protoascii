@@ -198,11 +198,9 @@ tags: {  # <amp-script>
       also_requires_attr: "script"
     }
   }
-  attrs: {
-    name: "nodom"
-    value: ""
-  }
+  attrs: { name: "nodom" }
   attrs: { name: "sandbox" }
+  attrs: { name: "sandboxed" }
   attrs: {
     name: "script"
     mandatory_oneof: "['script', 'src']"
