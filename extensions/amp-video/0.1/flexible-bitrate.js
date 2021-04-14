@@ -286,7 +286,7 @@ export class BitrateManager {
 function onNontrivialWait(video, callback) {
   listen(video, 'waiting', () => {
     // Do not trigger downgrade if not loaded metadata yet, or if video is fully loaded (eg: replay).
-    if (video.readyState < 1 || getBufferedPercentage(video) === 1) {
+    if (video.readyState < 1 || getBufferedPercentage(video) > 0.99) {
       return;
     }
     let timer = null;
