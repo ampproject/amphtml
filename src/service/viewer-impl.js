@@ -24,7 +24,7 @@ import {
   duplicateErrorIfNecessary,
   stripUserError,
 } from '../log';
-import {endsWith} from '../string';
+import {endsWith} from '../core/types/string';
 import {findIndex} from '../core/types/array';
 import {
   getSourceOrigin,

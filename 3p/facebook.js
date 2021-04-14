@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dashToUnderline} from '../src/string';
+import {dashToUnderline} from '../src/core/types/string';
 import {dict} from '../src/utils/object';
 import {loadScript} from './3p';
 import {setStyle} from '../src/style';

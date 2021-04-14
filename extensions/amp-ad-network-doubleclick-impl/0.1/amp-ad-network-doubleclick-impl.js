@@ -124,7 +124,7 @@ import {
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
 import {parseQueryString} from '../../../src/url';
-import {stringHash32} from '../../../src/string';
+import {stringHash32} from '../../../src/core/types/string';
 import {tryParseJson} from '../../../src/json';
 
 /** @type {string} */

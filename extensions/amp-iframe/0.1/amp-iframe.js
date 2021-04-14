@@ -25,7 +25,7 @@ import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {endsWith} from '../../../src/string';
+import {endsWith} from '../../../src/core/types/string';
 import {getConsentDataToForward} from '../../../src/consent';
 import {
   isAdLike,

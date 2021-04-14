@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {endsWith} from '../../../src/string';
+import {endsWith} from '../../../src/core/types/string';
 import {measurePageLayoutBox} from '../../../src/utils/page-layout-box';
 import {user} from '../../../src/log';
 
