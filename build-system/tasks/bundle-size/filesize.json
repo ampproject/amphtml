@@ -6,7 +6,8 @@
       "dist/*.mjs",
       "dist/v0/*-?.?.mjs",
       "dist.3p/current-min/vendor/*.js",
-      "dist.3p/current-min/vendor/*.mjs"
+      "dist.3p/current-min/vendor/*.mjs",
+      "extensions/*/?.?/dist/*.js"
     ],
     "trackFormat": ["brotli"]
   }
