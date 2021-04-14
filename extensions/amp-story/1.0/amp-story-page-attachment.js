@@ -280,28 +280,23 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   openRemote_() {
-    this.element.parentElement
-      .querySelector('.i-amphtml-page-attachment-host')
-      .shadowRoot.querySelector('a')
-      .click();
-    // const animationEl = this.win.document.createElement('div');
-    // // animationEl.classList.add('i-amphtml-story-page-attachment-expand');
-    // const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
+    const animationEl = this.win.document.createElement('div');
+    animationEl.classList.add('i-amphtml-story-page-attachment-expand');
+    const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
 
-    // this.mutateElement(() => {
-    //   storyEl.appendChild(animationEl);
-    // }).then(() => {
-    // Give some time for the 120ms CSS animation to run (cf
-    // amp-story-page-attachment.css). The navigation itself will take some
-    // time, depending on the target and network conditions.
-    // this.win.setTimeout(() => {
-    //   const navigationService = Services.navigationForDoc(this.getAmpDoc());
-    //   navigationService.navigateTo(
-    //     this.win,
-    //     this.element.getAttribute('href')
-    //   );
-    // }, 50);
-    // });
+    this.mutateElement(() => {
+      storyEl.appendChild(animationEl);
+    }).then(() => {
+      // Give some time for the 120ms CSS animation to run (cf
+      // amp-story-page-attachment.css). The navigation itself will take some
+      // time, depending on the target and network conditions.
+      this.win.setTimeout(() => {
+        this.element.parentElement
+          .querySelector('.i-amphtml-page-attachment-host')
+          .shadowRoot.querySelector('a')
+          .click();
+      }, 50);
+    });
   }
 
   /**
