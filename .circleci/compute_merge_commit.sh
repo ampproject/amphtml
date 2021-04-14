@@ -22,6 +22,9 @@ err=0
 
 GREEN() { echo -e "\n\033[0;32m$1\033[0m"; }
 
+# Ensure the CircleCI workspace directory exists.
+mkdir -p /tmp/workspace
+
 # Try to determine the PR number.
 curl -sS https://raw.githubusercontent.com/ampproject/amphtml/main/.circleci/get_pr_number.sh | bash
 if [[ -f "$BASH_ENV" ]]; then
@@ -40,6 +43,8 @@ MERGE_BRANCH="refs/pull/$PR_NUMBER/merge"
 echo $(GREEN "Computing merge SHA of $MERGE_BRANCH...")
 CIRCLE_MERGE_SHA="$(git ls-remote https://github.com/ampproject/amphtml.git "$MERGE_BRANCH" | awk '{print $1}')"
 
-echo "$CIRCLE_MERGE_SHA" > .CIRCLECI_MERGE_COMMIT
-echo $(GREEN "Stored merge SHA $CIRCLE_MERGE_SHA in .CIRCLECI_MERGE_COMMIT.")
+# Store the merge commit info in the CircleCI workspace for use by followup
+# jobs.
+echo "$CIRCLE_MERGE_SHA" > /tmp/workspace/.CIRCLECI_MERGE_COMMIT
+echo $(GREEN "Stored merge SHA $CIRCLE_MERGE_SHA in /tmp/workspace/.CIRCLECI_MERGE_COMMIT.")
 exit 0

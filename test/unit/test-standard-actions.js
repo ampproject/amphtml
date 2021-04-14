@@ -698,7 +698,10 @@ describes.sandboxed('StandardActions', {}, (env) => {
           });
         yield standardActions.handleAmpTarget_(invocation);
         expect(navigator.navigateTo).to.be.calledTwice;
-        expect(userError).to.be.calledWith('STANDARD-ACTIONS', 'Fake error.');
+        expect(userError).to.be.calledWith(
+          'STANDARD-ACTIONS',
+          env.sandbox.match((arg) => arg.message === 'Fake error.')
+        );
       });
     });
 

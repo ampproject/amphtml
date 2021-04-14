@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
@@ -15,13 +14,19 @@
  * limitations under the License.
  */
 
-const {
-  printGulpDeprecationNotice,
-} = require('./build-system/tasks/amp-task-runner');
+import * as Preact from '../../../../src/preact';
+import {Twitter} from '../component';
+import {withA11y} from '@storybook/addon-a11y';
+import {withKnobs} from '@storybook/addon-knobs';
 
-/**
- * Print a deprecation notice and fall back to the amp task runner.
- * TODO(amphtml): Remove this script after a month or so.
- */
-printGulpDeprecationNotice(/* withTimeStamps */ true);
-require('./amp');
+export default {
+  title: 'Twitter',
+  component: Twitter,
+  decorators: [withKnobs, withA11y],
+};
+
+export const _default = () => {
+  return (
+    <Twitter style={{width: 300, height: 200}} tweetId="638793490521001985" />
+  );
+};

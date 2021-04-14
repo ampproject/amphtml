@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,23 @@
  * limitations under the License.
  */
 
+/** @externs */
 
-const IS_DEV = true;
-const IS_EXPANDED = false;
+/** @const */
+var TwitterDef = {};
+
+/**
+ * @typedef {{
+ *   loading: (string|undefined),
+ *   onReadyState: (function(string, *=)|undefined),
+ *   requestResize: (function(number):*|undefined),
+ *   title: (string|undefined),
+ * }}
+ */
+TwitterDef.Props;
+
+/** @constructor */
+TwitterDef.Api = function () {};
+
+/** @type {string} */
+TwitterDef.Api.prototype.readyState;

@@ -37,11 +37,10 @@ import {isJsonScriptTag, tryFocus} from '../dom';
 // Source for this constant is css/amp-story-player-iframe.css
 import {cssText} from '../../build/amp-story-player-iframe.css';
 import {dev} from '../log';
-import {findIndex} from '../utils/array';
+import {findIndex, toArray} from '../core/types/array';
 import {getMode} from '../../src/mode';
 import {parseJson} from '../json';
 import {resetStyles, setStyle, setStyles} from '../style';
-import {toArray} from '../types';
 import {urls} from '../config';
 
 /** @enum {string} */
@@ -236,6 +235,9 @@ export class AmpStoryPlayer {
     /** @private {boolean} */
     this.autoplay_ = true;
 
+    /** @private {?string} */
+    this.attribution_ = null;
+
     return this.element_;
   }
 
@@ -377,6 +379,7 @@ export class AmpStoryPlayer {
     this.readPlayerConfig_();
     this.maybeFetchMoreStories_(this.stories_.length - this.currentIdx_ - 1);
     this.initializeAutoplay_();
+    this.initializeAttribution_();
     this.initializePageScroll_();
     this.initializeCircularWrapping_();
     this.signalReady_();
@@ -1189,6 +1192,10 @@ export class AmpStoryPlayer {
       'cap': 'swipe',
     };
 
+    if (this.attribution_ === 'auto') {
+      playerFragmentParams['attribution'] = 'auto';
+    }
+
     const originalFragmentString = getFragment(href);
     const originalFragments = parseQueryString(originalFragmentString);
 
@@ -1707,6 +1714,19 @@ export class AmpStoryPlayer {
 
     if (behavior && typeof behavior.autoplay === 'boolean') {
       this.autoplay_ = behavior.autoplay;
+    }
+  }
+
+  /** @private */
+  initializeAttribution_() {
+    if (!this.playerConfig_) {
+      return;
+    }
+
+    const {display} = this.playerConfig_;
+
+    if (display && display.attribution === 'auto') {
+      this.attribution_ = 'auto';
     }
   }
 
