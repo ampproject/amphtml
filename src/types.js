@@ -14,27 +14,6 @@
  * limitations under the License.
  */
 
-/* @const */
-const toString_ = Object.prototype.toString;
-
-/**
- * Returns the ECMA [[Class]] of a value
- * @param {*} value
- * @return {string}
- */
-function toString(value) {
-  return toString_.call(value);
-}
-
-/**
- * Determines if value is actually an Object.
- * @param {*} value
- * @return {boolean}
- */
-export function isObject(value) {
-  return toString(value) === '[object Object]';
-}
-
 /**
  * Determines if value is of number type and finite.
  * NaN and Infinity are not considered a finite number.
