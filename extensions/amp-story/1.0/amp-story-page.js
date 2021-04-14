@@ -60,18 +60,7 @@ import {
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
-import {
-  computedStyle,
-  px,
-  setImportantStyles,
-  toggle,
-} from '../../../src/style';
-import {
-  createShadowRootWithStyle,
-  getRGBFromCssColorValue,
-  getTextColorForRGB,
-  setTextBackgroundColor,
-} from './utils';
+import {createShadowRootWithStyle, setTextBackgroundColor} from './utils';
 import {debounce} from '../../../src/utils/rate-limit';
 import {delegateAutoplay} from '../../../src/video-interface';
 import {dev} from '../../../src/log';
@@ -87,6 +76,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen} from '../../../src/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
+import {px, toggle} from '../../../src/style';
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
 import {toArray} from '../../../src/core/types/array';
@@ -1761,24 +1751,11 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    // Calculating contrast color (black or white) needed for outlink CTA UI.
-    const ctaAccentColor = attachmentEl.getAttribute('cta-accent-color');
-    let contrastColor = null;
-    if (ctaAccentColor) {
-      setImportantStyles(this.element, {
-        'background-color': attachmentEl.getAttribute('cta-accent-color'),
-      });
-      const styles = computedStyle(this.win, this.element);
-      const rgb = getRGBFromCssColorValue(styles['background-color']);
-      contrastColor = getTextColorForRGB(rgb);
-    }
-
     if (!this.openAttachmentEl_) {
       this.openAttachmentEl_ = renderPageAttachmentUI(
         this.win,
         this.element,
-        attachmentEl,
-        contrastColor
+        attachmentEl
       );
 
       const container = this.win.document.createElement('div');

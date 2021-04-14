@@ -18,10 +18,11 @@
  * @fileoverview Helper for amp-story rendering of page-attachment UI.
  */
 import {LocalizedStringId} from '../../../src/localized-strings';
+import {computedStyle, setImportantStyles} from '../../../src/style';
 import {getLocalizationService} from './amp-story-localization-service';
+import {getRGBFromCssColorValue, getTextColorForRGB} from './utils';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
-import {setImportantStyles} from '../../../src/style';
 
 /**
  * @enum {string}
@@ -84,15 +85,9 @@ const buildOpenOutlinkAttachmentElement = (element) =>
  * @param {!Window} win
  * @param {!Element} pageEl
  * @param {!Element} attachmentEl
- * @param  {string} contrastColor '#FFF' or '#000'
  * @return {!Element}
  */
-export const renderPageAttachmentUI = (
-  win,
-  pageEl,
-  attachmentEl,
-  contrastColor
-) => {
+export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
   const openImgAttr = attachmentEl.getAttribute('cta-image');
   const attachmentHref = attachmentEl.getAttribute('href');
   if (isPageAttachmentUiV2ExperimentOn(win) && attachmentHref) {
@@ -100,8 +95,7 @@ export const renderPageAttachmentUI = (
       win,
       pageEl,
       attachmentEl,
-      attachmentHref,
-      contrastColor
+      attachmentHref
     );
   } else if (isPageAttachmentUiV2ExperimentOn(win) && openImgAttr) {
     return renderPageAttachmentUiWithImages(win, pageEl, attachmentEl);
@@ -144,15 +138,13 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
  * @param {!Element} pageEl
  * @param {!Element} attachmentEl
  * @param {!Element} attachmentHref
- * @param  {string} contrastColor '#FFF' or '#000'
  * @return {!Element}
  */
 const renderOutlinkPageAttachmentUI = (
   win,
   pageEl,
   attachmentEl,
-  attachmentHref,
-  contrastColor
+  attachmentHref
 ) => {
   const openAttachmentEl = buildOpenOutlinkAttachmentElement(pageEl);
 
@@ -171,6 +163,16 @@ const renderOutlinkPageAttachmentUI = (
 
   if (themeAttribute === 'custom') {
     const accentColor = attachmentEl.getAttribute('cta-accent-color');
+    // Calculating contrast color (black or white) needed for outlink CTA UI.
+    let contrastColor = null;
+    if (accentColor) {
+      setImportantStyles(attachmentEl, {
+        'background-color': attachmentEl.getAttribute('cta-accent-color'),
+      });
+      const styles = computedStyle(win, attachmentEl);
+      const rgb = getRGBFromCssColorValue(styles['background-color']);
+      contrastColor = getTextColorForRGB(rgb);
+    }
     if (attachmentEl.getAttribute('cta-accent-element') === 'background') {
       labelTextColor = contrastColor;
       setImportantStyles(openAttachmentEl, {
