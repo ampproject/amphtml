@@ -60,8 +60,12 @@ const DEFAULT_SANDBOX =
  */
 function ProxyIframeEmbedWithRef(
   {
+    allow = BLOCK_SYNC_XHR,
+    contextOptions,
+    excludeSandbox,
     name: nameProp,
     messageHandler,
+    options,
     sandbox = DEFAULT_SANDBOX,
     src: srcProp,
     type,
@@ -90,16 +94,23 @@ function ProxyIframeEmbedWithRef(
     if (!win) {
       return;
     }
+    const context = dict({
+      'location': {
+        'href': win.location.href,
+      },
+      'sentinel': generateSentinel(win),
+    });
+    for (const key in contextOptions) {
+      context[key] = contextOptions[key];
+    }
     const attrs = dict({
       'title': title,
       'type': type,
-      '_context': dict({
-        'location': {
-          'href': win.location.href,
-        },
-        'sentinel': generateSentinel(win),
-      }),
+      '_context': context,
     });
+    for (const key in options) {
+      attrs[key] = options[key];
+    }
     setNameAndSrc({
       name: JSON.stringify(
         dict({
@@ -114,17 +125,17 @@ function ProxyIframeEmbedWithRef(
       ),
       src,
     });
-  }, [count, nameProp, srcProp, title, type]);
+  }, [contextOptions, count, nameProp, options, srcProp, title, type]);
 
   return (
     <IframeEmbed
-      allow={BLOCK_SYNC_XHR}
+      allow={allow}
       contentRef={contentRef}
       messageHandler={messageHandler}
       name={name}
       ref={ref}
       ready={!!name}
-      sandbox={sandbox}
+      sandbox={excludeSandbox ? undefined : sandbox}
       src={src}
       title={title}
       {...rest}
