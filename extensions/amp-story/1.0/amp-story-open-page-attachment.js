@@ -214,9 +214,6 @@ const renderOutlinkPageAttachmentUI = (
       ctaImgEl.classList.add('i-amphtml-story-outlink-page-attachment-img');
       setImportantStyles(ctaImgEl, {
         'background-image': 'url(' + openImgAttr + ')',
-        'border-width': '1px',
-        'border-style': 'solid',
-        'border-color': 'var(--i-amphtml-outlink-cta-background-color)',
       });
       chipEl.prepend(ctaImgEl);
     } else {
