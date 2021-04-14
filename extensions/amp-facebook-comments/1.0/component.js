@@ -66,7 +66,10 @@ function FacebookCommentsWithRef(
       ref={ref}
       title={title}
       {...rest}
-      // non-overridable props
+      /* non-overridable props */
+      // We sandbox all 3P iframes however facebook embeds completely break in
+      // sandbox mode since they need access to document.domain, so we
+      // exclude facebook.
       excludeSandbox
       matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
       messageHandler={messageHandler}
