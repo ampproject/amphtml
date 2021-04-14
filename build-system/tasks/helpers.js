@@ -646,6 +646,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
     if (options.onWatchBuild) {
       options.onWatchBuild(buildResult);
     }
+    await buildResult;
   }
 
   if (options.watch) {
@@ -654,7 +655,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
     watch(deps).on('change', debounce(compile, watchDebounceDelay));
   }
 
-  compile();
+  await compile();
 }
 
 /**
