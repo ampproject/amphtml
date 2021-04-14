@@ -37,7 +37,7 @@ import {Services} from '../../../src/services';
 import {Transport} from './transport';
 import {dev, devAssert, rethrowAsync, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
-import {expandTemplate} from '../../../src/string';
+import {expandTemplate} from '../../../src/core/types/string';
 import {getMode} from '../../../src/mode';
 import {installLinkerReaderService} from './linker-reader';
 import {isArray} from '../../../src/core/types/array';

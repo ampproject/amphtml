@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {dashToUnderline} from '../../../src/string';
+import {dashToUnderline} from '../../../src/core/types/string';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';

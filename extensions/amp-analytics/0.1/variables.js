@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {TickLabel} from '../../../src/enums';
-import {asyncStringReplace} from '../../../src/string';
+import {asyncStringReplace} from '../../../src/core/types/string';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {cookieReader} from './cookie-reader';
 import {dev, devAssert, user, userAssert} from '../../../src/log';

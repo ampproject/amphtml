@@ -40,7 +40,7 @@ import {
   matches,
   parseBooleanAttribute,
 } from '../dom';
-import {dashToCamelCase} from '../string';
+import {dashToCamelCase} from '../core/types/string';
 import {devAssert} from '../log';
 import {dict, hasOwn, map} from '../utils/object';
 import {getDate} from '../utils/date';
