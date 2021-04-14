@@ -22,7 +22,7 @@ import {Services} from '../../../src/services';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getResourceTiming} from './resource-timing';
-import {isArray} from '../../../src/core/types/array';
+import {isArray} from '../../../src/core/types';
 import {isFiniteNumber, isObject} from '../../../src/types';
 
 const BATCH_INTERVAL_MIN = 200;

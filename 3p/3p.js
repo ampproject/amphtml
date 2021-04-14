@@ -23,7 +23,7 @@
 
 import {devAssert, rethrowAsync, userAssert} from '../src/log';
 import {hasOwn, map} from '../src/utils/object';
-import {isArray} from '../src/core/types/array';
+import {isArray} from '../src/core/types';
 
 /** @typedef {function(!Window, !Object)}  */
 let ThirdPartyFunctionDef;

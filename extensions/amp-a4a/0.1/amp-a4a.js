@@ -72,8 +72,9 @@ import {
   measureIntersection,
 } from '../../../src/utils/intersection';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {isArray} from '../../../src/core/types/array';
-import {isEnumValue, isObject} from '../../../src/types';
+import {isArray, isEnumValue} from '../../../src/core/types';
+
+import {isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
 import {
   observeWithSharedInOb,

@@ -17,7 +17,8 @@
 import {ConsentPolicyManager} from './consent-policy-manager'; // eslint-disable-line no-unused-vars
 import {TCF_POST_MESSAGE_API_COMMANDS} from './consent-info';
 import {hasOwn, map} from '../../../src/utils/object';
-import {isEnumValue, isObject} from '../../../src/types';
+import {isEnumValue} from '../../../src/core/types';
+import {isObject} from '../../../src/types';
 import {user} from '../../../src/log';
 
 /**

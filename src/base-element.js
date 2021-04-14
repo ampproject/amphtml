@@ -21,7 +21,7 @@ import {devAssert, user, userAssert} from './log';
 import {dispatchCustomEvent} from './dom';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
-import {isArray} from './core/types/array';
+import {isArray} from './core/types';
 import {toWin} from './types';
 
 /**

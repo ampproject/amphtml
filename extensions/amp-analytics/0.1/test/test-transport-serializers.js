@@ -16,7 +16,7 @@
 
 import {TransportSerializers} from '../transport-serializer';
 import {dict} from '../../../../src/utils/object';
-import {isArray} from '../../../../src/core/types/array';
+import {isArray} from '../../../../src/core/types';
 
 /**
  * Please add your custom test data here in alphabetic order.
