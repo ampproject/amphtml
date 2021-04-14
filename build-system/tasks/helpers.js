@@ -625,6 +625,12 @@ async function minifyWithTerser(destDir, destFilename, options) {
 }
 
 /**
+ * The set of entrypoints currently watched by compileJs.
+ * @type {Set<string>}
+ */
+const watchedEntryPoints = new Set();
+
+/**
  * Bundles (max) or compiles (min) a given JavaScript file entry point.
  *
  * @param {string} srcDir Path to the src directory
@@ -635,6 +641,16 @@ async function minifyWithTerser(destDir, destFilename, options) {
  */
 async function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
+  const entryPoint = path.join(srcDir, srcFilename);
+  if (watchedEntryPoints.has(entryPoint)) {
+    return;
+  }
+
+  if (options.watch) {
+    watchedEntryPoints.add(entryPoint);
+    const deps = await getDependencies(entryPoint);
+    watch(deps).on('change', debounce(doCompileJs, watchDebounceDelay));
+  }
 
   async function doCompileJs(modifiedFile) {
     if (options.minified && modifiedFile) {
@@ -648,12 +664,6 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
       options.onWatchBuild(buildResult);
     }
     await buildResult;
-  }
-
-  if (options.watch) {
-    const entryPoint = path.join(srcDir, srcFilename);
-    const deps = await getDependencies(entryPoint);
-    watch(deps).on('change', debounce(doCompileJs, watchDebounceDelay));
   }
 
   await doCompileJs();
