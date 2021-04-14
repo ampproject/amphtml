@@ -526,7 +526,7 @@ You will need to find a [Reviewer and Owner](https://github.com/ampproject/ampht
 
 When you're new to contributing to AMP it can be tricky to figure out who should review your code. In general if you've been working with someone in the community on your change, they can likely review your code or know who can review it. The [people who previously changed the files you're changing](https://help.github.com/en/articles/tracking-changes-in-a-file) are also good candidates for reviewing your change. If you aren't sure who to ask to review your code, the steps for [finding a guide](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md#find-a-guide) can also work for finding a reviewer for your change.
 
-When you're done click "Create pull request." This will bring you to your Pull Request page where you can track progress, add comments, etc.
+This is a good time to make sure that you've signed in to the services used to validate `amphtml` pull requests. See the one-time setup instructions [here](https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-quick.md#one-time-setup). When you're done, click "Create pull request." This will bring you to your Pull Request page where you can track progress, add comments, etc.
 
 On the Pull Request page you can see that a few checks are running:
 
