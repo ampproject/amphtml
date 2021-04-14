@@ -82,7 +82,7 @@ tags: {  # <amp-inline-gallery-thumbnails>
       also_requires_attr: "aspect-ratio-width"
     }
   }
-  attrs: { 
+  attrs: {
     name: "aspect-ratio-width" # 0.1 only
     # Non-zero number
     value_regex: "\\d+(\\.\\d+)?"
@@ -91,7 +91,7 @@ tags: {  # <amp-inline-gallery-thumbnails>
       also_requires_attr: "aspect-ratio-height"
     }
   }
-  attrs: { 
+  attrs: {
     name: "aspect-ratio" # 1.0 only
     # Non-zero number
     value_regex: "\\d+(\\.\\d+)?"
