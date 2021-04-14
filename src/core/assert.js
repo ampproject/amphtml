@@ -114,13 +114,13 @@ function baseAssertType_(
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function baseAssertElement(assertFn, shouldBeElement, opt_message) {
-  return baseAssertType_(
+  return /** @type {!Element} */ (baseAssertType_(
     assertFn,
     shouldBeElement,
     shouldBeElement?.nodeType == 1,
     'Element expected',
     opt_message
-  );
+  ));
 }
 
 /**
