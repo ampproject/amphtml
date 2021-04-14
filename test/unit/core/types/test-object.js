@@ -16,7 +16,7 @@
 
 import * as object from '../../../../src/core/types/object';
 
-describe('Object', () => {
+describes.sandboxed('type helpers - objects', {}, () => {
   it('hasOwn', () => {
     expect(object.hasOwn(object.map(), 'a')).to.be.false;
     expect(object.hasOwn(object.map({'a': 'b'}), 'b')).to.be.false;
