@@ -39,6 +39,9 @@ const BITRATE_BY_EFFECTIVE_TYPE = {
 /** @const {number} Do not downgrade the quality of a video that has loaded enough content */
 const BUFFERED_THRESHOLD_PERCENTAGE = 0.8;
 
+/** @const {string} Simulates video being buffered (fully loaded) for the bitrate algorithm. */
+const VIDEO_BUFFERED_DEBUG_ATTR = 'i-amphtml-video-buffered-debug';
+
 /** @type {!BitrateManager|undefined} */
 let instance;
 /**
@@ -102,20 +105,27 @@ export class BitrateManager {
     if (video.changedSources) {
       return;
     }
-    onNontrivialWait(video, () => {
-      const current = currentSource(video);
-      const newBitrate = current.bitrate_ - 1;
-      if (newBitrate >= this.acceptableBitrate_) {
-        return;
-      }
-      this.acceptableBitrate_ = newBitrate;
-      this.switchToLowerBitrate_(video, current.bitrate_);
-      this.updateOtherManagedAndPausedVideos_();
-    });
+    onNontrivialWait(video, this.downgradeVideo_);
+    listen(video, 'downgrade', () => this.downgradeVideo_(video));
     video.changedSources = () => {
       this.sortSources_(video);
     };
     this.videos_.push(DomBasedWeakRef.make(this.win, video));
+  }
+
+  /**
+   * Callback to try downgrade a video when it doesn't load properly.
+   * @param {!Element} video
+   */
+  downgradeVideo_(video) {
+    const current = currentSource(video);
+    const newBitrate = current.bitrate_ - 1;
+    if (newBitrate >= this.acceptableBitrate_) {
+      return;
+    }
+    this.acceptableBitrate_ = newBitrate;
+    this.switchToLowerBitrate_(video, current.bitrate_);
+    this.updateOtherManagedAndPausedVideos_();
   }
 
   /**
@@ -261,13 +271,10 @@ export class BitrateManager {
       const video = weakref.deref();
       if (!video) {
         this.videos_.splice(i, 1);
-        return;
+        continue;
       }
-      if (
-        !video.paused ||
-        getBufferedPercentage(video) > BUFFERED_THRESHOLD_PERCENTAGE
-      ) {
-        return;
+      if (!video.paused || isVideoLoaded(video)) {
+        continue;
       }
       const hasChanges = this.sortSources_(video);
       if (hasChanges) {
@@ -343,4 +350,16 @@ function getBufferedPercentage(videoEl) {
     bufferedSum += videoEl.buffered.end(i) - videoEl.buffered.start(i);
   }
   return bufferedSum / videoEl.duration;
+}
+
+/**
+ * Whether the video is loaded (so it should not be downgraded)
+ * @param {!Element} videoEl
+ * @return {boolean}
+ */
+function isVideoLoaded(videoEl) {
+  if (videoEl.hasAttribute(VIDEO_BUFFERED_DEBUG_ATTR)) {
+    return videoEl.getAttribute(VIDEO_BUFFERED_DEBUG_ATTR) === 'true';
+  }
+  return getBufferedPercentage(videoEl) > BUFFERED_THRESHOLD_PERCENTAGE;
 }
