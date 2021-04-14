@@ -163,7 +163,7 @@ export class AmpRender extends BaseElement {
       if (!src || isAmpStateSrc(src) || isAmpScriptSrc(src)) {
         return;
       }
-      api./*OK*/ refresh();
+      api.refresh();
     });
 
     return dict({
