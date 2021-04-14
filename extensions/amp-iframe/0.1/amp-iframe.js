@@ -35,10 +35,6 @@ import {
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isExperimentOn} from '../../../src/experiments';
 import {moveLayoutRect} from '../../../src/layout-rect';
-import {
-  observeDisplay,
-  unobserveDisplay,
-} from '../../../src/utils/display-observer';
 import {parseJson} from '../../../src/json';
 import {removeElement} from '../../../src/dom';
 import {removeFragment} from '../../../src/url';
@@ -96,9 +92,6 @@ export class AmpIframe extends AMP.BaseElement {
 
     /** @private  {?HTMLIFrameElement} */
     this.iframe_ = null;
-
-    /** @private  {boolean} */
-    this.isDisplayed_ = false;
 
     /** @private {boolean} */
     this.isResizable_ = false;
@@ -489,9 +482,6 @@ export class AmpIframe extends AMP.BaseElement {
 
     this.container_.appendChild(iframe);
 
-    this.isDisplayed_ = false;
-    observeDisplay(this.element, this.onDisplay_);
-
     return this.loadPromise(iframe).then(() => {
       // On iOS the iframe at times fails to render inside the `overflow:auto`
       // container. To avoid this problem, we set the `overflow:auto` property
@@ -582,7 +572,6 @@ export class AmpIframe extends AMP.BaseElement {
    * @override
    **/
   unlayoutCallback() {
-    unobserveDisplay(this.element, this.onDisplay_);
     if (this.unlistenPym_) {
       this.unlistenPym_();
       this.unlistenPym_ = null;
@@ -637,21 +626,6 @@ export class AmpIframe extends AMP.BaseElement {
   /** @override */
   unlayoutOnPause() {
     return true;
-  }
-
-  /**
-   * @param {boolean} isDisplayed
-   * @private
-   */
-  onDisplay_(isDisplayed) {
-    if (isDisplayed === this.isDisplayed_) {
-      return;
-    }
-    this.isDisplayed_ = isDisplayed;
-    const hasOwner = !!this.element.getOwner();
-    if (!isDisplayed && !hasOwner && this.iframe_) {
-      this.getVsync().mutate(() => this.unload());
-    }
   }
 
   /**

@@ -462,6 +462,13 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
   line-height: normal;
 }
 
+/**
+ * "overflow" element must not contribute space to a size-defined element.
+ */
+.i-amphtml-layout-size-defined > [overflow] {
+  position: absolute;
+}
+
 .i-amphtml-element > [overflow].amp-visible {
   visibility: visible;
 }

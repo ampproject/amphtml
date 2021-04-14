@@ -40,9 +40,7 @@ describe.configure().run('CSS', () => {
     expect(overflowRect.height).to.be.greaterThan(0);
     // The amp-iframe has a 1:1 aspect ratio, and its height should be
     // incremented by the overflow's height.
-    expect(
-      Math.abs(iframeRect.width + overflowRect.height) - iframeRect.height
-    ).to.lessThan(2);
+    expect(Math.abs(iframeRect.width - iframeRect.height)).to.lessThan(2);
   });
 
   it('should include height of [placeholder] child in size before build', async () => {

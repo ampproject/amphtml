@@ -16,6 +16,7 @@
 
 import {ConsentPolicyManager} from './consent-policy-manager'; // eslint-disable-line no-unused-vars
 import {TCF_POST_MESSAGE_API_COMMANDS} from './consent-info';
+import {hasOwn, map} from '../../../src/utils/object';
 import {isEnumValue, isObject} from '../../../src/types';
 import {user} from '../../../src/log';
 
@@ -57,6 +58,21 @@ export class TcfApiCommandManager {
   constructor(policyManager) {
     /** @private {!./consent-policy-manager.ConsentPolicyManager} */
     this.policyManager_ = policyManager;
+
+    /** @private {!Object<number, Object>} */
+    this.changeListeners_ = map();
+
+    /** @private {?string} */
+    this.currentTcString_ = null;
+
+    /** @private {number} */
+    this.listenerId_ = 0;
+
+    // Set the policy manager to signal to us
+    // when a new TC has potentially been stored.
+    policyManager.setOnPolicyChange(() => {
+      this.handleTcDataChange_();
+    });
   }
 
   /**
@@ -78,10 +94,85 @@ export class TcfApiCommandManager {
         this.handleGetTcData_(payload, win);
         break;
       case TCF_POST_MESSAGE_API_COMMANDS.ADD_EVENT_LISTENER:
+        this.handleAddEventListner_(payload, win);
+        break;
       case TCF_POST_MESSAGE_API_COMMANDS.REMOVE_EVENT_LISTENER:
+        this.handleRemoveEventListner_(payload, win);
+        break;
       default:
         return;
     }
+  }
+
+  /**
+   * Add a entry to our changeListeners to signify that there
+   * is another iframe intrested in listening for TCData changes.
+   *
+   * Each entry has a unique `listenerId` that will be sent
+   * back to the 3p iframe.
+   * @param {!Object} payload
+   * @param {!Window} win
+   */
+  handleAddEventListner_(payload, win) {
+    if (this.changeListeners_[this.listenerId_]) {
+      return;
+    }
+    this.changeListeners_[this.listenerId_] = {
+      payload,
+      win,
+    };
+    this.listenerId_++;
+  }
+
+  /**
+   * @param {!Object} payload
+   * @param {!Window} win
+   */
+  handleRemoveEventListner_(payload, win) {
+    const {callId, parameter} = payload;
+    const success = !!this.changeListeners_[parameter];
+    if (success) {
+      delete this.changeListeners_[parameter];
+    }
+
+    this.sendTcfApiReturn_(win, /** returnValue */ undefined, callId, success);
+  }
+
+  /**
+   * Handler for when policy manager signal potential TCData
+   * change. Only triggers new TCData to be sent if TC String
+   * has been change and is non-null.
+   */
+  handleTcDataChange_() {
+    if (!Object.keys(this.changeListeners_).length) {
+      return;
+    }
+
+    this.getTcDataPromises_().then((consentPromises) => {
+      const newTcString = consentPromises[2];
+      if (!newTcString || newTcString === this.currentTcString_) {
+        return;
+      }
+
+      this.currentTcString_ = newTcString;
+      const listenerIds = Object.keys(this.changeListeners_);
+      for (let i = 0; i < listenerIds.length; i++) {
+        const listenerId = Number(listenerIds[i]);
+        if (!hasOwn(this.changeListeners_, listenerId)) {
+          continue;
+        }
+        const {payload, win} = this.changeListeners_[listenerId];
+        const {callId} = payload;
+        const returnValue = this.getMinimalTcData_(
+          consentPromises[0],
+          consentPromises[1],
+          newTcString,
+          listenerId
+        );
+
+        this.sendTcfApiReturn_(win, returnValue, callId, true);
+      }
+    });
   }
 
   /**
@@ -218,7 +309,10 @@ export class TcfApiCommandManager {
       );
       return false;
     }
-    if (parameter) {
+    if (
+      parameter &&
+      command != TCF_POST_MESSAGE_API_COMMANDS.REMOVE_EVENT_LISTENER
+    ) {
       user().error(
         TAG,
         `Unsupported parameter found in "tcfapiCall": ${parameter}`
@@ -245,10 +339,11 @@ export class TcfApiCommandManager {
    * @param {?Object} metadata
    * @param {?Object} sharedData
    * @param {?string} tcString
+   * @param {number=} listenerId
    * @return {!MinimalPingReturn}
    * @visibleForTesting
    */
-  getMinimalTcDataForTesting(metadata, sharedData, tcString) {
-    return this.getMinimalTcData_(metadata, sharedData, tcString);
+  getMinimalTcDataForTesting(metadata, sharedData, tcString, listenerId) {
+    return this.getMinimalTcData_(metadata, sharedData, tcString, listenerId);
   }
 }

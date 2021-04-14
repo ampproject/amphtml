@@ -17,7 +17,6 @@
 import {ActionTrust} from '../../../../src/action-constants';
 import {AmpIframe, setTrackingIframeTimeoutForTesting} from '../amp-iframe';
 import {CommonSignals} from '../../../../src/common-signals';
-import {DisplayObserver} from '../../../../src/utils/display-observer';
 import {LayoutPriority} from '../../../../src/layout';
 import {Services} from '../../../../src/services';
 import {
@@ -84,14 +83,6 @@ describes.realWin(
       setTrackingIframeTimeoutForTesting(20);
       resizeObserverStub = installResizeObserverStub(env.sandbox, win);
     });
-
-    function setDisplay(aTarget, value) {
-      displayObserverTargets.forEach(({target, callback}) => {
-        if (target === aTarget) {
-          callback(value);
-        }
-      });
-    }
 
     function stubUserAsserts() {
       const errors = [];

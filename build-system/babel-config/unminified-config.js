@@ -16,6 +16,9 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const {
+  VERSION: internalRuntimeVersion,
+} = require('../compile/internal-version');
 const {getReplacePlugin} = require('./helpers');
 
 /**
@@ -39,7 +42,7 @@ function getUnminifiedConfig() {
     '@babel/preset-env',
     {
       bugfixes: true,
-      modules: 'commonjs',
+      modules: false,
       loose: true,
       targets,
     },
@@ -49,6 +52,10 @@ function getUnminifiedConfig() {
     argv.coverage ? 'babel-plugin-istanbul' : null,
     replacePlugin,
     './build-system/babel-plugins/babel-plugin-transform-json-import',
+    [
+      './build-system/babel-plugins/babel-plugin-transform-internal-version',
+      {version: internalRuntimeVersion},
+    ],
     './build-system/babel-plugins/babel-plugin-transform-json-configuration',
     './build-system/babel-plugins/babel-plugin-transform-jss',
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',

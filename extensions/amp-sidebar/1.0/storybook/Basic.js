@@ -49,12 +49,14 @@ function SidebarWithActions(props) {
           <button onClick={() => ref.current.toggle()}>toggle</button>
           <button onClick={() => ref.current.open()}>open</button>
           <button onClick={() => ref.current.close()}>close</button>
+          {props.children}
         </div>
       </Sidebar>
       <div style={{marginTop: 8}}>
         <button onClick={() => ref.current.toggle()}>toggle</button>
         <button onClick={() => ref.current.open()}>open</button>
         <button onClick={() => ref.current.close()}>close</button>
+        {props.moreBackgroundContent}
       </div>
     </>
   );

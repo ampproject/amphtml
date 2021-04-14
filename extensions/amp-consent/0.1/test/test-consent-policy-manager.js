@@ -415,6 +415,65 @@ describes.realWin(
           return Promise.all(promises);
         });
       });
+
+      describe('setOnPolicyChange', () => {
+        let policy;
+        beforeEach(() => {
+          manager = new ConsentPolicyManager(ampdoc);
+          consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
+          manager.setLegacyConsentInstanceId('ABC');
+          policy = expandPolicyConfig(dict({}), 'ABC');
+          const keys = Object.keys(policy);
+          for (let i = 0; i < keys.length; i++) {
+            manager.registerConsentPolicyInstance(keys[i], policy[keys[i]]);
+          }
+        });
+
+        it('will not fire, if not set', () => {
+          manager.consentStateChangeHandler_(
+            constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'abc123')
+          );
+          expect(manager.tcfConsentChangeHandler_).is.null;
+        });
+
+        it('will fire only fire for a valid change', () => {
+          const spy = window.sandbox.spy();
+          manager.setOnPolicyChange(spy);
+          expect(manager.tcfConsentChangeHandler_).to.not.be.null;
+
+          manager.consentStateChangeHandler_(
+            constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'abc123')
+          );
+          expect(spy).to.be.calledOnce;
+
+          // Unknown does not trigger change.
+          manager.consentStateChangeHandler_(
+            constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN, '321cba')
+          );
+          expect(spy).to.be.calledOnce;
+        });
+
+        it('will fire on multiple changes', () => {
+          const spy = window.sandbox.spy();
+          manager.setOnPolicyChange(spy);
+          expect(manager.tcfConsentChangeHandler_).to.not.be.null;
+
+          manager.consentStateChangeHandler_(
+            constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'abc123')
+          );
+          expect(spy).to.be.calledOnce;
+
+          manager.consentStateChangeHandler_(
+            constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'abc123')
+          );
+          expect(spy).to.be.calledTwice;
+
+          manager.consentStateChangeHandler_(
+            constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'xyz123')
+          );
+          expect(spy).to.be.calledThrice;
+        });
+      });
     });
 
     describe('Consent Policy Instance', () => {

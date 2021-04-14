@@ -456,6 +456,25 @@ describes.realWin(
         win.document.dir = documentDir;
       });
 
+      it('should have `overscroll-behavior: none` to prevent background scrolling', async () => {
+        // open the sidebar
+        openButton.click();
+        await waitForOpen(element, true);
+        expect(element).to.have.attribute('open');
+
+        const {
+          firstElementChild: sidebarElement,
+          lastElementChild: backdropElement,
+        } = container;
+
+        expect(
+          win.getComputedStyle(sidebarElement).overscrollBehavior
+        ).to.equal('none');
+        expect(
+          win.getComputedStyle(backdropElement).overscrollBehavior
+        ).to.equal('none');
+      });
+
       describe('programatic access to imperative API', () => {
         it('open', async () => {
           // sidebar is initially closed

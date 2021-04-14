@@ -16,11 +16,12 @@
 
 import {createUseStyles} from 'react-jss';
 
-const sidebarClass = {
+const sidebar = {
   position: 'fixed !important',
   overflowX: 'hidden !important',
   overflowY: 'auto !important',
   boxSizing: 'border-box !important',
+  overscrollBehavior: 'none !important',
 };
 
 // User overridable styles
@@ -44,12 +45,13 @@ const right = {
   right: 0,
 };
 
-const backdropClass = {
+const backdrop = {
   position: 'fixed !important',
   top: '0 !important',
   left: '0 !important',
-  width: '100vw !important',
+  width: '120vw !important',
   height: '100vh !important',
+  overflow: 'hidden scroll !important',
   /* Prevent someone from making this a full-sceen image */
   backgroundImage: 'none !important',
   overscrollBehavior: 'none !important',
@@ -73,10 +75,8 @@ const unmounted = {
 };
 
 const JSS = {
-  sidebarClass,
+  sidebar,
   defaultSidebarStyles,
-  backdropClass,
-  defaultBackdropStyles,
   left,
   right,
   backdrop,

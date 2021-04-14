@@ -56,6 +56,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
 
     afterEach(() => {
       Element.prototype.animate = animateFunction;
+      wrapper.unmount();
     });
 
     it('close the sidebar when the backdrop is clicked', () => {
