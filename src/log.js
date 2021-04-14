@@ -190,11 +190,12 @@ export class Log {
     });
 
     const assertFn = this.assert.bind(this);
-    this.assertElement = baseAssertElement.bind(null, assertFn);
-    this.assertString = baseAssertString.bind(null, assertFn);
-    this.assertNumber = baseAssertNumber.bind(null, assertFn);
-    this.assertArray = baseAssertArray.bind(null, assertFn);
-    this.assertBoolean = baseAssertBoolean.bind(null, assertFn);
+    const wrap = (typeAssertFn) => typeAssertFn.bind(null, assertFn);
+    this.assertElement = wrap(baseAssertElement);
+    this.assertString = wrap(baseAssertString);
+    this.assertNumber = wrap(baseAssertNumber);
+    this.assertArray = wrap(baseAssertArray);
+    this.assertBoolean = wrap(baseAssertBoolean);
   }
 
   /**

@@ -75,7 +75,6 @@ export function baseAssert(
  * default. An interpolation token is added at the end to include the `subject`.
  * @param {!function} assertFn underlying assertion function to call
  * @param {*} subject
- * @param {*} assertion
  * @param shouldBeTruthy
  * @param {string} defaultMessage
  * @param {!Array|string=} opt_message
@@ -311,3 +310,46 @@ export function pureDevAssert(
     opt_9
   );
 }
+
+/**
+ * Given an assertion function, produces the type assertion variants. Allows
+ * AMP Log to use its own wrapped assertion method.
+ * @param {!function} assertFn
+//  * @return {!Object}
+//  */
+// export function typeAssertions(assertFn) {
+//   return {
+//     assertElement: baseAssertElement.bind(null, assertFn),
+//     assertString: baseAssertString.bind(null, assertFn),
+//     assertNumber: baseAssertNumber.bind(null, assertFn),
+//     assertArray: baseAssertArray.bind(null, assertFn),
+//     assertBoolean: baseAssertBoolean.bind(null, assertFn),
+//   };
+// }
+
+// /**
+//  * Creates a set of assertions using the provided sentinel string, if any.
+//  * @param {string|undefined} sentinel
+//  * @return {!Object}
+//  */
+// function Assertions(sentinel) {
+//   const assert = baseAssert.bind(null, sentinel);
+//   return {assert, ...typeAssertions(assert)};
+// }
+
+export const userAsserts = {
+  assert: pureUserAssert,
+  assertElement: baseAssertElement.bind(null, pureUserAssert),
+  assertString: baseAssertString.bind(null, pureUserAssert),
+  assertNumber: baseAssertNumber.bind(null, pureUserAssert),
+  assertArray: baseAssertArray.bind(null, pureUserAssert),
+  assertBoolean: baseAssertBoolean.bind(null, pureUserAssert),
+};
+export const devAsserts = {
+  assert: pureUserAssert,
+  assertElement: baseAssertElement.bind(null, pureUserAssert),
+  assertString: baseAssertString.bind(null, pureUserAssert),
+  assertNumber: baseAssertNumber.bind(null, pureUserAssert),
+  assertArray: baseAssertArray.bind(null, pureUserAssert),
+  assertBoolean: baseAssertBoolean.bind(null, pureUserAssert),
+};
