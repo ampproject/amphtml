@@ -16,12 +16,8 @@
 
 const fs = require('fs');
 const selenium = require('selenium-webdriver');
-const {
-  DOMRectDef,
-  ElementHandle,
-  Key,
-} = require('./functional-test-controller');
 const {ControllerPromise} = require('./controller-promise');
+const {DOMRectDef, ElementHandle, Key} = require('./functional-test-types');
 const {expect} = require('chai');
 const {NetworkLogger} = require('./network-logger');
 
@@ -84,7 +80,6 @@ async function waitFor(driver, valueFn, condition, opt_mutate) {
   return result.value; // Unbox the value.
 }
 
-/** @implements {FunctionalTestController} */
 class SeleniumWebDriverController {
   /**
    * @param {!selenium.WebDriver} driver
