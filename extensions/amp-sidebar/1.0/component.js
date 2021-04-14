@@ -185,6 +185,7 @@ export {Sidebar};
  * @return {PreactDef.Renderable}
  */
 export function SidebarToolbar({
+  as: Comp = 'nav',
   toolbar: mediaQueryProp,
   toolbarTarget,
   children,
@@ -195,13 +196,17 @@ export function SidebarToolbar({
   const [targetEl, setTargetEl] = useState(null);
 
   useEffect(() => {
+    console.log('in useeffect', ref.current.parentElement.parentElement);
     const window = ref.current?.ownerDocument?.defaultView;
     if (!window) {
       return;
     }
 
     const mediaQueryList = window.matchMedia(mediaQueryProp);
-    const updateMatches = () => setMatches(mediaQueryList.matches);
+    const updateMatches = () => {
+      console.log('matches:', mediaQueryList.matches);
+      setMatches(mediaQueryList.matches);
+    };
     mediaQueryList.addEventListener('change', updateMatches);
     setMatches(mediaQueryList.matches);
     return () => mediaQueryList.removeEventListener('change', updateMatches);
@@ -215,20 +220,24 @@ export function SidebarToolbar({
 
     const selector = `#${CSS.escape(toolbarTarget)}`;
     const newTargetEl = document.querySelector(selector);
+    console.log('targetEl', newTargetEl, selector);
     setTargetEl(newTargetEl);
   }, [toolbarTarget]);
 
+  console.log('matches', matches, targetEl, children, rest);
+
   return (
     <>
-      <nav
+      <Comp
         ref={ref}
         toolbar={mediaQueryProp}
         toolbar-target={toolbarTarget}
         {...rest}
       >
         {children}
-      </nav>
+      </Comp>
       {matches && targetEl && createPortal(children, targetEl)}
+      {matches && targetEl && createPortal('children', targetEl)}
     </>
   );
 }

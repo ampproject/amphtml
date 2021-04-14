@@ -61,7 +61,7 @@ amp-sidebar::part(sidebar) {
  * styling is not shown directly on amp-sidebar element.
  */
 amp-sidebar {
-  visibility: hidden !important;
+  /*visibility: hidden !important;*/
   position: fixed !important;
 }
 

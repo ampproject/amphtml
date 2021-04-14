@@ -81,6 +81,56 @@ export const _default = () => {
   );
 };
 
+export const toolbar = () => {
+  const sideConfigurations = ['left', 'right', undefined];
+  const side = select('side', sideConfigurations, sideConfigurations[0]);
+  const foregroundColor = color('color');
+  const backgroundColor = color('background');
+  const backdropColor = color('backdrop color');
+
+  return (
+    <main>
+      <style>
+        {`
+          amp-sidebar {
+              color: ${foregroundColor};
+              background-color: ${backgroundColor};
+          }
+          amp-sidebar::part(backdrop) {
+              background-color: ${backdropColor};
+          }
+          `}
+      </style>
+      <amp-sidebar layout="nodisplay" id="sidebar" side={side}>
+        <span>
+          Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque
+          inermis reprehendunt.
+        </span>
+        <ul>
+          <li>1</li>
+          <li>2</li>
+          <li>3</li>
+        </ul>
+        <nav toolbar="(max-width: 500px)" toolbar-target="toolbar-target">
+          <ul>
+            <li>Toolbar Item 1</li>
+            <li>Toolbar Item 2</li>
+          </ul>
+        </nav>
+        <button on="tap:sidebar.toggle()">toggle</button>
+        <button on="tap:sidebar.open()">open</button>
+        <button on="tap:sidebar.close()">close</button>
+      </amp-sidebar>
+      <div class="buttons" style={{margin: 8}}>
+        <button on="tap:sidebar.toggle()">toggle</button>
+        <button on="tap:sidebar.open()">open</button>
+        <button on="tap:sidebar.close()">close</button>
+      </div>
+      <div id="toolbar-target">target</div>
+    </main>
+  );
+};
+
 export const styles = () => {
   const sideConfigurations = ['left', 'right', undefined];
   const side = select('side', sideConfigurations, sideConfigurations[0]);
