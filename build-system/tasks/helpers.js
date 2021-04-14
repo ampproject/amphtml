@@ -39,7 +39,7 @@ const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
 const {removeFromClosureBabelCache} = require('../compile/pre-closure-babel');
 const {thirdPartyFrames} = require('../test-configs/config');
-const {watch: fileWatch, watch} = require('chokidar');
+const {watch} = require('chokidar');
 
 /** @type {Remapping.default} */
 const remapping = /** @type {*} */ (Remapping);
@@ -134,7 +134,7 @@ async function bootstrapThirdPartyFrames(options) {
       const watchFunc = async () => {
         await thirdPartyBootstrap(frameObject.max, frameObject.min, options);
       };
-      fileWatch(frameObject.max).on(
+      watch(frameObject.max).on(
         'change',
         debounce(watchFunc, watchDebounceDelay)
       );
@@ -636,7 +636,7 @@ async function minifyWithTerser(destDir, destFilename, options) {
 async function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
 
-  async function compile(modifiedFile) {
+  async function doCompileJs(modifiedFile) {
     if (options.minified && modifiedFile) {
       removeFromClosureBabelCache(modifiedFile);
     }
@@ -653,10 +653,10 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
   if (options.watch) {
     const entryPoint = path.join(srcDir, srcFilename);
     const deps = await getDependencies(entryPoint);
-    watch(deps).on('change', debounce(compile, watchDebounceDelay));
+    watch(deps).on('change', debounce(doCompileJs, watchDebounceDelay));
   }
 
-  await compile();
+  await doCompileJs();
 }
 
 /**
@@ -857,7 +857,6 @@ module.exports = {
   compileJsWithEsbuild,
   doBuildJs,
   endBuildStep,
-  getDependencies,
   compileUnminifiedJs,
   maybePrintCoverageMessage,
   maybeToEsmName,

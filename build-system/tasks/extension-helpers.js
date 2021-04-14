@@ -23,12 +23,14 @@ const {
   extensionAliasBundles,
   extensionBundles,
   verifyExtensionBundles,
+  jsBundles,
 } = require('../compile/bundles.config');
 const {
   maybeToEsmName,
   compileJs,
   compileJsWithEsbuild,
   mkdirSync,
+  doBuildJs,
 } = require('./helpers');
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
 const {compileJison} = require('./compile-jison');
@@ -482,6 +484,9 @@ async function buildExtension(
   }
 
   await compileJison(path.join(extDir, '**', '*.jison'));
+  if (name === 'amp-bind') {
+    await doBuildJs(jsBundles, 'ww.max.js', {...options, watch: false});
+  }
   if (options.npm) {
     await buildNpmBinaires(extDir, options);
   }
