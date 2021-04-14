@@ -62,7 +62,7 @@ let transform;
  */
 function updatePreprocessors(config) {
   const createHtmlTransformer = function () {
-    return function (content, file, done) {
+    return function (content, _file, done) {
       if (!transform) {
         const outputDir = `../../../${SERVER_TRANSFORM_PATH}/dist/transform`;
         transform = require(outputDir).transformSync;

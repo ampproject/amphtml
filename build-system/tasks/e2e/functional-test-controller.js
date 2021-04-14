@@ -26,10 +26,9 @@ class ElementHandle {
   /**
    * Wrap the framework-specific element handle object.
    * @param {!T} element
-   * @param {!T} unusedController
    * @package
    */
-  constructor(element, unusedController) {
+  constructor(element) {
     /** @private */
     this.element_ = element;
   }

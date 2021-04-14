@@ -14,6 +14,11 @@ declare global {
   interface EslintContext {
     report: (val: any) => void;
   }
+
+  interface Window {
+    queryXpath: (xpath: string, root: unknown /** Puppeteer.ElementHandle */) => unknown[] | null;
+    AMP: Function[];
+  }
 }
 
 export { }
