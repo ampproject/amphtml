@@ -37,7 +37,6 @@ import {isMinifiedMode} from './minified-mode';
  * @param {string} opt_message
  * @param {...*} var_args Arguments substituted into %s in the message
  * @return {T}
- * @template {T}
  * @throws {Error} when shouldBeTruthy is not truthy.
  * @closurePrimitive {asserts.truthy}
  */
@@ -84,7 +83,6 @@ export function baseAssert(
  * @param {string} defaultMessage
  * @param {Array|string=} opt_message
  * @return {T}
- * @template {T}
  * @private
  */
 function baseAssertType_(
