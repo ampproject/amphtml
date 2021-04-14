@@ -21,6 +21,7 @@ import '../amp-render';
 import * as BatchedJsonModule from '../../../../src/batched-json';
 import {ActionInvocation} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
+import {Services} from '../../../../src/services';
 import {htmlFor} from '../../../../src/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';
@@ -219,6 +220,10 @@ describes.realWin(
         'batchFetchJsonFor'
       );
 
+      const bindStub = env.sandbox
+        .stub(Services, 'bindForDocOrNull')
+        .callThrough();
+
       const ampState = html`
         <amp-state id="theFood">
           <script type="application/json">
@@ -243,10 +248,12 @@ describes.realWin(
       doc.body.appendChild(element);
 
       await getRenderedData();
+      expect(bindStub).to.have.been.calledOnce;
       expect(fetchJsonStub).not.to.have.been.called;
 
       element.enqueAction(invocation('refresh'));
       await getRenderedData();
+      expect(bindStub).to.have.been.calledOnce;
       expect(fetchJsonStub).not.to.have.been.called;
     });
 
@@ -290,10 +297,12 @@ describes.realWin(
       env.sandbox.stub(ampScript, 'getImpl').resolves(impl);
 
       await getRenderedData();
+      expect(ampScript.getImpl).to.have.been.calledOnce;
       expect(fetchJsonStub).not.to.have.been.called;
 
       element.enqueAction(invocation('refresh'));
       await getRenderedData();
+      expect(ampScript.getImpl).to.have.been.calledOnce;
       expect(fetchJsonStub).not.to.have.been.called;
     });
   }
