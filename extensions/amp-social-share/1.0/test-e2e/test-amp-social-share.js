@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Key} from '../../../../build-system/tasks/e2e/functional-test-controller';
+import {Key} from '../../../../build-system/tasks/e2e/functional-test-types';
 
 describes.endtoend(
   'amp-social-share',
