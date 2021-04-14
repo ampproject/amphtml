@@ -27,7 +27,6 @@ import {
 import {listenOncePromise} from '../../../../src/event-helper';
 import {macroTask} from '../../../../testing/yield';
 import {parseUrlDeprecated} from '../../../../src/url';
-import {user} from '../../../../src/log';
 
 describes.realWin(
   'amp-brightcove',
@@ -96,32 +95,13 @@ describes.realWin(
       });
     }
 
-    // https://go.amp.dev/issue/32706
-    it('should remove `dock`', async () => {
-      const warn = env.sandbox.spy(user(), 'warn');
+    it('should not remove `dock`', async () => {
       const element = await getBrightcoveBuild({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
         'dock': '',
       });
-      expect(element.hasAttribute('dock')).to.be.false;
-      expect(
-        warn.withArgs(
-          env.sandbox.match.any,
-          env.sandbox.match(/`dock` has been disabled/)
-        )
-      ).to.have.been.calledOnce;
-    });
-
-    // https://go.amp.dev/issue/32706
-    it('should not warn without `dock`', async () => {
-      const warn = env.sandbox.spy(user(), 'warn');
-      const element = await getBrightcoveBuild({
-        'data-account': '1290862519001',
-        'data-video-id': 'ref:amp-test-video',
-      });
-      expect(element.hasAttribute('dock')).to.be.false;
-      expect(warn).to.not.have.been.called;
+      expect(element.hasAttribute('dock')).to.be.true;
     });
 
     it('renders', () => {
@@ -134,7 +114,8 @@ describes.realWin(
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.src).to.equal(
           'https://players.brightcove.net/1290862519001/default_default' +
-            '/index.html?videoId=ref:amp-test-video&playsinline=true'
+            '/index.html?amp=1&autoplay=false' +
+            '&videoId=ref:amp-test-video&playsinline=true'
         );
       });
     });
@@ -173,7 +154,8 @@ describes.realWin(
 
         expect(iframe.src).to.equal(
           'https://players.brightcove.net/1290862519001/default_default' +
-            '/index.html?videoId=ref:amp-test-video&playsinline=true'
+            '/index.html?amp=1&autoplay=false' +
+            '&videoId=ref:amp-test-video&playsinline=true'
         );
 
         bc.setAttribute('data-account', '12345');
@@ -185,7 +167,8 @@ describes.realWin(
 
         expect(iframe.src).to.equal(
           'https://players.brightcove.net/' +
-            '12345/default_default/index.html?videoId=abcdef&playsinline=true'
+            '12345/default_default/index.html?amp=1&autoplay=false' +
+            '&videoId=abcdef&playsinline=true'
         );
       });
     });
