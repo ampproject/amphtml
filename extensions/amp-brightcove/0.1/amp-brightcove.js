@@ -135,16 +135,6 @@ class AmpBrightcove extends AMP.BaseElement {
       },
       3000
     ));
-
-    if (this.element.hasAttribute('dock')) {
-      this.mutateElement(() => {
-        user().warn(
-          TAG,
-          '`dock` has been disabled on this element. See https://go.amp.dev/issue/32706 for more information.'
-        );
-        this.element.removeAttribute('dock');
-      });
-    }
   }
 
   /**
@@ -334,11 +324,12 @@ class AmpBrightcove extends AMP.BaseElement {
       `https://players.brightcove.net/${encodeURIComponent(account)}` +
       `/${encodeURIComponent(this.playerId_)}` +
       `_${encodeURIComponent(embed)}/index.html` +
+      '?amp=1&autoplay=false' +
       // These are encodeURIComponent'd in encodeId_().
       (el.getAttribute('data-playlist-id')
-        ? '?playlistId=' + this.encodeId_(el.getAttribute('data-playlist-id'))
+        ? '&playlistId=' + this.encodeId_(el.getAttribute('data-playlist-id'))
         : el.getAttribute('data-video-id')
-        ? '?videoId=' + this.encodeId_(el.getAttribute('data-video-id'))
+        ? '&videoId=' + this.encodeId_(el.getAttribute('data-video-id'))
         : '');
 
     const customReferrer = el.getAttribute('data-referrer');
