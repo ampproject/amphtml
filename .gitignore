@@ -14,11 +14,13 @@ npm-debug.log
 firebase
 firebase.json
 
-# Local cache directories (keep this list in sync with build-system/tasks/clean.js)
+# Local cache directories
+# Keep this list in sync with .eslintignore, .prettierignore, and build-system/tasks/clean.js
 .babel-cache
 .css-cache
 
-# Output directories (keep this list in sync with build-system/tasks/clean.js)
+# Output directories
+# Keep this list in sync with .eslintignore, .prettierignore, and build-system/tasks/clean.js
 .amp-dep-check
 build
 build-system/dist

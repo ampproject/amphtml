@@ -29,11 +29,13 @@ const ROOT_DIR = path.resolve(__dirname, '../../');
  */
 async function clean() {
   const pathsToDelete = [
-    // Local cache directories (keep this list in sync with .gitignore)
+    // Local cache directories
+    // Keep this list in sync with .gitignore, .eslintignore, and .prettierignore
     '.babel-cache',
     '.css-cache',
 
-    // Output directories (keep this list in sync with .gitignore)
+    // Output directories
+    // Keep this list in sync with .gitignore, .eslintignore, and .prettierignore
     '.amp-dep-check',
     'build',
     'build-system/dist',
