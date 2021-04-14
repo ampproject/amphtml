@@ -18,3 +18,19 @@
 
 /** @const */
 var FacebookCommentsDef = {};
+
+/**
+ * @typedef {{
+ *   loading: (string|undefined),
+ *   onReadyState: (function(string, *=)|undefined),
+ *   requestResize: (function(number):*|undefined),
+ *   title: (string|undefined),
+ * }}
+ */
+FacebookCommentsDef.Props;
+
+/** @constructor */
+FacebookCommentsDef.Api = function () {};
+
+/** @type {string} */
+FacebookCommentsDef.Api.prototype.readyState;
