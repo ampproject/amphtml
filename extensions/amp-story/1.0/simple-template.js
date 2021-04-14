@@ -18,7 +18,7 @@ import {createElementWithAttributes} from '../../../src/dom';
 import {devAssert} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';
 import {hasOwn} from '../../../src/utils/object';
-import {isArray} from '../../../src/core/types/array';
+import {isArray} from '../../../src/core/types';
 
 /**
  * @typedef {{

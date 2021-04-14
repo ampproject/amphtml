@@ -27,7 +27,7 @@ import {dev, user} from './log';
 import {disposeServicesForDoc, getServicePromiseOrNullForDoc} from './service';
 import {getMode} from './mode';
 import {installStylesForDoc} from './style-installer';
-import {isArray} from './core/types/array';
+import {isArray} from './core/types';
 import {isObject} from './types';
 import {parseExtensionUrl} from './service/extension-script';
 import {parseUrlDeprecated} from './url';

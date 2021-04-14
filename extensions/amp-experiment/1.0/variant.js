@@ -18,7 +18,7 @@ import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
-import {isArray} from '../../../src/core/types/array';
+import {isArray} from '../../../src/core/types';
 import {isObject} from '../../../src/types';
 
 export const ATTR_PREFIX = 'amp-x-';

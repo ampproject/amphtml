@@ -15,7 +15,7 @@
  */
 import {Services} from './services';
 import {devAssert, userAssert} from './log';
-import {isArray} from './core/types/array';
+import {isArray} from './core/types';
 import {isObject} from './types';
 import {tryParseJson} from './json';
 

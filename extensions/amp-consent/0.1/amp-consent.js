@@ -49,9 +49,10 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {isArray} from '../../../src/core/types/array';
-import {isEnumValue, isObject} from '../../../src/types';
+import {isArray, isEnumValue} from '../../../src/core/types';
+
 import {isExperimentOn} from '../../../src/experiments';
+import {isObject} from '../../../src/types';
 import {toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';

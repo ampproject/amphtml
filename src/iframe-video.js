@@ -18,7 +18,7 @@ import {VideoEvents} from './video-interface';
 import {dev} from './log';
 import {dispatchCustomEvent} from './dom';
 import {htmlFor} from './static-template';
-import {isArray} from './core/types/array';
+import {isArray} from './core/types';
 import {isObject} from './types';
 import {tryParseJson} from './json';
 

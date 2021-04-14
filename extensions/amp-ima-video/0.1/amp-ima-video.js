@@ -32,8 +32,9 @@ import {getConsentPolicyState} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isEnumValue, isObject} from '../../../src/types';
+import {isEnumValue} from '../../../src/core/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {isObject} from '../../../src/types';
 import {
   observeContentSize,
   unobserveContentSize,

@@ -40,7 +40,7 @@ import {getAmpdoc} from '../../../../src/service';
 import {getJsonLd} from '../jsonld';
 import {getLocalizationService} from '../amp-story-localization-service';
 import {getRequestService} from '../amp-story-request-service';
-import {isArray} from '../../../../src/core/types/array';
+import {isArray} from '../../../../src/core/types';
 import {renderAsElement} from '../simple-template';
 import {toggle} from '../../../../src/style';
 

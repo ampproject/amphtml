@@ -23,7 +23,7 @@ import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {getSourceUrl, resolveRelativeUrl} from '../../../../../src/url';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
-import {isArray} from '../../../../../src/core/types/array';
+import {isArray} from '../../../../../src/core/types';
 import {userAssert} from '../../../../../src/log';
 import {userAssertValidProtocol} from '../../utils';
 
