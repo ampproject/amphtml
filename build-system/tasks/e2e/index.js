@@ -33,7 +33,7 @@ const {buildRuntime, getFilesFromArgv} = require('../../common/utils');
 const {cyan} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
-const {isCiBuild} = require('../../common/ci');
+const {isCiBuild, isCircleciBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
 const {reportTestStarted} = require('../report-test-status');
@@ -80,7 +80,7 @@ function createMocha_() {
   let reporter;
   if (argv.testnames || argv.watch) {
     reporter = '';
-  } else if (argv.report) {
+  } else if (argv.report || isCircleciBuild()) {
     reporter = ciReporter;
   } else {
     reporter = dotsReporter;
@@ -93,6 +93,11 @@ function createMocha_() {
     reporter,
     retries: TEST_RETRIES,
     fullStackTrace: true,
+    reporterOptions: isCiBuild()
+      ? {
+          mochaFile: 'result-reports/e2e.xml',
+        }
+      : null,
   });
 }
 

@@ -103,7 +103,7 @@ function isPackageLockFileProperlyUpdated() {
     logWithoutTimestamp(
       loggingPrefix,
       '⤷ To fix this, sync your branch to',
-      cyan('ampproject/amphtml:master') + ', run',
+      cyan('ampproject/amphtml:main') + ', run',
       cyan('npm install') + ', and push a new commit containing the changes.'
     );
     logWithoutTimestamp(loggingPrefix, 'Expected changes:');

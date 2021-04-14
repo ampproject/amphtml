@@ -127,7 +127,9 @@
 }
 
 .i-amphtml-story-page-open-attachment-bar-left,
-.i-amphtml-story-page-open-attachment-bar-right {
+.i-amphtml-story-page-open-attachment-bar-right,
+.i-amphtml-story-outlink-page-open-attachment-bar-left,
+.i-amphtml-story-outlink-page-open-attachment-bar-right {
   position: absolute !important;
   display: block !important;
   height: 3px !important;
@@ -168,8 +170,20 @@
 }
 
 /** For amp-story-inline-page-attachment-v2 experiment elements. */
+.i-amphtml-story-page-open-attachment {
+  --i-amphtml-chip-background-color: rgba(255, 255, 255, 0.5) !important;
+  --i-amphtml-img-background-color: white !important;
+  --i-amphtml-label-text-color: white !important;
+}
+
+[theme="dark"].i-amphtml-story-page-open-attachment {
+  --i-amphtml-chip-background-color: rgba(0, 0, 0, 0.5) !important;
+  --i-amphtml-img-background-color: black !important;
+  --i-amphtml-label-text-color: black !important;
+}
+
 .i-amphtml-story-inline-page-attachment-chip {
-  background-color: rgba(255, 255, 255, 0.5) !important;
+  background-color: var(--i-amphtml-chip-background-color) !important;
   display: flex !important;
   border-radius: 24px !important;
   align-items: center !important;
@@ -190,7 +204,7 @@
 .i-amphtml-story-inline-page-attachment-img {
   height: 48px !important;
   width: 48px !important;
-  background-color: white !important;
+  background-color: var(--i-amphtml-img-background-color) !important;
 }
 
 .i-amphtml-story-inline-page-attachment-img:nth-child(2) {
@@ -205,6 +219,10 @@
   background-position: center !important;
 }
 
+[theme="dark"] .i-amphtml-story-inline-page-attachment-arrow {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 32 32"><path d="M16 32a16 16 0 100-32 16 16 0 000 32z" fill="black"/><path d="M7 19v-2l8-5a1 1 0 112 3l-8 4H7z" fill="white"/><path d="M15 13l2-1 8 5a1 1 0 11-2 2l-8-4v-2z" fill="white"/></svg>') !important;
+}
+
 .i-amphtml-story-inline-page-attachment-label {
   font-family: 'Roboto', sans-serif !important;
   font-size: 16px !important;
@@ -216,4 +234,74 @@
   white-space: nowrap !important;
   max-width: 210px !important;
   margin-bottom: 20px !important;
+  color: var(--i-amphtml-label-text-color) !important;
 }
+
+/** For amp-story-outlink-page-attachment-v2 experiment elements. */
+.i-amphtml-story-outlink-page-attachment-arrow {
+  display: block !important;
+  height: 32px !important;
+  width: 32px !important;
+  cursor: pointer !important;
+  position: relative !important;
+}
+
+.i-amphtml-story-outlink-page-open-attachment-bar-left {
+  background: white !important;
+  left: 6px !important;
+  animation: open-attachment-bar-left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+}
+
+.i-amphtml-story-outlink-page-open-attachment-bar-right {
+  background: white !important;
+  right: 6px !important;
+  animation: open-attachment-bar-right 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+}
+
+.i-amphtml-story-outlink-page-attachment-outlink-chip {
+  display: flex !important;
+  position: relative !important;
+  padding: 10px 6px 10px 6px !important;
+  margin: 0 0 20px 0 !important;
+  height: 16px !important;
+  max-width: calc(100% - 64px) !important;
+  border-radius: 30px !important;
+  background: white !important;
+  color: var(--cta-accent-color, black) !important;
+  place-items: center !important;
+}
+
+.i-amphtml-story-outlink-page-attachment-img {
+  height: 24px !important;
+  width: 24px !important;
+  vertical-align: middle !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  border-radius: 50% !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"><rect width="24" height="24" fill="#E8EAED" rx="12"/><path fill="#000" stroke="#000" stroke-width=".25" d="M9.63 18s0 0 0 0c.98 0 1.9-.38 2.58-1.07l1.47-1.48a.55.55 0 000-.77.55.55 0 00-.77 0l-1.47 1.48a2.53 2.53 0 01-3.6 0 2.53 2.53 0 010-3.6l1.48-1.48a.54.54 0 000-.77.54.54 0 00-.77 0L7.07 11.8a3.62 3.62 0 000 5.14A3.6 3.6 0 009.63 18zM11.09 9.31l1.47-1.48a2.53 2.53 0 013.6 0 2.53 2.53 0 010 3.6l-1.48 1.48a.54.54 0 000 .77.55.55 0 00.77 0l1.48-1.47a3.62 3.62 0 000-5.14A3.61 3.61 0 0014.36 6s0 0 0 0c-.98 0-1.9.38-2.58 1.07l-1.47 1.48a.55.55 0 000 .77c.22.21.57.21.78 0z"/><path fill="#000" stroke="#000" stroke-width=".25" d="M14.63 9.37a.55.55 0 00-.78 0l-4.48 4.48a.55.55 0 00.39.94c.13 0 .28-.06.38-.17l4.48-4.48a.54.54 0 000-.77z"/></svg>') !important;
+}
+
+.i-amphtml-story-outlink-page-attachment-label {
+  display: flex !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  letter-spacing: 0.3px;
+  line-height: 16px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  max-width: 210px !important;
+  padding-inline-start: 6px !important;
+  padding-inline-end: 8px !important;
+}
+
+.i-amphtml-story-outlink-page-attachment-outlink-chip-no-image {
+  padding-inline-start: 14px !important;
+}
+
+.i-amphtml-story-outlink-page-attachment-outlink-chip-no-image > * {
+  padding-inline-start: 0px !important;
+}
+

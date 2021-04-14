@@ -813,11 +813,16 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
 
             # Create module and nomodule extension tagspecs with spec_names
             module_tagspec = copy.deepcopy(tagspec)
-            module_tagspec.spec_name = tagspec.extension_spec.name + (
-                ' module extension script')
+            base_spec_name = module_tagspec.extension_spec.name
+            if module_tagspec.extension_spec.version_name:
+              base_spec_name = (
+                  module_tagspec.extension_spec.name + ' ' +
+                  module_tagspec.extension_spec.version_name)
+            module_tagspec.spec_name = base_spec_name + (' module extension '
+                                                         'script')
             nomodule_tagspec = copy.deepcopy(tagspec)
-            nomodule_tagspec.spec_name = tagspec.extension_spec.name + (
-                ' nomodule extension script')
+            nomodule_tagspec.spec_name = base_spec_name + (' nomodule extension'
+                                                           ' script')
 
             # Module extension specifics
             # Add requires/satisfies pair for module/nomodule

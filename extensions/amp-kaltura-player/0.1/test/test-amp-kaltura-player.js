@@ -120,6 +120,23 @@ describes.realWin(
       });
     });
 
+    it('unlayout and relayout', async () => {
+      const kp = await getKaltura({
+        'data-partner': '1281471',
+        'data-entryid': '1_3ts1ms9c',
+        'data-uiconf': '33502051',
+        'data-param-my-param': 'hello world',
+      });
+      expect(kp.querySelector('iframe')).to.exist;
+
+      const unlayoutResult = kp.unlayoutCallback();
+      expect(unlayoutResult).to.be.true;
+      expect(kp.querySelector('iframe')).to.not.exist;
+
+      await kp.layoutCallback();
+      expect(kp.querySelector('iframe')).to.exist;
+    });
+
     describe('createPlaceholderCallback', () => {
       it('should create a placeholder image', () => {
         return getKaltura({

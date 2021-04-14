@@ -42,7 +42,7 @@ A few important things to note:
 -   An element ID is required, so that the template can be referenced by the ad response.
 -   The selected template ID will be set as an attribute of `amp-ad`: `<amp-ad template="template-1">`
 -   The content inside a template should strictly follow the
-    [rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/validator-amp-story.protoascii) of `amp-story-grid-layer`
+    [rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-story/validator-amp-story.protoascii) of `amp-story-grid-layer`
 -   Be aware of the [restrictions](../amp-mustache/amp-mustache.md#restrictions) of `amp-mustache`.
 -   Ads that use different templates can be styled separately using CSS attribute selector:
 

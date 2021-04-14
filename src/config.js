@@ -61,7 +61,21 @@ function getMetaUrl(name) {
   return (metaEl && metaEl.getAttribute('content')) || null;
 }
 
-/** @type {!Object<string, string|boolean|RegExp|Array<RegExp>>} */
+/**
+ * @typedef {{
+ *   thirdParty: string,
+ *   thirdPartyFrameHost: string,
+ *   thirdPartyFrameRegex: !RegExp,
+ *   cdn: string,
+ *   cdnProxyRegex: !RegExp,
+ *   localhostRegex: !RegExp,
+ *   errorReporting: string,
+ *   betaErrorReporting: string,
+ *   localDev: boolean,
+ *   trustedViewerHosts: !Array<!RegExp>,
+ *   geoApi: ?string,
+ * }}
+ */
 export const urls = {
   thirdParty: env['thirdPartyUrl'] || 'https://3p.ampproject.net',
   thirdPartyFrameHost: env['thirdPartyFrameHost'] || 'ampproject.net',
@@ -85,7 +99,7 @@ export const urls = {
    * propagating the referrer. If you believe your domain should be here,
    * file the issue on GitHub to discuss. The process will be similar
    * (but somewhat more stringent) to the one described in the [3p/README.md](
-   * https://github.com/ampproject/amphtml/blob/master/3p/README.md)
+   * https://github.com/ampproject/amphtml/blob/main/3p/README.md)
    *
    * {!Array<!RegExp>}
    */

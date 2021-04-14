@@ -29,17 +29,17 @@ limitations under the License.
 The `<amp-story-grid-layer>` component lays its children out into a grid. Its implementation is based off of the [CSS Grid Spec](https://www.w3.org/TR/css-grid-1/).
 
 <div class="flex-images">
-  <amp-img alt="Layer 1 - background" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-1.gif" width="200" height="355">
-  <noscript><img width="200" alt="Layer 1 - background" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-1.gif" /></noscript></amp-img>
+  <amp-img alt="Layer 1 - background" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-story/img/layers-layer-1.gif" width="200" height="355">
+  <noscript><img width="200" alt="Layer 1 - background" src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-story/img/layers-layer-1.gif" /></noscript></amp-img>
   <span class="special-char">+</span>
-  <amp-img alt="Layer 2 - page content (with equal margin from the screen edge)" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-2.jpg" alt="Layer 2" width="200" height="355">
-  <noscript><img width="200" alt="Layer 2 - page content (with equal margin from the screen edge)" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-2.jpg" /></noscript></amp-img>
+  <amp-img alt="Layer 2 - page content (with equal margin from the screen edge)" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-story/img/layers-layer-2.jpg" alt="Layer 2" width="200" height="355">
+  <noscript><img width="200" alt="Layer 2 - page content (with equal margin from the screen edge)" src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-story/img/layers-layer-2.jpg" /></noscript></amp-img>
   <span class="special-char">+</span>
-  <amp-img alt="Layer 3 - logo, positioned in the bottom-right of the screen" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-3.jpg" width="200" height="355">
-  <noscript><img width="200" alt="Layer 3 - logo, positioned in the bottom-right of the screen" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-3.jpg" /></noscript></amp-img>
+  <amp-img alt="Layer 3 - logo, positioned in the bottom-right of the screen" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-story/img/layers-layer-3.jpg" width="200" height="355">
+  <noscript><img width="200" alt="Layer 3 - logo, positioned in the bottom-right of the screen" src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-story/img/layers-layer-3.jpg" /></noscript></amp-img>
   <span class="special-char">=</span>
-  <amp-img alt="All layers shown together" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-4.gif" width="200" height="355">
-  <noscript><img width="200" alt="All layers shown together" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-4.gif" /></noscript></amp-img>
+  <amp-img alt="All layers shown together" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-story/img/layers-layer-4.gif" width="200" height="355">
+  <noscript><img width="200" alt="All layers shown together" src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-story/img/layers-layer-4.gif" /></noscript></amp-img>
 </div>
 
 ## Valid children
@@ -291,9 +291,9 @@ Names Areas: (none)
 
 Example:
 
-<amp-img alt="Fill template example: a cat.jpg image, sized to fill the entire screen" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-fill.png" width="145" height="255">
+<amp-img alt="Fill template example: a cat.jpg image, sized to fill the entire screen" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/template-fill.png" width="145" height="255">
   <noscript>
-    <img  alt="Fill template example: a cat.jpg image, sized to fill the entire screen" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-fill.png" />
+    <img  alt="Fill template example: a cat.jpg image, sized to fill the entire screen" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/template-fill.png" />
   </noscript>
 </amp-img>
 
@@ -309,9 +309,9 @@ The `vertical` template lays its elements out along the y-axis. By default, its 
 
 Names Areas: (none)
 
-<amp-img alt="Illustration: element1, element2 and element3, stacked vertically" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-vertical.png" width="145" height="255">
+<amp-img alt="Illustration: element1, element2 and element3, stacked vertically" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/template-vertical.png" width="145" height="255">
   <noscript>
-    <img alt="Illustration: element1, element2 and element3, stacked vertically" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-vertical.png" />
+    <img alt="Illustration: element1, element2 and element3, stacked vertically" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/template-vertical.png" />
   </noscript>
 </amp-img>
 
@@ -329,9 +329,9 @@ The `horizontal` template lays its elements out along the x-axis. By default, it
 
 Names Areas: (none)
 
-<amp-img alt="Illustration: element1, element2 and element3, stacked horizontally in columns" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-horizontal.png" width="145" height="255">
+<amp-img alt="Illustration: element1, element2 and element3, stacked horizontally in columns" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/template-horizontal.png" width="145" height="255">
   <noscript>
-    <img alt="Illustration: element1, element2 and element3, stacked horizontally in columns" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-horizontal.png" />
+    <img alt="Illustration: element1, element2 and element3, stacked horizontally in columns" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/template-horizontal.png" />
   </noscript>
 </amp-img>
 
@@ -353,9 +353,9 @@ Named Areas:
 -   `middle-third`
 -   `lower-third`
 
-<amp-img alt="Illustration: the screen split into three horizontal stacked areas - upper-third, middle-third, lower-third; element 3 is in the upper-third; element 2 is in the lower-third; element 1 is in the middle third" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-thirds.png" width="145" height="255">
+<amp-img alt="Illustration: the screen split into three horizontal stacked areas - upper-third, middle-third, lower-third; element 3 is in the upper-third; element 2 is in the lower-third; element 1 is in the middle third" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/template-thirds.png" width="145" height="255">
   <noscript>
-    <img alt="Illustration: the screen split into three horizontal stacked areas - upper-third, middle-third, lower-third; element 3 is in the upper-third; element 2 is in the lower-third; element 1 is in the middle third" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-thirds.png" />
+    <img alt="Illustration: the screen split into three horizontal stacked areas - upper-third, middle-third, lower-third; element 3 is in the upper-third; element 2 is in the lower-third; element 1 is in the middle third" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/template-thirds.png" />
   </noscript>
 </amp-img>
 
@@ -384,9 +384,9 @@ Note: your story needs to enable the `supports-landscape` mode to use this templ
 
 Example:
 
-<amp-img alt="Landscape half-half UI template - in small screen/smartphone, the image is behind the content; on large screen/tablet, the image is on the left, while the content is on the right" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-img-video-object-fit-position.png" width="600" height="287">
+<amp-img alt="Landscape half-half UI template - in small screen/smartphone, the image is behind the content; on large screen/tablet, the image is on the left, while the content is on the right" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-img-video-object-fit-position.png" width="600" height="287">
   <noscript>
-    <img alt="Landscape half-half UI template - in small screen/smartphone, the image is behind the content; on large screen/tablet, the image is on the left, while the content is on the right" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-img-video-object-fit-position.png" />
+    <img alt="Landscape half-half UI template - in small screen/smartphone, the image is behind the content; on large screen/tablet, the image is on the left, while the content is on the right" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-img-video-object-fit-position.png" />
   </noscript>
 </amp-img>
 
@@ -433,9 +433,9 @@ While this technique provides the most consistent user experience, it may crop u
 
 <div layout="container" width="3" height="2">
   <div style="width:33%;display:inline-block">
-    <amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/preset_story_scaled.gif" layout="responsive" alt="Animation showing how a perfectly scaled with a 7.2% bleed-area adapts to different screen aspect ratios, always keeping content visible" width="200" height="350"/>
+    <amp-img src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/preset_story_scaled.gif" layout="responsive" alt="Animation showing how a perfectly scaled with a 7.2% bleed-area adapts to different screen aspect ratios, always keeping content visible" width="200" height="350"/>
   </div>
   <div style="width:66%;display:inline-block">
-    <amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/preset_story_anchor.gif" layout="responsive" alt="Animation showing a background that remains anchored to the bottom of the viewport, regardless of screen aspect ratio/height" width="500" height="400"/>
+    <amp-img src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/preset_story_anchor.gif" layout="responsive" alt="Animation showing a background that remains anchored to the bottom of the viewport, regardless of screen aspect ratio/height" width="500" height="400"/>
   </div>
 </div>

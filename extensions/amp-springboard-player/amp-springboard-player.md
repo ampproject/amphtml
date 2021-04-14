@@ -78,4 +78,4 @@ The `width` and `height` attributes determine the aspect ratio of the player emb
 
 ## Validation
 
-See [amp-springboard-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-springboard-player/validator-amp-springboard-player.protoascii) in the AMP validator specification.
+See [amp-springboard-player rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-springboard-player/validator-amp-springboard-player.protoascii) in the AMP validator specification.

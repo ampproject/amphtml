@@ -16,7 +16,7 @@
 
 import * as events from '../../../src/event-helper';
 import {isJsonLdScriptTag} from '../../../src/dom';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 import {tryParseJson} from '../../../src/json';
 
 const rules = [

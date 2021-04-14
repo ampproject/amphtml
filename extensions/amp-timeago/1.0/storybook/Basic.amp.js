@@ -47,6 +47,4 @@ export const Responsive = () => {
   );
 };
 
-Responsive.story = {
-  name: 'responsive',
-};
+Responsive.storyName = 'responsive';

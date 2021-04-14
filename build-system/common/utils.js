@@ -22,7 +22,7 @@ const {clean} = require('../tasks/clean');
 const {default: ignore} = require('ignore');
 const {doBuild} = require('../tasks/build');
 const {doDist} = require('../tasks/dist');
-const {gitDiffNameOnlyMaster} = require('./git');
+const {gitDiffNameOnlyMain} = require('./git');
 const {green, cyan, yellow} = require('kleur/colors');
 const {log, logLocalDev} = require('./logging');
 
@@ -75,7 +75,7 @@ function getValidExperiments() {
  */
 function getFilesChanged(globs) {
   const allFiles = globby.sync(globs, {dot: true});
-  return gitDiffNameOnlyMaster().filter((changedFile) => {
+  return gitDiffNameOnlyMain().filter((changedFile) => {
     return fs.existsSync(changedFile) && allFiles.includes(changedFile);
   });
 }

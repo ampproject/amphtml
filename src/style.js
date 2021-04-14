@@ -24,6 +24,11 @@ let propertyNameCache;
 /** @const {!Array<string>} */
 const vendorPrefixes = ['Webkit', 'webkit', 'Moz', 'moz', 'ms', 'O', 'o'];
 
+const EMPTY_CSS_DECLARATION = /** @type {!CSSStyleDeclaration} */ ({
+  'getPropertyPriority': () => '',
+  'getPropertyValue': () => '',
+});
+
 /**
  * @param {string} camelCase camel cased string
  * @return {string} title cased string
@@ -97,7 +102,7 @@ export function setImportantStyles(element, styles) {
   for (const k in styles) {
     style.setProperty(
       getVendorJsPropertyName(style, k),
-      styles[k].toString(),
+      String(styles[k]),
       'important'
     );
   }
@@ -334,11 +339,11 @@ export function removeAlphaFromColor(rgbaColor) {
  *
  * @param {!Window} win
  * @param {!Element} el
- * @return {!Object<string, string>}
+ * @return {!CSSStyleDeclaration}
  */
 export function computedStyle(win, el) {
   const style = /** @type {?CSSStyleDeclaration} */ (win.getComputedStyle(el));
-  return /** @type {!Object<string, string>} */ (style) || map();
+  return style || EMPTY_CSS_DECLARATION;
 }
 
 /**

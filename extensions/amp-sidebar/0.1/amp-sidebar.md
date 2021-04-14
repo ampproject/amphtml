@@ -210,7 +210,7 @@ When using `toolbar` feature, `autoscroll` only works if the `<nav toolbar>` ele
 <div id="target-element"></div>
 ```
 
-Please see [this example file](https://github.com/ampproject/amphtml/blob/master/examples/amp-sidebar-autoscroll.amp.html) for a working example code.
+Please see [this example file](https://github.com/ampproject/amphtml/blob/main/examples/amp-sidebar-autoscroll.amp.html) for a working example code.
 
 ### Building Nested Menus
 
@@ -358,4 +358,4 @@ Visit [AMP Start](https://ampstart.com/components#navigation) for responsive, pr
 
 ## Validation
 
-See [amp-sidebar rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-sidebar/validator-amp-sidebar.protoascii) in the AMP validator specification.
+See [amp-sidebar rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-sidebar/validator-amp-sidebar.protoascii) in the AMP validator specification.
