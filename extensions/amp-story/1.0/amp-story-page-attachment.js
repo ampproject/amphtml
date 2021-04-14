@@ -292,8 +292,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       // time, depending on the target and network conditions.
       this.win.setTimeout(() => {
         this.element.parentElement
-          .querySelector('.i-amphtml-page-attachment-host')
-          .shadowRoot.querySelector('a')
+          .querySelector('.i-amphtml-story-page-open-attachment-host')
+          .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment')
           .click();
       }, 50);
     });
