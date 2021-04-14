@@ -30,6 +30,7 @@ firebase
 firebase.json
 .firebase/
 src/purifier/dist
+build-system/dist
 build-system/server/new-server/transforms/dist
 build-system/tasks/performance/cache
 build-system/tasks/performance/results.json
