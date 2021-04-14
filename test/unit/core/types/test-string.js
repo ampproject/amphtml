@@ -21,9 +21,10 @@ import {
   endsWith,
   expandTemplate,
   includes,
+  isString,
   padStart,
   trimEnd,
-} from '../../src/string';
+} from '../../../../src/core/types/string';
 
 describe('dashToCamelCase', () => {
   it('should transform dashes to camel case.', () => {
@@ -240,5 +241,19 @@ describe('padStart', () => {
   it('should return original string if equal or greater than target length', () => {
     expect(padStart('abc', 3, ' ')).to.equal('abc');
     expect(padStart('abc', 0, ' ')).to.equal('abc');
+  });
+});
+
+describe('isString', () => {
+  it('returns true for strings', () => {
+    ['hello', '', `template ${1}`].forEach(
+      (s) => expect(isString(s)).to.be.true
+    );
+  });
+
+  it('returns true for anything else', () => {
+    [[], {}, true, -1, null, undefined, function () {}].forEach(
+      (s) => expect(isString(s)).to.be.false
+    );
   });
 });
