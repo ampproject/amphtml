@@ -19,6 +19,7 @@ import {
   elementStringOrPassThru,
 } from './error-message-helpers';
 import {isArray} from './types/array';
+import {isEnumValue} from './types/enum';
 import {isMinifiedMode} from './minified-mode';
 
 /**
@@ -216,6 +217,32 @@ export function baseAssertBoolean(assertFn, shouldBeBoolean, opt_message) {
 }
 
 /**
+ * Asserts and returns the enum value. If the enum doesn't contain such a
+ * value, the error is thrown.
+ *
+ * @param {!AssertionFunction} assertFn
+ * @param {*} shouldBeEnum
+ * @param {T} shouldBeEnum
+ * @param {!Object<T>} enumObj
+ * @param {string=} opt_enumName
+ * @return {T}
+ * @closurePrimitive {asserts.matchesReturn}
+ */
+export function baseAssertEnumValue(
+  assertFn,
+  shouldBeEnum,
+  enumObj,
+  opt_enumName = 'enum'
+) {
+  return baseAssertType_(
+    assertFn,
+    shouldBeEnum,
+    isEnumValue(enumObj, shouldBeEnum),
+    `Unknown ${opt_enumName} value: "${shouldBeEnum}"`
+  );
+}
+
+/**
  * Throws a user error if the first argument isn't trueish. Mirrors userAssert
  * in src/log.js.
  * @param {T} shouldBeTruthy
@@ -329,12 +356,14 @@ export const userAsserts = {
   assertNumber: baseAssertNumber.bind(null, pureUserAssert),
   assertArray: baseAssertArray.bind(null, pureUserAssert),
   assertBoolean: baseAssertBoolean.bind(null, pureUserAssert),
+  assertEnum: baseAssertEnumValue.bind(null, pureUserAssert),
 };
 export const devAsserts = {
-  assert: pureUserAssert,
-  assertElement: baseAssertElement.bind(null, pureUserAssert),
-  assertString: baseAssertString.bind(null, pureUserAssert),
-  assertNumber: baseAssertNumber.bind(null, pureUserAssert),
-  assertArray: baseAssertArray.bind(null, pureUserAssert),
-  assertBoolean: baseAssertBoolean.bind(null, pureUserAssert),
+  assert: pureDevAssert,
+  assertElement: baseAssertElement.bind(null, pureDevAssert),
+  assertString: baseAssertString.bind(null, pureDevAssert),
+  assertNumber: baseAssertNumber.bind(null, pureDevAssert),
+  assertArray: baseAssertArray.bind(null, pureDevAssert),
+  assertBoolean: baseAssertBoolean.bind(null, pureDevAssert),
+  assertEnum: baseAssertEnumValue.bind(null, pureDevAssert),
 };

@@ -23,6 +23,7 @@ import {
   baseAssertArray,
   baseAssertBoolean,
   baseAssertElement,
+  baseAssertEnumValue,
   baseAssertNumber,
   baseAssertString,
 } from './core/assert';
@@ -271,6 +272,7 @@ export class Log {
      * @closurePrimitive {asserts.matchesReturn}
      */
     this.assertBoolean = wrap(baseAssertBoolean);
+    this.assertEnumValue = wrap(baseAssertEnumValue);
   }
 
   /**
@@ -496,24 +498,6 @@ export class Log {
       self.__AMP_REPORT_ERROR(e);
       throw e;
     }
-  }
-
-  /**
-   * Asserts and returns the enum value. If the enum doesn't contain such a
-   * value, the error is thrown.
-   *
-   * @param {!Object<T>} enumObj
-   * @param {string} s
-   * @param {string=} opt_enumName
-   * @return {T}
-   * @template T
-   * @closurePrimitive {asserts.matchesReturn}
-   */
-  assertEnumValue(enumObj, s, opt_enumName) {
-    if (isEnumValue(enumObj, s)) {
-      return s;
-    }
-    this.assert(false, 'Unknown %s value: "%s"', opt_enumName || 'enum', s);
   }
 
   /**
