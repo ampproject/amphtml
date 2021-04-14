@@ -204,11 +204,7 @@ describes.realWin(
           <template type="amp-mustache"><p>Hello {{name}}</p></template>
         </amp-render>
       `;
-      const button = html`
-        <button on="tap:my-amp-render.refresh">Refresh list</button>;
-      `;
       doc.body.appendChild(element);
-      doc.body.appendChild(button);
 
       await getRenderedData();
 
