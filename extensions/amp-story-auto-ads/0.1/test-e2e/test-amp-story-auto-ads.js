@@ -120,7 +120,6 @@ async function validateAdOverlay(controller) {
     .to.exist;
 
   const adBadge = await controller.findElement('.i-amphtml-story-ad-badge');
-  await expect(controller.getElementText(adBadge)).to.equal('Ad');
   await expect(controller.getElementCssValue(adBadge, 'visibility')).to.equal(
     'visible'
   );
