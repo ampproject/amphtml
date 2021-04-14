@@ -38,7 +38,7 @@ import {isMinifiedMode} from './minified-mode';
  * @return {T}
  * @throws {Error} when shouldBeTruthy is not truthy.
  */
-function assertion(
+export function baseAssert(
   sentinel,
   shouldBeTruthy,
   opt_message = 'Assertion failed',
@@ -99,7 +99,7 @@ export function pureUserAssert(
   opt_8,
   opt_9
 ) {
-  return assertion(
+  return baseAssert(
     USER_ERROR_SENTINEL,
     shouldBeTruthy,
     opt_message,
@@ -159,7 +159,7 @@ export function pureDevAssert(
       .log('__devAssert_sentinel__');
   }
 
-  return assertion(
+  return baseAssert(
     null,
     shouldBeTruthy,
     opt_message,

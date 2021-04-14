@@ -18,12 +18,12 @@ import {
   USER_ERROR_SENTINEL,
   elementStringOrPassThru,
 } from './core/error-message-helpers';
+import {baseAssert} from './core/assert';
 import {findIndex, isArray} from './core/types/array';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
 import {isEnumValue} from './core/types';
 import {once} from './utils/function';
-import {pureDevAssert, pureUserAssert} from './core/assert';
 import {urls} from './config';
 
 const noop = () => {};
@@ -370,6 +370,21 @@ export class Log {
     return error;
   }
 
+  wrapAssertFn_(assertFn) {
+    const logger = this;
+    const assertion = assertFn.bind(null, logger.opt_suffix);
+    return function (var_args) {
+      try {
+        return assertion.apply(null, arguments);
+      } catch (e) {
+        logger.prepareError_(e);
+        // __AMP_REPORT_ERROR is installed globally per window in the entry point.
+        self.__AMP_REPORT_ERROR(e);
+        throw e;
+      }
+    };
+  }
+
   /**
    * Throws an error if the first argument isn't trueish.
    *
@@ -401,15 +416,17 @@ export class Log {
       );
     }
 
-    try {
-      const assertion = this == logs.user ? pureUserAssert : pureDevAssert;
-      return assertion.apply(null, arguments);
-    } catch (e) {
-      this.prepareError_(e);
-      // __AMP_REPORT_ERROR is installed globally per window in the entry point.
-      self.__AMP_REPORT_ERROR(e);
-      throw e;
-    }
+    // const assertion = this == logs.user ? pureUserAssert : pureDevAssert;
+    return this.wrapAssertFn_(baseAssert).apply(null, arguments);
+    // try {
+    //   const assertion = this == logs.user ? pureUserAssert : pureDevAssert;
+    //   return assertion.apply(null, arguments);
+    // } catch (e) {
+    //   this.prepareError_(e);
+    //   // __AMP_REPORT_ERROR is installed globally per window in the entry point.
+    //   self.__AMP_REPORT_ERROR(e);
+    //   throw e;
+    // }
   }
 
   /**
