@@ -23,6 +23,7 @@ module.exports = {
       iframe.src = '';
       iframe.srcdoc = contents;
     });
+
     await page.waitForTimeout(2000);
   },
 };
