@@ -155,6 +155,15 @@ class AmpAccordion extends AMP.BaseElement {
         // for details.
       });
 
+      userAssert(
+        !section.hasAttribute('[expanded]') &&
+          !section.hasAttribute('data-amp-bind-expanded'),
+        'The "expanded" attribute cannot be used with amp-bind in version ' +
+          '0.1 of amp-accordion. Please bind to [data-expand] instead. ' +
+          'Found in: %s',
+        this.element
+      );
+
       const isExpanded = section.hasAttribute('expanded');
       header.classList.add('i-amphtml-accordion-header');
       if (!header.hasAttribute('role')) {
