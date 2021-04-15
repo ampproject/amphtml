@@ -15,6 +15,36 @@
  */
 
 /**
+ * Converts an array-like object to an array.
+ * @param {?IArrayLike<T>|string} arrayLike
+ * @return {!Array<T>}
+ * @template T
+ */
+export function toArray(arrayLike) {
+  return arrayLike ? Array.prototype.slice.call(arrayLike) : [];
+}
+
+/**
+ * Determines if value is actually an Array.
+ * @param {*} value
+ * @return {boolean}
+ */
+export const {isArray} = Array;
+
+/**
+ * If the specified argument is an array, it's returned as is. If it's a
+ * single item, the array containing this item is created and returned.
+ * @param {!Array<T>|T} arrayOrSingleItem
+ * @return {!Array<T>}
+ * @template T
+ */
+export function arrayOrSingleItemToArray(arrayOrSingleItem) {
+  return isArray(arrayOrSingleItem)
+    ? /** @type {!Array<T>} */ (arrayOrSingleItem)
+    : [arrayOrSingleItem];
+}
+
+/**
  * Compares if two arrays contains exactly same elements of same number
  * of same order. Note that it does NOT handle NaN case as expected.
  *

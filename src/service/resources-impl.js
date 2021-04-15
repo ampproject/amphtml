@@ -34,7 +34,7 @@ import {ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error';
 import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
-import {remove} from '../utils/array';
+import {remove} from '../core/types/array';
 import {startupChunk} from '../chunk';
 import {throttle} from '../utils/rate-limit';
 

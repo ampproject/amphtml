@@ -38,7 +38,7 @@ import {
 } from '../../../src/dom';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 /**
  * @enum {number}

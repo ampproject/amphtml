@@ -18,7 +18,7 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 import {userAssert} from '../../../src/log';
 
 export class AmpInlineGallerySlide extends AMP.BaseElement {

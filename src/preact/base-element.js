@@ -48,7 +48,7 @@ import {getMode} from '../mode';
 import {hydrate, render} from './index';
 import {installShadowStyle} from '../shadow-embed';
 import {sequentialIdGenerator} from '../utils/id-generator';
-import {toArray} from '../types';
+import {toArray} from '../core/types/array';
 
 /**
  * The following combinations are allowed.

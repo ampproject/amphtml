@@ -19,7 +19,7 @@ import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-selector-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
-import {areEqualOrdered} from '../../../src/utils/array';
+import {areEqualOrdered, toArray} from '../../../src/core/types/array';
 import {
   closestAncestorElementBySelector,
   isRTL,
@@ -29,7 +29,6 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {mod} from '../../../src/utils/math';
-import {toArray} from '../../../src/types';
 
 const TAG = 'amp-selector';
 
@@ -465,14 +464,6 @@ export class AmpSelector extends AMP.BaseElement {
         'selectedOptions': this.selectedOptions_(),
       })
     );
-    // TODO(wg-components): Remove this in Q1 2020.
-    if (trust < ActionTrust.DEFAULT) {
-      user().warn(
-        TAG,
-        '"select" event now has the same trust as the originating action. ' +
-          'See https://github.com/ampproject/amphtml/issues/24443 for details.'
-      );
-    }
     this.action_.trigger(this.element, name, selectEvent, trust);
   }
 

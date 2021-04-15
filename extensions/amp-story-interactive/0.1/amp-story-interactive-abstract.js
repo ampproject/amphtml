@@ -42,7 +42,7 @@ import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {emojiConfetti} from './interactive-confetti';
 import {isExperimentOn} from '../../../src/experiments';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 /** @const {string} */
 const TAG = 'amp-story-interactive';
