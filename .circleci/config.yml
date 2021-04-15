@@ -19,7 +19,7 @@ push_builds_only: &push_builds_only
 executors:
   amphtml-docker-small-executor:
     docker:
-      - image: cimg/base:2020.12
+      - image: cimg/base:2021.04
     resource_class: small
   amphtml-medium-executor:
     machine:
