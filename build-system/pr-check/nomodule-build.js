@@ -65,9 +65,9 @@ async function prBuildWorkflow() {
       return abortTimedJob(jobName, startTime);
     }
     timedExecOrDie('amp storybook --build');
-    storeNomoduleBuildToWorkspace();
     await processAndStoreBuildToArtifacts();
     await signalPrDeployUpload('success');
+    storeNomoduleBuildToWorkspace();
   } else {
     await signalPrDeployUpload('skipped');
 
