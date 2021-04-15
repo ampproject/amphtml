@@ -137,7 +137,7 @@ async function transformCss(contents, hash, opt_filename) {
   }
 
   const transformed = transform(contents, opt_filename);
-  transformCache.set(
+  await transformCache.set(
     hash,
     transformed.then((r) => JSON.stringify(r))
   );

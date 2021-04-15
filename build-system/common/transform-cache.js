@@ -22,6 +22,10 @@ const path = require('path');
  * Cache for storing transformed files on both memory and on disk.
  */
 class TransformCache {
+  /**
+   * @param {string} cacheName
+   * @param {string} fileExtension
+   */
   constructor(cacheName, fileExtension) {
     /** @type {string} */
     this.fileExtension = fileExtension;
@@ -60,19 +64,16 @@ class TransformCache {
   /**
    * @param {string} hash
    * @param {Promise<string>} transformPromise
+   * @return {Promise<void>}
    */
-  set(hash, transformPromise) {
+  async set(hash, transformPromise) {
     if (this.transformMap.has(hash)) {
-      throw new Error(
-        `Read race occured. Attempting to transform a file twice.`
-      );
+      throw new Error('Read race: Attempting to transform a file twice.');
     }
-
     this.transformMap.set(hash, transformPromise);
     const filepath = path.join(this.cacheDir, hash) + this.fileExtension;
-    transformPromise.then((contents) => {
-      fs.outputFile(filepath, contents);
-    });
+    const contents = await transformPromise;
+    await fs.outputFile(filepath, contents);
   }
 }
 
@@ -91,17 +92,17 @@ function md5(...args) {
 }
 
 /**
- * Used to cache file reads, since some (esbuild) will have multiple
- * "loads" per file. This batches consecutive reads into a single, and then
- * clears its cache item for the next load.
+ * Used to cache file reads, since some (esbuild) will have multiple "loads" per
+ * file. This batches consecutive reads into a single, and then clears its cache
+ * item for the next load.
  * @private @const {!Map<string, Promise<{hash: string, contents: string}>>}
  */
 const readCache = new Map();
 
 /**
- * Returns the string contents and hash of the file at the specified path.
- * If multiple reads are requested for the same file before the first read has completed,
- * the result will be reused.
+ * Returns the string contents and hash of the file at the specified path. If
+ * multiple reads are requested for the same file before the first read has
+ * completed, the result will be reused.
  *
  * @param {string} path
  * @param {string=} optionsHash
@@ -110,7 +111,7 @@ const readCache = new Map();
 function batchedRead(path, optionsHash) {
   let read = readCache.get(path);
   if (!read) {
-    read = fs.promises
+    read = fs
       .readFile(path)
       .then((contents) => ({
         contents,
@@ -125,4 +126,8 @@ function batchedRead(path, optionsHash) {
   return read;
 }
 
-module.exports = {TransformCache, batchedRead, md5};
+module.exports = {
+  batchedRead,
+  md5,
+  TransformCache,
+};

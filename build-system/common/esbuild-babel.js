@@ -43,7 +43,7 @@ function getEsbuildBabelPlugin(
     transformCache = new TransformCache('.babel-cache', '.js');
   }
 
-  function transformContents(contents, hash, babelOptions) {
+  async function transformContents(contents, hash, babelOptions) {
     if (enableCache) {
       const cached = transformCache.get(hash);
       if (cached) {
@@ -56,7 +56,7 @@ function getEsbuildBabelPlugin(
       .then((result) => result.code);
 
     if (enableCache) {
-      transformCache.set(hash, promise);
+      await transformCache.set(hash, promise);
     }
 
     return promise.finally(postLoad);

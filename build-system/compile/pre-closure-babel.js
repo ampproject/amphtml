@@ -24,6 +24,7 @@ const {BABEL_SRC_GLOBS} = require('./sources');
 const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
 const {log} = require('../common/logging');
 const {red, cyan} = require('kleur/colors');
+const {TransformCache, batchedRead, md5} = require('../common/transform-cache');
 
 /**
  * Files on which to run pre-closure babel transforms.
@@ -33,30 +34,26 @@ const {red, cyan} = require('kleur/colors');
 let filesToTransform;
 
 /**
- * Directory used to cache babel transforms.
+ * Directory used to output babel transformed files for closure compilation.
  *
  * @private @const {string}
  */
-let cacheDir;
+let outputDir;
 
 /**
- * Returns the name of the babel cache directory if it has been created.
+ * Used to cache pre-closure babel transforms.
+ *
+ * @const {TransformCache}
+ */
+let transformCache;
+
+/**
+ * Returns the name of the babel output directory if it has been created.
+ *
  * @return {string}
  */
-function getBabelCacheDir() {
-  return cacheDir || '';
-}
-
-/**
- * Removes the transformed output of a file or a directory from the babel cache
- * so it can be retransformed during a watch build.
- * @param {string} fileOrDir
- */
-function removeFromClosureBabelCache(fileOrDir) {
-  const cachedPath = path.join(cacheDir, fileOrDir);
-  if (fs.existsSync(cachedPath)) {
-    fs.removeSync(cachedPath);
-  }
+function getBabelOutputDir() {
+  return outputDir || '';
 }
 
 /**
@@ -69,48 +66,67 @@ function getFilesToTransform() {
 }
 
 /**
- * Apply babel transforms prior to closure compiler pass and return the path
+ * Apply babel transforms prior to closure compiler pass, store the transformed
+ * file in an output directory (used by closure compiler), and return the path
  * of the transformed file.
  *
  * When a source file is transformed for the first time, it is written to a
- * cache directory from where it is retrieved every subsequent time without
- * invoking babel.
+ * persistent transform cache from where it is retrieved every subsequent time
+ * without invoking babel. A change to the file contents or to the invocation
+ * arguments will invalidate the cached result and re-transform the file.
  *
  * @param {string} file
  * @param {string} outputFilename
  * @param {!Object} options
- * @return {string}
+ * @return {Promise<string>}
  */
 async function preClosureBabel(file, outputFilename, options) {
-  if (!cacheDir) {
-    cacheDir = tempy.directory();
+  if (!outputDir) {
+    outputDir = tempy.directory();
+  }
+  if (!transformCache) {
+    transformCache = new TransformCache('.pre-closure-cache', '.js');
   }
   if (!filesToTransform) {
     filesToTransform = getFilesToTransform();
   }
-  const transformedFile = path.join(cacheDir, file);
-  if (fs.existsSync(transformedFile)) {
-    return transformedFile;
-  }
+  const transformedFile = path.join(outputDir, file);
   if (!filesToTransform.includes(file)) {
-    await fs.copy(file, transformedFile);
+    if (!(await fs.exists(transformedFile))) {
+      await fs.copy(file, transformedFile);
+    }
     return transformedFile;
   }
-  debug(CompilationLifecycles['pre-babel'], file);
-  const babelOptions = babel.loadOptions({
-    caller: {name: 'pre-closure'},
-    filename: file,
-    sourceFileName: path.relative(process.cwd(), file),
-  });
   try {
-    const {code} = await babel.transformFileAsync(file, babelOptions);
-    await fs.outputFile(transformedFile, Buffer.from(code, 'utf-8'));
-    debug(CompilationLifecycles['pre-closure'], transformedFile);
+    debug(CompilationLifecycles['pre-babel'], file);
+    const babelOptions =
+      babel.loadOptions({caller: {name: 'pre-closure'}}) || {};
+    const optionsHash = md5(
+      JSON.stringify({babelOptions, argv: process.argv.slice(2)})
+    );
+    const {contents, hash} = await batchedRead(file, optionsHash);
+    const cachedPromise = transformCache.get(hash);
+    if (cachedPromise) {
+      if (!(await fs.exists(transformedFile))) {
+        await fs.outputFile(transformedFile, await cachedPromise);
+      }
+    } else {
+      const transformPromise = babel
+        .transformAsync(contents, {
+          ...babelOptions,
+          filename: file,
+          filenameRelative: path.basename(file),
+          sourceFileName: path.relative(process.cwd(), file),
+        })
+        .then((result) => result?.code);
+      await transformCache.set(hash, transformPromise);
+      await fs.outputFile(transformedFile, await transformPromise);
+      debug(CompilationLifecycles['pre-closure'], transformedFile);
+    }
   } catch (err) {
     const reason = handlePreClosureError(err, outputFilename, options);
     if (reason) {
       throw reason;
-      return;
     }
   }
   return transformedFile;
@@ -137,7 +153,6 @@ function handlePreClosureError(err, outputFilename, options) {
 }
 
 module.exports = {
-  getBabelCacheDir,
-  removeFromClosureBabelCache,
+  getBabelOutputDir,
   preClosureBabel,
 };
