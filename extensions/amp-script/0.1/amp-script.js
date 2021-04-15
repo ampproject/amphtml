@@ -282,6 +282,15 @@ export class AmpScript extends AMP.BaseElement {
 
     const sandbox = this.element.getAttribute('sandbox') || '';
     const sandboxTokens = sandbox.split(' ').map((s) => s.trim());
+    let iframeUrl;
+    if (getMode().localDev) {
+      const folder = getMode().minified ? 'current-min' : 'current';
+      iframeUrl = `/dist.3p/${folder}/amp-script-proxy-iframe.html`;
+    } else {
+      iframeUrl = `${urls.thirdParty}${
+        getMode().rtvVersion
+      }/amp-script-proxy-iframe.html`;
+    }
 
     // @see src/main-thread/configuration.WorkerDOMConfiguration in worker-dom.
     const config = {
@@ -302,13 +311,7 @@ export class AmpScript extends AMP.BaseElement {
       onReceiveMessage: (data) => {
         dev().info(TAG, 'From worker:', data);
       },
-      sandbox: this.sandboxed_ && {
-        iframeUrl: getMode().localDev
-          ? '/dist.3p/current/amp-script-proxy-iframe.html'
-          : `${urls.thirdParty}${
-              getMode().rtvVersion
-            }/amp-script-proxy-iframe.html`,
-      },
+      sandbox: this.sandboxed_ && {iframeUrl},
     };
 
     // Create worker and hydrate.
