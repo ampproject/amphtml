@@ -160,7 +160,7 @@ export class AmpRender extends BaseElement {
   init() {
     this.registerApiAction('refresh', (api) => {
       const src = this.element.getAttribute('src');
-      if (!src || isAmpStateSrc(src) || isAmpScriptSrc(src)) {
+      if (!src?.length || isAmpStateSrc(src) || isAmpScriptSrc(src)) {
         return;
       }
       api.refresh();
