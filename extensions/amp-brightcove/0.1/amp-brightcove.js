@@ -15,6 +15,7 @@
  */
 
 import {Deferred} from '../../../src/utils/promise';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamToUrl, addParamsToUrl} from '../../../src/url';
@@ -100,6 +101,9 @@ class AmpBrightcove extends AMP.BaseElement {
 
     /**@private {?string} */
     this.consentString_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /** @override */
@@ -228,15 +232,19 @@ class AmpBrightcove extends AMP.BaseElement {
       return;
     }
 
-    if (eventType === 'ready') {
-      this.onReady_(data);
-    }
-
-    if (eventType === 'playing') {
-      this.playing_ = true;
-    }
-    if (eventType === 'pause') {
-      this.playing_ = false;
+    switch (eventType) {
+      case 'ready':
+        this.onReady_(data);
+        break;
+      case 'playing':
+        this.playing_ = true;
+        this.pauseHelper_.updatePlaying(true);
+        break;
+      case 'pause':
+      case 'ended':
+        this.playing_ = false;
+        this.pauseHelper_.updatePlaying(false);
+        break;
     }
 
     if (data['ct']) {
@@ -431,6 +439,8 @@ class AmpBrightcove extends AMP.BaseElement {
 
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
+
+    this.pauseHelper_.updatePlaying(false);
 
     return true; // Call layoutCallback again.
   }
