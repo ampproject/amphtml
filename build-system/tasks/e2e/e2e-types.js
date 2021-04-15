@@ -44,8 +44,7 @@ class ElementHandle {
 }
 
 /**
- * Key to send to the FunctionalTestController#type method to trigger
- * actions instead of text.
+ * Key codes used to trigger actions.
  * @enum {string}
  */
 const Key = {

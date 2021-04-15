@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Key} from '../../../../build-system/tasks/e2e/functional-test-types';
+import {Key} from '../../../../build-system/tasks/e2e/e2e-types';
 
 describes.endtoend(
   'amp-date-picker',

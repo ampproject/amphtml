@@ -17,7 +17,7 @@
 const fs = require('fs');
 const selenium = require('selenium-webdriver');
 const {ControllerPromise} = require('./controller-promise');
-const {DOMRectDef, ElementHandle, Key} = require('./functional-test-types');
+const {DOMRectDef, ElementHandle, Key} = require('./e2e-types');
 const {expect} = require('chai');
 const {NetworkLogger} = require('./network-logger');
 
