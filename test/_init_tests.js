@@ -582,3 +582,24 @@ chai.Assertion.addMethod('jsonEqual', function (compare) {
     b
   );
 });
+
+chai.Assertion.addMethod('deepEqualMapObject', function (compare) {
+  const map = this._obj;
+  const objStr = stringify(compare);
+
+  // Manual stringify because JSON stringify does not work for Map
+  let mapStr = '{';
+  map.forEach((value, key) => {
+    const valueStr = value ? `"${value}"` : null;
+    mapStr += `"${key}":${valueStr},`;
+  });
+  mapStr = mapStr.substring(0, mapStr.length - 1) + '}';
+
+  this.assert(
+    mapStr == objStr,
+    'expected string of Map to be equal to that of Object.\nExp: #{exp}\nAct: #{act}',
+    'expected string of Map to not be equal to that of Object.\nExp: #{exp}\nAct: #{act}',
+    objStr,
+    mapStr
+  );
+});

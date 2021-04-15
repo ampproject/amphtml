@@ -20,17 +20,19 @@ import {isObject} from '../types';
 const hasOwn_ = Object.prototype.hasOwnProperty;
 
 /**
- * Returns a map-like object.
+ * Returns a Map.
  * If opt_initial is provided, copies its own properties into the
  * newly created object.
  * @param {T=} opt_initial This should typically be an object literal.
- * @return {T}
+ * @return {Map}
  * @template T
  */
 export function map(opt_initial) {
-  const obj = Object.create(null);
+  const obj = new Map();
   if (opt_initial) {
-    Object.assign(obj, opt_initial);
+    Object.keys(opt_initial).map(function (key, value) {
+      obj.set(key, value);
+    });
   }
   return obj;
 }

@@ -1033,6 +1033,8 @@ export function parseActionMap(action, context) {
         actionMap = map();
       }
 
+      // TODO: If we are using the Map constructor, this should be actionMap.set(event, actions).
+      // However, doing so will break a large amount of tests.
       actionMap[event] = actions;
     } else {
       // Unexpected token.
@@ -1161,9 +1163,9 @@ export function dereferenceArgsVariables(args, event, opt_args) {
       value = exprValue === undefined ? null : exprValue;
     }
     if (data[value]) {
-      applied[key] = data[value];
+      applied.set(key, data[value]);
     } else {
-      applied[key] = value;
+      applied.set(key, value);
     }
   });
   return applied;
