@@ -136,3 +136,29 @@ export const WithAmpScriptSrc = () => {
 };
 
 WithAmpScriptSrc.storyName = 'With AMP script src';
+
+export const WithRefreshButton = () => {
+  return (
+    <>
+      <amp-render
+        id="my-amp-render"
+        src="https://amp.dev/static/samples/json/examples.json"
+        width="300"
+        height="200"
+        layout="fixed"
+      >
+        <template type="amp-mustache">
+          <ul>
+            {`{{#items}}`}
+            <li>{`{{title}}`}</li>
+            {`{{/items}}`}
+          </ul>
+        </template>
+      </amp-render>
+
+      <button on="tap:my-amp-render.refresh">Refresh data</button>
+    </>
+  );
+};
+
+WithBindableSrc.storyName = 'With bindable src';

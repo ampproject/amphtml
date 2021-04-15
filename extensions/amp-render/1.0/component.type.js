@@ -27,3 +27,8 @@ var RenderDef = {};
  * }}
  */
 RenderDef.Props;
+
+/** @interface */
+RenderDef.RenderApi = class {
+  refresh() {}
+};
