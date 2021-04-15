@@ -58,7 +58,7 @@
     "@types/eslint": "7.2.9",
     "@types/minimist": "1.2.1",
     "@types/mocha": "8.2.2",
-    "@types/node": "14.14.37",
+    "@types/node": "14.14.41",
     "acorn-globals": "6.0.0",
     "amphtml-validator": "1.0.34",
     "ast-replace": "1.1.3",
