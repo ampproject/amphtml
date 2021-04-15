@@ -15,11 +15,11 @@
  */
 
 .i-amphtml-ad-overlay-container {
-  align-items: center;
-  display: flex;
+  align-items: center !important;
+  display: flex !important;
   height: 48px !important;
   left: 0 !important;
-  justify-content: center;
+  justify-content: center !important;
   pointer-events: none !important;
   position: absolute !important;
   top: 0 !important;
