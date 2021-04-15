@@ -18,7 +18,7 @@ import * as Preact from '../../../src/preact';
 import {WithAmpContext} from '../../../src/preact/context';
 import {animateCollapse, animateExpand} from './animations';
 import {forwardRef} from '../../../src/preact/compat';
-import {omit} from '../../../src/utils/object';
+import {omit} from '../../../src/core/types/object';
 import {
   randomIdGenerator,
   sequentialIdGenerator,

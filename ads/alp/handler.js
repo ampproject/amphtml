@@ -23,7 +23,7 @@ import {
 } from '../../src/url';
 import {closest, openWindowDialog} from '../../src/dom';
 import {dev} from '../../src/log';
-import {dict} from '../../src/utils/object';
+import {dict} from '../../src/core/types/object';
 import {urls} from '../../src/config';
 
 /**

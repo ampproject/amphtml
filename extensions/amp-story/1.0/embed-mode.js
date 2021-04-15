@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {isEnumValue} from '../../../src/types';
+import {isEnumValue} from '../../../src/core/types';
 import {parseQueryString} from '../../../src/url';
 
 /**

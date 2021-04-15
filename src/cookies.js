@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {endsWith} from './string';
+import {endsWith} from './core/types/string';
 import {
   getSourceOrigin,
   isProxyOrigin,

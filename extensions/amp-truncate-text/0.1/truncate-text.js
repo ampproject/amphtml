@@ -19,7 +19,7 @@ import {
   BinarySearchStop,
   binarySearch,
 } from './binary-search';
-import {trimEnd} from '../../../src/string';
+import {trimEnd} from '../../../src/core/types/string';
 
 /** The class to add to the container when it has overflow. */
 const CONTAINER_OVERFLOW_ATTRIBUTE = 'i-amphtml-truncate-overflow';

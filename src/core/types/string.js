@@ -210,3 +210,12 @@ export function padStart(s, targetLength, padString) {
   }
   return padding.slice(0, targetLength) + s;
 }
+
+/**
+ * Tests if a value is a string.
+ * @param {string} s
+ * @return {boolean}
+ */
+export function isString(s) {
+  return typeof s == 'string';
+}

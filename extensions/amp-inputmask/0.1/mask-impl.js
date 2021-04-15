@@ -17,7 +17,7 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {MASK_SEPARATOR_CHAR, MaskChars, NamedMasks} from './constants';
 import {MaskInterface} from './mask-interface';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {factory as inputmaskCustomAliasFactory} from './inputmask-custom-alias';
 import {factory as inputmaskPaymentCardAliasFactory} from './inputmask-payment-card-alias';
 import {requireExternal} from '../../../src/module';

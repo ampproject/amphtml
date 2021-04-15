@@ -50,10 +50,10 @@ import {US_CA_CODE, ampGeoPresets} from './amp-geo-presets';
 import {GEO_IN_GROUP} from './amp-geo-in-group';
 import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {isArray} from '../../../src/core/types/array';
+import {isArray, isObject} from '../../../src/core/types';
 import {isCanary} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
-import {isObject} from '../../../src/types';
+
 import {tryParseJson} from '../../../src/json';
 import {urls} from '../../../src/config';
 

@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
-import {isObject} from '../types';
-
 /* @const */
-const hasOwn_ = Object.prototype.hasOwnProperty;
+const {toString: toString_, hasOwnProperty: hasOwn_} = Object.prototype;
+
+/**
+ * Determines if value is actually an Object.
+ * @param {*} value
+ * @return {boolean}
+ */
+export function isObject(value) {
+  return toString_.call(value) === '[object Object]';
+}
 
 /**
  * Returns a map-like object.

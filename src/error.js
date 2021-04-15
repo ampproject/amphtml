@@ -23,7 +23,7 @@ import {
   isUserErrorEmbed,
   isUserErrorMessage,
 } from './log';
-import {dict} from './utils/object';
+import {dict} from './core/types/object';
 import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
 import {exponentialBackoff} from './exponential-backoff';
 import {getMode} from './mode';

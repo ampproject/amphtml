@@ -20,7 +20,7 @@ import {GEO_IN_GROUP} from '../../../extensions/amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../src/services';
 import {buildUrl} from './shared/url-builder';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   getBinaryType,
   isExperimentOn,

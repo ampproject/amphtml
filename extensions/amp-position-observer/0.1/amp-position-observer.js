@@ -30,7 +30,7 @@ import {
 } from '../../../src/layout';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {installPositionObserverServiceForDoc} from '../../../src/service/position-observer/position-observer-impl';
 
 const TAG = 'amp-position-observer';

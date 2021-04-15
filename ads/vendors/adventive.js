@@ -15,8 +15,8 @@
  */
 
 import {addParamsToUrl} from '../../src/url.js';
-import {dict, hasOwn} from '../../src/utils/object';
-import {endsWith} from '../../src/string';
+import {dict, hasOwn} from '../../src/core/types/object';
+import {endsWith} from '../../src/core/types/string';
 import {loadScript, validateData, writeScript} from '../../3p/3p';
 
 /**

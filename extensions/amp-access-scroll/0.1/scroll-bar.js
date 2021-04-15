@@ -16,7 +16,7 @@
 
 import {ScrollComponent} from './scroll-component';
 import {buildUrl, connectHostname} from './scroll-url';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 
 /**
  * UI for Scroll users.

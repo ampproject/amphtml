@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   getViewerInterceptResponse,
   setupAMPCors,

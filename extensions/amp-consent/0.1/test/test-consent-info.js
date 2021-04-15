@@ -28,7 +28,7 @@ import {
   recalculateConsentStateValue,
 } from '../consent-info';
 import {CONSENT_STRING_TYPE} from '../../../../src/consent-state';
-import {dict} from '../../../../src/utils/object';
+import {dict} from '../../../../src/core/types/object';
 
 describes.fakeWin('ConsentInfo', {}, () => {
   describe('getStoredConsentInfo', () => {

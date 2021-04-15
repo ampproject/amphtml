@@ -26,7 +26,7 @@ import {
   postMessageToWindows,
 } from '../../../src/iframe-helper';
 import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getData} from '../../../src/event-helper';
 import {getHtml} from '../../../src/get-html';
 import {isExperimentOn} from '../../../src/experiments';

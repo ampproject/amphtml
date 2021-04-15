@@ -16,8 +16,8 @@
 
 import {Services} from '../../../src/services';
 import {getMode} from '../../../src/mode';
-import {includes} from '../../../src/string';
-import {map} from '../../../src/utils/object';
+import {includes} from '../../../src/core/types/string';
+import {map} from '../../../src/core/types/object';
 import {parseExtensionUrl} from '../../../src/service/extension-script';
 import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
 import {removeElement, rootNodeFor} from '../../../src/dom';

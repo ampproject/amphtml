@@ -15,7 +15,7 @@
  */
 /* eslint-disable local/window-property-name */
 
-import {dict} from '../src/utils/object';
+import {dict} from '../src/core/types/object';
 import {getData, listen} from '../src/event-helper';
 import {getMode} from '../src/mode';
 import {isFiniteNumber} from '../src/types';

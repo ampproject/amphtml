@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {hasOwn} from '../../utils/object';
+import {hasOwn} from '../../core/types/object';
 import {rethrowAsync, user} from '../../log';
-import {trimStart} from '../../string';
+import {trimStart} from '../../core/types/string';
 import {tryResolve} from '../../utils/promise';
 
 /** @private @const {string} */

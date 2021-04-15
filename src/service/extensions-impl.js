@@ -25,7 +25,7 @@ import {createExtensionScript, getExtensionScripts} from './extension-script';
 import {dev, devAssert, rethrowAsync} from '../log';
 import {getMode} from '../mode';
 import {installStylesForDoc} from '../style-installer';
-import {map} from '../utils/object';
+import {map} from '../core/types/object';
 import {registerExtendedTemplateForDoc} from './template-impl';
 import {registerServiceBuilder, registerServiceBuilderForDoc} from '../service';
 

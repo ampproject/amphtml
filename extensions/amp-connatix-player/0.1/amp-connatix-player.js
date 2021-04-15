@@ -22,7 +22,7 @@ import {Deferred} from '../../../src/utils/promise';
 import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,

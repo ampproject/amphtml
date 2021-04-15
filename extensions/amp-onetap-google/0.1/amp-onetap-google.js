@@ -32,9 +32,9 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getData, listen} from '../../../src/event-helper';
-import {isObject} from '../../../src/types';
+import {isObject} from '../../../src/core/types';
 import {px, setStyle, toggle} from '../../../src/style';
 import {removeElement} from '../../../src/dom';
 

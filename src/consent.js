@@ -18,7 +18,7 @@ import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
 } from './consent-state';
 import {Services} from './services';
-import {dict} from './utils/object';
+import {dict} from './core/types/object';
 
 /**
  * Returns a promise that resolve when all consent state the policy wait

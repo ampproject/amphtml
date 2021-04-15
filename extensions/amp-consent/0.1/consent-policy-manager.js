@@ -23,8 +23,9 @@ import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {hasOwn, map} from '../../../src/utils/object';
-import {isFiniteNumber, isObject} from '../../../src/types';
+import {hasOwn, map} from '../../../src/core/types/object';
+import {isFiniteNumber} from '../../../src/types';
+import {isObject} from '../../../src/core/types';
 import {user, userAssert} from '../../../src/log';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';

@@ -15,7 +15,7 @@
  */
 
 import {Keys} from '../../../src/utils/key-codes';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {listen} from '../../../src/event-helper';
 
 /**

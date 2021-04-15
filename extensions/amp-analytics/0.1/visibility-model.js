@@ -17,7 +17,7 @@
 import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 
 /**
  * This class implements visibility calculations based on the

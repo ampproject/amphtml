@@ -16,7 +16,7 @@
 
 import {MessageType} from '../3p-frame-messaging';
 import {SubscriptionApi} from '../iframe-helper';
-import {dict} from './object';
+import {dict} from '../core/types/object';
 import {layoutRectLtwh, moveLayoutRect, rectIntersection} from '../layout-rect';
 
 /**

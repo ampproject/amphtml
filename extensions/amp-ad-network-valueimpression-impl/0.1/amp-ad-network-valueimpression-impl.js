@@ -27,7 +27,7 @@ import {getFlexibleAdSlotData} from './flexible-ad-slot-utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {internalRuntimeVersion} from '../../../src/internal-version';
-import {stringHash32} from '../../../src/string';
+import {stringHash32} from '../../../src/core/types/string';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-valueimpression-impl';

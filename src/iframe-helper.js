@@ -17,7 +17,7 @@
 import {addAttributesToElement, closestAncestorElementBySelector} from './dom';
 import {deserializeMessage, isAmpMessage} from './3p-frame-messaging';
 import {dev, devAssert} from './log';
-import {dict} from './utils/object';
+import {dict} from './core/types/object';
 import {getData} from './event-helper';
 import {parseUrlDeprecated} from './url';
 import {remove} from './core/types/array';

@@ -16,7 +16,7 @@
 
 import {Services} from '../services';
 import {dev, devAssert} from '../log';
-import {dict} from '../utils/object';
+import {dict} from '../core/types/object';
 import {getSourceOrigin} from '../url';
 import {parseJson, recreateNonProtoObject} from '../json';
 import {registerServiceBuilderForDoc} from '../service';

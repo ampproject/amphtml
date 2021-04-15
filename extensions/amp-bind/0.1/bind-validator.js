@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {hasOwn, ownProperty} from '../../../src/utils/object';
+import {hasOwn, ownProperty} from '../../../src/core/types/object';
 import {parseSrcset} from '../../../src/srcset';
 import {user} from '../../../src/log';
 

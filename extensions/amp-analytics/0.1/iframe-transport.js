@@ -18,7 +18,7 @@ import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 import {createElementWithAttributes} from '../../../src/dom';
 import {devAssert, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {hasOwn} from '../../../src/utils/object';
+import {hasOwn} from '../../../src/core/types/object';
 import {internalRuntimeVersion} from '../../../src/internal-version';
 import {toggle} from '../../../src/style';
 import {urls} from '../../../src/config';

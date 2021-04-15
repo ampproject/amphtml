@@ -28,7 +28,7 @@ import {
 import {computedStyle} from '../../../src/style';
 import {createCustomEvent, getDetail, listen} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {triggerAnalyticsEvent} from '../../../src/analytics';

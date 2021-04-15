@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {IframeEmbed} from './iframe';
-import {dict} from '../../utils/object';
+import {dict} from '../../core/types/object';
 import {forwardRef} from '../compat';
 import {
   generateSentinel,

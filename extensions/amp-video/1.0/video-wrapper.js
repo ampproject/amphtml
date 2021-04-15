@@ -27,7 +27,7 @@ import {
   setMediaSession,
 } from '../../../src/mediasession-helper';
 import {ReadyState} from '../../../src/ready-state';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {fillContentOverlay, fillStretch} from './video-wrapper.css';
 import {forwardRef} from '../../../src/preact/compat';
 import {once} from '../../../src/utils/function';

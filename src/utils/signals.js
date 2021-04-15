@@ -15,7 +15,7 @@
  */
 
 import {Deferred} from './promise';
-import {map} from './object';
+import {map} from '../core/types/object';
 
 /**
  * This object tracts signals and allows blocking until a signal has been

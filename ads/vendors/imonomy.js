@@ -15,7 +15,7 @@
  */
 
 import {doubleclick} from '../../ads/google/doubleclick';
-import {hasOwn} from '../../src/utils/object';
+import {hasOwn} from '../../src/core/types/object';
 import {loadScript, writeScript} from '../../3p/3p';
 
 const DEFAULT_TIMEOUT = 500; // ms

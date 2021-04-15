@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 
 /**
  * Installs an alias used to mask credit cards and enable digit chunking.

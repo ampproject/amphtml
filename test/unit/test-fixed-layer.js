@@ -19,7 +19,7 @@ import {Animation} from '../../src/animation';
 import {FakeMutationObserver, FakeWindow} from '../../testing/fake-dom';
 import {FixedLayer} from '../../src/service/fixed-layer';
 import {Services} from '../../src/services';
-import {endsWith} from '../../src/string';
+import {endsWith} from '../../src/core/types/string';
 import {installHiddenObserverForDoc} from '../../src/service/hidden-observer-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';

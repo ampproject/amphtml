@@ -21,7 +21,7 @@ import {
   setupInit,
   setupInput,
 } from './utils/xhr-utils';
-import {dict} from './utils/object';
+import {dict} from './core/types/object';
 import {user} from './log';
 
 /**

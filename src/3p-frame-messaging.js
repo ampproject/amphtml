@@ -15,7 +15,7 @@
  */
 
 import {dev, devAssert} from './log';
-import {dict} from './utils/object';
+import {dict} from './core/types/object';
 import {internalListenImplementation} from './event-helper-listen';
 import {parseJson} from './json';
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {endsWith} from '../../../../src/string';
+import {endsWith} from '../../../../src/core/types/string';
 import {toWin} from '../../../../src/types';
 
 /**

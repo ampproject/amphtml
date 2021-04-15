@@ -25,7 +25,7 @@ import {Sheet} from './scroll-sheet';
 import {addParamToUrl, isProxyOrigin, parseQueryString} from '../../../src/url';
 import {buildUrl, connectHostname} from './scroll-url';
 import {createElementWithAttributes} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {installStylesForDoc} from '../../../src/style-installer';
 
 const TAG = 'amp-access-scroll-elt';

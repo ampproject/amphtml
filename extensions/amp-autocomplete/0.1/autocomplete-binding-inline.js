@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ownProperty} from '../../../src/utils/object';
+import {ownProperty} from '../../../src/core/types/object';
 import {tryFocus} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 

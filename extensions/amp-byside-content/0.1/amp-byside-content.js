@@ -37,7 +37,7 @@ import {Services} from '../../../src/services';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {setStyles} from '../../../src/style';

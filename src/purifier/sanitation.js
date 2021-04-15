@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dict, map} from '../utils/object';
+import {dict, map} from '../core/types/object';
 import {isAmp4Email} from '../format';
 import {isUrlAttribute} from '../url-rewrite';
 

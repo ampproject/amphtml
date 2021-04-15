@@ -15,7 +15,7 @@
  */
 
 import {BaseTemplate} from '../../../src/base-template';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {
   sanitizeHtml,
