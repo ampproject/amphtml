@@ -120,14 +120,13 @@ async function validateAdOverlay(controller) {
     .to.exist;
 
   const adBadge = await controller.findElement('.i-amphtml-story-ad-badge');
-  await expect(controller.getElementText(adBadge)).to.equal('Ad');
   await expect(controller.getElementCssValue(adBadge, 'visibility')).to.equal(
     'visible'
   );
   // Design spec is 14px from top, 16px from left.
   await expect(controller.getElementRect(adBadge)).to.include({
-    left: 16,
-    top: 14,
+    left: 12,
+    top: 12,
   });
 
   await controller.switchToLight();
