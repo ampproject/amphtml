@@ -174,19 +174,18 @@ export class AmpIframely extends AMP.BaseElement {
       const media = data['data']['media'] || null;
       if (media && media['aspect-ratio']) {
         const intersection = measureIntersection(this.element);
-        let el = this;
-        intersection.then((box) => {
+        intersection.then(box => {
           if (media['padding-bottom']) {
             /** Apply height for media with updated "aspect-ratio" and "padding-bottom". */
             const height =
               box.boundingClientRect.width / media['aspect-ratio'] +
               media['padding-bottom'];
-            el.attemptChangeHeight(Math.round(height)).catch(() => {});
+            this.attemptChangeHeight(Math.round(height)).catch(() => {});
           } else {
             const height = box.boundingClientRect.width / media['aspect-ratio'];
             if (Math.abs(box.boundingClientRect.height - height) > 1) {
               /** Apply new height for updated "aspect-ratio". */
-              el.attemptChangeHeight(Math.round(height)).catch(() => {});
+              this.attemptChangeHeight(Math.round(height)).catch(() => {});
             }
           }
         });
