@@ -220,7 +220,7 @@ function checkPythonVersion() {
   // Python 3.6+ are still supported
   // https://devguide.python.org/#status-of-python-branches
   const recommendedVersion = '2.7 or 3.6+';
-  const recommendedVersionRegex = /^2\.7|^3\.[6-9]/;
+  const recommendedVersionRegex = /^2\.7|^3\.(?:[6-9]|1\d)/;
 
   // Python2 prints its version to stderr (fixed in Python 3.4)
   // See: https://bugs.python.org/issue18338
