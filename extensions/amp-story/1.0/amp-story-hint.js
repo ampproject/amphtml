@@ -24,7 +24,7 @@ import {
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {createShadowRootWithStyle} from './utils';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {renderAsElement} from './simple-template';
 
 /** @private @const {!./simple-template.ElementDef} */

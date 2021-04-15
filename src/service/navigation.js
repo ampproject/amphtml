@@ -22,7 +22,7 @@ import {
   tryFocus,
 } from '../dom';
 import {dev, user, userAssert} from '../log';
-import {dict} from '../utils/object';
+import {dict} from '../core/types/object';
 import {escapeCssSelectorIdent} from '../css';
 import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
 import {getMode} from '../mode';

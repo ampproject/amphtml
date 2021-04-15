@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 import {dev, devAssert, user} from '../log';
-import {hasOwn, map} from '../utils/object';
-import {isArray} from '../core/types/array';
-import {isObject} from '../types';
+import {hasOwn, map} from '../core/types/object';
+import {isArray, isObject} from '../core/types';
+
 import {parseJson} from '../json';
 import {utf8Encode} from '../utils/bytes';
 

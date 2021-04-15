@@ -17,7 +17,7 @@
 import {Services} from './services';
 import {getFormAsObject, getSubmitButtonUsed} from './form';
 import {iterateCursor} from './dom';
-import {map} from './utils/object';
+import {map} from './core/types/object';
 
 /**
  * Create a form data wrapper. The wrapper is necessary to provide a common

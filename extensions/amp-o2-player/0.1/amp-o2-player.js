@@ -18,7 +18,7 @@ import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {MessageType} from '../../../src/3p-frame-messaging';
 import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   getConsentPolicyInfo,
   getConsentPolicyState,
