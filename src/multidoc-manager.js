@@ -27,7 +27,7 @@ import {dev, user} from './log';
 import {disposeServicesForDoc, getServicePromiseOrNullForDoc} from './service';
 import {getMode} from './mode';
 import {installStylesForDoc} from './style-installer';
-import {isArray, isObject} from './core/types';
+import {isArray, isObject, isString} from './core/types';
 
 import {parseExtensionUrl} from './service/extension-script';
 import {parseUrlDeprecated} from './url';
@@ -190,7 +190,7 @@ export class MultidocManager {
         if (!bind) {
           return Promise.reject('amp-bind is not available in this document');
         }
-        if (typeof state === 'string') {
+        if (isString(state)) {
           return bind.setStateWithExpression(
             /** @type {string} */ (state),
             /** @type {!JsonObject} */ ({})

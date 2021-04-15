@@ -16,6 +16,7 @@
 
 import {Services} from './services';
 import {dev} from './log';
+import {isString} from './core/types';
 
 /**
  * The interface that is implemented by all templates.
@@ -122,7 +123,7 @@ export class BaseTemplate {
   unwrapChildren(root) {
     const children = [];
     this.visitChildren_(root, (c) => {
-      if (typeof c == 'string') {
+      if (isString(c)) {
         const element = this.win.document.createElement('div');
         element.textContent = c;
         children.push(element);

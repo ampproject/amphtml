@@ -29,6 +29,7 @@ import {exponentialBackoff} from './exponential-backoff';
 import {getMode} from './mode';
 import {isLoadErrorMessage} from './event-helper';
 import {isProxyOrigin} from './url';
+import {isString} from './core/types';
 import {makeBodyVisibleRecovery} from './style-installer';
 import {triggerAnalyticsEvent} from './analytics';
 import {urls} from './config';
@@ -244,10 +245,10 @@ export function isCancellation(errorOrMessage) {
   if (!errorOrMessage) {
     return false;
   }
-  if (typeof errorOrMessage == 'string') {
+  if (isString(errorOrMessage)) {
     return errorOrMessage.startsWith(CANCELLED);
   }
-  if (typeof errorOrMessage.message == 'string') {
+  if (isString(errorOrMessage.message)) {
     return errorOrMessage.message.startsWith(CANCELLED);
   }
   return false;
@@ -269,10 +270,10 @@ export function isBlockedByConsent(errorOrMessage) {
   if (!errorOrMessage) {
     return false;
   }
-  if (typeof errorOrMessage == 'string') {
+  if (isString(errorOrMessage)) {
     return errorOrMessage.startsWith(BLOCK_BY_CONSENT);
   }
-  if (typeof errorOrMessage.message == 'string') {
+  if (isString(errorOrMessage.message)) {
     return errorOrMessage.message.startsWith(BLOCK_BY_CONSENT);
   }
   return false;

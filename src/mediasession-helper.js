@@ -15,7 +15,7 @@
  */
 import {Services} from './services';
 import {devAssert, userAssert} from './log';
-import {isArray, isObject} from './core/types';
+import {isArray, isObject, isString} from './core/types';
 
 import {tryParseJson} from './json';
 
@@ -79,19 +79,19 @@ export function parseSchemaImage(doc) {
   }
 
   // Image definition in schema could be one of :
-  if (typeof schemaJson['image'] === 'string') {
+  if (isString(schemaJson['image'])) {
     // 1. "image": "http://..",
     return schemaJson['image'];
   } else if (
     schemaJson['image']['@list'] &&
-    typeof schemaJson['image']['@list'][0] === 'string'
+    isString(schemaJson['image']['@list'][0])
   ) {
     // 2. "image": {.., "@list": ["http://.."], ..}
     return schemaJson['image']['@list'][0];
-  } else if (typeof schemaJson['image']['url'] === 'string') {
+  } else if (isString(schemaJson['image']['url'])) {
     // 3. "image": {.., "url": "http://..", ..}
     return schemaJson['image']['url'];
-  } else if (typeof schemaJson['image'][0] === 'string') {
+  } else if (isString(schemaJson['image'][0])) {
     // 4. "image": ["http://.. "]
     return schemaJson['image'][0];
   } else {

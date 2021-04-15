@@ -15,6 +15,7 @@
  */
 
 import {getMode} from '../mode';
+import {isString} from '../core/types';
 import {
   registerServiceBuilder,
   registerServiceBuilderInEmbedWin,
@@ -104,7 +105,7 @@ export class Timer {
    * @param {number|string|null} timeoutId
    */
   cancel(timeoutId) {
-    if (typeof timeoutId == 'string') {
+    if (isString(timeoutId)) {
       this.canceled_[timeoutId] = true;
       return;
     }

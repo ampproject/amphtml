@@ -17,6 +17,7 @@
 import {dev, devAssert} from './log';
 import {dict} from './core/types/object';
 import {internalListenImplementation} from './event-helper-listen';
+import {isString} from './core/types';
 import {parseJson} from './json';
 
 /** @const */
@@ -135,7 +136,7 @@ export function deserializeMessage(message) {
  */
 export function isAmpMessage(message) {
   return (
-    typeof message == 'string' &&
+    isString(message) &&
     message.indexOf(AMP_MESSAGE_PREFIX) == 0 &&
     message.indexOf('{') != -1
   );

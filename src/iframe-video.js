@@ -18,7 +18,7 @@ import {VideoEvents} from './video-interface';
 import {dev} from './log';
 import {dispatchCustomEvent} from './dom';
 import {htmlFor} from './static-template';
-import {isArray, isObject} from './core/types';
+import {isArray, isObject, isString} from './core/types';
 
 import {tryParseJson} from './json';
 
@@ -42,7 +42,7 @@ export function originMatches(event, iframe, host) {
   if (!iframe || event.source != iframe.contentWindow) {
     return false;
   }
-  if (typeof host === 'string') {
+  if (isString(host)) {
     return host == event.origin;
   }
   return host.test(event.origin);

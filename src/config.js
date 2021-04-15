@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {isString} from './core/types';
+
 /**
  * Allows for runtime configuration. Internally, the runtime should
  * use the src/config.js module for various constants. We can use the
@@ -24,12 +26,12 @@
 const env = self.AMP_CONFIG || {};
 
 const thirdPartyFrameRegex =
-  (typeof env['thirdPartyFrameRegex'] == 'string'
+  (isString(env['thirdPartyFrameRegex'])
     ? new RegExp(env['thirdPartyFrameRegex'])
     : env['thirdPartyFrameRegex']) || /^d-\d+\.ampproject\.net$/;
 
 const cdnProxyRegex =
-  (typeof env['cdnProxyRegex'] == 'string'
+  (isString(env['cdnProxyRegex'])
     ? new RegExp(env['cdnProxyRegex'])
     : env['cdnProxyRegex']) ||
   /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org$/;

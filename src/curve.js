@@ -17,6 +17,7 @@
 // Imported just for the side effect of getting the `types` it exports into
 // the type system during compile time.
 import './time';
+import {isString} from './core/types';
 
 /**
  * A CurveDef is a function that returns a normtime value (0 to 1) for another
@@ -291,7 +292,7 @@ export function getCurve(curve) {
   if (!curve) {
     return null;
   }
-  if (typeof curve == 'string') {
+  if (isString(curve)) {
     // If the curve is a custom cubic-bezier curve
     if (curve.indexOf('cubic-bezier') != -1) {
       const match = curve.match(/cubic-bezier\((.+)\)/);

@@ -47,6 +47,7 @@ import {getDate} from '../utils/date';
 import {getMode} from '../mode';
 import {hydrate, render} from './index';
 import {installShadowStyle} from '../shadow-embed';
+import {isString} from '../core/types';
 import {sequentialIdGenerator} from '../utils/id-generator';
 import {toArray} from '../core/types/array';
 
@@ -165,7 +166,7 @@ const HAS_MEDIA = (def) => !!def.media;
  * @param {!AmpElementPropDef} def
  * @return {boolean}
  */
-const HAS_SELECTOR = (def) => typeof def === 'string' || !!def.selector;
+const HAS_SELECTOR = (def) => isString(def) || !!def.selector;
 
 /**
  * @param {!AmpElementPropDef} def
@@ -1213,7 +1214,7 @@ function matchChild(element, defs) {
   // TODO: a little slow to do this repeatedly.
   for (const match in defs) {
     const def = defs[match];
-    const selector = typeof def == 'string' ? def : def.selector;
+    const selector = isString(def) ? def : def.selector;
     if (matches(element, selector)) {
       return match;
     }

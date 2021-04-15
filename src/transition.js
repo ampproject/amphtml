@@ -17,6 +17,7 @@
 import * as st from './style';
 import {assertNotDisplay, setStyle} from './style';
 import {getCurve} from './curve';
+import {isString} from './core/types';
 
 export const NOOP = function (unusedTime) {
   return null;
@@ -50,7 +51,7 @@ export function concat(transitions, opt_delimiter = ' ') {
     for (let i = 0; i < transitions.length; i++) {
       const tr = transitions[i];
       const result = tr(time, complete);
-      if (typeof result == 'string') {
+      if (isString(result)) {
         results.push(result);
       }
     }
@@ -143,7 +144,7 @@ export function px(transition) {
 export function translateX(transition) {
   return (time) => {
     const res = transition(time);
-    if (typeof res == 'string') {
+    if (isString(res)) {
       return `translateX(${res})`;
     }
     return `translateX(${res}px)`;
@@ -158,7 +159,7 @@ export function translateX(transition) {
 export function translateY(transition) {
   return (time) => {
     const res = transition(time);
-    if (typeof res == 'string') {
+    if (isString(res)) {
       return `translateY(${res})`;
     }
     return `translateY(${res}px)`;

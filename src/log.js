@@ -21,7 +21,7 @@ import {
 import {findIndex, isArray} from './core/types/array';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
-import {isEnumValue} from './core/types';
+import {isEnumValue, isString} from './core/types';
 import {once} from './utils/function';
 import {pureDevAssert, pureUserAssert} from './core/assert';
 import {urls} from './config';
@@ -246,7 +246,7 @@ export class Log {
       const args = this.maybeExpandMessageArgs_(messages);
       // Prefix console message with "[tag]".
       const prefix = `[${tag}]`;
-      if (typeof args[0] === 'string') {
+      if (isString(args[0])) {
         // Prepend string to avoid breaking string substitutions e.g. %s.
         args[0] = prefix + ' ' + args[0];
       } else {
@@ -448,7 +448,7 @@ export class Log {
   assertString(shouldBeString, opt_message) {
     this.assertType_(
       shouldBeString,
-      typeof shouldBeString == 'string',
+      isString(shouldBeString),
       'String expected',
       opt_message
     );

@@ -15,7 +15,7 @@
  */
 
 import {dict} from './core/types/object';
-import {isArray} from './core/types';
+import {isArray, isString} from './core/types';
 import {toStructuredCloneable} from './utils/xhr-utils';
 import {userAssert} from './log';
 
@@ -120,7 +120,7 @@ export class SsrTemplateHelper {
     let renderTemplatePromise;
     if (this.isEnabled()) {
       userAssert(
-        typeof data['html'] === 'string',
+        isString(data['html']),
         'Server side html response must be defined'
       );
       renderTemplatePromise = this.assertTrustedViewer(element).then(() => {

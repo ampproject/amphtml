@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {isString} from './core/types';
+
 /** @type {!Array<string>} */
 const excludedTags = ['script', 'style'];
 
@@ -81,7 +83,7 @@ function appendToResult(node, attrs, result) {
   while (stack.length > 0) {
     node = stack.pop();
 
-    if (typeof node === 'string') {
+    if (isString(node)) {
       result.push(node);
     } else if (node.nodeType === Node.TEXT_NODE) {
       result.push(node.textContent);

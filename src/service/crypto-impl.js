@@ -18,6 +18,7 @@ import {Services} from '../services';
 import {base64UrlEncodeFromBytes} from '../utils/base64';
 import {dev, devAssert, user} from '../log';
 import {getService, registerServiceBuilder} from '../service';
+import {isString} from '../core/types';
 import {stringToBytes, utf8Encode} from '../utils/bytes';
 
 /** @const {string} */
@@ -72,7 +73,7 @@ export class Crypto {
    * @throws {!Error} when input string contains chars out of range [0,255]
    */
   sha384(input) {
-    if (typeof input === 'string') {
+    if (isString(input)) {
       input = stringToBytes(input);
     }
 

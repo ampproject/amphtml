@@ -45,6 +45,7 @@ import {WindowInterface} from '../window-interface';
 import {getTrackImpressionPromise} from '../impression.js';
 import {hasOwn} from '../core/types/object';
 import {internalRuntimeVersion} from '../internal-version';
+import {isString} from '../core/types/types';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -307,7 +308,7 @@ export class GlobalVariableSource extends VariableSource {
             // TODO: replace with "filter" when it's in place. #2198
             const cookieName = opt_cookieName || scope;
             if (cid && cookieName == '_ga') {
-              if (typeof cid === 'string') {
+              if (isString(cid)) {
                 cid = extractClientIdFromGaCookie(cid);
               } else {
                 // TODO(@jridgewell, #11120): remove once #11120 is figured out.
@@ -706,7 +707,7 @@ export class GlobalVariableSource extends VariableSource {
       'The first argument to FRAGMENT_PARAM, the fragment string ' +
         'param is required'
     );
-    userAssert(typeof param == 'string', 'param should be a string');
+    userAssert(isString(param), 'param should be a string');
     const hash = this.ampdoc.win.location['originalHash'];
     const params = parseQueryString(hash);
     return params[param] === undefined ? defaultValue : params[param];
