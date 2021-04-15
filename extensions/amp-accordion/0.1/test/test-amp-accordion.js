@@ -25,6 +25,7 @@ import {
   tryFocus,
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
+import {htmlFor} from '../../../../src/static-template';
 import {poll} from '../../../../testing/iframe';
 
 describes.realWin(
@@ -844,6 +845,33 @@ describes.realWin(
       expect(header2.getAttribute('id')).to.equal(
         content2.getAttribute('aria-labelledby')
       );
+    });
+
+    it('should throw an error when amp-bind used with expanded attribute ', async () => {
+      const errors = [];
+      const consoleError = console.error;
+      console.error = (msg) => {
+        errors.push(msg);
+      };
+
+      const html = htmlFor(win.document);
+      const accordion = html`
+        <amp-accordion animate>
+          <section [expanded]="section1">
+            <h2>Section 1</h2>
+            <div>Puppies are cute.</div>
+          </section>
+        </amp-accordion>
+      `;
+      doc.body.appendChild(accordion);
+
+      await accordion.buildInternal().catch((err) => {
+        expect(err.message).to.include('The "expanded" attribute');
+      });
+
+      expect(errors.length).to.equal(1);
+      expect(errors[0]).to.include('The "expanded" attribute');
+      console.error = consoleError;
     });
   }
 );
