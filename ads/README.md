@@ -271,7 +271,7 @@ AMP runtime provides the following `window.context` APIs for ad network to acces
 </dl>
 
 After overriding the default consent handling behavior, don't forget to update your publisher facing
-documentation with the new behaviors on user's consent choices. You can refer to our documentation example [here](https://github.com/ampproject/amphtml/blob/main/ads/_ping_.md#user-consent-integration).
+documentation with the new behaviors on user's consent choices. You can refer to our documentation example [here](https://github.com/ampproject/amphtml/blob/main/ads/vendors/_ping_.md#user-consent-integration).
 
 ### Optimizing ad performance
 
