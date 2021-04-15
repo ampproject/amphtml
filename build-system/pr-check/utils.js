@@ -287,7 +287,7 @@ function storeExperimentBuildToWorkspace(exp) {
 }
 
 // TODO(danielrozenberg): remove when Cloud Storage -> CircleCI Artifacts migration is complete.
-async function legacyProcessAndStoreBuildToArtifacts_() {
+function legacyProcessAndStoreBuildToArtifacts_() {
   const loggingPrefix = getLoggingPrefix();
 
   logWithoutTimestamp(
