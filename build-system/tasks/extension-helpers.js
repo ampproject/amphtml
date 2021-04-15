@@ -701,8 +701,9 @@ async function buildSandboxedProxyIframe(minify) {
     'dist.3p',
     minify ? `${internalRuntimeVersion}` : 'current'
   );
+  const fileExt = argv.esm ? '.mjs' : '.js';
   const proxyScript = await fs.readFile(
-    path.join(dist3pDir, 'amp-script-proxy-iframe.js')
+    path.join(dist3pDir, 'amp-script-proxy-iframe' + fileExt)
   );
   const proxyIframe = `<html><script>${proxyScript}</script></html>`;
   await fs.outputFile(
