@@ -158,7 +158,8 @@ class AmpAccordion extends AMP.BaseElement {
       userAssert(
         !section.hasAttribute('[expanded]') &&
           !section.hasAttribute('data-amp-bind-expanded'),
-        'The "expanded" attribute cannot be used with amp-bind. ' +
+        'The "expanded" attribute cannot be used with amp-bind in version ' +
+          '0.1 of amp-accordion. Please bind to [data-expand] instead. ' +
           'Found in: %s',
         this.element
       );

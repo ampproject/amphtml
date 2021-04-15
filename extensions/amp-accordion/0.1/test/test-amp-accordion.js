@@ -865,13 +865,12 @@ describes.realWin(
       `;
       doc.body.appendChild(accordion);
 
-      try {
-        await accordion.buildInternal();
-      } catch (expected) {
-        expect(errors.length).to.equal(1);
-        expect(errors[0]).to.include('The "expanded" attribute');
-      }
+      await accordion.buildInternal().catch((err) => {
+        expect(err.message).to.include('The "expanded" attribute');
+      });
 
+      expect(errors.length).to.equal(1);
+      expect(errors[0]).to.include('The "expanded" attribute');
       console.error = consoleError;
     });
   }
