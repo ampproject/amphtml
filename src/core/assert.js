@@ -19,35 +19,10 @@ import {
   elementStringOrPassThru,
 } from './error-message-helpers';
 import {isMinifiedMode} from './minified-mode';
-
-/** @fileoverview Dependency-free assertion helpers for use in Preact. */
-
-/**
- * User error class for use in Preact. Use of sentinel string instead of a
- * boolean to check user errors because errors could be rethrown by some native
- * code as a new error, and only a message would survive. Mirrors errors
- * produced by `user().error()` in src/log.js.
- * @final
- * @public
- */
-export class UserError extends Error {
-  /**
-   * Builds the error, adding the user sentinel if not present.
-   * @param {string} message
-   */
-  constructor(message) {
-    if (!message) {
-      message = USER_ERROR_SENTINEL;
-    } else if (message.indexOf(USER_ERROR_SENTINEL) == -1) {
-      message += USER_ERROR_SENTINEL;
-    }
-
-    super(message);
-  }
-}
+import {remove} from './types/array';
 
 /**
- * Throws a provided error if the second argument isn't trueish.
+ * Throws an error if the second argument isn't trueish.
  *
  * Supports argument substitution into the message via %s placeholders.
  *
@@ -57,45 +32,48 @@ export class UserError extends Error {
  * - messageArray: The elements of the substituted message as non-stringified
  *   elements in an array. When e.g. passed to console.error this yields
  *   native displays of things like HTML elements.
- * @param {Object} errorCls
+ * @param {string} sentinel
  * @param {T} shouldBeTruthy
  * @param {string} opt_message
  * @param {...*} var_args Arguments substituted into %s in the message
  * @return {T}
  * @throws {Error} when shouldBeTruthy is not truthy.
  */
-function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
+function assertion(
+  sentinel,
+  shouldBeTruthy,
+  opt_message = 'Assertion failed',
+  var_args
+) {
   if (shouldBeTruthy) {
     return shouldBeTruthy;
   }
 
+  // Include the sentinel string if provided and not already present
+  if (sentinel && !opt_message.includes(sentinel)) {
+    opt_message += sentinel;
+  }
+
   // Skip the first 3 arguments to isolate format params
-  const messageArgs = Array.prototype.slice.call(arguments, 3);
-  const messageArray = [];
-  let firstElement;
+  // const messageArgs = Array.prototype.slice.call(arguments, 3);
+  // Index at which message args start
+  let i = 3;
 
   // Substitute provided values into format string in message
-  const message = (opt_message || 'Assertion failed').replace(/%s/g, () => {
-    const subValue = messageArgs.shift();
+  const splitMessage = opt_message.split('%s');
+  let message = splitMessage.shift();
+  const messageArray = [message];
 
-    if (subValue != '') {
-      messageArray.push(subValue);
-    }
+  while (splitMessage.length) {
+    const subValue = arguments[i++];
+    const nextConstant = splitMessage.shift();
 
-    // If an element is provided, add it to the error object
-    if (!firstElement && subValue?.nodeType == 1) {
-      firstElement = subValue;
-    }
-
-    return elementStringOrPassThru(subValue);
-  });
-
-  const error = new errorCls(message);
-  error.messageArray = messageArray;
-  if (firstElement) {
-    error.associatedElement = firstElement;
-    firstElement.classList.add('i-amphtml-error');
+    message += elementStringOrPassThru(subValue) + nextConstant;
+    messageArray.push(subValue, nextConstant.trim());
   }
+
+  const error = new Error(message);
+  error.messageArray = remove(messageArray, (x) => x !== '');
   throw error;
 }
 
@@ -131,7 +109,7 @@ export function pureUserAssert(
   opt_9
 ) {
   return assertion(
-    UserError,
+    USER_ERROR_SENTINEL,
     shouldBeTruthy,
     opt_message,
     opt_1,
@@ -150,7 +128,7 @@ export function pureUserAssert(
  * Throws an error if the first argument isn't trueish. Mirrors devAssert in
  * src/log.js.
  * @param {T} shouldBeTruthy
- * @param {string} opt_message
+ * @param {string=} opt_message
  * @param {*=} opt_1 Optional argument (var arg as individual params for better
  * @param {*=} opt_2 Optional argument inlining)
  * @param {*=} opt_3 Optional argument
@@ -181,8 +159,17 @@ export function pureDevAssert(
     return shouldBeTruthy;
   }
 
+  if (self.__AMP_ASSERTION_CHECK) {
+    // This will never execute regardless, but will be included on unminified
+    // builds. It will be DCE'd away from minified builds, and so can be used to
+    // validate that Babel is properly removing dev assertions in minified
+    // builds.
+    console /*OK*/
+      .log('__devAssert_sentinel__');
+  }
+
   return assertion(
-    Error,
+    null,
     shouldBeTruthy,
     opt_message,
     opt_1,

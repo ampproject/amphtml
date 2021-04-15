@@ -1,0 +1,17 @@
+// For an explanation of the OWNERS rules and syntax, see:
+// https://github.com/ampproject/amp-github-apps/blob/main/owners/OWNERS.example
+
+{
+  rules: [
+    {
+      owners: [
+        // Outreach group maintains extension boilerplate/template.
+        {name: 'ampproject/wg-outreach'},
+
+        // Most new extensions are reviewed by this group. It's in their
+        // interest to maintain the extension generator.
+        {name: 'ampproject/wg-components'},
+      ],
+    },
+  ],
+}

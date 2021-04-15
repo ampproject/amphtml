@@ -73,7 +73,6 @@ describes.sandboxed('assertions', {}, () => {
     }
 
     expect(error.toString()).to.match(/div#testId a 2 b 3/);
-    expect(error.associatedElement).to.equal(div);
-    expect(error.messageArray).to.deep.equal([div, 2, 3]);
+    expect(error.messageArray).to.deep.equal([div, 'a', 2, 'b', 3]);
   });
 });

@@ -355,14 +355,14 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       // Non-zero size.
       resizeObserverStub.notifySync({
         target: element,
-        contentRect: {width: 10, height: 10},
+        borderBoxSize: [{inlineSize: 10, blockSize: 10}],
       });
       expect(pauseStub).to.not.be.called;
 
       // Zero size.
       resizeObserverStub.notifySync({
         target: element,
-        contentRect: {width: 0, height: 0},
+        borderBoxSize: [{inlineSize: 0, blockSize: 0}],
       });
       expect(pauseStub).to.be.calledOnce;
     });

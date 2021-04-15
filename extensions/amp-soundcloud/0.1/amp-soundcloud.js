@@ -27,6 +27,7 @@
  * </amp-soundcloud>
  */
 
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -40,6 +41,9 @@ class AmpSoundcloud extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.iframe_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -109,7 +113,30 @@ class AmpSoundcloud extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
+    this.pauseHelper_.updatePlaying(true);
+
     return this.loadPromise(iframe);
+  }
+
+  /**@override*/
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    this.pauseHelper_.updatePlaying(false);
+    return true;
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    return true;
   }
 
   /** @override */

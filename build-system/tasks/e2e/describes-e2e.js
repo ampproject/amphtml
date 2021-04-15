@@ -22,6 +22,7 @@ const chrome = require('selenium-webdriver/chrome');
 const fetch = require('node-fetch');
 const firefox = require('selenium-webdriver/firefox');
 const puppeteer = require('puppeteer');
+const selenium = require('selenium-webdriver');
 const {
   clearLastExpectError,
   getLastExpectError,
@@ -31,11 +32,11 @@ const {
   SeleniumWebDriverController,
 } = require('./selenium-webdriver-controller');
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
-const {Builder, Capabilities, logging} = require('selenium-webdriver');
 const {HOST, PORT} = require('../serve');
 const {installRepl, uninstallRepl} = require('./repl');
 const {isCiBuild} = require('../../common/ci');
 const {PuppeteerController} = require('./puppeteer-controller');
+const {Builder, Capabilities, logging} = selenium;
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
@@ -57,7 +58,7 @@ if (argv.coverage) {
 /**
  * TODO(cvializ): Firefox now experimentally supports puppeteer.
  * When it's more mature we might want to support it.
- * {@link https://github.com/GoogleChrome/puppeteer/blob/master/experimental/puppeteer-firefox/README.md}
+ * {@link https://github.com/puppeteer/puppeteer/blob/main/experimental/puppeteer-firefox/README.md}
  */
 const PUPPETEER_BROWSERS = new Set(['chrome']);
 
@@ -81,14 +82,14 @@ let DescribesConfigDef;
 
 /**
  * @typedef {{
- *  headless: boolean,
+ *  headless?: boolean,
  * }}
  */
 let PuppeteerConfigDef;
 
 /**
  * @typedef {{
- *  headless: boolean,
+ *  headless?: boolean,
  * }}
  */
 let SeleniumConfigDef;
@@ -126,7 +127,7 @@ function getConfig() {
 /**
  * Configure and launch a Puppeteer instance
  * @param {!PuppeteerConfigDef=} opt_config
- * @return {!Promise}
+ * @return {!Promise<puppeteer.Browser>}
  */
 async function createPuppeteer(opt_config = {}) {
   const browser = await puppeteer.launch({
@@ -142,16 +143,16 @@ async function createPuppeteer(opt_config = {}) {
  * Configure and launch a Selenium instance
  * @param {string} browserName
  * @param {!SeleniumConfigDef=} args
- * @param {?string} deviceName
- * @return {!WebDriver}
+ * @param {string=} deviceName
+ * @return {!selenium.WebDriver}
  */
 function createSelenium(browserName, args = {}, deviceName) {
   switch (browserName) {
     case 'safari':
       // Safari's only option is setTechnologyPreview
-      return createDriver(browserName, []);
+      return createDriver(browserName, [], deviceName);
     case 'firefox':
-      return createDriver(browserName, getFirefoxArgs(args));
+      return createDriver(browserName, getFirefoxArgs(args), deviceName);
     case 'chrome':
     default:
       return createDriver(browserName, getChromeArgs(args), deviceName);
@@ -161,9 +162,9 @@ function createSelenium(browserName, args = {}, deviceName) {
 /**
  *
  * @param {string} browserName
- * @param {!SeleniumConfigDef=} args
- * @param {?string} deviceName
- * @return {!WebDriver}
+ * @param {!string[]} args
+ * @param {string=} deviceName
+ * @return {!selenium.WebDriver}
  */
 function createDriver(browserName, args, deviceName) {
   const capabilities = Capabilities[browserName]();
@@ -239,7 +240,7 @@ function getFirefoxArgs(config) {
  *  environments: (!Array<!AmpdocEnvironment>|undefined),
  *  testUrl: string|undefined,
  *  fixture: string,
- *  initialRect: ({{width: number, height:number}}|undefined),
+ *  initialRect: ({width: number, height:number}|undefined),
  *  deviceName: string|undefined,
  *  version: string|undefined,
  * }}
@@ -252,9 +253,9 @@ let TestSpec;
  *  environments: (!Array<!AmpdocEnvironment>|undefined),
  *  testUrl: string|undefined,
  *  fixture: string,
- *  initialRect: ({{width: number, height:number}}|undefined),
+ *  initialRect: ({width: number, height:number}|undefined),
  *  deviceName: string|undefined,
- *  versions: {{[version: string]: TestSpec}}
+ *  versions: {[version: string]: TestSpec}
  * }}
  */
 let RootSpec;
@@ -328,11 +329,11 @@ envPresets['ampdoc-amp4ads-preset'] = envPresets['ampdoc-preset'].concat(
  */
 class ItConfig {
   /**
-   * @param {Function} it
+   * @param {function} it
    * @param {Object} env
    */
   constructor(it, env) {
-    this.it = it;
+    this.it = /** @type {Mocha.it} */ (it);
     this.env = env;
     this.skip = false;
   }
@@ -371,8 +372,8 @@ class ItConfig {
 
   /**
    * @param {string} name
-   * @param {Function} fn
-   * @return {ItConfig}
+   * @param {function(): void} fn
+   * @return {void|Mocha.Test}
    */
   run(name, fn) {
     if (this.skip) {
@@ -414,16 +415,16 @@ async function reportCoverage() {
  * Returns a wrapped version of Mocha's describe(), it() and only() methods
  * that also sets up the provided fixtures and returns the corresponding
  * environment objects of each fixture to the test method.
- * @param {function(!Object):!Array<?Fixture>} factory
- * @return {function()}
+ * @param {function(!TestSpec): EndToEndFixture} factory
+ * @return {function(string, RootSpec, function(!Object): void): void}
  */
 function describeEnv(factory) {
   /**
    * @param {string} suiteName
    * @param {!Object} spec
-   * @param {function(!Object)} fn
-   * @param {function(string, function())} describeFunc
-   * @return {function()}
+   * @param {function(!Object): void} fn
+   * @param {function(string, function(): void): void} describeFunc
+
    */
   const templateFunc = function (suiteName, spec, fn, describeFunc) {
     const fixture = factory(spec);
@@ -501,9 +502,10 @@ function describeEnv(factory) {
       }
     }
 
-    return describeFunc(suiteName, function () {
+    describeFunc(suiteName, function () {
       createBrowserDescribe();
     });
+    return;
 
     /**
      *
@@ -561,8 +563,7 @@ function describeEnv(factory) {
   /**
    * @param {string} name
    * @param {!RootSpec} spec
-   * @param {function(!Object)} fn
-   * @return {function()}
+   * @param {function(!Object): void} fn
    */
   const mainFunc = function (name, spec, fn) {
     const {versions, ...baseSpec} = spec;
@@ -594,15 +595,20 @@ function describeEnv(factory) {
   /**
    * @param {string} name
    * @param {!Object} spec
-   * @param {function(!Object)} fn
-   * @return {function()}
+   * @param {function(!Object): void} fn
    */
   mainFunc.only = function (name, spec, fn) {
-    return templateFunc(name, spec, fn, describe./*OK*/ only);
+    templateFunc(name, spec, fn, describe./*OK*/ only);
+    return;
   };
 
+  /**
+   * @param {string} name
+   * @param {!Object} variants
+   * @param {function(!Object): void} fn
+   */
   mainFunc.skip = function (name, variants, fn) {
-    return templateFunc(name, variants, fn, describe.skip);
+    templateFunc(name, variants, fn, describe.skip);
   };
 
   return mainFunc;
@@ -688,8 +694,8 @@ class EndToEndFixture {
  * Get the driver for the configured engine.
  * @param {!DescribesConfigDef} describesConfig
  * @param {string} browserName
- * @param {?string} deviceName
- * @return {!ThenableWebDriver}
+ * @param {string|undefined} deviceName
+ * @return {!selenium.WebDriver|Promise<puppeteer.Browser>}
  */
 function getDriver(
   {engine = EngineType.SELENIUM, headless = false},
@@ -706,7 +712,6 @@ function getDriver(
 }
 
 /**
- *
  * @param {{
  *  environment: *,
  *  ampDriver: *,

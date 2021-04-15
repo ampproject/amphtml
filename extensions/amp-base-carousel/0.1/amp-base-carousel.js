@@ -38,7 +38,7 @@ import {
 } from '../../../src/dom';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 /**
  * @enum {number}
@@ -450,7 +450,7 @@ class AmpCarousel extends AMP.BaseElement {
       'goToSlide',
       (actionInvocation) => {
         const {args, trust} = actionInvocation;
-        this.carousel_.goToSlide(args['index'] ?? -1, {
+        this.carousel_.goToSlide(Number(args['index'] ?? -1), {
           actionSource: this.getActionSource_(trust),
         });
       },

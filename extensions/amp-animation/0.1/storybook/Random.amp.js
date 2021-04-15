@@ -85,6 +85,4 @@ export const Random = () => {
   );
 };
 
-Random.story = {
-  name: 'random',
-};
+Random.storyName = 'random';

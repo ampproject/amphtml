@@ -66,11 +66,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4171',
   },
   {
-    id: 'cache-service-worker',
-    name: 'AMP Cache Service Worker',
-    spec: 'https://github.com/ampproject/amphtml/issues/1199',
-  },
-  {
     id: 'amp-lightbox-a4a-proto',
     name: 'Allows the new lightbox experience to be used in A4A (prototype).',
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
@@ -85,10 +80,6 @@ export const EXPERIMENTS = [
     id: 'web-worker',
     name: 'Web worker for background processing',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
-  },
-  {
-    id: 'jank-meter',
-    name: 'Display jank meter',
   },
   {
     id: 'input-debounced',

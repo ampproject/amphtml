@@ -142,8 +142,8 @@ def CreateWebuiAppengineDist(out_dir):
   f = open(os.path.join(webui_out, 'index.html'), 'wb')
   f.write(vulcanized_index_html)
   f.close()
-  f = open(os.path.join(webui_out, 'index_wasm.html'), 'wb')
-  f.write(vulcanized_index_html.replace(b'https://cdn.ampproject.org/v0/validator.js', b'https://cdn.ampproject.org/v0/validator_wasm.js', 1))
+  f = open(os.path.join(webui_out, 'legacy.html'), 'wb')
+  f.write(vulcanized_index_html.replace(b'https://cdn.ampproject.org/v0/validator_wasm.js', b'https://cdn.ampproject.org/v0/validator.js', 1))
   f.close()
   logging.info('... success')
 

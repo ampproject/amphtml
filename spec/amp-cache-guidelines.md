@@ -14,9 +14,9 @@ AMP is an open ecosystem and actively encourages the development of more AMP Cac
 
 ## Guidelines: Core
 
-1. An AMP Cache only serves [valid AMP input documents](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md).
+1. An AMP Cache only serves [valid AMP input documents](https://github.com/ampproject/amphtml/blob/main/spec/amp-html-format.md).
 
-2. It participates in the [AMP validator release cycle](https://github.com/ampproject/amphtml/tree/master/validator).
+2. It participates in the [AMP validator release cycle](https://github.com/ampproject/amphtml/tree/main/validator).
 
 3. It participates in the AMP JS library release cycle and makes every effort to serve the latest version. It does not allow sites to perform version locking.
 
@@ -99,7 +99,7 @@ For resources (i.e., HTML, images, fonts) that are larger than 12 MB, you may no
 ## Guidelines: Adding a new cache to the AMP ecosystem
 
 -   Add the details of your cache to [caches.json](../build-system/global-configs/caches.json).
-    -   Some tools use the deployed version of this file (<https://cdn.ampproject.org/caches.json>) to automatically generate appropriate CORS headers as described at [CORS Security in AMP Guidelines](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#cors-security-in-amp).
+    -   Some tools use the deployed version of this file (<https://cdn.ampproject.org/caches.json>) to automatically generate appropriate CORS headers as described at [CORS Security in AMP Guidelines](https://github.com/ampproject/amphtml/blob/main/spec/amp-cors-requests.md#cors-security-in-amp).
 -   Handle dynamically generated components:
     -   [`<amp-geo>`](../extensions/amp-geo/amp-geo.md) — at delivery time, the string `{{AMP_ISO_COUNTRY_HOTPATCH}}` in [`amp-geo.js`](../extensions/amp-geo/0.1/amp-geo.js) is replaced by a string consisting of the user's ISO country code followed by exactly 26 spaces (to avoid breaking map files).
 
@@ -112,7 +112,7 @@ For resources (i.e., HTML, images, fonts) that are larger than 12 MB, you may no
     -   The [Google AMP Cache](https://developers.google.com/amp/cache/) is a proxy-based content delivery network for delivering all valid AMP documents.
     -   It fetches AMP HTML pages, caches them, and improves page performance automatically.
     -   When using the Google AMP Cache, the document, all JS files and all images load from the same origin, which is using [HTTP 2.0](https://http2.github.io/) for maximum efficiency.
-    -   The cache also comes with a built-in [validation system](https://github.com/ampproject/amphtml/tree/master/validator) which confirms that the page works, and that it doesn’t depend on external resources.
+    -   The cache also comes with a built-in [validation system](https://github.com/ampproject/amphtml/tree/main/validator) which confirms that the page works, and that it doesn’t depend on external resources.
     -   The validation system runs a series of assertions confirming that the page’s markup meets the AMP HTML specification.
     -   [Google AMP Cache FAQ](https://developers.google.com/amp/cache/faq)
     -   [Google AMP Cache updates](https://developers.google.com/amp/cache/overview#google-amp-cache-updates)

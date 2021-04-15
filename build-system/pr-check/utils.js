@@ -15,6 +15,14 @@
  */
 'use strict';
 
+const fs = require('fs-extra');
+const {
+  ciBuildSha,
+  ciPullRequestSha,
+  circleciBuildNumber,
+  isCiBuild,
+  isCircleciBuild,
+} = require('../common/ci');
 const {
   gitBranchCreationPoint,
   gitBranchName,
@@ -24,27 +32,34 @@ const {
   gitCiMainBaseline,
   shortSha,
 } = require('../common/git');
-const {ciBuildSha, ciPullRequestSha, isCiBuild} = require('../common/ci');
 const {cyan, green, yellow} = require('kleur/colors');
 const {execOrDie, execOrThrow, execWithError, exec} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
-const {mainBranch} = require('../common/main-branch');
 const {replaceUrls} = require('../tasks/pr-deploy-bot-utils');
 
-const UNMINIFIED_OUTPUT_FILE = `amp_unminified_${ciBuildSha()}.zip`;
-const NOMODULE_OUTPUT_FILE = `amp_nomodule_${ciBuildSha()}.zip`;
-const MODULE_OUTPUT_FILE = `amp_module_${ciBuildSha()}.zip`;
-const EXPERIMENT_OUTPUT_FILE = (exp) => `amp_${exp}_${ciBuildSha()}.zip`;
+const UNMINIFIED_CONTAINER_DIRECTORY = 'unminified';
+const NOMODULE_CONTAINER_DIRECTORY = 'nomodule';
+const MODULE_CONTAINER_DIRECTORY = 'module';
 
-const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/';
-const APP_SERVING_DIRS =
-  'dist.tools/ examples/ test/manual/ test/fixtures/e2e/';
+const UNMINIFIED_GCLOUD_OUTPUT_FILE = `amp_unminified_${ciBuildSha()}.zip`;
+const NOMODULE_GCLOUD_OUTPUT_FILE = `amp_nomodule_${ciBuildSha()}.zip`;
+const MODULE_GCLOUD_OUTPUT_FILE = `amp_module_${ciBuildSha()}.zip`;
+const EXPERIMENT_GCLOUD_OUTPUT_FILE = (exp) => `amp_${exp}_${ciBuildSha()}.zip`;
+
+const BUILD_OUTPUT_DIRS = ['build', 'dist', 'dist.3p'];
+const APP_SERVING_DIRS = [
+  ...BUILD_OUTPUT_DIRS,
+  'dist.tools',
+  'examples',
+  'test/manual',
+  'test/fixtures/e2e',
+];
 
 // TODO(rsimha, ampproject/amp-github-apps#1110): Update storage details.
 const GCLOUD_STORAGE_BUCKET = 'gs://amp-travis-builds';
 
 const GIT_BRANCH_URL =
-  'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#create-a-git-branch';
+  'https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md#create-a-git-branch';
 
 /**
  * Prints a summary of files changed by, and commits included in the PR.
@@ -55,7 +70,7 @@ function printChangeSummary() {
 
   if (isCiBuild()) {
     logWithoutTimestamp(
-      `${loggingPrefix} Latest commit from ${cyan(mainBranch)} included ` +
+      `${loggingPrefix} Latest commit from ${cyan('main')} included ` +
         `in this build: ${cyan(shortSha(gitCiMainBaseline()))}`
     );
     commitSha = ciPullRequestSha();
@@ -75,7 +90,7 @@ function printChangeSummary() {
     logWithoutTimestamp(
       `${loggingPrefix} Commit log since branch`,
       `${cyan(gitBranchName())} was forked from`,
-      `${cyan(mainBranch)} at`,
+      `${cyan('main')} at`,
       `${cyan(shortSha(branchCreationPoint))}:`
     );
     logWithoutTimestamp(gitDiffCommitLog() + '\n');
@@ -86,13 +101,13 @@ function printChangeSummary() {
       'Could not find a common ancestor for',
       cyan(gitBranchName()),
       'and',
-      cyan(mainBranch) + '. (This can happen with older PR branches.)'
+      cyan('main') + '. (This can happen with older PR branches.)'
     );
     logWithoutTimestamp(
       loggingPrefix,
       yellow('NOTE 1:'),
       'If this causes unexpected test failures, try rebasing the PR branch on',
-      cyan(mainBranch) + '.'
+      cyan('main') + '.'
     );
     logWithoutTimestamp(
       loggingPrefix,
@@ -104,15 +119,35 @@ function printChangeSummary() {
 }
 
 /**
- * Prints a message indicating why a job was skipped.
+ * Signal to dependent jobs that they should be skipped. Uses an identifier that
+ * corresponds to the current job to eliminate conflicts if a parallel job also
+ * signals the same thing.
+ *
+ * Currently only relevant for CircleCI builds.
+ */
+function signalGracefulHalt() {
+  if (isCircleciBuild()) {
+    const loggingPrefix = getLoggingPrefix();
+    const sentinelFile = `/tmp/workspace/.CI_GRACEFULLY_HALT_${circleciBuildNumber()}`;
+    fs.closeSync(fs.openSync(sentinelFile, 'w'));
+    logWithoutTimestamp(
+      `${loggingPrefix} Created ${cyan(sentinelFile)} to signal graceful halt.`
+    );
+  }
+}
+
+/**
+ * Prints a message indicating why a job was skipped and mark its dependent jobs
+ * for skipping.
  * @param {string} jobName
  * @param {string} skipReason
  */
-function printSkipMessage(jobName, skipReason) {
+function skipDependentJobs(jobName, skipReason) {
   const loggingPrefix = getLoggingPrefix();
   logWithoutTimestamp(
     `${loggingPrefix} Skipping ${cyan(jobName)} because ${skipReason}.`
   );
+  signalGracefulHalt();
 }
 
 /**
@@ -208,111 +243,80 @@ const timedExecOrDie = timedExecFn(execOrDie);
 const timedExecOrThrow = timedExecFn(execOrThrow);
 
 /**
- * Download output helper
- * @param {string} outputFileName
- * @param {string} outputDirs
- * @private
- */
-function downloadOutput_(outputFileName, outputDirs) {
-  const loggingPrefix = getLoggingPrefix();
-  const buildOutputDownloadUrl = `${GCLOUD_STORAGE_BUCKET}/${outputFileName}`;
-  const dirsToUnzip = outputDirs.split(' ');
-
-  logWithoutTimestamp(
-    `${loggingPrefix} Downloading build output from ` +
-      cyan(buildOutputDownloadUrl) +
-      '...'
-  );
-  execOrDie(`gsutil -q cp ${buildOutputDownloadUrl} ${outputFileName}`);
-
-  logWithoutTimestamp(
-    `${loggingPrefix} Extracting ` + cyan(outputFileName) + '...'
-  );
-  dirsToUnzip.forEach((dir) => {
-    execOrDie(`unzip -q -o ${outputFileName} '${dir.replace('/', '/*')}'`);
-  });
-  execOrDie(`du -sh ${outputDirs}`);
-}
-
-/**
  * Upload output helper
- * @param {string} outputFileName
- * @param {string} outputDirs
+ * @param {string} containerDirectory
+ * @param {string} gcloudOutputFileName
+ * @param {!Array<string>} outputDirs
  * @private
  */
-function uploadOutput_(outputFileName, outputDirs) {
+function uploadOutput_(containerDirectory, gcloudOutputFileName, outputDirs) {
   const loggingPrefix = getLoggingPrefix();
 
+  // TODO(danielrozenberg): remove this once deploy-bot uses CircleCI artifacts.
   logWithoutTimestamp(
     `\n${loggingPrefix} Compressing ` +
-      cyan(outputDirs.split(' ').join(', ')) +
+      cyan(outputDirs.join(', ')) +
       ' into ' +
-      cyan(outputFileName) +
+      cyan(gcloudOutputFileName) +
       '...'
   );
-  execOrDie(`zip -r -q ${outputFileName} ${outputDirs}`);
-  execOrDie(`du -sh ${outputFileName}`);
+  execOrDie(`zip -r -q ${gcloudOutputFileName} ${outputDirs.join('/ ')}/`);
+  execOrDie(`du -sh ${gcloudOutputFileName}`);
 
   logWithoutTimestamp(
     `${loggingPrefix} Uploading ` +
-      cyan(outputFileName) +
+      cyan(gcloudOutputFileName) +
       ' to ' +
       cyan(GCLOUD_STORAGE_BUCKET) +
       '...'
   );
-  execOrDie(`gsutil -q -m cp -r ${outputFileName} ${GCLOUD_STORAGE_BUCKET}`);
-}
+  execOrDie(
+    `gsutil -q -m cp -r ${gcloudOutputFileName} ${GCLOUD_STORAGE_BUCKET}`
+  );
+  // TODO(danielrozenberg): ...until here.
 
-/**
- * Downloads and unzips build output from storage
- */
-function downloadUnminifiedOutput() {
-  downloadOutput_(UNMINIFIED_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
-}
-
-/**
- * Downloads and unzips nomodule output from storage
- */
-function downloadNomoduleOutput() {
-  downloadOutput_(NOMODULE_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
-}
-
-/**
- * Downloads and unzips module output from storage
- */
-function downloadModuleOutput() {
-  downloadOutput_(MODULE_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
-}
-
-/**
- * Downloads and unzips output for the given experiment from storage
- * @param {string} exp
- */
-function downloadExperimentOutput(exp) {
-  downloadOutput_(EXPERIMENT_OUTPUT_FILE(exp), BUILD_OUTPUT_DIRS);
+  if (isCircleciBuild()) {
+    fs.ensureDirSync(`/tmp/workspace/builds/${containerDirectory}`);
+    for (const outputDir of outputDirs) {
+      fs.moveSync(
+        `${outputDir}/`,
+        `/tmp/workspace/builds/${containerDirectory}/${outputDir}`
+      );
+    }
+  }
 }
 
 /**
  * Zips and uploads the build output to a remote storage location
  */
 function uploadUnminifiedOutput() {
-  uploadOutput_(UNMINIFIED_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
+  uploadOutput_(
+    UNMINIFIED_CONTAINER_DIRECTORY,
+    UNMINIFIED_GCLOUD_OUTPUT_FILE,
+    BUILD_OUTPUT_DIRS
+  );
 }
 
 /**
  * Zips and uploads the nomodule output to a remote storage location
  */
 function uploadNomoduleOutput() {
-  const nomoduleOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
-  uploadOutput_(NOMODULE_OUTPUT_FILE, nomoduleOutputDirs);
+  uploadOutput_(
+    NOMODULE_CONTAINER_DIRECTORY,
+    NOMODULE_GCLOUD_OUTPUT_FILE,
+    APP_SERVING_DIRS
+  );
 }
 
 /**
  * Zips and uploads the module output to a remote storage location
  */
 function uploadModuleOutput() {
-  const moduleOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
-  uploadOutput_(MODULE_OUTPUT_FILE, moduleOutputDirs);
+  uploadOutput_(
+    MODULE_CONTAINER_DIRECTORY,
+    MODULE_GCLOUD_OUTPUT_FILE,
+    APP_SERVING_DIRS
+  );
 }
 
 /**
@@ -321,8 +325,7 @@ function uploadModuleOutput() {
  * @param {string} exp
  */
 function uploadExperimentOutput(exp) {
-  const experimentOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
-  uploadOutput_(EXPERIMENT_OUTPUT_FILE(exp), experimentOutputDirs);
+  uploadOutput_(exp, EXPERIMENT_GCLOUD_OUTPUT_FILE(exp), APP_SERVING_DIRS);
 }
 
 /**
@@ -337,12 +340,8 @@ async function processAndUploadNomoduleOutput() {
 
 module.exports = {
   abortTimedJob,
-  downloadExperimentOutput,
-  downloadUnminifiedOutput,
-  downloadNomoduleOutput,
-  downloadModuleOutput,
   printChangeSummary,
-  printSkipMessage,
+  skipDependentJobs,
   processAndUploadNomoduleOutput,
   startTimer,
   stopTimer,

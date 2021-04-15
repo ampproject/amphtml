@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
@@ -38,6 +39,9 @@ class AmpKaltura extends AMP.BaseElement {
 
     /** @private {string} */
     this.entryId_ = '';
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -101,7 +105,21 @@ class AmpKaltura extends AMP.BaseElement {
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
+
+    this.pauseHelper_.updatePlaying(true);
+
     return this.loadPromise(iframe);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    this.pauseHelper_.updatePlaying(false);
+    return true;
   }
 
   /** @override */
