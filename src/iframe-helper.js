@@ -19,6 +19,7 @@ import {deserializeMessage, isAmpMessage} from './3p-frame-messaging';
 import {dev, devAssert} from './log';
 import {dict} from './core/types/object';
 import {getData} from './event-helper';
+import {isString} from './core/types';
 import {parseUrlDeprecated} from './url';
 import {remove} from './core/types/array';
 import {setStyle} from './style';
@@ -334,7 +335,7 @@ export function listenFor(
  */
 export function listenForOncePromise(iframe, typeOfMessages, opt_is3P) {
   const unlistenList = [];
-  if (typeof typeOfMessages == 'string') {
+  if (isString(typeOfMessages)) {
     typeOfMessages = [typeOfMessages];
   }
   return new Promise((resolve) => {
@@ -421,7 +422,7 @@ function getSentinel_(iframe, opt_is3P) {
  * @visibleForTesting
  */
 export function parseIfNeeded(data) {
-  if (typeof data == 'string') {
+  if (isString(data)) {
     if (data.charAt(0) == '{') {
       data =
         tryParseJson(data, (e) => {

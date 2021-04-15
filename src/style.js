@@ -16,6 +16,7 @@
 
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 import {dev, devAssert} from './log';
+import {isString} from './core/types';
 import {map} from './core/types/object';
 
 /** @type {Object<string, string>} */
@@ -273,7 +274,7 @@ export function deg(value) {
  * @return {string}
  */
 export function translateX(value) {
-  if (typeof value == 'string') {
+  if (isString(value)) {
     return `translateX(${value})`;
   }
   return `translateX(${px(value)})`;

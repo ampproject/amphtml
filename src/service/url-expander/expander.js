@@ -15,8 +15,8 @@
  */
 
 import {hasOwn} from '../../core/types/object';
+import {isString, trimStart} from '../../core/types/string';
 import {rethrowAsync, user} from '../../log';
-import {trimStart} from '../../core/types/string';
 import {tryResolve} from '../../utils/promise';
 
 /** @private @const {string} */
@@ -428,7 +428,7 @@ export class Expander {
         user().error(TAG, 'ignoring async macro resolution');
         result = '';
       } else if (
-        typeof value === 'string' ||
+        isString(value) ||
         typeof value === 'number' ||
         typeof value === 'boolean'
       ) {

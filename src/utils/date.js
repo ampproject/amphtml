@@ -18,6 +18,7 @@ import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,
 } from '../core/assert';
+import {isString} from '../core/types';
 
 /**
  * Parses the date using the `Date.parse()` rules. Additionally supports the
@@ -50,7 +51,7 @@ export function getDate(value) {
   if (typeof value == 'number') {
     return value;
   }
-  if (typeof value == 'string') {
+  if (isString(value)) {
     return parseDate(value);
   }
   // Must be a `Date` object.

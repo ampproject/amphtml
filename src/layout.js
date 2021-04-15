@@ -23,6 +23,7 @@ import {dev, devAssert, userAssert} from './log';
 import {htmlFor} from './static-template';
 import {isExperimentOn} from './experiments';
 import {isFiniteNumber, toWin} from './types';
+import {isString} from './core/types';
 import {setStyle, setStyles, toggle} from './style';
 
 import {transparentPng} from './utils/img';
@@ -177,7 +178,7 @@ export function isLayoutSizeFixed(layout) {
  * @return {boolean}
  */
 export function isInternalElement(tag) {
-  const tagName = typeof tag == 'string' ? tag : tag.tagName;
+  const tagName = isString(tag) ? tag : tag.tagName;
   return tagName && tagName.toLowerCase().startsWith('i-');
 }
 

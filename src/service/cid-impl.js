@@ -33,8 +33,9 @@ import {getCookie, setCookie} from '../cookies';
 import {getCryptoRandomBytesArray} from '../utils/bytes';
 import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
 import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from '../url';
-import {isExperimentOn} from '../../src/experiments';
+import {isExperimentOn} from '../experiments';
 import {isIframed} from '../dom';
+import {isString} from '../core/types';
 import {parseJson, tryParseJson} from '../json';
 import {tryResolve} from '../utils/promise';
 
@@ -725,7 +726,7 @@ function getEntropy(win) {
  */
 export function getRandomString64(win) {
   const entropy = getEntropy(win);
-  if (typeof entropy == 'string') {
+  if (isString(entropy)) {
     return Services.cryptoFor(win).sha384Base64(entropy);
   } else {
     // If our entropy is a pure random number, we can just directly turn it

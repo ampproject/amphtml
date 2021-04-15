@@ -18,7 +18,7 @@ import {RTC_VENDORS} from './callout-vendors';
 import {Services} from '../../services';
 import {dev, user, userAssert} from '../../log';
 import {getMode} from '../../mode';
-import {isArray, isObject} from '../../core/types';
+import {isArray, isObject, isString} from '../../core/types';
 import {isCancellation} from '../../error';
 
 import {registerServiceBuilderForDoc} from '../../service';
@@ -322,7 +322,7 @@ export class RealTimeConfigManager {
       if (isObject(urlObj)) {
         url = urlObj.url;
         errorReportingUrl = urlObj.errorReportingUrl;
-      } else if (typeof urlObj == 'string') {
+      } else if (isString(urlObj)) {
         url = urlObj;
       } else {
         dev().warn(TAG, `Invalid url: ${urlObj}`);

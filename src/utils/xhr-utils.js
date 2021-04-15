@@ -16,8 +16,8 @@
 
 import {Services} from '../services';
 import {devAssert, user, userAssert} from '../log';
-import {dict, isObject, map} from '../core/types/object';
-import {fromIterator, isArray} from '../core/types/array';
+import {dict, isArray, isObject, isString, map} from '../core/types/object';
+import {fromIterator} from '../core/types/array';
 import {
   getCorsUrl,
   getWinOrigin,
@@ -248,7 +248,7 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
  * @return {string}
  */
 export function setupInput(win, input, init) {
-  devAssert(typeof input == 'string', 'Only URL supported: %s', input);
+  devAssert(isString(input), 'Only URL supported: %s', input);
   if (init.ampCors !== false) {
     input = getCorsUrl(win, input);
   }

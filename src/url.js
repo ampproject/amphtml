@@ -18,7 +18,7 @@ import {LruCache} from './utils/lru-cache';
 import {dict, hasOwn} from './core/types/object';
 import {endsWith} from './core/types/string';
 import {getMode} from './mode';
-import {isArray} from './core/types';
+import {isArray, isString} from './core/types';
 import {parseQueryString_} from './url-parse-query-string';
 import {tryDecodeUriComponent_} from './url-try-decode-uri-component';
 import {urls} from './config';
@@ -291,7 +291,7 @@ export function serializeQueryString(params) {
  * @return {boolean}
  */
 export function isSecureUrlDeprecated(url) {
-  if (typeof url == 'string') {
+  if (isString(url)) {
     url = parseUrlDeprecated(url);
   }
   return (
@@ -400,7 +400,7 @@ export function getFragment(url) {
  * @return {boolean}
  */
 export function isProxyOrigin(url) {
-  if (typeof url == 'string') {
+  if (isString(url)) {
     url = parseUrlDeprecated(url);
   }
   return urls.cdnProxyRegex.test(url.origin);
@@ -414,7 +414,7 @@ export function isProxyOrigin(url) {
  * @return {?string}
  */
 export function getProxyServingType(url) {
-  if (typeof url == 'string') {
+  if (isString(url)) {
     url = parseUrlDeprecated(url);
   }
   if (!isProxyOrigin(url)) {
@@ -430,7 +430,7 @@ export function getProxyServingType(url) {
  * @return {boolean}
  */
 export function isLocalhostOrigin(url) {
-  if (typeof url == 'string') {
+  if (isString(url)) {
     url = parseUrlDeprecated(url);
   }
   return urls.localhostRegex.test(url.origin);
@@ -446,7 +446,7 @@ export function isProtocolValid(url) {
   if (!url) {
     return true;
   }
-  if (typeof url == 'string') {
+  if (isString(url)) {
     url = parseUrlDeprecated(url);
   }
   return !INVALID_PROTOCOLS.includes(url.protocol);
@@ -521,7 +521,7 @@ export function removeParamsFromSearch(urlSearch, paramName) {
  * @return {string}
  */
 export function getSourceUrl(url) {
-  if (typeof url == 'string') {
+  if (isString(url)) {
     url = parseUrlDeprecated(url);
   }
 
@@ -574,7 +574,7 @@ export function getSourceOrigin(url) {
  * @return {string}
  */
 export function resolveRelativeUrl(relativeUrlString, baseUrl) {
-  if (typeof baseUrl == 'string') {
+  if (isString(baseUrl)) {
     baseUrl = parseUrlDeprecated(baseUrl);
   }
   if (IS_ESM || typeof URL == 'function') {
@@ -591,7 +591,7 @@ export function resolveRelativeUrl(relativeUrlString, baseUrl) {
  * @private @visibleForTesting
  */
 export function resolveRelativeUrlFallback_(relativeUrlString, baseUrl) {
-  if (typeof baseUrl == 'string') {
+  if (isString(baseUrl)) {
     baseUrl = parseUrlDeprecated(baseUrl);
   }
   relativeUrlString = relativeUrlString.replace(/\\/g, '/');
