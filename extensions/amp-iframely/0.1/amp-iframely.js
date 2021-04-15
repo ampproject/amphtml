@@ -159,42 +159,41 @@ export class AmpIframely extends AMP.BaseElement {
 
   /**
    * Handles Iframely events: widget sizing, cancel, decorate cards
-   * @param {AmpIframely} me - instance of an active component
    * @param {window.event} event - Iframely message with a method to apply
    * */
-  handleEvent_(me, event) {
+  handleEvent_(event) {
     const data = tryParseJson(getData(event));
     if (!data) {
       return;
     }
     if (data.method === 'resize' && data.height > 50) {
       /** Set the size of the card according to the message from Iframely */
-      me.attemptChangeHeight(data['height']).catch(() => {});
-    }
-    if (data.method === 'setIframelyEmbedData') {
+      this.attemptChangeHeight(data['height']).catch(() => {});
+    } else if (data.method === 'setIframelyEmbedData') {
       /** apply Iframely card styles if present */
       const media = data['data']['media'] || null;
       if (media && media['aspect-ratio']) {
-        const intersection = measureIntersection(me.element);
-        intersection.then(function onFulfilled(box) {
+        const intersection = measureIntersection(this.element);
+        let el = this;
+        intersection.then((box) => {
           if (media['padding-bottom']) {
             /** Apply height for media with updated "aspect-ratio" and "padding-bottom". */
             const height =
               box.boundingClientRect.width / media['aspect-ratio'] +
               media['padding-bottom'];
-            me.attemptChangeHeight(Math.round(height)).catch(() => {});
+            el.attemptChangeHeight(Math.round(height)).catch(() => {});
           } else {
             const height = box.boundingClientRect.width / media['aspect-ratio'];
             if (Math.abs(box.boundingClientRect.height - height) > 1) {
               /** Apply new height for updated "aspect-ratio". */
-              me.attemptChangeHeight(Math.round(height)).catch(() => {});
+              el.attemptChangeHeight(Math.round(height)).catch(() => {});
             }
           }
         });
       }
     }
     if (data.method === 'cancelWidget') {
-      me.attemptCollapse().catch(() => {});
+      this.attemptCollapse().catch(() => {});
     }
   }
 
