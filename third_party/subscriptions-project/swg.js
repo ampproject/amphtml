@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.155 */
+/** Version: 0.1.22.157 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -4467,7 +4467,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.155',
+    '_client': 'SwG 0.1.22.157',
   });
 }
 
@@ -4728,8 +4728,8 @@ class PayCompleteFlow {
     /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
-    /** @private {?ActivityIframeView} */
-    this.activityIframeView_ = null;
+    /** @private {?Promise<!ActivityIframeView>} */
+    this.activityIframeViewPromise_ = null;
 
     /** @private {?Promise} */
     this.readyPromise_ = null;
@@ -4739,6 +4739,9 @@ class PayCompleteFlow {
 
     /** @private @const {!../runtime/client-event-manager.ClientEventManager} */
     this.eventManager_ = deps.eventManager();
+
+    /** @private @const {!../runtime/client-config-manager.ClientConfigManager} */
+    this.clientConfigManager_ = deps.clientConfigManager();
 
     /** @private {?string} */
     this.sku_ = null;
@@ -4783,25 +4786,32 @@ class PayCompleteFlow {
     } else {
       args['loginHint'] = response.userData && response.userData.email;
     }
-    this.activityIframeView_ = new ActivityIframeView(
-      this.win_,
-      this.activityPorts_,
-      feUrl('/payconfirmiframe'),
-      feArgs(args),
-      /* shouldFadeBody */ true
-    );
+    return (this.activityIframeViewPromise_ = this.clientConfigManager_
+      .getClientConfig()
+      .then((clientConfig) => {
+        args['useUpdatedConfirmUi'] = clientConfig.useUpdatedOfferFlows;
+        return new ActivityIframeView(
+          this.win_,
+          this.activityPorts_,
+          feUrl('/payconfirmiframe'),
+          feArgs(args),
+          /* shouldFadeBody */ true
+        );
+      })
+      .then((activityIframeView) => {
+        activityIframeView.on(
+          EntitlementsResponse,
+          this.handleEntitlementsResponse_.bind(this)
+        );
 
-    this.activityIframeView_.on(
-      EntitlementsResponse,
-      this.handleEntitlementsResponse_.bind(this)
-    );
+        activityIframeView.acceptResult().then(() => {
+          // The flow is complete.
+          this.dialogManager_.completeView(activityIframeView);
+        });
 
-    this.activityIframeView_.acceptResult().then(() => {
-      // The flow is complete.
-      this.dialogManager_.completeView(this.activityIframeView_);
-    });
-    this.readyPromise_ = this.dialogManager_.openView(this.activityIframeView_);
-    return this.readyPromise_;
+        this.readyPromise_ = this.dialogManager_.openView(activityIframeView);
+        return activityIframeView;
+      }));
   }
 
   /**
@@ -4825,24 +4835,28 @@ class PayCompleteFlow {
       getEventParams$1(this.sku_ || '')
     );
     this.deps_.entitlementsManager().unblockNextNotification();
-    this.readyPromise_.then(() => {
+    return Promise.all([
+      this.activityIframeViewPromise_,
+      this.readyPromise_,
+    ]).then((values) => {
+      const activityIframeView = values[0];
       const accountCompletionRequest = new AccountCreationRequest();
       accountCompletionRequest.setComplete(true);
-      this.activityIframeView_.execute(accountCompletionRequest);
+      activityIframeView.execute(accountCompletionRequest);
+      return activityIframeView
+        .acceptResult()
+        .catch(() => {
+          // Ignore errors.
+        })
+        .then(() => {
+          this.eventManager_.logSwgEvent(
+            AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED,
+            true,
+            getEventParams$1(this.sku_ || '')
+          );
+          this.deps_.entitlementsManager().setToastShown(true);
+        });
     });
-    return this.activityIframeView_
-      .acceptResult()
-      .catch(() => {
-        // Ignore errors.
-      })
-      .then(() => {
-        this.eventManager_.logSwgEvent(
-          AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED,
-          true,
-          getEventParams$1(this.sku_ || '')
-        );
-        this.deps_.entitlementsManager().setToastShown(true);
-      });
   }
 }
 
@@ -5645,7 +5659,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.155',
+        '_client': 'SwG 0.1.22.157',
         'supportsEventManager': true,
       },
       args || {}
@@ -6492,7 +6506,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.155');
+    context.setClientVersion('SwG 0.1.22.157');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -7626,7 +7640,7 @@ class AutoPromptConfig {
    */
   constructor(
     maxImpressionsPerWeek,
-    dismissalDelaySeconds,
+    displayDelaySeconds,
     backoffSeconds,
     maxDismissalsPerWeek,
     maxDismissalsResultingHideSeconds
@@ -7635,7 +7649,7 @@ class AutoPromptConfig {
     this.maxImpressionsPerWeek = maxImpressionsPerWeek;
 
     /** @const {!ClientDisplayTrigger} */
-    this.clientDisplayTrigger = new ClientDisplayTrigger(dismissalDelaySeconds);
+    this.clientDisplayTrigger = new ClientDisplayTrigger(displayDelaySeconds);
 
     /** @const {!ExplicitDismissalConfig} */
     this.explicitDismissalConfig = new ExplicitDismissalConfig(
@@ -7651,11 +7665,11 @@ class AutoPromptConfig {
  */
 class ClientDisplayTrigger {
   /**
-   * @param {number|undefined} dismissalDelaySeconds
+   * @param {number|undefined} displayDelaySeconds
    */
-  constructor(dismissalDelaySeconds) {
+  constructor(displayDelaySeconds) {
     /** @const {number|undefined} */
-    this.dismissalDelaySeconds = dismissalDelaySeconds;
+    this.displayDelaySeconds = displayDelaySeconds;
   }
 }
 
@@ -7870,7 +7884,7 @@ class ClientConfigManager {
     if (autoPromptConfigJson) {
       autoPromptConfig = new AutoPromptConfig(
         autoPromptConfigJson.maxImpressionsPerWeek,
-        autoPromptConfigJson.clientDisplayTrigger?.dismissalDelaySeconds,
+        autoPromptConfigJson.clientDisplayTrigger?.displayDelaySeconds,
         autoPromptConfigJson.explicitDismissalConfig?.backoffSeconds,
         autoPromptConfigJson.explicitDismissalConfig?.maxDismissalsPerWeek,
         autoPromptConfigJson.explicitDismissalConfig?.maxDismissalsResultingHideSeconds
