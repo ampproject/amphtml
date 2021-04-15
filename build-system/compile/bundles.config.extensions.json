@@ -152,7 +152,11 @@
   {"name": "amp-embedly-card", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-experiment", "version": ["0.1", "1.0"], "latestVersion": "0.1"},
   {"name": "amp-facebook", "version": "0.1", "latestVersion": "0.1"},
-  {"name": "amp-facebook-comments", "version": ["0.1", "1.0"], "latestVersion": "0.1"},
+  {
+    "name": "amp-facebook-comments",
+    "version": ["0.1", "1.0"],
+    "latestVersion": "0.1"
+  },
   {"name": "amp-facebook-like", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-facebook-page", "version": "0.1", "latestVersion": "0.1"},
   {
@@ -255,11 +259,7 @@
       "cssBinaries": ["amp-inline-gallery-pagination"]
     }
   },
-  {
-    "name": "amp-inputmask",
-    "version": "0.1",
-    "latestVersion": "0.1"
-  },
+  {"name": "amp-inputmask", "version": "0.1", "latestVersion": "0.1"},
   {
     "name": "amp-instagram",
     "version": ["0.1", "1.0"],
