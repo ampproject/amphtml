@@ -107,14 +107,15 @@
 
 :not([desktop]).amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header .i-amphtml-story-draggable-drawer-header-title-and-close {
   position: absolute !important;
-  /* transition: opacity .3s, visibility .3s !important; */
   opacity: 0 !important;
-  /* visibility: hidden !important; */
+  transition: opacity .3s, visibility .3s !important;
+  /* Visibility is toggled to prevent screen readers from selecting content. */
+  visibility: hidden !important;
 }
 
 :not([desktop]).amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header.i-amphtml-story-draggable-drawer-header-stuck .i-amphtml-story-draggable-drawer-header-title-and-close {
   opacity: 1 !important;
-  /* visibility: visible !important; */
+  visibility: visible !important;
 }
 
 .amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-title {
