@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from './amp-events';
+import {AmpEvents} from './core/constants/amp-events';
 import {Services} from './services';
 import {
   USER_ERROR_SENTINEL,

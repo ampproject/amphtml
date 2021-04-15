@@ -16,8 +16,8 @@
 
 import {Services} from '../services';
 import {Signals} from '../utils/signals';
-import {TickLabel} from '../enums';
-import {VisibilityState} from '../visibility-state';
+import {TickLabel} from '../core/constants/enums';
+import {VisibilityState} from '../core/constants/visibility-state';
 import {createCustomEvent} from '../event-helper';
 import {dev, devAssert} from '../log';
 import {dict, map} from '../core/types/object';

@@ -19,8 +19,8 @@ import {
   DEFAULT_ACTION,
   RAW_OBJECT_ARGS_KEY,
   actionTrustToString,
-} from '../action-constants';
-import {Keys} from '../utils/key-codes';
+} from '../core/constants/action-constants';
+import {Keys} from '../core/constants/key-codes';
 import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
 import {dev, devAssert, user, userAssert} from '../log';

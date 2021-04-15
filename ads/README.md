@@ -246,7 +246,7 @@ AMP runtime provides the following `window.context` APIs for ad network to acces
   <dd>
     Provides the initial consent state when the ad is unblocked.
     The states are integers defined <a href="https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#advanced-blocking-behaviors">here</a>
-    (<a href="https://github.com/ampproject/amphtml/blob/main/src/consent-state.js#L23">code</a>).
+    (<a href="https://github.com/ampproject/amphtml/blob/main/src/core/constants/consent-state.js#L23">code</a>).
   </dd>
   <dt><code>window.context.getConsentState(callback)</code></dt>
   <dd>

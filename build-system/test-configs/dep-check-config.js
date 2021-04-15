@@ -96,7 +96,7 @@ exports.rules = [
       '3p/**->src/json.js',
       '3p/**->src/3p-frame-messaging.js',
       '3p/**->src/observable.js',
-      '3p/**->src/amp-events.js',
+      '3p/**->src/core/constants/amp-events.js',
       '3p/**->src/internal-version.js',
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
@@ -128,7 +128,7 @@ exports.rules = [
       'ads/**->src/url.js',
       'ads/**->src/core/types/array.js',
       'ads/**->src/style.js',
-      'ads/**->src/consent-state.js',
+      'ads/**->src/core/constants/consent-state.js',
       'ads/**->src/internal-version.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
       // somewhere else at some point

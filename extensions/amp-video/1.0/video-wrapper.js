@@ -26,7 +26,7 @@ import {
   parseSchemaImage,
   setMediaSession,
 } from '../../../src/mediasession-helper';
-import {ReadyState} from '../../../src/ready-state';
+import {ReadyState} from '../../../src/core/constants/ready-state';
 import {dict} from '../../../src/core/types/object';
 import {fillContentOverlay, fillStretch} from './video-wrapper.css';
 import {forwardRef} from '../../../src/preact/compat';

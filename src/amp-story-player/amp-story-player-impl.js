@@ -19,7 +19,7 @@ import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observ
 import {Deferred} from '../core/data-structures/promise';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {PageScroller} from './page-scroller';
-import {VisibilityState} from '../visibility-state';
+import {VisibilityState} from '../core/constants/visibility-state';
 import {
   addParamsToUrl,
   getFragment,

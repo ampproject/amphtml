@@ -15,8 +15,8 @@
  */
 
 import * as dom from './dom';
-import {AmpEvents} from './amp-events';
-import {CommonSignals} from './common-signals';
+import {AmpEvents} from './core/constants/amp-events';
+import {CommonSignals} from './core/constants/common-signals';
 import {ElementStub} from './element-stub';
 import {
   Layout,
@@ -26,7 +26,7 @@ import {
   isLoadingAllowed,
 } from './layout';
 import {MediaQueryProps} from './utils/media-query-props';
-import {ReadyState} from './ready-state';
+import {ReadyState} from './core/constants/ready-state';
 import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './utils/signals';

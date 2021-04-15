@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from './common-signals';
+import {CommonSignals} from './core/constants/common-signals';
 import {Services} from './services';
-import {VisibilityState} from './visibility-state';
+import {VisibilityState} from './core/constants/visibility-state';
 import {childElementsByTag, isConnectedNode} from './dom';
 import {
   createShadowDomWriter,

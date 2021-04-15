@@ -46,7 +46,7 @@ import {
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
-} from '../../../../src/consent-state';
+} from '../../../../src/core/constants/consent-state';
 import {Deferred} from '../../../../src/core/data-structures/promise';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {Layout} from '../../../../src/layout';

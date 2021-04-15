@@ -17,7 +17,7 @@
 import {Deferred} from '../core/data-structures/promise';
 import {Observable} from '../core/data-structures/observable';
 import {Signals} from '../utils/signals';
-import {VisibilityState} from '../visibility-state';
+import {VisibilityState} from '../core/constants/visibility-state';
 import {WindowInterface} from '../window-interface';
 import {
   addDocumentVisibilityChangeListener,
