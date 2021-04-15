@@ -150,10 +150,6 @@ amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-dragg
   flex-direction: column !important;
 }
 
-/* amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-container {
-  display: none;
-} */
-
 amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-spacer {
   /* Removes default button background. */
   background: none !important;
@@ -162,6 +158,11 @@ amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-dragg
   height: calc(var(--story-page-vh) * 100) !important;
   /* Sets the minimum size of the placeholder element */
   min-height: calc(var(--story-page-vh) * 20) !important;
+}
+
+body:not(.amp-mode-keyboard-active) amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-spacer {
+  /* Remove outline if user is not navigating via keyboard */
+  outline: none !important;
 }
 
 amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-content {
