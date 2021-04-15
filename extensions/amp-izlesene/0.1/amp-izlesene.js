@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {devAssert, userAssert} from '../../../src/log';
@@ -35,6 +36,9 @@ class AmpIzlesene extends AMP.BaseElement {
     this.iframe_ = null;
     /** @private {?string} */
     this.videoIframeSrc_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -104,6 +108,8 @@ class AmpIzlesene extends AMP.BaseElement {
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
 
+    this.pauseHelper_.updatePlaying(true);
+
     return this.loadPromise(iframe);
   }
 
@@ -113,6 +119,7 @@ class AmpIzlesene extends AMP.BaseElement {
       this.element.removeChild(this.iframe_);
       this.iframe_ = null;
     }
+    this.pauseHelper_.updatePlaying(false);
     return true;
   }
 

@@ -16,6 +16,7 @@
 
 import {Deferred} from '../../../src/utils/promise';
 import {ImaPlayerData} from '../../../ads/google/ima-player-data';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
@@ -86,6 +87,9 @@ class AmpImaVideo extends AMP.BaseElement {
     this.playerData_ = new ImaPlayerData();
 
     this.onResized_ = this.onResized_.bind(this);
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /** @override */
@@ -231,6 +235,9 @@ class AmpImaVideo extends AMP.BaseElement {
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
+
+    this.pauseHelper_.updatePlaying(false);
+
     return true;
   }
 
@@ -292,8 +299,19 @@ class AmpImaVideo extends AMP.BaseElement {
 
     const videoEvent = eventData['event'];
     if (isEnumValue(VideoEvents, videoEvent)) {
-      if (videoEvent == VideoEvents.LOAD) {
-        this.playerReadyResolver_(this.iframe_);
+      switch (videoEvent) {
+        case VideoEvents.LOAD:
+          this.playerReadyResolver_(this.iframe_);
+          break;
+        case VideoEvents.AD_START:
+        case VideoEvents.PLAY:
+        case VideoEvents.PLAYING:
+          this.pauseHelper_.updatePlaying(true);
+          break;
+        case VideoEvents.PAUSE:
+        case VideoEvents.ENDED:
+          this.pauseHelper_.updatePlaying(false);
+          break;
       }
       dispatchCustomEvent(this.element, videoEvent);
       return;

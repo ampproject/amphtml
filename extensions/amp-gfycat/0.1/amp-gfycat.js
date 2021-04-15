@@ -217,6 +217,8 @@ class AmpGfycat extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
+    // gfycat automatically paused in the zero-size case and additional
+    // intervention is not needed. Additionally, gfycat are always muted.
     this.pause();
   }
 

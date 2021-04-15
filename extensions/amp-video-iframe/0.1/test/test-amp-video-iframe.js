@@ -21,6 +21,7 @@ import {
   createElementWithAttributes,
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
+import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
 import {listenOncePromise} from '../../../../src/event-helper';
 import {macroTask} from '../../../../testing/yield';
 
@@ -37,6 +38,7 @@ describes.realWin(
     let win;
     let doc;
     let videoManagerStub;
+    let resizeObserverStub;
 
     beforeEach(() => {
       win = env.win;
@@ -49,6 +51,7 @@ describes.realWin(
       env.sandbox
         .stub(Services, 'videoManagerForDoc')
         .returns(videoManagerStub);
+      resizeObserverStub = installResizeObserverStub(env.sandbox, win);
     });
 
     function getIframeSrc(fixture = null) {
@@ -197,6 +200,65 @@ describes.realWin(
             });
           })
         );
+      });
+    });
+
+    describe('pause', () => {
+      let player, impl;
+      let postMessageSpy;
+
+      beforeEach(async () => {
+        player = createVideoIframe();
+        await layoutAndLoad(player);
+        await acceptMockedMessages(player);
+        env.sandbox.stub(player, 'isBuilt').returns(true);
+        impl = await player.getImpl(false);
+        postMessageSpy = await stubPostMessage(player);
+      });
+
+      it('should auto-pause when playing and no size', async () => {
+        impl.onMessage_({data: {event: VideoEvents.PLAYING}});
+        // First send "size" event and then "no size".
+        resizeObserverStub.notifySync({
+          target: player,
+          borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+        });
+        resizeObserverStub.notifySync({
+          target: player,
+          borderBoxSize: [{inlineSize: 0, blockSize: 0}],
+        });
+        await macroTask();
+        expect(
+          postMessageSpy.withArgs(
+            env.sandbox.match({
+              event: 'method',
+              method: 'pause',
+            })
+          )
+        ).to.be.calledOnce;
+      });
+
+      it('should NOT auto-pause when not playing', async () => {
+        impl.onMessage_({data: {event: VideoEvents.PLAYING}});
+        impl.onMessage_({data: {event: VideoEvents.PAUSE}});
+        // First send "size" event and then "no size".
+        resizeObserverStub.notifySync({
+          target: player,
+          borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+        });
+        resizeObserverStub.notifySync({
+          target: player,
+          borderBoxSize: [{inlineSize: 0, blockSize: 0}],
+        });
+        await macroTask();
+        expect(
+          postMessageSpy.withArgs(
+            env.sandbox.match({
+              event: 'method',
+              method: 'pause',
+            })
+          )
+        ).to.not.be.called;
       });
     });
 
