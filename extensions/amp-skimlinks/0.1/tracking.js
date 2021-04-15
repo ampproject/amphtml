@@ -15,7 +15,7 @@
  */
 
 import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {generatePageImpressionId, isExcludedAnchorUrl} from './utils';
 
 import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';

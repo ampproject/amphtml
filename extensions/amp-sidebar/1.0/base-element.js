@@ -17,7 +17,7 @@
 import {CSS as COMPONENT_CSS} from './component.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Sidebar} from './component';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {pauseAll} from '../../../src/utils/resource-container-helper';
 import {toggle} from '../../../src/style';
 import {toggleAttribute} from '../../../src/dom';

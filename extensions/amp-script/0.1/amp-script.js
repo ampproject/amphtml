@@ -24,7 +24,7 @@ import {UserActivationTracker} from './user-activation-tracker';
 import {calculateExtensionScriptUrl} from '../../../src/service/extension-script';
 import {cancellation} from '../../../src/error';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
+import {dict, map} from '../../../src/core/types/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
 import {getService, registerServiceBuilder} from '../../../src/service';

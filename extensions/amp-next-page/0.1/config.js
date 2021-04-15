@@ -20,7 +20,7 @@ import {
   getSourceUrl,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {isArray} from '../../../src/core/types/array';
+import {isArray} from '../../../src/core/types';
 import {user, userAssert} from '../../../src/log';
 
 const ADSENSE_REC_ORIGIN = 'https://googleads.g.doubleclick.net';

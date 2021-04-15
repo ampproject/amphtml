@@ -30,7 +30,7 @@ import {
 } from '../style';
 import {closest, domOrderComparator, matches} from '../dom';
 import {dev, user} from '../log';
-import {endsWith} from '../string';
+import {endsWith} from '../core/types/string';
 import {getMode} from '../mode';
 import {remove} from '../core/types/array';
 

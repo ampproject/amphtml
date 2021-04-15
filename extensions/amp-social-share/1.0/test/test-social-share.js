@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {SocialShare} from '../social-share';
-import {dict} from '../../../../src/utils/object';
+import {dict} from '../../../../src/core/types/object';
 import {mount} from 'enzyme';
 
 describes.sandboxed('SocialShare 1.0 preact component', {}, () => {

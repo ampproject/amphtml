@@ -26,7 +26,7 @@ import {
 } from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getStyle, setStyle} from '../../../src/style';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';

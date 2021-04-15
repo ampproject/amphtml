@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {hasOwn} from '../src/utils/object';
+import {hasOwn} from '../src/core/types/object';
 import {loadScript} from './3p';
 import {setStyle} from '../src/style';
 

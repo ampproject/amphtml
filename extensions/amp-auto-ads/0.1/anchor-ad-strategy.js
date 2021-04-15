@@ -15,7 +15,7 @@
  */
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-auto-ads';

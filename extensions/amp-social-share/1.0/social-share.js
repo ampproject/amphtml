@@ -20,7 +20,7 @@ import {Keys} from '../../../src/utils/key-codes';
 import {SocialShareIcon} from './social-share-svgs';
 import {Wrapper} from '../../../src/preact/component';
 import {addParamsToUrl, parseQueryString} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getSocialConfig} from './social-share-config';
 import {openWindowDialog} from '../../../src/dom';
 import {useResourcesNotify} from '../../../src/preact/utils';

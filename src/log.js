@@ -21,7 +21,7 @@ import {
 import {findIndex, isArray} from './core/types/array';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
-import {isEnumValue} from './types';
+import {isEnumValue} from './core/types';
 import {once} from './utils/function';
 import {pureDevAssert, pureUserAssert} from './core/assert';
 import {urls} from './config';

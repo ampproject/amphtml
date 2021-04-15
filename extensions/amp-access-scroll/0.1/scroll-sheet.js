@@ -15,7 +15,7 @@
  */
 
 import {ScrollComponent} from './scroll-component';
-import {dict, hasOwn} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/core/types/object';
 import {toggle} from '../../../src/style';
 
 /** Provides iframe for the Scroll Audio Player. */

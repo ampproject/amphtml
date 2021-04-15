@@ -26,7 +26,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {dispatchCustomEvent, removeElement} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';

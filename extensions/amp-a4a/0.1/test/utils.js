@@ -15,7 +15,7 @@
  */
 
 import {AmpA4A} from '../amp-a4a';
-import {dict} from '../../../../src/utils/object';
+import {dict} from '../../../../src/core/types/object';
 
 /** @type {string} @private */
 export const TEST_URL =

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {hasOwn, map} from '../../../src/utils/object';
+import {hasOwn, map} from '../../../src/core/types/object';
 import {accessParser as parser} from '../../../build/parsers/access-expr-impl';
 
 /**

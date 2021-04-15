@@ -18,7 +18,7 @@ import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   elementByTag,
   insertAtStart,

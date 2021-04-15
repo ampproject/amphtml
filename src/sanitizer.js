@@ -24,7 +24,7 @@ import {
   TRIPLE_MUSTACHE_ALLOWLISTED_TAGS,
   isValidAttr,
 } from './purifier/sanitation';
-import {dict} from './utils/object';
+import {dict} from './core/types/object';
 import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
 import {isAmp4Email} from './format';
 import {rewriteAttributeValue} from './url-rewrite';

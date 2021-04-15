@@ -30,7 +30,7 @@ import {
 } from '../../dom';
 import {computedStyle, setStyle} from '../../style';
 import {dev, devAssert} from '../../log';
-import {dict} from '../../utils/object';
+import {dict} from '../../core/types/object';
 import {getFriendlyIframeEmbedOptional} from '../../iframe-helper';
 import {getMode} from '../../mode';
 import {

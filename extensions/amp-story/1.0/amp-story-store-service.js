@@ -19,7 +19,7 @@ import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {deepEquals} from '../../../src/json';
 import {dev} from '../../../src/log';
-import {hasOwn} from '../../../src/utils/object';
+import {hasOwn} from '../../../src/core/types/object';
 import {registerServiceBuilder} from '../../../src/service';
 
 /** @type {string} */

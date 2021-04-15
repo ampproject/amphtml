@@ -31,7 +31,7 @@ import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {getTopWindow} from '../../../src/service';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
-import {isObject} from '../../../src/types';
+import {isObject} from '../../../src/core/types';
 import {makeClickDelaySpec} from './filters/click-delay';
 import {makeInactiveElementSpec} from './filters/inactive-element';
 import {parseJson} from '../../../src/json';

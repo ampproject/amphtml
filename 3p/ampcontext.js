@@ -18,8 +18,8 @@ import {Deferred} from '../src/utils/promise';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
 import {dev, devAssert} from '../src/log';
-import {dict, map} from '../src/utils/object';
-import {isObject} from '../src/types';
+import {dict, map} from '../src/core/types/object';
+import {isObject} from '../src/core/types';
 import {parseUrlDeprecated} from '../src/url';
 import {tryParseJson} from '../src/json';
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {stringHash32} from '../string';
+import {stringHash32} from '../core/types/string';
 
 /**
  * Gets a string of concatenated element names and relative positions

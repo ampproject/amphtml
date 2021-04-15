@@ -15,7 +15,7 @@
  */
 import {DomFingerprint} from './utils/dom-fingerprint';
 import {Services} from './services';
-import {dict} from './utils/object.js';
+import {dict} from './core/types/object';
 import {experimentToggles, isCanary} from './experiments';
 import {getLengthNumeral} from './layout';
 import {getModeObject} from './mode-object';

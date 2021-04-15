@@ -19,10 +19,11 @@ import {CSS} from '../../../build/amp-viz-vega-0.1.css';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {isExperimentOn} from '../../../src/experiments';
-import {isFiniteNumber, isObject} from '../../../src/types';
+import {isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {isObject} from '../../../src/core/types';
 import {
   observeContentSize,
   unobserveContentSize,

@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {IframeEmbed} from '../../../src/preact/component/iframe';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {forwardRef} from '../../../src/preact/compat';
 import {getData} from '../../../src/event-helper';
 import {parseJson} from '../../../src/json';

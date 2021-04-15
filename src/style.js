@@ -16,7 +16,7 @@
 
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 import {dev, devAssert} from './log';
-import {map} from './utils/object.js';
+import {map} from './core/types/object';
 
 /** @type {Object<string, string>} */
 let propertyNameCache;

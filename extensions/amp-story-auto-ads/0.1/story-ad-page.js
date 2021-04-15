@@ -42,7 +42,7 @@ import {
   toggleAttribute,
 } from '../../../src/dom';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
+import {dict, map} from '../../../src/core/types/object';
 import {getData, listen} from '../../../src/event-helper';
 import {getFrameDoc, localizeCtaText} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';

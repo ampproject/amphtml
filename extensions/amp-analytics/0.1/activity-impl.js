@@ -20,7 +20,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {hasOwn} from '../../../src/utils/object';
+import {hasOwn} from '../../../src/core/types/object';
 import {listen} from '../../../src/event-helper';
 import {registerServiceBuilderForDoc} from '../../../src/service';
 

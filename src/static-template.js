@@ -15,7 +15,7 @@
  */
 
 import {devAssert} from './log';
-import {map} from './utils/object.js';
+import {map} from './core/types/object';
 
 let htmlContainer;
 let svgContainer;

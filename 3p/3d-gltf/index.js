@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dict} from '../../src/utils/object';
+import {dict} from '../../src/core/types/object';
 import {listenParent, nonSensitiveDataPostMessage} from '../messaging';
 import {loadScript} from '../3p';
 import {parseJson} from '../../src/json';

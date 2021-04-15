@@ -15,7 +15,7 @@
  */
 import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {registerServiceBuilder} from '../../../src/service';
 
 /**

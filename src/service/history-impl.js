@@ -17,7 +17,7 @@
 import {Deferred, tryResolve} from '../utils/promise';
 import {Services} from '../services';
 import {dev, devAssert} from '../log';
-import {dict, map} from '../utils/object';
+import {dict, map} from '../core/types/object';
 import {getMode} from '../mode';
 import {
   getService,

@@ -15,7 +15,7 @@
  */
 
 import {adConfig} from '../../ads/_config';
-import {hasOwn} from '../../src/utils/object';
+import {hasOwn} from '../../src/core/types/object';
 
 describe('test-ads-config', () => {
   it('should have all ad networks configured', () => {

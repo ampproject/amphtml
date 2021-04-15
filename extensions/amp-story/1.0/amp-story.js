@@ -95,8 +95,8 @@ import {
 import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
-import {endsWith} from '../../../src/string';
+import {dict, map} from '../../../src/core/types/object';
+import {endsWith} from '../../../src/core/types/string';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex, lastItem, toArray} from '../../../src/core/types/array';
 import {getConsentPolicyState} from '../../../src/consent';

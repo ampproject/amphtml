@@ -20,7 +20,7 @@
  */
 
 import {Deferred} from '../../../src/utils/promise';
-import {hasOwn} from '../../../src/utils/object';
+import {hasOwn} from '../../../src/core/types/object';
 
 export class AssistjsConfigService {
   /** */

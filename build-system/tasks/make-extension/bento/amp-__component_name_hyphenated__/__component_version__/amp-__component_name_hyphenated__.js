@@ -16,7 +16,7 @@
 
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-__component_name_hyphenated__-__component_version__.css';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 

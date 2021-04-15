@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {hasOwn} from '../../src/utils/object.js';
+import {hasOwn} from '../../src/core/types/object';
 import {tryParseJson} from '../../src/json.js';
 import {validateData} from '../../3p/3p';
 

@@ -16,7 +16,7 @@
 
 import {Services} from '../services';
 import {devAssert, user, userAssert} from '../log';
-import {dict, map} from './object';
+import {dict, isObject, map} from '../core/types/object';
 import {fromIterator, isArray} from '../core/types/array';
 import {
   getCorsUrl,
@@ -29,7 +29,6 @@ import {getMode} from '../mode';
 
 import {isExperimentOn} from '../experiments';
 import {isFormDataWrapper} from '../form-data-wrapper';
-import {isObject} from '../types';
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];

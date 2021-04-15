@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 
 /**
  * - visibilePercentageMin: The percentage of pixels that need to be on screen

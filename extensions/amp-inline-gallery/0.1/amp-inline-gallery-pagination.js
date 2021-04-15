@@ -18,7 +18,7 @@ import {InlineGalleryEvents} from './inline-gallery-events';
 import {Layout} from '../../../src/layout';
 import {createCustomEvent} from '../../../src/event-helper';
 import {devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {htmlFor} from '../../../src/static-template';
 import {scopedQuerySelectorAll} from '../../../src/dom';
 import {setImportantStyles} from '../../../src/style.js';

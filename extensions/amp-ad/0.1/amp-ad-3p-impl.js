@@ -34,7 +34,7 @@ import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/utils/math';
 import {computedStyle, setStyle} from '../../../src/style';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getAdCid} from '../../../src/ad-cid';
 import {getAdContainer, isAdPositionAllowed} from '../../../src/ad-helper';
 import {

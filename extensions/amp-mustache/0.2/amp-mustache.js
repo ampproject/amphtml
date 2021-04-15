@@ -16,7 +16,7 @@
 
 import {BaseTemplate} from '../../../src/base-template';
 import {Purifier} from '../../../src/purifier/purifier';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';

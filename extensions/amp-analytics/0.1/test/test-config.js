@@ -17,7 +17,7 @@
 import {AnalyticsConfig, expandConfigRequest, mergeObjects} from '../config';
 import {Services} from '../../../../src/services';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
-import {map} from '../../../../src/utils/object';
+import {map} from '../../../../src/core/types/object';
 import {stubService} from '../../../../testing/test-helper';
 import {user} from '../../../../src/log';
 

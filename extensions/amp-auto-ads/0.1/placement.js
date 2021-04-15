@@ -27,7 +27,7 @@ import {
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {measurePageLayoutBox} from '../../../src/utils/page-layout-box';
 
 /** @const */

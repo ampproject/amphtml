@@ -20,7 +20,7 @@ import {TickLabel} from './enums';
 import {dev, devAssert, rethrowAsync} from './log';
 import {getAmpdoc} from './service';
 import {insertAfterOrAtStart, waitForBodyOpenPromise} from './dom';
-import {map} from './utils/object';
+import {map} from './core/types/object';
 import {setStyles} from './style';
 import {waitForServices} from './render-delaying-services';
 

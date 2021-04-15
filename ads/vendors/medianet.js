@@ -16,7 +16,7 @@
 
 import {computeInMasterFrame, validateData, writeScript} from '../../3p/3p';
 import {getSourceUrl, parseUrlDeprecated} from '../../src/url';
-import {hasOwn} from '../../src/utils/object';
+import {hasOwn} from '../../src/core/types/object';
 
 const mandatoryParams = ['tagtype', 'cid'],
   optionalParams = [

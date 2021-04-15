@@ -17,7 +17,7 @@
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 
 /**
  * @implements {./ad-network-config.AdNetworkConfigDef}

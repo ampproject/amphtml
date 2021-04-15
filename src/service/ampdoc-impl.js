@@ -32,7 +32,7 @@ import {
 } from '../service';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
 import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '../dom';
-import {map} from '../utils/object';
+import {map} from '../core/types/object';
 import {parseQueryString} from '../url';
 
 /** @const {string} */

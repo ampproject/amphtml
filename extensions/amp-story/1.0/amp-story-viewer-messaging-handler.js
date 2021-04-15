@@ -21,7 +21,7 @@ import {
 } from './amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from './variable-service';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 
 /** @type {string} */
 const TAG = 'amp-story-viewer-messaging-handler';

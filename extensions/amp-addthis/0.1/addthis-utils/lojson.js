@@ -27,7 +27,7 @@ import {
   getFragmentId,
   getServiceFromUrlFragment,
 } from './fragment';
-import {dict} from '../../../../src/utils/object';
+import {dict} from '../../../../src/core/types/object';
 import {getMetaElements} from './meta';
 import {getSessionId} from './session';
 import {parseUrlDeprecated} from '../../../../src/url';
