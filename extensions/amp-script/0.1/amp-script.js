@@ -287,8 +287,8 @@ export class AmpScript extends AMP.BaseElement {
       const folder = getMode().minified ? 'current-min' : 'current';
       iframeUrl = `/dist.3p/${folder}/amp-script-proxy-iframe.html`;
     } else {
-      iframeUrl = `${urls.thirdParty}${
-        getMode().rtvVersion
+      iframeUrl = `${urls.thirdParty}/${
+        getMode().version
       }/amp-script-proxy-iframe.html`;
     }
 
