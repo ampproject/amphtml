@@ -23,6 +23,7 @@
 
 const checkDependencies = require('check-dependencies');
 const fs = require('fs-extra');
+const path = require('path');
 const {cyan, red} = require('kleur/colors');
 const {exec} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
@@ -66,6 +67,36 @@ function isPackageLockFileInSync() {
 }
 
 /**
+ * Recursively find all files named 'package-lock.json'
+ * @return {string[]}
+ */
+function getAllPackageLockFiles() {
+  const packageLockFiles = [];
+  let q = fs.readdirSync('.');
+
+  while (q.length) {
+    const fileName = q.pop();
+    if (fileName.includes('node_modules')) {
+      continue;
+    }
+    if (fileName.endsWith('package-lock.json')) {
+      packageLockFiles.push(fileName);
+      continue;
+    }
+    const stats = fs.lstatSync(fileName);
+    if (stats.isDirectory()) {
+      q = q.concat(
+        fs
+          .readdirSync(fileName)
+          .map((childName) => path.join(fileName, childName))
+      );
+    }
+  }
+
+  return packageLockFiles;
+}
+
+/**
  * Makes sure that package-lock.json was properly updated in two steps:
  * 1. First make sure it was generated with a compatible version of npm.
  * 2. Then run `npm i` and check for missing changes (required because `npm ci`
@@ -74,41 +105,43 @@ function isPackageLockFileInSync() {
  */
 function isPackageLockFileProperlyUpdated() {
   const loggingPrefix = getLoggingPrefix();
-  if (fs.readJsonSync('package-lock.json').lockfileVersion != 1) {
-    logWithoutTimestamp(
-      loggingPrefix,
-      red('ERROR:'),
-      cyan('package-lock.json'),
-      'was generated with an incorrect version of',
-      cyan('npm') + '.'
-    );
-    logWithoutTimestamp(
-      loggingPrefix,
-      '⤷ To fix this, make sure you are using the version of',
-      cyan('npm'),
-      'that came pre-installed with the latest LTS version of',
-      cyan('node') + '.'
-    );
-  }
+  for (const lockFile of getAllPackageLockFiles()) {
+    if (fs.readJsonSync(lockFile).lockfileVersion != 1) {
+      logWithoutTimestamp(
+        loggingPrefix,
+        red('ERROR:'),
+        cyan(lockFile),
+        'was generated with an incorrect version of',
+        cyan('npm') + '.'
+      );
+      logWithoutTimestamp(
+        loggingPrefix,
+        '⤷ To fix this, make sure you are using the version of',
+        cyan('npm'),
+        'that came pre-installed with the latest LTS version of',
+        cyan('node') + '.'
+      );
+    }
 
-  exec('npm install', {'stdio': 'ignore'});
-  const filesChanged = gitDiffNameOnly();
-  if (filesChanged.includes('package-lock.json')) {
-    logWithoutTimestamp(
-      loggingPrefix,
-      red('ERROR:'),
-      'This PR did not properly update',
-      cyan('package-lock.json') + '.'
-    );
-    logWithoutTimestamp(
-      loggingPrefix,
-      '⤷ To fix this, sync your branch to',
-      cyan('ampproject/amphtml:main') + ', run',
-      cyan('npm install') + ', and push a new commit containing the changes.'
-    );
-    logWithoutTimestamp(loggingPrefix, 'Expected changes:');
-    logWithoutTimestamp(gitDiffColor());
-    return false;
+    exec('npm install', {'stdio': 'ignore'});
+    const filesChanged = gitDiffNameOnly();
+    if (filesChanged.includes(lockFile)) {
+      logWithoutTimestamp(
+        loggingPrefix,
+        red('ERROR:'),
+        'This PR did not properly update',
+        cyan(lockFile) + '.'
+      );
+      logWithoutTimestamp(
+        loggingPrefix,
+        '⤷ To fix this, sync your branch to',
+        cyan('ampproject/amphtml:main') + ', run',
+        cyan('npm install') + ', and push a new commit containing the changes.'
+      );
+      logWithoutTimestamp(loggingPrefix, 'Expected changes:');
+      logWithoutTimestamp(gitDiffColor());
+      return false;
+    }
   }
   return true;
 }
