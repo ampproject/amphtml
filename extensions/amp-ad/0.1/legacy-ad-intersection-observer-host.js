@@ -18,7 +18,10 @@ import {MessageType} from '../../../src/3p-frame-messaging';
 import {Services} from '../../../src/services';
 import {SubscriptionApi} from '../../../src/iframe-helper';
 import {dict} from '../../../src/utils/object';
-import {intersectionEntryToJson} from '../../../src/utils/intersection';
+import {
+  intersectionEntryToJson,
+  measureIntersection,
+} from '../../../src/utils/intersection';
 
 /**
  * LegacyAdIntersectionObserverHost exists for backward compatibility to support
@@ -57,9 +60,6 @@ export class LegacyAdIntersectionObserverHost {
     /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
 
-    /** @private {?IntersectionObserver} */
-    this.fireInOb_ = null;
-
     /** @private {boolean} */
     this.inViewport_ = false;
 
@@ -96,11 +96,9 @@ export class LegacyAdIntersectionObserverHost {
    * Fires element intersection
    */
   fire() {
-    if (!this.fireInOb_) {
-      return;
-    }
-    this.fireInOb_.unobserve(this.baseElement_.element);
-    this.fireInOb_.observe(this.baseElement_.element);
+    measureIntersection(this.element).then((intersection) => {
+      this.sendElementIntersection_(intersection);
+    });
   }
 
   /**
@@ -130,12 +128,6 @@ export class LegacyAdIntersectionObserverHost {
         this.onViewportCallback_(lastEntry);
       });
       this.intersectionObserver_.observe(this.baseElement_.element);
-    }
-    if (!this.fireInOb_) {
-      this.fireInOb_ = new IntersectionObserver((entries) => {
-        const lastEntry = entries[entries.length - 1];
-        this.sendElementIntersection_(lastEntry);
-      });
     }
     this.fire();
   }
@@ -230,10 +222,6 @@ export class LegacyAdIntersectionObserverHost {
     if (this.intersectionObserver_) {
       this.intersectionObserver_.disconnect();
       this.intersectionObserver_ = null;
-    }
-    if (this.fireInOb_) {
-      this.fireInOb_.disconnect();
-      this.fireInOb_ = null;
     }
     this.timer_.cancel(this.flushTimeout_);
     this.unlistenOnOutViewport_();
