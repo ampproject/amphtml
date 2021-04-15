@@ -22,20 +22,29 @@
 		background-color: white;
 		border-radius: 50%;
 	}
-  input[flexible-bitrate-debug] {
+  input#flexible-bitrate-debug {
     position: absolute;
     right: 0;
     top: 0;
+    width: 150px;
+  }
+  span.flexible-bitrate-src-debug {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    padding: 0.2em;
+    font-size: 0.6em;
+    background-color: white;
   }
 	</style>
   <script>
     (self.AMP = self.AMP || []).push(function(AMP) {
       AMP.toggleExperiment('flexible-bitrate', true);
-      AMP.toggleExperiment('flexible-bitrate-debug', true);
     });
     window.onload = () => {
       const debugField = document.createElement('input');
-      debugField.setAttribute('flexible-bitrate-debug', '');
+      debugField.id = 'flexible-bitrate-debug';
+      debugField.placeholder = 'Debug command (eg: 1d)';
       document.body.appendChild(debugField);
       debugField.addEventListener('keyup', (e) => {
         const number = debugField.value.slice(0, -1);
@@ -49,13 +58,25 @@
           videoEl.setAttribute('i-amphtml-video-buffered-debug', 'true');
         } else if (e.key === 'u') {
           videoEl.setAttribute('i-amphtml-video-buffered-debug', 'false');
-        } else if (e.key === 'i') {
-          alert(`Current source for ${videoEl.id}: ${videoEl.currentSrc}`);
         } else {
           return;
         }
         // If key was command, clean field.
         debugField.value = '';
+      });
+
+      // Show video source in video
+      document.body.querySelectorAll('amp-video').forEach((videoEl) => {
+        const srcLabel = document.createElement('span');
+        srcLabel.classList.add('flexible-bitrate-src-debug');
+        videoEl.appendChild(srcLabel);
+        srcLabel.textContent = videoEl.querySelector('video').currentSrc;
+        videoEl.addEventListener('playing', () => {
+          srcLabel.textContent = videoEl.querySelector('video').currentSrc;
+        });
+        videoEl.addEventListener('loadeddata', () => {
+          srcLabel.textContent = videoEl.querySelector('video').currentSrc;
+        });
       });
     }
 </script>

@@ -105,7 +105,7 @@ export class BitrateManager {
     if (video.changedSources) {
       return;
     }
-    onNontrivialWait(video, this.downgradeVideo_);
+    onNontrivialWait(video, () => this.downgradeVideo_(video));
     listen(video, 'downgrade', () => this.downgradeVideo_(video));
     video.changedSources = () => {
       this.sortSources_(video);
