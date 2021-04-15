@@ -263,7 +263,8 @@ export class VideoManager {
      * @param {function()} fn
      */
     function registerAction(action, fn) {
-      video.registerAction(
+      const videoBE = /** @type {!AMP.BaseElement} */ (video);
+      videoBE.registerAction(
         action,
         () => {
           userInteractedWith(video);
@@ -996,8 +997,12 @@ class VideoEntry {
    */
   getAnalyticsDetails() {
     const {video} = this;
-    return this.supportsAutoplay_().then((supportsAutoplay) => {
-      const {width, height} = video.element.getLayoutSize();
+    const supportsAutoplay = this.supportsAutoplay_();
+    const intersection = measureIntersection(video.element);
+    return Promise.all([supportsAutoplay, intersection]).then((responses) => {
+      const supportsAutoplay = /** @type {boolean} */ (responses[0]);
+      const intersection = /** @type {!IntersectionObserverEntry} */ (responses[1]);
+      const {width, height} = intersection.boundingClientRect;
       const autoplay = this.hasAutoplay && supportsAutoplay;
       const playedRanges = video.getPlayedRanges();
       const playedTotal = playedRanges.reduce(
@@ -1075,8 +1080,8 @@ export class AutoFullscreenManager {
       this.getPlayingState_(video) == PlayingStates.PLAYING_MANUAL;
 
     /**
-     * @param {!../video-interface.VideoOrBaseElementDef} a
-     * @param {!../video-interface.VideoOrBaseElementDef} b
+     * @param {!IntersectionObserverEntry} a
+     * @param {!IntersectionObserverEntry} b
      * @return {number}
      */
     this.boundCompareEntries_ = (a, b) => this.compareEntries_(a, b);
@@ -1231,7 +1236,7 @@ export class AutoFullscreenManager {
    * Scrolls to a video if it's not in view.
    * @param {!../video-interface.VideoOrBaseElementDef} video
    * @param {?string=} optPos
-   * @return {*} TODO(#23582): Specify return type
+   * @return {!Promise}
    * @private
    */
   scrollIntoIfNotVisible_(video, optPos = null) {
@@ -1258,7 +1263,7 @@ export class AutoFullscreenManager {
 
   /**
    * @private
-   * @return {*} TODO(#23582): Specify return type
+   * @return {./viewport/viewport-interface.ViewportInterface}
    */
   getViewport_() {
     return Services.viewportForDoc(this.ampdoc_);

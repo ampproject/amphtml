@@ -194,7 +194,7 @@ As these providers are not pre-configured, you'll need to create the appropriate
 
 ### Variable Substitution
 
-You can use [global AMP variables substitution](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md) in the `<amp-social-share>` element. In the example below, `TITLE` is substituted with the page title and `CANONICAL_URL` with the document's canonical URL.
+You can use [global AMP variables substitution](https://github.com/ampproject/amphtml/blob/main/spec/amp-var-substitutions.md) in the `<amp-social-share>` element. In the example below, `TITLE` is substituted with the page title and `CANONICAL_URL` with the document's canonical URL.
 
 ```html
 <amp-social-share
@@ -291,4 +291,4 @@ Without sufficient contrast, content can be difficult to perceive and therefore 
 
 ## Validation
 
-See [amp-social-share rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-social-share/validator-amp-social-share.protoascii) in the AMP validator specification.
+See [amp-social-share rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-social-share/validator-amp-social-share.protoascii) in the AMP validator specification.

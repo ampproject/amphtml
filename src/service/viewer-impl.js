@@ -25,7 +25,7 @@ import {
   stripUserError,
 } from '../log';
 import {endsWith} from '../string';
-import {findIndex} from '../utils/array';
+import {findIndex} from '../core/types/array';
 import {
   getSourceOrigin,
   isProxyOrigin,
@@ -890,7 +890,7 @@ export class ViewerImpl {
         getSourceOrigin(url) == getSourceOrigin(replaceUrl)
       ) {
         this.win.history.replaceState({}, '', replaceUrl.href);
-        this.win.location.originalHref = url.href;
+        this.win.location['originalHref'] = url.href;
         dev().fine(TAG_, 'replace url:' + replaceUrl.href);
       }
     } catch (e) {

@@ -117,7 +117,7 @@ Depending on the ad server / provider, some methods of rendering ads involve a s
 
 #### Position in viewport
 
-Ads can call the special `window.context.observeIntersection(changesCallback)`API to receive IntersectionObserver style [change records](https://github.com/w3c/IntersectionObserver/blob/master/explainer.md) of the ad's intersection with the parent viewport.
+Ads can call the special `window.context.observeIntersection(changesCallback)`API to receive IntersectionObserver style [change records](https://github.com/w3c/IntersectionObserver/blob/main/explainer.md) of the ad's intersection with the parent viewport.
 
 The API allows you to specify a callback that fires with change records when AMP observes that an ad becomes visible and then while it is visible, changes are reported as they happen.
 
@@ -233,7 +233,7 @@ Note that if the creative needs to resize on user interaction, the creative can 
 
 ### amp-consent integration
 
-If [amp-consent](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md) extension is used on the page, `data-block-on-consent` attribute
+If [amp-consent](https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/amp-consent.md) extension is used on the page, `data-block-on-consent` attribute
 can be added to `amp-ad` element to respect the corresponding `amp-consent` policy.
 In that case, the `amp-ad` element will be blocked from loading until the consent accepted.
 Individual ad network can override this default consent handling by putting a `consentHandlingOverride: true` in `ads/_config.js`.
@@ -245,8 +245,8 @@ AMP runtime provides the following `window.context` APIs for ad network to acces
   <dt><code>window.context.initialConsentState</code></dt>
   <dd>
     Provides the initial consent state when the ad is unblocked.
-    The states are integers defined <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#advanced-blocking-behaviors">here</a>
-    (<a href="https://github.com/ampproject/amphtml/blob/master/src/consent-state.js#L23">code</a>).
+    The states are integers defined <a href="https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#advanced-blocking-behaviors">here</a>
+    (<a href="https://github.com/ampproject/amphtml/blob/main/src/consent-state.js#L23">code</a>).
   </dd>
   <dt><code>window.context.getConsentState(callback)</code></dt>
   <dd>
@@ -256,22 +256,22 @@ AMP runtime provides the following `window.context` APIs for ad network to acces
   <dt><code>window.context.consentSharedData</code></dt>
   <dd>
     Provides additional user privacy related data retrieved from publishers.
-    See <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#response">here</a> for details.
+    See <a href="https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/amp-consent.md#response">here</a> for details.
   </dd>
   <dt><code>window.context.initialConsentState</code></dt>
   <dd>
     Provides the initial consent string when the ad is unblocked.
-    See <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#on-consent-string">here</a> for details.
+    See <a href="https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#on-consent-string">here</a> for details.
   </dd>
   <dt><code>window.context.initialConsentMetadata</code></dt>
   <dd>
     Provides initial consent metadata when the ad is unblocked.
-    See <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#on-consent-metadata">here</a> for details.
+    See <a href="https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#on-consent-metadata">here</a> for details.
   </dd>
 </dl>
 
 After overriding the default consent handling behavior, don't forget to update your publisher facing
-documentation with the new behaviors on user's consent choices. You can refer to our documentation example [here](https://github.com/ampproject/amphtml/blob/master/ads/_ping_.md#user-consent-integration).
+documentation with the new behaviors on user's consent choices. You can refer to our documentation example [here](https://github.com/ampproject/amphtml/blob/main/ads/_ping_.md#user-consent-integration).
 
 ### Optimizing ad performance
 
@@ -279,7 +279,7 @@ documentation with the new behaviors on user's consent choices. You can refer to
 
 To allow ads to bundle HTTP requests across multiple ad units on the same page the object `window.context.master` will contain the window object of the iframe being elected master iframe for the current page. The `window.context.isMaster` property is `true` when the current frame is the master frame.
 
-The `computeInMasterFrame` function is designed to make it easy to perform a task only in the master frame and provide the result to all frames. It is also available to custom ad iframes as `window.context.computeInMasterFrame`. See [3p.js](https://github.com/ampproject/amphtml/blob/master/3p/3p.js) for function signature.
+The `computeInMasterFrame` function is designed to make it easy to perform a task only in the master frame and provide the result to all frames. It is also available to custom ad iframes as `window.context.computeInMasterFrame`. See [3p.js](https://github.com/ampproject/amphtml/blob/main/3p/3p.js) for function signature.
 
 #### Preconnect and prefetch
 
@@ -289,7 +289,7 @@ This triggers prefetch/preconnect when the ad is first seen, so that loads are f
 
 ### Ad markup
 
-Ads are loaded using the `<amp-ad>` tag containing the specified `type` for the ad netowkr, and name value pairs of configuration.
+Ads are loaded using the `<amp-ad>` tag containing the specified `type` for the ad network, and name value pairs of configuration.
 
 This is an example for the A9 network:
 

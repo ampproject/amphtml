@@ -169,4 +169,4 @@ This property like the the `alt` attribute on an `<img>` tag specifies the alter
 
 ## Validation
 
-See [amp-pinterest rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/validator-amp-pinterest.protoascii) in the AMP validator specification.
+See [amp-pinterest rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-pinterest/validator-amp-pinterest.protoascii) in the AMP validator specification.
