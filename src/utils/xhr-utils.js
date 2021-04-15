@@ -16,7 +16,7 @@
 
 import {Services} from '../services';
 import {devAssert, user, userAssert} from '../log';
-import {dict, isArray, isObject, isString, map} from '../core/types/object';
+import {dict, map} from '../core/types/object';
 import {fromIterator} from '../core/types/array';
 import {
   getCorsUrl,
@@ -26,6 +26,7 @@ import {
   serializeQueryString,
 } from '../url';
 import {getMode} from '../mode';
+import {isArray, isObject, isString} from '../core/types';
 
 import {isExperimentOn} from '../experiments';
 import {isFormDataWrapper} from '../form-data-wrapper';

@@ -217,5 +217,5 @@ export function padStart(s, targetLength, padString) {
  * @return {boolean}
  */
 export function isString(s) {
-  return isString(s);
+  return typeof s == 'string';
 }

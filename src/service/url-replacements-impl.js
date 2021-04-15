@@ -45,7 +45,7 @@ import {WindowInterface} from '../window-interface';
 import {getTrackImpressionPromise} from '../impression.js';
 import {hasOwn} from '../core/types/object';
 import {internalRuntimeVersion} from '../internal-version';
-import {isString} from '../core/types/types';
+import {isString} from '../core/types';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
