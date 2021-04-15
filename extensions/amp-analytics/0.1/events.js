@@ -15,8 +15,8 @@
  */
 
 import {CommonSignals} from '../../../src/common-signals';
-import {Deferred} from '../../../src/utils/promise';
-import {Observable} from '../../../src/observable';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {Observable} from '../../../src/core/data-structures/observable';
 import {
   PlayingStates,
   VideoAnalyticsEvents,

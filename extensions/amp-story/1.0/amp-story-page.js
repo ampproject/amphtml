@@ -44,7 +44,7 @@ import {
 } from './amp-story-embedded-component';
 import {AnimationManager, hasAnimations} from './animation';
 import {CommonSignals} from '../../../src/common-signals';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {EventType, dispatch} from './events';
 import {Layout} from '../../../src/layout';
 import {LoadingSpinner} from './loading-spinner';

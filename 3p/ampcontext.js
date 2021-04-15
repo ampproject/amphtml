@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {AmpEvents} from '../src/amp-events';
-import {Deferred} from '../src/utils/promise';
+import {Deferred} from '../src/core/data-structures/promise';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
 import {dev, devAssert} from '../src/log';

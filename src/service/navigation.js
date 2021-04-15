@@ -29,7 +29,7 @@ import {getMode} from '../mode';
 import {isLocalhostOrigin} from '../url';
 import {registerServiceBuilderForDoc} from '../service';
 import {toWin} from '../types';
-import PriorityQueue from '../utils/priority-queue';
+import PriorityQueue from '../core/data-structures/priority-queue';
 
 const TAG = 'navigation';
 

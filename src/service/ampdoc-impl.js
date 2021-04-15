@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
-import {Observable} from '../observable';
+import {Deferred} from '../core/data-structures/promise';
+import {Observable} from '../core/data-structures/observable';
 import {Signals} from '../utils/signals';
 import {VisibilityState} from '../visibility-state';
 import {WindowInterface} from '../window-interface';

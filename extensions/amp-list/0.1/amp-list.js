@@ -23,7 +23,7 @@ import {
   DIFF_KEY,
   markElementForDiffing,
 } from '../../../src/purifier/sanitation';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {
   Layout,
   getLayoutClass,

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
-import {Observable} from '../observable';
+import {Deferred} from '../core/data-structures/promise';
+import {Observable} from '../core/data-structures/observable';
 import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL} from '../service/resources-interface';
 import {Resource, ResourceState} from '../service/resource';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
+import {Deferred} from '../core/data-structures/promise';
 import {Pass} from '../pass';
 import {Services} from '../services';
 import {

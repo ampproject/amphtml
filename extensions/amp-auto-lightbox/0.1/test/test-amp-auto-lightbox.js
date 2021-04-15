@@ -37,7 +37,7 @@ import {Signals} from '../../../../src/utils/signals';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
 import {isArray} from '../../../../src/core/types';
-import {tryResolve} from '../../../../src/utils/promise';
+import {tryResolve} from '../../../../src/core/data-structures/promise';
 
 const TAG = 'amp-auto-lightbox';
 

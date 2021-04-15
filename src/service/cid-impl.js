@@ -37,7 +37,7 @@ import {isExperimentOn} from '../experiments';
 import {isIframed} from '../dom';
 import {isString} from '../core/types';
 import {parseJson, tryParseJson} from '../json';
-import {tryResolve} from '../utils/promise';
+import {tryResolve} from '../core/data-structures/promise';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 

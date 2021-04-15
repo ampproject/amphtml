@@ -54,7 +54,7 @@ import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
 } from '../../../src/consent-state';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,

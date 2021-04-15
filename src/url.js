@@ -17,6 +17,7 @@
 import {LruCache} from './utils/lru-cache';
 import {dict, hasOwn} from './core/types/object';
 import {endsWith} from './core/types/string';
+import {LruCache} from './core/data-structures/lru-cache';
 import {getMode} from './mode';
 import {isArray, isString} from './core/types';
 import {parseQueryString_} from './url-parse-query-string';

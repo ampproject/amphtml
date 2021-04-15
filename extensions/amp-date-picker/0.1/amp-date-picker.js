@@ -19,7 +19,7 @@ import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-date-picker-0.1.css';
 import {DEFAULT_FORMAT, DEFAULT_LOCALE, FORMAT_STRINGS} from './constants';
 import {DatesList} from './dates-list';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {FiniteStateMachine} from '../../../src/finite-state-machine';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';

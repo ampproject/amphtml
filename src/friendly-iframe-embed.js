@@ -15,7 +15,7 @@
  */
 
 import {CommonSignals} from './common-signals';
-import {Deferred} from './utils/promise';
+import {Deferred} from './core/data-structures/promise';
 import {FIE_EMBED_PROP} from './iframe-helper';
 import {Services} from './services';
 import {Signals} from './utils/signals';

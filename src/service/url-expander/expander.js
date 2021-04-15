@@ -17,7 +17,7 @@
 import {hasOwn} from '../../core/types/object';
 import {isString, trimStart} from '../../core/types/string';
 import {rethrowAsync, user} from '../../log';
-import {tryResolve} from '../../utils/promise';
+import {tryResolve} from '../../core/data-structures/promise';
 
 /** @private @const {string} */
 const PARSER_IGNORE_FLAG = '`';

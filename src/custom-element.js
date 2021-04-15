@@ -46,7 +46,7 @@ import {setStyle} from './style';
 import {shouldBlockOnConsentByMeta} from './consent';
 import {startupChunk} from './chunk';
 import {toWin} from './types';
-import {tryResolve} from './utils/promise';
+import {tryResolve} from './core/data-structures/promise';
 
 const TAG = 'CustomElement';
 
