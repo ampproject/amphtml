@@ -125,8 +125,8 @@ async function validateAdOverlay(controller) {
   );
   // Design spec is 14px from top, 16px from left.
   await expect(controller.getElementRect(adBadge)).to.include({
-    left: 16,
-    top: 14,
+    left: 12,
+    top: 12,
   });
 
   await controller.switchToLight();
