@@ -217,10 +217,10 @@ function logNpmVersion() {
  */
 function checkPythonVersion() {
   // Python 2.7 is EOL but still supported
-  // Python 3.5+ are still supported (TODO: deprecate 3.5 on 2020-09-13)
+  // Python 3.6+ are still supported
   // https://devguide.python.org/#status-of-python-branches
-  const recommendedVersion = '2.7 or 3.5+';
-  const recommendedVersionRegex = /^2\.7|^3\.[5-9]/;
+  const recommendedVersion = '2.7 or 3.6+';
+  const recommendedVersionRegex = /^2\.7|^3\.(?:[6-9]|1\d)/;
 
   // Python2 prints its version to stderr (fixed in Python 3.4)
   // See: https://bugs.python.org/issue18338
