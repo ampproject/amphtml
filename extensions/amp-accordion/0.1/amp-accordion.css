@@ -25,7 +25,7 @@ amp-accordion > section[expanded] > :last-child {
   display: block !important;
 }
 
-/* heading/clontent */
+/* heading/content */
 .i-amphtml-accordion-header,
 .i-amphtml-accordion-content {
   margin: 0;

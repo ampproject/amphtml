@@ -18,8 +18,9 @@ import {RTC_VENDORS} from './callout-vendors';
 import {Services} from '../../services';
 import {dev, user, userAssert} from '../../log';
 import {getMode} from '../../mode';
-import {isArray, isObject} from '../../types';
+import {isArray, isObject} from '../../core/types';
 import {isCancellation} from '../../error';
+
 import {registerServiceBuilderForDoc} from '../../service';
 import {tryParseJson} from '../../json';
 

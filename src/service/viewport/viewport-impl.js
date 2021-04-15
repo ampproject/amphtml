@@ -30,7 +30,7 @@ import {
 } from '../../dom';
 import {computedStyle, setStyle} from '../../style';
 import {dev, devAssert} from '../../log';
-import {dict} from '../../utils/object';
+import {dict} from '../../core/types/object';
 import {getFriendlyIframeEmbedOptional} from '../../iframe-helper';
 import {getMode} from '../../mode';
 import {
@@ -138,7 +138,7 @@ export class ViewportImpl {
     /** @private @const {!Observable<!./viewport-interface.ViewportResizedEventDef>} */
     this.resizeObservable_ = new Observable();
 
-    /** @private {?Element|undefined} */
+    /** @private {?HTMLMetaElement|undefined} */
     this.viewportMeta_ = undefined;
 
     /** @private {string|undefined} */
@@ -858,7 +858,7 @@ export class ViewportImpl {
   }
 
   /**
-   * @return {?Element}
+   * @return {?HTMLMetaElement}
    * @private
    */
   getViewportMeta_() {
@@ -1199,7 +1199,7 @@ const ViewportType = {
    * that AMP sets when Viewer has requested "natural" viewport on a iOS
    * device.
    * See:
-   * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
+   * https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md
    */
   NATURAL_IOS_EMBED: 'natural-ios-embed',
 };

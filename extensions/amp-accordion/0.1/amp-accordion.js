@@ -25,7 +25,7 @@ import {clamp} from '../../../src/utils/math';
 import {closest, dispatchCustomEvent, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getStyle, setImportantStyles, setStyles} from '../../../src/style';
 import {
   numeric,
@@ -93,7 +93,7 @@ class AmpAccordion extends AMP.BaseElement {
       userAssert(
         section.tagName.toLowerCase() == 'section',
         'Sections should be enclosed in a <section> tag, ' +
-          'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
+          'See https://github.com/ampproject/amphtml/blob/main/extensions/' +
           'amp-accordion/amp-accordion.md. Found in: %s',
         this.element
       );
@@ -101,7 +101,7 @@ class AmpAccordion extends AMP.BaseElement {
       userAssert(
         sectionComponents.length == 2,
         'Each section must have exactly two children. ' +
-          'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
+          'See https://github.com/ampproject/amphtml/blob/main/extensions/' +
           'amp-accordion/amp-accordion.md. Found in: %s',
         this.element
       );
@@ -154,6 +154,15 @@ class AmpAccordion extends AMP.BaseElement {
         // See https://github.com/ampproject/amphtml/issues/3586
         // for details.
       });
+
+      userAssert(
+        !section.hasAttribute('[expanded]') &&
+          !section.hasAttribute('data-amp-bind-expanded'),
+        'The "expanded" attribute cannot be used with amp-bind in version ' +
+          '0.1 of amp-accordion. Please bind to [data-expand] instead. ' +
+          'Found in: %s',
+        this.element
+      );
 
       const isExpanded = section.hasAttribute('expanded');
       header.classList.add('i-amphtml-accordion-header');

@@ -31,11 +31,12 @@ import {
 import {addParamToUrl} from '../../../src/url';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict, hasOwn, map, ownProperty} from '../../../src/utils/object';
+import {dict, hasOwn, map, ownProperty} from '../../../src/core/types/object';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
-import {includes} from '../../../src/string';
+import {includes} from '../../../src/core/types/string';
 import {isAmp4Email} from '../../../src/format';
-import {isArray, isEnumValue} from '../../../src/types';
+import {isArray, isEnumValue} from '../../../src/core/types';
+
 import {mod} from '../../../src/utils/math';
 import {once} from '../../../src/utils/function';
 import {removeChildren, tryFocus} from '../../../src/dom';

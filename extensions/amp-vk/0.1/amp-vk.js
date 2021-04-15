@@ -25,7 +25,7 @@ const EmbedType = {
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, appendEncodedParamStringToUrl} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getData, listen} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
 import {user, userAssert} from '../../../src/log';

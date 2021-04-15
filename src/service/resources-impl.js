@@ -25,7 +25,7 @@ import {Services} from '../services';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
 import {dev, devAssert} from '../log';
-import {dict} from '../utils/object';
+import {dict} from '../core/types/object';
 import {expandLayoutRect} from '../layout-rect';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder} from '../dom';
@@ -34,7 +34,7 @@ import {ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error';
 import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
-import {remove} from '../utils/array';
+import {remove} from '../core/types/array';
 import {startupChunk} from '../chunk';
 import {throttle} from '../utils/rate-limit';
 

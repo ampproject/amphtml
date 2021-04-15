@@ -36,7 +36,7 @@ import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getChildJsonConfig} from '../../../src/json';
-import {map, omit} from '../../../src/utils/object';
+import {map, omit} from '../../../src/core/types/object';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 

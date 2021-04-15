@@ -23,7 +23,7 @@ import {
   isUserErrorEmbed,
   isUserErrorMessage,
 } from './log';
-import {dict} from './utils/object';
+import {dict} from './core/types/object';
 import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
 import {exponentialBackoff} from './exponential-backoff';
 import {getMode} from './mode';
@@ -611,10 +611,7 @@ export function getErrorReportData(
   data['exps'] = exps.join(',');
 
   if (error) {
-    const tagName = error.associatedElement
-      ? error.associatedElement.tagName
-      : 'u'; // Unknown
-    data['el'] = tagName;
+    data['el'] = error.associatedElement?.tagName || 'u'; // Unknown
 
     if (error.args) {
       data['args'] = JSON.stringify(error.args);
@@ -635,7 +632,7 @@ export function getErrorReportData(
   }
   data['r'] = self.document ? self.document.referrer : '';
   data['ae'] = accumulatedErrorMessages.join(',');
-  data['fr'] = self.location.originalHash || self.location.hash;
+  data['fr'] = self.location['originalHash'] || self.location.hash;
 
   // TODO(https://github.com/ampproject/error-tracker/issues/129): Remove once
   // all clients are serving a version with pre-throttling.

@@ -44,7 +44,7 @@ import {
   secondsToTimestampString,
 } from './utils';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
 import {getElementServiceForDoc} from '../../../src/element-service';
@@ -53,7 +53,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {prepareImageAnimation} from '@ampproject/animations';
 import {reportError} from '../../../src/error';
 import {setStyle, setStyles, toggle} from '../../../src/style';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const */

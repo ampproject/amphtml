@@ -51,7 +51,7 @@ import {
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
-import {deepMerge, dict} from '../../../src/utils/object';
+import {deepMerge, dict} from '../../../src/core/types/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {
@@ -64,12 +64,14 @@ import {getMode} from '../../../src/mode';
 import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isAmp4Email} from '../../../src/format';
-import {isArray, toArray, toWin} from '../../../src/types';
+import {isArray, toArray} from '../../../src/core/types/array';
 import {
   setupAMPCors,
   setupInit,
   setupInput,
 } from '../../../src/utils/xhr-utils';
+
+import {toWin} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryParseJson} from '../../../src/json';
 

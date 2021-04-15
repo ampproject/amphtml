@@ -84,11 +84,11 @@ exports.rules = [
     mustNotDependOn: 'src/**/*.js',
     allowlist: [
       '3p/**->src/utils/function.js',
-      '3p/**->src/utils/object.js',
+      '3p/**->src/core/types/index.js',
+      '3p/**->src/core/types/string.js',
+      '3p/**->src/core/types/object.js',
       '3p/**->src/utils/promise.js',
       '3p/**->src/log.js',
-      '3p/**->src/types.js',
-      '3p/**->src/string.js',
       '3p/**->src/style.js',
       '3p/**->src/url.js',
       '3p/**->src/config.js',
@@ -119,13 +119,14 @@ exports.rules = [
     mustNotDependOn: 'src/**/*.js',
     allowlist: [
       'ads/**->src/utils/dom-fingerprint.js',
-      'ads/**->src/utils/object.js',
+      'ads/**->src/core/types/index.js',
+      'ads/**->src/core/types/object.js',
+      'ads/**->src/core/types/string.js',
       'ads/**->src/utils/rate-limit.js',
       'ads/**->src/log.js',
       'ads/**->src/mode.js',
       'ads/**->src/url.js',
-      'ads/**->src/types.js',
-      'ads/**->src/string.js',
+      'ads/**->src/core/types/array.js',
       'ads/**->src/style.js',
       'ads/**->src/consent-state.js',
       'ads/**->src/internal-version.js',
@@ -356,8 +357,6 @@ exports.rules = [
         'src/service/video-manager-impl.js',
       'extensions/amp-delight-player/0.1/amp-delight-player.js->' +
         'src/service/video-manager-impl.js',
-      'extensions/amp-analytics/0.1/iframe-transport.js->' +
-        'src/service/jank-meter.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
         'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
@@ -428,9 +427,9 @@ exports.rules = [
     mustNotDependOn: '**/*.js',
     allowlist: [
       'src/polyfills/fetch.js->src/log.js',
-      'src/polyfills/fetch.js->src/types.js',
       'src/polyfills/fetch.js->src/json.js',
-      'src/polyfills/fetch.js->src/utils/object.js',
+      'src/polyfills/fetch.js->src/core/types/index.js',
+      'src/polyfills/fetch.js->src/core/types/object.js',
       'src/polyfills/fetch.js->src/utils/bytes.js',
       'src/polyfills/intersection-observer.js->src/polyfillstub/intersection-observer-stub.js',
       'src/polyfills/resize-observer.js->src/polyfillstub/resize-observer-stub.js',

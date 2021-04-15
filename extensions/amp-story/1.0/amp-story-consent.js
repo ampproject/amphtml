@@ -40,8 +40,8 @@ import {
   triggerClickFromLightDom,
 } from './utils';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from './../../../src/utils/object';
-import {isArray} from '../../../src/types';
+import {dict} from './../../../src/core/types/object';
+import {isArray} from '../../../src/core/types';
 import {parseJson} from '../../../src/json';
 import {renderAsElement} from './simple-template';
 

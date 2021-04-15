@@ -40,8 +40,19 @@ const realiasGetMode =
  *   message?: (undefined|string),
  *   allowlist?: (undefined|Array<string>),
  *   checkInTestFolder?: (undefined|boolean),
- *   checkComments?: (undefined|boolean),
+ *   checkProse?: (undefined|boolean),
  * }}
+ * - message:
+ *   a message optionally displayed with a matching term
+ *
+ * - allowlist:
+ *   optional list of filepaths that are allowed to use a term
+ *
+ * - checkInTestFolder:
+ *   check term in files whose path includes /test/ (false by default)
+ *
+ * - checkProse:
+ *   check term in comments and documentation (.md) (false by default)
  */
 let ForbiddenTermDef;
 
@@ -51,19 +62,19 @@ let ForbiddenTermDef;
  */
 const forbiddenTermsGlobal = {
   'DO NOT SUBMIT': {
-    checkComments: true,
+    checkProse: true,
   },
   'whitelist|white-list': {
     message: 'Please use the term allowlist instead',
-    checkComments: true,
+    checkProse: true,
   },
   'blacklist|black-list': {
     message: 'Please use the term denylist instead',
-    checkComments: true,
+    checkProse: true,
   },
   'grandfather|grandfathered': {
     message: 'Please use the term legacy instead',
-    checkComments: true,
+    checkProse: true,
   },
   '(^-amp-|\\W-amp-)': {
     message: 'Switch to new internal class form',
@@ -71,7 +82,7 @@ const forbiddenTermsGlobal = {
       'build-system/server/amp4test.js',
       'build-system/server/app-index/boilerplate.js',
       'build-system/server/variable-substitution.js',
-      'build-system/tasks/extension-generator/index.js',
+      'build-system/tasks/make-extension/index.js',
       'extensions/amp-pinterest/0.1/amp-pinterest.css',
       'extensions/amp-pinterest/0.1/follow-button.js',
       'extensions/amp-pinterest/0.1/pin-widget.js',
@@ -116,6 +127,7 @@ const forbiddenTermsGlobal = {
     allowlist: [
       'build-system/common/check-package-manager.js',
       'build-system/common/logging.js',
+      'build-system/task-runner/amp-cli-runner.js',
       'src/purifier/noop.js',
       'validator/js/engine/validator-in-browser.js',
       'validator/js/engine/validator.js',
@@ -126,9 +138,9 @@ const forbiddenTermsGlobal = {
     message: realiasGetMode,
     allowlist: ['src/mode-object.js', 'src/iframe-attributes.js'],
   },
-  '(?:var|let|const) +IS_DEV +=': {
+  '(?:var|let|const) +IS_FORTESTING +=': {
     message:
-      'IS_DEV local var only allowed in mode.js and ' +
+      'IS_FORTESTING local var only allowed in mode.js and ' +
       'dist.3p/current/integration.js',
     allowlist: ['src/mode.js'],
   },
@@ -147,6 +159,7 @@ const forbiddenTermsGlobal = {
   '\\.buildInternal': {
     message: 'can only be called by the framework',
     allowlist: [
+      'build-system/externs/amp.extern.js',
       'src/custom-element.js',
       'src/service/resource.js',
       'testing/iframe.js',
@@ -154,7 +167,10 @@ const forbiddenTermsGlobal = {
   },
   '\\.mountInternal': {
     message: 'can only be called by the framework',
-    allowlist: ['src/service/scheduler.js'],
+    allowlist: [
+      'build-system/externs/amp.extern.js',
+      'src/service/scheduler.js',
+    ],
   },
   'getSchedulerForDoc': {
     message: 'can only be used by the runtime',
@@ -648,6 +664,7 @@ const forbiddenTermsGlobal = {
       'This is a protected API. Please only override it the element is ' +
       'render blocking',
     allowlist: [
+      'build-system/externs/amp.extern.js',
       'src/service/resources-impl.js',
       'src/service/resource.js',
       'src/custom-element.js',
@@ -787,7 +804,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-mode.js',
       'test/unit/test-motion.js',
       'test/unit/test-mustache.js',
-      'test/unit/test-object.js',
       'test/unit/test-observable.js',
       'test/unit/test-pass.js',
       'test/unit/test-platform.js',
@@ -803,7 +819,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-service.js',
       'test/unit/test-srcset.js',
       'test/unit/test-static-template.js',
-      'test/unit/test-string.js',
       'test/unit/test-style-installer.js',
       'test/unit/test-style.js',
       'test/unit/test-task-queue.js',
@@ -814,7 +829,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-viewport.js',
       'test/unit/test-web-components.js',
       'test/unit/test-xhr.js',
-      'test/unit/utils/test-array.js',
       'test/unit/utils/test-base64.js',
       'test/unit/utils/test-bytes.js',
       'test/unit/utils/test-lru-cache.js',
@@ -1032,7 +1046,7 @@ const forbiddenTermsSrcInclusive = {
       'build-system/server/shadow-viewer.js',
       'build-system/server/variable-substitution.js',
       'build-system/tasks/dist.js',
-      'build-system/tasks/extension-generator/index.js',
+      'build-system/tasks/make-extension/index.js',
       'build-system/tasks/helpers.js',
       'build-system/tasks/performance/helpers.js',
       'src/3p-frame.js',
@@ -1093,15 +1107,14 @@ const forbiddenTermsSrcInclusive = {
   '\\.getLayoutSize': {
     message: measurementApiDeprecated,
     allowlist: [
+      'build-system/externs/amp.extern.js',
       'builtins/amp-img.js',
       'src/base-element.js',
       'src/custom-element.js',
       'src/iframe-helper.js',
       'src/service/mutator-impl.js',
       'src/service/resources-impl.js',
-      'src/service/video-manager-impl.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
-      'extensions/amp-auto-lightbox/0.1/amp-auto-lightbox.js',
       'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
       'extensions/amp-script/0.1/amp-script.js',
       'extensions/amp-story/1.0/amp-story-page.js',
@@ -1201,7 +1214,7 @@ function matchForbiddenTerms(srcFile, contents, terms) {
         message,
         allowlist = null,
         checkInTestFolder = false,
-        checkComments = false,
+        checkProse = false,
       } =
         typeof messageOrDef === 'string'
           ? {message: messageOrDef}
@@ -1210,7 +1223,8 @@ function matchForbiddenTerms(srcFile, contents, terms) {
       // if needed but that might be too permissive.
       if (
         (Array.isArray(allowlist) && allowlist.indexOf(srcFile) != -1) ||
-        (isInTestFolder(srcFile) && !checkInTestFolder)
+        (isInTestFolder(srcFile) && !checkInTestFolder) ||
+        (srcFile.endsWith('.md') && !checkProse)
       ) {
         return [];
       }
@@ -1221,13 +1235,13 @@ function matchForbiddenTerms(srcFile, contents, terms) {
       // original term to get the possible fix value. This is ok as the
       // presubmit doesn't have to be blazing fast and this is most likely
       // negligible.
-      const regex = new RegExp(term, 'gm' + (checkComments ? 'i' : ''));
+      const regex = new RegExp(term, 'gm' + (checkProse ? 'i' : ''));
       let index = 0;
       let line = 1;
       let column = 0;
       const start = {line: -1, column: -1};
 
-      const subject = checkComments ? contents : contentsWithoutComments;
+      const subject = checkProse ? contents : contentsWithoutComments;
       let result;
       while ((result = regex.exec(subject))) {
         const [match] = result;

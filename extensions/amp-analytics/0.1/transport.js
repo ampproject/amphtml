@@ -42,17 +42,23 @@ import {toggle} from '../../../src/style';
 /** @const {string} */
 const TAG_ = 'amp-analytics/transport';
 
+/** @const {string} */
+const AMP_SCRIPT_URI_SCHEME = 'amp-script:';
+
 /**
  * Transport defines the ways how the analytics pings are going to be sent.
  */
 export class Transport {
   /**
-   * @param {!Window} win
+   * @param {!AmpDoc} ampdoc
    * @param {!JsonObject} options
    */
-  constructor(win, options = /** @type {!JsonObject} */ ({})) {
+  constructor(ampdoc, options = /** @type {!JsonObject} */ ({})) {
+    /** @private {!AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
     /** @private {!Window} */
-    this.win_ = win;
+    this.win_ = ampdoc.win;
 
     /** @private {!JsonObject} */
     this.options_ = options;
@@ -75,7 +81,7 @@ export class Transport {
     this.iframeTransport_ = null;
 
     /** @private {boolean} */
-    this.isInabox_ = getMode(win).runtime == 'inabox';
+    this.isInabox_ = getMode(this.win_).runtime == 'inabox';
   }
 
   /**
@@ -97,8 +103,10 @@ export class Transport {
       const request = inBatch
         ? serializer.generateBatchRequest(url, segments, withPayload)
         : serializer.generateRequest(url, segments[0], withPayload);
-      assertHttpsUrl(request.url, 'amp-analytics request');
-      checkCorsUrl(request.url);
+      if (!request.url.startsWith(AMP_SCRIPT_URI_SCHEME)) {
+        assertHttpsUrl(request.url, 'amp-analytics request');
+        checkCorsUrl(request.url);
+      }
       return request;
     }
 
@@ -110,6 +118,14 @@ export class Transport {
         return;
       }
       this.iframeTransport_.sendRequest(getRequest(false).url);
+      return;
+    }
+
+    if (this.options_['amp-script']) {
+      Transport.forwardRequestToAmpScript(this.ampdoc_, {
+        url,
+        payload: getRequest(true).payload,
+      });
       return;
     }
 
@@ -207,7 +223,7 @@ export class Transport {
         parseUrlDeprecated(this.win_.location.href).origin,
       'Origin of iframe request must not be equal to the document origin.' +
         ' See https://github.com/ampproject/' +
-        'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.'
+        'amphtml/blob/main/spec/amp-iframe-origin-policy.md for details.'
     );
 
     /** @const {!Element} */
@@ -305,6 +321,38 @@ export class Transport {
 
     xhr.send(request.payload || '');
     return true;
+  }
+
+  /**
+   * @param {!AmpDoc} ampdoc
+   * @param {!RequestDef} request
+   * @return {boolean} True if this browser supports cross-domain XHR.
+   */
+  static forwardRequestToAmpScript(ampdoc, request) {
+    userAssert(
+      request.url.startsWith(AMP_SCRIPT_URI_SCHEME),
+      `[${TAG_}]: "amp-script" URL must begin with "amp-script:"`
+    );
+
+    const target = request.url.slice(AMP_SCRIPT_URI_SCHEME.length).split('.');
+    userAssert(
+      target.length === 2 && target[0].length > 0 && target[1].length > 0,
+      `[${TAG_}]: "amp-script" target must be specified as "scriptId.functionIdentifier".`
+    );
+
+    const ampScriptId = target[0];
+    const fnIdentifier = target[1];
+    const ampScriptEl = ampdoc.getElementById(ampScriptId);
+    userAssert(
+      ampScriptEl && ampScriptEl.tagName === 'AMP-SCRIPT',
+      `[${TAG_}]: could not find <amp-script> with ID "${ampScriptId}"`
+    );
+
+    ampScriptEl
+      .getImpl()
+      .then((impl) =>
+        impl.callFunction(fnIdentifier, JSON.parse(request.payload))
+      );
   }
 }
 
