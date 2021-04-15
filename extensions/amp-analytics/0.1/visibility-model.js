@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {Observable} from '../../../src/observable';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {Observable} from '../../../src/core/data-structures/observable';
 import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 

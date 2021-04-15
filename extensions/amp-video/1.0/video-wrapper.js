@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {ContainWrapper, useValueRef} from '../../../src/preact/component';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {Loading} from '../../../src/core/loading-instructions';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
 import {

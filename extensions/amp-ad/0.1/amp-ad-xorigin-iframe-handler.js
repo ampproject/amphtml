@@ -16,7 +16,7 @@
 
 import {CONSTANTS, MessageType} from '../../../src/3p-frame-messaging';
 import {CommonSignals} from '../../../src/common-signals';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {LegacyAdIntersectionObserverHost} from './legacy-ad-intersection-observer-host';
 import {Services} from '../../../src/services';
 import {

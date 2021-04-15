@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {
   NOTIFICATION_UI_MANAGER,

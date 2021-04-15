@@ -22,7 +22,7 @@ import {
   AsyncInputClasses,
 } from '../../../src/async-input';
 import {CSS} from '../../../build/amp-form-0.1.css';
-import {Deferred, tryResolve} from '../../../src/utils/promise';
+import {Deferred, tryResolve} from '../../../src/core/data-structures/promise';
 import {
   FORM_VERIFY_OPTOUT,
   FORM_VERIFY_PARAM,

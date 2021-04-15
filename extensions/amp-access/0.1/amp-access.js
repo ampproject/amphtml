@@ -20,7 +20,7 @@ import {ActionTrust} from '../../../src/action-constants';
 import {AmpAccessEvaluator} from './access-expr';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-access-0.1.css';
-import {Observable} from '../../../src/observable';
+import {Observable} from '../../../src/core/data-structures/observable';
 import {Services} from '../../../src/services';
 import {TickLabel} from '../../../src/enums';
 import {cancellation} from '../../../src/error-reporting';

@@ -15,7 +15,7 @@
  */
 
 import {Animation} from '../../animation';
-import {Observable} from '../../observable';
+import {Observable} from '../../core/data-structures/observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
 import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper';
@@ -44,7 +44,7 @@ import {
   moveLayoutRect,
 } from '../../layout-rect';
 import {numeric} from '../../transition';
-import {tryResolve} from '../../utils/promise';
+import {tryResolve} from '../../core/data-structures/promise';
 
 const TAG_ = 'Viewport';
 const SCROLL_POS_TO_BLOCK = {

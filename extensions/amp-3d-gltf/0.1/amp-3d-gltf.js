@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {ActionTrust} from '../../../src/action-constants';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {dev, devAssert} from '../../../src/log';

@@ -16,7 +16,7 @@
 
 import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
 import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
-import {Deferred} from '../utils/promise';
+import {Deferred} from '../core/data-structures/promise';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {PageScroller} from './page-scroller';
 import {VisibilityState} from '../visibility-state';

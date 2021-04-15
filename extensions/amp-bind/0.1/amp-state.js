@@ -15,7 +15,7 @@
  */
 
 import {ActionTrust} from '../../../src/action-constants';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {

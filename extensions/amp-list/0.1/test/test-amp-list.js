@@ -19,7 +19,7 @@ import {ActionTrust} from '../../../../src/action-constants';
 import {AmpDocService} from '../../../../src/service/ampdoc-impl';
 import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
-import {Deferred} from '../../../../src/utils/promise';
+import {Deferred} from '../../../../src/core/data-structures/promise';
 import {Services} from '../../../../src/services';
 import {
   createElementWithAttributes,
