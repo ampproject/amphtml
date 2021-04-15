@@ -483,15 +483,6 @@ export class NextPageService {
   }
 
   /**
-   * Adds an initial entry in history that sub-pages can
-   * replace when they become visible
-   */
-  initializeHistory() {
-    const {title, url} = this.hostPage_;
-    this.history_.push(undefined /** opt_onPop */, {title, url});
-  }
-
-  /**
    * Creates the initial (host) page based on the window's metadata
    * @return {!HostPage}
    */
