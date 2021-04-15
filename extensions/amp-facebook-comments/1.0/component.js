@@ -19,10 +19,11 @@ import {
   MessageType,
   ProxyIframeEmbed,
 } from '../../../src/preact/component/3p-frame';
+import {dashToUnderline} from '../../../src/string';
 import {deserializeMessage} from '../../../src/3p-frame-messaging';
 import {forwardRef} from '../../../src/preact/compat';
 import {tryParseJson} from '../../../src/json';
-import {useCallback, useState} from '../../../src/preact';
+import {useCallback, useLayoutEffect, useState} from '../../../src/preact';
 
 /** @const {string} */
 const TYPE = 'facebook';
@@ -36,7 +37,17 @@ const DEFAULT_TITLE = 'Facebook comments';
  * @return {PreactDef.Renderable}
  */
 function FacebookCommentsWithRef(
-  {onReady, requestResize, title = DEFAULT_TITLE, ...rest},
+  {
+    colorScheme,
+    href,
+    locale: localeProp,
+    numPosts,
+    onReady,
+    orderBy,
+    requestResize,
+    title = DEFAULT_TITLE,
+    ...rest
+  },
   ref
 ) {
   const [height, setHeight] = useState(FULL_HEIGHT);
@@ -61,8 +72,23 @@ function FacebookCommentsWithRef(
     [requestResize, onReady]
   );
 
+  const [locale, setLocale] = useState(localeProp);
+  useLayoutEffect(() => {
+    if (localeProp) {
+      setLocale(localeProp);
+      return;
+    }
+    const win = ref?.current?.ownerDocument?.defaultView;
+    if (!win) {
+      return;
+    }
+    setLocale(dashToUnderline(win.navigator.language));
+  }, [localeProp, ref]);
+
   return (
     <ProxyIframeEmbed
+      contextOptions={{tagName: 'AMP-FACEBOOK-COMMENTS'}}
+      options={{colorScheme, href, locale, numPosts, orderBy}}
       ref={ref}
       title={title}
       {...rest}

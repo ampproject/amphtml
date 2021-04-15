@@ -30,16 +30,16 @@ export const _default = () => {
     'href',
     'http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html'
   );
-  const numPosts = boolean('show 5 comments max');
-  const orderBy = boolean('order by time');
-  const locale = boolean('french locale');
+  const numPosts = boolean('show 5 comments max') ? 5 : undefined;
+  const orderBy = boolean('order by time') ? 'time' : undefined;
+  const locale = boolean('french locale') ? 'fr_FR' : undefined;
   return (
     <FacebookComments
-      width="486"
-      height="657"
-      layout="responsive"
-      contextOptions={{tagName: 'AMP-FACEBOOK-COMMENTS'}}
-      options={{href, locale, numPosts, orderBy}}
+      href={href}
+      locale={locale}
+      numPosts={numPosts}
+      orderBy={orderBy}
+      style={{width: '400px', height: '400px'}}
     ></FacebookComments>
   );
 };

@@ -21,7 +21,12 @@ var FacebookCommentsDef = {};
 
 /**
  * @typedef {{
+ *   colorScheme: (string|undefined),
+ *   href: (string|undefined),
  *   loading: (string|undefined),
+ *   locale: (string|undefined),
+ *   numPosts: (number|undefined),
+ *   orderBy: (string|undefined),
  *   onReadyState: (function(string, *=)|undefined),
  *   requestResize: (function(number):*|undefined),
  *   title: (string|undefined),

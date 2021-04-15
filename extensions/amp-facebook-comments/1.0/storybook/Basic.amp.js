@@ -39,18 +39,18 @@ export const _default = () => {
     'data-href',
     'http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html'
   );
-  const numPosts = boolean('show 5 comments max');
-  const orderBy = boolean('order by time');
-  const locale = boolean('french locale');
+  const numPosts = boolean('show 5 comments max') ? 5 : undefined;
+  const orderBy = boolean('order by time') ? 'time' : undefined;
+  const locale = boolean('french locale') ? 'fr_FR' : undefined;
   return (
     <amp-facebook-comments
       width="486"
       height="657"
       layout="responsive"
       data-href={href}
-      data-locale={locale ? 'fr_FR' : undefined}
-      data-numposts={numPosts ? 5 : undefined}
-      data-order-by={orderBy ? 'time' : undefined}
+      data-locale={locale}
+      data-numposts={numPosts}
+      data-order-by={orderBy}
     ></amp-facebook-comments>
   );
 };

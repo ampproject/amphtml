@@ -93,7 +93,7 @@ describes.realWin(
       await waitForRender();
 
       const iframe = element.shadowRoot.querySelector('iframe');
-      expect(iframe.getAttribute('name')).not.to.contain('"locale"');
+      expect(iframe.getAttribute('name')).to.contain('"locale":"en_US"');
     });
 
     it('renders amp-facebook-comments with specified locale', async () => {

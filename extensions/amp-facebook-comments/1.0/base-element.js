@@ -16,6 +16,7 @@
 
 import {FacebookComments} from './component';
 import {PreactBaseElement} from '../../../src/preact/base-element';
+import {dashToUnderline} from '../../../src/string';
 
 export class BaseElement extends PreactBaseElement {}
 
@@ -25,7 +26,14 @@ BaseElement['Component'] = FacebookComments;
 /** @override */
 BaseElement['props'] = {
   'title': {attr: 'title'}, // Needed for Preact component
-  'options': {attrPrefix: 'data-'}, // Needed to render component upon mutation
+  'href': {attr: 'data-href'},
+  'locale': {
+    attr: 'data-locale',
+    default: dashToUnderline(window.navigator.language),
+  },
+  'numPosts': {attr: 'data-numposts'},
+  'colorScheme': {attr: 'data-colorscheme'},
+  'orderBy': {attr: 'data-order-by'},
 };
 
 /** @override */
