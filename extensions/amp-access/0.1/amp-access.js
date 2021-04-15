@@ -16,13 +16,13 @@
 
 import {AccessSource, AccessType} from './amp-access-source';
 import {AccessVars} from './access-vars';
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {AmpAccessEvaluator} from './access-expr';
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {Observable} from '../../../src/core/data-structures/observable';
 import {Services} from '../../../src/services';
-import {TickLabel} from '../../../src/enums';
+import {TickLabel} from '../../../src/core/constants/enums';
 import {cancellation} from '../../../src/error-reporting';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';

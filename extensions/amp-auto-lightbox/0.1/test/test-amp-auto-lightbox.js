@@ -15,7 +15,7 @@
  */
 
 import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
-import {CommonSignals} from '../../../../src/common-signals';
+import {CommonSignals} from '../../../../src/core/constants/common-signals';
 import {
   Criteria,
   DocMetaAnnotations,

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';

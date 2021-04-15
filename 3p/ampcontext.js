@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {AmpEvents} from '../src/amp-events';
+import {AmpEvents} from '../src/core/constants/amp-events';
 import {Deferred} from '../src/core/data-structures/promise';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';

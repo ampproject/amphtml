@@ -17,7 +17,7 @@
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
-} from '../../../src/consent-state';
+} from '../../../src/core/constants/consent-state';
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';

@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-social-share-0.1.css';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, parseQueryString} from '../../../src/url';
 import {dev, devAssert, user, userAssert} from '../../../src/log';

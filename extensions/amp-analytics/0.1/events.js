@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {Observable} from '../../../src/core/data-structures/observable';
 import {

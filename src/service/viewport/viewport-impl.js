@@ -21,7 +21,7 @@ import {ViewportBindingDef} from './viewport-binding-def';
 import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {ViewportInterface} from './viewport-interface';
-import {VisibilityState} from '../../visibility-state';
+import {VisibilityState} from '../../core/constants/visibility-state';
 import {clamp} from '../../utils/math';
 import {
   closestAncestorElementBySelector,

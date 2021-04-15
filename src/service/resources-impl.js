@@ -23,7 +23,7 @@ import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
 import {Resource, ResourceState} from './resource';
 import {Services} from '../services';
 import {TaskQueue} from './task-queue';
-import {VisibilityState} from '../visibility-state';
+import {VisibilityState} from '../core/constants/visibility-state';
 import {dev, devAssert} from '../log';
 import {dict} from '../core/types/object';
 import {expandLayoutRect} from '../layout-rect';
