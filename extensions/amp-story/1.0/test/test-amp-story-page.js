@@ -723,7 +723,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     ).to.exist;
   });
 
-  it('should build the new outlink page attachment UI with icon based on custom theme color', async () => {
+  it('should build the new outlink page attachment UI with icon', async () => {
     toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
 
     const attachmentEl = createElementWithAttributes(
@@ -747,10 +747,11 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
       '.i-amphtml-story-page-open-attachment'
     );
 
-    const linkIconEl = openAttachmentEl.querySelector(
-      '.i-amphtml-story-page-open-attachment-link-icon'
-    );
-    expect(linkIconEl.style.fill).to.equal('pink');
+    expect(
+      openAttachmentEl.querySelector(
+        '.i-amphtml-story-page-open-attachment-link-icon'
+      )
+    ).to.exist;
   });
 
   it('should build the open attachment UI with custom CTA label', async () => {
