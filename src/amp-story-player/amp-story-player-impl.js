@@ -598,6 +598,11 @@ export class AmpStoryPlayer {
             false
           );
 
+          messaging.sendRequest(
+            'onDocumentState',
+            dict({'state': STORY_MESSAGE_STATE_TYPE.MUTED_STATE})
+          );
+
           messaging.registerHandler('documentStateUpdate', (event, data) => {
             this.onDocumentStateUpdate_(
               /** @type {!DocumentStateTypeDef} */ (data),
@@ -1374,6 +1379,9 @@ export class AmpStoryPlayer {
           messaging
         );
         break;
+      case STORY_MESSAGE_STATE_TYPE.MUTED_STATE:
+        this.onMutedStateUpdate_(/** @type {string} */ (data.value));
+        break;
       case AMP_STORY_PLAYER_EVENT:
         this.onPlayerEvent_(/** @type {string} */ (data.value));
         break;
@@ -1399,6 +1407,17 @@ export class AmpStoryPlayer {
         );
         break;
     }
+  }
+
+  /**
+   * Reacts to mute/unmute events coming from the story.
+   * @param {string} isMuted
+   * @private
+   */
+  onMutedStateUpdate_(isMuted) {
+    this.element_.dispatchEvent(
+      createCustomEvent(this.win_, 'amp-story-muted-state', {isMuted})
+    );
   }
 
   /**
