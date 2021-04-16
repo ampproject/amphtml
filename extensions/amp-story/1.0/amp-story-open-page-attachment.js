@@ -160,7 +160,7 @@ const renderOutlinkPageAttachmentUI = (
   // Setting theme
   let themeAttribute = attachmentEl.getAttribute('theme');
   if (themeAttribute) {
-    themeAttribute = AttachmentTheme[themeAttribute.toUpperCase()];
+    themeAttribute = themeAttribute.toLowerCase();
   }
   openAttachmentEl.setAttribute('theme', themeAttribute);
 
