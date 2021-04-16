@@ -119,7 +119,7 @@ async function preClosureBabel(file, outputFilename, options) {
           sourceFileName: path.relative(process.cwd(), file),
         })
         .then((result) => result?.code);
-      await transformCache.set(hash, transformPromise);
+      transformCache.set(hash, transformPromise);
       await fs.outputFile(transformedFile, await transformPromise);
       debug(CompilationLifecycles['pre-closure'], transformedFile);
     }

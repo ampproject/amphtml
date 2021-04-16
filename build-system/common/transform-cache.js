@@ -64,16 +64,14 @@ class TransformCache {
   /**
    * @param {string} hash
    * @param {Promise<string>} transformPromise
-   * @return {Promise<void>}
    */
-  async set(hash, transformPromise) {
+  set(hash, transformPromise) {
     if (this.transformMap.has(hash)) {
       throw new Error('Read race: Attempting to transform a file twice.');
     }
     this.transformMap.set(hash, transformPromise);
     const filepath = path.join(this.cacheDir, hash) + this.fileExtension;
-    const contents = await transformPromise;
-    await fs.outputFile(filepath, contents);
+    transformPromise.then((contents) => fs.outputFile(filepath, contents));
   }
 }
 

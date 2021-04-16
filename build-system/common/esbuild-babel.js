@@ -56,7 +56,7 @@ function getEsbuildBabelPlugin(
       .then((result) => result.code);
 
     if (enableCache) {
-      await transformCache.set(hash, promise);
+      transformCache.set(hash, promise);
     }
 
     return promise.finally(postLoad);
