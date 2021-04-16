@@ -1411,12 +1411,12 @@ export class AmpStoryPlayer {
 
   /**
    * Reacts to mute/unmute events coming from the story.
-   * @param {string} isMuted
+   * @param {string} muted
    * @private
    */
-  onMutedStateUpdate_(isMuted) {
+  onMutedStateUpdate_(muted) {
     this.element_.dispatchEvent(
-      createCustomEvent(this.win_, 'amp-story-muted-state', {isMuted})
+      createCustomEvent(this.win_, 'amp-story-muted-state', {muted})
     );
   }
 

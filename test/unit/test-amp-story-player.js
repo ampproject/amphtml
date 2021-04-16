@@ -1384,7 +1384,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       expect(navigationSpy).to.have.been.calledWithMatch({
         type: 'amp-story-muted-state',
         detail: {
-          isMuted: false,
+          muted: false,
         },
       });
     });
@@ -1409,7 +1409,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       expect(navigationSpy).to.have.been.calledWithMatch({
         type: 'amp-story-muted-state',
         detail: {
-          isMuted: true,
+          muted: true,
         },
       });
     });
