@@ -22,12 +22,11 @@ import {
   devAssert,
   isUserErrorEmbed,
   isUserErrorMessage,
-  rethrowAsync,
   setReportError,
   user,
   userAssert,
 } from '../../src/log';
-import {duplicateErrorIfNecessary} from '../../src/core/error';
+import {duplicateErrorIfNecessary, rethrowAsync} from '../../src/core/error';
 
 describe('Logging', () => {
   const RETURNS_FINE = () => LogLevel.FINE;

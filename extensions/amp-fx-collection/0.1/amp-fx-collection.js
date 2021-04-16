@@ -21,13 +21,14 @@ import {
   FxType, // eslint-disable-line no-unused-vars
   getFxTypes,
 } from './fx-type';
-import {devAssert, rethrowAsync} from '../../../src/log';
+import {devAssert} from '../../../src/log';
 import {
   installPositionBoundFx,
   installScrollToggledFx,
 } from './providers/fx-provider';
 import {iterateCursor} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
+import {rethrowAsync} from '../../../src/core/error';
 
 const TAG = 'amp-fx-collection';
 
