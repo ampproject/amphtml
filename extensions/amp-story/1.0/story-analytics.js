@@ -126,6 +126,7 @@ export class StoryAnalyticsService {
         if (!pageId || this.storeService_.get(StateProperty.AD_STATE)) {
           return;
         }
+
         this.triggerEvent(StoryAnalyticsEvent.PAGE_VISIBLE);
 
         const pageIds = this.storeService_.get(StateProperty.PAGE_IDS);
