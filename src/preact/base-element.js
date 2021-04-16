@@ -40,15 +40,15 @@ import {
   matches,
   parseBooleanAttribute,
 } from '../dom';
-import {dashToCamelCase} from '../string';
+import {dashToCamelCase} from '../core/types/string';
 import {devAssert} from '../log';
-import {dict, hasOwn, map} from '../utils/object';
+import {dict, hasOwn, map} from '../core/types/object';
 import {getDate} from '../utils/date';
 import {getMode} from '../mode';
 import {hydrate, render} from './index';
 import {installShadowStyle} from '../shadow-embed';
 import {sequentialIdGenerator} from '../utils/id-generator';
-import {toArray} from '../types';
+import {toArray} from '../core/types/array';
 
 /**
  * The following combinations are allowed.

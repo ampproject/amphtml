@@ -95,10 +95,10 @@ import {
 import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
-import {endsWith} from '../../../src/string';
+import {dict, map} from '../../../src/core/types/object';
+import {endsWith} from '../../../src/core/types/string';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {findIndex, lastItem} from '../../../src/utils/array';
+import {findIndex, lastItem, toArray} from '../../../src/core/types/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getLocalizationService} from './amp-story-localization-service';
@@ -113,7 +113,7 @@ import {
   setAttributeInMutate,
   shouldShowStoryUrlInfo,
 } from './utils';
-import {toArray} from '../../../src/types';
+
 import {upgradeBackgroundAudio} from './audio';
 import LocalizedStringsAr from './_locales/ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsDe from './_locales/de.json' assert {type: 'json'}; // lgtm[js/syntax-error]

@@ -36,11 +36,12 @@ import {RequestHandler, expandPostMessage} from './requests';
 import {Services} from '../../../src/services';
 import {Transport} from './transport';
 import {dev, devAssert, rethrowAsync, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
-import {expandTemplate} from '../../../src/string';
+import {dict, hasOwn} from '../../../src/core/types/object';
+import {expandTemplate} from '../../../src/core/types/string';
 import {getMode} from '../../../src/mode';
 import {installLinkerReaderService} from './linker-reader';
-import {isArray, isEnumValue} from '../../../src/types';
+import {isArray, isEnumValue} from '../../../src/core/types';
+
 import {isIframed} from '../../../src/dom';
 import {isInFie} from '../../../src/iframe-helper';
 

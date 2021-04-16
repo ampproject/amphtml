@@ -32,7 +32,7 @@ import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/core/types/object';
 import {expandConsentEndpointUrl, getConsentCID} from './consent-config';
 
 const TAG = 'CONSENT-STATE-MANAGER';

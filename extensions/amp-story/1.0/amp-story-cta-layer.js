@@ -31,7 +31,7 @@
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {addAttributesToElement, matches, removeElement} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {user} from '../../../src/log';
 
 /**

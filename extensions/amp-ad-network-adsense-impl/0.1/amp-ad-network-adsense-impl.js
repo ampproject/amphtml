@@ -68,7 +68,7 @@ import {
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {removeElement} from '../../../src/dom';
-import {stringHash32} from '../../../src/string';
+import {stringHash32} from '../../../src/core/types/string';
 import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @const {string} */

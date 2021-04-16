@@ -82,7 +82,7 @@ const forbiddenTermsGlobal = {
       'build-system/server/amp4test.js',
       'build-system/server/app-index/boilerplate.js',
       'build-system/server/variable-substitution.js',
-      'build-system/tasks/extension-generator/index.js',
+      'build-system/tasks/make-extension/index.js',
       'extensions/amp-pinterest/0.1/amp-pinterest.css',
       'extensions/amp-pinterest/0.1/follow-button.js',
       'extensions/amp-pinterest/0.1/pin-widget.js',
@@ -127,6 +127,7 @@ const forbiddenTermsGlobal = {
     allowlist: [
       'build-system/common/check-package-manager.js',
       'build-system/common/logging.js',
+      'build-system/task-runner/amp-cli-runner.js',
       'src/purifier/noop.js',
       'validator/js/engine/validator-in-browser.js',
       'validator/js/engine/validator.js',
@@ -137,9 +138,9 @@ const forbiddenTermsGlobal = {
     message: realiasGetMode,
     allowlist: ['src/mode-object.js', 'src/iframe-attributes.js'],
   },
-  '(?:var|let|const) +IS_DEV +=': {
+  '(?:var|let|const) +IS_FORTESTING +=': {
     message:
-      'IS_DEV local var only allowed in mode.js and ' +
+      'IS_FORTESTING local var only allowed in mode.js and ' +
       'dist.3p/current/integration.js',
     allowlist: ['src/mode.js'],
   },
@@ -337,7 +338,7 @@ const forbiddenTermsGlobal = {
     message: 'Usages must be reviewed.',
     allowlist: [
       // viewer-impl.sendMessage
-      'src/error.js',
+      'src/error-reporting.js',
       'src/service/navigation.js',
       'src/service/viewport/viewport-impl.js',
       'src/service/performance-impl.js',
@@ -398,7 +399,7 @@ const forbiddenTermsGlobal = {
     message: requiresReviewPrivacy,
     allowlist: [
       'extensions/amp-bind/0.1/bind-impl.js',
-      'src/error.js',
+      'src/error-reporting.js',
       'src/utils/xhr-utils.js',
       'src/service/navigation.js',
       'src/service/viewer-impl.js',
@@ -498,7 +499,7 @@ const forbiddenTermsGlobal = {
       'ads/google/a4a/utils.js',
       'src/inabox/inabox-viewer.js',
       'src/service/viewer-impl.js',
-      'src/error.js',
+      'src/error-reporting.js',
       'src/window-interface.js',
     ],
   },
@@ -781,7 +782,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-describes.js',
       'test/unit/test-document-info.js',
       'test/unit/test-document-ready.js',
-      'test/unit/test-error.js',
       'test/unit/test-event-helper.js',
       'test/unit/test-experiments.js',
       'test/unit/test-exponential-backoff.js',
@@ -803,7 +803,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-mode.js',
       'test/unit/test-motion.js',
       'test/unit/test-mustache.js',
-      'test/unit/test-object.js',
       'test/unit/test-observable.js',
       'test/unit/test-pass.js',
       'test/unit/test-platform.js',
@@ -819,7 +818,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-service.js',
       'test/unit/test-srcset.js',
       'test/unit/test-static-template.js',
-      'test/unit/test-string.js',
       'test/unit/test-style-installer.js',
       'test/unit/test-style.js',
       'test/unit/test-task-queue.js',
@@ -830,7 +828,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-viewport.js',
       'test/unit/test-web-components.js',
       'test/unit/test-xhr.js',
-      'test/unit/utils/test-array.js',
       'test/unit/utils/test-base64.js',
       'test/unit/utils/test-bytes.js',
       'test/unit/utils/test-lru-cache.js',
@@ -1048,7 +1045,7 @@ const forbiddenTermsSrcInclusive = {
       'build-system/server/shadow-viewer.js',
       'build-system/server/variable-substitution.js',
       'build-system/tasks/dist.js',
-      'build-system/tasks/extension-generator/index.js',
+      'build-system/tasks/make-extension/index.js',
       'build-system/tasks/helpers.js',
       'build-system/tasks/performance/helpers.js',
       'src/3p-frame.js',
@@ -1116,7 +1113,6 @@ const forbiddenTermsSrcInclusive = {
       'src/iframe-helper.js',
       'src/service/mutator-impl.js',
       'src/service/resources-impl.js',
-      'src/service/video-manager-impl.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
       'extensions/amp-script/0.1/amp-script.js',

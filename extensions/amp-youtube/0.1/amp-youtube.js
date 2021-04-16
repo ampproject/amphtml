@@ -15,6 +15,7 @@
  */
 
 import {Deferred} from '../../../src/utils/promise';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
@@ -28,7 +29,7 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   dispatchCustomEvent,
   fullscreenEnter,
@@ -108,6 +109,9 @@ class AmpYoutube extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenLooping_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -307,6 +311,9 @@ class AmpYoutube extends AMP.BaseElement {
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
+
+    this.pauseHelper_.updatePlaying(false);
+
     return true; // Call layoutCallback again.
   }
 
@@ -414,6 +421,16 @@ class AmpYoutube extends AMP.BaseElement {
 
     const playerState = info['playerState'];
     if (eventType == 'infoDelivery' && playerState != null) {
+      switch (playerState) {
+        case PlayerStates.PLAYING:
+          this.pauseHelper_.updatePlaying(true);
+          break;
+        case PlayerStates.PAUSED:
+        case PlayerStates.ENDED:
+          this.pauseHelper_.updatePlaying(false);
+          break;
+      }
+
       redispatch(element, playerState.toString(), {
         [PlayerStates.PLAYING]: VideoEvents.PLAYING,
         [PlayerStates.PAUSED]: VideoEvents.PAUSE,

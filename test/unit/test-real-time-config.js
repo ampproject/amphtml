@@ -25,7 +25,7 @@ import {
 } from '../../src/service/real-time-config/real-time-config-impl';
 import {Services} from '../../src/services';
 import {Xhr} from '../../src/service/xhr-impl';
-import {cancellation} from '../../src/error';
+import {cancellation} from '../../src/error-reporting';
 import {createElementWithAttributes} from '../../src/dom';
 import {dev, user} from '../../src/log';
 import {isFiniteNumber} from '../../src/types';
