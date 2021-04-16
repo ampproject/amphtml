@@ -682,14 +682,13 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-live-story.js"
     },
     {
-      // TODO(#33758, @ampproject/wg-stories): e.g., https://percy.io/ampproject/amphtml/builds/9803190/changed/552186579
-      "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-bot-rendering.html",
       "name": "amp-story: bot rendering",
       "viewport": {"width": 360, "height": 4500},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
       ],
+      "interactive_tests": "examples/visual-tests/amp-story-player/story-loaded.js",
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-interactive-quiz-sizing-positioning.html",
