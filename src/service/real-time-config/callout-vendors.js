@@ -250,6 +250,12 @@ const RTC_VENDORS = jsonConfiguration({
     macros: ['REQUEST_ID', 'CONSENT_STRING', 'ACCOUNT_ID'],
     disableKeyAppend: true,
   },
+  mediasquare: {
+    url:
+      'https://pbs-front.mediasquare.fr/msq_prebid?owner=OWNER&code=CODE&sizes=ATTR(data-multi-size)&adunit=ATTR(data-slot)&referer=HREF&gdpr_consent=CONSENT_STRING',
+    macros: ['OWNER', 'CODE', 'CONSENT_STRING'],
+    disableKeyAppend: true,
+  },
 });
 
 // DO NOT MODIFY: Setup for tests
