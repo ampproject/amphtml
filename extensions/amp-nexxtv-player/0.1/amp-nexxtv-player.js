@@ -165,9 +165,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
       this.unlistenMessage_ = listen(this.win, 'message', (event) => {
         this.handleNexxMessage_(event);
       });
-      return this.loadPromise(this.iframe_).then(
-        () => this.playerReadyPromise_
-      );
+      return this.loadPromise(this.iframe_);
     });
   }
 

@@ -61,6 +61,7 @@ describes.realWin(
       const element = await getNexxtvPlayer({
         'data-mediaid': '71QQG852413DU7J',
         'data-client': '761',
+        'data-streamtype': 'video',
       });
       const playerIframe = element.querySelector('iframe');
       expect(playerIframe).to.not.be.null;
@@ -71,7 +72,7 @@ describes.realWin(
             element.getAttribute('data-client') +
               '/video/' +
               element.getAttribute('data-mediaid') +
-              '\\?dataMode=static&platform=amp' +
+              '\\?platform=amp' +
               '$' // suffix
           )
         );
