@@ -19,6 +19,9 @@ module.exports = {
   'rendering vertical view of story': async (page) => {
     await page.waitForSelector('amp-story-page#cover[active]');
     await page.waitForTimeout(500);
-    await page.$eval('amp-video video', (e) => e.removeAttribute('controls'));
+    await page.$eval('video', (e) => {
+      e.remove();
+    });
+    await page.waitForTimeout(500);
   },
 };
