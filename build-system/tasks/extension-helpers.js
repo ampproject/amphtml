@@ -34,6 +34,9 @@ const {
   verifyExtensionBundles,
   jsBundles,
 } = require('../compile/bundles.config');
+const {
+  VERSION: internalRuntimeVersion,
+} = require('../compile/internal-version');
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
 const {compileJison} = require('./compile-jison');
 const {green, red, cyan} = require('kleur/colors');
@@ -683,8 +686,30 @@ async function buildExtensionJs(extDir, name, version, latestVersion, options) {
   }
 
   if (name === 'amp-script') {
-    copyWorkerDomResources(version);
+    await copyWorkerDomResources(version);
+    await buildSandboxedProxyIframe(options.minify);
   }
+}
+
+/**
+ * Builds and writes the HTML file used for <amp-script> sandboxed mode.
+ * @param {boolean} minify
+ */
+async function buildSandboxedProxyIframe(minify) {
+  await doBuildJs(jsBundles, 'amp-script-proxy-iframe.js', {minify});
+  const dist3pDir = path.join(
+    'dist.3p',
+    minify ? `${internalRuntimeVersion}` : 'current'
+  );
+  const fileExt = argv.esm ? '.mjs' : '.js';
+  const proxyScript = await fs.readFile(
+    path.join(dist3pDir, 'amp-script-proxy-iframe' + fileExt)
+  );
+  const proxyIframe = `<html><script>${proxyScript}</script></html>`;
+  await fs.outputFile(
+    path.join(dist3pDir, 'amp-script-proxy-iframe.html'),
+    proxyIframe
+  );
 }
 
 /**
