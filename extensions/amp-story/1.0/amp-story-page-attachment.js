@@ -34,9 +34,10 @@ const DARK_THEME_CLASS = 'i-amphtml-story-draggable-drawer-theme-dark';
 /**
  * @enum {string}
  */
-const AttachmentTheme = {
+export const AttachmentTheme = {
   LIGHT: 'light', // default
   DARK: 'dark',
+  CUSTOM: 'custom',
 };
 
 /**

@@ -855,8 +855,17 @@ tags: {  # <amp-story-page-attachment> with href
   }
   attrs: {
     name: "theme"
+    value: "custom"
     value: "dark"
     value: "light"
+  }
+  attrs: {
+    name: "cta-accent-color"
+  }
+  attrs: {
+    name: "cta-accent-element"
+    value: "background"
+    value: "text"
   }
   attrs: {
     name: "href"
