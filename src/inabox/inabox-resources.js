@@ -32,7 +32,7 @@ const FOUR_FRAME_DELAY = 70;
 /**
  * @implements {../service/resources-interface.ResourcesInterface}
  * @implements {../service.Disposable}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class InaboxResources {
   /**

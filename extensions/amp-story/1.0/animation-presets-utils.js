@@ -79,7 +79,7 @@ export function whooshIn(startX, startY, endX, endY) {
  * those of the page.
  * @param {StoryAnimationDimsDef} dimensions Dimensions of page and target.
  * @return {boolean}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function targetFitsWithinPage(dimensions) {
   return (

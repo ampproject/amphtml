@@ -27,7 +27,7 @@ import {dev, devAssert} from '../log';
  *
  * @interface
  * @extends {WritableStreamDefaultWriter}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class DomWriter {
   /**
@@ -68,7 +68,7 @@ export class DomWriter {
  * details.
  *
  * @implements {DomWriter}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class DomWriterStreamer {
   /**
@@ -216,7 +216,7 @@ export class DomWriterStreamer {
  * https://bugzilla.mozilla.org/show_bug.cgi?id=867102
  *
  * @implements {DomWriter}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class DomWriterBulk {
   /**

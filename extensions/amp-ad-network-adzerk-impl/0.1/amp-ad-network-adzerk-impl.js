@@ -31,7 +31,7 @@ import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
 /** @type {string} */
 const TAG = 'amp-ad-network-adzerk-impl';
 
-/** @visibleForTesting @type {string} */
+/** @@visibleForTesting @type {string} */
 export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-template-amp-creative';
 
 /**

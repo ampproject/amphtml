@@ -87,7 +87,7 @@ export function rewriteAttributesForElement(
  * @param {string} attrName Lowercase attribute name.
  * @param {string} attrValue
  * @return {string}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function rewriteAttributeValue(tagName, attrName, attrValue) {
   if (isUrlAttribute(attrName)) {
@@ -122,7 +122,7 @@ export function isUrlAttribute(attrName) {
  * @param {!Location} windowLocation
  * @return {string}
  * @private
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
   checkCorsUrl(attrValue);

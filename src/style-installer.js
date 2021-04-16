@@ -189,7 +189,7 @@ let bodyMadeVisible = false;
 
 /**
  * @param {boolean} value
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setBodyMadeVisibleForTesting(value) {
   bodyMadeVisible = value;

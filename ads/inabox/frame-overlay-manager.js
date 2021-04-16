@@ -48,7 +48,7 @@ export class FrameOverlayManager {
     this.win_.addEventListener('resize', () => this.onWindowResize());
   }
 
-  /** @visibleForTesting */
+  /** @@visibleForTesting */
   onWindowResize() {
     if (this.isExpanded_) {
       this.viewportChangedSinceExpand_ = true;

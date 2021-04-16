@@ -566,7 +566,7 @@ export class UserNotificationManager {
 
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function installUserNotificationManagerForTesting(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, SERVICE_ID, UserNotificationManager);

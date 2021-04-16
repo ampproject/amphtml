@@ -135,7 +135,7 @@ export function twitter(global, data) {
 
 /**
  * @param {string} tweetid
- * @visibleForTesting
+ * @@visibleForTesting
  * @return {*} TODO(#23582): Specify return type
  */
 export function cleanupTweetId_(tweetid) {

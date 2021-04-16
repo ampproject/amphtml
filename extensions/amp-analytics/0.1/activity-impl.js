@@ -338,7 +338,7 @@ export class Activity {
 
   /**
    * @private
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   cleanup_() {
     this.unlisten_();

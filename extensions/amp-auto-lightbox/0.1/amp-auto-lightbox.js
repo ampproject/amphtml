@@ -121,7 +121,7 @@ const NOOP = () => {};
  */
 const getRootNode = (ampdoc) => ampdoc.getRootNode();
 
-/** @visibleForTesting */
+/** @@visibleForTesting */
 export class Criteria {
   /**
    * @param {!Element} element
@@ -237,7 +237,7 @@ export function getMaxNaturalDimensions(img) {
  * @param {number} vw
  * @param {number} vh
  * @return {boolean}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function meetsSizingCriteria(
   renderWidth,
@@ -290,7 +290,7 @@ function whenLoaded(element) {
   );
 }
 
-/** @visibleForTesting */
+/** @@visibleForTesting */
 export class Scanner {
   /**
    * Gets all unvisited lightbox candidates.
@@ -310,7 +310,7 @@ export class Scanner {
 /**
  * Parses document metadata annotations as defined by either LD+JSON schema or
  * Open Graph <meta> tags.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class DocMetaAnnotations {
   /**
@@ -383,7 +383,7 @@ function usesLightboxExplicitly(ampdoc) {
  * Determines whether auto-lightbox is enabled for a document.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {boolean}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function isEnabledForDoc(ampdoc) {
   if (usesLightboxExplicitly(ampdoc)) {
@@ -411,7 +411,7 @@ function generateLightboxUid() {
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} element
  * @return {!Promise<!Element>}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function apply(ampdoc, element) {
   const mutator = Services.mutatorForDoc(ampdoc);

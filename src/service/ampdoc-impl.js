@@ -198,7 +198,7 @@ export class AmpDocService {
    * @param {!ShadowRoot} shadowRoot
    * @param {!AmpDocOptions=} opt_options
    * @return {!AmpDocShadow}
-   * @restricted
+   * @@restricted
    */
   installShadowDoc(url, shadowRoot, opt_options) {
     devAssert(
@@ -216,7 +216,7 @@ export class AmpDocService {
    * @param {!Window} childWin
    * @param {!AmpDocOptions=} opt_options
    * @return {!AmpDocFie}
-   * @restricted
+   * @@restricted
    */
   installFieDoc(url, childWin, opt_options) {
     const doc = childWin.document;
@@ -439,7 +439,7 @@ export class AmpDoc {
    * Adds a declared extension to an ampdoc.
    * @param {string} extensionId
    * @param {string} version
-   * @restricted
+   * @@restricted
    */
   declareExtension(extensionId, version) {
     devAssert(
@@ -461,7 +461,7 @@ export class AmpDoc {
 
   /**
    * Signal that the initial document set of extensions is known.
-   * @restricted
+   * @@restricted
    */
   setExtensionsKnown() {
     this.signals_.signal(AmpDocSignals.EXTENSIONS_KNOWN);
@@ -573,7 +573,7 @@ export class AmpDoc {
 
   /**
    * @param {!VisibilityState} visibilityState
-   * @restricted
+   * @@restricted
    */
   overrideVisibilityState(visibilityState) {
     if (this.visibilityStateOverride_ != visibilityState) {
@@ -888,7 +888,7 @@ export class AmpDocShadow extends AmpDoc {
   /**
    * Signals that the shadow doc has a body.
    * @param {!Element} body
-   * @restricted
+   * @@restricted
    */
   setBody(body) {
     devAssert(!this.body_, 'Duplicate body');
@@ -909,7 +909,7 @@ export class AmpDocShadow extends AmpDoc {
 
   /**
    * Signals that the shadow doc is ready.
-   * @restricted
+   * @@restricted
    */
   setReady() {
     devAssert(!this.ready_, 'Duplicate ready state');
@@ -1017,7 +1017,7 @@ export class AmpDocFie extends AmpDoc {
 
   /**
    * Signals that the FIE doc is ready.
-   * @restricted
+   * @@restricted
    */
   setReady() {
     devAssert(!this.ready_, 'Duplicate ready state');

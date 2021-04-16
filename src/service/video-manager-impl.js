@@ -318,7 +318,7 @@ export class VideoManager {
 
   /**
    * @return {!AutoFullscreenManager}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getAutoFullscreenManagerForTesting_() {
     return this.getAutoFullscreenManager_();
@@ -1030,7 +1030,7 @@ class VideoEntry {
 /**
  * @param {!AmpElement} video
  * @return {boolean}
- * @restricted
+ * @@restricted
  */
 function supportsFullscreenViaApi(video) {
   // TODO(alanorozco): Determine this via a flag in the component itself.
@@ -1134,7 +1134,7 @@ export class AutoFullscreenManager {
 
   /**
    * @return {boolean}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   isInLandscape() {
     return isLandscape(this.ampdoc_.win);
@@ -1372,10 +1372,10 @@ function isLandscape(win) {
   return Math.abs(win.orientation) == 90;
 }
 
-/** @visibleForTesting */
+/** @@visibleForTesting */
 export const PERCENTAGE_INTERVAL = 5;
 
-/** @visibleForTesting */
+/** @@visibleForTesting */
 export const PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS = 500;
 
 /** @private */
@@ -1417,7 +1417,7 @@ function calculateActualPercentageFrequencyMs(durationSeconds) {
 const isDurationFiniteNonZero = (duration) =>
   !!duration && !isNaN(duration) && duration > 1;
 
-/** @visibleForTesting */
+/** @@visibleForTesting */
 export class AnalyticsPercentageTracker {
   /**
    * @param {!Window} win

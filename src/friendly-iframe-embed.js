@@ -77,13 +77,13 @@ export let FriendlyIframeSpec;
 
 /**
  * @type {boolean|undefined}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 let srcdocSupported;
 
 /**
  * @param {boolean|undefined} val
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setSrcdocSupportedForTesting(val) {
   srcdocSupported = val;
@@ -136,7 +136,7 @@ export function preloadFriendlyIframeEmbedExtensions(win, extensions) {
  * @param {!Window} win
  * @param {!Array<string>} extensionIds
  * TODO(#33020): remove this method in favor `preloadFriendlyIframeEmbedExtensions`.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function preloadFriendlyIframeEmbedExtensionIdsDeprecated(
   win,
@@ -361,7 +361,7 @@ function mergeHtml(spec) {
  * Exposes `mergeHtml` for testing purposes.
  * @param {!FriendlyIframeSpec} spec
  * @return {string}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function mergeHtmlForTesting(spec) {
   return mergeHtml(spec);
@@ -377,7 +377,7 @@ export function mergeHtmlForTesting(spec) {
  * destroyed, the `destroy` method must be called to free up the shared
  * resources.
  *
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class FriendlyIframeEmbed {
   /**
@@ -522,7 +522,7 @@ export class FriendlyIframeEmbed {
 
   /**
    * @private
-   * @restricted
+   * @@restricted
    */
   startRender_() {
     if (this.host) {
@@ -570,7 +570,7 @@ export class FriendlyIframeEmbed {
 
   /**
    * @return {!HTMLBodyElement}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getBodyElement() {
     return /** @type {!HTMLBodyElement} */ ((
@@ -727,7 +727,7 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
 
 /**
  * Static installers that can be easily stubbed for tests.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class Installers {
   /**

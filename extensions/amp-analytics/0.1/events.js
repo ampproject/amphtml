@@ -141,7 +141,7 @@ const TRACKER_TYPE = Object.freeze({
   },
 });
 
-/** @visibleForTesting */
+/** @@visibleForTesting */
 export const trackerTypeForTesting = TRACKER_TYPE;
 
 /**
@@ -269,7 +269,7 @@ export class AnalyticsEvent {
  *
  * @implements {../../../src/service.Disposable}
  * @abstract
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class EventTracker {
   /**
@@ -1014,7 +1014,7 @@ class TimerEventHandler {
 
   /**
    * @param {!Window} win
-   * @restricted
+   * @@restricted
    */
   stopTimer_(win) {
     if (!this.isRunning()) {
@@ -1072,7 +1072,7 @@ export class TimerEventTracker extends EventTracker {
 
   /**
    * @return {!Array<number>}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getTrackedTimerKeys() {
     return /** @type {!Array<number>} */ (Object.keys(this.trackers_));
@@ -1643,7 +1643,7 @@ export class VisibilityTracker extends EventTracker {
    * @param {string|undefined} waitForSpec
    * @param {Element=} opt_element
    * @return {?Promise}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getReadyPromise(waitForSpec, opt_element) {
     if (opt_element) {

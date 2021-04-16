@@ -54,7 +54,7 @@ export function invokeWebWorker(win, method, opt_args, opt_localWin) {
 /**
  * @param {!Window} win
  * @return {!AmpWorker}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function ampWorkerForTesting(win) {
   registerServiceBuilder(win, 'amp-worker', AmpWorker);
@@ -147,7 +147,7 @@ class AmpWorker {
    * @param {Window=} opt_localWin
    * @return {!Promise}
    * @private
-   * @restricted
+   * @@restricted
    */
   sendMessage_(method, args, opt_localWin) {
     return this.fetchPromise_.then(() => {
@@ -202,7 +202,7 @@ class AmpWorker {
 
   /**
    * @return {boolean}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   hasPendingMessages() {
     return Object.keys(this.messages_).length > 0;
@@ -225,7 +225,7 @@ class AmpWorker {
 
   /**
    * @return {!Promise}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   fetchPromiseForTesting() {
     return this.fetchPromise_;

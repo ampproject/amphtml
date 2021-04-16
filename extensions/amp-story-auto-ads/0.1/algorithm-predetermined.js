@@ -32,7 +32,7 @@ const MAX_ADS_PER_STORY = 4;
  * @param {number} storyLength
  * @param {number} numberOfAds
  * @return {!Array<number>}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getAdPositions(storyLength, numberOfAds) {
   if (!numberOfAds) {
@@ -55,7 +55,7 @@ export function getAdPositions(storyLength, numberOfAds) {
  * @param {number} pageCount
  * @param {number} targetInterval
  * @return {number}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getNumberOfAds(pageCount, targetInterval) {
   const fullSegments = Math.floor(pageCount / targetInterval);

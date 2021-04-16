@@ -354,7 +354,7 @@ export class Resource {
 
   /**
    * @param {*} reason
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   maybeReportErrorOnBuildFailure(reason) {
     if (!isBlockedByConsent(reason)) {
@@ -776,7 +776,7 @@ export class Resource {
    * @param {number|boolean} multiplier
    * @param {ViewportRatioDef=} opt_viewportRatio
    * @return {boolean} whether multiplier given is within viewport ratio
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   isWithinViewportRatio(multiplier, opt_viewportRatio) {
     if (typeof multiplier === 'boolean') {

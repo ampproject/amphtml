@@ -54,7 +54,7 @@ BaseElement['props'] = {
  * @param {!Element} element
  * @return {?number}
  * @throws {UserError} when attribute values are missing or invalid.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function parseDateAttrs(element) {
   return parseDateAttrsBase(element, [

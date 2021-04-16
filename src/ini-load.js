@@ -60,7 +60,7 @@ export function whenContentIniLoad(
  * @param {!./layout-rect.LayoutRectDef} rect
  * @param {boolean=} opt_prerenderableOnly signifies if we are in prerender mode.
  * @return {!Promise}
- * @visibleForTesting
+ * @@visibleForTesting
  * TODO(#31915): remove, once launched.
  */
 export function whenContentIniLoadMeasure(
@@ -98,7 +98,7 @@ export function whenContentIniLoadMeasure(
  * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {boolean=} opt_prerenderableOnly signifies if we are in prerender mode.
  * @return {!Promise}
- * @visibleForTesting
+ * @@visibleForTesting
  * TODO(#31915): remove visibility
  */
 export function whenContentIniLoadInOb(elementOrAmpDoc, opt_prerenderableOnly) {

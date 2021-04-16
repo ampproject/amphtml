@@ -642,7 +642,7 @@ class AmpAccordion extends AMP.BaseElement {
 
   /**
    * @return {?../../../src/service/action-impl.ActionService}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getActionServiceForTesting() {
     return this.action_;

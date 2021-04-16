@@ -446,7 +446,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Executes page level experiment diversion and pushes any experiment IDs
    * onto this.experimentIds.
    * @param {?string} urlExperimentId
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   setPageLevelExperiments(urlExperimentId) {
     let forcedExperimentId;
@@ -636,7 +636,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @param {?ConsentTupleDef} consentTuple
    * @param {!Array<!AmpAdNetworkDoubleclickImpl>=} instances
    * @return {!Object<string,string|boolean|number>}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getPageParameters(consentTuple, instances) {
     instances = instances || [this];
@@ -742,7 +742,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Populate's block-level state for ad URL construction.
    * Sets initialSize_ , jsonTargeting, and adKey member fields.
    * @param {ConsentTupleDef} consentTuple
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   populateAdUrlState(consentTuple) {
     this.consentTuple = consentTuple;
@@ -1281,7 +1281,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     );
   }
 
-  /** @visibleForTesting */
+  /** @@visibleForTesting */
   cleanupAfterTest() {
     this.destroySafeFrameApi_();
   }
@@ -1637,7 +1637,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * @param {string} impressions
    * @param {boolean=} scrubReferer
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   fireDelayedImpressions(impressions, scrubReferer) {
     if (!impressions) {
@@ -1678,7 +1678,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Groups slots by type and networkId from data-slot parameter.  Exposed for
    * ease of testing.
    * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   groupSlotsForSra() {
     return groupAmpAdsByType(
@@ -1696,7 +1696,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * - for each grouping, construct SRA request
    * - handle chunks for streaming response for each block
    * @return {!Promise}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   initiateSraRequests() {
     // Use cancellation of the first slot's promiseId as indication of
@@ -1845,7 +1845,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * @param {string} message
    * @param {*} error
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   warnOnError(message, error) {
     dev().warn(TAG, message, error);
@@ -1895,7 +1895,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Note that location is parsed once on first access and cached.
    * @param {string} parameterName
    * @return {string|undefined} parameter value from window.location.search
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getLocationQueryParameterValue(parameterName) {
     windowLocationQueryParameters =
@@ -1939,7 +1939,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * null is returned. The promise is returned only for test convenience.
    *
    * @return {?Promise}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   postTroubleshootMessage() {
     if (!this.win.opener || !/[?|&]dfpdeb/.test(this.win.location.search)) {
@@ -2024,12 +2024,12 @@ AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAdNetworkDoubleclickImpl);
 });
 
-/** @visibleForTesting */
+/** @@visibleForTesting */
 export function resetSraStateForTesting() {
   sraRequests = null;
 }
 
-/** @visibleForTesting */
+/** @@visibleForTesting */
 export function resetLocationQueryParametersForTesting() {
   windowLocationQueryParameters = null;
 }
@@ -2037,7 +2037,7 @@ export function resetLocationQueryParametersForTesting() {
 /**
  * @param {!Element} element
  * @return {string} networkId from data-ad-slot attribute.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getNetworkId(element) {
   const networkId = /^(?:\/)?(\d+)/.exec(
@@ -2093,7 +2093,7 @@ export function getPageviewStateTokensForAdRequest(instancesInAdRequest) {
 
 /**
  * Resets the tokensToInstances mapping for testing purposes.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function resetTokensToInstancesMap() {
   tokensToInstances = {};

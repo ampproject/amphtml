@@ -79,7 +79,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     /**
      * @private {?Element}
-     * @visibleForTesting
+     * @@visibleForTesting
      */
     this.iframe_ = null;
 
@@ -94,13 +94,13 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     /**
      * @private {?Element}
-     * @visibleForTesting
+     * @@visibleForTesting
      */
     this.placeholder_ = null;
 
     /**
      * @private {?Element}
-     * @visibleForTesting
+     * @@visibleForTesting
      */
     this.fallback_ = null;
 
@@ -116,7 +116,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /**
      * Call to stop listening to viewport changes.
      * @private {?function()}
-     * @visibleForTesting
+     * @@visibleForTesting
      */
     this.unlistenViewportChanges_ = null;
 
@@ -125,7 +125,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     /**
      * @private {IntersectionObserver}
-     * @visibleForTesting
+     * @@visibleForTesting
      */
     this.intersectionObserver_ = null;
 
@@ -183,7 +183,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /**
    * @return {!../../../src/service/resource.Resource}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getResource() {
     return this.element.getResources().getResourceForElement(this.element);

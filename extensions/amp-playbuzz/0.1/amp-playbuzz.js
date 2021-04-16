@@ -64,7 +64,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @visibleForTesting {?Promise} */
+    /** @@visibleForTesting {?Promise} */
     this.iframePromise_ = null;
 
     /** @private {?number} */

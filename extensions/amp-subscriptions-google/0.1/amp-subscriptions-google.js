@@ -1024,7 +1024,7 @@ export class GoogleSubscriptionsPlatform {
 /**
  * Adopts fetcher protocol required for SwG to AMP fetching rules.
  * @implements {FetcherInterface}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class AmpFetcher {
   /**

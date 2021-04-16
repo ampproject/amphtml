@@ -41,7 +41,7 @@ export let FrameData;
  * @param {!Window} ampWin
  * @param {boolean=} opt_forceProdUrl
  * @return {string}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getIframeTransportScriptUrlForTesting(
   ampWin,
@@ -74,7 +74,7 @@ function getIframeTransportScriptUrl(ampWin, opt_forceProdUrl) {
 }
 
 /**
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class IframeTransport {
   /**
@@ -137,7 +137,7 @@ export class IframeTransport {
   /**
    * Create a cross-domain iframe for third-party vendor analytics
    * @return {!FrameData}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   createCrossDomainIframe() {
     // Explanation of IDs:
@@ -261,7 +261,7 @@ export class IframeTransport {
    * Returns whether this type of cross-domain frame is already known
    * @param {string} type The type attribute of the amp-analytics tag
    * @return {boolean}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   static hasCrossDomainIframe(type) {
     return hasOwn(IframeTransport.crossDomainIframes_, type);
@@ -281,7 +281,7 @@ export class IframeTransport {
    * Sends an AMP Analytics trigger event to a vendor's cross-domain iframe,
    * or queues the message if the frame is not yet ready to receive messages.
    * @param {string} event A string describing the trigger event
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   sendRequest(event) {
     const frameData = IframeTransport.getFrameData(this.type_);
@@ -305,7 +305,7 @@ export class IframeTransport {
    * Gets the FrameData associated with a particular cross-domain frame type.
    * @param {string} type The type attribute of the amp-analytics tag
    * @return {FrameData}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   static getFrameData(type) {
     return IframeTransport.crossDomainIframes_[type];
@@ -314,7 +314,7 @@ export class IframeTransport {
   /**
    * Removes all knowledge of cross-domain iframes.
    * Does not actually remove them from the DOM.
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   static resetCrossDomainIframes() {
     IframeTransport.crossDomainIframes_ = {};
@@ -322,7 +322,7 @@ export class IframeTransport {
 
   /**
    * @return {string} Unique ID of this instance of IframeTransport
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getCreativeId() {
     return this.creativeId_;
@@ -330,7 +330,7 @@ export class IframeTransport {
 
   /**
    * @return {string} Type attribute of parent amp-analytics instance
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getType() {
     return this.type_;

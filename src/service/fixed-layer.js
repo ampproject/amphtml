@@ -233,7 +233,7 @@ export class FixedLayer {
 
   /**
    * Begin observing changes to the hidden attribute.
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   observeHiddenMutations() {
     this.initHiddenObserver_();

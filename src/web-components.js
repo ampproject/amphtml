@@ -27,19 +27,19 @@ export const ShadowDomVersion = {
 
 /**
  * @type {ShadowDomVersion|undefined}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 let shadowDomSupportedVersion;
 
 /**
  * @type {boolean|undefined}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 let shadowCssSupported;
 
 /**
  * @param {ShadowDomVersion|undefined} val
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setShadowDomSupportedVersionForTesting(val) {
   shadowDomSupportedVersion = val;
@@ -47,7 +47,7 @@ export function setShadowDomSupportedVersionForTesting(val) {
 
 /**
  * @param {boolean|undefined} val
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setShadowCssSupportedForTesting(val) {
   shadowCssSupported = val;

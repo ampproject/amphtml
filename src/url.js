@@ -116,7 +116,7 @@ export function parseUrlDeprecated(url, opt_nocache) {
  * @param {LruCache=} opt_cache
  *   Cache is always ignored on ESM builds, see https://go.amp.dev/pr/31594
  * @return {!Location}
- * @restricted
+ * @@restricted
  */
 export function parseUrlWithA(a, url, opt_cache) {
   if (IS_ESM) {

@@ -557,7 +557,7 @@ export function variableServicePromiseForDoc(elementOrAmpDoc) {
 /**
  * @param {string} key
  * @return {{name, argList}|!FunctionNameArgsDef}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getNameArgsForTesting(key) {
   return getNameArgs(key);

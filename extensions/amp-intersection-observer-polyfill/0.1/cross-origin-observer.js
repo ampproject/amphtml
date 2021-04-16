@@ -63,7 +63,7 @@ export function maybeSetupCrossOriginObserver(win) {
  * @param {!../../../src/layout-rect.LayoutRectDef} viewportRect
  * @param {!../../../src/layout-rect.LayoutRectDef} targetRect
  * @return {!../../../src/layout-rect.LayoutRectDef}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function calculateIntersectionRect(viewportRect, targetRect) {
   const top = Math.max(targetRect.top, 0);

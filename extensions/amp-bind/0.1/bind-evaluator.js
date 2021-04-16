@@ -242,7 +242,7 @@ export class BindEvaluator {
   /**
    * Return parsed bindings for testing.
    * @return {!Array<!BindBindingDef>}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   bindingsForTesting() {
     return this.bindings_;
@@ -251,7 +251,7 @@ export class BindEvaluator {
   /**
    * Returns the expression cache for testing.
    * @return {!Object<string, !BindExpression>}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   expressionsForTesting() {
     return this.expressions_;

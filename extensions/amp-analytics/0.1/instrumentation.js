@@ -38,7 +38,7 @@ const PROP = '__AMP_AN_ROOT';
 /**
  * @implements {../../../src/service.Disposable}
  * @package
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class InstrumentationService {
   /**

@@ -100,7 +100,7 @@ export class LiveListInterface {
  * @param {string} value
  * @param {number} defaultValue
  * @return {number}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getNumberMaxOrDefault(value, defaultValue) {
   return Math.max(parseInt(value, 10) || 0, defaultValue);

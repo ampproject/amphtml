@@ -44,7 +44,7 @@ const MIN_EVENT_INTERVAL = 100;
  * @param {!Window} win
  * @param {!Element} bodyElement
  * @return {!Promise}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function prepareBodyForOverlay(win, bodyElement) {
   return Services.vsyncFor(win).runPromise(
@@ -77,7 +77,7 @@ export function prepareBodyForOverlay(win, bodyElement) {
  * @param {!Window} win
  * @param {!Element} bodyElement
  * @return {!Promise}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function resetBodyForOverlay(win, bodyElement) {
   return Services.vsyncFor(win).mutatePromise(() => {
@@ -426,7 +426,7 @@ class InaboxViewportImpl {
  * Implementation of ViewportBindingDef that works inside an non-scrollable
  * iframe box by listening to host doc for position and resize updates.
  *
- * @visibleForTesting
+ * @@visibleForTesting
  * @implements {ViewportBindingDef}
  */
 export class ViewportBindingInabox {
@@ -647,7 +647,7 @@ export class ViewportBindingInabox {
 
   /**
    * @return {!Array<!../service/resource.Resource>}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getChildResources() {
     return Services.resourcesForDoc(this.win.document.documentElement).get();
@@ -796,7 +796,7 @@ export class ViewportBindingInabox {
     });
   }
 
-  /** @visibleForTesting */
+  /** @@visibleForTesting */
   getBodyElement() {
     return dev().assertElement(this.win.document.body);
   }

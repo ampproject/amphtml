@@ -418,7 +418,7 @@ function getSentinel_(iframe, opt_is3P) {
  * @param {*} data
  * @return {?JsonObject} object message
  * @private
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function parseIfNeeded(data) {
   if (typeof data == 'string') {
@@ -533,7 +533,7 @@ const adSizes = [
  * Guess whether this element might be an ad.
  * @param {!Element} element An amp-iframe element.
  * @return {boolean}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function isAdLike(element) {
   const {width, height} = element.getLayoutSize();

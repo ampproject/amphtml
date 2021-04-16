@@ -118,7 +118,7 @@ export class IframeTransportClient {
   /**
    * Gets the IframeMessagingClient.
    * @return {!IframeMessagingClient}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getIframeMessagingClient() {
     return this.iframeMessagingClient_;

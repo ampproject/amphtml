@@ -161,7 +161,7 @@ export class PositionObserver {
   /**
    * This should always be called in vsync.
    * @param {boolean=} opt_force
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   updateAllEntries(opt_force) {
     for (let i = 0; i < this.workers_.length; i++) {

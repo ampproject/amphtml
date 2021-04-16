@@ -42,7 +42,7 @@ export class Variants {
   /**
    * @param {!Object<string, ?string>|!Promise<!Object<string, ?string>>} variants
    * @package
-   * @restricted
+   * @@restricted
    */
   init(variants) {
     this.variantsDeferred_.resolve(variants);

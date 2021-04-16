@@ -34,7 +34,7 @@ let scopeSelectorSupported;
 
 /**
  * @param {boolean|undefined} val
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setScopeSelectorSupportedForTesting(val) {
   scopeSelectorSupported = val;

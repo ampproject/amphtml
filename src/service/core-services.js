@@ -53,7 +53,7 @@ import {installXhrService} from './xhr-impl';
 /**
  * Install builtins.
  * @param {!Window} win
- * @restricted
+ * @@restricted
  */
 export function installBuiltinElements(win) {
   installImg(win);
@@ -64,7 +64,7 @@ export function installBuiltinElements(win) {
 /**
  * Install runtime-level services.
  * @param {!Window} global Global scope to adopt.
- * @restricted
+ * @@restricted
  */
 export function installRuntimeServices(global) {
   installCryptoService(global);
@@ -80,7 +80,7 @@ export function installRuntimeServices(global) {
 /**
  * Install ampdoc-level services.
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @restricted
+ * @@restricted
  */
 export function installAmpdocServices(ampdoc) {
   devAssert(!ampdoc.getParent());
@@ -90,7 +90,7 @@ export function installAmpdocServices(ampdoc) {
 /**
  * Install ampdoc-level services for an embedded doc.
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @restricted
+ * @@restricted
  */
 export function installAmpdocServicesForEmbed(ampdoc) {
   devAssert(!!ampdoc.getParent());

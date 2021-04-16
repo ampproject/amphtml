@@ -158,7 +158,7 @@ export class StoryAnalyticsService {
    * Updates event details.
    * @param {!StoryAnalyticsEvent} eventType
    * @param {Element=} element
-   * @visibleForTesting
+   * @@visibleForTesting
    * @return {!JsonObject}}
    */
   updateDetails(eventType, element = null) {

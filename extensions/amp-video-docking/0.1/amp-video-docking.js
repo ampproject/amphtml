@@ -79,7 +79,7 @@ export const REVERT_TO_INLINE_RATIO = 0.85;
 
 /**
  * Width/height of placeholder icon when the inline box is large.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export const PLACEHOLDER_ICON_LARGE_WIDTH = 48;
 
@@ -104,7 +104,7 @@ export const PLACEHOLDER_ICON_BREAKPOINTS = [
   },
 ];
 
-/** @visibleForTesting @const {string} */
+/** @@visibleForTesting @const {string} */
 export const BASE_CLASS_NAME = 'i-amphtml-video-docked';
 
 /** @enum {string} */
@@ -165,7 +165,7 @@ function throttleByAnimationFrame(win, fn) {
 
 /**
  * @param {!Element} element
- * @restricted
+ * @@restricted
  */
 function complainAboutPortrait(element) {
   // Constant named `TAG` per lint rules.
@@ -234,7 +234,7 @@ const PlaceholderBackground = (html) =>
 /**
  * Manages docking (a.k.a. minimize to corner) for videos that satisfy the
  * {@see VideoInterface}.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class VideoDocking {
   /**

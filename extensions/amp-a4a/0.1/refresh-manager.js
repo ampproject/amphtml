@@ -45,7 +45,7 @@ const TAG = 'AMP-AD';
  * @param {!AmpElement} element
  * @param {!Window} unusedWin
  * @return {?number}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getPublisherSpecifiedRefreshInterval(element, unusedWin) {
   const refreshInterval = element.getAttribute(DATA_ATTR_NAME);

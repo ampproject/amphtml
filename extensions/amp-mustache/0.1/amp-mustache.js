@@ -30,7 +30,7 @@ const TAG = 'amp-mustache';
  * Implements an AMP template for Mustache.js.
  * See {@link https://github.com/janl/mustache.js/}.
  *
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class AmpMustache extends BaseTemplate {
   /**

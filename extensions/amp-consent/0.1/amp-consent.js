@@ -62,7 +62,7 @@ const TAG = 'amp-consent';
 
 /**
  * @enum {string}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export const ACTION_TYPE = {
   ACCEPT: 'accept',
@@ -920,7 +920,7 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * @return {?ConsentStateManager}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getConsentStateManagerForTesting() {
     return this.consentStateManager_;
@@ -928,7 +928,7 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * @return {!Promise<boolean>}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getConsentRequiredPromiseForTesting() {
     return this.getConsentRequiredPromise_();
@@ -936,7 +936,7 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * @return {boolean}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getIsPromptUiOnForTesting() {
     return this.isPromptUiOn_;

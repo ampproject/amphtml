@@ -698,7 +698,7 @@ function changeIcon(element, name, fill = '#FFFFFF') {
 /**
  * Triggered when the user clicks on the big play button div.
  * @param {!Object} global
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function onBigPlayClick(global) {
   if (playbackStarted) {
@@ -761,7 +761,7 @@ export function requestAds() {
  * Starts ad playback. If the ad request has not yet resolved, calls itself
  * again after 250ms.
  * @param {!Object} global
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function playAds(global) {
   if (!imaLoadAllowed) {
@@ -797,7 +797,7 @@ export function playAds(global) {
 /**
  * Called when the content completes.
  *
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function onContentEnded() {
   contentComplete = true;
@@ -819,7 +819,7 @@ export function onContentEnded() {
  * Called when the IMA SDK has an AdsManager ready for us.
  * @param {!Object} global
  * @param {*} adsManagerLoadedEvent
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
   const adsRenderingSettings = new global.google.ima.AdsRenderingSettings();
@@ -866,7 +866,7 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
 /**
  * Called when we encounter an error trying to load ads.
  *
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function onAdsLoaderError() {
   adRequestFailed = true;
@@ -886,7 +886,7 @@ export function onAdsLoaderError() {
 /**
  * Called when we encounter an error trying to play ads.
  *
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function onAdError() {
   postMessage({event: VideoEvents.AD_END});
@@ -904,7 +904,7 @@ export function onAdError() {
 /**
  * Called each time a new ad loads. Sets currentAd
  * @param {!Object} global
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function onAdLoad(global) {
   currentAd = global.getAd();
@@ -913,7 +913,7 @@ export function onAdLoad(global) {
 /**
  * Called intermittently as the ad plays, allowing us to display ad counter.
  * @param {!Object} unusedEvent
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function onAdProgress(unusedEvent) {
   const adPodInfo = currentAd.getAdPodInfo();
@@ -932,7 +932,7 @@ export function onAdProgress(unusedEvent) {
 /**
  * Called by the IMA SDK. Pauses the content and readies the player for ads.
  * @param {!Object} global
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function onContentPauseRequested(global) {
   if (adsManagerWidthOnLoad) {
@@ -959,7 +959,7 @@ export function onContentPauseRequested(global) {
 /**
  * Called by the IMA SDK. Resumes content after an ad break.
  *
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function onContentResumeRequested() {
   adsActive = false;
@@ -985,7 +985,7 @@ export function onContentResumeRequested() {
  * Sets the (ads) controls to reflect a paused state.
  * Does not need to set the big play pause since that is handled
  * by the SDK generally.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function onAdPaused() {
   // show play button while ad is paused
@@ -997,7 +997,7 @@ export function onAdPaused() {
  * Sets the (ads) controls to reflect a paused state.
  * Does not need to set the big play pause since that is handled
  * by the SDK generally.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function onAdResumed() {
   // show pause button when ad resumes
@@ -1007,7 +1007,7 @@ export function onAdResumed() {
 /**
  * Called by the IMA SDK. Signifies all ads have been played for the video.
  *
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function onAllAdsCompleted() {
   currentAd = null;
@@ -1042,7 +1042,7 @@ function playerDataTick() {
  * Updates the video player UI.
  * @param {number} currentTime
  * @param {number} duration
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function updateUi(currentTime, duration) {
   timeNode.textContent = formatTime(currentTime) + ' / ' + formatTime(duration);
@@ -1056,7 +1056,7 @@ export function updateUi(currentTime, duration) {
  * hour if the content is less than one hour.
  * @param {number} time
  * @return {*} TODO(#23582): Specify return type
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function formatTime(time) {
   if (isNaN(time)) {
@@ -1082,7 +1082,7 @@ export function formatTime(time) {
  * Zero-pads the provided int and returns a string of length 2.
  * @param {string|number} input
  * @return {*} TODO(#23582): Specify return type
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function zeroPad(input) {
   input = String(input);
@@ -1158,7 +1158,7 @@ function getPagePosition(el) {
 /**
  * Called when the user clicks on the play / pause button.
  *
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function onPlayPauseClick() {
   if (playerState == PlayerStates.PLAYING) {
@@ -1171,7 +1171,7 @@ export function onPlayPauseClick() {
 /**
  * Plays the content video.
  *
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function playVideo() {
   if (adsActive) {
@@ -1190,7 +1190,7 @@ export function playVideo() {
 /**
  * Pauses the video player.
  * @param {?Event} event
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function pauseVideo(event = null) {
   if (adsActive) {
@@ -1357,7 +1357,7 @@ function onFullscreenChange(global) {
  * Show a subset of controls when ads are playing.
  * Visible controls are countdownDiv, playPauseDiv, muteUnmuteDiv, and fullscreenDiv
  *
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function showAdControls() {
   const hasMobileStyles = videoWidth <= 400;
@@ -1387,7 +1387,7 @@ export function showAdControls() {
 /**
  * Reinstate access to all controls when ads have ended.
  *
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function resetControlsAfterAd() {
   // hide ad controls
@@ -1411,7 +1411,7 @@ export function resetControlsAfterAd() {
 /**
  * Show video controls and reset hide controls timeout.
  * @param {boolean} opt_adsForce
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function showControls(opt_adsForce) {
   showControlsFirstCalled = true;
@@ -1438,7 +1438,7 @@ export function showControls(opt_adsForce) {
 /**
  * Hide video controls, except when ads are active.
  *
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function hideControls() {
   if (controlsVisible && !adsActive) {
@@ -1552,7 +1552,7 @@ function postMessage(data) {
  * Returns the properties we need to access for testing.
  *
  * @return {*} TODO(#23582): Specify return type
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getPropertiesForTesting() {
   return {
@@ -1587,7 +1587,7 @@ export function getPropertiesForTesting() {
 /**
  * Gets the throttled show controls
  * @return {Function}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getShowControlsThrottledForTesting() {
   return showControlsThrottled;
@@ -1596,7 +1596,7 @@ export function getShowControlsThrottledForTesting() {
 /**
  * Sets the big play button div.
  * @param {!Element} div
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setBigPlayDivForTesting(div) {
   bigPlayDiv = div;
@@ -1605,7 +1605,7 @@ export function setBigPlayDivForTesting(div) {
 /**
  * Sets the ad display container.
  * @param {!Element} adc
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setAdDisplayContainerForTesting(adc) {
   adDisplayContainer = adc;
@@ -1615,7 +1615,7 @@ export function setAdDisplayContainerForTesting(adc) {
  * Sets the video width and height.
  * @param {number} width
  * @param {number} height
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setVideoWidthAndHeightForTesting(width, height) {
   videoWidth = width;
@@ -1625,7 +1625,7 @@ export function setVideoWidthAndHeightForTesting(width, height) {
 /**
  * Sets the video muted state
  * @param {boolean} shouldMute
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setVideoPlayerMutedForTesting(shouldMute) {
   videoPlayer.muted = shouldMute;
@@ -1634,7 +1634,7 @@ export function setVideoPlayerMutedForTesting(shouldMute) {
 /**
  * Sets the allAdsCompleted flag.
  * @param {boolean} newValue
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setAllAdsCompletedForTesting(newValue) {
   allAdsCompleted = newValue;
@@ -1643,7 +1643,7 @@ export function setAllAdsCompletedForTesting(newValue) {
 /**
  * Sets the ad request failed flag.
  * @param {boolean} newValue
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setAdRequestFailedForTesting(newValue) {
   adRequestFailed = newValue;
@@ -1652,7 +1652,7 @@ export function setAdRequestFailedForTesting(newValue) {
 /**
  * Sets the ads loader.
  * @param {*} newAdsLoader
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setAdsLoaderForTesting(newAdsLoader) {
   adsLoader = newAdsLoader;
@@ -1661,7 +1661,7 @@ export function setAdsLoaderForTesting(newAdsLoader) {
 /**
  * Sets the ads request.
  * @param {*} newAdsRequest
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setAdsRequestForTesting(newAdsRequest) {
   adsRequest = newAdsRequest;
@@ -1670,7 +1670,7 @@ export function setAdsRequestForTesting(newAdsRequest) {
 /**
  * Sets the flag to mute the ads manager when it loads.
  * @param {boolean} shouldMute
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setMuteAdsManagerOnLoadedForTesting(shouldMute) {
   muteAdsManagerOnLoaded = shouldMute;
@@ -1679,7 +1679,7 @@ export function setMuteAdsManagerOnLoadedForTesting(shouldMute) {
 /**
  * Sets the ads manager.
  * @param {*} newAdsManager
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setAdsManagerForTesting(newAdsManager) {
   adsManager = newAdsManager;
@@ -1689,7 +1689,7 @@ export function setAdsManagerForTesting(newAdsManager) {
  * Sets the ads manager dimensions on load.
  * @param {number} width
  * @param {number} height
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setAdsManagerDimensionsOnLoadForTesting(width, height) {
   adsManagerWidthOnLoad = width;
@@ -1699,7 +1699,7 @@ export function setAdsManagerDimensionsOnLoadForTesting(width, height) {
 /**
  * Sets the content complete flag.
  * @param {*} newContentComplete
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setContentCompleteForTesting(newContentComplete) {
   contentComplete = newContentComplete;
@@ -1708,7 +1708,7 @@ export function setContentCompleteForTesting(newContentComplete) {
 /**
  * Sets the video player.
  * @param {*} newPlayer
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setVideoPlayerForTesting(newPlayer) {
   videoPlayer = newPlayer;
@@ -1717,7 +1717,7 @@ export function setVideoPlayerForTesting(newPlayer) {
 /**
  * Sets the player state.
  * @param {*} newState
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setPlayerStateForTesting(newState) {
   playerState = newState;
@@ -1726,7 +1726,7 @@ export function setPlayerStateForTesting(newState) {
 /**
  * Sets the hideControlsTimeout
  * @param {number} newTimeout
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setHideControlsTimeoutForTesting(newTimeout) {
   hideControlsTimeout = newTimeout;
@@ -1735,7 +1735,7 @@ export function setHideControlsTimeoutForTesting(newTimeout) {
 /**
  * Sets the consent state.
  * @param {*} newConsentState
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setConsentStateForTesting(newConsentState) {
   consentState = newConsentState;

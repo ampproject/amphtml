@@ -600,7 +600,7 @@ function shouldUseAspectRatioCss(win) {
   return aspectRatioCssCache;
 }
 
-/** @visibleForTesting */
+/** @@visibleForTesting */
 export function resetShouldUseAspectRatioCssForTesting() {
   aspectRatioCssCache = null;
 }

@@ -1764,7 +1764,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Handle resize events and set the story's desktop state.
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   onResize() {
     const uiState = this.getUIType_();

@@ -104,7 +104,7 @@ function fetchCaptions(page, videoEl) {
  * Extract the text content from a captions file.
  * @param {string} text
  * @return {string}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function extractTextContent(text) {
   text = text.trim();

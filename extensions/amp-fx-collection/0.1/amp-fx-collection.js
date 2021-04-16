@@ -35,7 +35,7 @@ const TAG = 'amp-fx-collection';
 /**
  * Bootstraps elements that have `amp-fx=<fx1 fx2>` attribute and installs
  * the specified effects on them.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class AmpFxCollection {
   /**

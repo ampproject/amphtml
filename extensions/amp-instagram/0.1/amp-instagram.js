@@ -64,7 +64,7 @@ export class AmpInstagram extends AMP.BaseElement {
 
     /**
      * @private {?Promise}
-     * @visibleForTesting
+     * @@visibleForTesting
      */
     this.iframePromise_ = null;
   }

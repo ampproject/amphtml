@@ -160,7 +160,7 @@ export class AmpVideo extends AMP.BaseElement {
     /** @private @const {!Array<!UnlistenDef>} */
     this.unlisteners_ = [];
 
-    /** @visibleForTesting {?Element} */
+    /** @@visibleForTesting {?Element} */
     this.posterDummyImageForTesting_ = null;
 
     /** @private {?boolean} whether there are sources that will use a BitrateManager */
@@ -943,7 +943,7 @@ export class AmpVideo extends AMP.BaseElement {
  * @param {!Element} element
  * @param {!Element=} opt_videoElement
  * @return {boolean}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function isCachedByCdn(element, opt_videoElement) {
   const src = element.getAttribute('src');

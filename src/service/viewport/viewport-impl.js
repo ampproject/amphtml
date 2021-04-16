@@ -660,7 +660,7 @@ export class ViewportImpl {
 
   /**
    * @return {boolean}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   isLightboxExperimentOn() {
     return isExperimentOn(this.ampdoc.win, 'amp-lightbox-a4a-proto');
@@ -669,7 +669,7 @@ export class ViewportImpl {
   /**
    * Enters frame lightbox mode if under a Friendly Iframe Embed.
    * @param {!Element} requestingElement
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   maybeEnterFieLightboxMode(requestingElement) {
     const fieOptional = this.getFriendlyIframeEmbed_(requestingElement);
@@ -688,7 +688,7 @@ export class ViewportImpl {
   /**
    * Leaves frame lightbox mode if under a Friendly Iframe Embed.
    * @param {!Element} requestingElement
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   maybeLeaveFieLightboxMode(requestingElement) {
     const fieOptional = this.getFriendlyIframeEmbed_(requestingElement);

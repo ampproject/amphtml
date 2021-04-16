@@ -189,7 +189,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
   /**
    * Gets the root element.
-   * @visibleForTesting
+   * @@visibleForTesting
    * @return {?Element}
    */
   getRootElement() {

@@ -65,7 +65,7 @@ function findLocalizedString(
 /**
  * @param {string} languageCode
  * @return {!Array<string>} A list of language codes.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getLanguageCodesFromString(languageCode) {
   if (!languageCode) {

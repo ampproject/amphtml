@@ -19,7 +19,7 @@ import {base64DecodeToBytes} from '../../../src/utils/base64';
 import {dev, devAssert, user} from '../../../src/log';
 import {isArray} from '../../../src/core/types';
 
-/** @visibleForTesting */
+/** @@visibleForTesting */
 export const AMP_SIGNATURE_HEADER = 'AMP-Fast-Fetch-Signature';
 
 /**
@@ -208,7 +208,7 @@ export class SignatureVerifier {
    * @param {!Uint8Array} signature
    * @param {!ArrayBuffer} creative
    * @return {!Promise<!VerificationStatus>}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   verifyCreativeAndSignature(
     signingServiceName,

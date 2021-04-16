@@ -32,7 +32,7 @@ const STUB = '_stub';
 /**
  * @param {!Window} win
  * @return {boolean}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function shouldLoadPolyfill(win) {
   return (
@@ -289,7 +289,7 @@ export class IntersectionObserverStub {
  */
 IntersectionObserverStub[UPGRADERS] = [];
 
-/** @visibleForTesting */
+/** @@visibleForTesting */
 export function resetStubsForTesting() {
   IntersectionObserverStub[UPGRADERS] = [];
 }

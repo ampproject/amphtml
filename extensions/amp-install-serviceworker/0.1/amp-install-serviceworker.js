@@ -43,7 +43,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     /** @private {?string}  */
     this.iframeSrc_ = null;
 
-    /** @visibleForTesting {?UrlRewriter_}  */
+    /** @@visibleForTesting {?UrlRewriter_}  */
     this.urlRewriter_ = null;
 
     /** @private @const {boolean}*/

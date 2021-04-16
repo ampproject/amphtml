@@ -117,7 +117,7 @@ class ViewerLoginDialog {
 
 /**
  * Web-based implementation of the Login Dialog.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class WebLoginDialog {
   /**

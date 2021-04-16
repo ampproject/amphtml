@@ -173,7 +173,7 @@ export function handleInitialOverflowElements(textareas) {
  * Measure if any overflow is present on the element.
  * @param {!Element} element
  * @return {!Promise<boolean>}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getHasOverflow(element) {
   const mutator = Services.mutatorForDoc(element);
@@ -245,7 +245,7 @@ function maybeRemoveResizeBehavior(element, startHeight, endHeight) {
  * needed.
  * @param {!Element} element
  * @return {!Promise}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function maybeResizeTextarea(element) {
   const mutator = Services.mutatorForDoc(element);

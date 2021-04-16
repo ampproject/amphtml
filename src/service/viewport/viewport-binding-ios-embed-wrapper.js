@@ -36,7 +36,7 @@ const TAG_ = 'Viewport';
  * reparenting the original `<body>` inside.
  *
  * @implements {ViewportBindingDef}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class ViewportBindingIosEmbedWrapper_ {
   /**

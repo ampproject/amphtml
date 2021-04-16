@@ -154,7 +154,7 @@ class Cid {
      * Cached base cid once read from storage to avoid repeated
      * reads.
      * @private {?Promise<string>}
-     * @restricted
+     * @@restricted
      */
     this.baseCid_ = null;
 
@@ -162,7 +162,7 @@ class Cid {
      * Cache to store external cids. Scope is used as the key and cookie value
      * is the value.
      * @private {!Object<string, !Promise<string>>}
-     * @restricted
+     * @@restricted
      */
     this.externalCidCache_ = Object.create(null);
 
@@ -346,7 +346,7 @@ class Cid {
  *
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!Promise}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function optOutOfCid(ampdoc) {
   // Tell the viewer that user has opted out.
@@ -366,7 +366,7 @@ export function optOutOfCid(ampdoc) {
  *
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!Promise<boolean>}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function isOptedOutOfCid(ampdoc) {
   return Services.storageForDoc(ampdoc)
@@ -514,7 +514,7 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
  * on a proxy origin. Throws an error if the doc is not on a proxy origin.
  * @param {!Location} url URL of an AMP document.
  * @return {string} The source origin of the URL.
- * @visibleForTesting BUT if this is needed elsewhere it could be
+ * @@visibleForTesting BUT if this is needed elsewhere it could be
  *     factored into its own package.
  */
 export function getProxySourceOrigin(url) {

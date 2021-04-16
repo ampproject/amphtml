@@ -68,7 +68,7 @@ const builderInstances = {};
  * @param {string} type
  * @param {function(new:BookendComponentClass)} ctor
  * @return {!BookendComponentClass}
- * @restricted
+ * @@restricted
  */
 function setBuilderInstance(type, ctor) {
   return (builderInstances[type] = builderInstances[type] || new ctor());
@@ -78,7 +78,7 @@ function setBuilderInstance(type, ctor) {
  * Dispatches the components to their specific builder classes.
  * @param {string} type
  * @return {?BookendComponentClass}
- * @restricted
+ * @@restricted
  */
 function componentBuilderInstanceFor(type) {
   switch (type) {

@@ -139,13 +139,13 @@ function getRtvVersion(win) {
 /**
  * @param {!Window} win
  * @return {string}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getRtvVersionForTesting(win) {
   return getRtvVersion(win);
 }
 
-/** @visibleForTesting */
+/** @@visibleForTesting */
 export function resetRtvVersionForTesting() {
   rtvVersion = '';
 }

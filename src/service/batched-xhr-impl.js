@@ -23,7 +23,7 @@ import {map} from '../core/types/object';
  * A wrapper around the Xhr service which batches the result of GET requests
  *
  * @package Visible for type.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class BatchedXhr extends Xhr {
   /**

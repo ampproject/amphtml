@@ -404,7 +404,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    *
    * @param {string} url
    * @param {string=} opt_preloadAs
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   preload(url, opt_preloadAs) {
     Services.preconnectFor(this.win).preload(

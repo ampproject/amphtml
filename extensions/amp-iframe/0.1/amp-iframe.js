@@ -855,7 +855,7 @@ export class AmpIframe extends AMP.BaseElement {
 
   /**
    * @param {string} value
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   setTargetOriginForTesting(value) {
     this.targetOrigin_ = value;

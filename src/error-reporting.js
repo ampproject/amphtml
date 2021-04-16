@@ -403,7 +403,7 @@ export function reportErrorToServerOrViewer(win, data) {
  * @param {!JsonObject} data Data from `getErrorReportData`.
  * @return {!Promise<boolean>} `Promise<True>` if the error was sent to the
  *     viewer, `Promise<False>` otherwise.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function maybeReportErrorToViewer(win, data) {
   const ampdocService = Services.ampdocServiceFor(win);
@@ -434,7 +434,7 @@ export function maybeReportErrorToViewer(win, data) {
  * to be sent to the viewer.
  * @param {!JsonObject} errorReportData
  * @return {!JsonObject}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function errorReportingDataForViewer(errorReportData) {
   return dict({
@@ -653,7 +653,7 @@ export function getErrorReportData(
  * current page.
  * @param {!Window} win
  * @return {boolean}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function detectNonAmpJs(win) {
   if (!win.document) {
@@ -681,7 +681,7 @@ export function resetAccumulatedErrorMessagesForTesting() {
  * just the UserAgent, since browsers often allow overriding it to "emulate"
  * mobile.
  * @return {string}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function detectJsEngineFromStack() {
   /** @constructor */

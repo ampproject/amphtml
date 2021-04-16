@@ -205,7 +205,7 @@ export class AnimationRunner {
 
   /**
    * @return {!Promise<!StoryAnimationDimsDef>}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getDims() {
     return this.vsync_.measurePromise(() => {

@@ -21,7 +21,7 @@ import {parseJson} from '../../../src/json';
 const EXPIRATION_DURATION_MILLIS = 10 * 60 * 1000; // 10 Minutes
 const CREATION_TIME = 'time';
 const STATE = 'state';
-/** @visibleForTesting */
+/** @@visibleForTesting */
 export const LOCAL_STORAGE_KEY = 'amp-story-state';
 
 /** @enum {string} */

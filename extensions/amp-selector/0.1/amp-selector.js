@@ -675,7 +675,7 @@ export class AmpSelector extends AMP.BaseElement {
 
   /**
    * @return {!Array<!Element>}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getElementsForTesting() {
     return this.elements_;
@@ -683,7 +683,7 @@ export class AmpSelector extends AMP.BaseElement {
 
   /**
    * @return {!Array<!Element>}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getSelectedElementsForTesting() {
     return this.selectedElements_;

@@ -34,7 +34,7 @@ export class ViewerForTesting {
     /** @type {string} */
     this.ampdocUrl = ampdocUrl;
 
-    /** @visibleForTesting @private {boolean} */
+    /** @@visibleForTesting @private {boolean} */
     this.hasDocumentLoaded_ = false;
 
     /** @private {string} */

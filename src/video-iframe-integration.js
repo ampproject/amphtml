@@ -69,7 +69,7 @@ const validMethods = [
  * @param {function()} win
  * @param {*} opt_initializer
  * @return {function()}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getVideoJs(win, opt_initializer) {
   return userAssert(
@@ -78,13 +78,13 @@ export function getVideoJs(win, opt_initializer) {
   );
 }
 
-/** @visibleForTesting */
+/** @@visibleForTesting */
 export class AmpVideoIntegration {
   /** @param {!Window} win */
   constructor(win) {
     /**
      * Used for checking callback return type.
-     * @visibleForTesting
+     * @@visibleForTesting
      */
     this.isAmpVideoIntegration_ = true;
 
@@ -438,7 +438,7 @@ function listenTo(win, onMessage) {
  * Adopt window asynchronously.
  * This follows the same method as AMP.push (see runtime).
  * @param {!Window} global
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function adopt(global) {
   userAssert(

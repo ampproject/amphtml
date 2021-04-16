@@ -589,7 +589,7 @@ export class ResourcesImpl {
   /**
    * Runs a pass immediately.
    *
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   doPass() {
     if (!this.isRuntimeOn_) {

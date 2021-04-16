@@ -442,7 +442,7 @@ export class ViewerImpl {
   /**
    * Passthrough for ampdoc visibility state. Only to be used by viewer
    * integration.
-   * @restricted
+   * @@restricted
    * TODO(#22733): remove if no longer used by the viewer.
    */
   getVisibilityState() {
@@ -452,7 +452,7 @@ export class ViewerImpl {
   /**
    * Passthrough for ampdoc visibility state. Only to be used by viewer
    * integration.
-   * @restricted
+   * @@restricted
    * TODO(#22733): remove if no longer used by the viewer.
    */
   isVisible() {
@@ -462,7 +462,7 @@ export class ViewerImpl {
   /**
    * Passthrough for ampdoc visibility state. Only to be used by viewer
    * integration.
-   * @restricted
+   * @@restricted
    * TODO(#22733): remove if no longer used by the viewer.
    */
   hasBeenVisible() {
@@ -472,7 +472,7 @@ export class ViewerImpl {
   /**
    * Passthrough for ampdoc visibility state. Only to be used by viewer
    * integration.
-   * @restricted
+   * @@restricted
    * TODO(#22733): remove if no longer used by the viewer.
    */
   whenFirstVisible() {
@@ -482,7 +482,7 @@ export class ViewerImpl {
   /**
    * Passthrough for ampdoc visibility state. Only to be used by viewer
    * integration.
-   * @restricted
+   * @@restricted
    * TODO(#22733): remove if no longer used by the viewer.
    */
   whenNextVisible() {
@@ -492,7 +492,7 @@ export class ViewerImpl {
   /**
    * Passthrough for ampdoc visibility state. Only to be used by viewer
    * integration.
-   * @restricted
+   * @@restricted
    * TODO(#22733): remove if no longer used by the viewer.
    */
   getFirstVisibleTime() {
@@ -502,7 +502,7 @@ export class ViewerImpl {
   /**
    * Passthrough for ampdoc visibility state. Only to be used by viewer
    * integration.
-   * @restricted
+   * @@restricted
    * TODO(#22733): remove if no longer used by the viewer.
    */
   getLastVisibleTime() {
@@ -512,7 +512,7 @@ export class ViewerImpl {
   /**
    * Passthrough for ampdoc visibility state. Only to be used by viewer
    * integration.
-   * @restricted
+   * @@restricted
    * TODO(#22733): remove if no longer used by the viewer.
    */
   onVisibilityChanged(handler) {
@@ -559,7 +559,7 @@ export class ViewerImpl {
    * the current page's URL. The trusted viewers are allowed to override this
    * value.
    * @return {!Promise<string>}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getViewerUrl() {
     return this.viewerUrl_;

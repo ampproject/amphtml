@@ -81,7 +81,7 @@ export class History {
     this.binding_.setOnStateUpdated(this.onStateUpdated_.bind(this));
   }
 
-  /** @visibleForTesting */
+  /** @@visibleForTesting */
   cleanup() {
     this.binding_.cleanup();
   }

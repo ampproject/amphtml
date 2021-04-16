@@ -38,7 +38,7 @@ export class WebviewViewerForTesting {
     /** @type {string} */
     this.ampdocUrl = ampdocUrl;
 
-    /** @visibleForTesting @private {boolean} */
+    /** @@visibleForTesting @private {boolean} */
     this.alreadyLoaded_ = false;
 
     /** @private {string} */
@@ -184,7 +184,7 @@ export class WebviewViewerForTesting {
    * Fake docs for testing
    * @param {*} eventData
    * @return {*} TODO(#23582): Specify return type
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   processRequest_(eventData) {
     const data = eventData;

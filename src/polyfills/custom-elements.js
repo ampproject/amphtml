@@ -902,7 +902,7 @@ function setPrototypeOf(obj, prototype) {
  * created object.
  * @param {!Object} obj
  * @param {!Object} prototype
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function copyProperties(obj, prototype) {
   let current = prototype;

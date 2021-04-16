@@ -214,7 +214,7 @@ export const MODULE_NOMODULE_PARAMS_EXP = {
  *    and arguments provided to function call.
  * @return {!Function} protected function
  * @template T
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function protectFunctionWrapper(
   fn,
@@ -373,7 +373,7 @@ export class AmpA4A extends AMP.BaseElement {
      * be null before buildCallback() executes or if the impl does not provide
      * an analytice config.
      * @private {?Element}
-     * @visibleForTesting
+     * @@visibleForTesting
      */
     this.a4aAnalyticsElement_ = null;
 
@@ -581,7 +581,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * @return {!../../../src/service/resource.Resource}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getResource() {
     return this.element.getResources().getResourceForElement(this.element);
@@ -601,7 +601,7 @@ export class AmpA4A extends AMP.BaseElement {
    * postAdResponseExperimentFeatures is populated.
    * @return {boolean} whether in experiment giving non-AMP creatives same
    *    benefits as AMP (increased priority, no throttle)
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   inNonAmpPreferenceExp() {
     return (
@@ -928,7 +928,7 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * @visibleForTesting
+   * @@visibleForTesting
    * @return {boolean}
    */
   isInNoSigningExp() {
@@ -1624,7 +1624,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Forces the UI Handler to collapse this slot.
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   forceCollapse() {
     if (this.isRefreshing) {
@@ -1660,7 +1660,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * @param {!Element} iframe that was just created.  To be overridden for
    * testing.
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   onCrossDomainIframeCreated(iframe) {
     dev().info(
@@ -2570,7 +2570,7 @@ export function assignAdUrlToError(error, adUrl) {
  *
  * @param {!Window} win
  * @return {!SignatureVerifier}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function signatureVerifierFor(win) {
   const propertyName = 'AMP_FAST_FETCH_SIGNATURE_VERIFIER_';
@@ -2583,7 +2583,7 @@ export function signatureVerifierFor(win) {
 /**
  * @param {!Window} win
  * @return {boolean}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function isPlatformSupported(win) {
   // Require Shadow DOM support for a4a.

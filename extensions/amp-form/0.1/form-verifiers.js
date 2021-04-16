@@ -60,7 +60,7 @@ export function getFormVerifier(form, xhr) {
  * data in ways not possible with standard form validation, or check
  * values against sets of data too large to fit in browser memory
  * e.g. ensuring zip codes match with cities.
- * @visibleForTesting
+ * @@visibleForTesting
  * @abstract
  */
 export class FormVerifier {
@@ -142,13 +142,13 @@ export class FormVerifier {
 
 /**
  * A no-op verifier.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class DefaultVerifier extends FormVerifier {}
 
 /**
  * A verifier that verifies values via an XHR
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class AsyncVerifier extends FormVerifier {
   /**

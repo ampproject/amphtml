@@ -37,7 +37,7 @@ const INABOX_UNREGISTER_IFRAME = 'inaboxUnregisterIframe';
 
 /**
  * Class for initializing host script and consuming queued messages.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class InaboxHost {
   /**

@@ -25,7 +25,7 @@ const TAG_ = 'amp-analytics/iframe-transport-message-queue';
 const MAX_QUEUE_SIZE_ = 100;
 
 /**
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class IframeTransportMessageQueue {
   /**
@@ -61,7 +61,7 @@ export class IframeTransportMessageQueue {
   /**
    * Returns whether the queue has been marked as ready yet
    * @return {boolean}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   isReady() {
     return this.isReady_;
@@ -70,7 +70,7 @@ export class IframeTransportMessageQueue {
   /**
    * Indicate that a cross-domain frame is ready to receive messages, and
    * send all messages that were previously queued for it.
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   setIsReady() {
     this.isReady_ = true;
@@ -80,7 +80,7 @@ export class IframeTransportMessageQueue {
   /**
    * Returns how many creativeId -> message(s) mappings there are
    * @return {number}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   queueSize() {
     return this.pendingEvents_.length;

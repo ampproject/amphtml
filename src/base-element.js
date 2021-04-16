@@ -299,7 +299,7 @@ export class BaseElement {
    * allow individual extensions to request priority upgrade.
    *
    * @param {number} newLayoutPriority
-   * @restricted
+   * @@restricted
    */
   updateLayoutPriority(newLayoutPriority) {
     this.element

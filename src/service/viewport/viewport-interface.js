@@ -128,7 +128,7 @@ export class ViewportInterface extends Disposable {
   /**
    * Resource manager signals to the viewport that content height is changed
    * and some action may need to be taken.
-   * @restricted Use is restricted due to potentially very heavy performance
+   * @@restricted Use is restricted due to potentially very heavy performance
    *   impact. Can only be called when not actively scrolling.
    */
   contentHeightChanged() {}

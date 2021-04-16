@@ -308,7 +308,7 @@ export class AccessService {
   /**
    * @return {!AccessService}
    * @private
-   * @restricted
+   * @@restricted
    */
   start_() {
     if (!this.enabled_) {

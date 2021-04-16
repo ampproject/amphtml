@@ -37,13 +37,13 @@ export class ClickDelayFilter extends Filter {
 
     /**
      * @const {!../config.ClickDelayConfig}
-     * @visibleForTesting
+     * @@visibleForTesting
      */
     this.spec = spec;
 
     /**
      * @type {number}
-     * @visibleForTesting
+     * @@visibleForTesting
      */
     this.intervalStart = Date.now();
 

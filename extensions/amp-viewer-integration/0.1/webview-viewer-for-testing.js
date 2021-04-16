@@ -39,7 +39,7 @@ export class WebviewViewerForTesting {
     /** @type {string} */
     this.ampdocUrl = ampdocUrl;
 
-    /** @visibleForTesting @private {boolean} */
+    /** @@visibleForTesting @private {boolean} */
     this.alreadyLoaded_ = false;
 
     /** @private {string} */

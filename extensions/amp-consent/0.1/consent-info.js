@@ -80,7 +80,7 @@ export const CONSENT_ITEM_STATE = {
 
 /**
  * @enum {string}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export const TCF_POST_MESSAGE_API_COMMANDS = {
   GET_TC_DATA: 'getTCData',

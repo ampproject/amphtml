@@ -211,7 +211,7 @@ export function transformShadowCss(shadowRoot, css) {
  * @param {!ShadowRoot} shadowRoot
  * @param {string} css
  * @return {string}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function scopeShadowCss(shadowRoot, css) {
   const id = devAssert(shadowRoot['id']);
@@ -328,7 +328,7 @@ export function installShadowStyle(shadowRoot, name, cssText) {
 
 /**
  * @param {!Window} win
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function resetShadowStyleCacheForTesting(win) {
   win[SHADOW_CSS_CACHE] = null;
@@ -336,7 +336,7 @@ export function resetShadowStyleCacheForTesting(win) {
 
 /**
  * @param {boolean|undefined} val
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setShadowDomStreamingSupportedForTesting(val) {
   shadowDomStreamingSupported = val;

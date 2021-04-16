@@ -94,7 +94,7 @@ export function FitText({
  * @param {number} minFontSize
  * @param {number} maxFontSize
  * @return {number}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function calculateFontSize(
   measurer,
@@ -124,7 +124,7 @@ export function calculateFontSize(
  * @param {Element} measurer
  * @param {number} maxHeight
  * @param {number} fontSize
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setOverflowStyle(measurer, maxHeight, fontSize) {
   const overflowed = measurer./*OK*/ scrollHeight > maxHeight;

@@ -181,7 +181,7 @@ export class FormValidator {
   /**
    * Fires a valid/invalid event from the form if its validity state
    * has changed since the last invocation of this function.
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   fireValidityEventIfNecessary() {
     const previousValidity = this.formValidity_;

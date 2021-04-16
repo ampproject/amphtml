@@ -34,7 +34,7 @@ function isShowable(element) {
 /**
  * @param {!Element} element
  * @return {?Element}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getAutofocusElementForShowAction(element) {
   if (element.hasAttribute('autofocus')) {
@@ -55,7 +55,7 @@ const AMP_CSS_RE = /^i-amphtml-/;
 /**
  * This service contains implementations of some of the most typical actions,
  * such as hiding DOM elements.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class StandardActions {
   /**

@@ -31,7 +31,7 @@ const STUB = '_stub';
 /**
  * @param {!Window} win
  * @return {boolean}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function shouldLoadPolyfill(win) {
   return !win.ResizeObserver || !!win.ResizeObserver[STUB];
@@ -174,7 +174,7 @@ export class ResizeObserverStub {
  */
 ResizeObserverStub[UPGRADERS] = [];
 
-/** @visibleForTesting */
+/** @@visibleForTesting */
 export function resetStubsForTesting() {
   ResizeObserverStub[UPGRADERS] = [];
 }

@@ -84,7 +84,7 @@ const TAG = 'amp-ad-network-adsense-impl';
  */
 const sharedState = new AdsenseSharedState();
 
-/** @visibleForTesting */
+/** @@visibleForTesting */
 export function resetSharedState() {
   sharedState.reset();
 }
@@ -228,7 +228,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /**
    * Selects into experiments based on url fragment and/or page level diversion.
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   divertExperiments() {
     const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([

@@ -64,7 +64,7 @@ const Phase = {
 /**
  * See src/transfer/TransferrableStorage.ts in worker-dom.
  * @enum {number}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export const StorageLocation = {
   LOCAL: 0,
@@ -194,7 +194,7 @@ export class AmpScript extends AMP.BaseElement {
 
   /**
    * @param {!AmpScriptService} service
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   setService(service) {
     this.service_ = service;
@@ -202,7 +202,7 @@ export class AmpScript extends AMP.BaseElement {
 
   /**
    * @return {?UserActivationTracker}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getUserActivation() {
     return this.userActivation_;
@@ -557,7 +557,7 @@ export class AmpScript extends AMP.BaseElement {
 /**
  * Service for sharing data across <amp-script> elements.
  *
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class AmpScriptService {
   /**
@@ -635,7 +635,7 @@ const FORM_ELEMENTS = [
 
 /**
  * A DOMPurify wrapper that implements the worker-dom.Sanitizer interface.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class SanitizerImpl {
   /**

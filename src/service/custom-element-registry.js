@@ -185,7 +185,7 @@ export function registerElement(win, name, implementationClass) {
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!AmpElement} element
  * @param {?(typeof BaseElement)} implementationClass
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function elementConnectedCallback(ampdoc, element, implementationClass) {
   // Make sure that the ampdoc has already been stubbed.
@@ -212,7 +212,7 @@ export function elementConnectedCallback(ampdoc, element, implementationClass) {
  * This makes it possible to mark an element as loaded in a test.
  * @param {!Window} win
  * @param {string} elementName Name of an extended custom element.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function markElementScheduledForTesting(win, elementName) {
   const knownElements = getExtendedElements(win);
@@ -225,7 +225,7 @@ export function markElementScheduledForTesting(win, elementName) {
  * Resets our scheduled elements.
  * @param {!Window} win
  * @param {string} elementName Name of an extended custom element.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function resetScheduledElementForTesting(win, elementName) {
   if (win.__AMP_EXTENDED_ELEMENTS) {
@@ -238,7 +238,7 @@ export function resetScheduledElementForTesting(win, elementName) {
  * @param {!Window} win
  * @param {string} elementName Name of an extended custom element.
  * @return {?function()}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getElementClassForTesting(win, elementName) {
   const knownElements = win.__AMP_EXTENDED_ELEMENTS;

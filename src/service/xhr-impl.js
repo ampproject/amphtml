@@ -33,7 +33,7 @@ import {parseJson} from '../json';
  * A service that polyfills Fetch API for use within AMP.
  *
  * @package Visible for type.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class Xhr {
   /**

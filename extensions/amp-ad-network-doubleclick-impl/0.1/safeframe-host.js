@@ -256,7 +256,7 @@ export class SafeframeHostApi {
    * Returns the canonical URL of the page, if the publisher allows
    * it to be passed.
    * @return {string|undefined}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   maybeGetCanonicalUrl() {
     // Don't allow for referrer policy same-origin,

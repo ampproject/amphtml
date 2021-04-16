@@ -23,7 +23,7 @@ import {dict} from '../../../src/core/types/object';
  * and demo purposes. This implementation gets stripped out in compiled
  * production code.
  * @implements {./ad-network-config.AdNetworkConfigDef}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class PingNetworkConfig {
   /**

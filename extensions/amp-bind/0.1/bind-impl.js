@@ -645,7 +645,7 @@ export class Bind {
   /**
    * The current number of bindings.
    * @return {number}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   numberOfBindings() {
     return this.boundElements_.reduce((number, boundElement) => {
@@ -655,7 +655,7 @@ export class Bind {
 
   /**
    * @param {number} value
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   setMaxNumberOfBindingsForTesting(value) {
     this.maxNumberOfBindings_ = value;
@@ -1756,7 +1756,7 @@ export class Bind {
    * Wait for bind scan to finish for testing.
    *
    * @return {?Promise}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   initializePromiseForTesting() {
     return this.initializePromise_;
@@ -1767,7 +1767,7 @@ export class Bind {
    * be called once for each event that changes bindings.
    *
    * @return {?Promise}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   setStatePromiseForTesting() {
     return this.setStatePromise_;

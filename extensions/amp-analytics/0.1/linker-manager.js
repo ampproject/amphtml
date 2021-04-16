@@ -484,7 +484,7 @@ export class LinkerManager {
  * @param {string} domain1
  * @param {string} domain2
  * @return {boolean}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function areFriendlyDomains(domain1, domain2) {
   return getBaseDomain(domain1) === getBaseDomain(domain2);
@@ -516,7 +516,7 @@ function regexEscape(str) {
  * @param {string} hostname
  * @param {string} domain
  * @return {boolean}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function isWildCardMatch(hostname, domain) {
   const escaped = regexEscape(domain);

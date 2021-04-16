@@ -26,7 +26,7 @@ let denylistedProperties = null;
 
 /**
  * @param {?Array<string>} properties
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function setDenylistedPropertiesForTesting(properties) {
   denylistedProperties = properties;

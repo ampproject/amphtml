@@ -100,7 +100,7 @@ export class VideoUtils {
     return isAutoplaySupported(win, isLiteViewer);
   }
 
-  /** @visibleForTesting */
+  /** @@visibleForTesting */
   static resetIsAutoplaySupported() {
     setIsAutoplaySupported();
   }

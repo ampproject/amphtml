@@ -147,7 +147,7 @@ export class IntersectionObserver3pHost {
  * @param {!../layout-rect.LayoutRectDef} smaller
  * @param {!../layout-rect.LayoutRectDef} larger
  * @return {number}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function intersectionRatio(smaller, larger) {
   const smallerBoxArea = smaller.width * smaller.height;

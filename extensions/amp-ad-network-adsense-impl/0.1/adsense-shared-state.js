@@ -70,7 +70,7 @@ export class AdsenseSharedState {
 
   /**
    * Resets to initial state. Currently used only in testing.
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   reset() {
     this.previousSlots_ = [];

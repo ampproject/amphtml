@@ -79,7 +79,7 @@ export function installGlobalNavigationHandlerForDoc(ampdoc) {
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Event} e
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function maybeExpandUrlParamsForTesting(ampdoc, e) {
   maybeExpandUrlParams(ampdoc, e);
@@ -88,7 +88,7 @@ export function maybeExpandUrlParamsForTesting(ampdoc, e) {
 /**
  * Intercept any click on the current document and prevent any
  * linking to an identifier from pushing into the history stack.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class Navigation {
   /**

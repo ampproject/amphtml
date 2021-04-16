@@ -294,7 +294,7 @@ export class Templates {
    * @param {string} type
    * @param {typeof ../base-template.BaseTemplate} templateClass
    * @private
-   * @restricted
+   * @@restricted
    */
   registerTemplate_(type, templateClass) {
     if (!this.templateClassMap_[type]) {
@@ -352,7 +352,7 @@ export function registerExtendedTemplateForDoc(ampdoc, type, templateClass) {
  * @param {!Templates} templates
  * @param {string} type
  * @return {!Promise<typeof ../base-template.BaseTemplate>|undefined}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getTemplateClassForTesting(templates, type) {
   return templates.templateClassMap_[type];

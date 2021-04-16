@@ -591,7 +591,7 @@ export class AmpPanZoom extends AMP.BaseElement {
   /**
    * @param {!../../../src/gesture-recognizers.DoubletapDef} data
    * @return {!Promise}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   handleDoubleTap(data) {
     const {clientX, clientY} = data;
@@ -603,7 +603,7 @@ export class AmpPanZoom extends AMP.BaseElement {
   /**
    * @param {!../../../src/gesture-recognizers.PinchDef} data
    * @return {!Promise}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   handlePinch(data) {
     const {centerClientX, centerClientY, deltaX, deltaY, dir, last} = data;
@@ -623,7 +623,7 @@ export class AmpPanZoom extends AMP.BaseElement {
   /**
    * @param {!../../../src/gesture-recognizers.SwipeDef} data
    * @return {!Promise}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   handleSwipe(data) {
     const {deltaX, deltaY, last, velocityX, velocityY} = data;

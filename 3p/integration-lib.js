@@ -209,7 +209,7 @@ export function draw3p(
  * Only check for browsers that support ancestorOrigins
  * @param {!Window} window
  * @param {!Location} parentLocation
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function validateParentOrigin(window, parentLocation) {
   const ancestors = window.location.ancestorOrigins;
@@ -232,7 +232,7 @@ export function validateParentOrigin(window, parentLocation) {
  * @param {!Window} window
  * @param {string} type 3p type
  * @param {!Array<string>|undefined} allowedTypes May be undefined.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function validateAllowedTypes(window, type, allowedTypes) {
   const thirdPartyHost = parseUrlDeprecated(urls.thirdParty).hostname;
@@ -261,7 +261,7 @@ export function validateAllowedTypes(window, type, allowedTypes) {
  * Check that parent host name was allowed.
  * @param {!Window} window
  * @param {!Array<string>} allowedHostnames Suffixes of allowed host names.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
   if (!window.document.referrer) {
@@ -297,7 +297,7 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
 /**
  * Throws if this window is a top level window.
  * @param {!Window} window
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function ensureFramed(window) {
   if (window == window.parent) {
@@ -309,7 +309,7 @@ export function ensureFramed(window) {
  * Expects the fragment to contain JSON.
  * @param {string} fragment Value of location.fragment
  * @return {?JsonObject}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function parseFragment(fragment) {
   try {

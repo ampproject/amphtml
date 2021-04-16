@@ -60,7 +60,7 @@ export function getTrackImpressionPromise() {
 
 /**
  * Function that reset the trackImpressionPromise only for testing
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function resetTrackImpressionPromiseForTesting() {
   trackImpressionPromise = null;
@@ -170,7 +170,7 @@ function handleReplaceUrl(win) {
 /**
  * @param {string} referrer
  * @return {boolean}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function isTrustedReferrer(referrer) {
   const url = parseUrlDeprecated(referrer);

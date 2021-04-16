@@ -155,14 +155,14 @@ export class MediaPool {
     /**
      * Holds all of the pool-bound media elements that have been allocated.
      * @const {!Object<!MediaType, !Array<!PoolBoundElementDef>>}
-     * @visibleForTesting
+     * @@visibleForTesting
      */
     this.allocated = {};
 
     /**
      * Holds all of the pool-bound media elements that have not been allocated.
      * @const {!Object<!MediaType, !Array<!PoolBoundElementDef>>}
-     * @visibleForTesting
+     * @@visibleForTesting
      */
     this.unallocated = {};
 

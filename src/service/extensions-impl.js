@@ -94,7 +94,7 @@ let ExtensionHolderDef;
 /**
  * Install extensions service.
  * @param {!Window} window
- * @restricted
+ * @@restricted
  */
 export function installExtensionsService(window) {
   registerServiceBuilder(window, 'extensions', Extensions);
@@ -102,7 +102,7 @@ export function installExtensionsService(window) {
 
 /**
  * The services that manages extensions in the runtime.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class Extensions {
   /**
@@ -138,7 +138,7 @@ export class Extensions {
    * @param {boolean} latest
    * @param {function(!Object, !Object)} factory
    * @param {!Object} arg
-   * @restricted
+   * @@restricted
    */
   registerExtension(extensionId, version, latest, factory, arg) {
     const holder = this.getExtensionHolder_(extensionId, /* auto */ true);
@@ -323,7 +323,7 @@ export class Extensions {
    * @param {string} name
    * @param {typeof ../base-element.BaseElement} implementationClass
    * @param {?string|undefined} css
-   * @restricted
+   * @@restricted
    */
   addElement(name, implementationClass, css) {
     const holder = this.getCurrentExtensionHolder_(name);
@@ -339,7 +339,7 @@ export class Extensions {
    * extension registration.
    * @param {string} name
    * @param {typeof ../base-template.BaseTemplate} implementationClass
-   * @restricted
+   * @@restricted
    */
   addTemplate(name, implementationClass) {
     this.addDocFactory((ampdoc) => {
@@ -415,7 +415,7 @@ export class Extensions {
    * extension registration.
    * @param {function(!./ampdoc-impl.AmpDoc)} factory
    * @param {string=} opt_forName
-   * @restricted
+   * @@restricted
    */
   addDocFactory(factory, opt_forName) {
     const holder = this.getCurrentExtensionHolder_(opt_forName);
@@ -443,7 +443,7 @@ export class Extensions {
    * Preinstalls built-ins and legacy elements in the emebedded ampdoc.
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!Array<string>} extensionIds
-   * @restricted
+   * @@restricted
    */
   preinstallEmbed(ampdoc, extensionIds) {
     const topWin = this.win;
@@ -469,7 +469,7 @@ export class Extensions {
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!Array<string>} extensionIds
    * @return {!Promise}
-   * @restricted
+   * @@restricted
    */
   installExtensionsInDoc(ampdoc, extensionIds) {
     return Promise.all(

@@ -330,7 +330,7 @@ export class TcfApiCommandManager {
   /**
    * @param {?Object} metadata
    * @return {!MinimalPingReturn}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getMinimalPingReturnForTesting(metadata) {
     return this.getMinimalPingReturn_(metadata);
@@ -342,7 +342,7 @@ export class TcfApiCommandManager {
    * @param {?string} tcString
    * @param {number=} listenerId
    * @return {!MinimalPingReturn}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getMinimalTcDataForTesting(metadata, sharedData, tcString, listenerId) {
     return this.getMinimalTcData_(metadata, sharedData, tcString, listenerId);

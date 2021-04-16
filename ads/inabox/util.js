@@ -27,7 +27,7 @@
  * @param {!Window} win
  * @param {{measure: (Function|undefined), mutate: (Function|undefined)}} task
  * @param {!Object=} opt_state
- * @visibleForTesting
+ * @@visibleForTesting
  * TODO(alanorozco): Figure out a longer-term solution
  */
 export function restrictedVsync(win, task, opt_state) {
@@ -49,7 +49,7 @@ export function restrictedVsync(win, task, opt_state) {
  * tests.
  * @param {!Function} callback
  * @param {number} timeMs
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function timer(callback, timeMs) {
   setTimeout(callback, timeMs);

@@ -80,7 +80,7 @@ export class AmpBysideContent extends AMP.BaseElement {
 
     /**
      * @private {?Promise}
-     * @visibleForTesting
+     * @@visibleForTesting
      */
     this.iframePromise_ = null;
 

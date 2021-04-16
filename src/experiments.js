@@ -247,7 +247,7 @@ function saveExperimentToggles(win, toggles) {
  * See getExperimentToggles().
  * @param {!Window} win
  * @return {!Object<string, boolean>}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getExperimentTogglesForTesting(win) {
   return getExperimentToggles(win);
@@ -256,7 +256,7 @@ export function getExperimentTogglesForTesting(win) {
 /**
  * Resets the experimentsToggle cache for testing purposes.
  * @param {!Window} win
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function resetExperimentTogglesForTesting(win) {
   saveExperimentToggles(win, {});
@@ -283,7 +283,7 @@ function slowButAccuratePrng() {
  * allows us to set an "accurate" PRNG for branch selection, but to mock it
  * out easily in tests.
  *
- * @visibleForTesting
+ * @@visibleForTesting
  * @const {!{accuratePrng: function():number}}
  */
 export const RANDOM_NUMBER_GENERATORS = {
@@ -388,7 +388,7 @@ export function getActiveExperimentBranches(win) {
  * @param {string} experimentName Name of the experiment to check.
  * @param {?string} branchId ID of branch to force or null to disable
  *     altogether.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function forceExperimentBranch(win, experimentName, branchId) {
   win.__AMP_EXPERIMENT_BRANCHES = win.__AMP_EXPERIMENT_BRANCHES || {};

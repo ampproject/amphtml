@@ -32,7 +32,7 @@ const BUILD_ATTRIBUTES = [
   'aria-labelledby',
 ];
 const LAYOUT_ATTRIBUTES = ['src', 'srcset'];
-/** @visibleForTesting */
+/** @@visibleForTesting */
 export const SRC_PLACEHOLDER =
   'data:image/gif;base64,' +
   'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';

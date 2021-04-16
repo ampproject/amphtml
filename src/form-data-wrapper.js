@@ -62,7 +62,7 @@ export function isFormDataWrapper(o) {
  * For more details on this, see http://mdn.io/FormData.
  *
  * @implements {FormDataWrapperInterface}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class PolyfillFormDataWrapper {
   /** @override */

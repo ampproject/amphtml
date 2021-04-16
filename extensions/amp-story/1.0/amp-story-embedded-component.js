@@ -1481,7 +1481,7 @@ export class AmpStoryEmbeddedComponent {
   }
 
   /**
-   * @visibleForTesting
+   * @@visibleForTesting
    * @return {?Element}
    */
   getShadowRootForTesting() {

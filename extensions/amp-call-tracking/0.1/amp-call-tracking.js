@@ -42,7 +42,7 @@ function fetch_(win, url) {
   return cachedResponsePromises_[url];
 }
 
-/** @visibleForTesting */
+/** @@visibleForTesting */
 export function clearResponseCacheForTesting() {
   cachedResponsePromises_ = {};
 }

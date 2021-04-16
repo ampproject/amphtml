@@ -242,7 +242,7 @@ export function preloadBootstrap(win, type, ampdoc, preconnect) {
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {boolean=} opt_strictForUnitTest
  * @return {string}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getBootstrapBaseUrl(
   parentWindow,
@@ -328,7 +328,7 @@ function getAdsLocalhost(win) {
  * called once and hence all frames on a page use the same URL.
  * @param {!Window} win
  * @return {string}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getSubDomain(win) {
   return 'd-' + getRandom(win);
@@ -397,7 +397,7 @@ function getCustomBootstrapBaseUrl(
 /**
  * Applies a sandbox to the iframe, if the required flags can be allowed.
  * @param {!Element} iframe
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function applySandbox(iframe) {
   if (!iframe.sandbox || !iframe.sandbox.supports) {
@@ -423,7 +423,7 @@ export function applySandbox(iframe) {
  * window in the window hierarchy and the second a random integer.
  * @param {!Window} parentWindow
  * @return {string}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function generateSentinel(parentWindow) {
   let windowDepth = 0;
@@ -435,7 +435,7 @@ export function generateSentinel(parentWindow) {
 
 /**
  * Resets the count of each 3p frame type
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function resetCountForTesting() {
   count = {};

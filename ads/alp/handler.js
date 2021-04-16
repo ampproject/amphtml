@@ -47,7 +47,7 @@ export function installAlpClickHandler(win) {
  * with impression logging.
  * @param {!Event} e
  * @param {function(string)=} opt_viewerNavigate
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function handleClick(e, opt_viewerNavigate) {
   if (e.defaultPrevented) {
@@ -193,7 +193,7 @@ export function warmupStatic(win) {
  * For events (such as touch events) that point to an eligible URL, preload
  * that URL.
  * @param {!Event} e
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function warmupDynamic(e) {
   const link = getLinkInfo(e);

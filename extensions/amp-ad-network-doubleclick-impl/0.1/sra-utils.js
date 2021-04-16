@@ -28,7 +28,7 @@ const TAG = 'amp-ad-network-doubleclick-impl';
 
 /**
  * @const {string}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export const TFCD = 'tagForChildDirectedTreatment';
 
@@ -87,7 +87,7 @@ function getFirstInstanceValue_(impls, extractFn) {
  *    iu_parts=123,foo,bar,blah & enc_prev_ius=/0/1/2,/3/1/2/0
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
  * @return {?Object<string,string>}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function combineInventoryUnits(impls) {
   const uniqueIuNames = {};
@@ -122,7 +122,7 @@ export function combineInventoryUnits(impls) {
  * cookie opt out in targeting.
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
  * @return {?Object<string,string>}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getCookieOptOut(impls) {
   return getFirstInstanceValue_(impls, (impl) =>
@@ -136,7 +136,7 @@ export function getCookieOptOut(impls) {
  * Combine ad unit key of each block via comma separated values.
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
  * @return {?Object<string,string>}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getAdks(impls) {
   return {'adks': impls.map((impl) => devAssert(impl.adKey)).join()};
@@ -146,7 +146,7 @@ export function getAdks(impls) {
  * Combine block sizes via comma separated values.
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
  * @return {?Object<string,string>}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getSizes(impls) {
   return {
@@ -159,7 +159,7 @@ export function getSizes(impls) {
  * in targeting.
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
  * @return {?Object<string,string>}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getTfcd(impls) {
   return getFirstInstanceValue_(impls, (impl) =>
@@ -174,7 +174,7 @@ export function getTfcd(impls) {
  * manual experiment id.
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
  * @return {?Object<string,string>}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function isAdTest(impls) {
   return getFirstInstanceValue_(impls, (impl) =>
@@ -188,7 +188,7 @@ export function isAdTest(impls) {
  * key (list of categories are comma separated).
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
  * @return {?Object<string,string>}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getTargetingAndExclusions(impls) {
   let commonKVs = null;
@@ -251,7 +251,7 @@ export function getTargetingAndExclusions(impls) {
  * matter).
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
  * @return {?Object<string,string>}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getExperimentIds(impls) {
   const eids = {};
@@ -272,7 +272,7 @@ export function getExperimentIds(impls) {
  * block.
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
  * @return {?Object<string,string>}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getIdentity(impls) {
   return getFirstInstanceValue_(impls, (impl) => impl.buildIdentityParams());
@@ -284,7 +284,7 @@ export function getIdentity(impls) {
  * blocks has force safeframe, parameter is not included in SRA request.
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
  * @return {?Object<string,string>}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getForceSafeframe(impls) {
   let safeframeForced = false;
@@ -301,7 +301,7 @@ export function getForceSafeframe(impls) {
  * for left (adxs) and top (adyx) via comma separated.
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
  * @return {?Object<string,string>}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getPageOffsets(impls) {
   const adxs = [];
@@ -320,7 +320,7 @@ export function getPageOffsets(impls) {
  * none of the blocks have a container, then parameter is not sent.
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
  * @return {?Object<string,string>}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getContainers(impls) {
   let hasAmpContainer = false;
@@ -337,7 +337,7 @@ export function getContainers(impls) {
  * Combine fluid settings for each block via comma separator.
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
  * @return {?Object<string,string>}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getIsFluid(impls) {
   let hasFluid = false;

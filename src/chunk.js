@@ -124,7 +124,7 @@ export function allowLongTasksInChunking() {
 }
 
 /**
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function activateChunkingForTesting() {
   deactivated = false;
@@ -532,7 +532,7 @@ class Chunks {
  *     budget for callback to fire.
  * @param {number} timeout in millis for callback to fire.
  * @param {function(?IdleDeadline)} fn Callback.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function onIdle(win, minimumTimeRemaining, timeout, fn) {
   const startTime = Date.now();

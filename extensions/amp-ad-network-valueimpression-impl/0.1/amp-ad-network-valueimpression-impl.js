@@ -73,7 +73,7 @@ const MAX_URL_LENGTH = 15360;
 
 /**
  * @const {!./shared/url-builder.QueryParameterDef}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 
@@ -399,7 +399,7 @@ function getHistoryLength(win) {
  * canonical page.
  * @param {!Window} win
  * @return {?string} The binary type enum.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 function getAmpRuntimeTypeParameter(win) {
   const art = getBinaryTypeNumericalCode(getBinaryType(win));
@@ -595,7 +595,7 @@ function makeCorrelator(pageViewId, opt_clientId) {
 /**
  * @param {string} url
  * @return {string} hostname portion of url
- * @visibleForTesting
+ * @@visibleForTesting
  */
 function extractHost(url) {
   return (/^(?:https?:\/\/)?([^\/\?:]+)/i.exec(url) || [])[1] || url;

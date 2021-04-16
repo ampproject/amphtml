@@ -31,7 +31,7 @@ let ThirdPartyFunctionDef;
 
 /**
  * @const {!Object<ThirdPartyFunctionDef>}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 let registrations;
 

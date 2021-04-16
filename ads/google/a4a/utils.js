@@ -82,7 +82,7 @@ export const SANDBOX_HEADER = 'amp-ff-sandbox';
  * added by a publisher page.
  *
  * @const {string}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';
 
@@ -94,7 +94,7 @@ export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';
  * added by a publisher page.
  *
  * @const {string}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export const AMP_EXPERIMENT_ATTRIBUTE = 'data-amp-experiment-id';
 
@@ -109,7 +109,7 @@ export let NameframeExperimentConfig;
 
 /**
  * @const {!./shared/url-builder.QueryParameterDef}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 
@@ -415,7 +415,7 @@ function getHistoryLength(win) {
 /**
  * @param {string} url
  * @return {string} hostname portion of url
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function extractHost(url) {
   return (/^(?:https?:\/\/)?([^\/\?:]+)/i.exec(url) || [])[1] || url;
@@ -525,7 +525,7 @@ function makeCorrelator(pageViewId, opt_clientId) {
  * @param {!Window} win The window for which we read the browser dimensions.
  * @param {{width: number, height: number}|null} viewportSize
  * @return {string}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function additionalDimensions(win, viewportSize) {
   // Some browsers throw errors on some of these.
@@ -1021,7 +1021,7 @@ function executeIdentityTokenFetch(
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
  * @param {string=} domain
  * @return {string} url
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getIdentityTokenRequestUrl(win, ampDoc, domain = undefined) {
   if (!domain && win != win.top && win.location.ancestorOrigins) {
@@ -1103,7 +1103,7 @@ function getBrowserCapabilitiesBitmap(win) {
  * canonical page.
  * @param {!Window} win
  * @return {?string} The binary type enum.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getAmpRuntimeTypeParameter(win) {
   const art = getBinaryTypeNumericalCode(getBinaryType(win));
@@ -1115,7 +1115,7 @@ export function getAmpRuntimeTypeParameter(win) {
  * based on the geolocation.
  * @param {!Element} element
  * @return {!Promise<boolean>}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getServeNpaPromise(element) {
   if (!element.hasAttribute('always-serve-npa')) {

@@ -300,7 +300,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   }
 
   /**
-   * @visibleForTesting
+   * @@visibleForTesting
    * @return {Element}
    */
   getAdBadgeRoot() {

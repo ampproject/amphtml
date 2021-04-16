@@ -483,7 +483,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      *
      * @return {?Promise}
      * @final
-     * @restricted
+     * @@restricted
      */
     buildInternal() {
       assertNotTemplate(this);
@@ -619,7 +619,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      *
      * @return {!Promise}
      * @final
-     * @restricted
+     * @@restricted
      */
     mountInternal() {
       if (this.mountPromise_) {
@@ -815,7 +815,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      *
      * @param {!Element=} opt_scroller A child of the container that should be
      * monitored. Typically a scrollable element.
-     * @restricted
+     * @@restricted
      * @final
      */
     setAsContainerInternal(opt_scroller) {
@@ -825,7 +825,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
     /**
      * See `BaseElement.removeAsContainer`.
-     * @restricted
+     * @@restricted
      * @final
      */
     removeAsContainerInternal() {
@@ -2179,7 +2179,7 @@ function isInternalOrServiceNode(node) {
  * @param {(typeof ./base-element.BaseElement)=} opt_implementationClass For testing only.
  * @param {function(!./service/ampdoc-impl.AmpDoc, !AmpElement element, ?(typeof BaseElement))=} opt_elementConnectedCallback
  * @return {!Object} Prototype of element.
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function createAmpElementForTesting(
   win,
@@ -2197,7 +2197,7 @@ export function createAmpElementForTesting(
 }
 
 /**
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function resetStubsForTesting() {
   stubbedElements.length = 0;
@@ -2206,7 +2206,7 @@ export function resetStubsForTesting() {
 /**
  * @param {!AmpElement} element
  * @return {?(typeof BaseElement)}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getImplClassSyncForTesting(element) {
   return element.implClass_;
@@ -2215,7 +2215,7 @@ export function getImplClassSyncForTesting(element) {
 /**
  * @param {!AmpElement} element
  * @return {!BaseElement}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getImplSyncForTesting(element) {
   return element.impl_;
@@ -2224,7 +2224,7 @@ export function getImplSyncForTesting(element) {
 /**
  * @param {!AmpElement} element
  * @return {?Array<!./service/action-impl.ActionInvocation>|undefined}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function getActionQueueForTesting(element) {
   return element.actionQueue_;

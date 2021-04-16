@@ -108,7 +108,7 @@ export function unregisterContainer(container) {
 
 /**
  * @implements {Disposable}
- * @visibleForTesting
+ * @@visibleForTesting
  * @package
  */
 export class DisplayObserver {

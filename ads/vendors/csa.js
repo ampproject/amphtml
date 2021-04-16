@@ -27,7 +27,7 @@ const overflowHeight = 40;
 /**
  * Enum for different AdSense Products
  * @enum {number}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export const AD_TYPE = {
   /** Value if we can't determine which product to request */
@@ -148,7 +148,7 @@ function orientationChangeHandler(global, containerDiv) {
  * @param {!Window} global The window object of the iframe
  * @param {!Element} container The CSA container
  * @param {number} requestedHeight The height of the resize request
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function resizeSuccessHandler(global, container, requestedHeight) {
   currentAmpHeight = requestedHeight;
@@ -167,7 +167,7 @@ export function resizeSuccessHandler(global, container, requestedHeight) {
  * @param {!Window} global The window object of the iframe
  * @param {!Element} container The CSA container
  * @param {number} requestedHeight The height of the resize request
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function resizeDeniedHandler(global, container, requestedHeight) {
   const overflow = global.document.getElementById('overflow');
@@ -240,7 +240,7 @@ function getAdType(data) {
  * @param {!Window} global The window object of the iframe
  * @param {string} containerName The name of the CSA container
  * @param {boolean} hasAd Whether or not CSA returned an ad
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function callbackWithNoBackfill(global, containerName, hasAd) {
   if (hasAd) {
@@ -258,7 +258,7 @@ export function callbackWithNoBackfill(global, containerName, hasAd) {
  * @param {!Object} ad The parsed AFS page options to backfill the unit with
  * @param {string} containerName The name of the CSA container
  * @param {boolean} hasAd Whether or not CSA returned an ad
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function callbackWithBackfill(global, page, ad, containerName, hasAd) {
   if (hasAd) {
@@ -273,7 +273,7 @@ export function callbackWithBackfill(global, page, ad, containerName, hasAd) {
  * CSA callback function to resize the iframe when ads were returned
  * @param {!Window} global
  * @param {string} containerName Name of the container ('csacontainer')
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function resizeIframe(global, containerName) {
   // Get actual height of container

@@ -37,7 +37,7 @@ import {expandConsentEndpointUrl, getConsentCID} from './consent-config';
 
 const TAG = 'CONSENT-STATE-MANAGER';
 
-/** @visibleForTesting */
+/** @@visibleForTesting */
 export const CONSENT_STORAGE_MAX = 1200;
 
 export class ConsentStateManager {
@@ -269,7 +269,7 @@ export class ConsentStateManager {
 
   /**
    * Get last consent instance stored.
-   * @visibleForTesting
+   * @@visibleForTesting
    * @return {?ConsentInfoDef}
    */
   getSavedInstanceForTesting() {
@@ -278,7 +278,7 @@ export class ConsentStateManager {
 }
 
 /**
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class ConsentInstance {
   /**

@@ -96,7 +96,7 @@ export class RealTimeConfigService {
    * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
    * @param {!Function} checkStillCurrent
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   maybeExecuteRealTimeConfig(
     element,
@@ -211,7 +211,7 @@ export class RealTimeConfigManager {
    * @param {Object|string} calloutConfig
    * @param {boolean=} optIsGloballyValid
    * @return {boolean}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   isValidCalloutForConsentState(calloutConfig, optIsGloballyValid) {
     const {sendRegardlessOfConsentState} = calloutConfig;
@@ -570,7 +570,7 @@ export class RealTimeConfigManager {
    * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
    * @param {!Function} checkStillCurrent
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   execute(
     element,

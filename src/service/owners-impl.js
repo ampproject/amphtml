@@ -33,7 +33,7 @@ function elements(elements) {
 
 /**
  * @implements {OwnersInterface}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export class OwnersImpl {
   /**

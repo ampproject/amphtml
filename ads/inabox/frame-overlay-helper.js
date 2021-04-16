@@ -115,14 +115,14 @@ export let expandFrame = expandFrameImpl;
 
 /**
  * @param {!Function} implFn
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function stubExpandFrameForTesting(implFn) {
   expandFrame = implFn;
 }
 
 /**
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function resetExpandFrameForTesting() {
   expandFrame = expandFrameImpl;
@@ -139,14 +139,14 @@ export let collapseFrame = collapseFrameImpl;
 
 /**
  * @param {!Function} implFn
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function stubCollapseFrameForTesting(implFn) {
   collapseFrame = implFn;
 }
 
 /**
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function resetCollapseFrameForTesting() {
   collapseFrame = collapseFrameImpl;

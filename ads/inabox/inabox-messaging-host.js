@@ -323,7 +323,7 @@ export class InaboxMessagingHost {
    * For when win is friendly framed, returns the frame element for win.
    * @param {?Window} win
    * @return {?HTMLIFrameElement}
-   * @visibleForTesting
+   * @@visibleForTesting
    */
   getMeasureableFrame(win) {
     if (!win) {
