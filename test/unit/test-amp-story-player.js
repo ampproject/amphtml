@@ -1364,6 +1364,56 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       });
     });
 
+    it('should dispatch amp-story-muted-state when story is unmuted', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      attachPlayerWithStories(playerEl, 1);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      const spy = env.sandbox.spy();
+      playerEl.addEventListener('amp-story-muted-state', spy);
+
+      const fakeData = {state: 'MUTED_STATE', value: false};
+      fireHandler['documentStateUpdate']('documentStateUpdate', fakeData);
+
+      await nextTick();
+
+      expect(spy).to.have.been.calledWithMatch({
+        type: 'amp-story-muted-state',
+        detail: {
+          muted: false,
+        },
+      });
+    });
+
+    it('should dispatch amp-story-muted-state when story is muted', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      attachPlayerWithStories(playerEl, 1);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      const spy = env.sandbox.spy();
+      playerEl.addEventListener('amp-story-muted-state', spy);
+
+      const fakeData = {state: 'MUTED_STATE', value: true};
+      fireHandler['documentStateUpdate']('documentStateUpdate', fakeData);
+
+      await nextTick();
+
+      expect(spy).to.have.been.calledWithMatch({
+        type: 'amp-story-muted-state',
+        detail: {
+          muted: true,
+        },
+      });
+    });
+
     it('should react to CURRENT_PAGE_ID events', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       attachPlayerWithStories(playerEl, 1);
