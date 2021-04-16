@@ -23,7 +23,7 @@ import {CSS} from '../../../build/amp-access-0.1.css';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {TickLabel} from '../../../src/enums';
-import {cancellation} from '../../../src/error';
+import {cancellation} from '../../../src/error-reporting';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getSourceOrigin} from '../../../src/url';

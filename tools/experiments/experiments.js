@@ -26,7 +26,7 @@ import {listenOnce} from '../../src/event-helper';
 import {onDocumentReady} from '../../src/document-ready';
 import {parseUrlDeprecated} from '../../src/url';
 //TODO(@cramforce): For type. Replace with forward declaration.
-import {reportError} from '../../src/error';
+import {reportError} from '../../src/error-reporting';
 
 initLogConstructor();
 setReportError(reportError);

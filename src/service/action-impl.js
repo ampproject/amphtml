@@ -33,7 +33,7 @@ import {isArray, toArray} from '../core/types/array';
 import {isEnabled} from '../dom';
 import {isFiniteNumber, toWin} from '../types';
 import {registerServiceBuilderForDoc} from '../service';
-import {reportError} from '../error';
+import {reportError} from '../error-reporting';
 
 /** @const {string} */
 const TAG_ = 'Action';
