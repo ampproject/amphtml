@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {rethrowAsync} from '../log';
+import {rethrowAsync} from '../core/error';
 
 /**
  * Creates a scheduling function that executes the callback based on the

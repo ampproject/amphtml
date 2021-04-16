@@ -16,8 +16,8 @@
 
 // This must load before all other tests.
 import '../src/polyfills';
+import * as coreError from '../src/core/error';
 import * as describes from '../testing/describes';
-import * as log from '../src/log';
 import {Services} from '../src/services';
 import {activateChunkingForTesting} from '../src/chunk';
 import {adoptWithMultidocDeps} from '../src/runtime';
@@ -379,8 +379,8 @@ function maybeStubConsoleInfoLogWarn() {
 function preventAsyncErrorThrows() {
   self.stubAsyncErrorThrows = function () {
     rethrowAsyncSandbox = sinon.createSandbox();
-    rethrowAsyncSandbox.stub(log, 'rethrowAsync').callsFake((...args) => {
-      const error = log.createErrorVargs.apply(null, args);
+    rethrowAsyncSandbox.stub(coreError, 'rethrowAsync').callsFake((...args) => {
+      const error = coreError.createErrorVargs.apply(null, args);
       self.__AMP_REPORT_ERROR(error);
       throw error;
     });
