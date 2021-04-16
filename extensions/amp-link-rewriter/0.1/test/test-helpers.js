@@ -27,6 +27,23 @@ const helpersMaker = () => {
       element.append(script);
       return element;
     },
+    createConfig(config = {}) {
+      const defaults = {
+        'output':
+          'https://visit.foo.net/visit?pid=110&url=${href}&cid=${customerId}&ref=DOCUMENT_REFERRER&location=SOURCE_URL&rel=${rel}&productId=${eventId}',
+        'section': ['#in-scope'],
+        'attribute': {
+          'class': 'sidebar',
+          'href': '(https:\\/\\/(www\\.)?retailer-example\\.local).*',
+        },
+        'vars': {
+          'customerId': '12345',
+        },
+        'scopeDocument': false,
+      };
+
+      return Object.assign(defaults, config);
+    },
   };
 };
 
