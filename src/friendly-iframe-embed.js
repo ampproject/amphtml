@@ -21,7 +21,7 @@ import {Services} from './services';
 import {Signals} from './utils/signals';
 import {VisibilityState} from './core/constants/visibility-state';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
-import {dev, devAssert, rethrowAsync, userAssert} from './log';
+import {dev, devAssert, userAssert} from './log';
 import {
   disposeServicesForEmbed,
   getTopWindow,
@@ -48,6 +48,7 @@ import {
   setStyle,
   setStyles,
 } from './style';
+import {rethrowAsync} from './core/error';
 import {toWin} from './types';
 import {urls} from './config';
 import {whenContentIniLoad} from './ini-load';

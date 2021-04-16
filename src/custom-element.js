@@ -37,11 +37,12 @@ import {
   isCancellation,
   reportError,
 } from './error-reporting';
-import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
+import {dev, devAssert, user, userAssert} from './log';
 import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
 import {getMode} from './mode';
 import {getSchedulerForDoc} from './service/scheduler';
 import {isExperimentOn} from './experiments';
+import {rethrowAsync} from './core/error';
 import {setStyle} from './style';
 import {shouldBlockOnConsentByMeta} from './consent';
 import {startupChunk} from './chunk';
