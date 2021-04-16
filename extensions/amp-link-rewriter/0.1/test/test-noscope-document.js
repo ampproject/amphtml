@@ -98,5 +98,57 @@ describes.fakeWin(
         'https://retailer-example.local/some-path/'
       );
     });
+
+    it('Should rewrite urls in container scope', () => {
+      const template = `
+        <div id='in-scope'>
+            <a rel='nofollow'
+                class='sidebar'
+                href='https://www.retailer-example.local/some-path/'
+                data-vars-event-id='234'>Should pass</a>
+            <a rel='nofollow'
+                class='sidebar'
+                href='https://retailer-example.local/some-path/'
+                data-vars-event-id='234'>Should pass</a>
+        </div>
+        <div class='out-of-scope'>
+            <a rel='nofollow' class='sidebar' href='https://www.retailer-example.local/some-path/'>Should fail by scope</a>
+            <a rel='nofollow'
+                class='sidebar'
+                href='https://retailer-example.local/some-path/'
+                data-vars-event-id='234'>Should fail by scope</a>
+        </div>
+      `;
+      const rootNode = env.ampdoc.getRootNode();
+
+      const config = helpers.createConfig();
+
+      const linkRewriterElement = helpers.createLinkRewriterElement(config);
+      rootNode.body.appendChild(linkRewriterElement);
+      rootNode.body.insertAdjacentHTML('afterbegin', template);
+
+      const rewriter = new LinkRewriter('', linkRewriterElement, env.ampdoc);
+
+      const links = rootNode.body.querySelectorAll('a');
+
+      expect(links.length).to.equal(4);
+
+      rewriter.handleClick(links[0]);
+      expect(links[0].href).to.equal(
+        'https://visit.foo.net/visit?pid=110&url=https%3A%2F%2Fwww.retailer-example.local%2Fsome-path%2F&cid=12345&ref=&location=http%3A%2F%2Fpartnersite.com%2F123&rel=nofollow&productId=234'
+      );
+      rewriter.handleClick(links[1]);
+      expect(links[1].href).to.equal(
+        'https://visit.foo.net/visit?pid=110&url=https%3A%2F%2Fretailer-example.local%2Fsome-path%2F&cid=12345&ref=&location=http%3A%2F%2Fpartnersite.com%2F123&rel=nofollow&productId=234'
+      );
+      rewriter.handleClick(links[2]);
+      expect(links[2].href).to.equal(
+        'https://www.retailer-example.local/some-path/'
+      );
+      rewriter.handleClick(links[3]);
+      expect(links[3].href).to.equal(
+        'https://retailer-example.local/some-path/'
+      );
+    });
   }
 );
