@@ -263,7 +263,7 @@
 
 [theme="dark"] .i-amphtml-story-outlink-page-open-attachment-bar-left,
 [theme="dark"] .i-amphtml-story-outlink-page-open-attachment-bar-right {
-  background: black !important;
+  --i-amphtml-outlink-cta-background-color: black !important;
 }
 
 .i-amphtml-story-outlink-page-open-attachment-bar-right {
@@ -284,7 +284,7 @@
 }
 
 [theme="dark"] .i-amphtml-story-outlink-page-attachment-outlink-chip {
-  background-color: black !important;
+  --i-amphtml-outlink-cta-background-color: black !important;
 }
 
 .i-amphtml-story-outlink-page-attachment-img {
@@ -313,7 +313,7 @@
 }
 
 [theme="dark"] .i-amphtml-story-outlink-page-attachment-label {
-  color: white !important;
+  --i-amphtml-outlink-cta-text-color: white !important;
 }
 
 .i-amphtml-story-outlink-page-attachment-outlink-chip-no-image {
