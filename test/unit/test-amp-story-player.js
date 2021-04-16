@@ -1373,15 +1373,15 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
       await nextTick();
 
-      const navigationSpy = env.sandbox.spy();
-      playerEl.addEventListener('amp-story-muted-state', navigationSpy);
+      const spy = env.sandbox.spy();
+      playerEl.addEventListener('amp-story-muted-state', spy);
 
       const fakeData = {state: 'MUTED_STATE', value: false};
       fireHandler['documentStateUpdate']('documentStateUpdate', fakeData);
 
       await nextTick();
 
-      expect(navigationSpy).to.have.been.calledWithMatch({
+      expect(spy).to.have.been.calledWithMatch({
         type: 'amp-story-muted-state',
         detail: {
           muted: false,
@@ -1398,15 +1398,15 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
       await nextTick();
 
-      const navigationSpy = env.sandbox.spy();
-      playerEl.addEventListener('amp-story-muted-state', navigationSpy);
+      const spy = env.sandbox.spy();
+      playerEl.addEventListener('amp-story-muted-state', spy);
 
       const fakeData = {state: 'MUTED_STATE', value: true};
       fireHandler['documentStateUpdate']('documentStateUpdate', fakeData);
 
       await nextTick();
 
-      expect(navigationSpy).to.have.been.calledWithMatch({
+      expect(spy).to.have.been.calledWithMatch({
         type: 'amp-story-muted-state',
         detail: {
           muted: true,
