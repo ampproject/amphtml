@@ -18,6 +18,7 @@ import {
   USER_ERROR_SENTINEL,
   elementStringOrPassThru,
 } from './error-message-helpers';
+import {includes} from './types/string';
 import {isMinifiedMode} from './minified-mode';
 import {remove} from './types/array';
 
@@ -50,7 +51,7 @@ function assertion(
   }
 
   // Include the sentinel string if provided and not already present
-  if (sentinel && !opt_message.includes(sentinel)) {
+  if (sentinel && !includes(opt_message, sentinel)) {
     opt_message += sentinel;
   }
 

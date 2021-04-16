@@ -16,7 +16,7 @@
 
 import {computedStyle} from '../style';
 import {remove} from '../core/types/array';
-import {rethrowAsync} from '../log';
+import {rethrowAsync} from '../core/error';
 import {toWin} from '../types';
 
 /** @enum {number} */

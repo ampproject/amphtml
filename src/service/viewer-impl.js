@@ -18,12 +18,8 @@ import {Deferred, tryResolve} from '../core/data-structures/promise';
 import {Observable} from '../core/data-structures/observable';
 import {Services} from '../services';
 import {VisibilityState} from '../core/constants/visibility-state';
-import {
-  dev,
-  devAssert,
-  duplicateErrorIfNecessary,
-  stripUserError,
-} from '../log';
+import {dev, devAssert, stripUserError} from '../log';
+import {duplicateErrorIfNecessary} from '../core/error';
 import {endsWith} from '../core/types/string';
 import {findIndex} from '../core/types/array';
 import {

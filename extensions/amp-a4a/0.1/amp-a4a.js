@@ -37,14 +37,9 @@ import {assertHttpsUrl, tryDecodeUriComponent} from '../../../src/url';
 import {cancellation, isCancellation} from '../../../src/error-reporting';
 import {createElementWithAttributes} from '../../../src/dom';
 import {createSecureDocSkeleton, createSecureFrame} from './secure-frame';
-import {
-  dev,
-  devAssert,
-  duplicateErrorIfNecessary,
-  user,
-  userAssert,
-} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
+import {duplicateErrorIfNecessary} from '../../../src/core/error';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
