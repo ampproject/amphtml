@@ -24,7 +24,7 @@ import {
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {CSS as ctaButtonCSS} from '../../../build/amp-story-auto-ads-cta-button-0.1.css';
 import {dev, user} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
+import {dict, map} from '../../../src/core/types/object';
 
 /**
  * @typedef {{

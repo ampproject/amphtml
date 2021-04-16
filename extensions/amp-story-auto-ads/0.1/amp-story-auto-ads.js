@@ -33,7 +33,7 @@ import {StoryAdPageManager} from './story-ad-page-manager';
 import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {divertStoryAdPlacements} from '../../../src/experiments/story-ad-placements';
 import {getPlacementAlgo} from './algorithm-utils';
 import {getServicePromiseForDoc} from '../../../src/service';
@@ -318,9 +318,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.adBadgeContainer_ = this.doc_.createElement('aside');
     this.adBadgeContainer_.className = 'i-amphtml-ad-overlay-container';
 
-    const badge = this.doc_.createElement('p');
+    const badge = this.doc_.createElement('div');
     badge.className = 'i-amphtml-story-ad-badge';
-    badge.textContent = 'Ad';
 
     this.adBadgeContainer_.appendChild(badge);
     createShadowRootWithStyle(root, this.adBadgeContainer_, adBadgeCSS);

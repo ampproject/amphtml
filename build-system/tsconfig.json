@@ -29,7 +29,7 @@
     "./tasks/coverage-map/*",
     "./tasks/create-golden-css/*",
     "./tasks/css/*",
-    "./tasks/e2e/*", // 253 remaining type errors.
+    "./tasks/e2e/*", // 152 remaining type errors.
     "./tasks/get-zindex/*",
     "./tasks/markdown-toc/*",
     // "./tasks/performance/*", // 35 remaining type errors.

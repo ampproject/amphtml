@@ -17,7 +17,7 @@
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
 import {Services} from '../../../src/services';
 import {dev, rethrowAsync, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {openWindowDialog, removeElement} from '../../../src/dom';
 
 const TAG = 'amp-app-banner';

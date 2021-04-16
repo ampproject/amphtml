@@ -22,9 +22,9 @@ import {WindowInterface} from '../../../src/window-interface';
 import {addMissingParamsToUrl, addParamToUrl} from '../../../src/url';
 import {createElementWithAttributes} from '../../../src/dom';
 import {createLinker} from './linker';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getHighestAvailableDomain} from '../../../src/cookies';
-import {isObject} from '../../../src/types';
+import {isObject} from '../../../src/core/types';
 import {user} from '../../../src/log';
 
 /** @const {string} */

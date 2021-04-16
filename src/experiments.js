@@ -24,7 +24,7 @@
 import {dev, user} from './log';
 import {getMode} from './mode';
 import {getTopWindow} from './service';
-import {hasOwn} from './utils/object';
+import {hasOwn} from './core/types/object';
 import {parseQueryString} from './url';
 
 /** @const {string} */
