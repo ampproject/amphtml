@@ -17,7 +17,6 @@
 // This must load before all other tests.
 import '../src/polyfills';
 import * as describes from '../testing/describes';
-import * as log from '../src/log';
 import {Services} from '../src/services';
 import {activateChunkingForTesting} from '../src/chunk';
 import {adoptWithMultidocDeps} from '../src/runtime';
