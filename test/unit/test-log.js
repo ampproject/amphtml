@@ -26,7 +26,6 @@ import {
   user,
   userAssert,
 } from '../../src/log';
-import {duplicateErrorIfNecessary, rethrowAsync} from '../../src/core/error';
 
 describe('Logging', () => {
   const RETURNS_FINE = () => LogLevel.FINE;
