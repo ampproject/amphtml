@@ -38,7 +38,7 @@ let JwtTokenInternalDef;
  * @visibleForTesting
  */
 export function pemToBytes(pem) {
-  key = pem
+  const key = pem
     .trim()
     // Remove pem prefix, e.g. "----BEGIN PUBLIC KEY----".
     .replace(/^-+BEGIN[^-]*-+/, '')
