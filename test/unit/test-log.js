@@ -20,7 +20,6 @@ import {
   USER_ERROR_SENTINEL,
   dev,
   devAssert,
-  duplicateErrorIfNecessary,
   isUserErrorEmbed,
   isUserErrorMessage,
   rethrowAsync,
@@ -28,6 +27,7 @@ import {
   user,
   userAssert,
 } from '../../src/log';
+import {duplicateErrorIfNecessary} from '../../src/core/error';
 
 describe('Logging', () => {
   const RETURNS_FINE = () => LogLevel.FINE;
