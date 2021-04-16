@@ -19,7 +19,7 @@ import {Deferred} from '../../../src/utils/promise';
 import {Entitlement} from './entitlement';
 import {Observable} from '../../../src/observable';
 import {devAssert, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/core/types/object';
 
 /** @typedef {{platformKey: string, entitlement: (!./entitlement.Entitlement|undefined)}} */
 export let EntitlementChangeEventDef;

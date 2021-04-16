@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {USER_ERROR_SENTINEL} from '../../src/core/error-message-helpers';
+import {USER_ERROR_SENTINEL} from '../../../src/core/error-message-helpers';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,
-} from '../../src/core/assert';
+} from '../../../src/core/assert';
 
 describes.sandboxed('assertions', {}, () => {
   describe('devAssert', () => {
@@ -73,7 +73,6 @@ describes.sandboxed('assertions', {}, () => {
     }
 
     expect(error.toString()).to.match(/div#testId a 2 b 3/);
-    expect(error.associatedElement).to.equal(div);
     expect(error.messageArray).to.deep.equal([div, 'a', 2, 'b', 3]);
   });
 });

@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
@@ -15,13 +14,8 @@
  * limitations under the License.
  */
 
-const {
-  printGulpDeprecationNotice,
-} = require('./build-system/task-runner/amp-task-runner');
-
-/**
- * Print a deprecation notice and fall back to the amp task runner.
- * TODO(amphtml): Remove this script after a month or so.
- */
-printGulpDeprecationNotice(/* withTimeStamps */ true);
-require('./amp');
+// Export all type-checking helpers for convenience
+export {isArray} from './array';
+export {isEnumValue} from './enum';
+export {isString} from './string';
+export {isObject} from './object';

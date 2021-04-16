@@ -26,7 +26,7 @@ import {clamp} from '../../../src/utils/math';
 import {computedStyle, getStyle, setStyle} from '../../../src/style';
 import {dev, devAssert, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
-import {hasOwn} from '../../../src/utils/object';
+import {hasOwn} from '../../../src/core/types/object';
 import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';

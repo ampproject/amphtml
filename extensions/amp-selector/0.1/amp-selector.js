@@ -27,7 +27,7 @@ import {
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {mod} from '../../../src/utils/math';
 
 const TAG = 'amp-selector';
@@ -464,14 +464,6 @@ export class AmpSelector extends AMP.BaseElement {
         'selectedOptions': this.selectedOptions_(),
       })
     );
-    // TODO(wg-components): Remove this in Q1 2020.
-    if (trust < ActionTrust.DEFAULT) {
-      user().warn(
-        TAG,
-        '"select" event now has the same trust as the originating action. ' +
-          'See https://github.com/ampproject/amphtml/issues/24443 for details.'
-      );
-    }
     this.action_.trigger(this.element, name, selectEvent, trust);
   }
 

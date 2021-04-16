@@ -21,8 +21,8 @@ import {
   prependSelectorsWith,
 } from './css';
 import {dev, devAssert} from './log';
-import {dict} from './utils/object';
-import {includes} from './string';
+import {dict} from './core/types/object';
+import {includes} from './core/types/string';
 import {toWin} from './types';
 
 const HTML_ESCAPE_CHARS = {
