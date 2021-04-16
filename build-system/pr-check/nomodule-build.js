@@ -23,11 +23,11 @@ const atob = require('atob');
 const {
   abortTimedJob,
   skipDependentJobs,
-  processAndUploadNomoduleOutput,
+  processAndStoreBuildToArtifacts,
   startTimer,
   timedExecWithError,
   timedExecOrDie,
-  uploadNomoduleOutput,
+  storeNomoduleBuildToWorkspace,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {log} = require('../common/logging');
@@ -39,7 +39,7 @@ const jobName = 'nomodule-build.js';
 
 function pushBuildWorkflow() {
   timedExecOrDie('amp dist --fortesting');
-  uploadNomoduleOutput();
+  storeNomoduleBuildToWorkspace();
 }
 
 /**
@@ -65,8 +65,9 @@ async function prBuildWorkflow() {
       return abortTimedJob(jobName, startTime);
     }
     timedExecOrDie('amp storybook --build');
-    await processAndUploadNomoduleOutput();
+    await processAndStoreBuildToArtifacts();
     await signalPrDeployUpload('success');
+    storeNomoduleBuildToWorkspace();
   } else {
     await signalPrDeployUpload('skipped');
 
