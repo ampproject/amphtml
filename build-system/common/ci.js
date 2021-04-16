@@ -232,14 +232,6 @@ function ciBuildSha() {
   return isPullRequestBuild() ? ciPullRequestSha() : ciCommitSha();
 }
 
-/**
- * Returns the workflow for a GitHub Action run.
- * @return {string}
- */
-function githubActionsWorkflow() {
-  return isGithubActions ? env('GITHUB_WORKFLOW') : '';
-}
-
 module.exports = {
   ciBuildId,
   ciBuildSha,
@@ -258,5 +250,4 @@ module.exports = {
   isGithubActionsBuild,
   isPullRequestBuild,
   isPushBuild,
-  githubActionsWorkflow,
 };
