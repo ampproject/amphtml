@@ -665,6 +665,18 @@ player.addEventListener("amp-story-player-touchend", (event) => {
 });
 ```
 
+#### amp-story-muted-state
+
+Fired when the story is muted/unmuted.
+
+This event provides an `isMuted` property, which tells the state of the muted property.
+
+```javascript
+player.addEventListener('amp-story-muted-state', (event) => {
+  console.log('muted?', event.detail.isMuted);
+})
+```
+
 #### navigation
 
 Fired when the player changes to a new story and provides the `index`, the player's story after changing, and `remaining`, the number of stories left.
