@@ -118,9 +118,10 @@ function getAmpScriptJson(ampdoc, src) {
  * amp-script.
  *
  * @param {!AmpElement} element
+ * @param options
  * @return {Function}
  */
-export const getJsonFn = (element) => {
+export const getJsonFn = (element, options) => {
   const src = element.getAttribute('src');
   if (!src) {
     // TODO(dmanek): assert that src is provided instead of silently failing below.
@@ -132,7 +133,7 @@ export const getJsonFn = (element) => {
   if (isAmpScriptSrc(src)) {
     return (src) => getAmpScriptJson(element.getAmpDoc(), src);
   }
-  return () => batchFetchJsonFor(element.getAmpDoc(), element);
+  return (src) => batchFetchJsonFor(element.getAmpDoc(), element, options);
 };
 
 export class AmpRender extends BaseElement {
@@ -170,8 +171,19 @@ export class AmpRender extends BaseElement {
       api.refresh();
     });
 
+    const xssiPrefix = this.element.hasAttribute('xssi-prefix')
+      ? this.element.getAttribute('xssi-prefix')
+      : undefined;
+    const expr = this.element.hasAttribute('key')
+      ? this.element.getAttribute('key')
+      : '.';
+
     return dict({
-      'getJson': getJsonFn(this.element),
+      'getJson': getJsonFn(this.element, {
+        xssiPrefix,
+        expr,
+        refresh: false,
+      }),
     });
   }
 
