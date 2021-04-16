@@ -30,6 +30,15 @@ import {isExperimentOn} from '../../../src/experiments';
 const AttachmentTheme = {
   LIGHT: 'light', // default
   DARK: 'dark',
+  CUSTOM: 'custom',
+};
+
+/**
+ * @enum {string}
+ */
+ const ctaAccentElement = {
+  TEXT: 'text',
+  BACKGROUND: 'background',
 };
 
 /**
@@ -157,11 +166,14 @@ const renderOutlinkPageAttachmentUI = (
   const {chipEl, ctaLabelEl} = htmlRefs(openAttachmentEl);
 
   // Setting theme
-  const themeAttribute = attachmentEl.getAttribute('theme');
+  let themeAttribute = attachmentEl.getAttribute('theme');
+  if (themeAttribute) {
+    themeAttribute = AttachmentTheme[themeAttribute.toUpperCase()];
+  }
   openAttachmentEl.setAttribute('theme', themeAttribute);
-  let labelTextColor = themeAttribute === 'dark' ? 'white' : 'black';
+  let labelTextColor = themeAttribute === AttachmentTheme.DARK ? 'white' : 'black';
 
-  if (themeAttribute === 'custom') {
+  if (themeAttribute === AttachmentTheme.CUSTOM) {
     const accentColor = attachmentEl.getAttribute('cta-accent-color');
     // Calculating contrast color (black or white) needed for outlink CTA UI.
     let contrastColor = null;
@@ -176,7 +188,7 @@ const renderOutlinkPageAttachmentUI = (
         'background-color': '',
       });
     }
-    if (attachmentEl.getAttribute('cta-accent-element') === 'background') {
+    if (attachmentEl.getAttribute('cta-accent-element') === ctaAccentElement.BACKGROUND) {
       labelTextColor = contrastColor;
       setImportantStyles(openAttachmentEl, {
         '--i-amphtml-outlink-cta-background-color': accentColor,
