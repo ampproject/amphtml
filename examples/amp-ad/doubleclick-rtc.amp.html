@@ -12,6 +12,7 @@
     }
   </style>
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script async custom-element="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
@@ -42,5 +43,17 @@
             }
             }'>
     </amp-ad>
+
+    <amp-ad width="320" height="50"
+            type="doubleclick"
+            data-slot="/4119129/mobile_ad_banner"
+            rtc-config='{"vendors": {}, "urls": ["amp-script:targetingFns.getTargeting"], "timeoutMillis": 500}'
+    </amp-ad>
+    <amp-script nodom data-ampdevmode id="targetingFns" script="targetingFnsScript"></amp-script>
+    <script id="targetingFnsScript" type="text/plain" target="amp-script">
+      exportFunction("getTargeting", () => {
+        return {targeting: {food: ["chicken"]}};
+      });
+    </script>
 </body>
 </html>
