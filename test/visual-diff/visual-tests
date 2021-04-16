@@ -688,7 +688,7 @@
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
       ],
-      "interactive_tests": "examples/visual-tests/amp-story-player/story-loaded.js",
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-vertical-rendering.js",
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-interactive-quiz-sizing-positioning.html",
