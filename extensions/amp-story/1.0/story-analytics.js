@@ -123,10 +123,9 @@ export class StoryAnalyticsService {
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_ID,
       (pageId) => {
-        if (!pageId) {
+        if (!pageId || this.storeService_.get(StateProperty.AD_STATE)) {
           return;
         }
-
         this.triggerEvent(StoryAnalyticsEvent.PAGE_VISIBLE);
 
         const pageIds = this.storeService_.get(StateProperty.PAGE_IDS);
