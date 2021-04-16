@@ -261,11 +261,6 @@
   animation: open-attachment-bar-left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
 }
 
-[theme="dark"] .i-amphtml-story-outlink-page-open-attachment-bar-left,
-[theme="dark"] .i-amphtml-story-outlink-page-open-attachment-bar-right {
-  --i-amphtml-outlink-cta-background-color: black !important;
-}
-
 .i-amphtml-story-outlink-page-open-attachment-bar-right {
   right: 6px !important;
   animation: open-attachment-bar-right 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
@@ -281,10 +276,6 @@
   border-radius: 30px !important;
   background: var(--i-amphtml-outlink-cta-background-color) !important;
   place-items: center !important;
-}
-
-[theme="dark"] .i-amphtml-story-outlink-page-attachment-outlink-chip {
-  --i-amphtml-outlink-cta-background-color: black !important;
 }
 
 .i-amphtml-story-outlink-page-attachment-img {
@@ -312,10 +303,6 @@
   color: var(--i-amphtml-outlink-cta-text-color) !important;
 }
 
-[theme="dark"] .i-amphtml-story-outlink-page-attachment-label {
-  --i-amphtml-outlink-cta-text-color: white !important;
-}
-
 .i-amphtml-story-outlink-page-attachment-outlink-chip-no-image {
   padding-inline-start: 14px !important;
 }
@@ -324,3 +311,12 @@
   padding-inline-start: 0px !important;
 }
 
+.i-amphtml-story-page-open-attachment-link-icon {
+  fill: var(--i-amphtml-outlink-cta-text-color) !important;
+  stroke: var(--i-amphtml-outlink-cta-text-color) !important;
+}
+
+[theme="dark"] .i-amphtml-story-page-open-attachment {
+  --i-amphtml-outlink-cta-text-color: white !important;
+  --i-amphtml-outlink-cta-background-color: black !important;
+}

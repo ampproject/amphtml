@@ -227,11 +227,6 @@ const renderOutlinkPageAttachmentUI = (
         </svg>`;
 
       chipEl.prepend(linkImage);
-
-      setImportantStyles(linkImage, {
-        'fill': labelTextColor,
-        'stroke': labelTextColor,
-      });
     }
   }
 
