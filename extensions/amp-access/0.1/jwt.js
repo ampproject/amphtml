@@ -38,12 +38,16 @@ let JwtTokenInternalDef;
  * @visibleForTesting
  */
 export function pemToBytes(pem) {
-  // Remove pem prefix, e.g. "----BEGIN PUBLIC KEY----".
-  // Remove pem suffix, e.g. "----END PUBLIC KEY----".
-  // Remove surrounding whitespace.
-  // Remove line breaks.
-  const removeRegex = /^\s*-+BEGIN[^-]*-+\s*|\s*-+END[^-]*-+\s*$|[\r\n]/g;
-  const key = pem.replace(removeRegex, '');
+  key = pem
+    .trim()
+    // Remove pem prefix, e.g. "----BEGIN PUBLIC KEY----".
+    .replace(/^-+BEGIN[^-]*-+/, '')
+    // Remove pem suffix, e.g. "----END PUBLIC KEY----".
+    .replace(/-+END[^-]*-+$/, '')
+    // Remove line breaks.
+    .replace(/[\r\n]/g, '')
+    // Remove surrounding whitespace.
+    .trim();
   return base64DecodeToBytes(key);
 }
 
