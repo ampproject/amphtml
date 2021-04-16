@@ -338,7 +338,7 @@ const forbiddenTermsGlobal = {
     message: 'Usages must be reviewed.',
     allowlist: [
       // viewer-impl.sendMessage
-      'src/error.js',
+      'src/error-reporting.js',
       'src/service/navigation.js',
       'src/service/viewport/viewport-impl.js',
       'src/service/performance-impl.js',
@@ -399,7 +399,7 @@ const forbiddenTermsGlobal = {
     message: requiresReviewPrivacy,
     allowlist: [
       'extensions/amp-bind/0.1/bind-impl.js',
-      'src/error.js',
+      'src/error-reporting.js',
       'src/utils/xhr-utils.js',
       'src/service/navigation.js',
       'src/service/viewer-impl.js',
@@ -499,7 +499,7 @@ const forbiddenTermsGlobal = {
       'ads/google/a4a/utils.js',
       'src/inabox/inabox-viewer.js',
       'src/service/viewer-impl.js',
-      'src/error.js',
+      'src/error-reporting.js',
       'src/window-interface.js',
     ],
   },
@@ -782,7 +782,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-describes.js',
       'test/unit/test-document-info.js',
       'test/unit/test-document-ready.js',
-      'test/unit/test-error.js',
       'test/unit/test-event-helper.js',
       'test/unit/test-experiments.js',
       'test/unit/test-exponential-backoff.js',

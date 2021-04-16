@@ -19,7 +19,7 @@ import {
   registerServiceBuilder,
   registerServiceBuilderInEmbedWin,
 } from '../service';
-import {reportError} from '../error';
+import {reportError} from '../error-reporting';
 import {user} from '../log';
 
 const TAG = 'timer';

@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {cancellation} from '../../../src/error';
+import {cancellation} from '../../../src/error-reporting';
 import {dev} from '../../../src/log';
 import {listenOnce} from '../../../src/event-helper';
 

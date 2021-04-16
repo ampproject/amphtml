@@ -35,7 +35,7 @@ import {
   installRuntimeServices,
 } from '../service/core-services';
 import {installDocService} from '../service/ampdoc-impl';
-import {installErrorReporting} from '../error';
+import {installErrorReporting} from '../error-reporting';
 import {installPerformanceService} from '../service/performance-impl';
 import {installPlatformService} from '../service/platform-impl';
 import {

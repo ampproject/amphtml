@@ -22,7 +22,7 @@ import {Purifier} from '../../../src/purifier/purifier';
 import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
 import {calculateExtensionScriptUrl} from '../../../src/service/extension-script';
-import {cancellation} from '../../../src/error';
+import {cancellation} from '../../../src/error-reporting';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/core/types/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
