@@ -22,7 +22,7 @@ import {
 
 import {dev} from '../../../../src/log';
 
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../../../src/core/constants/consent-state';
 
 const TAG = 'amp-apester-media';
 

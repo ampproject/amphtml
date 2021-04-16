@@ -15,7 +15,7 @@
  */
 
 import {BaseElement} from '../../src/base-element';
-import {DEFAULT_ACTION} from '../../src/action-constants';
+import {DEFAULT_ACTION} from '../../src/core/constants/action-constants';
 import {LayoutPriority} from '../../src/layout';
 import {Resource} from '../../src/service/resource';
 import {Services} from '../../src/services';

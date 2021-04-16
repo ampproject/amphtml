@@ -28,7 +28,7 @@ import {
   isConsentInfoStoredValueSame,
   recalculateConsentStateValue,
 } from './consent-info';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert, user} from '../../../src/log';

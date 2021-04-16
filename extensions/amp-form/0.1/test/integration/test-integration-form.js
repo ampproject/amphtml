@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../../../src/amp-events';
+import {AmpEvents} from '../../../../../src/core/constants/amp-events';
 import {AmpForm, AmpFormService} from '../../amp-form';
 import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';
 import {Services} from '../../../../../src/services';

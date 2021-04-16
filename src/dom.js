@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred} from './utils/promise';
+import {Deferred} from './core/data-structures/promise';
 import {
   assertIsName,
   isScopeSelectorSupported,

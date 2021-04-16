@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CONSENT_POLICY_STATE} from '../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../src/core/constants/consent-state';
 import {loadScript, validateData} from '../../3p/3p';
 
 const pubmineOptional = ['section', 'pt', 'ht', 'npaOnUnknownConsent'],

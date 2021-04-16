@@ -32,7 +32,7 @@ Note: Currently, only the `default` consent policy is supported.
 
 AMP provides the consent state information for vendors to customize their behavior based on user control.
 
-This is `null` when no `<amp-consent>` tag is included. Otherwise, its value is one of [`CONSENT_POLICY_STATE`](../../src/consent-state.js):
+This is `null` when no `<amp-consent>` tag is included. Otherwise, its value is one of [`CONSENT_POLICY_STATE`](../../src/core/constants/consent-state.js):
 
 -   `SUFFICIENT` (`1`): Consent is granted
 -   `INSUFFICIENT` (`2`): Consent is not granted

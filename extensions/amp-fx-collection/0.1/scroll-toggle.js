@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Observable} from '../../../src/observable';
+import {Observable} from '../../../src/core/data-structures/observable';
 import {Services} from '../../../src/services';
 import {devAssert, user} from '../../../src/log';
 import {once} from '../../../src/utils/function';

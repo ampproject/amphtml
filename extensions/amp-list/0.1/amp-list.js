@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {CSS} from '../../../build/amp-list-0.1.css';
 import {
   DIFFABLE_AMP_ELEMENTS,
@@ -23,7 +23,7 @@ import {
   DIFF_KEY,
   markElementForDiffing,
 } from '../../../src/purifier/sanitation';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {
   Layout,
   getLayoutClass,

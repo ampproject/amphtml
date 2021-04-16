@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../../src/common-signals';
-import {Deferred} from '../../../src/utils/promise';
-import {Observable} from '../../../src/observable';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {Observable} from '../../../src/core/data-structures/observable';
 import {
   PlayingStates,
   VideoAnalyticsEvents,

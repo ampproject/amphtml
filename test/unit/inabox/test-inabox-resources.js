@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {InaboxResources} from '../../../src/inabox/inabox-resources';
 import {ResourceState} from '../../../src/service/resource';
 import {macroTask} from '../../../testing/yield';

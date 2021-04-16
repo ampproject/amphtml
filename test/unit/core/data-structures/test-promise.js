@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as PromiseUtils from '../../../src/utils/promise';
+import * as PromiseUtils from '../../../../src/core/data-structures/promise';
 
 describes.sandboxed('PromiseUtils', {}, () => {
   function getPromiseObject() {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred} from './promise';
+import {Deferred} from '../core/data-structures/promise';
 
 /**
  * Decodes readable stream from response and writes to given writeable stream.

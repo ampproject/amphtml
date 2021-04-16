@@ -23,7 +23,7 @@ import {
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {AmpStory} from '../../../amp-story/1.0/amp-story';
 import {AmpStoryAutoAds, Attributes} from '../amp-story-auto-ads';
-import {CommonSignals} from '../../../../src/common-signals';
+import {CommonSignals} from '../../../../src/core/constants/common-signals';
 import {
   MockStoryImpl,
   addStoryAutoAdsConfig,

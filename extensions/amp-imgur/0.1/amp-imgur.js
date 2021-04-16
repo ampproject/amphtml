@@ -27,7 +27,7 @@
  * </code>
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';

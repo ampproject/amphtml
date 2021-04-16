@@ -15,7 +15,7 @@
  */
 
 import {BrowserController, RequestBank} from '../../testing/test-helper';
-import {Deferred} from '../../src/utils/promise';
+import {Deferred} from '../../src/core/data-structures/promise';
 import {poll} from '../../testing/iframe';
 
 // TODO(wg-components): These tests are broken on Firefox (as of v77). They

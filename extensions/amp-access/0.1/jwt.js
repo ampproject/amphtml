@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
-import {pemToBytes} from '../../../src/utils/pem';
+import {
+  base64DecodeToBytes,
+  base64UrlDecodeToBytes,
+} from '../../../src/utils/base64';
 import {stringToBytes, utf8Decode} from '../../../src/utils/bytes';
 import {tryParseJson} from '../../../src/json';
 
@@ -28,6 +30,26 @@ import {tryParseJson} from '../../../src/json';
  * }}
  */
 let JwtTokenInternalDef;
+
+/**
+ * Converts a text in PEM format into a binary array buffer.
+ * @param {string} pem
+ * @return {!Uint8Array}
+ * @visibleForTesting
+ */
+export function pemToBytes(pem) {
+  const key = pem
+    .trim()
+    // Remove pem prefix, e.g. "----BEGIN PUBLIC KEY----".
+    .replace(/^-+BEGIN[^-]*-+/, '')
+    // Remove pem suffix, e.g. "----END PUBLIC KEY----".
+    .replace(/-+END[^-]*-+$/, '')
+    // Remove line breaks.
+    .replace(/[\r\n]/g, '')
+    // Remove surrounding whitespace.
+    .trim();
+  return base64DecodeToBytes(key);
+}
 
 /**
  * Provides helper methods to decode and verify JWT tokens.

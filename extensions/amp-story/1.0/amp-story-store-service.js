@@ -15,7 +15,7 @@
  */
 
 import {EmbedMode, parseEmbedMode} from './embed-mode';
-import {Observable} from '../../../src/observable';
+import {Observable} from '../../../src/core/data-structures/observable';
 import {Services} from '../../../src/services';
 import {deepEquals} from '../../../src/json';
 import {dev} from '../../../src/log';

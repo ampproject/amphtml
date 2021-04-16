@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-import {dev} from '../log';
-
-/** @const {string} */
-const TAG = 'lru-cache';
-
 /**
  * @template T
  */
@@ -86,7 +81,6 @@ export class LruCache {
       return;
     }
 
-    dev().warn(TAG, 'Trimming LRU cache');
     const cache = this.cache_;
     let oldest = this.access_ + 1;
     let oldestKey;

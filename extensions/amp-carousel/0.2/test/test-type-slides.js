@@ -16,7 +16,7 @@
 
 import '../amp-carousel';
 import * as Listen from '../../../../src/event-helper';
-import {ActionTrust} from '../../../../src/action-constants';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {CarouselEvents} from '../../../amp-base-carousel/0.1/carousel-events';
 import {Services} from '../../../../src/services';
 import {getDetail, listenOncePromise} from '../../../../src/event-helper';

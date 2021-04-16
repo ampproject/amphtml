@@ -22,7 +22,7 @@ import {
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {ButtonTextFitter} from '../story-ad-button-text-fitter';
-import {CommonSignals} from '../../../../src/common-signals';
+import {CommonSignals} from '../../../../src/core/constants/common-signals';
 import {Gestures} from '../../../../src/gesture';
 import {StoryAdAnalytics} from '../story-ad-analytics';
 import {StoryAdLocalization} from '../story-ad-localization';

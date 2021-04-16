@@ -28,14 +28,14 @@
  *      "iceland": [ "is" ]
  *    }
  *  }
- *  </scirpt>
+ *  </script>
  * </amp-geo>
  * </code>
  *
  * the amp-geo element's layout type is nodisplay.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {Services} from '../../../src/services';
 
 /**

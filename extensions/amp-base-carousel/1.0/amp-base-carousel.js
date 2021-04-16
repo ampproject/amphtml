@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {BaseCarousel} from './base-carousel';
 import {CSS as COMPONENT_CSS} from './base-carousel.jss';
 import {CSS} from '../../../build/amp-base-carousel-1.0.css';

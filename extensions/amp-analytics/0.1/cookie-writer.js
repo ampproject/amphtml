@@ -16,7 +16,7 @@
 
 import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
 import {ChunkPriority, chunk} from '../../../src/chunk';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {SameSite, setCookie} from '../../../src/cookies';
 import {Services} from '../../../src/services';
 import {hasOwn} from '../../../src/core/types/object';

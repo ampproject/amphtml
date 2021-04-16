@@ -16,7 +16,7 @@
 
 import {PlacementState} from './placement';
 import {SizeInfoDef} from './ad-network-config';
-import {tryResolve} from '../../../src/utils/promise';
+import {tryResolve} from '../../../src/core/data-structures/promise';
 import {user} from '../../../src/log';
 
 /** @const */

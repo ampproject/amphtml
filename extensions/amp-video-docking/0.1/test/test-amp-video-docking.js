@@ -30,7 +30,10 @@ import {
   VideoDocking,
   getPosterImageSrc,
 } from '../amp-video-docking';
-import {Deferred, tryResolve} from '../../../../src/utils/promise';
+import {
+  Deferred,
+  tryResolve,
+} from '../../../../src/core/data-structures/promise';
 import {DirectionX, DirectionY} from '../def.js';
 import {PlayingStates} from '../../../../src/video-interface';
 import {Services} from '../../../../src/services';

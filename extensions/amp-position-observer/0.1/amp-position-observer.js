@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
 import {
   RelativePositions,

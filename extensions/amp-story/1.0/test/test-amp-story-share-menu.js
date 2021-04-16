@@ -19,7 +19,7 @@ import {
   AmpStoryStoreService,
   StateProperty,
 } from '../amp-story-store-service';
-import {Keys} from '../../../../src/utils/key-codes';
+import {Keys} from '../../../../src/core/constants/key-codes';
 import {Services} from '../../../../src/services';
 import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
 import {ShareWidget} from '../amp-story-share';

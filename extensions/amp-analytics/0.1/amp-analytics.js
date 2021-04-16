@@ -19,7 +19,7 @@ import {AnalyticsConfig, mergeObjects} from './config';
 import {AnalyticsEventType} from './events';
 import {ChunkPriority, chunk} from '../../../src/chunk';
 import {CookieWriter} from './cookie-writer';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {
   ExpansionOptions,
   VariableService,

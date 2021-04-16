@@ -21,7 +21,7 @@ import {getMode} from '../src/mode';
 import {isFiniteNumber} from '../src/types';
 import {once} from '../src/utils/function';
 import {tryParseJson} from '../src/json';
-import {tryResolve} from '../src/utils/promise';
+import {tryResolve} from '../src/core/data-structures/promise';
 
 /** @fileoverview Entry point for documents inside an <amp-video-iframe>. */
 

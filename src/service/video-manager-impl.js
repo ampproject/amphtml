@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../action-constants';
+import {ActionTrust} from '../core/constants/action-constants';
 import {
   EMPTY_METADATA,
   parseFavicon,

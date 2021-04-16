@@ -15,7 +15,7 @@
  */
 
 import {AnimationRunner} from './animation-runner';
-import {Observable} from '../../../../src/observable';
+import {Observable} from '../../../../src/core/data-structures/observable';
 import {
   WebAnimationDef,
   WebAnimationPlayState,

@@ -16,7 +16,7 @@
 
 import '../amp-autocomplete';
 import {AmpAutocomplete} from '../amp-autocomplete';
-import {Keys} from '../../../../src/utils/key-codes';
+import {Keys} from '../../../../src/core/constants/key-codes';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
 

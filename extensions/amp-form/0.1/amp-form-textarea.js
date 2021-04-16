@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {Services} from '../../../src/services';
 import {computedStyle, px, setStyle} from '../../../src/style';
 import {dev, devAssert, user} from '../../../src/log';

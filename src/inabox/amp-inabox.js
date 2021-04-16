@@ -21,7 +21,7 @@
 import '../polyfills';
 import {Navigation} from '../service/navigation';
 import {Services} from '../services';
-import {TickLabel} from '../enums';
+import {TickLabel} from '../core/constants/enums';
 import {adopt} from '../runtime';
 import {allowLongTasksInChunking, startupChunk} from '../chunk';
 import {cssText as ampSharedCss} from '../../build/ampshared.css';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from './common-signals';
+import {CommonSignals} from './core/constants/common-signals';
 import {Services} from './services';
 import {createElementWithAttributes, removeElement} from './dom';
 import {devAssert} from './log';

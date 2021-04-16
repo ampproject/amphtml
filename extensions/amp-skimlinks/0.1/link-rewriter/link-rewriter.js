@@ -17,7 +17,7 @@
 import {ChunkPriority, chunk} from '../../../../src/chunk';
 import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
 import {LinkReplacementCache} from './link-replacement-cache';
-import {Observable} from '../../../../src/observable';
+import {Observable} from '../../../../src/core/data-structures/observable';
 import {TwoStepsResponse} from './two-steps-response';
 import {userAssert} from '../../../../src/log';
 
