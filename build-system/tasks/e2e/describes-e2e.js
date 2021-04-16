@@ -707,17 +707,6 @@ async function toggleExperiments(ampDriver, testUrl, experiments) {
   }
 }
 
-/**
- * Intersection of two sets
- * @param {Set<T>} a
- * @param {Set<T>} b
- * @return {Set<T>}
- * @template T
- */
-function intersect(a, b) {
-  return new Set(Array.from(a).filter((aItem) => b.has(aItem)));
-}
-
 module.exports = {
   RootSpec,
   TestSpec,
