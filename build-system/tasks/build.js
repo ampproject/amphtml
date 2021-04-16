@@ -61,6 +61,7 @@ async function doBuild(extraArgs = {}) {
   const options = {
     fortesting: extraArgs.fortesting || argv.fortesting,
     minify: false,
+    npm: argv.npm,
     watch: argv.watch,
   };
   printNobuildHelp();
@@ -104,4 +105,5 @@ build.flags = {
   esm: 'Do not transpile down to ES5',
   define_experiment_constant:
     'Builds runtime with the EXPERIMENT constant set to true',
+  npm: 'Builds extension binaries for npm',
 };
