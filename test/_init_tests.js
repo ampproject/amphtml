@@ -33,7 +33,7 @@ import {removeElement} from '../src/dom';
 import {
   reportError,
   resetAccumulatedErrorMessagesForTesting,
-} from '../src/error';
+} from '../src/error-reporting';
 import {resetEvtListenerOptsSupportForTesting} from '../src/event-helper-listen';
 import {resetExperimentTogglesForTesting} from '../src/experiments';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';

@@ -25,7 +25,7 @@ import './web-worker-polyfills';
 import {BindEvaluator} from '../../extensions/amp-bind/0.1/bind-evaluator';
 import {dev, initLogConstructor, setReportError} from '../log';
 import {exponentialBackoff} from '../exponential-backoff';
-import {reportError} from '../error';
+import {reportError} from '../error-reporting';
 import {urls} from '../config';
 
 initLogConstructor();

@@ -28,7 +28,7 @@ import {
   reportError,
   reportErrorToAnalytics,
   reportErrorToServerOrViewer,
-} from '../../src/error';
+} from '../../src/error-reporting';
 import {getRtvVersionForTesting} from '../../src/mode';
 import {
   resetExperimentTogglesForTesting,
@@ -98,7 +98,7 @@ describes.fakeWin('installErrorReporting', {}, (env) => {
   });
 });
 
-describe('reportErrorToServerOrViewer', () => {
+describes.sandboxed('reportErrorToServerOrViewer', {}, () => {
   let win;
   let viewer;
   let ampdocServiceForStub;
@@ -202,7 +202,7 @@ describe('reportErrorToServerOrViewer', () => {
   );
 });
 
-describe('getErrorReportData', () => {
+describes.sandboxed('getErrorReportData', {}, () => {
   let onError;
   let nextRandomNumber;
 
@@ -637,7 +637,7 @@ describe('getErrorReportData', () => {
     expect(data.exps).to.equal('test-exp=1,disabled-exp=0');
   });
 
-  describe('detectNonAmpJs', () => {
+  describes.sandboxed('detectNonAmpJs', {}, () => {
     let win;
     let scripts;
     beforeEach(() => {
@@ -753,7 +753,7 @@ describes.sandboxed('reportError', {}, (env) => {
   });
 });
 
-describe('detectJsEngineFromStack', () => {
+describes.sandboxed('detectJsEngineFromStack', {}, () => {
   // Note that these are not true of every case. You can emulate iOS Safari
   // on Desktop Chrome and break this.
   describe

@@ -38,7 +38,7 @@ import {isIframed} from '../dom';
 import {listen} from '../event-helper';
 import {map} from '../core/types/object';
 import {registerServiceBuilderForDoc} from '../service';
-import {reportError} from '../error';
+import {reportError} from '../error-reporting';
 import {urls} from '../config';
 
 import {ViewerInterface} from './viewer-interface';

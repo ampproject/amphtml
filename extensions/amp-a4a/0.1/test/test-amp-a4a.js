@@ -48,7 +48,7 @@ import {LayoutPriority} from '../../../../src/layout';
 import {MockA4AImpl, TEST_URL} from './utils';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
-import {cancellation} from '../../../../src/error';
+import {cancellation} from '../../../../src/error-reporting';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';
 import {dev, user} from '../../../../src/log';

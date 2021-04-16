@@ -22,7 +22,7 @@ import {
   isDocumentHidden,
   removeDocumentVisibilityChangeListener,
 } from '../utils/document-visibility';
-import {cancellation} from '../error';
+import {cancellation} from '../error-reporting';
 import {dev, devAssert, rethrowAsync} from '../log';
 import {getService, registerServiceBuilder} from '../service';
 import {installTimerService} from './timer-impl';
