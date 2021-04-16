@@ -20,30 +20,26 @@ const fs = require('fs-extra');
 const path = require('path');
 const wrappers = require('../compile/compile-wrappers');
 const {
-  compileJs,
-  compileJsWithEsbuild,
-  doBuildJs,
-  endBuildStep,
-  maybeToEsmName,
-  mkdirSync,
-  watchDebounceDelay,
-} = require('./helpers');
-const {
   extensionAliasBundles,
   extensionBundles,
   verifyExtensionBundles,
   jsBundles,
 } = require('../compile/bundles.config');
 const {
-  VERSION: internalRuntimeVersion,
-} = require('../compile/internal-version');
+  maybeToEsmName,
+  compileJs,
+  compileJsWithEsbuild,
+  mkdirSync,
+} = require('./helpers');
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
 const {compileJison} = require('./compile-jison');
+const {endBuildStep, watchDebounceDelay, doBuildJs} = require('./helpers');
 const {green, red, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
 const {log} = require('../common/logging');
 const {parse: pathParse} = require('path');
+const {removeFromClosureBabelCache} = require('../compile/pre-closure-babel');
 const {watch} = require('chokidar');
 
 /**
@@ -403,7 +399,8 @@ async function doBuildExtension(extensions, extension, options) {
 }
 
 /**
- * Watches for non-JS changes within an extensions directory to trigger recompilation.
+ * Watches the contents of an extension directory. When a file in the given path
+ * changes, the extension is rebuilt.
  *
  * @param {string} extDir
  * @param {string} name
@@ -412,29 +409,24 @@ async function doBuildExtension(extensions, extension, options) {
  * @param {boolean} hasCss
  * @param {?Object} options
  */
-async function watchExtension(
-  extDir,
-  name,
-  version,
-  latestVersion,
-  hasCss,
-  options
-) {
+function watchExtension(extDir, name, version, latestVersion, hasCss, options) {
   function watchFunc() {
-    buildExtension(name, version, latestVersion, hasCss, {
-      ...options,
-      continueOnError: true,
-      isRebuild: true,
-      watch: false,
-    });
-  }
+    if (options.minify) {
+      removeFromClosureBabelCache(extDir);
+    }
 
-  const cssDeps = `${extDir}/**/*.css`;
-  const jisonDeps = `${extDir}/**/*.jison`;
-  watch([cssDeps, jisonDeps]).on(
-    'change',
-    debounce(watchFunc, watchDebounceDelay)
-  );
+    const bundleComplete = buildExtension(
+      name,
+      version,
+      latestVersion,
+      hasCss,
+      {...options, continueOnError: true}
+    );
+    if (options.onWatchBuild) {
+      options.onWatchBuild(bundleComplete);
+    }
+  }
+  watch(`${extDir}/**/*`).on('change', debounce(watchFunc, watchDebounceDelay));
 }
 
 /**
@@ -472,12 +464,18 @@ async function buildExtension(
   }
   const extDir = 'extensions/' + name + '/' + version;
 
-  // Use a separate watcher for css and jison compilation.
-  // The watcher within compileJs recompiles the JS.
+  // Use a separate watcher for extensions to copy / inline CSS and compile JS
+  // instead of relying on the watchers used by compileUnminifiedJs and
+  // compileMinifiedJs, which only recompile JS.
   if (options.watch) {
-    await watchExtension(extDir, name, version, latestVersion, hasCss, options);
+    options.watch = false;
+    watchExtension(extDir, name, version, latestVersion, hasCss, options);
+    // When an ad network extension is being watched, also watch amp-a4a.
+    if (name.match(/amp-ad-network-.*-impl/)) {
+      const a4aPath = `extensions/amp-a4a/${version}`;
+      watchExtension(a4aPath, name, version, latestVersion, hasCss, options);
+    }
   }
-
   if (hasCss) {
     mkdirSync('build');
     mkdirSync('build/css');
@@ -500,11 +498,6 @@ async function buildExtension(
   if (name === 'amp-analytics') {
     await analyticsVendorConfigs(options);
   }
-
-  if (options.isRebuild) {
-    return;
-  }
-
   await buildExtensionJs(extDir, name, version, latestVersion, options);
 }
 
