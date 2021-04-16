@@ -114,6 +114,7 @@ import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 
 import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
+import {StoryAdAutoAdvance} from '../../../src/experiments/story-ad-auto-advance';
 import {StoryAdPlacements} from '../../../src/experiments/story-ad-placements';
 import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
@@ -530,6 +531,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     );
     if (storyAdPlacementsExpId) {
       addExperimentIdToElement(storyAdPlacementsExpId, this.element);
+    }
+
+    const storyAdAutoAdvanceId = getExperimentBranch(
+      this.win,
+      StoryAdAutoAdvance.ID
+    );
+    if (storyAdAutoAdvanceId) {
+      addExperimentIdToElement(storyAdAutoAdvanceId, this.element);
     }
   }
 

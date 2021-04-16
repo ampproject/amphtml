@@ -9,7 +9,7 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * WITHOUT WidsANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
@@ -28,6 +28,10 @@ import {
   StateProperty,
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
+import {
+  StoryAdAutoAdvance,
+  ViewerIdsToAdsIds,
+} from '../../../src/experiments/story-ad-auto-advance';
 import {StoryAdConfig} from './story-ad-config';
 import {StoryAdPageManager} from './story-ad-page-manager';
 import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
@@ -35,6 +39,7 @@ import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {divertStoryAdPlacements} from '../../../src/experiments/story-ad-placements';
+import {forceExperimentBranch} from '../../../src/experiments';
 import {getPlacementAlgo} from './algorithm-utils';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
@@ -86,6 +91,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {?StoryAdPageManager} */
     this.adPageManager_ = null;
+
+    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
+    this.viewer_ = null;
   }
 
   /** @override */
@@ -98,6 +106,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         if (!this.isAutomaticAdInsertionAllowed_()) {
           return;
         }
+
+        this.viewer_ = Services.viewerForDoc(this.element);
 
         const ampStoryElement = this.element.parentElement;
         userAssert(
@@ -129,6 +139,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       .signals()
       .whenSignal(CommonSignals.INI_LOAD)
       .then(() => {
+        this.listenForPlayerExps_();
         this.handleConfig_();
         this.adPageManager_ = new StoryAdPageManager(
           this.ampStory_,
@@ -152,6 +163,38 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         this.initializeListeners_();
         this.initializePages_();
       });
+  }
+
+  /**
+   *
+   */
+  listenForPlayerExps_() {
+    this.viewer_.onMessage('playerExperiments', (data) =>
+      this.onPlayerExpsMessage_(data)
+    );
+  }
+
+  /**
+   *
+   * @param {!JsonObject} data
+   */
+  onPlayerExpsMessage_(data) {
+    if (!data) {
+      return;
+    }
+
+    const {eids} = data;
+    for (let i = 0; i < eids.length; i++) {
+      const id = eids[i];
+      if (ViewerIdsToAdsIds[id]) {
+        forceExperimentBranch(
+          this.win,
+          StoryAdAutoAdvance.ID,
+          ViewerIdsToAdsIds[id]
+        );
+        return;
+      }
+    }
   }
 
   /**
