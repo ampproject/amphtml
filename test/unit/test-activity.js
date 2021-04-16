@@ -15,7 +15,7 @@
  */
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {Observable} from '../../src/observable';
+import {Observable} from '../../src/core/data-structures/observable';
 import {Services} from '../../src/services';
 import {installActivityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
 import {installPlatformService} from '../../src/service/platform-impl';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LruCache} from '../../../src/utils/lru-cache';
+import {LruCache} from '../../../src/core/data-structures/lru-cache';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {devAssert} from '../../../src/log';

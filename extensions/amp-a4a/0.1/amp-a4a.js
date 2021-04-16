@@ -16,8 +16,8 @@
 
 import {A4AVariableSource} from './a4a-variable-source';
 import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {Deferred, tryResolve} from '../../../src/utils/promise';
+import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
+import {Deferred, tryResolve} from '../../../src/core/data-structures/promise';
 import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from './common-signals';
+import {CommonSignals} from './core/constants/common-signals';
 import {Services} from './services';
-import {TickLabel} from './enums';
+import {TickLabel} from './core/constants/enums';
 import {dev, devAssert, rethrowAsync} from './log';
 import {getAmpdoc} from './service';
 import {insertAfterOrAtStart, waitForBodyOpenPromise} from './dom';
