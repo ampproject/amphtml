@@ -23,7 +23,7 @@ import {AmpAdUIHandler} from './amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-} from '../../../src/consent-state';
+} from '../../../src/core/constants/consent-state';
 import {
   Layout, // eslint-disable-line no-unused-vars
   LayoutPriority,

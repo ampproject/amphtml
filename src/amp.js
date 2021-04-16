@@ -22,7 +22,7 @@
 import './polyfills';
 
 import {Services} from './services';
-import {TickLabel} from './enums';
+import {TickLabel} from './core/constants/enums';
 import {adoptWithMultidocDeps} from './runtime';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';

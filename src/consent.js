@@ -16,7 +16,7 @@
 
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-} from './consent-state';
+} from './core/constants/consent-state';
 import {Services} from './services';
 import {dict} from './core/types/object';
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {getMode} from '../../../src/mode';
 import {isIframed} from '../../../src/dom';
 import {memo} from '../../../src/core/types/object';

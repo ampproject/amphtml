@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CONSENT_STRING_TYPE} from '../../../src/consent-state';
+import {CONSENT_STRING_TYPE} from '../../../src/core/constants/consent-state';
 import {deepEquals} from '../../../src/json';
 import {dev, user} from '../../../src/log';
 import {hasOwn, map} from '../../../src/core/types/object';

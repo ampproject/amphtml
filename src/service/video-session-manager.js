@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Observable} from '../observable';
+import {Observable} from '../core/data-structures/observable';
 
 export class VideoSessionManager {
   /**

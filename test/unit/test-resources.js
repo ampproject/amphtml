@@ -21,7 +21,7 @@ import {Resource, ResourceState} from '../../src/service/resource';
 import {ResourcesImpl} from '../../src/service/resources-impl';
 import {Services} from '../../src/services';
 import {Signals} from '../../src/utils/signals';
-import {VisibilityState} from '../../src/visibility-state';
+import {VisibilityState} from '../../src/core/constants/visibility-state';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 

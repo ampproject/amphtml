@@ -21,7 +21,7 @@
 
 import ampToolboxCacheUrl from '../../../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 
-import {Deferred, tryResolve} from '../../../src/utils/promise';
+import {Deferred, tryResolve} from '../../../src/core/data-structures/promise';
 import {Services} from '../../../src/services';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';

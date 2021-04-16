@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-nested-menu-0.1.css';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {

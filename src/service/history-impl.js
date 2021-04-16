@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred, tryResolve} from '../utils/promise';
+import {Deferred, tryResolve} from '../core/data-structures/promise';
 import {Services} from '../services';
 import {dev, devAssert} from '../log';
 import {dict, map} from '../core/types/object';

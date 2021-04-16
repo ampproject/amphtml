@@ -27,7 +27,7 @@ import {
   AnalyticsVars,
   STORY_AD_ANALYTICS,
 } from './story-ad-analytics';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Gestures} from '../../../src/gesture';
 import {
   StateProperty,

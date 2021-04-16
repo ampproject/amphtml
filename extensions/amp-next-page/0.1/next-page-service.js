@@ -18,7 +18,7 @@ import {CSS} from '../../../build/amp-next-page-0.1.css';
 import {MultidocManager} from '../../../src/multidoc-manager';
 import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
-import {VisibilityState} from '../../../src/visibility-state';
+import {VisibilityState} from '../../../src/core/constants/visibility-state';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getAmpdoc} from '../../../src/service';
@@ -556,7 +556,7 @@ export class NextPageService {
    * Manually overrides the document's visible state to the given state
    *
    * @param {!DocumentRef} ref Reference to the document to change
-   * @param {!../../../src/visibility-state.VisibilityState} visibilityState
+   * @param {!../../../src/core/constants/visibility-state.VisibilityState} visibilityState
    * @private
    */
   setDocumentVisibility_(ref, visibilityState) {

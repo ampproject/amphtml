@@ -15,7 +15,7 @@
  */
 import '../amp-base-carousel';
 import {ActionInvocation} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {
   createElementWithAttributes,
   waitForChildPromise,

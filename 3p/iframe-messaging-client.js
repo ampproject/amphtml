@@ -19,7 +19,7 @@ import {
   listen,
   serializeMessage,
 } from '../src/3p-frame-messaging';
-import {Observable} from '../src/observable';
+import {Observable} from '../src/core/data-structures/observable';
 import {dev} from '../src/log';
 import {dict, map} from '../src/core/types/object';
 import {getData} from '../src/event-helper';

@@ -15,7 +15,7 @@
  */
 
 import {ViewportRelativePos} from './visibility-observer';
-import {VisibilityState} from '../../../src/visibility-state';
+import {VisibilityState} from '../../../src/core/constants/visibility-state';
 import {devAssert} from '../../../src/log';
 
 /** @enum {number} */

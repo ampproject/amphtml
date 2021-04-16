@@ -20,7 +20,7 @@
  * Invariant: Service getters never return null for registered services.
  */
 
-import {Deferred} from './utils/promise';
+import {Deferred} from './core/data-structures/promise';
 import {dev, devAssert} from './log';
 import {toWin} from './types';
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../src/utils/promise';
+import {Deferred} from '../../src/core/data-structures/promise';
 import {Services} from '../../src/services';
 import {removeItem} from '../../src/core/types/array';
 import {

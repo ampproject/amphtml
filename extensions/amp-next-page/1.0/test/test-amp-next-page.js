@@ -17,7 +17,7 @@ import '../amp-next-page';
 import {PageState} from '../page';
 import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';
 import {Services} from '../../../../src/services';
-import {VisibilityState} from '../../../../src/visibility-state';
+import {VisibilityState} from '../../../../src/core/constants/visibility-state';
 import {htmlFor} from '../../../../src/static-template';
 import {setStyle} from '../../../../src/style';
 

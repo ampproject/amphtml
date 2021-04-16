@@ -23,7 +23,7 @@ import {
   listenOncePromise,
   loadPromise,
 } from '../../src/event-helper';
-import {Observable} from '../../src/observable';
+import {Observable} from '../../src/core/data-structures/observable';
 import {
   detectEvtListenerOptsSupport,
   resetEvtListenerOptsSupportForTesting,

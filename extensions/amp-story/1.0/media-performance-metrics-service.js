@@ -19,7 +19,7 @@ import {
   listen,
 } from '../../../src/event-helper';
 import {Services} from '../../../src/services';
-import {TickLabel} from '../../../src/enums';
+import {TickLabel} from '../../../src/core/constants/enums';
 import {dev} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {lastChildElement} from '../../../src/dom';

@@ -21,7 +21,7 @@ import {
   StoryAdAnalytics,
 } from './story-ad-analytics';
 import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {EventType, dispatch} from '../../amp-story/1.0/events';
 import {Services} from '../../../src/services';
 import {

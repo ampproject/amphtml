@@ -20,7 +20,7 @@ import {getEnclosingContainerTypes} from '../../../ads/google/a4a/utils';
 import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {isInManualExperiment} from '../../../ads/google/a4a/traffic-experiments';
 import {isObject} from '../../../src/core/types';
-import {tryResolve} from '../../../src/utils/promise';
+import {tryResolve} from '../../../src/core/data-structures/promise';
 import {utf8Encode} from '../../../src/utils/bytes';
 
 /** @type {string} */

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
 import {CSS} from '../../../build/amp-next-page-0.1.css';
 import {Layout} from '../../../src/layout';
 import {NextPageService} from './next-page-service';

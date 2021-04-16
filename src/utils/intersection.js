@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Deferred} from './promise';
+import {Deferred} from '../core/data-structures/promise';
 import {createViewportObserver} from '../viewport-observer';
 import {dict} from '../core/types/object';
 import {layoutRectFromDomRect} from '../layout-rect';

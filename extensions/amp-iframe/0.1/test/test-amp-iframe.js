@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../../src/action-constants';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {AmpIframe, setTrackingIframeTimeoutForTesting} from '../amp-iframe';
-import {CommonSignals} from '../../../../src/common-signals';
+import {CommonSignals} from '../../../../src/core/constants/common-signals';
 import {LayoutPriority} from '../../../../src/layout';
 import {Services} from '../../../../src/services';
 import {

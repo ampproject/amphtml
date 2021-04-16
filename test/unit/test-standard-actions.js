@@ -15,7 +15,7 @@
  */
 
 import {AmpDocService, AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {RAW_OBJECT_ARGS_KEY} from '../../src/action-constants';
+import {RAW_OBJECT_ARGS_KEY} from '../../src/core/constants/action-constants';
 import {Services} from '../../src/services';
 import {
   StandardActions,

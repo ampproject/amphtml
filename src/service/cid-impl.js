@@ -36,7 +36,7 @@ import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from '../url';
 import {isExperimentOn} from '../../src/experiments';
 import {isIframed} from '../dom';
 import {parseJson, tryParseJson} from '../json';
-import {tryResolve} from '../utils/promise';
+import {tryResolve} from '../core/data-structures/promise';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 

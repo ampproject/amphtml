@@ -15,7 +15,7 @@
  */
 import '../amp-accordion';
 import {ActionInvocation} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {CanRender} from '../../../../src/core/contextprops';
 import {htmlFor} from '../../../../src/static-template';
 import {subscribe, unsubscribe} from '../../../../src/context';

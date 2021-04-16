@@ -17,7 +17,7 @@
 import '../amp-ima-video';
 import * as imaVideoObj from '../../../../ads/google/imaVideo';
 
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../../../src/core/constants/consent-state';
 import {Services} from '../../../../src/services';
 import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
 

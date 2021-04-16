@@ -16,7 +16,7 @@
 
 import '../../src/polyfills';
 import '../../src/service/timer-impl';
-import {Deferred} from '../../src/utils/promise';
+import {Deferred} from '../../src/core/data-structures/promise';
 import {EXPERIMENTS} from './experiments-config';
 import {SameSite, getCookie, setCookie} from '../../src/cookies';
 import {devAssert, initLogConstructor, setReportError} from '../../src/log';

@@ -16,7 +16,7 @@
 
 import '../amp-carousel';
 import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {Services} from '../../../../src/services';
 import {
   createElementWithAttributes,

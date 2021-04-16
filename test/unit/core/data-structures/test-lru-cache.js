@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {LruCache} from '../../../src/utils/lru-cache';
+import {LruCache} from '../../../../src/core/data-structures/lru-cache';
 
-describe('LruCache', () => {
+describes.sandboxed('LruCache', {}, () => {
   let cache;
 
   beforeEach(() => {

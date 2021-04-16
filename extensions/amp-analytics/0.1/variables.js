@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {TickLabel} from '../../../src/enums';
+import {TickLabel} from '../../../src/core/constants/enums';
 import {asyncStringReplace} from '../../../src/core/types/string';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {cookieReader} from './cookie-reader';
