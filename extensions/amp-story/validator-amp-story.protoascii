@@ -855,9 +855,9 @@ tags: {  # <amp-story-page-attachment> with href
   }
   attrs: {
     name: "theme"
+    value: "custom"
     value: "dark"
     value: "light"
-    value: "custom"
   }
   attrs: {
     name: "cta-accent-color"

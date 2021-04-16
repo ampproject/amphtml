@@ -17,18 +17,18 @@
 /**
  * @fileoverview Helper for amp-story rendering of page-attachment UI.
  */
+import {AttachmentTheme} from './amp-story-page-attachment';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {computedStyle, setImportantStyles} from '../../../src/style';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getRGBFromCssColorValue, getTextColorForRGB} from './utils';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
-import {AttachmentTheme} from './amp-story-page-attachment';
 
 /**
  * @enum {string}
  */
- const ctaAccentElement = {
+const CtaAccentElement = {
   TEXT: 'text',
   BACKGROUND: 'background',
 };
@@ -163,7 +163,6 @@ const renderOutlinkPageAttachmentUI = (
     themeAttribute = AttachmentTheme[themeAttribute.toUpperCase()];
   }
   openAttachmentEl.setAttribute('theme', themeAttribute);
-  let labelTextColor = themeAttribute === AttachmentTheme.DARK ? 'white' : 'black';
 
   if (themeAttribute === AttachmentTheme.CUSTOM) {
     setCustomThemeStyles(win, attachmentEl, openAttachmentEl);
@@ -283,7 +282,7 @@ export const isPageAttachmentUiV2ExperimentOn = (win) => {
  * @param {!Element} attachmentEl
  * @param {!Element} openAttachmentEl
  */
- export const setCustomThemeStyles = (win, attachmentEl, openAttachmentEl) => {
+export const setCustomThemeStyles = (win, attachmentEl, openAttachmentEl) => {
   const accentColor = attachmentEl.getAttribute('cta-accent-color');
 
   // Calculating contrast color (black or white) needed for outlink CTA UI.
@@ -299,14 +298,15 @@ export const isPageAttachmentUiV2ExperimentOn = (win) => {
       'background-color': '',
     });
   }
-  if (attachmentEl.getAttribute('cta-accent-element') === ctaAccentElement.BACKGROUND) {
-    labelTextColor = contrastColor;
+  if (
+    attachmentEl.getAttribute('cta-accent-element') ===
+    CtaAccentElement.BACKGROUND
+  ) {
     setImportantStyles(openAttachmentEl, {
       '--i-amphtml-outlink-cta-background-color': accentColor,
       '--i-amphtml-outlink-cta-text-color': contrastColor,
     });
   } else {
-    labelTextColor = accentColor;
     setImportantStyles(openAttachmentEl, {
       '--i-amphtml-outlink-cta-background-color': contrastColor,
       '--i-amphtml-outlink-cta-text-color': accentColor,
