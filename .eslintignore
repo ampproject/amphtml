@@ -2,6 +2,7 @@
 # Keep this list in sync with .gitignore, .prettierignore, and build-system/tasks/clean.js
 .babel-cache
 .css-cache
+.pre-closure-cache
 
 # Output directories
 # Keep this list in sync with .gitignore, .prettierignore, and build-system/tasks/clean.js
@@ -26,8 +27,7 @@ test/coverage-e2e
 validator/**/dist
 validator/export
 
-
-# Files and directories specifically ignored by eslint
+# Files and directories explicitly ignored by eslint
 build-system/babel-plugins/**/fixtures/**/*.js
 build-system/babel-plugins/**/fixtures/**/*.mjs
 build-system/server/app-index/test/*.js

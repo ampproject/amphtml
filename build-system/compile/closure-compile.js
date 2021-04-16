@@ -18,7 +18,7 @@
 const compiler = require('@ampproject/google-closure-compiler');
 const vinylFs = require('vinyl-fs');
 const {cyan, red, yellow} = require('kleur/colors');
-const {getBabelCacheDir} = require('./pre-closure-babel');
+const {getBabelOutputDir} = require('./pre-closure-babel');
 const {log, logWithoutTimestamp} = require('../common/logging');
 
 /**
@@ -29,13 +29,13 @@ const {log, logWithoutTimestamp} = require('../common/logging');
  */
 function logClosureCompilerError(message) {
   log(red('ERROR:'));
-  const babelCacheDir = `${getBabelCacheDir()}/`;
+  const babelOutputDir = `${getBabelOutputDir()}/`;
   const loggingPrefix = /^.*?gulp-google-closure-compiler.*?: /;
   const {highlight} = require('cli-highlight'); // Lazy-required to speed up task loading.
   const highlightedMessage = highlight(message, {ignoreIllegals: true});
   const formattedMessage = highlightedMessage
     .replace(loggingPrefix, '')
-    .replace(new RegExp(babelCacheDir, 'g'), '')
+    .replace(new RegExp(babelOutputDir, 'g'), '')
     .replace(/ ERROR /g, red(' ERROR '))
     .replace(/ WARNING /g, yellow(' WARNING '));
   logWithoutTimestamp(formattedMessage);
@@ -87,7 +87,7 @@ function initializeClosure(flags) {
 function runClosure(outputFilename, options, flags, srcFiles) {
   return new Promise((resolve, reject) => {
     vinylFs
-      .src(srcFiles, {base: getBabelCacheDir()})
+      .src(srcFiles, {base: getBabelOutputDir()})
       .pipe(initializeClosure(flags))
       .on('error', (err) => {
         const reason = handleClosureCompilerError(err, outputFilename, options);
