@@ -33,6 +33,7 @@ async function clean() {
     // Keep this list in sync with .gitignore, .eslintignore, and .prettierignore
     '.babel-cache',
     '.css-cache',
+    '.pre-closure-cache',
 
     // Output directories
     // Keep this list in sync with .gitignore, .eslintignore, and .prettierignore

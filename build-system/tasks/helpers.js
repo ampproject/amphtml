@@ -37,7 +37,6 @@ const {green, red, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
-const {removeFromClosureBabelCache} = require('../compile/pre-closure-babel');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {watch} = require('chokidar');
 
@@ -649,14 +648,13 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
   if (options.watch) {
     watchedEntryPoints.add(entryPoint);
     const deps = await getDependencies(entryPoint);
-    watch(deps).on('change', debounce(doCompileJs, watchDebounceDelay));
+    const watchFunc = async () => {
+      await doCompileJs({...options, continueOnError: true});
+    };
+    watch(deps).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
-  async function doCompileJs(modifiedFile) {
-    if (options.minified && modifiedFile) {
-      removeFromClosureBabelCache(modifiedFile);
-    }
-
+  async function doCompileJs(options) {
     const buildResult = options.minify
       ? compileMinifiedJs(srcDir, srcFilename, destDir, options)
       : compileUnminifiedJs(srcDir, srcFilename, destDir, options);
@@ -666,7 +664,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
     await buildResult;
   }
 
-  await doCompileJs();
+  await doCompileJs(options);
 }
 
 /**
