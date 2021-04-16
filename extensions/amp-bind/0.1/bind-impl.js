@@ -45,7 +45,7 @@ import {isAmp4Email} from '../../../src/format';
 
 import {isFiniteNumber} from '../../../src/types';
 import {isObject} from '../../../src/core/types';
-import {reportError} from '../../../src/error';
+import {reportError} from '../../../src/error-reporting';
 import {rewriteAttributesForElement} from '../../../src/url-rewrite';
 
 /** @const {string} */

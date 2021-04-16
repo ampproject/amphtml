@@ -30,14 +30,12 @@ const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
-const {batchedRead} = require('../common/transform-cache');
 const {closureCompile} = require('../compile/compile');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {green, red, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
-const {removeFromClosureBabelCache} = require('../compile/pre-closure-babel');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {watch} = require('chokidar');
 
@@ -648,15 +646,14 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
 
   if (options.watch) {
     watchedEntryPoints.add(entryPoint);
-    const deps = await getDependencies(entryPoint);
-    watch(deps).on('change', debounce(doCompileJs, watchDebounceDelay));
+    const deps = await getDependencies(entryPoint, options);
+    const watchFunc = async () => {
+      await doCompileJs({...options, continueOnError: true});
+    };
+    watch(deps).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
-  async function doCompileJs(modifiedFile) {
-    if (options.minified && modifiedFile) {
-      removeFromClosureBabelCache(modifiedFile);
-    }
-
+  async function doCompileJs(options) {
     const buildResult = options.minify
       ? compileMinifiedJs(srcDir, srcFilename, destDir, options)
       : compileUnminifiedJs(srcDir, srcFilename, destDir, options);
@@ -666,7 +663,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
     await buildResult;
   }
 
-  await doCompileJs();
+  await doCompileJs(options);
 }
 
 /**
@@ -829,31 +826,24 @@ function mkdirSync(path) {
 }
 
 /**
- * Returns the list of dependencies for a given JS entrypoint.
+ * Returns the list of dependencies for a given JS entrypoint by having esbuild
+ * generate a metafile for it. Uses the set of babel plugins that would've been
+ * used to compile the entrypoint.
+ *
  * @param {string} entryPoint
+ * @param {!Object} options
  * @return {Promise<Array<string>>}
  */
-async function getDependencies(entryPoint) {
-  const stripImportAssertionPlugin = {
-    name: 'stripImportAssertion',
-    setup(build) {
-      build.onLoad({filter: /\.[cm]?js$/, namespace: ''}, async (file) => {
-        const filename = file.path;
-        const contents = (await batchedRead(filename)).contents.toString();
-        const stripped = contents.replace(/assert {type: 'json'}/g, '');
-        return {contents: stripped};
-      });
-    },
-  };
-
+async function getDependencies(entryPoint, options) {
+  const caller = options.minify ? 'minified' : 'unminified';
+  const babelPlugin = getEsbuildBabelPlugin(caller, /* enableCache */ true);
   const result = await esbuild.build({
     entryPoints: [entryPoint],
     bundle: true,
     write: false,
     metafile: true,
-    plugins: [stripImportAssertionPlugin],
+    plugins: [babelPlugin],
   });
-
   return Object.keys(result.metafile?.inputs);
 }
 

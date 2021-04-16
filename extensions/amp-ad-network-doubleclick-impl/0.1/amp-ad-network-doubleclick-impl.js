@@ -118,7 +118,7 @@ import {StoryAdPlacements} from '../../../src/experiments/story-ad-placements';
 import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isArray} from '../../../src/core/types';
-import {isCancellation} from '../../../src/error';
+import {isCancellation} from '../../../src/error-reporting';
 import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
