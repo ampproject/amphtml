@@ -30,6 +30,7 @@ import {getMode} from '../../../src/mode';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {tryParseJson} from '../../../src/json';
+import {urls} from '../../../src/config';
 import {utf8Encode} from '../../../src/utils/bytes';
 
 /** @const {string} */
@@ -120,6 +121,15 @@ export class AmpScript extends AMP.BaseElement {
      * @private {boolean}
      */
     this.nodom_ = false;
+
+    /**
+     * If true, signals that worker-dom should activate sandboxed mode.
+     * In this mode the Worker lives in its own crossorigin iframe, creating
+     * a strong security boundary.
+     *
+     * @private {boolean}
+     */
+    this.sandboxed_ = false;
   }
 
   /** @override */
@@ -130,6 +140,7 @@ export class AmpScript extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.nodom_ = this.element.hasAttribute('nodom');
+    this.sandboxed_ = this.element.hasAttribute('sandboxed');
     this.development_ =
       this.element.hasAttribute('data-ampdevmode') ||
       this.element.ownerDocument.documentElement.hasAttribute(
@@ -271,6 +282,15 @@ export class AmpScript extends AMP.BaseElement {
 
     const sandbox = this.element.getAttribute('sandbox') || '';
     const sandboxTokens = sandbox.split(' ').map((s) => s.trim());
+    let iframeUrl;
+    if (getMode().localDev) {
+      const folder = getMode().minified ? 'current-min' : 'current';
+      iframeUrl = `/dist.3p/${folder}/amp-script-proxy-iframe.html`;
+    } else {
+      iframeUrl = `${urls.thirdParty}/${
+        getMode().version
+      }/amp-script-proxy-iframe.html`;
+    }
 
     // @see src/main-thread/configuration.WorkerDOMConfiguration in worker-dom.
     const config = {
@@ -291,6 +311,7 @@ export class AmpScript extends AMP.BaseElement {
       onReceiveMessage: (data) => {
         dev().info(TAG, 'From worker:', data);
       },
+      sandbox: this.sandboxed_ && {iframeUrl},
     };
 
     // Create worker and hydrate.
@@ -370,7 +391,7 @@ export class AmpScript extends AMP.BaseElement {
           id
         );
         const text = local.textContent;
-        if (this.development_) {
+        if (this.development_ || this.sandboxed_) {
           return Promise.resolve(text);
         } else {
           return this.service_.checkSha384(text, debugId).then(() => text);
