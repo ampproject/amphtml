@@ -21,6 +21,7 @@ export const StoryAdPlacements = {
   ID: 'story-ad-placements',
   CONTROL: '31060567',
   PREDETERMINED_EIGHT: '31060568',
+  PREDETERMINED_TEN: '31060817',
   PREDETERMINED_TWELVE: '31060569',
 };
 
@@ -36,6 +37,7 @@ export function divertStoryAdPlacements(win) {
       branches: [
         StoryAdPlacements.CONTROL,
         StoryAdPlacements.PREDETERMINED_EIGHT,
+        StoryAdPlacements.PREDETERMINED_TEN,
         StoryAdPlacements.PREDETERMINED_TWELVE,
       ],
     },

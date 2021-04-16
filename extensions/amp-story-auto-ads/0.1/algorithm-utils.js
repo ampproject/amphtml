@@ -29,8 +29,8 @@ import {getExperimentBranch} from '../../../src/experiments';
 export function getPlacementAlgo(win, storeService, pageManager) {
   const placementsExpBranch = getExperimentBranch(win, StoryAdPlacements.ID);
   if (
-    placementsExpBranch === StoryAdPlacements.PREDETERMINED_EIGHT ||
-    placementsExpBranch === StoryAdPlacements.PREDETERMINED_TWELVE
+    placementsExpBranch &&
+    placementsExpBranch !== StoryAdPlacements.CONTROL
   ) {
     return new PredeterminedPositionAlgorithm(
       storeService,
