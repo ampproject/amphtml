@@ -43,7 +43,7 @@ const RAFMT_PARAMS = {
 };
 
 /** @const {!{branch: string, control: string, experiment: string}}
-    @visibleForTesting
+    @@visibleForTesting
 */
 export const AD_SIZE_OPTIMIZATION_EXP = {
   branch: 'adsense-ad-size-optimization',
@@ -52,7 +52,7 @@ export const AD_SIZE_OPTIMIZATION_EXP = {
 };
 
 /** @const {!{branch: string, control: string, experiment: string}}
-    @visibleForTesting
+    @@visibleForTesting
 */
 export const MAX_HEIGHT_EXP = {
   branch: 'fix-inconsistent-responsive-height-selection',

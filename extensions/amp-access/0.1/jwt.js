@@ -35,7 +35,7 @@ let JwtTokenInternalDef;
  * Converts a text in PEM format into a binary array buffer.
  * @param {string} pem
  * @return {!Uint8Array}
- * @visibleForTesting
+ * @@visibleForTesting
  */
 export function pemToBytes(pem) {
   const key = pem
