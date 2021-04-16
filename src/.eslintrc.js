@@ -56,7 +56,6 @@ module.exports = {
         './core/contextprops.js',
         './context/node.js',
         './context/scheduler.js',
-        './context/values.js',
         // TEMPORARY, follow tracking issue #33631
         './preact/component/3p-frame.js',
       ],
