@@ -22,7 +22,7 @@
 const {
   skipDependentJobs,
   timedExecOrDie,
-  uploadModuleOutput,
+  storeModuleBuildToWorkspace,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {runCiJob} = require('./ci-job');
@@ -31,7 +31,7 @@ const jobName = 'module-build.js';
 
 function pushBuildWorkflow() {
   timedExecOrDie('amp dist --esm --fortesting');
-  uploadModuleOutput();
+  storeModuleBuildToWorkspace();
 }
 
 function prBuildWorkflow() {
@@ -40,7 +40,7 @@ function prBuildWorkflow() {
   // run against the module build. (ex. visual diffs, e2e, etc.)
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     timedExecOrDie('amp dist --esm --fortesting');
-    uploadModuleOutput();
+    storeModuleBuildToWorkspace();
   } else {
     skipDependentJobs(
       jobName,
