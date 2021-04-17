@@ -29,7 +29,6 @@ const {
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
 const {red} = require('kleur/colors');
-const {runNpmChecks} = require('./npm-checks');
 const {updatePackages} = require('../common/update-packages');
 
 /**
@@ -41,12 +40,8 @@ const {updatePackages} = require('../common/update-packages');
 async function runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow) {
   setLoggingPrefix(jobName);
   const startTime = startTimer(jobName);
-  updatePackages();
-  if (!runNpmChecks()) {
-    abortTimedJob(jobName, startTime);
-    return;
-  }
   try {
+    updatePackages();
     if (isPullRequestBuild()) {
       printChangeSummary();
       determineBuildTargets();
