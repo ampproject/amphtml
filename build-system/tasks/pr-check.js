@@ -17,18 +17,17 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
-  abortTimedJob,
+  buildTargetsInclude,
+  determineBuildTargets,
+  Targets,
+} = require('../pr-check/build-targets');
+const {
   printChangeSummary,
   startTimer,
   stopTimer,
   timedExec,
 } = require('../pr-check/utils');
-const {
-  buildTargetsInclude,
-  determineBuildTargets,
-  Targets,
-} = require('../pr-check/build-targets');
-const {runNpmChecks} = require('../pr-check/npm-checks');
+const {runNpmChecks} = require('../common/npm-checks');
 const {setLoggingPrefix} = require('../common/logging');
 
 const jobName = 'pr-check.js';
@@ -38,26 +37,17 @@ const jobName = 'pr-check.js';
  * closely as possible.
  */
 async function prCheck() {
-  setLoggingPrefix(jobName);
-
-  const failTask = () => {
-    stopTimer(jobName, startTime);
-    throw new Error('Local PR check failed. See logs above.');
-  };
-
   const runCheck = (cmd) => {
     const {status} = timedExec(cmd);
     if (status != 0) {
-      failTask();
+      stopTimer(jobName, startTime);
+      throw new Error('Local PR check failed. See logs above.');
     }
   };
 
+  setLoggingPrefix(jobName);
   const startTime = startTimer(jobName);
-  if (!runNpmChecks()) {
-    abortTimedJob(jobName, startTime);
-    failTask();
-  }
-
+  runNpmChecks();
   printChangeSummary();
   determineBuildTargets();
 
