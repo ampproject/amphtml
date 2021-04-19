@@ -208,10 +208,16 @@ describes.realWin(
       doc.body.appendChild(element);
 
       await getRenderedData();
+      let options = fetchJsonStub.getCall(0).args[2];
+      // verify initial call to `batchFetJsonFor`
+      expect(options.refresh).to.be.false;
 
       element.enqueAction(invocation('refresh'));
       await getRenderedData();
       expect(fetchJsonStub).to.have.been.calledTwice;
+      options = fetchJsonStub.getCall(1).args[2];
+      // verify subsequent call to `batchFetJsonFor`
+      expect(options.refresh).to.be.true;
     });
 
     it('should not re-fetch when src=amp-state', async () => {
@@ -304,6 +310,43 @@ describes.realWin(
       await getRenderedData();
       expect(ampScript.getImpl).to.have.been.calledOnce;
       expect(fetchJsonStub).not.to.have.been.called;
+    });
+
+    it('should use the specified xssi-prefix and key attributes', async () => {
+      const fetchJsonStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+      fetchJsonStub.resolves({
+        fullName: {
+          firstName: 'Joe',
+          lastName: 'Biden',
+        },
+      });
+
+      element = html`
+        <amp-render
+          xssi-prefix=")]}"
+          key="fullName"
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache">
+            <ul>
+              <li>{{lastName}}, {{firstName}}</li>
+            </ul>
+          </template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await getRenderedData();
+      const options = fetchJsonStub.getCall(0).args[2];
+      // verify initial call to `batchFetJsonFor`
+      expect(options.xssiPrefix).to.equal(')]}');
+      expect(options.expr).to.equal('fullName');
     });
   }
 );

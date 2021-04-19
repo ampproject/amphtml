@@ -190,7 +190,6 @@ export class AmpRender extends BaseElement {
       api.refresh();
     });
 
-    // XXX batchFetchJsonFor is called in re-render with default options object
     return dict({
       'getJson': getJsonFn(this.element),
     });
