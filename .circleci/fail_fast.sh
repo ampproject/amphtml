@@ -63,9 +63,6 @@ elif [[ "$CIRCLE_BRANCH" =~ ^amp-release-* ]]; then
   echo $(YELLOW "This release branch build failed, notifying @ampproject/release-on-duty.")
   send_email "amp-release-on-duty@grotations.appspotmail.com" "AMP Release On-Duty"
   exit 0
-else
-  echo $(YELLOW "DO NOT MERGE")
-  send_email "rodaniel@google.com" "Daniel Rozenberg"
 fi
 
 # For PR builds, cancel when the first job fails.
