@@ -30,7 +30,7 @@ describes.fakeWin(
     let helpers;
 
     beforeEach(() => {
-      helpers = helpersMaker(env);
+      helpers = helpersMaker();
     });
 
     afterEach(() => {
