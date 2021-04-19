@@ -650,7 +650,7 @@ export class AmpScriptService {
     return ampScriptEl
       .getImpl()
       .then((impl) =>
-        impl.callFunction.apply(impl, [].concat(fnIdentifier).concat(args))
+        impl.callFunction.apply(impl, [fnIdentifier].concat(args))
       );
   }
 }
