@@ -216,6 +216,13 @@ In this example, it means that all the anchors with `youtube.com` and
 `mobile.vodafone.de` will be excluded. Also, the included anchors need to have a
 class attribute with the value `comments`.
 
+#### scopeDocument (optional)
+
+By default, all anchors will be rewritten if the page doesn't have any
+links which respect the `attribute` and `section` scope specified in the config.
+
+To change this behavior, you need to set `scopeDocument` to `false`.
+
 ## Validation
 
 See [`amp-link-rewriter` rules](validator-amp-link-rewriter.protoascii)
