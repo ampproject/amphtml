@@ -35,7 +35,7 @@ describes.fakeWin(
     beforeEach(() => {
       win = env.win;
 
-      helpers = helpersMaker(env);
+      helpers = helpersMaker();
 
       config = {
         'output':
