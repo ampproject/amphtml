@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Observable} from '../../../src/observable';
+import {Observable} from '../../../src/core/data-structures/observable';
 
 /**
  * @typedef {{

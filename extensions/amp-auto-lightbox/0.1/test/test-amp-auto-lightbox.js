@@ -15,7 +15,7 @@
  */
 
 import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
-import {CommonSignals} from '../../../../src/common-signals';
+import {CommonSignals} from '../../../../src/core/constants/common-signals';
 import {
   Criteria,
   DocMetaAnnotations,
@@ -37,7 +37,7 @@ import {Signals} from '../../../../src/utils/signals';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
 import {isArray} from '../../../../src/core/types';
-import {tryResolve} from '../../../../src/utils/promise';
+import {tryResolve} from '../../../../src/core/data-structures/promise';
 
 const TAG = 'amp-auto-lightbox';
 

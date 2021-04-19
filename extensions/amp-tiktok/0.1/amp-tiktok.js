@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-tiktok-0.1.css';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {Services} from '../../../src/services';
 import {
   childElementByTag,

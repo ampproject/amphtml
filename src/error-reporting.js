@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from './amp-events';
+import {AmpEvents} from './core/constants/amp-events';
 import {Services} from './services';
 import {
   USER_ERROR_SENTINEL,
   dev,
-  duplicateErrorIfNecessary,
   isUserErrorEmbed,
   isUserErrorMessage,
 } from './log';
 import {dict} from './core/types/object';
+import {duplicateErrorIfNecessary} from './core/error';
 import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
 import {exponentialBackoff} from './exponential-backoff';
 import {getMode} from './mode';

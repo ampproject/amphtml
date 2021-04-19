@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {
@@ -127,6 +127,9 @@ export class AmpSlideScroll extends BaseSlides {
 
     /** @private @const {boolean} */
     this.isIos_ = platform.isIos();
+
+    /** @private @const {boolean} */
+    this.isSafari_ = platform.isSafari();
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
@@ -430,7 +433,7 @@ export class AmpSlideScroll extends BaseSlides {
   scrollHandler_(unusedEvent) {
     const currentScrollLeft = this.slidesContainer_./*OK*/ scrollLeft;
 
-    if (!this.isIos_) {
+    if (!this.isIos_ && !this.isSafari_) {
       this.handleCustomElasticScroll_(currentScrollLeft);
     }
 

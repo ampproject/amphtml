@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import PriorityQueue from '../../../src/utils/priority-queue';
+import PriorityQueue from '../../../../src/core/data-structures/priority-queue';
 
-describe('PriorityQueue', function () {
+describes.sandboxed('PriorityQueue', {}, () => {
   let pq;
 
   beforeEach(() => {

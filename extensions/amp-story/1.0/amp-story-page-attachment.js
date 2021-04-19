@@ -34,9 +34,10 @@ const DARK_THEME_CLASS = 'i-amphtml-story-draggable-drawer-theme-dark';
 /**
  * @enum {string}
  */
-const AttachmentTheme = {
+export const AttachmentTheme = {
   LIGHT: 'light', // default
   DARK: 'dark',
+  CUSTOM: 'custom',
 };
 
 /**
@@ -291,11 +292,10 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       // amp-story-page-attachment.css). The navigation itself will take some
       // time, depending on the target and network conditions.
       this.win.setTimeout(() => {
-        const navigationService = Services.navigationForDoc(this.getAmpDoc());
-        navigationService.navigateTo(
-          this.win,
-          this.element.getAttribute('href')
-        );
+        this.element.parentElement
+          .querySelector('.i-amphtml-story-page-open-attachment-host')
+          .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment')
+          .click();
       }, 50);
     });
   }

@@ -19,7 +19,7 @@ import {AnalyticsConfig, mergeObjects} from './config';
 import {AnalyticsEventType} from './events';
 import {ChunkPriority, chunk} from '../../../src/chunk';
 import {CookieWriter} from './cookie-writer';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {
   ExpansionOptions,
   VariableService,
@@ -35,12 +35,13 @@ import {LinkerManager} from './linker-manager';
 import {RequestHandler, expandPostMessage} from './requests';
 import {Services} from '../../../src/services';
 import {Transport} from './transport';
-import {dev, devAssert, rethrowAsync, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/core/types/object';
 import {expandTemplate} from '../../../src/core/types/string';
 import {getMode} from '../../../src/mode';
 import {installLinkerReaderService} from './linker-reader';
 import {isArray, isEnumValue} from '../../../src/core/types';
+import {rethrowAsync} from '../../../src/core/error';
 
 import {isIframed} from '../../../src/dom';
 import {isInFie} from '../../../src/iframe-helper';
