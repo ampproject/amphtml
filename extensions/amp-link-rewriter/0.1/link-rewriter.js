@@ -17,7 +17,7 @@
 import {Services} from '../../../src/services';
 import {getConfigOpts} from './config-options';
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {getScopeElements, isElementOnScope} from './scope';
+import {getScopeElements, isElementInScope} from './scope';
 
 const WL_ANCHOR_ATTR = ['href', 'id', 'rel', 'rev'];
 const PREFIX_DATA_ATTR = /^vars(.+)/;
@@ -111,7 +111,7 @@ export class LinkRewriter {
    */
   isNotFiltered_(anchor) {
     if (!this.configOpts_.scopeDocument) {
-      return isElementOnScope(anchor, this.configOpts_);
+      return isElementInScope(anchor, this.configOpts_);
     }
 
     return this.isListed_(anchor);
