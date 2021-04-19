@@ -682,8 +682,6 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-live-story.js"
     },
     {
-      // TODO(#33758, @ampproject/wg-stories): e.g., https://percy.io/ampproject/amphtml/builds/9803190/changed/552186579
-      "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-bot-rendering.html",
       "name": "amp-story: bot rendering",
       "viewport": {"width": 360, "height": 4500},
