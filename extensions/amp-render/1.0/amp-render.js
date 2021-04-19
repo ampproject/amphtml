@@ -85,9 +85,10 @@ export const getJsonFn = (element) => {
   }
   if (isAmpScriptUri(src)) {
     return (src) =>
-      Services.scriptForDocOrNull(element).then((ampScriptService) =>
-        ampScriptService.fetch(src)
-      );
+      Services.scriptForDocOrNull(element).then((ampScriptService) => {
+        userAssert(ampScriptService, 'AMP-SCRIPT is not installed');
+        return ampScriptService.fetch(src);
+      });
   }
   return () => batchFetchJsonFor(element.getAmpDoc(), element);
 };

@@ -329,6 +329,7 @@ export class Transport {
    */
   static forwardRequestToAmpScript(ampdoc, request) {
     return Services.scriptForDocOrNull(ampdoc).then((ampScriptService) => {
+      userAssert(ampScriptService, 'AMP-SCRIPT is not installed');
       ampScriptService.fetch(request.url, JSON.parse(request.payload));
     });
   }
