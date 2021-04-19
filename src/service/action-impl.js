@@ -323,12 +323,6 @@ export class ActionService {
               event,
               ActionTrust.HIGH
             );
-            // Only if the element has an action do we prevent the default.
-            // In the absence of an action, e.g. on="[event].method", we do not
-            // want to stop default behavior.
-            if (hasAction) {
-              event.preventDefault();
-            }
           }
         }
       });
