@@ -1009,7 +1009,7 @@ describes.repeated(
             });
           });
 
-          describe.only('Using amp-script: protocol', () => {
+          describe('Using amp-script: protocol', () => {
             let ampScriptEl;
             beforeEach(() => {
               resetExperimentTogglesForTesting(win);
