@@ -39,7 +39,6 @@ export function duplicateErrorIfNecessary(error) {
 /**
  * @param {...*} var_args
  * @return {!Error}
- * @visibleForTesting
  */
 export function createErrorVargs(var_args) {
   let error = null;
