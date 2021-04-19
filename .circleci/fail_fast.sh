@@ -29,7 +29,27 @@ send_email() {
     --url https://api.sendgrid.com/v3/mail/send \
     --header "Authorization: Bearer ${SENDGRID_API_KEY}" \
     --header "Content-Type: application/json" \
-    --data '{"personalizations": [{"to": [{"email": "'$1'"}]}], "from": {"email": "bot+noreply@amp.dev"}, "template_id": "d-5a6b574506534ab3aad1da13a78cdeb4", "dynamic_template_data": {"branch": "'${CIRCLE_BRANCH}'", "build_url": "'${CIRCLE_BUILD_URL}'"}}'
+    --data '{
+        "from": {
+          "email": "bot+noreply@amp.dev"
+        },
+        "template_id": "d-5a6b574506534ab3aad1da13a78cdeb4",
+        "personalizations": [
+          {
+            "to": [
+              {
+                "email": "'$1'",
+                "name": "'$2'"
+              }
+            ],
+            "dynamic_template_data": {
+              "branch": "'${CIRCLE_BRANCH}'",
+              "name": "'$2'",
+              "build_url": "'${CIRCLE_BUILD_URL}'"
+            }
+          }
+        ]
+      }'
 }
 
 # For push builds, continue in spite of failures so that other jobs like
@@ -37,11 +57,11 @@ send_email() {
 # Without this, our custom bots will not be able to function correctly.
 if [[ "$CIRCLE_BRANCH" == "main" ]]; then
   echo $(YELLOW "This main branch build failed, notifying @ampproject/build-on-duty.")
-  send_mail "amp-build-on-duty@grotations.appspotmail.com"
+  send_mail "amp-build-on-duty@grotations.appspotmail.com" "AMP Build On-Duty"
   exit 0
 elif [[ "$CIRCLE_BRANCH" =~ ^amp-release-* ]]; then
   echo $(YELLOW "This release branch build failed, notifying @ampproject/release-on-duty.")
-  send_mail "amp-release-on-duty@grotations.appspotmail.com"
+  send_mail "amp-release-on-duty@grotations.appspotmail.com" "AMP Release On-Duty"
   exit 0
 fi
 
