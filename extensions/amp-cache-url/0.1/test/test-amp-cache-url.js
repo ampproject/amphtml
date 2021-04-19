@@ -29,5 +29,19 @@ describes.fakeWin(
         'https://amp-dev.cdn.ampproject.org/c/s/amp.dev/stories'
       );
     });
+
+    it('should not throw with empty url', async () => {
+      const cacheUrlService = new AmpCacheUrlService();
+      expect(
+        async () => await cacheUrlService.createCacheUrl('')
+      ).to.not.throw();
+    });
+
+    it('should not throw with invalid url', async () => {
+      const cacheUrlService = new AmpCacheUrlService();
+      expect(
+        async () => await cacheUrlService.createCacheUrl('invalid url')
+      ).to.not.throw();
+    });
   }
 );
