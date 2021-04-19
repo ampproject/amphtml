@@ -409,5 +409,4 @@ dist.flags = {
   sxg: 'Outputs the compiled code for the SxG build',
   warning_level:
     "Optionally sets closure's warning level to one of [quiet, default, verbose]",
-  npm: 'Builds extension binaries for npm',
 };

@@ -104,5 +104,4 @@ build.flags = {
   esm: 'Do not transpile down to ES5',
   define_experiment_constant:
     'Builds runtime with the EXPERIMENT constant set to true',
-  npm: 'Builds extension binaries for npm',
 };
