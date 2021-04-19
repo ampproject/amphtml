@@ -15,10 +15,12 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
+import {AmpScriptService} from '../../../../extensions/amp-script/0.1/amp-script';
 import {
   ImagePixelVerifier,
   mockWindowInterface,
 } from '../../../../testing/test-helper';
+import {Services} from '../../../../src/services';
 import {Transport} from '../transport';
 import {getMode} from '../../../../src/mode';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
@@ -384,27 +386,27 @@ describes.realWin(
     });
 
     describe('amp-script transport', () => {
+      beforeEach(() => {
+        env.sandbox
+          .stub(Services, 'scriptForDocOrNull')
+          .returns(Promise.resolve(new AmpScriptService(env.ampdoc)));
+      });
+
       it('should throw if the url does not begin with amp-script scheme', () => {
-        allowConsoleError(() => {
-          expect(() =>
-            Transport.forwardRequestToAmpScript(env.ampdoc, {
-              url: 'receiver.functionId',
-            })
-          ).throws(/URL must begin with/);
+        const req = Transport.forwardRequestToAmpScript(env.ampdoc, {
+          url: 'receiver.functionId',
         });
+        expect(req).rejectedWith(/URL must begin with/);
       });
 
       it('should throw if the amp-script cannot be found', () => {
-        allowConsoleError(() => {
-          expect(() =>
-            Transport.forwardRequestToAmpScript(env.ampdoc, {
-              url: 'amp-script:nonexistent.functionId',
-            })
-          ).throws(/could not find/);
+        const req = Transport.forwardRequestToAmpScript(env.ampdoc, {
+          url: 'amp-script:nonexistent.functionId',
         });
+        expect(req).rejectedWith(/could not find/);
       });
 
-      it('should forward the payload to the specifed amp-script element', () => {
+      it('should forward the payload to the specifed amp-script element', async () => {
         const callFunctionSpy = env.sandbox.spy();
         const ampScript = doc.createElement('amp-script');
         ampScript.id = 'receiver';
@@ -414,7 +416,7 @@ describes.realWin(
         doc.body.appendChild(ampScript);
 
         const payload = '{}';
-        Transport.forwardRequestToAmpScript(env.ampdoc, {
+        await Transport.forwardRequestToAmpScript(env.ampdoc, {
           url: 'amp-script:receiver.functionId',
           payload,
         });
