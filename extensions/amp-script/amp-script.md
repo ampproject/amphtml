@@ -107,6 +107,8 @@ You can also include your JavaScript inline, in a `script` tag. You must:
 
 [tip type="default"]
 For security reasons, `amp-script` elements with a `script` or cross-origin `src` attribute require a [script hash](#calculating-the-script-hash) in a `<meta name="amp-script-src" content="...">` tag. Also, same-origin `src` files must have [`Content-Type`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type): `application/javascript` or `text/javascript`.
+
+If you are including multiple `amp-script` elements which require a [script hash](#calculating-the-script-hash), they should be included as a whitespace-delimited list in a single `<meta name="amp-script-src" content="...">` tag (see [examples/amp-script/example.amp.html](https://github.com/ampproject/amphtml/blob/main/examples/amp-script/example.amp.html) for an example with multiple script hashes).
 [/tip]
 
 ### How does it work?
