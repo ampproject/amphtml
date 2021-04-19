@@ -347,6 +347,10 @@ describes.realWin(
       // verify initial call to `batchFetJsonFor`
       expect(options.xssiPrefix).to.equal(')]}');
       expect(options.expr).to.equal('fullName');
+
+      // we cant verify the rendered data here because that functionality for
+      // replacing xssi prefix and returning the sub-object based on key is
+      // in the internal implementation of `batchFetchJsonFor`.
     });
   }
 );
