@@ -15,6 +15,7 @@
  */
 
 import {Deferred} from '../../../src/utils/promise';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {
@@ -26,7 +27,7 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   dispatchCustomEvent,
   fullscreenEnter,
@@ -83,6 +84,9 @@ class AmpMowplayer extends AMP.BaseElement {
      * @private @const {string}
      */
     this.baseUrl_ = 'https://mowplayer.com/watch/';
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -145,6 +149,9 @@ class AmpMowplayer extends AMP.BaseElement {
       dispatchCustomEvent(this.element, VideoEvents.LOAD);
     });
     this.playerReadyResolver_(loaded);
+
+    this.pauseHelper_.updatePlaying(true);
+
     return loaded;
   }
 
@@ -160,6 +167,9 @@ class AmpMowplayer extends AMP.BaseElement {
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
+
+    this.pauseHelper_.updatePlaying(false);
+
     return true; // Call layoutCallback again.
   }
 
@@ -291,6 +301,11 @@ class AmpMowplayer extends AMP.BaseElement {
   /** @override */
   pause() {
     this.sendCommand_('pauseVideo');
+    // The player doesn't appear to respect "pauseVideo" message.
+    const iframe = this.iframe_;
+    if (iframe) {
+      iframe.src = iframe.src;
+    }
   }
 
   /** @override */

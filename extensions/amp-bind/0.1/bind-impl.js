@@ -30,7 +30,7 @@ import {
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
-import {deepMerge, dict, map} from '../../../src/utils/object';
+import {deepMerge, dict, map} from '../../../src/core/types/object';
 import {dev, devAssert, user} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {
@@ -43,8 +43,9 @@ import {getMode} from '../../../src/mode';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isAmp4Email} from '../../../src/format';
 
-import {isFiniteNumber, isObject} from '../../../src/types';
-import {reportError} from '../../../src/error';
+import {isFiniteNumber} from '../../../src/types';
+import {isObject} from '../../../src/core/types';
+import {reportError} from '../../../src/error-reporting';
 import {rewriteAttributesForElement} from '../../../src/url-rewrite';
 
 /** @const {string} */

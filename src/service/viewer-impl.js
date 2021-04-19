@@ -24,7 +24,7 @@ import {
   duplicateErrorIfNecessary,
   stripUserError,
 } from '../log';
-import {endsWith} from '../string';
+import {endsWith} from '../core/types/string';
 import {findIndex} from '../core/types/array';
 import {
   getSourceOrigin,
@@ -36,9 +36,9 @@ import {
 } from '../url';
 import {isIframed} from '../dom';
 import {listen} from '../event-helper';
-import {map} from '../utils/object';
+import {map} from '../core/types/object';
 import {registerServiceBuilderForDoc} from '../service';
-import {reportError} from '../error';
+import {reportError} from '../error-reporting';
 import {urls} from '../config';
 
 import {ViewerInterface} from './viewer-interface';

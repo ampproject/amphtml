@@ -24,7 +24,7 @@ import {Keys} from '../utils/key-codes';
 import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
 import {dev, devAssert, user, userAssert} from '../log';
-import {dict, hasOwn, map} from '../utils/object';
+import {dict, hasOwn, map} from '../core/types/object';
 import {getDetail} from '../event-helper';
 import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
@@ -33,7 +33,7 @@ import {isArray, toArray} from '../core/types/array';
 import {isEnabled} from '../dom';
 import {isFiniteNumber, toWin} from '../types';
 import {registerServiceBuilderForDoc} from '../service';
-import {reportError} from '../error';
+import {reportError} from '../error-reporting';
 
 /** @const {string} */
 const TAG_ = 'Action';

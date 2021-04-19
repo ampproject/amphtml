@@ -34,7 +34,7 @@ import {
   getDefaultBootstrapBaseUrl,
 } from '../../../src/3p-frame';
 import {assertHttpsUrl, tryDecodeUriComponent} from '../../../src/url';
-import {cancellation, isCancellation} from '../../../src/error';
+import {cancellation, isCancellation} from '../../../src/error-reporting';
 import {createElementWithAttributes} from '../../../src/dom';
 import {createSecureDocSkeleton, createSecureFrame} from './secure-frame';
 import {
@@ -44,7 +44,7 @@ import {
   user,
   userAssert,
 } from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
@@ -72,14 +72,14 @@ import {
   measureIntersection,
 } from '../../../src/utils/intersection';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {isArray} from '../../../src/core/types/array';
-import {isEnumValue, isObject} from '../../../src/types';
+import {isArray, isEnumValue, isObject} from '../../../src/core/types';
+
 import {listenOnce} from '../../../src/event-helper';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {padStart} from '../../../src/string';
+import {padStart} from '../../../src/core/types/string';
 import {parseJson} from '../../../src/json';
 import {processHead} from './head-validation';
 import {setStyle} from '../../../src/style';

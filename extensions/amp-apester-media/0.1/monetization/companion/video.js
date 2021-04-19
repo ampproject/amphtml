@@ -17,7 +17,7 @@
 import {Services} from '../../../../../src/services';
 const ALLOWED_AD_PROVIDER = 'sr';
 import {createElementWithAttributes} from '../../../../../src/dom';
-import {dict} from '../../../../../src/utils/object';
+import {dict} from '../../../../../src/core/types/object';
 import {getValueForExpr} from '../../../../../src/json';
 
 /**

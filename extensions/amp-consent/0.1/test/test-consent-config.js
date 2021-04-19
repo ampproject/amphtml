@@ -22,7 +22,7 @@ import {
 } from '../consent-config';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../../src/services';
-import {dict} from '../../../../src/utils/object';
+import {dict} from '../../../../src/core/types/object';
 
 describes.realWin('ConsentConfig', {amp: 1}, (env) => {
   let doc;
