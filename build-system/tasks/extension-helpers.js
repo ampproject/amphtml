@@ -492,7 +492,7 @@ async function buildExtension(
     await doBuildJs(jsBundles, 'ww.max.js', options);
   }
   if (options.npm) {
-    await buildNpmBinaires(extDir, options);
+    await buildNpmBinaries(extDir, options);
   }
   if (options.binaries) {
     await buildBinaries(extDir, options.binaries, options);
@@ -564,7 +564,7 @@ function buildExtensionCss(extDir, name, version, options) {
  * @param {!Object} options
  * @return {!Promise}
  */
-function buildNpmBinaires(extDir, options) {
+function buildNpmBinaries(extDir, options) {
   const {npm} = options;
   const keys = Object.keys(npm);
   const promises = keys.flatMap((entryPoint) => {
