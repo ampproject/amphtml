@@ -61,7 +61,6 @@ async function doBuild(extraArgs = {}) {
   const options = {
     fortesting: extraArgs.fortesting || argv.fortesting,
     minify: false,
-    npm: argv.npm,
     watch: argv.watch,
   };
   printNobuildHelp();

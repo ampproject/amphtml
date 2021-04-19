@@ -128,7 +128,6 @@ async function doDist(extraArgs = {}) {
   const options = {
     fortesting: extraArgs.fortesting || argv.fortesting,
     minify: true,
-    npm: argv.npm,
     watch: argv.watch,
   };
   printClosureConcurrency();
