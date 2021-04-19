@@ -715,7 +715,7 @@ export class AmpForm {
     // Fields that support var substitutions.
     return formElementsQuerySelectorAll(
       this.form_,
-      'input[type="hidden"][data-amp-replace]'
+      '[type="hidden"][data-amp-replace]'
     );
   }
 
