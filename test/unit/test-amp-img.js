@@ -535,10 +535,10 @@ describes.sandboxed('amp-img', {}, (env) => {
       el.appendChild(img);
       el.getResources = () => Services.resourcesForDoc(document);
       if (serverRendered) {
-        el.setAttribute('i-amphtml-ssr', '');
         const serverRenderedImg = document.createElement('img');
         serverRenderedImg.setAttribute('src', '/examples/img/sample.jpg');
         el.appendChild(serverRenderedImg);
+        el.setAttribute('i-amphtml-ssr', '');
       }
       const impl = new AmpImg(el);
       impl.togglePlaceholder = sandbox.stub();
@@ -588,7 +588,8 @@ describes.sandboxed('amp-img', {}, (env) => {
       impl.buildCallback();
       impl.layoutCallback();
 
-      // expect(ampImg.querySelector('img[src*="sample.jpg"]')).to.exist;
+      // debugger;
+      expect(ampImg.querySelector('img[src*="sample.jpg"]')).to.exist;
       expect(ampImg.querySelector('img[src*="image/svg+xml"]')).to.exist;
     });
 

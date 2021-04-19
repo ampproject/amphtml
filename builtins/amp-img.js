@@ -191,8 +191,7 @@ export class AmpImg extends BaseElement {
     // fallback to stop from nested fallback abuse.
     this.allowImgLoadFallback_ = !this.element.hasAttribute('fallback');
 
-    // For inabox SSR, image will have been written directly to DOM so no need
-    // to recreate.  Calling appendChild again will have no effect.
+    // For SSR, image will have been written directly to DOM so no need to recreate.
     if (this.element.hasAttribute('i-amphtml-ssr')) {
       this.img_ = scopedQuerySelector(this.element, '> img:not([placeholder])');
       return this.img_;
