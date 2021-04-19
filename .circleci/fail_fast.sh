@@ -56,10 +56,12 @@ send_email() {
 # bundle-size and visual-diff can establish their baselines for this commit.
 # Without this, our custom bots will not be able to function correctly.
 if [[ "$CIRCLE_BRANCH" == "main" ]]; then
+  echo $(YELLOW "Not canceling build in spite of failures because ${CIRCLE_BRANCH} is not a PR branch.")
   echo $(YELLOW "This main branch build failed, notifying @ampproject/build-on-duty.")
   send_email "amp-build-on-duty@grotations.appspotmail.com" "AMP Build On-Duty"
   exit 0
 elif [[ "$CIRCLE_BRANCH" =~ ^amp-release-* ]]; then
+  echo $(YELLOW "Not canceling build in spite of failures because ${CIRCLE_BRANCH} is not a PR branch.")
   echo $(YELLOW "This release branch build failed, notifying @ampproject/release-on-duty.")
   send_email "amp-release-on-duty@grotations.appspotmail.com" "AMP Release On-Duty"
   exit 0
