@@ -205,6 +205,19 @@ player.show('cool-story.html', 'page-4'); // Will display cool-story.html and sw
 player.show(null, 'page-4'); // Stay on current story and switch to page-4
 ```
 
+#### rewind
+
+**Parameters**
+
+-   string: the URL of the story to rewind.
+
+Will rewind the provided story to the first page.
+
+```javascript
+player.show('story-2.html');
+player.rewind('story-1.html'); // Will rewind story-1 to the first page.
+```
+
 #### add
 
 **Parameters**
@@ -650,6 +663,16 @@ player.addEventListener("amp-story-player-touchend", (event) => {
     // Do something else when not navigating.
 
 });
+```
+
+#### amp-story-muted-state
+
+Fired when the story is muted/unmuted. This event provides an `muted` property.
+
+```javascript
+player.addEventListener('amp-story-muted-state', (event) => {
+  console.log('muted state', event.detail.muted);
+})
 ```
 
 #### navigation

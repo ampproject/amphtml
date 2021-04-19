@@ -16,7 +16,7 @@
 
 import {AmpDocFie} from '../../src/service/ampdoc-impl';
 import {BaseElement} from '../../src/base-element';
-import {Deferred} from '../../src/utils/promise';
+import {Deferred} from '../../src/core/data-structures/promise';
 import {ElementStub} from '../../src/element-stub';
 import {FakeWindow} from '../../testing/fake-dom';
 import {

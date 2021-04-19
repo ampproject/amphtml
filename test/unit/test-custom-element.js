@@ -15,9 +15,9 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {AmpEvents} from '../../src/amp-events';
+import {AmpEvents} from '../../src/core/constants/amp-events';
 import {BaseElement} from '../../src/base-element';
-import {CommonSignals} from '../../src/common-signals';
+import {CommonSignals} from '../../src/core/constants/common-signals';
 import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {Resource, ResourceState} from '../../src/service/resource';

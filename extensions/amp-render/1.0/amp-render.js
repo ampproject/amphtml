@@ -18,7 +18,7 @@ import {BaseElement} from './base-element';
 import {Services} from '../../../src/services';
 import {batchFetchJsonFor} from '../../../src/batched-json';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
@@ -158,6 +158,18 @@ export class AmpRender extends BaseElement {
 
   /** @override */
   init() {
+    this.registerApiAction('refresh', (api) => {
+      const src = this.element.getAttribute('src');
+      // There is an alternative way to do this using `mutationObserverCallback` while using a boolean
+      // variable `canRefresh`. See https://github.com/ampproject/amphtml/pull/33776#discussion_r614087734
+      // for more context. This approach may be better if src does not mutate often. But the alternative might
+      // be better if src mutatates often and component user does not use `refresh` action.
+      if (!src?.length || isAmpStateSrc(src) || isAmpScriptSrc(src)) {
+        return;
+      }
+      api.refresh();
+    });
+
     return dict({
       'getJson': getJsonFn(this.element),
     });

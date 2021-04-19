@@ -15,7 +15,7 @@
  */
 
 import {AmpAdUIHandler} from './amp-ad-ui';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
@@ -24,7 +24,7 @@ import {
   closestAncestorElementBySelector,
   removeChildren,
 } from '../../../src/dom';
-import {hasOwn} from '../../../src/utils/object';
+import {hasOwn} from '../../../src/core/types/object';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} Tag name for custom ad implementation. */

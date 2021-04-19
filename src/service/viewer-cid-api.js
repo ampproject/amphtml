@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../services';
-import {dict} from '../utils/object';
+import {dict} from '../core/types/object';
 import {parseUrlDeprecated} from '../url';
 
 /**

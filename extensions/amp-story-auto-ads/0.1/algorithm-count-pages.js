@@ -16,7 +16,7 @@
 
 import {InsertionState} from './story-ad-page-manager';
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
-import {hasOwn, map} from '../../../src/utils/object';
+import {hasOwn, map} from '../../../src/core/types/object';
 
 /** @const {number} */
 const INTERVAL = 7;
