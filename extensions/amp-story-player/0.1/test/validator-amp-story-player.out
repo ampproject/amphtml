@@ -30,6 +30,7 @@ PASS
 |  <body>
 |    <amp-story-player width="360" height="600">
 |      <a href="https://www.example.com" class="story">
+|        <img data-amp-story-player-poster-img src="https://www.example.com/img" width="360" height="600" loading="lazy">
 |        <span class="title">A local’s guide to what to eat and do in New York City</span>
 |      </a>
 |      <a href="https://www.example.com2" class="story">

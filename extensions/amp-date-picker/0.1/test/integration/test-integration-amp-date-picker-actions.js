@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {poll} from '../../../../../testing/iframe';
 
 const config = describe.configure().ifChrome();
@@ -52,8 +52,7 @@ config.skip('amp-date-picker', function () {
       beforeEach(() => {
         win = env.win;
         document = env.win.document;
-        clock = lolex.install({
-          target: win,
+        clock = fakeTimers.withGlobal(win).install({
           now: new Date('2018-01-01T08:00:00Z'),
         });
       });
@@ -111,8 +110,7 @@ config.skip('amp-date-picker', function () {
       beforeEach(() => {
         win = env.win;
         document = env.win.document;
-        clock = lolex.install({
-          target: win,
+        clock = fakeTimers.withGlobal(win).install({
           now: new Date('2018-01-01T08:00:00Z'),
         });
       });
@@ -179,8 +177,7 @@ config.skip('amp-date-picker', function () {
       beforeEach(() => {
         win = env.win;
         document = env.win.document;
-        clock = lolex.install({
-          target: win,
+        clock = fakeTimers.withGlobal(win).install({
           now: new Date('2018-01-01T08:00:00Z'),
         });
       });
@@ -248,8 +245,7 @@ config.skip('amp-date-picker', function () {
       beforeEach(() => {
         win = env.win;
         document = env.win.document;
-        clock = lolex.install({
-          target: win,
+        clock = fakeTimers.withGlobal(win).install({
           now: new Date('2018-01-01T08:00:00Z'),
         });
       });

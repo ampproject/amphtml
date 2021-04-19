@@ -15,8 +15,9 @@
  */
 
 import {deepScan, findParent} from './scan';
-import {devAssert, rethrowAsync} from '../log';
-import {pushIfNotExist, removeItem} from '../utils/array';
+import {pureDevAssert as devAssert} from '../core/assert';
+import {pushIfNotExist, removeItem} from '../core/types/array';
+import {rethrowAsync} from '../core/error';
 import {throttleTail} from './scheduler';
 
 const EMPTY_ARRAY = [];
@@ -33,7 +34,7 @@ const Pending = {
 
 /**
  * The structure for a property's inputs. It's important that `values` are
- * easily available as an array to pass them to the `needsParent` and
+ * easily available as an array to pass them to the `recursive` and
  * `compute` callbacks without reallocation.
  *
  * @typedef {{
@@ -500,7 +501,7 @@ export class Values {
       newValue = this.calc_(used, refreshParent);
     } catch (e) {
       // This is the narrowest catch to avoid unrelated values breaking each
-      // other. The only exposure to the user-code are `needsParent` and
+      // other. The only exposure to the user-code are `recursive` and
       // `compute` methods in the `ContextProp`.
       rethrowAsync(e);
     }
@@ -559,11 +560,11 @@ export class Values {
     const inputValues = inputs && inputs.values;
 
     // Calculate parent value.
-    const needsParent = calcNeedsParent(prop, inputValues);
+    const recursive = calcRecursive(prop, inputValues);
 
     // Refresh parent if requested.
-    if (refreshParent || needsParent != Boolean(used.parentContextNode)) {
-      const newParentContextNode = needsParent
+    if (refreshParent || recursive != Boolean(used.parentContextNode)) {
+      const newParentContextNode = recursive
         ? findParent(this.contextNode_, hasInput, prop, /* includeSelf */ false)
         : null;
       this.updateParentContextNode_(used, newParentContextNode);
@@ -572,14 +573,14 @@ export class Values {
     // If no parent node is found, use the default value.
     const parentValue = isDefined(used.parentValue)
       ? used.parentValue
-      : needsParent && !used.parentContextNode
+      : recursive && !used.parentContextNode
       ? defaultValue
       : undefined;
 
     // Calculate the "used" value.
     let newValue = undefined;
     const ready =
-      depValues.every(isDefined) && (!needsParent || isDefined(parentValue));
+      depValues.every(isDefined) && (!recursive || isDefined(parentValue));
     if (ready) {
       const {node} = this.contextNode_;
       if (inputValues && !compute) {
@@ -680,7 +681,7 @@ function hasInput(contextNode, prop) {
 function isRecursive(prop) {
   // Only `false` values make a value non-recursive. `true` and
   // `function` values are considered recursive.
-  return !!prop.needsParent;
+  return !!prop.recursive;
 }
 
 /**
@@ -690,18 +691,18 @@ function isRecursive(prop) {
  * @param {?Array} inputs
  * @return {boolean}
  */
-function calcNeedsParent(prop, inputs) {
-  const {needsParent, compute} = prop;
-  if (typeof needsParent == 'function') {
-    return inputs ? needsParent(inputs) : true;
+function calcRecursive(prop, inputs) {
+  const {recursive, compute} = prop;
+  if (typeof recursive == 'function') {
+    return inputs ? recursive(inputs) : true;
   }
-  if (needsParent && inputs && !compute) {
+  if (recursive && inputs && !compute) {
     // The default `compute` function is to pick the input value when available
     // and to fallback to the parent. Thus, when inputs are specified,
     // there's no longer a need for the parent.
     return false;
   }
-  return needsParent;
+  return recursive;
 }
 
 /**

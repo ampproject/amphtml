@@ -15,9 +15,11 @@
  */
 
 import {createElementWithAttributes, escapeHtml} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
+import {getFieSafeScriptSrcs} from '../../../src/friendly-iframe-embed';
 
 // If making changes also change ALLOWED_FONT_REGEX in head-validation.js
+/** @const {string} */
 const fontProviderAllowList = [
   'https://cdn.materialdesignicons.com',
   'https://cloud.typography.com',
@@ -30,14 +32,23 @@ const fontProviderAllowList = [
   'https://use.typekit.net',
 ].join(' ');
 
-const sandboxVals = [
-  'allow-forms',
-  'allow-popups',
-  'allow-popups-to-escape-sandbox',
-  'allow-same-origin',
-  'allow-top-navigation',
-];
+/** @const {string} */
+const sandboxVals =
+  'allow-forms ' +
+  'allow-popups ' +
+  'allow-popups-to-escape-sandbox ' +
+  'allow-same-origin ' +
+  'allow-scripts ' +
+  'allow-top-navigation';
 
+/**
+ * Create the starting html for all FIE ads. If streaming is supported body will be
+ * piped in later.
+ * @param {string} url
+ * @param {string} sanitizedHeadElements
+ * @param {string} body
+ * @return {string}
+ */
 export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
   `<!DOCTYPE html>
   <html ⚡4ads lang="en">
@@ -49,7 +60,7 @@ export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
       media-src *;
       font-src *;
       connect-src *;
-      script-src 'none';
+      script-src ${getFieSafeScriptSrcs()};
       object-src 'none';
       child-src 'none';
       default-src 'none';
@@ -62,13 +73,14 @@ export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
 
 /**
  * Create iframe with predefined CSP and sandbox attributes for security.
- * @param {!Document} document
+ * @param {!Window} win
  * @param {string} title
  * @param {string} height
  * @param {string} width
  * @return {!HTMLIFrameElement}
  */
-export function createSecureFrame(document, title, height, width) {
+export function createSecureFrame(win, title, height, width) {
+  const {document} = win;
   const iframe = /** @type {!HTMLIFrameElement} */ (createElementWithAttributes(
     document,
     'iframe',
@@ -82,7 +94,7 @@ export function createSecureFrame(document, title, height, width) {
       'allowfullscreen': '',
       'allowtransparency': '',
       'scrolling': 'no',
-      'sandbox': sandboxVals.join(' '),
+      'sandbox': sandboxVals,
     })
   ));
   return iframe;

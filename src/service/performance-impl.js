@@ -16,11 +16,11 @@
 
 import {Services} from '../services';
 import {Signals} from '../utils/signals';
-import {TickLabel} from '../enums';
-import {VisibilityState} from '../visibility-state';
+import {TickLabel} from '../core/constants/enums';
+import {VisibilityState} from '../core/constants/visibility-state';
 import {createCustomEvent} from '../event-helper';
 import {dev, devAssert} from '../log';
-import {dict, map} from '../utils/object';
+import {dict, map} from '../core/types/object';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
 import {isStoryDocument} from '../utils/story';
@@ -36,8 +36,7 @@ import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
  */
 const QUEUE_LIMIT = 50;
 
-/** @const {string} */
-const VISIBILITY_CHANGE_EVENT = 'visibilitychange';
+const TAG = 'Performance';
 
 /**
  * Fields:
@@ -79,6 +78,9 @@ export class Performance {
     /** @private {?./resources-interface.ResourcesInterface} */
     this.resources_ = null;
 
+    /** @private {?./document-info-impl.DocumentInfoDef} */
+    this.documentInfo_ = null;
+
     /** @private {boolean} */
     this.isMessagingReady_ = false;
 
@@ -87,8 +89,9 @@ export class Performance {
 
     /** @private {!Object<string,boolean>} */
     this.enabledExperiments_ = map();
-    /** @private {string} */
-    this.ampexp_ = '';
+
+    /** @private {string|undefined} */
+    this.ampexp_ = undefined;
 
     /** @private {Signals} */
     this.metrics_ = new Signals();
@@ -101,18 +104,10 @@ export class Performance {
     this.shiftScoresTicked_ = 0;
 
     /**
-     * The sum of all layout shift fractions triggered on the page from the
-     * Layout Instability API.
-     *
-     * @private {number}
+     * The collection of layout shift events from the Layout Instability API.
+     * @private {Array<LayoutShift>}
      */
-    this.aggregateShiftScore_ = 0;
-
-    /**
-     * True if the ratios have already been ticked.
-     * @private {boolean}
-     */
-    this.slowElementRatioTicked_ = false;
+    this.layoutShifts_ = [];
 
     const supportedEntryTypes =
       (this.win.PerformanceObserver &&
@@ -196,7 +191,6 @@ export class Performance {
      */
     this.largestContentfulPaintRenderTime_ = null;
 
-    this.boundOnVisibilityChange_ = this.onVisibilityChange_.bind(this);
     this.onAmpDocVisibilityChange_ = this.onAmpDocVisibilityChange_.bind(this);
 
     // Add RTV version as experiment ID, so we can slice the data by version.
@@ -223,6 +217,7 @@ export class Performance {
     this.ampdoc_ = Services.ampdoc(documentElement);
     this.viewer_ = Services.viewerForDoc(documentElement);
     this.resources_ = Services.resourcesForDoc(documentElement);
+    this.documentInfo_ = Services.documentInfoForDoc(this.ampdoc_);
 
     this.isPerformanceTrackingOn_ =
       this.viewer_.isEmbedded() && this.viewer_.getParam('csi') === '1';
@@ -248,12 +243,6 @@ export class Performance {
     // Register a handler to record metrics when the page enters the hidden
     // lifecycle state.
     if (registerVisibilityChangeListener) {
-      this.win.addEventListener(
-        VISIBILITY_CHANGE_EVENT,
-        this.boundOnVisibilityChange_,
-        {capture: true}
-      );
-
       this.ampdoc_.onVisibilityChanged(this.onAmpDocVisibilityChange_);
     }
 
@@ -272,6 +261,13 @@ export class Performance {
 
         // Tick timeOrigin so that epoch time can be calculated by consumers.
         this.tick(TickLabel.TIME_ORIGIN, undefined, this.timeOrigin_);
+
+        const usqp = this.ampdoc_.getMetaByName('amp-usqp');
+        if (usqp) {
+          usqp.split(',').forEach((exp) => {
+            this.addEnabledExperiment('ssr-' + exp);
+          });
+        }
 
         return this.maybeAddStoryExperimentId_();
       })
@@ -352,8 +348,9 @@ export class Performance {
       } else if (entry.entryType === 'layout-shift') {
         // Ignore layout shift that occurs within 500ms of user input, as it is
         // likely in response to the user's action.
-        if (!entry.hadRecentInput) {
-          this.aggregateShiftScore_ += entry.value;
+        // 1000 here is a magic number to prevent unbounded growth. We don't expect it to be reached.
+        if (!entry.hadRecentInput && this.layoutShifts_.length < 1000) {
+          this.layoutShifts_.push(entry);
         }
       } else if (entry.entryType === 'largest-contentful-paint') {
         if (entry.loadTime) {
@@ -387,54 +384,59 @@ export class Performance {
     }
 
     if (this.supportsEventTiming_) {
-      const firstInputObserver = this.createPerformanceObserver_(processEntry);
-      firstInputObserver.observe({type: 'first-input', buffered: true});
+      this.createPerformanceObserver_(processEntry, {
+        type: 'first-input',
+        buffered: true,
+      });
     }
 
     if (this.supportsLayoutShift_) {
-      const layoutInstabilityObserver = this.createPerformanceObserver_(
-        processEntry
-      );
-      layoutInstabilityObserver.observe({type: 'layout-shift', buffered: true});
+      this.createPerformanceObserver_(processEntry, {
+        type: 'layout-shift',
+        buffered: true,
+      });
     }
 
     if (this.supportsLargestContentfulPaint_) {
-      const lcpObserver = this.createPerformanceObserver_(processEntry);
-      lcpObserver.observe({type: 'largest-contentful-paint', buffered: true});
+      // lcpObserver
+      this.createPerformanceObserver_(processEntry, {
+        type: 'largest-contentful-paint',
+        buffered: true,
+      });
     }
 
     if (this.supportsNavigation_) {
-      const navigationObserver = this.createPerformanceObserver_(processEntry);
-      navigationObserver.observe({type: 'navigation', buffered: true});
+      // Wrap in a try statement as there are some browsers (ex. chrome 73)
+      // that will say it supports navigation but throws.
+      this.createPerformanceObserver_(processEntry, {
+        type: 'navigation',
+        buffered: true,
+      });
     }
 
-    if (entryTypesToObserve.length === 0) {
-      return;
-    }
-
-    const observer = this.createPerformanceObserver_(processEntry);
-
-    // Wrap observer.observe() in a try statement for testing, because
-    // Webkit throws an error if the entry types to observe are not natively
-    // supported.
-    try {
-      observer.observe({entryTypes: entryTypesToObserve});
-    } catch (err) {
-      dev() /*OK*/
-        .warn(err);
+    if (entryTypesToObserve.length > 0) {
+      this.createPerformanceObserver_(processEntry, {
+        entryTypes: entryTypesToObserve,
+      });
     }
   }
 
   /**
    * @param {function(!PerformanceEntry)} processEntry
+   * @param {!PerformanceObserverInit} init
    * @return {!PerformanceObserver}
    * @private
    */
-  createPerformanceObserver_(processEntry) {
-    return new this.win.PerformanceObserver((list) => {
-      list.getEntries().forEach(processEntry);
-      this.flush();
-    });
+  createPerformanceObserver_(processEntry, init) {
+    try {
+      const obs = new this.win.PerformanceObserver((list) => {
+        list.getEntries().forEach(processEntry);
+        this.flush();
+      });
+      obs.observe(init);
+    } catch (err) {
+      dev().warn(TAG, err);
+    }
   }
 
   /**
@@ -452,23 +454,16 @@ export class Performance {
   }
 
   /**
-   * When the visibility state of the document changes to hidden,
-   * send the layout scores.
-   * @private
-   */
-  onVisibilityChange_() {
-    if (this.win.document.visibilityState === 'hidden') {
-      this.tickCumulativeMetrics_();
-    }
-  }
-
-  /**
-   * When the viewer visibility state of the document changes to inactive,
+   * When the viewer visibility state of the document changes to inactive or hidden,
    * send the layout score.
    * @private
    */
   onAmpDocVisibilityChange_() {
-    if (this.ampdoc_.getVisibilityState() === VisibilityState.INACTIVE) {
+    const state = this.ampdoc_.getVisibilityState();
+    if (
+      state === VisibilityState.INACTIVE ||
+      state === VisibilityState.HIDDEN
+    ) {
       this.tickCumulativeMetrics_();
     }
   }
@@ -484,7 +479,6 @@ export class Performance {
     if (this.supportsLargestContentfulPaint_) {
       this.tickLargestContentfulPaint_();
     }
-    this.tickSlowElementRatio_();
   }
 
   /**
@@ -500,49 +494,38 @@ export class Performance {
    * amount of visibility into this metric.
    */
   tickLayoutShiftScore_() {
+    const cls = this.layoutShifts_.reduce((sum, entry) => sum + entry.value, 0);
+    const fcp = this.metrics_.get(TickLabel.FIRST_CONTENTFUL_PAINT) ?? 0; // fallback to 0, so that we never overcount.
+    const ofv = this.metrics_.get(TickLabel.ON_FIRST_VISIBLE) ?? 0;
+
+    // TODO(#33207): Remove after data collection
+    const clsBeforeFCP = this.layoutShifts_.reduce((sum, entry) => {
+      if (entry.startTime < fcp) {
+        return sum + entry.value;
+      }
+      return sum;
+    }, 0);
+    const clsBeforeOFV = this.layoutShifts_.reduce((sum, entry) => {
+      if (entry.startTime < ofv) {
+        return sum + entry.value;
+      }
+      return sum;
+    }, 0);
+
     if (this.shiftScoresTicked_ === 0) {
+      this.tick(TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_VISIBLE, clsBeforeOFV);
       this.tickDelta(
-        TickLabel.CUMULATIVE_LAYOUT_SHIFT,
-        this.aggregateShiftScore_
+        TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_FCP,
+        clsBeforeFCP
       );
+      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT, cls);
       this.flush();
       this.shiftScoresTicked_ = 1;
     } else if (this.shiftScoresTicked_ === 1) {
-      this.tickDelta(
-        TickLabel.CUMULATIVE_LAYOUT_SHIFT_2,
-        this.aggregateShiftScore_
-      );
+      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_2, cls);
       this.flush();
       this.shiftScoresTicked_ = 2;
-
-      // No more work to do, so clean up event listeners.
-      this.win.removeEventListener(
-        VISIBILITY_CHANGE_EVENT,
-        this.boundOnVisibilityChange_,
-        {capture: true}
-      );
     }
-  }
-
-  /**
-   * Tick the slow element ratio.
-   */
-  tickSlowElementRatio_() {
-    if (this.slowElementRatioTicked_) {
-      return;
-    }
-    if (!this.resources_) {
-      const TAG = 'Performance';
-      dev().error(TAG, 'Failed to tick ser due to null resources');
-      return;
-    }
-
-    this.slowElementRatioTicked_ = true;
-    this.tickDelta(
-      TickLabel.SLOW_ELEMENT_RATIO,
-      this.resources_.getSlowElementRatio()
-    );
-    this.flush();
   }
 
   /**
@@ -693,7 +676,7 @@ export class Performance {
       data['value'] = this.timeOrigin_ + delta;
     }
 
-    // Emit events. Used by `gulp performance`.
+    // Emit events. Used by `amp performance`.
     this.win.dispatchEvent(
       createCustomEvent(
         this.win,
@@ -758,10 +741,14 @@ export class Performance {
    */
   flush() {
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
+      if (this.ampexp_ == null) {
+        this.ampexp_ = Object.keys(this.enabledExperiments_).join(',');
+      }
       this.viewer_.sendMessage(
         'sendCsi',
         dict({
           'ampexp': this.ampexp_,
+          'canonicalUrl': this.documentInfo_.canonicalUrl,
         }),
         /* cancelUnsent */ true
       );
@@ -784,7 +771,7 @@ export class Performance {
    */
   addEnabledExperiment(experimentId) {
     this.enabledExperiments_[experimentId] = true;
-    this.ampexp_ = Object.keys(this.enabledExperiments_).join(',');
+    this.ampexp_ = undefined;
   }
 
   /**

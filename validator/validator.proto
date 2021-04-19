@@ -347,7 +347,7 @@ message CdataSpec {
 // Specifies which AMP Layouts are supported by a given element.
 // For the purpose of the validator, this specifies which
 // values for layout, height, and width attributes are allowed. Also see
-// https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
+// https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md
 // TODO(johannes): Make the error messages around layouts better. This
 // may require revamping the documentation for elements and/or the above spec,
 // so that a user gets more clearly informed about which layouts are
@@ -357,22 +357,22 @@ message CdataSpec {
 message AmpLayout {
   // NEXT AVAILABLE TAG: 10
   enum Layout {
-    UNKNOWN = 0;
-    NODISPLAY = 1;
-    FIXED = 2;
-    FIXED_HEIGHT = 3;
-    RESPONSIVE = 4;
     CONTAINER = 5;
     FILL = 6;
+    FIXED = 2;
+    FIXED_HEIGHT = 3;
     FLEX_ITEM = 7;
     FLUID = 8;
     INTRINSIC = 9;
+    NODISPLAY = 1;
+    RESPONSIVE = 4;
+    UNKNOWN = 0;
   }
   // Specifies which layouts are supported by this element.
   repeated Layout supported_layouts = 1;
   // Specifies whether this element has default dimensions. This corresponds
   // to being allowlisted in naturalDimensions_ in
-  // https://github.com/ampproject/amphtml/blob/master/src/layout.js.
+  // https://github.com/ampproject/amphtml/blob/main/src/layout.js.
   optional bool defines_default_width = 2;
   optional bool defines_default_height = 3;
 }
@@ -455,7 +455,7 @@ message ReferencePoint {
 
 // Specs specific to AMP Extensions. This is a field within TagSpec that
 // replaces the standard tagspec list of attributes, requirements, etc.
-// NEXT AVAILABLE TAG: 9
+// NEXT AVAILABLE TAG: 10
 message ExtensionSpec {
   // e.g. "amp-video". This is used both as the attribute value for the
   // 'custom-element' attribute value as well as part of the 'src' attribute
@@ -463,6 +463,11 @@ message ExtensionSpec {
   optional string name = 1;
   // e.g. "0.1", "1.0", "latest".
   repeated string version = 2;
+  // If multiple TagSpecs for the same extension exist, separated by version,
+  // specify a version_name string to disambiguate their spec_names. For
+  // example, "v1.0" or "v0.1-0.2". This string will become part of the name
+  // used for referring to this extension in validator error messages.
+  optional string version_name = 9;
   // deprecated_version must be a strict subset of version. If the version
   // matches a deprecated_version, validation will emit a warning.
   repeated string deprecated_version = 3;
@@ -761,11 +766,9 @@ message DocCssSpec {
   // If provided, a URL linking to a section / sentence in the AMP HTML spec.
   optional string max_bytes_spec_url = 8;
 
-  // Declaration allow-lists were added when style attribute validation was
-  // implementented. Therefore older style tags do not enforce an allow list
-  // of declarations. If true, all declarations are allowed in style tags,
-  // regardless of the contents of the `declaration` list.
-  optional bool allow_all_declaration_in_style_tag = 10 [default = false];
+  // If true, all declarations are allowed in style tags and inline style
+  // attributes, regardless of the contents of the `declaration` list.
+  optional bool allow_all_declaration_in_style = 10 [default = false];
   // If true, all variants of declarations that are vendor prefixes are allowed.
   // for example, if `gradient` is an allowed declaration and this is true, then
   // `-webkit-gradient` is also an allowed declaration.
@@ -851,7 +854,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [default = ERROR];
-  // NEXT AVAILABLE TAG: 118
+  // NEXT AVAILABLE TAG: 121
   enum Code {
     UNKNOWN_CODE = 0;
     INVALID_DOCTYPE_HTML = 111;
@@ -864,6 +867,7 @@ message ValidationError {
     WARNING_EXTENSION_DEPRECATED_VERSION = 80;
     NON_LTS_SCRIPT_AFTER_LTS = 112;
     LTS_SCRIPT_AFTER_NON_LTS = 113;
+    INCORRECT_SCRIPT_RELEASE_VERSION = 119;
     ATTR_REQUIRED_BUT_MISSING = 61;
     DISALLOWED_TAG = 2;
     GENERAL_DISALLOWED_TAG = 51;
@@ -886,6 +890,7 @@ message ValidationError {
     STYLESHEET_TOO_LONG = 50;
     STYLESHEET_AND_INLINE_STYLE_TOO_LONG = 102;
     INLINE_STYLE_TOO_LONG = 103;
+    INLINE_SCRIPT_TOO_LONG = 118;
     MANDATORY_CDATA_MISSING_OR_INCORRECT = 9;
     CDATA_VIOLATES_DENYLIST = 30;
     NON_WHITESPACE_CDATA_ENCOUNTERED = 82;
@@ -930,6 +935,7 @@ message ValidationError {
     INVALID_UTF8 = 96;
     DOCUMENT_SIZE_LIMIT_EXCEEDED = 108;
     DEV_MODE_ONLY = 109;
+    AMP_EMAIL_MISSING_STRICT_CSS_ATTR = 120;
     VALUE_SET_MISMATCH = 110;
 
     CSS_SYNTAX_INVALID_AT_RULE = 29;

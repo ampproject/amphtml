@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+import '../../../amp-mustache/0.2/amp-mustache';
 import {
   AMP_TEMPLATED_CREATIVE_HEADER_NAME,
   TemplateValidator,
-  getAmpAdTemplateHelper,
 } from '../template-validator';
-import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
 import {TemplateRenderer} from '../template-renderer';
 import {ValidatorResult} from '../amp-ad-type-defs';
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
+import {getAmpAdTemplateHelper} from '../amp-ad-template-helper';
 import {utf8Encode} from '../../../../src/utils/bytes';
 
 const realWinConfig = {
@@ -41,7 +41,7 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
     },
   };
 
-  let doc;
+  let doc, ampdoc;
   let containerElement;
   let context;
   let renderer;
@@ -50,6 +50,7 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
 
   beforeEach(() => {
     doc = env.win.document;
+    ampdoc = env.ampdoc;
     renderer = new TemplateRenderer();
     validator = new TemplateValidator();
 
@@ -57,15 +58,11 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
     containerElement.setAttribute('height', 50);
     containerElement.setAttribute('width', 320);
     containerElement.signals = () => ({
+      signal: () => {},
+      reset: () => {},
       whenSignal: () => Promise.resolve(),
     });
     containerElement.renderStarted = () => {};
-    containerElement.getPageLayoutBox = () => ({
-      left: 0,
-      top: 0,
-      width: 0,
-      height: 0,
-    });
     containerElement.getLayoutBox = () => ({
       left: 0,
       top: 0,
@@ -85,7 +82,7 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
     };
 
     env.sandbox
-      .stub(getAmpAdTemplateHelper(env.win), 'fetch')
+      .stub(getAmpAdTemplateHelper(ampdoc), 'fetch')
       .callsFake((url) => {
         expect(url).to.equal(templateUrl);
         return Promise.resolve(data.adTemplate);
@@ -93,6 +90,7 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
 
     validatorPromise = validator.validate(
       context,
+      containerElement,
       utf8Encode(
         JSON.stringify({
           templateUrl,
@@ -109,7 +107,12 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
   });
 
   it('should append iframe child with correct template values', () => {
-    env.win.AMP.registerTemplate('amp-mustache', AmpMustache);
+    env.installExtension(
+      'amp-mustache',
+      '0.2',
+      /* latest */ true,
+      /* auto */ false
+    );
     return validatorPromise.then((validatorOutput) => {
       // Sanity check. This behavior is tested in test-template-validator.js.
       expect(validatorOutput).to.be.ok;
@@ -122,8 +125,8 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
           const iframe = containerElement.querySelector('iframe');
           expect(iframe).to.be.ok;
           expect(iframe.contentWindow.document.body.innerHTML.trim()).to.equal(
-            '<div>\n      <p>ipsum lorem</p>\n      <a href=' +
-              '"https://buy.com/buy-1" target="_top">Click for ad!</a>' +
+            '<div>\n      <p>ipsum lorem</p>\n      <a target="_top" href=' +
+              '"https://buy.com/buy-1">Click for ad!</a>' +
               '\n    <amp-analytics class="i-amphtml-element i-amphtml' +
               '-notbuilt amp-notbuilt i-amphtml-layout-fixed i-amphtml' +
               '-layout-size-defined amp-unresolved i-amphtml-' +
@@ -135,7 +138,12 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
   });
 
   it('should set correct attributes on the iframe', () => {
-    env.win.AMP.registerTemplate('amp-mustache', AmpMustache);
+    env.installExtension(
+      'amp-mustache',
+      '0.2',
+      /* latest */ true,
+      /* auto */ false
+    );
     return validatorPromise.then((validatorOutput) => {
       // Sanity check. This behavior is tested in test-template-validator.js.
       expect(validatorOutput).to.be.ok;
@@ -158,7 +166,12 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
   });
 
   it('should style body of iframe document to be visible', () => {
-    env.win.AMP.registerTemplate('amp-mustache', AmpMustache);
+    env.installExtension(
+      'amp-mustache',
+      '0.2',
+      /* latest */ true,
+      /* auto */ false
+    );
     return validatorPromise.then((validatorOutput) => {
       // Sanity check. This behavior is tested in test-template-validator.js.
       expect(validatorOutput).to.be.ok;
@@ -178,9 +191,14 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
   });
 
   it('should insert analytics', () => {
-    env.win.AMP.registerTemplate('amp-mustache', AmpMustache);
+    env.installExtension(
+      'amp-mustache',
+      '0.2',
+      /* latest */ true,
+      /* auto */ false
+    );
     const insertAnalyticsSpy = env.sandbox.spy(
-      getAmpAdTemplateHelper(env.win),
+      getAmpAdTemplateHelper(ampdoc),
       'insertAnalytics'
     );
     return validatorPromise.then((validatorOutput) => {

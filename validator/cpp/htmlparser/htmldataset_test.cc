@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "absl/flags/flag.h"
 #include "atomutil.h"
 #include "defer.h"
 #include "fileutil.h"
@@ -50,10 +51,10 @@ struct TestCaseData {
     ss << "Original: \n";
     ss << "-----\n";
     ss << text;
-    ss << "Parsed: \n";
+    ss << "\nParsed: \n";
     ss << "-----\n";
     ss << want;
-    ss << "Context: \n";
+    ss << "\nContext: \n";
     ss << "-----\n";
     ss << context;
     return ss.str();
@@ -294,10 +295,27 @@ std::optional<Error> Dump(Node* node, std::stringbuf* buffer) {
 TEST(HTMLDatasetTest, WebkitData) {
   // Files excluded from testing due to remaining TODOs in the parser.
   std::vector<std::string> files_excluded_from_test = {
-          "testdata/tree-construction/"
-          "adoption01.dat",
-          "testdata/tree-construction/"
-          "foreign-fragment.dat",
+    // Add excluded files here. If only a small number of test cases in the file
+    // are broken, add them in test_cases_excluded below.
+  };
+  // Files excluded from testing due to remaining TODOs in the parser.
+  std::vector<std::string> test_cases_excluded = {
+    // tree-construction/adoption01.dat
+    "<p><b><b><b><b><p>x",
+    // tree-construction/domjs-unsafe.dat
+    "<script type=\"data\"><!--<p></script>",
+    // tree-construction/menuitem-element.dat
+    // menuitem has been deprecated in html5.
+    "<!DOCTYPE html><body><menuitem>A<menuitem>B",
+    "<!DOCTYPE html><body><menuitem>A<menu>B</menu>",
+    "<!DOCTYPE html><body><menuitem>A<hr>B",
+    "<!DOCTYPE html><menuitem><asdf></menuitem>x",
+    // foreign-fragment.dat
+    "<div></div>",        // Inside <math ms> fragment.
+    "<figure></figure>",  // Inside <math ms> fragment.
+    // tree-construction/scriptdata01.dat
+    "FOO<script><!--<script>-></script>--></script>QUX",
+    // tree-construction/tests11.dat
   };
   int num_test_cases = 0;
   for (auto pattern : htmlparser::testing::kTestDataDirs) {
@@ -312,6 +330,7 @@ TEST(HTMLDatasetTest, WebkitData) {
                     files_excluded_from_test.end(),
                     path) != files_excluded_from_test.end())
         continue;
+
       std::cerr << "Processing testdata: " << path << std::endl;
       std::ifstream fd(path);
       defer(fd.close());
@@ -320,7 +339,6 @@ TEST(HTMLDatasetTest, WebkitData) {
       ParseOptions options = {
         .scripting = true,
         .frameset_ok = true,
-        .allow_deprecated_tags = true
       };
 
       while (!fd.eof()) {
@@ -328,12 +346,29 @@ TEST(HTMLDatasetTest, WebkitData) {
         if (test_case.error) break;
 
         std::string html = test_case.text;
+        if (std::find(test_cases_excluded.begin(),
+                      test_cases_excluded.end(),
+                      html) != test_cases_excluded.end()) continue;
         if (!test_case.context.empty()) {
-          Atom context_atom = AtomUtil::ToAtom(test_case.context);
+          auto context_components = htmlparser::Strings::SplitStringAt(
+              test_case.context, ' ');
+          std::string name_space = "";
+          std::string context_tag = "";
+          if (context_components.size() == 2) {
+            name_space = context_components[0];
+            context_tag = context_components[1];
+          } else if (context_components.size() == 1) {
+            context_tag = context_components[0];
+          } else {
+            // Invalid context, skip.
+            continue;
+          }
+
+          Atom context_atom = AtomUtil::ToAtom(context_tag);
           auto context_node = std::unique_ptr<Node>(
-              new Node(NodeType::ELEMENT_NODE, context_atom));
+              new Node(NodeType::ELEMENT_NODE, context_atom, name_space));
           if (context_atom == Atom::UNKNOWN) {
-            context_node->SetData(test_case.context);
+            context_node->SetData(context_tag);
           }
           auto document =  ParseFragmentWithOptions(html, options,
                                                     context_node.get());
@@ -364,6 +399,6 @@ TEST(HTMLDatasetTest, WebkitData) {
   }
 
   // Hardcoded, whenever dataset changes. Ensures no new tests are added, or
-  // old tests removed, without maintainers knowledge.
-  EXPECT_EQ(794, num_test_cases);
+  // old tests mistakenly removed.
+  EXPECT_EQ(1484, num_test_cases);
 };

@@ -17,12 +17,19 @@
 const JsonReporter = require('./mocha-custom-json-reporter');
 const mocha = require('mocha');
 const MochaDotsReporter = require('./mocha-dots-reporter');
+const MochaJUnitReporter = require('mocha-junit-reporter');
 const {Base} = mocha.reporters;
 
+/**
+ * @param {*} runner
+ * @param {*} options
+ * @return {MochaDotsReporter}
+ */
 function ciReporter(runner, options) {
   Base.call(this, runner, options);
   this._mochaDotsReporter = new MochaDotsReporter(runner, options);
   this._jsonReporter = new JsonReporter(runner, options);
+  this._mochaJunitReporter = new MochaJUnitReporter(runner, options);
   return this;
 }
 ciReporter.prototype.__proto__ = Base.prototype;

@@ -23,8 +23,7 @@ import {
 } from '../../src/url';
 import {closest, openWindowDialog} from '../../src/dom';
 import {dev} from '../../src/log';
-import {dict} from '../../src/utils/object';
-import {startsWith} from '../../src/string';
+import {dict} from '../../src/core/types/object';
 import {urls} from '../../src/config';
 
 /**
@@ -140,7 +139,7 @@ function getEventualUrl(a) {
   }
   if (
     !isProxyOrigin(eventualUrl) ||
-    !startsWith(parseUrlDeprecated(eventualUrl).pathname, '/c/')
+    !parseUrlDeprecated(eventualUrl).pathname.startsWith('/c/')
   ) {
     return;
   }

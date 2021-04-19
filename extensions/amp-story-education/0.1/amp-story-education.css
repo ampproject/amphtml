@@ -75,11 +75,14 @@ amp-story-education {
 .i-amphtml-story-education-navigation-gesture-outer {
   position: absolute !important;
   height: 60px !important;
-  width: 100% !important;
   border-radius: 60px !important;
   border: 4px solid #FFF !important;
   animation: i-amphtml-tap-outer 1.6s cubic-bezier(0.4,0,0.2,1) 0.5s infinite backwards !important;
   will-change: left, opacity !important;
+}
+
+[step="tap"] .i-amphtml-story-education-navigation-gesture-outer {
+  width: 100% !important;
 }
 
 [step="swipe"] .i-amphtml-story-education-navigation-gesture-outer {
@@ -96,18 +99,15 @@ amp-story-education {
   width: 30px !important;
   background: #FFF;
   border-radius: 50% !important;
-  opacity: 0.5 !important;
   animation: i-amphtml-tap-inner 1.6s cubic-bezier(0.4,0,0.2,1) 0.5s infinite backwards !important;
   will-change: opacity !important;
 }
 
 [step="swipe"] .i-amphtml-story-education-navigation-gesture-inner {
-  left: 15px !important;
   animation: i-amphtml-swipe-inner 1.6s cubic-bezier(0.4,0,0.2,1) 0.5s infinite backwards !important;
 }
 
 [dir="rtl"] [step="swipe"] .i-amphtml-story-education-navigation-gesture-inner {
-  right: 15px !important;
   animation: i-amphtml-swipe-inner-rtl 1.6s cubic-bezier(0.4,0,0.2,1) 0.5s infinite backwards !important;
 }
 
@@ -250,7 +250,7 @@ amp-story-education {
   80%, 90% {
     opacity: 0;
     left: 15px;
-  },
+  }
 
   100% {
     opacity: 0;

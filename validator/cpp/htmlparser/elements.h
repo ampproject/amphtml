@@ -23,62 +23,29 @@
 
 namespace htmlparser {
 
-inline constexpr std::array<Atom, 19> kBlockElements {
-    Atom::ADDRESS,
-    Atom::BLOCKQUOTE,
-    Atom::DIV,
-    Atom::DL,
-    Atom::FIELDSET,
-    Atom::FORM,
-    Atom::H1,
-    Atom::H2,
-    Atom::H3,
-    Atom::H4,
-    Atom::H5,
-    Atom::H6,
-    Atom::HR,
-    Atom::NOSCRIPT,
-    Atom::OL,
-    Atom::P,
-    Atom::PRE,
-    Atom::TABLE,
-    Atom::UL,
+inline constexpr std::array<Atom, 19> kBlockElements{
+    Atom::ADDRESS,  Atom::BLOCKQUOTE, Atom::DIV, Atom::DL,
+    Atom::FIELDSET, Atom::FORM,       Atom::H1,  Atom::H2,
+    Atom::H3,       Atom::H4,         Atom::H5,  Atom::H6,
+    Atom::HR,       Atom::NOSCRIPT,   Atom::OL,  Atom::P,
+    Atom::PRE,      Atom::TABLE,      Atom::UL,
 };
 
-inline constexpr std::array<Atom, 8> kRawTextNodes {
-    Atom::IFRAME,
-    Atom::NOEMBED,
-    Atom::NOFRAMES,
-    Atom::NOSCRIPT,
-    Atom::PLAINTEXT,
-    Atom::SCRIPT,
-    Atom::STYLE,
-    Atom::XMP,
+inline constexpr std::array<Atom, 8> kRawTextNodes{
+    Atom::IFRAME,    Atom::NOEMBED, Atom::NOFRAMES, Atom::NOSCRIPT,
+    Atom::PLAINTEXT, Atom::SCRIPT,  Atom::STYLE,    Atom::XMP,
 };
 
 // Section 12.1.2, "Elements", gives this list of void elements. Void elements
 // are those that can't have any contents.
-inline constexpr std::array<Atom, 16> kVoidElements {
-    Atom::AREA,
-    Atom::BASE,
-    Atom::BR,
-    Atom::COL,
-    Atom::COMMAND,
-    Atom::EMBED,
-    Atom::HR,
-    Atom::IMG,
-    Atom::INPUT,
-    Atom::KEYGEN,
-    Atom::LINK,
-    Atom::META,
-    Atom::PARAM,
-    Atom::SOURCE,
-    Atom::TRACK,
-    Atom::WBR,
+inline constexpr std::array<Atom, 15> kVoidElements{
+    Atom::AREA,    Atom::BASE,   Atom::BR,    Atom::COL,
+    Atom::EMBED,  Atom::HR,    Atom::IMG,
+    Atom::INPUT,   Atom::KEYGEN, Atom::LINK,  Atom::META,
+    Atom::PARAM,   Atom::SOURCE, Atom::TRACK, Atom::WBR,
 };
 
-// TODO: Add reference to what this means in html spec.
-inline constexpr std::array<Atom, 83> kSpecialElements {
+inline constexpr std::array<Atom, 82> kSpecialElements{
     Atom::ADDRESS,
     Atom::APPLET,
     Atom::AREA,
@@ -123,9 +90,6 @@ inline constexpr std::array<Atom, 83> kSpecialElements {
     Atom::IFRAME,
     Atom::IMG,
     Atom::INPUT,
-    // The 'isindex' element has been removed, but keep it for backwards
-    // compatibility.
-    Atom::ISINDEX,
     Atom::KEYGEN,
     Atom::LI,
     Atom::LINK,

@@ -15,27 +15,19 @@
  */
 /* eslint-disable local/window-property-name */
 
-import {dict} from '../src/utils/object';
+import {dict} from '../src/core/types/object';
 import {getData, listen} from '../src/event-helper';
 import {getMode} from '../src/mode';
 import {isFiniteNumber} from '../src/types';
 import {once} from '../src/utils/function';
 import {tryParseJson} from '../src/json';
-import {tryResolve} from '../src/utils/promise';
+import {tryResolve} from '../src/core/data-structures/promise';
 
 /** @fileoverview Entry point for documents inside an <amp-video-iframe>. */
 
 const TAG = '<amp-video-iframe>';
 const DOCS_URL = 'https://go.amp.dev/c/amp-video-iframe';
 const __AMP__ = '__AMP__VIDEO_IFRAME__';
-
-/**
- * @typedef {{
- *   sourceUrl: string,
- *   canonicalUrl: string,
- * }}
- */
-let DocMetadataDef;
 
 /**
  * @typedef {{
@@ -120,16 +112,13 @@ export class AmpVideoIntegration {
     this.usedListenToHelper_ = false;
 
     /**
-     * @return {!DocMetadataDef}
+     * @return {!JsonObject}
      * @private
      */
-    this.getMetadataOnce_ = once(() => {
-      const {canonicalUrl, sourceUrl} = tryParseJson(this.win_.name);
-      return {canonicalUrl, sourceUrl};
-    });
+    this.getMetadataOnce_ = once(() => tryParseJson(this.win_.name));
   }
 
-  /** @return {!DocMetadataDef} */
+  /** @return {!JsonObject} */
   getMetadata() {
     return this.getMetadataOnce_();
   }
@@ -342,7 +331,7 @@ export class AmpVideoIntegration {
 
   /**
    * @param {function()} callback
-   * @return {*} TODO(#23582): Specify return type
+   * @return {!Promise}
    * @private
    */
   safePlayOrPause_(callback) {
@@ -383,7 +372,7 @@ export class AmpVideoIntegration {
   /**
    * @param {!JsonObject} data
    * @param {function()=} opt_callback
-   * @return {*} TODO(#23582): Specify return type
+   * @return {number}
    * @private
    */
   postToParent_(data, opt_callback) {
@@ -405,19 +394,28 @@ export class AmpVideoIntegration {
    * @param {function(!JsonObject)} callback
    */
   getIntersection(callback) {
-    this.listenToOnce_();
-    this.getIntersectionForTesting_(callback);
+    this.getFromHostForTesting_('getIntersection', callback);
+  }
+
+  /**
+   * Gets the host document's user consent data.
+   * @param {function(!JsonObject)} callback
+   */
+  getConsentData(callback) {
+    this.getFromHostForTesting_('getConsentData', callback);
   }
 
   /**
    * Returns message id for testing. Private as message id is an implementation
    * detail that others should not rely on.
+   * @param {string} method
    * @param {function(!JsonObject)} callback
-   * @return {*} TODO(#23582): Specify return type
+   * @return {number}
    * @private
    */
-  getIntersectionForTesting_(callback) {
-    return this.postToParent_(dict({'method': 'getIntersection'}), callback);
+  getFromHostForTesting_(method, callback) {
+    this.listenToOnce_();
+    return this.postToParent_(dict({'method': method}), callback);
   }
 }
 

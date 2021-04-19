@@ -36,9 +36,9 @@ select a single date:
 <amp-date-picker layout="fixed-height" height="360"> </amp-date-picker>
 ```
 
-<amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-basic.png" width="329" height="365">
+<amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-date-picker/img/amp-date-picker-basic.png" width="329" height="365">
   <noscript>
-    <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-basic.png" width="329" height="365">
+    <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-date-picker/img/amp-date-picker-basic.png" width="329" height="365">
   </noscript>
 </amp-img>
 
@@ -140,8 +140,8 @@ To opt-out of this behavior, add the `touch-keyboard-editable` attribute to the
 
 The `amp-date-picker` provides two types of dates to select:
 
-- `single`: Select a single date within the date picker.
-- `range`: Select a date range within the date picker.
+-   `single`: Select a single date within the date picker.
+-   `range`: Select a date range within the date picker.
 
 #### `type="single"`
 
@@ -153,9 +153,9 @@ and the user can select a single date. This is the default selection type.
 </amp-date-picker>
 ```
 
-<amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-single-static.png" width="336" height="370">
+<amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-date-picker/img/amp-date-picker-single-static.png" width="336" height="370">
   <noscript>
-    <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-single-static.png" width="336" height="370">
+    <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-date-picker/img/amp-date-picker-single-static.png" width="336" height="370">
   </noscript>
 </amp-img>
 
@@ -169,9 +169,9 @@ and the user can select a date range with a starting date and ending date.
 </amp-date-picker>
 ```
 
-<amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-range-static.png" width="332" height="373">
+<amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-date-picker/img/amp-date-picker-range-static.png" width="332" height="373">
   <noscript>
-    <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-range-static.png"  width="332" height="373">
+    <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-date-picker/img/amp-date-picker-range-static.png"  width="332" height="373">
   </noscript>
 </amp-img>
 
@@ -197,16 +197,16 @@ The API is not friendly to memorize, but there are various
 
 Specifies how the date picker is rendered. Allowed values are:
 
-- **`static`** (default): The date picker renders as an interactive calendar view.
-- **`overlay`**: The date picker calendar view is not rendered until the user interacts
-  with required input field(s) nested in the `<amp-date-picker>`.
+-   **`static`** (default): The date picker renders as an interactive calendar view.
+-   **`overlay`**: The date picker calendar view is not rendered until the user interacts
+    with required input field(s) nested in the `<amp-date-picker>`.
 
 ### type
 
 Specifies the selection type for the date picker. Allowed values are:
 
-- **`single`** (default): The user can select a single date.
-- **`range`**: The user can select a date range.
+-   **`single`** (default): The user can select a single date.
+-   **`range`**: The user can select a date range.
 
 ### input-selector
 
@@ -242,7 +242,7 @@ with an existing element in the form, an error is emitted.
 When `amp-date-picker` loads, the input element's value is used to display the
 initially selected start date.
 
-Specify the `startDate` property via the [`src` attribute](#src-optional) to set
+Specify the `startDate` property via the [`src` attribute](#src) to set
 an initial end date dynamically.
 
 ```html
@@ -517,9 +517,9 @@ This works best with `layout="fill"`.
 </amp-lightbox>
 ```
 
-<amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-lightbox-fullscreen.png" width="320" height="571">
+<amp-img alt="static single date picker" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-date-picker/img/amp-date-picker-lightbox-fullscreen.png" width="320" height="571">
   <noscript>
-    <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-date-picker/img/amp-date-picker-lightbox-fullscreen.png" width="320" height="571">
+    <img alt="static single date picker" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-date-picker/img/amp-date-picker-lightbox-fullscreen.png" width="320" height="571">
   </noscript>
 </amp-img>
 
@@ -735,10 +735,10 @@ Using `src` prevents chached AMP documents from showing out-of-date information.
 
 A `date-template` must have a `dates` or `default` attribute.
 
-- **dates**: A space-separated list of ISO 8601 single dates or RFC 5545 RRULE repeating dates.
-  The template content will render for the dates matching the dates in the attribute.
-- **default**: If the `default` attribute is present, the template content will render for
-  all dates not matching an existing template.
+-   **dates**: A space-separated list of ISO 8601 single dates or RFC 5545 RRULE repeating dates.
+    The template content will render for the dates matching the dates in the attribute.
+-   **default**: If the `default` attribute is present, the template content will render for
+    all dates not matching an existing template.
 
 The date picker provides mustache variables to render in the templates.
 These variables are ISO 8601 format string values e.g. `DD`, `D`, `X`, etc.

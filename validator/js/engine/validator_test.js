@@ -289,7 +289,7 @@ ValidatorTestCase.prototype.run = function() {
   message += 'expected:\n' + this.expectedOutput + '\nsaw:\n' + observed;
   if (this.expectedOutputFile !== null) {
     message += '\n\nIf validator/' + absolutePathFor(this.expectedOutputFile) +
-        ' is incorrect, please run `gulp validator --update_tests` to ' +
+        ' is incorrect, please run `amp validator --update_tests` to ' +
         'regenerate it based on its corresponding .html file.';
   }
   asserts.fail(message);
@@ -384,7 +384,8 @@ describe('ValidatorOutput', () => {
 
   it('validate amp4email format', () => {
     const results = validator.validateString(
-        '<!doctype html><html ⚡4email><head><meta charset="utf-8">' +
+        '<!doctype html><html ⚡4email data-css-strict><head>' +
+            '<meta charset="utf-8">' +
             '<script async src="https://cdn.ampproject.org/v0.js"></script>' +
             '<style amp4email-boilerplate>body{visibility:hidden}</style>' +
             '</head><body>Hello, AMP4EMAIL world.</body></html>',
@@ -394,7 +395,8 @@ describe('ValidatorOutput', () => {
 
   it('validate amp4email format with error', () => {
     const results = validator.validateString(
-        '<!doctype html><html ⚡4email><head><meta charset="utf-8">' +
+        '<!doctype html><html ⚡4email data-css-strict><head>' +
+            '<meta charset="utf-8">' +
             '<script async src="https://cdn.ampproject.org/v0.js"></script>' +
             '</head><body>Hello, AMP4EMAIL world.</body></html>',
         'amp4email');
@@ -447,30 +449,67 @@ describe('Validator.DocSizeAmpEmail', () => {
   const validBlob = '<b>Hello, World</b>\n';
   assertStrictEqual(20, validBlob.length);
 
-  it('accepts 100000 bytes in the test document', () => {
-    const body = Array(4946).join(validBlob);
+  it('accepts 200000 bytes in the test document', () => {
+    const body = Array(9945).join(validBlob);
     const test = new ValidatorTestCase('amp4email_feature_tests/doc_size.html');
     test.ampHtmlFileContents =
         test.ampHtmlFileContents.replace('replace_body', body);
-    assertStrictEqual(100000, htmlparser.byteLength(test.ampHtmlFileContents));
+    assertStrictEqual(200000, htmlparser.byteLength(test.ampHtmlFileContents));
     test.inlineOutput = false;
     test.expectedOutput = 'PASS';
     test.run();
   });
 
-  it('will not accept 100001 bytes in the test document', () => {
-    const body = Array(4946).join(validBlob) + ' ';
+  it('will not accept 200001 bytes in the test document', () => {
+    const body = Array(9945).join(validBlob) + ' ';
     const test = new ValidatorTestCase('amp4email_feature_tests/doc_size.html');
     test.ampHtmlFileContents =
         test.ampHtmlFileContents.replace('replace_body', body);
-    assertStrictEqual(100001, htmlparser.byteLength(test.ampHtmlFileContents));
+    assertStrictEqual(200001, htmlparser.byteLength(test.ampHtmlFileContents));
     test.inlineOutput = false;
     test.expectedOutputFile = null;
     test.expectedOutput = 'FAIL\n' +
-        'amp4email_feature_tests/doc_size.html:4978:6 ' +
-        'Document exceeded 100000 bytes limit. Actual size 100001 bytes. ' +
+        'amp4email_feature_tests/doc_size.html:9977:6 ' +
+        'Document exceeded 200000 bytes limit. Actual size 200001 bytes. ' +
         '(see https://amp.dev/documentation/guides-and-tutorials/learn/' +
         'email-spec/amp-email-format/?format=email)';
+    test.run();
+  });
+});
+
+describe('Validator.ScriptLength', () => {
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') {
+    return;
+  }
+  // This string is 10 bytes of inline script.
+  const inlineScriptBlob = 'alert(\'\');';
+  assertStrictEqual(10, inlineScriptBlob.length);
+
+  it('accepts 10000 bytes of inline style', () => {
+    const inlineScript = Array(1001).join(inlineScriptBlob);
+    assertStrictEqual(10000, inlineScript.length);
+    const test =
+        new ValidatorTestCase('feature_tests/inline_script_length.html');
+    test.inlineOutput = false;
+    test.ampHtmlFileContents =
+        test.ampHtmlFileContents.replace('replace_inline_script', inlineScript);
+    test.expectedOutput = 'PASS';
+    test.run();
+  });
+
+  it('will not accept 10010 bytes in inline script', () => {
+    const inlineScript = Array(1001).join(inlineScriptBlob) + ' ';
+    assertStrictEqual(10001, inlineScript.length);
+    const test =
+        new ValidatorTestCase('feature_tests/inline_script_length.html');
+    test.inlineOutput = false;
+    test.ampHtmlFileContents =
+        test.ampHtmlFileContents.replace('replace_inline_script', inlineScript);
+    test.expectedOutputFile = null;
+    test.expectedOutput = 'FAIL\n' +
+        'feature_tests/inline_script_length.html:35:2 The inline script ' +
+        'is 10001 bytes, which exceeds the limit of 10000 bytes. ' +
+        '(see https://amp.dev/documentation/components/amp-script/#faq)';
     test.run();
   });
 });
@@ -486,7 +525,7 @@ describe('Validator.CssLength', () => {
 
   // We use a blob of length 10 (both bytes and chars) to make it easy to
   // construct stylesheets of any length that we want.
-  const validStyleBlob = 'h1 {a: b}\n';
+  const validStyleBlob = 'h1{top:0}\n';
   assertStrictEqual(10, validStyleBlob.length);
   const validInlineStyleBlob = '<b style=\'width:1px;\'></b>';
 
@@ -601,7 +640,7 @@ describe('Validator.CssLengthAmpEmail', () => {
 
   // We use a blob of length 10 (both bytes and chars) to make it easy to
   // construct stylesheets of any length that we want.
-  const validStyleBlob = 'h1 {a: b}\n';
+  const validStyleBlob = 'h1{top:0}\n';
   assertStrictEqual(10, validStyleBlob.length);
   const validInlineStyleBlob = '<b style="width:1px;"></b>';
 
@@ -616,7 +655,12 @@ describe('Validator.CssLengthAmpEmail', () => {
            test.ampHtmlFileContents
                .replace('.replace_amp_custom {}', stylesheet)
                .replace('replace_inline_style', '');
-       test.expectedOutput = 'PASS';
+       test.expectedOutput = 'PASS\n' +
+           'amp4email_feature_tests/css_length.html:23:0 Tag \'html\' ' +
+           'marked with attribute \'amp4email\' is missing the corresponding ' +
+           'attribute \'data-css-strict\' for enabling strict CSS ' +
+           'validation. This may become an error in the future. ' +
+           '(see https://github.com/ampproject/amphtml/issues/32587)';
        test.run();
      });
 
@@ -634,6 +678,11 @@ describe('Validator.CssLengthAmpEmail', () => {
                .replace('replace_inline_style', '');
        test.expectedOutputFile = null;
        test.expectedOutput = 'FAIL\n' +
+           'amp4email_feature_tests/css_length.html:23:0 Tag \'html\' ' +
+           'marked with attribute \'amp4email\' is missing the corresponding ' +
+           'attribute \'data-css-strict\' for enabling strict CSS ' +
+           'validation. This may become an error in the future. ' +
+           '(see https://github.com/ampproject/amphtml/issues/32587)\n' +
            'amp4email_feature_tests/css_length.html:28:2 The author stylesheet ' +
            'specified in tag \'style amp-custom\' is too long - document ' +
            'contains 75001 bytes whereas the limit is 75000 bytes. ' +
@@ -656,6 +705,11 @@ describe('Validator.CssLengthAmpEmail', () => {
                .replace('replace_inline_style', '');
        test.expectedOutputFile = null;
        test.expectedOutput = 'FAIL\n' +
+           'amp4email_feature_tests/css_length.html:23:0 Tag \'html\' ' +
+           'marked with attribute \'amp4email\' is missing the corresponding ' +
+           'attribute \'data-css-strict\' for enabling strict CSS ' +
+           'validation. This may become an error in the future. ' +
+           '(see https://github.com/ampproject/amphtml/issues/32587)\n' +
            'amp4email_feature_tests/css_length.html:28:2 The author ' +
            'stylesheet specified in tag \'style amp-custom\' is ' +
            'too long - document contains 75002 bytes whereas the limit is ' +
@@ -674,11 +728,12 @@ describe('Validator.CssLengthAmpEmail', () => {
        test.ampHtmlFileContents =
            test.ampHtmlFileContents.replace('.replace_amp_custom {}', '')
                .replace('replace_inline_style', inlineStyle);
-       test.expectedOutput = 'FAIL\n' +
-           'amp4email_feature_tests/css_length.html:34:6 Document exceeded ' +
-           '100000 bytes limit. Actual size 196140 bytes. ' +
-           '(see https://amp.dev/documentation/guides-and-tutorials/learn/' +
-           'email-spec/amp-email-format/?format=email)';
+       test.expectedOutput = 'PASS\n' +
+           'amp4email_feature_tests/css_length.html:23:0 Tag \'html\' ' +
+           'marked with attribute \'amp4email\' is missing the corresponding ' +
+           'attribute \'data-css-strict\' for enabling strict CSS ' +
+           'validation. This may become an error in the future. ' +
+           '(see https://github.com/ampproject/amphtml/issues/32587)';
        test.run();
      });
 
@@ -694,13 +749,13 @@ describe('Validator.CssLengthAmpEmail', () => {
                .replace('replace_inline_style', inlineStyle);
        test.expectedOutputFile = null;
        // TODO(gregable): This should not pass for the case when there are more
-       // than 75,000 bytes of inline style. It fails for now due to the 100k
-       // doc size limit.
-       test.expectedOutput = 'FAIL\n' +
-           'amp4email_feature_tests/css_length.html:34:6 Document exceeded ' +
-           '100000 bytes limit. Actual size 196166 bytes. ' +
-           '(see https://amp.dev/documentation/guides-and-tutorials/learn/' +
-           'email-spec/amp-email-format/?format=email)\n' +
+       // than 75,000 bytes of inline style.
+       test.expectedOutput = 'PASS\n' +
+           'amp4email_feature_tests/css_length.html:23:0 Tag \'html\' ' +
+           'marked with attribute \'amp4email\' is missing the corresponding ' +
+           'attribute \'data-css-strict\' for enabling strict CSS ' +
+           'validation. This may become an error in the future. ' +
+           '(see https://github.com/ampproject/amphtml/issues/32587)\n' +
            'amp4email_feature_tests/css_length.html:34:6 The author ' +
            'stylesheet specified in tag \'style amp-custom\' and the ' +
            'combined inline styles is too large - document contains 75010 ' +
@@ -725,6 +780,11 @@ describe('Validator.CssLengthAmpEmail', () => {
        // TODO(gregable): This should not pass, as we have more than 75,000
        // bytes of total style.
        test.expectedOutput = 'PASS\n' +
+           'amp4email_feature_tests/css_length.html:23:0 Tag \'html\' ' +
+           'marked with attribute \'amp4email\' is missing the corresponding ' +
+           'attribute \'data-css-strict\' for enabling strict CSS ' +
+           'validation. This may become an error in the future. ' +
+           '(see https://github.com/ampproject/amphtml/issues/32587)\n' +
            'amp4email_feature_tests/css_length.html:7534:6 The author ' +
            'stylesheet specified in tag \'style amp-custom\' and the ' +
            'combined inline styles is too large - document contains 75014 ' +
@@ -750,7 +810,7 @@ describe('Validator.CssLengthWithUrls', () => {
 
   // We use a blob of length 10 (both bytes and chars) to make it easy to
   // construct stylesheets of any length that we want.
-  const validStyleBlob = 'h1 {a: b}\n';
+  const validStyleBlob = 'h1{top:0}\n';
   assertStrictEqual(10, validStyleBlob.length);
 
   it('will accept 75010 bytes in author stylesheet that includes an URL ' +
@@ -880,7 +940,7 @@ describe('ValidatorTransformedAmp.CssLengthWithUrls', () => {
 
   // We use a blob of length 10 (both bytes and chars) to make it easy to
   // construct stylesheets of any length that we want.
-  const validStyleBlob = 'h1 {a: b}\n';
+  const validStyleBlob = 'h1{top:0}\n';
   assertStrictEqual(10, validStyleBlob.length);
 
   it('will accept 75010 bytes in author stylesheet that includes an URL ' +
@@ -1278,8 +1338,8 @@ function attrRuleShouldMakeSense(attrSpec, tagSpec, rules) {
   // dispatch_key
   if (attrSpec.dispatchKey !== null && attrSpec.dispatchKey) {
     it('mandatory must be true when dispatch_key is true', () => {
-      expect(attrSpec.mandatory).toBeDefined();
-      expect(attrSpec.mandatory).toBe(true);
+      expect(attrSpec.mandatory === true || attrSpec.mandatoryOneof !== null)
+          .toBe(true);
     });
   }
   // Value property names must be unique.
@@ -1462,7 +1522,8 @@ describe('ValidatorRulesMakeSense', () => {
         expect(specNameIsUnique.hasOwnProperty(tagSpec.specName)).toBe(false);
         specNameIsUnique[tagSpec.specName] = 0;
       } else if (tagSpec.extensionSpec !== null) {
-        const specName = tagSpec.extensionSpec.name + ' extension .js script';
+        const specName = tagSpec.extensionSpec.name + ' ' +
+            tagSpec.extensionSpec.versionName + ' extension script';
 
         expect(specNameIsUnique.hasOwnProperty(specName)).toBe(false);
         specNameIsUnique[specName] = 0;
@@ -1492,9 +1553,9 @@ describe('ValidatorRulesMakeSense', () => {
         (tagSpec.htmlFormat.indexOf(generated.HtmlFormat.Code.AMP4ADS) !==
          -1)) {
       // AMP4ADS format lists approved extensions.
-      // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
+      // https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
       // Changes to the following map must be approved by the Ads Working
-      // Group, @wg-ads.
+      // Group, @wg-monetization.
       const approvedAmp4AdsExtensions = {
         'amp-accordion': ['0.1', 'latest'],
         'amp-ad-exit': ['0.1', 'latest'],
@@ -1534,7 +1595,7 @@ describe('ValidatorRulesMakeSense', () => {
           it(extension + ' has html_format either explicitly or implicitly' +
                  ' set for AMP4ADS but ' + extension + ' version ' + version +
                  ' is not approved for AMP4ADS. If this version is intended' +
-                 ' for AMP4ADS please get approval from @wg-ads and then' +
+                 ' for AMP4ADS please get approval from @wg-monetization and then' +
                  ' update this test. Otherwise remove the version for' +
                  ' AMP4ADS from the tagspec',
              () => {
@@ -1621,7 +1682,6 @@ describe('ValidatorRulesMakeSense', () => {
     }
 
     // attr_specs within tag.
-    let seenDispatchKey = false;
     const attrNameIsUnique = {};
     for (const attrSpecId of tagSpec.attrs) {
       if (attrSpecId < 0) {
@@ -1660,14 +1720,6 @@ describe('ValidatorRulesMakeSense', () => {
            () => {
              expect(attrSpec.value.length > 0 || attrSpec.valueRegex !== null)
                  .toBe(true);
-           });
-      }
-      if (attrSpec.dispatchKey) {
-        it('tag_spec ' + tagSpecName +
-               ' can not have more than one dispatch_key',
-           () => {
-             expect(seenDispatchKey).toBe(false);
-             seenDispatchKey = true;
            });
       }
     }
@@ -1717,7 +1769,7 @@ describe('ValidatorRulesMakeSense', () => {
            // it's sufficiently wrapped in private context inside the validator
            // that I don't see a way to call it.  For now just gold the current
            // index.
-           expect(tagSpec.attrLists[0]).toEqual(20);
+           expect(tagSpec.attrLists[0]).toEqual(15);
          });
     }
 
@@ -1786,6 +1838,7 @@ describe('ValidatorRulesMakeSense', () => {
               tagSpec.cdata.cdataRegex !== null ||
               tagSpec.cdata.mandatoryCdata !== null ||
               tagSpec.cdata.maxBytes === -1 ||
+              tagSpec.cdata.whitespaceOnly !== null ||
               tagSpec.cdata.cssSpec.validateKeyframes)
               .toBe(true);
         });
@@ -1800,6 +1853,7 @@ describe('ValidatorRulesMakeSense', () => {
         let hasTextPlain = false;
         let hasOctetStream = false;
         let hasCiphertext = false;
+        let hasAmpOnerror = false;
         for (const attrSpecId of tagSpec.attrs) {
           if (attrSpecId < 0) {
             continue;
@@ -1825,13 +1879,16 @@ describe('ValidatorRulesMakeSense', () => {
               }
             }
           }
+          if (attrSpec.name === 'amp-onerror') {
+            hasAmpOnerror = true;
+          }
         }
         it('script tags must have either a src attribute or type json, ' +
                'octet-stream (during SwG encryption), or text/plain',
            () => {
              expect(
                  hasSrc || hasJson || hasTextPlain ||
-                 (hasOctetStream && hasCiphertext))
+                 (hasOctetStream && hasCiphertext) || hasAmpOnerror)
                  .toBe(true);
            });
       }

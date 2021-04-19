@@ -1,8 +1,10 @@
 # Interactive components
 
-### Developer preview - August 2020
-
 ## Summary
+
+The interactive components extension provides story creators with a set of interactive experiences they can use to make stories more engaging.
+
+A more complete version of this document can be found in [amp.dev](https://amp.dev/documentation/components/amp-story-interactive/?format=stories).
 
 <table>
   <tr>
@@ -11,19 +13,6 @@
 <td><img src="https://user-images.githubusercontent.com/22420856/90187528-e9bca800-dd87-11ea-8a22-0a99970fab1c.png"></td>
   </tr>
 </table>
-
-This release contains the developer documentation for some of the features we plan to launch on the interactive components extension for web stories in September. All the APIs are final unless noted otherwise, but more functionality will be added in the following weeks. The goal of this beta preview is to flush out any inconsistencies or bugs, and polish the behaviors.
-
-This developer preview update covers:
-
-- Details on the new quiz and poll components, as well as quiz and category results
-- Code examples to show proper configuration
-- API to support a backend and integration details
-- Fully functional example Stories demonstrating good usage of these components
-- Additional demos for the variety of styling and customization options
-- Examples for how you can easily integrate these components into WYSIWYG editors and tools
-- Additional explorations and roadmap
-- FAQs (please feel free to reach out with other questions & thoughts)
 
 ## List of interactive components
 
@@ -46,22 +35,20 @@ This developer preview update covers:
 <tr>
 <td>
 <strong>amp-story-interactive-results</strong>
-<br><br>Component that can display 2-4 different states/categories depending on the options selected on the previous pages of a story.<br><br>Requires polls or quizzes in previous pages to feed into the state of the component, and the state will be calculated following the strategy specified: correctness, category-voting, etc.<br><br>Note: we're still finalizing the design for the component, check status of <a href="https://github.com/ampproject/amphtml/pull/29837">#29837</a<</td>
+<br><br>Component that can display 2-4 different states/categories depending on the options selected on the previous pages of a story.<br><br>Requires polls or quizzes in previous pages to feed into the state of the component, and the state will be calculated following the strategy specified: correctness, category-voting, etc.</td>
 <td><img src="https://user-images.githubusercontent.com/22420856/89945317-2b661b00-dbef-11ea-9319-e36bede95460.png"></td>
 </tr>
 </table>
 
 ## Environment setup
 
-Optional: Most things covered here will work out of the box, but be sure to activate the nightly releases for any bug fixes and latest updates to the codebase. In order to run the nightly version of AMP on your machine, go to the [AMP Experiments](https://cdn.ampproject.org/experiments.html) and enable the nightly release.
-
-Also add the following import to your AMP documents:
+Add the following import to your AMP documents:
 
 ```html
 <script
   async
   custom-element="amp-story-interactive"
-  src="https://cdn.ampproject.org/v0/amp-story-interactive-1.0.js"
+  src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"
 ></script>
 ```
 
@@ -71,26 +58,26 @@ Single-page components are ones that can be embedded onto a story by themselves,
 
 All of them support the config attributes:
 
-- **id**: Unique element identifier, also used to match the votes in the backend.
-- **endpoint**: Required url of the backend. More info on the backend section.
-- **prompt-text**: Optional string that represents the title or question. All components support it out of the box. If too long (past 3 visible lines) it will be truncated. If not specified, the prompt space will not show up.
-- **prompt-size**: String that determines the font size of the prompt, default is _medium_. Supports _small_, _medium_ and _large_.
-- **option-{1/2/3/4}-text**: Strings that represent the options, indexed from 1. Binary polls require 2 options, polls and quizzes require 2-4 options.
-- **option-{1/2/3/4}-confetti**: Optional emoji that, when the option is selected, will trigger a confetti animation with the given emoji.
+-   **id**: Unique element identifier, also used to match the votes in the backend.
+-   **endpoint**: Required url of the backend. More info on the backend section.
+-   **prompt-text**: Optional string that represents the title or question. All components support it out of the box. If too long (past 3 visible lines) it will be truncated. If not specified, the prompt space will not show up.
+-   **prompt-size**: String that determines the font size of the prompt, default is _medium_. Supports _small_, _medium_ and _large_.
+-   **option-{1/2/3/4}-text**: Strings that represent the options, indexed from 1. Binary polls require 2 options, polls and quizzes require 2-4 options.
+-   **option-{1/2/3/4}-confetti**: Optional emoji that, when the option is selected, will trigger a confetti animation with the given emoji.
 
 All of them support the styling attributes:
 
-- **theme**: String that represents the color theme, default is _light_. Supports _light_ and _dark_.
-- **chip-style**: Alternates the visual style of the component, defaults to _flat_. Supports _flat_ and _shadow_ (_transparent_ might also be available in upcoming PR). Only affects quizzes and polls, but not binary-polls.
-- **style**: We have exposed the following CSS properties, available to be overridden through a class declaration:
-  - **--interactive-accent-color**: Default color of the prompt background, and quizzes' option letters, defaults to blue.
-  - **--interactive-prompt-background**: Color or gradient for the prompt background, defaults to \_var(--interactive-accent-color). Note: We recommend setting the accent color to match the prompt background color.
-  - **--interactive-prompt-text-color**: Color of the prompt text, defaults to white. Note: We recommend changing to black/dark if the accent color is bright.
-  - **--interactive-prompt-alignment**: Text alignment of the prompt, defaults to _initial_.
+-   **theme**: String that represents the color theme, default is _light_. Supports _light_ and _dark_.
+-   **chip-style**: Alternates the visual style of the component, defaults to _flat_. Supports _flat_ and _shadow_ (_transparent_ might also be available in upcoming PR). Only affects quizzes and polls, but not binary-polls.
+-   **style**: We have exposed the following CSS properties, available to be overridden through a class declaration:
+    -   **--interactive-accent-color**: Default color of the prompt background, and quizzes' option letters, defaults to blue.
+    -   **--interactive-prompt-background**: Color or gradient for the prompt background, defaults to \_var(--interactive-accent-color). Note: We recommend setting the accent color to match the prompt background color.
+    -   **--interactive-prompt-text-color**: Color of the prompt text, defaults to white. Note: We recommend changing to black/dark if the accent color is bright.
+    -   **--interactive-prompt-alignment**: Text alignment of the prompt, defaults to _initial_.
 
 Quizzes support:
 
-- **option-{1/2/3/4}-correct**: Empty attribute that selects the correct option. All other options are assumed to be incorrect.
+-   **option-{1/2/3/4}-correct**: Empty attribute that selects the correct option. All other options are assumed to be incorrect.
 
 ### Components API examples
 
@@ -156,16 +143,16 @@ Currently multi-page results support 2 strategies to decide on what option to sh
 
 All of them support the config attributes:
 
-- **prompt-text**: Optional short text that shows before the category name. Eg: "you are a", "your spirit animal is", etc.
-- **option-{1/2/3/4}-results-category**: Name of the category, also used to link the poll results to this option; required for all options.
-- **option-{1/2/3/4}-image**: The image associated with this option, optional but highly encouraged.
-- **option-{1/2/3/4}-text**: Description of the category, usually explaining what it is.
+-   **prompt-text**: Optional short text that shows before the category name. Eg: "you are a", "your spirit animal is", etc.
+-   **option-{1/2/3/4}-results-category**: Name of the category, also used to link the poll results to this option; required for all options.
+-   **option-{1/2/3/4}-image**: The image associated with this option, optional but highly encouraged.
+-   **option-{1/2/3/4}-text**: Description of the category, usually explaining what it is.
 
 All of them support the styling attributes:
 
-- **theme**: String that represents the color theme, default is _light_. Supports _light_ and _dark_.
-- **style**: We have exposed the following CSS properties, available to be overridden here:
-  - **--interactive-accent-color**: Default color of the accents.
+-   **theme**: String that represents the color theme, default is _light_. Supports _light_ and _dark_.
+-   **style**: We have exposed the following CSS properties, available to be overridden here:
+    -   **--interactive-accent-color**: Default color of the accents.
 
 ### Percentage results
 
@@ -259,6 +246,45 @@ Meanwhile, please use:
 
 The endpoint will return the JSON on a GET request, useful for testing. The public endpoint will be released before the public launch, and with it, this mock endpoint will be deprecated.
 
+## Sizing
+
+The component follows the container model. The size can be changed by overriding the element's font-size, which by default will be set to `3*var(--story-page-vmin)`. The component has a `min-width: 14ems` and `max-width: 25ems`, unless it's a binary-poll or results, in which case it will have `max-width:18em`. This makes it occupy 75% of the width on portrait stories by default, but the width can be overridden with a CSS rule to any value in between the min and max. The height will depend on the font-size and number of lines on the prompt, so it cannot be specified.
+
+The demos section contains updated CSS to reflect all the mesurements in ems.
+
+### Creating pixel-perfect layouts with interactive components using amp-story-grid-layer with aspect-ratio
+
+While the component by default adapts to the screen size with the variable font-size, it doesn't stay perfectly consistent across screen sizes. It's possible to use the aspect-ratio layer in order to create layouts that will scale perfectly with different screen sizes, by setting the `font-size` in ems on the component.
+
+The width can be set either in ems or percentages of the parent width, and it will behave perfectly consistent (while keeping it between the min and max widths).
+
+<table>
+<tr>
+  <td>
+    <code>
+
+    ```
+    <amp-story-grid-layer template="fill" aspect-ratio="400:600">
+      <amp-story-interactive-quiz
+        style="font-size:0.2em">
+      </amp-story-interactive-quiz>
+    </amp-story-grid-layer>
+    ```
+
+  </code>
+  </td>
+
+  <td><img src="https://user-images.githubusercontent.com/22420856/92150262-26ab1600-eded-11ea-9b16-0e482c2f7d58.png" width="300"></td></tr>
+</table>
+
+### Resizing components without aspect-ratio
+
+By default the component will take 75% of the width, but publishers can set a `font-size` rule on the component, overriding the initial value. The `font-size` can take em, rem, px, var(--story-page-vmin) or any other units, but responsive units are recommended to have a component that scales with the screen size.
+
+The `width` can also be overriden to any value between the min and max using ems, percentages or any other unit available. It is important to consider that by default the component will take 25ems of width, which resizes with the component helping it keep the same look. If the width is specified in different units from the font-size, the component could shift the contents on different screen sizes (specially the prompt and option titles), so it's recommended to keep in mind the units used (or keep the width untouched).
+
+The `height` is always auto and will adapt to fit the prompt and options with the given font-size and width.
+
 ## Demos
 
 With these components we wanted to help users create more entertaining and immersive experiences, and to facilitate that, we have created demos with good use cases of the components. Feel free to ~~steal~~ implement any ideas from these demos into your own stories (or check the source code).
@@ -290,7 +316,7 @@ Codepen with HTML and CSS of a quiz, and a simple panel that could show how the 
 <br><br>
 Note: not all properties can be modified on this Codepen. When integrating, take into account other fields and variants such as prompt-text-color, prompt-background (if users want it different from the accent color, or if users want gradients), etc.
 <br><br>
-<a href="https://codepen.io/mszylkowski/pen/pogGxbz">https://codepen.io/mszylkowski/pen/pogGxbz</a>
+<a href="https://codepen.io/mszylkowski/pen/qBZXmQj">https://codepen.io/mszylkowski/pen/qBZXmQj</a>
 </td>
 <td>
 <img src="https://user-images.githubusercontent.com/22420856/88303287-dd878280-ccd4-11ea-8238-1dcedf4c5bee.png">
@@ -305,7 +331,31 @@ Codepen with HTML and CSS of a poll, and a simple panel that could show how the 
 <br><br>
 Note: not all properties can be modified on this Codepen. When integrating, take into account other fields and variants such as prompt-text-color, prompt-background (if users want it different from the accent color, or if users want gradients), etc.
 <br><br>
-<a href="https://codepen.io/mszylkowski/pen/GRoeorr">https://codepen.io/mszylkowski/pen/GRoeorr</a>
+<a href="https://codepen.io/mszylkowski/pen/ZEWaBoZ">https://codepen.io/mszylkowski/pen/ZEWaBoZ</a>
+</td>
+</tr>
+<tr>
+<td>
+Codepen with HTML and CSS of a results component, and a simple panel that could show how the component could look like on a creation tool. This component is highly customizable, so we included a list of custom styles that can be implemented with the given CSS. The Codepen also can reflect the layout of results with/without an image on the category, and with/without score (for quizzes and polls results).
+<br><br>
+Note: not all properties can be modified on this Codepen. When integrating, take into account other fields and variants such as prompt-text-color, prompt-background (if users want it different from the accent color, or if users want gradients), etc.
+<br><br>
+<a href="https://codepen.io/mszylkowski/pen/abNWzdb">https://codepen.io/mszylkowski/pen/abNWzdb</a>
+</td>
+<td>
+<img src="https://user-images.githubusercontent.com/22420856/92153654-9f60a100-edf2-11ea-86ec-fe8bcd816879.png">
+</td>
+</tr>
+<tr>
+<td>
+<img src="https://user-images.githubusercontent.com/22420856/92153451-4c86e980-edf2-11ea-9327-1b5136e7e63c.png">
+</td>
+<td>
+Codepen with HTML and CSS of a binary poll, and a simple panel that could show how the component could look like on a creation tool. Useful to experiment how the component looks on different states, as well as imagine how to integrate it with creation tools. On answered state, the component reflects the option sizing that adapts to the content of the options.
+<br><br>
+Note: not all properties can be modified on this Codepen. When integrating, take into account other fields and variants such as prompt-text-color, prompt-background (if users want it different from the accent color, or if users want gradients), etc.
+<br><br>
+<a href="https://codepen.io/mszylkowski/pen/oNxogoV">https://codepen.io/mszylkowski/pen/oNxogoV</a>
 </td>
 </tr>
 </table>
@@ -330,9 +380,9 @@ We have provided Codepens in the Demos section to check the current HTML and CSS
 
 This is a starting point for creating the inputs on a creation tool (and just a guideline / thoughts on good ideas):
 
-- _Styles_: A good starting point for customizing the style is to provide a color picker for accent color (and can additionally provide gradients for the prompt-background), and have dropdowns to select the theme=dark|light) and chip-style=flat|shadow. Dropdowns are better for future-proofing the attributes, as we may add more styles later.
-- _Fields_: Prompt text can be a field that, if left empty, the tool doesn't specify it in the component. Options should be a list of custom fields, where users start with 2 options and can add new options (up to 4 if not a binary-poll). Each option requires a text, but more attributes such as the confetti/correct can be assigned to each option.
-- _Results_: It's useful to guide the users through creating multi-page results. For quizzes, users can add the results component to any page, but it's a good idea to warn users that they need quizzes on previous pages to use it correctly. Users can edit the attributes in a WYSIWYG editor for the multiple states if tools provide a dropdown to change the visible option, allowing users to input one state at a time (thresholds can be specified on a sidebar for example). Poll results can also be edited in a WYSIWYG manner, but it's a good idea to first require users to create the categories in the results component, and provide a dropdown on each poll option to link it to a category of the results page. This prevents errors in matching the names of the categories across components (eg: titlecase vs lowercase, extra spaces, etc) that are hard to debug from a user standpoint.
+-   _Styles_: A good starting point for customizing the style is to provide a color picker for accent color (and can additionally provide gradients for the prompt-background), and have dropdowns to select the theme=dark|light) and chip-style=flat|shadow. Dropdowns are better for future-proofing the attributes, as we may add more styles later.
+-   _Fields_: Prompt text can be a field that, if left empty, the tool doesn't specify it in the component. Options should be a list of custom fields, where users start with 2 options and can add new options (up to 4 if not a binary-poll). Each option requires a text, but more attributes such as the confetti/correct can be assigned to each option.
+-   _Results_: It's useful to guide the users through creating multi-page results. For quizzes, users can add the results component to any page, but it's a good idea to warn users that they need quizzes on previous pages to use it correctly. Users can edit the attributes in a WYSIWYG editor for the multiple states if tools provide a dropdown to change the visible option, allowing users to input one state at a time (thresholds can be specified on a sidebar for example). Poll results can also be edited in a WYSIWYG manner, but it's a good idea to first require users to create the categories in the results component, and provide a dropdown on each poll option to link it to a category of the results page. This prevents errors in matching the names of the categories across components (eg: titlecase vs lowercase, extra spaces, etc) that are hard to debug from a user standpoint.
 
 **What if I want to animate the interactive components?**
 

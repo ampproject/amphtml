@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 
 /** @enum {string} */
 export const GrantReason = {
   'SUBSCRIBER': 'SUBSCRIBER',
   'METERING': 'METERING',
-  'UNLOCKED': 'UNLOCKED',
+  'FREE': 'UNLOCKED',
+  'LAA': 'LAA',
 };
 
 /**
@@ -126,10 +127,18 @@ export class Entitlement {
   }
 
   /**
-   * Returns if the user is a subscriber.
+   * Returns true if the user is a subscriber.
    * @return {boolean}
    */
   isSubscriber() {
     return this.granted && this.grantReason === GrantReason.SUBSCRIBER;
+  }
+
+  /**
+   * Returns true if the article is free.
+   * @return {boolean}
+   */
+  isFree() {
+    return this.granted && this.grantReason === GrantReason.FREE;
   }
 }

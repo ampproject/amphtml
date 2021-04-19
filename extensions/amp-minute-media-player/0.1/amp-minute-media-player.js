@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
@@ -28,8 +28,9 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
+  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
@@ -191,7 +192,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
         return;
       }
       this.muted_ = muted;
-      this.element.dispatchCustomEvent(mutedOrUnmutedEvent(this.muted_));
+      dispatchCustomEvent(this.element, mutedOrUnmutedEvent(this.muted_));
       return;
     }
   }
@@ -233,7 +234,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     Services.videoManagerForDoc(this.element).register(this);
 
     const loaded = this.loadPromise(this.iframe_).then(() => {
-      element.dispatchCustomEvent(VideoEvents.LOAD);
+      dispatchCustomEvent(element, VideoEvents.LOAD);
     });
     this.playerReadyResolver_(loaded);
     return loaded;

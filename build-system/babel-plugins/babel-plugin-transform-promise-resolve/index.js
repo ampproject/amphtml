@@ -14,9 +14,20 @@
  * limitations under the License.
  */
 
-const filepath = require('path');
+const pathmodule = require('path');
 const {addNamed} = require('@babel/helper-module-imports');
 
+/**
+ * @param {*} babel
+ * @param {{
+ *  importFrom?: string,
+ * }=} options
+ * @return {{
+ *   visitor: {
+ *     CallExpression: {Funcion(path: string): void}
+ *  }
+ * }}
+ */
 module.exports = function (babel, options = {}) {
   const {types: t} = babel;
   const promiseResolveMatcher = t.buildMatchMemberExpression('Promise.resolve');
@@ -41,7 +52,10 @@ module.exports = function (babel, options = {}) {
         // Relative will return "foo" instead of "./foo". And if it returned
         // a "../foo", making it "./../foo" doesn't hurt.
         const source =
-          './' + filepath.relative(filepath.dirname(filename), importFrom);
+          './' +
+          toPosix(
+            pathmodule.relative(pathmodule.dirname(filename), importFrom)
+          );
         const resolvedPromise = addNamed(path, 'resolvedPromise', source, {
           importedType: 'es6',
         });
@@ -50,3 +64,13 @@ module.exports = function (babel, options = {}) {
     },
   };
 };
+
+/**
+ * Even though we are using the path module, JS Modules should never have
+ * their paths specified in Windows format.
+ * @param {string} path
+ * @return {string}
+ */
+function toPosix(path) {
+  return path.replace(/\\\\?/g, '/');
+}

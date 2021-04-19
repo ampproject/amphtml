@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {GOOGLE_ACTIVEVIEW_ERROR_TAG} from './requests';
-import {Observable} from '../../../src/observable';
-import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {Observable} from '../../../src/core/data-structures/observable';
+import {devAssert} from '../../../src/log';
+import {dict} from '../../../src/core/types/object';
 
 /**
  * This class implements visibility calculations based on the
@@ -29,28 +28,10 @@ export class VisibilityModel {
   /**
    * @param {!JsonObject} spec
    * @param {function():number} calcVisibility
-   * @param {?function():?../../../src/layout-rect.LayoutRectDef} calcLayoutBoxTemp
-   * @param {?function():?../../../src/layout-rect.LayoutRectDef} calcBoundingClientRectTemp
-   * @param {?../../../src/service/viewport/viewport-impl.ViewportImpl} viewportTemp
    */
-  constructor(
-    spec,
-    calcVisibility,
-    calcLayoutBoxTemp = null,
-    calcBoundingClientRectTemp = null,
-    viewportTemp = null
-  ) {
+  constructor(spec, calcVisibility) {
     /** @const @private */
     this.calcVisibility_ = calcVisibility;
-
-    // TODO(#29618): Remove after ampim investigation
-    this.calcLayoutBoxTemp_ = calcLayoutBoxTemp;
-
-    this.calcBoundingClientRectTemp_ = calcBoundingClientRectTemp;
-
-    this.viewportTemp_ = viewportTemp;
-
-    this.errorInfoTemp_ = dict({});
 
     /**
      * Spec parameters.
@@ -322,20 +303,6 @@ export class VisibilityModel {
   }
 
   /**
-   * TODO(#29618): Remove after ampim investigation
-   * Return object
-   * {
-   *   'layoutBoxAtMaxRatio': AMP calculated layout box at max intersect ratio
-   *   'boundingClientRectAtMaxRatio': InOb calculated clientRect at max intersect ratio
-   *   'viewportSizeAtMaxRatio': viewport size at max intersect ratio
-   * }
-   * @return {!JsonObject}
-   */
-  getErrorInfoTemp() {
-    return this.errorInfoTemp_;
-  }
-
-  /**
    * @param {number} visibility
    * @private
    */
@@ -470,29 +437,6 @@ export class VisibilityModel {
         this.minVisiblePercentage_ > 0
           ? Math.min(this.minVisiblePercentage_, visibility)
           : visibility;
-
-      // TODO(#29618): Remove after ampim investigation
-      if (visibility > this.maxVisiblePercentage_) {
-        try {
-          if (this.calcLayoutBoxTemp_) {
-            this.errorInfoTemp_[
-              'layoutBoxAtMaxRatio'
-            ] = this.calcLayoutBoxTemp_();
-          }
-          if (this.calcBoundingClientRectTemp_) {
-            this.errorInfoTemp_[
-              'boundingClientRectAtMaxRatio'
-            ] = this.calcBoundingClientRectTemp_();
-          }
-          if (this.viewportTemp_) {
-            this.errorInfoTemp_[
-              'viewportSizeAtMaxRatio'
-            ] = this.viewportTemp_.getSize();
-          }
-        } catch (e) {
-          dev().error(GOOGLE_ACTIVEVIEW_ERROR_TAG, e);
-        }
-      }
 
       this.maxVisiblePercentage_ = Math.max(
         this.maxVisiblePercentage_,

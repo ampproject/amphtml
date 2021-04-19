@@ -38,6 +38,10 @@ module.exports = function () {
     },
   };
 
+  /**
+   * @param {BabelPath} path
+   * @return {BabelPath|void}
+   */
   function deepestMember(path) {
     while (true) {
       const object = path.get('object');
@@ -48,12 +52,26 @@ module.exports = function () {
     }
   }
 
+  /**
+   *
+   * @param {BabelPath} path
+   * @param {T} namespaceMember
+   * @param {T} state
+   * @return {void}
+   */
   function memberInAssignmentExpression(path, namespaceMember, state) {
     const {name} = namespaceMember.node.property;
     state.declaredNames.set(name, path.parentPath);
   }
 
-  function memberExpression(path, namespaceMember, state) {
+  /**
+   *
+   * @param {BabelPath} _path
+   * @param {T} namespaceMember
+   * @param {T} state
+   * @return {void}
+   */
+  function memberExpression(_path, namespaceMember, state) {
     const {name} = namespaceMember.node.property;
     state.usedNames.add(name);
   }

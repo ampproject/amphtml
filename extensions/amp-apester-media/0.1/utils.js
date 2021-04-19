@@ -16,7 +16,7 @@
 
 import * as events from '../../../src/event-helper';
 import {isJsonLdScriptTag} from '../../../src/dom';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 import {tryParseJson} from '../../../src/json';
 
 const rules = [
@@ -124,7 +124,7 @@ export function extractArticleTags(ampdoc) {
   return (ampdoc.getMetaByName('keywords') || '')
     .split(',')
     .map((e) => e.trim())
-    .filter((e) => e);
+    .filter(Boolean);
 }
 
 /**

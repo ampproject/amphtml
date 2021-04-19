@@ -53,7 +53,7 @@ describes.realWin(
       ampYotpo.setAttribute('data-widget-type', opts.widgetType);
       doc.body.appendChild(ampYotpo);
       return ampYotpo
-        .build()
+        .buildInternal()
         .then(() => ampYotpo.layoutCallback())
         .then(() => ampYotpo);
     }

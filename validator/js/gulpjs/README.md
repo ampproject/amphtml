@@ -41,24 +41,32 @@ To treat warnings as errors, replace the last line of the validation closure wit
 
 ## Release Notes
 
+### 1.0.6
+
+-   Use fancy-log log.info (#30744)
+
+### 1.0.5
+
+-   Update repository location.
+
 ### 1.0.4
 
-- Update amphtml-validator dependency to 1.0.30, gulp to 4.0.2 and mocha to
-  7.0.1.
+-   Update amphtml-validator dependency to 1.0.30, gulp to 4.0.2 and mocha to
+    7.0.1.
 
 ### 1.0.3
 
-- Remove engine section from pacakge.json to allow any version of gulpjs.
+-   Remove engine section from pacakge.json to allow any version of gulpjs.
 
 ### 1.0.2
 
-- Add failAfterWarningOrError option
-- Upgrade amphtml-validator version to 1.0.21
+-   Add failAfterWarningOrError option
+-   Upgrade amphtml-validator version to 1.0.21
 
 ### 1.0.1
 
-- Upgrade amphtml-validator version to 1.0.18
+-   Upgrade amphtml-validator version to 1.0.18
 
 ### 1.0.0
 
-- initial release
+-   initial release

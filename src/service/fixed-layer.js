@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Animation} from '../animation';
 import {Pass} from '../pass';
 import {Services} from '../services';
 import {
@@ -29,9 +30,9 @@ import {
 } from '../style';
 import {closest, domOrderComparator, matches} from '../dom';
 import {dev, user} from '../log';
-import {endsWith} from '../string';
+import {endsWith} from '../core/types/string';
 import {getMode} from '../mode';
-import {remove} from '../utils/array';
+import {remove} from '../core/types/array';
 
 const TAG = 'FixedLayer';
 
@@ -573,7 +574,6 @@ export class FixedLayer {
    * @param {!Node} root
    * @param {boolean=} opt_lightboxMode
    * @private
-   * @noinline
    */
   trySetupSelectors_(root, opt_lightboxMode) {
     try {
@@ -883,6 +883,36 @@ export class FixedLayer {
         }
       }
     }
+  }
+
+  /**
+   * @param {number} paddingTop
+   * @param {number} lastPaddingTop
+   * @param {number} duration
+   * @param {string} curve
+   * @param {boolean} transient
+   * @return {!Promise}
+   */
+  animateFixedElements(paddingTop, lastPaddingTop, duration, curve, transient) {
+    this.updatePaddingTop(paddingTop, transient);
+    if (duration <= 0) {
+      return Promise.resolve();
+    }
+    // Add transit effect on position fixed element
+    const tr = (time) => {
+      return lastPaddingTop - paddingTop + (paddingTop - lastPaddingTop) * time;
+    };
+    return Animation.animate(
+      this.ampdoc.getRootNode(),
+      (time) => {
+        const p = tr(time);
+        this.transformMutate(`translateY(${p}px)`);
+      },
+      duration,
+      curve
+    ).thenAlways(() => {
+      this.transformMutate(null);
+    });
   }
 }
 

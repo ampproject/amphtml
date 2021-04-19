@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {Deferred} from './utils/promise';
+import {Deferred} from './core/data-structures/promise';
 import {Services} from './services';
+import {WindowInterface} from './window-interface';
 import {
   addParamsToUrl,
   isProxyOrigin,
@@ -37,9 +38,9 @@ const DEFAULT_APPEND_URL_PARAM = ['gclid', 'gclsrc'];
  * sending impression requests. If you believe your domain should be here,
  * file the issue on GitHub to discuss. The process will be similar
  * (but somewhat more stringent) to the one described in the [3p/README.md](
- * https://github.com/ampproject/amphtml/blob/master/3p/README.md)
+ * https://github.com/ampproject/amphtml/blob/main/3p/README.md)
  *
- * @export {!Array<!RegExp>}
+ * @type {!Array<!RegExp>}
  */
 const TRUSTED_REFERRER_HOSTS = [
   /**
@@ -204,11 +205,11 @@ function handleClickUrl(win) {
     return Promise.resolve();
   }
 
-  if (win.location.hash) {
+  if (WindowInterface.getLocation(win).hash) {
     // This is typically done using replaceState inside the viewer.
     // If for some reason it failed, get rid of the fragment here to
     // avoid duplicate tracking.
-    win.location.hash = '';
+    WindowInterface.getLocation(win).hash = '';
   }
 
   // TODO(@zhouyx) need test with a real response.
@@ -278,7 +279,7 @@ function applyResponse(win, response) {
     }
 
     const viewer = Services.viewerForDoc(win.document.documentElement);
-    const currentHref = win.location.href;
+    const currentHref = WindowInterface.getLocation(win).href;
     const url = parseUrlDeprecated(adLocation);
     const params = parseQueryString(url.search);
     const newHref = addParamsToUrl(currentHref, params);
@@ -310,7 +311,7 @@ export function shouldAppendExtraParams(ampdoc) {
  */
 export function getExtraParamsUrl(win, target) {
   // Get an array with extra params that needs to append.
-  const url = parseUrlDeprecated(win.location.href);
+  const url = parseUrlDeprecated(WindowInterface.getLocation(win).href);
   const params = parseQueryString(url.search);
   const appendParams = [];
   for (let i = 0; i < DEFAULT_APPEND_URL_PARAM.length; i++) {

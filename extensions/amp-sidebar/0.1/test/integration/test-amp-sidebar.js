@@ -87,10 +87,11 @@ describe
         it.configure()
           .skipIfPropertiesObfuscated()
           .skipFirefox()
-          .run('should not change scroll position after close', () => {
+          .run('should not change scroll position after close', async () => {
             const openerButton = win.document.getElementById('sidebarOpener');
             const sidebar = win.document.getElementById('sidebar1');
-            const viewport = sidebar.implementation_.getViewport();
+            const impl = await sidebar.getImpl(false);
+            const viewport = impl.getViewport();
             const openedPromise = waitForSidebarOpen(win.document);
             openerButton.click();
             expect(viewport.getScrollTop()).to.equal(0);

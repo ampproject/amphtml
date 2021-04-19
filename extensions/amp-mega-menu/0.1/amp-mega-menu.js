@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {CSS} from '../../../build/amp-mega-menu-0.1.css';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
@@ -31,7 +31,7 @@ import {
 import {dev, userAssert} from '../../../src/log';
 import {mod} from '../../../src/utils/math';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 /** @const {string} */
 const TAG = 'amp-mega-menu';
@@ -45,6 +45,11 @@ const ARIA_LABEL_CLOSE = 'Close the menu';
  * template rendering via dynamically fetched data.
  */
 export class AmpMegaMenu extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -86,11 +91,6 @@ export class AmpMegaMenu extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout === Layout.FIXED_HEIGHT;
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @override */

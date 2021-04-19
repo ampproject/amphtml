@@ -24,7 +24,7 @@ _Refer to [enabling AMP experimental features doc](https://amp.dev/documentation
 
 ## Before you start
 
-Because real traffic can be automatically assigned to the experiment, plus the experiment slots are limited. Any experiment declaration and launch requires an issue tracker and at least one approval from @ampproject/wg-approvers or @ampprojeg/wg-ads depending on the type of experiment environment(#environment).
+Because real traffic can be automatically assigned to the experiment, plus the experiment slots are limited. Any experiment declaration and launch requires an issue tracker and at least one approval from @ampproject/wg-approvers or @ampprojeg/wg-monetization depending on the type of experiment environment(#environment).
 
 ## Run an Experiment
 
@@ -46,12 +46,12 @@ During transpiling, babel will replace the experiment flag with a boolean value 
 The experiment flag values are default to `false`. You can use the `--define_experiment_constant` flag to set the value to `true`.
 
 ```
-gulp build --define_experiment_const MY_EXPERIMENT`
+amp build --define_experiment_const MY_EXPERIMENT`
 ```
 
 ### Start an Experiment
 
-Once you receive approval to start a server side experiment. You can add your experiment to one of the three experiment slots under the `experiments-config.js` [file](https://github.com/ampproject/amphtml/blob/master/build-system/global-configs/experiments-config.json).
+Once you receive approval to start a server side experiment. You can add your experiment to one of the three experiment slots under the `experiments-config.js` [file](https://github.com/ampproject/amphtml/blob/main/build-system/global-configs/experiments-config.json).
 
 Example
 
@@ -68,6 +68,19 @@ Example
   "experimentC": {}
 }
 ```
+
+In the same pull request you also need to add an experiment constant in the `experiments-const.json` [file](https://github.com/ampproject/amphtml/blob/main/build-system/global-configs/experiments-const.json).
+
+Example
+
+```
+{
+  "MY_EXPERIMENT": false,
+  ...
+}
+```
+
+You start with the `false` value at first. Note that the `experiment-config.json` constants override the values set in the `experiment-const.json` file.
 
 #### More on Experiment Config
 
@@ -114,12 +127,12 @@ There's no additional step to run an experiment with `environment = AMP`. The sa
 
 ##### AMPHTML Ads
 
-To run an experiment with `environment = INABOX`, please reach out to @ampproject/wg-ads for additional instructions.
+To run an experiment with `environment = INABOX`, please reach out to @ampproject/wg-monetization for additional instructions.
 
 ## Launch an Experiment
 
 Once approvals have been collected from the corresponding working group. One can quickly launch an experiment by setting the experiment flag value under
-[`experiment-consts.json`](https://github.com/ampproject/amphtml/blob/master/build-system/global-configs/experiments-const.json).
+[`experiment-consts.json`](https://github.com/ampproject/amphtml/blob/main/build-system/global-configs/experiments-const.json).
 
 E.g.
 
@@ -129,6 +142,6 @@ E.g.
 }
 ```
 
-Make sure to remove the experiment config from [`experiment-configs.json`](https://github.com/ampproject/amphtml/blob/master/build-system/global-configs/experiments-config.json) when you do so. Because the config will override the value from [`experiment-consts.json`](https://github.com/ampproject/amphtml/blob/master/build-system/global-configs/experiments-const.json).
+Make sure to remove the experiment config from [`experiment-configs.json`](https://github.com/ampproject/amphtml/blob/main/build-system/global-configs/experiments-config.json) when you do so. Because the config will override the value from [`experiment-consts.json`](https://github.com/ampproject/amphtml/blob/main/build-system/global-configs/experiments-const.json).
 
 It is recommended to follow up with a proper clean up and remove the flag from the above file after the change is stable in production.

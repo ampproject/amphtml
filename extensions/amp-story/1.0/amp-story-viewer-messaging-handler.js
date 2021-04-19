@@ -21,7 +21,7 @@ import {
 } from './amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from './variable-service';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 
 /** @type {string} */
 const TAG = 'amp-story-viewer-messaging-handler';
@@ -106,6 +106,9 @@ export class AmpStoryViewerMessagingHandler {
     );
     this.viewer_.onMessageRespond('setDocumentState', (data) =>
       this.onSetDocumentState_(data)
+    );
+    this.viewer_.onMessageRespond('customDocumentUI', (data) =>
+      this.onCustomDocumentUI_(data)
     );
   }
 
@@ -192,5 +195,17 @@ export class AmpStoryViewerMessagingHandler {
     this.storeService_.dispatch(config.action, value);
 
     return Promise.resolve({state, value});
+  }
+
+  /**
+   * Handles 'customDocumentUI' viewer messages.
+   * @param {!Object} data
+   * @private
+   */
+  onCustomDocumentUI_(data) {
+    this.storeService_.dispatch(
+      Action.SET_VIEWER_CUSTOM_CONTROLS,
+      data.controls
+    );
   }
 }

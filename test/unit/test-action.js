@@ -25,12 +25,11 @@ import {
   ActionTrust,
   DEFAULT_ACTION,
   RAW_OBJECT_ARGS_KEY,
-} from '../../src/action-constants';
+} from '../../src/core/constants/action-constants';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {Keys} from '../../src/utils/key-codes';
+import {Keys} from '../../src/core/constants/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
 import {htmlFor} from '../../src/static-template';
-import {setParentWindow} from '../../src/service';
 import {whenCalled} from '../../testing/test-helper.js';
 
 /**
@@ -47,7 +46,7 @@ function actionService() {
       },
     },
     __AMP_SERVICES: {
-      vsync: {obj: {}},
+      vsync: {obj: {}, ctor: Object},
     },
   };
   return new ActionService(new AmpDocSingle(win), document);
@@ -515,29 +514,6 @@ describe('Action parseActionMap', () => {
     expect(parseActionMap('')).to.equal(null);
     expect(parseActionMap('  ')).to.equal(null);
     expect(parseActionMap(';;;')).to.equal(null);
-  });
-});
-
-describes.sandboxed('Action adoptEmbedWindow', {}, () => {
-  let action;
-  let embedWin;
-
-  beforeEach(() => {
-    action = actionService();
-    embedWin = {
-      frameElement: document.createElement('div'),
-      document: document.implementation.createHTMLDocument(''),
-    };
-    setParentWindow(embedWin, action.ampdoc.win);
-  });
-
-  it('should create embedded action service', () => {
-    ActionService.installInEmbedWindow(embedWin, action.ampdoc);
-    const embedService =
-      embedWin.__AMP_SERVICES.action && embedWin.__AMP_SERVICES.action.obj;
-    expect(embedService).to.exist;
-    expect(embedService.ampdoc).to.equal(action.ampdoc);
-    expect(embedService.root_).to.equal(embedWin.document);
   });
 });
 

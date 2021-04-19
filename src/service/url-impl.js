@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LruCache} from '../utils/lru-cache';
+import {LruCache} from '../core/data-structures/lru-cache';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
@@ -26,46 +26,26 @@ import {
   parseUrlWithA,
   resolveRelativeUrl,
 } from '../url';
-import {
-  installServiceInEmbedScope,
-  registerServiceBuilderForDoc,
-} from '../service';
+import {registerServiceBuilderForDoc} from '../service';
 import {urls} from '../config';
 
 const SERVICE = 'url';
 
 /**
- * @implements {../service.EmbeddableService}
  */
 export class Url {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @param {(!Document|!ShadowRoot)=} opt_rootNode
    */
-  constructor(ampdoc, opt_rootNode) {
-    // TODO(#22733): remove subroooting once ampdoc-fie is launched.
-
-    const root = opt_rootNode || ampdoc.getRootNode();
+  constructor(ampdoc) {
+    const root = ampdoc.getRootNode();
     const doc = root.ownerDocument || root;
 
     /** @private @const {!HTMLAnchorElement} */
     this.anchor_ = /** @type {!HTMLAnchorElement} */ (doc.createElement('a'));
 
-    /** @private @const {!LruCache} */
-    this.cache_ = new LruCache(100);
-  }
-
-  /**
-   * @param {!Window} embedWin
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @nocollapse
-   */
-  static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(
-      embedWin,
-      SERVICE,
-      new Url(ampdoc, embedWin.document)
-    );
+    /** @private @const {?LruCache} */
+    this.cache_ = IS_ESM ? null : new LruCache(100);
   }
 
   /**
@@ -73,10 +53,15 @@ export class Url {
    *
    * @param {string} url
    * @param {boolean=} opt_nocache
+   *   Cache is always ignored on ESM builds, see https://go.amp.dev/pr/31594
    * @return {!Location}
    */
   parse(url, opt_nocache) {
-    return parseUrlWithA(this.anchor_, url, opt_nocache ? null : this.cache_);
+    return parseUrlWithA(
+      this.anchor_,
+      url,
+      IS_ESM || opt_nocache ? null : this.cache_
+    );
   }
 
   /**

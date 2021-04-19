@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {AmpFormTextarea} from './amp-form-textarea';
 import {
   AsyncInputAttributes,
   AsyncInputClasses,
 } from '../../../src/async-input';
 import {CSS} from '../../../build/amp-form-0.1.css';
-import {Deferred, tryResolve} from '../../../src/utils/promise';
+import {Deferred, tryResolve} from '../../../src/core/data-structures/promise';
 import {
   FORM_VERIFY_OPTOUT,
   FORM_VERIFY_PARAM,
@@ -31,7 +31,7 @@ import {
 import {FormDirtiness} from './form-dirtiness';
 import {FormEvents} from './form-events';
 import {FormSubmitService} from './form-submit-service';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {
   SOURCE_ORIGIN_PARAM,
   addParamsToUrl,
@@ -51,7 +51,7 @@ import {
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
-import {deepMerge, dict} from '../../../src/utils/object';
+import {deepMerge, dict} from '../../../src/core/types/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {
@@ -64,12 +64,14 @@ import {getMode} from '../../../src/mode';
 import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isAmp4Email} from '../../../src/format';
-import {isArray, toArray, toWin} from '../../../src/types';
+import {isArray, toArray} from '../../../src/core/types/array';
 import {
   setupAMPCors,
   setupInit,
   setupInput,
 } from '../../../src/utils/xhr-utils';
+
+import {toWin} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryParseJson} from '../../../src/json';
 
@@ -136,32 +138,32 @@ export class AmpForm {
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
 
-    /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacement_ = Services.urlReplacementsForDoc(element);
-
-    /** @private {?Promise} */
-    this.dependenciesPromise_ = null;
-
     /** @const @private {!HTMLFormElement} */
     this.form_ = element;
 
     /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc}  */
     this.ampdoc_ = Services.ampdoc(this.form_);
 
+    /** @private {?Promise} */
+    this.dependenciesPromise_ = null;
+
+    /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
+    this.urlReplacement_ = Services.urlReplacementsForDoc(this.ampdoc_);
+
     /** @const @private {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(this.win_);
+    this.templates_ = Services.templatesForDoc(this.ampdoc_);
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(this.win_);
 
     /** @const @private {!../../../src/service/action-impl.ActionService} */
-    this.actions_ = Services.actionServiceForDoc(this.form_);
+    this.actions_ = Services.actionServiceForDoc(this.ampdoc_);
 
     /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
-    this.mutator_ = Services.mutatorForDoc(this.form_);
+    this.mutator_ = Services.mutatorForDoc(this.ampdoc_);
 
     /** @const @private {!../../../src/service/viewer-interface.ViewerInterface}  */
-    this.viewer_ = Services.viewerForDoc(this.form_);
+    this.viewer_ = Services.viewerForDoc(this.ampdoc_);
 
     /**
      * @const {!../../../src/ssr-template-helper.SsrTemplateHelper}
@@ -257,7 +259,7 @@ export class AmpForm {
   getXhrUrl_(attribute) {
     const url = this.form_.getAttribute(attribute);
     if (url) {
-      const urlService = Services.urlForDoc(this.form_);
+      const urlService = Services.urlForDoc(this.ampdoc_);
       urlService.assertHttpsUrl(url, this.form_, attribute);
       userAssert(
         !urlService.isProxyOrigin(url),
@@ -399,7 +401,7 @@ export class AmpForm {
       EXTERNAL_DEPS.join(',')
     );
     // Wait for an element to be built to make sure it is ready.
-    const promises = toArray(depElements).map((el) => el.whenBuilt());
+    const promises = toArray(depElements).map((el) => el.build());
     return (this.dependenciesPromise_ = this.waitOnPromisesOrTimeout_(
       promises,
       2000
@@ -476,7 +478,7 @@ export class AmpForm {
 
   /** @private */
   installInputMasking_() {
-    Services.inputmaskServiceForDocOrNull(this.form_).then(
+    Services.inputmaskServiceForDocOrNull(this.ampdoc_).then(
       (inputmaskService) => {
         if (inputmaskService) {
           inputmaskService.install();
@@ -504,7 +506,11 @@ export class AmpForm {
     }
     formDataForAnalytics['formId'] = this.form_.id;
 
-    this.analyticsEvent_(eventType, formDataForAnalytics);
+    try {
+      this.analyticsEvent_(eventType, formDataForAnalytics);
+    } catch (err) {
+      dev().error(TAG, 'Sending analytics failed:', err);
+    }
   }
 
   /**
@@ -1042,8 +1048,8 @@ export class AmpForm {
       promise = Promise.resolve(null);
     }
     return promise.then((responseJson) => {
-      this.triggerFormSubmitInAnalytics_('amp-form-submit-error');
       this.handleSubmitFailure_(e, responseJson, incomingTrust);
+      this.triggerFormSubmitInAnalytics_('amp-form-submit-error');
       this.maybeHandleRedirect_(e.response);
     });
   }
@@ -1173,7 +1179,7 @@ export class AmpForm {
         this.form_
       );
       try {
-        const urlService = Services.urlForDoc(this.form_);
+        const urlService = Services.urlForDoc(this.ampdoc_);
         urlService.assertAbsoluteHttpOrHttpsUrl(redirectTo);
         urlService.assertHttpsUrl(redirectTo, 'AMP-Redirect-To', 'Url');
       } catch (e) {
@@ -1184,7 +1190,7 @@ export class AmpForm {
           redirectTo
         );
       }
-      const navigator = Services.navigationForDoc(this.form_);
+      const navigator = Services.navigationForDoc(this.ampdoc_);
       navigator.navigateTo(this.win_, redirectTo, REDIRECT_TO_HEADER);
     }
   }

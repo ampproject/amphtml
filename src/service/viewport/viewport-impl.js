@@ -15,13 +15,13 @@
  */
 
 import {Animation} from '../../animation';
-import {Observable} from '../../observable';
+import {Observable} from '../../core/data-structures/observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
 import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {ViewportInterface} from './viewport-interface';
-import {VisibilityState} from '../../visibility-state';
+import {VisibilityState} from '../../core/constants/visibility-state';
 import {clamp} from '../../utils/math';
 import {
   closestAncestorElementBySelector,
@@ -30,7 +30,7 @@ import {
 } from '../../dom';
 import {computedStyle, setStyle} from '../../style';
 import {dev, devAssert} from '../../log';
-import {dict} from '../../utils/object';
+import {dict} from '../../core/types/object';
 import {getFriendlyIframeEmbedOptional} from '../../iframe-helper';
 import {getMode} from '../../mode';
 import {
@@ -44,9 +44,15 @@ import {
   moveLayoutRect,
 } from '../../layout-rect';
 import {numeric} from '../../transition';
-import {tryResolve} from '../../utils/promise';
+import {tryResolve} from '../../core/data-structures/promise';
 
 const TAG_ = 'Viewport';
+const SCROLL_POS_TO_BLOCK = {
+  'top': 'start',
+  'center': 'center',
+  'bottom': 'end',
+};
+const SMOOTH_SCROLL_DELAY_ = 300;
 
 /**
  * This object represents the viewport. It tracks scroll position, resize
@@ -132,7 +138,7 @@ export class ViewportImpl {
     /** @private @const {!Observable<!./viewport-interface.ViewportResizedEventDef>} */
     this.resizeObservable_ = new Observable();
 
-    /** @private {?Element|undefined} */
+    /** @private {?HTMLMetaElement|undefined} */
     this.viewportMeta_ = undefined;
 
     /** @private {string|undefined} */
@@ -197,6 +203,19 @@ export class ViewportImpl {
       } catch (e) {
         // Ignore errors.
       }
+    }
+
+    // BF-cache navigation sometimes breaks clicks in an iframe on iOS. See
+    // https://github.com/ampproject/amphtml/issues/30838 for more details.
+    // The solution is to make a "fake" scrolling API call.
+    const isIframedIos = Services.platformFor(win).isIos() && isIframed(win);
+    // We dont want to scroll if we're in a shadow doc, so check that we're
+    // in a single doc. Fix for
+    // https://github.com/ampproject/amphtml/issues/32165.
+    if (isIframedIos && this.ampdoc.isSingleDoc()) {
+      this.ampdoc.whenReady().then(() => {
+        win./*OK*/ scrollTo(-0.1, 0);
+      });
     }
   }
 
@@ -335,14 +354,14 @@ export class ViewportImpl {
   }
 
   /** @override */
-  getLayoutRect(el, opt_premeasuredRect) {
+  getLayoutRect(el) {
     const scrollLeft = this.getScrollLeft();
     const scrollTop = this.getScrollTop();
 
     // Go up the window hierarchy through friendly iframes.
     const frameElement = getParentWindowFrameElement(el, this.ampdoc.win);
     if (frameElement) {
-      const b = this.binding_.getLayoutRect(el, 0, 0, opt_premeasuredRect);
+      const b = this.binding_.getLayoutRect(el, 0, 0);
       const c = this.binding_.getLayoutRect(
         frameElement,
         scrollLeft,
@@ -356,12 +375,7 @@ export class ViewportImpl {
       );
     }
 
-    return this.binding_.getLayoutRect(
-      el,
-      scrollLeft,
-      scrollTop,
-      opt_premeasuredRect
-    );
+    return this.binding_.getLayoutRect(el, scrollLeft, scrollTop);
   }
 
   /** @override */
@@ -403,9 +417,14 @@ export class ViewportImpl {
 
   /** @override */
   scrollIntoView(element) {
-    return this.getScrollingContainerFor_(element).then((parent) =>
-      this.scrollIntoViewInternal_(element, parent)
-    );
+    if (IS_SXG) {
+      element./* OK */ scrollIntoView();
+      return Promise.resolve();
+    } else {
+      return this.getScrollingContainerFor_(element).then((parent) =>
+        this.scrollIntoViewInternal_(element, parent)
+      );
+    }
   }
 
   /**
@@ -425,20 +444,30 @@ export class ViewportImpl {
 
   /** @override */
   animateScrollIntoView(element, pos = 'top', opt_duration, opt_curve) {
-    devAssert(
-      !opt_curve || opt_duration !== undefined,
-      "Curve without duration doesn't make sense."
-    );
+    if (IS_SXG) {
+      return new Promise((resolve, opt_) => {
+        element./* OK */ scrollIntoView({
+          block: SCROLL_POS_TO_BLOCK[pos],
+          behavior: 'smooth',
+        });
+        setTimeout(resolve, SMOOTH_SCROLL_DELAY_);
+      });
+    } else {
+      devAssert(
+        !opt_curve || opt_duration !== undefined,
+        "Curve without duration doesn't make sense."
+      );
 
-    return this.getScrollingContainerFor_(element).then((parent) =>
-      this.animateScrollWithinParent(
-        element,
-        parent,
-        dev().assertString(pos),
-        opt_duration,
-        opt_curve
-      )
-    );
+      return this.getScrollingContainerFor_(element).then((parent) =>
+        this.animateScrollWithinParent(
+          element,
+          parent,
+          dev().assertString(pos),
+          opt_duration,
+          opt_curve
+        )
+      );
+    }
   }
 
   /** @override */
@@ -829,7 +858,7 @@ export class ViewportImpl {
   }
 
   /**
-   * @return {?Element}
+   * @return {?HTMLMetaElement}
    * @private
    */
   getViewportMeta_() {
@@ -875,14 +904,22 @@ export class ViewportImpl {
     this.lastPaddingTop_ = this.paddingTop_;
     this.paddingTop_ = paddingTop;
 
-    const animPromise = this.animateFixedElements_(duration, curve, transient);
-    if (paddingTop < this.lastPaddingTop_) {
-      this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
-      return;
+    if (this.fixedLayer_) {
+      const animPromise = this.fixedLayer_.animateFixedElements(
+        this.paddingTop_,
+        this.lastPaddingTop_,
+        duration,
+        curve,
+        transient
+      );
+      if (paddingTop < this.lastPaddingTop_) {
+        this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
+      } else {
+        animPromise.then(() => {
+          this.binding_.showViewerHeader(transient, paddingTop);
+        });
+      }
     }
-    animPromise.then(() => {
-      this.binding_.showViewerHeader(transient, paddingTop);
-    });
   }
 
   /**
@@ -895,33 +932,6 @@ export class ViewportImpl {
     } else {
       this.resetScroll();
     }
-  }
-
-  /**
-   * @param {number} duration
-   * @param {string} curve
-   * @param {boolean} transient
-   * @return {!Promise}
-   * @private
-   */
-  animateFixedElements_(duration, curve, transient) {
-    this.fixedLayer_.updatePaddingTop(this.paddingTop_, transient);
-    if (duration <= 0) {
-      return Promise.resolve();
-    }
-    // Add transit effect on position fixed element
-    const tr = numeric(this.lastPaddingTop_ - this.paddingTop_, 0);
-    return Animation.animate(
-      this.ampdoc.getRootNode(),
-      (time) => {
-        const p = tr(time);
-        this.fixedLayer_.transformMutate(`translateY(${p}px)`);
-      },
-      duration,
-      curve
-    ).thenAlways(() => {
-      this.fixedLayer_.transformMutate(null);
-    });
   }
 
   /**
@@ -1189,7 +1199,7 @@ const ViewportType = {
    * that AMP sets when Viewer has requested "natural" viewport on a iOS
    * device.
    * See:
-   * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
+   * https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md
    */
   NATURAL_IOS_EMBED: 'natural-ios-embed',
 };

@@ -17,8 +17,7 @@
 describes.endtoend(
   'AMP carousel 0.1 slideChange on type="slide" with autoplay',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-carousel/0.1/slidescroll-autoplay.html',
+    fixture: 'amp-carousel/0.1/slidescroll-autoplay.html',
     environments: ['single'],
   },
   async function (env) {

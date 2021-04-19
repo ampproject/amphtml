@@ -29,8 +29,8 @@
 
 namespace htmlparser {
 
-using OnNodeCallback = std::function<void(Node* parsed_node,
-                                          Token original_token)>;
+using OnNodeCallback =
+    std::function<void(Node* parsed_node, Token original_token)>;
 
 struct ParseOptions {
  public:
@@ -54,16 +54,6 @@ struct ParseOptions {
   bool record_node_offsets = false;
   // Records attributes position in the html string.
   bool record_attribute_offsets = false;
-
-  // Allow deprecated tags.
-  // Following deprecated tags are parsed and added to the tree as if they are
-  // allowed. If false, the deprecated tags are processed as per html5
-  // algorithm.
-  //
-  // 1: <isindex> is deprecated and not supported by any browser.
-  // The HTML5 spec treatment is messy and chrome diverge from it.
-  // https://www.w3.org/TR/2011/WD-html5-20110113/Overview.html#isindex
-  bool allow_deprecated_tags = false;
 
   OnNodeCallback on_node_callback = nullptr;
 };
@@ -96,15 +86,12 @@ struct ParseAccounting {
   bool duplicate_html_elements = false;
   bool duplicate_body_elements = false;
   // Set only if above duplicate bits are true.
-  std::optional <LineCol> duplicate_html_element_location = std::nullopt;
-  std::optional <LineCol> duplicate_body_element_location = std::nullopt;
+  std::optional<LineCol> duplicate_html_element_location = std::nullopt;
+  std::optional<LineCol> duplicate_body_element_location = std::nullopt;
 
   // If true, parsed src is missing required <!doctype html> declaration or is
   // invalid syntax or is XHTML 4 or legacy doctype.
   bool quirks_mode = false;
-
-  // TODO: Implemnent this.
-  int total_nodes;
 };
 
 // Parse returns the parse tree for the HTML from the given html.
@@ -126,14 +113,12 @@ struct ParseAccounting {
     std::string_view html, Node* fragment_parent = nullptr);
 
 [[nodiscard]] std::unique_ptr<Document> ParseFragmentWithOptions(
-    const std::string_view html,
-    const ParseOptions& options,
+    const std::string_view html, const ParseOptions& options,
     Node* fragment_parent = nullptr);
 
 class Parser {
  public:
-  Parser(std::string_view html,
-         const ParseOptions& options = {},
+  Parser(std::string_view html, const ParseOptions& options = {},
          Node* fragment_parent = nullptr);
 
   [[nodiscard]] std::unique_ptr<Document> Parse();
@@ -157,8 +142,7 @@ class Parser {
                                                  Node* fragment_parent);
 
   friend std::unique_ptr<Document> ParseFragmentWithOptions(
-      const std::string_view html,
-      const ParseOptions& options,
+      const std::string_view html, const ParseOptions& options,
       Node* fragment_parent);
 
  private:
@@ -181,10 +165,13 @@ class Parser {
 
   // Parses a token as though it had appeared in the parser's input.
   void ParseImpliedToken(TokenType token_type, Atom atom,
-      const std::string& data);
+                         const std::string& data);
 
   // Runs the current token through the parsing routines until it is consumed.
   void ParseCurrentToken();
+
+  // Section 12.2.4.2.
+  Node* AdjustedCurrentNode();
 
   // Section 12.2.4.3.
   void ReconstructActiveFormattingElements();
@@ -192,6 +179,9 @@ class Parser {
 
   // Section 12.2.6.
   bool InForeignContent();
+
+  // Section 12.2.6.2.
+  void ParseGenericRawTextElement();
 
   // Section 12.2.6.5
   bool ParseForeignContent();
@@ -265,7 +255,7 @@ class Parser {
   // Section 12.2.4.1, "using the rules for".
   void SetOriginalIM();
 
-  // popUntil pops the stack of open elements at the highest element whose tag
+  // Pops the stack of open elements at the highest element whose tag
   // is in matchTags, provided there is no higher element in the scope's stop
   // tags (as defined in section 12.2.4.2). It returns whether or not there was
   // such an element. If there was not, popUntil leaves the stack unchanged.
@@ -282,17 +272,17 @@ class Parser {
   // higher element in the stack that was also in the stop tags). For example,
   // popUntil(tableScope, "table") returns true and leaves:
   // ["html", "body", "font"]
-  template<typename... Args>
+  template <typename... Args>
   bool PopUntil(Scope scope, Args... match_tags);
 
-  // indexOfElementInScope returns the index in p.oe of the highest element
+  // Returns the index in p.oe of the highest element
   // whose tag is in matchTags that is in scope. If no matching element is in
   // scope, it returns -1.
-  int IndexOfElementInScope(Scope scope, const std::vector<Atom>& match_tags)
-    const;
+  int IndexOfElementInScope(Scope scope,
+                            const std::vector<Atom>& match_tags) const;
 
   // Is like popUntil, except that it doesn't modify the stack of open elements.
-  template<typename... Args>
+  template <typename... Args>
   bool ElementInScope(Scope scope, Args... match_tags) const;
 
   // Pops elements off the stack of open elements until a scope-defined element
@@ -367,17 +357,12 @@ class Parser {
   bool record_node_offsets_ = false;
   bool record_attribute_offsets_ = false;
 
-  // If true, diverges from HTML5 algorithm and allows deprecated elements in
-  // the tree.
-  bool allow_deprecated_tags_ = false;
-
   // Whether the parser is parsing an HTML fragment.
   // If the fragment is the InnerHTML of a node, set that node in context_node_.
   // in parent_node.
   bool fragment_ = false;
   // The context element when parsing an HTML fragment (section 12.4).
-  Node* fragment_parent_node_;
-
+  Node* context_node_;
 
   // Whether new elements should be inserted according to
   // the foster parenting rules (section 12.2.6.1).
@@ -397,23 +382,21 @@ class Parser {
 
   // Stop tags for use in popUntil. These come from section 12.2.4.2.
   static constexpr std::pair<std::string_view, std::array<Atom, 9>>
-    kDefaultScopeStopTags[] {
-      {
-        "",  // Empty namespace.
-        {
-          Atom::APPLET, Atom::CAPTION, Atom::HTML, Atom::TABLE, Atom::TD,
-          Atom::TH, Atom::MARQUEE, Atom::OBJECT, Atom::TEMPLATE},
-      },
-      {
-        "math",
-        {Atom::ANNOTATION_XML, Atom::MI, Atom::MN, Atom::MO, Atom::MS,
-         Atom::MTEXT},
-      },
-      {
-        "svg",
-        {Atom::DESC, Atom::FOREIGN_OBJECT, Atom::TITLE},
-      }
-    };
+      kDefaultScopeStopTags[]{
+          {
+              "",  // Empty namespace.
+              {Atom::APPLET, Atom::CAPTION, Atom::HTML, Atom::TABLE, Atom::TD,
+               Atom::TH, Atom::MARQUEE, Atom::OBJECT, Atom::TEMPLATE},
+          },
+          {
+              "math",
+              {Atom::ANNOTATION_XML, Atom::MI, Atom::MN, Atom::MO, Atom::MS,
+               Atom::MTEXT},
+          },
+          {
+              "svg",
+              {Atom::DESC, Atom::FOREIGN_OBJECT, Atom::TITLE},
+          }};
 
   // Internal tracking.
   int num_html_tags_ = 0;

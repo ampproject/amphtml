@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const fs = require('fs').promises;
+const fs = require('fs-extra');
 const {
   EVENT_TEST_PASS,
   EVENT_TEST_FAIL,
@@ -23,18 +23,23 @@ const {
   EVENT_TEST_PENDING,
   EVENT_SUITE_BEGIN,
   EVENT_SUITE_END,
-} = require('mocha').Runner;
+} = require('mocha').Runner.constants;
 const {Base} = require('mocha').reporters;
 const {inherits} = require('mocha').utils;
 
+/**
+ * @param {Object} output
+ * @param {string} filename
+ * @return {Promise<void>}
+ */
 async function writeOutput(output, filename) {
   try {
-    await fs.writeFile(filename, JSON.stringify(output, null, 4));
+    await fs.outputJson(filename, output, {spaces: 4});
   } catch (error) {
     process.stdout.write(
       Base.color(
         'fail',
-        `Could not write test result report to file '${filename}'`
+        `Could not write test result report to file '${filename}': ${error}`
       )
     );
   }
@@ -68,7 +73,7 @@ function JsonReporter(runner) {
   });
 
   runner.on(EVENT_RUN_END, async function () {
-    const testResults = testEvents.map(({test, suiteList, event}) => ({
+    const results = testEvents.map(({test, suiteList, event}) => ({
       description: test.title,
       suite: suiteList,
       success: event === EVENT_TEST_PASS,
@@ -79,7 +84,7 @@ function JsonReporter(runner) {
     // Apparently we'll need to add a --no-exit flag when calling this
     // to allow for the asynchronous reporter.
     // See https://github.com/mochajs/mocha/issues/812
-    await writeOutput({testResults}, `result-reports/e2e.json`);
+    await writeOutput({browsers: [{results}]}, `result-reports/e2e.json`);
   });
 }
 

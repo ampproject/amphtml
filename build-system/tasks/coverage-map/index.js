@@ -15,23 +15,25 @@
  */
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs').promises;
-const log = require('fancy-log');
+const {buildNewServer} = require('../../server/typescript-compile');
+const {cyan} = require('kleur/colors');
 const {dist} = require('../dist');
-const {installPackages} = require('../../common/utils');
+const {log} = require('../../common/logging');
 const {startServer, stopServer} = require('../serve');
-
-let puppeteer;
-let explore;
 
 const coverageJsonName = argv.json || 'coverage.json';
 const serverPort = argv.port || 8000;
-const testUrl =
-  argv.url || `http://localhost:${serverPort}/examples/everything.amp.html`;
-const outHtml = argv.html || 'coverage.html';
-const inputJs = argv.file || 'v0.js';
+const outHtml = argv.outputhtml || 'coverage.html';
+const inputHtml = argv.inputhtml || 'everything.amp.html';
+let testUrl = `http://localhost:${serverPort}/examples/${inputHtml}`;
+let inputJs = argv.file || 'v0.js';
 
+/**
+ * @return {Promise<void>}
+ */
 async function collectCoverage() {
-  log(`Opening browser and navigating to ${testUrl}...`);
+  const puppeteer = require('puppeteer');
+  log('Opening browser and navigating to', cyan(`${testUrl}`) + '...');
   const browser = await puppeteer.launch({
     defaultViewport: {width: 1200, height: 800},
   });
@@ -52,15 +54,25 @@ async function collectCoverage() {
   log('Testing completed.');
   const jsCoverage = await page.coverage.stopJSCoverage();
   const data = JSON.stringify(jsCoverage);
-  log(`Writing to ${coverageJsonName} in dist/${coverageJsonName}...`);
-  await fs.writeFile(`dist/${coverageJsonName}`, data, () => {});
+  log(
+    'Writing to',
+    cyan(`${coverageJsonName}`),
+    'in',
+    cyan(`dist/${coverageJsonName}`) + '...'
+  );
+  await fs.writeFile(`dist/${coverageJsonName}`, data);
   await browser.close();
 }
 
-// Source: https://github.com/chenxiaochun/blog/issues/38s
+/**
+ * Source: https://github.com/chenxiaochun/blog/issues/38s
+ *
+ * @param {puppeteer.Page} page
+ * @return {Promise<void>}
+ */
 async function autoScroll(page) {
   await page.evaluate(async () => {
-    await new Promise((resolve, opt_) => {
+    await /** @type {Promise<void>} */ (new Promise((resolve) => {
       let totalHeight = 0;
       const scrollDistance = 100;
       const distance = scrollDistance;
@@ -74,30 +86,72 @@ async function autoScroll(page) {
           resolve();
         }
       }, 100);
-    });
+    }));
   });
 }
 
-async function generateMap() {
+/**
+ * @return {Promise<void>}
+ */
+async function htmlTransform() {
+  const {
+    transform,
+  } = require('../../server/new-server/transforms/dist/transform');
+  log('Transforming', cyan(`${inputHtml}`) + '...');
+  const transformed = await transform(`examples/${inputHtml}`);
+  const transformedName = `transformed.${inputHtml}`;
+  await fs.mkdir('dist/transformed', {recursive: true});
+  await fs.writeFile(`dist/transformed/${transformedName}`, transformed);
   log(
-    `Generating heat map in dist/${outHtml} of ${inputJs}, based on ${coverageJsonName}...`
+    'Transformation complete. It can be found at',
+    cyan(`dist/transformed/${transformedName}`) + '.'
   );
-  await explore(`dist/${inputJs}`, {
-    output: {format: 'html', filename: `${outHtml}`},
-    coverage: `dist/${coverageJsonName}`,
-    onlyMapped: true,
-  });
+  testUrl = `http://localhost:${serverPort}/dist/transformed/${transformedName}`;
 }
 
-async function coverageMap() {
-  installPackages(__dirname);
+/**
+ * @return {Promise<void>}
+ */
+async function generateMap() {
+  const {explore} = require('source-map-explorer');
 
-  puppeteer = require('puppeteer');
-  explore = require('source-map-explorer').explore;
+  // Change source map explorer to mjs file extension if needed
+  if (argv.esm && inputJs.includes('.js')) {
+    inputJs = inputJs.replace(/\.js/g, '.mjs');
+  }
+
+  log(
+    'Generating heat map in',
+    cyan(`dist/${outHtml}`),
+    'of',
+    cyan(`${inputJs}`),
+    'based on',
+    cyan(`${coverageJsonName}`) + '...'
+  );
+  await explore(
+    {code: `dist/${inputJs}`, map: `dist/${inputJs}.map`},
+    {
+      output: {format: 'html', filename: `dist/${outHtml}`},
+      coverage: `dist/${coverageJsonName}`,
+      onlyMapped: true,
+    }
+  );
+}
+
+/**
+ * @return {Promise<void>}
+ */
+async function coverageMap() {
+  await buildNewServer();
 
   if (!argv.nobuild) {
     await dist();
   }
+
+  if (argv.esm || argv.sxg) {
+    await htmlTransform();
+  }
+
   await startServer(
     {host: 'localhost', port: serverPort},
     {quiet: true},
@@ -108,22 +162,21 @@ async function coverageMap() {
   await stopServer();
 }
 
-module.exports = {coverageMap};
+module.exports = {
+  coverageMap,
+};
 
 coverageMap.description =
-  'Generates a code coverage "heat map" HTML visualization on v0.js based on code traversed during puppeteer test via source map explorer';
+  'Generates a code coverage heat map for v0.js via source map explorer';
 
 coverageMap.flags = {
-  json:
-    '  Customize the name of the JSON output from puppeteer (out.json by default).',
-  url:
-    '  Set the URL for puppeteer testing, starting with  "http://localhost[:port_number]..." (http://localhost[:port_number]/examples/everything.amp.html by default).',
-  html:
-    '  Customize the name of the HTML output from source map explorer (out.html by default).',
-  nobuild:
-    "  Skips dist build. Your working directory should be dist if you're using this flag.",
-  port:
-    '  Customize the port number of the local AMP server (8000 by default).',
+  json: 'JSON output filename [default: out.json]',
+  inputhtml: 'Input HTML file under "examples/" [default: everything.amp.html]',
+  outputhtml: 'Output HTML file [default: out.html]',
+  nobuild: 'Skips dist build.',
+  port: 'Port number for AMP server [default: 8000]',
   file:
-    '  Designate which JS file to view in coverage map, or *.js for all files (v0.js by default). If the JS file is not in the top level dist directory, you need to indicate the path to the JS file relative to dist.',
+    'Output file(s) relative to dist/. Accepts .js, .mjs, and wildcards. [default: v0.js]',
+  esm: 'Generate coverage in ESM mode. Triggers an extra HTML transformation.',
+  sxg: 'Generate in SxG mode. Triggers an extra HTML transformation.',
 };

@@ -803,6 +803,28 @@ describes.sandboxed('Navigation', {}, () => {
           expect(event.defaultPrevented).to.be.false;
         });
 
+        it('should not intercept requests a shadow doc', () => {
+          handler.isTrustedViewer_ = true;
+          handler.ampdoc.isSingleDoc = () => false;
+          // isSingleDoc affects where the services get stored. So stub the getters.
+          env.sandbox
+            .stub(Services, 'urlForDoc')
+            .returns(handler.ampdoc.win.__AMP_SERVICES.url.obj);
+          env.sandbox
+            .stub(Services, 'viewerForDoc')
+            .returns(handler.ampdoc.win.__AMP_SERVICES.viewer.obj);
+
+          handler.handle_(event);
+
+          expect(viewerInterceptsNavigationSpy).to.be.calledOnce;
+          expect(viewerInterceptsNavigationSpy).to.be.calledWithExactly(
+            'https://www.google.com/other',
+            'intercept_click'
+          );
+          expect(sendMessageStub).to.not.be.called;
+          expect(event.defaultPrevented).to.be.false;
+        });
+
         it('should require opted in ampdoc', () => {
           ampdoc
             .getRootNode()
@@ -851,16 +873,11 @@ describes.sandboxed('Navigation', {}, () => {
           beforeEach(() => {
             win = env.win;
             doc = win.document;
-            // TODO(#22733): cleanup `env.ampdoc` part.
-            ampdoc = doc.__AMPDOC || env.ampdoc;
+            ampdoc = env.ampdoc;
             parentWin = env.parentWin;
             embed = env.embed;
 
-            // TODO(#22733): cleanup `win.__AMP_SERVICES.navigation` part.
-            handler = (
-              (ampdoc.__AMP_SERVICES && ampdoc.__AMP_SERVICES.navigation) ||
-              win.__AMP_SERVICES.navigation
-            ).obj;
+            handler = ampdoc.__AMP_SERVICES.navigation.obj;
             winOpenStub = env.sandbox.stub(win, 'open').callsFake(() => {
               return {};
             });

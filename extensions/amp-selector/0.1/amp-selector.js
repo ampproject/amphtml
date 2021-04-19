@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {CSS} from '../../../build/amp-selector-0.1.css';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
-import {areEqualOrdered} from '../../../src/utils/array';
+import {areEqualOrdered, toArray} from '../../../src/core/types/array';
 import {
   closestAncestorElementBySelector,
   isRTL,
@@ -27,9 +27,8 @@ import {
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {mod} from '../../../src/utils/math';
-import {toArray} from '../../../src/types';
 
 const TAG = 'amp-selector';
 
@@ -45,6 +44,11 @@ const KEYBOARD_SELECT_MODES = {
 };
 
 export class AmpSelector extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -78,11 +82,6 @@ export class AmpSelector extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported() {
-    return true;
-  }
-
-  /** @override */
-  prerenderAllowed() {
     return true;
   }
 
@@ -465,14 +464,6 @@ export class AmpSelector extends AMP.BaseElement {
         'selectedOptions': this.selectedOptions_(),
       })
     );
-    // TODO(wg-ui-and-a11y): Remove this in Q1 2020.
-    if (trust < ActionTrust.DEFAULT) {
-      user().warn(
-        TAG,
-        '"select" event now has the same trust as the originating action. ' +
-          'See https://github.com/ampproject/amphtml/issues/24443 for details.'
-      );
-    }
     this.action_.trigger(this.element, name, selectEvent, trust);
   }
 

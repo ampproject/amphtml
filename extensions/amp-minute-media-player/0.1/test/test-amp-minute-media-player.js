@@ -15,6 +15,7 @@
  */
 
 import '../amp-minute-media-player';
+import * as dom from '../../../../src/dom';
 
 const WIDTH = '16';
 const HEIGHT = '9';
@@ -42,65 +43,137 @@ describes.realWin(
     });
 
     function getMinuteMediaPlayer(attributes) {
-      const minuteMediaPlayerElement = doc.createElement(
-        'amp-minute-media-player'
-      );
+      const player = doc.createElement('amp-minute-media-player');
       for (const key in attributes) {
-        minuteMediaPlayerElement.setAttribute(key, attributes[key]);
+        player.setAttribute(key, attributes[key]);
       }
 
-      minuteMediaPlayerElement.setAttribute('width', WIDTH);
-      minuteMediaPlayerElement.setAttribute('height', HEIGHT);
-      minuteMediaPlayerElement.setAttribute('layout', RESPONSIVE);
+      player.setAttribute('width', WIDTH);
+      player.setAttribute('height', HEIGHT);
+      player.setAttribute('layout', RESPONSIVE);
 
-      doc.body.appendChild(minuteMediaPlayerElement);
-      return minuteMediaPlayerElement
-        .build()
+      doc.body.appendChild(player);
+      return player
+        .buildInternal()
         .then(() => {
-          minuteMediaPlayerElement.layoutCallback();
+          player.layoutCallback();
         })
-        .then(() => minuteMediaPlayerElement);
+        .then(() => player);
     }
 
-    it('renders with curated content', async () => {
-      const minuteMediaPlayerElement = await getMinuteMediaPlayer({
-        'data-content-type': CURATED,
-        'data-content-id': DATA_CONTENT_ID,
+    describe('rendering', async () => {
+      it('renders with curated content', async () => {
+        const player = await getMinuteMediaPlayer({
+          'data-content-type': CURATED,
+          'data-content-id': DATA_CONTENT_ID,
+        });
+        const iframe = player.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.src).to.contain(CURATED);
+        expect(iframe.src).to.contain(DATA_CONTENT_ID);
+        expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });
-      const iframe = minuteMediaPlayerElement.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.src).to.equal(
-        `https://www.oo-syringe.com/prod/AMP/minute-media-player.html?content_type=${CURATED}&content_id=${DATA_CONTENT_ID}`
-      );
-      expect(iframe.className).to.match(/i-amphtml-fill-content/);
+
+      it('renders with semantic (empty params)', async () => {
+        const player = await getMinuteMediaPlayer({
+          'data-content-type': SEMANTIC,
+          /* no params to semantic */
+        });
+        const iframe = player.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.src).to.contain(SEMANTIC);
+        expect(iframe.className).to.match(/i-amphtml-fill-content/);
+      });
+
+      it('renders with semantic (with params)', async () => {
+        const player = await getMinuteMediaPlayer({
+          'data-content-type': SEMANTIC,
+          'data-minimum-date-factor': DATA_MINIMUM_DATE_FACTOR,
+          'data-scanned-element-type': DATA_SCANNED_ELEMENT_TYPE,
+          'data-scoped-keywords': DATA_SCOPED_KEYWORDS,
+        });
+        const iframe = player.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.src).to.contain(SEMANTIC);
+        expect(iframe.src).to.contain(DATA_MINIMUM_DATE_FACTOR);
+        expect(iframe.src).to.contain(DATA_SCANNED_ELEMENT_TYPE);
+        expect(iframe.src).to.contain(DATA_SCOPED_KEYWORDS);
+        expect(iframe.className).to.match(/i-amphtml-fill-content/);
+      });
+
+      it('removes iframe after unlayoutCallback', async () => {
+        const player = await getMinuteMediaPlayer({
+          'data-content-type': SEMANTIC,
+          'data-minimum-date-factor': DATA_MINIMUM_DATE_FACTOR,
+          'data-scanned-element-type': DATA_SCANNED_ELEMENT_TYPE,
+          'data-scoped-keywords': DATA_SCOPED_KEYWORDS,
+        });
+        const iframe = player.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+
+        const impl = await player.getImpl(false);
+        impl.unlayoutCallback();
+        expect(player.querySelector('iframe')).to.be.null;
+        expect(impl.iframe_).to.be.null;
+      });
     });
 
-    it('renders with semantic (empty params)', async () => {
-      const minuteMediaPlayerElement = await getMinuteMediaPlayer({
-        'data-content-type': SEMANTIC,
-        /* no params to semantic */
+    describe('methods', async () => {
+      let impl;
+      beforeEach(async () => {
+        const player = await getMinuteMediaPlayer({
+          'data-content-type': SEMANTIC,
+          'data-minimum-date-factor': DATA_MINIMUM_DATE_FACTOR,
+          'data-scanned-element-type': DATA_SCANNED_ELEMENT_TYPE,
+          'data-scoped-keywords': DATA_SCOPED_KEYWORDS,
+        });
+        impl = await player.getImpl(false);
       });
-      const iframe = minuteMediaPlayerElement.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.src).to.equal(
-        `https://www.oo-syringe.com/prod/AMP/minute-media-player.html?content_type=${SEMANTIC}`
-      );
-      expect(iframe.className).to.match(/i-amphtml-fill-content/);
-    });
 
-    it('renders with semantic (with params)', async () => {
-      const minuteMediaPlayerElement = await getMinuteMediaPlayer({
-        'data-content-type': SEMANTIC,
-        'data-minimum-date-factor': DATA_MINIMUM_DATE_FACTOR,
-        'data-scanned-element-type': DATA_SCANNED_ELEMENT_TYPE,
-        'data-scoped-keywords': DATA_SCOPED_KEYWORDS,
+      it('is interactive', () => {
+        expect(impl.isInteractive()).to.be.true;
       });
-      const iframe = minuteMediaPlayerElement.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.src).to.equal(
-        `https://www.oo-syringe.com/prod/AMP/minute-media-player.html?content_type=${SEMANTIC}&scanned_element_type=${DATA_SCANNED_ELEMENT_TYPE}&minimum_date_factor=${DATA_MINIMUM_DATE_FACTOR}&scoped_keywords=${DATA_SCOPED_KEYWORDS}`
-      );
-      expect(iframe.className).to.match(/i-amphtml-fill-content/);
+
+      it('plays', () => {
+        const spy = env.sandbox.spy(impl, 'sendCommand_');
+        impl.play();
+        expect(spy).to.be.calledWith('play');
+      });
+
+      it('can pause', () => {
+        const spy = env.sandbox.spy(impl, 'sendCommand_');
+        impl.pause();
+        expect(spy).to.be.calledWith('pause');
+      });
+
+      it('can mute', () => {
+        env.sandbox.spy(impl, 'sendCommand_');
+        impl.mute();
+        expect(impl.sendCommand_).calledWith('mute');
+      });
+
+      it('can unmute', () => {
+        env.sandbox.spy(impl, 'sendCommand_');
+        impl.unmute();
+        expect(impl.sendCommand_).calledWith('unmute');
+      });
+
+      it('can enter fullscreen', () => {
+        const spy = env.sandbox.spy(dom, 'fullscreenEnter');
+        impl.fullscreenEnter();
+        expect(spy).calledWith(impl.iframe_);
+      });
+
+      it('can exit fullscreen', () => {
+        const spy = env.sandbox.spy(dom, 'fullscreenExit');
+        impl.fullscreenExit();
+        expect(spy).calledWith(impl.iframe_);
+        expect(impl.isFullscreen()).to.be.false;
+      });
+
+      it('does not pre-implement MediaSession API', () => {
+        expect(impl.preimplementsMediaSessionAPI()).to.be.false;
+      });
     });
   }
 );

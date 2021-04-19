@@ -22,16 +22,18 @@
  * Instead, the runtime loads it when encountering an <amp-img>.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {AutoLightboxEvents} from '../../../src/auto-lightbox';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Services} from '../../../src/services';
 import {
   closestAncestorElementBySelector,
+  dispatchCustomEvent,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
-import {toArray} from '../../../src/types';
+import {measureIntersectionNoRoot} from '../../../src/utils/intersection-no-root';
+import {toArray} from '../../../src/core/types/array';
 import {tryParseJson} from '../../../src/json';
 
 const TAG = 'amp-auto-lightbox';
@@ -123,11 +125,13 @@ const getRootNode = (ampdoc) => ampdoc.getRootNode();
 export class Criteria {
   /**
    * @param {!Element} element
+   * @param {number} renderWidth
+   * @param {number} renderHeight
    * @return {boolean}
    */
-  static meetsAll(element) {
+  static meetsAll(element, renderWidth, renderHeight) {
     return (
-      Criteria.meetsSizingCriteria(element) &&
+      Criteria.meetsSizingCriteria(element, renderWidth, renderHeight) &&
       Criteria.meetsTreeShapeCriteria(element)
     );
   }
@@ -151,14 +155,14 @@ export class Criteria {
 
   /**
    * @param {!Element} element
+   * @param {number} renderWidth
+   * @param {number} renderHeight
    * @return {boolean}
    */
-  static meetsSizingCriteria(element) {
+  static meetsSizingCriteria(element, renderWidth, renderHeight) {
     const {naturalWidth, naturalHeight} = getMaxNaturalDimensions(
       dev().assertElement(element.querySelector('img'))
     );
-
-    const {width: renderWidth, height: renderHeight} = element.getLayoutBox();
 
     const viewport = Services.viewportForDoc(element);
     const {width: vw, height: vh} = viewport.getSize();
@@ -340,7 +344,7 @@ export class DocMetaAnnotations {
         const {textContent} = el;
         return (tryParseJson(textContent) || {})['@type'];
       })
-      .filter((typeOrUndefined) => typeOrUndefined);
+      .filter(Boolean);
   }
 
   /**
@@ -420,7 +424,7 @@ export function apply(ampdoc, element) {
       REQUIRED_EXTENSION
     );
 
-    element.dispatchCustomEvent(AutoLightboxEvents.NEWLY_SET);
+    dispatchCustomEvent(element, AutoLightboxEvents.NEWLY_SET);
 
     return element;
   });
@@ -439,11 +443,16 @@ export function runCandidates(ampdoc, candidates) {
       if (candidate.signals().get(CommonSignals.UNLOAD)) {
         return;
       }
-      if (!Criteria.meetsAll(candidate)) {
-        return;
-      }
-      dev().info(TAG, 'apply', candidate);
-      return apply(ampdoc, candidate);
+      return measureIntersectionNoRoot(candidate).then(
+        ({boundingClientRect}) => {
+          const {width, height} = boundingClientRect;
+          if (!Criteria.meetsAll(candidate, width, height)) {
+            return;
+          }
+          dev().info(TAG, 'apply', candidate);
+          return apply(ampdoc, candidate);
+        }
+      );
     }, NOOP)
   );
 }

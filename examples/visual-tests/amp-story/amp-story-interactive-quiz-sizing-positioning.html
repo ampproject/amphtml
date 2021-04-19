@@ -14,10 +14,8 @@
       font-size: 48px;
     }
   </style>
-  <script async custom-element="amp-story"
-        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
-  <script async
-        src="https://cdn.ampproject.org/v0/amp-story-interactive-1.0.js"></script>
+  <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+  <script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
@@ -37,9 +35,13 @@
           justify-content: flex-end;
           align-content: flex-end;
         }
+        amp-story-interactive-quiz.size {
+          font-size: 16px;
+        }
       </style>
       <amp-story-grid-layer id='cat-question-cute'>
         <amp-story-interactive-quiz
+        class="size"
         prompt-text="Are cats cute?"
         option-1-text="Yes" option-1-correct
         option-2-text="No">

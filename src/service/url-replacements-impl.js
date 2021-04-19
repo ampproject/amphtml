@@ -35,7 +35,7 @@ import {
 } from '../url';
 import {dev, devAssert, user, userAssert} from '../log';
 import {
-  installServiceInEmbedScope,
+  installServiceInEmbedDoc,
   registerServiceBuilderForDoc,
 } from '../service';
 
@@ -43,7 +43,7 @@ import {Expander} from './url-expander/expander';
 import {Services} from '../services';
 import {WindowInterface} from '../window-interface';
 import {getTrackImpressionPromise} from '../impression.js';
-import {hasOwn} from '../utils/object';
+import {hasOwn} from '../core/types/object';
 import {internalRuntimeVersion} from '../internal-version';
 
 /** @private @const {string} */
@@ -267,7 +267,7 @@ export class GlobalVariableSource extends VariableSource {
         }
         return clientIds[scope];
       },
-      (scope, opt_userNotificationId, opt_cookieName) => {
+      (scope, opt_userNotificationId, opt_cookieName, opt_disableBackup) => {
         userAssert(
           scope,
           'The first argument to CLIENT_ID, the fallback' +
@@ -287,11 +287,13 @@ export class GlobalVariableSource extends VariableSource {
         }
         return Services.cidForDoc(this.ampdoc)
           .then((cid) => {
+            opt_disableBackup = opt_disableBackup == 'true' ? true : false;
             return cid.get(
               {
                 /** @type {string} */ scope,
                 createCookieIfNotPresent: true,
-                cookieName: opt_cookieName,
+                cookieName: opt_cookieName || undefined,
+                disableBackup: opt_disableBackup,
               },
               consent
             );
@@ -426,7 +428,8 @@ export class GlobalVariableSource extends VariableSource {
       const nav = win.navigator;
       return (
         nav.language ||
-        nav.userLanguage ||
+        // Only used on IE.
+        nav['userLanguage'] ||
         nav.browserLanguage ||
         ''
       ).toLowerCase();
@@ -607,11 +610,14 @@ export class GlobalVariableSource extends VariableSource {
    * @private
    */
   addReplaceParamsIfMissing_(orig) {
-    const {replaceParams} = /** @type {!Object} */ (this.getDocInfo_());
+    const {replaceParams} = this.getDocInfo_();
     if (!replaceParams) {
       return orig;
     }
-    return addMissingParamsToUrl(removeAmpJsParamsFromUrl(orig), replaceParams);
+    return addMissingParamsToUrl(
+      removeAmpJsParamsFromUrl(orig),
+      /** @type {!JsonObject} */ (replaceParams)
+    );
   }
 
   /**
@@ -637,8 +643,9 @@ export class GlobalVariableSource extends VariableSource {
       Services.accessServiceForDocOrNull(element),
       Services.subscriptionsServiceForDocOrNull(element),
     ]).then((services) => {
-      const service = /** @type {?../../extensions/amp-access/0.1/access-vars.AccessVars} */ (services[0] ||
-        services[1]);
+      const accessService = /** @type {?../../extensions/amp-access/0.1/access-vars.AccessVars} */ (services[0]);
+      const subscriptionService = /** @type {?../../extensions/amp-access/0.1/access-vars.AccessVars} */ (services[1]);
+      const service = accessService || subscriptionService;
       if (!service) {
         // Access/subscriptions service is not installed.
         user().error(
@@ -648,6 +655,13 @@ export class GlobalVariableSource extends VariableSource {
         );
         return null;
       }
+
+      // If both an access and subscription service are present, prefer
+      // subscription then fall back to access because access can be namespaced.
+      if (accessService && subscriptionService) {
+        return getter(subscriptionService) || getter(accessService);
+      }
+
       return getter(service);
     });
   }
@@ -693,7 +707,7 @@ export class GlobalVariableSource extends VariableSource {
         'param is required'
     );
     userAssert(typeof param == 'string', 'param should be a string');
-    const hash = this.ampdoc.win.location.originalHash;
+    const hash = this.ampdoc.win.location['originalHash'];
     const params = parseQueryString(hash);
     return params[param] === undefined ? defaultValue : params[param];
   }
@@ -721,7 +735,7 @@ export class GlobalVariableSource extends VariableSource {
 
   /**
    * Resolves the value via geo service.
-   * @param {function(Object<string, string>)} getter
+   * @param {function(!../../extensions/amp-geo/0.1/amp-geo.GeoDef)} getter
    * @param {string} expr
    * @return {!Promise<Object<string,(string|Array<string>)>>}
    * @template T
@@ -760,7 +774,7 @@ export class UrlReplacements {
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} source
    * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of
+   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of
    *     names that can be substituted.
    * @return {string}
    */
@@ -801,7 +815,7 @@ export class UrlReplacements {
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} url
    * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of
+   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of
    *     names that can be substituted.
    * @return {string}
    */
@@ -824,7 +838,7 @@ export class UrlReplacements {
    * or override existing ones.
    * @param {string} url
    * @param {!Object<string, *>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of names
+   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of names
    *     that can be substituted.
    * @param {boolean=} opt_noEncode should not encode URL
    * @return {!Promise<string>}
@@ -970,6 +984,7 @@ export class UrlReplacements {
    */
   maybeExpandLink(element, defaultUrlParams) {
     devAssert(element.tagName == 'A');
+    const aElement = /** @type {!HTMLAnchorElement} */ (element);
     const supportedReplacements = {
       'CLIENT_ID': true,
       'QUERY_PARAM': true,
@@ -978,9 +993,9 @@ export class UrlReplacements {
       'NAV_TIMING': true,
     };
     let additionalUrlParameters =
-      element.getAttribute('data-amp-addparams') || '';
+      aElement.getAttribute('data-amp-addparams') || '';
     const allowlist = this.getAllowlistForElement_(
-      element,
+      aElement,
       supportedReplacements
     );
 
@@ -991,11 +1006,11 @@ export class UrlReplacements {
     // We set this to the original value before doing any work and use it
     // on subsequent replacements, so that each run gets a fresh value.
     let href = dev().assertString(
-      element[ORIGINAL_HREF_PROPERTY] || element.getAttribute('href')
+      aElement[ORIGINAL_HREF_PROPERTY] || aElement.getAttribute('href')
     );
     const url = parseUrlDeprecated(href);
-    if (element[ORIGINAL_HREF_PROPERTY] == null) {
-      element[ORIGINAL_HREF_PROPERTY] = href;
+    if (aElement[ORIGINAL_HREF_PROPERTY] == null) {
+      aElement[ORIGINAL_HREF_PROPERTY] = href;
     }
 
     const isAllowedOrigin = this.isAllowedOrigin_(url);
@@ -1016,7 +1031,7 @@ export class UrlReplacements {
           href
         );
       }
-      return (element.href = href);
+      return (aElement.href = href);
     }
 
     // Note that defaultUrlParams is treated differently than
@@ -1041,7 +1056,7 @@ export class UrlReplacements {
 
     href = this.expandSyncIfAllowedList_(href, allowlist);
 
-    return (element.href = href);
+    return (aElement.href = href);
   }
 
   /**
@@ -1147,12 +1162,11 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @param {!Window} embedWin
  * @param {!VariableSource} varSource
  */
-export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
-  installServiceInEmbedScope(
-    embedWin,
+export function installUrlReplacementsForEmbed(ampdoc, varSource) {
+  installServiceInEmbedDoc(
+    ampdoc,
     'url-replace',
     new UrlReplacements(ampdoc, varSource)
   );

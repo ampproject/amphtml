@@ -62,7 +62,7 @@ describes.realWin(
       naturalDimensions_['AMP-AUDIO'] = {width: '300px', height: '30px'};
       const ampAudio = getAmpAudio(attributes, opt_childNodesAttrs);
       return ampAudio
-        .build()
+        .buildInternal()
         .then(() => ampAudio.layoutCallback())
         .then(() => ampAudio)
         .catch((error) => {
@@ -86,7 +86,7 @@ describes.realWin(
       doc.body.appendChild(ampStory);
 
       return ampAudio
-        .build()
+        .buildInternal()
         .then(() => ampAudio.layoutCallback())
         .then(() => ampAudio)
         .catch((error) => {
@@ -135,22 +135,22 @@ describes.realWin(
     it(
       'should attach `<audio>` element and execute relevant actions for ' +
         'layout="nodisplay"',
-      () => {
-        return attachAndRun({
+      async () => {
+        const ampAudio = await attachAndRun({
           src: 'audio.mp3',
           preload: 'none',
           layout: 'nodisplay',
-        }).then((ampAudio) => {
-          const audio = ampAudio.querySelector('audio');
-          expect(audio).to.not.be.null;
-
-          const impl = ampAudio.implementation_;
-          impl.executeAction({method: 'play', satisfiesTrust: () => true});
-          expect(impl.isPlaying).to.be.true;
-
-          impl.executeAction({method: 'pause', satisfiesTrust: () => true});
-          expect(impl.isPlaying).to.be.false;
         });
+        const impl = await ampAudio.getImpl();
+
+        const audio = ampAudio.querySelector('audio');
+        expect(audio).to.not.be.null;
+
+        impl.executeAction({method: 'play', satisfiesTrust: () => true});
+        expect(impl.isPlaying).to.be.true;
+
+        impl.executeAction({method: 'pause', satisfiesTrust: () => true});
+        expect(impl.isPlaying).to.be.false;
       }
     );
 
@@ -251,35 +251,35 @@ describes.realWin(
       });
     });
 
-    it('should play/pause when `play`/`pause` actions are called', () => {
-      return attachAndRun({
+    it('should play/pause when `play`/`pause` actions are called', async () => {
+      const ampAudio = await attachAndRun({
         'width': '500',
         src: 'audio.mp3',
-      }).then((ampAudio) => {
-        const impl = ampAudio.implementation_;
-        impl.executeAction({method: 'play', satisfiesTrust: () => true});
-        expect(impl.isPlaying).to.be.true;
-
-        impl.executeAction({method: 'pause', satisfiesTrust: () => true});
-        expect(impl.isPlaying).to.be.false;
       });
+      const impl = await ampAudio.getImpl();
+
+      impl.executeAction({method: 'play', satisfiesTrust: () => true});
+      expect(impl.isPlaying).to.be.true;
+
+      impl.executeAction({method: 'pause', satisfiesTrust: () => true});
+      expect(impl.isPlaying).to.be.false;
     });
 
     it(
       'should not play/pause when `amp-audio` is a direct descendant ' +
         'of `amp-story`',
-      () => {
-        return attachToAmpStoryAndRun({
+      async () => {
+        const ampAudio = await attachToAmpStoryAndRun({
           'width': '500',
           src: 'audio.mp3',
-        }).then((ampAudio) => {
-          const impl = ampAudio.implementation_;
-          impl.executeAction({method: 'play', satisfiesTrust: () => true});
-          expect(impl.isPlaying).to.be.false;
-
-          impl.executeAction({method: 'pause', satisfiesTrust: () => true});
-          expect(impl.isPlaying).to.be.false;
         });
+        const impl = await ampAudio.getImpl();
+
+        impl.executeAction({method: 'play', satisfiesTrust: () => true});
+        expect(impl.isPlaying).to.be.false;
+
+        impl.executeAction({method: 'pause', satisfiesTrust: () => true});
+        expect(impl.isPlaying).to.be.false;
       }
     );
   }

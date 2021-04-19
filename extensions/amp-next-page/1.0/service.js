@@ -22,7 +22,7 @@ import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {VisibilityState} from '../../../src/visibility-state';
+import {VisibilityState} from '../../../src/core/constants/visibility-state';
 import {
   childElementByAttr,
   childElementsByTag,
@@ -34,7 +34,7 @@ import {
 } from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {findIndex} from '../../../src/utils/array';
+import {findIndex, toArray} from '../../../src/core/types/array';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
@@ -43,7 +43,7 @@ import {
   parseSchemaImage,
 } from '../../../src/mediasession-helper';
 import {setStyles, toggle} from '../../../src/style';
-import {toArray} from '../../../src/types';
+
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryParseJson} from '../../../src/json';
 import {validatePage, validateUrl} from './utils';
@@ -89,7 +89,7 @@ export class NextPageService {
     this.mutator_ = Services.mutatorForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(this.win_);
+    this.templates_ = Services.templatesForDoc(ampdoc);
 
     /** @private {?Element} */
     this.separator_ = null;

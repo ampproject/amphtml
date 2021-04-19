@@ -16,7 +16,7 @@
     </style>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
-    <script async src="https://cdn.ampproject.org/v0/amp-story-interactive-1.0.js"></script>
+    <script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"></script>
     <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
   </head>
@@ -50,6 +50,11 @@
                 layout="responsive"
                 height="1600"
                 width="900">
+                <h1 style="position: absolute;top: 0;z-index: 1">
+                  This is a
+                  <a href="https://example.com" tabindex="2">Link</a>
+                </h1>
+                
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
@@ -62,7 +67,7 @@
                 prompt-text="Is this an international quiz?"
                 option-1-text="你好，这是马蒂亚斯"
                 option-2-text="مرحبا هذا ماتياس"
-                option-3-text="Yes it is" option-3-correct
+                option-3-text="Yes it is, this is indeed an international quiz" option-3-correct
                 option-3-confetti="🌎"
                 option-4-text="ब्राज़ील यहाँ होना चाहिए">
             </amp-story-interactive-quiz>
@@ -372,7 +377,6 @@
               chip-style="shadow"
               endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
               style="--interactive-accent-color: #eb50a8"
-              prompt-text="What city do you like the most?"
               option-1-text="Montevideo" option-1-confetti="🇺🇾"
               option-2-text="Paris" option-2-confetti="🇫🇷"
               option-3-text="Amsterdam" option-3-confetti="🇳🇱">
@@ -425,7 +429,7 @@
               theme="light"
               prompt-text="What is your favorite food?"
               option-1-text="Tacos"
-              option-2-text="Bacon"
+              option-2-text="Bacon is my favourite food in the world and I eat it everyday"
               option-3-text="Broccoli"
               option-4-text="Ice cream"
               option-1-confetti="🌮"

@@ -618,7 +618,7 @@
       if (!queryString) {
         return params;
       }
-      if (startsWith(queryString, '?') || startsWith(queryString, '#')) {
+      if (queryString.startsWith('?') || queryString.startsWith('#')) {
         queryString = queryString.substr(1);
       }
       const pairs = queryString.split('&');

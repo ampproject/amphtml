@@ -9,15 +9,19 @@
   },
   "pageFailsValidationTitle": {
     "message": "Invalid AMP",
-    "description": "Extension title stating that the page is not valid AMP HTML."
+    "description": "Extension title stating that the page is not valid AMPHTML."
   },
   "pageHasAmpAltTitle": {
     "message": "AMP Available",
-    "description": "Extension title stating that the page is not an AMP HTML page, but one is available."
+    "description": "Extension title stating that the page is not an AMPHTML page, but one is available."
+  },
+  "pageInDevModeTitle": {
+    "message": "AMP in Dev Mode",
+    "description": "Extension title stating that the page is an AMPHTML page set to Dev Mode."
   },
   "pageIsNotAmpTitle": {
     "message": "Is Not AMP",
-    "description": "Extension title stating that the page is not an AMP HTML page."
+    "description": "Extension title stating that the page is not an AMPHTML page."
   },
   "pageFromAmpCacheTitle": {
     "message": "From an AMP Cache",
@@ -25,7 +29,7 @@
   },
   "pagePassesValidationTitle": {
     "message": "Valid AMP",
-    "description": "Extension title stating that the page is valid AMP HTML."
+    "description": "Extension title stating that the page is valid AMPHTML."
   },
   "emptyResultsText": {
     "message": "None found.",

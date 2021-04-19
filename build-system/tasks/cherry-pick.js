@@ -16,36 +16,21 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const log = require('fancy-log');
-const {getOutput} = require('../common/exec');
-const {green, cyan, red, yellow} = require('ansi-colors');
-
-/**
- * Executes a shell command, and logs an error message if the command fails.
- *
- * @param {string} cmd
- * @param {string} msg
- * @return {!Object}
- */
-function execOrThrow(cmd, msg) {
-  const result = getOutput(cmd);
-  if (result.status) {
-    log(yellow('ERROR:'), msg);
-    throw new Error(result.stderr);
-  }
-
-  return result;
-}
+const {execOrThrow, getOutput} = require('../common/exec');
+const {green, cyan, red, yellow} = require('kleur/colors');
+const {log} = require('../common/logging');
 
 /**
  * Determines the name of the cherry-pick branch.
  *
  * @param {string} version
+ * @param {number} numCommits
  * @return {string}
  */
-function cherryPickBranchName(version) {
+function cherryPickBranchName(version, numCommits) {
   const timestamp = version.slice(0, -3);
-  const suffix = String(Number(version.slice(-3)) + 1).padStart(3, '0');
+  const suffixNumber = Number(version.slice(-3)) + numCommits;
+  const suffix = String(suffixNumber).padStart(3, '0');
   return `amp-release-${timestamp}${suffix}`;
 }
 
@@ -90,20 +75,19 @@ function performCherryPick(sha) {
   }
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function cherryPick() {
   const {push, remote = 'origin'} = argv;
   const commits = (argv.commits || '').split(',').filter(Boolean);
   let onto = String(argv.onto || '');
 
   if (!commits.length) {
-    const error = new Error('Must provide commit list with --commits');
-    error.showStack = false;
-    throw error;
+    throw new Error('Must provide commit list with --commits');
   }
   if (!onto) {
-    const error = new Error('Must provide 13-digit AMP version with --onto');
-    error.showStack = false;
-    throw error;
+    throw new Error('Must provide 13-digit AMP version with --onto');
   }
   if (onto.length === 15) {
     log(
@@ -115,12 +99,10 @@ async function cherryPick() {
     onto = onto.substr(2);
   }
   if (onto.length !== 13) {
-    const error = new Error('Expected 13-digit AMP version');
-    error.showStack = false;
-    throw error;
+    throw new Error('Expected 13-digit AMP version');
   }
 
-  const branch = cherryPickBranchName(onto);
+  const branch = cherryPickBranchName(onto, commits.length);
   try {
     prepareBranch(onto, branch, remote);
     commits.forEach(performCherryPick);
@@ -146,7 +128,7 @@ async function cherryPick() {
   } catch (e) {
     log(red('ERROR:'), e.message);
     log('Deleting branch', cyan(branch));
-    getOutput(`git checkout master && git branch -d ${branch}`);
+    getOutput(`git checkout main && git branch -d ${branch}`);
     throw e;
   }
 }
@@ -155,8 +137,8 @@ module.exports = {cherryPick};
 
 cherryPick.description = 'Cherry-picks one or more commits onto a new branch';
 cherryPick.flags = {
-  'commits': '  Comma-delimited list of commit SHAs to cherry-pick',
-  'push': '  If set, will push the created branch to the remote',
-  'remote': '  Remote to refresh tags from (default: origin)',
-  'onto': '  13-digit AMP version to cherry-pick onto',
+  'commits': 'Comma-delimited list of commit SHAs to cherry-pick',
+  'push': 'If set, will push the created branch to the remote',
+  'remote': 'Remote to refresh tags from (default: origin)',
+  'onto': '13-digit AMP version to cherry-pick onto',
 };

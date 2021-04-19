@@ -111,7 +111,7 @@ export class WebviewViewerForTesting {
     if (!this.iframe) {
       return;
     }
-    const listener = function (e) {
+    const listener = (e) => {
       if (this.isChannelOpen_(e)) {
         //stop polling
         window.clearInterval(this.pollingIntervalIds_[intervalCtr]);
@@ -119,7 +119,7 @@ export class WebviewViewerForTesting {
         this.completeHandshake_(e.data.requestid);
       }
     };
-    window.addEventListener('message', listener.bind(this));
+    window.addEventListener('message', listener);
 
     const message = {
       app: APP,

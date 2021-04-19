@@ -24,12 +24,13 @@ import {parseQueryString_} from './url-parse-query-string';
  *   minified: boolean,
  *   lite: boolean,
  *   test: boolean,
+ *   examiner: boolean,
  *   log: (string|undefined),
  *   version: string,
  *   rtvVersion: string,
  *   runtime: (null|string|undefined),
  *   a4aId: (null|string|undefined),
- *   esm: (boolean|undefined)
+ *   esm: (boolean|undefined),
  * }}
  */
 export let ModeDef;
@@ -65,18 +66,18 @@ function getMode_(win) {
 
   // Magic constants that are replaced by closure compiler.
   // IS_MINIFIED is always replaced with true when closure compiler is used
-  // while IS_DEV is only replaced when `gulp dist` is called without the
+  // while IS_FORTESTING is only replaced when `amp dist` is called without the
   // --fortesting flag.
-  const IS_DEV = true;
+  const IS_FORTESTING = true;
   const IS_MINIFIED = false;
 
   const runningTests =
-    IS_DEV && !!(AMP_CONFIG.test || win.__AMP_TEST || win.__karma__);
-  const isLocalDev = IS_DEV && (!!AMP_CONFIG.localDev || runningTests);
+    IS_FORTESTING && !!(AMP_CONFIG.test || win.__AMP_TEST || win.__karma__);
+  const isLocalDev = IS_FORTESTING && (!!AMP_CONFIG.localDev || runningTests);
   const hashQuery = parseQueryString_(
     // location.originalHash is set by the viewer when it removes the fragment
     // from the URL.
-    win.location.originalHash || win.location.hash
+    win.location['originalHash'] || win.location.hash
   );
 
   const searchQuery = parseQueryString_(win.location.search);
@@ -86,7 +87,7 @@ function getMode_(win) {
   }
 
   // The `minified`, `test` and `localDev` properties are replaced
-  // as boolean literals when we run `gulp dist` without the `--fortesting`
+  // as boolean literals when we run `amp dist` without the `--fortesting`
   // flags. This improved DCE on the production file we deploy as the code
   // paths for localhost/testing/development are eliminated.
   return {

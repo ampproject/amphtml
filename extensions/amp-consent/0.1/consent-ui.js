@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   elementByTag,
   insertAtStart,
@@ -32,6 +32,7 @@ import {getConsentStateValue} from './consent-info';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {htmlFor} from '../../../src/static-template';
+import {isExperimentOn} from '../../../src/experiments';
 import {setImportantStyles, setStyles, toggle} from '../../../src/style';
 
 const TAG = 'amp-consent-ui';
@@ -50,6 +51,8 @@ const CONSENT_PROMPT_CAPTION = 'User Consent Prompt';
 const BUTTON_ACTION_CAPTION = 'Focus Prompt';
 const CANCEL_OVERLAY = 'cancelFullOverlay';
 const REQUEST_OVERLAY = 'requestFullOverlay';
+
+const IFRAME_RUNNING_TIMEOUT = 1000;
 
 export const actionState = {
   error: 'error',
@@ -72,6 +75,7 @@ export const consentUiClasses = {
   mask: 'i-amphtml-consent-ui-mask',
   borderEnabled: 'i-amphtml-consent-ui-border-enabled',
   screenReaderDialog: 'i-amphtml-consent-alertdialog',
+  iframeTransform: 'i-amphtml-consent-ui-iframe-transform',
 };
 
 export class ConsentUI {
@@ -152,6 +156,9 @@ export class ConsentUI {
     /** @private {?Deferred} */
     this.iframeReady_ = null;
 
+    /** @private {boolean} */
+    this.removeIframe_ = false;
+
     /** @private {?JsonObject} */
     this.clientConfig_ = null;
 
@@ -175,6 +182,11 @@ export class ConsentUI {
 
     /** @private {?Promise<string>} */
     this.promptUISrcPromise_ = null;
+
+    this.isGranularConsentExperimentOn_ = isExperimentOn(
+      this.win_,
+      'amp-consent-granular-consent'
+    );
 
     this.init_(config, opt_postPromptUI);
   }
@@ -279,15 +291,7 @@ export class ConsentUI {
           this.elementWithFocusBeforeShowing_ = this.document_.activeElement;
 
           this.maybeShowOverlay_();
-
-          // scheduleLayout is required everytime because some AMP element may
-          // get un laid out after toggle display (#unlayoutOnPause)
-          // for example <amp-iframe>
-          Services.ownersForDoc(this.baseInstance_.element).scheduleLayout(
-            this.baseInstance_.element,
-            this.ui_
-          );
-
+          this.resume();
           this.ui_./*OK*/ focus();
         }
       };
@@ -297,7 +301,7 @@ export class ConsentUI {
       // at build time. (see #18841).
       if (isAmpElement(this.ui_)) {
         whenUpgradedToCustomElement(this.ui_)
-          .then(() => this.ui_.whenBuilt())
+          .then(() => this.ui_.build())
           .then(() => show());
       } else {
         show();
@@ -315,6 +319,8 @@ export class ConsentUI {
       // Nothing to hide from;
       return;
     }
+
+    this.pause();
 
     this.baseInstance_.mutateElement(() => {
       if (this.isCreatedIframe_) {
@@ -355,6 +361,33 @@ export class ConsentUI {
         this.win_.document.body.children[0]./*OK*/ focus();
       }
     });
+  }
+
+  /** */
+  pause() {
+    if (this.ui_) {
+      Services.ownersForDoc(this.baseInstance_.element).schedulePause(
+        this.baseInstance_.element,
+        this.ui_
+      );
+    }
+  }
+
+  /** */
+  resume() {
+    if (this.ui_) {
+      // scheduleLayout is required everytime because some AMP element may
+      // get un laid out after toggle display (#unlayoutOnPause)
+      // for example <amp-iframe>
+      Services.ownersForDoc(this.baseInstance_.element).scheduleLayout(
+        this.baseInstance_.element,
+        this.ui_
+      );
+      Services.ownersForDoc(this.baseInstance_.element).scheduleResume(
+        this.baseInstance_.element,
+        this.ui_
+      );
+    }
   }
 
   /**
@@ -509,7 +542,7 @@ export class ConsentUI {
       return consentStateManager
         .getLastConsentInstanceInfo()
         .then((consentInfo) => {
-          return dict({
+          const returnValue = dict({
             'clientConfig': this.clientConfig_,
             // consentState to be deprecated
             'consentState': getConsentStateValue(consentInfo['consentState']),
@@ -521,6 +554,10 @@ export class ConsentUI {
             'promptTrigger': this.isActionPromptTrigger_ ? 'action' : 'load',
             'isDirty': !!consentInfo['isDirty'],
           });
+          if (this.isGranularConsentExperimentOn_) {
+            returnValue['purposeConsents'] = consentInfo['purposeConsents'];
+          }
+          return returnValue;
         });
     });
   }
@@ -540,6 +577,7 @@ export class ConsentUI {
     toggle(dev().assertElement(this.ui_), false);
 
     const iframePromise = this.promptUISrcPromise_.then((expandedSrc) => {
+      this.removeIframe_ = false;
       this.ui_.src = expandedSrc;
       return this.getClientInfoPromise_().then((clientInfo) => {
         this.ui_.setAttribute('name', JSON.stringify(clientInfo));
@@ -564,11 +602,12 @@ export class ConsentUI {
   showIframe_() {
     const {classList} = this.parent_;
     classList.add(consentUiClasses.iframeActive);
-    if (this.modalEnabled_) {
-      classList.add(consentUiClasses.modal);
-    }
     toggle(dev().assertElement(this.placeholder_), false);
     toggle(dev().assertElement(this.ui_), true);
+    if (this.modalEnabled_) {
+      classList.add(consentUiClasses.modal);
+      tryFocus(dev().assertElement(this.ui_));
+    }
 
     // Remove transition styles added by the fixed layer
     // Transform styles applied by us for the animation.
@@ -618,17 +657,24 @@ export class ConsentUI {
     this.isIframeVisible_ = false;
     this.ui_.removeAttribute('name');
     toggle(dev().assertElement(this.placeholder_), false);
-    removeElement(dev().assertElement(this.ui_));
+    this.removeIframe_ = true;
+    this.win_.setTimeout(() => {
+      if (this.removeIframe_) {
+        removeElement(dev().assertElement(this.ui_));
+      }
+    }, IFRAME_RUNNING_TIMEOUT);
   }
 
   /**
    * If this is the first time viewing the iframe, create
    * an 'invisible' alert dialog with a title and a button.
    * Clicking on the button will transfer focus to the iframe.
+   *
+   * This only applies for bottom pane iframes.
    */
   maybeShowSrAlert_() {
     // If the SR alert has been shown, don't show it again
-    if (this.srAlertShown_) {
+    if (this.srAlertShown_ || this.modalEnabled_) {
       return;
     }
 
@@ -687,6 +733,7 @@ export class ConsentUI {
    * Apply styles for ready event
    */
   applyInitialStyles_() {
+    const {classList} = this.parent_;
     // Apply our initial height and border
     if (this.ui_) {
       setStyles(this.ui_, {
@@ -694,12 +741,11 @@ export class ConsentUI {
       });
     }
     setImportantStyles(this.parent_, {
-      transform: `translate3d(0px, calc(100% - ${this.initialHeight_}), 0px)`,
       '--i-amphtml-modal-height': `${this.initialHeight_}`,
     });
+    classList.add(consentUiClasses.iframeTransform);
     // Border is default with modal enabled and option with non-modal
     if (this.borderEnabled_ || this.modalEnabled_) {
-      const {classList} = this.parent_;
       classList.add(consentUiClasses.borderEnabled);
     }
     if (this.modalEnabled_) {

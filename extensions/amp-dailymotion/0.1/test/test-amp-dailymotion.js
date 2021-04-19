@@ -44,7 +44,7 @@ describes.realWin(
         dailymotion.setAttribute('data-param-origin', 'example&.org');
       }
       doc.body.appendChild(dailymotion);
-      await dailymotion.build();
+      await dailymotion.buildInternal();
       await dailymotion.layoutCallback();
       return dailymotion;
     }
@@ -82,6 +82,18 @@ describes.realWin(
           /The data-videoid attribute is required for/
         );
       });
+    });
+
+    it('unlayout and relayout', async () => {
+      const dailymotion = await getDailymotion('x2m8jpp');
+      expect(dailymotion.querySelector('iframe')).to.exist;
+
+      const unlayoutResult = dailymotion.unlayoutCallback();
+      expect(unlayoutResult).to.be.true;
+      expect(dailymotion.querySelector('iframe')).to.not.exist;
+
+      await dailymotion.layoutCallback();
+      expect(dailymotion.querySelector('iframe')).to.exist;
     });
   }
 );

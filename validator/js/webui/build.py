@@ -72,14 +72,6 @@ def CheckPrereqs():
     if not os.path.exists(f):
       Die('%s not found. Must run in amp_validator source directory.' % f)
 
-  # Ensure that yarn is installed.
-  try:
-    subprocess.check_output(['yarn', '--version'])
-  except (subprocess.CalledProcessError, OSError):
-    Die('Yarn package manager not found. Run '
-        '"curl -o- -L https://yarnpkg.com/install.sh | bash" '
-        'or see https://yarnpkg.com/docs/install.')
-
 
 def SetupOutDir(out_dir):
   """Sets up a clean output directory.
@@ -98,14 +90,14 @@ def SetupOutDir(out_dir):
 
 
 def InstallNodeDependencies():
-  """Installs the dependencies using yarn."""
+  """Installs the dependencies using npm install."""
   logging.info('entering ...')
   # Install the project dependencies specified in package.json into
   # node_modules.
   logging.info('installing AMP Validator webui dependencies ...')
   subprocess.check_call(
-      ['yarn', 'install'],
-      stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
+      ['npm', 'install', '--userconfig', '../../../.npmrc'],
+      stdout=(open(os.devnull, 'wb') if os.environ.get('CI') else sys.stdout))
   logging.info('... done')
 
 
@@ -150,6 +142,9 @@ def CreateWebuiAppengineDist(out_dir):
   f = open(os.path.join(webui_out, 'index.html'), 'wb')
   f.write(vulcanized_index_html)
   f.close()
+  f = open(os.path.join(webui_out, 'legacy.html'), 'wb')
+  f.write(vulcanized_index_html.replace(b'https://cdn.ampproject.org/v0/validator_wasm.js', b'https://cdn.ampproject.org/v0/validator.js', 1))
+  f.close()
   logging.info('... success')
 
 
@@ -157,7 +152,7 @@ def Main():
   """The main method, which executes all build steps and runs the tests."""
   logging.basicConfig(
       format='[[%(filename)s %(funcName)s]] - %(message)s',
-      level=(logging.ERROR if os.environ.get('TRAVIS') else logging.INFO))
+      level=(logging.ERROR if os.environ.get('CI') else logging.INFO))
   GetNodeJsCmd()
   CheckPrereqs()
   InstallNodeDependencies()

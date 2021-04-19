@@ -44,7 +44,7 @@ const recaptchaFrameRequestHandler = (req, res, next) => {
   }
 };
 
-recaptchaRouter.get('/mock.js', (req, res) => {
+recaptchaRouter.get('/mock.js', (_req, res) => {
   res.end(recaptchaMock);
 });
 

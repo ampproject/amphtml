@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 import * as Preact from '../../../src/preact';
-import {WithAmpContext} from '../../../src/preact/context';
+import {
+  Alignment,
+  Axis,
+  findOverlappingIndex,
+  getPercentageOffsetFromAlignment,
+  scrollContainerToElement,
+} from './dimensions';
+import {LightboxGalleryContext} from '../../amp-lightbox-gallery/1.0/context';
 import {debounce} from '../../../src/utils/rate-limit';
 import {forwardRef} from '../../../src/preact/compat';
 import {mod} from '../../../src/utils/math';
 import {setStyle} from '../../../src/style';
+import {toWin} from '../../../src/types';
 import {
+  useCallback,
+  useContext,
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
@@ -43,91 +53,209 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
  * @return {PreactDef.Renderable}
  * @template T
  */
-function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
+function ScrollerWithRef(
+  {
+    advanceCount,
+    alignment,
+    axis,
+    children,
+    lightbox,
+    loop,
+    mixedLength,
+    restingIndex,
+    setRestingIndex,
+    snap,
+    snapBy = 1,
+    visibleCount,
+    _thumbnails,
+    ...rest
+  },
+  ref
+) {
   // We still need our own ref that we can always rely on to be there.
   const containerRef = useRef(null);
-  useImperativeHandle(ref, () => ({
-    // Expose "advance" action for navigating between slides by the given quantity of slides.
-    advance: (by) => {
-      const container = containerRef.current;
-      // Modify scrollLeft is preferred to `setRestingIndex` to enable smooth scroll.
-      // Note: `setRestingIndex` will still be called on debounce by scroll handler.
-      container./* OK */ scrollLeft += container./* OK */ offsetWidth * by;
-    },
-  }));
-  const classes = useStyles();
 
   /**
-   * The number of slides we want to place before the
-   * reference or resting index. Only needed if loop=true.
+   * The number of slides we want to place before the reference or resting index.
+   * Normalized to == restingIndex if loop=false.
    */
-  const pivotIndex = Math.floor(children.length / 2);
+  const pivotIndex = loop ? Math.floor(children.length / 2) : restingIndex;
+
+  /**
+   * Whether to early exit from the scroll handler.
+   * This is useful on each render where the container is scrolled to the active
+   * slide at a non-integer pixel position. This is likely to happen
+   * with responsive containers or non-integer `visibleCount`.
+   */
+  const ignoreProgrammaticScrollRef = useRef(false);
+
+  const advance = useCallback(
+    (by) => {
+      const container = containerRef.current;
+      if (!container) {
+        return;
+      }
+      // Smooth scrolling is preferred to `setRestingIndex` whenever possible.
+      // Note: `setRestingIndex` will still be called on debounce by scroll handler.
+      currentIndex.current = mod(currentIndex.current + by, children.length);
+      scrollOffset.current = 0;
+      const didScroll = scrollContainerToElement(
+        axis,
+        alignment,
+        container,
+        container.children[mod(pivotIndex + by, container.children.length)],
+        scrollOffset.current
+      );
+      if (!didScroll) {
+        setRestingIndex(currentIndex.current);
+      }
+    },
+    [alignment, axis, children.length, pivotIndex, setRestingIndex]
+  );
+  useImperativeHandle(
+    ref,
+    () => ({
+      advance,
+      next: () => advance(advanceCount),
+      prev: () => advance(-advanceCount),
+      get node() {
+        return containerRef.current;
+      },
+    }),
+    [advance, advanceCount]
+  );
+  const classes = useStyles();
 
   /**
    * The dynamic position that the slide at the resting index
    * is with respect to its scrolling order. Only needed if loop=true.
    */
   const offsetRef = useRef(restingIndex);
-  const ignoreProgrammaticScrollRef = useRef(true);
+
+  /**
+   * The partial scroll position as a percentage of the current visible slide.
+   * Only modified if snap=false.
+   */
+  const scrollOffset = useRef(0);
+
+  const {open: openLightbox} = useContext(LightboxGalleryContext);
   const slides = renderSlides(
     {
+      alignment,
       children,
       loop,
+      mixedLength,
       offsetRef,
+      openLightbox: lightbox && openLightbox,
       pivotIndex,
       restingIndex,
+      snap,
+      snapBy,
+      visibleCount,
+      _thumbnails,
     },
     classes
   );
   const currentIndex = useRef(restingIndex);
 
-  // useLayoutEffect needed to avoid FOUC while scrolling
+  const scrollToActiveSlide = useCallback(() => {
+    if (!containerRef.current || !containerRef.current.children.length) {
+      return;
+    }
+    const container = containerRef.current;
+    setStyle(container, 'scrollBehavior', 'auto');
+    ignoreProgrammaticScrollRef.current = true;
+    scrollContainerToElement(
+      axis,
+      alignment,
+      container,
+      container.children[pivotIndex],
+      scrollOffset.current
+    );
+    setStyle(container, 'scrollBehavior', 'smooth');
+  }, [alignment, axis, pivotIndex]);
+
+  // useLayoutEffect to avoid FOUC while scrolling for looping layouts.
+  useLayoutEffect(() => {
+    if (!containerRef.current || !loop) {
+      return;
+    }
+    const container = containerRef.current;
+    if (!container.children.length) {
+      return;
+    }
+    scrollToActiveSlide();
+  }, [loop, restingIndex, scrollToActiveSlide]);
+
+  // Adjust slide position when container size changes.
   useLayoutEffect(() => {
     if (!containerRef.current) {
       return;
     }
-    const container = containerRef.current;
-    ignoreProgrammaticScrollRef.current = true;
-    setStyle(container, 'scrollBehavior', 'auto');
-    container./* OK */ scrollLeft = loop
-      ? container./* OK */ offsetWidth * pivotIndex
-      : container./* OK */ offsetWidth * restingIndex;
-    setStyle(container, 'scrollBehavior', 'smooth');
-  }, [loop, restingIndex, pivotIndex]);
+    const node = containerRef.current;
+    if (!node) {
+      return;
+    }
+    // Use local window.
+    const win = toWin(node.ownerDocument.defaultView);
+    if (!win) {
+      return undefined;
+    }
+    const observer = new win.ResizeObserver(scrollToActiveSlide);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [scrollToActiveSlide]);
 
   // Trigger render by setting the resting index to the current scroll state.
-  const debouncedResetScrollReferencePoint = useMemo(
-    () =>
-      debounce(
-        window,
-        () => {
-          // Check if the resting index we are centered around is the same as where
-          // we stopped scrolling. If so, we do not need to move anything.
-          if (
-            currentIndex.current === null ||
-            currentIndex.current === restingIndex
-          ) {
-            return;
-          }
-          ignoreProgrammaticScrollRef.current = true;
-          setRestingIndex(currentIndex.current);
-        },
-        RESET_SCROLL_REFERENCE_POINT_WAIT_MS
-      ),
-    [restingIndex, setRestingIndex]
-  );
+  const debouncedResetScrollReferencePoint = useMemo(() => {
+    // Use local window if possible.
+    const win = containerRef.current
+      ? toWin(containerRef.current.ownerDocument.defaultView)
+      : window;
+    return debounce(
+      win,
+      () => {
+        // Check if the resting index we are centered around is the same as where
+        // we stopped scrolling. If so, we do not need to move anything.
+        if (
+          currentIndex.current === null ||
+          currentIndex.current === restingIndex
+        ) {
+          return;
+        }
+        setRestingIndex(currentIndex.current);
+      },
+      RESET_SCROLL_REFERENCE_POINT_WAIT_MS
+    );
+  }, [restingIndex, setRestingIndex]);
 
   // Track current slide without forcing render.
   // This is necessary for smooth scrolling because
   // intermediary renders will interupt scroll and cause jank.
   const updateCurrentIndex = () => {
     const container = containerRef.current;
-    const slideOffset = Math.round(
-      (container./* OK */ scrollLeft -
-        offsetRef.current * container./* OK */ offsetWidth) /
-        container./* OK */ offsetWidth
+    if (!container) {
+      return;
+    }
+    const overlappingIndex = findOverlappingIndex(
+      axis,
+      alignment,
+      container,
+      container.children,
+      pivotIndex
     );
-    currentIndex.current = mod(slideOffset, children.length);
+    if (!snap) {
+      scrollOffset.current = getPercentageOffsetFromAlignment(
+        axis,
+        alignment,
+        container,
+        container.children[overlappingIndex]
+      );
+    }
+    currentIndex.current = mod(
+      overlappingIndex - offsetRef.current,
+      children.length
+    );
   };
 
   const handleScroll = () => {
@@ -141,21 +269,20 @@ function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
 
   return (
     <div
-      hide-scrollbar
-      key="container"
       ref={containerRef}
       onScroll={handleScroll}
-      class={`${classes.scrollContainer} ${classes.hideScrollbar} ${classes.horizontalScroll}`}
+      class={`${classes.scrollContainer} ${classes.hideScrollbar} ${
+        axis === Axis.X ? classes.horizontalScroll : classes.verticalScroll
+      }`}
       tabindex={0}
+      {...rest}
     >
       {slides}
     </div>
   );
 }
 
-const Scroller = forwardRef((props, ref) =>
-  ScrollerWithRef(/** @type {BaseCarouselDef.ScrollerProps} */ (props), ref)
-);
+const Scroller = forwardRef(ScrollerWithRef);
 Scroller.displayName = 'Scroller'; // Make findable for tests.
 export {Scroller};
 
@@ -212,24 +339,51 @@ export {Scroller};
  * @return {PreactDef.Renderable}
  */
 function renderSlides(
-  {children, restingIndex, offsetRef, pivotIndex, loop},
+  {
+    alignment,
+    children,
+    loop,
+    mixedLength,
+    restingIndex,
+    offsetRef,
+    openLightbox,
+    pivotIndex,
+    snap,
+    snapBy,
+    visibleCount,
+    _thumbnails,
+  },
   classes
 ) {
   const {length} = children;
-  const slides = [];
-
-  children.forEach((child, index) => {
+  const lightboxProps = openLightbox && {
+    role: 'button',
+    tabindex: '0',
+    onClick: () => openLightbox(),
+  };
+  const slides = children.map((child, index) => {
     const key = `slide-${child.key || index}`;
-    slides.push(
-      <WithAmpContext
+    return (
+      <div
         key={key}
-        renderable={index == restingIndex}
-        playable={index == restingIndex}
+        data-slide={index}
+        class={`${classes.slideSizing} ${classes.slideElement} ${
+          snap && mod(index, snapBy) === 0
+            ? classes.enableSnap
+            : classes.disableSnap
+        } ${
+          alignment === Alignment.CENTER
+            ? classes.centerAlign
+            : classes.startAlign
+        } ${_thumbnails ? classes.thumbnails : ''} `}
+        part="slide"
+        style={{
+          flex: mixedLength ? '0 0 auto' : `0 0 ${100 / visibleCount}%`,
+        }}
+        {...lightboxProps}
       >
-        <div class={`${classes.slideSizing} ${classes.slideElement}`}>
-          {child}
-        </div>
-      </WithAmpContext>
+        {child}
+      </div>
     );
   });
 

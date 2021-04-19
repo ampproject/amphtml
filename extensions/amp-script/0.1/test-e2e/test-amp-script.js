@@ -17,8 +17,7 @@
 describes.endtoend(
   'amp-script e2e',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-script/basic.amp.html',
+    fixture: 'amp-script/basic.amp.html',
     initialRect: {width: 600, height: 600},
     environments: ['single'],
     browsers: ['chrome', 'safari'],

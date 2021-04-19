@@ -14,47 +14,24 @@
  * limitations under the License.
  */
 
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {Timeago} from './timeago';
-import {dict} from '../../../src/utils/object';
+import {BaseElement} from './base-element';
 import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-timeago';
 
-class AmpTimeago extends PreactBaseElement {
-  /** @override */
-  init() {
-    return dict({'cutoffText': this.element.textContent});
-  }
-
+class AmpTimeago extends BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-timeago-bento'),
-      'expected amp-timeago-bento experiment to be enabled'
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-timeago'),
+      'expected global "bento" or specific "bento-timeago" experiment to be enabled'
     );
-    return isLayoutSizeDefined(layout);
+    return super.isLayoutSupported(layout);
   }
 }
-
-/** @override */
-AmpTimeago['Component'] = Timeago;
-
-/** @override */
-AmpTimeago['passthrough'] = true;
-
-/** @override */
-AmpTimeago['layoutSizeDefined'] = true;
-
-/** @override */
-AmpTimeago['props'] = {
-  'datetime': {attr: 'datetime'},
-  'locale': {attr: 'locale', default: 'en'},
-  'cutoff': {attr: 'cutoff', type: 'number'},
-};
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpTimeago);

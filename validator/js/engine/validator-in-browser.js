@@ -80,7 +80,7 @@ goog.exportSymbol('amp.validator.validateInBrowser', validateInBrowser);
 /**
  * Validates a URL input, logging to the console the result.
  * Careful when modifying this; it's called from
- * https://github.com/ampproject/amphtml/blob/master/src/validator-integration.js
+ * https://github.com/ampproject/amphtml/blob/main/src/validator-integration.js
  *
  * WARNING: This is exported; interface changes may break downstream users like
  * https://www.npmjs.com/package/amphtml-validator and

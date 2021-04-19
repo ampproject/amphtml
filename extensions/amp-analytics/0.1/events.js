@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../../src/common-signals';
-import {Deferred} from '../../../src/utils/promise';
-import {Observable} from '../../../src/observable';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {Observable} from '../../../src/core/data-structures/observable';
 import {
   PlayingStates,
   VideoAnalyticsEvents,
   videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
-import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
+import {deepMerge, dict, hasOwn} from '../../../src/core/types/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
-import {getDataParamsFromAttributes} from '../../../src/dom';
-import {isArray, isEnumValue, isFiniteNumber} from '../../../src/types';
-import {startsWith} from '../../../src/string';
+import {getDataParamsFromAttributes, isAmpElement} from '../../../src/dom';
+import {isArray, isEnumValue} from '../../../src/core/types';
+
+import {isFiniteNumber} from '../../../src/types';
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
@@ -148,7 +149,7 @@ export const trackerTypeForTesting = TRACKER_TYPE;
  * @return {boolean}
  */
 function isAmpStoryTriggerType(triggerType) {
-  return startsWith(triggerType, 'story');
+  return triggerType.startsWith('story');
 }
 
 /**
@@ -156,7 +157,7 @@ function isAmpStoryTriggerType(triggerType) {
  * @return {boolean}
  */
 function isVideoTriggerType(triggerType) {
-  return startsWith(triggerType, 'video');
+  return triggerType.startsWith('video');
 }
 
 /**
@@ -199,7 +200,7 @@ export function getTrackerTypesForParentType(parentType) {
     ) {
       filtered[key] = TRACKER_TYPE[key].klass;
     }
-  }, this);
+  });
   return filtered;
 }
 
@@ -352,7 +353,7 @@ export class CustomEventTracker extends EventTracker {
       selectionMethod
     );
 
-    const isSandboxEvent = startsWith(eventType, 'sandbox-');
+    const isSandboxEvent = eventType.startsWith('sandbox-');
 
     // Push recent events if any.
     const buffer = isSandboxEvent
@@ -400,7 +401,7 @@ export class CustomEventTracker extends EventTracker {
    */
   trigger(event) {
     const eventType = event['type'];
-    const isSandboxEvent = startsWith(eventType, 'sandbox-');
+    const isSandboxEvent = eventType.startsWith('sandbox-');
     const observables = this.observables_[eventType];
 
     // If listeners already present - trigger right away.
@@ -1353,7 +1354,12 @@ export class VideoEventTracker extends EventTracker {
         devAssert(isFiniteNumber(normalizedPercentageInt));
         devAssert(normalizedPercentageInt % percentageInterval == 0);
 
-        if (lastPercentage == normalizedPercentageInt) {
+        // Don't trigger if current percentage is the same as
+        // last triggered percentage
+        if (
+          lastPercentage == normalizedPercentageInt &&
+          percentages.length > 1
+        ) {
           return;
         }
 
@@ -1446,7 +1452,6 @@ export class VisibilityTracker extends EventTracker {
     const visibilitySpec = config['visibilitySpec'] || {};
     const selector = config['selector'] || visibilitySpec['selector'];
     const waitForSpec = visibilitySpec['waitFor'];
-    let readyPromiseWaitForSpec;
     let reportWhenSpec = visibilitySpec['reportWhen'];
     let createReportReadyPromiseFunc = null;
     if (reportWhenSpec) {
@@ -1489,7 +1494,8 @@ export class VisibilityTracker extends EventTracker {
     if (!selector || selector == ':root' || selector == ':host') {
       // When `selector` is specified, we always use "ini-load" signal as
       // a "ready" signal.
-      readyPromiseWaitForSpec = waitForSpec || (selector ? 'ini-load' : null);
+      const readyPromiseWaitForSpec =
+        waitForSpec || (selector ? 'ini-load' : 'none');
       return visibilityManager.listenRoot(
         visibilitySpec,
         this.getReadyPromise(readyPromiseWaitForSpec),
@@ -1503,19 +1509,14 @@ export class VisibilityTracker extends EventTracker {
       );
     }
 
-    // An AMP-element. Wait for DOM to be fully parsed to avoid
+    // An element. Wait for DOM to be fully parsed to avoid
     // false missed searches.
     // Array selectors do not suppor the special cases: ':host' & ':root'
     const selectionMethod =
       config['selectionMethod'] || visibilitySpec['selectionMethod'];
-    readyPromiseWaitForSpec = waitForSpec || 'ini-load';
     this.assertUniqueSelectors_(selector);
     const unlistenPromise = this.root
-      .getAmpElements(
-        context.parentElement || context,
-        selector,
-        selectionMethod
-      )
+      .getElements(context.parentElement || context, selector, selectionMethod)
       .then((elements) => {
         const unlistenCallbacks = [];
         for (let i = 0; i < elements.length; i++) {
@@ -1523,7 +1524,7 @@ export class VisibilityTracker extends EventTracker {
             visibilityManager.listenElement(
               elements[i],
               visibilitySpec,
-              this.getReadyPromise(readyPromiseWaitForSpec, elements[i]),
+              this.getReadyPromise(waitForSpec, elements[i]),
               createReportReadyPromiseFunc,
               this.onEvent_.bind(this, eventType, listener, elements[i])
             )
@@ -1645,14 +1646,26 @@ export class VisibilityTracker extends EventTracker {
    * @visibleForTesting
    */
   getReadyPromise(waitForSpec, opt_element) {
-    if (!waitForSpec) {
+    if (opt_element) {
+      if (!isAmpElement(opt_element)) {
+        userAssert(
+          !waitForSpec || waitForSpec == 'none',
+          'waitFor for non-AMP elements must be none or null. Found %s',
+          waitForSpec
+        );
+      } else {
+        waitForSpec = waitForSpec || 'ini-load';
+      }
+    }
+
+    if (!waitForSpec || waitForSpec == 'none') {
       // Default case, waitFor selector is not defined, wait for nothing
       return null;
     }
 
     const trackerAllowlist = getTrackerTypesForParentType('visible');
     userAssert(
-      waitForSpec == 'none' || trackerAllowlist[waitForSpec] !== undefined,
+      trackerAllowlist[waitForSpec] !== undefined,
       'waitFor value %s not supported',
       waitForSpec
     );

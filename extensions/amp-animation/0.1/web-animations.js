@@ -16,7 +16,7 @@
 
 import {CssNumberNode, CssTimeNode, isVarCss} from './parsers/css-expr-ast';
 import {
-  InternalWebAnimationRequestDef, // eslint-disable-line no-unused-vars
+  InternalWebAnimationRequestDef,
   WebAnimationDef,
   WebAnimationSelectorDef,
   WebAnimationSubtargetDef,
@@ -40,16 +40,17 @@ import {
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
-import {dashToCamelCase, startsWith} from '../../../src/string';
+import {dashToCamelCase} from '../../../src/core/types/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {extractKeyframes} from './parsers/keyframes-extractor';
 import {getMode} from '../../../src/mode';
-import {isArray, isObject, toArray} from '../../../src/types';
+import {isArray, toArray} from '../../../src/core/types/array';
 import {isExperimentOn} from '../../../src/experiments';
 import {isInFie} from '../../../src/iframe-helper';
+import {isObject} from '../../../src/core/types';
 import {layoutRectLtwh} from '../../../src/layout-rect';
-import {map} from '../../../src/utils/object';
+import {map} from '../../../src/core/types/object';
 import {parseCss} from './parsers/css-expr';
 
 /** @const {string} */
@@ -725,13 +726,13 @@ export class MeasureScanner extends Scanner {
     // the previous and new vars.
     const result = map(prevVars);
     for (const k in newVars) {
-      if (startsWith(k, '--')) {
+      if (k.startsWith('--')) {
         result[k] = newVars[k];
       }
     }
     this.css_.withVars(result, () => {
       for (const k in newVars) {
-        if (startsWith(k, '--')) {
+        if (k.startsWith('--')) {
           result[k] = this.css_.resolveCss(newVars[k]);
         }
       }
@@ -972,7 +973,7 @@ class CssContextImpl {
     }
 
     // Resolve a var or a property.
-    return startsWith(prop, '--')
+    return prop.startsWith('--')
       ? styles.getPropertyValue(prop)
       : styles[getVendorJsPropertyName(styles, dashToCamelCase(prop))];
   }

@@ -16,9 +16,10 @@
 
 import {AstNodeType} from './bind-expr-defines';
 import {devAssert, user} from '../../../src/log';
-import {dict, hasOwn, map} from '../../../src/utils/object';
+import {dict, hasOwn, map} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
-import {isArray, isObject} from '../../../src/types';
+import {isArray, isObject} from '../../../src/core/types';
+
 import {bindParser as parser} from '../../../build/parsers/bind-expr-impl';
 
 const TAG = 'amp-bind';
@@ -184,7 +185,8 @@ function generateFunctionAllowlist() {
       const func = functionsForType[name];
       if (func) {
         devAssert(
-          !func.name || name === func.name,
+          // Partial match to account for bundlers adding a suffix to the name.
+          !func.name || func.name.startsWith(name),
           'Listed function name ' +
             `"${name}" doesn't match name property "${func.name}".`
         );

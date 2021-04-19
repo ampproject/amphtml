@@ -17,7 +17,7 @@
 describes.endtoend(
   'amp-list SSR templates',
   {
-    testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-list/amp-list.html',
+    fixture: 'amp-list/amp-list.html',
     environments: ['viewer-demo'],
   },
   async (env) => {
@@ -49,7 +49,7 @@ describes.endtoend(
 describes.endtoend(
   'amp-list',
   {
-    testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-list/amp-list.html',
+    fixture: 'amp-list/amp-list.html',
     environments: ['single'],
   },
   async (env) => {

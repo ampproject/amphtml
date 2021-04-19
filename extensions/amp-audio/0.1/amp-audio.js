@@ -20,6 +20,7 @@ import {
   parseOgImage,
   parseSchemaImage,
   setMediaSession,
+  validateMediaMetadata,
 } from '../../../src/mediasession-helper';
 import {Layout, isLayoutSizeFixed} from '../../../src/layout';
 import {assertHttpsUrl} from '../../../src/url';
@@ -289,13 +290,8 @@ export class AmpAudio extends AMP.BaseElement {
     };
 
     // Update the media session
-    setMediaSession(
-      this.element,
-      this.win,
-      this.metadata_,
-      playHandler,
-      pauseHandler
-    );
+    validateMediaMetadata(this.element, this.metadata_);
+    setMediaSession(this.win, this.metadata_, playHandler, pauseHandler);
   }
 }
 

@@ -29,7 +29,7 @@ limitations under the License.
 
 The `amp-position-observer` component monitors the position of an
 element within the viewport as a user scrolls, and dispatches
-`enter`, `exit` and `scroll:<Position In Viewport As a Percentage>` events (**Low Trust Level**), which can be used to trigger actions (**Only Low Trust Actions**) on other components (e.g., [amp-animation](https://amp.dev/documentation/components/amp-animation).
+`enter`, `exit` and `scroll:<Position In Viewport As a Percentage>` events (**Low Trust Level**), which can be used to trigger actions (**Only Low Trust Actions**) on other components (e.g., [amp-animation](https://amp.dev/documentation/components/amp-animation)).
 
 The `amp-position-observer` component is only useful when used with other components and does not do anything on its own.
 
@@ -168,6 +168,10 @@ as clock becomes less than 50% visible.
 </div>
 ```
 
+### Accessibility considerations for scroll-bound and visibility-based animations
+
+Animations in general can present an issue for certain user groups. Scroll-bound and parallax animations in particular can be [problematic for users with vestibular disorders](https://web.dev/prefers-reduced-motion/#motion-triggered-vestibular-spectrum-disorder). Make sure to review the advice provided in the [accessibility considerations for `amp-animation`](https://amp.dev/documentation/components/amp-animation/?format=websites#accessibility-considerations-for-animations).
+
 ## Attributes
 
 ### target (optional)
@@ -214,4 +218,4 @@ The presence of the attribute represents the `true` value and the absence of the
 
 ## Validation
 
-See [amp-position-observer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-position-observer/validator-amp-position-observer.protoascii) in the AMP validator specification.
+See [amp-position-observer rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-position-observer/validator-amp-position-observer.protoascii) in the AMP validator specification.

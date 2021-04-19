@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../../src/utils/object';
+import {dict} from '../../../../src/core/types/object';
 import {
   getConsentPolicyInfo,
   getConsentPolicyState,
@@ -22,7 +22,7 @@ import {
 
 import {dev} from '../../../../src/log';
 
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../../../src/core/constants/consent-state';
 
 const TAG = 'amp-apester-media';
 

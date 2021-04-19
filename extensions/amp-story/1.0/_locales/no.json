@@ -1,0 +1,41 @@
+{
+  "2": {"string": "Trykk på Neste"},
+  "3": {"string": "Trykk på Tilbake"},
+  "4": {"string": "Kunne ikke kopiere linken til utklippstavlen :("},
+  "5": {"string": "Linken er kopiert."},
+  "6": {"string": "E-post"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Hent linken"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "SMS"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {"string": "Gjør vinduet ditt større for å se denne opplevelsen"},
+  "19": {
+    "string": "Du må aktivere eksperimentet med AMP-snuttsamlinger for å se dette innholdet."
+  },
+  "20": {"string": "Den beste visningen av siden er i stående retning"},
+  "21": {
+    "string": "Beklager, men det ser ut til at nettleseren din ikke støtter denne opplevelsen"
+  },
+  "22": {"string": "Godta"},
+  "23": {"string": "Avslå"},
+  "25": {"string": "Se på det opprinnelige domenet:"},
+  "26": {"string": "Mer om AMP-resultater"},
+  "27": {"string": "Fortsett likevel"},
+  "28": {"string": "Endre personverninnstillingene for data"},
+  "29": {"string": "Personverninnstillinger"},
+  "30": {"string": "Mer å lese"},
+  "31": {"string": "Lyd av"},
+  "32": {"string": "Lyd på"},
+  "33": {"string": "Denne siden har ikke noe lyd"},
+  "34": {"string": "Spill av videoen"},
+  "35": {"string": "Sveip opp"},
+  "36": {"string": "Vis Twitter-meldingen"},
+  "37": {"string": "Gjør vinduet ditt større for å se denne opplevelsen"},
+  "38": {"string": "Gjør vinduet ditt bredere for å se denne opplevelsen"},
+  "63": {"string": "Line"}
+}

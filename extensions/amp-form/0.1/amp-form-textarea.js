@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {Services} from '../../../src/services';
 import {computedStyle, px, setStyle} from '../../../src/style';
 import {dev, devAssert, user} from '../../../src/log';
 import {iterateCursor, removeElement} from '../../../src/dom';
 import {listen, listenOncePromise} from '../../../src/event-helper';
 import {throttle} from '../../../src/utils/rate-limit';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 const AMP_FORM_TEXTAREA_EXPAND_ATTR = 'autoexpand';
 
@@ -295,7 +295,15 @@ export function maybeResizeTextarea(element) {
         // Prevent the textarea from shrinking if it has not yet expanded.
         const hasExpanded =
           AMP_FORM_TEXTAREA_HAS_EXPANDED_DATA in element.dataset;
-        const shouldResize = hasExpanded || scrollHeight <= minScrollHeight;
+
+        // There is super specific a bug in Chrome affecting scrollHeight calculation
+        // for textareas with padding when the document is zoomed in.
+        // It makes the scrollHeight calculation off by ~1px.
+        // This is why we have a small error margin.
+        // TODO: Remove error margin when chrome bug is resolved (https://bugs.chromium.org/p/chromium/issues/detail?id=1171989).
+        const errorMargin = /google/i.test(win.navigator.vendor) ? 3 : 0;
+        const shouldResize =
+          hasExpanded || scrollHeight <= minScrollHeight + errorMargin;
 
         if (shouldResize) {
           element.dataset[AMP_FORM_TEXTAREA_HAS_EXPANDED_DATA] = '';

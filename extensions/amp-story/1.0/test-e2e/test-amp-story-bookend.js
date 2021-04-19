@@ -15,12 +15,11 @@
  */
 
 import {Key} from '../../../../build-system/tasks/e2e/functional-test-controller';
-import sleep from 'sleep-promise';
 
 describes.endtoend(
   'amp story bookend',
   {
-    testUrl: 'http://localhost:8000/test/manual/amp-story/amp-story.amp.html',
+    fixture: 'amp-story/amp-story.amp.html',
     // TODO(estherkim): implement mobile emulation on Firefox when available on geckodriver
     browsers: ['chrome'],
     environments: ['single'],
@@ -29,6 +28,10 @@ describes.endtoend(
   async (env) => {
     /** @type {SeleniumWebDriverController} */
     let controller;
+
+    function sleep(ms) {
+      return new Promise((res) => setTimeout(res, ms));
+    }
 
     beforeEach(async () => {
       controller = env.controller;
@@ -51,7 +54,7 @@ describes.endtoend(
       ).to.exist;
     });
 
-    it('should copy the link using the bookend share menu', async () => {
+    it.skip('should copy the link using the bookend share menu', async () => {
       await goToBookend();
 
       const shadowHost = await controller.findElement(

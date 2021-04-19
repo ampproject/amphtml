@@ -150,9 +150,9 @@ The `amp-live-list` component has 3 sections. We'll refer to these sections as
 must be a direct child of the `amp-live-list` component. The 3 reference points
 are:
 
-- `update` (mandatory)
-- `items` (mandatory)
-- `pagination` (optional)
+-   `update` (mandatory)
+-   `items` (mandatory)
+-   `pagination` (optional)
 
 For more details, see the ["Reference Points"](#reference-points) section below.
 
@@ -265,7 +265,7 @@ If a `data-update-time` attribute is present and its value is a number higher
 than the original `data-sort-time` on the attribute, the item will be updated in
 place through a `replaceChild` operation. If a `data-tombstone` attribute is
 present the element's subtree will be emptied out and the item is hidden through
-css (see [amp-live-list.css](https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/0.1/amp-live-list.css)).
+css (see [amp-live-list.css](https://github.com/ampproject/amphtml/blob/main/extensions/amp-live-list/0.1/amp-live-list.css)).
 
 If a replace or tombstone operation is found but no insert (no new items) is
 found on a poll request, the replace and the tombstone operation will occur
@@ -426,5 +426,5 @@ point, and you can hook into this class to add transitions.
 
 ## Validation
 
-See [amp-live-list rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/validator-amp-live-list.protoascii)
+See [amp-live-list rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-live-list/validator-amp-live-list.protoascii)
 in the AMP validator specification.

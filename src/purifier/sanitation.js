@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {dict, map} from '../utils/object';
+import {dict, map} from '../core/types/object';
 import {isAmp4Email} from '../format';
 import {isUrlAttribute} from '../url-rewrite';
-import {startsWith} from '../string';
 
 /** @const {string} */
 export const BIND_PREFIX = 'data-amp-bind-';
@@ -48,7 +47,7 @@ export const DIFFABLE_AMP_ELEMENTS = {
  * @param {function(): string} generateKey
  */
 export function markElementForDiffing(element, generateKey) {
-  const isAmpElement = startsWith(element.tagName, 'AMP-');
+  const isAmpElement = element.tagName.startsWith('AMP-');
   // Don't DOM diff nodes with bindings because amp-bind scans newly rendered
   // elements and discards _all_ old elements _before_ diffing, so preserving
   // old elements would cause loss of functionality.
@@ -73,7 +72,7 @@ export function markElementForDiffing(element, generateKey) {
 
 /**
  * @const {!Object<string, boolean>}
- * @see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md
+ * @see https://github.com/ampproject/amphtml/blob/main/spec/amp-html-format.md
  */
 export const DENYLISTED_TAGS = {
   'applet': true,
@@ -96,7 +95,7 @@ export const DENYLISTED_TAGS = {
  * - amp-list and amp-state, which cannot be nested.
  * - amp-lightbox and amp-image-lightbox, which are deprecated.
  * @const {!Object<string, boolean>}
- * @see https://github.com/ampproject/amphtml/blob/master/spec/email/amp-email-components.md
+ * @see https://github.com/ampproject/amphtml/blob/main/spec/email/amp-email-components.md
  */
 export const EMAIL_ALLOWLISTED_AMP_TAGS = {
   'amp-accordion': true,
@@ -119,7 +118,11 @@ export const EMAIL_ALLOWLISTED_AMP_TAGS = {
  */
 export const TRIPLE_MUSTACHE_ALLOWLISTED_TAGS = [
   'a',
+  'amp-img',
+  'article',
+  'aside',
   'b',
+  'blockquote',
   'br',
   'caption',
   'code',
@@ -127,23 +130,36 @@ export const TRIPLE_MUSTACHE_ALLOWLISTED_TAGS = [
   'colgroup',
   'dd',
   'del',
+  'details',
   'div',
   'dl',
   'dt',
   'em',
+  'figcaption',
+  'figure',
+  'footer',
+  'h1',
+  'h2',
+  'h3',
+  'header',
   'hr',
   'i',
   'ins',
   'li',
+  'main',
   'mark',
+  'nav',
   'ol',
   'p',
+  'pre',
   'q',
   's',
+  'section',
   'small',
   'span',
   'strong',
   'sub',
+  'summary',
   'sup',
   'table',
   'tbody',
@@ -314,7 +330,7 @@ export function isValidAttr(
 
   if (!opt_purify) {
     // "on*" attributes are not allowed.
-    if (startsWith(attrName, 'on') && attrName != 'on') {
+    if (attrName.startsWith('on') && attrName != 'on') {
       return false;
     }
 

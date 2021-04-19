@@ -61,9 +61,9 @@ For performance, and to avoid the risk of unexpected content jumping, `amp-bind`
 
 In the example above:
 
-- The **state** begins as empty.
-- It has a single **binding** to `[text]`, the text content of a node, on the `<p>` element.
-- The `[text]` value contains the **expression**, `'Hello ' + foo`. This expression concatenates the string 'Hello ' and the value of the **state variable** foo.
+-   The **state** begins as empty.
+-   It has a single **binding** to `[text]`, the text content of a node, on the `<p>` element.
+-   The `[text]` value contains the **expression**, `'Hello ' + foo`. This expression concatenates the string 'Hello ' and the value of the **state variable** foo.
 
 When the user taps/clicks the button:
 
@@ -91,6 +91,9 @@ Calling `AMP.setState()` in some examples may set or change states of other exam
     .redBorder {
       border: 5px solid red;
     }
+    .defaultBorder {
+      border: 5px solid transparent;
+    }
   </style>
 </head>
 <body>
@@ -108,7 +111,7 @@ Calling `AMP.setState()` in some examples may set or change states of other exam
       }
     </script>
   </amp-state>
-  <div class="greenBorder" [class]="theFood[currentMeal].style">
+  <div class="defaultBorder" [class]="theFood[currentMeal].style || 'defaultBorder'">
     <p>Each food has a different border color.</p>
     <p [text]="'I want to eat ' + currentMeal + '.'">I want to eat cupcakes.</p>
     <amp-img
@@ -130,15 +133,15 @@ Calling `AMP.setState()` in some examples may set or change states of other exam
 
 In the example above:
 
-- The `<amp-state>` component declares state using JSON. The `<amp-state>` element has an `id` of `theFood` to allow us to reference the defined data. But because `<amp-bind>` does not evaluate `<amp-state>` on page load, the **state** is empty.
-- The page loads with visual defaults.
-  - The `<div>` element has `class="greenBorder"` defined.
-  - The second `<p>` element has "I want cupcakes." defined within the tags.
-  - The `<amp-img>` `src` points to a url.
-- Changeable elements have **bindings** that point to **expressions**.
-  - The `[class]` attribute on the `<div>` is bound to the `theFood[currentMeal].style` **expression**.
-  - The `[text]` attribute on the second `<p>` is bound to the `'I want to eat ' + currentMeal + '.'` **expression**.
-  - The `[src]` attribute is bound to the `theFood[currentMeal].imageUrl` **expression**.
+-   The `<amp-state>` component declares state using JSON. The `<amp-state>` element has an `id` of `theFood` to allow us to reference the defined data. But because `<amp-bind>` does not evaluate `<amp-state>` on page load, the **state** is empty.
+-   The page loads with visual defaults.
+    -   The `<div>` element has `class="greenBorder"` defined.
+    -   The second `<p>` element has "I want cupcakes." defined within the tags.
+    -   The `<amp-img>` `src` points to a url.
+-   Changeable elements have **bindings** that point to **expressions**.
+    -   The `[class]` attribute on the `<div>` is bound to the `theFood[currentMeal].style` **expression**.
+    -   The `[text]` attribute on the second `<p>` is bound to the `'I want to eat ' + currentMeal + '.'` **expression**.
+    -   The `[src]` attribute is bound to the `theFood[currentMeal].imageUrl` **expression**.
 
 If a user clicks the "Set to sushi" button:
 
@@ -151,10 +154,10 @@ If a user clicks the "Set to sushi" button:
 
 Using `[class]="theFood[currentMeal].style"` as an example of **expression** syntax evaluation:
 
-- `[class]` is the property to update.
-- `theFood` is the id of the `<amp-state>` component.
-- `currentMeal` is the state name. In the case of `theFood` it will be `cupcakes` or `sushi`.
-- `style` is the **state variable**. It corresponds to the matching JSON key, and sets the bound property to that key's value.
+-   `[class]` is the property to update.
+-   `theFood` is the id of the `<amp-state>` component.
+-   `currentMeal` is the state name. In the case of `theFood` it will be `cupcakes` or `sushi`.
+-   `style` is the **state variable**. It corresponds to the matching JSON key, and sets the bound property to that key's value.
 
 [/filter] <!-- formats="websites, ads" -->
 
@@ -197,14 +200,14 @@ Using `[class]="theFood[currentMeal].style"` as an example of **expression** syn
 
 [/example]
 
-- The `<amp-state>` component declares state using a JSON object. It has an `id` of `theFood` to allow us to reference the defined data. But because `<amp-bind>` does not evaluate `<amp-state>` on email load, the **state** is empty.
-- The page loads with visual defaults.
-- The `<div>` element has `class="greenBorder"` defined.
-- The second `<p>` element has "I want cupcakes." defined within the tags.
-- The `<amp-img>` `src` points to a url.
-- Changeable elements have **bindings** that point to **expressions**.
-- The `[class]` attribute on the `<div>` is bound to the `theFood[currentMeal].style` **expression**.
-- The `[text]` attribute on the second `<p>` is bound to the `theFood[currentMeal].text` **expression**.
+-   The `<amp-state>` component declares state using a JSON object. It has an `id` of `theFood` to allow us to reference the defined data. But because `<amp-bind>` does not evaluate `<amp-state>` on email load, the **state** is empty.
+-   The page loads with visual defaults.
+-   The `<div>` element has `class="greenBorder"` defined.
+-   The second `<p>` element has "I want cupcakes." defined within the tags.
+-   The `<amp-img>` `src` points to a url.
+-   Changeable elements have **bindings** that point to **expressions**.
+-   The `[class]` attribute on the `<div>` is bound to the `theFood[currentMeal].style` **expression**.
+-   The `[text]` attribute on the second `<p>` is bound to the `theFood[currentMeal].text` **expression**.
 
 If a user clicks the "Set to sushi" button:
 
@@ -216,10 +219,10 @@ If a user clicks the "Set to sushi" button:
 
 Using `[class]="theFood[currentMeal].style"` as an example of **expression** syntax evaluation:
 
-- `[class]` is the property to update
-- `theFood` is the id of the `<amp-state>` component.
-- `currentMeal` is the state name. In the case of `theFood` it will be `cupcakes` or `sushi`.
-- `style` is the **state variable**. It corresponds to the matching JSON key, and sets the bound property to that key's value.
+-   `[class]` is the property to update
+-   `theFood` is the id of the `<amp-state>` component.
+-   `currentMeal` is the state name. In the case of `theFood` it will be `cupcakes` or `sushi`.
+-   `style` is the **state variable**. It corresponds to the matching JSON key, and sets the bound property to that key's value.
 
 [/filter] <!-- formats="email" -->
 
@@ -277,8 +280,8 @@ The endpoint must implement the requirements specified in the [CORS Requests in 
 
 Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
 
-- Supported values: `omit`, `include`
-- Default: `omit`
+-   Supported values: `omit`, `include`
+-   Default: `omit`
 
 To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests/#cors-security-in-amp).
 
@@ -540,12 +543,12 @@ Using `AMP.pushState()` sets the current state to the most recent pushed state.
 
 ### Differences from JavaScript
 
-- Expressions may only access the containing document's [state](#state).
-- Expressions **do not** have access to `window` or `document`. `global` references the top-level state.
-- Only `amp-bind` [allowed-listed functions](#allowed-listed functions) and operators are usable. are usable. Use of arrow functions are allowed as function parameters, e.g. `[1, 2, 3].map(x => x + 1)`.
-  - Custom functions, classes and loops are disallowed.
-- Undefined variables and array-index-out-of-bounds return `null` instead of `undefined` or throwing errors.
-- A single expression is currently capped at 50 operands for performance. Please [contact us](https://github.com/ampproject/amphtml/issues/new) if this is insufficient for your use case.
+-   Expressions may only access the containing document's [state](#state).
+-   Expressions **do not** have access to `window` or `document`. `global` references the top-level state.
+-   Only `amp-bind` [allowlisted functions](#allowlisted-functions) and operators are usable. are usable. Use of arrow functions are allowed as function parameters, e.g. `[1, 2, 3].map(x => x + 1)`.
+    -   Custom functions, classes and loops are disallowed.
+-   Undefined variables and array-index-out-of-bounds return `null` instead of `undefined` or throwing errors.
+-   A single expression is currently capped at 50 operands for performance. Please [contact us](https://github.com/ampproject/amphtml/issues/new) if this is insufficient for your use case.
 
 The following are all valid expressions:
 
@@ -579,24 +582,24 @@ The following are all valid expressions:
 
 Find the full expression grammar and implementation in [bind-expr-impl.jison](./0.1/bind-expr-impl.jison) and [bind-expression.js](./0.1/bind-expression.js).
 
-### Allowed-listed functions
+### Allowlisted functions
 
 #### [`Array`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods)
 
 Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` instead of `(x) => x + 1`. `sort()` and `splice()` return modified copies instead of operating in-place.
 
-- [concat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/concat)
-- [filter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)
-- [includes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/includes)
-- [indexOf](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf)
-- [join](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/join)
-- [lastIndexOf](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/lastIndexOf)
-- [map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
-- [reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)
-- [slice](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice)
-- [some](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
-- [sort](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)
-- [splice](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice) (not-in-place)
+-   [concat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/concat)
+-   [filter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)
+-   [includes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/includes)
+-   [indexOf](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf)
+-   [join](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/join)
+-   [lastIndexOf](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/lastIndexOf)
+-   [map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
+-   [reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)
+-   [slice](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice)
+-   [some](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
+-   [sort](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)
+-   [splice](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice) (not-in-place)
 
 [example preview="inline" playground="true" imports="amp-bind"]
 
@@ -649,10 +652,10 @@ Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` i
 
 #### [`Number`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number#Methods)
 
-- [toExponential](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toExponential)
-- [toFixed](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toFixed)
-- [toPrecision](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toPrecision)
-- [toString](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toString)
+-   [toExponential](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toExponential)
+-   [toFixed](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toFixed)
+-   [toPrecision](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toPrecision)
+-   [toString](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toString)
 
 [example preview="inline" playground="true" imports="amp-bind"]
 
@@ -676,17 +679,17 @@ Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` i
 
 #### [`String`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String#Methods)
 
-- [charAt](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/charAt)
-- [charCodeAt](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/charCodeAt)
-- [concat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/concat)
-- [indexOf](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/indexOf)
-- [lastIndexOf](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/indexOf)
-- [replace](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace)
-- [slice](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/slice)
-- [split](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/split)
-- [substr](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substr)
-- [toLowerCase](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/toLowerCase)
-- [toUpperCase](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/toUpperCase)
+-   [charAt](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/charAt)
+-   [charCodeAt](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/charCodeAt)
+-   [concat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/concat)
+-   [indexOf](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/indexOf)
+-   [lastIndexOf](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/indexOf)
+-   [replace](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace)
+-   [slice](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/slice)
+-   [split](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/split)
+-   [substr](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substr)
+-   [toLowerCase](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/toLowerCase)
+-   [toUpperCase](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/toUpperCase)
 
 [example preview="inline" playground="true" imports="amp-bind"]
 
@@ -735,15 +738,15 @@ Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` i
 
 Static functions are not namespaced, e.g. use `abs(-1)` instead of `Math.abs(-1)`
 
-- [abs](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/abs)
-- [ceil](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/ceil)
-- [floor](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/floor)
-- [max](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/max)
-- [min](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/min)
-- [pow](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/pow)
-- [random](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random)
-- [round](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round)
-- [sign](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/sign)
+-   [abs](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/abs)
+-   [ceil](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/ceil)
+-   [floor](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/floor)
+-   [max](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/max)
+-   [min](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/min)
+-   [pow](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/pow)
+-   [random](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random)
+-   [round](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round)
+-   [sign](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/sign)
 
 [example preview="inline" playground="true" imports="amp-bind"]
 
@@ -770,8 +773,8 @@ Static functions are not namespaced, e.g. use `abs(-1)` instead of `Math.abs(-1)
 
 Static functions are not namespaced, e.g. use `keys(Object)` instead of `Object.abs(Object)`
 
-- [keys](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys)
-- [values](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values)
+-   [keys](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys)
+-   [values](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values)
 
 [example preview="inline" playground="true" imports="amp-bind"]
 
@@ -797,8 +800,8 @@ Static functions are not namespaced, e.g. use `keys(Object)` instead of `Object.
 
 #### [`Global`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects)
 
-- [encodeURI](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI)
-- [encodeURIComponent](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent)
+-   [encodeURI](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI)
+-   [encodeURIComponent](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent)
 
 [example preview="inline" playground="true" imports="amp-bind"]
 
@@ -848,7 +851,7 @@ A macro can also call other macros <i>defined before itself</i>. A macro cannot 
 
 ## Bindings
 
-A **binding** is a special attribute of the form `[property]` that links an element's property to an [expression](#expressions). Use the alternative,[XML-compatible](#xml-compatibility) syntax if developing in XML.
+A **binding** is a special attribute of the form `[property]` that links an element's property to an [expression](#expressions). Use the alternative,[XML-compatible](#react-and-xml-compatibility) syntax if developing in XML.
 
 When the **state** changes, expressions tied to that state are evaluated. The element properties **bound** to the **state** are updated with the new expression results.
 
@@ -1007,18 +1010,18 @@ Some AMP components and HTML elements have specific bindable attributes. They ar
 
 **`<amp-brightcove>`**
 
-- `[data-account]`
-- `[data-embed]`
-- `[data-player]`
-- `[data-player-id]`
-- `[data-playlist-id]`
-- `[data-video-id]` Changes the displayed Brightcove video.
+-   `[data-account]`
+-   `[data-embed]`
+-   `[data-player]`
+-   `[data-player-id]`
+-   `[data-playlist-id]`
+-   `[data-video-id]` Changes the displayed Brightcove video.
 
 [/filter] <!-- formats="websites" -->
 
 **`<amp-carousel type=slides>`**
 
-- `[slide]` Changes the currently displayed slide index.
+-   `[slide]` Changes the currently displayed slide index.
 
 [See an example](https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind).
 
@@ -1026,27 +1029,27 @@ Some AMP components and HTML elements have specific bindable attributes. They ar
 
 **`<amp-date-picker>`**
 
-- `[min]` Sets the earliest selectable date
-- `[max]` Sets the latest selectable date
+-   `[min]` Sets the earliest selectable date
+-   `[max]` Sets the latest selectable date
 
 **`<amp-google-document-embed>`**
 
-- `[src]` Displays the document at the updated URL.
-- `[title]` Changes the document's title.
+-   `[src]` Displays the document at the updated URL.
+-   `[title]` Changes the document's title.
 
 **`<amp-iframe>`**
 
-- `[src]` Changes the iframe's source URL.
+-   `[src]` Changes the iframe's source URL.
 
 [/filter] <!-- formats="websites" -->
 [filter formats="websites, ads"]
 
 **`<amp-img>`**
 
-- `[alt]`
-- `[attribution]`
-- `[src]`
-- `[srcset]`
+-   `[alt]`
+-   `[attribution]`
+-   `[src]`
+-   `[srcset]`
 
 Bind to `[srcset]` instead of `[src]` to support responsive images. See corresponding [`amp-img` attributes](../../builtins/amp-img.md#attributes).
 [/filter] <!-- formats="websites, ads" -->
@@ -1054,14 +1057,14 @@ Bind to `[srcset]` instead of `[src]` to support responsive images. See correspo
 
 **`<amp-img>`**
 
-- `[alt]`
-- `[attribution]`
+-   `[alt]`
+-   `[attribution]`
 
 [/filter] <!-- formats="email" -->
 
 **`<amp-lightbox>`**
 
-- `[open]` Toggles display of the lightbox.
+-   `[open]` Toggles display of the lightbox.
 
 [tip type="default"]
 Use `on="lightboxClose: AMP.setState(...)"` to update variables when the lightbox is closed.
@@ -1071,7 +1074,7 @@ Use `on="lightboxClose: AMP.setState(...)"` to update variables when the lightbo
 
 **`<amp-list>`**
 
-- `[src]`
+-   `[src]`
 
 If the expression is a string, it fetches and renders JSON from the string URL. If the expression is an object or array, it renders the expression data.
 
@@ -1081,8 +1084,8 @@ If the expression is a string, it fetches and renders JSON from the string URL. 
 
 **`<amp-selector>`**
 
-- `[selected]` Changes the currently selected children element(s) identified by their `option` attribute values. Supports a comma-separated list of values for multiple selection. [See an example](https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/?format=email#linking-carousels-with-amp-bind).
-- `[disabled]`
+-   `[selected]` Changes the currently selected children element(s) identified by their `option` attribute values. Supports a comma-separated list of values for multiple selection. [See an example](https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/?format=email#linking-carousels-with-amp-bind).
+-   `[disabled]`
 
 [tip type="note"]
 `[selected]` does not have a non-bindable attribute. The AMP Validator will throw an error if `selected` is used.
@@ -1094,7 +1097,7 @@ If the expression is a string, it fetches and renders JSON from the string URL. 
 
 **`<amp-state>`**
 
-- `[src]`
+-   `[src]`
 
 Fetches JSON from the new URL and merges it into the existing state. The following update will ignore `<amp-state>`elements to prevent cycles.
 
@@ -1104,7 +1107,7 @@ Fetches JSON from the new URL and merges it into the existing state. The followi
 
 **`<amp-twitter>`**
 
-- `[data-tweetid]` Changes the displayed Tweet.
+-   `[data-tweetid]` Changes the displayed Tweet.
 
 [/filter] <!-- formats="websites" -->
 
@@ -1112,13 +1115,13 @@ Fetches JSON from the new URL and merges it into the existing state. The followi
 
 **`<amp-video>`**
 
-- `[alt]`
-- `[attribution]`
-- `[controls]`
-- `[loop]`
-- `[poster]`
-- `[preload]`
-- `[src]`
+-   `[alt]`
+-   `[attribution]`
+-   `[controls]`
+-   `[loop]`
+-   `[poster]`
+-   `[preload]`
+-   `[src]`
 
 See corresponding [`amp-video` attributes](../amp-video/amp-video.md#attributes).
 [/filter] <!-- formats="websites, ads" -->
@@ -1127,7 +1130,7 @@ See corresponding [`amp-video` attributes](../amp-video/amp-video.md#attributes)
 
 **`<amp-youtube>`**
 
-- `[data-videoid]` Changes the displayed YouTube video.
+-   `[data-videoid]` Changes the displayed YouTube video.
 
 [/filter] <!-- formats="websites, ads" -->
 
@@ -1137,13 +1140,13 @@ See corresponding [`amp-video` attributes](../amp-video/amp-video.md#attributes)
 
 **`<a>`**
 
-- `[href]` Changes the link.
+-   `[href]` Changes the link.
 
 **`<button>`**
 
-- `[disabled]`
-- `[type]`
-- `[value]`
+-   `[disabled]`
+-   `[type]`
+-   `[value]`
 
 [/filter] <!-- formats="websites, ads" -->
 
@@ -1151,8 +1154,8 @@ See corresponding [`amp-video` attributes](../amp-video/amp-video.md#attributes)
 
 **`<button>`**
 
-- `[disabled]`
-- `[value]`
+-   `[disabled]`
+-   `[value]`
 
 See corresponding [button attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Attributes).
 
@@ -1160,17 +1163,17 @@ See corresponding [button attributes](https://developer.mozilla.org/en-US/docs/W
 
 **`<details>`**
 
-- `[open]`
+-   `[open]`
 
 See corresponding [details attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details#Attributes).
 
 **`<fieldset>`**
 
-- `[disabled]` Enables or disables the fieldset.
+-   `[disabled]` Enables or disables the fieldset.
 
 **`<image>`**
 
-- `[xlink:href]`
+-   `[xlink:href]`
 
 See corresponding [image attributes](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/image).
 
@@ -1178,27 +1181,27 @@ See corresponding [image attributes](https://developer.mozilla.org/en-US/docs/We
 
 **`<input>`**
 
-- `[accept]`
-- `[accessKey]`
-- `[autocomplete]`
-- `[checked]`
-- `[disabled]`
-- `[height]`
-- `[inputmode]`
-- `[max]`
-- `[maxlength]`
-- `[multiple]`
-- `[pattern]`
-- `[placeholder]`
-- `[readonly]`
-- `[required]`
-- `[selectiondirection]`
-- `[size]`
-- `[spellcheck]`
-- `[step]`
-- `[type]`
-- `[value]`
-- `[width]`
+-   `[accept]`
+-   `[accessKey]`
+-   `[autocomplete]`
+-   `[checked]`
+-   `[disabled]`
+-   `[height]`
+-   `[inputmode]`
+-   `[max]`
+-   `[maxlength]`
+-   `[multiple]`
+-   `[pattern]`
+-   `[placeholder]`
+-   `[readonly]`
+-   `[required]`
+-   `[selectiondirection]`
+-   `[size]`
+-   `[spellcheck]`
+-   `[step]`
+-   `[type]`
+-   `[value]`
+-   `[width]`
 
 See corresponding [input attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#Attributes).
 
@@ -1208,21 +1211,21 @@ See corresponding [input attributes](https://developer.mozilla.org/en-US/docs/We
 
 **`<input>`**
 
-- `[autocomplete]`
-- `[disabled]`
-- `[height]`
-- `[max]`
-- `[maxlength]`
-- `[multiple]`
-- `[pattern]`
-- `[placeholder]`
-- `[readonly]`
-- `[required]`
-- `[size]`
-- `[spellcheck]`
-- `[step]`
-- `[value]`
-- `[width]`
+-   `[autocomplete]`
+-   `[disabled]`
+-   `[height]`
+-   `[max]`
+-   `[maxlength]`
+-   `[multiple]`
+-   `[pattern]`
+-   `[placeholder]`
+-   `[readonly]`
+-   `[required]`
+-   `[size]`
+-   `[spellcheck]`
+-   `[step]`
+-   `[value]`
+-   `[width]`
 
 See corresponding [input attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#Attributes).
 
@@ -1230,33 +1233,33 @@ See corresponding [input attributes](https://developer.mozilla.org/en-US/docs/We
 
 **`<option>`**
 
-- `[disabled]`
-- `[label]`
-- `[selected]`
-- `[value]`
+-   `[disabled]`
+-   `[label]`
+-   `[selected]`
+-   `[value]`
 
 See corresponding [option attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option#Attributes).
 
 **`<optgroup>`**
 
-- `[disabled]`
-- `[label]`
+-   `[disabled]`
+-   `[label]`
 
 See corresponding [optgroup attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/optgroup#Attributes).
 
 **`<section>`**
 
-- `[data-expand]` Changes the expansion of a `section` in an [`amp-accordion`](../amp-accordion/amp-accordion.md).
+-   `[data-expand]` Changes the expansion of a `section` in an [`amp-accordion`](../amp-accordion/amp-accordion.md).
 
 [filter formats="websites, ads"]
 
 **`<select>`**
 
-- `[autofocus]`
-- `[disabled]`
-- `[multiple]`
-- `[required]`
-- `[size]`
+-   `[autofocus]`
+-   `[disabled]`
+-   `[multiple]`
+-   `[required]`
+-   `[size]`
 
 See corresponding [select attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select#Attributes).
 
@@ -1266,10 +1269,10 @@ See corresponding [select attributes](https://developer.mozilla.org/en-US/docs/W
 
 **`<select>`**
 
-- `[disabled]`
-- `[multiple]`
-- `[required]`
-- `[size]`
+-   `[disabled]`
+-   `[multiple]`
+-   `[required]`
+-   `[size]`
 
 See corresponding [select attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select#Attributes).
 
@@ -1279,16 +1282,16 @@ See corresponding [select attributes](https://developer.mozilla.org/en-US/docs/W
 
 **`<source>`**
 
-- `[src]`
-- `[type]`
+-   `[src]`
+-   `[type]`
 
 See corresponding [source attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/source#Attributes).
 
 **`<track>`**
 
-- [label]
-- [src]
-- [srclang]
+-   [label]
+-   [src]
+-   [srclang]
 
 See corresponding [track attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track#Attributes).
 
@@ -1298,22 +1301,22 @@ See corresponding [track attributes](https://developer.mozilla.org/en-US/docs/We
 
 **`<textarea>`**
 
-- `[autocomplete]`
-- `[autofocus]`
-- `[cols]`
-- `[disabled]`
-- `[defaultText]`
-- `[maxlength]`
-- `[minlength]`
-- `[placeholder]`
-- `[readonly]`
-- `[required]`
-- `[rows]`
-- `[selectiondirection]`
-- `[selectionend]`
-- `[selectionstart]`
-- `[spellcheck]`
-- `[wrap]`
+-   `[autocomplete]`
+-   `[autofocus]`
+-   `[cols]`
+-   `[disabled]`
+-   `[defaultText]`
+-   `[maxlength]`
+-   `[minlength]`
+-   `[placeholder]`
+-   `[readonly]`
+-   `[required]`
+-   `[rows]`
+-   `[selectiondirection]`
+-   `[selectionend]`
+-   `[selectionstart]`
+-   `[spellcheck]`
+-   `[wrap]`
 
 Use `[defaultText]` to update initial text, and `[text]` to update current text. See corresponding [textarea attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes).
 
@@ -1323,18 +1326,18 @@ Use `[defaultText]` to update initial text, and `[text]` to update current text.
 
 **`<textarea>`**
 
-- `[autocomplete]`
-- `[cols]`
-- `[disabled]`
-- `[defaultText]`
-- `[maxlength]`
-- `[minlength]`
-- `[placeholder]`
-- `[readonly]`
-- `[required]`
-- `[rows]`
-- `[spellcheck]`
-- `[wrap]`
+-   `[autocomplete]`
+-   `[cols]`
+-   `[disabled]`
+-   `[defaultText]`
+-   `[maxlength]`
+-   `[minlength]`
+-   `[placeholder]`
+-   `[readonly]`
+-   `[required]`
+-   `[rows]`
+-   `[spellcheck]`
+-   `[wrap]`
 
 Use `[defaultText]` to update initial text, and `[text]` to update current text. See corresponding [textarea attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes).
 
@@ -1393,7 +1396,7 @@ Below outlines the types of errors that may arise when working with `amp-bind`.
   <tr>
     <td class="col-thirty">Invalid binding</td>
     <td class="col-fourty"><em>Binding to [foo] on &lt;P> is not allowed</em>.</td>
-    <td class="col-thirty">Use only <a href="#element-specific-attributes">white-listed bindings</a>.</td>
+    <td class="col-thirty">Use only <a href="#amp-component-specific-attributes">allowlisted bindings</a>.</td>
   </tr>
   <tr>
     <td>Syntax error</td>

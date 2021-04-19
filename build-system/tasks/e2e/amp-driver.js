@@ -18,11 +18,11 @@
 const AmpdocEnvironment = {
   SINGLE: 'single',
   VIEWER_DEMO: 'viewer-demo',
+  EMAIL_DEMO: 'email-demo',
   SHADOW_DEMO: 'shadow-demo',
 
   // AMPHTML ads environments
   A4A_FIE: 'a4a-fie',
-  A4A_FIE_NO_SIGNING: 'a4a-fie-no-signing',
   A4A_INABOX: 'a4a-inabox',
   A4A_INABOX_FRIENDLY: 'a4a-inabox-friendly',
   A4A_INABOX_SAFEFRAME: 'a4a-inabox-safeframe',
@@ -50,21 +50,18 @@ const EnvironmentBehaviorMap = {
     },
 
     url(url) {
-      const defaultCaps = [
-        'a2a',
-        'focus-rect',
-        'foo',
-        'keyboard',
-        'swipe',
-        'iframeScroll',
-      ];
-      // Correctly append extra params in original url
-      url = url.replace('#', '&');
-      // TODO(estherkim): somehow allow non-8000 port and domain
-      return (
-        `http://localhost:8000/test/fixtures/e2e/amp-viewer-integration/viewer.html#href=${url}` +
-        `&caps=${defaultCaps.join(',')}`
-      );
+      return getViewerUrl(url);
+    },
+  },
+
+  [AmpdocEnvironment.EMAIL_DEMO]: {
+    ready(controller) {
+      return controller
+        .findElement('#viewer[data-loaded]')
+        .then((frame) => controller.switchToFrame(frame));
+    },
+    url(url) {
+      return getViewerUrl(url, {isEmail: true});
     },
   },
 
@@ -96,21 +93,6 @@ const EnvironmentBehaviorMap = {
 
     url(url) {
       return url.replace(HOST, HOST + '/a4a');
-    },
-  },
-
-  [AmpdocEnvironment.A4A_FIE_NO_SIGNING]: {
-    async ready(controller) {
-      return controller
-        .findElement('amp-ad > iframe')
-        .then((frame) => controller.switchToFrame(frame));
-    },
-
-    url(url) {
-      const a4aUrl = url.replace(HOST, HOST + '/a4a');
-      // Exp value is from extensions/amp-a4a/0.1/amp-a4a.js
-      // NO_SIGNING_EXP.experiment
-      return `${a4aUrl}?eid=a4a-no-signing:21066325`;
     },
   },
 
@@ -152,11 +134,35 @@ const EnvironmentBehaviorMap = {
 };
 
 /**
+ * @param {string} url
+ * @param {{isEmail: boolean}=} opts
+ * @return {string}
+ */
+function getViewerUrl(url, {isEmail} = {isEmail: false}) {
+  const defaultCaps = [
+    'a2a',
+    'focus-rect',
+    'foo',
+    'keyboard',
+    'swipe',
+    'iframeScroll',
+  ];
+  // Correctly append extra params in original url
+  url = url.replace('#', '&');
+  // TODO(estherkim): somehow allow non-8000 port and domain
+  return (
+    `http://localhost:8000/test/fixtures/e2e/amp-viewer-integration/viewer.html#href=${url}` +
+    `&caps=${defaultCaps.join(',')}` +
+    `&isEmail=${isEmail}`
+  );
+}
+
+/**
  * Provides AMP-related utilities for E2E Functional Tests.
  */
 class AmpDriver {
   /**
-   * @param {!../functional-test-controller.FunctionalTestController} controller
+   * @param {!./functional-test-controller.FunctionalTestController} controller
    */
   constructor(controller) {
     /** @private @const */

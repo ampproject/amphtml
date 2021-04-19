@@ -17,7 +17,7 @@
 describes.endtoend(
   'amp-video autoplay with control',
   {
-    testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-video/autoplay.html',
+    fixture: 'amp-video/autoplay.html',
     environments: 'amp4ads-preset',
   },
   (env) => {

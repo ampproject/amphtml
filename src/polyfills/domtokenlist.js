@@ -24,11 +24,14 @@
  * @return {boolean}
  */
 function domTokenListTogglePolyfill(token, opt_force) {
+  // eslint-disable-next-line local/no-invalid-this
   const remove = opt_force === undefined ? this.contains(token) : !opt_force;
   if (remove) {
+    // eslint-disable-next-line local/no-invalid-this
     this.remove(token);
     return false;
   } else {
+    // eslint-disable-next-line local/no-invalid-this
     this.add(token);
     return true;
   }

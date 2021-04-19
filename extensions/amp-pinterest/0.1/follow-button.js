@@ -17,7 +17,7 @@
 import {Util} from './util';
 import {assertHttpsUrl} from '../../../src/url';
 import {openWindowDialog} from '../../../src/dom';
-import {tryResolve} from '../../../src/utils/promise';
+import {tryResolve} from '../../../src/core/data-structures/promise';
 
 import {userAssert} from '../../../src/log';
 
@@ -89,5 +89,14 @@ export class FollowButton {
     this.href += `pins/follow/?guid=${Util.guid}`;
 
     return tryResolve(() => this.renderTemplate());
+  }
+
+  /**
+   * Determine the height of the contents to allow resizing after first layout.
+   *
+   * @return {!Promise<number|null>}
+   */
+  height() {
+    return Promise.resolve(null);
   }
 }

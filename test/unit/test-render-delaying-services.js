@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import * as service from '../../src/service';
 import {createIframePromise} from '../../testing/iframe';
 import {
@@ -49,7 +49,7 @@ describe('waitForServices', () => {
 
     return createIframePromise().then((iframe) => {
       win = iframe.win;
-      clock = lolex.install({target: win});
+      clock = fakeTimers.withGlobal(win).install();
     });
   });
 

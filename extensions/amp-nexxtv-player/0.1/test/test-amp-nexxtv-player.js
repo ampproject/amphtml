@@ -16,6 +16,7 @@
 
 import '../amp-nexxtv-player';
 import {VideoEvents} from '../../../../src/video-interface';
+import {createElementWithAttributes} from '../../../../src/dom';
 import {listenOncePromise} from '../../../../src/event-helper';
 
 describes.realWin(
@@ -33,89 +34,86 @@ describes.realWin(
       doc = win.document;
     });
 
-    async function getNexxtv(attributes, opt_responsive) {
-      const nexxtv = doc.createElement('amp-nexxtv-player');
-
-      for (const key in attributes) {
-        nexxtv.setAttribute(key, attributes[key]);
-      }
-      nexxtv.setAttribute('width', '111');
-      nexxtv.setAttribute('height', '222');
-      if (opt_responsive) {
-        nexxtv.setAttribute('layout', 'responsive');
-      }
-      doc.body.appendChild(nexxtv);
-      await nexxtv.build();
-      await nexxtv.layoutCallback();
-      const nexxTimerIframe = nexxtv.querySelector('iframe');
-      nexxtv.implementation_.handleNexxMessage_({
+    async function getNexxtvPlayer(attributes) {
+      const element = createElementWithAttributes(doc, 'amp-nexxtv-player', {
+        width: 111,
+        height: 222,
+        ...attributes,
+        // Use a blank page, since these tests don't require an actual page.
+        // hash # at the end so path is not affected by param concat
+        'data-origin': `http://localhost:${location.port}/test/fixtures/served/blank.html#`,
+      });
+      doc.body.appendChild(element);
+      await element.buildInternal();
+      await element.layoutCallback();
+      const impl = await element.getImpl(false);
+      const iframe = element.querySelector('iframe');
+      impl.handleNexxMessage_({
         origin: 'https://embed.nexx.cloud',
-        source: nexxTimerIframe.contentWindow,
+        source: iframe.contentWindow,
         data: JSON.stringify({cmd: 'onload'}),
       });
-      return nexxtv;
+      return element;
     }
 
     it('renders nexxtv video player', async () => {
-      const nexxtv = await getNexxtv({
+      const element = await getNexxtvPlayer({
         'data-mediaid': '71QQG852413DU7J',
         'data-client': '761',
       });
-      const playerIframe = nexxtv.querySelector('iframe');
+      const playerIframe = element.querySelector('iframe');
       expect(playerIframe).to.not.be.null;
-      expect(playerIframe.src).to.equal(
-        'https://embed.nexx.cloud/761/video/' +
-          '71QQG852413DU7J?dataMode=static&platform=amp'
-      );
-    });
-
-    it('renders player responsive', async () => {
-      const nexxtv = await getNexxtv({
-        'data-mediaid': '71QQG852413DU7J',
-        'data-client': '761',
-      });
-      const playerIframe = nexxtv.querySelector('iframe');
-      expect(playerIframe).to.not.be.null;
-      expect(playerIframe.className).to.match(/i-amphtml-fill-content/);
+      expect(playerIframe.src)
+        .to.be.a('string')
+        .and.match(
+          new RegExp(
+            element.getAttribute('data-client') +
+              '/video/' +
+              element.getAttribute('data-mediaid') +
+              '\\?dataMode=static&platform=amp' +
+              '$' // suffix
+          )
+        );
     });
 
     it('removes iframe after unlayoutCallback', async () => {
-      const nexxtv = await getNexxtv({
+      const nexxtv = await getNexxtvPlayer({
         'data-mediaid': '71QQG852413DU7J',
         'data-client': '761',
       });
       const playerIframe = nexxtv.querySelector('iframe');
       expect(playerIframe).to.not.be.null;
 
-      const obj = nexxtv.implementation_;
+      const obj = await nexxtv.getImpl(false);
       obj.unlayoutCallback();
       expect(nexxtv.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;
     });
 
     it('should forward events from nexxtv-player to the amp element', async () => {
-      const nexxtv = await getNexxtv({
+      const nexxtv = await getNexxtvPlayer({
         'data-mediaid': '71QQG852413DU7J',
         'data-client': '761',
       });
       const iframe = nexxtv.querySelector('iframe');
       await Promise.resolve();
       const p1 = listenOncePromise(nexxtv, VideoEvents.PLAYING);
-      sendFakeMessage(nexxtv, iframe, {event: 'play'});
+      await sendFakeMessage(nexxtv, iframe, {event: 'play'});
       await p1;
       const p2 = listenOncePromise(nexxtv, VideoEvents.MUTED);
-      sendFakeMessage(nexxtv, iframe, {event: 'mute'});
+      await sendFakeMessage(nexxtv, iframe, {event: 'mute'});
       await p2;
       const p3 = listenOncePromise(nexxtv, VideoEvents.PAUSE);
-      sendFakeMessage(nexxtv, iframe, {event: 'pause'});
+      await sendFakeMessage(nexxtv, iframe, {event: 'pause'});
       await p3;
       const p4 = listenOncePromise(nexxtv, VideoEvents.UNMUTED);
-      sendFakeMessage(nexxtv, iframe, {event: 'unmute'});
+      await sendFakeMessage(nexxtv, iframe, {event: 'unmute'});
       return p4;
     });
 
-    function sendFakeMessage(nexxtv, iframe, command) {
-      nexxtv.implementation_.handleNexxMessage_({
+    async function sendFakeMessage(nexxtv, iframe, command) {
+      const impl = await nexxtv.getImpl(false);
+      impl.handleNexxMessage_({
         origin: 'https://embed.nexx.cloud',
         source: iframe.contentWindow,
         data: command,

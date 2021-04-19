@@ -17,7 +17,7 @@ import '../amp-next-page';
 import {PageState} from '../page';
 import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';
 import {Services} from '../../../../src/services';
-import {VisibilityState} from '../../../../src/visibility-state';
+import {VisibilityState} from '../../../../src/core/constants/visibility-state';
 import {htmlFor} from '../../../../src/static-template';
 import {setStyle} from '../../../../src/style';
 
@@ -120,7 +120,7 @@ describes.realWin(
         options.scrollTop != undefined ? options.scrollTop : 1;
 
       if (waitForLayout) {
-        await element.build();
+        await element.buildInternal();
         await element.layoutCallback();
       }
 
@@ -175,7 +175,7 @@ describes.realWin(
           false /** waitForLayout */
         );
         await allowConsoleError(() =>
-          element.build().catch((err) => {
+          element.buildInternal().catch((err) => {
             expect(err.message).to.include(
               'amp-next-page Page list expected an array, found: object: [object Object]'
             );
@@ -248,7 +248,7 @@ describes.realWin(
           });
         const service = Services.nextPageServiceForDoc(doc);
 
-        await element.build();
+        await element.buildInternal();
         await element.layoutCallback();
 
         expect(
@@ -457,11 +457,11 @@ describes.realWin(
       });
 
       it('awaits first scroll', async () => {
-        element.build();
-        await Promise.resolve();
+        element.buildInternal();
+        await new Promise(setTimeout);
         expect(service.pages_.length).to.equal(1);
         win.dispatchEvent(new Event('scroll'));
-        await Promise.resolve();
+        await new Promise(setTimeout);
         expect(service.pages_.length).to.equal(3);
       });
     });
@@ -639,11 +639,7 @@ describes.realWin(
       });
 
       it('renders a custom separator correctly', async () => {
-        const separator = html`
-          <div separator>
-            Custom separator
-          </div>
-        `;
+        const separator = html` <div separator>Custom separator</div> `;
 
         element = await getAmpNextPage({
           inlineConfig: VALID_CONFIG,

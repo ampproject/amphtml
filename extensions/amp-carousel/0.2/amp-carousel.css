@@ -44,6 +44,10 @@ amp-carousel:not([type="slides"]) .i-amphtml-carousel-content {
   margin-inline-end: 0;
 }
 
+.amp-scrollable-carousel-slide.i-amphtml-layout-responsive {
+  width: 100%
+}
+
 .amp-scrollable-carousel-slide:first-child {
   margin-left: 0px;
   margin-inline-start: 0;
@@ -93,11 +97,20 @@ amp-carousel:not([type="slides"]) .i-amphtml-carousel-content {
   pointer-events: all;
 }
 
+.amp-carousel-button:focus {
+  border: 1px black solid;
+  outline: 1px white solid;
+}
+
 .amp-carousel-button.amp-disabled {
   animation: none;
-  opacity: 0;
-  visibility: hidden;
   pointer-events: none;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 1px;
 }
 
 .amp-carousel-button-prev {

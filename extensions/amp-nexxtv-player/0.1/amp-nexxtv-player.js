@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
@@ -24,8 +25,9 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
+  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
@@ -58,6 +60,9 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.playerReadyResolver_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -137,11 +142,6 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
-  }
-
-  /** @override */
   layoutCallback() {
     const iframe = createFrameFor(this, this.getVideoIframeSrc_());
 
@@ -153,23 +153,18 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
     this.element.appendChild(this.iframe_);
     const loaded = this.loadPromise(this.iframe_).then(() => {
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      dispatchCustomEvent(this.element, VideoEvents.LOAD);
     });
     this.playerReadyResolver_(loaded);
+
+    this.pauseHelper_.updatePlaying(true);
+
     return loaded;
   }
 
   /** @override */
   pauseCallback() {
-    if (this.iframe_) {
-      this.pause();
-    }
-  }
-
-  /** @override */
-  unlayoutOnPause() {
-    // TODO(aghassemi, #8264): Temp until #8264 is fixed.
-    return true;
+    this.pause();
   }
 
   /** @override */
@@ -186,6 +181,9 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
+
+    this.pauseHelper_.updatePlaying(false);
+
     return true;
   }
 
@@ -238,7 +236,9 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
   /** @override */
   pause() {
-    this.sendCommand_('pause');
+    if (this.iframe_) {
+      this.sendCommand_('pause');
+    }
   }
 
   /** @override */

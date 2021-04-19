@@ -15,11 +15,11 @@
  */
 
 import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {AmpDocService} from '../../../../src/service/ampdoc-impl';
-import {AmpEvents} from '../../../../src/amp-events';
+import {AmpEvents} from '../../../../src/core/constants/amp-events';
 import {AmpList} from '../amp-list';
-import {Deferred} from '../../../../src/utils/promise';
+import {Deferred} from '../../../../src/core/data-structures/promise';
 import {Services} from '../../../../src/services';
 import {
   createElementWithAttributes,
@@ -66,7 +66,7 @@ describes.repeated(
             findAndRenderTemplate: env.sandbox.stub(),
             findAndRenderTemplateArray: env.sandbox.stub(),
           };
-          env.sandbox.stub(Services, 'templatesFor').returns(templates);
+          env.sandbox.stub(Services, 'templatesForDoc').returns(templates);
           env.sandbox
             .stub(AmpDocService.prototype, 'getAmpDoc')
             .returns(ampdoc);
@@ -174,7 +174,10 @@ describes.repeated(
           // If "reset-on-refresh" is set, show loading/placeholder before fetch.
           if (opts.resetOnRefresh) {
             listMock.expects('togglePlaceholder').withExactArgs(true).once();
-            listMock.expects('toggleLoading').withExactArgs(true).once();
+            listMock
+              .expects('toggleLoading')
+              .withExactArgs(true, opts.resetOnRefresh)
+              .once();
           }
 
           // Stub the rendering of the template.
@@ -312,11 +315,21 @@ describes.repeated(
 
                 it('should require placeholder', () => {
                   list.getPlaceholder = () => null;
-                  allowConsoleError(() => {
-                    expect(() => list.isLayoutSupported('container')).to.throw(
-                      /amp-list\[layout=container\] requires a placeholder/
+                  if (variant.type === 'experiment') {
+                    allowConsoleError(() => {
+                      expect(() =>
+                        list.isLayoutSupported('container')
+                      ).to.throw(
+                        /amp-list\[layout=container\] should have a placeholder/
+                      );
+                    });
+                  } else {
+                    expect(() =>
+                      list.isLayoutSupported('container')
+                    ).to.not.throw(
+                      /amp-list\[layout=container\] should have a placeholder/
                     );
-                  });
+                  }
                 });
 
                 it('should unlock height for layout=container with successful attemptChangeHeight', () => {
@@ -463,12 +476,13 @@ describes.repeated(
             });
           });
 
-          it('should resize with viewport', () => {
+          it('should resize with viewport', async () => {
             const resize = env.sandbox.spy(list, 'attemptToFit_');
-            list.layoutCallback().then(() => {
-              list.viewport_.resize_();
-              expect(resize).to.have.been.called;
-            });
+            const itemElement = doc.createElement('div');
+            expectFetchAndRender(DEFAULT_FETCHED_DATA, [itemElement]);
+            await list.layoutCallback();
+            list.viewport_.resize_();
+            expect(resize).to.be.calledOnce;
           });
 
           // TODO(choumx, #14772): Flaky.
@@ -607,7 +621,7 @@ describes.repeated(
             });
           });
 
-          it('should set tabbindex only if the list item is not tabbable', () => {
+          it('should not override or set missing tabindex', () => {
             // A list item with a no tabindex value or tabbable child
             const nonTabbableItemElement = doc.createElement('div');
 
@@ -628,9 +642,8 @@ describes.repeated(
             ]);
 
             return list.layoutCallback().then(() => {
-              expect(nonTabbableItemElement.getAttribute('tabindex')).to.equal(
-                '0'
-              );
+              expect(nonTabbableItemElement.getAttribute('tabindex')).to.be
+                .null;
               expect(tabbableItemElement.getAttribute('tabindex')).to.equal(
                 '4'
               );
@@ -819,14 +832,14 @@ describes.repeated(
             it('should error if proxied fetch fails', () => {
               env.sandbox
                 .stub(ssrTemplateHelper, 'ssr')
-                .returns(Promise.reject());
+                .returns(Promise.reject(new Error('error')));
 
               listMock.expects('toggleLoading').withExactArgs(false).once();
 
               return expect(
                 list.layoutCallback()
               ).to.eventually.be.rejectedWith(
-                /Error proxying amp-list templates/
+                /XHR Failed fetching \(https:\/\/data.com\/\.\.\.\): error/
               );
             });
 
@@ -850,7 +863,7 @@ describes.repeated(
               return expect(
                 list.layoutCallback()
               ).to.eventually.be.rejectedWith(
-                /Error proxying amp-list templates with status/
+                /fetching JSON data \(https:\/\/data.com\/\.\.\.\): HTTP error 400/
               );
             });
 
@@ -941,7 +954,6 @@ describes.repeated(
             });
 
             it('"amp-script:" uri should skip rendering and emit an error', () => {
-              toggleExperiment(win, 'protocol-adapters', true);
               list.element.setAttribute('src', 'amp-script:fetchData');
 
               listMock.expects('scheduleRender_').never();
@@ -949,7 +961,6 @@ describes.repeated(
               const errorMsg = /cannot be used in SSR mode/;
               expectAsyncConsoleError(errorMsg);
               expect(list.layoutCallback()).eventually.rejectedWith(errorMsg);
-              toggleExperiment(win, 'protocol-adapters', false);
             });
 
             it('Bound [src] should skip rendering and emit an error', async () => {
@@ -996,6 +1007,7 @@ describes.repeated(
               return list.layoutCallback().catch(() => {});
             });
           });
+
           describe('Using amp-script: protocol', () => {
             let ampScriptEl;
             beforeEach(() => {
@@ -1012,14 +1024,7 @@ describes.repeated(
               list = createAmpList(element);
             });
 
-            it('should throw an error if used without the experiment enabled', async () => {
-              const errorMsg = /Invalid value: amp-script:example.fetchData/;
-              expectAsyncConsoleError(errorMsg);
-              expect(list.layoutCallback()).to.eventually.throw(errorMsg);
-            });
-
             it('should throw an error if given an invalid format', async () => {
-              toggleExperiment(win, 'protocol-adapters', true);
               const errorMsg = /URIs must be of the format/;
 
               element.setAttribute('src', 'amp-script:fetchData');
@@ -1036,7 +1041,6 @@ describes.repeated(
             });
 
             it('should throw if specified amp-script does not exist', () => {
-              toggleExperiment(win, 'protocol-adapters', true);
               element.setAttribute('src', 'amp-script:doesnotexist.fn');
 
               const errorMsg = /could not find <amp-script> with/;
@@ -1045,7 +1049,6 @@ describes.repeated(
             });
 
             it('should fail if function call rejects', async () => {
-              toggleExperiment(win, 'protocol-adapters', true);
               ampScriptEl.getImpl = () =>
                 Promise.resolve({
                   callFunction: () =>
@@ -1061,7 +1064,6 @@ describes.repeated(
             it('should render non-array if single-item is set', async () => {
               const callFunctionResult = {'items': {title: 'Title'}};
               element.setAttribute('single-item', 'true');
-              toggleExperiment(win, 'protocol-adapters', true);
               ampScriptEl.getImpl = () =>
                 Promise.resolve({
                   callFunction(fnId) {
@@ -1086,7 +1088,6 @@ describes.repeated(
             });
 
             it('should render a list from AmpScriptService provided data', async () => {
-              toggleExperiment(win, 'protocol-adapters', true);
               ampScriptEl.getImpl = () =>
                 Promise.resolve({
                   callFunction(fnId) {
@@ -1269,7 +1270,10 @@ describes.repeated(
               listMock.expects('fetchList_').never();
               // Expect display of placeholder/loading before render.
               listMock.expects('togglePlaceholder').withExactArgs(true).once();
-              listMock.expects('toggleLoading').withExactArgs(true).once();
+              listMock
+                .expects('toggleLoading')
+                .withExactArgs(true, true)
+                .once();
               // Expect hiding of placeholder/loading after render.
               listMock.expects('togglePlaceholder').withExactArgs(false).once();
               listMock.expects('toggleLoading').withExactArgs(false).once();
@@ -1529,7 +1533,8 @@ describes.realWin(
       env.sandbox.spy(element, 'enqueAction');
       env.sandbox.stub(element, 'getDefaultActionAlias').returns({'items': []});
       await whenUpgradedToCustomElement(element);
-      env.sandbox.stub(element.implementation_, 'fetchList_');
+      const impl = await element.getImpl(false);
+      env.sandbox.stub(impl, 'fetchList_');
 
       ['changeToLayoutContainer', 'refresh'].forEach((method) => {
         action.execute(

@@ -15,7 +15,7 @@
  */
 import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {registerServiceBuilder} from '../../../src/service';
 
 /**
@@ -120,8 +120,12 @@ export class AmpStoryVariableService {
         const numberOfPages = this.storeService_.get(StateProperty.PAGE_IDS)
           .length;
         if (numberOfPages > 0) {
-          this.variables_[AnalyticsVariable.STORY_PROGRESS] =
-            pageIndex / numberOfPages;
+          if (numberOfPages === 1) {
+            this.variables_[AnalyticsVariable.STORY_PROGRESS] = 0;
+          } else {
+            this.variables_[AnalyticsVariable.STORY_PROGRESS] =
+              pageIndex / (numberOfPages - 1);
+          }
         }
       },
       true /* callToInitialize */

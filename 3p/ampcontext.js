@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {AmpEvents} from '../src/amp-events';
-import {Deferred} from '../src/utils/promise';
+import {AmpEvents} from '../src/core/constants/amp-events';
+import {Deferred} from '../src/core/data-structures/promise';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
 import {dev, devAssert} from '../src/log';
-import {dict, map} from '../src/utils/object';
-import {isObject} from '../src/types';
+import {dict, map} from '../src/core/types/object';
+import {isObject} from '../src/core/types';
 import {parseUrlDeprecated} from '../src/url';
 import {tryParseJson} from '../src/json';
 
@@ -77,6 +77,9 @@ export class AbstractAmpContext {
 
     /** @type {?string} */
     this.initialConsentValue = null;
+
+    /** @type {?Object} */
+    this.initialConsentMetadata = null;
 
     /** @type {?Object} */
     this.initialLayoutRect = null;
@@ -215,8 +218,8 @@ export class AbstractAmpContext {
   /**
    *  Send message to runtime requesting to resize ad to height and width.
    *    This is not guaranteed to succeed. All this does is make the request.
-   *  @param {number} width The new width for the ad we are requesting.
-   *  @param {number} height The new height for the ad we are requesting.
+   *  @param {number|undefined} width The new width for the ad we are requesting.
+   *  @param {number|undefined} height The new height for the ad we are requesting.
    *  @param {boolean=} hasOverflow Whether the ad handles its own overflow ele
    *  @return {Promise} Signify the success/failure of the request.
    */
@@ -300,6 +303,13 @@ export class AbstractAmpContext {
   }
 
   /**
+   *  Make the ad interactive.
+   */
+  signalInteractive() {
+    this.client_.sendMessage(MessageType.SIGNAL_INTERACTIVE);
+  }
+
+  /**
    *  Takes the current name on the window, and attaches it to
    *  the name of the iframe.
    *  @param {HTMLIFrameElement} iframe The iframe we are adding the context to.
@@ -348,6 +358,7 @@ export class AbstractAmpContext {
     this.hidden = context.hidden;
     this.initialConsentState = context.initialConsentState;
     this.initialConsentValue = context.initialConsentValue;
+    this.initialConsentMetadata = context.initialConsentMetadata;
     this.initialLayoutRect = context.initialLayoutRect;
     this.initialIntersection = context.initialIntersection;
     this.location = parseUrlDeprecated(context.location.href);

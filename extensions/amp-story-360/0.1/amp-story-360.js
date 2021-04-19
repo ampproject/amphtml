@@ -14,18 +14,114 @@
  * limitations under the License.
  */
 
+/**
+ * Must be served over https for permissions API to work.
+ * For local development, run amp --host="192.168.44.47" --https --extensions=amp-story-360
+ */
+
+import {
+  Action,
+  StateProperty,
+} from '../../../extensions/amp-story/1.0/amp-story-store-service';
 import {CSS} from '../../../build/amp-story-360-0.1.css';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
+import {LocalizedStringId} from '../../../src/localized-strings';
 import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
 import {Services} from '../../../src/services';
-import {StateProperty} from '../../../extensions/amp-story/1.0/amp-story-store-service';
+import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
+import {dev, user, userAssert} from '../../../src/log';
+import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {listenOncePromise} from '../../../src/event-helper';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
-import {user, userAssert} from '../../../src/log';
-import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_360';
+
+/**
+ * readyState for first rendrable frame of video element.
+ * @const {number}
+ */
+const HAVE_CURRENT_DATA = 2;
+
+/**
+ * Centers heading and pitch value between [-90; 90]
+ * @const {number}
+ */
+const CENTER_OFFSET = 90;
+
+/**
+ * Minimum distance from active page to activate WebGL context.
+ * @const {number}
+ */
+const MIN_WEBGL_DISTANCE = 2;
+
+/**
+ * Generates the template for the permission button.
+ *
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildActivateButtonTemplate = (element) => htmlFor(element)`
+    <button class="i-amphtml-story-360-activate-button" role="button">
+      <span class="i-amphtml-story-360-activate-text"></span>
+      <span class="i-amphtml-story-360-activate-button-icon"
+        >360°
+        <svg
+          class="i-amphtml-story-360-activate-button-icon-svg"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <defs>
+            <linearGradient id="i-amphtml-story-360-activate-gradient">
+              <stop stop-color="white" stop-opacity=".3"></stop>
+              <stop offset="1" stop-color="white"></stop>
+            </linearGradient>
+            <ellipse
+              id="i-amphtml-story-360-activate-ellipse"
+              ry="11.5"
+              rx="7.5"
+              cy="12"
+              cx="12"
+              stroke="url(#i-amphtml-story-360-activate-gradient)"
+            ></ellipse>
+          </defs>
+          <use xlink:href="#i-amphtml-story-360-activate-ellipse"></use>
+          <use
+            xlink:href="#i-amphtml-story-360-activate-ellipse"
+            transform="rotate(90, 12, 12)"
+          ></use>
+        </svg>
+      </span>
+    </button>
+  `;
+
+/**
+ * Generates the template for the gyroscope feature discovery animation.
+ *
+ * NOTE: i-amphtml-story-360-discovery is used in maybeShowDiscoveryAnimation_
+ * and must be changed in both places if updated.
+ *
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildDiscoveryTemplate = (element) => htmlFor(element)`
+    <div class="i-amphtml-story-360-discovery" aria-live="polite">
+      <div class="i-amphtml-story-360-discovery-animation"></div>
+      <span class="i-amphtml-story-360-discovery-text"></span>
+    </div>
+  `;
+
+/**
+ * @param {number} deg
+ * @return {number}
+ * */
+function deg2rad(deg) {
+  return (deg * Math.PI) / 180;
+}
 
 /**
  * Internal helper class representing a camera orientation (POV) in polar
@@ -50,10 +146,9 @@ class CameraOrientation {
    * @return {!CameraOrientation}
    */
   static fromDegrees(heading, pitch, zoom) {
-    const deg2rad = (deg) => (deg * Math.PI) / 180;
     return new CameraOrientation(
-      deg2rad(-pitch - 90),
-      deg2rad(90 + heading),
+      deg2rad(-pitch - CENTER_OFFSET),
+      deg2rad(CENTER_OFFSET + heading),
       1 / zoom
     );
   }
@@ -146,6 +241,9 @@ export class AmpStory360 extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /** @private {?../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = null;
+
     /** @private {!Array<!CameraOrientation>} */
     this.orientations_ = [];
 
@@ -166,19 +264,64 @@ export class AmpStory360 extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isReady_ = false;
+
+    /** @private {boolean} */
+    this.gyroscopeControls_ = false;
+
+    /** @private {?Element} */
+    this.activateButton_ = null;
+
+    /** @private {?../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = null;
+
+    /** @private {?string} */
+    this.pageId_ = null;
+
+    /** @private {boolean} */
+    this.isOnActivePage_ = false;
+
+    /** @private {?number} */
+    this.distance_ = null;
+
+    /** @private {number} */
+    this.sceneHeading_ = 0;
+
+    /** @private {number} */
+    this.scenePitch_ = 0;
+
+    /** @private {number} */
+    this.sceneRoll_ = 0;
+
+    /** @private {?Element|?EventTarget} */
+    this.ampVideoEl_ = null;
+
+    /** @private {?Element} */
+    this.image_ = null;
+
+    /** @private {number} */
+    this.headingOffset_ = 0;
+
+    /** @private WebGL extension for lost context. */
+    this.lostGlContext_ = null;
+
+    /** @private {!Array<number>} */
+    this.rot_ = null;
   }
 
   /** @override */
   buildCallback() {
     const attr = (name) => this.element.getAttribute(name);
+    const attrAsFloat = (name, fallbackValue = 0) => {
+      return parseFloat(attr(name) || fallbackValue);
+    };
 
     if (attr('duration')) {
       this.duration_ = timeStrToMillis(attr('duration')) || 0;
     }
 
-    const startHeading = parseFloat(attr('heading-start') || 0);
-    const startPitch = parseFloat(attr('pitch-start') || 0);
-    const startZoom = parseFloat(attr('zoom-start') || 1);
+    const startHeading = attrAsFloat('heading-start');
+    const startPitch = attrAsFloat('pitch-start');
+    const startZoom = attrAsFloat('zoom-start', 1);
     this.orientations_.push(
       CameraOrientation.fromDegrees(startHeading, startPitch, startZoom)
     );
@@ -188,12 +331,22 @@ export class AmpStory360 extends AMP.BaseElement {
       attr('pitch-end') !== undefined ||
       attr('zoom-end') !== undefined
     ) {
-      const endHeading = parseFloat(attr('heading-end') || startHeading);
-      const endPitch = parseFloat(attr('pitch-end') || startPitch);
-      const endZoom = parseFloat(attr('zoom-end') || startZoom);
+      const endHeading = attrAsFloat('heading-end', startHeading);
+      const endPitch = attrAsFloat('pitch-end', startPitch);
+      const endZoom = attrAsFloat('zoom-end', startZoom);
       this.orientations_.push(
         CameraOrientation.fromDegrees(endHeading, endPitch, endZoom)
       );
+    }
+
+    if (
+      attr('scene-heading') !== undefined ||
+      attr('scene-pitch') !== undefined ||
+      attr('scene-roll') !== undefined
+    ) {
+      this.sceneHeading_ = attrAsFloat('scene-heading');
+      this.scenePitch_ = attrAsFloat('scene-pitch');
+      this.sceneRoll_ = attrAsFloat('scene-roll');
     }
 
     const container = this.element.ownerDocument.createElement('div');
@@ -202,15 +355,289 @@ export class AmpStory360 extends AMP.BaseElement {
     container.appendChild(this.canvas_);
     this.applyFillContent(container, /* replacedContent */ true);
 
-    return Services.storyStoreServiceForOrNull(this.win).then(
-      (storeService) => {
-        storeService.subscribe(
-          StateProperty.PAGE_SIZE,
-          this.resizeRenderer_.bind(this),
-          false /* callToInitialize */
+    // Mutation observer for distance attribute
+    const config = {attributes: true, attributeFilter: ['distance']};
+    const callback = (mutationsList) => {
+      this.distance_ = parseInt(
+        mutationsList[0].target.getAttribute('distance'),
+        10
+      );
+      this.restoreOrLoseGlContext_();
+    };
+    const observer = new MutationObserver(callback);
+    this.getPage_() && observer.observe(this.getPage_(), config);
+
+    // Initialize all services before proceeding
+    return Promise.all([
+      Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
+        this.storeService_ = storeService;
+
+        storeService.subscribe(StateProperty.PAGE_SIZE, () =>
+          this.resizeRenderer_()
         );
-      }
+
+        if (attr('controls') === 'gyroscope') {
+          storeService.subscribe(
+            StateProperty.GYROSCOPE_PERMISSION_STATE,
+            (permissionState) => this.onPermissionState_(permissionState)
+          );
+          this.checkGyroscopePermissions_();
+        }
+
+        storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
+          this.isOnActivePage_ = currPageId === this.getPageId_();
+          this.onPageNavigation_();
+          this.maybeShowDiscoveryAnimation_();
+        });
+
+        this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
+          if (this.isOnActivePage_) {
+            isPaused ? this.pause_() : this.play_();
+          }
+        });
+      }),
+
+      Services.localizationServiceForOrNull(this.element).then(
+        (localizationService) => {
+          this.localizationService_ = localizationService;
+        }
+      ),
+    ]).then(() => Promise.resolve());
+  }
+
+  /**
+   * @private
+   * @return {string} the page id
+   */
+  getPageId_() {
+    if (this.pageId_ == null) {
+      this.pageId_ = this.getPage_().getAttribute('id');
+    }
+    return this.pageId_;
+  }
+
+  /**
+   * @private
+   * @return {?Element} the parent amp-story-page
+   */
+  getPage_() {
+    return closest(
+      dev().assertElement(this.element),
+      (el) => el.tagName.toLowerCase() === 'amp-story-page'
     );
+  }
+
+  /** @private */
+  onPageNavigation_() {
+    if (this.isOnActivePage_) {
+      this.play_();
+    } else {
+      this.pause_();
+      this.rewind_();
+    }
+  }
+
+  /** @private */
+  restoreOrLoseGlContext_() {
+    if (!this.renderer_) {
+      return;
+    }
+    if (this.distance_ < MIN_WEBGL_DISTANCE) {
+      if (this.renderer_.gl.isContextLost()) {
+        this.lostGlContext_.restoreContext();
+      }
+    } else if (!this.renderer_.gl.isContextLost()) {
+      this.lostGlContext_.loseContext();
+    }
+  }
+
+  /**
+   * @param {string} permissionState
+   * @private
+   */
+  onPermissionState_(permissionState) {
+    if (this.activateButton_) {
+      this.mutateElement(() => {
+        this.getPage_().removeChild(this.activateButton_);
+        this.activateButton_ = null;
+      });
+    }
+    if (permissionState === 'granted') {
+      this.enableGyroscope_();
+    } else if (permissionState === 'denied') {
+      this.gyroscopeControls_ = false;
+    }
+  }
+
+  /** @private */
+  checkGyroscopePermissions_() {
+    //  If browser doesn't support DeviceOrientationEvent.
+    if (typeof this.win.DeviceOrientationEvent === 'undefined') {
+      return;
+    }
+
+    // If browser doesn't require permission for DeviceOrientationEvent.
+    if (
+      typeof this.win.DeviceOrientationEvent.requestPermission === 'undefined'
+    ) {
+      this.enableGyroscope_();
+    }
+
+    // If permissions needed for DeviceOrientationEvent.
+    if (
+      typeof this.win.DeviceOrientationEvent.requestPermission === 'function'
+    ) {
+      this.win.DeviceOrientationEvent.requestPermission()
+        .catch(() => {
+          // If permissions weren't set, render activate button.
+          this.renderActivateButton_();
+        })
+        .then((permissionState) => {
+          // If permissions already set, set permission state.
+          permissionState && this.setPermissionState_(permissionState);
+        });
+    }
+  }
+
+  /**
+   * Listens for deviceorientation events.
+   *
+   * Some browsers support the 'deviceorientation' event but never call it.
+   * This waits for one call before initiating a constant listener.
+   * @private
+   */
+  enableGyroscope_() {
+    // Listen for one call before initiating.
+    listenOncePromise(this.win, 'deviceorientation').then((e) => {
+      this.gyroscopeControls_ = true;
+      // Renders active page orientation correctly on load.
+      // isOnActivePage_ is slightly async so unfortunately we do this for all pages.
+      this.setGyroscopeDefaultHeading_(e.alpha);
+      // Debounce onDeviceOrientation_ to rAF.
+      let rafTimeout;
+      this.win.addEventListener('deviceorientation', (e) => {
+        if (this.isReady_ && this.distance_ < MIN_WEBGL_DISTANCE) {
+          rafTimeout && this.win.cancelAnimationFrame(rafTimeout);
+          rafTimeout = this.win.requestAnimationFrame(() => {
+            if (!this.isOnActivePage_) {
+              this.setGyroscopeDefaultHeading_(e.alpha);
+            }
+            this.onDeviceOrientation_(e);
+          });
+        }
+      });
+      this.maybeShowDiscoveryAnimation_();
+    });
+  }
+
+  /**
+   * Ensures user is facing a specified point of interest.
+   * @param {number} orientationAlpha
+   * @private
+   */
+  setGyroscopeDefaultHeading_(orientationAlpha) {
+    this.headingOffset_ =
+      parseFloat(
+        this.element.getAttribute('heading-end') ||
+          this.element.getAttribute('heading-start') ||
+          0
+      ) +
+      CENTER_OFFSET +
+      orientationAlpha;
+  }
+
+  /**
+   * Only show once per story on first instance of 360 component.
+   * @private
+   */
+  maybeShowDiscoveryAnimation_() {
+    if (
+      this.isOnActivePage_ &&
+      this.gyroscopeControls_ &&
+      !this.element.ownerDocument.querySelector(
+        `.i-amphtml-story-360-discovery`
+      )
+    ) {
+      const page = this.getPage_();
+      const discoveryTemplate = page && buildDiscoveryTemplate(page);
+      // Support translation of discovery dialogue text.
+      this.mutateElement(() => {
+        discoveryTemplate.querySelector(
+          '.i-amphtml-story-360-discovery-text'
+        ).textContent = this.localizationService_.getLocalizedString(
+          LocalizedStringId.AMP_STORY_DISCOVERY_DIALOG_TEXT
+        );
+      });
+      this.mutateElement(() => page.appendChild(discoveryTemplate));
+    }
+  }
+
+  /**
+   * @param {!Event} e
+   * @private
+   */
+  onDeviceOrientation_(e) {
+    let rot = Matrix.identity(3);
+    rot = Matrix.mul(
+      3,
+      Matrix.rotation(3, 1, 0, deg2rad(e.alpha - this.headingOffset_)),
+      rot
+    );
+    rot = Matrix.mul(3, Matrix.rotation(3, 2, 1, deg2rad(e.beta)), rot);
+    rot = Matrix.mul(3, Matrix.rotation(3, 0, 2, deg2rad(e.gamma)), rot);
+
+    // Smoothen sensor data by averaging previous and next rotation matrix values.
+    this.rot_ = this.rot_ ? rot.map((val, i) => (val + this.rot_[i]) / 2) : rot;
+
+    this.renderer_.setCamera(this.rot_, 1);
+    this.renderer_.render(true);
+  }
+
+  /**
+   * A button to ask for permissons.
+   * @private
+   */
+  renderActivateButton_() {
+    const ampStoryPage = this.getPage_();
+    this.activateButton_ =
+      ampStoryPage && buildActivateButtonTemplate(ampStoryPage);
+
+    this.activateButton_.querySelector(
+      '.i-amphtml-story-360-activate-text'
+    ).textContent = this.localizationService_.getLocalizedString(
+      LocalizedStringId.AMP_STORY_ACTIVATE_BUTTON_TEXT
+    );
+
+    this.activateButton_.addEventListener('click', () =>
+      this.requestGyroscopePermissions_()
+    );
+
+    this.mutateElement(() => ampStoryPage.appendChild(this.activateButton_));
+  }
+
+  /** @private */
+  requestGyroscopePermissions_() {
+    if (this.win.DeviceOrientationEvent.requestPermission) {
+      this.win.DeviceOrientationEvent.requestPermission()
+        .then((permissionState) => {
+          this.setPermissionState_(permissionState);
+        })
+        .catch((error) => {
+          dev().error(TAG, `Gyroscope permission error: ${error.message}`);
+        });
+    }
+  }
+
+  /**
+   * @param {string} permissionState
+   * @private
+   */
+  setPermissionState_(permissionState) {
+    if (permissionState === 'granted') {
+      this.storeService_.dispatch(Action.SET_GYROSCOPE_PERMISSION, 'granted');
+    } else if (permissionState === 'denied') {
+      this.storeService_.dispatch(Action.SET_GYROSCOPE_PERMISSION, 'denied');
+    }
   }
 
   /** @override */
@@ -218,35 +645,171 @@ export class AmpStory360 extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
+  /**
+   * Checks if the image is larger than the GPUs max texture size.
+   * Scales the image down if neededed.
+   * Returns the image element if image is within bounds.
+   * If image is out of bounds, returns a scaled canvas element.
+   * @param {!Element} imgEl
+   * @return {!Element}
+   * @private
+   */
+  checkImageReSize_(imgEl) {
+    const MAX_TEXTURE_SIZE = this.renderer_.gl.getParameter(
+      this.renderer_.gl.MAX_TEXTURE_SIZE
+    );
+
+    if (
+      imgEl.naturalWidth > MAX_TEXTURE_SIZE ||
+      imgEl.naturalHeight > MAX_TEXTURE_SIZE
+    ) {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = Math.min(imgEl.naturalWidth, MAX_TEXTURE_SIZE);
+      canvas.height = Math.min(imgEl.naturalHeight, MAX_TEXTURE_SIZE);
+      ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
+      return canvas;
+    } else {
+      return imgEl;
+    }
+  }
+
   /** @override */
   layoutCallback() {
     const ampImgEl = this.element.querySelector('amp-img');
-    userAssert(ampImgEl, 'amp-story-360 must contain an amp-img element.');
+    // Used to update the video in animate_.
+    this.ampVideoEl_ = this.element.querySelector('amp-video');
+
+    const mediaEl = ampImgEl || this.ampVideoEl_;
+    userAssert(
+      mediaEl,
+      'amp-story-360 must contain an amp-img or amp-video element.'
+    );
+    if (mediaEl) {
+      this.setAccessibleText_(mediaEl);
+    }
+
+    if (ampImgEl) {
+      return this.setupAmpImgRenderer_(ampImgEl);
+    }
+    if (this.ampVideoEl_) {
+      return this.setupAmpVideoRenderer_();
+    }
+  }
+
+  /**
+   * Puts a11y text on canvas element so it can be read by screen readers.
+   * The media element is hidden by CSS it no longer can read it.
+   * @param {!Element} mediaEl Either an amp-img or amp-video
+   * @private
+   */
+  setAccessibleText_(mediaEl) {
+    const altTags = ['alt', 'title', 'aria-label']; /** In order of priority. */
+    const altTag = altTags.find((attr) => mediaEl.getAttribute(attr));
+    if (altTag) {
+      const altText = mediaEl.getAttribute(altTag);
+      this.canvas_.setAttribute('role', 'img');
+      this.canvas_.setAttribute('aria-label', altText);
+    }
+  }
+
+  /**
+   * @param {!Element} ampImgEl
+   * @return {!Promise}
+   * @private
+   */
+  setupAmpImgRenderer_(ampImgEl) {
     const owners = Services.ownersForDoc(this.element);
     owners.setOwner(ampImgEl, this.element);
     owners.scheduleLayout(this.element, ampImgEl);
     return whenUpgradedToCustomElement(ampImgEl)
-      .then(() => {
-        return ampImgEl.signals().whenSignal(CommonSignals.LOAD_END);
-      })
+      .then(() => ampImgEl.signals().whenSignal(CommonSignals.LOAD_END))
       .then(
         () => {
           this.renderer_ = new Renderer(this.canvas_);
-          this.renderer_.setImage(this.element.querySelector('img'));
-          this.renderer_.resize();
-          if (this.orientations_.length < 1) {
-            return;
-          }
-          this.renderInitialPosition_();
-          this.isReady_ = true;
-          if (this.isPlaying_) {
-            this.animate_();
-          }
+          this.setupGlContextListeners_();
+          this.image_ = this.checkImageReSize_(
+            dev().assertElement(this.element.querySelector('img'))
+          );
+          this.initRenderer_();
         },
         () => {
           user().error(TAG, 'Failed to load the amp-img.');
         }
       );
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  setupAmpVideoRenderer_() {
+    return whenUpgradedToCustomElement(dev().assertElement(this.ampVideoEl_))
+      .then(() => this.ampVideoEl_.signals().whenSignal(CommonSignals.LOAD_END))
+      .then(() => {
+        const alreadyHasData =
+          dev().assertElement(this.ampVideoEl_.querySelector('video'))
+            .readyState >= HAVE_CURRENT_DATA;
+
+        return alreadyHasData
+          ? Promise.resolve()
+          : listenOncePromise(this.ampVideoEl_, 'loadeddata');
+      })
+      .then(
+        () => {
+          this.renderer_ = new Renderer(this.canvas_);
+          this.setupGlContextListeners_();
+          this.initRenderer_();
+        },
+        () => {
+          user().error(TAG, 'Failed to load the amp-video.');
+        }
+      );
+  }
+
+  /** @private */
+  setupGlContextListeners_() {
+    this.lostGlContext_ = this.renderer_.gl.getExtension('WEBGL_lose_context');
+    this.renderer_.canvas.addEventListener('webglcontextlost', (e) => {
+      // Calling preventDefault is necessary for restoring context.
+      e.preventDefault();
+      this.isReady_ = false;
+    });
+    this.renderer_.canvas.addEventListener('webglcontextrestored', () =>
+      this.initRenderer_()
+    );
+  }
+
+  /** @private */
+  initRenderer_() {
+    this.renderer_.init();
+    this.renderer_.setImageOrientation(
+      this.sceneHeading_,
+      this.scenePitch_,
+      this.sceneRoll_
+    );
+    this.renderer_.setImage(
+      this.image_
+        ? this.image_
+        : dev().assertElement(this.ampVideoEl_.querySelector('video'))
+    );
+    this.renderer_.resize();
+    if (this.orientations_.length < 1) {
+      return;
+    }
+    this.renderInitialPosition_();
+    this.isReady_ = true;
+    if (this.isPlaying_) {
+      this.animate_();
+    }
+    this.markAsLoaded_();
+  }
+
+  /** @private */
+  markAsLoaded_() {
+    this.mutateElement(() => {
+      this.element.classList.add('i-amphtml-story-360-loaded');
+    });
   }
 
   /** @private */
@@ -263,6 +826,9 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @private */
   renderInitialPosition_() {
+    if (this.gyroscopeControls_) {
+      return;
+    }
     this.mutateElement(() => {
       this.renderer_.setCamera(
         this.orientations_[0].rotation,
@@ -290,32 +856,47 @@ export class AmpStory360 extends AMP.BaseElement {
         return;
       }
       const nextOrientation = this.animation_.getNextOrientation();
-      if (nextOrientation) {
-        // mutateElement causes inaccurate animation speed here, so we use rAF.
-        this.win.requestAnimationFrame(() => {
+      // mutateElement causes inaccurate animation speed here, so we use rAF.
+      this.win.requestAnimationFrame(() => {
+        // Stop loop if no next orientation and not a video.
+        if (!nextOrientation && !this.ampVideoEl_) {
+          this.isPlaying_ = false;
+          this.renderer_.render(false);
+          return;
+        }
+        // Only apply next orientation if not in gyroscope mode.
+        if (nextOrientation && !this.gyroscopeControls_) {
           this.renderer_.setCamera(
             nextOrientation.rotation,
             nextOrientation.scale
           );
-          this.renderer_.render(true);
-          loop();
-        });
-      } else {
-        this.isPlaying_ = false;
-        this.renderer_.render(false);
-        return;
-      }
+        }
+        // If video, check if ready and copy the texture on each frame.
+        if (this.ampVideoEl_) {
+          const videoEl = dev().assertElement(
+            this.ampVideoEl_.querySelector('video')
+          );
+          if (videoEl.readyState >= HAVE_CURRENT_DATA) {
+            this.renderer_.setImage(videoEl);
+          }
+        }
+        this.renderer_.render(true);
+        loop();
+      });
     };
     this.mutateElement(() => loop());
   }
 
-  /** @public */
-  pause() {
+  /** @private */
+  pause_() {
     this.isPlaying_ = false;
   }
 
-  /** @public */
-  play() {
+  /** @private */
+  play_() {
+    if (!this.canAnimate) {
+      return;
+    }
     userAssert(
       this.canAnimate,
       'amp-story-360 is either not configured to play an animation or ' +
@@ -327,14 +908,14 @@ export class AmpStory360 extends AMP.BaseElement {
     }
   }
 
-  /** @public */
-  rewind() {
+  /** @private */
+  rewind_() {
     if (!this.canAnimate) {
       return;
     }
     this.animation_ = null;
     // Let the animation loop exit, then render the initial position and resume
-    // the animation (if applicable)
+    // the animation (if applicable).
     if (this.isReady_) {
       this.win.requestAnimationFrame(() => {
         this.renderInitialPosition_();

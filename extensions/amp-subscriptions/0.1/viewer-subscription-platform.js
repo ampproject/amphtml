@@ -20,7 +20,7 @@ import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {PageConfig as PageConfigInterface} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getSourceOrigin, getWinOrigin} from '../../../src/url';
 import {localSubscriptionPlatformFactory} from './local-subscription-platform';
 
@@ -232,8 +232,8 @@ export class ViewerSubscriptionPlatform {
   }
 
   /** @override */
-  getServiceId() {
-    return this.platform_.getServiceId();
+  getPlatformKey() {
+    return this.platform_.getPlatformKey();
   }
 
   /** @override */

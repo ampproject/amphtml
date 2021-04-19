@@ -15,7 +15,6 @@
 -->
 <!--
   Test Description:
-
   This test demonstrates that an LTS version of an extension may not be used with the standard
   runtime.
 -->
@@ -30,11 +29,9 @@
   <!-- Valid: First script is non-LTS runtime -->
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <!-- Invalid: LTS extension is included. Produces error. -->
-  <script async custom-element='amp-ad'
-     src='https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js'></script>
+  <script async custom-element='amp-ad' src='https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js'></script>
   <!-- Valid: Non-LTS extension is included and used. No error or warning. -->
-  <script async custom-element='amp-font'
-     src='https://cdn.ampproject.org/v0/amp-font-0.1.js'></script>
+  <script async custom-element='amp-font' src='https://cdn.ampproject.org/v0/amp-font-0.1.js'></script>
 </head>
 <body>
   <amp-font

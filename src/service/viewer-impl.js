@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-import {Deferred, tryResolve} from '../utils/promise';
-import {Observable} from '../observable';
+import {Deferred, tryResolve} from '../core/data-structures/promise';
+import {Observable} from '../core/data-structures/observable';
 import {Services} from '../services';
-import {VisibilityState} from '../visibility-state';
-import {
-  dev,
-  devAssert,
-  duplicateErrorIfNecessary,
-  stripUserError,
-} from '../log';
-import {endsWith, startsWith} from '../string';
-import {findIndex} from '../utils/array';
+import {VisibilityState} from '../core/constants/visibility-state';
+import {dev, devAssert, stripUserError} from '../log';
+import {duplicateErrorIfNecessary} from '../core/error';
+import {endsWith} from '../core/types/string';
+import {findIndex} from '../core/types/array';
 import {
   getSourceOrigin,
   isProxyOrigin,
@@ -36,9 +32,9 @@ import {
 } from '../url';
 import {isIframed} from '../dom';
 import {listen} from '../event-helper';
-import {map} from '../utils/object';
+import {map} from '../core/types/object';
 import {registerServiceBuilderForDoc} from '../service';
-import {reportError} from '../error';
+import {reportError} from '../error-reporting';
 import {urls} from '../config';
 
 import {ViewerInterface} from './viewer-interface';
@@ -49,6 +45,12 @@ const TAG_ = 'Viewer';
 export const Capability = {
   VIEWER_RENDER_TEMPLATE: 'viewerRenderTemplate',
 };
+
+/**
+ * Max length for each array of the received message queue.
+ * @const @private {number}
+ */
+const RECEIVED_MESSAGE_QUEUE_MAX_LENGTH = 50;
 
 /**
  * Duration in milliseconds to wait for viewerOrigin to be set before an empty
@@ -124,6 +126,14 @@ export class ViewerImpl {
      * }>}
      */
     this.messageQueue_ = [];
+
+    /**
+     * @private {!Object<string, !Array<!{
+     *   data: !JsonObject,
+     *   deferred: !Deferred
+     * }>>}
+     */
+    this.receivedMessageQueue_ = map();
 
     /**
      * Subset of this.params_ that only contains parameters in the URL hash,
@@ -246,8 +256,8 @@ export class ViewerImpl {
       if (newUrl != this.win.location.href && this.win.history.replaceState) {
         // Persist the hash that we removed has location.originalHash.
         // This is currently used by mode.js to infer development mode.
-        if (!this.win.location.originalHash) {
-          this.win.location.originalHash = this.win.location.hash;
+        if (!this.win.location['originalHash']) {
+          this.win.location['originalHash'] = this.win.location.hash;
         }
         this.win.history.replaceState({}, '', newUrl);
         delete this.hashParams_['click'];
@@ -356,7 +366,7 @@ export class ViewerImpl {
       const queryParams = parseQueryString(this.win.location.search);
       this.isCctEmbedded_ =
         queryParams['amp_gsa'] === '1' &&
-        startsWith(queryParams['amp_js_v'] || '', 'a');
+        (queryParams['amp_js_v'] || '').startsWith('a');
     }
     return this.isCctEmbedded_;
   }
@@ -661,12 +671,26 @@ export class ViewerImpl {
       observable = new Observable();
       this.messageObservables_[eventType] = observable;
     }
-    return observable.add(handler);
+    const unlistenFn = observable.add(handler);
+    if (this.receivedMessageQueue_[eventType]) {
+      this.receivedMessageQueue_[eventType].forEach((message) => {
+        observable.fire(message.data);
+        message.deferred.resolve();
+      });
+      this.receivedMessageQueue_[eventType] = [];
+    }
+    return unlistenFn;
   }
 
   /** @override */
   onMessageRespond(eventType, responder) {
     this.messageResponders_[eventType] = responder;
+    if (this.receivedMessageQueue_[eventType]) {
+      this.receivedMessageQueue_[eventType].forEach((message) => {
+        message.deferred.resolve(responder(message.data));
+      });
+      this.receivedMessageQueue_[eventType] = [];
+    }
     return () => {
       if (this.messageResponders_[eventType] === responder) {
         delete this.messageResponders_[eventType];
@@ -687,17 +711,31 @@ export class ViewerImpl {
       return Promise.resolve();
     }
     const observable = this.messageObservables_[eventType];
+    const responder = this.messageResponders_[eventType];
+
+    // Queue the message if there are no handlers. Returns a pending promise to
+    // be resolved once a handler/responder is registered.
+    if (!observable && !responder) {
+      this.receivedMessageQueue_[eventType] =
+        this.receivedMessageQueue_[eventType] || [];
+      if (
+        this.receivedMessageQueue_[eventType].length >=
+        RECEIVED_MESSAGE_QUEUE_MAX_LENGTH
+      ) {
+        return undefined;
+      }
+      const deferred = new Deferred();
+      this.receivedMessageQueue_[eventType].push({data, deferred});
+      return deferred.promise;
+    }
     if (observable) {
       observable.fire(data);
     }
-    const responder = this.messageResponders_[eventType];
     if (responder) {
       return responder(data);
     } else if (observable) {
       return Promise.resolve();
     }
-    dev().fine(TAG_, 'unknown message:', eventType);
-    return undefined;
   }
 
   /** @override */
@@ -848,7 +886,7 @@ export class ViewerImpl {
         getSourceOrigin(url) == getSourceOrigin(replaceUrl)
       ) {
         this.win.history.replaceState({}, '', replaceUrl.href);
-        this.win.location.originalHref = url.href;
+        this.win.location['originalHref'] = url.href;
         dev().fine(TAG_, 'replace url:' + replaceUrl.href);
       }
     } catch (e) {

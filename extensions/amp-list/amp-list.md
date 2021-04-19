@@ -38,8 +38,8 @@ Your endpoint must implement the requirements specified in the [CORS Requests in
 
 You can specify a template in one of two ways:
 
-- a `template` attribute that references an ID of an existing templating element.
-- a templating element nested directly inside the `amp-list` element.
+-   a `template` attribute that references an ID of an existing templating element.
+-   a templating element nested directly inside the `amp-list` element.
 
 [tip type="note"]
 When using `<amp-list>` in tandem with another templating AMP component, such as `<amp-form>`, note that templates may not nest in valid AMP documents. In this case a valid workaround is to provide the template by `id` via the `template` attribute. Learn more about [nested templates in `<amp-mustache>`](../amp-mustache/amp-mustache.md).
@@ -110,7 +110,13 @@ The request is always made from the client, even if the document was served from
 
 If `<amp-list>` needs more space after loading, it requests the AMP runtime to update its height using the normal AMP flow. If the AMP runtime cannot satisfy the request for the new height, it will display the `overflow` element when available. Notice however, that the typical placement of `<amp-list>` elements at the bottom of the document almost always guarantees that the AMP runtime can resize them.
 
-By default, `<amp-list>` adds a `list` ARIA role to the list element and a `listitem` role to item elements rendered via the template. If the list element or any of its children are not "tabbable" (accessible by keyboard keys such as the `a` and `button` elements or any elements with a positive `tabindex`), a `tabindex` of `0` will be added by default to the list item.
+### Accessibility considerations for `amp-list`
+
+By default, `<amp-list>` adds a `list` ARIA role to the list element and a `listitem` role to item elements rendered via the template. If the list element or any of its children are not "tabbable" (accessible by keyboard keys such as the `a` and `button` elements or any elements with a positive `tabindex`), a `tabindex` of `0` will be added by default to the list item. This behaviour is arguably not always appropriate - generally, only interactive controls/content should be focusable. If you want to suppress this behaviour, make sure to include `tabindex="-1"` as part of the outermost element of your template.
+
+[tip type="important"]
+Currently, the rendered list element is declared as an ARIA live region (using `aria-live="polite"`), meaning that any change to the content of the list results in the entire list being read out/announced by assistive technologies (such as screen readers). Due to the way lists are initially rendered, this can also result in lists being announced in their entirety when a page is loaded. To work around this issue for now, you can add `aria-live="off"` to `<amp-list>`, which will override the addition of `aria-live="polite"`.
+[/tip]
 
 [tip type="note"]
 Note also that a good practice is to provide templates a single top-level element to prevent unintended side effects. This means the following input:
@@ -143,15 +149,15 @@ Would most predictably be applied and rendered if instead provided as follows:
 
 AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `<amp-list>` elements) on an AMP page. For example, if your `<amp-list>` makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR.
 
-In `<amp-list>`, you can use the [`items`](#items-optional) attribute to render a subset of the JSON response, allowing you to have multiple `<amp-list>` elements rendering different content but sharing a single XHR.
+In `<amp-list>`, you can use the [`items`](#items) attribute to render a subset of the JSON response, allowing you to have multiple `<amp-list>` elements rendering different content but sharing a single XHR.
 
 ### Specifying an overflow
 
-Optionally, the `<amp-list>` component can contain an element with the `overflow` attribute. Add an element with the AMP `overflow` attribute to `amp-list` if the AMP framework is unable to size it as requested. If you include a child element of `amp-list` with the `overflow` attribute, it will appear if one of the following conditions are met:
+Optionally, the `<amp-list>` component can contain an element with the `overflow` attribute. AMP will display this element if all of the following conditions are met:
 
-- The bottom of `amp-list` is below the viewport.
-
-- The bottom of `amp-list` is within 15% of the height of the entire page and within 1000px of the end of the page.
+-   The contents rendered into the `amp-list` exceed its specified size.
+-   The bottom of `amp-list` is within the viewport.
+-   The bottom of `amp-list` is not near the bottom of the page (defined as the minimum of either the bottom 15% of the document or the bottom 1000px)
 
 If `amp-list` is outside the viewport, it will be automatically expanded.
 
@@ -199,8 +205,8 @@ AMP applies the following CSS to elements with the `overflow` attribute:
 
 Optionally, `<amp-list>` supports a placeholder and/or fallback.
 
-- A _placeholder_ is a child element with the `placeholder` attribute. This element is shown until the `<amp-list>` loads successfully. If a fallback is also provided, the placeholder is hidden when the `<amp-list>` fails to load.
-- A _fallback_ is a child element with the `fallback` attribute. This element is shown if the `<amp-list>` fails to load.
+-   A _placeholder_ is a child element with the `placeholder` attribute. This element is shown until the `<amp-list>` loads successfully. If a fallback is also provided, the placeholder is hidden when the `<amp-list>` fails to load.
+-   A _fallback_ is a child element with the `fallback` attribute. This element is shown if the `<amp-list>` fails to load.
 
 Learn more in [Placeholders & Fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders). Note that a child element cannot be both a placeholder and a fallback.
 
@@ -339,6 +345,8 @@ For working examples, please see [test/manual/amp-list/infinite-scroll-1.amp.htm
 
 [tip type="important"]
 
+When using `<amp-list>` infinite scroll, content placed below the component may not be accessible, and it is recommended to place the infinite scroll content at the bottom of the document.
+
 When using `<amp-list>` infinite scroll in conjunction with `<amp-analytics>` scroll triggers, it is recommended to make use of the `useInitialPageSize` property of `<amp-analytics>` to get a more accurate measurement of the scroll position that ignores the height changes caused by `<amp-list>`.
 
 Without `useInitialPageSize`, the `100%` scroll trigger point might never fire as more documents get loaded. Note that this will also ignore the size changes caused by other extensions (such as expanding embedded content) so some scroll events might fire prematurely instead.
@@ -351,6 +359,10 @@ Without `useInitialPageSize`, the `100%` scroll trigger point might never fire a
 #### load-more-button
 
 An `<amp-list-load-more>` element with the `load-more-button` attribute, which shows up at the end of the list (for the manual load-more) if there are more elements to be loaded. Clicking on this element will trigger a fetch to load more elements from the url contained in the `load-more-src` field or the field of the data returned corresponding to the `load-more-bookmark` attribute. This element can be customized by providing `<amp-list>` with a child element that has the attribute `load-more-button`.
+
+### Accessibility considerations for infinite scroll lists
+
+Be careful when using infinite scroll lists - if there is any content after the list (including a standard footer or similar), users won't be able to reach it until all list items have been loaded/displayed. This can make the experience frustrating or even impossible to overcome for users. See [Adrian Roselli: So you think you've built a good infinite scroll](https://adrianroselli.com/2014/05/so-you-think-you-built-good-infinite.html).
 
 ##### Example:
 
@@ -485,12 +497,21 @@ may make a request to something like `https://foo.com/list.json?0.8390278471201`
 
 ### `src` (required)
 
+[filter formats="websites, stories"]
+
 The URL of the remote endpoint that returns the JSON that will be rendered
 within this `<amp-list>`. There are three valid protocols for the `src` attribute.
 
 1. **https**: This must refer to a CORS HTTP service. Insecure HTTP is not supported.
 2. **amp-state**: For initializing from `<amp-state>` data. See [Initialization from `<amp-state>`](#initialization-from-amp-state) for more details.
 3. **amp-script**: For using `<amp-script>` functions as the data source. See [Using `<amp-script>` as a data source](#using-amp-script-as-a-data-source) for more details.
+   [/filter]<!-- formats="websites, stories" -->
+
+[filter formats="email"]
+
+The URL of the remote endpoint that returns the JSON for amp-list to render. This must refer to a CORS HTTP service and Insecure HTTP is not supported.
+
+[/filter]<!-- formats="email" -->
 
 [tip type="important"]
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
@@ -508,8 +529,8 @@ The `src` attribute may be omitted if the `[src]` attribute exists. `[src]` supp
 
 Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
 
-- Supported values: `omit`, `include`
-- Default: `omit`
+-   Supported values: `omit`, `include`
+-   Default: `omit`
 
 To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
 
@@ -533,9 +554,9 @@ Here's an example that specifies including credentials to display personalized c
 Defines the expression to locate the array to be rendered within the response. This is a dot-notated expression that navigates via fields of the JSON response.
 By defaut `<amp-list>` expects an array, the `single-item` attribute may be used to load data from an object.
 
-- The default value is `"items"`. The expected response: `{items: [...]}`.
-- If the response itself is the desired array, use the value of `"."`. The expected response is: `[...]`.
-- Nested navigation is permitted (e.g., `"field1.field2"`). The expected response is: `{field1: {field2: [...]}}`.
+-   The default value is `"items"`. The expected response: `{items: [...]}`.
+-   If the response itself is the desired array, use the value of `"."`. The expected response is: `[...]`.
+-   Nested navigation is permitted (e.g., `"field1.field2"`). The expected response is: `{field1: {field2: [...]}}`.
 
 When `items="items"` is specified (which, is the default) the response must be a JSON object that contains an array property called `"items"`:
 
@@ -590,9 +611,9 @@ For pages using `<amp-list>` that also use `amp-bind`, controls whether or not t
 
 We recommend using `binding="no"` or `binding="refresh"` for faster performance.
 
-- `binding="no"`: Never block render **(fastest)**.
-- `binding="refresh"`: Don't block render on initial load **(faster)**.
-- `binding="always"`: Always block render **(slow)**.
+-   `binding="no"`: Never block render **(fastest)**.
+-   `binding="refresh"`: Don't block render on initial load **(faster)**.
+-   `binding="always"`: Always block render **(slow)**.
 
 If `binding` attribute is not provided, default is `always`.
 
@@ -633,19 +654,19 @@ This element includes [common attributes](https://amp.dev/documentation/guides-a
 
 The AMP for Email spec disallows the use of the following attributes on the AMP email format.
 
-- `[src]`
-- `[state]`
-- `[is-layout-container]`
-- `auto-resize`
-- `credentials`
-- `data-amp-bind-src`
-- `load-more`
-- `load-more-bookmark`
-- `reset-on-refresh`
-- `xssi-prefix`
+-   `[src]`
+-   `[state]`
+-   `[is-layout-container]`
+-   `auto-resize`
+-   `credentials`
+-   `data-amp-bind-src`
+-   `load-more`
+-   `load-more-bookmark`
+-   `reset-on-refresh`
+-   `xssi-prefix`
 
 [/filter] <!-- formats="email" -->
 
 ## Validation
 
-See [amp-list rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/validator-amp-list.protoascii) in the AMP validator specification.
+See [amp-list rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-list/validator-amp-list.protoascii) in the AMP validator specification.

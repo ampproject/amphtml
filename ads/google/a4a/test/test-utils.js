@@ -17,8 +17,8 @@
 import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import * as IniLoad from '../../../../src/ini-load';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
+  AMP_EXPERIMENT_ATTRIBUTE,
   EXPERIMENT_ATTRIBUTE,
   TRUNCATION_PARAM,
   ValidAdContainerTypes,
@@ -32,11 +32,14 @@ import {
   getEnclosingContainerTypes,
   getIdentityToken,
   getIdentityTokenRequestUrl,
+  getServeNpaPromise,
   googleAdUrl,
   groupAmpAdsByType,
   maybeAppendErrorParameter,
   mergeExperimentIds,
 } from '../utils';
+import {CONSENT_POLICY_STATE} from '../../../../src/core/constants/consent-state';
+import {GEO_IN_GROUP} from '../../../../extensions/amp-geo/0.1/amp-geo-in-group';
 import {MockA4AImpl} from '../../../../extensions/amp-a4a/0.1/test/utils';
 import {Services} from '../../../../src/services';
 import {buildUrl} from '../shared/url-builder';
@@ -46,6 +49,7 @@ import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {installExtensionsService} from '../../../../src/service/extensions-impl';
 import {installXhrService} from '../../../../src/service/xhr-impl';
 import {toggleExperiment} from '../../../../src/experiments';
+import {user} from '../../../../src/log';
 
 function setupForAdTesting(fixture) {
   installDocService(fixture.win, /* isSingleDoc */ true);
@@ -70,18 +74,20 @@ function noopMethods(
   pageLayoutBox = {
     top: 11.1,
     left: 12.1,
-    right: 0,
-    bottom: 0,
     width: 0,
     height: 0,
   }
 ) {
   const noop = () => {};
-  impl.element.build = noop;
+  impl.element.buildInternal = noop;
   impl.element.getPlaceholder = noop;
   impl.element.createPlaceholder = noop;
   sandbox.stub(impl, 'getAmpDoc').returns(ampdoc);
-  sandbox.stub(impl, 'getPageLayoutBox').returns(pageLayoutBox);
+  sandbox.stub(impl.element, 'offsetParent').value(null);
+  sandbox.stub(impl.element, 'offsetTop').value(pageLayoutBox.top);
+  sandbox.stub(impl.element, 'offsetLeft').value(pageLayoutBox.left);
+  sandbox.stub(impl.element, 'offsetWidth').value(pageLayoutBox.width);
+  sandbox.stub(impl.element, 'offsetHeight').value(pageLayoutBox.height);
 }
 
 describe('Google A4A utils', () => {
@@ -203,7 +209,7 @@ describe('Google A4A utils', () => {
           'width': '200',
           'height': '50',
           'type': 'adsense',
-          'data-experiment-id': '00000001,0000002',
+          [EXPERIMENT_ATTRIBUTE]: '00000001,0000002',
         });
         const a4a = new MockA4AImpl(element);
         url = 'not an array';
@@ -251,6 +257,8 @@ describe('Google A4A utils', () => {
           switch (name) {
             case EXPERIMENT_ATTRIBUTE:
               return '00000001,00000002';
+            case AMP_EXPERIMENT_ATTRIBUTE:
+              return '103,204';
             case 'type':
               return 'fake-type';
             case 'data-amp-slot-index':
@@ -285,6 +293,7 @@ describe('Google A4A utils', () => {
         new RegExp(`(\\?|&)met\\.a4a\\.0=${metricName}\\.-?[0-9]+(&|$)`),
         /(\?|&)dt=-?[0-9]+(&|$)/,
         /(\?|&)e\.0=00000001%2C00000002(&|$)/,
+        /(\?|&)aexp=103!204(&|$)/,
         /(\?|&)rls=\$internalRuntimeVersion\$(&|$)/,
         /(\?|&)adt.0=fake-type(&|$)/,
       ];
@@ -380,16 +389,12 @@ describe('Google A4A utils', () => {
         });
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, fixture.ampdoc, window.sandbox);
-        return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], false, []).then((url1) => {
-            expect(url1).to.match(/ady=11.1/);
-            expect(url1).to.match(/adx=12.1/);
-            return googleAdUrl(impl, '', 0, [], true, []).then((url1) => {
-              expect(url1).to.match(/ady=11/);
-              expect(url1).to.match(/adx=12/);
-            });
-          });
-        });
+        return fixture.addElement(elem).then(() =>
+          googleAdUrl(impl, '', 0, [], []).then((url1) => {
+            expect(url1).to.match(/ady=11/);
+            expect(url1).to.match(/adx=12/);
+          })
+        );
       });
     });
 
@@ -415,13 +420,8 @@ describe('Google A4A utils', () => {
         const getScrollTop = () => 34.2;
         const viewportStub = window.sandbox.stub(Services, 'viewportForDoc');
         viewportStub.returns({getRect, getSize, getScrollTop, getScrollLeft});
-        return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, {}, false, []).then((url1) => {
-            expect(url1).to.match(/scr_x=12.1&scr_y=34.2/);
-          });
-          return googleAdUrl(impl, '', 0, {}, true, []).then((url1) => {
-            expect(url1).to.match(/scr_x=12&scr_y=34/);
-          });
+        return googleAdUrl(impl, '', 0, {}, []).then((url1) => {
+          expect(url1).to.match(/scr_x=12&scr_y=34/);
         });
       });
     });
@@ -437,16 +437,16 @@ describe('Google A4A utils', () => {
           'type': 'adsense',
           'width': '320',
           'height': '50',
-          'data-experiment-id': '123,456',
+          [EXPERIMENT_ATTRIBUTE]: '123,456',
+          [AMP_EXPERIMENT_ATTRIBUTE]: '111,222',
         });
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, fixture.ampdoc, window.sandbox);
         return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, {}, false, ['789', '098']).then(
-            (url1) => {
-              expect(url1).to.match(/eid=123%2C456%2C789%2C098/);
-            }
-          );
+          return googleAdUrl(impl, '', 0, {}, ['789', '098']).then((url1) => {
+            expect(url1).to.match(/eid=123%2C456%2C789%2C098/);
+            expect(url1).to.match(/aexp=111!222/);
+          });
         });
       });
     });
@@ -466,7 +466,7 @@ describe('Google A4A utils', () => {
         impl.win.AMP_CONFIG = {type: 'production'};
         impl.win.location.hash = 'foo,deid=123456,654321,bar';
         return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], false, []).then((url1) => {
+          return googleAdUrl(impl, '', 0, [], []).then((url1) => {
             expect(url1).to.match(/[&?]debug_experiment_id=123456%2C654321/);
           });
         });
@@ -487,7 +487,7 @@ describe('Google A4A utils', () => {
         noopMethods(impl, fixture.ampdoc, window.sandbox);
         impl.win.gaGlobal = {cid: 'foo', hid: 'bar'};
         return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], false, []).then((url) => {
+          return googleAdUrl(impl, '', 0, [], []).then((url) => {
             expect(url).to.match(/[&?]ga_cid=foo[&$]/);
             expect(url).to.match(/[&?]ga_hid=bar[&$]/);
           });
@@ -517,9 +517,9 @@ describe('Google A4A utils', () => {
           },
         });
         return fixture.addElement(elem).then(() => {
-          return expect(
-            googleAdUrl(impl, '', 0, {}, false, [])
-          ).to.eventually.match(/[&?]bc=7[&$]/);
+          return expect(googleAdUrl(impl, '', 0, {}, [])).to.eventually.match(
+            /[&?]bc=7[&$]/
+          );
         });
       });
     });
@@ -544,9 +544,9 @@ describe('Google A4A utils', () => {
           sandbox: {},
         });
         return fixture.addElement(elem).then(() => {
-          return expect(
-            googleAdUrl(impl, '', 0, {}, false, [])
-          ).to.eventually.match(/[&?]bc=1[&$]/);
+          return expect(googleAdUrl(impl, '', 0, {}, [])).to.eventually.match(
+            /[&?]bc=1[&$]/
+          );
         });
       });
     });
@@ -575,7 +575,7 @@ describe('Google A4A utils', () => {
         });
         return fixture.addElement(elem).then(() => {
           return expect(
-            googleAdUrl(impl, '', 0, {}, false, [])
+            googleAdUrl(impl, '', 0, {}, [])
           ).to.eventually.not.match(/[&?]bc=1[&$]/);
         });
       });
@@ -608,7 +608,7 @@ describe('Google A4A utils', () => {
         expectAsyncConsoleError(/Referrer timeout/, 1);
         return fixture.addElement(elem).then(() => {
           return expect(
-            googleAdUrl(impl, '', 0, {}, false, [])
+            googleAdUrl(impl, '', 0, {}, [])
           ).to.eventually.not.match(/[&?]ref=[&$]/);
         });
       });
@@ -623,11 +623,9 @@ describe('Google A4A utils', () => {
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, fixture.ampdoc, window.sandbox);
         return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', Date.now(), [], false, []).then(
-            (url) => {
-              expect(url).to.match(/[&?]bdt=[1-9][0-9]*[&$]/);
-            }
-          );
+          return googleAdUrl(impl, '', Date.now(), [], []).then((url) => {
+            expect(url).to.match(/[&?]bdt=[1-9][0-9]*[&$]/);
+          });
         });
       });
     });
@@ -1053,6 +1051,71 @@ describe('Google A4A utils', () => {
       const correlator = getCorrelator(win, win.document);
       expect(correlator).to.be.below(2 ** 52);
       expect(correlator).to.be.above(0);
+    });
+  });
+
+  describes.realWin('#getServeNpaPromise', {}, (env) => {
+    let win, doc, element, geoService;
+
+    beforeEach(() => {
+      win = env.win;
+      doc = win.document;
+      element = doc.createElement('amp-ad');
+      geoService = {
+        isInCountryGroup(country) {
+          switch (country) {
+            case 'usca':
+              return GEO_IN_GROUP.IN;
+            case 'gdpr':
+              return GEO_IN_GROUP.NOT_IN;
+            default:
+              return GEO_IN_GROUP.NOT_DEFINED;
+          }
+        },
+      };
+    });
+
+    it('should return false if no attribute found', async () => {
+      expect(await getServeNpaPromise(element)).to.false;
+    });
+
+    it('should return true, regardless of geo location if empty string', async () => {
+      element.setAttribute('always-serve-npa', '');
+      expect(await getServeNpaPromise(element)).to.true;
+    });
+
+    it('should return if doc is served from a defined geo group', async () => {
+      env.sandbox
+        .stub(Services, 'geoForDocOrNull')
+        .returns(Promise.resolve(geoService));
+      element.setAttribute('always-serve-npa', 'gdpr,usca');
+      expect(await getServeNpaPromise(element)).to.true;
+    });
+
+    it('should return false when doc is in an undefined group or not in', async () => {
+      const warnSpy = env.sandbox.stub(user(), 'warn');
+      env.sandbox
+        .stub(Services, 'geoForDocOrNull')
+        .returns(Promise.resolve(geoService));
+
+      // Undefined group
+      element.setAttribute('always-serve-npa', 'tx');
+      expect(await getServeNpaPromise(element)).to.false;
+      expect(warnSpy.args[0][0]).to.match(/AMP-AD/);
+      expect(warnSpy.args[0][1]).to.match(/Geo group "tx" was not defined./);
+      expect(warnSpy).to.have.been.calledOnce;
+      // Not in
+      element.setAttribute('always-serve-npa', 'gdpr');
+      expect(await getServeNpaPromise(element)).to.false;
+    });
+
+    it('should return true when geoService is null', async () => {
+      geoService = null;
+      env.sandbox
+        .stub(Services, 'geoForDocOrNull')
+        .returns(Promise.resolve(geoService));
+      element.setAttribute('always-serve-npa', 'gdpr');
+      expect(await getServeNpaPromise(element)).to.true;
     });
   });
 });

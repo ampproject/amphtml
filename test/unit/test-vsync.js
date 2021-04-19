@@ -72,8 +72,7 @@ describes.fakeWin('vsync', {}, (env) => {
       });
     });
 
-    // TODO(choumx, #12476): Make this test work with sinon 4.0.
-    it.skip('should generate a frame and run callbacks', () => {
+    it('should generate a frame and run callbacks', () => {
       let result = '';
       return new Promise((resolve) => {
         vsync.run({
@@ -171,8 +170,7 @@ describes.fakeWin('vsync', {}, (env) => {
       });
     });
 
-    // TODO(choumx, #12476): Make this test work with sinon 4.0.
-    it.skip('should schedule nested vsyncs', () => {
+    it('should schedule nested vsyncs', () => {
       let result = '';
       return new Promise((resolve) => {
         vsync.run({
@@ -207,8 +205,7 @@ describes.fakeWin('vsync', {}, (env) => {
       });
     });
 
-    // TODO(choumx, #12476): Make this test work with sinon 4.0.
-    it.skip('should return a promise from runPromise that executes "run"', () => {
+    it('should return a promise from runPromise that executes "run"', () => {
       const measureSpy = env.sandbox.spy();
       const mutateSpy = env.sandbox.spy();
       return vsync
@@ -219,8 +216,7 @@ describes.fakeWin('vsync', {}, (env) => {
         });
     });
 
-    // TODO(choumx, #12476): Make this test work with sinon 4.0.
-    it.skip('should return a promise from measurePromise that runs measurer', () => {
+    it('should return a promise from measurePromise that runs measurer', () => {
       let measured = false;
       return vsync
         .measurePromise(() => {
@@ -231,8 +227,7 @@ describes.fakeWin('vsync', {}, (env) => {
         });
     });
 
-    // TODO(choumx, #12476): Make this test work with sinon 4.0.
-    it.skip('should return a promise from mutatePromisethat runs mutator', () => {
+    it('should return a promise from mutatePromisethat runs mutator', () => {
       const mutator = env.sandbox.spy();
       return vsync.mutatePromise(mutator).then(() => {
         expect(mutator).to.be.calledOnce;
@@ -450,10 +445,10 @@ describes.fakeWin('vsync', {}, (env) => {
       vsync.raf_ = (handler) => (rafHandler = handler);
       isVisibleStub.returns(false);
 
-      let result = ''; // eslint-disable-line no-unused-vars
+      let result = '';
       const res = vsync.runAnim(contextNode, {
         mutate: () => {
-          result += 'mu1';
+          result += 'mu1'; // eslint-disable-line no-unused-vars
         },
       });
 
@@ -467,10 +462,10 @@ describes.fakeWin('vsync', {}, (env) => {
       vsync.raf_ = (handler) => (rafHandler = handler);
       isVisibleStub.returns(false);
 
-      let result = ''; // eslint-disable-line no-unused-vars
+      let result = '';
       const task = vsync.createAnimTask(contextNode, {
         mutate: () => {
-          result += 'mu1';
+          result += 'mu1'; // eslint-disable-line no-unused-vars
         },
       });
       const res = task();
@@ -730,10 +725,10 @@ describes.fakeWin('vsync', {}, (env) => {
       vsync.raf_ = (handler) => (rafHandler = handler);
       doc.visibilityState = 'hidden';
 
-      let result = ''; // eslint-disable-line no-unused-vars
+      let result = '';
       const res = vsync.runAnim(contextNode, {
         mutate: () => {
-          result += 'mu1';
+          result += 'mu1'; // eslint-disable-line no-unused-vars
         },
       });
 
@@ -747,10 +742,10 @@ describes.fakeWin('vsync', {}, (env) => {
       vsync.raf_ = (handler) => (rafHandler = handler);
       doc.visibilityState = 'hidden';
 
-      let result = ''; // eslint-disable-line no-unused-vars
+      let result = '';
       const task = vsync.createAnimTask(contextNode, {
         mutate: () => {
-          result += 'mu1';
+          result += 'mu1'; // eslint-disable-line no-unused-vars
         },
       });
       const res = task();

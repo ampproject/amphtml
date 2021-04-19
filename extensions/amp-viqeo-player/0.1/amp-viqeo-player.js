@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 import {redispatch} from '../../../src/iframe-video';
-import {startsWith} from '../../../src/string';
 
 import {dev, userAssert} from '../../../src/log';
 import {
@@ -140,6 +139,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
         allowFullscreen: true,
       }
     );
+    iframe.title = this.element.title || 'Viqeo video';
 
     // required to display the user gesture in the iframe
     iframe.setAttribute('allow', 'autoplay');
@@ -177,7 +177,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     if (redispatch(this.element, action, EVENTS)) {
       return;
     }
-    if (startsWith(action, 'update')) {
+    if (action.startsWith('update')) {
       const key = action.replace(
         /^update([A-Z])(.*)$/,
         (_, c, rest) => c.toLowerCase() + rest

@@ -50,12 +50,12 @@ element to further optimize `amp-anim`.
 Specifies the URL for a GIF image.
 
 [filter formats="email"]
-In an AMP email, the `src`must point to an absolute URL. Use of `amp-anim` in
-email doesn't allow the following attributes:
+In an AMP email, the `src` must point to an absolute `https` URL. Use of
+`amp-anim` in email doesn't allow the following attributes:
 
-- `srcset`
-- `object-fit`
-- `object-position`
+-   `srcset`
+-   `object-fit`
+-   `object-position`
 
 [/filter]
 
@@ -104,5 +104,5 @@ a grey background placeholder:
 
 ## Validation
 
-See [`amp-anim` rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/validator-amp-anim.protoascii)
+See [`amp-anim` rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-anim/validator-amp-anim.protoascii)
 in the AMP validator specification.

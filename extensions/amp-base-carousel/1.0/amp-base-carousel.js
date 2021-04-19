@@ -14,43 +14,75 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {BaseCarousel} from './base-carousel';
-import {CSS} from './base-carousel.jss';
+import {CSS as COMPONENT_CSS} from './base-carousel.jss';
+import {CSS} from '../../../build/amp-base-carousel-1.0.css';
+import {CarouselContextProp} from './carousel-props';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
+import {dispatchCustomEvent} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-base-carousel';
 
+/** @extends {PreactBaseElement<BaseCarouselDef.CarouselApi>} */
 class AmpBaseCarousel extends PreactBaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?number} */
+    this.slide_ = null;
+  }
+
   /** @override */
   init() {
     const {element} = this;
-    let advance = () => {};
-    this.registerAction('prev', () => advance(-1), ActionTrust.LOW);
-    this.registerAction('next', () => advance(1), ActionTrust.LOW);
+    this.registerApiAction('prev', (api) => api.prev(), ActionTrust.LOW);
+    this.registerApiAction('next', (api) => api.next(), ActionTrust.LOW);
+    this.registerApiAction(
+      'goToSlide',
+      (api, invocation) => {
+        const {args} = invocation;
+        api.goToSlide(args['index'] || -1);
+      },
+      ActionTrust.LOW
+    );
+
+    this.slide_ = parseInt(element.getAttribute('slide'), 10);
     return dict({
+      'defaultSlide': this.slide_ || 0,
       'onSlideChange': (index) => {
         fireSlideChangeEvent(this.win, element, index, ActionTrust.HIGH);
-        this.mutateProps(dict({'slide': index}));
       },
-      'setAdvance': (a) => (advance = a),
     });
   }
 
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-base-carousel-bento'),
-      'expected amp-base-carousel-bento experiment to be enabled'
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-carousel'),
+      'expected global "bento" or specific "bento-carousel" experiment to be enabled'
     );
-    return isLayoutSizeDefined(layout);
+    return super.isLayoutSupported(layout);
+  }
+
+  /** @override */
+  mutationObserverCallback() {
+    const slide = parseInt(this.element.getAttribute('slide'), 10);
+    if (slide === this.slide_) {
+      return;
+    }
+    this.slide_ = slide;
+    if (!isNaN(slide)) {
+      this.api().goToSlide(slide);
+    }
   }
 }
 
@@ -58,31 +90,58 @@ class AmpBaseCarousel extends PreactBaseElement {
 AmpBaseCarousel['Component'] = BaseCarousel;
 
 /** @override */
-AmpBaseCarousel['children'] = {
+AmpBaseCarousel['layoutSizeDefined'] = true;
+
+/** @override */
+AmpBaseCarousel['props'] = {
+  'advanceCount': {attr: 'advance-count', type: 'number', media: true},
   'arrowPrev': {
-    name: 'arrowPrev',
     selector: '[slot="prev-arrow"]',
     single: true,
   },
   'arrowNext': {
-    name: 'arrowNext',
     selector: '[slot="next-arrow"]',
     single: true,
   },
+  'autoAdvance': {attr: 'auto-advance', type: 'boolean', media: true},
+  'autoAdvanceCount': {attr: 'auto-advance-count', type: 'number', media: true},
+  'autoAdvanceInterval': {
+    attr: 'auto-advance-interval',
+    type: 'number',
+    media: true,
+  },
+  'autoAdvanceLoops': {attr: 'auto-advance-loops', type: 'number', media: true},
+  'controls': {attr: 'controls', type: 'string', media: true},
+  'orientation': {
+    attr: 'orientation',
+    type: 'string',
+    media: true,
+    default: 'horizontal',
+  },
+  'loop': {attr: 'loop', type: 'boolean', media: true},
+  'mixedLength': {attr: 'mixed-length', type: 'boolean', media: true},
+  'outsetArrows': {attr: 'outset-arrows', type: 'boolean', media: true},
+  'snap': {attr: 'snap', type: 'boolean', media: true, default: true},
+  'snapBy': {attr: 'snap-by', type: 'number', media: true},
+  'snapAlign': {attr: 'snap-align', type: 'string', media: true},
+  'visibleCount': {attr: 'visible-count', type: 'number', media: true},
   'children': {
-    name: 'children',
+    props: {
+      'thumbnailSrc': {attr: 'data-thumbnail-src'},
+    },
     selector: '*', // This should be last as catch-all.
     single: false,
   },
 };
 
 /** @override */
-AmpBaseCarousel['props'] = {
-  'loop': {attr: 'loop', type: 'boolean'},
-};
+AmpBaseCarousel['usesShadowDom'] = true;
 
 /** @override */
-AmpBaseCarousel['shadowCss'] = CSS;
+AmpBaseCarousel['shadowCss'] = COMPONENT_CSS;
+
+/** @override */
+AmpBaseCarousel['useContexts'] = [CarouselContextProp];
 
 /**
  * Triggers a 'slideChange' event with one data param:
@@ -94,15 +153,22 @@ AmpBaseCarousel['shadowCss'] = CSS;
  * @private
  */
 function fireSlideChangeEvent(win, el, index, trust) {
-  const name = 'slideChange';
+  const eventName = 'slideChange';
+  const data = dict({'index': index});
   const slideChangeEvent = createCustomEvent(
     win,
-    `amp-base-carousel.${name}`,
-    dict({'index': index})
+    `amp-base-carousel.${eventName}`,
+    data
   );
-  Services.actionServiceForDoc(el).trigger(el, name, slideChangeEvent, trust);
+  Services.actionServiceForDoc(el).trigger(
+    el,
+    eventName,
+    slideChangeEvent,
+    trust
+  );
+  dispatchCustomEvent(el, eventName, data);
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpBaseCarousel);
+  AMP.registerElement(TAG, AmpBaseCarousel, CSS);
 });

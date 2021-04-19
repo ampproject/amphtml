@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {adoptServiceForEmbedDoc} from '../service';
+import {
+  adoptServiceFactoryForEmbedDoc,
+  adoptServiceForEmbedDoc,
+} from '../service';
+import {devAssert} from '../log';
 import {installActionServiceForDoc} from './action-impl';
 import {installBatchedXhrService} from './batched-xhr-impl';
 import {installCidService} from './cid-impl';
@@ -25,8 +29,10 @@ import {installGlobalSubmitListenerForDoc} from '../document-submit';
 import {installHiddenObserverForDoc} from './hidden-observer-impl';
 import {installHistoryServiceForDoc} from './history-impl';
 import {installImg} from '../../builtins/amp-img';
+import {installInaboxResourcesServiceForDoc} from '../inabox/inabox-resources';
 import {installInputService} from '../input';
 import {installLayout} from '../../builtins/amp-layout';
+import {installLoadingIndicatorForDoc} from './loading-indicator';
 import {installMutatorServiceForDoc} from './mutator-impl';
 import {installOwnersServiceForDoc} from './owners-impl';
 import {installPixel} from '../../builtins/amp-pixel';
@@ -35,7 +41,7 @@ import {installPreconnectService} from '../preconnect';
 import {installResourcesServiceForDoc} from './resources-impl';
 import {installStandardActionsForDoc} from './standard-actions-impl';
 import {installStorageServiceForDoc} from './storage-impl';
-import {installTemplatesService} from './template-impl';
+import {installTemplatesServiceForDoc} from './template-impl';
 import {installTimerService} from './timer-impl';
 import {installUrlForDoc} from './url-impl';
 import {installUrlReplacementsServiceForDoc} from './url-replacements-impl';
@@ -64,7 +70,6 @@ export function installRuntimeServices(global) {
   installCryptoService(global);
   installBatchedXhrService(global);
   installPlatformService(global);
-  installTemplatesService(global);
   installTimerService(global);
   installVsyncService(global);
   installXhrService(global);
@@ -78,12 +83,35 @@ export function installRuntimeServices(global) {
  * @restricted
  */
 export function installAmpdocServices(ampdoc) {
-  const isEmbedded = !!ampdoc.getParent();
+  devAssert(!ampdoc.getParent());
+  installAmpdocServicesInternal(ampdoc, /* isEmbedded */ false);
+}
+
+/**
+ * Install ampdoc-level services for an embedded doc.
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @restricted
+ */
+export function installAmpdocServicesForEmbed(ampdoc) {
+  devAssert(!!ampdoc.getParent());
+  installAmpdocServicesInternal(ampdoc, /* isEmbedded */ true);
+}
+
+/**
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {boolean} isEmbedded
+ */
+function installAmpdocServicesInternal(ampdoc, isEmbedded) {
+  // This function is constructed to DCE embedded-vs-non-embedded path when
+  // a constant value passed in the `isEmbedded` arg.
 
   // When making changes to this method:
   // 1. Order is important!
   // 2. Consider to install same services to amp-inabox.js
   installUrlForDoc(ampdoc);
+  isEmbedded
+    ? adoptServiceFactoryForEmbedDoc(ampdoc, 'templates')
+    : installTemplatesServiceForDoc(ampdoc);
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'documentInfo')
     : installDocumentInfoServiceForDoc(ampdoc);
@@ -101,15 +129,13 @@ export function installAmpdocServices(ampdoc) {
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'history')
     : installHistoryServiceForDoc(ampdoc);
+
   isEmbedded
-    ? adoptServiceForEmbedDoc(ampdoc, 'resources')
+    ? installInaboxResourcesServiceForDoc(ampdoc)
     : installResourcesServiceForDoc(ampdoc);
-  isEmbedded
-    ? adoptServiceForEmbedDoc(ampdoc, 'owners')
-    : installOwnersServiceForDoc(ampdoc);
-  isEmbedded
-    ? adoptServiceForEmbedDoc(ampdoc, 'mutator')
-    : installMutatorServiceForDoc(ampdoc);
+  installOwnersServiceForDoc(ampdoc);
+  installMutatorServiceForDoc(ampdoc);
+
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'url-replace')
     : installUrlReplacementsServiceForDoc(ampdoc);
@@ -120,4 +146,9 @@ export function installAmpdocServices(ampdoc) {
     : installStorageServiceForDoc(ampdoc);
   installGlobalNavigationHandlerForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
+  if (!isEmbedded) {
+    // Embeds do not show loading indicators, since the whole embed is
+    // usually behind a parent loading indicator.
+    installLoadingIndicatorForDoc(ampdoc);
+  }
 }

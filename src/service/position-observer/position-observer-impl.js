@@ -16,7 +16,7 @@
 
 import {
   PositionObserverFidelity, // eslint-disable-line no-unused-vars
-  PositionObserverWorker, // eslint-disable-line no-unused-vars
+  PositionObserverWorker,
 } from './position-observer-worker';
 import {Services} from '../../services';
 import {debounce} from '../../utils/rate-limit';

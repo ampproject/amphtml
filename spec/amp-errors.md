@@ -20,29 +20,29 @@ AMP reports 90% of errors to the endpoint specified by the `errorReportingUrl`
 config property, with the remaining 10% reporting to the endpoint specified by
 the `betaErrorReportingUrl` config. E.g. for `cdn.ampproject.org`
 
-- 90%: `https://us-central1-amp-error-reporting.cloudfunctions.net/r`
-- 10%: `https://us-central1-amp-error-reporting.cloudfunctions.net/r-beta`
+-   90%: `https://us-central1-amp-error-reporting.cloudfunctions.net/r`
+-   10%: `https://us-central1-amp-error-reporting.cloudfunctions.net/r-beta`
 
 The following fields are reported:
 
-- `v=string` - AMP version
-- `m=string` - the error message
-- `a=1` - whether the error is labeled as "user" error (as opposed to a "dev" error).
-- `ex=1` - whether the error is labeled as "expected".
-- `3p=1` - whether the error occured in the 3p context.
-- `ca=1` - whether this is a canary version of AMP.
-- `or=string` - the ancestor origin if available.
-- `iem=1` - whether this document is iframed.
-- `rvu=string` - the viewer URL, provided by the viewer.
-- `mso=string` - the messaging origin for viewer communication.
-- `el=string` - the identifier/information on the associated DOM element.
-- `s=string` - the error stack.
-- `f=string` - the error's file name.
-- `l=number` - the error's line number.
-- `c=number` - the error's column number.
-- `r=string` - the document's referrer.
-- `ae=string` - accumulated/correlated error messages.
-- `fr=string` - the document's location fragment.
+-   `v=string` - AMP version
+-   `m=string` - the error message
+-   `a=1` - whether the error is labeled as "user" error (as opposed to a "dev" error).
+-   `ex=1` - whether the error is labeled as "expected".
+-   `3p=1` - whether the error occured in the 3p context.
+-   `ca=1` - whether this is a canary version of AMP.
+-   `or=string` - the ancestor origin if available.
+-   `iem=1` - whether this document is iframed.
+-   `rvu=string` - the viewer URL, provided by the viewer.
+-   `mso=string` - the messaging origin for viewer communication.
+-   `el=string` - the identifier/information on the associated DOM element.
+-   `s=string` - the error stack.
+-   `f=string` - the error's file name.
+-   `l=number` - the error's line number.
+-   `c=number` - the error's column number.
+-   `r=string` - the document's referrer.
+-   `ae=string` - accumulated/correlated error messages.
+-   `fr=string` - the document's location fragment.
 
 ## "Expected" errors
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {hasOwn, map} from '../../../src/utils/object';
+import {hasOwn, map} from '../../../src/core/types/object';
 import {accessParser as parser} from '../../../build/parsers/access-expr-impl';
 
 /**
@@ -22,7 +22,7 @@ import {accessParser as parser} from '../../../build/parsers/access-expr-impl';
  *
  * The grammar is defined in the `access-expr-impl.jison` and compiled using
  * (Jison)[https://zaach.github.io/jison/] parser. The compilation steps are
- * built into the `gulp build` and `gulp dist` tasks.
+ * built into the `amp build` and `amp dist` tasks.
  *
  * Grammar highlights:
  * - Shorthand truthy expressions are allowed, such as `field`. Truthy value

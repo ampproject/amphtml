@@ -21,7 +21,7 @@
 import '../polyfills';
 import {Navigation} from '../service/navigation';
 import {Services} from '../services';
-import {TickLabel} from '../enums';
+import {TickLabel} from '../core/constants/enums';
 import {adopt} from '../runtime';
 import {allowLongTasksInChunking, startupChunk} from '../chunk';
 import {cssText as ampSharedCss} from '../../build/ampshared.css';
@@ -35,7 +35,7 @@ import {
   installRuntimeServices,
 } from '../service/core-services';
 import {installDocService} from '../service/ampdoc-impl';
-import {installErrorReporting} from '../error';
+import {installErrorReporting} from '../error-reporting';
 import {installPerformanceService} from '../service/performance-impl';
 import {installPlatformService} from '../service/platform-impl';
 import {
@@ -44,6 +44,7 @@ import {
   makeBodyVisibleRecovery,
 } from '../style-installer';
 import {internalRuntimeVersion} from '../internal-version';
+import {maybeRenderInaboxAsStoryAd} from './inabox-story-ad';
 import {maybeValidate} from '../validator-integration';
 import {stubElementsForDoc} from '../service/custom-element-registry';
 
@@ -83,6 +84,7 @@ startupChunk(self.document, function initial() {
   self.document.documentElement.classList.add('i-amphtml-inabox');
   installStylesForDoc(
     ampdoc,
+    // TODO: Can this be eliminated in ESM mode?
     ampSharedCss +
       'html.i-amphtml-inabox{width:100%!important;height:100%!important}',
     () => {
@@ -111,6 +113,7 @@ startupChunk(self.document, function initial() {
         self.document,
         function final() {
           Navigation.installAnchorClickInterceptor(ampdoc, self);
+          maybeRenderInaboxAsStoryAd(ampdoc);
           maybeValidate(self);
           makeBodyVisible(self.document);
         },

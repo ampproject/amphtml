@@ -44,7 +44,14 @@ navigation arrow.
 [example preview="inline" playground="true" imports="amp-carousel"]
 
 ```html
-<amp-carousel width="450" height="300" layout="responsive" type="slides">
+<amp-carousel
+  width="450"
+  height="300"
+  layout="responsive"
+  type="slides"
+  role="region"
+  aria-label="Basic carousel"
+>
   <amp-img
     src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
     width="450"
@@ -67,18 +74,20 @@ navigation arrow.
 
 ### Differences from `<amp-carousel>` 0.1
 
-- `autoplay` is allowed on `type="carousel"`
-- `loop` is allowed on `type="carousel"`
+-   `autoplay` is allowed on `type="carousel"`
+-   `loop` is allowed on `type="carousel"`
 
 #### Migration Notes
 
-- Update the required script from `amp-carousel-0.1` to `amp-carousel-0.2`.
-- Ensure any CSS for positioning next/previous arrows is still valid. See the
-  [styling](#styling) for more information on arrow positioning.
-- Ensure any CSS used to style the carousel is still valid. The internal DOM
-  structure of `<amp-carousel>` 0.2 differs from 0.1, effecting CSS selectors
-  targeting internal elements such as `amp-carousel > div`. Any selectors using
-  the `.amp-class-name` format should still work.
+-   Update the required script from `amp-carousel-0.1` to `amp-carousel-0.2`.
+-   Ensure any CSS for positioning next/previous arrows is still valid. See the
+    [styling](#styling) for more information on arrow positioning.
+-   Ensure any CSS used to style the carousel is still valid. The internal DOM
+    structure of `<amp-carousel>` 0.2 differs from 0.1, effecting CSS selectors
+    targeting internal elements such as `amp-carousel > div`. Any selectors using
+    the `.amp-class-name` format should still work.
+-   **NOTE**: Support for `amp-carousel-0.1` is limited, with the intent to
+    deprecate in the future.
 
 ### Advancing to a specific slide
 
@@ -100,6 +109,8 @@ corresponding carousel item displays.
   height="300"
   layout="responsive"
   type="slides"
+  role="region"
+  aria-label="Carousel with slide previews"
 >
   <amp-img
     src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
@@ -153,16 +164,24 @@ corresponding carousel item displays.
 
 [/example]
 
+### Accessibility considerations for `amp-carousel`
+
+Autoplaying, and particularly infinitely looping, carousels can be very distracting and confusing for users - especially for users with cognitive impairments. In general, we recommend avoiding autoplaying carousels. While autoplaying carousels stop once the user has interacted with the carousel, consider also adding an explicit "Play/Pause" control.
+
+By default, the `<amp-carousel>` is programmatically identified as a list when rendered (using `role="list"` on the container element, and `role="listitem"` on each item). However, for `<amp-carousel type="slides">`, no specific `role` is currently provided. As a result, it will not be obvious for assistive technology users reading/navigating through a page when they reach a carousel. We recommend including an explicit `role="region"` and a descriptive `aria-label` (either a generic `aria-label="Carousel"` or a more descriptive label such as `aria-label="Latest news items"`) to `<amp-carousel>`.
+
+Currently, an `<amp-carousel type="slides">` carousel is declared as an ARIA live region (using `aria-live="polite"`), meaning that every time a new slide is shown, the entire content of the slide is announced by assistive technologies (such as screen readers). Due to the way carousels are initially rendered, this can also result in the carousel's content being announced in its entirety when a page is loaded. This also means that pages that contain an `autoplay` carousel will continuously announce whenever a slide auto-advances. There is currently no work-around for this issue.
+
 ## Attributes
 
 ### type
 
 Specifies the display type for the carousel items, which can be:
 
-- carousel (default): All slides are shown and are scrollable horizontally. Each
-  slide may specify a different width using CSS.
-- slides: Shows a single slide at a time, with each slide snapping into place as
-  the user swipes.
+-   carousel (default): All slides are shown and are scrollable horizontally. Each
+    slide may specify a different width using CSS.
+-   slides: Shows a single slide at a time, with each slide snapping into place as
+    the user swipes.
 
 ### controls (optional)
 
@@ -198,18 +217,19 @@ manually changes slides, then autoplay is stopped.
 
 If present without a value:
 
-- By default, advances a slide in 5000 millisecond intervals (5 seconds); this
-  can be overridden by the `delay` attribute.
-- Requires at least 2 slides for autoplay to occur.
+-   By default, advances a slide in 5000 millisecond intervals (5 seconds); this
+    can be overridden by the `delay` attribute.
+-   Requires at least 2 slides for autoplay to occur.
 
 If present with a value:
 
-- Stops autoplaying after the requisite number of loops are made.
+-   Stops autoplaying after the requisite number of loops are made.
 
 ### delay (optional)
 
 Specifies the duration (in milliseconds) to delay advancing to the next slide
-when `autoplay` is enabled.
+when `autoplay` is enabled. Note that the minimum allowed value for delay is
+1000 milliseconds.
 
 ### loop (optional)
 
@@ -230,7 +250,9 @@ autoplay.
   {% if not format=='email'%}  autoplay
   delay="3000"{% endif %}
   data-next-button-aria-label="Go to next slide"
-  data-previous-button-aria-label="Go to previous slide">
+  data-previous-button-aria-label="Go to previous slide"
+  role="region"
+  aria-label="Looping carousel">
   <amp-img src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
     width="450"
     height="300"></amp-img>
@@ -281,10 +303,10 @@ Event.index
 
 [filter formats="websites, ads"]
 
-- You may use the `amp-carousel` element selector to style it freely.
-- You may use the `.amp-carousel-slide` class selector to target carousel items.
-- The visual state of an `amp-carousel` button when it's disabled is hidden.
-- By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own SVG or image as in the example below.
+-   You may use the `amp-carousel` element selector to style it freely.
+-   You may use the `.amp-carousel-slide` class selector to target carousel items.
+-   The visual state of an `amp-carousel` button when it's disabled is hidden.
+-   By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own SVG or image as in the example below.
 
 _Example: Default `.amp-carousel-button` inlined SVG_
 
@@ -304,7 +326,7 @@ _Example: Overriding the default `.amp-carousel-button` inlined SVG_
 
 Note that the SVG content needs to have certain characters, including `<`, `>` and `#` encoded. This can be done using a tool like [SVGO](https://github.com/svg/svgo) or using [`encodeURIComponent`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent).
 
-- You can position the carousel buttons using align-self and/or relative positioning. Note that the carousel arrows are automatically flipped in RTL, so you should not change their flex order.
+-   You can position the carousel buttons using align-self and/or relative positioning. Note that the carousel arrows are automatically flipped in RTL, so you should not change their flex order.
 
 ```css
 .amp-carousel-button-prev {
@@ -318,10 +340,10 @@ Note that the SVG content needs to have certain characters, including `<`, `>` a
 
 [filter formats="email"]
 
-- You may use the `amp-carousel` element selector to style it freely.
-- You may use the `.amp-carousel-slide` class selector to target carousel items.
-- The visual state of an `amp-carousel` button when it's disabled is hidden.
-- By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own image. Some email clients may not support SVG.
+-   You may use the `amp-carousel` element selector to style it freely.
+-   You may use the `.amp-carousel-slide` class selector to target carousel items.
+-   The visual state of an `amp-carousel` button when it's disabled is hidden.
+-   By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own image. Some email clients may not support SVG.
 
 _Example: Overriding the default `.amp-carousel-button` inlined SVG_
 
