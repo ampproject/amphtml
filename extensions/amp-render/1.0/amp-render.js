@@ -114,6 +114,21 @@ function getAmpScriptJson(ampdoc, src) {
 }
 
 /**
+ *
+ * @param {!AmpElement} element
+ * @return {!Object} options object to pass to `batchFetchJsonFor` method.
+ */
+function buildOptionsObject(element) {
+  return {
+    xssiPrefix: element.hasAttribute('xssi-prefix')
+      ? element.getAttribute('xssi-prefix')
+      : undefined,
+    expr: element.hasAttribute('key') ? element.getAttribute('key') : '.',
+    refresh: false, // TODO: does this need to be hardcoded to false?
+  };
+}
+
+/**
  * Returns a function to fetch json from remote url, amp-state or
  * amp-script.
  *
@@ -121,7 +136,7 @@ function getAmpScriptJson(ampdoc, src) {
  * @param options
  * @return {Function}
  */
-export const getJsonFn = (element, options) => {
+export const getJsonFn = (element) => {
   const src = element.getAttribute('src');
   if (!src?.length) {
     // TODO(dmanek): assert that src is provided instead of silently failing below.
@@ -133,7 +148,12 @@ export const getJsonFn = (element, options) => {
   if (isAmpScriptSrc(src)) {
     return (src) => getAmpScriptJson(element.getAmpDoc(), src);
   }
-  return () => batchFetchJsonFor(element.getAmpDoc(), element, options);
+  return () =>
+    batchFetchJsonFor(
+      element.getAmpDoc(),
+      element,
+      buildOptionsObject(element)
+    );
 };
 
 export class AmpRender extends BaseElement {
@@ -171,20 +191,9 @@ export class AmpRender extends BaseElement {
       api.refresh();
     });
 
-    const xssiPrefix = this.element.hasAttribute('xssi-prefix')
-      ? this.element.getAttribute('xssi-prefix')
-      : undefined;
-    const expr = this.element.hasAttribute('key')
-      ? this.element.getAttribute('key')
-      : '.';
-
     // XXX batchFetchJsonFor is called in re-render with default options object
     return dict({
-      'getJson': getJsonFn(this.element, {
-        xssiPrefix,
-        expr,
-        refresh: false,
-      }),
+      'getJson': getJsonFn(this.element),
     });
   }
 
