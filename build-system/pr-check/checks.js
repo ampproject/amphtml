@@ -51,6 +51,7 @@ function pushBuildWorkflow() {
  * @return {Promise<void>}
  */
 async function prBuildWorkflow() {
+  process.exit(1);
   await reportAllExpectedTests();
 
   if (buildTargetsInclude(Targets.PRESUBMIT)) {
