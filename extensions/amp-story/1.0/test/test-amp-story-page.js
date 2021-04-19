@@ -18,7 +18,7 @@ import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
-import {Deferred} from '../../../../src/utils/promise';
+import {Deferred} from '../../../../src/core/data-structures/promise';
 import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {Services} from '../../../../src/services';
@@ -719,6 +719,37 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(
       openAttachmentEl.querySelector(
         '.i-amphtml-story-outlink-page-attachment-outlink-chip'
+      )
+    ).to.exist;
+  });
+
+  it('should build the new outlink page attachment UI with icon', async () => {
+    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
+
+    const attachmentEl = createElementWithAttributes(
+      win.document,
+      'amp-story-page-attachment',
+      {
+        'layout': 'nodisplay',
+        'href': 'www.google.com',
+        'theme': 'custom',
+        'cta-accent-color': 'pink',
+        'cta-accent-element': 'text',
+      }
+    );
+    element.appendChild(attachmentEl);
+
+    await page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    expect(
+      openAttachmentEl.querySelector(
+        '.i-amphtml-story-page-open-attachment-link-icon'
       )
     ).to.exist;
   });

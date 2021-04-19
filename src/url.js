@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LruCache} from './utils/lru-cache';
+import {LruCache} from './core/data-structures/lru-cache';
 import {dict, hasOwn} from './core/types/object';
 import {endsWith} from './core/types/string';
 import {getMode} from './mode';

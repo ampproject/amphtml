@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {ImaPlayerData} from '../../../ads/google/ima-player-data';
 import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';

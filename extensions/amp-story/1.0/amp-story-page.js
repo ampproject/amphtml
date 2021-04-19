@@ -35,7 +35,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {
   AmpStoryEmbeddedComponent,
   EMBED_ID_ATTRIBUTE_NAME,
@@ -43,8 +43,8 @@ import {
   expandableElementsSelectors,
 } from './amp-story-embedded-component';
 import {AnimationManager, hasAnimations} from './animation';
-import {CommonSignals} from '../../../src/common-signals';
-import {Deferred} from '../../../src/utils/promise';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {EventType, dispatch} from './events';
 import {Layout} from '../../../src/layout';
 import {LoadingSpinner} from './loading-spinner';
@@ -1759,7 +1759,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       );
 
       const container = this.win.document.createElement('div');
-      container.classList.add('i-amphtml-page-attachment-host');
+      container.classList.add('i-amphtml-story-page-open-attachment-host');
       container.setAttribute('role', 'button');
 
       container.addEventListener('click', () => this.openAttachment());

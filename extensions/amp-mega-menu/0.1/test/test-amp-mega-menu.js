@@ -15,7 +15,7 @@
  */
 
 import '../amp-mega-menu';
-import {Keys} from '../../../../src/utils/key-codes';
+import {Keys} from '../../../../src/core/constants/key-codes';
 import {htmlFor} from '../../../../src/static-template';
 import {tryFocus} from '../../../../src/dom';
 

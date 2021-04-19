@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
 import {Util} from './util';
 import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';

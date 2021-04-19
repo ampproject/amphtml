@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
+import {Deferred} from '../core/data-structures/promise';
 import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
@@ -23,7 +23,7 @@ import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
 import {Resource, ResourceState} from './resource';
 import {Services} from '../services';
 import {TaskQueue} from './task-queue';
-import {VisibilityState} from '../visibility-state';
+import {VisibilityState} from '../core/constants/visibility-state';
 import {dev, devAssert} from '../log';
 import {dict} from '../core/types/object';
 import {expandLayoutRect} from '../layout-rect';
