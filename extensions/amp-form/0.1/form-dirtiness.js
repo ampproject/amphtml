@@ -15,10 +15,12 @@
  */
 
 import {AmpEvents} from '../../../src/core/constants/amp-events';
+import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {dict, map} from '../../../src/core/types/object';
+import {getServiceForDocOrNull} from '../../../src/service';
 import {isDisabled, isFieldDefault, isFieldEmpty} from '../../../src/form';
 
 export const DIRTINESS_INDICATOR_CLASS = 'amp-form-dirty';
@@ -30,21 +32,26 @@ const SUPPORTED_TAG_NAMES = {
   'TEXTAREA': true,
 };
 
+/** @const {string} */
+const TAG = 'amp-form';
+
 export class FormDirtiness {
   /**
    * @param {!HTMLFormElement} form
    * @param {!Window} win
-   * @param {?AmpFormService} ampFormService
    */
-  constructor(form, win, ampFormService) {
+  constructor(form, win) {
     /** @private @const {!HTMLFormElement} */
     this.form_ = form;
 
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private @const {?AmpFormService} */
-    this.ampFormService_ = ampFormService;
+    /** @const {!../../../src/service/ampdoc-impl.AmpDoc}  */
+    const ampdoc = Services.ampdoc(this.form_);
+
+    /** @const @private {?AmpFormService} */
+    this.ampFormService_ = getServiceForDocOrNull(ampdoc, TAG);
 
     /** @private {number} */
     this.dirtyFieldCount_ = 0;
@@ -134,26 +141,25 @@ export class FormDirtiness {
    * @private
    */
   installEventHandlers_() {
-    if (this.ampFormService_) {
-      this.ampFormService_.addFormEventListener(
-        this.form_,
-        'input',
-        this.onInput_.bind(this)
-      );
-      this.ampFormService_.addFormEventListener(
-        this.form_,
-        'reset',
-        this.onReset_.bind(this)
-      );
+    devAssert(this.ampFormService_);
+    this.ampFormService_.addFormEventListener(
+      this.form_,
+      'input',
+      this.onInput_.bind(this)
+    );
+    this.ampFormService_.addFormEventListener(
+      this.form_,
+      'reset',
+      this.onReset_.bind(this)
+    );
 
-      // `amp-bind` dispatches the custom event `FORM_VALUE_CHANGE` when it
-      // mutates the value of a form field (e.g. textarea, input, etc)
-      this.ampFormService_.addFormEventListener(
-        this.form_,
-        AmpEvents.FORM_VALUE_CHANGE,
-        this.onInput_.bind(this)
-      );
-    }
+    // `amp-bind` dispatches the custom event `FORM_VALUE_CHANGE` when it
+    // mutates the value of a form field (e.g. textarea, input, etc)
+    this.ampFormService_.addFormEventListener(
+      this.form_,
+      AmpEvents.FORM_VALUE_CHANGE,
+      this.onInput_.bind(this)
+    );
   }
 
   /** @private */

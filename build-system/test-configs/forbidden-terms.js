@@ -295,6 +295,8 @@ const forbiddenTermsGlobal = {
       'extensions/amp-a4a/0.1/amp-ad-template-helper.js',
       'extensions/amp-analytics/0.1/instrumentation.js',
       'extensions/amp-analytics/0.1/variables.js',
+      'extensions/amp-form/0.1/amp-form.js',
+      'extensions/amp-form/0.1/form-dirtiness.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'extensions/amp-gwd-animation/0.1/amp-gwd-animation.js',
       'src/chunk.js',

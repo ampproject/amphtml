@@ -52,7 +52,7 @@ import {
 } from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
-import {deepMerge, dict} from '../../../src/core/types/object';
+import {deepMerge, dict, hasOwn} from '../../../src/core/types/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {
@@ -221,11 +221,7 @@ export class AmpForm {
     }
 
     /** @const @private {!./form-dirtiness.FormDirtiness} */
-    this.dirtinessHandler_ = new FormDirtiness(
-      this.form_,
-      this.win_,
-      this.ampFormService_
-    );
+    this.dirtinessHandler_ = new FormDirtiness(this.form_, this.win_);
 
     /** @const @private {!./form-validators.FormValidator} */
     this.validator_ = getFormValidator(this.form_);
@@ -400,7 +396,7 @@ export class AmpForm {
    * the form tag are loaded and built (e.g. amp-selector) or 2 seconds timeout
    * - whichever is first.
    *
-   * NOTE: amp-form allows <input>'s that are not descendants of itself, but
+   * NOTE: amp-form allows elements that are not descendants of itself, but
    * not <amp-selector>s
    * @return {!Promise}
    * @private
@@ -428,70 +424,67 @@ export class AmpForm {
         tryFocus(autofocus);
       }
     });
-    if (this.ampFormService_) {
-      this.ampFormService_.addFormEventListener(
-        this.form_,
-        'submit',
-        this.handleSubmitEvent_.bind(this),
-        true
-      );
+    devAssert(this.ampFormService_);
+    this.ampFormService_.addFormEventListener(
+      this.form_,
+      'submit',
+      this.handleSubmitEvent_.bind(this),
+      true
+    );
 
-      this.ampFormService_.addFormEventListener(
-        this.form_,
-        'blur',
-        (e) => {
-          checkUserValidityAfterInteraction_(dev().assertElement(e.target));
-          this.validator_.onBlur(e);
-        },
-        true
-      );
+    this.ampFormService_.addFormEventListener(
+      this.form_,
+      'blur',
+      (e) => {
+        checkUserValidityAfterInteraction_(dev().assertElement(e.target));
+        this.validator_.onBlur(e);
+      },
+      true
+    );
 
-      this.ampFormService_.addFormEventListener(
-        this.form_,
-        AmpEvents.FORM_VALUE_CHANGE,
-        (e) => {
-          checkUserValidityAfterInteraction_(dev().assertElement(e.target));
-          this.validator_.onInput(e);
-        },
-        true
-      );
-
-      //  Form verification is not supported when SSRing templates is enabled.
-      if (!this.ssrTemplateHelper_.isEnabled()) {
-        this.ampFormService_.addFormEventListener(this.form_, 'change', (e) => {
-          this.verifier_.onCommit().then((updatedErrors) => {
-            const {updatedElements, errors} = updatedErrors;
-            updatedElements.forEach(checkUserValidityAfterInteraction_);
-            // Tell the validation to reveal any input.validationMessage added
-            // by the form verifier.
-            this.validator_.onBlur(e);
-
-            // Only make the verify XHR if the user hasn't pressed submit.
-            if (this.state_ === FormState.VERIFYING) {
-              if (errors.length) {
-                this.setState_(FormState.VERIFY_ERROR);
-                this.renderTemplate_(dict({'verifyErrors': errors})).then(
-                  () => {
-                    this.triggerAction_(
-                      FormEvents.VERIFY_ERROR,
-                      errors,
-                      ActionTrust.DEFAULT // DEFAULT because async after gesture.
-                    );
-                  }
-                );
-              } else {
-                this.setState_(FormState.INITIAL);
-              }
-            }
-          });
-        });
-      }
-
-      this.ampFormService_.addFormEventListener(this.form_, 'change', (e) => {
+    this.ampFormService_.addFormEventListener(
+      this.form_,
+      AmpEvents.FORM_VALUE_CHANGE,
+      (e) => {
         checkUserValidityAfterInteraction_(dev().assertElement(e.target));
         this.validator_.onInput(e);
+      },
+      true
+    );
+
+    //  Form verification is not supported when SSRing templates is enabled.
+    if (!this.ssrTemplateHelper_.isEnabled()) {
+      this.ampFormService_.addFormEventListener(this.form_, 'change', (e) => {
+        this.verifier_.onCommit().then((updatedErrors) => {
+          const {updatedElements, errors} = updatedErrors;
+          updatedElements.forEach(checkUserValidityAfterInteraction_);
+          // Tell the validation to reveal any input.validationMessage added
+          // by the form verifier.
+          this.validator_.onBlur(e);
+
+          // Only make the verify XHR if the user hasn't pressed submit.
+          if (this.state_ === FormState.VERIFYING) {
+            if (errors.length) {
+              this.setState_(FormState.VERIFY_ERROR);
+              this.renderTemplate_(dict({'verifyErrors': errors})).then(() => {
+                this.triggerAction_(
+                  FormEvents.VERIFY_ERROR,
+                  errors,
+                  ActionTrust.DEFAULT // DEFAULT because async after gesture.
+                );
+              });
+            } else {
+              this.setState_(FormState.INITIAL);
+            }
+          }
+        });
       });
     }
+
+    this.ampFormService_.addFormEventListener(this.form_, 'change', (e) => {
+      checkUserValidityAfterInteraction_(dev().assertElement(e.target));
+      this.validator_.onInput(e);
+    });
   }
 
   /** @private */
@@ -560,7 +553,7 @@ export class AmpForm {
       this.form_,
       '.user-valid, .user-invalid'
     );
-    iterateCursor(validityElements, (element) => {
+    validityElements.forEach((element) => {
       element.classList.remove('user-valid');
       element.classList.remove('user-invalid');
     });
@@ -720,14 +713,10 @@ export class AmpForm {
    */
   getVarSubsFields_() {
     // Fields that support var substitutions.
-    const {elements} = this.form_;
-    return Array.from(elements).filter((ele) => {
-      return (
-        ele.tagName.toUpperCase() === 'INPUT' &&
-        ele.hasAttribute('data-amp-replace') &&
-        ele.type.toLocaleLowerCase() === 'hidden'
-      );
-    });
+    return formElementsQuerySelectorAll(
+      this.form_,
+      'input[type="hidden"][data-amp-replace]'
+    );
   }
 
   /**
@@ -904,7 +893,7 @@ export class AmpForm {
 
   /**
    * Perform asynchronous variable substitution on the fields that require it.
-   * @param {!IArrayLike<!HTMLInputElement>} varSubsFields
+   * @param {!Array<!HTMLInputElement>} varSubsFields
    * @return {!Promise}
    * @private
    */
@@ -964,11 +953,9 @@ export class AmpForm {
    * @private
    */
   doVerifyXhr_() {
-    const noVerifyFields = toArray(
-      formElementsQuerySelectorAll(
-        this.form_,
-        `[${escapeCssSelectorIdent(FORM_VERIFY_OPTOUT)}]`
-      )
+    const noVerifyFields = formElementsQuerySelectorAll(
+      this.form_,
+      `[${escapeCssSelectorIdent(FORM_VERIFY_OPTOUT)}]`
     );
     const denylist = noVerifyFields.map((field) => field.name || field.id);
 
@@ -1161,7 +1148,7 @@ export class AmpForm {
     userAssert(
       fields.length == 0,
       'input[type=password] or input[type=file] ' +
-        'may only appear in form[method=post]'
+        'may only appear with form[method=post]'
     );
   }
 
@@ -1473,21 +1460,14 @@ export class AmpForm {
 }
 
 /**
- * Returns all element who's form attribute is the `form`
+ * Returns all elements of form.elements
  * that match the selectors.
- * These elements must be contained by the form or <input>s
- * that are outside the form.
  * @param {!HTMLFormElement} form
  * @param {string} query
  * @return {!Array<HTMLElement>}
  */
 export function formElementsQuerySelectorAll(form, query) {
-  return Array.from(form.elements).filter((element) => {
-    return (
-      matches(element, query) &&
-      (form.contains(element) || element.tagName.toUpperCase() === 'INPUT')
-    );
-  });
+  return Array.from(form.elements).filter((element) => matches(element, query));
 }
 
 /**
@@ -1500,7 +1480,7 @@ function checkUserValidityOnSubmission(form) {
     form,
     'input,select,textarea,fieldset'
   );
-  iterateCursor(elements, (element) => checkUserValidity(element));
+  elements.forEach((element) => checkUserValidity(element));
   return checkUserValidity(form);
 }
 
@@ -1544,7 +1524,7 @@ function removeValidityStateClasses(form) {
       form,
       `.${escapeCssSelectorIdent(validityState)}`
     );
-    iterateCursor(elements, (element) => {
+    elements.forEach((element) => {
       dev().assertElement(element).classList.remove(validityState);
     });
   }
@@ -1642,7 +1622,7 @@ export class AmpFormService {
     /** @const @private {!Array<UnlistenDef>} */
     this.unlisteners_ = [];
 
-    /** @const @private {!Object<string, WeakMap<HTMLFormElement, function(!Event)>>} */
+    /** @const @private {!Object<string, WeakMap<HTMLFormElement, Array<function(!Event)>>>} */
     this.eventHandlers_ = {};
 
     // Dispatch a test-only event for integration tests.
@@ -1751,16 +1731,20 @@ export class AmpFormService {
           (e) => {
             const {form} = e.target;
 
-            // Only call handler if the elemen has a registered form.
+            // Only call handlers if the element has a registered form.
             if (this.eventHandlers_[type].has(form)) {
-              this.eventHandlers_[type].get(form)(e);
+              this.eventHandlers_[type].get(form).forEach((handlerForForm) => {
+                handlerForForm(e);
+              });
             }
           },
           opt_options
         )
       );
     }
-    this.eventHandlers_[type].set(form, handler);
+    const handlersArr = this.eventHandlers_[type].get(form) || [];
+    handlersArr.push(handler);
+    this.eventHandlers_[type].set(form, handlersArr);
     this.unlisteners_.push(() => {
       this.eventHandlers_[type].delete(form);
     });

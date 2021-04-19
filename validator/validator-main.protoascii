@@ -2613,6 +2613,7 @@ attr_lists: {
   }
   attrs: { name: "checked" }
   attrs: { name: "disabled" }
+  attrs: { name: "form" }
   attrs: { name: "height" }
   attrs: {
     disabled_by: "amp4email"
@@ -2763,18 +2764,6 @@ tags: {
   attr_lists: "input-common-attr"
   attr_lists: "name-attr"
   mandatory_ancestor: "FORM [method=POST]"
-  spec_url: "https://amp.dev/documentation/components/amp-form/"
-}
-tags: {
-  html_format: AMP
-  tag_name: "INPUT"
-  spec_name: "INPUT [form]"
-  attrs: {
-    name: "form"
-    mandatory: true
-  }
-  attr_lists: "input-common-attr"
-  attr_lists: "name-attr"
   spec_url: "https://amp.dev/documentation/components/amp-form/"
 }
 # 4.10.6 The button element

@@ -132,11 +132,7 @@ feature_tests/forms.html:125:2 The attribute 'target' in tag 'form' is set to th
 |    </form>
 |    <!-- Valid: input with form attribute can be outside the form. -->
 |    <input form="my-form3" type="text" name="name">
->>   ^~~~~~~~~
-feature_tests/forms.html:129:2 The attribute 'form' may not appear in tag 'input'. (see https://amp.dev/documentation/components/amp-form/)
 |    <input form="my-form3" type="hidden" data-amp-replace="RANDOM">
->>   ^~~~~~~~~
-feature_tests/forms.html:130:2 The attribute 'form' may not appear in tag 'input'. (see https://amp.dev/documentation/components/amp-form/)
 |    <form id="my-form3" method="post" action-xhr="https://example-cdn.ampproject.org/subscribe" target="_blank">
 |      <input type="submit" value="Subscribe">
 |    </form>

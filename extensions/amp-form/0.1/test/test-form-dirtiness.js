@@ -15,6 +15,7 @@
  */
 
 import {AmpEvents} from '../../../../src/core/constants/amp-events';
+import {AmpFormService} from '../amp-form';
 import {DIRTINESS_INDICATOR_CLASS, FormDirtiness} from '../form-dirtiness';
 import {Services} from '../../../../src/services';
 import {closestAncestorElementBySelector} from '../../../../src/dom';
@@ -89,6 +90,7 @@ describes.realWin(
   {
     amp: {
       runtimeOn: true,
+      extensions: ['amp-form'], // amp-form is installed as service.
     },
   },
   (env) => {
@@ -103,7 +105,7 @@ describes.realWin(
         },
       });
       ampFormService = new AmpFormService(env.ampdoc);
-      dirtinessHandler = new FormDirtiness(form, env.win, ampFormService);
+      dirtinessHandler = new FormDirtiness(form, env.win);
       await macroTask();
     });
 

@@ -39,6 +39,7 @@ import {
   isFormDataWrapper,
 } from '../../../../src/form-data-wrapper';
 import {fromIterator} from '../../../../src/core/types/array';
+import {macroTask} from '../../../../testing/yield.js';
 import {parseQueryString} from '../../../../src/url.js';
 import {
   setCheckValiditySupportedForTesting,

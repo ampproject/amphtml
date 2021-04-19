@@ -16,7 +16,7 @@
 
 import {LastAddedResolver} from '../../../src/core/data-structures/promise';
 import {isFieldDefault} from '../../../src/form';
-import {iterateCursor} from '../../../src/dom';
+import {iterateCursor, matches} from '../../../src/dom';
 import {user} from '../../../src/log';
 
 export const FORM_VERIFY_PARAM = '__amp_form_verify';
@@ -247,9 +247,7 @@ export class AsyncVerifier extends FormVerifier {
       errors.every((error) => previousError.name !== error.name);
     const fixedElements = previousErrors
       .filter(isFixed)
-      .map(
-        (e) => formElementsQuerySelectorAll(this.form_, `[name="${e.name}"]`)[0]
-      );
+      .map((e) => formElementsQuerySelector(this.form_, `[name="${e.name}"]`));
 
     return /** @type {!UpdatedErrorsDef} */ ({
       updatedElements: errorElements.concat(fixedElements),
@@ -273,4 +271,21 @@ function getResponseErrorData_(error) {
     (json) => json.verifyErrors || [],
     () => []
   );
+}
+
+/**
+ * Returns the first element for the form.elements that
+ * that match the selectors.
+ * @param {!HTMLFormElement} form
+ * @param {string} query
+ * @return {?HTMLElement}
+ */
+function formElementsQuerySelector(form, query) {
+  for (let i = 0; i < form.elements.length; i++) {
+    const element = form.elements[i];
+    if (matches(element, query)) {
+      return element;
+    }
+  }
+  return null;
 }
