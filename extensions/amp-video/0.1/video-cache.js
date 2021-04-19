@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {createElementWithAttributes, matches} from '../../../src/dom';
-import {extensionScriptsInNode} from '../../../src/service/extension-script';
+import {extensionScriptInNode} from '../../../src/service/extension-script';
 import {resolveRelativeUrl} from '../../../src/url';
 import {toArray} from '../../../src/core/types/array';
 import {user} from '../../../src/log';
@@ -27,17 +27,12 @@ import {user} from '../../../src/log';
  * @param {!Window} win
  * @return {!Promise}
  */
-export function addCacheSources(videoEl, win) {
+export function fetchCacheSources(videoEl, win) {
   if (
-    !extensionScriptsInNode(win.document).some(
-      (extension) => extension.extensionId === 'amp-cache-url'
-    ) ||
-    !videoEl.querySelector('source[src]')
+    !extensionScriptInNode(win.document, 'amp-cache-url', '0.1') ||
+    !videoEl.querySelector('source[src]').getAttribute('src')
   ) {
-    user().error(
-      'AMP-VIDEO',
-      'Need to import amp-cache-url in the story to enable google video cache'
-    );
+    user().error('AMP-VIDEO', 'Video cache not properly configured');
     return Promise.resolve();
   }
   const {sourceUrl} = Services.documentInfoForDoc(win.document);

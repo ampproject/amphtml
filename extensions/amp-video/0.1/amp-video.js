@@ -19,7 +19,6 @@ import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {VisibilityState} from '../../../src/core/constants/visibility-state';
-import {addCacheSources} from './video-cache';
 import {addParamsToUrl} from '../../../src/url';
 import {
   childElement,
@@ -34,6 +33,7 @@ import {
 } from '../../../src/dom';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert, user} from '../../../src/log';
+import {fetchCacheSources} from './video-cache';
 import {getBitrateManager} from './flexible-bitrate';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
@@ -267,12 +267,9 @@ export class AmpVideo extends AMP.BaseElement {
 
     Services.videoManagerForDoc(element).register(this);
 
-    // Add cache sources if opted-in and it's sources are not already cached.
-    if (
-      this.element.hasAttribute('cache') &&
-      !this.element.querySelector('source[amp-orig-src]')
-    ) {
-      return addCacheSources(this.element, this.win);
+    // Fetch and add cached sources URLs if opted-in, and if the sources don't already contained cached URLs from the AMP Cache.
+    if (this.element.hasAttribute('cache') && !this.hasAnyCachedSources_()) {
+      return fetchCacheSources(this.element, this.win);
     }
   }
 
