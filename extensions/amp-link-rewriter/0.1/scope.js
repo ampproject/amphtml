@@ -50,7 +50,7 @@ export function getScopeElements(ampDoc, configOpts) {
  * @param {?Object} configOpts
  * @return {boolean}
  */
-export function isElementOnScope(htmlElement, configOpts) {
+export function isElementInScope(htmlElement, configOpts) {
   return (
     !!hasAttributeValues(htmlElement, configOpts) &&
     isBelongsToContainer(htmlElement, configOpts)
