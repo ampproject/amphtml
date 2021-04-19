@@ -192,9 +192,9 @@ export class AmpImg extends BaseElement {
     this.allowImgLoadFallback_ = !this.element.hasAttribute('fallback');
 
     // For SSR, image will have been written directly to DOM so no need to recreate.
-    if (this.element.hasAttribute('i-amphtml-ssr')) {
+    const serverRendered = this.element.hasAttribute('i-amphtml-ssr');
+    if (serverRendered) {
       this.img_ = scopedQuerySelector(this.element, '> img:not([placeholder])');
-      return this.img_;
     }
     this.img_ = this.img_ || new Image();
     this.img_.setAttribute('decoding', 'async');
@@ -224,7 +224,9 @@ export class AmpImg extends BaseElement {
     this.applyFillContent(this.img_, true);
     propagateObjectFitStyles(this.element, this.img_);
 
-    this.element.appendChild(this.img_);
+    if (!serverRendered) {
+      this.element.appendChild(this.img_);
+    }
     return this.img_;
   }
 
