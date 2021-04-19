@@ -304,9 +304,24 @@ export class ActionService {
       // TODO(dvoytenko): if needed, also configure touch-based tap, e.g. for
       // fast-click.
       this.root_.addEventListener('click', (event) => {
-        if (!event.defaultPrevented) {
-          const element = dev().assertElement(event.target);
-          this.trigger(element, name, event, ActionTrust.HIGH);
+        const {key, target} = event;
+        const element = dev().assertElement(event.target);
+        const role = element.getAttribute('role');
+        const isTapEventRole =
+          role && hasOwn(TAPPABLE_ARIA_ROLES, role.toLowerCase());
+        if (!event.defaultPrevented && isTapEventRole) {
+          this.trigger(
+            element,
+            name,
+            event,
+            ActionTrust.HIGH
+          );
+          // Only if the element has an action do we prevent the default.
+          // In the absence of an action, e.g. on="[event].method", we do not
+          // want to stop default behavior.
+          if (hasAction) {
+            event.preventDefault();
+          }
         }
       });
       this.root_.addEventListener('keydown', (event) => {
