@@ -15,12 +15,7 @@
  */
 
 const fs = require('fs');
-const {
-  Browser, // eslint-disable-line no-unused-vars
-  JSHandle, // eslint-disable-line no-unused-vars
-  Page, // eslint-disable-line no-unused-vars
-  ElementHandle: PuppeteerHandle, // eslint-disable-line no-unused-vars
-} = require('puppeteer');
+const puppeteer = require('puppeteer'); // eslint-disable-line no-unused-vars
 const {
   DOMRectDef,
   ElementHandle,
@@ -50,13 +45,14 @@ const DEFAULT_WAIT_TIMEOUT = 10000;
 /**
  * Make the test runner wait until the value returned by the valueFn matches
  * the given condition.
- * @param {!Page} page
- * @param {function(): !Promise<T>} valueFn
- * @param {!IArrayLike<*>} args
- * @param {function(T):boolean} condition
- * @param {function(T):T} opt_mutate
- * @return {!Promise<?T>}
- * @template T
+ * @param {!puppeteer.Page} page
+ * @param {function(T1): !Promise<?T2>|?T2} valueFn
+ * @param {!*[]} args
+ * @param {function(T2): boolean} condition
+ * @param {function(T1): T2} opt_mutate
+ * @return {!Promise<?T2>}
+ * @template T1
+ * @template T2
  */
 async function waitFor(page, valueFn, args, condition, opt_mutate) {
   const handle = await evaluate(page, valueFn, ...args);
@@ -80,22 +76,22 @@ async function waitFor(page, valueFn, args, condition, opt_mutate) {
 }
 
 /**
- * Remove the jsonValue wrapper from a PuppeteerHandle and
+ * Remove the jsonValue wrapper from a ElementHandle and
  * remove an outer object wrapper if present.
- * @param {!PuppeteerHandle} handle
- * @return {T}
- * @template T
+ * @param {!puppeteer.ElementHandle} handle
+ * @return {!Promise<*>}
  */
 async function unboxHandle(handle) {
+  /** @type {*} */
   const prop = await handle.jsonValue();
   return 'value' in prop ? prop.value : prop;
 }
 
 /**
  * Evaluate the given function and its arguments in the context of the document.
- * @param {!Frame} frame
+ * @param {!puppeteer.Frame} frame
  * @param {function(...*):*} fn
- * @return {!Promise<!JSHandle>}
+ * @return {!Promise<!puppeteer.JSHandle>}
  */
 function evaluate(frame, fn) {
   const args = Array.prototype.slice.call(arguments, 2);
@@ -105,7 +101,7 @@ function evaluate(frame, fn) {
 /** @implements {FunctionalTestController} */
 class PuppeteerController {
   /**
-   * @param {!Browser} browser
+   * @param {!puppeteer.Browser} browser
    */
   constructor(browser) {
     /** @private @const */
@@ -126,7 +122,7 @@ class PuppeteerController {
 
   /**
    * Get the current page object. Create the object if it does not exist.
-   * @return {!Promise<!Page>}
+   * @return {!Promise<!puppeteer.Page>}
    */
   async getPage_() {
     if (!this.page_) {
@@ -138,7 +134,7 @@ class PuppeteerController {
 
   /**
    * Get the current page object. Create the object if it does not exist.
-   * @return {!Promise<!Frame>}
+   * @return {!Promise<!puppeteer.Frame>}
    */
   async getCurrentFrame_() {
     if (!this.currentFrame_) {
@@ -152,10 +148,11 @@ class PuppeteerController {
   /**
    * Return a wait function. When called, the function will cause the test
    * runner to wait until the given value matches the expected value.
-   * @param {function(): !Promise<?T>} valueFn
-   * @param {...*} args
-   * @return {function(T,T): !Promise<?T>}
-   * @template T
+   * @param {function(T1): !Promise<?T2>|?T2} valueFn
+   * @param {...T1} args
+   * @return {function(function(T2): boolean, function(T1): T2): ReturnType<waitFor<T1, T2>>}
+   * @template T1
+   * @template T2
    */
   getWaitFn_(valueFn, ...args) {
     return async (condition, opt_mutate) => {
@@ -168,7 +165,7 @@ class PuppeteerController {
    * Evaluate a function in the context of the document.
    * @param {function(...*):T} fn
    * @param {...*} args
-   * @return {!Promise<!JSHandle>}
+   * @return {!Promise<!puppeteer.JSHandle>}
    * @template T
    */
   async evaluate(fn, ...args) {
@@ -183,6 +180,7 @@ class PuppeteerController {
    */
   async evaluateValue_(fn, ...args) {
     const value = await this.evaluate(fn, ...args);
+    /** @type {*} */
     const json = await value.jsonValue();
     return json.value;
   }
@@ -190,7 +188,7 @@ class PuppeteerController {
   /**
    * @param {string} selector
    * @param {number=} timeout
-   * @return {!Promise<!ElementHandle<!PuppeteerHandle>>}
+   * @return {!Promise<!ElementHandle<!puppeteer.ElementHandle>>}
    * @override
    */
   async findElement(selector, timeout = DEFAULT_WAIT_TIMEOUT) {
@@ -210,7 +208,7 @@ class PuppeteerController {
 
   /**
    * @param {string} selector
-   * @return {!Promise<!Array<!ElementHandle<!PuppeteerHandle>>>}
+   * @return {!Promise<!Array<!ElementHandle<!puppeteer.ElementHandle>>>}
    * @override
    */
   async findElements(selector) {
@@ -240,7 +238,7 @@ class PuppeteerController {
 
   /**
    * @param {string} xpath
-   * @return {!Promise<!ElementHandle<!PuppeteerHandle>>}
+   * @return {!Promise<!ElementHandle<!puppeteer.ElementHandle>>}
    * @override
    */
   async findElementXPath(xpath) {
@@ -262,7 +260,7 @@ class PuppeteerController {
 
   /**
    * @param {string} xpath
-   * @return {!Promise<!Array<!ElementHandle<!PuppeteerHandle>>>}
+   * @return {!Promise<!Array<!ElementHandle<!puppeteer.ElementHandle>>>}
    * @override
    */
   async findElementsXPath(xpath) {
@@ -313,7 +311,7 @@ class PuppeteerController {
   }
 
   /**
-   * @return {!Promise<!ElementHandle<!PuppeteerHandle>>}
+   * @return {!Promise<!ElementHandle<!puppeteer.ElementHandle>>}
    * @override
    */
   async getDocumentElement() {
@@ -334,7 +332,7 @@ class PuppeteerController {
   }
 
   /**
-   * @param {!ElementHandle<!PuppeteerHandle>} handle
+   * @param {!ElementHandle<!puppeteer.ElementHandle>} handle
    * @param {string|Key} keys
    * @return {!Promise}
    * @override
@@ -354,7 +352,7 @@ class PuppeteerController {
   }
 
   /**
-   * @param {!ElementHandle<!PuppeteerHandle>} handle
+   * @param {!ElementHandle<!puppeteer.ElementHandle>} handle
    * @return {!Promise<string>}
    * @override
    */
@@ -368,7 +366,7 @@ class PuppeteerController {
   }
 
   /**
-   * @param {!ElementHandle<!PuppeteerHandle>} handle
+   * @param {!ElementHandle<!ElementHandle>} handle
    * @param {string} styleProperty
    * @return {!Promise<string>} styleProperty
    * @override
@@ -386,7 +384,7 @@ class PuppeteerController {
   }
 
   /**
-   * @param {!ElementHandle<!PuppeteerHandle>} handle
+   * @param {!ElementHandle<!puppeteer.ElementHandle>} handle
    * @param {string} attribute
    * @return {!Promise<string>}
    * @override
@@ -403,7 +401,7 @@ class PuppeteerController {
   }
 
   /**
-   * @param {!ElementHandle<!PuppeteerHandle>} handle
+   * @param {!ElementHandle<!puppeteer.ElementHandle>} handle
    * @param {string} property
    * @return {!Promise<string>}
    * @override
@@ -425,7 +423,7 @@ class PuppeteerController {
   }
 
   /**
-   * @param {!ElementHandle<!PuppeteerHandle>} handle
+   * @param {!ElementHandle<!puppeteer.ElementHandle>} handle
    * @return {!Promise<!DOMRectDef>}
    * @override
    */
@@ -463,7 +461,7 @@ class PuppeteerController {
   }
 
   /**
-   * @param {!WindowRectDef} rect
+   * @param {!puppeteer.WindowRectDef} rect
    * @return {!Promise}
    * @override
    */
@@ -562,7 +560,7 @@ class PuppeteerController {
   }
 
   /**
-   * @return {!Promise<!PuppeteerHandle>}
+   * @return {!Promise<!puppeteer.ElementHandle>}
    * @override
    */
   async getActiveElement() {
@@ -575,7 +573,7 @@ class PuppeteerController {
 
   /**
    * TODO(cvializ): decide if we need to waitForNavigation on click and keypress
-   * @param {!ElementHandle<!PuppeteerHandle>} handle
+   * @param {!ElementHandle<!puppeteer.ElementHandle>} handle
    * @return {!Promise}
    * @override
    */
@@ -584,8 +582,8 @@ class PuppeteerController {
   }
 
   /**
-   * @param {!ElementHandle<!PuppeteerHandle>} handle
-   * @param {!ScrollToOptionsDef=} opt_scrollToOptions
+   * @param {!ElementHandle<!puppeteer.ElementHandle>} handle
+   * @param {!*=} opt_scrollToOptions
    * @return {!Promise}
    * @override
    */
@@ -601,8 +599,8 @@ class PuppeteerController {
   }
 
   /**
-   * @param {!ElementHandle<!PuppeteerHandle>} handle
-   * @param {!ScrollToOptionsDef=} opt_scrollToOptions
+   * @param {!ElementHandle<!puppeteer.ElementHandle>} handle
+   * @param {!*=} opt_scrollToOptions
    * @return {!Promise}
    * @override
    */
@@ -620,7 +618,7 @@ class PuppeteerController {
   /**
    * For some reason page.screenshot fails, so we use the html element.
    * @param {string} path
-   * @return {!Promise<string>} An encoded string representing the image data
+   * @return {!Promise<string|Buffer|void>} An encoded string representing the image data
    * @override
    */
   async takeScreenshot(path) {
@@ -629,15 +627,17 @@ class PuppeteerController {
   }
 
   /**
-   * @param {!ElementHandle<!PuppeteerHandle>} handle
+   * @param {!ElementHandle<!puppeteer.ElementHandle>} handle
    * @param {string} path The path relative to the build-system/tasks/e2e root.
-   * @return {!Promise<string>} An encoded string representing the image data
+   * @return {!Promise<string|void|Buffer>} An encoded string representing the image data
    * @override
    */
   async takeElementScreenshot(handle, path) {
     const relative = join(__dirname, path);
     try {
-      await fs.mkdirAsync(dirname(relative), {recursive: true});
+      // TODO(rileyajones) ask questions about this line...
+      // probably something like `await promisify(fs.mkdir)(dirname(relative), {recursive: true});`
+      await fs.mkdir(dirname(relative), {recursive: true});
     } catch (err) {
       if (err.code != 'EEXIST') {
         throw err;
@@ -653,7 +653,7 @@ class PuppeteerController {
   }
 
   /**
-   * @param {?ElementHandle<!PuppeteerHandle>} handle
+   * @param {ElementHandle<!puppeteer.ElementHandle>} handle
    * @return {!Promise}
    */
   async switchToFrame(handle) {
@@ -675,7 +675,7 @@ class PuppeteerController {
 
   /**
    * Switch controller to shadowRoot body hosted by given element.
-   * @param {!ElementHandle<!PuppeteerHandle} handle
+   * @param {!ElementHandle<!puppeteer.ElementHandle>} handle
    * @return {!Promise}
    */
   switchToShadow(handle) {
@@ -685,7 +685,7 @@ class PuppeteerController {
 
   /**
    * Switch controller to shadowRoot hosted by given element.
-   * @param {!ElementHandle<!PuppeteerHandle>} handle
+   * @param {!ElementHandle<!puppeteer.ElementHandle>} handle
    * @return {!Promise}
    */
   switchToShadowRoot(handle) {
@@ -694,8 +694,8 @@ class PuppeteerController {
   }
 
   /**.
-   * @param {!ElementHandle<!PuppeteerHandle>} handle
-   * @param {!Function} getter
+   * @param {!ElementHandle<!puppeteer.ElementHandle>} handle
+   * @param {!Parameters<evaluate>[1]} getter
    */
   async switchToShadowInternal_(handle, getter) {
     const shadowHost = handle.getElement();
@@ -709,7 +709,7 @@ class PuppeteerController {
 
   /**
    * Get the current root
-   * @return {!Promise<!PuppeteerHandle>}
+   * @return {!Promise<!puppeteer.JSHandle>}
    */
   async getRoot_() {
     if (this.shadowRoot_) {

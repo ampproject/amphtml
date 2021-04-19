@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 import {VideoUtils} from '../../../src/utils/video';
@@ -25,7 +26,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {dispatchCustomEvent, removeElement} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
@@ -97,6 +98,9 @@ class AmpVimeo extends AMP.BaseElement {
 
     /** @private {!UnlistenDef|null} */
     this.unlistenFrame_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /** @override */
@@ -169,6 +173,7 @@ class AmpVimeo extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.removeIframe_();
+    this.pauseHelper_.updatePlaying(false);
     return true; // layout again.
   }
 
@@ -249,6 +254,16 @@ class AmpVimeo extends AMP.BaseElement {
     }
 
     const {element} = this;
+
+    switch (data['event']) {
+      case 'play':
+        this.pauseHelper_.updatePlaying(true);
+        break;
+      case 'pause':
+      case 'ended':
+        this.pauseHelper_.updatePlaying(false);
+        break;
+    }
 
     if (redispatch(element, data['event'], VIMEO_EVENTS)) {
       return;

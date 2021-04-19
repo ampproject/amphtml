@@ -24,7 +24,7 @@ import {
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {childElementsByTag, toggleAttribute} from '../../../src/dom';
 import {devAssert} from '../../../src/log';
-import {dict, memo} from '../../../src/utils/object';
+import {dict, memo} from '../../../src/core/types/object';
 import {forwardRef} from '../../../src/preact/compat';
 import {toArray} from '../../../src/core/types/array';
 import {useDOMHandle} from '../../../src/preact/component';

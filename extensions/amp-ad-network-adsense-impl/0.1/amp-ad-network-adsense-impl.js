@@ -27,7 +27,7 @@ import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
-} from '../../../src/consent-state';
+} from '../../../src/core/constants/consent-state';
 import {Navigation} from '../../../src/service/navigation';
 import {
   QQID_HEADER,
@@ -68,7 +68,7 @@ import {
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {removeElement} from '../../../src/dom';
-import {stringHash32} from '../../../src/string';
+import {stringHash32} from '../../../src/core/types/string';
 import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @const {string} */

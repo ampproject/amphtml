@@ -19,7 +19,7 @@ import {dev} from './log';
 import {getData} from './event-helper';
 import {getServiceForDoc, registerServiceBuilderForDoc} from './service';
 import {makeBodyVisibleRecovery} from './style-installer';
-import PriorityQueue from './utils/priority-queue';
+import PriorityQueue from './core/data-structures/priority-queue';
 
 /**
  * @const {string}

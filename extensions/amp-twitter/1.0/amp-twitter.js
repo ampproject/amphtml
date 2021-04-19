@@ -15,7 +15,7 @@
  */
 
 import {BaseElement} from './base-element';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {
@@ -29,7 +30,7 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   dispatchCustomEvent,
   fullscreenEnter,
@@ -106,6 +107,9 @@ class AmpDailymotion extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isFullscreen_ = false;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -183,6 +187,7 @@ class AmpDailymotion extends AMP.BaseElement {
       this.element.removeChild(iframe);
       this.iframe_ = null;
     }
+    this.pauseHelper_.updatePlaying(false);
     return true;
   }
 
@@ -215,13 +220,19 @@ class AmpDailymotion extends AMP.BaseElement {
         this.playerReadyResolver_(true);
         break;
 
-      case DailymotionEvents.END:
-        this.playerState_ = DailymotionEvents.PAUSE;
+      case DailymotionEvents.PLAY:
+        this.playerState_ = data['event'];
+        this.pauseHelper_.updatePlaying(true);
         break;
 
       case DailymotionEvents.PAUSE:
-      case DailymotionEvents.PLAY:
         this.playerState_ = data['event'];
+        this.pauseHelper_.updatePlaying(false);
+        break;
+
+      case DailymotionEvents.END:
+        this.playerState_ = DailymotionEvents.PAUSE;
+        this.pauseHelper_.updatePlaying(false);
         break;
 
       case DailymotionEvents.VOLUMECHANGE:

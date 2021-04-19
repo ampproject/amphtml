@@ -18,7 +18,7 @@ import * as Preact from '../../../src/preact';
 import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
 import {InlineGallery} from './component';
 import {PreactBaseElement} from '../../../src/preact/base-element';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {setProp} from '../../../src/context';
 import {useContext, useLayoutEffect} from '../../../src/preact';
 
