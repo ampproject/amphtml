@@ -868,14 +868,6 @@ tags: {  # <amp-story-page-attachment> with href
     value: "text"
   }
   attrs: {
-    name: "cta-accent-color"
-  }
-  attrs: {
-    name: "cta-accent-element"
-    value: "background"
-    value: "text"
-  }
-  attrs: {
     name: "href"
     mandatory: true
     value_url: {
