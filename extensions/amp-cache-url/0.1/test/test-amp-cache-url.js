@@ -32,16 +32,12 @@ describes.fakeWin(
 
     it('should not throw with empty url', async () => {
       const cacheUrlService = new AmpCacheUrlService();
-      expect(
-        async () => await cacheUrlService.createCacheUrl('')
-      ).to.not.throw();
+      expect(cacheUrlService.createCacheUrl('')).to.not.be.rejected;
     });
 
     it('should not throw with invalid url', async () => {
       const cacheUrlService = new AmpCacheUrlService();
-      expect(
-        async () => await cacheUrlService.createCacheUrl('invalid url')
-      ).to.not.throw();
+      expect(cacheUrlService.createCacheUrl('invalid url')).to.not.be.rejected;
     });
   }
 );
