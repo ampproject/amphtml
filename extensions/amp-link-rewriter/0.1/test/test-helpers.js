@@ -1,3 +1,5 @@
+import {LinkRewriter} from '../link-rewriter';
+
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
@@ -39,10 +41,26 @@ const helpersMaker = () => {
         'vars': {
           'customerId': '12345',
         },
-        'scopeDocument': false,
       };
 
       return Object.assign(defaults, config);
+    },
+    assertLinksRewritten(urlsList, template, config, env) {
+      const rootNode = env.ampdoc.getRootNode();
+      const linkRewriterElement = this.createLinkRewriterElement(config);
+      rootNode.body.appendChild(linkRewriterElement);
+      rootNode.body.insertAdjacentHTML('afterbegin', template);
+
+      const rewriter = new LinkRewriter('', linkRewriterElement, env.ampdoc);
+
+      const links = rootNode.body.querySelectorAll('a');
+
+      expect(links.length).to.equal(urlsList.length);
+
+      for (let i = 0; i < links.length; i++) {
+        rewriter.handleClick(links[i]);
+        expect(links[i].href).to.equal(urlsList[i]);
+      }
     },
   };
 };
