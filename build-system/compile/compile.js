@@ -253,7 +253,7 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     // If you need a polyfill. Manually include them in the
     // respective top level polyfills.js files.
     rewrite_polyfills: false,
-    externs,
+    externs: options.noAddExterns ? [] : externs,
     js_module_root: [
       // Do _not_ include 'node_modules/' in js_module_root with 'NODE'
       // resolution or bad things will happen (#18600).
@@ -415,12 +415,9 @@ async function compile(
     outputFilename,
     options
   );
-  const srcs = getSrcs(
-    entryModuleFilenames,
-    outputDir,
-    outputFilename,
-    options
-  );
+  const srcs = options.noAddSrcs
+    ? entryModuleFilenames.concat(options.extraGlobs || [])
+    : getSrcs(entryModuleFilenames, outputDir, outputFilename, options);
   const transformedSrcFiles = await Promise.all(
     globby
       .sync(srcs)
