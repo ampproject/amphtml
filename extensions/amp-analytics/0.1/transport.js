@@ -27,6 +27,7 @@ import {WindowInterface} from '../../../src/window-interface';
 import {
   assertHttpsUrl,
   checkCorsUrl,
+  isAmpScriptUri,
   parseUrlDeprecated,
 } from '../../../src/url';
 import {createPixel} from '../../../src/pixel';
@@ -34,6 +35,7 @@ import {dev, user, userAssert} from '../../../src/log';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getMode} from '../../../src/mode';
 import {getTopWindow} from '../../../src/service';
+
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
 import {toWin} from '../../../src/types';
@@ -41,9 +43,6 @@ import {toggle} from '../../../src/style';
 
 /** @const {string} */
 const TAG_ = 'amp-analytics/transport';
-
-/** @const {string} */
-const AMP_SCRIPT_URI_SCHEME = 'amp-script:';
 
 /**
  * Transport defines the ways how the analytics pings are going to be sent.
@@ -103,7 +102,7 @@ export class Transport {
       const request = inBatch
         ? serializer.generateBatchRequest(url, segments, withPayload)
         : serializer.generateRequest(url, segments[0], withPayload);
-      if (!request.url.startsWith(AMP_SCRIPT_URI_SCHEME)) {
+      if (!isAmpScriptUri(request.url)) {
         assertHttpsUrl(request.url, 'amp-analytics request');
         checkCorsUrl(request.url);
       }
@@ -326,33 +325,11 @@ export class Transport {
   /**
    * @param {!AmpDoc} ampdoc
    * @param {!RequestDef} request
-   * @return {boolean} True if this browser supports cross-domain XHR.
    */
   static forwardRequestToAmpScript(ampdoc, request) {
-    userAssert(
-      request.url.startsWith(AMP_SCRIPT_URI_SCHEME),
-      `[${TAG_}]: "amp-script" URL must begin with "amp-script:"`
-    );
-
-    const target = request.url.slice(AMP_SCRIPT_URI_SCHEME.length).split('.');
-    userAssert(
-      target.length === 2 && target[0].length > 0 && target[1].length > 0,
-      `[${TAG_}]: "amp-script" target must be specified as "scriptId.functionIdentifier".`
-    );
-
-    const ampScriptId = target[0];
-    const fnIdentifier = target[1];
-    const ampScriptEl = ampdoc.getElementById(ampScriptId);
-    userAssert(
-      ampScriptEl && ampScriptEl.tagName === 'AMP-SCRIPT',
-      `[${TAG_}]: could not find <amp-script> with ID "${ampScriptId}"`
-    );
-
-    ampScriptEl
-      .getImpl()
-      .then((impl) =>
-        impl.callFunction(fnIdentifier, JSON.parse(request.payload))
-      );
+    Services.scriptForDocOrNull(ampdoc).then((ampScriptService) => {
+      ampScriptService.fetch(request.url, JSON.parse(request.payload));
+    });
   }
 }
 
