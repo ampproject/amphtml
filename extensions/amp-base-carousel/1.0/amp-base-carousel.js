@@ -21,6 +21,7 @@ import {CSS} from '../../../build/amp-base-carousel-1.0.css';
 import {CarouselContextProp} from './carousel-props';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
+import {cloneElement} from '../../../src/preact';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/core/types/object';
 import {dispatchCustomEvent} from '../../../src/dom';
@@ -82,6 +83,17 @@ class AmpBaseCarousel extends PreactBaseElement {
     this.slide_ = slide;
     if (!isNaN(slide)) {
       this.api().goToSlide(slide);
+    }
+  }
+
+  /** @override */
+  updatePropsForRendering(props) {
+    const {arrowPrev, arrowNext} = props;
+    if (arrowPrev) {
+      props['arrowPrevAs'] = (props) => cloneElement(arrowPrev, props);
+    }
+    if (arrowNext) {
+      props['arrowNextAs'] = (props) => cloneElement(arrowNext, props);
     }
   }
 }

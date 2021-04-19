@@ -23,11 +23,11 @@ import {
   useCallback,
   useImperativeHandle,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
 } from '../../../src/preact';
 import {useStyles} from './stream-gallery.jss';
+import objstr from 'obj-str';
 
 const DEFAULT_VISIBLE_COUNT = 1;
 const OUTSET_ARROWS_WIDTH = 100;
@@ -39,8 +39,8 @@ const OUTSET_ARROWS_WIDTH = 100;
  */
 function StreamGalleryWithRef(props, ref) {
   const {
-    arrowPrev: customArrowPrev,
-    arrowNext: customArrowNext,
+    arrowPrevAs = DefaultArrow,
+    arrowNextAs = DefaultArrow,
     children,
     className,
     extraSpace,
@@ -56,16 +56,6 @@ function StreamGalleryWithRef(props, ref) {
   const classes = useStyles();
   const carouselRef = useRef(null);
   const [visibleCount, setVisibleCount] = useState(DEFAULT_VISIBLE_COUNT);
-  const arrowPrev = useMemo(
-    () =>
-      customArrowPrev ?? <DefaultArrow by={-1} outsetArrows={outsetArrows} />,
-    [customArrowPrev, outsetArrows]
-  );
-  const arrowNext = useMemo(
-    () =>
-      customArrowNext ?? <DefaultArrow by={1} outsetArrows={outsetArrows} />,
-    [customArrowNext, outsetArrows]
-  );
 
   const measure = useCallback(
     (containerWidth) =>
@@ -127,11 +117,13 @@ function StreamGalleryWithRef(props, ref) {
   return (
     <BaseCarousel
       advanceCount={Math.floor(visibleCount)}
-      arrowPrev={arrowPrev}
-      arrowNext={arrowNext}
-      className={`${className ?? ''} ${classes.gallery} ${
-        extraSpace === 'around' ? classes.extraSpace : ''
-      }`}
+      arrowPrevAs={arrowPrevAs}
+      arrowNextAs={arrowNextAs}
+      className={objstr({
+        [className]: !!className,
+        [classes.gallery]: true,
+        [classes.extraSpace]: extraSpace === 'around',
+      })}
       outsetArrows={outsetArrows}
       snapAlign={slideAlign}
       ref={carouselRef}
@@ -151,28 +143,35 @@ export {StreamGallery};
  * @param {!StreamGalleryDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-function DefaultArrow({advance, by, outsetArrows, ...rest}) {
+function DefaultArrow({by, className, outsetArrows, ...rest}) {
   const classes = useStyles();
   return (
-    <button
-      onClick={() => advance(by)}
-      className={`${classes.arrow} ${
-        by < 0 ? classes.arrowPrev : classes.arrowNext
-      } ${outsetArrows ? classes.outsetArrow : classes.insetArrow}`}
-      aria-hidden="true"
-      {...rest}
-    >
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d={by < 0 ? 'M14,7.4 L9.4,12 L14,16.6' : 'M10,7.4 L14.6,12 L10,16.6'}
-          fill="none"
-          stroke="#000"
-          stroke-width="2"
-          stroke-linejoin="round"
-          stroke-linecap="round"
-        />
-      </svg>
-    </button>
+    <div className={className}>
+      <button
+        aria-hidden="true"
+        className={objstr({
+          [classes.arrow]: true,
+          [classes.arrowPrev]: by < 0,
+          [classes.arrowNext]: by > 0,
+          [classes.outsetArrow]: outsetArrows,
+          [classes.insetArrow]: !outsetArrows,
+        })}
+        {...rest}
+      >
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d={
+              by < 0 ? 'M14,7.4 L9.4,12 L14,16.6' : 'M10,7.4 L14.6,12 L10,16.6'
+            }
+            fill="none"
+            stroke="#000"
+            stroke-width="2"
+            stroke-linejoin="round"
+            stroke-linecap="round"
+          />
+        </svg>
+      </button>
+    </div>
   );
 }
 

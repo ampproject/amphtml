@@ -21,6 +21,7 @@ import {CSS as GALLERY_CSS} from './stream-gallery.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {StreamGallery} from './stream-gallery';
+import {cloneElement} from '../../../src/preact';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/core/types/object';
 import {dispatchCustomEvent} from '../../../src/dom';
@@ -60,6 +61,17 @@ class AmpStreamGallery extends PreactBaseElement {
       'expected global "bento" or specific "bento-stream-gallery" experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
+  }
+
+  /** @override */
+  updatePropsForRendering(props) {
+    const {arrowPrev, arrowNext} = props;
+    if (arrowPrev) {
+      props['arrowPrevAs'] = (props) => cloneElement(arrowPrev, props);
+    }
+    if (arrowNext) {
+      props['arrowNextAs'] = (props) => cloneElement(arrowNext, props);
+    }
   }
 }
 
