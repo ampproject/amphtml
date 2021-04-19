@@ -40,10 +40,18 @@ describes.sandboxed('StreamGallery preact component', {}, () => {
   });
 
   it('should render custom Arrows when given', () => {
-    const arrowPrev = <div class="my-custom-arrow-prev">left</div>;
-    const arrowNext = <div class="my-custom-arrow-next">right</div>;
+    const arrowPrev = (props) => (
+      <div {...props} className="my-custom-arrow-prev">
+        left
+      </div>
+    );
+    const arrowNext = (props) => (
+      <div {...props} className="my-custom-arrow-next">
+        right
+      </div>
+    );
     const wrapper = mount(
-      <StreamGallery arrowPrev={arrowPrev} arrowNext={arrowNext}>
+      <StreamGallery arrowPrevAs={arrowPrev} arrowNextAs={arrowNext}>
         <div>slide 1</div>
         <div>slide 2</div>
         <div>slide 3</div>
@@ -51,8 +59,8 @@ describes.sandboxed('StreamGallery preact component', {}, () => {
     );
     const arrows = wrapper.find('Arrow');
     expect(arrows).to.have.lengthOf(2);
-    expect(arrows.first().props().customArrow).to.equal(arrowPrev);
-    expect(arrows.last().props().customArrow).to.equal(arrowNext);
+    expect(arrows.first().props().as).to.equal(arrowPrev);
+    expect(arrows.last().props().as).to.equal(arrowNext);
   });
 
   it('should not loop by default', () => {
