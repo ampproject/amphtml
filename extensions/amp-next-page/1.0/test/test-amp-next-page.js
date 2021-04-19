@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import '../amp-next-page';
-import {PageState} from '../page';
+import {HostPage, PageState} from '../page';
 import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';
 import {Services} from '../../../../src/services';
 import {VisibilityState} from '../../../../src/core/constants/visibility-state';
@@ -438,6 +438,7 @@ describes.realWin(
     describe('initial behavior', () => {
       let element;
       let service;
+      let hostPage;
 
       beforeEach(async () => {
         element = await getAmpNextPage(
@@ -448,8 +449,21 @@ describes.realWin(
           /* no awaiting */ false
         );
 
+        hostPage = new HostPage(
+          {} /* nextPageService */,
+          {
+            url: 'test.html',
+            title: 'test title',
+            img: '/img.jpg',
+          },
+          PageState.INSERTED /** initState */,
+          VisibilityState.VISIBLE /** initVisibility */,
+          {} /* Document */
+        );
+
         service = Services.nextPageServiceForDoc(doc);
         env.sandbox.stub(service, 'getViewportsAway_').returns(2);
+        env.sandbox.stub(service, 'createHostPage').returns(hostPage);
       });
 
       afterEach(async () => {
@@ -460,6 +474,8 @@ describes.realWin(
         element.buildInternal();
         await new Promise(setTimeout);
         expect(service.pages_.length).to.equal(1);
+        expect(service.hostPage_).to.equal(hostPage);
+        expect(service.currentTitlePage_).to.equal(service.hostPage_);
         win.dispatchEvent(new Event('scroll'));
         await new Promise(setTimeout);
         expect(service.pages_.length).to.equal(3);
