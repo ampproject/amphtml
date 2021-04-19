@@ -195,6 +195,7 @@ export class AmpImg extends BaseElement {
     // to recreate.  Calling appendChild again will have no effect.
     if (this.element.hasAttribute('i-amphtml-ssr')) {
       this.img_ = scopedQuerySelector(this.element, '> img:not([placeholder])');
+      return this.img_;
     }
     this.img_ = this.img_ || new Image();
     this.img_.setAttribute('decoding', 'async');
