@@ -115,16 +115,16 @@ function getAmpScriptJson(ampdoc, src) {
 
 /**
  * @param {!AmpElement} element
- * @param {boolean} isRefresh true to force refresh of browser cache.
+ * @param {boolean} shouldRefresh true to force refresh of browser cache.
  * @return {!Object} options object to pass to `batchFetchJsonFor` method.
  */
-function buildOptionsObject(element, isRefresh = false) {
+function buildOptionsObject(element, shouldRefresh = false) {
   return {
     xssiPrefix: element.hasAttribute('xssi-prefix')
       ? element.getAttribute('xssi-prefix')
       : undefined,
     expr: element.hasAttribute('key') ? element.getAttribute('key') : '.',
-    refresh: isRefresh,
+    refresh: shouldRefresh,
   };
 }
 
@@ -133,10 +133,9 @@ function buildOptionsObject(element, isRefresh = false) {
  * amp-script.
  *
  * @param {!AmpElement} element
- * @param {boolean} isRefresh true to force refresh of browser cache.
  * @return {Function}
  */
-export const getJsonFn = (element, isRefresh = false) => {
+export const getJsonFn = (element) => {
   const src = element.getAttribute('src');
   if (!src?.length) {
     // TODO(dmanek): assert that src is provided instead of silently failing below.
@@ -148,11 +147,11 @@ export const getJsonFn = (element, isRefresh = false) => {
   if (isAmpScriptSrc(src)) {
     return (src) => getAmpScriptJson(element.getAmpDoc(), src);
   }
-  return () =>
+  return (_src, shouldRefresh = false) =>
     batchFetchJsonFor(
       element.getAmpDoc(),
       element,
-      buildOptionsObject(element, isRefresh)
+      buildOptionsObject(element, shouldRefresh)
     );
 };
 
