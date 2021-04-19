@@ -440,9 +440,14 @@ describes.realWin('amp-img V1', {amp: true}, (env) => {
      *     placeholder attribute.
      * @param {boolean} addBlurClass Whether the child should have the
      *     class that allows it to be a blurred placeholder.
+     * @param {boolean} serverRendered If the image is server rendered.
      * @return {AmpImg} An amp-img object potentially with a blurry placeholder
      */
-    function getImgWithBlur(addPlaceholder, addBlurClass) {
+    function getImgWithBlur(
+      addPlaceholder,
+      addBlurClass,
+      serverRendered = false
+    ) {
       const el = createImg({
         src: '/examples/img/sample.jpg',
         id: 'img1',
@@ -462,6 +467,12 @@ describes.realWin('amp-img V1', {amp: true}, (env) => {
         img.classList.add('i-amphtml-blurry-placeholder');
       }
       el.appendChild(img);
+      if (serverRendered) {
+        const serverRenderedImg = doc.createElement('img');
+        serverRenderedImg.setAttribute('src', '/examples/img/sample.jpg');
+        el.appendChild(serverRenderedImg);
+        el.setAttribute('i-amphtml-ssr', '');
+      }
       doc.body.appendChild(el);
       return el;
     }
@@ -506,7 +517,6 @@ describes.realWin('amp-img V1', {amp: true}, (env) => {
 
     it('does not interfere with SSR img creation', async () => {
       const ampImg = getImgWithBlur(true, true);
-      ampImg.setAttribute('i-amphtml-ssr', '');
       await ampImg.build();
 
       expect(ampImg.querySelector('img[src*="sample.jpg"]')).to.exist;
