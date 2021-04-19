@@ -18,7 +18,7 @@
                 "#track-section"
             ],
             "attribute": {
-                "href": "((?!skip-example\\.com|also-skip\\.com).)*",
+                "href": "((?!\bskip-example\\.com\b|\balso-skip\\.com\b).)*",
                 "class": "content"
             },
             "vars": {
@@ -30,21 +30,9 @@
 
 </amp-link-rewriter>
 
-<div id="track-section">
-    <h3>#track-section</h3>
-    <p>
-      <a class="content" href="https://www.amazon.de/dp/B01KU8Z8P8/">Amazon.de</a><br>
-      <a class="content" href="https://skip-example.com/test">This link is skipped by <code>href</code> attribute filter</a><br>
-      <a class="some-different-class" href="https://www.amazon.de/dp/B01KU8Z8P8/">This link is skipped by <code>class</code> filter</a>
-    </p>
-</div>
-<div id="do-not-track-section">
-  <h3>#do-not-track-section</h3>
-  <p>The links below do not belong to the section specified in <code>section</code> config param.</p>
-  <p>
-    <a class="content" href="https://amazon.com/dp/B01KU8Z8P8/">This link is skipped</a>
-  </p>
-</div>
+<p id="track-section">
+    <a class="content" href="https://www.amazon.de/dp/B01KU8Z8P8/">Stelton Theo Milk Jug</a>
+</p>
 
 </body>
 </html>
