@@ -36,9 +36,6 @@ import {utf8Encode} from '../../../src/utils/bytes';
 /** @const {string} */
 const TAG = 'amp-script';
 
-/** @const {string} */
-const SERVICE_TAG = 'amp-script-service';
-
 /**
  * @typedef {{
  *   terminate: function():void,
@@ -604,7 +601,7 @@ export class AmpScriptService {
         // TODO(#24266): Refactor to %s interpolation when error string
         // extraction is ready.
         throw user().createError(
-          SERVICE_TAG,
+          TAG,
           `Script hash not found or incorrect for ${debugId}. You must include <meta name="amp-script-src" content="sha384-${hash}">. ` +
             'See https://amp.dev/documentation/components/amp-script/#script-hash.'
         );
@@ -639,7 +636,7 @@ export class AmpScriptService {
     const uriParts = uri.slice('amp-script:'.length).split('.');
     userAssert(
       uriParts.length === 2 && uriParts[0].length > 0 && uriParts[1].length > 0,
-      `[${SERVICE_TAG}]: "amp-script" URIs must be of the format "scriptId.functionIdentifier".`
+      `[${TAG}]: "amp-script" URIs must be of the format "scriptId.functionIdentifier".`
     );
 
     const ampScriptId = uriParts[0];
@@ -647,7 +644,7 @@ export class AmpScriptService {
     const ampScriptEl = this.ampdoc_.getElementById(ampScriptId);
     userAssert(
       ampScriptEl && ampScriptEl.tagName === 'AMP-SCRIPT',
-      `[${SERVICE_TAG}]: could not find <amp-script> with script set to ${ampScriptId}`
+      `[${TAG}]: could not find <amp-script> with script set to ${ampScriptId}`
     );
     const args = Array.prototype.slice.call(arguments, 1);
     return ampScriptEl
@@ -917,6 +914,6 @@ export class SanitizerImpl {
 }
 
 AMP.extension(TAG, '0.1', function (AMP) {
-  AMP.registerServiceForDoc(SERVICE_TAG, AmpScriptService);
+  AMP.registerServiceForDoc(TAG, AmpScriptService);
   AMP.registerElement(TAG, AmpScript, CSS);
 });

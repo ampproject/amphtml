@@ -212,7 +212,7 @@ export class Services {
   static scriptForDocOrNull(element) {
     return /** @type {!Promise<?../extensions/amp-script/0.1/amp-script.AmpScriptService>} */ (getElementServiceIfAvailableForDocInEmbedScope(
       element,
-      'amp-script-service',
+      'amp-script',
       'amp-script'
     ));
   }
