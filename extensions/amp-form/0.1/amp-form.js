@@ -397,7 +397,7 @@ export class AmpForm {
    * - whichever is first.
    *
    * NOTE: amp-form allows elements that are not descendants of itself, but
-   * not <amp-selector>s
+   * not <amp-selector>s. See https://go.amp.dev/issue/33891
    * @return {!Promise}
    * @private
    */
