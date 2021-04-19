@@ -649,7 +649,9 @@ export class AmpScriptService {
     const args = Array.prototype.slice.call(arguments, 1);
     return ampScriptEl
       .getImpl()
-      .then((impl) => impl.callFunction([].concat(fnIdentifier).concat(args)));
+      .then((impl) =>
+        impl.callFunction.apply(impl, [].concat(fnIdentifier).concat(args))
+      );
   }
 }
 

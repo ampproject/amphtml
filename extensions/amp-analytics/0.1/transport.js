@@ -325,9 +325,10 @@ export class Transport {
   /**
    * @param {!AmpDoc} ampdoc
    * @param {!RequestDef} request
+   * @return {!Promise}
    */
   static forwardRequestToAmpScript(ampdoc, request) {
-    Services.scriptForDocOrNull(ampdoc).then((ampScriptService) => {
+    return Services.scriptForDocOrNull(ampdoc).then((ampScriptService) => {
       ampScriptService.fetch(request.url, JSON.parse(request.payload));
     });
   }
