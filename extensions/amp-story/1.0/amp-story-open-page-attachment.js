@@ -106,6 +106,7 @@ export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
 
 /**
  * Renders default page attachment UI.
+ * @param {!Window} win
  * @param {!Element} pageEl
  * @param {!Element} attachmentEl
  * @return {!Element}
