@@ -108,6 +108,7 @@ export const LOADING_ELEMENTS_ = {
   'AMP-PINTEREST': true,
   'AMP-PLAYBUZZ': true,
   'AMP-TWITTER': true,
+  'AMP-TIKTOK': true,
 };
 /**
  * All video player components must either have a) "video" or b) "player" in

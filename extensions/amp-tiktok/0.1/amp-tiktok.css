@@ -29,3 +29,13 @@
     width: 325px;
     height: 500px;
 }
+
+.i-amphtml-tiktok-placeholder-image {
+    height: 578px;
+    top: 1px;
+    width: 325px;
+    left: 50%;
+    transform: translateX(-50%);
+    position: absolute;
+    border-radius: 8px 8px 0px 0px;
+}

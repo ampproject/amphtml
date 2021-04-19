@@ -115,6 +115,27 @@ describes.realWin(
       expect(computedStyle(win, playerIframe).height).to.equal('775.25px');
     });
 
+    it('renders placeholder', async () => {
+      const player = await getTiktok({'data-src': VIDEOID});
+      const placeHolder = player.querySelector('amp-img');
+      expect(placeHolder).to.not.be.null;
+    });
+
+    it('renders aria title', async () => {
+      const player = await getTiktok({'data-src': VIDEOID});
+
+      // Wait 1100ms for resize fallback to be invoked.
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, 1100);
+      });
+
+      const ariaTitle = player.getAttribute('aria-title');
+      console.log(ariaTitle);
+      expect(ariaTitle).to.contain('TikTok');
+    });
+
     it('removes iframe after unlayoutCallback', async () => {
       const player = await getTiktok({'data-src': VIDEOID});
       const playerIframe = player.querySelector('iframe');
