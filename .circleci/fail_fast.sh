@@ -38,13 +38,13 @@ send_email() {
           {
             "to": [
               {
-                "email": "'$1'",
-                "name": "'$2'"
+                "email": "'${1}'",
+                "name": "'${2}'"
               }
             ],
             "dynamic_template_data": {
               "branch": "'${CIRCLE_BRANCH}'",
-              "name": "'$2'",
+              "name": "'${2}'",
               "build_url": "'${CIRCLE_BUILD_URL}'"
             }
           }
