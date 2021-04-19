@@ -21,25 +21,6 @@ tags: {  # amp-lightbox 1.0
   excludes: "amp-lightbox 0.1"
   extension_spec: {
     name: "amp-lightbox"
-<<<<<<<
-=======
-    version_name: "v1.0"
-    version: "1.0"
-  }
-  attr_lists: "common-extension-attrs"
-}
-tags: {  # amp-lightbox 0.1 and latest
-  html_format: AMP
-  tag_name: "SCRIPT"
-  satisfies: "amp-lightbox 0.1"
-  excludes: "amp-lightbox 1.0"
-  extension_spec: {
-    name: "amp-lightbox"
-    version_name: "v0.1"
-    version: "0.1"
-    version: "latest"
-    requires_usage: EXEMPTED
->>>>>>>
     version_name: "v1.0"
     version: "1.0"
   }
@@ -93,16 +74,6 @@ tags: {  # <amp-lightbox>
   requires_extension: "amp-lightbox"
   attrs: {
     name: "animate-in" # 0.1 only
-    value_casei: "fade-in"
-    value_casei: "fly-in-bottom"
-    value_casei: "fly-in-top"
-  }
-  attrs: {
-<<<<<<<
-    name: "animate-in" # 0.1 only
-=======
-    name: "animation" # 1.0 only
->>>>>>>
     value_casei: "fade-in"
     value_casei: "fly-in-bottom"
     value_casei: "fly-in-top"
