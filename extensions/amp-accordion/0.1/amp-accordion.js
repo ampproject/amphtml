@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-accordion-0.1.css';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
@@ -25,9 +25,8 @@ import {clamp} from '../../../src/utils/math';
 import {closest, dispatchCustomEvent, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getStyle, setImportantStyles, setStyles} from '../../../src/style';
-import {isExperimentOn} from '../../../src/experiments';
 import {
   numeric,
   px,
@@ -41,10 +40,6 @@ const MAX_TRANSITION_DURATION = 500; // ms
 const MIN_TRANSITION_DURATION = 200; // ms
 const EXPAND_CURVE_ = bezierCurve(0.47, 0, 0.745, 0.715);
 const COLLAPSE_CURVE_ = bezierCurve(0.39, 0.575, 0.565, 1);
-
-const isDisplayLockingEnabledForAccordion = (win) =>
-  isExperimentOn(win, 'amp-accordion-display-locking') &&
-  win.document.body.onbeforematch !== undefined;
 
 class AmpAccordion extends AMP.BaseElement {
   /** @override @nocollapse */
@@ -98,7 +93,7 @@ class AmpAccordion extends AMP.BaseElement {
       userAssert(
         section.tagName.toLowerCase() == 'section',
         'Sections should be enclosed in a <section> tag, ' +
-          'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
+          'See https://github.com/ampproject/amphtml/blob/main/extensions/' +
           'amp-accordion/amp-accordion.md. Found in: %s',
         this.element
       );
@@ -106,7 +101,7 @@ class AmpAccordion extends AMP.BaseElement {
       userAssert(
         sectionComponents.length == 2,
         'Each section must have exactly two children. ' +
-          'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
+          'See https://github.com/ampproject/amphtml/blob/main/extensions/' +
           'amp-accordion/amp-accordion.md. Found in: %s',
         this.element
       );
@@ -160,6 +155,15 @@ class AmpAccordion extends AMP.BaseElement {
         // for details.
       });
 
+      userAssert(
+        !section.hasAttribute('[expanded]') &&
+          !section.hasAttribute('data-amp-bind-expanded'),
+        'The "expanded" attribute cannot be used with amp-bind in version ' +
+          '0.1 of amp-accordion. Please bind to [data-expand] instead. ' +
+          'Found in: %s',
+        this.element
+      );
+
       const isExpanded = section.hasAttribute('expanded');
       header.classList.add('i-amphtml-accordion-header');
       if (!header.hasAttribute('role')) {
@@ -183,13 +187,6 @@ class AmpAccordion extends AMP.BaseElement {
 
       header.addEventListener('click', this.clickHandler_.bind(this));
       header.addEventListener('keydown', this.keyDownHandler_.bind(this));
-
-      if (isDisplayLockingEnabledForAccordion(this.win)) {
-        this.element.classList.add('i-amphtml-display-locking');
-        content.addEventListener('beforematch', () => {
-          this.toggle_(section, ActionTrust.HIGH, /* force expand */ true);
-        });
-      }
     });
   }
 

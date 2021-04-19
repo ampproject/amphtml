@@ -128,7 +128,7 @@ async function cherryPick() {
   } catch (e) {
     log(red('ERROR:'), e.message);
     log('Deleting branch', cyan(branch));
-    getOutput(`git checkout master && git branch -d ${branch}`);
+    getOutput(`git checkout main && git branch -d ${branch}`);
     throw e;
   }
 }

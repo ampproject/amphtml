@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 import {CSS} from '../../../build/amp-delight-player-0.1.css';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 import {
@@ -23,7 +24,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {dispatchCustomEvent, removeElement} from '../../../src/dom';
 import {
   getConsentMetadata,
@@ -141,6 +142,9 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
     /** @private {HTMLElement} */
     this.placeholderEl_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -217,6 +221,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
     this.unregisterEventHandlers_();
     unobserveWithSharedInOb(this.element);
+    this.pauseHelper_.updatePlaying(false);
 
     return true;
   }
@@ -284,6 +289,16 @@ class AmpDelightPlayer extends AMP.BaseElement {
     }
 
     const {element} = this;
+
+    switch (data['type']) {
+      case DelightEvent.PLAYING:
+        this.pauseHelper_.updatePlaying(true);
+        break;
+      case DelightEvent.PAUSED:
+      case DelightEvent.ENDED:
+        this.pauseHelper_.updatePlaying(false);
+        break;
+    }
 
     const redispatched = redispatch(element, data['type'], {
       [DelightEvent.PLAYING]: VideoEvents.PLAYING,

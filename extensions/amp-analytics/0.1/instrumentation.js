@@ -24,7 +24,7 @@ import {
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from './analytics-root';
 import {AnalyticsGroup} from './analytics-group';
 import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {
   getParentWindowFrameElement,

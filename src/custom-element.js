@@ -15,8 +15,8 @@
  */
 
 import * as dom from './dom';
-import {AmpEvents} from './amp-events';
-import {CommonSignals} from './common-signals';
+import {AmpEvents} from './core/constants/amp-events';
+import {CommonSignals} from './core/constants/common-signals';
 import {ElementStub} from './element-stub';
 import {
   Layout,
@@ -26,7 +26,7 @@ import {
   isLoadingAllowed,
 } from './layout';
 import {MediaQueryProps} from './utils/media-query-props';
-import {ReadyState} from './ready-state';
+import {ReadyState} from './core/constants/ready-state';
 import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './utils/signals';
@@ -36,17 +36,18 @@ import {
   isBlockedByConsent,
   isCancellation,
   reportError,
-} from './error';
-import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
+} from './error-reporting';
+import {dev, devAssert, user, userAssert} from './log';
 import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
 import {getMode} from './mode';
 import {getSchedulerForDoc} from './service/scheduler';
 import {isExperimentOn} from './experiments';
+import {rethrowAsync} from './core/error';
 import {setStyle} from './style';
 import {shouldBlockOnConsentByMeta} from './consent';
 import {startupChunk} from './chunk';
 import {toWin} from './types';
-import {tryResolve} from './utils/promise';
+import {tryResolve} from './core/data-structures/promise';
 
 const TAG = 'CustomElement';
 
@@ -1869,11 +1870,12 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
     /**
      * Get the purpose consents that should be granted.
-     * @return {?Array<string>}
+     * @return {Array<string>|undefined}
      */
     getPurposesConsent_() {
-      const purposes = this.getAttribute('data-block-on-consent-purposes');
-      return purposes ? purposes.split(',') : null;
+      const purposes =
+        this.getAttribute('data-block-on-consent-purposes') || null;
+      return purposes?.replace(/\s+/g, '')?.split(',');
     }
 
     /**

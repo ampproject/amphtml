@@ -18,7 +18,7 @@ import {EMPTY_METADATA} from '../../../src/mediasession-helper';
 import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {VisibilityState} from '../../../src/visibility-state';
+import {VisibilityState} from '../../../src/core/constants/visibility-state';
 import {addParamsToUrl} from '../../../src/url';
 import {
   childElement,
@@ -46,7 +46,7 @@ import {
   setInitialDisplay,
   setStyles,
 } from '../../../src/style';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 const TAG = 'amp-video';
 

@@ -357,10 +357,6 @@ class Parser {
   bool record_node_offsets_ = false;
   bool record_attribute_offsets_ = false;
 
-  // If true, diverges from HTML5 algorithm and allows deprecated elements in
-  // the tree.
-  bool allow_deprecated_tags_ = false;
-
   // Whether the parser is parsing an HTML fragment.
   // If the fragment is the InnerHTML of a node, set that node in context_node_.
   // in parent_node.

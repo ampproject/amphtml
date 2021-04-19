@@ -15,9 +15,9 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {AmpEvents} from '../../src/amp-events';
+import {AmpEvents} from '../../src/core/constants/amp-events';
 import {BaseElement} from '../../src/base-element';
-import {CommonSignals} from '../../src/common-signals';
+import {CommonSignals} from '../../src/core/constants/common-signals';
 import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
@@ -714,19 +714,42 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           toggleExperiment(win, 'amp-consent-granular-consent', false);
         });
 
-        it('should find the correct purposes', () => {
-          const element = new ElementClass();
-          expect(element.getPurposesConsent_()).to.be.null;
-          element.setAttribute('data-block-on-consent-purposes', '');
-          expect(element.getPurposesConsent_()).to.be.null;
-          element.setAttribute(
-            'data-block-on-consent-purposes',
-            'purpose-foo,purpose-bar'
-          );
-          expect(element.getPurposesConsent_()).to.deep.equals([
-            'purpose-foo',
-            'purpose-bar',
-          ]);
+        describe('getPurposeConsent_', () => {
+          let element;
+          beforeEach(() => {
+            element = new ElementClass();
+          });
+
+          it('should find no consent purposes w/ no attribute', () => {
+            expect(element.getPurposesConsent_()).to.be.undefined;
+          });
+
+          it('should find no consent purposes w/ no value on attribute', () => {
+            element.setAttribute('data-block-on-consent-purposes', '');
+            expect(element.getPurposesConsent_()).to.be.undefined;
+          });
+
+          it('should find correct consent purposes', () => {
+            element.setAttribute(
+              'data-block-on-consent-purposes',
+              'purpose-foo,purpose-bar'
+            );
+            expect(element.getPurposesConsent_()).to.deep.equals([
+              'purpose-foo',
+              'purpose-bar',
+            ]);
+          });
+
+          it('should find correct consent purposes w/ whitespaces', () => {
+            element.setAttribute(
+              'data-block-on-consent-purposes',
+              '     purpose-foo, purpose-bar'
+            );
+            expect(element.getPurposesConsent_()).to.deep.equals([
+              'purpose-foo',
+              'purpose-bar',
+            ]);
+          });
         });
 
         it('should default to policyId', () => {

@@ -206,7 +206,7 @@ It is possible to specify multiple access providers using an array instead of a 
 
 ### Access URL Variables
 
-When configuring the URLs for various endpoints, the Publisher can use substitution variables. The full list of these variables are defined in the [AMP Var Spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md). In addition, this spec adds a few access-specific variables such as `READER_ID` and `AUTHDATA`. Some of the most relevant variables are described in the table below:
+When configuring the URLs for various endpoints, the Publisher can use substitution variables. The full list of these variables are defined in the [AMP Var Spec](https://github.com/ampproject/amphtml/blob/main/spec/amp-var-substitutions.md). In addition, this spec adds a few access-specific variables such as `READER_ID` and `AUTHDATA`. Some of the most relevant variables are described in the table below:
 
 <table>
   <tr>
@@ -629,4 +629,4 @@ This section will cover a detailed explanation of the design underlying the amp-
 
 ## Validation
 
-See [amp-access rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/validator-amp-access.protoascii) in the AMP validator specification.
+See [amp-access rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-access/validator-amp-access.protoascii) in the AMP validator specification.

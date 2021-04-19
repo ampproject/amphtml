@@ -26,9 +26,9 @@ If your run into any issues finding a Reviewer/Owner or have any other questions
 
 Significant changes (e.g. new components or significant changes to behavior) require consultation with and approval from knowledgeable members of the community.
 
-**If you are making a change to existing behavior, familiarize yourself with AMP's [policy on breaking changes](https://github.com/ampproject/amphtml/blob/master/spec/amp-versioning-policy.md#breaking-changes).**
+**If you are making a change to existing behavior, familiarize yourself with AMP's [policy on breaking changes](https://github.com/ampproject/amphtml/blob/main/spec/amp-versioning-policy.md#breaking-changes).**
 
-**If you are deprecating/removing a feature, follow the [deprecation process](https://github.com/ampproject/amphtml/blob/master/spec/amp-versioning-policy.md#deprecations) instead of this process.**
+**If you are deprecating/removing a feature, follow the [deprecation process](https://github.com/ampproject/amphtml/blob/main/spec/amp-versioning-policy.md#deprecations) instead of this process.**
 
 -   [ ] _Before you start coding_, [find a guide](#find-a-guide) who you can discuss your change with and who can help guide you through the process.
 -   [ ] Agree to the [OpenJSF Contributor License Agreement (CLA)](#contributor-license-agreement).
@@ -37,7 +37,7 @@ Significant changes (e.g. new components or significant changes to behavior) req
     -   If you are integrating a third-party service, provide a link to the third-party's site and product.
     -   Details on any data collection or tracking that your change might require.
     -   A prototype or mockup (for example, an image, a GIF, or a link to a demo).
--   [ ] Determine who needs to approve your I2I. Changes that have a significant impact on AMP's behavior or significant new features require the approval from the [Approvers Working Group (WG)](https://github.com/ampproject/wg-approvers). Work with your guide to determine whether your change is significant enough that it requires approval from the Approvers Working Group and/or any other [Working Group](https://github.com/ampproject/meta/tree/master/working-groups).
+-   [ ] Determine who needs to approve your I2I. Changes that have a significant impact on AMP's behavior or significant new features require the approval from the [Approvers Working Group (WG)](https://github.com/ampproject/wg-approvers). Work with your guide to determine whether your change is significant enough that it requires approval from the Approvers Working Group and/or any other [Working Group](https://github.com/ampproject/meta/tree/main/working-groups).
 -   [ ] Get pre-approval from the Approvers WG if needed. For changes that require approval from the Approvers WG, at least 3 members of the Approvers WG should provide pre-approval on the I2I before significant implementation work proceeds.
 -   [ ] Finalize the design of your change.
     -   Familiarize yourself with our [Design Principles](DESIGN_PRINCIPLES.md).
@@ -53,7 +53,7 @@ A guide is required if you are making a substantial change to AMP, but is option
 
 To find a guide:
 
--   The [Working Group](https://github.com/ampproject/meta/blob/master/working-groups/README.md) that is most responsible for the area you are changing may document how to find a guide from that Working Group. If they do not, reach out to the facilitator of the WG (on [Slack](https://bit.ly/amp-slack-signup) or by ccing them on your GitHub issue by adding "/cc @username" in the issue body or comment).
+-   The [Working Group](https://github.com/ampproject/meta/blob/main/working-groups/README.md) that is most responsible for the area you are changing may document how to find a guide from that Working Group. If they do not, reach out to the facilitator of the WG (on [Slack](https://bit.ly/amp-slack-signup) or by ccing them on your GitHub issue by adding "/cc @username" in the issue body or comment).
 -   If there is no obvious Working Group responsible for the area you are changing but you know what part of the codebase your change will be in, reach out to one of the people in the OWNERS files for the areas you're changing (on [Slack](https://bit.ly/amp-slack-signup) or by ccing them on your GitHub issue).
 -   If you're still not sure who your guide should be, ask for a guide on [Slack](https://bit.ly/amp-slack-signup) in the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/).
 -   If you can't find a guide after going through these routes or the guides you find aren't responsive, reach out to mrjoro on Slack or cc him on your GitHub issue/PR.
@@ -74,7 +74,7 @@ Once you have found a guide, make sure to @-mention them on any issues / PRs rel
         -   **CSS**: [Writing CSS For AMP Runtime](./writing-css.md)
         -   **Creating new components**:
             -   [Instructions and Guidelines for building an AMP component](./building-an-amp-extension.md)
-            -   Learn to create your first component in this [guide](https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md)
+            -   Learn to create your first component in this [guide](https://github.com/ampproject/amphtml/blob/main/contributing/building-an-amp-extension.md)
             -   Watch this [YouTube video](https://youtu.be/FJEhQFNKeaQ?list=PLXTOW_XMsIDTDXYO-NAi2OpEH0zyguvqX) to learn about "Building a new AMP component"
         -   **Integrating third-party software, embeds, services**: [Guidelines](../3p/README.md)
         -   **Accessibility**:
@@ -119,7 +119,7 @@ We have a few additional resources that provide an introduction to contributing 
 -   ["Building an AMP Extension"](./building-an-amp-extension.md) has a detailed description of how to build an AMP component.
 -   The ["Building a new AMP component" talk at AMP Conf 2017](https://youtu.be/FJEhQFNKeaQ?list=PLXTOW_XMsIDTDXYO-NAi2OpEH0zyguvqX) provides an introduction to contributing AMP components.
 
-For further detail on integrating third-party services (e.g., fonts, embeds, etc.), see our [3p contribution guidelines](https://github.com/ampproject/amphtml/tree/master/3p).
+For further detail on integrating third-party services (e.g., fonts, embeds, etc.), see our [3p contribution guidelines](https://github.com/ampproject/amphtml/tree/main/3p).
 
 ## Contributor License Agreement
 
@@ -182,7 +182,7 @@ We have a well-defined process for handling requests for changes to the **experi
 
 **Keep in mind that performing a cherry-pick requires a significant amount of work from you and the on-duty engineer** and they can take a long time to process.
 
--   In general only fixes for [P0 issues](https://github.com/ampproject/amphtml/blob/master/contributing/issue-priorities.md) may be cherry-picked. P0 issues are those that:
+-   In general only fixes for [P0 issues](https://github.com/ampproject/amphtml/blob/main/contributing/issue-priorities.md) may be cherry-picked. P0 issues are those that:
     -   cause privacy or security issues
     -   cause user data loss
     -   break existing AMP web pages in a significant way

@@ -135,7 +135,12 @@
 }
 
 .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-container { 
+  border-radius: 16px !important;
   height: 100% !important;
+}
+
+amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-container {
+  border-radius: 16px 16px 0 0 !important;
 }
 
 amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-container {
@@ -146,6 +151,8 @@ amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-dragg
 }
 
 amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-spacer {
+  /* Removes default button background. */
+  background: none !important;
   /* This placeholder element takes up all available space when drawer-content is less than 80vh. */
   display: block !important;
   height: calc(var(--story-page-vh) * 100) !important;
@@ -153,7 +160,13 @@ amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-dragg
   min-height: calc(var(--story-page-vh) * 20) !important;
 }
 
+body:not(.amp-mode-keyboard-active) amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-spacer {
+  /* Remove outline if user is not navigating via keyboard */
+  outline: none !important;
+}
+
 amp-story:not([desktop]) .amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-content {
+  border-radius: inherit !important;
   background: #fff !important;
 }
 

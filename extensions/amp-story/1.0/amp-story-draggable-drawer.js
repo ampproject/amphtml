@@ -22,10 +22,12 @@ import {
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-draggable-drawer-header-1.0.css';
 import {Layout} from '../../../src/layout';
+import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {closest, isAmpElement} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
+import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-open-page-attachment';
 import {listen} from '../../../src/event-helper';
@@ -154,11 +156,23 @@ export class DraggableDrawer extends AMP.BaseElement {
     );
 
     if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-      const spacerEl = this.win.document.createElement('div');
+      const spacerEl = this.win.document.createElement('button');
       spacerEl.classList.add('i-amphtml-story-draggable-drawer-spacer');
+      spacerEl.classList.add('i-amphtml-story-system-reset');
+      spacerEl.setAttribute('role', 'button');
+      const localizationService = getLocalizationService(
+        devAssert(this.element)
+      );
+      if (localizationService) {
+        const localizedCloseString = localizationService.getLocalizedString(
+          LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
+        );
+        spacerEl.setAttribute('aria-label', localizedCloseString);
+      }
       this.containerEl_.insertBefore(spacerEl, this.contentEl_);
       this.contentEl_.appendChild(headerShadowRootEl);
       this.element.classList.add('amp-story-page-attachment-ui-v2');
+      this.headerEl_.classList.add('amp-story-page-attachment-ui-v2');
     } else {
       templateEl.insertBefore(headerShadowRootEl, templateEl.firstChild);
     }
@@ -209,11 +223,18 @@ export class DraggableDrawer extends AMP.BaseElement {
         this.close_();
       });
 
+      // For displaying sticky header on mobile.
+      new this.win.IntersectionObserver((e) => {
+        this.headerEl_.classList.toggle(
+          'i-amphtml-story-draggable-drawer-header-stuck',
+          !e[0].isIntersecting
+        );
+      }).observe(spacerEl);
+
       // Update spacerElHeight_ on resize for drag offset.
-      const observer = new this.win.ResizeObserver((e) => {
+      new this.win.ResizeObserver((e) => {
         this.spacerElHeight_ = e[0].contentRect.height;
-      });
-      observer.observe(spacerEl);
+      }).observe(spacerEl);
 
       // Reset scroll position on end of close transiton.
       this.element.addEventListener('transitionend', (e) => {
@@ -233,9 +254,13 @@ export class DraggableDrawer extends AMP.BaseElement {
    * @protected
    */
   onUIStateUpdate_(uiState) {
-    uiState === UIType.MOBILE
+    const isMobile = uiState === UIType.MOBILE;
+
+    isMobile
       ? this.startListeningForTouchEvents_()
       : this.stopListeningForTouchEvents_();
+
+    this.headerEl_.toggleAttribute('desktop', !isMobile);
   }
 
   /**

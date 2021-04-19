@@ -56,7 +56,7 @@ import {callEng} from './addthis-utils/eng';
 import {callLojson} from './addthis-utils/lojson';
 import {callPjson} from './addthis-utils/pjson';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   getAddThisMode,
   isProductCode,

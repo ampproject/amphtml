@@ -40,8 +40,19 @@ const realiasGetMode =
  *   message?: (undefined|string),
  *   allowlist?: (undefined|Array<string>),
  *   checkInTestFolder?: (undefined|boolean),
- *   checkComments?: (undefined|boolean),
+ *   checkProse?: (undefined|boolean),
  * }}
+ * - message:
+ *   a message optionally displayed with a matching term
+ *
+ * - allowlist:
+ *   optional list of filepaths that are allowed to use a term
+ *
+ * - checkInTestFolder:
+ *   check term in files whose path includes /test/ (false by default)
+ *
+ * - checkProse:
+ *   check term in comments and documentation (.md) (false by default)
  */
 let ForbiddenTermDef;
 
@@ -51,19 +62,19 @@ let ForbiddenTermDef;
  */
 const forbiddenTermsGlobal = {
   'DO NOT SUBMIT': {
-    checkComments: true,
+    checkProse: true,
   },
   'whitelist|white-list': {
     message: 'Please use the term allowlist instead',
-    checkComments: true,
+    checkProse: true,
   },
   'blacklist|black-list': {
     message: 'Please use the term denylist instead',
-    checkComments: true,
+    checkProse: true,
   },
   'grandfather|grandfathered': {
     message: 'Please use the term legacy instead',
-    checkComments: true,
+    checkProse: true,
   },
   '(^-amp-|\\W-amp-)': {
     message: 'Switch to new internal class form',
@@ -71,7 +82,7 @@ const forbiddenTermsGlobal = {
       'build-system/server/amp4test.js',
       'build-system/server/app-index/boilerplate.js',
       'build-system/server/variable-substitution.js',
-      'build-system/tasks/extension-generator/index.js',
+      'build-system/tasks/make-extension/index.js',
       'extensions/amp-pinterest/0.1/amp-pinterest.css',
       'extensions/amp-pinterest/0.1/follow-button.js',
       'extensions/amp-pinterest/0.1/pin-widget.js',
@@ -116,6 +127,7 @@ const forbiddenTermsGlobal = {
     allowlist: [
       'build-system/common/check-package-manager.js',
       'build-system/common/logging.js',
+      'build-system/task-runner/amp-cli-runner.js',
       'src/purifier/noop.js',
       'validator/js/engine/validator-in-browser.js',
       'validator/js/engine/validator.js',
@@ -126,9 +138,9 @@ const forbiddenTermsGlobal = {
     message: realiasGetMode,
     allowlist: ['src/mode-object.js', 'src/iframe-attributes.js'],
   },
-  '(?:var|let|const) +IS_DEV +=': {
+  '(?:var|let|const) +IS_FORTESTING +=': {
     message:
-      'IS_DEV local var only allowed in mode.js and ' +
+      'IS_FORTESTING local var only allowed in mode.js and ' +
       'dist.3p/current/integration.js',
     allowlist: ['src/mode.js'],
   },
@@ -147,6 +159,7 @@ const forbiddenTermsGlobal = {
   '\\.buildInternal': {
     message: 'can only be called by the framework',
     allowlist: [
+      'build-system/externs/amp.extern.js',
       'src/custom-element.js',
       'src/service/resource.js',
       'testing/iframe.js',
@@ -154,7 +167,10 @@ const forbiddenTermsGlobal = {
   },
   '\\.mountInternal': {
     message: 'can only be called by the framework',
-    allowlist: ['src/service/scheduler.js'],
+    allowlist: [
+      'build-system/externs/amp.extern.js',
+      'src/service/scheduler.js',
+    ],
   },
   'getSchedulerForDoc': {
     message: 'can only be used by the runtime',
@@ -322,7 +338,7 @@ const forbiddenTermsGlobal = {
     message: 'Usages must be reviewed.',
     allowlist: [
       // viewer-impl.sendMessage
-      'src/error.js',
+      'src/error-reporting.js',
       'src/service/navigation.js',
       'src/service/viewport/viewport-impl.js',
       'src/service/performance-impl.js',
@@ -383,7 +399,7 @@ const forbiddenTermsGlobal = {
     message: requiresReviewPrivacy,
     allowlist: [
       'extensions/amp-bind/0.1/bind-impl.js',
-      'src/error.js',
+      'src/error-reporting.js',
       'src/utils/xhr-utils.js',
       'src/service/navigation.js',
       'src/service/viewer-impl.js',
@@ -483,7 +499,7 @@ const forbiddenTermsGlobal = {
       'ads/google/a4a/utils.js',
       'src/inabox/inabox-viewer.js',
       'src/service/viewer-impl.js',
-      'src/error.js',
+      'src/error-reporting.js',
       'src/window-interface.js',
     ],
   },
@@ -648,6 +664,7 @@ const forbiddenTermsGlobal = {
       'This is a protected API. Please only override it the element is ' +
       'render blocking',
     allowlist: [
+      'build-system/externs/amp.extern.js',
       'src/service/resources-impl.js',
       'src/service/resource.js',
       'src/custom-element.js',
@@ -656,7 +673,7 @@ const forbiddenTermsGlobal = {
       'extensions/amp-experiment/1.0/amp-experiment.js',
     ],
   },
-  '^describe[\\.|\\(|$]': {
+  '^describe\n*\\s*[\\.|\\(]': {
     message:
       'Top-level "describe" blocks in test files have been deprecated. ' +
       'Use "describes.{realWin|sandboxed|fakeWin|integration}".',
@@ -693,6 +710,7 @@ const forbiddenTermsGlobal = {
       'extensions/amp-access/0.1/test/test-access-expr.js',
       'extensions/amp-access/0.1/test/test-amp-login-done-dialog.js',
       'extensions/amp-access/0.1/test/test-jwt.js',
+      'extensions/amp-accordion/0.1/test/integration/test-amp-accordion.js',
       'extensions/amp-ad-exit/0.1/test/filters/test-click-delay.js',
       'extensions/amp-ad/0.1/test/test-amp-ad-3p-impl.js',
       'extensions/amp-ad/0.1/test/test-amp-ad-custom.js',
@@ -708,24 +726,38 @@ const forbiddenTermsGlobal = {
       'extensions/amp-bind/0.1/test/test-bind-evaluator.js',
       'extensions/amp-bind/0.1/test/test-bind-expression.js',
       'extensions/amp-bind/0.1/test/test-bind-validator.js',
+      'extensions/amp-bodymovin-animation/0.1/test/integration/test-amp-bodymovin-animation.js',
       'extensions/amp-dynamic-css-classes/0.1/test/test-dynamic-classes.js',
       'extensions/amp-fx-collection/0.1/test/integration/test-amp-fx-fly-in.js',
+      'extensions/amp-image-lightbox/0.1/test/integration/test-amp-image-lightbox.js',
       'extensions/amp-lightbox-gallery/0.1/test/integration/test-amp-lightbox-gallery.js',
       'extensions/amp-list/0.1/test/integration/test-amp-list.js',
       'extensions/amp-live-list/0.1/test/test-poller.js',
+      'extensions/amp-pan-zoom/0.1/test/integration/test-amp-pan-zoom.js',
+      'extensions/amp-script/0.1/test/integration/test-amp-script.js',
       'extensions/amp-script/0.1/test/unit/test-amp-script.js',
+      'extensions/amp-sidebar/0.1/test/integration/test-amp-sidebar.js',
       'extensions/amp-sidebar/0.1/test/test-toolbar.js',
+      'extensions/amp-sidebar/0.2/test/integration/test-amp-sidebar.js',
       'extensions/amp-truncate-text/0.1/test/test-binary-search.js',
+      'extensions/amp-viewer-integration/0.1/test/integration/test-amp-viewer-integration.js',
       'extensions/amp-viewer-integration/0.1/test/test-findtext.js',
       'test/integration/test-3p-nameframe.js',
       'test/integration/test-amp-ad-3p.js',
+      'test/integration/test-amp-ad-doubleclick.js',
+      'test/integration/test-amp-analytics.js',
+      'test/integration/test-amp-bind.js',
+      'test/integration/test-amp-img.js',
       'test/integration/test-amp-pixel.js',
+      'test/integration/test-amp-recaptcha-input.js',
       'test/integration/test-amp-skimlinks.js',
       'test/integration/test-boilerplates.js',
       'test/integration/test-configuration.js',
       'test/integration/test-css.js',
+      'test/integration/test-double-loading.js',
       'test/integration/test-extensions-loading.js',
       'test/integration/test-released.js',
+      'test/integration/test-shadow-dom-element.js',
       'test/integration/test-video-manager.js',
       'test/integration/test-video-players.js',
       'test/unit/3p/test-3p-messaging.js',
@@ -748,8 +780,8 @@ const forbiddenTermsGlobal = {
       'test/unit/test-css.js',
       'test/unit/test-curve.js',
       'test/unit/test-describes.js',
+      'test/unit/test-document-info.js',
       'test/unit/test-document-ready.js',
-      'test/unit/test-error.js',
       'test/unit/test-event-helper.js',
       'test/unit/test-experiments.js',
       'test/unit/test-exponential-backoff.js',
@@ -759,6 +791,8 @@ const forbiddenTermsGlobal = {
       'test/unit/test-gesture.js',
       'test/unit/test-get-html.js',
       'test/unit/test-ie-media-bug.js',
+      'test/unit/test-iframe-helper.js',
+      'test/unit/test-iframe-stub.js',
       'test/unit/test-input.js',
       'test/unit/test-integration.js',
       'test/unit/test-intersection-observer-polyfill.js',
@@ -769,8 +803,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-mode.js',
       'test/unit/test-motion.js',
       'test/unit/test-mustache.js',
-      'test/unit/test-object.js',
-      'test/unit/test-observable.js',
       'test/unit/test-pass.js',
       'test/unit/test-platform.js',
       'test/unit/test-polyfill-document-contains.js',
@@ -785,7 +817,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-service.js',
       'test/unit/test-srcset.js',
       'test/unit/test-static-template.js',
-      'test/unit/test-string.js',
       'test/unit/test-style-installer.js',
       'test/unit/test-style.js',
       'test/unit/test-task-queue.js',
@@ -795,10 +826,9 @@ const forbiddenTermsGlobal = {
       'test/unit/test-url.js',
       'test/unit/test-viewport.js',
       'test/unit/test-web-components.js',
-      'test/unit/utils/test-array.js',
+      'test/unit/test-xhr.js',
+      'test/unit/utils/test-base64.js',
       'test/unit/utils/test-bytes.js',
-      'test/unit/utils/test-lru-cache.js',
-      'test/unit/utils/test-priority-queue.js',
       'test/unit/utils/test-rate-limit.js',
       'test/unit/web-worker/test-amp-worker.js',
     ],
@@ -1011,7 +1041,7 @@ const forbiddenTermsSrcInclusive = {
       'build-system/server/shadow-viewer.js',
       'build-system/server/variable-substitution.js',
       'build-system/tasks/dist.js',
-      'build-system/tasks/extension-generator/index.js',
+      'build-system/tasks/make-extension/index.js',
       'build-system/tasks/helpers.js',
       'build-system/tasks/performance/helpers.js',
       'src/3p-frame.js',
@@ -1072,15 +1102,14 @@ const forbiddenTermsSrcInclusive = {
   '\\.getLayoutSize': {
     message: measurementApiDeprecated,
     allowlist: [
+      'build-system/externs/amp.extern.js',
       'builtins/amp-img.js',
       'src/base-element.js',
       'src/custom-element.js',
       'src/iframe-helper.js',
       'src/service/mutator-impl.js',
       'src/service/resources-impl.js',
-      'src/service/video-manager-impl.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
-      'extensions/amp-auto-lightbox/0.1/amp-auto-lightbox.js',
       'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
       'extensions/amp-script/0.1/amp-script.js',
       'extensions/amp-story/1.0/amp-story-page.js',
@@ -1118,12 +1147,6 @@ const forbiddenTermsSrcInclusive = {
   "require\\('fancy-log'\\)": {
     message:
       'Instead of fancy-log, use the logging functions in build-system/common/logging.js.',
-    allowlist: [
-      'babel.config.js',
-      'build-system/common/logging.js',
-      'build-system/tasks/visual-diff/helpers.js',
-      'validator/js/gulpjs/index.js',
-    ],
   },
 };
 
@@ -1186,7 +1209,7 @@ function matchForbiddenTerms(srcFile, contents, terms) {
         message,
         allowlist = null,
         checkInTestFolder = false,
-        checkComments = false,
+        checkProse = false,
       } =
         typeof messageOrDef === 'string'
           ? {message: messageOrDef}
@@ -1195,7 +1218,8 @@ function matchForbiddenTerms(srcFile, contents, terms) {
       // if needed but that might be too permissive.
       if (
         (Array.isArray(allowlist) && allowlist.indexOf(srcFile) != -1) ||
-        (isInTestFolder(srcFile) && !checkInTestFolder)
+        (isInTestFolder(srcFile) && !checkInTestFolder) ||
+        (srcFile.endsWith('.md') && !checkProse)
       ) {
         return [];
       }
@@ -1206,13 +1230,13 @@ function matchForbiddenTerms(srcFile, contents, terms) {
       // original term to get the possible fix value. This is ok as the
       // presubmit doesn't have to be blazing fast and this is most likely
       // negligible.
-      const regex = new RegExp(term, 'gm' + (checkComments ? 'i' : ''));
+      const regex = new RegExp(term, 'gm' + (checkProse ? 'i' : ''));
       let index = 0;
       let line = 1;
       let column = 0;
       const start = {line: -1, column: -1};
 
-      const subject = checkComments ? contents : contentsWithoutComments;
+      const subject = checkProse ? contents : contentsWithoutComments;
       let result;
       while ((result = regex.exec(subject))) {
         const [match] = result;

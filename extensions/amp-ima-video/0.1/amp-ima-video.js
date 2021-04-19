@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {ImaPlayerData} from '../../../ads/google/ima-player-data';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
@@ -26,17 +27,19 @@ import {
   isJsonScriptTag,
   removeElement,
 } from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isEnumValue, isObject, toArray} from '../../../src/types';
+import {isEnumValue, isObject} from '../../../src/core/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
+
 import {
   observeContentSize,
   unobserveContentSize,
 } from '../../../src/utils/size-observer';
+import {toArray} from '../../../src/core/types/array';
 
 /** @const */
 const TAG = 'amp-ima-video';
@@ -85,6 +88,9 @@ class AmpImaVideo extends AMP.BaseElement {
     this.playerData_ = new ImaPlayerData();
 
     this.onResized_ = this.onResized_.bind(this);
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /** @override */
@@ -230,6 +236,9 @@ class AmpImaVideo extends AMP.BaseElement {
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
+
+    this.pauseHelper_.updatePlaying(false);
+
     return true;
   }
 
@@ -291,8 +300,19 @@ class AmpImaVideo extends AMP.BaseElement {
 
     const videoEvent = eventData['event'];
     if (isEnumValue(VideoEvents, videoEvent)) {
-      if (videoEvent == VideoEvents.LOAD) {
-        this.playerReadyResolver_(this.iframe_);
+      switch (videoEvent) {
+        case VideoEvents.LOAD:
+          this.playerReadyResolver_(this.iframe_);
+          break;
+        case VideoEvents.AD_START:
+        case VideoEvents.PLAY:
+        case VideoEvents.PLAYING:
+          this.pauseHelper_.updatePlaying(true);
+          break;
+        case VideoEvents.PAUSE:
+        case VideoEvents.ENDED:
+          this.pauseHelper_.updatePlaying(false);
+          break;
       }
       dispatchCustomEvent(this.element, videoEvent);
       return;

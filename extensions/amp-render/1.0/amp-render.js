@@ -18,7 +18,7 @@ import {BaseElement} from './base-element';
 import {Services} from '../../../src/services';
 import {batchFetchJsonFor} from '../../../src/batched-json';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
@@ -44,7 +44,7 @@ const isAmpScriptSrc = (src) => src && src.startsWith(AMP_SCRIPT_URI_SCHEME);
 /**
  * Gets the json from an "amp-state:" uri. For example, src="amp-state:json.path".
  *
- * TODO: this implementation is identical to one in amp-list. Move it
+ * TODO: this is similar to the implementation in amp-list. Move it
  * to a common file and import it.
  *
  * @param {!AmpElement} element
@@ -75,6 +75,45 @@ const getAmpStateJson = (element, src) => {
 };
 
 /**
+ * Gets the json from an amp-script uri.
+ * TODO: this is similar to the implementation in amp-list. Move it
+ * to a common file and import it.
+ *
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} src
+ * @return {Promise<!JsonObject>}
+ */
+function getAmpScriptJson(ampdoc, src) {
+  return Promise.resolve()
+    .then(() => {
+      const args = src.slice('amp-script:'.length).split('.');
+      userAssert(
+        args.length === 2 && args[0].length > 0 && args[1].length > 0,
+        '[amp-render]: "amp-script" URIs must be of the format "scriptId.functionIdentifier".'
+      );
+
+      const ampScriptId = args[0];
+      const fnIdentifier = args[1];
+      const ampScriptEl = ampdoc.getElementById(ampScriptId);
+      userAssert(
+        ampScriptEl && ampScriptEl.tagName === 'AMP-SCRIPT',
+        `[amp-render]: could not find <amp-script> with script set to ${ampScriptId}`
+      );
+
+      return ampScriptEl.getImpl().then((impl) => {
+        return impl.callFunction(fnIdentifier);
+      });
+    })
+    .then((json) => {
+      userAssert(
+        json !== undefined,
+        `[amp-render] ${src} must return json, but instead returned: ${typeof json}`
+      );
+      return json;
+    });
+}
+
+/**
  * Returns a function to fetch json from remote url, amp-state or
  * amp-script.
  *
@@ -91,8 +130,7 @@ export const getJsonFn = (element) => {
     return (src) => getAmpStateJson(element, src);
   }
   if (isAmpScriptSrc(src)) {
-    // TODO(dmanek): implement this
-    return () => {};
+    return (src) => getAmpScriptJson(element.getAmpDoc(), src);
   }
   return () => batchFetchJsonFor(element.getAmpDoc(), element);
 };
@@ -120,6 +158,18 @@ export class AmpRender extends BaseElement {
 
   /** @override */
   init() {
+    this.registerApiAction('refresh', (api) => {
+      const src = this.element.getAttribute('src');
+      // There is an alternative way to do this using `mutationObserverCallback` while using a boolean
+      // variable `canRefresh`. See https://github.com/ampproject/amphtml/pull/33776#discussion_r614087734
+      // for more context. This approach may be better if src does not mutate often. But the alternative might
+      // be better if src mutatates often and component user does not use `refresh` action.
+      if (!src?.length || isAmpStateSrc(src) || isAmpScriptSrc(src)) {
+        return;
+      }
+      api.refresh();
+    });
+
     return dict({
       'getJson': getJsonFn(this.element),
     });

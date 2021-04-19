@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {LastAddedResolver} from '../../../src/utils/promise';
-import {formElementsQuerySelectorAll} from './amp-form';
+import {LastAddedResolver} from '../../../src/core/data-structures/promise';
 import {isFieldDefault} from '../../../src/form';
 import {iterateCursor} from '../../../src/dom';
 import {user} from '../../../src/log';

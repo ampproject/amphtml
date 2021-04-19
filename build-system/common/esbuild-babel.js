@@ -15,77 +15,14 @@
  */
 
 const babel = require('@babel/core');
-const crypto = require('crypto');
-const fs = require('fs-extra');
 const path = require('path');
-
-/**
- * Directory where the babel filecache lives.
- */
-const CACHE_DIR = path.resolve(__dirname, '..', '..', '.babel-cache');
-
-/**
- * Cache for storing transformed files on both memory and on disk.
- */
-class BabelTransformCache {
-  constructor() {
-    fs.ensureDirSync(CACHE_DIR);
-
-    /** @type {Map<string, Promise<Buffer|string>>} */
-    this.map = new Map();
-
-    /** @type {Set<string>} */
-    this.fsCache = new Set(fs.readdirSync(CACHE_DIR));
-  }
-
-  /**
-   * @param {string} hash
-   * @return {null|Promise<Buffer|string>}
-   */
-  get(hash) {
-    const cached = this.map.get(hash);
-    if (cached) {
-      return cached;
-    }
-    if (this.fsCache.has(hash)) {
-      const transformedPromise = fs.readFile(path.join(CACHE_DIR, hash));
-      this.map.set(hash, transformedPromise);
-      return transformedPromise;
-    }
-    return null;
-  }
-
-  /**
-   * @param {string} hash
-   * @param {Promise<string>} transformPromise
-   */
-  set(hash, transformPromise) {
-    if (this.map.has(hash)) {
-      throw new Error(
-        `Read race occured. Attempting to transform a file twice.`
-      );
-    }
-
-    this.map.set(hash, transformPromise);
-    transformPromise.then((contents) => {
-      fs.outputFile(path.join(CACHE_DIR, hash), contents);
-    });
-  }
-}
+const {TransformCache, batchedRead, md5} = require('./transform-cache');
 
 /**
  * Used to cache babel transforms done by esbuild.
- * @const {!BabelTransformCache}
+ * @const {TransformCache}
  */
-const transformCache = new BabelTransformCache();
-
-/**
- * Used to cache file reads done by esbuild, since it can issue multiple
- * "loads" per file. This batches consecutive reads into a single, and then
- * clears its cache item for the next load.
- * @private @const {!Map<string, Promise<{hash: string, contents: string}>>}
- */
-const readCache = new Map();
+let transformCache;
 
 /**
  * Creates a babel plugin for esbuild for the given caller. Optionally enables
@@ -102,41 +39,11 @@ function getEsbuildBabelPlugin(
   preSetup = () => {},
   postLoad = () => {}
 ) {
-  function md5(...args) {
-    if (!enableCache) {
-      return '';
-    }
-    const hash = crypto.createHash('md5');
-    for (const a of args) {
-      hash.update(a);
-    }
-    return hash.digest('hex');
+  if (!transformCache) {
+    transformCache = new TransformCache('.babel-cache', '.js');
   }
 
-  /**
-   * @param {string} path
-   * @param {string} optionsHash
-   * @return {{contents: string, hash: string}}
-   */
-  function batchedRead(path, optionsHash) {
-    let read = readCache.get(path);
-    if (!read) {
-      read = fs.promises
-        .readFile(path)
-        .then((contents) => ({
-          contents,
-          hash: md5(contents, optionsHash),
-        }))
-        .finally(() => {
-          readCache.delete(path);
-        });
-      readCache.set(path, read);
-    }
-
-    return read;
-  }
-
-  function transformContents(contents, hash, babelOptions) {
+  async function transformContents(contents, hash, babelOptions) {
     if (enableCache) {
       const cached = transformCache.get(hash);
       if (cached) {

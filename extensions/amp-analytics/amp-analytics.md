@@ -194,10 +194,10 @@ etc.) see
 To load a remote configuration, in the `<amp-analytics>` element, specify the
 `config` attribute and the URL for the configuration data. The URL specified
 should use the HTTPS scheme. The URL may include
-[AMP URL vars](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md).
+[AMP URL vars](https://github.com/ampproject/amphtml/blob/main/spec/amp-var-substitutions.md).
 To access cookies, see the [`data-credentials`](#data-credentials) attribute.
 The response must follow the
-[AMP CORS security guidelines](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md).
+[AMP CORS security guidelines](https://github.com/ampproject/amphtml/blob/main/spec/amp-cors-requests.md).
 
 In this example, we specify the `config` attribute to load the configuration
 data from the specified URL.
@@ -974,7 +974,7 @@ used to generate a hash and a threshold that the hash must meet.
 ###### `videoSpec` trigger
 
 This configuration is used in conjunction with the
-[`video-*`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-video-analytics.md)
+[`video-*`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-analytics/amp-video-analytics.md)
 triggers. Used when `on` is set to `video-*`.
 
 #### Transport
