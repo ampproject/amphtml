@@ -203,7 +203,6 @@ export class NextPageService {
     insertAtStart(this.host_, this.recBox_);
 
     this.history_ = Services.historyForDoc(this.ampdoc_);
-    this.initializeHistory();
 
     this.navigation_ = Services.navigationForDoc(this.ampdoc_);
 
