@@ -123,7 +123,7 @@ function getAmpScriptJson(ampdoc, src) {
  */
 export const getJsonFn = (element, options) => {
   const src = element.getAttribute('src');
-  if (!src) {
+  if (!src?.length) {
     // TODO(dmanek): assert that src is provided instead of silently failing below.
     return () => {};
   }
@@ -133,7 +133,7 @@ export const getJsonFn = (element, options) => {
   if (isAmpScriptSrc(src)) {
     return (src) => getAmpScriptJson(element.getAmpDoc(), src);
   }
-  return (src) => batchFetchJsonFor(element.getAmpDoc(), element, options);
+  return () => batchFetchJsonFor(element.getAmpDoc(), element, options);
 };
 
 export class AmpRender extends BaseElement {
@@ -178,6 +178,7 @@ export class AmpRender extends BaseElement {
       ? this.element.getAttribute('key')
       : '.';
 
+    // XXX batchFetchJsonFor is called in re-render with default options object
     return dict({
       'getJson': getJsonFn(this.element, {
         xssiPrefix,
