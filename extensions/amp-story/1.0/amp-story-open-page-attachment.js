@@ -56,7 +56,7 @@ export const buildOpenDefaultAttachmentElement = (element) =>
 export const buildOpenInlineAttachmentElement = (element) =>
   htmlFor(element)`
     <a class="
-        i-amphtml-story-page-open-attachment i-amphtml-story-system-reset amp-story-page-attachment-ui-v2"
+        i-amphtml-story-page-open-attachment i-amphtml-story-system-reset i-amphtml-amp-story-page-attachment-ui-v2"
         role="button">
       <div class="i-amphtml-story-inline-page-attachment-chip">
         <div class="i-amphtml-story-inline-page-attachment-img"></div>
@@ -70,7 +70,7 @@ export const buildOpenInlineAttachmentElement = (element) =>
  */
 const buildOpenOutlinkAttachmentElement = (element) =>
   htmlFor(element)`
-     <a class="i-amphtml-story-page-open-attachment amp-story-page-attachment-ui-v2"
+     <a class="i-amphtml-story-page-open-attachment i-amphtml-amp-story-page-attachment-ui-v2"
          role="button">
        <span class="i-amphtml-story-outlink-page-attachment-arrow">
          <span class="i-amphtml-story-outlink-page-open-attachment-bar-left"></span>
@@ -133,7 +133,7 @@ const renderDefaultPageAttachmentUI = (win, pageEl, attachmentEl) => {
   textEl.textContent = openLabel;
 
   if (isPageAttachmentUiV2ExperimentOn(win)) {
-    openAttachmentEl.classList.add('amp-story-page-attachment-ui-v2');
+    openAttachmentEl.classList.add('i-amphtml-amp-story-page-attachment-ui-v2');
   }
   return openAttachmentEl;
 };
