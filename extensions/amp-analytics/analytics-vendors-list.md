@@ -467,7 +467,7 @@ Type attribute value: `piStats`
 
 Type attribute value: `ppasanalytics`
 
-Adds support for Piwik PRO Analytics Suite. Configuration details can be found at [piwik.pro](https://developers.piwik.pro/integrations/AMP_integration.html).
+Adds support for Piwik PRO Analytics Suite. Configuration details can be found at [piwik.pro](https://developers.piwik.pro/en/latest/integrations/AMP_integration.html).
 
 ### Pressboard
 
