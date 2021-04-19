@@ -128,7 +128,6 @@ export class AmpTiktok extends AMP.BaseElement {
       // If the user provides a src attribute extract the video id from the src
       const videoIdRegex = /^((.+\/)?)(\d+)\/?$/;
       this.videoId_ = src.replace(videoIdRegex, '$3');
-      this.oEmbedRequestUrl_ = this.videoId_ !== src ? src : null;
     } else {
       // If the user provides a blockquote element use the blockquote videoId as video id
       const blockquoteOrNull = childElementByTag(this.element, 'blockquote');
@@ -142,7 +141,6 @@ export class AmpTiktok extends AMP.BaseElement {
         return;
       }
       this.videoId_ = blockquoteOrNull.dataset.videoId;
-      this.oEmbedRequestUrl_ = blockquoteOrNull.dataset.cite;
     }
   }
 

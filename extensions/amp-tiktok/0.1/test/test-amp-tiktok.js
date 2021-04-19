@@ -48,8 +48,6 @@ describes.realWin(
           }
           return createElementWithAttributes(document, tagName, attributes);
         });
-
-      env.sandbox.stub(dom, '');
     });
 
     async function getTiktok(attrs = {}) {
