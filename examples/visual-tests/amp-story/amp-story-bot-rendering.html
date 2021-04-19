@@ -30,6 +30,15 @@
       amp-story-page-attachment {
         color: rgba(0, 0, 0, 0.93);
       }
+
+      .block-to-hide-video-controls {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 80px;
+        background-color:#fff;
+      }
     </style>
     <script type="text/javascript">
       // Override user agent to trigger bot rendering.
@@ -100,6 +109,9 @@
             <source src="../../amp-story/video/stamp.mp4" type="video/mp4">
             <track default src="../../amp-story/video/stamp.vtt" srclang="en">
           </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <div class="block-to-hide-video-controls"></div>
         </amp-story-grid-layer>
       </amp-story-page>
 

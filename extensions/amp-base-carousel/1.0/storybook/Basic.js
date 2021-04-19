@@ -170,6 +170,7 @@ export const provideArrows = () => {
     color: 'white',
     width: '30px',
     height: '30px',
+    padding: '1px 6px',
   };
   const MyButton = (props) => {
     const {children} = props;
@@ -184,8 +185,8 @@ export const provideArrows = () => {
       controls={controls}
       style={{width, height}}
       outsetArrows={outsetArrows}
-      arrowPrev={<MyButton>←</MyButton>}
-      arrowNext={<MyButton>→</MyButton>}
+      arrowPrevAs={(props) => <MyButton {...props}>←</MyButton>}
+      arrowNextAs={(props) => <MyButton {...props}>→</MyButton>}
     >
       {['lightcoral', 'peachpuff', 'lavender'].map((color) => (
         <div style={{backgroundColor: color, width, height}}></div>
