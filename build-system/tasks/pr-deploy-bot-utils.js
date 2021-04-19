@@ -25,7 +25,7 @@ const {replaceUrls: replaceUrlsAppUtil} = require('../server/app-utils');
 
 const hostNamePrefix = 'https://storage.googleapis.com/amp-test-website-1';
 const prDeployBotBaseUrl =
-  'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
+  'https://20210419t191212-dot-amp-pr-deploy-bot.uc.r.appspot.com/v0/pr-deploy/';
 
 /**
  * @param {string} dest
@@ -90,10 +90,7 @@ async function signalPrDeployUpload(result) {
     'to the pr-deploy GitHub App...'
   );
   const sha = ciBuildSha();
-  const maybeJobId =
-    result == 'success' && !process.env.USE_LEGACY_GCLOUD_STORAGE
-      ? `/${circleciBuildNumber()}`
-      : '';
+  const maybeJobId = result == 'success' ? `/${circleciBuildNumber()}` : '';
   const url = `${prDeployBotBaseUrl}headshas/${sha}/${result}${maybeJobId}`;
   await fetch(url, {method: 'POST'});
 }
