@@ -103,6 +103,8 @@ export class LinkRewriter {
   }
 
   /**
+   * Check if anchor is not filtered by attribute or section scope
+   *
    * @param {!Element} anchor
    * @return {boolean}
    * @private
