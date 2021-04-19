@@ -425,4 +425,4 @@ Keep the following points in mind when you style an amp-accordion:
 
 The experimental `1.0` version of `amp-accordion` does not support session states. It behaves as if the `disable-session-states` attribute is always applied.
 
-Version `0.1` and `1.0` are compatible with `amp-bind`, but some binding syntax is different. You may bind directly with the `expanded` attribute in version `1.0`. The `[data-expanded]` is not supported in version `1.0`. See the `expanded` attribute below for further information.
+Version `0.1` and `1.0` are compatible with `amp-bind`, but some binding syntax is different. You may bind directly with the `expanded` attribute in version `1.0`. The `data-expand` binding is not supported in version `1.0`. See the [`expanded` attribute](#expanded) for further information.
