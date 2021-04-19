@@ -17,8 +17,8 @@
 import '../../../amp-mustache/0.1/amp-mustache';
 import * as xhrUtils from '../../../../src/utils/xhr-utils';
 import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
-import {AmpEvents} from '../../../../src/amp-events';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
+import {AmpEvents} from '../../../../src/core/constants/amp-events';
 import {
   AmpForm,
   AmpFormService,
@@ -38,7 +38,7 @@ import {
   createFormDataWrapper,
   isFormDataWrapper,
 } from '../../../../src/form-data-wrapper';
-import {fromIterator} from '../../../../src/utils/array';
+import {fromIterator} from '../../../../src/core/types/array';
 import {parseQueryString} from '../../../../src/url.js';
 import {
   setCheckValiditySupportedForTesting,

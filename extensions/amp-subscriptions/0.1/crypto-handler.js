@@ -20,8 +20,8 @@ import {
   safeAesGcmImportKey,
 } from '../../../third_party/subscriptions-project/aes_gcm';
 import {iterateCursor} from '../../../src/dom';
-import {padStart} from '../../../src/string';
-import {toArray} from '../../../src/types';
+import {padStart} from '../../../src/core/types/string';
+import {toArray} from '../../../src/core/types/array';
 import {tryParseJson} from '../../../src/json';
 import {utf8Encode} from '../../../src/utils/bytes';
 

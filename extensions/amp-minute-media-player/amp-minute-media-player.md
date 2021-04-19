@@ -120,4 +120,4 @@ Example with FIXED layout - fixed width and height.
 
 ## Validation
 
-See [amp-minute-media-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-minute-media-player/validator-amp-minute-media-player.protoascii) in the AMP validator specification.
+See [amp-minute-media-player rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-minute-media-player/validator-amp-minute-media-player.protoascii) in the AMP validator specification.

@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {ContainWrapper, useValueRef} from '../../../src/preact/component';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Side} from './sidebar-config';
 import {createPortal, forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';

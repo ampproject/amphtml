@@ -10,7 +10,7 @@ assignees: ''
 <!--
 Replace/remove all of the text in brackets, including this text.
 
-See https://github.com/ampproject/amphtml/blob/master/spec/amp-versioning-policy.md for details on AMP's deprecation policy, instructions on filling out this I2D template and how to get help if you have questions.
+See https://github.com/ampproject/amphtml/blob/main/spec/amp-versioning-policy.md for details on AMP's deprecation policy, instructions on filling out this I2D template and how to get help if you have questions.
 
 If your feature can be removed immediately after deprecation, you can use this issue to track removal as well (changing the title to "Intent-to-Deprecate-and-Remove" and adding the "INTENT TO REMOVE" label).  Otherwise you will file a separate Intent-to-Remove (I2R) issue after the feature has been deprecated and you are ready to remove the feature.
 -->

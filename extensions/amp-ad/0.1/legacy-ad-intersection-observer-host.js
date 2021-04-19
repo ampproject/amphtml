@@ -17,7 +17,7 @@
 import {MessageType} from '../../../src/3p-frame-messaging';
 import {Services} from '../../../src/services';
 import {SubscriptionApi} from '../../../src/iframe-helper';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {intersectionEntryToJson} from '../../../src/utils/intersection';
 
 /**

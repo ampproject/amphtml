@@ -20,9 +20,10 @@ import {ExpansionOptions, variableServiceForDoc} from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-allowlist';
 import {Services} from '../../../src/services';
 import {devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getResourceTiming} from './resource-timing';
-import {isArray, isFiniteNumber, isObject} from '../../../src/types';
+import {isArray, isObject} from '../../../src/core/types';
+import {isFiniteNumber} from '../../../src/types';
 
 const BATCH_INTERVAL_MIN = 200;
 

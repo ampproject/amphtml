@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {VisibilityState} from '../visibility-state';
+import {VisibilityState} from '../core/constants/visibility-state';
 import {containsNotSelf} from '../dom';
 import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
-import {pushIfNotExist, removeItem} from './array';
-import {rethrowAsync} from '../log';
+import {pushIfNotExist, removeItem} from '../core/types/array';
+import {rethrowAsync} from '../core/error';
 
 const SERVICE_ID = 'DisplayObserver';
 

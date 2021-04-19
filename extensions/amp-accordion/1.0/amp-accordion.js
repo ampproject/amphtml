@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-accordion-1.0.css';
 import {Services} from '../../../src/services';
@@ -30,8 +30,6 @@ const TAG = 'amp-accordion';
 class AmpAccordion extends BaseElement {
   /** @override */
   init() {
-    const props = super.init();
-
     this.registerApiAction('toggle', (api, invocation) =>
       api./*OK*/ toggle(invocation.args && invocation.args['section'])
     );
@@ -42,17 +40,7 @@ class AmpAccordion extends BaseElement {
       api./*OK*/ collapse(invocation.args && invocation.args['section'])
     );
 
-    const {win} = this;
-    const displayLockingExperimentEnabled =
-      isExperimentOn(win, 'amp-accordion-display-locking') &&
-      win.document.body.onbeforematch !== undefined;
-
-    if (displayLockingExperimentEnabled) {
-      this.element.classList.add('i-amphtml-display-locking');
-    }
-
-    props['experimentDisplayLocking'] = displayLockingExperimentEnabled;
-    return props;
+    return super.init();
   }
 
   /** @override */

@@ -22,7 +22,7 @@
 import './polyfills';
 
 import {Services} from './services';
-import {TickLabel} from './enums';
+import {TickLabel} from './core/constants/enums';
 import {adoptWithMultidocDeps} from './runtime';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
@@ -35,7 +35,7 @@ import {
 } from './service/core-services';
 import {installAutoLightboxExtension} from './auto-lightbox';
 import {installDocService} from './service/ampdoc-impl';
-import {installErrorReporting} from './error';
+import {installErrorReporting} from './error-reporting';
 import {installPerformanceService} from './service/performance-impl';
 import {installPlatformService} from './service/platform-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
@@ -103,7 +103,7 @@ function bootstrap(ampdoc, perf) {
 // Store the originalHash as early as possible. Trying to debug:
 // https://github.com/ampproject/amphtml/issues/6070
 if (self.location) {
-  self.location.originalHash = self.location.hash;
+  self.location['originalHash'] = self.location.hash;
 }
 
 /** @type {!./service/ampdoc-impl.AmpDocService} */

@@ -244,7 +244,7 @@ For testing documents on arbitrary URLs with your current local version of the A
 
 ## Visual Diff Tests
 
-In addition to building the AMP runtime and running `amp [unit|integration]`, the automatic test run on CircleCI includes a set of visual diff tests to make sure a new commit to `master` does not result in unintended changes to how pages are rendered. The tests load a few well-known pages in a browser and compare the results with known good versions of the same pages.
+In addition to building the AMP runtime and running `amp [unit|integration]`, the automatic test run on CircleCI includes a set of visual diff tests to make sure a new commit to `main` does not result in unintended changes to how pages are rendered. The tests load a few well-known pages in a browser and compare the results with known good versions of the same pages.
 
 The technology stack used is:
 
@@ -282,7 +282,7 @@ Percy DOES NOT by default run JavaScript, so the same DOM snapshot will be used 
 
 #### One-time Setup
 
-First create a free Percy account at [https://percy.io](https://percy.io), create a project, and set the `PERCY_TOKEN` environment variable using the unique value you find at `https://percy.io/<org>/<project>/integrations`:
+First create a [free BrowserStack account](https://www.browserstack.com/), use it to log into [https://percy.io](https://percy.io), create a project, and set the `PERCY_TOKEN` environment variable using the unique value you find at `https://percy.io/<org>/<project>/integrations`:
 
 ```sh
 export PERCY_TOKEN="<unique-percy-token>"

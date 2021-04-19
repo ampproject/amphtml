@@ -143,13 +143,13 @@ Supported DOM APIs include:
 -   Element properties like `attributes`, `id`, `outerHTML`, `textContent`, `value`, `classList`, and `className`
 -   And many more.
 
-For a complete list of supported DOM APIs, see the [API compatibility table](https://github.com/ampproject/worker-dom/blob/master/web_compat_table.md).
+For a complete list of supported DOM APIs, see the [API compatibility table](https://github.com/ampproject/worker-dom/blob/main/web_compat_table.md).
 
 `querySelector()` is supported for simple selectors - element, id, class, and attribute. So, `document.querySelector('.class')` will work, but `document.querySelector('.class1 .class2')` will not. [See the code](https://github.com/ampproject/worker-dom/blob/main/src/worker-thread/dom/Element.ts#L159) for details.
 
 `amp-script` supports common Web APIs like `Fetch`, `WebSockets`, `localStorage`, `sessionStorage`, and `Canvas`. Presently, the `History` API is not implemented, and neither are cookies.
 
-`amp-script` does not support the entire DOM API or Web API, as this would make `amp-script`'s own JavaScript too large and slow. If there's an API you'd like to see supported, please [file an issue](https://github.com/ampproject/amphtml/issues/new) or [suggest and contribute the change yourself](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md).
+`amp-script` does not support the entire DOM API or Web API, as this would make `amp-script`'s own JavaScript too large and slow. If there's an API you'd like to see supported, please [file an issue](https://github.com/ampproject/amphtml/issues/new) or [suggest and contribute the change yourself](https://github.com/ampproject/amphtml/blob/main/CONTRIBUTING.md).
 
 [tip type="default"]
 For a set of samples showing `amp-script` in use, [see here](https://amp.dev/documentation/examples/components/amp-script/).
@@ -330,7 +330,7 @@ const crypto = require('crypto');
 const hash = crypto.createHash('sha384');
 
 function generateCSPHash(script) {
-  const data = hash.update(script, 'utf-8');
+  const data = hash.update(script, 'utf8');
   return (
     'sha384-' +
     data

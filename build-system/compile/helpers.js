@@ -18,7 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
 const path = require('path');
-const {getBabelCacheDir} = require('./pre-closure-babel');
+const {getBabelOutputDir} = require('./pre-closure-babel');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
 function getSourceMapBase(options) {
@@ -36,10 +36,10 @@ function getSourceMapBase(options) {
 }
 
 function updatePaths(sourcemaps) {
-  const babelCacheDir = getBabelCacheDir();
+  const babelOutputDir = getBabelOutputDir();
   sourcemaps.sources = sourcemaps.sources.map((source) =>
-    source.startsWith(babelCacheDir)
-      ? path.relative(babelCacheDir, source)
+    source.startsWith(babelOutputDir)
+      ? path.relative(babelOutputDir, source)
       : source
   );
   if (sourcemaps.file) {

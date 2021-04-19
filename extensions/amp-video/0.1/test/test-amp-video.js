@@ -17,7 +17,7 @@
 import {AmpVideo, isCachedByCdn} from '../amp-video';
 import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
-import {VisibilityState} from '../../../../src/visibility-state';
+import {VisibilityState} from '../../../../src/core/constants/visibility-state';
 import {dispatchCustomEvent} from '../../../../src/dom';
 import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
 import {listenOncePromise} from '../../../../src/event-helper';
@@ -465,9 +465,14 @@ describes.realWin(
       env.sandbox.spy(video, 'pause');
       // The auto-pause only happens on when the video is actually playing.
       dispatchCustomEvent(video, 'play');
+      // First send "size" event and then "no size".
       resizeObserverStub.notifySync({
         target: v,
-        contentRect: {width: 0, height: 0},
+        borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+      });
+      resizeObserverStub.notifySync({
+        target: v,
+        borderBoxSize: [{inlineSize: 0, blockSize: 0}],
       });
       expect(video.pause.called).to.be.true;
     });

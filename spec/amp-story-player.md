@@ -26,9 +26,9 @@ limitations under the License.
 
 <table>
   <tr>
-    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/carousel-cards-entry-point.png?raw=true"></td>
-    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/player-in-recipe.png?raw=true"></td>
-<td><img src="https://github.com/ampproject/amphtml/raw/master/spec/img/amp-story-player.gif?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/carousel-cards-entry-point.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/player-in-recipe.png?raw=true"></td>
+<td><img src="https://github.com/ampproject/amphtml/raw/main/spec/img/amp-story-player.gif?raw=true"></td>
   </tr>
 </table>
 
@@ -48,7 +48,7 @@ limitations under the License.
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td>
-      <li>See <a href="https://github.com/ampproject/amphtml/blob/master/examples/amp-story/player.html">code snippet</a>.</li>
+      <li>See <a href="https://github.com/ampproject/amphtml/blob/main/examples/amp-story/player.html">code snippet</a>.</li>
     </td>
   </tr>
 </table>
@@ -121,6 +121,40 @@ Use a poster image as a placeholder to display to users while the story loads. T
 
 URL pointing to the story.
 
+## Display Story Attribution
+
+<img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/story-attribution.png?raw=true">
+
+The story attribution displays the entity or publisher's name and logo. When clicked, it will navigate the user to either the entity's URL or the publisher's canonical domain.
+
+To display the attribution on the stories, use the player's `display` and `attribution` options. See the JSON configuration below.
+
+The data will come from the `<amp-story>`'s metadata attributes in the story's document as described:
+
+-   For the logo: the `entity-logo-src` attribute (if provided), otherwise the `publisher-logo-src` attribute.
+-   For the string of text: the `entity` attribute (if provided), otherwise the `publisher` attribute.
+-   When the attribution is clicked, it will navigate the user to a URL. This will come from `entity-url` attribute if provided, otherwise it will use the story's canonical domain.
+
+Read more about these attibutes on the [Metadata Guidelines of `amp-story`.](https://github.com/ampproject/amphtml/blob/main/extensions/amp-story/amp-story.md#metadata-guidelines)
+
+### JSON Configuration
+
+Here's the JSON configuration to display the story attribution:
+
+```html
+<amp-story-player>
+  <script type="application/json">
+  {
+    "display": {
+      "attribution": "auto"
+    }
+  }
+</script>
+ <a href="./story1.html"> ... </a>
+ <a href="./story2.html"> ... </a>
+  ...
+```
+
 ## Programmatic Control
 
 Call the player's various methods to programmatically control the player. These methods are exposed on the HTML element, `const playerEl = document.querySelector('amp-story-player')`.
@@ -169,6 +203,19 @@ Will change the current story being displayed by the player.
 player.show('cool-story.html'); // Will display cool-story.html
 player.show('cool-story.html', 'page-4'); // Will display cool-story.html and switch to page-4
 player.show(null, 'page-4'); // Stay on current story and switch to page-4
+```
+
+#### rewind
+
+**Parameters**
+
+-   string: the URL of the story to rewind.
+
+Will rewind the provided story to the first page.
+
+```javascript
+player.show('story-2.html');
+player.rewind('story-1.html'); // Will rewind story-1 to the first page.
 ```
 
 #### add
@@ -373,9 +420,9 @@ See [examples](#Example-#1---Close-button-on-the-start-position) below to get an
 
 <table>
   <tr>
-    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/close-button-left.png?raw=true"></td>
-    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/close-and-skip-next.png?raw=true"></td>
-<td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/close-button-custom-background.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/close-button-left.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/close-and-skip-next.png?raw=true"></td>
+<td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/close-button-custom-background.png?raw=true"></td>
   </tr>
 </table>
 
@@ -482,7 +529,7 @@ Since by default the close button will be placed to the end, all we have to do i
 </amp-story-player>
       </pre>
     </td>
-    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/lightbox-close-button.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/lightbox-close-button.png?raw=true"></td>
   </tr>
 </table>
 
@@ -508,7 +555,7 @@ On desktop, you can now display a button that navigates from the current story t
 </amp-story-player>
       </pre>
     </td>
-    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/skip-next-desktop.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/skip-next-desktop.png?raw=true"></td>
   </tr>
 </table>
 
@@ -534,7 +581,7 @@ On desktop, you can now display a button that navigates from the current story t
 </amp-story-player>
       </pre>
     </td>
-    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/close-button-custom-background.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/close-button-custom-background.png?raw=true"></td>
   </tr>
 </table>
 
@@ -616,6 +663,16 @@ player.addEventListener("amp-story-player-touchend", (event) => {
     // Do something else when not navigating.
 
 });
+```
+
+#### amp-story-muted-state
+
+Fired when the story is muted/unmuted. This event provides an `muted` property.
+
+```javascript
+player.addEventListener('amp-story-muted-state', (event) => {
+  console.log('muted state', event.detail.muted);
+})
 ```
 
 #### navigation

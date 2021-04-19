@@ -24,8 +24,8 @@ import {
   tryFocus,
 } from '../../../src/dom';
 import {devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {toArray} from '../../../src/types';
+import {dict} from '../../../src/core/types/object';
+import {toArray} from '../../../src/core/types/array';
 import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
 
 export class BaseElement extends PreactBaseElement {

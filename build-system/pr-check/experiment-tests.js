@@ -20,8 +20,7 @@
  */
 
 const {
-  downloadExperimentOutput,
-  printSkipMessage,
+  skipDependentJobs,
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
@@ -60,16 +59,9 @@ function runExperimentTests(config) {
 }
 
 function pushBuildWorkflow() {
+  // Note that if config is invalid, this build would have been skipped by CircleCI.
   const config = getExperimentConfig(experiment);
-  if (config) {
-    downloadExperimentOutput(experiment);
-    runExperimentTests(config);
-  } else {
-    printSkipMessage(
-      jobName,
-      `${experiment} is expired, misconfigured, or does not exist`
-    );
-  }
+  runExperimentTests(config);
 }
 
 function prBuildWorkflow() {
@@ -82,7 +74,7 @@ function prBuildWorkflow() {
   ) {
     pushBuildWorkflow();
   } else {
-    printSkipMessage(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime, integration tests, or end-to-end tests'
     );

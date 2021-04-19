@@ -27,7 +27,7 @@ import {
   AnalyticsVars,
   STORY_AD_ANALYTICS,
 } from './story-ad-analytics';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Gestures} from '../../../src/gesture';
 import {
   StateProperty,
@@ -42,7 +42,7 @@ import {
   toggleAttribute,
 } from '../../../src/dom';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
+import {dict, map} from '../../../src/core/types/object';
 import {getData, listen} from '../../../src/event-helper';
 import {getFrameDoc, localizeCtaText} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
