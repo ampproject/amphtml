@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-selector-1.0.css';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
 import {userAssert} from '../../../src/log';

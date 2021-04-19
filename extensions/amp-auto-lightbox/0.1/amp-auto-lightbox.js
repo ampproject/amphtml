@@ -22,9 +22,9 @@
  * Instead, the runtime loads it when encountering an <amp-img>.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {AutoLightboxEvents} from '../../../src/auto-lightbox';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Services} from '../../../src/services';
 import {
   closestAncestorElementBySelector,

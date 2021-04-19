@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {
@@ -26,7 +26,7 @@ import {
 } from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getStyle, setStyle} from '../../../src/style';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';

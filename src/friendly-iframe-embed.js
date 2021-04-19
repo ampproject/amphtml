@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from './common-signals';
-import {Deferred} from './utils/promise';
+import {CommonSignals} from './core/constants/common-signals';
+import {Deferred} from './core/data-structures/promise';
 import {FIE_EMBED_PROP} from './iframe-helper';
 import {Services} from './services';
 import {Signals} from './utils/signals';
-import {VisibilityState} from './visibility-state';
+import {VisibilityState} from './core/constants/visibility-state';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
-import {dev, devAssert, rethrowAsync, userAssert} from './log';
+import {dev, devAssert, userAssert} from './log';
 import {
   disposeServicesForEmbed,
   getTopWindow,
@@ -48,6 +48,7 @@ import {
   setStyle,
   setStyles,
 } from './style';
+import {rethrowAsync} from './core/error';
 import {toWin} from './types';
 import {urls} from './config';
 import {whenContentIniLoad} from './ini-load';

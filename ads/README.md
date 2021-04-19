@@ -246,7 +246,7 @@ AMP runtime provides the following `window.context` APIs for ad network to acces
   <dd>
     Provides the initial consent state when the ad is unblocked.
     The states are integers defined <a href="https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#advanced-blocking-behaviors">here</a>
-    (<a href="https://github.com/ampproject/amphtml/blob/main/src/consent-state.js#L23">code</a>).
+    (<a href="https://github.com/ampproject/amphtml/blob/main/src/core/constants/consent-state.js#L23">code</a>).
   </dd>
   <dt><code>window.context.getConsentState(callback)</code></dt>
   <dd>
@@ -271,7 +271,7 @@ AMP runtime provides the following `window.context` APIs for ad network to acces
 </dl>
 
 After overriding the default consent handling behavior, don't forget to update your publisher facing
-documentation with the new behaviors on user's consent choices. You can refer to our documentation example [here](https://github.com/ampproject/amphtml/blob/main/ads/_ping_.md#user-consent-integration).
+documentation with the new behaviors on user's consent choices. You can refer to our documentation example [here](https://github.com/ampproject/amphtml/blob/main/ads/vendors/_ping_.md#user-consent-integration).
 
 ### Optimizing ad performance
 
@@ -289,7 +289,7 @@ This triggers prefetch/preconnect when the ad is first seen, so that loads are f
 
 ### Ad markup
 
-Ads are loaded using the `<amp-ad>` tag containing the specified `type` for the ad netowkr, and name value pairs of configuration.
+Ads are loaded using the `<amp-ad>` tag containing the specified `type` for the ad network, and name value pairs of configuration.
 
 This is an example for the A9 network:
 

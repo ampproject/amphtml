@@ -19,7 +19,7 @@ push_builds_only: &push_builds_only
 executors:
   amphtml-docker-small-executor:
     docker:
-      - image: cimg/base:2020.12
+      - image: cimg/base:2021.04
     resource_class: small
   amphtml-medium-executor:
     machine:
@@ -143,8 +143,13 @@ jobs:
       - setup_vm
       - setup_gcloud_storage
       - run:
+          name: 'Create Artifacts Directory'
+          command: mkdir -p /tmp/artifacts
+      - run:
           name: 'Nomodule Build'
           command: node build-system/pr-check/nomodule-build.js
+      - store_artifacts:
+          path: /tmp/artifacts/amp_nomodule_build.tar.gz
       - fail_fast
       - teardown_vm
   'Module Build':
@@ -279,6 +284,7 @@ jobs:
       - run:
           name: 'End-to-End Tests'
           command: node build-system/pr-check/e2e-tests.js
+      - store_test_output
       - fail_fast
       - teardown_vm
   'Performance Tests':

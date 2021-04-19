@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {parseJson} from '../../../src/json';
 import {user} from '../../../src/log';
 

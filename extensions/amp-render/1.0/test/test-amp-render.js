@@ -19,6 +19,9 @@ import '../../../amp-mustache/0.2/amp-mustache';
 import '../../../amp-script/0.1/amp-script';
 import '../amp-render';
 import * as BatchedJsonModule from '../../../../src/batched-json';
+import {ActionInvocation} from '../../../../src/service/action-impl';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
+import {Services} from '../../../../src/services';
 import {htmlFor} from '../../../../src/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';
@@ -53,6 +56,22 @@ describes.realWin(
     async function getRenderedData() {
       const wrapper = await waitRendered();
       return wrapper.textContent;
+    }
+
+    function invocation(method, args = {}) {
+      const source = null;
+      const caller = null;
+      const event = null;
+      const trust = ActionTrust.DEFAULT;
+      return new ActionInvocation(
+        element,
+        method,
+        args,
+        source,
+        caller,
+        event,
+        trust
+      );
     }
 
     beforeEach(async function () {
@@ -94,9 +113,12 @@ describes.realWin(
     });
 
     it('renders json from src', async () => {
-      env.sandbox
-        .stub(BatchedJsonModule, 'batchFetchJsonFor')
-        .resolves({name: 'Joe'});
+      const fetchStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+
+      fetchStub.resolves({name: 'Joe'});
 
       element = html`
         <amp-render
@@ -112,6 +134,7 @@ describes.realWin(
 
       const text = await getRenderedData();
       expect(text).to.equal('Hello Joe');
+      expect(fetchStub).to.have.been.calledOnce;
     });
 
     it('renders from amp-script', async () => {
@@ -162,6 +185,125 @@ describes.realWin(
 
       const text = await getRenderedData();
       expect(text).to.equal('Hello ');
+    });
+
+    it('re-fetches json on refresh action', async () => {
+      const fetchJsonStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+      fetchJsonStub.resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          id="my-amp-render"
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await getRenderedData();
+
+      element.enqueAction(invocation('refresh'));
+      await getRenderedData();
+      expect(fetchJsonStub).to.have.been.calledTwice;
+    });
+
+    it('should not re-fetch when src=amp-state', async () => {
+      const fetchJsonStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+
+      const bindStub = env.sandbox
+        .stub(Services, 'bindForDocOrNull')
+        .callThrough();
+
+      const ampState = html`
+        <amp-state id="theFood">
+          <script type="application/json">
+            {
+              "name": "Bill"
+            }
+          </script>
+        </amp-state>
+      `;
+      doc.body.appendChild(ampState);
+
+      element = html`
+        <amp-render
+          src="amp-state:theFood"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await getRenderedData();
+      expect(bindStub).to.have.been.calledOnce;
+      expect(fetchJsonStub).not.to.have.been.called;
+
+      element.enqueAction(invocation('refresh'));
+      await getRenderedData();
+      expect(bindStub).to.have.been.calledOnce;
+      expect(fetchJsonStub).not.to.have.been.called;
+    });
+
+    it('should not re-fetch when src=amp-script', async () => {
+      const fetchJsonStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+
+      const ampScript = html`
+        <amp-script id="dataFunctions" script="local-script" nodom></amp-script>
+      `;
+      const fetchScript = html`
+        <script id="local-script" type="text/plain" target="amp-script">
+          function getRemoteData() {
+            return fetch('https://example.com/data.json')
+                .then((resp) => resp.json());
+          }
+          exportFunction('getRemoteData', getRemoteData);
+        </script>
+      `;
+
+      element = html`
+        <amp-render
+          src="amp-script:dataFunctions.getRemoteData"
+          width="auto"
+          height="200"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(fetchScript);
+      doc.body.appendChild(ampScript);
+      doc.body.appendChild(element);
+
+      const impl = {
+        callFunction: env.sandbox.stub(),
+      };
+      impl.callFunction.resolves({name: 'Joe'});
+      env.sandbox.stub(ampScript, 'getImpl').resolves(impl);
+
+      await getRenderedData();
+      expect(ampScript.getImpl).to.have.been.calledOnce;
+      expect(fetchJsonStub).not.to.have.been.called;
+
+      element.enqueAction(invocation('refresh'));
+      await getRenderedData();
+      expect(ampScript.getImpl).to.have.been.calledOnce;
+      expect(fetchJsonStub).not.to.have.been.called;
     });
   }
 );

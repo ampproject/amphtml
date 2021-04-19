@@ -21,7 +21,7 @@
 import '../polyfills';
 import {Navigation} from '../service/navigation';
 import {Services} from '../services';
-import {TickLabel} from '../enums';
+import {TickLabel} from '../core/constants/enums';
 import {adopt} from '../runtime';
 import {allowLongTasksInChunking, startupChunk} from '../chunk';
 import {cssText as ampSharedCss} from '../../build/ampshared.css';
@@ -35,7 +35,7 @@ import {
   installRuntimeServices,
 } from '../service/core-services';
 import {installDocService} from '../service/ampdoc-impl';
-import {installErrorReporting} from '../error';
+import {installErrorReporting} from '../error-reporting';
 import {installPerformanceService} from '../service/performance-impl';
 import {installPlatformService} from '../service/platform-impl';
 import {

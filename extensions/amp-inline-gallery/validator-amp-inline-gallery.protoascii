@@ -20,6 +20,7 @@ tags: {  # amp-inline-gallery
   extension_spec: {
     name: "amp-inline-gallery"
     version: "0.1"
+    version: "1.0"
     version: "latest"
   }
   attr_lists: "common-extension-attrs"
@@ -82,13 +83,19 @@ tags: {  # <amp-inline-gallery-thumbnails>
     }
   }
   attrs: {
-    name: "aspect-ratio-width"
+    name: "aspect-ratio-width" # 0.1 only
     # Non-zero number
     value_regex: "\\d+(\\.\\d+)?"
     disallowed_value_regex: "^0+(\\.0+)?$"
     trigger: {
       also_requires_attr: "aspect-ratio-height"
     }
+  }
+  attrs: {
+    name: "aspect-ratio" # 1.0 only
+    # Non-zero number
+    value_regex: "\\d+(\\.\\d+)?"
+    disallowed_value_regex: "^0+(\\.0+)?$"
   }
   attrs: {
     name: "loop"

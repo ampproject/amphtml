@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
   VideoEvents,
 } from '../../../src/video-interface';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {
   SandboxOptions,
   createFrameFor,
@@ -28,7 +29,7 @@ import {
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   disableScrollingOnIframe,
   looksLikeTrackingIframe,
@@ -127,6 +128,9 @@ class AmpVideoIframe extends AMP.BaseElement {
      * @private
      */
     this.boundOnMessage_ = (e) => this.onMessage_(e);
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /** @override */
@@ -216,6 +220,7 @@ class AmpVideoIframe extends AMP.BaseElement {
   unlayoutCallback() {
     this.canPlay_ = false;
     this.removeIframe_();
+    this.pauseHelper_.updatePlaying(false);
     return true; // layout again.
   }
 
@@ -343,6 +348,16 @@ class AmpVideoIframe extends AMP.BaseElement {
       const spec = devAssert(data['analytics']);
       this.dispatchCustomAnalyticsEvent_(spec['eventType'], spec['vars']);
       return;
+    }
+
+    switch (eventReceived) {
+      case 'playing':
+        this.pauseHelper_.updatePlaying(true);
+        break;
+      case 'pause':
+      case 'ended':
+        this.pauseHelper_.updatePlaying(false);
+        break;
     }
 
     if (ALLOWED_EVENTS.indexOf(eventReceived) > -1) {
