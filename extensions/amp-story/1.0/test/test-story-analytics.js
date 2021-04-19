@@ -38,7 +38,7 @@ describes.realWin('amp-story-analytics', {amp: true}, (env) => {
       id: 'page-1',
       index: 0,
     });
-    expect(triggerAnalyticsStub).calledOnceWithExactly(
+    expect(triggerAnalyticsStub).to.have.been.calledOnceWithExactly(
       el,
       'story-page-visible',
       env.sandbox.match({storyPageIndex: 0, storyPageId: 'page-1'})
