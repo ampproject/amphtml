@@ -588,7 +588,6 @@ describes.sandboxed('amp-img', {}, (env) => {
       impl.buildCallback();
       impl.layoutCallback();
 
-      // debugger;
       expect(ampImg.querySelector('img[src*="sample.jpg"]')).to.exist;
       expect(ampImg.querySelector('img[src*="image/svg+xml"]')).to.exist;
     });
