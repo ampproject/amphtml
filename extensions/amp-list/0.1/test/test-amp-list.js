@@ -19,6 +19,7 @@ import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {AmpDocService} from '../../../../src/service/ampdoc-impl';
 import {AmpEvents} from '../../../../src/core/constants/amp-events';
 import {AmpList} from '../amp-list';
+import {AmpScriptService} from '../../../amp-script/0.1/amp-script';
 import {Deferred} from '../../../../src/core/data-structures/promise';
 import {Services} from '../../../../src/services';
 import {
@@ -1013,7 +1014,9 @@ describes.repeated(
             beforeEach(() => {
               resetExperimentTogglesForTesting(win);
 
-              env.sandbox.stub(Services, 'scriptForDocOrNull');
+              env.sandbox
+                .stub(Services, 'scriptForDocOrNull')
+                .returns(Promise.resolve(new AmpScriptService(env.ampdoc)));
               ampScriptEl = document.createElement('amp-script');
               ampScriptEl.setAttribute('id', 'example');
               doc.body.appendChild(ampScriptEl);

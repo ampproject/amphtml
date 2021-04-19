@@ -407,6 +407,14 @@ export function isProxyOrigin(url) {
 }
 
 /**
+ * @param {string} uri
+ * @return {boolean}
+ */
+export function isAmpScriptUri(uri) {
+  return uri.startsWith('amp-script:');
+}
+
+/**
  * For proxy-origin URLs, returns the serving type. Otherwise, returns null.
  * E.g., 'https://amp-com.cdn.ampproject.org/a/s/amp.com/amp_document.html'
  * returns 'a'.
