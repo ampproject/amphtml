@@ -123,7 +123,8 @@ export class StoryAnalyticsService {
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_ID,
       (pageId) => {
-        if (!pageId || this.storeService_.get(StateProperty.AD_STATE)) {
+        const isAd = this.storeService_.get(StateProperty.AD_STATE); 
+        if (!pageId || isAd) {
           return;
         }
 
