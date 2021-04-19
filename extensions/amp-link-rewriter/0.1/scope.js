@@ -58,7 +58,7 @@ export function isElementOnScope(htmlElement, configOpts) {
 }
 
 /**
- * Check if the element have a parent container specified in config.
+ * Check if the element has a parent container specified in config.
  *
  * @param {!Node} htmlElement
  * @param {!Object} configOpts
