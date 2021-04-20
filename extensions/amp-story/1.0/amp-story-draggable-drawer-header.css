@@ -81,7 +81,7 @@
   border-radius: inherit !important; /* Propogate border-radius */
 }
 
-.amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header {
+.i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header {
   justify-content: center !important;
   box-shadow: none !important;
   border-radius: inherit !important;
@@ -90,11 +90,11 @@
   top: 0 !important;
 }
 
-:not([desktop]).amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header {
+:not([desktop]).i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header {
   height: 20px !important;
 }
 
-.amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header .i-amphtml-story-draggable-drawer-header-title-and-close {
+.i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header .i-amphtml-story-draggable-drawer-header-title-and-close {
   opacity: 1 !important;
   height: 44px !important;
   width: 100% !important;
@@ -105,7 +105,7 @@
   border-radius: inherit !important;
 }
 
-:not([desktop]).amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header .i-amphtml-story-draggable-drawer-header-title-and-close {
+:not([desktop]).i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header .i-amphtml-story-draggable-drawer-header-title-and-close {
   position: absolute !important;
   opacity: 0 !important;
   transition: opacity .3s, visibility .3s !important;
@@ -113,19 +113,19 @@
   visibility: hidden !important;
 }
 
-:not([desktop]).amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header.i-amphtml-story-draggable-drawer-header-stuck .i-amphtml-story-draggable-drawer-header-title-and-close {
+:not([desktop]).i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-header.i-amphtml-story-draggable-drawer-header-stuck .i-amphtml-story-draggable-drawer-header-title-and-close {
   opacity: 1 !important;
   visibility: visible !important;
 }
 
-.amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-title {
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-title {
   font-size: 14px !important;
   position: absolute !important;
   padding: 0 !important;
   color: #202124 !important;
 }
 
-.amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-close-button {
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-close-button {
   margin-inline-start: auto !important; /* RTL support */
   width: 14px !important;
   height: 14px !important;
@@ -134,7 +134,7 @@
 }
 
 /* Draggable handle UI */
-:not([desktop]).amp-story-page-attachment-ui-v2:before {
+:not([desktop]).i-amphtml-amp-story-page-attachment-ui-v2:before {
   content: '' !important;
   position: absolute !important;
   top: 8px !important;
