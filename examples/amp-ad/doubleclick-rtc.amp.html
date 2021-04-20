@@ -47,12 +47,15 @@
     <amp-ad width="320" height="50"
             type="doubleclick"
             data-slot="/4119129/mobile_ad_banner"
-            rtc-config='{"vendors": {}, "urls": ["amp-script:targetingFns.getTargeting"], "timeoutMillis": 500}'
+            rtc-config='{"urls": ["amp-script:targetingFns.getTargeting"]}'
     </amp-ad>
     <amp-script nodom data-ampdevmode id="targetingFns" script="targetingFnsScript"></amp-script>
     <script id="targetingFnsScript" type="text/plain" target="amp-script">
       exportFunction("getTargeting", () => {
-        return {targeting: {food: ["chicken"]}};
+        return {
+          targeting: {food: ["chicken", "beans"]},
+          categoryExclusions: ["sports", "food", "fun"]
+        };
       });
     </script>
 </body>
