@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-const {getOutput, execScriptAsync} = require('../../common/exec');
+const {execScriptAsync} = require('../../common/exec');
+const {getOutput} = require('../../common/process');
 
 const command = (args = []) =>
   [
