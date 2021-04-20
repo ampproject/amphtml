@@ -22,7 +22,8 @@
  * @enum {string}
  */
 const MESSAGE_TYPE = {
-  ready: 'iframe-ready',
+  iframeReady: 'iframe-ready',
+  workerReady: 'worker-ready',
   init: 'init-worker',
   onmessage: 'onmessage',
   onerror: 'onerror',
@@ -37,7 +38,7 @@ let parentOrigin = '*';
  * @param {*} message
  */
 function send(type, message) {
-  if (type !== MESSAGE_TYPE.ready && parentOrigin === '*') {
+  if (type !== MESSAGE_TYPE.iframeReady && parentOrigin === '*') {
     throw new Error('Broadcast banned except for iframe-ready message.');
   }
   parent./*OK*/ postMessage({type, message}, parentOrigin);
@@ -62,7 +63,7 @@ function listen(type, handler) {
 }
 
 // Send initialization.
-send(MESSAGE_TYPE.ready);
+send(MESSAGE_TYPE.iframeReady);
 
 let worker = null;
 // Listen for Worker Init.
@@ -87,4 +88,6 @@ listen(MESSAGE_TYPE.init, ({code}) => {
   listen(MESSAGE_TYPE./*OK*/ postMessage, ({message}) =>
     worker./*OK*/ postMessage(message)
   );
+
+  send(MESSAGE_TYPE.workerReady);
 });
