@@ -63,4 +63,4 @@ Example:
 
 ## Validation
 
-See [amp-adplayer-pro rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-adplayer-pro/validator-amp-adplayer-pro.protoascii) in the AMP validator specification.
+See `[amp-adplayer-pro rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-adplayer-pro/validator-amp-adplayer-pro.protoasci)` in the AMP validator specification.
