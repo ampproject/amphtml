@@ -27,7 +27,7 @@ import {user} from '../../../src/log';
  * @param {!Window} win
  * @return {!Promise}
  */
-export function fetchCacheSources(videoEl, win) {
+export function fetchCachedSources(videoEl, win) {
   if (
     !extensionScriptInNode(win, 'amp-cache-url', '0.1') ||
     !videoEl.querySelector('source[src]').getAttribute('src')
@@ -58,7 +58,7 @@ export function fetchCacheSources(videoEl, win) {
  * @param {!Element} videoEl
  * @return {?string}
  */
-export function selectVideoSource(videoEl) {
+function selectVideoSource(videoEl) {
   const possibleSources = toArray(videoEl.querySelectorAll('source[src]'));
   for (let i = 0; i < possibleSources.length; i++) {
     if (matches(possibleSources[i], '[type*="video/mp4"]')) {

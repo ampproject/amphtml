@@ -33,7 +33,7 @@ import {
 } from '../../../src/dom';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert, user} from '../../../src/log';
-import {fetchCacheSources} from './video-cache';
+import {fetchCachedSources} from './video-cache';
 import {getBitrateManager} from './flexible-bitrate';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
@@ -269,7 +269,7 @@ export class AmpVideo extends AMP.BaseElement {
 
     // Fetch and add cached sources URLs if opted-in, and if the sources don't already contained cached URLs from the AMP Cache.
     if (this.element.hasAttribute('cache') && !this.hasAnyCachedSources_()) {
-      return fetchCacheSources(this.element, this.win);
+      return fetchCachedSources(this.element, this.win);
     }
   }
 
