@@ -21,7 +21,7 @@ import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {RAW_OBJECT_ARGS_KEY} from '../../../src/core/constants/action-constants';
 import {Services} from '../../../src/services';
-import {Signals} from '../../../src/utils/signals';
+import {Signals} from '../../../src/core/data-structures/signals';
 import {
   closestAncestorElementBySelector,
   iterateCursor,

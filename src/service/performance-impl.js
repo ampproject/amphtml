@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../services';
-import {Signals} from '../utils/signals';
+import {Signals} from '../core/data-structures/signals';
 import {TickLabel} from '../core/constants/enums';
 import {VisibilityState} from '../core/constants/visibility-state';
 import {createCustomEvent} from '../event-helper';
