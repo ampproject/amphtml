@@ -55,6 +55,10 @@ async function prCheck() {
     runCheck('amp presubmit');
   }
 
+  if (buildTargetsInclude(Targets.INVALID_WHITESPACES)) {
+    runCheck('amp check-invalid-whitespaces --local_changes');
+  }
+
   if (buildTargetsInclude(Targets.LINT)) {
     runCheck('amp lint --local_changes');
   }
