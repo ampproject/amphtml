@@ -211,6 +211,8 @@ describes.realWin(
       let options = fetchJsonStub.getCall(0).args[2];
       // verify initial call to `batchFetchJsonFor`
       expect(options.refresh).to.be.false;
+      expect(options.xssiPrefix).to.be.null;
+      expect(options.expr).to.be.equal('.');
 
       element.enqueAction(invocation('refresh'));
       await getRenderedData();
@@ -218,6 +220,8 @@ describes.realWin(
       options = fetchJsonStub.getCall(1).args[2];
       // verify subsequent call to `batchFetchJsonFor`
       expect(options.refresh).to.be.true;
+      expect(options.xssiPrefix).to.be.null;
+      expect(options.expr).to.be.equal('.');
     });
 
     it('should not re-fetch when src=amp-state', async () => {
@@ -347,6 +351,7 @@ describes.realWin(
       // verify initial call to `batchFetchJsonFor`
       expect(options.xssiPrefix).to.equal(')]}');
       expect(options.expr).to.equal('fullName');
+      expect(options.refresh).to.be.false;
 
       // we cant verify the rendered data here because that functionality for
       // replacing xssi prefix and returning the sub-object based on key is
