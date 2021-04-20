@@ -121,7 +121,7 @@ function getAmpScriptJson(ampdoc, src) {
 function buildOptionsObject(element, shouldRefresh = false) {
   return {
     xssiPrefix: element.getAttribute('xssi-prefix'),
-    expr: element.hasAttribute('key') ? element.getAttribute('key') : '.',
+    expr: element.getAttribute('key') ?? '.',
     refresh: shouldRefresh,
   };
 }
