@@ -145,7 +145,7 @@ export const getJsonFn = (element) => {
   if (isAmpScriptSrc(src)) {
     return (src) => getAmpScriptJson(element.getAmpDoc(), src);
   }
-  return (_src, shouldRefresh = false) =>
+  return (unusedSrc, shouldRefresh = false) =>
     batchFetchJsonFor(
       element.getAmpDoc(),
       element,
