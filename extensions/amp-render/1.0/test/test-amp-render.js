@@ -216,7 +216,7 @@ describes.realWin(
       await getRenderedData();
       expect(fetchJsonStub).to.have.been.calledTwice;
       options = fetchJsonStub.getCall(1).args[2];
-      // verify subsequent call to `batchFetJsonFor`
+      // verify subsequent call to `batchFetchJsonFor`
       expect(options.refresh).to.be.true;
     });
 
