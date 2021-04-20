@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {debounce, throttle} from '../../../src/utils/rate-limit';
+import {debounce, throttle} from '../../../src/core/types/function';
 
-describe('function utils', () => {
+describe('type helpers - functions', () => {
   describe('throttle', () => {
     let clock;
 
