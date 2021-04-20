@@ -141,9 +141,9 @@
         window.__tcfapi = function (cmd, version, callback, arg) {
           if (!cmpFrame) {
               callback(
-                { 
-                  msg: "CMP not found" 
-                }, 
+                {
+                  msg: "CMP not found"
+                },
                 false
               );
             } else {
@@ -206,12 +206,12 @@
         // should get response from window.top's CMP
         console.log('Ping return:', pingReturn);
       });
-      
+
       __tcfapi("getTCData", 2, (tcData, success) => {
         // should get response from window.top's CMP
         console.log('Minimal TCData return:', tcData);
       });
-      
+
       const callback = (tcData, success) => {
         console.log('addEventListenerCallback:', tcData)
         if(success && tcData.eventStatus === 'tcloaded') {

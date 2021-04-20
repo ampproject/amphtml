@@ -36,10 +36,10 @@ PASS
 |
 |      <!-- Specifies where the attribution icon will be loaded from (optional). -->
 |      <meta name="amp4ads-vars-attribution-icon" content="https://placekitten.com/30/30">
-|      
+|
 |      <!-- Specifies where a click on attribution icon will land (optional). -->
 |      <meta name="amp4ads-vars-attribution-url" content="https://example.com">
-|      
+|
 |      <!-- Optional format for creatives to pass data to AMP runtime.  -->
 |      <meta name="amp4ads-vars-foo" content="bar">
 |

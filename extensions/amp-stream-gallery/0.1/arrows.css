@@ -46,7 +46,7 @@
 
 .i-amphtml-stream-gallery-arrow-prev-slot > *,
 .i-amphtml-stream-gallery-arrow-next-slot > * {
-  /* 
+  /*
    * Make sure arrows do not collapse due to parent having no width for inset
    * arrows. Note this needs to apply to both the default arrows and custom
    * arrows.

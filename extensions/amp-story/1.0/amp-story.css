@@ -416,8 +416,8 @@ amp-story-grid-layer[anchor*="right"] {
 }
 
 /**
- * Prevents pre-load placeholders from pushing content offscreen. 
- * Prevents preload placeholders from pushing content offscreen. 
+ * Prevents pre-load placeholders from pushing content offscreen.
+ * Prevents preload placeholders from pushing content offscreen.
  */
 .i-amphtml-story-grid-template-fill amp-img img,
 .i-amphtml-story-grid-template-fill amp-video video {

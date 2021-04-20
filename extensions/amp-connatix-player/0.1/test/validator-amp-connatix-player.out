@@ -36,7 +36,7 @@ FAIL
 |  </head>
 |  <body>
 |    <!-- Invalid: missing required data-player-id attribute -->
-|    <amp-connatix-player 
+|    <amp-connatix-player
 >>   ^~~~~~~~~
 amp-connatix-player/0.1/test/validator-amp-connatix-player.html:38:2 The mandatory attribute 'data-player-id' is missing in tag 'amp-connatix-player'. (see https://amp.dev/documentation/components/amp-connatix-player/)
 |      layout="responsive"
@@ -44,7 +44,7 @@ amp-connatix-player/0.1/test/validator-amp-connatix-player.html:38:2 The mandato
 |      height="80">
 |    </amp-connatix-player>
 |    <!-- Valid -->
-|    <amp-connatix-player 
+|    <amp-connatix-player
 |      data-player-id="f721b0d8-7a79-42b6-b637-fa4e86138ed9"
 |      layout="responsive"
 |      width="150"

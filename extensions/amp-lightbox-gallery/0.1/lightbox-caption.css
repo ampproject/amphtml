@@ -20,7 +20,7 @@
   right: 0 !important;
   bottom: 0 !important;
   z-index: 1;
-  /* 
+  /*
    * Make sure we do not overlap with the buttons. This is not applied to
    * `.i-amphtml-lbg-caption-text` to avoid expanding the hit area when
    * collapsed.

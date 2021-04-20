@@ -58,14 +58,14 @@
 
     <h3>Image that is only blocked by only 'purpose-foo'</h3>
     <amp-img data-block-on-consent-purposes="purpose-foo" src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no-n" width=300 height=200></amp-img>
-    
+
     <h3>Image that is blocked by global consent</h3>
     <amp-img data-block-on-consent src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no-n"
       width=300 height=200></amp-img>
 
     <h3>Image that is NOT blocked by consent</h3>
     <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no-n" width=300 height=200></amp-img>
-    
+
     <!-- INLINE EXAMPLE -->
     <amp-consent id='ABC' layout='nodisplay'>
       <script type="application/json">{
@@ -77,10 +77,10 @@
         "checkConsentHref": "/check-consent?consentRequired=true&expireCache=false"
       }</script>
       <div id="ui1">
-          Explictly set `purpose-foo`: 
+          Explictly set `purpose-foo`:
           <button on="tap:ABC.setPurpose(purpose-foo=true)">ACCEPT FOO</button>
           <br>
-          Explictly set multiple purposes: 
+          Explictly set multiple purposes:
           <button on="tap:ABC.setPurpose(purpose-foo=true,purpose-bar=true)">ACCEPT FOO & BAR</button>
           <br>
           Toggle `purpose-bar`:
@@ -92,7 +92,7 @@
             >
             Toggle Bar Consent
           </label>
-          
+
           <br>
           CA: Can I load the image??
           <button on="tap:ABC.accept">Accept</button>

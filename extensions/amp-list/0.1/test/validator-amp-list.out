@@ -54,7 +54,7 @@ amp-list/0.1/test/validator-amp-list.html:48:2 The attribute '[state]' may not a
 |      <div></div>
 |    </amp-list>
 |    <!-- Valid: amp-list with "amp-state" src -->
-|    <amp-list width=10 height=10 src="amp-state:example"> 
+|    <amp-list width=10 height=10 src="amp-state:example">
 |      <div></div>
 |    </amp-list>
 |    <!-- Valid: amp-list with src and reset-on-refresh attributes -->

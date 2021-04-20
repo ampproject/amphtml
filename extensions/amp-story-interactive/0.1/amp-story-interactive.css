@@ -64,7 +64,7 @@
   }
 }
 
-.i-amphtml-story-interactive-container:not(.i-amphtml-story-interactive-post-selection) 
+.i-amphtml-story-interactive-container:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option {
   cursor: pointer !important;
   pointer-events: all;

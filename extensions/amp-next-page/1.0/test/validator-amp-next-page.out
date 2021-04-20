@@ -23,7 +23,7 @@ PASS
 |      <!-- Valid: Footers should be inside amp-next-page -->
 |      <div footer>
 |          Footer
-|      </div>   
+|      </div>
 |    </amp-next-page>
 |  </body>
 |  </html>

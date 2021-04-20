@@ -179,6 +179,21 @@ const linkCheckGlobs = [
 ];
 
 /**
+ * List of files checked by `amp check-invalid-whitespaces`.
+ * - JS files are already checked by `amp lint` using eslint / prettier.
+ * - Markdown files are ignored because line-breaks use trailing whitespaces.
+ */
+const invalidWhitespaceGlobs = [
+  '**/*.css',
+  '**/*.html',
+  '**/*.out',
+  '**/*.out.cpponly',
+  '**/*.protoascii',
+  '**/*.sh',
+  '!**/{node_modules,build,dist,dist.3p,dist.tools}/**',
+];
+
+/**
  * Array of 3p bootstrap urls
  * Defined by the following object schema:
  * basename: the name of the 3p frame without extension
@@ -227,4 +242,5 @@ module.exports = {
   thirdPartyFrames,
   unitTestCrossBrowserPaths,
   unitTestPaths,
+  invalidWhitespaceGlobs,
 };
