@@ -517,10 +517,16 @@ describes.realWin(
         const signals = new Signals();
         img.signals = () => signals;
 
-        signals.signal(CommonSignals.UNLOAD);
         signals.signal(CommonSignals.LOAD_END);
 
-        const elected = await Promise.all(runCandidates(env.ampdoc, [img]));
+        const candidatePromise = Promise.all(runCandidates(env.ampdoc, [img]));
+
+        // Skip microtask and reset LOAD_END to emulate unloading in the middle
+        // of the candidate's measurement.
+        await new Promise((resolve) => resolve());
+        signals.reset(CommonSignals.LOAD_END);
+
+        const elected = await candidatePromise;
         expect(elected[0]).to.be.undefined;
       });
 
