@@ -17,7 +17,7 @@
 import * as Preact from './index';
 import {ActionTrust} from '../core/constants/action-constants';
 import {AmpEvents} from '../core/constants/amp-events';
-import {CanPlay, CanRender, LoadingProp} from '../core/contextprops';
+import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
 import {Deferred} from '../core/data-structures/promise';
 import {Layout, isLayoutSizeDefined} from '../layout';
 import {Loading} from '../core/loading-instructions';
