@@ -25,7 +25,7 @@ const {replaceUrls: replaceUrlsAppUtil} = require('../server/app-utils');
 
 const hostNamePrefix = 'https://storage.googleapis.com/amp-test-website-1';
 const prDeployBotBaseUrl =
-  'https://20210419t191212-dot-amp-pr-deploy-bot.uc.r.appspot.com/v0/pr-deploy/';
+  'https://20210420t160847-dot-amp-pr-deploy-bot.uc.r.appspot.com/v0/pr-deploy/';
 
 /**
  * @param {string} dest
