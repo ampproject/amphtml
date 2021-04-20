@@ -64,13 +64,12 @@ export const buildGtagConfig = (gtagId) => ({
     },
   },
   'linkers': {
-    'linker1': {
-      'enabled': true,
-      'proxyOnly': false,
-      'destinationDomains': ['google.com', 'localhost'],
+    'enabled': true,
+    'proxyOnly': false,
+    'destinationDomains': ['google.com'],
+    'linker': {
       'ids': {
-        'cid': 'CLIENT_ID(_ga)',
-        'uid': 'QUERY_PARAM(uid)',
+        'cid': 'CLIENT_ID(cid)',
       },
     },
   },
