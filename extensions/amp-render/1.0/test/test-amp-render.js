@@ -209,7 +209,7 @@ describes.realWin(
 
       await getRenderedData();
       let options = fetchJsonStub.getCall(0).args[2];
-      // verify initial call to `batchFetJsonFor`
+      // verify initial call to `batchFetchJsonFor`
       expect(options.refresh).to.be.false;
 
       element.enqueAction(invocation('refresh'));
