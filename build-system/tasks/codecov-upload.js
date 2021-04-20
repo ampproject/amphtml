@@ -18,7 +18,7 @@
 const colors = require('kleur/colors');
 const fs = require('fs-extra');
 const {ciBuildSha, isCiBuild} = require('../common/ci');
-const {getStdout} = require('../common/exec');
+const {getStdout} = require('../common/process');
 const {log} = require('../common/logging');
 const {shortSha} = require('../common/git');
 
