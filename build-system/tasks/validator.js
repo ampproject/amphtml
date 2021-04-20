@@ -38,7 +38,7 @@ async function validator() {
  */
 async function validatorCpp() {
   execOrDie(
-    `bazel test --repo_env=CC=clang --cxxopt='-std=c++17' validator_test`,
+    `bazel test --repo_env=CC=clang --cxxopt='-std=c++17' --test_output=errors validator_test`,
     {
       cwd: 'validator/cpp/engine',
       stdio: 'inherit',
