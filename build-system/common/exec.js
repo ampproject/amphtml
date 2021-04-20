@@ -21,7 +21,7 @@
 
 const childProcess = require('child_process');
 const {log} = require('./logging');
-const {spawnProcess, getOutput, getStdout, getStderr} = require('./process');
+const {spawnProcess} = require('./process');
 const {yellow} = require('kleur/colors');
 
 const shellCmd = process.platform == 'win32' ? 'cmd' : '/bin/bash';
@@ -104,7 +104,4 @@ module.exports = {
   execScriptAsync,
   execWithError,
   execOrThrow,
-  getOutput,
-  getStderr,
-  getStdout,
 };

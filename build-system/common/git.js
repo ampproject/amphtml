@@ -25,7 +25,7 @@ const {
   ciPullRequestBranch,
   ciPullRequestSha,
 } = require('./ci');
-const {getStdout} = require('./exec');
+const {getStdout} = require('./process');
 
 /**
  * Returns the commit at which the current PR branch was forked off of the main
