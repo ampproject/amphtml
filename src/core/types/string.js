@@ -132,6 +132,12 @@ export function stringHash32(str) {
   // Convert from 32-bit signed to unsigned.
   return String(hash >>> 0);
 }
+/*
+ * Missing string externs.
+ * https://github.com/google/closure-compiler/blob/v20190106/externs/es5.js#L47
+ */
+String.prototype.trimStart = String.prototype.trimLeft;
+String.prototype.trimEnd = String.prototype.trimRight;
 
 /**
  * Trims a string on the end, removing whitespace characters.

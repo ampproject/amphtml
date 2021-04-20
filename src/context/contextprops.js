@@ -17,6 +17,9 @@
 import {Loading, reducer as loadingReducer} from '../core/loading-instructions';
 import {contextProp} from './prop';
 
+/** @typedef {*} */
+let ContextProp;
+
 /**
  * Defines whether a DOM subtree can be currently seen by the user. A subtree
  * can be not renderable due `display: none`, or `hidden` attribute, unslotted
