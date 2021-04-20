@@ -53,7 +53,6 @@ module.exports = {
       'files': [
         './preact/base-element.js',
         './preact/slot.js',
-        './core/contextprops.js',
         './context/node.js',
         // TEMPORARY, follow tracking issue #33631
         './preact/component/3p-frame.js',
