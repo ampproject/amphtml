@@ -46,15 +46,17 @@ export const Type = {
  * @return {!Element}
  */
 const getBlockingTemplate = (element) => {
-  return htmlFor(element)`
-      <div class="i-amphtml-story-access-overflow">
-        <div class="i-amphtml-story-access-container">
-          <div class="i-amphtml-story-access-header">
-            <div class="i-amphtml-story-access-logo"></div>
-          </div>
-          <div class="i-amphtml-story-access-content"></div>
+  const html = htmlFor(element);
+  return html`
+    <div class="i-amphtml-story-access-overflow">
+      <div class="i-amphtml-story-access-container">
+        <div class="i-amphtml-story-access-header">
+          <div class="i-amphtml-story-access-logo"></div>
         </div>
-      </div>`;
+        <div class="i-amphtml-story-access-content"></div>
+      </div>
+    </div>
+  `;
 };
 
 /**
@@ -63,16 +65,18 @@ const getBlockingTemplate = (element) => {
  * @return {!Element}
  */
 const getNotificationTemplate = (element) => {
-  return htmlFor(element)`
-      <div class="i-amphtml-story-access-overflow">
-        <div class="i-amphtml-story-access-container">
-          <div class="i-amphtml-story-access-content">
-            <span class="i-amphtml-story-access-close-button" role="button">
-              &times;
-            </span>
-          </div>
+  const html = htmlFor(element);
+  return html`
+    <div class="i-amphtml-story-access-overflow">
+      <div class="i-amphtml-story-access-container">
+        <div class="i-amphtml-story-access-content">
+          <span class="i-amphtml-story-access-close-button" role="button">
+            &times;
+          </span>
         </div>
-      </div>`;
+      </div>
+    </div>
+  `;
 };
 
 /**

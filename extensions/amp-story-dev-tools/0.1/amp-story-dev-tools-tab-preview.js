@@ -427,9 +427,10 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     this.storyUrl_ = this.element.getAttribute('data-story-url');
     this.element.classList.add('i-amphtml-story-dev-tools-tab');
 
-    this.devicesContainer_ = htmlFor(
-      this.element
-    )`<div class="i-amphtml-story-dev-tools-devices-container"></div>`;
+    const html = htmlFor(this.element);
+    this.devicesContainer_ = html`
+      <div class="i-amphtml-story-dev-tools-devices-container"></div>
+    `;
     this.element.appendChild(this.devicesContainer_);
 
     const chipListContainer = this.element.ownerDocument.createElement('div');

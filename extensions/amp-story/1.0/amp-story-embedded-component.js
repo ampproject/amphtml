@@ -216,10 +216,20 @@ export const EMBED_ID_ATTRIBUTE_NAME = 'i-amphtml-embed-id';
  * @param {!Element} element
  * @return {!Element}
  */
-const buildExpandedViewOverlay = (element) => htmlFor(element)`
-    <div class="i-amphtml-story-expanded-view-overflow i-amphtml-story-system-reset">
-      <button class="i-amphtml-expanded-view-close-button" aria-label="close" role="button"></button>
-    </div>`;
+const buildExpandedViewOverlay = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <div
+      class="i-amphtml-story-expanded-view-overflow i-amphtml-story-system-reset"
+    >
+      <button
+        class="i-amphtml-expanded-view-close-button"
+        aria-label="close"
+        role="button"
+      ></button>
+    </div>
+  `;
+};
 
 /**
  * Updates embed's corresponding <style> element with embedData.

@@ -88,12 +88,14 @@ const DEFAULT_ANIMATION = 'fade-in';
  * @return {!Element}
  */
 function renderCloseButtonHeader(ctx) {
-  return htmlFor(ctx)`
-    <i-amphtml-ad-close-header role=button tabindex=0 aria-label="Close Ad">
+  const html = htmlFor(ctx);
+  return html`
+    <i-amphtml-ad-close-header role="button" tabindex="0" aria-label="Close Ad">
       <div>Ad</div>
       <i-amphtml-ad-close-button class="amp-ad-close-button">
       </i-amphtml-ad-close-button>
-    </i-amphtml-ad-close-header>`;
+    </i-amphtml-ad-close-header>
+  `;
 }
 
 class AmpLightbox extends AMP.BaseElement {

@@ -536,11 +536,17 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
     // Intrinsic uses an svg inside the sizer element rather than the padding
     // trick Note a naked svg won't work becasue other thing expect the
     // i-amphtml-sizer element
-    const sizer = htmlFor(element)`
+    const html = htmlFor(element);
+    const sizer = html`
       <i-amphtml-sizer class="i-amphtml-sizer" slot="i-amphtml-svc">
-        <img alt="" role="presentation" aria-hidden="true"
-             class="i-amphtml-intrinsic-sizer" />
-      </i-amphtml-sizer>`;
+        <img
+          alt=""
+          role="presentation"
+          aria-hidden="true"
+          class="i-amphtml-intrinsic-sizer"
+        />
+      </i-amphtml-sizer>
+    `;
     const intrinsicSizer = sizer.firstElementChild;
     intrinsicSizer.setAttribute(
       'src',

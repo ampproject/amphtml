@@ -41,7 +41,8 @@ describes.realWin(
       const element = doc.createElement('amp-mega-menu');
       element.setAttribute('layout', 'fixed-height');
       element.setAttribute('height', '10');
-      const nav = htmlFor(doc)`
+      const html = htmlFor(doc);
+      const nav = html`
         <nav>
           <ul>
             <li>

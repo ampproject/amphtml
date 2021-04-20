@@ -44,36 +44,43 @@ export class LightboxControls {
    */
   static build(win, doc, measureMutateElement) {
     // TODO(aghassemi): i18n and customization. See https://git.io/v6JWu
-    const el = htmlFor(doc)`
+    const html = htmlFor(doc);
+    const el = html`
       <div class="i-amphtml-lbg-controls">
         <div class="i-amphtml-lbg-top-bar">
-          <div role="button"
-              class="i-amphtml-lbg-button "
-              data-action="close"
-              aria-label="Close">
-          </div>
-          <div role="button"
-              class="i-amphtml-lbg-button"
-              data-action="gallery"
-              aria-label="Gallery">
-          </div>
-          <div role="button"
-              class="i-amphtml-lbg-button"
-              data-action="slides"
-              aria-label="Content">
-          </div>
-        </div>
-        <div role="button"
+          <div
+            role="button"
+            class="i-amphtml-lbg-button "
+            data-action="close"
+            aria-label="Close"
+          ></div>
+          <div
+            role="button"
             class="i-amphtml-lbg-button"
-            data-action="prev"
-            aria-label="Content">
-        </div>
-        <div role="button"
+            data-action="gallery"
+            aria-label="Gallery"
+          ></div>
+          <div
+            role="button"
             class="i-amphtml-lbg-button"
-            data-action="next"
-            aria-label="Content">
+            data-action="slides"
+            aria-label="Content"
+          ></div>
         </div>
-      </div>`;
+        <div
+          role="button"
+          class="i-amphtml-lbg-button"
+          data-action="prev"
+          aria-label="Content"
+        ></div>
+        <div
+          role="button"
+          class="i-amphtml-lbg-button"
+          data-action="next"
+          aria-label="Content"
+        ></div>
+      </div>
+    `;
 
     const input = Services.inputFor(win);
     if (!input.isMouseDetected()) {

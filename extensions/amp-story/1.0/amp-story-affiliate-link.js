@@ -132,14 +132,16 @@ export class AmpStoryAffiliateLink {
    * @private
    */
   addIconElement_() {
-    const iconEl = htmlFor(this.element_)`
+    const html = htmlFor(this.element_);
+    const iconEl = html`
       <div class="i-amphtml-story-affiliate-link-circle">
         <i class="i-amphtml-story-affiliate-link-icon"></i>
         <div class="i-amphtml-story-reset i-amphtml-hidden">
           <span class="i-amphtml-story-affiliate-link-text" hidden></span>
           <i class="i-amphtml-story-affiliate-link-launch" hidden></i>
         </div>
-      </div>`;
+      </div>
+    `;
     this.element_.appendChild(iconEl);
   }
 
@@ -173,8 +175,10 @@ export class AmpStoryAffiliateLink {
    * @private
    */
   addPulseElement_() {
-    const pulseEl = htmlFor(this.element_)`
-      <div class="i-amphtml-story-affiliate-link-pulse"></div>`;
+    const html = htmlFor(this.element_);
+    const pulseEl = html`
+      <div class="i-amphtml-story-affiliate-link-pulse"></div>
+    `;
     this.element_.appendChild(pulseEl);
   }
 }

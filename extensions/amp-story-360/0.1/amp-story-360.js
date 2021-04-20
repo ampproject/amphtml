@@ -62,7 +62,9 @@ const MIN_WEBGL_DISTANCE = 2;
  * @param {!Element} element
  * @return {!Element}
  */
-const buildActivateButtonTemplate = (element) => htmlFor(element)`
+const buildActivateButtonTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`
     <button class="i-amphtml-story-360-activate-button" role="button">
       <span class="i-amphtml-story-360-activate-text"></span>
       <span class="i-amphtml-story-360-activate-button-icon"
@@ -98,6 +100,7 @@ const buildActivateButtonTemplate = (element) => htmlFor(element)`
       </span>
     </button>
   `;
+};
 
 /**
  * Generates the template for the gyroscope feature discovery animation.
@@ -108,12 +111,15 @@ const buildActivateButtonTemplate = (element) => htmlFor(element)`
  * @param {!Element} element
  * @return {!Element}
  */
-const buildDiscoveryTemplate = (element) => htmlFor(element)`
+const buildDiscoveryTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`
     <div class="i-amphtml-story-360-discovery" aria-live="polite">
       <div class="i-amphtml-story-360-discovery-animation"></div>
       <span class="i-amphtml-story-360-discovery-text"></span>
     </div>
   `;
+};
 
 /**
  * @param {number} deg

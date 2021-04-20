@@ -147,23 +147,32 @@ const VIDEO_PREVIEW_AUTO_ADVANCE_DURATION = '5s';
  * @param {!Element} element
  * @return {!Element}
  */
-const buildPlayMessageElement = (element) =>
-  htmlFor(element)`
-      <button role="button" class="i-amphtml-story-page-play-button i-amphtml-story-system-reset">
-        <span class="i-amphtml-story-page-play-label"></span>
-        <span class='i-amphtml-story-page-play-icon'></span>
-      </button>`;
+const buildPlayMessageElement = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <button
+      role="button"
+      class="i-amphtml-story-page-play-button i-amphtml-story-system-reset"
+    >
+      <span class="i-amphtml-story-page-play-label"></span>
+      <span class="i-amphtml-story-page-play-icon"></span>
+    </button>
+  `;
+};
 
 /**
  * @param {!Element} element
  * @return {!Element}
  */
-const buildErrorMessageElement = (element) =>
-  htmlFor(element)`
-      <div class="i-amphtml-story-page-error i-amphtml-story-system-reset">
-        <span class="i-amphtml-story-page-error-label"></span>
-        <span class='i-amphtml-story-page-error-icon'></span>
-      </div>`;
+const buildErrorMessageElement = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <div class="i-amphtml-story-page-error i-amphtml-story-system-reset">
+      <span class="i-amphtml-story-page-error-label"></span>
+      <span class="i-amphtml-story-page-error-icon"></span>
+    </div>
+  `;
+};
 
 /**
  * amp-story-page states.
