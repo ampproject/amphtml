@@ -90,10 +90,7 @@ async function signalPrDeployUpload(result) {
     'to the pr-deploy GitHub App...'
   );
   const sha = ciBuildSha();
-  const maybeJobId =
-    result == 'success' && !process.env.USE_LEGACY_GCLOUD_STORAGE
-      ? `/${circleciBuildNumber()}`
-      : '';
+  const maybeJobId = result == 'success' ? `/${circleciBuildNumber()}` : '';
   const url = `${prDeployBotBaseUrl}headshas/${sha}/${result}${maybeJobId}`;
   await fetch(url, {method: 'POST'});
 }
