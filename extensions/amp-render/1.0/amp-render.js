@@ -133,9 +133,9 @@ function buildOptionsObject(element, shouldRefresh = false) {
  * @param {!AmpElement} element
  * @return {Function}
  */
-export const getJsonFn = (element) => {
+export function getJsonFn(element) {
   const src = element.getAttribute('src');
-  if (!src?.length) {
+  if (!src) {
     // TODO(dmanek): assert that src is provided instead of silently failing below.
     return () => {};
   }
@@ -151,7 +151,7 @@ export const getJsonFn = (element) => {
       element,
       buildOptionsObject(element, shouldRefresh)
     );
-};
+}
 
 export class AmpRender extends BaseElement {
   /** @param {!AmpElement} element */
@@ -182,7 +182,7 @@ export class AmpRender extends BaseElement {
       // variable `canRefresh`. See https://github.com/ampproject/amphtml/pull/33776#discussion_r614087734
       // for more context. This approach may be better if src does not mutate often. But the alternative might
       // be better if src mutatates often and component user does not use `refresh` action.
-      if (!src?.length || isAmpStateSrc(src) || isAmpScriptSrc(src)) {
+      if (!src || isAmpStateSrc(src) || isAmpScriptSrc(src)) {
         return;
       }
       api.refresh();
