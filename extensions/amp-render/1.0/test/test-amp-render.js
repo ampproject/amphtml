@@ -317,15 +317,24 @@ describes.realWin(
     });
 
     it('should use the specified xssi-prefix and key attributes', async () => {
-      const fetchJsonStub = env.sandbox.stub(
-        BatchedJsonModule,
-        'batchFetchJsonFor'
-      );
-      fetchJsonStub.resolves({
+      const json = {
         fullName: {
           firstName: 'Joe',
           lastName: 'Biden',
         },
+      };
+
+      const fetchJsonStub = env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .callThrough();
+
+      env.sandbox.stub(Services, 'batchedXhrFor').returns({
+        fetchJson: () => Promise.resolve(json),
+      });
+
+      env.sandbox.stub(Services, 'xhrFor').returns({
+        fetch: () => Promise.resolve(json),
+        xssiJson: () => Promise.resolve(json),
       });
 
       element = html`
@@ -337,25 +346,17 @@ describes.realWin(
           height="140"
           layout="fixed-height"
         >
-          <template type="amp-mustache">
-            <ul>
-              <li>{{lastName}}, {{firstName}}</li>
-            </ul>
-          </template>
+          <template type="amp-mustache">{{lastName}}, {{firstName}}</template>
         </amp-render>
       `;
       doc.body.appendChild(element);
 
-      await getRenderedData();
+      const text = await getRenderedData();
+      expect(text).to.equal('Biden, Joe');
       const options = fetchJsonStub.getCall(0).args[2];
-      // verify initial call to `batchFetchJsonFor`
       expect(options.xssiPrefix).to.equal(')]}');
       expect(options.expr).to.equal('fullName');
       expect(options.refresh).to.be.false;
-
-      // we cant verify the rendered data here because that functionality for
-      // replacing xssi prefix and returning the sub-object based on key is
-      // in the internal implementation of `batchFetchJsonFor`.
     });
   }
 );
