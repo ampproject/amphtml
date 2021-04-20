@@ -41,7 +41,7 @@ const EXTERNS_GLOB = 'src/core{,/**}/*.extern.js';
 const getExtensionSrcPaths = () =>
   Object.values(extensions)
     .filter((ext) => !ext.noTypeCheck)
-    .map((ext) => `extensions/${ext.name}/${ext.version}/${ext.name}.js`)
+    .map(({name, version}) => `extensions/${name}/${version}/${name}.js`)
     .sort();
 
 /**
