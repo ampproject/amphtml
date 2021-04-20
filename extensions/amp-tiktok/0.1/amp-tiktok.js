@@ -24,7 +24,6 @@ import {
 } from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
 import {getData, listen} from '../../../src/event-helper';
-import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {px, resetStyles, setStyles} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
@@ -216,12 +215,19 @@ export class AmpTiktok extends AMP.BaseElement {
       return null;
     }
 
-    const placeholder = document.createElement('div');
-    placeholder.setAttribute('placeholder', '');
-    const imageContainer = document.createElement('div');
-    imageContainer.setAttribute(
-      'class',
-      'i-amphtml-tiktok-placeholder-image-container'
+    const placeholder = createElementWithAttributes(
+      this.element.ownerDocument,
+      'div',
+      {
+        'placeholder': '',
+      }
+    );
+    const imageContainer = createElementWithAttributes(
+      this.element.ownerDocument,
+      'div',
+      {
+        'class': 'i-amphtml-tiktok-placeholder-image-container',
+      }
     );
 
     const oEmbedRequestUrl = encodeURIComponent(this.oEmbedRequestUrl_);
@@ -237,7 +243,8 @@ export class AmpTiktok extends AMP.BaseElement {
             {
               'src': thumbnailUrl,
               'placeholder': thumbnailUrl,
-              'class': 'i-amphtml-tiktok-placeholder-image',
+              'class':
+                'i-amphtml-tiktok-centered i-amphtml-tiktok-placeholder-image',
             }
           );
 
