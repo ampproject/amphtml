@@ -25,21 +25,12 @@ const {
 } = require('../compile/debug-compilation-lifecycle');
 const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
-const {cyan, red} = require('kleur/colors');
+const {cyan, green, yellow, red} = require('kleur/colors');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
 const {log} = require('../common/logging');
 const {typecheckNewServer} = require('../server/typescript-compile');
 
-// List of entry-point files for type-checking `src/``
-const COMPILE_SRC_PATHS = [
-  'src/amp.js',
-  'src/amp-shadow.js',
-  'src/inabox/amp-inabox.js',
-  'ads/alp/install-alp.js',
-  'ads/inabox/inabox-host.js',
-  'src/web-worker/web-worker.js',
-];
-const EXTERNS_GLOB = './src/core{,/**}/*.extern.js';
+const EXTERNS_GLOB = 'src/core{,/**}/*.extern.js';
 
 /**
  * Generates a list of source file paths for extensions to type-check
@@ -53,20 +44,31 @@ const getExtensionSrcPaths = () =>
     .map((ext) => `extensions/${ext.name}/${ext.version}/${ext.name}.js`)
     .sort();
 
-// The main configuration location to add/edit targets for type checking.
-// Properties besides `path` are passed on to `closureCompile` as options.
-// Values may be objects or functions, as some require initialization or
-// filesystem access and shouldn't be run until needed.
+/**
+ * The main configuration location to add/edit targets for type checking.
+ * Properties besides `path` are passed on to `closureCompile` as options.
+ * Values may be objects or functions, as some require initialization or
+ * filesystem access and shouldn't be run until needed.
+ * @type {Object<string, Object|function():Object>}
+ */
 const TYPE_CHECK_TARGETS = {
   'src': {
-    entryPoints: COMPILE_SRC_PATHS,
+    entryPoints: [
+      'src/amp.js',
+      'src/amp-shadow.js',
+      'src/inabox/amp-inabox.js',
+      'ads/alp/install-alp.js',
+      'ads/inabox/inabox-host.js',
+      'src/web-worker/web-worker.js',
+    ],
     extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
+    warningLevel: 'QUIET',
   },
   'src-core': () => ({
     externs: globby.sync(EXTERNS_GLOB),
     extraGlobs: [
       // Include all core JS files
-      'src/core/**/*.js',
+      'src/core/{,**/}*.js',
       // Exclude all core extern files (already included via externs)
       `!${EXTERNS_GLOB}`,
     ],
@@ -74,18 +76,22 @@ const TYPE_CHECK_TARGETS = {
   'extensions': () => ({
     entryPoints: getExtensionSrcPaths(),
     extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
+    warningLevel: 'QUIET',
   }),
   'integration': {
     entryPoints: '3p/integration.js',
     externs: ['ads/ads.extern.js'],
+    warningLevel: 'QUIET',
   },
   'ampcontext': {
     entryPoints: '3p/ampcontext-lib.js',
     externs: ['ads/ads.extern.js'],
+    warningLevel: 'QUIET',
   },
   'iframe-transport-client': {
     entryPoints: '3p/iframe-transport-client-lib.js',
     externs: ['ads/ads.extern.js'],
+    warningLevel: 'QUIET',
   },
 };
 
@@ -111,18 +117,39 @@ async function typeCheck(targetName) {
     );
   }
 
-  const {entryPoints = [], ...opts} = target;
+  let {entryPoints = [], warningLevel, ...opts} = target;
   // If no entry point is defined, we want to scan the globs provided without
   // injecting extra dependencies.
   const noAddDeps = !entryPoints.length;
-  await closureCompile(entryPoints, './dist', `${targetName}-check-types.js`, {
-    noAddDeps,
-    include3pDirectories: !noAddDeps,
-    includePolyfills: !noAddDeps,
-    typeCheckOnly: true,
-    warningLevel: 'DEFAULT',
-    ...opts,
-  });
+  // If the --warning_level flag is passed explicitly, it takes precedence.
+  warningLevel = argv.warning_level || warningLevel || 'VERBOSE';
+
+  // For type-checking, QUIET suppresses all warnings and can't affect the
+  // resulting status, so there's no point in doing it.
+  if (target.warningLevel == 'QUIET') {
+    log(
+      yellow('WARNING:'),
+      'Warning level for target',
+      cyan(targetName),
+      `is set to ${cyan('QUIET')}; skipping`
+    );
+    return;
+  }
+
+  const results = await closureCompile(
+    entryPoints,
+    './dist',
+    `${targetName}-check-types.js`,
+    {
+      noAddDeps,
+      warningLevel,
+      include3pDirectories: !noAddDeps,
+      includePolyfills: !noAddDeps,
+      typeCheckOnly: true,
+      ...opts,
+    }
+  );
+  log(green('SUCCESS:'), 'Type-checking passed for target', cyan(targetName));
 }
 
 /**
