@@ -29,7 +29,7 @@ import {user} from '../../../src/log';
  */
 export function fetchCacheSources(videoEl, win) {
   if (
-    !extensionScriptInNode(win.document, 'amp-cache-url', '0.1') ||
+    !extensionScriptInNode(win, 'amp-cache-url', '0.1') ||
     !videoEl.querySelector('source[src]').getAttribute('src')
   ) {
     user().error('AMP-VIDEO', 'Video cache not properly configured');
