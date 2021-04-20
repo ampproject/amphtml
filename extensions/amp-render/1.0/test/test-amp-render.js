@@ -344,7 +344,7 @@ describes.realWin(
 
       await getRenderedData();
       const options = fetchJsonStub.getCall(0).args[2];
-      // verify initial call to `batchFetJsonFor`
+      // verify initial call to `batchFetchJsonFor`
       expect(options.xssiPrefix).to.equal(')]}');
       expect(options.expr).to.equal('fullName');
 
