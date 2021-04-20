@@ -46,9 +46,9 @@ const getExtensionSrcPaths = () =>
 
 /**
  * The main configuration location to add/edit targets for type checking.
- * Properties besides `path` are passed on to `closureCompile` as options.
- * Values may be objects or functions, as some require initialization or
- * filesystem access and shouldn't be run until needed.
+ * Properties besides `entryPoints` are passed on to `closureCompile` as
+ * options. * Values may be objects or functions, as some require initialization
+ * or filesystem access and shouldn't be run until needed.
  * @type {Object<string, Object|function():Object>}
  */
 const TYPE_CHECK_TARGETS = {
