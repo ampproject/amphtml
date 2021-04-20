@@ -43,6 +43,7 @@ createTask('check-analytics-vendors-list', 'checkAnalyticsVendorsList');
 createTask('check-asserts', 'checkAsserts');
 createTask('check-build-system', 'checkBuildSystem');
 createTask('check-exact-versions', 'checkExactVersions');
+createTask('check-invalid-whitespaces', 'checkInvalidWhitespaces');
 createTask('check-links', 'checkLinks');
 createTask('check-owners', 'checkOwners');
 createTask('check-renovate-config', 'checkRenovateConfig');

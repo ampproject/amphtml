@@ -36,6 +36,6 @@ PASS
 |      <option option="1">1</option>
 |      <option option="2">2</option>
 |      <option option="3" disabled>3</option>
-|    </amp-selector> 
+|    </amp-selector>
 |  </body>
 |  </html>

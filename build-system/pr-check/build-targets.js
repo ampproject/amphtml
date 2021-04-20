@@ -40,6 +40,7 @@ let buildTargets;
 let lintFiles;
 let presubmitFiles;
 let prettifyFiles;
+let invalidWhitespaceFiles;
 
 /***
  * All of AMP's build targets that can be tested during CI.
@@ -54,6 +55,7 @@ const Targets = {
   DOCS: 'DOCS',
   E2E_TEST: 'E2E_TEST',
   INTEGRATION_TEST: 'INTEGRATION_TEST',
+  INVALID_WHITESPACES: 'INVALID_WHITESPACES',
   LINT: 'LINT',
   OWNERS: 'OWNERS',
   PACKAGE_UPGRADE: 'PACKAGE_UPGRADE',
@@ -257,6 +259,13 @@ const targetMatchers = {
       file.startsWith('build-system/server/')
     );
   },
+  [Targets.INVALID_WHITESPACES]: (file) => {
+    return (
+      invalidWhitespaceFiles.includes(file) ||
+      file == 'build-system/tasks/check-invalid-whitespaces.js' ||
+      file.startsWith('build-system/test-configs')
+    );
+  },
   [Targets.UNIT_TEST]: (file) => {
     if (isOwnersFile(file)) {
       return false;
@@ -314,6 +323,7 @@ function determineBuildTargets() {
   lintFiles = globby.sync(config.lintGlobs);
   presubmitFiles = globby.sync(config.presubmitGlobs);
   prettifyFiles = globby.sync(config.prettifyGlobs);
+  invalidWhitespaceFiles = globby.sync(config.invalidWhitespaceGlobs);
   const filesChanged = gitDiffNameOnlyMain();
   for (const file of filesChanged) {
     let isRuntimeFile = true;

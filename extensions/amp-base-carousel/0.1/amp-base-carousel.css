@@ -64,7 +64,7 @@ amp-base-carousel .i-amphtml-carousel-scroll[loop="false"] + .i-amphtml-base-car
 amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel-arrow-prev-slot > *,
 amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel-arrow-next-slot > * {
   opacity: 0;
-  /** 
+  /**
    * Note, screen readers can still activate the buttons when hide buttons is
    * specified, even though we have `pointer-events: none`.
    */

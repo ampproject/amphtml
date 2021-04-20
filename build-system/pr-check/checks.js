@@ -28,6 +28,7 @@ const jobName = 'checks.js';
 
 function pushBuildWorkflow() {
   timedExecOrDie('amp presubmit');
+  timedExecOrDie('amp check-invalid-whitespaces');
   timedExecOrDie('amp lint');
   timedExecOrDie('amp prettify');
   timedExecOrDie('amp ava');
@@ -55,6 +56,10 @@ async function prBuildWorkflow() {
 
   if (buildTargetsInclude(Targets.PRESUBMIT)) {
     timedExecOrDie('amp presubmit');
+  }
+
+  if (buildTargetsInclude(Targets.INVALID_WHITESPACES)) {
+    timedExecOrDie('amp check-invalid-whitespaces');
   }
 
   if (buildTargetsInclude(Targets.LINT)) {
@@ -86,9 +91,8 @@ async function prBuildWorkflow() {
     timedExecOrDie('amp dev-dashboard-tests');
   }
 
-  // Validate owners syntax only for PR builds.
   if (buildTargetsInclude(Targets.OWNERS)) {
-    timedExecOrDie('amp check-owners --local_changes');
+    timedExecOrDie('amp check-owners --local_changes'); // only for PR builds
   }
 
   if (buildTargetsInclude(Targets.PACKAGE_UPGRADE)) {

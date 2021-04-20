@@ -51,7 +51,7 @@ FAIL
 >>     ^~~~~~~~~
 amp-next-page/1.0/test/validator-amp-next-page-templates.html:49:4 The attribute 'ooter' may not appear in tag 'div'.
 |          Footer
-|      </div>   
+|      </div>
 |    </amp-next-page>
 |  </body>
 |  </html>
