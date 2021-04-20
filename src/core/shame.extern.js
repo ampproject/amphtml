@@ -19,7 +19,7 @@
  * Shame! Shame! Shame! Avoid adding to this.
  *
  * It's okay for some things to start off here, since moving them doesn't
- * require any other file changes (inlike real code, which requires updating)
+ * require any other file changes (unlike real code, which requires updating)
  * imports throughout the repo).
  *
  * @externs
