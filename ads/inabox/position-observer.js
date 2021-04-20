@@ -21,7 +21,7 @@ import {
   moveLayoutRect,
 } from '../../src/layout-rect';
 import {Observable} from '../../src/core/data-structures/observable';
-import {throttle} from '../../src/utils/rate-limit';
+import {throttle} from '../../src/core/types/function';
 
 /**
  * @typedef {{

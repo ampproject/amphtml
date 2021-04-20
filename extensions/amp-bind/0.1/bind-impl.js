@@ -28,7 +28,7 @@ import {
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {debounce} from '../../../src/utils/rate-limit';
+import {debounce} from '../../../src/core/types/function';
 import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
 import {deepMerge, dict, map} from '../../../src/core/types/object';
 import {dev, devAssert, user} from '../../../src/log';
