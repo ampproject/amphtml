@@ -56,7 +56,7 @@ export const buildOpenDefaultAttachmentElement = (element) =>
 export const buildOpenInlineAttachmentElement = (element) =>
   htmlFor(element)`
     <a class="
-        i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
+        i-amphtml-story-page-open-attachment i-amphtml-story-system-reset i-amphtml-amp-story-page-attachment-ui-v2"
         role="button">
       <div class="i-amphtml-story-inline-page-attachment-chip">
         <div class="i-amphtml-story-inline-page-attachment-img"></div>
@@ -70,7 +70,7 @@ export const buildOpenInlineAttachmentElement = (element) =>
  */
 const buildOpenOutlinkAttachmentElement = (element) =>
   htmlFor(element)`
-     <a class="i-amphtml-story-page-open-attachment"
+     <a class="i-amphtml-story-page-open-attachment i-amphtml-amp-story-page-attachment-ui-v2"
          role="button">
        <span class="i-amphtml-story-outlink-page-attachment-arrow">
          <span class="i-amphtml-story-outlink-page-open-attachment-bar-left"></span>
@@ -101,16 +101,17 @@ export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
   } else if (isPageAttachmentUiV2ExperimentOn(win) && openImgAttr) {
     return renderPageAttachmentUiWithImages(win, pageEl, attachmentEl);
   }
-  return renderDefaultPageAttachmentUI(pageEl, attachmentEl);
+  return renderDefaultPageAttachmentUI(win, pageEl, attachmentEl);
 };
 
 /**
  * Renders default page attachment UI.
+ * @param {!Window} win
  * @param {!Element} pageEl
  * @param {!Element} attachmentEl
  * @return {!Element}
  */
-const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
+const renderDefaultPageAttachmentUI = (win, pageEl, attachmentEl) => {
   const openAttachmentEl = buildOpenDefaultAttachmentElement(pageEl);
   // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
   const attachmentHref = attachmentEl.getAttribute('href');
@@ -130,6 +131,10 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
     );
 
   textEl.textContent = openLabel;
+
+  if (isPageAttachmentUiV2ExperimentOn(win)) {
+    openAttachmentEl.classList.add('i-amphtml-amp-story-page-attachment-ui-v2');
+  }
   return openAttachmentEl;
 };
 

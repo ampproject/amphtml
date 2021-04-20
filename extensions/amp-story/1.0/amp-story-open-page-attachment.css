@@ -243,6 +243,10 @@
   --i-amphtml-outlink-cta-text-color: black !important;
 }
 
+.i-amphtml-story-page-open-attachment.i-amphtml-amp-story-page-attachment-ui-v2 {
+  background: none !important;
+}
+
 .i-amphtml-story-outlink-page-attachment-arrow {
   display: block !important;
   height: 32px !important;
