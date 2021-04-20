@@ -21,11 +21,6 @@
 export const buildGtagConfig = (gtagId) => ({
   'vars': {
     'gtag_id': gtagId,
-    'config': {
-      [gtagId]: {
-        'groups': 'default',
-      },
-    },
   },
   'triggers': {
     'storyPageCount': {
@@ -65,6 +60,17 @@ export const buildGtagConfig = (gtagId) => ({
       },
       'storySpec': {
         'repeat': false,
+      },
+    },
+  },
+  'linkers': {
+    'linker1': {
+      'enabled': true,
+      'proxyOnly': false,
+      'destinationDomains': ['google.com', 'localhost'],
+      'ids': {
+        'cid': 'CLIENT_ID(_ga)',
+        'uid': 'QUERY_PARAM(uid)',
       },
     },
   },
