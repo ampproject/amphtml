@@ -187,6 +187,7 @@ const invalidWhitespaceGlobs = [
   '**/*.css',
   '**/*.html',
   '**/*.out',
+  '**/*.out.cpponly',
   '**/*.protoascii',
   '**/*.sh',
   '!**/{node_modules,build,dist,dist.3p,dist.tools}/**',
