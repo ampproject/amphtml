@@ -15,8 +15,8 @@
  */
 
 import {BaseElement} from './base-element';
+import {FetchOptionsDef, batchFetchJsonFor} from '../../../src/batched-json';
 import {Services} from '../../../src/services';
-import {batchFetchJsonFor} from '../../../src/batched-json';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {isExperimentOn} from '../../../src/experiments';
@@ -116,7 +116,7 @@ function getAmpScriptJson(ampdoc, src) {
 /**
  * @param {!AmpElement} element
  * @param {boolean} shouldRefresh true to force refresh of browser cache.
- * @return {!Object} options object to pass to `batchFetchJsonFor` method.
+ * @return {!FetchOptionsDef} options object to pass to `batchFetchJsonFor` method.
  */
 function buildOptionsObject(element, shouldRefresh = false) {
   return {
