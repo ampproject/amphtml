@@ -182,7 +182,7 @@ export class AmpScript extends AMP.BaseElement {
     }
 
     const {width, height} = this.getLayoutSize();
-    if (width === 0 && height === 0 && !this.nodom_) {
+    if (width === 0 && height === 0) {
       this.reportedZeroSize_ = true;
       user().warn(
         TAG,
