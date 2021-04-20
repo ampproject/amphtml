@@ -136,6 +136,8 @@ function SidebarWithRef(
     };
   }, [opened, close]);
 
+  console.log('first render');
+
   return (
     <div className={objstr({[classes.unmounted]: !mounted})} part="wrapper">
       <ContainWrapper

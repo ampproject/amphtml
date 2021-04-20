@@ -115,10 +115,12 @@ export function useSidebarAnimation(
       return;
     }
 
+    console.log('inside sidebar animation hook');
     // begin animation if fully opened or closed
     if (opened) {
       // make visible animation
       if (!sidebarElement.animate || !backdropElement.animate) {
+        console.log('no animations');
         postVisibleAnim();
         return;
       }
@@ -129,6 +131,7 @@ export function useSidebarAnimation(
           : ANIMATION_STYLES_SIDEBAR_RIGHT_INIT
       );
       safelySetStyles(backdropElement, ANIMATION_STYLES_BACKDROP_INIT);
+      console.log(sidebarElement.parentElement.parentElement.parentElement);
       const sidebarAnimation = sidebarElement.animate(
         side === Side.LEFT
           ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
