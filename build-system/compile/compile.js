@@ -253,7 +253,7 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     // If you need a polyfill. Manually include them in the
     // respective top level polyfills.js files.
     rewrite_polyfills: false,
-    externs: options.noAddExterns ? [] : externs,
+    externs: options.noAddDeps ? options.externs || [] : externs,
     js_module_root: [
       // Do _not_ include 'node_modules/' in js_module_root with 'NODE'
       // resolution or bad things will happen (#18600).
@@ -264,9 +264,9 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     module_resolution: 'NODE',
     package_json_entry_names: 'module,main',
     process_common_js_modules: true,
-    // This strips all files from the input set that aren't explicitly
+    // PRUNE strips all files from the input set that aren't explicitly
     // required.
-    dependency_mode: 'PRUNE',
+    dependency_mode: options.noAddDeps ? 'SORT_ONLY' : 'PRUNE',
     output_wrapper: wrapper,
     source_map_include_content: !!argv.full_sourcemaps,
     // These arrays are filled in below.
@@ -415,7 +415,7 @@ async function compile(
     outputFilename,
     options
   );
-  const srcs = options.noAddSrcs
+  const srcs = options.noAddDeps
     ? entryModuleFilenames.concat(options.extraGlobs || [])
     : getSrcs(entryModuleFilenames, outputDir, outputFilename, options);
   const transformedSrcFiles = await Promise.all(
