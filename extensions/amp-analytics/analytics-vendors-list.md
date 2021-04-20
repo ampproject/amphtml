@@ -463,11 +463,11 @@ Adds support for Pinpoll. Configuration details can be found at [pinpoll.com](ht
 
 Type attribute value: `piStats`
 
-### PPAS analytics
+### Piwik PRO Analytics Suite
 
 Type attribute value: `ppasanalytics`
 
-Adds support for PPAS analytics. Configuration details can be found at [piwik.pro](https://developers.piwik.pro/).
+Adds support for Piwik PRO Analytics Suite. Configuration details can be found at [piwik.pro](https://developers.piwik.pro/en/latest/integrations/AMP_integration.html).
 
 ### Pressboard
 
