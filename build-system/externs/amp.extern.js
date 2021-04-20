@@ -64,6 +64,9 @@ FormData.prototype.entries = function () {};
  * JSON serialization. Requires the objects fields to be accessed with
  * bracket notation object['name'] to make sure the fields do not get
  * obfuscated.
+ *
+ * Exists in src/core.
+ *
  * @constructor
  * @dict
  */
@@ -452,6 +455,9 @@ var time;
 
 /**
  * This type signifies a callback that can be called to remove the listener.
+ *
+ * Exists in src/core.
+ *
  * @typedef {function()}
  */
 var UnlistenDef;
