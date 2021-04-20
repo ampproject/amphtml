@@ -66,7 +66,6 @@ export const buildGtagConfig = (gtagId) => ({
   'linkers': {
     'enabled': true,
     'proxyOnly': false,
-    'destinationDomains': ['google.com'],
     'linker': {
       'ids': {
         'cid': 'CLIENT_ID(cid)',
