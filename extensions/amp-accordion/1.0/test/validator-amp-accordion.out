@@ -89,7 +89,7 @@ amp-accordion/1.0/test/validator-amp-accordion.html:72:6 Tag 'div' is disallowed
 |    <amp-accordion expand-single-section disable-session-states>
 |      <section amp-access="NOT nwPlus" access-hide>
 |          <h2 class="accordion-header">
-|            Web-Abo 
+|            Web-Abo
 |            <span class="show-more">&#9207;</span>
 |            <span class="show-less">&#9206;</span>
 |          </h2>
@@ -113,21 +113,21 @@ amp-accordion/1.0/test/validator-amp-accordion.html:90:4 The attribute 'access-h
 |            <span class="show-more">&#9207;</span>
 |            <span class="show-less">&#9206;</span>
 |          </h2>
-|          <form 
-|            id="loginform-overlay" 
-|            class="text-center" 
-|            method="post" 
-|            action-xhr="test" 
-|            target="_top" 
+|          <form
+|            id="loginform-overlay"
+|            class="text-center"
+|            method="post"
+|            action-xhr="test"
+|            target="_top"
 |            on="submit:loading-spinner.show;submit-success:loginform.hide,loading-spinner.hide,logoutform.show"
 |          >
-|            <input 
-|              id="my_user" 
-|              type="text" 
-|              name="my_user" 
-|              maxlength="50" 
-|              size="20" 
-|              placeholder="Benutzername o. E-Mail" 
+|            <input
+|              id="my_user"
+|              type="text"
+|              name="my_user"
+|              maxlength="50"
+|              size="20"
+|              placeholder="Benutzername o. E-Mail"
 |              required
 |            />
 |          </form>
