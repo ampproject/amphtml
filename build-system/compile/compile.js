@@ -204,7 +204,7 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     'third_party/react-externs/externs.js',
     'build-system/externs/preact.extern.js',
     'build-system/externs/weakref.extern.js',
-  ];
+  ].concat(globby.sync('src/core{,/**}/*.extern.js'));
   const hideWarningsFor = [
     'third_party/amp-toolbox-cache-url/',
     'third_party/caja/',
@@ -277,6 +277,7 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     hide_warnings_for: hideWarningsFor,
     // TODO(amphtml): Change 'QUIET' to 'DEFAULT'.
     warning_level: argv.warning_level ?? options.warningLevel ?? 'QUIET',
+    extra_annotation_name: ['visibleForTesting', 'restricted'],
   };
   if (argv.pseudo_names) {
     // Some optimizations get turned off when pseudo_names is on.
