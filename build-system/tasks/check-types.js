@@ -117,16 +117,16 @@ async function typeCheck(targetName) {
     );
   }
 
-  let {entryPoints = [], warningLevel, ...opts} = target;
+  const {entryPoints = [], ...opts} = target;
   // If no entry point is defined, we want to scan the globs provided without
   // injecting extra dependencies.
   const noAddDeps = !entryPoints.length;
   // If the --warning_level flag is passed explicitly, it takes precedence.
-  warningLevel = argv.warning_level || warningLevel || 'VERBOSE';
+  opts.warningLevel = argv.warning_level || opts.warningLevel || 'VERBOSE';
 
   // For type-checking, QUIET suppresses all warnings and can't affect the
   // resulting status, so there's no point in doing it.
-  if (target.warningLevel == 'QUIET') {
+  if (opts.warningLevel == 'QUIET') {
     log(
       yellow('WARNING:'),
       'Warning level for target',
@@ -136,19 +136,13 @@ async function typeCheck(targetName) {
     return;
   }
 
-  const results = await closureCompile(
-    entryPoints,
-    './dist',
-    `${targetName}-check-types.js`,
-    {
-      noAddDeps,
-      warningLevel,
-      include3pDirectories: !noAddDeps,
-      includePolyfills: !noAddDeps,
-      typeCheckOnly: true,
-      ...opts,
-    }
-  );
+  await closureCompile(entryPoints, './dist', `${targetName}-check-types.js`, {
+    noAddDeps,
+    include3pDirectories: !noAddDeps,
+    includePolyfills: !noAddDeps,
+    typeCheckOnly: true,
+    ...opts,
+  });
   log(green('SUCCESS:'), 'Type-checking passed for target', cyan(targetName));
 }
 
