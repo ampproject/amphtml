@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Loading, reducer as loadingReducer} from './loading-instructions';
-import {contextProp} from '../context';
+import {Loading, reducer as loadingReducer} from '../core/loading-instructions';
+import {contextProp} from './prop';
 
 /**
  * Defines whether a DOM subtree can be currently seen by the user. A subtree
