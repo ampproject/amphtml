@@ -33,7 +33,7 @@ import {
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
-} from '../../../../src/consent-state';
+} from '../../../../src/core/constants/consent-state';
 import {Services} from '../../../../src/services';
 import {
   addAttributesToElement,

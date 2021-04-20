@@ -15,7 +15,7 @@
  */
 
 import {CMP_CONFIG} from './cmps';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../src/services';
 import {childElementByTag} from '../../../src/dom';

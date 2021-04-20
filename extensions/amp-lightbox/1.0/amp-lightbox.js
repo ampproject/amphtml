@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {ActionTrust, DEFAULT_ACTION} from '../../../src/action-constants';
+import {
+  ActionTrust,
+  DEFAULT_ACTION,
+} from '../../../src/core/constants/action-constants';
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-lightbox-1.0.css';
 import {Services} from '../../../src/services';

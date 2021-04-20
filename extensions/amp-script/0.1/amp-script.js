@@ -16,7 +16,7 @@
 
 import * as WorkerDOM from '@ampproject/worker-dom/dist/amp-production/main.mjs';
 import {CSS} from '../../../build/amp-script-0.1.css';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Purifier} from '../../../src/purifier/purifier';
 import {Services} from '../../../src/services';
@@ -208,15 +208,15 @@ export class AmpScript extends AMP.BaseElement {
     return this.userActivation_;
   }
 
-  // * @param {Array<*>} args
-
   /**
    * Calls the specified function on this amp-script's worker-dom instance.
+   * Accepts variable number of args to pass along to the underlying worker.
    *
-   * @param {string} unused - function identifier
+   * @param {string} unusedFnId - function identifier
+   * @param {...*} unusedFnArgs
    * @return {!Promise<*>}
    */
-  callFunction(unused /*, ...args */) {
+  callFunction(unusedFnId, unusedFnArgs) {
     return this.initialize_.promise.then(() => {
       return this.workerDom_.callFunction.apply(this.workerDom_, arguments);
     });
@@ -564,6 +564,9 @@ export class AmpScriptService {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc}  */
+    this.ampdoc_ = ampdoc;
+
     /** @private {number} */
     this.cumulativeSize_ = 0;
 
@@ -615,6 +618,40 @@ export class AmpScriptService {
   sizeLimitExceeded(size) {
     this.cumulativeSize_ += size;
     return this.cumulativeSize_ > MAX_TOTAL_SCRIPT_SIZE;
+  }
+
+  /**
+   * Fetches an amp-script URI by finding the associated amp-script and
+   * calling the specified function.
+   *
+   * Note: the amp-script URI does not yet support function args,
+   *       even though worker-dom's callFunction does. Therefore we allow it
+   *       via extra args.
+   *
+   * @param {string} uri
+   * @param {...*} unusedArgs
+   * @return {Promise<*>}
+   */
+  fetch(uri, unusedArgs) {
+    const uriParts = uri.slice('amp-script:'.length).split('.');
+    userAssert(
+      uriParts.length === 2 && uriParts[0].length > 0 && uriParts[1].length > 0,
+      `[${TAG}]: "amp-script" URIs must be of the format "scriptId.functionIdentifier".`
+    );
+
+    const ampScriptId = uriParts[0];
+    const fnIdentifier = uriParts[1];
+    const ampScriptEl = this.ampdoc_.getElementById(ampScriptId);
+    userAssert(
+      ampScriptEl && ampScriptEl.tagName === 'AMP-SCRIPT',
+      `[${TAG}]: could not find <amp-script> with script set to ${ampScriptId}`
+    );
+    const args = Array.prototype.slice.call(arguments, 1);
+    return ampScriptEl
+      .getImpl()
+      .then((impl) =>
+        impl.callFunction.apply(impl, [fnIdentifier].concat(args))
+      );
   }
 }
 

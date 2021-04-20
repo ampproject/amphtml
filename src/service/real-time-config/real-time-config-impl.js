@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CONSENT_POLICY_STATE} from '../../consent-state';
+import {CONSENT_POLICY_STATE} from '../../core/constants/consent-state';
 import {RTC_VENDORS} from './callout-vendors';
 import {Services} from '../../services';
 import {dev, user, userAssert} from '../../log';

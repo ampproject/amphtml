@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {FilterType} from './filters/filter';
 import {HostServices} from '../../../src/inabox/host-services';
 import {

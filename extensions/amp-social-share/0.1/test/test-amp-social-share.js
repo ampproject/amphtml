@@ -15,7 +15,7 @@
  */
 
 import '../amp-social-share';
-import {Keys} from '../../../../src/utils/key-codes';
+import {Keys} from '../../../../src/core/constants/key-codes';
 import {Services} from '../../../../src/services';
 import {tryFocus} from '../../../../src/dom';
 

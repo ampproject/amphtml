@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred, tryResolve} from '../../../src/utils/promise';
+import {Deferred, tryResolve} from '../../../src/core/data-structures/promise';
 import {Sources} from './sources';
 import {isConnectedNode} from '../../../src/dom';
 

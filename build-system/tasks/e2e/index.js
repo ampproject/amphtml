@@ -55,7 +55,6 @@ async function setUpTesting_() {
   const {describes} = require('./helper');
   describes.configure({
     browsers: argv.browsers,
-    engine: argv.engine,
     headless: argv.headless,
   });
 
@@ -236,9 +235,6 @@ e2e.flags = {
   'files': 'Run tests found in a specific path (ex: **/test-e2e/*.js)',
   'testnames': 'Lists the name of each test being run',
   'watch': 'Watches for changes in files, runs corresponding test(s)',
-  'engine':
-    'The automation engine that orchestrates the browser. ' +
-    'Options are `puppeteer` or `selenium`. Default: `selenium`',
   'headless': 'Runs the browser in headless mode',
   'debug': 'Prints debugging information while running tests',
   'report': 'Write test result report to a local file',

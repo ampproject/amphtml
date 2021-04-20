@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust, DEFAULT_ACTION} from './action-constants';
+import {ActionTrust, DEFAULT_ACTION} from './core/constants/action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
 import {devAssert, user, userAssert} from './log';

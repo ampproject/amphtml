@@ -16,10 +16,10 @@
 
 import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
 import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
-import {Deferred} from '../utils/promise';
+import {Deferred} from '../core/data-structures/promise';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {PageScroller} from './page-scroller';
-import {VisibilityState} from '../visibility-state';
+import {VisibilityState} from '../core/constants/visibility-state';
 import {
   addParamsToUrl,
   getFragment,
@@ -596,6 +596,11 @@ export class AmpStoryPlayer {
             'onDocumentState',
             dict({'state': STORY_MESSAGE_STATE_TYPE.CURRENT_PAGE_ID}),
             false
+          );
+
+          messaging.sendRequest(
+            'onDocumentState',
+            dict({'state': STORY_MESSAGE_STATE_TYPE.MUTED_STATE})
           );
 
           messaging.registerHandler('documentStateUpdate', (event, data) => {
@@ -1374,6 +1379,9 @@ export class AmpStoryPlayer {
           messaging
         );
         break;
+      case STORY_MESSAGE_STATE_TYPE.MUTED_STATE:
+        this.onMutedStateUpdate_(/** @type {string} */ (data.value));
+        break;
       case AMP_STORY_PLAYER_EVENT:
         this.onPlayerEvent_(/** @type {string} */ (data.value));
         break;
@@ -1399,6 +1407,17 @@ export class AmpStoryPlayer {
         );
         break;
     }
+  }
+
+  /**
+   * Reacts to mute/unmute events coming from the story.
+   * @param {string} muted
+   * @private
+   */
+  onMutedStateUpdate_(muted) {
+    this.element_.dispatchEvent(
+      createCustomEvent(this.win_, 'amp-story-muted-state', {muted})
+    );
   }
 
   /**

@@ -184,8 +184,8 @@ function createTask(
     task.description(taskFunc.description);
   }
   if (isInvokedTask || isDefaultTask) {
+    startAtRepoRoot();
     if (!isTaskLevelHelp && !isCiBuild()) {
-      startAtRepoRoot();
       updatePackages();
     }
     const taskFunc = getTaskFunc(taskSourceFileName, taskFuncName);
