@@ -194,17 +194,19 @@ function getSrcs(entryModuleFilenames, outputDir, outputFilename, options) {
  * @return {!Object}
  */
 function generateCompilerOptions(outputDir, outputFilename, options) {
-  const baseExterns = [
-    'build-system/externs/amp.extern.js',
-    'build-system/externs/dompurify.extern.js',
-    'build-system/externs/layout-jank.extern.js',
-    'build-system/externs/performance-observer.extern.js',
-    'third_party/web-animations-externs/web_animations.js',
-    'third_party/moment/moment.extern.js',
-    'third_party/react-externs/externs.js',
-    'build-system/externs/preact.extern.js',
-    'build-system/externs/weakref.extern.js',
-  ].concat(globby.sync('src/core{,/**}/*.extern.js'));
+  // Determine externs
+  let externs = options.externs || [];
+  if (!options.noAddDeps) {
+    externs = [
+      'third_party/web-animations-externs/web_animations.js',
+      'third_party/react-externs/externs.js',
+      'third_party/moment/moment.extern.js',
+      ...globby.sync('src/core{,/**}/*.extern.js'),
+      ...globby.sync('build-system/externs/*.extern.js'),
+      ...externs,
+    ];
+  }
+
   const hideWarningsFor = [
     'third_party/amp-toolbox-cache-url/',
     'third_party/caja/',
@@ -230,11 +232,6 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     ? options.wrapper.replace('<%= contents %>', '%output%')
     : `(function(){%output%})();`;
   wrapper = `${wrapper}\n\n//# sourceMappingURL=${outputFilename}.map`;
-  let externs = baseExterns;
-  if (options.externs) {
-    externs = externs.concat(options.externs);
-  }
-  externs.push('build-system/externs/amp.multipass.extern.js');
 
   /**
    * TODO(#28387) write a type for this.
@@ -253,7 +250,7 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     // If you need a polyfill. Manually include them in the
     // respective top level polyfills.js files.
     rewrite_polyfills: false,
-    externs: options.noAddDeps ? options.externs || [] : externs,
+    externs,
     js_module_root: [
       // Do _not_ include 'node_modules/' in js_module_root with 'NODE'
       // resolution or bad things will happen (#18600).
