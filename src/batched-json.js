@@ -32,7 +32,8 @@ import {user} from './log';
  *  expr:(string|undefined),
  *  urlReplacement: (UrlReplacementPolicy|undefined),
  *  refresh: (boolean|undefined),
- *  xssiPrefix: (string|undefined)}}
+ *  xssiPrefix: (string|undefined),
+ * }}
  */
 export let BatchFetchOptionsDef;
 
