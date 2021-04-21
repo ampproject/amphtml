@@ -47,9 +47,8 @@ FAIL
 |              data-mediaid="71QQG852413DU7J"
 |              data-client="761"
 |              data-streamtype="video"
-|              data-seek-to="0"
 |              data-mode="api"
-|              data-origin="https://embed.nexx.cloud/"
+|              data-exit-mode="replay"
 |              data-disable-ads="1"
 |              data-streaming-filter="nxp-bitrate-2500"
 |              layout="responsive"
@@ -59,7 +58,7 @@ FAIL
 |      <!-- invalid, needs data-mediaid -->
 |      <amp-nexxtv-player
 >>     ^~~~~~~~~
-amp-nexxtv-player/0.1/test/validator-amp-nexxtv-player.html:59:4 The mandatory attribute 'data-mediaid' is missing in tag 'amp-nexxtv-player'. (see https://amp.dev/documentation/components/amp-nexxtv-player)
+amp-nexxtv-player/0.1/test/validator-amp-nexxtv-player.html:58:4 The mandatory attribute 'data-mediaid' is missing in tag 'amp-nexxtv-player'. (see https://amp.dev/documentation/components/amp-nexxtv-player)
 |              data-client="761"
 |              width="480" height="270"
 |      ></amp-nexxtv-player>
@@ -67,7 +66,7 @@ amp-nexxtv-player/0.1/test/validator-amp-nexxtv-player.html:59:4 The mandatory a
 |      <!-- invalid, needs data-client -->
 |      <amp-nexxtv-player
 >>     ^~~~~~~~~
-amp-nexxtv-player/0.1/test/validator-amp-nexxtv-player.html:65:4 The mandatory attribute 'data-client' is missing in tag 'amp-nexxtv-player'. (see https://amp.dev/documentation/components/amp-nexxtv-player)
+amp-nexxtv-player/0.1/test/validator-amp-nexxtv-player.html:64:4 The mandatory attribute 'data-client' is missing in tag 'amp-nexxtv-player'. (see https://amp.dev/documentation/components/amp-nexxtv-player)
 |              data-mediaid="71QQG852413DU7J"
 |              width="480" height="270"
 |      ></amp-nexxtv-player>
