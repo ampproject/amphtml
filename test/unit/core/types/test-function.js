@@ -16,7 +16,7 @@
 
 import {debounce, throttle} from '../../../src/core/types/function';
 
-describe('type helpers - functions', () => {
+describes.sandboxed('type helpers - functions', {}, () => {
   describe('throttle', () => {
     let clock;
 
