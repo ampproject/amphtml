@@ -15,12 +15,12 @@
  */
 
 import {Services} from '../../../src/services';
-import {TickLabel} from '../../../src/enums';
-import {asyncStringReplace} from '../../../src/string';
+import {TickLabel} from '../../../src/core/constants/enums';
+import {asyncStringReplace} from '../../../src/core/types/string';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {cookieReader} from './cookie-reader';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   getActiveExperimentBranches,
   getExperimentBranch,
@@ -35,7 +35,7 @@ import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
-import {isArray} from '../../../src/core/types/array';
+import {isArray} from '../../../src/core/types';
 import {isFiniteNumber} from '../../../src/types';
 import {isInFie} from '../../../src/iframe-helper';
 import {linkerReaderServiceFor} from './linker-reader';

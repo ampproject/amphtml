@@ -15,12 +15,12 @@
  */
 
 import {ActionSource} from './action-source';
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {CSS} from '../../../build/amp-base-carousel-0.1.css';
 import {Carousel} from './carousel.js';
 import {CarouselEvents} from './carousel-events';
 import {ChildLayoutManager} from './child-layout-manager';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {
   ResponsiveAttributes,
   getResponsiveAttributeValue,
@@ -28,7 +28,7 @@ import {
 import {Services} from '../../../src/services';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   dispatchCustomEvent,
   isRTL,

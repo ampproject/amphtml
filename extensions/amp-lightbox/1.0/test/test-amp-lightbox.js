@@ -15,7 +15,10 @@
  */
 import '../amp-lightbox';
 import {ActionInvocation} from '../../../../src/service/action-impl';
-import {ActionTrust, DEFAULT_ACTION} from '../../../../src/action-constants';
+import {
+  ActionTrust,
+  DEFAULT_ACTION,
+} from '../../../../src/core/constants/action-constants';
 import {htmlFor} from '../../../../src/static-template';
 import {poll} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';

@@ -14,11 +14,26 @@
 # limitations under the license.
 #
 
-tags: {  # amp-lightbox
+tags: {  # amp-lightbox 1.0
   html_format: AMP
   tag_name: "SCRIPT"
+  satisfies: "amp-lightbox 1.0"
+  excludes: "amp-lightbox 0.1"
   extension_spec: {
     name: "amp-lightbox"
+    version_name: "v1.0"
+    version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-lightbox 0.1 and latest
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies: "amp-lightbox 0.1"
+  excludes: "amp-lightbox 1.0"
+  extension_spec: {
+    name: "amp-lightbox"
+    version_name: "v0.1"
     version: "0.1"
     version: "latest"
     requires_usage: EXEMPTED
@@ -32,6 +47,7 @@ tags: {  # amp-lightbox
   spec_name: "SCRIPT[custom-element=amp-lightbox] (AMP4ADS)"
   extension_spec: {
     name: "amp-lightbox"
+    version_name: "v0.1"
     version: "0.1"
     version: "latest"
   }
@@ -43,6 +59,7 @@ tags: {  # amp-lightbox
   spec_name: "SCRIPT[custom-element=amp-lightbox] (AMP4EMAIL)"
   extension_spec: {
     name: "amp-lightbox"
+    version_name: "v0.1"
     version: "0.1"
     version: "latest"
   }
@@ -56,7 +73,13 @@ tags: {  # <amp-lightbox>
   tag_name: "AMP-LIGHTBOX"
   requires_extension: "amp-lightbox"
   attrs: {
-    name: "animate-in"
+    name: "animate-in" # 0.1 only
+    value_casei: "fade-in"
+    value_casei: "fly-in-bottom"
+    value_casei: "fly-in-top"
+  }
+  attrs: {
+    name: "animation" # 1.0 only
     value_casei: "fade-in"
     value_casei: "fly-in-bottom"
     value_casei: "fly-in-top"
@@ -64,7 +87,7 @@ tags: {  # <amp-lightbox>
   attrs: { name: "controls" }
   attrs: { name: "from" }
   attrs: {
-    name: "scrollable"
+    name: "scrollable" # 0.1 only
     disabled_by: "amp4email"
   }
   # <amp-bind>

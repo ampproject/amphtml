@@ -29,8 +29,7 @@
     "./tasks/coverage-map/*",
     "./tasks/create-golden-css/*",
     "./tasks/css/*",
-    // "./tasks/e2e/*", // 253 remaining type errors.
-    "./tasks/make-extension/*",
+    "./tasks/e2e/*", // 152 remaining type errors.
     "./tasks/get-zindex/*",
     "./tasks/markdown-toc/*",
     // "./tasks/performance/*", // 35 remaining type errors.
@@ -52,6 +51,8 @@
     "server/app-index/test/test-amphtml-helpers.js",
     "server/new-server/transforms/dist",
     "server/typescript-compile.js",
-    "test-configs/dep-check-config.js"
+    "test-configs/dep-check-config.js",
+    "tasks/e2e/helper.js",
+    "tasks/get-zindex/test-1.js"
   ]
 }

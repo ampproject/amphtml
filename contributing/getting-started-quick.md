@@ -39,8 +39,7 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
     git clone git@github.com:<your username>/amphtml.git
     ```
 
-7. Add an alias called `upstream` to refer to the main `ampproject/amphtml` repository. Go to the root directory of the
-   newly created local repository directory and run:
+7. Add an alias called `upstream` to refer to the main `ampproject/amphtml` repository. Go to the root directory of the newly created local repository directory and run:
 
     ```shell
     git remote add upstream git@github.com:ampproject/amphtml.git
@@ -52,12 +51,16 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
     git fetch upstream main
     ```
 
-9. Set up your local `main` branch to track `upstream/main` instead of `origin/main` (which will rapidly become
-   outdated).
+9. Set up your local `main` branch to track `upstream/main` instead of `origin/main` (which will rapidly become outdated).
 
     ```shell
     git branch -u upstream/main main
     ```
+
+10. Sign in to these services that are used to validate `amphtml` pull requests.
+    - **CLA Assistant:** Mandatory step, used by AMP's contributor license agreement. Sign in [here](https://cla-assistant.io/ampproject/amphtml) using your GitHub credentials.
+    - **CircleCI:** Mandatory step, used to perform continuous integration testing. Sign in [here](https://app.circleci.com/pipelines/github/ampproject/amphtml) using your GitHub credentials.
+    - **Percy:** Optional step, only needed to approve visual diffs introduced by a PR. Sign in [here](https://percy.io/ampproject/amphtml) using your GitHub credentials and link it to a Browserstack profile.
 
 ## Branch (do this each time you want a new branch)
 

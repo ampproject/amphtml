@@ -19,7 +19,7 @@ import {
   LiveListManager,
   SERVICE_ID,
 } from './live-list-manager';
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {Layout} from '../../../src/layout';
 import {childElementByAttr} from '../../../src/dom';

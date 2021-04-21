@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
-import {Observable} from '../observable';
+import {Deferred} from '../core/data-structures/promise';
+import {Observable} from '../core/data-structures/observable';
 import {Signals} from '../utils/signals';
-import {VisibilityState} from '../visibility-state';
+import {VisibilityState} from '../core/constants/visibility-state';
 import {WindowInterface} from '../window-interface';
 import {
   addDocumentVisibilityChangeListener,
@@ -32,7 +32,7 @@ import {
 } from '../service';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
 import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '../dom';
-import {map} from '../utils/object';
+import {map} from '../core/types/object';
 import {parseQueryString} from '../url';
 
 /** @const {string} */

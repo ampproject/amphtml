@@ -22,9 +22,23 @@
   },
   {
     "name": "amp-accordion",
-    "version": ["0.1", "1.0"],
+    "version": "0.1",
     "latestVersion": "0.1",
     "options": {"hasCss": true}
+  },
+  {
+    "name": "amp-accordion",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": {
+        "component.js": {
+          "preact": "component-preact.js",
+          "react": "component-react.js"
+        }
+      }
+    }
   },
   {"name": "amp-action-macro", "version": "0.1", "latestVersion": "0.1"},
   {
@@ -128,13 +142,39 @@
   {"name": "amp-dailymotion", "version": "0.1", "latestVersion": "0.1"},
   {
     "name": "amp-date-countdown",
-    "version": ["0.1", "1.0"],
+    "version": "0.1",
+    "latestVersion": "0.1"
+  },
+  {
+    "name": "amp-date-countdown",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "npm": {
+        "component.js": {
+          "preact": "component-preact.js",
+          "react": "component-react.js"
+        }
+      }
+    }
+  },
+  {
+    "name": "amp-date-display",
+    "version": "0.1",
     "latestVersion": "0.1"
   },
   {
     "name": "amp-date-display",
-    "version": ["0.1", "1.0"],
-    "latestVersion": "0.1"
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "npm": {
+        "component.js": {
+          "preact": "component-preact.js",
+          "react": "component-react.js"
+        }
+      }
+    }
   },
   {
     "name": "amp-date-picker",
@@ -256,15 +296,35 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "cssBinaries": ["amp-inline-gallery-pagination"]
+      "cssBinaries": ["amp-inline-gallery-pagination"],
+      "npm": {
+        "component.js": {
+          "preact": "component-preact.js",
+          "react": "component-react.js"
+        }
+      }
     }
   },
   {"name": "amp-inputmask", "version": "0.1", "latestVersion": "0.1"},
   {
     "name": "amp-instagram",
-    "version": ["0.1", "1.0"],
+    "version": "0.1",
     "latestVersion": "0.1",
     "options": {"hasCss": true}
+  },
+  {
+    "name": "amp-instagram",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": {
+        "component.js": {
+          "preact": "component-preact.js",
+          "react": "component-react.js"
+        }
+      }
+    }
   },
   {
     "name": "amp-install-serviceworker",
@@ -281,9 +341,23 @@
   {"name": "amp-kaltura-player", "version": "0.1", "latestVersion": "0.1"},
   {
     "name": "amp-lightbox",
-    "version": ["0.1", "1.0"],
+    "version": "0.1",
     "latestVersion": "0.1",
     "options": {"hasCss": true}
+  },
+  {
+    "name": "amp-lightbox",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": {
+        "component.js": {
+          "preact": "component-preact.js",
+          "react": "component-react.js"
+        }
+      }
+    }
   },
   {
     "name": "amp-lightbox-gallery",
@@ -382,7 +456,19 @@
   },
   {"name": "amp-redbull-player", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-reddit", "version": "0.1", "latestVersion": "0.1"},
-  {"name": "amp-render", "version": "1.0", "latestVersion": "1.0"},
+  {
+    "name": "amp-render",
+    "version": "1.0",
+    "latestVersion": "1.0",
+    "options": {
+      "npm": {
+        "component.js": {
+          "preact": "component-preact.js",
+          "react": "component-react.js"
+        }
+      }
+    }
+  },
   {
     "name": "amp-resize-observer-polyfill",
     "version": "0.1",
@@ -397,9 +483,23 @@
   },
   {
     "name": "amp-selector",
-    "version": ["0.1", "1.0"],
+    "version": "0.1",
     "latestVersion": "0.1",
     "options": {"hasCss": true}
+  },
+  {
+    "name": "amp-selector",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": {
+        "component.js": {
+          "preact": "component-preact.js",
+          "react": "component-react.js"
+        }
+      }
+    }
   },
   {
     "name": "amp-shadow-dom-polyfill",
@@ -409,9 +509,23 @@
   },
   {
     "name": "amp-sidebar",
-    "version": ["0.1", "0.2", "1.0"],
+    "version": ["0.1", "0.2"],
     "latestVersion": "0.1",
     "options": {"hasCss": true}
+  },
+  {
+    "name": "amp-sidebar",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": {
+        "component.js": {
+          "preact": "component-preact.js",
+          "react": "component-react.js"
+        }
+      }
+    }
   },
   {"name": "amp-skimlinks", "version": "0.1", "latestVersion": "0.1"},
   {
@@ -563,7 +677,20 @@
       "cssBinaries": ["amp-truncate-text", "amp-truncate-text-shadow"]
     }
   },
-  {"name": "amp-twitter", "version": ["0.1", "1.0"], "latestVersion": "0.1"},
+  {"name": "amp-twitter", "version": "0.1", "latestVersion": "0.1"},
+  {
+    "name": "amp-twitter",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "npm": {
+        "component.js": {
+          "preact": "component-preact.js",
+          "react": "component-react.js"
+        }
+      }
+    }
+  },
   {
     "name": "amp-user-notification",
     "version": "0.1",
@@ -619,6 +746,14 @@
     "name": "amp-youtube",
     "version": "1.0",
     "latestVersion": "0.1",
-    "options": {"hasCss": true}
+    "options": {
+      "hasCss": true,
+      "npm": {
+        "component.js": {
+          "preact": "component-preact.js",
+          "react": "component-react.js"
+        }
+      }
+    }
   }
 ]

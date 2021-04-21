@@ -18,7 +18,7 @@
 
 import {initLogConstructor, setReportError} from '../../src/log';
 import {installAlpClickHandler, warmupStatic} from './handler';
-import {reportError} from '../../src/error';
+import {reportError} from '../../src/error-reporting';
 
 initLogConstructor();
 setReportError(reportError);
