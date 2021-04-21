@@ -15,13 +15,13 @@
  */
 
 import {Animation} from '../../animation';
-import {Observable} from '../../observable';
+import {Observable} from '../../core/data-structures/observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
 import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {ViewportInterface} from './viewport-interface';
-import {VisibilityState} from '../../visibility-state';
+import {VisibilityState} from '../../core/constants/visibility-state';
 import {clamp} from '../../utils/math';
 import {
   closestAncestorElementBySelector,
@@ -30,7 +30,7 @@ import {
 } from '../../dom';
 import {computedStyle, setStyle} from '../../style';
 import {dev, devAssert} from '../../log';
-import {dict} from '../../utils/object';
+import {dict} from '../../core/types/object';
 import {getFriendlyIframeEmbedOptional} from '../../iframe-helper';
 import {getMode} from '../../mode';
 import {
@@ -44,7 +44,7 @@ import {
   moveLayoutRect,
 } from '../../layout-rect';
 import {numeric} from '../../transition';
-import {tryResolve} from '../../utils/promise';
+import {tryResolve} from '../../core/data-structures/promise';
 
 const TAG_ = 'Viewport';
 const SCROLL_POS_TO_BLOCK = {

@@ -18,7 +18,7 @@ import {Services} from '../../../src/services';
 import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
 import {createElementWithAttributes} from '../../../src/dom';
 import {devAssert} from '../../../src/log';
-import {hasOwn} from '../../../src/utils/object';
+import {hasOwn} from '../../../src/core/types/object';
 
 /** @abstract */
 export class ScrollComponent {

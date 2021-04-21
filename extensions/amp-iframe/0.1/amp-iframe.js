@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {AMPDOC_SINGLETON_NAME} from '../../../src/enums';
-import {ActionTrust} from '../../../src/action-constants';
+import {AMPDOC_SINGLETON_NAME} from '../../../src/core/constants/enums';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
 import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {MessageType} from '../../../src/3p-frame-messaging';
@@ -24,8 +24,8 @@ import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {endsWith} from '../../../src/string';
+import {dict} from '../../../src/core/types/object';
+import {endsWith} from '../../../src/core/types/string';
 import {getConsentDataToForward} from '../../../src/consent';
 import {
   isAdLike,

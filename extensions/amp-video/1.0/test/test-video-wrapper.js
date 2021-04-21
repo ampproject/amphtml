@@ -20,7 +20,7 @@ import {WithAmpContext} from '../../../../src/preact/context';
 import {createRef} from '../../../../src/preact';
 import {forwardRef} from '../../../../src/preact/compat';
 import {mount} from 'enzyme';
-import {omit} from '../../../../src/utils/object';
+import {omit} from '../../../../src/core/types/object';
 
 import {useStyles as useAutoplayStyles} from '../autoplay.jss';
 

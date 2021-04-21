@@ -886,10 +886,8 @@ class AmpFixture {
       );
       const {ampdoc} = ret;
       env.ampdoc = ampdoc;
-      // TODO(#33020): pass the `extensions` array directly.
-      const extensionIds = extensions.map(({extensionId}) => extensionId);
       const promise = Promise.all([
-        env.extensions.installExtensionsInDoc(ampdoc, extensionIds),
+        env.extensions.installExtensionsInDoc(ampdoc, extensions),
         ampdoc.whenReady(),
       ]);
       ampdoc.setExtensionsKnown();

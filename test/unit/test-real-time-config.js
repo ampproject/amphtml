@@ -18,14 +18,14 @@
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
-import {CONSENT_POLICY_STATE} from '../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../src/core/constants/consent-state';
 import {
   RTC_ERROR_ENUM,
   RealTimeConfigManager,
 } from '../../src/service/real-time-config/real-time-config-impl';
 import {Services} from '../../src/services';
 import {Xhr} from '../../src/service/xhr-impl';
-import {cancellation} from '../../src/error';
+import {cancellation} from '../../src/error-reporting';
 import {createElementWithAttributes} from '../../src/dom';
 import {dev, user} from '../../src/log';
 import {isFiniteNumber} from '../../src/types';

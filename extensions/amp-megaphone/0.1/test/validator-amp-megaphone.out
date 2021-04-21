@@ -74,7 +74,7 @@ amp-megaphone/0.1/test/validator-amp-megaphone.html:57:2 The specified layout 'I
 |    <!-- valid: playlist with sharing buttons -->
 |    <amp-megaphone height=166 data-playlist="DEM6640968282" data-sharing
 |                    layout="fixed-height"></amp-megaphone>
-|    
+|
 |    <!-- Broken tests (until validator supports dynamic exclusion of attributes) -->
 |
 |    <!-- invalid: both episode and playlist specified-->

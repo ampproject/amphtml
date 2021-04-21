@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {rethrowAsync} from '../log';
+import {rethrowAsync} from '../core/error';
 
 const AMP_CLASS = 'i-amphtml-element';
 const DEEP = true;
