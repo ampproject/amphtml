@@ -50,8 +50,6 @@ export function runVideoPlayerIntegrationTests(
    */
   const FRAME_HEIGHT = 1000;
 
-  const TIMEOUT = 20000;
-
   let fixtureGlobal;
   let videoGlobal;
 
@@ -67,10 +65,7 @@ export function runVideoPlayerIntegrationTests(
     .skipIfPropertiesObfuscated()
     .ifChrome()
     .run('Video Interface', function () {
-      this.timeout(TIMEOUT);
-
       it('should override the video interface methods', function () {
-        this.timeout(TIMEOUT);
         return getVideoPlayer({outsideView: false, autoplay: true})
           .then((r) => {
             return r.video.getImpl(false);
@@ -95,8 +90,6 @@ export function runVideoPlayerIntegrationTests(
     .configure()
     .ifChrome()
     .run('Actions', function () {
-      this.timeout(TIMEOUT);
-
       // TODO(cvializ, #14827): Fails on Chrome 66.
       it.skip('should support mute, play, pause, unmute actions', function () {
         return getVideoPlayer({outsideView: false, autoplay: false}).then(
@@ -139,7 +132,6 @@ export function runVideoPlayerIntegrationTests(
       // would be considered a user-initiated action, but no way to do that in a
       // scripted test environment.
       before(function () {
-        this.timeout(TIMEOUT);
         return skipIfAutoplayUnsupported.call(this, window);
       });
 
@@ -151,7 +143,6 @@ export function runVideoPlayerIntegrationTests(
     .skipIfPropertiesObfuscated()
     .ifChrome()
     .run('Analytics Triggers', function () {
-      this.timeout(TIMEOUT);
       let video;
 
       // TODO(cvializ, #14827): Fails on Chrome 66.
@@ -375,8 +366,6 @@ export function runVideoPlayerIntegrationTests(
 
   const t = describe.configure().ifChrome().skipIfPropertiesObfuscated();
   t.run('Autoplay', function () {
-    this.timeout(TIMEOUT);
-
     describe('play/pause', () => {
       it('should play when in view port initially', () => {
         return getVideoPlayer({outsideView: false, autoplay: true}).then(
@@ -469,15 +458,13 @@ export function runVideoPlayerIntegrationTests(
             () => {
               return iconElement.classList.contains('amp-video-eq-play');
             },
-            undefined,
-            TIMEOUT
+            undefined
           );
         }
       });
     });
 
     before(function () {
-      this.timeout(TIMEOUT);
       // Skip autoplay tests if browser does not support autoplay.
       return skipIfAutoplayUnsupported.call(this, window);
     });
@@ -489,8 +476,6 @@ export function runVideoPlayerIntegrationTests(
     .configure()
     .ifChrome()
     .run('Rotate-to-fullscreen', function () {
-      this.timeout(TIMEOUT);
-
       let video;
       let playButton;
       let autoFullscreen;
@@ -548,7 +533,6 @@ export function runVideoPlayerIntegrationTests(
       // would be considered a user-initiated action, but no way to do that in a
       // scripted test environment.
       before(function () {
-        this.timeout(TIMEOUT);
         // Skip autoplay tests if browser does not support autoplay.
         return skipIfAutoplayUnsupported.call(this, window);
       });
@@ -564,7 +548,7 @@ export function runVideoPlayerIntegrationTests(
         if (opt_experiment) {
           toggleExperiment(fixture.win, opt_experiment, true);
         }
-        return expectBodyToBecomeVisible(fixture.win, TIMEOUT);
+        return expectBodyToBecomeVisible(fixture.win);
       })
       .then(() => {
         const video = createVideoElementFunc(fixture);
