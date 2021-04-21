@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-@import url("../../../third_party/subscriptions-project/swg-button.css");
+// src/polyfills.js must be the first import.
+import '../polyfills';
 
+import {draw3p, init} from '../integration-lib';
+import {register} from '../3p';
 
-/**
- * Disabled Action when  realtime config has not loaded yet
- * Can be overridden by publisher CSS
- */
-[subscriptions-action][subscriptions-google-rtc] {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+import {digiteka} from '../../ads/vendors/digiteka';
+
+init(window);
+register('digiteka', digiteka);
+
+window.draw3p = draw3p;

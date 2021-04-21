@@ -2,9 +2,9 @@
 <html>
 <head>
   <script src="/extensions/amp-access/0.1/iframe-api/build/index.js"></script>
-  
+
   <script>
-    
+
     var pageConfig;
     var pageProtocol;
     function log() {
@@ -19,7 +19,7 @@
     var Controller = function() {
     };
     Controller.prototype.connect = function(origin, protocol, config) {
-      pageConfg = config; 
+      pageConfg = config;
       pageProtocol = protocol;
       log('connect: ', origin, protocol, config);
     };

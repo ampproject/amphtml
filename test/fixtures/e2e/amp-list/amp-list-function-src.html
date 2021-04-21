@@ -13,7 +13,7 @@
   <amp-script id="fns" script="fruit-script" nodom data-ampdevmode></amp-script>
   <script id="fruit-script" type="text/plain" target="amp-script">
     exportFunction('getFruit', () => ({items: [{name: 'Pineapple'}, {name: 'Mango'}]}));
-  </script> 
+  </script>
 
   <amp-list id="amp-list" width="auto" height="100" layout="fixed-height"
       src="amp-script:fns.getFruit">
