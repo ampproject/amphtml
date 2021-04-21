@@ -343,9 +343,8 @@ export class RealTimeConfigManager {
    * Manages sending the RTC callouts for all specified vendors.
    * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} customMacros The ad-network specified macro
    * @param {!Function} checkStillCurrent
-   * @param {!Element} element
    */
-  handleRtcForVendorUrls(customMacros, checkStillCurrent, element) {
+  handleRtcForVendorUrls(customMacros, checkStillCurrent) {
     // For each vendor the publisher has specified, inflate the vendor
     // url if it exists, and send the RTC request.
     Object.keys(this.rtcConfig_.vendors || []).forEach((vendor) => {
@@ -388,8 +387,7 @@ export class RealTimeConfigManager {
         macros,
         errorReportingUrl,
         checkStillCurrent,
-        vendor.toLowerCase(),
-        element
+        vendor.toLowerCase()
       );
     });
   }
@@ -400,7 +398,7 @@ export class RealTimeConfigManager {
    * @param {string} errorReportingUrl
    * @param {!Function} checkStillCurrent
    * @param {string=} opt_vendor
-   * @param {!Element} element
+   * @param {!Element=} opt_element
    * @private
    */
   inflateAndSendRtc_(
@@ -409,7 +407,7 @@ export class RealTimeConfigManager {
     errorReportingUrl,
     checkStillCurrent,
     opt_vendor,
-    element
+    opt_element
   ) {
     let {timeoutMillis} = this.rtcConfig_;
     const callout = opt_vendor || this.getCalloutParam_(url);
@@ -457,7 +455,7 @@ export class RealTimeConfigManager {
         callout,
         checkStillCurrent,
         errorReportingUrl,
-        element
+        opt_element
       );
     };
 
@@ -506,7 +504,7 @@ export class RealTimeConfigManager {
    * @param {string} callout
    * @param {!Function} checkStillCurrent
    * @param {string} errorReportingUrl
-   * @param {!Element} element
+   * @param {!Element=} opt_element
    * @return {!Promise<!rtcResponseDef>}
    * @private
    */
@@ -516,11 +514,11 @@ export class RealTimeConfigManager {
     callout,
     checkStillCurrent,
     errorReportingUrl,
-    element
+    opt_element
   ) {
     let rtcFetch;
     if (isAmpScriptUri(url)) {
-      rtcFetch = Services.scriptForDocOrNull(element)
+      rtcFetch = Services.scriptForDocOrNull(opt_element)
         .then((service) => {
           userAssert(service, 'AMP-SCRIPT is not installed.');
           return service.fetch(url);
@@ -625,7 +623,7 @@ export class RealTimeConfigManager {
     customMacros = this.assignMacros(customMacros);
     this.rtcStartTime_ = Date.now();
     this.handleRtcForCustomUrls(customMacros, checkStillCurrent, element);
-    this.handleRtcForVendorUrls(customMacros, checkStillCurrent, element);
+    this.handleRtcForVendorUrls(customMacros, checkStillCurrent);
     return Promise.all(this.promiseArray_);
   }
 
