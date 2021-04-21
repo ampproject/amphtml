@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
+import {Deferred} from '../core/data-structures/promise';
 import {Layout} from '../layout';
 import {Services} from '../services';
-import {cancellation, isBlockedByConsent, reportError} from '../error';
+import {
+  cancellation,
+  isBlockedByConsent,
+  reportError,
+} from '../error-reporting';
 import {computedStyle, toggle} from '../style';
 import {dev, devAssert} from '../log';
 import {
@@ -862,8 +866,7 @@ export class Resource {
         'currently: ',
         this.state_
       );
-      err.associatedElement = this.element;
-      reportError(err);
+      reportError(err, this.element);
       return Promise.reject(err);
     }
 

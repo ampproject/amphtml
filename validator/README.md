@@ -17,14 +17,14 @@ limitations under the License.
 # AMP HTML ⚡ Validator
 
 A validator for the
-[AMP HTML format](https://github.com/ampproject/amphtml/blob/master/README.md).
+[AMP HTML format](https://github.com/ampproject/amphtml/blob/main/README.md).
 
 If you just want to validate a page, please see
 [our documentation over at amp.dev](https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp).
 
 ## Chrome Extension
 
-Please see [js/chromeextension/README.md](https://github.com/ampproject/amphtml/blob/master/validator/js/chromeextension/README.md).
+Please see [js/chromeextension/README.md](https://github.com/ampproject/amphtml/blob/main/validator/js/chromeextension/README.md).
 
 ## Visual Studio Code Extension
 
@@ -33,11 +33,11 @@ An extension for Visual Studio Code
 
 ## Command Line Tool and Node.js API
 
-Please see [js/nodejs/README.md](https://github.com/ampproject/amphtml/blob/master/validator/js/nodejs/README.md).
+Please see [js/nodejs/README.md](https://github.com/ampproject/amphtml/blob/main/validator/js/nodejs/README.md).
 
 ## Web UI
 
-Please see [js/webui/README.md](https://github.com/ampproject/amphtml/blob/master/validator/js/webui/README.md).
+Please see [js/webui/README.md](https://github.com/ampproject/amphtml/blob/main/validator/js/webui/README.md).
 
 ## JSON
 
@@ -59,7 +59,7 @@ around the edges. Below are instructions for Linux Ubuntu 14.
 Install these packages using apt-get:
 
 -   `npm`
--   `openjdk-7-jre`
+-   `default-jdk`
 -   `protobuf-compiler`
 -   `python3`
 -   `python3-pip`

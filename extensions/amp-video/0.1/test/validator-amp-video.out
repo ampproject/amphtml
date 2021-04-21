@@ -59,12 +59,12 @@ amp-video/0.1/test/validator-amp-video.html:49:2 The attribute 'loop' in tag 'am
 |      loop preload="metadata" controls></amp-video>
 |
 |    <!-- Valid: Media Session Attributes -->
-|    <amp-video layout=fill width=300 height=500 
+|    <amp-video layout=fill width=300 height=500
 |      title="Hello" artist="World" artwork="example.jpg" poster="example.jpg"
 |      ></amp-video>
 |
 |    <!-- Valid: Most attributes are bindable -->
-|    <amp-video layout=fill width=300 height=500 
+|    <amp-video layout=fill width=300 height=500
 |      [title]="Hello" [artist]="World" [artwork]="example.jpg" [poster]="example.jpg"
 |      ></amp-video>
 |

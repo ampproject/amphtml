@@ -19,8 +19,8 @@
  * and provides config parameters to other assist.js components.
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {hasOwn} from '../../../src/utils/object';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {hasOwn} from '../../../src/core/types/object';
 
 export class AssistjsConfigService {
   /** */

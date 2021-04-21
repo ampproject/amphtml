@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Deferred} from './promise';
+import {Deferred} from '../core/data-structures/promise';
 import {createViewportObserver} from '../viewport-observer';
+import {dict} from '../core/types/object';
 import {layoutRectFromDomRect} from '../layout-rect';
 import {toWin} from '../types';
 
-/** @type {WeakMap<!Element, Deferred>} */
+/** @type {!WeakMap<!Element, !Deferred>|undefined} */
 let intersectionDeferreds;
 
-/** @type {WeakMap<!Window, IntersectionObserver>} */
+/** @type {!WeakMap<!Window, !IntersectionObserver>|undefined} */
 let intersectionObservers;
 
 /**
  * @param {!Window} win
- * @return {!IntersectionObserve}
+ * @return {!IntersectionObserver}
  */
 function getInOb(win) {
   if (!intersectionDeferreds) {
@@ -34,8 +35,9 @@ function getInOb(win) {
     intersectionObservers = new WeakMap();
   }
 
-  if (!intersectionObservers.has(win)) {
-    const observer = createViewportObserver(
+  let observer = intersectionObservers.get(win);
+  if (!observer) {
+    observer = createViewportObserver(
       (entries) => {
         const seen = new Set();
         for (let i = entries.length - 1; i >= 0; i--) {
@@ -54,9 +56,8 @@ function getInOb(win) {
       {needsRootBounds: true}
     );
     intersectionObservers.set(win, observer);
-    return observer;
   }
-  return intersectionObservers.get(win);
+  return observer;
 }
 
 /**
@@ -65,8 +66,8 @@ function getInOb(win) {
  * If multiple measures for the same element occur very quickly, they will
  * dedupe to the same promise.
  *
- * @param {Element} el
- * @return {!Promise<IntersectionObserverEntry>}
+ * @param {!Element} el
+ * @return {!Promise<!IntersectionObserverEntry>}
  */
 export function measureIntersection(el) {
   if (intersectionDeferreds && intersectionDeferreds.has(el)) {
@@ -85,25 +86,25 @@ export function measureIntersection(el) {
  * Convert an IntersectionObserverEntry to a regular object to make it serializable.
  *
  * @param {!IntersectionObserverEntry} entry
- * @return {!IntersectionObserverEntry}
+ * @return {!JsonObject}
  */
 export function intersectionEntryToJson(entry) {
-  return {
-    time: entry.time,
-    rootBounds: safeLayoutRectFromDomRect(entry.rootBounds),
-    boundingClientRect: safeLayoutRectFromDomRect(entry.boundingClientRect),
-    intersectionRect: safeLayoutRectFromDomRect(entry.intersectionRect),
-    intersectionRatio: entry.intersectionRatio,
-  };
+  return dict({
+    'time': entry.time,
+    'rootBounds': safeLayoutRectFromDomRect(entry.rootBounds),
+    'boundingClientRect': safeLayoutRectFromDomRect(entry.boundingClientRect),
+    'intersectionRect': safeLayoutRectFromDomRect(entry.intersectionRect),
+    'intersectionRatio': entry.intersectionRatio,
+  });
 }
 
 /**
- * @param {DOMRect} rect
- * @return {DOMRect}
+ * @param {?} rect
+ * @return {?../layout-rect.LayoutRectDef}
  */
 function safeLayoutRectFromDomRect(rect) {
   if (rect === null) {
     return null;
   }
-  return layoutRectFromDomRect(rect);
+  return layoutRectFromDomRect(/** @type {!ClientRect} */ (rect));
 }

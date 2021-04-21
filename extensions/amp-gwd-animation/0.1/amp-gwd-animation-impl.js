@@ -15,10 +15,10 @@
  */
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/core/types/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {scopedQuerySelector, waitForChild} from '../../../src/dom';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 /**
  * CSS class used to deactivate animations.

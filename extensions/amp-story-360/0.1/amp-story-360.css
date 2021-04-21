@@ -1,4 +1,4 @@
-  
+
 /**
  * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
@@ -17,8 +17,8 @@
 
 amp-story-360 canvas {
   position: absolute; /* fixes Safari bug */
- 	width: 100% !important;
- 	height: 100% !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 amp-story-360 amp-img {

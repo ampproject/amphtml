@@ -130,7 +130,7 @@ const lintGlobs = [
  *  - forbidden terms: local/no-forbidden-terms
  */
 const presubmitGlobs = [
-  '**/*.{css,go}',
+  '**/*.{css,go,md}',
   '!{node_modules,build,dist,dist.tools,' +
     'dist.3p/[0-9]*,dist.3p/current,dist.3p/current-min}/**/*.*',
   '!out/**/*.*',
@@ -176,6 +176,21 @@ const prettifyGlobs = [
 const linkCheckGlobs = [
   '**/*.md',
   '!**/{examples,node_modules,build,dist,dist.3p,dist.tools}/**',
+];
+
+/**
+ * List of files checked by `amp check-invalid-whitespaces`.
+ * - JS files are already checked by `amp lint` using eslint / prettier.
+ * - Markdown files are ignored because line-breaks use trailing whitespaces.
+ */
+const invalidWhitespaceGlobs = [
+  '**/*.css',
+  '**/*.html',
+  '**/*.out',
+  '**/*.out.cpponly',
+  '**/*.protoascii',
+  '**/*.sh',
+  '!**/{node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
 
 /**
@@ -227,4 +242,5 @@ module.exports = {
   thirdPartyFrames,
   unitTestCrossBrowserPaths,
   unitTestPaths,
+  invalidWhitespaceGlobs,
 };

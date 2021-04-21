@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {getChildJsonConfig} from '../../../src/json';
-import {hasOwn} from '../../../src/utils/object';
+import {hasOwn} from '../../../src/core/types/object';
 import {user, userAssert} from '../../../src/log';
 
 /**
@@ -42,6 +42,7 @@ export function getConfigOpts(element) {
       : {},
 
     vars: hasOwn(config, 'vars') ? config['vars'] : {},
+    scopeDocument: config['scopeDocument'] ?? true,
   };
 }
 

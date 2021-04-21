@@ -39,8 +39,7 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
     git clone git@github.com:<your username>/amphtml.git
     ```
 
-7. Add an alias called `upstream` to refer to the main `ampproject/amphtml` repository. Go to the root directory of the
-   newly created local repository directory and run:
+7. Add an alias called `upstream` to refer to the main `ampproject/amphtml` repository. Go to the root directory of the newly created local repository directory and run:
 
     ```shell
     git remote add upstream git@github.com:ampproject/amphtml.git
@@ -49,22 +48,26 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 8. Fetch data from the `upstream` remote:
 
     ```shell
-    git fetch upstream master
+    git fetch upstream main
     ```
 
-9. Set up your local `master` branch to track `upstream/master` instead of `origin/master` (which will rapidly become
-   outdated).
+9. Set up your local `main` branch to track `upstream/main` instead of `origin/main` (which will rapidly become outdated).
 
     ```shell
-    git branch -u upstream/master master
+    git branch -u upstream/main main
     ```
+
+10. Sign in to these services that are used to validate `amphtml` pull requests.
+    - **CLA Assistant:** Mandatory step, used by AMP's contributor license agreement. Sign in [here](https://cla-assistant.io/ampproject/amphtml) using your GitHub credentials.
+    - **CircleCI:** Mandatory step, used to perform continuous integration testing. Sign in [here](https://app.circleci.com/pipelines/github/ampproject/amphtml) using your GitHub credentials.
+    - **Percy:** Optional step, only needed to approve visual diffs introduced by a PR. Sign in [here](https://percy.io/ampproject/amphtml) using your GitHub credentials and link it to a Browserstack profile.
 
 ## Branch (do this each time you want a new branch)
 
 Create and go to the branch:
 
 ```shell
-git checkout -b <branch name> master
+git checkout -b <branch name> main
 ```
 
 ## Build AMP & run a local server
@@ -97,10 +100,10 @@ git checkout -b <branch name> master
 
 ## Pull the latest changes
 
-1.  Check out the master branch: `git checkout master`
+1.  Check out the main branch: `git checkout main`
 2.  Pull the latest changes: `git pull`
 3.  Check out your branch: `git checkout <branch name>`
-4.  Merge the changes to your branch: `git merge master`
+4.  Merge the changes to your branch: `git merge main`
 
     **Note**: You may need to resolve conflicting changes at this point.
 
@@ -115,8 +118,8 @@ git checkout -b <branch name> master
     ```
 
 3.  Go to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and in the banner indicating you've recently pushed a branch, click the "Compare & pull request" (if this banner does not appear, go to your fork at `https://github.com/<your username>/amphtml`, choose your branch from the "Branch" dropdown and click "New pull request")
-4.  Make sure you've signed the [CLA](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#contributor-license-agreement) (using the same email address as your git config indicates)
-5.  [Find people to review your code](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#code-review-and-approval) and add them as a reviewer on the PR (if you can) or cc them (by adding `/cc @username` in the PR description/comment). If your run into any issues finding the reviewers or have any other questions, ping the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/) on [Slack](https://bit.ly/amp-slack-signup).
+4.  Make sure you've signed the [CLA](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md#contributor-license-agreement) (using the same email address as your git config indicates)
+5.  [Find people to review your code](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md#code-review-and-approval) and add them as a reviewer on the PR (if you can) or cc them (by adding `/cc @username` in the PR description/comment). If your run into any issues finding the reviewers or have any other questions, ping the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/) on [Slack](https://bit.ly/amp-slack-signup).
 6.  If a reviewer requests changes make them locally and then repeat the steps in this section to push the changes to your branch back up to GitHub again.
 7.  For pushes after the first, just use `git push`
 8.  If you don't get a new review within 2 business days, feel free to ping the pull request by adding a comment.
@@ -125,7 +128,7 @@ git checkout -b <branch name> master
 
 ## Delete your branch after your changes are merged (optional)
 
-1.  Go to the master branch: `git checkout master`
+1.  Go to the main branch: `git checkout main`
 2.  Delete your local branch: `git branch -D <branch name>`
 3.  Delete the corresponding GitHub fork branch: `git push -d origin <branch name>`
 

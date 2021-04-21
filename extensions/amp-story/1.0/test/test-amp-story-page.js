@@ -18,7 +18,7 @@ import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
-import {Deferred} from '../../../../src/utils/promise';
+import {Deferred} from '../../../../src/core/data-structures/promise';
 import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {Services} from '../../../../src/services';
@@ -669,7 +669,6 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
         '.i-amphtml-story-inline-page-attachment-img'
       )
     ).to.exist;
-    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', false);
   });
 
   it('should build the inline page attachment UI with two images', async () => {
@@ -697,7 +696,62 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
         '.i-amphtml-story-inline-page-attachment-img'
       ).length
     ).to.equal(2);
-    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', false);
+  });
+
+  it('should build the new default outlink page attachment UI', async () => {
+    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
+
+    const attachmentEl = createElementWithAttributes(
+      win.document,
+      'amp-story-page-attachment',
+      {'layout': 'nodisplay', 'href': 'www.google.com'}
+    );
+    element.appendChild(attachmentEl);
+
+    await page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    expect(
+      openAttachmentEl.querySelector(
+        '.i-amphtml-story-outlink-page-attachment-outlink-chip'
+      )
+    ).to.exist;
+  });
+
+  it('should build the new outlink page attachment UI with icon', async () => {
+    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
+
+    const attachmentEl = createElementWithAttributes(
+      win.document,
+      'amp-story-page-attachment',
+      {
+        'layout': 'nodisplay',
+        'href': 'www.google.com',
+        'theme': 'custom',
+        'cta-accent-color': 'pink',
+        'cta-accent-element': 'text',
+      }
+    );
+    element.appendChild(attachmentEl);
+
+    await page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    expect(
+      openAttachmentEl.querySelector(
+        '.i-amphtml-story-page-open-attachment-link-icon'
+      )
+    ).to.exist;
   });
 
   it('should build the open attachment UI with custom CTA label', async () => {

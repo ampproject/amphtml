@@ -19,7 +19,7 @@ import {childElement, childElementsByTag} from '../../../src/dom';
 import {dev, devAssert} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {listen, listenOnce} from '../../../src/event-helper';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 const TAG = 'amp-video';
 
@@ -285,8 +285,8 @@ export class BitrateManager {
  */
 function onNontrivialWait(video, callback) {
   listen(video, 'waiting', () => {
-    // Do not trigger downgrade if not loaded metadata yet.
-    if (video.readyState < 1) {
+    // Do not trigger downgrade if not loaded metadata yet, or if video is fully loaded (eg: replay).
+    if (video.readyState < 1 || getBufferedPercentage(video) > 0.99) {
       return;
     }
     let timer = null;

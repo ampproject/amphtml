@@ -16,7 +16,8 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {execOrThrow, getOutput} = require('../common/exec');
+const {execOrThrow} = require('../common/exec');
+const {getOutput} = require('../common/process');
 const {green, cyan, red, yellow} = require('kleur/colors');
 const {log} = require('../common/logging');
 
@@ -128,7 +129,7 @@ async function cherryPick() {
   } catch (e) {
     log(red('ERROR:'), e.message);
     log('Deleting branch', cyan(branch));
-    getOutput(`git checkout master && git branch -d ${branch}`);
+    getOutput(`git checkout main && git branch -d ${branch}`);
     throw e;
   }
 }

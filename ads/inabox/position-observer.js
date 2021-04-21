@@ -20,7 +20,7 @@ import {
   layoutRectLtwh,
   moveLayoutRect,
 } from '../../src/layout-rect';
-import {Observable} from '../../src/observable';
+import {Observable} from '../../src/core/data-structures/observable';
 import {throttle} from '../../src/utils/rate-limit';
 
 /**

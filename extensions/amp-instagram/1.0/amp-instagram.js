@@ -16,7 +16,7 @@
 
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-instagram-1.0.css';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 

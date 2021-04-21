@@ -1,7 +1,6 @@
 {
   "allow-doc-opt-in": ["amp-next-page"],
   "allow-url-opt-in": [],
-  "amp-accordion-display-locking": 1,
   "canary": 1,
   "a4aProfilingRate": 0.01,
   "adsense-ad-size-optimization": 1,
@@ -14,7 +13,7 @@
   "visibility-trigger-improvements": 1,
   "ads-initialIntersection": 1,
   "amp-cid-backup": 1,
-  "sticky-ad-transition": 0.1,
+  "sticky-ad-transition": 1,
   "layout-aspect-ratio-css": 1,
   "tcf-post-message-proxy-api": 1,
   "amp-consent-granular-consent": 1,

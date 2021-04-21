@@ -15,7 +15,7 @@
  */
 
 import {MessageType} from '../../src/3p-frame-messaging';
-import {Observable} from '../observable';
+import {Observable} from '../core/data-structures/observable';
 import {Services} from '../services';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
 import {ViewportInterface} from '../service/viewport/viewport-interface';

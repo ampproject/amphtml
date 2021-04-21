@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
@@ -27,7 +28,7 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
 import {
   dispatchCustomEvent,
@@ -109,6 +110,9 @@ class AmpJWPlayer extends AMP.BaseElement {
 
     /** @private {?function()} */
     this.unlistenFullscreen_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /** @override */
@@ -334,6 +338,8 @@ class AmpJWPlayer extends AMP.BaseElement {
       this.iframe_ = null;
     }
 
+    this.pauseHelper_.updatePlaying(false);
+
     return true; // Call layoutCallback again.
   }
 
@@ -411,6 +417,17 @@ class AmpJWPlayer extends AMP.BaseElement {
     if (event === 'ready') {
       detail && this.onReadyOnce_(detail);
       return;
+    }
+
+    switch (event) {
+      case 'play':
+      case 'adPlay':
+        this.pauseHelper_.updatePlaying(true);
+        break;
+      case 'pause':
+      case 'complete':
+        this.pauseHelper_.updatePlaying(false);
+        break;
     }
 
     const {element} = this;

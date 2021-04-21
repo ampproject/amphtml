@@ -25,33 +25,34 @@ const {
   ciPullRequestBranch,
   ciPullRequestSha,
 } = require('./ci');
-const {getStdout} = require('./exec');
+const {getStdout} = require('./process');
 
 /**
- * Returns the commit at which the current PR branch was forked off of master.
- * During CI, there is an additional merge commit, so we must pick the first of
- * the boundary commits (prefixed with a -) returned by git rev-list.
- * On local branches, this is merge base of the current branch off of master.
+ * Returns the commit at which the current PR branch was forked off of the main
+ * branch. During CI, there is an additional merge commit, so we must pick the
+ * first of the boundary commits (prefixed with a -) returned by git rev-list.
+ * On local branches, this is merge base of the current branch off of the main
+ * branch.
  * @return {string}
  */
 function gitBranchCreationPoint() {
   if (isPullRequestBuild()) {
     const prSha = ciPullRequestSha();
     return getStdout(
-      `git rev-list --boundary ${prSha}...origin/master | grep "^-" | head -n 1 | cut -c2-`
+      `git rev-list --boundary ${prSha}...origin/main | grep "^-" | head -n 1 | cut -c2-`
     ).trim();
   }
-  return gitMergeBaseLocalMaster();
+  return gitMergeBaseLocalMain();
 }
 
 /**
- * Returns the `master` parent of the merge commit (current HEAD) during CI
- * builds. This is not the same as origin/master (a moving target), since
+ * Returns the main branch parent of the merge commit (current HEAD) during CI
+ * builds. This is not the same as origin/<main branch> (a moving target), since
  * new commits can be merged while a CI build is in progress.
  * @return {string}
  */
-function gitCiMasterBaseline() {
-  return getStdout('git merge-base origin/master HEAD').trim();
+function gitCiMainBaseline() {
+  return getStdout('git merge-base origin/main HEAD').trim();
 }
 
 /**
@@ -73,29 +74,29 @@ function gitDiffNameOnly() {
 }
 
 /**
- * Returns the list of files changed relative to the branch point off of master,
- * one on each line.
+ * Returns the list of files changed relative to the branch point off of the
+ * main branch, one on each line.
  * @return {!Array<string>}
  */
-function gitDiffNameOnlyMaster() {
-  const masterBaseline = gitMasterBaseline();
-  return getStdout(`git diff --name-only ${masterBaseline}`).trim().split('\n');
+function gitDiffNameOnlyMain() {
+  const mainBaseline = gitMainBaseline();
+  return getStdout(`git diff --name-only ${mainBaseline}`).trim().split('\n');
 }
 
 /**
- * Returns the list of files changed relative to the branch point off of master,
- * in diffstat format.
+ * Returns the list of files changed relative to the branch point off of the
+ * main branch in diffstat format.
  * @return {string}
  */
-function gitDiffStatMaster() {
-  const masterBaseline = gitMasterBaseline();
-  return getStdout(`git -c color.ui=always diff --stat ${masterBaseline}`);
+function gitDiffStatMain() {
+  const mainBaseline = gitMainBaseline();
+  return getStdout(`git -c color.ui=always diff --stat ${mainBaseline}`);
 }
 
 /**
  * Returns a detailed log of commits included in a PR check, starting with (and
- * including) the branch point off of master. Limited to commits in the past
- * 30 days to keep the output sane.
+ * including) the branch point off of the main branch. Limited to commits in the
+ * past 30 days to keep the output length manageable.
  *
  * @return {string}
  */
@@ -110,11 +111,11 @@ function gitDiffCommitLog() {
 
 /**
  * Returns the list of files added by the local branch relative to the branch
- * point off of master, one on each line.
+ * point off of the main branch, one on each line.
  * @return {!Array<string>}
  */
-function gitDiffAddedNameOnlyMaster() {
-  const branchPoint = gitMergeBaseLocalMaster();
+function gitDiffAddedNameOnlyMain() {
+  const branchPoint = gitMergeBaseLocalMain();
   return getStdout(`git diff --name-only --diff-filter=ARC ${branchPoint}`)
     .trim()
     .split('\n');
@@ -129,13 +130,14 @@ function gitDiffColor() {
 }
 
 /**
- * Returns the full color diff of the given file relative to the branch point off of master.
+ * Returns the full color diff of the given file relative to the branch point
+ * off of the main branch.
  * @param {string} file
  * @return {string}
  */
-function gitDiffFileMaster(file) {
-  const masterBaseline = gitMasterBaseline();
-  return getStdout(`git -c color.ui=always diff -U1 ${masterBaseline} ${file}`);
+function gitDiffFileMain(file) {
+  const mainBaseline = gitMainBaseline();
+  return getStdout(`git -c color.ui=always diff -U1 ${mainBaseline} ${file}`);
 }
 
 /**
@@ -168,7 +170,8 @@ function gitCommitterEmail() {
 }
 
 /**
- * Returns list of commit SHAs and their cherry-pick status from master.
+ * Returns list of commit SHAs and their cherry-pick status from the main
+ * branch.
  *
  * `git cherry <branch>` returns a list of commit SHAs. While the exact
  * mechanism is too complicated for this comment (run `git help cherry` for a
@@ -178,8 +181,8 @@ function gitCommitterEmail() {
  *
  * @return {!Array<string>}
  */
-function gitCherryMaster() {
-  const stdout = getStdout('git cherry master').trim();
+function gitCherryMain() {
+  const stdout = getStdout('git cherry main').trim();
   return stdout ? stdout.split('\n') : [];
 }
 
@@ -198,23 +201,24 @@ function gitCommitFormattedTime(ref = 'HEAD') {
 }
 
 /**
- * Returns the merge base of the current branch off of master when running on
- * a local workspace.
+ * Returns the merge base of the current branch off of the main branch when
+ * running on a local workspace.
  * @return {string}
  */
-function gitMergeBaseLocalMaster() {
-  return getStdout('git merge-base master HEAD').trim();
+function gitMergeBaseLocalMain() {
+  return getStdout('git merge-base main HEAD').trim();
 }
 
 /**
- * Returns the master baseline commit, regardless of running environment.
+ * Returns the baseline commit from the main branch, regardless of running
+ * environment.
  * @return {string}
  */
-function gitMasterBaseline() {
+function gitMainBaseline() {
   if (isCiBuild()) {
-    return gitCiMasterBaseline();
+    return gitCiMainBaseline();
   }
-  return gitMergeBaseLocalMaster();
+  return gitMergeBaseLocalMain();
 }
 
 /**
@@ -230,18 +234,18 @@ function gitDiffPath(path, commit) {
 module.exports = {
   gitBranchCreationPoint,
   gitBranchName,
-  gitCherryMaster,
+  gitCherryMain,
   gitCommitFormattedTime,
   gitCommitHash,
   gitCommitterEmail,
-  gitDiffAddedNameOnlyMaster,
+  gitDiffAddedNameOnlyMain,
   gitDiffColor,
   gitDiffCommitLog,
-  gitDiffFileMaster,
+  gitDiffFileMain,
   gitDiffNameOnly,
-  gitDiffNameOnlyMaster,
+  gitDiffNameOnlyMain,
   gitDiffPath,
-  gitDiffStatMaster,
-  gitCiMasterBaseline,
+  gitDiffStatMain,
+  gitCiMainBaseline,
   shortSha,
 };
