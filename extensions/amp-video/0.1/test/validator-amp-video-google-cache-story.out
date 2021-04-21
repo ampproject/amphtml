@@ -34,7 +34,7 @@ PASS
 |    <amp-story standalone title="My Story" publisher="Me" publisher-logo-src="http://me.com/logo.png" poster-portrait-src="http://me.com/portrait.jpg" poster-square-src="http://me.com/square.jpg" poster-landscape-src="http://me.com/landscape.jpg" background-audio="http://me.com/path/to/my.mp3" entity="Someone else" entity-logo-src="http://someoneelse.com/logo.png" entity-url="http://someoneelse.com/profile">
 |      <amp-story-page id="1" background-audio="path/to/my.mp3" auto-advance-after="any-value">
 |        <amp-story-grid-layer template="horizontal">
-|          <amp-video enable-google-video-cache
+|          <amp-video cache="google"
 |            autoplay
 |            width="640"
 |            height="360"
