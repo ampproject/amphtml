@@ -232,3 +232,76 @@ export function SidebarToolbar({
     </>
   );
 }
+
+/**
+ * @param {!SidebarDef.SidebarToolbarProps} props
+ * @return {PreactDef.Renderable}
+ */
+export function ToolbarHelper({
+  toolbar: mediaQueryProp,
+  toolbarTarget,
+  children,
+  ...rest
+}) {
+  const ref = useRef();
+  const [matches, setMatches] = useState(false);
+  const [targetEl, setTargetEl] = useState(null);
+
+  useEffect(() => {
+    const window = ref.current?.ownerDocument?.defaultView;
+    if (!window) {
+      return;
+    }
+
+    const mediaQueryList = window.matchMedia(mediaQueryProp);
+    const updateMatches = () => setMatches(mediaQueryList.matches);
+    mediaQueryList.addEventListener('change', updateMatches);
+    setMatches(mediaQueryList.matches);
+    return () => mediaQueryList.removeEventListener('change', updateMatches);
+  }, [mediaQueryProp]);
+
+  useEffect(() => {
+    const document = ref.current?.ownerDocument;
+    if (!document) {
+      return;
+    }
+
+    const selector = `#${CSS.escape(toolbarTarget)}`;
+    const newTargetEl = document.querySelector(selector);
+    setTargetEl(newTargetEl);
+  }, [toolbarTarget]);
+
+  return (
+    <>
+      <nav
+        ref={ref}
+        toolbar={mediaQueryProp}
+        toolbar-target={toolbarTarget}
+        {...rest}
+      ></nav>
+      {matches && targetEl && createPortal(children, targetEl)}
+    </>
+  );
+}
+
+export function SlotHelper({dom}) {
+  const ref = useRef();
+  useEffect(() => {
+    const elm = ref.current;
+    if (!elm) {
+      return;
+    }
+
+    const clone = dom.cloneNode(true);
+    elm.appendChild(clone);
+  });
+  return <div ref={ref}></div>;
+}
+
+/**
+ * @param {!SidebarDef.SidebarToolbarProps} props
+ * @return {PreactDef.Renderable}
+ */
+export function Tester() {
+  return <div>Hello world!</div>;
+}

@@ -1,4 +1,4 @@
-/**
+/** @override */ /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
+import * as Preact from '../../../src/preact';
 import {CSS as COMPONENT_CSS} from './component.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
-import {Sidebar} from './component';
+import {Sidebar, SlotHelper, ToolbarHelper} from './component';
 import {dict} from '../../../src/utils/object';
 import {pauseAll} from '../../../src/utils/resource-container-helper';
 import {toggle} from '../../../src/style';
 import {toggleAttribute} from '../../../src/dom';
 
 export class BaseElement extends PreactBaseElement {
+  /** @override */
+  static deferredMount(unusedElement) {
+    console.log('element', unusedElement);
+    return false;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -37,6 +44,30 @@ export class BaseElement extends PreactBaseElement {
       'onBeforeOpen': () => this.beforeOpen_(),
       'onAfterOpen': () => this.afterOpen_(),
       'onAfterClose': () => this.afterClose_(),
+    });
+  }
+
+  /** @override */
+  updatePropsForRendering(props) {
+    //props['children'].push(<ToolbarHelper />);
+    console.log('props', props, props['children']);
+    console.log(this.element.children);
+
+    this.getRealChildNodes().map((child) => {
+      if (
+        child.nodeName === 'NAV' &&
+        child.hasAttribute('toolbar') &&
+        child.hasAttribute('toolbar-target')
+      ) {
+        props['children'].push(
+          <ToolbarHelper
+            toolbar={child.getAttribute('toolbar')}
+            toolbarTarget={child.getAttribute('toolbar-target')}
+          >
+            <SlotHelper dom={child.children[0]}></SlotHelper>
+          </ToolbarHelper>
+        );
+      }
     });
   }
 
