@@ -208,10 +208,20 @@ describes.realWin(
       doc.body.appendChild(element);
 
       await getRenderedData();
+      let options = fetchJsonStub.getCall(0).args[2];
+      // verify initial call to `batchFetchJsonFor`
+      expect(options.refresh).to.be.false;
+      expect(options.xssiPrefix).to.be.null;
+      expect(options.expr).to.equal('.');
 
       element.enqueAction(invocation('refresh'));
       await getRenderedData();
       expect(fetchJsonStub).to.have.been.calledTwice;
+      options = fetchJsonStub.getCall(1).args[2];
+      // verify subsequent call to `batchFetchJsonFor`
+      expect(options.refresh).to.be.true;
+      expect(options.xssiPrefix).to.be.null;
+      expect(options.expr).to.equal('.');
     });
 
     it('should not re-fetch when src=amp-state', async () => {
@@ -304,6 +314,49 @@ describes.realWin(
       await getRenderedData();
       expect(ampScript.getImpl).to.have.been.calledOnce;
       expect(fetchJsonStub).not.to.have.been.called;
+    });
+
+    it('should use the specified xssi-prefix and key attributes', async () => {
+      const json = {
+        fullName: {
+          firstName: 'Joe',
+          lastName: 'Biden',
+        },
+      };
+
+      const fetchJsonStub = env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .callThrough();
+
+      env.sandbox.stub(Services, 'batchedXhrFor').returns({
+        fetchJson: () => Promise.resolve(json),
+      });
+
+      env.sandbox.stub(Services, 'xhrFor').returns({
+        fetch: () => Promise.resolve(json),
+        xssiJson: () => Promise.resolve(json),
+      });
+
+      element = html`
+        <amp-render
+          xssi-prefix=")]}"
+          key="fullName"
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache">{{lastName}}, {{firstName}}</template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      const text = await getRenderedData();
+      expect(text).to.equal('Biden, Joe');
+      const options = fetchJsonStub.getCall(0).args[2];
+      expect(options.xssiPrefix).to.equal(')]}');
+      expect(options.expr).to.equal('fullName');
+      expect(options.refresh).to.be.false;
     });
   }
 );
