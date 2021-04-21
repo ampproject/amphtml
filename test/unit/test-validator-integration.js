@@ -28,7 +28,9 @@ describes.fakeWin('validator-integration', {}, (env) => {
   describe('maybeValidate', () => {
     beforeEach(() => {
       win = env.win;
-      loadScriptStub = env.sandbox.stub(eventHelper, 'loadPromise').returns(Promise.resolve());
+      loadScriptStub = env.sandbox
+        .stub(eventHelper, 'loadPromise')
+        .returns(Promise.resolve());
       modeStub = env.sandbox.stub(mode, 'getMode');
     });
 
@@ -57,7 +59,11 @@ describes.fakeWin('validator-integration', {}, (env) => {
       win.location = 'https://www.example.com/#development=1';
       maybeValidate(win);
       expect(loadScriptStub).to.have.been.calledWith(
-        env.sandbox.match((el) => el.getAttribute('src') === 'https://cdn.ampproject.org/v0/validator.js')
+        env.sandbox.match(
+          (el) =>
+            el.getAttribute('src') ===
+            'https://cdn.ampproject.org/v0/validator.js'
+        )
       );
     });
 
@@ -66,7 +72,11 @@ describes.fakeWin('validator-integration', {}, (env) => {
       win.location = 'https://www.example.com/#development=1&validate=wasm';
       maybeValidate(win);
       expect(loadScriptStub).to.have.been.calledWith(
-        env.sandbox.match((el) => el.getAttribute('src') === 'https://cdn.ampproject.org/v0/validator_wasm.js')
+        env.sandbox.match(
+          (el) =>
+            el.getAttribute('src') ===
+            'https://cdn.ampproject.org/v0/validator_wasm.js'
+        )
       );
     });
   });
