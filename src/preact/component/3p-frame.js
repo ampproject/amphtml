@@ -94,23 +94,23 @@ function ProxyIframeEmbedWithRef(
     if (!win) {
       return;
     }
-    const context = dict({
-      'location': {
-        'href': win.location.href,
-      },
-      'sentinel': generateSentinel(win),
-    });
-    for (const key in contextOptions) {
-      context[key] = contextOptions[key];
-    }
-    const attrs = dict({
-      'title': title,
-      'type': type,
-      '_context': context,
-    });
-    for (const key in options) {
-      attrs[key] = options[key];
-    }
+    const context = Object.assign(
+      dict({
+        'location': {
+          'href': win.location.href,
+        },
+        'sentinel': generateSentinel(win),
+      }),
+      contextOptions
+    );
+    const attrs = Object.assign(
+      dict({
+        'title': title,
+        'type': type,
+        '_context': context,
+      }),
+      options
+    );
     setNameAndSrc({
       name: JSON.stringify(
         dict({
