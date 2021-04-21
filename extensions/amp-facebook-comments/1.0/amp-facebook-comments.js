@@ -16,8 +16,8 @@
 
 import {BaseElement} from './base-element';
 import {createLoaderLogo} from '../../amp-facebook/0.1/facebook-loader';
-import {dashToUnderline} from '../../../src/string';
-import {dict} from '../../../src/utils/object';
+import {dashToUnderline} from '../../../src/core/types/string';
+import {dict} from '../../../src/core/types/object';
 import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';

@@ -16,7 +16,7 @@
 
 import {FacebookComments} from './component';
 import {PreactBaseElement} from '../../../src/preact/base-element';
-import {dashToUnderline} from '../../../src/string';
+import {dashToUnderline} from '../../../src/core/types/string';
 
 export class BaseElement extends PreactBaseElement {}
 
