@@ -829,7 +829,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-xhr.js',
       'test/unit/utils/test-base64.js',
       'test/unit/utils/test-bytes.js',
-      'test/unit/utils/test-rate-limit.js',
       'test/unit/web-worker/test-amp-worker.js',
     ],
     checkInTestFolder: true,
