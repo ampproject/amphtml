@@ -256,7 +256,7 @@
   background: linear-gradient(0, rgba(255, 255, 255, 0.30), transparent) !important;
 }
 
-.i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment.i-amphtml-story-page-open-attachment-outlink {
+[href].i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
   background: none !important;
 }
 
