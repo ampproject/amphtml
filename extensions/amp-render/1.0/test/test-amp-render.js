@@ -212,7 +212,7 @@ describes.realWin(
       // verify initial call to `batchFetchJsonFor`
       expect(options.refresh).to.be.false;
       expect(options.xssiPrefix).to.be.null;
-      expect(options.expr).to.be.equal('.');
+      expect(options.expr).to.equal('.');
 
       element.enqueAction(invocation('refresh'));
       await getRenderedData();
