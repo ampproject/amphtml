@@ -994,7 +994,7 @@ const forbiddenTermsSrcInclusive = {
       '.github/workflows/create-design-review-issue.js',
       'extensions/amp-timeago/0.1/amp-timeago.js',
       'extensions/amp-timeago/1.0/component.js',
-      'src/utils/date.js',
+      'src/core/types/date.js',
     ],
   },
   '\\.expandStringSync\\(': {
