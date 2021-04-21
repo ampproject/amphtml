@@ -98,6 +98,10 @@ describes.realWin(
         expect(impl.preimplementsMediaSessionAPI()).to.be.false;
       });
 
+      it('does not implement PlayedRanges', () => {
+        expect(impl.getPlayedRanges().length).to.equal(0);
+      });
+
       it('gets currentTime', () => {
         expect(impl.getCurrentTime()).to.equal(0);
         impl.currentTime_ = 10;
@@ -107,6 +111,10 @@ describes.realWin(
       it('gets duration', () => {
         impl.duration_ = 20;
         expect(impl.getDuration()).to.equal(impl.duration_);
+      });
+
+      it('is fullscreen', () => {
+        expect(impl.isFullscreen()).to.be.false;
       });
 
       it('can play', () => {
@@ -131,6 +139,18 @@ describes.realWin(
         env.sandbox.spy(impl, 'sendCommand_');
         impl.unmute();
         expect(impl.sendCommand_).calledWith('muted', false);
+      });
+
+      it('call unlayoutCallback', () => {
+        const unlistenMessageSpy = env.sandbox.spy(impl, 'unlistenMessage_');
+        const unlistenFullscreenSpy = env.sandbox.spy(
+          impl,
+          'unlistenFullscreen_'
+        );
+        expect(impl.unlayoutCallback()).to.be.true;
+        expect(impl.iframe_).to.be.null;
+        expect(unlistenMessageSpy).to.be.calledOnce;
+        expect(unlistenFullscreenSpy).to.be.calledOnce;
       });
 
       describe('message handling', () => {
@@ -168,6 +188,27 @@ describes.realWin(
           mockMessage('time', mockTime);
           expect(impl.getCurrentTime()).to.equal(mockTime.currentTime);
           expect(impl.getDuration()).to.equal(mockTime.duration);
+        });
+
+        it('updates fullscreen from state', () => {
+          const isFullscreen = env.sandbox.stub(impl, 'isFullscreen');
+          const fullscreenEnterSpy = env.sandbox.spy(impl, 'fullscreenEnter');
+          const fullscreenExitSpy = env.sandbox.spy(impl, 'fullscreenExit');
+
+          isFullscreen.returns(false);
+          mockMessage('fullscreen', {fullscreen: true});
+          expect(fullscreenEnterSpy.callCount).to.equal(1);
+          expect(fullscreenExitSpy.callCount).to.equal(0);
+
+          isFullscreen.returns(true);
+          mockMessage('fullscreen', {fullscreen: false});
+          expect(fullscreenEnterSpy.callCount).to.equal(1);
+          expect(fullscreenExitSpy.callCount).to.equal(1);
+
+          isFullscreen.returns(false);
+          mockMessage('fullscreen', {fullscreen: false});
+          expect(fullscreenEnterSpy.callCount).to.equal(1);
+          expect(fullscreenExitSpy.callCount).to.equal(1);
         });
       });
     });
