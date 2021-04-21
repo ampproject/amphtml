@@ -16,6 +16,7 @@
 
 import {FocusHistory} from '../focus-history';
 import {MutatorInterface} from './mutator-interface';
+import {ResizerV2} from './resizer-v2';
 import {Resource} from './resource';
 import {Services} from '../services';
 import {areMarginsChanged} from '../layout-rect';
@@ -58,6 +59,9 @@ export class MutatorImpl {
     this.activeHistory_.onFocus((element) => {
       this.checkPendingChangeSize_(element);
     });
+
+    /** @private @const */
+    this.resizer_ = new ResizerV2(ampdoc);
   }
 
   /** @override */
@@ -321,6 +325,18 @@ export class MutatorImpl {
     force,
     opt_callback
   ) {
+    // DO NOT SUBMIT: testing
+    this.resizer_.tryChangeSize(
+      resource.element,
+      newHeight,
+      newWidth,
+      newMargins,
+      event,
+      force,
+      () => {},
+      () => {}
+    );
+
     if (resource.hasBeenMeasured() && !newMargins) {
       this.completeScheduleChangeSize_(
         resource,
