@@ -32,12 +32,20 @@ const EMPTY = {};
 /**
  * @param {!Element} element
  * @param {string} name
- * @param {!Object|undefined} props
- * @return {!PreactDef.VNode}
+ * @param {!Object|undefined} defaultProps
+ * @param {boolean} as
+ * @return {!PreactDef.VNode|!PreactDef.FunctionalComponent}
  */
-export function createSlot(element, name, props) {
+export function createSlot(element, name, defaultProps, as) {
+  /**
+   * @param {!Object|undefined} props
+   * @return {!PreactDef.VNode}
+   */
+  function SlotWithProps(props) {
+    return <Slot {...(defaultProps || EMPTY)} name={name} {...props} />;
+  }
   element.setAttribute('slot', name);
-  return <Slot {...(props || EMPTY)} name={name} />;
+  return as ? SlotWithProps : SlotWithProps();
 }
 
 /**

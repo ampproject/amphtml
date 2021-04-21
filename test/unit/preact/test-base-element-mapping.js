@@ -561,6 +561,19 @@ describes.realWin('PreactBaseElement', spec, (env) => {
           selector: '[special2]',
           single: true,
         },
+        'specialAs': {
+          selector: '[special3]',
+          props: {
+            'noValue': {attr: 'no-value'},
+            'valueWithDef': {attr: 'value-with-def', default: 'DEFAULT'},
+            'propA': {attr: 'prop-a'},
+            'minFontSize': {attr: 'min-font-size', type: 'number'},
+            'disabled': {attr: 'disabled', type: 'boolean'},
+            'enabled': {attr: 'enabled', type: 'boolean'},
+          },
+          single: true,
+          as: true,
+        },
         'children': {
           props: {
             'boolDefTrue': {
@@ -584,6 +597,13 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         <amp-preact layout="fixed" width="100" height="100">
           <div
             special1
+            prop-a="A"
+            min-font-size="72"
+            disabled
+            unknown="1"
+          ></div>
+          <div
+            special3
             prop-a="A"
             min-font-size="72"
             disabled
@@ -645,6 +665,38 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
       expect(element.querySelector('[special1]').slot).to.equal(
         'i-amphtml-special1'
+      );
+    });
+
+    it('should pass children as functional prop slot for single-element mapping with "as" and parse attributes', () => {
+      const {specialAs: Comp} = lastProps;
+      expect(typeof Comp).to.equal('function');
+      expect(Comp.name).to.equal('SlotWithProps');
+
+      const special3 = Comp();
+      expect(special3.props).to.deep.equal({
+        valueWithDef: 'DEFAULT',
+        propA: 'A',
+        minFontSize: 72,
+        disabled: true,
+        name: 'i-amphtml-specialAs',
+      });
+
+      const special3WithProps = Comp({
+        'aria-disabled': 'false',
+        disabled: false,
+      });
+      expect(special3WithProps.props).to.deep.equal({
+        valueWithDef: 'DEFAULT',
+        propA: 'A',
+        minFontSize: 72,
+        name: 'i-amphtml-specialAs',
+        'aria-disabled': 'false',
+        disabled: false,
+      });
+
+      expect(element.querySelector('[special3]').slot).to.equal(
+        'i-amphtml-specialAs'
       );
     });
 
