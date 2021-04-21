@@ -17,12 +17,13 @@
 import {BaseElement} from './base-element';
 import {
   BatchFetchOptionsDef,
+  UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {Services} from '../../../src/services';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {isAmpScriptUri} from '../../../src/url';
+import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
 import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
@@ -72,14 +73,35 @@ const getAmpStateJson = (element, src) => {
 
 /**
  * @param {!AmpElement} element
+ * @param {?string} initialSrc
+ * @return {!UrlReplacementPolicy}
+ */
+function getUrlReplacementPolicy(element, initialSrc) {
+  const src = element.getAttribute('src');
+  // Require opt-in for URL variable replacements on CORS fetches triggered
+  // by [src] mutation. @see spec/amp-var-substitutions.md
+  let policy = UrlReplacementPolicy.OPT_IN;
+  if (
+    src === initialSrc ||
+    getSourceOrigin(src) === getSourceOrigin(element.getAmpDoc().win.location)
+  ) {
+    policy = UrlReplacementPolicy.ALL;
+  }
+  return policy;
+}
+
+/**
+ * @param {!AmpElement} element
  * @param {boolean} shouldRefresh true to force refresh of browser cache.
+ * @param initialSrc
  * @return {!BatchFetchOptionsDef} options object to pass to `batchFetchJsonFor` method.
  */
-function buildOptionsObject(element, shouldRefresh = false) {
+function buildOptionsObject(element, shouldRefresh = false, initialSrc) {
   return {
     xssiPrefix: element.getAttribute('xssi-prefix'),
     expr: element.getAttribute('key') ?? '.',
     refresh: shouldRefresh,
+    urlReplacement: getUrlReplacementPolicy(element, initialSrc),
   };
 }
 
@@ -110,7 +132,7 @@ export function getJsonFn(element) {
     batchFetchJsonFor(
       element.getAmpDoc(),
       element,
-      buildOptionsObject(element, shouldRefresh)
+      buildOptionsObject(element, shouldRefresh, initialSrc)
     );
 }
 
@@ -124,6 +146,9 @@ export class AmpRender extends BaseElement {
 
     /** @private {?Element} */
     this.template_ = null;
+
+    /** @private {?string} */
+    this.initialSrc_ = this.element.getAttribute('src');
   }
 
   /** @override */
