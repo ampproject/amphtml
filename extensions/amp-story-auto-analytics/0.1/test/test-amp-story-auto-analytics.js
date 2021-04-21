@@ -53,5 +53,12 @@ describes.realWin(
       expect(autoAnalyticsEl.querySelector('amp-analytics[type="gtag"]')).to
         .exist;
     });
+
+    it('should add linker support by default', async () => {
+      await autoAnalyticsEl.whenBuilt();
+      expect(autoAnalyticsEl.querySelector('script').textContent).to.contain(
+        '"linkers":{"enabled":true,"proxyOnly":false,"linker":{"ids":{"cid":"CLIENT_ID(cid)"}}}'
+      );
+    });
   }
 );
