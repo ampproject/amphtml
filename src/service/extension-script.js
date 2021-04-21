@@ -238,6 +238,21 @@ export function extensionScriptsInNode(head) {
 }
 
 /**
+ * Verifies that an extension script is present in head for
+ * installation.
+ * @param {!Window} win
+ * @param {string} id
+ * @param {string} version
+ * @return {boolean}
+ */
+export function extensionScriptInNode(win, id, version) {
+  return extensionScriptsInNode(win.document.head).some(
+    ({extensionId, extensionVersion}) =>
+      id == extensionId && version == extensionVersion
+  );
+}
+
+/**
  * @param {string} extensionId
  * @return {boolean}
  */
