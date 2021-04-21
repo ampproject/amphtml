@@ -241,18 +241,12 @@
 .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
   --i-amphtml-outlink-cta-background-color: white !important;
   --i-amphtml-outlink-cta-text-color: black !important;
-}
-
-[theme="dark"].i-amphtml-story-page-open-attachment {
-  --i-amphtml-outlink-cta-background-color: black !important;
-  --i-amphtml-outlink-cta-text-color: white !important;
-}
-
-.i-amphtml-story-page-open-attachment.i-amphtml-amp-story-page-attachment-ui-v2 {
   background: linear-gradient(0, rgba(0, 0, 0, 0.30), transparent) !important;
 }
 
 [theme="dark"].i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
+  --i-amphtml-outlink-cta-background-color: black !important;
+  --i-amphtml-outlink-cta-text-color: white !important;
   background: linear-gradient(0, rgba(255, 255, 255, 0.30), transparent) !important;
 }
 
