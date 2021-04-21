@@ -47,7 +47,7 @@ import {getMode} from '../mode';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
 import {isFiniteNumber} from '../types';
 import {measureIntersection} from '../utils/intersection';
-import {once} from '../utils/function';
+import {once} from '../core/types/function';
 import {registerServiceBuilderForDoc} from '../service';
 import {renderIcon, renderInteractionOverlay} from './video/autoplay';
 import {toggle} from '../style';

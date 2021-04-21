@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../core/data-structures/promise';
-import {map} from '../core/types/object';
+import {Deferred} from './promise';
+import {map} from '../types/object';
 
 /**
  * This object tracts signals and allows blocking until a signal has been
@@ -29,7 +29,7 @@ export class Signals {
     /**
      * A mapping from a signal name to the signal response: either time or
      * an error.
-     * @private @const {!Object<string, (time|!Error)>}
+     * @private @const {!Object<string, (Timestamp|!Error)>}
      */
     this.map_ = map();
 
@@ -38,7 +38,7 @@ export class Signals {
      * Only allocated when promise has been requested.
      * @private {?Object<string, {
      *   promise: !Promise,
-     *   resolve: (function(time)|undefined),
+     *   resolve: (function(Timestamp)|undefined),
      *   reject: (function(!Error)|undefined)
      * }>}
      */
@@ -60,7 +60,7 @@ export class Signals {
    * Returns the promise that's resolved when the signal is triggered. The
    * resolved value is the time of the signal.
    * @param {string} name
-   * @return {!Promise<time>}
+   * @return {!Promise<Timestamp>}
    */
   whenSignal(name) {
     let promiseStruct = this.promiseMap_ && this.promiseMap_[name];
@@ -92,9 +92,9 @@ export class Signals {
   /**
    * Triggers the signal with the specified name on the element. The time is
    * optional; if not provided, the current time is used. The associated
-   * promise is resolved with the resulting time.
+   * promise is resolved with the resulting Timestamp.
    * @param {string} name
-   * @param {time=} opt_time
+   * @param {Timestamp=} opt_time
    */
   signal(name, opt_time) {
     if (this.map_[name] != null) {
