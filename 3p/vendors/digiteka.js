@@ -14,25 +14,15 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../../3p/3p';
+// src/polyfills.js must be the first import.
+import '../polyfills';
 
-/**
- * @param {!Window} global
- * @param {!Object} data
- */
-export function digiteka(global, data) {
-  /*eslint "google-camelcase/google-camelcase": 0*/
-  global._digiteka_amp = {
-    allowed_data: ['mdtk', 'zone', 'adunit', 'params'],
-    mandatory_data: ['mdtk', 'zone'],
-    data,
-  };
+import {draw3p, init} from '../integration-lib';
+import {register} from '../3p';
 
-  validateData(
-    data,
-    global._digiteka_amp.mandatory_data,
-    global._digiteka_amp.allowed_data
-  );
+import {digiteka} from '../../ads/vendors/digiteka';
 
-  loadScript(global, 'https://ot.digiteka.com/amp.js');
-}
+init(window);
+register('digiteka', digiteka);
+
+window.draw3p = draw3p;
