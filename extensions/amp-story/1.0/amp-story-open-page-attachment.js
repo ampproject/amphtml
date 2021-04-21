@@ -70,7 +70,7 @@ export const buildOpenInlineAttachmentElement = (element) =>
  */
 const buildOpenOutlinkAttachmentElement = (element) =>
   htmlFor(element)`
-     <a class="i-amphtml-story-page-open-attachment i-amphtml-amp-story-page-attachment-ui-v2"
+     <a class="i-amphtml-story-page-open-attachment i-amphtml-story-page-open-attachment-outlink i-amphtml-amp-story-page-attachment-ui-v2"
          role="button">
        <span class="i-amphtml-story-outlink-page-attachment-arrow">
          <span class="i-amphtml-story-outlink-page-open-attachment-bar-left"></span>
@@ -113,6 +113,11 @@ export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
  */
 const renderDefaultPageAttachmentUI = (win, pageEl, attachmentEl) => {
   const openAttachmentEl = buildOpenDefaultAttachmentElement(pageEl);
+  if (isPageAttachmentUiV2ExperimentOn(win)) {
+    openAttachmentEl.classList.add(
+      '.i-amphtml-amp-story-page-attachment-ui-v2'
+    );
+  }
   // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
   const attachmentHref = attachmentEl.getAttribute('href');
   if (attachmentHref) {

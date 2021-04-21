@@ -238,7 +238,7 @@
 }
 
 /** For amp-story-outlink-page-attachment-v2 experiment elements. */
-.i-amphtml-story-page-open-attachment {
+.i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
   --i-amphtml-outlink-cta-background-color: white !important;
   --i-amphtml-outlink-cta-text-color: black !important;
 }
@@ -252,8 +252,12 @@
   background: linear-gradient(0, rgba(0, 0, 0, 0.30), transparent) !important;
 }
 
-[theme="dark"].i-amphtml-story-page-open-attachment.i-amphtml-amp-story-page-attachment-ui-v2 {
+[theme="dark"].i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
   background: linear-gradient(0, rgba(255, 255, 255, 0.30), transparent) !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment.i-amphtml-story-page-open-attachment-outlink {
+  background: none !important;
 }
 
 .i-amphtml-story-outlink-page-attachment-arrow {
