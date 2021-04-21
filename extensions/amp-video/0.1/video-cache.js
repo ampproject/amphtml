@@ -76,7 +76,7 @@ function selectVideoSource(videoEl) {
  * @param {!Element} videoEl
  * @param {!Array<!Object>} sources
  */
-export function applySourcesToVideo(videoEl, sources) {
+function applySourcesToVideo(videoEl, sources) {
   sources
     .sort((a, b) => a['bitrate_kbps'] - b['bitrate_kbps'])
     .forEach((source) => {

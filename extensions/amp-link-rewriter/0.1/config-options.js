@@ -42,6 +42,7 @@ export function getConfigOpts(element) {
       : {},
 
     vars: hasOwn(config, 'vars') ? config['vars'] : {},
+    scopeDocument: config['scopeDocument'] ?? true,
   };
 }
 

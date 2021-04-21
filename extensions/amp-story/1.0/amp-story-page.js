@@ -112,7 +112,7 @@ export const Selectors = {
   ALL_PLAYBACK_MEDIA:
     '> audio, amp-story-grid-layer audio, amp-story-grid-layer video',
   ALL_VIDEO: 'amp-story-grid-layer video',
-  ALL_TABBABLE: 'a',
+  ALL_TABBABLE: 'a, amp-twitter > iframe',
 };
 
 /** @private @const {string} */
