@@ -40,7 +40,8 @@ const BITRATE_BY_EFFECTIVE_TYPE = {
 const BUFFERED_THRESHOLD_PERCENTAGE = 0.8;
 
 /** @const {string} Simulates video being buffered (fully loaded) for the bitrate algorithm. */
-const VIDEO_BUFFERED_DEBUG_ATTR = 'i-amphtml-video-buffered-debug';
+const IS_VIDEO_FULLY_LOADED_OVERRIDE_FOR_TESTING =
+  'i-amphtml-is-video-fully-loaded-override-for-testing';
 
 /** @type {!BitrateManager|undefined} */
 let instance;
@@ -114,7 +115,8 @@ export class BitrateManager {
   }
 
   /**
-   * Callback to try downgrade a video when it doesn't load properly.
+   * Downgrade a video quality by selecting a lower bitrate source if available,
+   * then downgrade the other registered videos.
    * @param {!Element} video
    */
   downgradeVideo_(video) {
@@ -353,13 +355,17 @@ function getBufferedPercentage(videoEl) {
 }
 
 /**
- * Whether the video is loaded (so it should not be downgraded)
+ * Checks for the video buffer percentage to know if a video is loaded
+ * (can be overriden with the attribute `i-amphtml-is-video-fully-loaded-override-for-testing`).
  * @param {!Element} videoEl
  * @return {boolean}
  */
 function isVideoLoaded(videoEl) {
-  if (videoEl.hasAttribute(VIDEO_BUFFERED_DEBUG_ATTR)) {
-    return videoEl.getAttribute(VIDEO_BUFFERED_DEBUG_ATTR) === 'true';
+  if (videoEl.hasAttribute(IS_VIDEO_FULLY_LOADED_OVERRIDE_FOR_TESTING)) {
+    return (
+      videoEl.getAttribute(IS_VIDEO_FULLY_LOADED_OVERRIDE_FOR_TESTING) ===
+      'true'
+    );
   }
   return getBufferedPercentage(videoEl) > BUFFERED_THRESHOLD_PERCENTAGE;
 }
