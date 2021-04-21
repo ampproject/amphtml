@@ -38,7 +38,7 @@ import {expandConsentEndpointUrl, getConsentCID} from './consent-config';
 const TAG = 'CONSENT-STATE-MANAGER';
 
 /** @visibleForTesting */
-export const CONSENT_STORAGE_MAX = 1200;
+export const CONSENT_STORAGE_MAX = 7000;
 
 export class ConsentStateManager {
   /**
