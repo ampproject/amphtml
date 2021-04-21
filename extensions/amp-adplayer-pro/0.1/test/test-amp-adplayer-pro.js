@@ -79,7 +79,7 @@ describes.realWin(
       }
 
       beforeEach(async () => {
-        impl = (await getAdPlayerPro()).implementation_;
+        impl = await (await getAdPlayerPro()).getImpl(false);
       });
 
       it('supports platform', () => {
@@ -153,11 +153,14 @@ describes.realWin(
         });
 
         it('updates mute from state', () => {
-          const spy = env.sandbox.spy(impl.element, 'dispatchCustomEvent');
+          const mutedEventSpy = env.sandbox.spy();
+          const unmutedEventSpy = env.sandbox.spy();
+          impl.element.addEventListener(VideoEvents.MUTED, mutedEventSpy);
+          impl.element.addEventListener(VideoEvents.UNMUTED, unmutedEventSpy);
           mockMessage('muted', {muted: true});
-          expect(spy).calledWith(VideoEvents.MUTED);
+          expect(mutedEventSpy).to.be.calledOnce;
           mockMessage('muted', {muted: false});
-          expect(spy).calledWith(VideoEvents.UNMUTED);
+          expect(unmutedEventSpy).to.be.calledOnce;
         });
 
         it('updates current time and duration from state', () => {

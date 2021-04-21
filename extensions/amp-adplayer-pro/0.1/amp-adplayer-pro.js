@@ -29,6 +29,7 @@ import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
 import {
+  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
@@ -254,7 +255,7 @@ class AmpAdPlayerPro extends AMP.BaseElement {
     }
 
     if (event === 'muted') {
-      element.dispatchCustomEvent(mutedOrUnmutedEvent(params.muted));
+      dispatchCustomEvent(element, mutedOrUnmutedEvent(params.muted));
     } else if (event === 'time') {
       this.currentTime_ = params.currentTime;
       this.duration_ = params.duration;
