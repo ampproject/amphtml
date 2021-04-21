@@ -27,11 +27,6 @@ const TAG = 'amp-facebook-comments';
 const TYPE = 'facebook';
 
 class AmpFacebookComments extends BaseElement {
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-  }
-
   /** @override @nocollapse */
   static createLoaderLogoCallback(element) {
     return createLoaderLogo(element);
