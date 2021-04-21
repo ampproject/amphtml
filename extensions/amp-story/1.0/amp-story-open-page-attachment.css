@@ -257,6 +257,7 @@
 }
 
 [href].i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
+  /* Outlink attachments do not need the linear gradient. */
   background: none !important;
 }
 
