@@ -15,9 +15,9 @@
  */
 
 import {Services} from '../../../src/services';
+import {addParamsToUrl, resolveRelativeUrl} from '../../../src/url';
 import {createElementWithAttributes, matches} from '../../../src/dom';
 import {extensionScriptInNode} from '../../../src/service/extension-script';
-import {resolveRelativeUrl} from '../../../src/url';
 import {toArray} from '../../../src/core/types/array';
 import {user} from '../../../src/log';
 
@@ -41,7 +41,10 @@ export function fetchCachedSources(videoEl, win) {
   return servicePromise
     .then((service) => service.createCacheUrl(videoUrl))
     .then((cacheUrl) => {
-      const requestUrl = cacheUrl.replace('/c/', '/mbv/');
+      const requestUrl = addParamsToUrl(cacheUrl.replace('/c/', '/mbv/'), {
+        'amp_video_host_url': Services.documentInfoForDoc(win.document)
+          .canonicalUrl,
+      });
       return Services.xhrFor(win).fetch(requestUrl);
     })
     .then((response) => response.json())
@@ -73,7 +76,7 @@ function selectVideoSource(videoEl) {
  * @param {!Element} videoEl
  * @param {!Array<!Object>} sources
  */
-function applySourcesToVideo(videoEl, sources) {
+export function applySourcesToVideo(videoEl, sources) {
   sources
     .sort((a, b) => a['bitrate_kbps'] - b['bitrate_kbps'])
     .forEach((source) => {
