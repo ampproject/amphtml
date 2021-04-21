@@ -15,7 +15,10 @@
  */
 
 import {BaseElement} from './base-element';
-import {FetchOptionsDef, batchFetchJsonFor} from '../../../src/batched-json';
+import {
+  BatchFetchOptionsDef,
+  batchFetchJsonFor,
+} from '../../../src/batched-json';
 import {Services} from '../../../src/services';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
@@ -70,7 +73,7 @@ const getAmpStateJson = (element, src) => {
 /**
  * @param {!AmpElement} element
  * @param {boolean} shouldRefresh true to force refresh of browser cache.
- * @return {!FetchOptionsDef} options object to pass to `batchFetchJsonFor` method.
+ * @return {!BatchFetchOptionsDef} options object to pass to `batchFetchJsonFor` method.
  */
 function buildOptionsObject(element, shouldRefresh = false) {
   return {

@@ -221,7 +221,7 @@ describes.realWin(
       // verify subsequent call to `batchFetchJsonFor`
       expect(options.refresh).to.be.true;
       expect(options.xssiPrefix).to.be.null;
-      expect(options.expr).to.be.equal('.');
+      expect(options.expr).to.equal('.');
     });
 
     it('should not re-fetch when src=amp-state', async () => {

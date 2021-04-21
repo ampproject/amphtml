@@ -53,7 +53,7 @@ export const UrlReplacementPolicy = {
  *
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} element
- * @param {!FetchOptionsDef} options options bag for modifying the request.
+ * @param {!BatchFetchOptionsDef} options options bag for modifying the request.
  * @return {!Promise<!JsonObject|!Array<JsonObject>>} Resolved with JSON
  *     result or rejected if response is invalid.
  */
