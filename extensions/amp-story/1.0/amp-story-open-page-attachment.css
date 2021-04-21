@@ -249,7 +249,11 @@
 }
 
 .i-amphtml-story-page-open-attachment.i-amphtml-amp-story-page-attachment-ui-v2 {
-  background: none !important;
+  background: linear-gradient(0, rgba(0, 0, 0, 0.30), transparent) !important;
+}
+
+[theme="dark"].i-amphtml-story-page-open-attachment.i-amphtml-amp-story-page-attachment-ui-v2 {
+  background: linear-gradient(0, rgba(255, 255, 255, 0.30), transparent) !important;
 }
 
 .i-amphtml-story-outlink-page-attachment-arrow {
