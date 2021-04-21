@@ -19,7 +19,6 @@ import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {VisibilityState} from '../../../src/visibility-state';
-import {addCacheSources} from './video-cache';
 import {addParamsToUrl} from '../../../src/url';
 import {
   childElement,
@@ -47,7 +46,7 @@ import {
   setInitialDisplay,
   setStyles,
 } from '../../../src/style';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 const TAG = 'amp-video';
 
@@ -260,20 +259,11 @@ export class AmpVideo extends AMP.BaseElement {
     // Cached so mediapool operations (eg: swapping sources) don't interfere with this bool.
     this.hasBitrateSources_ =
       !!this.element.querySelector('source[data-bitrate]') ||
-      this.hasAnyCachedSources_() ||
-      this.element.hasAttribute('enable-google-video-cache');
+      this.hasAnyCachedSources_();
 
     installVideoManagerForDoc(element);
 
     Services.videoManagerForDoc(element).register(this);
-
-    // Add cache sources if opted-in and it's sources are not already cached.
-    if (
-      this.element.hasAttribute('enable-google-video-cache') &&
-      !this.element.querySelector('source[amp-orig-src]')
-    ) {
-      return addCacheSources(this.element, this.win);
-    }
   }
 
   /**
