@@ -93,7 +93,7 @@ import {
   toggle,
 } from '../../../src/style';
 import {createPseudoLocale} from '../../../src/localized-strings';
-import {debounce} from '../../../src/utils/rate-limit';
+import {debounce} from '../../../src/core/types/function';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from '../../../src/core/types/object';
 import {endsWith} from '../../../src/core/types/string';

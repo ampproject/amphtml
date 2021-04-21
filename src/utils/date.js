@@ -18,44 +18,7 @@ import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,
 } from '../core/assert';
-
-/**
- * Parses the date using the `Date.parse()` rules. Additionally supports the
- * keyword "now" that indicates the "current date/time". Returns either a
- * valid epoch value or null.
- *
- * @param {?string|undefined} s
- * @return {?number}
- */
-export function parseDate(s) {
-  if (!s) {
-    return null;
-  }
-  if (s.toLowerCase() === 'now') {
-    return Date.now();
-  }
-  const parsed = Date.parse(s);
-  return isNaN(parsed) ? null : parsed;
-}
-
-/**
- * @param {!Date|number|string|T} value
- * @return {number|T}
- * @template T
- */
-export function getDate(value) {
-  if (!value) {
-    return null;
-  }
-  if (typeof value == 'number') {
-    return value;
-  }
-  if (typeof value == 'string') {
-    return parseDate(value);
-  }
-  // Must be a `Date` object.
-  return value.getTime();
-}
+import {parseDate} from '../core/types/date';
 
 /** Map from attribute names to their parsers. */
 const dateAttrParsers = {

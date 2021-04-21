@@ -29,7 +29,7 @@ import {MediaQueryProps} from './utils/media-query-props';
 import {ReadyState} from './core/constants/ready-state';
 import {ResourceState} from './service/resource';
 import {Services} from './services';
-import {Signals} from './utils/signals';
+import {Signals} from './core/data-structures/signals';
 import {
   blockedByConsentError,
   cancellation,

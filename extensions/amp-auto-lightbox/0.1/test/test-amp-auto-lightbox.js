@@ -33,7 +33,7 @@ import {
   scan,
 } from '../amp-auto-lightbox';
 import {Services} from '../../../../src/services';
-import {Signals} from '../../../../src/utils/signals';
+import {Signals} from '../../../../src/core/data-structures/signals';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
 import {isArray} from '../../../../src/core/types';

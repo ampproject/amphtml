@@ -17,7 +17,7 @@
 import * as Preact from '../../../src/preact';
 import {Wrapper} from '../../../src/preact/component';
 import {format, getLocale} from './locales';
-import {getDate} from '../../../src/utils/date';
+import {getDate} from '../../../src/core/types/date';
 import {toWin} from '../../../src/types';
 import {useEffect, useRef, useState} from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';

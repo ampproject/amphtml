@@ -19,7 +19,7 @@ import {dict} from '../../../src/core/types/object';
 import {findSentences, markTextRangeList} from './findtext';
 import {listenOnce} from '../../../src/event-helper';
 import {moveLayoutRect} from '../../../src/layout-rect';
-import {once} from '../../../src/utils/function';
+import {once} from '../../../src/core/types/function';
 import {parseJson} from '../../../src/json';
 import {parseQueryString} from '../../../src/url';
 import {resetStyles, setInitialDisplay, setStyles} from '../../../src/style';

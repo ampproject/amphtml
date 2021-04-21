@@ -25,7 +25,7 @@ import {
 import {RelativePositions} from '../../../src/layout-rect';
 import {Services} from '../../../src/services';
 import {devAssert} from '../../../src/log';
-import {throttle} from '../../../src/utils/rate-limit';
+import {throttle} from '../../../src/core/types/function';
 
 /** @enum {number} */
 export const ViewportRelativePos = {

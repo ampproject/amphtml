@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../services';
-import {Signals} from '../utils/signals';
+import {Signals} from '../core/data-structures/signals';
 import {TickLabel} from '../core/constants/enums';
 import {VisibilityState} from '../core/constants/visibility-state';
 import {createCustomEvent} from '../event-helper';
@@ -25,7 +25,7 @@ import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
 import {isStoryDocument} from '../utils/story';
 import {layoutRectLtwh} from '../layout-rect';
-import {throttle} from '../utils/rate-limit';
+import {throttle} from '../core/types/function';
 import {whenContentIniLoad} from '../ini-load';
 import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
 

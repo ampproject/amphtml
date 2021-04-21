@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {dev} from '../log';
-import {once} from './function';
+import {once} from '../core/types/function';
 import {setStyles} from '../style';
 
 /**

@@ -16,7 +16,7 @@
 import {Observable} from '../../../src/core/data-structures/observable';
 import {Services} from '../../../src/services';
 import {devAssert, user} from '../../../src/log';
-import {once} from '../../../src/utils/function';
+import {once} from '../../../src/core/types/function';
 import {px, setImportantStyles} from '../../../src/style';
 
 const TAG = 'amp-fx';

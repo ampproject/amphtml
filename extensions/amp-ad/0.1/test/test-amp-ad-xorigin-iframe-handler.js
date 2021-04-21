@@ -18,7 +18,7 @@ import {AmpAdUIHandler} from '../amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from '../amp-ad-xorigin-iframe-handler';
 import {BaseElement} from '../../../../src/base-element';
 import {Services} from '../../../../src/services';
-import {Signals} from '../../../../src/utils/signals';
+import {Signals} from '../../../../src/core/data-structures/signals';
 import {
   createIframeWithMessageStub,
   expectPostMessage,

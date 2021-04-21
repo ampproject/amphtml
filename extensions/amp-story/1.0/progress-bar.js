@@ -21,7 +21,7 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {debounce} from '../../../src/utils/rate-limit';
+import {debounce} from '../../../src/core/types/function';
 import {dev, devAssert} from '../../../src/log';
 import {escapeCssSelectorNth} from '../../../src/css';
 import {hasOwn, map} from '../../../src/core/types/object';

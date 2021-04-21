@@ -22,7 +22,7 @@ import {Deferred} from '../../../../src/core/data-structures/promise';
 import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {Services} from '../../../../src/services';
-import {Signals} from '../../../../src/utils/signals';
+import {Signals} from '../../../../src/core/data-structures/signals';
 import {VideoUtils} from '../../../../src/utils/video';
 import {
   addAttributesToElement,

@@ -36,7 +36,7 @@ import {CSS} from '../../../build/amp-byside-content-0.1.css';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
-import {debounce} from '../../../src/utils/rate-limit';
+import {debounce} from '../../../src/core/types/function';
 import {dict} from '../../../src/core/types/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';

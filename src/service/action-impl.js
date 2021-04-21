@@ -22,7 +22,7 @@ import {
 } from '../core/constants/action-constants';
 import {Keys} from '../core/constants/key-codes';
 import {Services} from '../services';
-import {debounce, throttle} from '../utils/rate-limit';
+import {debounce, throttle} from '../core/types/function';
 import {dev, devAssert, user, userAssert} from '../log';
 import {dict, hasOwn, map} from '../core/types/object';
 import {getDetail} from '../event-helper';
