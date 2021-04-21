@@ -576,10 +576,8 @@ export class AmpScriptService {
     // Query the meta tag once per document.
     const allowedHashes = ampdoc.getMetaByName('amp-script-src');
     if (allowedHashes) {
-      this.sources_ = allowedHashes
-        .split(' ')
-        .map((s) => s.trim())
-        .filter((s) => s.length);
+      // Allow newlines between hashes for readability/diffs
+      this.sources_ = allowedHashes.split(/\s+/).filter(Boolean);
     }
 
     /** @private @const {!../../../src/service/crypto-impl.Crypto} */
