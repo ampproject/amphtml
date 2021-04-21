@@ -15,8 +15,11 @@
  */
 
 import {BaseElement} from './base-element';
+import {
+  BatchFetchOptionsDef,
+  batchFetchJsonFor,
+} from '../../../src/batched-json';
 import {Services} from '../../../src/services';
-import {batchFetchJsonFor} from '../../../src/batched-json';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {isAmpScriptUri} from '../../../src/url';
@@ -68,13 +71,26 @@ const getAmpStateJson = (element, src) => {
 };
 
 /**
+ * @param {!AmpElement} element
+ * @param {boolean} shouldRefresh true to force refresh of browser cache.
+ * @return {!BatchFetchOptionsDef} options object to pass to `batchFetchJsonFor` method.
+ */
+function buildOptionsObject(element, shouldRefresh = false) {
+  return {
+    xssiPrefix: element.getAttribute('xssi-prefix'),
+    expr: element.getAttribute('key') ?? '.',
+    refresh: shouldRefresh,
+  };
+}
+
+/**
  * Returns a function to fetch json from remote url, amp-state or
  * amp-script.
  *
  * @param {!AmpElement} element
  * @return {Function}
  */
-export const getJsonFn = (element) => {
+export function getJsonFn(element) {
   const src = element.getAttribute('src');
   if (!src) {
     // TODO(dmanek): assert that src is provided instead of silently failing below.
@@ -90,8 +106,13 @@ export const getJsonFn = (element) => {
         return ampScriptService.fetch(src);
       });
   }
-  return () => batchFetchJsonFor(element.getAmpDoc(), element);
-};
+  return (unusedSrc, shouldRefresh = false) =>
+    batchFetchJsonFor(
+      element.getAmpDoc(),
+      element,
+      buildOptionsObject(element, shouldRefresh)
+    );
+}
 
 export class AmpRender extends BaseElement {
   /** @param {!AmpElement} element */
@@ -122,7 +143,7 @@ export class AmpRender extends BaseElement {
       // variable `canRefresh`. See https://github.com/ampproject/amphtml/pull/33776#discussion_r614087734
       // for more context. This approach may be better if src does not mutate often. But the alternative might
       // be better if src mutatates often and component user does not use `refresh` action.
-      if (!src?.length || isAmpStateSrc(src) || isAmpScriptUri(src)) {
+      if (!src || isAmpStateSrc(src) || isAmpScriptUri(src)) {
         return;
       }
       api.refresh();
