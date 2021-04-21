@@ -248,11 +248,6 @@ export class AmpAdUIHandler {
       this.addCloseButton_();
       this.closeButtonRendered_ = true;
     }
-
-    if (this.stickyAdPosition_ == StickyAdPositions.TOP) {
-      setStyle(this.doc_.querySelector('body'), 'padding-top', 80, 'px');
-      this.baseInstance_.win.scrollBy(0, 80);
-    }
   }
 
   /**
