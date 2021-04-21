@@ -742,7 +742,7 @@ export class AmpList extends AMP.BaseElement {
       } else if (isAmpScriptUri(elementSrc)) {
         fetch = this.getAmpScriptJson_(elementSrc);
       } else {
-        fetch = this.prepareAndSendFetch_(refresh);
+        fetch = this.fetch_(refresh);
       }
       fetch = fetch.then((data) => {
         // Bail if the src has changed while resolving the xhr request.
@@ -1589,15 +1589,6 @@ export class AmpList extends AMP.BaseElement {
           return this.loadMoreCallback_();
         }
       });
-  }
-
-  /**
-   * @param {boolean=} opt_refresh
-   * @return {!Promise<!JsonObject|!Array<JsonObject>>}
-   * @private
-   */
-  prepareAndSendFetch_(opt_refresh = false) {
-    return this.fetch_(opt_refresh);
   }
 
   /**
