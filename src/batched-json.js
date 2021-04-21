@@ -34,7 +34,7 @@ import {user} from './log';
  *  refresh: (boolean|undefined),
  *  xssiPrefix: (string|undefined)}}
  */
-export let FetchOptionsDef;
+export let BatchFetchOptionsDef;
 
 /**
  * @enum {number}
