@@ -837,26 +837,27 @@ describes.realWin(
       expect(
         doc.head.querySelectorAll('[custom-element="amp-test"]')
       ).to.have.length(0);
-      expect(extensions.extensions_['amp-test']).to.be.undefined;
+      expect(extensions.extensions_['amp-test:0.2']).to.be.undefined;
 
       expect(
         doc.head.querySelectorAll('[custom-template="amp-template"]')
       ).to.have.length(0);
-      expect(extensions.extensions_['amp-template']).to.be.undefined;
+      expect(extensions.extensions_['amp-template:0.2']).to.be.undefined;
 
       manager.installExtensionsForDoc_(div);
 
       expect(
         doc.head.querySelectorAll('[custom-element="amp-test"][src*="-0.2"]')
       ).to.have.length(1);
-      expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+      expect(extensions.extensions_['amp-test:0.2'].scriptPresent).to.be.true;
 
       expect(
         doc.head.querySelectorAll(
           '[custom-element="amp-template"][src*="-0.2"]'
         )
       ).to.have.length(1);
-      expect(extensions.extensions_['amp-template'].scriptPresent).to.be.true;
+      expect(extensions.extensions_['amp-template:0.2'].scriptPresent).to.be
+        .true;
     });
   }
 );
