@@ -33,11 +33,12 @@ import {remove} from './types/array';
  * - messageArray: The elements of the substituted message as non-stringified
  *   elements in an array. When e.g. passed to console.error this yields
  *   native displays of things like HTML elements.
- * @param {string} sentinel
+ * @param {?string} sentinel
  * @param {T} shouldBeTruthy
  * @param {string} opt_message
  * @param {...*} var_args Arguments substituted into %s in the message
  * @return {T}
+ * @template T
  * @throws {Error} when shouldBeTruthy is not truthy.
  */
 function assertion(
@@ -93,6 +94,7 @@ function assertion(
  * @param {*=} opt_8 Optional argument
  * @param {*=} opt_9 Optional argument
  * @return {T}
+ * @template T
  * @throws {UserError} when shouldBeTruthy is not truthy.
  * @closurePrimitive {asserts.truthy}
  */
@@ -140,6 +142,7 @@ export function pureUserAssert(
  * @param {*=} opt_8 Optional argument
  * @param {*=} opt_9 Optional argument
  * @return {T}
+ * @template T
  * @throws {Error} when shouldBeTruthy is not truthy.
  * @closurePrimitive {asserts.truthy}
  */
