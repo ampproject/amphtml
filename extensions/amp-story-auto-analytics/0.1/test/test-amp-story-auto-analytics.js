@@ -54,10 +54,43 @@ describes.realWin(
         .exist;
     });
 
-    it('should add linker support by default', async () => {
+    it('should add linker config', async () => {
       await autoAnalyticsEl.whenBuilt();
+      const config = {
+        'linkers': {
+          'ampStoryAutoAnalyticsLinker': {
+            'ids': {
+              'cid': '${clientId}',
+            },
+            'enabled': true,
+            'proxyOnly': false,
+          },
+        },
+      };
+
+      const strConfig = JSON.stringify(config);
+      const configContents = strConfig.substr(1, strConfig.length - 2);
+
       expect(autoAnalyticsEl.querySelector('script').textContent).to.contain(
-        '"linkers":{"enabled":true,"proxyOnly":false,"linker":{"ids":{"cid":"CLIENT_ID(cid)"}}}'
+        configContents
+      );
+    });
+
+    it('should add cookieWriter config', async () => {
+      await autoAnalyticsEl.whenBuilt();
+      const config = {
+        'cookies': {
+          'ampStoryAutoAnalyticsCookies': {
+            'value': 'LINKER_PARAM(ampStoryAutoAnalyticsLinker, cid)',
+          },
+        },
+      };
+
+      const strConfig = JSON.stringify(config);
+      const configContents = strConfig.substr(1, strConfig.length - 2);
+
+      expect(autoAnalyticsEl.querySelector('script').textContent).to.contain(
+        configContents
       );
     });
   }

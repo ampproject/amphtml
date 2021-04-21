@@ -64,12 +64,17 @@ export const buildGtagConfig = (gtagId) => ({
     },
   },
   'linkers': {
-    'enabled': true,
-    'proxyOnly': false,
-    'linker': {
+    'ampStoryAutoAnalyticsLinker': {
       'ids': {
-        'cid': 'CLIENT_ID(cid)',
+        'cid': '${clientId}',
       },
+      'enabled': true,
+      'proxyOnly': false,
+    },
+  },
+  'cookies': {
+    'ampStoryAutoAnalyticsCookies': {
+      'value': 'LINKER_PARAM(ampStoryAutoAnalyticsLinker, cid)',
     },
   },
 });
