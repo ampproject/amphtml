@@ -45,7 +45,7 @@ import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {measureIntersection} from '../../../src/utils/intersection';
-import {once} from '../../../src/utils/function';
+import {once} from '../../../src/core/types/function';
 
 /** @private @const */
 const TAG = 'amp-video-iframe';

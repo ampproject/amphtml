@@ -36,7 +36,7 @@ import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../core/types/array';
 import {startupChunk} from '../chunk';
-import {throttle} from '../utils/rate-limit';
+import {throttle} from '../core/types/function';
 
 const TAG_ = 'Resources';
 const LAYOUT_TASK_ID_ = 'L';

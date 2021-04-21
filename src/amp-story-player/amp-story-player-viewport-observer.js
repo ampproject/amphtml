@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {throttle} from '../utils/rate-limit';
+import {throttle} from '../core/types/function';
 
 /** @const {number} */
 const SCROLL_THROTTLE_MS = 500;

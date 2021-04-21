@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {throttle} from '../utils/rate-limit';
+import {throttle} from '../core/types/function';
 
 /**
  * Applies scroll and momentum to window by using touch events.

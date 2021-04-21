@@ -48,7 +48,7 @@ import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isRTL, removeElement, scopedQuerySelector} from '../../../src/dom';
 import {layoutRectEquals, rectIntersection} from '../../../src/layout-rect';
-import {once} from '../../../src/utils/function';
+import {once} from '../../../src/core/types/function';
 import {
   px,
   resetStyles,

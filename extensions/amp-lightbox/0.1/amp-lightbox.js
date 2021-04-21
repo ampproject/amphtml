@@ -33,7 +33,7 @@ import {
   toggle,
 } from '../../../src/style';
 import {createCustomEvent} from '../../../src/event-helper';
-import {debounce} from '../../../src/utils/rate-limit';
+import {debounce} from '../../../src/core/types/function';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';

@@ -32,7 +32,7 @@ import {
 } from '../layout-rect';
 import {px, resetStyles, setImportantStyles} from '../style';
 import {registerServiceBuilderForDoc} from '../service';
-import {throttle} from '../utils/rate-limit';
+import {throttle} from '../core/types/function';
 
 /** @const {string} */
 const TAG = 'inabox-viewport';

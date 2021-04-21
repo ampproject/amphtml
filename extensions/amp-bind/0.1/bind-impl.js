@@ -21,14 +21,14 @@ import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {RAW_OBJECT_ARGS_KEY} from '../../../src/core/constants/action-constants';
 import {Services} from '../../../src/services';
-import {Signals} from '../../../src/utils/signals';
+import {Signals} from '../../../src/core/data-structures/signals';
 import {
   closestAncestorElementBySelector,
   iterateCursor,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {debounce} from '../../../src/utils/rate-limit';
+import {debounce} from '../../../src/core/types/function';
 import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
 import {deepMerge, dict, map} from '../../../src/core/types/object';
 import {dev, devAssert, user} from '../../../src/log';

@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {debounce} from '../../../src/utils/rate-limit';
+import {debounce} from '../../../src/core/types/function';
 
 export class ReadDepthTracker {
   /**

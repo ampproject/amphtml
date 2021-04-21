@@ -34,7 +34,7 @@ import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
 import {removeElement} from '../../../src/dom';
 import {reportErrorToAnalytics} from '../../../src/error-reporting';
 import {setStyle} from '../../../src/style';
-import {throttle} from '../../../src/utils/rate-limit';
+import {throttle} from '../../../src/core/types/function';
 
 const VISIBILITY_TIMEOUT = 10000;
 

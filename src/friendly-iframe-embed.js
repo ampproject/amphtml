@@ -18,7 +18,7 @@ import {CommonSignals} from './core/constants/common-signals';
 import {Deferred} from './core/data-structures/promise';
 import {FIE_EMBED_PROP} from './iframe-helper';
 import {Services} from './services';
-import {Signals} from './utils/signals';
+import {Signals} from './core/data-structures/signals';
 import {VisibilityState} from './core/constants/visibility-state';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {dev, devAssert, userAssert} from './log';

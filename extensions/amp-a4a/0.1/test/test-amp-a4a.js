@@ -47,7 +47,7 @@ import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {LayoutPriority} from '../../../../src/layout';
 import {MockA4AImpl, TEST_URL} from './utils';
 import {Services} from '../../../../src/services';
-import {Signals} from '../../../../src/utils/signals';
+import {Signals} from '../../../../src/core/data-structures/signals';
 import {cancellation} from '../../../../src/error-reporting';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';

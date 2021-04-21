@@ -30,7 +30,7 @@ import {ReadyState} from '../../../src/core/constants/ready-state';
 import {dict} from '../../../src/core/types/object';
 import {fillContentOverlay, fillStretch} from './video-wrapper.css';
 import {forwardRef} from '../../../src/preact/compat';
-import {once} from '../../../src/utils/function';
+import {once} from '../../../src/core/types/function';
 import {useAmpContext, useLoading} from '../../../src/preact/context';
 import {useStyles as useAutoplayStyles} from './autoplay.jss';
 import {
