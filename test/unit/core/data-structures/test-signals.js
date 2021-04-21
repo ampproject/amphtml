@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Signals} from '../../../src/core/data-structures/signals';
+import {Signals} from '../../../../src/core/data-structures/signals';
 
 describes.sandboxed('Signals', {}, (env) => {
   let clock;
