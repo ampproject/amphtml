@@ -27,6 +27,7 @@ import {
   getOptionalSandboxFlags,
   getRequiredSandboxFlags,
 } from '../../core/3p-frame';
+import {includes} from '../../core/types/string';
 import {parseUrlDeprecated} from '../../url';
 import {sequentialIdGenerator} from '../../utils/id-generator';
 import {useLayoutEffect, useMemo, useRef, useState} from '../../../src/preact';
@@ -43,7 +44,7 @@ export const MessageType = {
 // Block synchronous XHR in ad. These are very rare, but super bad for UX
 // as they block the UI thread for the arbitrary amount of time until the
 // request completes.
-const BLOCK_SYNC_XHR = "sync-xhr 'none';";
+const BLOCK_SYNC_XHR = "sync-xhr 'none'";
 
 // TODO(wg-bento): UA check for required flags without iframe element
 const DEFAULT_SANDBOX =
@@ -74,6 +75,12 @@ function ProxyIframeEmbedWithRef(
   },
   ref
 ) {
+  if (!includes(allow, BLOCK_SYNC_XHR)) {
+    throw new Error(
+      `'allow' prop must contain "${BLOCK_SYNC_XHR}". Found "${allow}".`
+    );
+  }
+
   const contentRef = useRef(null);
   const count = useMemo(() => {
     if (!countGenerators[type]) {
