@@ -70,7 +70,7 @@ export function RenderWithRef(
   }, [src, getJson]);
 
   const refresh = useCallback(() => {
-    getJson(src).then((data) => {
+    getJson(src, /* shouldRefresh */ true).then((data) => {
       setData(data);
     });
   }, [getJson, src]);
