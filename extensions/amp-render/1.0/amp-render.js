@@ -93,15 +93,14 @@ function getUrlReplacementPolicy(element, initialSrc) {
 /**
  * @param {!AmpElement} element
  * @param {boolean} shouldRefresh true to force refresh of browser cache.
- * @param initialSrc
  * @return {!BatchFetchOptionsDef} options object to pass to `batchFetchJsonFor` method.
  */
-function buildOptionsObject(element, shouldRefresh = false, initialSrc) {
+function buildOptionsObject(element, shouldRefresh = false) {
   return {
     xssiPrefix: element.getAttribute('xssi-prefix'),
     expr: element.getAttribute('key') ?? '.',
     refresh: shouldRefresh,
-    urlReplacement: getUrlReplacementPolicy(element, initialSrc),
+    // urlReplacement: getUrlReplacementPolicy(element, initialSrc),
   };
 }
 
@@ -132,7 +131,7 @@ export function getJsonFn(element) {
     batchFetchJsonFor(
       element.getAmpDoc(),
       element,
-      buildOptionsObject(element, shouldRefresh, initialSrc)
+      buildOptionsObject(element, shouldRefresh)
     );
 }
 
@@ -177,6 +176,15 @@ export class AmpRender extends BaseElement {
     return dict({
       'getJson': getJsonFn(this.element),
     });
+  }
+
+  mutationObserverCallback() {
+    const src = this.element.getAttribute('src');
+    console.log(
+      src === this.initialSrc_,
+      getSourceOrigin(src) ==
+        getSourceOrigin(this.element.getAmpDoc().win.location)
+    );
   }
 
   /**
