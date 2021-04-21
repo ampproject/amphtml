@@ -59,5 +59,9 @@ module.exports = {
       ],
       'rules': {'import/no-restricted-paths': isCiBuild() ? 0 : 1},
     },
+    {
+      'files': ['./core/window.extern.js'],
+      'rules': {'local/no-global': 0},
+    },
   ],
 };

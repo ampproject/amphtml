@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+const argv = require('minimist')(process.argv.slice(2));
+const globby = require('globby');
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
@@ -23,9 +25,126 @@ const {
 } = require('../compile/debug-compilation-lifecycle');
 const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
+const {cyan, green, yellow, red} = require('kleur/colors');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
 const {log} = require('../common/logging');
 const {typecheckNewServer} = require('../server/typescript-compile');
+
+const EXTERNS_GLOB = 'src/core{,/**}/*.extern.js';
+
+/**
+ * Generates a list of source file paths for extensions to type-check
+ * Must be run after `maybeInitializeExtensions`
+ * @function
+ * @return {!Array<string>}
+ */
+const getExtensionSrcPaths = () =>
+  Object.values(extensions)
+    .filter((ext) => !ext.noTypeCheck)
+    .map(({name, version}) => `extensions/${name}/${version}/${name}.js`)
+    .sort();
+
+/**
+ * The main configuration location to add/edit targets for type checking.
+ * Properties besides `entryPoints` are passed on to `closureCompile` as
+ * options. * Values may be objects or functions, as some require initialization
+ * or filesystem access and shouldn't be run until needed.
+ * @type {Object<string, Object|function():Object>}
+ */
+const TYPE_CHECK_TARGETS = {
+  'src': {
+    entryPoints: [
+      'src/amp.js',
+      'src/amp-shadow.js',
+      'src/inabox/amp-inabox.js',
+      'ads/alp/install-alp.js',
+      'ads/inabox/inabox-host.js',
+      'src/web-worker/web-worker.js',
+    ],
+    extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
+    warningLevel: 'QUIET',
+  },
+  'src-core': () => ({
+    externs: globby.sync(EXTERNS_GLOB),
+    extraGlobs: [
+      // Include all core JS files
+      'src/core/{,**/}*.js',
+      // Exclude all core extern files (already included via externs)
+      `!${EXTERNS_GLOB}`,
+    ],
+  }),
+  'extensions': () => ({
+    entryPoints: getExtensionSrcPaths(),
+    extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
+    warningLevel: 'QUIET',
+  }),
+  'integration': {
+    entryPoints: '3p/integration.js',
+    externs: ['ads/ads.extern.js'],
+    warningLevel: 'QUIET',
+  },
+  'ampcontext': {
+    entryPoints: '3p/ampcontext-lib.js',
+    externs: ['ads/ads.extern.js'],
+    warningLevel: 'QUIET',
+  },
+  'iframe-transport-client': {
+    entryPoints: '3p/iframe-transport-client-lib.js',
+    externs: ['ads/ads.extern.js'],
+    warningLevel: 'QUIET',
+  },
+};
+
+/**
+ * Performs closure type-checking on the target provided.
+ * @param {string} targetName key in TYPE_CHECK_TARGETS
+ * @return {!Promise<void>}
+ */
+async function typeCheck(targetName) {
+  let target = TYPE_CHECK_TARGETS[targetName];
+  if (typeof target == 'function') {
+    target = target();
+  }
+
+  if (!target) {
+    log(
+      red('ERROR:'),
+      'No type-check configuration defined for target',
+      cyan(targetName)
+    );
+    throw new Error(
+      `No type-check configuration defined for target ${targetName}`
+    );
+  }
+
+  const {entryPoints = [], ...opts} = target;
+  // If no entry point is defined, we want to scan the globs provided without
+  // injecting extra dependencies.
+  const noAddDeps = !entryPoints.length;
+  // If the --warning_level flag is passed explicitly, it takes precedence.
+  opts.warningLevel = argv.warning_level || opts.warningLevel || 'VERBOSE';
+
+  // For type-checking, QUIET suppresses all warnings and can't affect the
+  // resulting status, so there's no point in doing it.
+  if (opts.warningLevel == 'QUIET') {
+    log(
+      yellow('WARNING:'),
+      'Warning level for target',
+      cyan(targetName),
+      `is set to ${cyan('QUIET')}; skipping`
+    );
+    return;
+  }
+
+  await closureCompile(entryPoints, './dist', `${targetName}-check-types.js`, {
+    noAddDeps,
+    include3pDirectories: !noAddDeps,
+    includePolyfills: !noAddDeps,
+    typeCheckOnly: true,
+    ...opts,
+  });
+  log(green('SUCCESS:'), 'Type-checking passed for target', cyan(targetName));
+}
 
 /**
  * Runs closure compiler's type checker against all AMP code.
@@ -33,77 +152,23 @@ const {typecheckNewServer} = require('../server/typescript-compile');
  */
 async function checkTypes() {
   const handlerProcess = createCtrlcHandler('check-types');
+
+  // Prepare build environment
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   maybeInitializeExtensions();
   typecheckNewServer();
-  const compileSrcs = [
-    'src/amp.js',
-    'src/amp-shadow.js',
-    'src/inabox/amp-inabox.js',
-    'ads/alp/install-alp.js',
-    'ads/inabox/inabox-host.js',
-    'src/web-worker/web-worker.js',
-  ];
-  const extensionValues = Object.keys(extensions).map((key) => extensions[key]);
-  const extensionSrcs = extensionValues
-    .filter((ext) => !ext.noTypeCheck)
-    .map((ext) => `extensions/${ext.name}/${ext.version}/${ext.name}.js`)
-    .sort();
   await compileCss();
-  log('Checking types...');
+
+  // Use the list of targets if provided, otherwise check all targets
+  const targets = argv.targets
+    ? argv.targets.split(/,/)
+    : Object.keys(TYPE_CHECK_TARGETS);
+
+  log(`Checking types for targets: ${targets.map(cyan).join(', ')}`);
   displayLifecycleDebugging();
-  await Promise.all([
-    closureCompile(
-      compileSrcs.concat(extensionSrcs),
-      './dist',
-      'check-types.js',
-      {
-        include3pDirectories: true,
-        includePolyfills: true,
-        extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
-        typeCheckOnly: true,
-        warningLevel: 'QUIET', // TODO(amphtml): Make this 'DEFAULT'
-      }
-    ),
-    // Type check 3p/ads code.
-    closureCompile(
-      ['3p/integration.js'],
-      './dist',
-      'integration-check-types.js',
-      {
-        externs: ['ads/ads.extern.js'],
-        include3pDirectories: true,
-        includePolyfills: true,
-        typeCheckOnly: true,
-        warningLevel: 'QUIET', // TODO(amphtml): Make this 'DEFAULT'
-      }
-    ),
-    closureCompile(
-      ['3p/ampcontext-lib.js'],
-      './dist',
-      'ampcontext-check-types.js',
-      {
-        externs: ['ads/ads.extern.js'],
-        include3pDirectories: true,
-        includePolyfills: true,
-        typeCheckOnly: true,
-        warningLevel: 'QUIET', // TODO(amphtml): Make this 'DEFAULT'
-      }
-    ),
-    closureCompile(
-      ['3p/iframe-transport-client-lib.js'],
-      './dist',
-      'iframe-transport-client-check-types.js',
-      {
-        externs: ['ads/ads.extern.js'],
-        include3pDirectories: true,
-        includePolyfills: true,
-        typeCheckOnly: true,
-        warningLevel: 'QUIET', // TODO(amphtml): Make this 'DEFAULT'
-      }
-    ),
-  ]);
+
+  await Promise.all(targets.map(typeCheck));
   exitCtrlcHandler(handlerProcess);
 }
 
@@ -117,6 +182,7 @@ checkTypes.description = 'Check source code for JS type errors';
 checkTypes.flags = {
   closure_concurrency: 'Sets the number of concurrent invocations of closure',
   debug: 'Outputs the file contents during compilation lifecycles',
+  targets: 'Comma-delimited list of targets to type-check',
   warning_level:
     "Optionally sets closure's warning level to one of [quiet, default, verbose]",
 };
