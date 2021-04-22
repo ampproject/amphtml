@@ -1762,7 +1762,10 @@ export class AmpStoryPage extends AMP.BaseElement {
       container.classList.add('i-amphtml-story-page-open-attachment-host');
       container.setAttribute('role', 'button');
 
-      container.addEventListener('click', () => this.openAttachment());
+      container.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.openAttachment();
+      });
 
       this.mutateElement(() => {
         this.element.appendChild(container);
