@@ -27,6 +27,7 @@ import {
   getOptionalSandboxFlags,
   getRequiredSandboxFlags,
 } from '../../core/3p-frame';
+import {includes} from '../../core/types/string';
 import {parseUrlDeprecated} from '../../url';
 import {sequentialIdGenerator} from '../../utils/id-generator';
 import {useLayoutEffect, useMemo, useRef, useState} from '../../../src/preact';
@@ -43,7 +44,7 @@ export const MessageType = {
 // Block synchronous XHR in ad. These are very rare, but super bad for UX
 // as they block the UI thread for the arbitrary amount of time until the
 // request completes.
-const BLOCK_SYNC_XHR = "sync-xhr 'none';";
+const BLOCK_SYNC_XHR = "sync-xhr 'none'";
 
 // TODO(wg-bento): UA check for required flags without iframe element
 const DEFAULT_SANDBOX =
@@ -60,8 +61,12 @@ const DEFAULT_SANDBOX =
  */
 function ProxyIframeEmbedWithRef(
   {
+    allow = BLOCK_SYNC_XHR,
+    contextOptions,
+    excludeSandbox,
     name: nameProp,
     messageHandler,
+    options,
     sandbox = DEFAULT_SANDBOX,
     src: srcProp,
     type,
@@ -70,6 +75,12 @@ function ProxyIframeEmbedWithRef(
   },
   ref
 ) {
+  if (!includes(allow, BLOCK_SYNC_XHR)) {
+    throw new Error(
+      `'allow' prop must contain "${BLOCK_SYNC_XHR}". Found "${allow}".`
+    );
+  }
+
   const contentRef = useRef(null);
   const count = useMemo(() => {
     if (!countGenerators[type]) {
@@ -90,16 +101,23 @@ function ProxyIframeEmbedWithRef(
     if (!win) {
       return;
     }
-    const attrs = dict({
-      'title': title,
-      'type': type,
-      '_context': dict({
+    const context = Object.assign(
+      dict({
         'location': {
           'href': win.location.href,
         },
         'sentinel': generateSentinel(win),
       }),
-    });
+      contextOptions
+    );
+    const attrs = Object.assign(
+      dict({
+        'title': title,
+        'type': type,
+        '_context': context,
+      }),
+      options
+    );
     setNameAndSrc({
       name: JSON.stringify(
         dict({
@@ -114,17 +132,17 @@ function ProxyIframeEmbedWithRef(
       ),
       src,
     });
-  }, [count, nameProp, srcProp, title, type]);
+  }, [contextOptions, count, nameProp, options, srcProp, title, type]);
 
   return (
     <IframeEmbed
-      allow={BLOCK_SYNC_XHR}
+      allow={allow}
       contentRef={contentRef}
       messageHandler={messageHandler}
       name={name}
       ref={ref}
       ready={!!name}
-      sandbox={sandbox}
+      sandbox={excludeSandbox ? undefined : sandbox}
       src={src}
       title={title}
       {...rest}
