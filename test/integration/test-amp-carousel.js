@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../src/common-signals';
+import {CommonSignals} from '../../src/core/constants/common-signals';
 import {whenUpgradedToCustomElement} from '../../src/dom';
 
 const t = describe.configure().ifChrome();

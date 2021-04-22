@@ -17,7 +17,7 @@ Examples: Youtube, Vimeo videos; Tweets, Instagrams; comment systems; polls; qui
 -   Avoid client side rendering of iframe content.
 -   If your use of iframes is for style isolation, consider that AMP might provide an iframe-free alternative.
 -   If you can make it not-iframe-based that is much better. (See e.g. the pinterest embed). We will always ask to do this first. E.g. adding a CORS endpoint to your server might make this possible.
--   Must play well within [AMP's sizing framework](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md).
+-   Must play well within [AMP's sizing framework](https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md).
 -   All JS on container page must be open source and bundled with AMP.
 -   JavaScript loaded into iframe should be reasonable with respect to functionality.
 -   Use the `sandbox` attribute on iframe if possible.
@@ -28,7 +28,7 @@ Examples: Youtube, Vimeo videos; Tweets, Instagrams; comment systems; polls; qui
 
 -   We welcome pull requests by all ad networks for inclusion into AMP.
 -   All ads and all sub resources must be served from HTTPS.
--   Must play well within [AMP's sizing framework](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md).
+-   Must play well within [AMP's sizing framework](https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md).
 -   For display ads support, always implement amp-ad and instruct your client to use your amp-ad implementation instead of using amp-iframe. Althought amp-iframe will render the ad, ad clicks will break and viewability information is not available.
 -   Providing an optional image only zero-iframe embed is appreciated.
 -   Support viewability and other metrics/instrumentation as supplied by AMP (via postMessage API)
@@ -66,5 +66,5 @@ Review the [ads/README](../ads/README.md) for further details on ad integration.
 You should ensure there are integration tests for your extension. These should be added to the AMP
 repo where it makes sense. In some cases this won't be possible because it relies on bringing up
 third-party infrastructure. In these cases you should maintain testing for the extension on your
-infrastructure against both production AMP and [canary](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#amp-experimental-and-beta-channels).
-Upon any monitored failures, an escalation can be raised in [regular AMP communication channel](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#discussion-channels).
+infrastructure against both production AMP and [canary](https://github.com/ampproject/amphtml/blob/main/contributing/release-schedule.md#amp-experimental-and-beta-channels).
+Upon any monitored failures, an escalation can be raised in [regular AMP communication channel](https://github.com/ampproject/amphtml/blob/main/CONTRIBUTING.md#discussion-channels).

@@ -25,7 +25,7 @@ import {
   ConsentInstance,
   ConsentStateManager,
 } from '../consent-state-manager';
-import {CONSENT_STRING_TYPE} from '../../../../src/consent-state';
+import {CONSENT_STRING_TYPE} from '../../../../src/core/constants/consent-state';
 import {Services} from '../../../../src/services';
 import {dev} from '../../../../src/log';
 import {macroTask} from '../../../../testing/yield';

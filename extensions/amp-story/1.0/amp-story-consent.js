@@ -19,7 +19,7 @@ import {
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {CSS} from '../../../build/amp-story-consent-1.0.css';
 import {Layout} from '../../../src/layout';
 import {LocalizedStringId} from '../../../src/localized-strings';
@@ -40,8 +40,8 @@ import {
   triggerClickFromLightDom,
 } from './utils';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from './../../../src/utils/object';
-import {isArray} from '../../../src/types';
+import {dict} from './../../../src/core/types/object';
+import {isArray} from '../../../src/core/types';
 import {parseJson} from '../../../src/json';
 import {renderAsElement} from './simple-template';
 

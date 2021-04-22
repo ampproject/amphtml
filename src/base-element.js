@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {ActionTrust, DEFAULT_ACTION} from './action-constants';
+import {ActionTrust, DEFAULT_ACTION} from './core/constants/action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
 import {devAssert, user, userAssert} from './log';
 import {dispatchCustomEvent} from './dom';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
-import {isArray, toWin} from './types';
+import {isArray} from './core/types';
+import {toWin} from './types';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting

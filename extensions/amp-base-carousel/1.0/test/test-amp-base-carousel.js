@@ -15,14 +15,14 @@
  */
 import '../amp-base-carousel';
 import {ActionInvocation} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {
   createElementWithAttributes,
   waitForChildPromise,
 } from '../../../../src/dom';
 import {mod} from '../../../../src/utils/math';
 import {setStyles} from '../../../../src/style';
-import {toArray} from '../../../../src/types';
+import {toArray} from '../../../../src/core/types/array';
 import {toggleExperiment} from '../../../../src/experiments';
 import {useStyles} from '../base-carousel.jss';
 import {waitFor, whenCalled} from '../../../../testing/test-helper';

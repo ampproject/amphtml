@@ -194,25 +194,29 @@ function getSrcs(entryModuleFilenames, outputDir, outputFilename, options) {
  * @return {!Object}
  */
 function generateCompilerOptions(outputDir, outputFilename, options) {
-  const baseExterns = [
-    'build-system/externs/amp.extern.js',
-    'build-system/externs/dompurify.extern.js',
-    'build-system/externs/layout-jank.extern.js',
-    'build-system/externs/performance-observer.extern.js',
-    'third_party/web-animations-externs/web_animations.js',
-    'third_party/moment/moment.extern.js',
-    'third_party/react-externs/externs.js',
-    'build-system/externs/preact.extern.js',
-    'build-system/externs/weakref.extern.js',
-  ];
+  // Determine externs
+  let externs = options.externs || [];
+  if (!options.noAddDeps) {
+    externs = [
+      'third_party/web-animations-externs/web_animations.js',
+      'third_party/react-externs/externs.js',
+      'third_party/moment/moment.extern.js',
+      ...globby.sync('src/core{,/**}/*.extern.js'),
+      ...globby.sync('build-system/externs/*.extern.js'),
+      ...externs,
+    ];
+  }
+
   const hideWarningsFor = [
     'third_party/amp-toolbox-cache-url/',
     'third_party/caja/',
     'third_party/closure-library/sha384-generated.js',
+    'third_party/closure-responding-channel',
     'third_party/d3/',
     'third_party/inputmask/',
     'third_party/mustache/',
     'third_party/react-dates/',
+    'third_party/resize-observer-polyfill/',
     'third_party/set-dom/',
     'third_party/subscriptions-project/',
     'third_party/vega/',
@@ -228,11 +232,6 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     ? options.wrapper.replace('<%= contents %>', '%output%')
     : `(function(){%output%})();`;
   wrapper = `${wrapper}\n\n//# sourceMappingURL=${outputFilename}.map`;
-  let externs = baseExterns;
-  if (options.externs) {
-    externs = externs.concat(options.externs);
-  }
-  externs.push('build-system/externs/amp.multipass.extern.js');
 
   /**
    * TODO(#28387) write a type for this.
@@ -262,9 +261,9 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     module_resolution: 'NODE',
     package_json_entry_names: 'module,main',
     process_common_js_modules: true,
-    // This strips all files from the input set that aren't explicitly
+    // PRUNE strips all files from the input set that aren't explicitly
     // required.
-    dependency_mode: 'PRUNE',
+    dependency_mode: options.noAddDeps ? 'SORT_ONLY' : 'PRUNE',
     output_wrapper: wrapper,
     source_map_include_content: !!argv.full_sourcemaps,
     // These arrays are filled in below.
@@ -275,12 +274,13 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     hide_warnings_for: hideWarningsFor,
     // TODO(amphtml): Change 'QUIET' to 'DEFAULT'.
     warning_level: argv.warning_level ?? options.warningLevel ?? 'QUIET',
+    extra_annotation_name: ['visibleForTesting', 'restricted'],
   };
   if (argv.pseudo_names) {
     // Some optimizations get turned off when pseudo_names is on.
     // This causes some errors caused by the babel transformations
     // that we apply like unreachable code because we turn a conditional
-    // falsey. (ex. is IS_DEV transformation which causes some conditionals
+    // falsey. (ex. is IS_FORTESTING transformation which causes some conditionals
     // to be unreachable/suspicious code since the whole expression is
     // falsey)
     compilerOptions.jscomp_off.push('uselessCode', 'externsValidation');
@@ -413,12 +413,9 @@ async function compile(
     outputFilename,
     options
   );
-  const srcs = getSrcs(
-    entryModuleFilenames,
-    outputDir,
-    outputFilename,
-    options
-  );
+  const srcs = options.noAddDeps
+    ? entryModuleFilenames.concat(options.extraGlobs || [])
+    : getSrcs(entryModuleFilenames, outputDir, outputFilename, options);
   const transformedSrcFiles = await Promise.all(
     globby
       .sync(srcs)

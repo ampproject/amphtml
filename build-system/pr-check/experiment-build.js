@@ -22,7 +22,7 @@
 const {
   skipDependentJobs: skipDependentJobs,
   timedExecOrDie,
-  uploadExperimentOutput,
+  storeExperimentBuildToWorkspace,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {experiment} = require('minimist')(process.argv.slice(2));
@@ -32,17 +32,11 @@ const {runCiJob} = require('./ci-job');
 const jobName = `${experiment}-build.js`;
 
 function pushBuildWorkflow() {
+  // Note that if config is invalid, this build would have been skipped by CircleCI.
   const config = getExperimentConfig(experiment);
-  if (config) {
-    const defineFlag = `--define_experiment_constant ${config.define_experiment_constant}`;
-    timedExecOrDie(`amp dist --fortesting ${defineFlag}`);
-    uploadExperimentOutput(experiment);
-  } else {
-    skipDependentJobs(
-      jobName,
-      `${experiment} is expired, misconfigured, or does not exist`
-    );
-  }
+  const defineFlag = `--define_experiment_constant ${config.define_experiment_constant}`;
+  timedExecOrDie(`amp dist --fortesting ${defineFlag}`);
+  storeExperimentBuildToWorkspace(experiment);
 }
 
 function prBuildWorkflow() {

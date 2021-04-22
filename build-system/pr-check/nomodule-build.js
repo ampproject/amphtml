@@ -19,14 +19,15 @@
  * @fileoverview Script that builds the nomodule AMP runtime during CI.
  */
 
+const atob = require('atob');
 const {
   abortTimedJob,
   skipDependentJobs,
-  processAndUploadNomoduleOutput,
+  processAndStoreBuildToArtifacts,
   startTimer,
   timedExecWithError,
   timedExecOrDie,
-  uploadNomoduleOutput,
+  storeNomoduleBuildToWorkspace,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {log} = require('../common/logging');
@@ -38,7 +39,7 @@ const jobName = 'nomodule-build.js';
 
 function pushBuildWorkflow() {
   timedExecOrDie('amp dist --fortesting');
-  uploadNomoduleOutput();
+  storeNomoduleBuildToWorkspace();
 }
 
 /**
@@ -64,14 +65,16 @@ async function prBuildWorkflow() {
       return abortTimedJob(jobName, startTime);
     }
     timedExecOrDie('amp storybook --build');
-    await processAndUploadNomoduleOutput();
+    await processAndStoreBuildToArtifacts();
     await signalPrDeployUpload('success');
+    storeNomoduleBuildToWorkspace();
   } else {
     await signalPrDeployUpload('skipped');
 
     // Special case for visual diffs - Percy is a required check and must pass,
     // but we just called `skipDependentJobs` so the Visual Diffs job will not
     // run. Instead, we create an empty, passing check on Percy here.
+    process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
     timedExecOrDie('amp visual-diff --empty');
 
     skipDependentJobs(

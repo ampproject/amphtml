@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {forwardRef} from '../../../src/preact/compat';
 import {
   useCallback,

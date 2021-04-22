@@ -32,15 +32,18 @@ import {Services} from '../../../src/services';
 import {closest, matches, scopedQuerySelector} from '../../../src/dom';
 import {
   createShadowRootWithStyle,
+  getStoryAttributeSrc,
   shouldShowStoryUrlInfo,
   triggerClickFromLightDom,
 } from './utils';
 import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {getMode} from '../../../src/mode';
+import {getSourceOrigin} from '../../../src/url';
 import {renderAsElement} from './simple-template';
 import {setImportantStyles} from '../../../src/style';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
@@ -97,7 +100,7 @@ const SIDEBAR_CLASS = 'i-amphtml-story-sidebar-control';
 const HAS_NEW_PAGE_ATTRIBUTE = 'i-amphtml-story-has-new-page';
 
 /** @private @const {string} */
-const ATTRIBUTION_CLASS = 'i-amphtml-story-story-attribution';
+const ATTRIBUTION_CLASS = 'i-amphtml-story-attribution';
 
 /** @private @const {number} */
 const HIDE_MESSAGE_TIMEOUT_MS = 1500;
@@ -466,9 +469,38 @@ export class SystemLayer {
       this.getShadowRoot().removeAttribute(HAS_INFO_BUTTON_ATTRIBUTE);
     }
 
+    this.maybeBuildAttribution_();
+
     this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
     this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, 'noshow');
     return this.getRoot();
+  }
+
+  /** @private */
+  maybeBuildAttribution_() {
+    if (!this.viewer_ || this.viewer_.getParam('attribution') !== 'auto') {
+      return;
+    }
+
+    this.systemLayerEl_.querySelector('.i-amphtml-story-attribution-logo').src =
+      getStoryAttributeSrc(this.parentEl_, 'entity-logo-src') ||
+      getStoryAttributeSrc(this.parentEl_, 'publisher-logo-src');
+
+    const anchorEl = this.systemLayerEl_.querySelector(
+      `.${escapeCssSelectorIdent(ATTRIBUTION_CLASS)}`
+    );
+
+    anchorEl.href =
+      getStoryAttributeSrc(this.parentEl_, 'entity-url') ||
+      getSourceOrigin(Services.documentInfoForDoc(this.parentEl_).sourceUrl);
+
+    this.systemLayerEl_.querySelector(
+      '.i-amphtml-story-attribution-text'
+    ).textContent =
+      this.parentEl_.getAttribute('entity') ||
+      this.parentEl_.getAttribute('publisher');
+
+    anchorEl.classList.add('i-amphtml-story-attribution-visible');
   }
 
   /**

@@ -18,9 +18,8 @@ import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 import {createElementWithAttributes} from '../../../src/dom';
 import {devAssert, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {hasOwn} from '../../../src/utils/object';
+import {hasOwn} from '../../../src/core/types/object';
 import {internalRuntimeVersion} from '../../../src/internal-version';
-import {isLongTaskApiSupported} from '../../../src/service/jank-meter';
 import {toggle} from '../../../src/style';
 import {urls} from '../../../src/config';
 
@@ -200,7 +199,6 @@ export class IframeTransport {
     if (!isLongTaskApiSupported(this.ampWin_)) {
       return;
     }
-    // TODO(jonkeller): Consider merging with jank-meter.js
     IframeTransport.performanceObservers_[
       this.type_
     ] = new this.ampWin_.PerformanceObserver((entryList) => {
@@ -337,6 +335,18 @@ export class IframeTransport {
   getType() {
     return this.type_;
   }
+}
+
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function isLongTaskApiSupported(win) {
+  return (
+    !!win.PerformanceObserver &&
+    !!win['TaskAttributionTiming'] &&
+    'containerName' in win['TaskAttributionTiming'].prototype
+  );
 }
 
 /** @private {Object<string, FrameData>} */

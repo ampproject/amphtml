@@ -22,10 +22,19 @@
 		background-color: white;
 		border-radius: 50%;
 	}
-  input[flexible-bitrate-debug] {
+  input#flexible-bitrate-debug {
     position: absolute;
     right: 0;
     top: 0;
+    width: 150px;
+  }
+  span.flexible-bitrate-src-debug {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    padding: 0.2em;
+    font-size: 0.6em;
+    background-color: white;
   }
 	</style>
   <script>
@@ -33,9 +42,13 @@
       AMP.toggleExperiment('flexible-bitrate', true);
       AMP.toggleExperiment('flexible-bitrate-debug', true);
     });
+    const IS_VIDEO_FULLY_LOADED_OVERRIDE_FOR_TESTING =
+      'i-amphtml-is-video-fully-loaded-override-for-testing';
+
     window.onload = () => {
       const debugField = document.createElement('input');
-      debugField.setAttribute('flexible-bitrate-debug', '');
+      debugField.id = 'flexible-bitrate-debug';
+      debugField.placeholder = 'Debug command (eg: 1d)';
       document.body.appendChild(debugField);
       debugField.addEventListener('keyup', (e) => {
         const number = debugField.value.slice(0, -1);
@@ -46,16 +59,28 @@
         if (e.key === 'd') {
           videoEl.dispatchEvent(new Event('downgrade'));
         } else if (e.key === 'l') {
-          videoEl.setAttribute('i-amphtml-video-buffered-debug', 'true');
+          videoEl.setAttribute(IS_VIDEO_FULLY_LOADED_OVERRIDE_FOR_TESTING, 'true');
         } else if (e.key === 'u') {
-          videoEl.setAttribute('i-amphtml-video-buffered-debug', 'false');
-        } else if (e.key === 'i') {
-          alert(`Current source for ${videoEl.id}: ${videoEl.currentSrc}`);
+          videoEl.setAttribute(IS_VIDEO_FULLY_LOADED_OVERRIDE_FOR_TESTING, 'false');
         } else {
           return;
         }
         // If key was command, clean field.
         debugField.value = '';
+      });
+
+      // Show video source in video
+      document.body.querySelectorAll('amp-video').forEach((videoEl) => {
+        const srcLabel = document.createElement('span');
+        srcLabel.classList.add('flexible-bitrate-src-debug');
+        videoEl.appendChild(srcLabel);
+        srcLabel.textContent = videoEl.querySelector('video').currentSrc;
+        videoEl.addEventListener('playing', () => {
+          srcLabel.textContent = videoEl.querySelector('video').currentSrc;
+        });
+        videoEl.addEventListener('loadeddata', () => {
+          srcLabel.textContent = videoEl.querySelector('video').currentSrc;
+        });
       });
     }
 </script>
@@ -94,7 +119,7 @@
 				</amp-story-grid-layer>
 				<amp-story-grid-layer><span class="page-num">2</span></amp-story-grid-layer>
 			</amp-story-page>
-			
+
 			<amp-story-page id="page-3">
         <amp-story-grid-layer template="fill">
 					<amp-video autoplay loop
@@ -110,7 +135,7 @@
 				</amp-story-grid-layer>
 				<amp-story-grid-layer><span class="page-num">3</span></amp-story-grid-layer>
 			</amp-story-page>
-			
+
 			<amp-story-page id="page-4">
         <amp-story-grid-layer template="fill">
 					<amp-video autoplay loop

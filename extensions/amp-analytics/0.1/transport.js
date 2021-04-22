@@ -27,6 +27,7 @@ import {WindowInterface} from '../../../src/window-interface';
 import {
   assertHttpsUrl,
   checkCorsUrl,
+  isAmpScriptUri,
   parseUrlDeprecated,
 } from '../../../src/url';
 import {createPixel} from '../../../src/pixel';
@@ -34,6 +35,7 @@ import {dev, user, userAssert} from '../../../src/log';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getMode} from '../../../src/mode';
 import {getTopWindow} from '../../../src/service';
+
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
 import {toWin} from '../../../src/types';
@@ -47,12 +49,15 @@ const TAG_ = 'amp-analytics/transport';
  */
 export class Transport {
   /**
-   * @param {!Window} win
+   * @param {!AmpDoc} ampdoc
    * @param {!JsonObject} options
    */
-  constructor(win, options = /** @type {!JsonObject} */ ({})) {
+  constructor(ampdoc, options = /** @type {!JsonObject} */ ({})) {
+    /** @private {!AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
     /** @private {!Window} */
-    this.win_ = win;
+    this.win_ = ampdoc.win;
 
     /** @private {!JsonObject} */
     this.options_ = options;
@@ -75,7 +80,7 @@ export class Transport {
     this.iframeTransport_ = null;
 
     /** @private {boolean} */
-    this.isInabox_ = getMode(win).runtime == 'inabox';
+    this.isInabox_ = getMode(this.win_).runtime == 'inabox';
   }
 
   /**
@@ -97,8 +102,10 @@ export class Transport {
       const request = inBatch
         ? serializer.generateBatchRequest(url, segments, withPayload)
         : serializer.generateRequest(url, segments[0], withPayload);
-      assertHttpsUrl(request.url, 'amp-analytics request');
-      checkCorsUrl(request.url);
+      if (!isAmpScriptUri(request.url)) {
+        assertHttpsUrl(request.url, 'amp-analytics request');
+        checkCorsUrl(request.url);
+      }
       return request;
     }
 
@@ -110,6 +117,14 @@ export class Transport {
         return;
       }
       this.iframeTransport_.sendRequest(getRequest(false).url);
+      return;
+    }
+
+    if (this.options_['amp-script']) {
+      Transport.forwardRequestToAmpScript(this.ampdoc_, {
+        url,
+        payload: getRequest(true).payload,
+      });
       return;
     }
 
@@ -207,7 +222,7 @@ export class Transport {
         parseUrlDeprecated(this.win_.location.href).origin,
       'Origin of iframe request must not be equal to the document origin.' +
         ' See https://github.com/ampproject/' +
-        'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.'
+        'amphtml/blob/main/spec/amp-iframe-origin-policy.md for details.'
     );
 
     /** @const {!Element} */
@@ -305,6 +320,18 @@ export class Transport {
 
     xhr.send(request.payload || '');
     return true;
+  }
+
+  /**
+   * @param {!AmpDoc} ampdoc
+   * @param {!RequestDef} request
+   * @return {!Promise}
+   */
+  static forwardRequestToAmpScript(ampdoc, request) {
+    return Services.scriptForDocOrNull(ampdoc).then((ampScriptService) => {
+      userAssert(ampScriptService, 'AMP-SCRIPT is not installed');
+      ampScriptService.fetch(request.url, JSON.parse(request.payload));
+    });
   }
 }
 

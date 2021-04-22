@@ -107,6 +107,8 @@ You can also include your JavaScript inline, in a `script` tag. You must:
 
 [tip type="default"]
 For security reasons, `amp-script` elements with a `script` or cross-origin `src` attribute require a [script hash](#calculating-the-script-hash) in a `<meta name="amp-script-src" content="...">` tag. Also, same-origin `src` files must have [`Content-Type`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type): `application/javascript` or `text/javascript`.
+
+If your page contains multiple `amp-script` elements, each requiring a [script hash](#calculating-the-script-hash), include each as a whitespace-delimited list in a single `<meta name="amp-script-src" content="...">` tag (see [examples/amp-script/example.amp.html](https://github.com/ampproject/amphtml/blob/main/examples/amp-script/example.amp.html) for an example with multiple script hashes).
 [/tip]
 
 ### How does it work?
@@ -143,13 +145,13 @@ Supported DOM APIs include:
 -   Element properties like `attributes`, `id`, `outerHTML`, `textContent`, `value`, `classList`, and `className`
 -   And many more.
 
-For a complete list of supported DOM APIs, see the [API compatibility table](https://github.com/ampproject/worker-dom/blob/master/web_compat_table.md).
+For a complete list of supported DOM APIs, see the [API compatibility table](https://github.com/ampproject/worker-dom/blob/main/web_compat_table.md).
 
 `querySelector()` is supported for simple selectors - element, id, class, and attribute. So, `document.querySelector('.class')` will work, but `document.querySelector('.class1 .class2')` will not. [See the code](https://github.com/ampproject/worker-dom/blob/main/src/worker-thread/dom/Element.ts#L159) for details.
 
 `amp-script` supports common Web APIs like `Fetch`, `WebSockets`, `localStorage`, `sessionStorage`, and `Canvas`. Presently, the `History` API is not implemented, and neither are cookies.
 
-`amp-script` does not support the entire DOM API or Web API, as this would make `amp-script`'s own JavaScript too large and slow. If there's an API you'd like to see supported, please [file an issue](https://github.com/ampproject/amphtml/issues/new) or [suggest and contribute the change yourself](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md).
+`amp-script` does not support the entire DOM API or Web API, as this would make `amp-script`'s own JavaScript too large and slow. If there's an API you'd like to see supported, please [file an issue](https://github.com/ampproject/amphtml/issues/new) or [suggest and contribute the change yourself](https://github.com/ampproject/amphtml/blob/main/CONTRIBUTING.md).
 
 [tip type="default"]
 For a set of samples showing `amp-script` in use, [see here](https://amp.dev/documentation/examples/components/amp-script/).

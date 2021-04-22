@@ -143,4 +143,4 @@ Optional. If set, this is the description of the page that the AddThis tool will
 
 ## Validation
 
-See [`amp-addthis` rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-addthis/validator-amp-addthis.protoascii) in the AMP validator specification.
+See [`amp-addthis` rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-addthis/validator-amp-addthis.protoascii) in the AMP validator specification.

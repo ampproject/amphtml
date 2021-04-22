@@ -27,12 +27,13 @@
  * </amp-megaphone>
  */
 
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeFixed} from '../../../src/layout';
-import {isObject} from '../../../src/types';
+import {isObject} from '../../../src/core/types';
 import {removeElement} from '../../../src/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {tryParseJson} from '../../../src/json';
@@ -54,6 +55,9 @@ class AmpMegaphone extends AMP.BaseElement {
 
     /** @private {string} */
     this.baseUrl_ = '';
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -110,6 +114,8 @@ class AmpMegaphone extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
+    this.pauseHelper_.updatePlaying(true);
+
     return this.loadPromise(iframe);
   }
 
@@ -122,6 +128,7 @@ class AmpMegaphone extends AMP.BaseElement {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
+    this.pauseHelper_.updatePlaying(false);
     return true; // Call layoutCallback again.
   }
 
@@ -204,6 +211,9 @@ class AmpMegaphone extends AMP.BaseElement {
         JSON.stringify(dict({'method': 'pause'})),
         this.baseUrl_
       );
+
+      // The player doesn't appear to respect `{method: pause}` message.
+      this.iframe_.src = this.iframe_.src;
     }
   }
 }

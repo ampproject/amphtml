@@ -40,6 +40,7 @@ let buildTargets;
 let lintFiles;
 let presubmitFiles;
 let prettifyFiles;
+let invalidWhitespaceFiles;
 
 /***
  * All of AMP's build targets that can be tested during CI.
@@ -54,6 +55,7 @@ const Targets = {
   DOCS: 'DOCS',
   E2E_TEST: 'E2E_TEST',
   INTEGRATION_TEST: 'INTEGRATION_TEST',
+  INVALID_WHITESPACES: 'INVALID_WHITESPACES',
   LINT: 'LINT',
   OWNERS: 'OWNERS',
   PACKAGE_UPGRADE: 'PACKAGE_UPGRADE',
@@ -204,7 +206,11 @@ const targetMatchers = {
     if (isOwnersFile(file)) {
       return false;
     }
-    return lintFiles.includes(file);
+    return (
+      lintFiles.includes(file) ||
+      file == 'build-system/tasks/lint.js' ||
+      file.startsWith('build-system/test-configs')
+    );
   },
   [Targets.OWNERS]: (file) => {
     return isOwnersFile(file) || file == 'build-system/tasks/check-owners.js';
@@ -216,7 +222,11 @@ const targetMatchers = {
     if (isOwnersFile(file)) {
       return false;
     }
-    return presubmitFiles.includes(file);
+    return (
+      presubmitFiles.includes(file) ||
+      file == 'build-system/tasks/presubmit-checks.js' ||
+      file.startsWith('build-system/test-configs')
+    );
   },
   [Targets.PRETTIFY]: (file) => {
     // OWNERS files can be prettified.
@@ -247,6 +257,13 @@ const targetMatchers = {
       file == 'build-system/tasks/serve.js' ||
       file == 'build-system/tasks/server-tests.js' ||
       file.startsWith('build-system/server/')
+    );
+  },
+  [Targets.INVALID_WHITESPACES]: (file) => {
+    return (
+      invalidWhitespaceFiles.includes(file) ||
+      file == 'build-system/tasks/check-invalid-whitespaces.js' ||
+      file.startsWith('build-system/test-configs')
     );
   },
   [Targets.UNIT_TEST]: (file) => {
@@ -306,6 +323,7 @@ function determineBuildTargets() {
   lintFiles = globby.sync(config.lintGlobs);
   presubmitFiles = globby.sync(config.presubmitGlobs);
   prettifyFiles = globby.sync(config.prettifyGlobs);
+  invalidWhitespaceFiles = globby.sync(config.invalidWhitespaceGlobs);
   const filesChanged = gitDiffNameOnlyMain();
   for (const file of filesChanged) {
     let isRuntimeFile = true;

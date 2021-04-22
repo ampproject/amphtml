@@ -53,8 +53,8 @@ import {
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
-} from '../../../src/consent-state';
-import {Deferred} from '../../../src/utils/promise';
+} from '../../../src/core/constants/consent-state';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
@@ -92,7 +92,7 @@ import {
   isRTL,
   removeElement,
 } from '../../../src/dom';
-import {deepMerge, dict} from '../../../src/utils/object';
+import {deepMerge, dict} from '../../../src/core/types/object';
 import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {escapeCssSelectorIdent} from '../../../src/css';
@@ -117,14 +117,14 @@ import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
 import {StoryAdPlacements} from '../../../src/experiments/story-ad-placements';
 import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {isArray} from '../../../src/types';
-import {isCancellation} from '../../../src/error';
+import {isArray} from '../../../src/core/types';
+import {isCancellation} from '../../../src/error-reporting';
 import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
 import {parseQueryString} from '../../../src/url';
-import {stringHash32} from '../../../src/string';
+import {stringHash32} from '../../../src/core/types/string';
 import {tryParseJson} from '../../../src/json';
 
 /** @type {string} */

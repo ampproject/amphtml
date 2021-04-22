@@ -7326,7 +7326,7 @@ function errorLine(filenameOrUrl, error) {
 /**
  * Renders the validation results into an array of human readable strings.
  * Careful when modifying this - it's called from
- * https://github.com/ampproject/amphtml/blob/master/test/integration/test-example-validation.js.
+ * https://github.com/ampproject/amphtml/blob/main/test/integration/test-example-validation.js.
  *
  * WARNING: This is exported; htmlparser changes may break downstream users
  * like https://www.npmjs.com/package/amphtml-validator and

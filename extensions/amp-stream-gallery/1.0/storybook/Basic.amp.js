@@ -91,4 +91,30 @@ export const Default = () => {
   );
 };
 
+export const customArrows = () => {
+  const width = number('width', 400);
+  const height = number('height', 200);
+  const slideCount = number('slide count', 7, {min: 0, max: 99});
+  const colorIncrement = Math.floor(255 / (slideCount + 1));
+  return (
+    <amp-stream-gallery max-visible-count={3} width={width} height={height}>
+      {Array.from({length: slideCount}, (x, i) => {
+        const v = colorIncrement * (i + 1);
+        return (
+          <div
+            style={{
+              backgroundColor: `rgb(${v}, 100, 100)`,
+              border: 'solid white 1px',
+              width: '100%',
+              height: '100%',
+            }}
+          ></div>
+        );
+      })}
+      <button slot="next-arrow">Next</button>
+      <button slot="prev-arrow">Prev</button>
+    </amp-stream-gallery>
+  );
+};
+
 Default.storyName = 'default';
