@@ -19,7 +19,9 @@ import {VideoBaseElement} from '../../amp-video/1.0/base-element';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/core/types/object';
+import {isExperimentOn} from '../../../src/experiments';
 import {measureIntersection} from '../../../src/utils/intersection';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-video-iframe';
@@ -38,7 +40,17 @@ function getIntersectionRatioMinAutoplay(element) {
   );
 }
 
-class AmpVideoIframe extends VideoBaseElement {}
+class AmpVideoIframe extends VideoBaseElement {
+  /** @override */
+  isLayoutSupported(layout) {
+    userAssert(
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-video-iframe'),
+      'expected global "bento" or specific "bento-video-iframe" experiment to be enabled'
+    );
+    return super.isLayoutSupported(layout);
+  }
+}
 
 /**
  * @param {!MessageEvent} e

@@ -22,7 +22,10 @@ import {withAmp} from '@ampproject/storybook-addon';
 export default {
   title: 'amp-video-iframe-1_0',
   decorators: [withA11y, withKnobs, withAmp],
-  parameters: {extensions: [{name: 'amp-video-iframe', version: '1.0'}]},
+  parameters: {
+    extensions: [{name: 'amp-video-iframe', version: '1.0'}],
+    experiments: ['bento'],
+  },
 };
 
 const AmpVideoIframeWithKnobs = ({i, ...rest}) => {
