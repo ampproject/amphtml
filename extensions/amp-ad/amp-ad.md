@@ -493,6 +493,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 
 -   [1wo](../../ads/vendors/1wo.md)
 -   [24smi](../../ads/vendors/24smi.md)
+-   [AdsKeeper](../../ads/vendors/adskeeper.md)
 -   [AdsLoom](../../ads/vendors/adsloom.md)
 -   [Bringhub](../../ads/vendors/bringhub.md)
 -   [Dable](../../ads/vendors/dable.md)
