@@ -41,8 +41,7 @@ describes.realWin(
       await loadPromise;
     };
 
-    const href =
-      'http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html';
+    const href = 'https://cdn.ampproject.org/';
 
     beforeEach(async function () {
       win = env.win;
