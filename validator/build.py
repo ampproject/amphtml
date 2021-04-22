@@ -76,8 +76,8 @@ def CheckPrereqs():
   try:
     libprotoc_version = subprocess.check_output(['protoc', '--version'])
   except (subprocess.CalledProcessError, OSError):
-    Die('Protobuf compiler not found. Try "apt-get install protobuf-compiler"'
-        'or follow the install instructions at'
+    Die('Protobuf compiler not found. Try "apt-get install protobuf-compiler" '
+        'or follow the install instructions at '
         'https://github.com/ampproject/amphtml/blob/main/validator/README.md#installation.'
        )
 
