@@ -23,11 +23,15 @@ import {
   pauseAll,
   unmountAll,
 } from '../utils/resource-container-helper';
+import {objectsEqualShallow} from '../core/types/object';
 import {rediscoverChildren, removeProp, setProp} from '../context';
 import {useAmpContext} from './context';
 import {useEffect, useLayoutEffect, useRef} from './index';
 
 const EMPTY = {};
+
+/** @const {WeakMap<Element, {oldDefauls: (!Object|undefined), component: Component}>} */
+const cache = new WeakMap();
 
 /**
  * @param {!Element} element
@@ -37,6 +41,16 @@ const EMPTY = {};
  * @return {!PreactDef.VNode|!PreactDef.FunctionalComponent}
  */
 export function createSlot(element, name, defaultProps, as) {
+  element.setAttribute('slot', name);
+  if (!as) {
+    return <Slot {...(defaultProps || EMPTY)} name={name} />;
+  }
+
+  const cached = cache.get(element);
+  if (cached && objectsEqualShallow(cached.oldProps, defaultProps)) {
+    return cached.component;
+  }
+
   /**
    * @param {!Object|undefined} props
    * @return {!PreactDef.VNode}
@@ -44,8 +58,9 @@ export function createSlot(element, name, defaultProps, as) {
   function SlotWithProps(props) {
     return <Slot {...(defaultProps || EMPTY)} name={name} {...props} />;
   }
-  element.setAttribute('slot', name);
-  return as ? SlotWithProps : SlotWithProps();
+  cache.set(element, {oldProps: defaultProps, component: SlotWithProps});
+
+  return SlotWithProps;
 }
 
 /**
