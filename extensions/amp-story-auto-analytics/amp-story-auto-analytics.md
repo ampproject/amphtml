@@ -64,7 +64,7 @@ Fired once the last page of the story has been viewed. It includes the following
 
 ## `storyPageIndex`
 
-Fired once per page once it has been viewed. It includes the following parameters:
+Fired once a page has been viewed. It includes the following parameters:
 
 | Parameter             | Value                                                           |
 | --------------------- | --------------------------------------------------------------- |
