@@ -98,6 +98,22 @@ let BoundPropertyDef;
 let BoundElementDef;
 
 /**
+ * The options bag for binding application.
+ * - skipAmpState: If true, skips <amp-state> elements.
+ * - constrain: If provided, restricts application to children of the provided elements.
+ * - evaluateOnly: If provided, caches the evaluated result on each bound element and skips the actual DOM updates.
+ *
+ * @typedef {Object} ApplyOptionsDef
+ * @property {boolean=} skipAmpState - If true, skips <amp-state> elements.
+ * @property {Array<!Element>=} constrain
+ * @property {boolean=} evaluateOnly
+ *   skipAmpState: boolean=,
+ *   constrain: Array<!Element>=,
+ *   evaluateOnly: boolean=
+ * }}
+ */
+
+/**
  * A map of tag names to arrays of attributes that do not have non-bind
  * counterparts. For instance, amp-carousel allows a `[slide]` attribute,
  * but does not support a `slide` attribute.
@@ -1188,12 +1204,7 @@ export class Bind {
    * Applies expression results to elements in the document.
    *
    * @param {Object<string, BindExpressionResultDef>} results
-   * @param {!Object} opts
-   * @param {boolean=} opts.skipAmpState If true, skips <amp-state> elements.
-   * @param {Array<!Element>=} opts.constrain If provided, restricts application
-   *   to children of the provided elements.
-   * @param {boolean=} opts.evaluateOnly If provided, caches the evaluated
-   *   result on each bound element and skips the actual DOM updates.
+   * @param {!ApplyOptionsDef} opts
    * @return {!Promise}
    * @private
    */

@@ -316,7 +316,11 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     // These are type-check errors / warnings by default, but cannot be.
     compilerOptions.jscomp_off.push(
       'moduleLoad', // Breaks type-only modules: google/closure-compiler#3041
-      'unknownDefines' // Closure complains about VERSION
+      'unknownDefines', // Closure complains about VERSION
+      // Build-time constant subsitution will trigger both uselessCode (DCE)
+      // as well as suspiciousCode (silly conditionals where constants are used).
+      'uselessCode',
+      'suspiciousCode'
     );
     compilerOptions.conformance_configs =
       'build-system/test-configs/conformance-config.textproto';

@@ -412,10 +412,9 @@ export class Log {
    *
    * Otherwise see `assert` for usage
    *
-   * @param {*} shouldBeElement
+   * @param {?} shouldBeElement
    * @param {!Array|string=} opt_message The assertion message
    * @return {!Element} The value of shouldBeTrueish.
-   * @template T
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertElement(shouldBeElement, opt_message) {

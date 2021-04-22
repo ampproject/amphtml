@@ -252,7 +252,7 @@ export function rootNodeFor(node) {
 
 /**
  * Determines if value is actually a `ShadowRoot` node.
- * @param {*} value
+ * @param {?} value
  * @return {boolean}
  */
 export function isShadowRoot(value) {
@@ -783,7 +783,7 @@ export function isAmpElement(element) {
 /**
  * Return a promise that resolve when an AMP element upgrade from HTMLElement
  * to CustomElement
- * @param {!Element} element
+ * @param {?} element
  * @return {!Promise<!AmpElement>}
  */
 export function whenUpgradedToCustomElement(element) {
@@ -881,7 +881,7 @@ export function isFullscreenElement(element) {
  * Returns true if node is not disabled.
  *
  * IE8 can return false positives, see {@link matches}.
- * @param {!Element} element
+ * @param {!HTMLInputElement} element
  * @return {boolean}
  * @see https://www.w3.org/TR/html5/forms.html#concept-fe-disabled
  */
@@ -980,7 +980,7 @@ export function getVerticalScrollbarWidth(win) {
 export function dispatchCustomEvent(node, name, opt_data, opt_options) {
   const data = opt_data || {};
   // Constructors of events need to come from the correct window. Sigh.
-  const event = node.ownerDocument.createEvent('Event');
+  const event = /** @type {?}*/ (node.ownerDocument.createEvent('Event'));
   event.data = data;
   const {bubbles, cancelable} = opt_options || DEFAULT_CUSTOM_EVENT_OPTIONS;
   event.initEvent(name, bubbles, cancelable);

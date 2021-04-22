@@ -24,6 +24,21 @@ export const GrantReason = {
 };
 
 /**
+ * The constructor arg for an {@link Entitlement}
+ *
+ * @typedef {{
+ *   source: string,
+ *   raw: string,
+ *   service: string,
+ *   granted: boolean,
+ *   grantReason: GrandReason=,
+ *   dataObject: JsonObject=,
+ *   decryptedDocumentKey: string=
+ * }}
+ */
+let EntitlementConstructorInputDef;
+
+/**
  * The single entitlement object.
  */
 export class Entitlement {
@@ -41,14 +56,7 @@ export class Entitlement {
   }
 
   /**
-   * @param {Object} input
-   * @param {string} [input.source]
-   * @param {string} [input.raw]
-   * @param {string} [input.service]
-   * @param {boolean} [input.granted]
-   * @param {?GrantReason} [input.grantReason]
-   * @param {?JsonObject} [input.dataObject]
-   * @param {?string} [input.decryptedDocumentKey]
+   * @param {!EntitlementConstructorInputDef} input
    */
   constructor(input) {
     const {

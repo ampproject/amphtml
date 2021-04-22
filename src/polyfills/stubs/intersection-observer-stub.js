@@ -103,7 +103,11 @@ export function installStub(win) {
  */
 export function supportsDocumentRoot(win) {
   try {
-    new win.IntersectionObserver(() => {}, {root: win.document});
+    new win.IntersectionObserver(
+      () => {},
+      // TODO: closure does not yet know about root: Document.
+      /** @type ?*/ ({root: win.document})
+    );
     return true;
   } catch {
     return false;

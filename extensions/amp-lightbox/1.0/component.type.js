@@ -43,7 +43,7 @@ LightboxDef.Props;
 LightboxDef.CloseButtonProps;
 
 /** @interface */
-Lightbox.LightboxApi = class {
+LightboxDef.LightboxApi = class {
   /** Open the lightbox */
   open() {}
 
