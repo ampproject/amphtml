@@ -600,6 +600,8 @@ Every element inside an `<amp-story-page>` can have an entrance animation.
 
 You can configure animations by specifying a set of [animation attributes](#animation-attributes) on the element; no additional AMP extensions or configuration is needed.
 
+You can also create more advanced animations by using the `<amp-story-animation>` component. Read more on the [amp-story-animation section](#Advanced-animations).
+
 {% call callout('Note', type='note') %}
 Animations can help make your Web Story more visually exciting and engaging, but use them sparingly. Some users may find long, continuous animations distracting. Other users may have motion sensitivity and be adversely affected by excessive use of motion and parallax effects.
 {% endcall %}
@@ -831,6 +833,33 @@ You can apply multiple entrance animations on one element (for example, an eleme
 {% call callout('Note', type='note') %}
 If a composed animation is supposed to start after the end of a separate element's animation, make sure that all nested elements that compose the animation have the attribute `animate-in-after` set to the same `id`.
 {% endcall %}
+
+## Advanced animations
+
+You can create more advanced animations by using the `<amp-story-animation>` component. It lets you create [`<amp-animation>`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-animation/amp-animation.md) type animations inside your Web Story.
+
+To use it, add a `<amp-story-animation layout="nodisplay" trigger="visibility">` tag under your `<amp-story-page>` with a child `<script type="application/json">` containing the JSON configuration describing your animation. In the following example, the "rotate with amp-story-animation" text will be rotated for 1 second using `<amp-story-animation>`:
+
+```html
+...
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="vertical">
+          <strong class="animate">rotate with amp-story-animation</strong>
+        </amp-story-grid-layer>
+
+        <amp-story-animation layout="nodisplay" trigger="visibility">
+          <script type="application/json">
+            {
+              "selector": ".animate",
+              "duration": "1s",
+              "keyframes": {"transform": "rotate(360deg)"}
+            }
+          </script>
+        </amp-story-animation>
+      </amp-story-page>
+```
+
+For more details on the animation configuration and options, please refer to the [`<amp-animation> docs`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-animation/amp-animation.md)
 
 ## Branching
 
