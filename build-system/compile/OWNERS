@@ -9,6 +9,7 @@
     {
       pattern: '{bundles.config,sources}.js',
       owners: [
+        {name: 'ampproject/wg-bento'},
         {name: 'ampproject/wg-infra'},
         {name: 'ampproject/wg-performance'},
       ],
