@@ -51,11 +51,15 @@ describes.realWin(
       element = html`
         <amp-video-iframe
           layout="responsive"
-          src="https://amp.dev/static/samples/files/amp-video-iframe-videojs.html"
           width="16"
           height="9"
         ></amp-video-iframe>
       `;
+
+      element.setAttribute(
+        'src',
+        `http://localhost:${location.port}/test/fixtures/served/blank.html#`
+      );
 
       env.win.document.body.appendChild(element);
 
