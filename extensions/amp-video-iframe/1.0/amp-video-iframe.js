@@ -19,37 +19,22 @@ import {VideoBaseElement} from '../../amp-video/1.0/base-element';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/core/types/object';
+import {measureIntersection} from '../../../src/utils/intersection';
 
 /** @const {string} */
 const TAG = 'amp-video-iframe';
 
 /**
  * @param {!Element} element
- * @return {!Promise<IntersectionObserverEntry>}
- */
-function getIntersectionObserverEntryAsync(element) {
-  return new Promise((resolve) => {
-    const {parentWindow} = element.ownerDocument;
-    const observer = new parentWindow.IntersectionObserver((entries) => {
-      resolve(entries[entries.length - 1]);
-      observer.disconnect();
-    });
-    observer.observe(element);
-  });
-}
-
-/**
- * @param {!Element} element
  * @return {!Promise<number>}
  */
 function getIntersectionRatioMinAutoplay(element) {
-  return getIntersectionObserverEntryAsync(element).then(
-    ({intersectionRatio}) =>
-      // Only post ratio > 0 when in autoplay range to prevent internal
-      // autoplay implementations that differ from ours.
-      intersectionRatio < MIN_VISIBILITY_RATIO_FOR_AUTOPLAY
-        ? 0
-        : intersectionRatio
+  return measureIntersection(element).then(({intersectionRatio}) =>
+    // Only post ratio > 0 when in autoplay range to prevent internal
+    // autoplay implementations that differ from ours.
+    intersectionRatio < MIN_VISIBILITY_RATIO_FOR_AUTOPLAY
+      ? 0
+      : intersectionRatio
   );
 }
 
@@ -60,22 +45,23 @@ class AmpVideoIframe extends VideoBaseElement {}
  */
 const onMessage = (e) => {
   const {currentTarget} = e;
-  const method = e.data && e.data['method'];
-  const messageId = e.data && e.data['id'];
+  const method = e.data?.['method'];
+  const messageId = e.data?.['id'];
   if (method) {
     if (method == 'getIntersection') {
-      getIntersectionRatioMinAutoplayFactory(
-        currentTarget.ownerDocument.parentWindow
-      )(currentTarget).then((intersectionRatio) => {
-        currentTarget.contentWindow./*OK*/ postMessage(
-          JSON.stringify(
-            dict({
-              'id': messageId,
-              'intersectionRatio': intersectionRatio,
-            })
-          )
-        );
-      });
+      // TODO(alanorozco): Throttle
+      getIntersectionRatioMinAutoplay(currentTarget).then(
+        (intersectionRatio) => {
+          currentTarget.contentWindow./*OK*/ postMessage(
+            JSON.stringify(
+              dict({
+                'id': messageId,
+                'intersectionRatio': intersectionRatio,
+              })
+            )
+          );
+        }
+      );
       return;
     }
     throw new Error(`Unknown method ${method}`);
@@ -104,7 +90,7 @@ const onMessage = (e) => {
 
 /**
  * @param {string} method
- * @return {method}
+ * @return {string}
  */
 const makeMethodMessage = (method) =>
   JSON.stringify({
