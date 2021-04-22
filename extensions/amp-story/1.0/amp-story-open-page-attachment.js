@@ -113,6 +113,11 @@ export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
  */
 const renderDefaultPageAttachmentUI = (win, pageEl, attachmentEl) => {
   const openAttachmentEl = buildOpenDefaultAttachmentElement(pageEl);
+  if (isPageAttachmentUiV2ExperimentOn(win)) {
+    openAttachmentEl.classList.add(
+      '.i-amphtml-amp-story-page-attachment-ui-v2'
+    );
+  }
   // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
   const attachmentHref = attachmentEl.getAttribute('href');
   if (attachmentHref) {
