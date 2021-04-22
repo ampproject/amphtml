@@ -55,9 +55,7 @@ function FacebookCommentsWithRef(
     (event) => {
       const data = tryParseJson(event.data) ?? deserializeMessage(event.data);
       if (data['action'] == 'ready') {
-        if (onReady) {
-          onReady();
-        }
+        onReady?.();
       }
       if (data['type'] == MessageType.EMBED_SIZE) {
         const height = data['height'];
