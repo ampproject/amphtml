@@ -66,7 +66,7 @@ const onMessage = (e) => {
     }
     throw new Error(`Unknown method ${method}`);
   }
-  const event = e.data && e.data['event'];
+  const event = e.data?.['event'];
   if (!event) {
     return;
   }
