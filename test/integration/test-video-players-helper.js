@@ -44,7 +44,7 @@ function skipIfAutoplayUnsupported(win) {
 export function runVideoPlayerIntegrationTests(
   createVideoElementFunc,
   opt_experiment,
-  timeout = 1000
+  timeout = 2000
 ) {
   /**
    * @const {number} Height of the fixture iframe
