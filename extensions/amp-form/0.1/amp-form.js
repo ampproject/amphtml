@@ -44,6 +44,7 @@ import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   ancestorElementsByTag,
   childElementByAttr,
+  closestAncestorElementBySelector,
   createElementWithAttributes,
   iterateCursor,
   matches,
@@ -1471,6 +1472,23 @@ export function formElementsQuerySelectorAll(form, query) {
 }
 
 /**
+ * Returns the first element for the form.elements
+ * that match the selectors.
+ * @param {!HTMLFormElement} form
+ * @param {string} query
+ * @return {?HTMLElement}
+ */
+export function formElementsQuerySelector(form, query) {
+  for (let i = 0; i < form.elements.length; i++) {
+    const element = form.elements[i];
+    if (matches(element, query)) {
+      return element;
+    }
+  }
+  return null;
+}
+
+/**
  * Checks user validity for all inputs, fieldsets and the form.
  * @param {!HTMLFormElement} form
  * @return {boolean} Whether the form is currently valid or not.
@@ -1729,10 +1747,21 @@ export class AmpFormService {
           this.ampdoc_.getRootNode(),
           type,
           (e) => {
-            const {form} = e.target;
+            let {form} = e.target;
+
+            // If it's an AMP element that does not have a native form attribute,
+            // then find the form by either querySelector for based upon 'form'
+            // attribute on the element or traversing up.
+            if (!form) {
+              dev.assertElement(e.target);
+              const formId = e.target.getAttribute('form');
+              form = formId
+                ? this.ampdoc_.getRootNode().querySelector(formId)
+                : closestAncestorElementBySelector(e.target, 'form');
+            }
 
             // Only call handlers if the element has a registered form.
-            if (this.eventHandlers_[type].has(form)) {
+            if (form && this.eventHandlers_[type].has(form)) {
               this.eventHandlers_[type].get(form).forEach((handlerForForm) => {
                 handlerForForm(e);
               });

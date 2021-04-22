@@ -15,7 +15,6 @@
  */
 
 import {AmpEvents} from '../../../../src/core/constants/amp-events';
-import {AmpFormService} from '../amp-form';
 import {DIRTINESS_INDICATOR_CLASS, FormDirtiness} from '../form-dirtiness';
 import {Services} from '../../../../src/services';
 import {closestAncestorElementBySelector} from '../../../../src/dom';
@@ -94,7 +93,7 @@ describes.realWin(
     },
   },
   (env) => {
-    let doc, form, dirtinessHandler, ampFormService;
+    let doc, form, dirtinessHandler;
 
     beforeEach(async () => {
       doc = env.win.document;
@@ -104,7 +103,6 @@ describes.realWin(
           return false;
         },
       });
-      ampFormService = new AmpFormService(env.ampdoc);
       dirtinessHandler = new FormDirtiness(form, env.win);
       await macroTask();
     });
@@ -478,16 +476,14 @@ describes.realWin(
 
       it('adds the dirtiness class if the form already has dirty fields', async () => {
         changeInput(input, 'changed');
-        ampFormService = new AmpFormService(env.ampdoc);
-        dirtinessHandler = new FormDirtiness(newForm, env.win, ampFormService);
+        dirtinessHandler = new FormDirtiness(newForm, env.win);
         await macroTask();
 
         expect(newForm).to.have.class(DIRTINESS_INDICATOR_CLASS);
       });
 
       it('does not add the dirtiness class if the form does not have dirty fields', async () => {
-        ampFormService = new AmpFormService(env.ampdoc);
-        dirtinessHandler = new FormDirtiness(newForm, env.win, ampFormService);
+        dirtinessHandler = new FormDirtiness(newForm, env.win);
         await macroTask();
 
         expect(newForm).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
