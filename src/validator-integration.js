@@ -32,16 +32,20 @@ export function maybeValidate(win) {
     // Should only happen in tests.
     return;
   }
-  let validator = false;
+  let validatorUrl = null;
   if (getMode().development) {
     const hash = parseQueryString(
       win.location['originalHash'] || win.location.hash
     );
-    validator = hash['validate'] !== '0';
+    if (hash['validate'] === 'wasm') {
+      validatorUrl = `${urls.cdn}/v0/validator_wasm.js`;
+    } else if (hash['validate'] !== '0') {
+      validatorUrl = `${urls.cdn}/v0/validator.js`;
+    }
   }
 
-  if (validator) {
-    loadScript(win.document, `${urls.cdn}/v0/validator.js`).then(() => {
+  if (validatorUrl) {
+    loadScript(win.document, validatorUrl).then(() => {
       /* global amp: false */
       amp.validator.validateUrlAndLog(filename, win.document);
     });
