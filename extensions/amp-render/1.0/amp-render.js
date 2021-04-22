@@ -178,14 +178,14 @@ export class AmpRender extends BaseElement {
     });
   }
 
-  mutationObserverCallback() {
-    const src = this.element.getAttribute('src');
-    console.log(
-      src === this.initialSrc_,
-      getSourceOrigin(src) ==
-        getSourceOrigin(this.element.getAmpDoc().win.location)
-    );
-  }
+  // mutationObserverCallback() {
+  //   const src = this.element.getAttribute('src');
+  //   console.log(
+  //     src === this.initialSrc_,
+  //     getSourceOrigin(src) ==
+  //       getSourceOrigin(this.element.getAmpDoc().win.location)
+  //   );
+  // }
 
   /**
    * TODO: this implementation is identical to one in amp-date-display &
