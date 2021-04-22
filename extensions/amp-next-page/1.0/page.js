@@ -253,7 +253,8 @@ export class Page {
       .attachDocumentToPage(
         this /** page */,
         /** @type {!Document} */ (devAssert(this.content_)),
-        this.is(PageState.PAUSED) /** force */
+        this.is(PageState.PAUSED) /** force */,
+        this.url_
       )
       .then((shadowDoc) => {
         if (!shadowDoc) {
