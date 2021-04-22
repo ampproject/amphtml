@@ -18,6 +18,7 @@ import * as _3p from '../../../3p/3p';
 import {createIframePromise} from '../../../testing/iframe';
 import {
   handlePosition,
+  handlePositionResponsive,
   keyBy,
   runWhenFetchingSettled,
   sizeAgainstWindow,
@@ -291,6 +292,30 @@ describes.fakeWin('amp-ad-ssp', {}, () => {
     expect(divStyles).to.eql({
       width: '100%',
       height: '100%',
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      maxWidth: '100%',
+    });
+  });
+
+  it('handlePositionResponsive() should center element', () => {
+    const div = win.document.createElement('div');
+    win.document.body.appendChild(div);
+    const e = {data: JSON.stringify({height: 200})};
+    handlePositionResponsive(e, div);
+
+    const divStyles = {
+      height: div.style.height,
+      position: div.style.position,
+      top: div.style.top,
+      left: div.style.left,
+      transform: div.style.transform,
+      maxWidth: div.style.maxWidth,
+    };
+    expect(divStyles).to.eql({
+      height: '200px',
       position: 'absolute',
       top: '50%',
       left: '50%',
