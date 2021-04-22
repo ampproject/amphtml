@@ -442,6 +442,12 @@ export class AmpDoc {
    * @restricted
    */
   declareExtension(extensionId, version) {
+    console.log(
+      'AmpDoc: declareExtension:',
+      this.constructor.name,
+      extensionId,
+      version
+    );
     devAssert(
       !this.declaredExtensions_[extensionId] ||
         this.declaredExtensions_[extensionId] === version,

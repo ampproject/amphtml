@@ -29,6 +29,8 @@ router.get('/examples/*.html', async (req, res) => {
     );
   }
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8000');
   res.end(transformedHTML);
 });
 

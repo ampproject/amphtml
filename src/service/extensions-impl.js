@@ -158,16 +158,29 @@ export class Extensions {
     );
     holder.latest = latest;
 
+    console.log(
+      'extensions: registerExtension:',
+      extensionId,
+      version,
+      latest,
+      'auto:',
+      holder.auto,
+      'latest.auto:',
+      latestHolder?.auto
+    );
+
     if (holder.loaded) {
       // This extension has already been registered. This could be a
       // a "latest" script requested for a previously loaded numeric
       // version or vice versa.
+      console.log('extensions: registerExtension: SKIP');
       return;
     }
 
     // Replace the "latest": both numerical and "latest" will be pointing to
     // the same record.
     if (latest) {
+      console.log('extensions: swap latest:', extensionId, version, latest);
       this.extensions_[extensionKey(extensionId, LATEST_VERSION)] = holder;
     }
 
@@ -224,6 +237,7 @@ export class Extensions {
    * @return {!Promise<!ExtensionDef>}
    */
   preloadExtension(extensionId, version = DEFAULT_VERSION) {
+    console.log('extensions: preloadExtension', extensionId, version);
     if (extensionId == 'amp-embed') {
       extensionId = 'amp-ad';
     }
@@ -511,6 +525,7 @@ export class Extensions {
    * @return {!Promise}
    */
   installExtensionInDoc(ampdoc, extensionId, version = DEFAULT_VERSION) {
+    console.log('extensions: installExtensionInDoc:', extensionId, version);
     ampdoc.declareExtension(extensionId, version);
     return this.waitFor_(this.getExtensionHolder_(extensionId, version)).then(
       () => {

@@ -139,10 +139,9 @@ export class AmpMustache extends BaseTemplate {
     if (typeof data === 'object') {
       mustacheData = {...data, ...this.nestedTemplates_};
     }
-    return mustache.render(
-      this.template_,
-      mustacheData,
-      /* partials */ undefined
+    return (
+      'M0.1 - ' +
+      mustache.render(this.template_, mustacheData, /* partials */ undefined)
     );
   }
 
