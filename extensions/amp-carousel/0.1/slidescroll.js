@@ -128,6 +128,9 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private @const {boolean} */
     this.isIos_ = platform.isIos();
 
+    /** @private @const {boolean} */
+    this.isSafari_ = platform.isSafari();
+
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
@@ -430,7 +433,7 @@ export class AmpSlideScroll extends BaseSlides {
   scrollHandler_(unusedEvent) {
     const currentScrollLeft = this.slidesContainer_./*OK*/ scrollLeft;
 
-    if (!this.isIos_) {
+    if (!this.isIos_ && !this.isSafari_) {
       this.handleCustomElasticScroll_(currentScrollLeft);
     }
 

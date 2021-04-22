@@ -59,12 +59,12 @@ amp-video/0.1/test/validator-amp-video.html:49:2 The attribute 'loop' in tag 'am
 |      loop preload="metadata" controls></amp-video>
 |
 |    <!-- Valid: Media Session Attributes -->
-|    <amp-video layout=fill width=300 height=500 
+|    <amp-video layout=fill width=300 height=500
 |      title="Hello" artist="World" artwork="example.jpg" poster="example.jpg"
 |      ></amp-video>
 |
 |    <!-- Valid: Most attributes are bindable -->
-|    <amp-video layout=fill width=300 height=500 
+|    <amp-video layout=fill width=300 height=500
 |      [title]="Hello" [artist]="World" [artwork]="example.jpg" [poster]="example.jpg"
 |      ></amp-video>
 |
@@ -77,6 +77,11 @@ amp-video/0.1/test/validator-amp-video.html:67:2 The attribute 'dock' requires i
 |    <amp-video rotate-to-fullscreen=true layout=fill width=300 height=500
 >>   ^~~~~~~~~
 amp-video/0.1/test/validator-amp-video.html:70:2 The attribute 'rotate-to-fullscreen' in tag 'amp-video' is set to the invalid value 'true'. (see https://amp.dev/documentation/components/amp-video/)
+|      loop preload="metadata" controls></amp-video>
+|    <!-- Invalid: Cannot enable google cache on non-stories video -->
+|    <amp-video cache="google" layout=fill width=300 height=500
+>>   ^~~~~~~~~
+amp-video/0.1/test/validator-amp-video.html:73:2 The attribute 'cache' may not appear in tag 'amp-video'. (see https://amp.dev/documentation/components/amp-video/)
 |      loop preload="metadata" controls></amp-video>
 |  </body>
 |  </html>
