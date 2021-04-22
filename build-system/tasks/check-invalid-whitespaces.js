@@ -45,7 +45,11 @@ function runCheck(filesToCheck) {
  * Checks multiple kinds of files for invalid whitespaces.
  */
 function checkInvalidWhitespaces() {
-  const filesToCheck = getFilesToCheck(invalidWhitespaceGlobs);
+  const filesToCheck = getFilesToCheck(
+    invalidWhitespaceGlobs,
+    {dot: true},
+    '.gitignore'
+  );
   if (filesToCheck.length == 0) {
     return;
   }

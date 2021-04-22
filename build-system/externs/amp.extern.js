@@ -60,16 +60,6 @@ FormDataWrapperInterface.prototype.getFormData = function () {};
 FormData.prototype.entries = function () {};
 
 /**
- * A type for Objects that can be JSON serialized or that come from
- * JSON serialization. Requires the objects fields to be accessed with
- * bracket notation object['name'] to make sure the fields do not get
- * obfuscated.
- * @constructor
- * @dict
- */
-function JsonObject() {}
-
-/**
  * @typedef {{
  *   YOU_MUST_USE: string,
  *   jsonLiteral: function(),
@@ -449,12 +439,6 @@ HTMLAnchorElement.prototype.origin;
 
 /** @typedef {number}  */
 var time;
-
-/**
- * This type signifies a callback that can be called to remove the listener.
- * @typedef {function()}
- */
-var UnlistenDef;
 
 /**
  * Just an element, but used with AMP custom elements..
