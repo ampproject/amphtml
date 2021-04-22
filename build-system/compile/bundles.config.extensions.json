@@ -727,7 +727,6 @@
   {
     "name": "amp-vimeo",
     "version": "1.0",
-    "options": {"hasCss": true},
     "latestVersion": "0.1"
   },
   {"name": "amp-vine", "version": "0.1", "latestVersion": "0.1"},

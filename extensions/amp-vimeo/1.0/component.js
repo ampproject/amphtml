@@ -24,7 +24,6 @@ import {
   useRef,
   useState,
 } from '../../../src/preact';
-import {useStyles} from './component.jss';
 
 /**
  * @param {!VimeoDef.Props} props
@@ -35,19 +34,24 @@ export function Vimeo({exampleTagNameProp, ...rest}) {
   // DO NOT SUBMIT: This is example code only.
   const [exampleValue, setExampleValue] = useState(0);
   const exampleRef = useRef(null);
-  const styles = useStyles();
 
-  useCallback(() => {/* Do things */}, [])
-  useEffect(() => {/* Do things */}, [])
-  useLayoutEffect(() => {/* Do things */}, [])
-  useMemo(() => {/* Do things */}, [])
+  useCallback(() => {
+    /* Do things */
+  }, []);
+  useEffect(() => {
+    /* Do things */
+  }, []);
+  useLayoutEffect(() => {
+    /* Do things */
+  }, []);
+  useMemo(() => {
+    /* Do things */
+  }, []);
 
   return (
-    <ContainWrapper layout size paint {...rest} >
+    <ContainWrapper layout size paint {...rest}>
       {{exampleTagNameProp}}
-      <div className={`${styles.exampleContentHidden}`}>
-        This is hidden
-      </div>
+      <div className={`${styles.exampleContentHidden}`}>This is hidden</div>
     </ContainWrapper>
   );
 }
