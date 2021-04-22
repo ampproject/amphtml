@@ -591,13 +591,23 @@ export class NextPageService {
 
     // Try inserting the shadow document
     try {
+      const params = {
+        visibilityState: VisibilityState.PRERENDER,
+      };
+
+      // Check if the viewer (if any) has stored params
+      // on the AMPDOC signifying it has capabilities (i.e. CID).
+      // If so, forward it to the shadowdoc, so that it
+      // will also know that it has the same capabilities.
+      const viewerCapabilities = this.ampdoc_.getParam('cap');
+      if (viewerCapabilities) {
+        params['cap'] = viewerCapabilities;
+      }
       const amp = this.multidocManager_.attachShadowDoc(
         shadowRoot,
         content,
         '',
-        {
-          visibilityState: VisibilityState.PRERENDER,
-        }
+        params
       );
 
       const ampdoc = devAssert(amp.ampdoc);
