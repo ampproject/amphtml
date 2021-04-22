@@ -181,6 +181,11 @@ tags: {  # <amp-video> in amp-story
     name: "poster"
     mandatory: true
   }
+  attrs: {
+    name: "cache"
+    requires_extension: "amp-cache-url"
+    value: "google"
+  }
   attr_lists: "extended-amp-global"
   attr_lists: "amp-video-common"
   spec_url: "https://amp.dev/documentation/components/amp-video/"
