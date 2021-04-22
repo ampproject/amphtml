@@ -23,6 +23,9 @@ import {user} from '../../../src/log';
 
 /**
  * Add the caching sources to the video if opted in.
+ * The request is sent to the AMP cache url with /mbv path prefix,
+ * and appends the canonical url as the queryParam `amp_video_host_url`.
+ *
  * @param {!Element} videoEl
  * @param {!Window} win
  * @return {!Promise}
