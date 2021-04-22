@@ -20,7 +20,7 @@ import {
   BookendComponentInterface,
 } from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
-import {dict} from '../../../../../src/utils/object';
+import {dict} from '../../../../../src/core/types/object';
 import {
   getSourceOriginForElement,
   resolveImgSrc,
@@ -38,6 +38,7 @@ import {userAssert} from '../../../../../src/log';
  *   url: string,
  *   domainName: string,
  *   image: string,
+ *   alt: string,
  * }}
  */
 export let LandscapeComponentDef;
@@ -87,6 +88,7 @@ export class LandscapeComponent {
       title: landscapeJson['title'],
       category: landscapeJson['category'],
       image: landscapeJson['image'],
+      alt: landscapeJson['alt'],
     };
 
     if (landscapeJson['amphtml']) {
@@ -147,6 +149,10 @@ export class LandscapeComponent {
       image,
       dict({'src': resolveImgSrc(win, landscapeData.image)})
     );
+
+    addAttributesToElement(image, {
+      'alt': landscapeData.alt ? landscapeData.alt : '',
+    });
 
     meta.textContent = landscapeData.domainName;
 

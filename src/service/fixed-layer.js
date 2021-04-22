@@ -30,9 +30,9 @@ import {
 } from '../style';
 import {closest, domOrderComparator, matches} from '../dom';
 import {dev, user} from '../log';
-import {endsWith} from '../string';
+import {endsWith} from '../core/types/string';
 import {getMode} from '../mode';
-import {remove} from '../utils/array';
+import {remove} from '../core/types/array';
 
 const TAG = 'FixedLayer';
 
@@ -574,7 +574,6 @@ export class FixedLayer {
    * @param {!Node} root
    * @param {boolean=} opt_lightboxMode
    * @private
-   * @noinline
    */
   trySetupSelectors_(root, opt_lightboxMode) {
     try {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../src/amp-events';
+import {AmpEvents} from '../src/core/constants/amp-events';
 import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
 import {FakeLocation} from './fake-dom';
 import {FormEvents} from '../extensions/amp-form/0.1/form-events';
@@ -267,7 +267,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
               const iWin = iframe.contentWindow;
               const p = onInsert(iWin)
                 .then(() => {
-                  return element.build();
+                  return element.buildInternal();
                 })
                 .then(() => {
                   if (!element.getPlaceholder()) {
@@ -276,16 +276,23 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
                       element.appendChild(placeholder);
                     }
                   }
+                  const resources = Services.resourcesForDoc(ampdoc);
+                  const resource = resources.getResourceForElementOptional(
+                    element
+                  );
+                  if (resource) {
+                    resource.measure();
+                  }
+                })
+                .then(() => {
                   if (element.layoutCount_ == 0) {
                     if (opt_beforeLayoutCallback) {
                       opt_beforeLayoutCallback(element);
                     }
-                    return element.layoutCallback().then(() => {
-                      return element;
-                    });
+                    return element.layoutCallback();
                   }
-                  return element;
-                });
+                })
+                .then(() => element);
               iWin.document.getElementById('parent').appendChild(element);
               return p;
             },
@@ -551,12 +558,14 @@ export function expectBodyToBecomeVisible(win, opt_timeout) {
  * Calling `triggerError` on the respective resources makes them
  * appear in error state.
  * @param {!Window} win
+ * @param {!Object} sandbox
  */
-export function doNotLoadExternalResourcesInTest(win) {
+export function doNotLoadExternalResourcesInTest(win, sandbox) {
+  const {document} = win;
   const {prototype} = win.Document;
   const {createElement} = prototype;
-  prototype.createElement = function (tagName) {
-    const element = createElement.apply(this, arguments);
+  sandbox.stub(prototype, 'createElement').callsFake(function (tagName) {
+    const element = createElement.apply(document, arguments);
     tagName = tagName.toLowerCase();
     if (tagName == 'iframe' || tagName == 'img') {
       // Make get/set write to a fake property instead of
@@ -589,7 +598,7 @@ export function doNotLoadExternalResourcesInTest(win) {
       }
     }
     return element;
-  };
+  });
 }
 
 /**

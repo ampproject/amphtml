@@ -13,16 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {CSS} from '../../../build/amp-video-docking-0.1.css';
 import {Controls} from './controls';
-import {DirectionX, DirectionY, FLOAT_TOLERANCE} from './def.js';
+import {DirectionX, DirectionY, FLOAT_TOLERANCE, RectDef} from './def';
 import {HtmlLiteralTagDef} from './html';
-import {
-  LayoutRectDef,
-  layoutRectEquals,
-  moveLayoutRect,
-} from '../../../src/layout-rect';
 import {
   PlayingStates,
   VideoAttributes,
@@ -31,11 +26,6 @@ import {
   VideoOrBaseElementDef,
   isDockable,
 } from '../../../src/video-interface';
-import {
-  PositionObserver, // eslint-disable-line no-unused-vars
-  installPositionObserverServiceForDoc,
-} from '../../../src/service/position-observer/position-observer-impl';
-import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
 import {VideoDockingEvents, pointerCoords} from './events';
 import {applyBreakpointClassname} from './breakpoints';
@@ -51,13 +41,14 @@ import {
 import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
 import {createViewportRect} from './viewport-rect';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getInternalVideoElementFor} from '../../../src/utils/video';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isRTL, removeElement, scopedQuerySelector} from '../../../src/dom';
-import {once} from '../../../src/utils/function';
+import {layoutRectEquals, rectIntersection} from '../../../src/layout-rect';
+import {once} from '../../../src/core/types/function';
 import {
   px,
   resetStyles,
@@ -139,7 +130,8 @@ let DockedDef;
 /**
  * @struct @typedef {{
  *   type: DockTargetType,
- *   rect: !LayoutRectDef,
+ *   rect: !RectDef,
+ *   slot: (!Element|undefined),
  * }}
  */
 let DockTargetDef;
@@ -247,9 +239,8 @@ const PlaceholderBackground = (html) =>
 export class VideoDocking {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!PositionObserver=} opt_injectedPositionObserver
    */
-  constructor(ampdoc, opt_injectedPositionObserver) {
+  constructor(ampdoc) {
     /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
@@ -259,7 +250,7 @@ export class VideoDocking {
     /** @private @const {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
-    /** @private @const {!LayoutRectDef} */
+    /** @private @const {!RectDef} */
     this.viewportRect_ = createViewportRect(this.viewport_);
 
     /** @private {?DockedDef} */
@@ -347,8 +338,8 @@ export class VideoDocking {
     /** @private @const {function():?Element} */
     this.findSlotOnce_ = once(() => this.findSlot_());
 
-    /** @private @const {?PositionObserver} */
-    this.injectedPositionObserver_ = opt_injectedPositionObserver || null;
+    /** @private @const {?IntersectionObserver} */
+    this.intersectionObserver_ = null;
 
     /** @private {boolean} */
     this.isTransitioning_ = false;
@@ -450,7 +441,8 @@ export class VideoDocking {
     const slot = this.getSlot_();
     if (slot) {
       // Match slot's top edge to tie transition to element.
-      return slot.getPageLayoutBox().top;
+      // TODO: Reuse a inlineRect
+      return slot./*OK*/ getBoundingClientRect().top;
     }
     return 0;
   }
@@ -459,11 +451,27 @@ export class VideoDocking {
   register(video) {
     this.install_();
 
-    const {element} = video;
-    const fidelity = PositionObserverFidelity.HIGH;
-    this.getPositionObserver_().observe(element, fidelity, () =>
-      this.updateOnPositionChange_(video)
-    );
+    if (!this.intersectionObserver_) {
+      this.intersectionObserver_ = new IntersectionObserver(
+        (entries) => {
+          // Multiple entries could belong to the same element, use only the
+          // most recent.
+          const handled = [];
+          for (let i = entries.length - 1; i >= 0; i--) {
+            const {target, boundingClientRect} = entries[i];
+            if (handled.indexOf(target) < 0) {
+              target.getImpl().then((video) => {
+                this.updateOnPositionChange_(video, boundingClientRect);
+              });
+              handled.push(target);
+            }
+          }
+        },
+        {threshold: [0, 0.1, 0.2, 0.8, 0.9, 1]}
+      );
+    }
+
+    this.intersectionObserver_.observe(video.element);
     this.observed_.push(video);
   }
 
@@ -564,29 +572,16 @@ export class VideoDocking {
   }
 
   /**
-   * @return {!PositionObserver}
-   * @private
-   */
-  getPositionObserver_() {
-    // for testing
-    if (this.injectedPositionObserver_) {
-      return this.injectedPositionObserver_;
-    }
-
-    installPositionObserverServiceForDoc(this.ampdoc_);
-    return Services.positionObserverForDoc(this.ampdoc_.getHeadNode());
-  }
-
-  /**
    * Returns the area's target when a video should be docked.
    * @param {!VideoOrBaseElementDef} video
+   * @param {!RectDef=} opt_inlineRect
    * @return {?DockTargetDef}
    * @private
    */
-  getTargetFor_(video) {
+  getTargetFor_(video, opt_inlineRect) {
     if (
       this.isDragging_ ||
-      !this.isValidSize_(video) ||
+      !this.isValidSize_(video, opt_inlineRect) ||
       this.ignoreBecauseAnotherDocked_(video) ||
       this.ignoreDueToNotPlayingManually_(video)
     ) {
@@ -594,24 +589,25 @@ export class VideoDocking {
     }
 
     const {element} = video;
-    const {intersectionRect} = element.getIntersectionChangeEntry();
-    if (!isSizedRect(intersectionRect)) {
+    const inlineRect = opt_inlineRect || element./*OK*/ getBoundingClientRect();
+    const intersectionRect = rectIntersection(inlineRect, this.viewportRect_);
+    if (!intersectionRect || !isSizedRect(intersectionRect)) {
       return null;
     }
     if (intersectionRect.top > this.getTopBoundary_()) {
       return null;
     }
-    return this.getUsableTarget_(video);
+    return this.getUsableTarget_(video, opt_inlineRect);
   }
 
   /**
    * @param {!AmpElement|!VideoOrBaseElementDef} element
-   * @return {!LayoutRectDef}
+   * @return {!inlineRect}
    * @private
    */
   getScrollAdjustedRect_(element) {
-    const dy = -this.viewport_.getScrollTop();
-    return moveLayoutRect(element.getLayoutBox(), /* dx */ 0, dy);
+    element = element.element || element;
+    return element./*OK*/ getBoundingClientRect();
   }
 
   /**
@@ -643,24 +639,26 @@ export class VideoDocking {
 
   /**
    * @param {!VideoOrBaseElementDef} video
+   * @param {!RectDef=} opt_inlineRect
    * @private
    */
-  updateOnPositionChange_(video) {
+  updateOnPositionChange_(video, opt_inlineRect) {
     if (this.isTransitioning_) {
       return;
     }
     if (this.scrollDirection_ == DirectionY.TOP) {
-      const target = this.getTargetFor_(video);
+      const target = this.getTargetFor_(video, opt_inlineRect);
       if (target) {
-        this.dockOnPositionChange_(video, target);
+        this.dockOnPositionChange_(video, target, opt_inlineRect);
       }
     } else if (this.scrollDirection_ == DirectionY.BOTTOM) {
       if (!this.currentlyDocked_) {
         return;
       }
-      const video = this.getDockedVideo_();
-      if (this.isVisible_(video, REVERT_TO_INLINE_RATIO)) {
-        this.undock_(video);
+      if (video === this.getDockedVideo_()) {
+        if (this.isVisible_(video, REVERT_TO_INLINE_RATIO, opt_inlineRect)) {
+          this.undock_(video, /* opt_reconciled */ false, opt_inlineRect);
+        }
       }
     }
   }
@@ -683,11 +681,13 @@ export class VideoDocking {
 
   /**
    * @param  {!VideoOrBaseElementDef} video
+   * @param {!RectDef=} opt_inlineRect
    * @return {boolean}
    * @private
    */
-  isValidSize_(video) {
-    const {width, height} = video.getLayoutBox();
+  isValidSize_(video, opt_inlineRect) {
+    const {width, height} =
+      opt_inlineRect || video.element./*OK*/ getBoundingClientRect();
     if (width / height < 1 - FLOAT_TOLERANCE) {
       complainAboutPortrait(video.element);
       return false;
@@ -714,9 +714,10 @@ export class VideoDocking {
   /**
    * @param {!VideoOrBaseElementDef} video
    * @param {!DockTargetDef} target
+   * @param {!RectDef=} opt_inlineRect
    * @private
    */
-  dockOnPositionChange_(video, target) {
+  dockOnPositionChange_(video, target, opt_inlineRect) {
     if (this.ignoreDueToDismissal_(video)) {
       return;
     }
@@ -725,41 +726,31 @@ export class VideoDocking {
       return;
     }
 
-    const currentlyDocked = this.currentlyDocked_;
-
-    if (
-      currentlyDocked &&
-      currentlyDocked.step >= 0 &&
-      layoutRectEquals(currentlyDocked.target.rect, target.rect)
-    ) {
-      return;
-    }
-
-    this.dockInTransferLayerStep_(video, target);
+    this.dockInTransferLayerStep_(video, target, opt_inlineRect);
   }
 
   /**
+   * Dock this in a two-step process due to a browser quirk in transferring
+   * layers to GPU.
    * @param {!VideoOrBaseElementDef} video
    * @param {!DockTargetDef} target
-   * @param {number=} opt_step
+   * @param {!RectDef=} opt_inlineRect
    * @return {!Promise}
    * @private
    */
-  dockInTransferLayerStep_(video, target, opt_step) {
-    // Do this in a multi-step process due to a browser quirk in transferring
-    // layers to GPU.
-    const step = opt_step || 0.1;
-    // This cutoff is arbitrary and may be dependant on performance.
-    // TODO(alanorozco): Investigate.
-    if (step > 0.3) {
-      return this.dock_(video, target, /* step */ 1);
-    }
+  dockInTransferLayerStep_(video, target, opt_inlineRect) {
     const isTransferLayerStep = true;
-    return this.dock_(video, target, step, isTransferLayerStep).then(
+    return this.dock_(
+      video,
+      target,
+      /* step */ 0.05,
+      opt_inlineRect,
+      isTransferLayerStep
+    ).then(
       () =>
         new Promise((resolve) => {
           this.raf_(() => {
-            this.dockInTransferLayerStep_(video, target, step + 0.1).then(
+            this.dock_(video, target, /* step */ 1, opt_inlineRect).then(
               resolve
             );
           });
@@ -771,11 +762,12 @@ export class VideoDocking {
    * @param {!VideoOrBaseElementDef} video
    * @param {!DockTargetDef} target
    * @param {number} step
+   * @param {!RectDef=} opt_inlineRect
    * @param {boolean=} opt_isTransferLayerStep
    * @return {!Promise}
    * @private
    */
-  dock_(video, target, step, opt_isTransferLayerStep) {
+  dock_(video, target, step, opt_inlineRect, opt_isTransferLayerStep) {
     const {element} = video;
 
     // Component background is now visible, so hide the poster for the Android
@@ -784,7 +776,12 @@ export class VideoDocking {
     // TODO(alanorozco): Make docking agnostic to this workaround.
     this.removePosterForAndroidBug_(element);
 
-    const {x, y, scale, relativeX} = this.getDims_(video, target, step);
+    const {x, y, scale, relativeX} = this.getDims_(
+      video,
+      target,
+      step,
+      opt_inlineRect
+    );
 
     video.hideControls();
 
@@ -799,7 +796,8 @@ export class VideoDocking {
       scale,
       step,
       transitionDurationMs,
-      relativeX
+      relativeX,
+      opt_inlineRect
     ).then(() => {
       if (opt_isTransferLayerStep) {
         // Do not enable controls during transfer layer steps, which would
@@ -812,11 +810,14 @@ export class VideoDocking {
 
   /**
    * @param {!Actions} action
+   * @param {!DockTargetDef=} opt_target
    * @private
    */
-  trigger_(action) {
+  trigger_(action, opt_target) {
     const element = dev().assertElement(
-      this.getSlot_() || this.getDockedVideo_().element
+      (opt_target && opt_target.slot) ||
+        this.getSlot_() ||
+        this.getDockedVideo_().element
     );
 
     const trust = ActionTrust.LOW;
@@ -838,6 +839,7 @@ export class VideoDocking {
     if (this.lastDismissed_ != video) {
       return false;
     }
+    // TODO: Reuse a inlineRect
     if (this.isVisible_(video.element, FLOAT_TOLERANCE)) {
       this.resetDismissed_();
     }
@@ -847,27 +849,6 @@ export class VideoDocking {
   /** @private */
   resetDismissed_() {
     this.lastDismissed_ = null;
-  }
-
-  /**
-   * @param {!AmpElement|!VideoOrBaseElementDef} element
-   * @return {number}
-   * @private
-   */
-  calculateIntersectionRatio_(element) {
-    const inlineRect = this.getScrollAdjustedRect_(element);
-
-    // If the component's box is way out of view, the runtime might have
-    // discarded its size values.
-    if (!isSizedRect(inlineRect)) {
-      return 0;
-    }
-
-    const intersectionHeight =
-      Math.min(inlineRect.bottom, this.viewportRect_.bottom) -
-      Math.max(inlineRect.top, this.viewportRect_.top);
-
-    return Math.max(0, intersectionHeight / inlineRect.height);
   }
 
   /**
@@ -908,23 +889,37 @@ export class VideoDocking {
    * @param {number} step in [0..1]
    * @param {number} transitionDurationMs
    * @param {DirectionX=} opt_relativeX
+   * @param {!RectDef=} opt_inlineRect
+   * @param {string=} position
    * @return {!Promise}
    * @private
    */
-  placeAt_(video, x, y, scale, step, transitionDurationMs, opt_relativeX) {
+  placeAt_(
+    video,
+    x,
+    y,
+    scale,
+    step,
+    transitionDurationMs,
+    opt_relativeX,
+    opt_inlineRect,
+    position = 'fixed'
+  ) {
     if (this.alreadyPlacedAt_(x, y, scale)) {
       return Promise.resolve();
     }
 
     this.isTransitioning_ = true;
 
-    const {width, height} = video.getLayoutBox();
+    const {element} = video;
+    const inlineRect =
+      opt_inlineRect || video.element./*OK*/ getBoundingClientRect();
+
+    const {width, height} = inlineRect;
 
     this.placedAt_ = {x, y, scale};
 
     const transitionTiming = step > 0 ? 'ease-out' : 'ease-in';
-
-    const {element} = video;
 
     const internalElement = getInternalVideoElementFor(element);
     const shadowLayer = this.getShadowLayer_();
@@ -1035,12 +1030,39 @@ export class VideoDocking {
         });
       });
 
-      this.getElementsOnDockArea_(video).forEach((el) => {
-        setImportantStyles(el, {
+      // To re-orient position: absolute elements since they're no longer
+      // relative to viewport rect.
+      let offsetLeft = 0;
+      let offsetTop = 0;
+
+      // Body-level elements that do not descend from the <amp-video> element,
+      // like the shadow layer, need to be additionally offset by the inline
+      // element's position relative to the body.
+      let bodyLevelOffsetLeft = 0;
+      let bodyLevelOffsetTop = 0;
+
+      if (position === 'absolute') {
+        offsetLeft = inlineRect.left;
+        offsetTop = inlineRect.top;
+        bodyLevelOffsetLeft = element./*OK*/ offsetLeft;
+        bodyLevelOffsetTop = element./*OK*/ offsetTop;
+      }
+
+      this.getElementsOnDockArea_(video).forEach((element) => {
+        const bodyLevelOffsetFactor = Number(element !== internalElement);
+
+        const left = bodyLevelOffsetFactor * bodyLevelOffsetLeft - offsetLeft;
+        const top = bodyLevelOffsetFactor * bodyLevelOffsetTop - offsetTop;
+
+        setImportantStyles(element, {
+          'position': position,
+          'left': px(left),
+          'top': px(top),
           'transform': transform(x, y, scale),
         });
-        setTransitionTiming(el);
-        maybeSetSizing(el);
+
+        setTransitionTiming(element);
+        maybeSetSizing(element);
       });
 
       setOpacity(shadowLayer);
@@ -1061,41 +1083,6 @@ export class VideoDocking {
    */
   getTimer_() {
     return Services.timerFor(this.ampdoc_.win);
-  }
-
-  /**
-   * @param {!VideoOrBaseElementDef} video
-   * @return {!Promise|undefined}
-   * @private
-   */
-  maybeUpdateStaleYAfterScroll_(video) {
-    if (!this.placedAt_) {
-      return;
-    }
-
-    const {x, y, scale} = this.placedAt_;
-    const {top: fixedScrollTop} = this.getScrollAdjustedRect_(video);
-
-    if (y == fixedScrollTop) {
-      return;
-    }
-
-    const maxTransitionDurationMs = 150;
-    const tentativeTransitionDurationMs = Math.abs(y - fixedScrollTop) / 2;
-
-    const transitionDurationMs = Math.min(
-      maxTransitionDurationMs,
-      tentativeTransitionDurationMs
-    );
-
-    return this.placeAt_(
-      video,
-      x,
-      fixedScrollTop,
-      scale,
-      /* step */ 0,
-      transitionDurationMs
-    );
   }
 
   /**
@@ -1171,7 +1158,7 @@ export class VideoDocking {
       return;
     }
     this.getControls_().setVideo(video, target.rect);
-    this.trigger_(Actions.DOCK);
+    this.trigger_(Actions.DOCK, target);
   }
 
   /**
@@ -1206,10 +1193,27 @@ export class VideoDocking {
   /**
    * @param {!AmpElement|!VideoOrBaseElementDef} element
    * @param {number=} minRatio
+   * @param {!RectDef=} opt_inlineRect
    * @return {boolean}
    */
-  isVisible_(element, minRatio = 1) {
-    const intersectionRatio = this.calculateIntersectionRatio_(element);
+  isVisible_(element, minRatio = 1, opt_inlineRect) {
+    const inlineRect = opt_inlineRect || this.getScrollAdjustedRect_(element);
+
+    // If the component's box is way out of view, the runtime might have
+    // discarded its size values.
+    if (!isSizedRect(inlineRect)) {
+      return 0;
+    }
+
+    const intersectionHeight =
+      Math.min(inlineRect.bottom, this.viewportRect_.bottom) -
+      Math.max(inlineRect.top, this.viewportRect_.top);
+
+    const intersectionRatio = Math.max(
+      0,
+      intersectionHeight / inlineRect.height
+    );
+
     return intersectionRatio > minRatio - FLOAT_TOLERANCE;
   }
 
@@ -1375,6 +1379,7 @@ export class VideoDocking {
 
     video.pause();
 
+    // TODO: Reuse a inlineRect
     if (this.isVisible_(video, 0.2)) {
       this.bounceToDismiss_(video, offsetX, direction);
       return;
@@ -1449,6 +1454,7 @@ export class VideoDocking {
       /* step */ 0,
       transitionDurationMs
     ).then(() => {
+      // TODO: Reuse a inlineRect
       this.undock_(video, /* reconciled */ true);
       video.showControls();
     });
@@ -1472,7 +1478,7 @@ export class VideoDocking {
   getCenterX_(offsetX) {
     const {target, step} = this.currentlyDocked_;
     const video = this.getDockedVideo_();
-    const {width} = video.getLayoutBox();
+    const {width} = video.element./*OK*/ getBoundingClientRect();
     const {x, scale} = this.getDims_(video, target, step);
     return x + offsetX + (width * scale) / 2;
   }
@@ -1488,6 +1494,7 @@ export class VideoDocking {
     const directionX = this.calculateDirectionX_(offsetX);
     this.cornerDirectionX_ = directionX;
 
+    // TODO: Reuse inlineRect
     const target = this.getUsableTarget_(video);
 
     this.currentlyDocked_.target = target;
@@ -1520,11 +1527,12 @@ export class VideoDocking {
    * @param {!VideoOrBaseElementDef} video
    * @param {!DockTargetDef} target
    * @param {number} step in [0..1]
+   * @param {!RectDef} opt_inlineRect
    * @return {{x: number, y: number, scale: number, relativeX: !DirectionX}}
    */
-  getDims_(video, target, step) {
+  getDims_(video, target, step, opt_inlineRect) {
     return interpolatedBoxesTransform(
-      this.getScrollAdjustedRect_(video),
+      opt_inlineRect || this.getScrollAdjustedRect_(video),
       target.rect,
       step
     );
@@ -1533,11 +1541,16 @@ export class VideoDocking {
   /**
    * @param {!VideoOrBaseElementDef} video
    * @param {boolean=} opt_reconciled
+   * @param {!RectDef=} opt_inlineRect
    * @return {!Promise}
    * @private
    */
-  undock_(video, opt_reconciled) {
-    const isMostlyInView = this.isVisible_(video, REVERT_TO_INLINE_RATIO);
+  undock_(video, opt_reconciled, opt_inlineRect) {
+    const isMostlyInView = this.isVisible_(
+      video,
+      REVERT_TO_INLINE_RATIO,
+      opt_inlineRect
+    );
 
     if (!isMostlyInView) {
       video.pause();
@@ -1573,13 +1586,13 @@ export class VideoDocking {
       scale,
       step,
       transitionDurationMs,
-      relativeX
-    )
-      .then(() => this.maybeUpdateStaleYAfterScroll_(video))
-      .then(() => {
-        video.showControls();
-        this.resetOnUndock_(video);
-      });
+      relativeX,
+      opt_inlineRect,
+      /* position */ 'absolute'
+    ).then(() => {
+      video.showControls();
+      this.resetOnUndock_(video);
+    });
   }
 
   /** @private */
@@ -1626,6 +1639,9 @@ export class VideoDocking {
           'height',
           'opacity',
           'overflow',
+          'position',
+          'left',
+          'top',
         ]);
       });
 
@@ -1667,17 +1683,20 @@ export class VideoDocking {
    * Otherwise returns a rectangle calculated relative to viewport and sticking
    * to the horizontal `directionX`.
    * @param {!AmpElement|!VideoOrBaseElementDef} video
+   * @param {!RectDef=} opt_inlineRect
    * @return {!DockTargetDef}
    * @private
    */
-  getUsableTarget_(video) {
+  getUsableTarget_(video, opt_inlineRect) {
     const slot = this.getSlot_();
-    const inlineRect = video.getLayoutBox();
+    const inlineRect =
+      opt_inlineRect || video.element./*OK*/ getBoundingClientRect();
 
     if (slot) {
       return {
         type: DockTargetType.SLOT,
-        rect: letterboxRect(inlineRect, slot.getPageLayoutBox()),
+        rect: letterboxRect(inlineRect, slot./*OK*/ getBoundingClientRect()),
+        slot,
       };
     }
 

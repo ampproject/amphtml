@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
-import {Observable} from '../observable';
-import {Signals} from '../utils/signals';
-import {VisibilityState} from '../visibility-state';
+import {Deferred} from '../core/data-structures/promise';
+import {Observable} from '../core/data-structures/observable';
+import {Signals} from '../core/data-structures/signals';
+import {VisibilityState} from '../core/constants/visibility-state';
 import {WindowInterface} from '../window-interface';
 import {
   addDocumentVisibilityChangeListener,
@@ -25,10 +25,14 @@ import {
   removeDocumentVisibilityChangeListener,
 } from '../utils/document-visibility';
 import {dev, devAssert} from '../log';
-import {getParentWindowFrameElement, registerServiceBuilder} from '../service';
+import {
+  disposeServicesForDoc,
+  getParentWindowFrameElement,
+  registerServiceBuilder,
+} from '../service';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
 import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '../dom';
-import {map} from '../utils/object';
+import {map} from '../core/types/object';
 import {parseQueryString} from '../url';
 
 /** @const {string} */
@@ -51,6 +55,8 @@ export let AmpDocOptions;
  * @enum {string}
  */
 const AmpDocSignals = {
+  // A complete preinstalled list of extensions is known.
+  EXTENSIONS_KNOWN: '-ampdoc-ext-known',
   // Signals the document has become visible for the first time.
   FIRST_VISIBLE: '-ampdoc-first-visible',
   // Signals when the document becomes visible the next time.
@@ -179,14 +185,6 @@ export class AmpDocService {
    * @return {!AmpDoc}
    */
   getAmpDoc(node) {
-    // Ensure that node is attached if specified. This check uses a new and
-    // fast `isConnected` API and thus only checked on platforms that have it.
-    // See https://www.chromestatus.com/feature/5676110549352448.
-    devAssert(
-      node['isConnected'] === undefined || node['isConnected'] === true,
-      'The node must be attached to request ampdoc.'
-    );
-
     const ampdoc = this.getAmpDocIfAvailable(node);
     if (!ampdoc) {
       throw dev().createError('No ampdoc found for', node);
@@ -267,8 +265,8 @@ export class AmpDoc {
     /** @protected {?Object<string, string>} */
     this.meta_ = null;
 
-    /** @private @const {!Array<string>} */
-    this.declaredExtensions_ = [];
+    /** @private @const {!Object<string, string>} */
+    this.declaredExtensions_ = {};
 
     /** @private {?VisibilityState} */
     this.visibilityStateOverride_ =
@@ -319,6 +317,7 @@ export class AmpDoc {
    * Dispose the document.
    */
   dispose() {
+    disposeServicesForDoc(this);
     this.unsubsribes_.forEach((unsubsribe) => unsubsribe());
   }
 
@@ -425,21 +424,55 @@ export class AmpDoc {
   /**
    * Returns whether the specified extension has been declared on this ampdoc.
    * @param {string} extensionId
+   * @param {string=} opt_version
    * @return {boolean}
    */
-  declaresExtension(extensionId) {
-    return this.declaredExtensions_.indexOf(extensionId) != -1;
+  declaresExtension(extensionId, opt_version) {
+    const declared = this.declaredExtensions_[extensionId];
+    if (!declared) {
+      return false;
+    }
+    return !opt_version || declared === opt_version;
   }
 
   /**
    * Adds a declared extension to an ampdoc.
    * @param {string} extensionId
+   * @param {string} version
    * @restricted
    */
-  declareExtension(extensionId) {
-    if (!this.declaresExtension(extensionId)) {
-      this.declaredExtensions_.push(extensionId);
-    }
+  declareExtension(extensionId, version) {
+    devAssert(
+      !this.declaredExtensions_[extensionId] ||
+        this.declaredExtensions_[extensionId] === version,
+      'extension already declared %s',
+      extensionId
+    );
+    this.declaredExtensions_[extensionId] = version;
+  }
+
+  /**
+   * @param {string} extensionId
+   * @return {?string}
+   */
+  getExtensionVersion(extensionId) {
+    return this.declaredExtensions_[extensionId] || null;
+  }
+
+  /**
+   * Signal that the initial document set of extensions is known.
+   * @restricted
+   */
+  setExtensionsKnown() {
+    this.signals_.signal(AmpDocSignals.EXTENSIONS_KNOWN);
+  }
+
+  /**
+   * Resolved when the initial document set of extension is known.
+   * @return {!Promise}
+   */
+  whenExtensionsKnown() {
+    return this.signals_.whenSignal(AmpDocSignals.EXTENSIONS_KNOWN);
   }
 
   /**

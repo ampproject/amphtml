@@ -2,7 +2,7 @@
 
 These are guidelines for what AMP cache implementations should look like. Some items are required for overall security of the platform while others are suggestions for performance improvements. All modifications are made to both AMP and AMP4ADS documents except where noted.
 
-For example, given a [recent version](https://github.com/ampproject/amphtml/tree/master/spec/amp-cache-modifications.everything.amp.html) of [everything.amp.html](https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html), the output after modifications will be [this version](https://github.com/ampproject/amphtml/tree/master/spec/amp-cache-modifications.everything.cache.html).
+For example, given a [recent version](https://github.com/ampproject/amphtml/tree/main/spec/amp-cache-modifications.everything.amp.html) of [everything.amp.html](https://github.com/ampproject/amphtml/blob/main/examples/everything.amp.html), the output after modifications will be [this version](https://github.com/ampproject/amphtml/tree/main/spec/amp-cache-modifications.everything.cache.html).
 
 ### HTML Sanitization
 
@@ -271,11 +271,11 @@ The AMP Cache removes any resource hints in the original document.
 _Condition_
 Any `<link>` tag present with attribute `rel` equal to any of the following:
 
-- `dns-prefetch`
-- `preconnect`
-- `prefetch`
-- `preload`
-- `prerender`
+-   `dns-prefetch`
+-   `preconnect`
+-   `prefetch`
+-   `preload`
+-   `prerender`
 
 <details>
 <summary>example</summary>
@@ -291,24 +291,24 @@ Any `<link>` tag present with attribute `rel` equal to any of the following:
 _Condition_:
 Remove any `<meta>` tags except for those that:
 
-- have attribute `charset`
-- do not have attributes `content`, `itemprop`, `name` and `property`
-- have attribute `http-equiv` where attribute value is not one of:
-  - `content-security-policy`
-  - `refresh`
-  - `x-dns-prefetch-control`
-- have attribute `name` with case-insensitive prefix `amp-`
-- have attribute `name` with case-insensitive prefix `amp4ads-`
-- have attribute `name` with case-insensitive prefix `dc.`
-- have attribute `name` with case-insensitive prefix `i-amphtml-`
-- have attribute `name` with case-insensitive prefix `twitter:`
-- have attribute `name=apple-itunes-app`
-- have attribute `name=referrer` [note: this may be inserted by AMP Cache]
-- have attribute `name=robots` [note: this is inserted by AMP Cache]
-- have attribute `name=viewport`
-- have attribute `property` with case-insensitive prefix "al:"
-- have attribute `property` with case-insensitive prefix "fb:"
-- have attribute `property` with case-insensitive prefix "og:"
+-   have attribute `charset`
+-   do not have attributes `content`, `itemprop`, `name` and `property`
+-   have attribute `http-equiv` where attribute value is not one of:
+    -   `content-security-policy`
+    -   `refresh`
+    -   `x-dns-prefetch-control`
+-   have attribute `name` with case-insensitive prefix `amp-`
+-   have attribute `name` with case-insensitive prefix `amp4ads-`
+-   have attribute `name` with case-insensitive prefix `dc.`
+-   have attribute `name` with case-insensitive prefix `i-amphtml-`
+-   have attribute `name` with case-insensitive prefix `twitter:`
+-   have attribute `name=apple-itunes-app`
+-   have attribute `name=referrer` [note: this may be inserted by AMP Cache]
+-   have attribute `name=robots` [note: this is inserted by AMP Cache]
+-   have attribute `name=viewport`
+-   have attribute `property` with case-insensitive prefix "al:"
+-   have attribute `property` with case-insensitive prefix "fb:"
+-   have attribute `property` with case-insensitive prefix "og:"
 
 <details>
 <summary>example</summary>
@@ -322,7 +322,7 @@ Remove any `<meta>` tags except for those that:
 
 #### Remove `amp-live-list` children based on `amp_latest_update_time` parameter
 
-This is discussed in detail at [Server side filtering for `amp-live-list`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/amp-live-list-server-side-filtering.md)
+This is discussed in detail at [Server side filtering for `amp-live-list`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-live-list/amp-live-list-server-side-filtering.md)
 
 #### Remove attribute `nonce`
 
@@ -373,7 +373,7 @@ Has a stylesheet of the form: `<link href=https://fonts.googleapis.com/... rel=s
 
 #### Prioritize AMP engine javascript and other render blocking scripts in `<head>`
 
-The AMP Cache places the [AMP engine javascript](https://cdn.ampproject.org/v0.js) as the second child of `<head>` right after `<meta charset=utf-8>`. It then emits any other render blocking custom-element script tags followed by the remaining custom-element `<script>` tags in the document. Render blocking custom-element `<script>` tags are listed in [SERVICES at render-delaying-services.js](https://github.com/ampproject/amphtml/blob/master/src/render-delaying-services.js#L28).
+The AMP Cache places the [AMP engine javascript](https://cdn.ampproject.org/v0.js) as the second child of `<head>` right after `<meta charset=utf-8>`. It then emits any other render blocking custom-element script tags followed by the remaining custom-element `<script>` tags in the document. Render blocking custom-element `<script>` tags are listed in [SERVICES at render-delaying-services.js](https://github.com/ampproject/amphtml/blob/main/src/render-delaying-services.js#L28).
 
 <details>
 <summary>example</summary>
@@ -406,14 +406,14 @@ If a custom-element `<script>` tag is included in `<head>` but not used in `<bod
 _Condition_:
 Remove unused custom-element extensions with the following exceptions:
 
-- Do not remove any custom-element extensions if `<amp-live-list>` is present within the document
-- Do not remove any of the following custom-element extensions:
-- amp-access
-- amp-access-laterpay
-- amp-analytics
-- amp-auto-ads
-- amp-dynamic-css-classes
-- amp-form
+-   Do not remove any custom-element extensions if `<amp-live-list>` is present within the document
+-   Do not remove any of the following custom-element extensions:
+-   amp-access
+-   amp-access-laterpay
+-   amp-analytics
+-   amp-auto-ads
+-   amp-dynamic-css-classes
+-   amp-form
 
 <details>
 <summary>example</summary>
@@ -431,8 +431,8 @@ Remove whitespace in `<head>` except for tags that should preserve whitespace.
 _Condition_:
 Remove whitespace except for within these tags:
 
-- `<script>`
-- `<style>`
+-   `<script>`
+-   `<style>`
 
 <details>
 <summary>example</summary>

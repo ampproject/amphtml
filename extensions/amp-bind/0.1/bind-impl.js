@@ -14,31 +14,38 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {BindEvents} from './bind-events';
 import {BindValidator} from './bind-validator';
 import {ChunkPriority, chunk} from '../../../src/chunk';
-import {Deferred} from '../../../src/utils/promise';
-import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {RAW_OBJECT_ARGS_KEY} from '../../../src/core/constants/action-constants';
 import {Services} from '../../../src/services';
-import {Signals} from '../../../src/utils/signals';
+import {Signals} from '../../../src/core/data-structures/signals';
 import {
   closestAncestorElementBySelector,
   iterateCursor,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {debounce} from '../../../src/utils/rate-limit';
+import {debounce} from '../../../src/core/types/function';
 import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
-import {deepMerge, dict, map} from '../../../src/utils/object';
+import {deepMerge, dict, map} from '../../../src/core/types/object';
 import {dev, devAssert, user} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {findIndex, remove} from '../../../src/utils/array';
+import {
+  findIndex,
+  isArray,
+  remove,
+  toArray,
+} from '../../../src/core/types/array';
 import {getMode} from '../../../src/mode';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isAmp4Email} from '../../../src/format';
-import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
-import {reportError} from '../../../src/error';
+
+import {isFiniteNumber} from '../../../src/types';
+import {isObject} from '../../../src/core/types';
+import {reportError} from '../../../src/error-reporting';
 import {rewriteAttributesForElement} from '../../../src/url-rewrite';
 
 /** @const {string} */
@@ -68,6 +75,12 @@ const FORM_VALUE_PROPERTIES = {
   },
   'TEXTAREA': {
     'text': true,
+    // amp-form relies on FORM_VALUE_CHANGE to update form validity state due
+    // to value changes from amp-bind. However, disabled form elements always
+    // report "valid" even if they have invalid values! A consequence is that
+    // toggling `disabled` via amp-bind may affect validity, so we need to
+    // inform amp-form about these too.
+    'disabled': true,
   },
 };
 
@@ -872,26 +885,13 @@ export class Bind {
   scanNode_(node, limit) {
     /** @type {!Array<!BindBindingDef>} */
     const bindings = [];
-    const doc = devAssert(
-      node.nodeType == Node.DOCUMENT_NODE ? node : node.ownerDocument,
-      'ownerDocument is null.'
-    );
-    // Third and fourth params of `createTreeWalker` are not optional on IE11.
-    const walker = doc.createTreeWalker(
-      node,
-      NodeFilter.SHOW_ELEMENT,
-      null,
-      /* entityReferenceExpansion */ false
-    );
+    const walker = new BindWalker(node);
     // Set to true if number of bindings in `node` exceeds `limit`.
     let limitExceeded = false;
     // Helper function for scanning the tree walker's next node.
     // Returns true if the walker has no more nodes.
     const scanNextNode_ = () => {
       const node = walker.currentNode;
-      if (!node) {
-        return true;
-      }
       // If `node` is a Document, it will be scanned first (despite
       // NodeFilter.SHOW_ELEMENT). Skip it.
       if (node.nodeType !== Node.ELEMENT_NODE) {
@@ -906,7 +906,7 @@ export class Bind {
       // rescan() with {fast: true} for better performance. Note that only
       // children are opted-out (e.g. amp-list children, not amp-list itself).
       const next = FAST_RESCAN_TAGS.includes(node.nodeName)
-        ? this.skipSubtree_(walker)
+        ? walker.skipSubtree()
         : walker.nextNode();
       return !next || limitExceeded;
     };
@@ -937,23 +937,6 @@ export class Bind {
       };
       chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
     });
-  }
-
-  /**
-   * Skips the subtree at the walker's current node and returns the next node
-   * in document order, if any. Otherwise, returns null.
-   * @param {!TreeWalker} walker
-   * @return {?Node}
-   * @private
-   */
-  skipSubtree_(walker) {
-    for (let n = walker.currentNode; n; n = walker.parentNode()) {
-      const sibling = walker.nextSibling();
-      if (sibling) {
-        return sibling;
-      }
-    }
-    return null;
   }
 
   /**
@@ -1805,5 +1788,106 @@ export class Bind {
       }
       this.localWin_.dispatchEvent(event);
     }
+  }
+}
+
+class BindWalker {
+  /**
+   * @param {!Node} root
+   */
+  constructor(root) {
+    const doc = devAssert(
+      root.nodeType == Node.DOCUMENT_NODE ? root : root.ownerDocument,
+      'ownerDocument is null.'
+    );
+
+    const useQuerySelector = doc.documentElement.hasAttribute(
+      'i-amphtml-binding'
+    );
+    /** @private @const {boolean} */
+    this.useQuerySelector_ = useQuerySelector;
+
+    /** @type {!Node} */
+    this.currentNode = root;
+
+    /** @private {number} */
+    this.index_ = 0;
+
+    /** @private @const {!Array<!Element>} */
+    this.nodeList_ = useQuerySelector
+      ? toArray(root.querySelectorAll('[i-amphtml-binding]'))
+      : [];
+
+    // Confusingly, the old TreeWalker hit the root node. We need to match that behavior.
+    if (
+      useQuerySelector &&
+      root.nodeType === Node.ELEMENT_NODE &&
+      root.hasAttribute('i-amphtml-binding')
+    ) {
+      this.nodeList_.unshift(root);
+    }
+
+    /**
+     * Third and fourth params of `createTreeWalker` are not optional on IE11.
+     * @private @const {?TreeWalker}
+     */
+    this.treeWalker_ = useQuerySelector
+      ? null
+      : doc.createTreeWalker(
+          root,
+          NodeFilter.SHOW_ELEMENT,
+          null,
+          /* entityReferenceExpansion */ false
+        );
+  }
+
+  /**
+   * Finds the next node in document order, if it exists. Returns that node, or null if it doesn't exist.
+   * Updates currentNode, if it exists, else currentNode stays the same.
+   *
+   * @return {?Node}
+   */
+  nextNode() {
+    if (this.useQuerySelector_) {
+      if (this.index_ == this.nodeList_.length) {
+        return null;
+      }
+      const next = this.nodeList_[this.index_++];
+      this.currentNode = next;
+      return next;
+    }
+
+    const walker = this.treeWalker_;
+    const next = walker.nextNode();
+    // This matches the TreeWalker's behavior.
+    if (next !== null) {
+      this.currentNode = next;
+    }
+    return next;
+  }
+
+  /**
+   * Skips the remaining sibling nodes in the current parent. Returns the next node in document order.
+   * @return {?Node}
+   */
+  skipSubtree() {
+    if (this.useQuerySelector_) {
+      const {currentNode} = this;
+      let next = null;
+      do {
+        next = this.nextNode();
+      } while (next !== null && currentNode.contains(next));
+      return next;
+    }
+
+    const walker = this.treeWalker_;
+    for (let n = walker.currentNode; n; n = walker.parentNode()) {
+      const sibling = walker.nextSibling();
+      if (sibling !== null) {
+        this.currentNode = sibling;
+        return sibling;
+      }
+    }
+    return null;
   }
 }

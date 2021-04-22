@@ -27,8 +27,8 @@ import {
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getElementLayoutBox} from './utils';
+import {dict} from '../../../src/core/types/object';
+import {measurePageLayoutBox} from '../../../src/utils/page-layout-box';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -158,9 +158,9 @@ export class Placement {
    * @return {!Promise<number>}
    */
   getEstimatedPosition() {
-    return getElementLayoutBox(this.anchorElement_).then((layoutBox) => {
-      return this.getEstimatedPositionFromAchorLayout_(layoutBox);
-    });
+    return measurePageLayoutBox(this.anchorElement_).then((layoutBox) =>
+      this.getEstimatedPositionFromAnchorLayout_(layoutBox)
+    );
   }
 
   /**
@@ -168,7 +168,7 @@ export class Placement {
    * @return {number}
    * @private
    */
-  getEstimatedPositionFromAchorLayout_(anchorLayout) {
+  getEstimatedPositionFromAnchorLayout_(anchorLayout) {
     // TODO: This should really take account of margins and padding too.
     switch (this.position_) {
       case Position.BEFORE:
@@ -194,6 +194,11 @@ export class Placement {
    */
   placeAd(baseAttributes, sizing, adTracker, isResponsiveEnabled) {
     return this.getEstimatedPosition().then((yPosition) => {
+      // TODO(powerivq@) Remove this after fixing ad resizing
+      if (this.ampdoc.win./*OK*/ scrollY > yPosition) {
+        this.state_ = PlacementState.UNUSED;
+        return this.state_;
+      }
       return adTracker.isTooNearAnAd(yPosition).then((tooNear) => {
         if (tooNear) {
           this.state_ = PlacementState.TOO_NEAR_EXISTING_AD;
@@ -213,7 +218,7 @@ export class Placement {
           return (
             whenUpgradedToCustomElement(this.getAdElement())
               // Responsive ads set their own size when built.
-              .then(() => this.getAdElement().whenBuilt())
+              .then(() => this.getAdElement().build())
               .then(() => {
                 const resized = !this.getAdElement().classList.contains(
                   'i-amphtml-layout-awaiting-size'
@@ -231,7 +236,7 @@ export class Placement {
           // synchronously. So we explicitly wait for CustomElement to be
           // ready.
           return whenUpgradedToCustomElement(this.getAdElement())
-            .then(() => this.getAdElement().whenBuilt())
+            .then(() => this.getAdElement().build())
             .then(() => {
               return this.mutator_.requestChangeSize(
                 this.getAdElement(),

@@ -20,7 +20,7 @@ import {
   BookendComponentInterface,
 } from './bookend-component-interface';
 import {htmlFor} from '../../../../../src/static-template';
-import {isArray} from '../../../../../src/types';
+import {isArray} from '../../../../../src/core/types';
 import {userAssert} from '../../../../../src/log';
 
 /**

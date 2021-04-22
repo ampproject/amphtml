@@ -122,8 +122,8 @@ Additional image features like captions can be implemented with standard HTML
 
 Learn more about using `amp-img` from these resources:
 
-- [Placeholders & fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders)
-- [Include Images & Video](https://amp.dev/documentation/guides-and-tutorials/develop/media_iframes_3p/)
+-   [Placeholders & fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders)
+-   [Include Images & Video](https://amp.dev/documentation/guides-and-tutorials/develop/media_iframes_3p/)
 
 [/tip]
 
@@ -276,13 +276,13 @@ the URL must be `https`.
 The AMP for Email spec disallows the use of the following attributes on the AMP
 email format.
 
-- `[src]`
-- `[srcset]`
-- `srcset`
-- `lightbox`
-- `lightbox-thumbnail-id`
-- `object-fit`
-- `object-position`
+-   `[src]`
+-   `[srcset]`
+-   `srcset`
+-   `lightbox`
+-   `lightbox-thumbnail-id`
+-   `object-fit`
+-   `object-position`
 
 [/filter] <!-- formats="email" -->
 
@@ -369,5 +369,5 @@ component with the `on` action.
 
 ## Validation
 
-See [`amp-img` rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii)
+See [`amp-img` rules](https://github.com/ampproject/amphtml/blob/main/validator/validator-main.protoascii)
 in the AMP validator specification.

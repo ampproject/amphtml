@@ -19,19 +19,13 @@ import {BatchSegmentDef, defaultSerializer} from './transport-serializer';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-allowlist';
 import {Services} from '../../../src/services';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {devAssert, userAssert} from '../../../src/log';
+import {dict} from '../../../src/core/types/object';
 import {getResourceTiming} from './resource-timing';
-import {isArray, isFiniteNumber, isObject} from '../../../src/types';
-import {parseQueryString, parseUrlDeprecated} from '../../../src/url';
+import {isArray, isObject} from '../../../src/core/types';
+import {isFiniteNumber} from '../../../src/types';
 
 const BATCH_INTERVAL_MIN = 200;
-
-// TODO(#29618): Remove after ampim investigation
-const _GOOGLE_ACTIVEVIEW_HOSTNAME = 'pagead2.googlesyndication.com';
-const _GOOGLE_ACTIVEVIEW_REQUEST_ID = 'ampim';
-export const GOOGLE_ACTIVEVIEW_ERROR_TAG = 'active-view-debug';
-export const _GOOGLE_ACTIVEVIEW_ERROR_STATE_NAME = '_avError_';
 
 export class RequestHandler {
   /**
@@ -79,9 +73,6 @@ export class RequestHandler {
     this.baseUrlPromise_ = null;
 
     /** @private {?Promise<string>} */
-    this.baseUrlTemplatePromise_ = null;
-
-    /** @private {?Promise<string>} */
     this.requestOriginPromise_ = null;
 
     /** @private {!Array<!Promise<!BatchSegmentDef>>} */
@@ -114,9 +105,6 @@ export class RequestHandler {
     /** @private @const {number} */
     this.startTime_ = Date.now();
 
-    /** @private {*} */
-    this.errorReportingStates_ = null;
-
     this.initReportWindow_();
     this.initBatchInterval_();
   }
@@ -126,20 +114,13 @@ export class RequestHandler {
    * Real ping may be batched and send out later.
    * @param {?JsonObject} configParams
    * @param {!JsonObject} trigger
-   * @param {!./variables.ExpansionOptions} expansionOption
+   * @param {!./variables.ExpansionOptions} expansionOptions
    */
-  send(configParams, trigger, expansionOption) {
+  send(configParams, trigger, expansionOptions) {
     const isImportant = trigger['important'] === true;
     if (!this.reportRequest_ && !isImportant) {
       // Ignore non important trigger out reportWindow
       return;
-    }
-
-    if (expansionOption.getVar(_GOOGLE_ACTIVEVIEW_ERROR_STATE_NAME)) {
-      this.errorReportingStates_ = expansionOption.getVar(
-        _GOOGLE_ACTIVEVIEW_ERROR_STATE_NAME
-      );
-      delete expansionOption.vars[_GOOGLE_ACTIVEVIEW_ERROR_STATE_NAME];
     }
 
     this.queueSize_++;
@@ -152,52 +133,29 @@ export class RequestHandler {
     );
 
     if (!this.baseUrlPromise_) {
-      expansionOption.freezeVar('extraUrlParams');
+      expansionOptions.freezeVar('extraUrlParams');
 
-      this.baseUrlTemplatePromise_ = this.variableService_.expandTemplate(
+      this.baseUrlPromise_ = this.expandTemplateUrl_(
         this.baseUrl,
-        expansionOption,
-        this.element_,
-        bindings,
-        this.allowlist_
+        expansionOptions,
+        bindings
       );
-
-      this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then((baseUrl) => {
-        return this.urlReplacementService_.expandUrlAsync(
-          baseUrl,
-          bindings,
-          this.allowlist_
-        );
-      });
     }
 
     // expand requestOrigin if it is declared
     if (!this.requestOriginPromise_ && this.requestOrigin_) {
       // do not encode vars in request origin
-      const requestOriginExpansionOpt = new ExpansionOptions(
-        expansionOption.vars,
-        expansionOption.iterations,
-        true // opt_noEncode
+      const requestOriginExpansionOptions = new ExpansionOptions(
+        expansionOptions.vars,
+        expansionOptions.iterations,
+        /* opt_noEncode */ true
       );
 
-      this.requestOriginPromise_ = this.variableService_
-        // expand variables in request origin
-        .expandTemplate(
-          this.requestOrigin_,
-          requestOriginExpansionOpt,
-          this.element_,
-          bindings,
-          this.allowlist_
-        )
-        // substitute in URL values e.g. DOCUMENT_REFERRER -> https://example.com
-        .then((expandedRequestOrigin) => {
-          return this.urlReplacementService_.expandUrlAsync(
-            expandedRequestOrigin,
-            bindings,
-            this.allowlist_,
-            true // opt_noEncode
-          );
-        });
+      this.requestOriginPromise_ = this.expandTemplateUrl_(
+        this.requestOrigin_,
+        requestOriginExpansionOptions,
+        bindings
+      );
     }
 
     const params = {...configParams, ...trigger['extraUrlParams']};
@@ -206,7 +164,7 @@ export class RequestHandler {
       this.variableService_,
       this.urlReplacementService_,
       params,
-      expansionOption,
+      expansionOptions,
       bindings,
       this.element_,
       this.allowlist_
@@ -240,6 +198,30 @@ export class RequestHandler {
   }
 
   /**
+   * @param {string} url
+   * @param {!ExpansionOptions} expansionOptions
+   * @param {!Object<string, (!../../../src/service/variable-source.ResolverReturnDef|!../../../src/service/variable-source.SyncResolverDef)>=} bindings
+   * @return {!Promise<string>}
+   */
+  expandTemplateUrl_(url, expansionOptions, bindings) {
+    return this.variableService_
+      .expandTemplate(
+        url,
+        expansionOptions,
+        this.element_,
+        bindings,
+        this.allowlist_
+      )
+      .then((url) =>
+        this.urlReplacementService_
+          .expandUrlAsync(url, bindings, this.allowlist_)
+          .catch((e) =>
+            userAssert(false, `Could not expand URL "${url}": ${e.message}`)
+          )
+      );
+  }
+
+  /**
    * Function that schedule the actual request send.
    * @param {boolean} isImmediate
    * @private
@@ -263,17 +245,16 @@ export class RequestHandler {
   fire_() {
     const {
       requestOriginPromise_: requestOriginPromise,
-      baseUrlTemplatePromise_: baseUrlTemplatePromise,
       baseUrlPromise_: baseUrlPromise,
       batchSegmentPromises_: segmentPromises,
     } = this;
     const trigger = /** @type {!JsonObject} */ (this.lastTrigger_);
     this.reset_();
 
-    // preconnect to requestOrigin if available, otherwise baseUrlTemplate
+    // preconnect to requestOrigin if available, otherwise baseUrl
     const preconnectPromise = requestOriginPromise
       ? requestOriginPromise
-      : baseUrlTemplatePromise;
+      : baseUrlPromise;
 
     preconnectPromise.then((preUrl) => {
       this.preconnect_.url(this.ampdoc_, preUrl, true);
@@ -289,17 +270,6 @@ export class RequestHandler {
       const batchSegments = results[1];
       if (batchSegments.length === 0) {
         return;
-      }
-      // TODO(#29618): Remove after ampim investigation
-      // It's fine to report error without checking segmentPromises
-      // activeview request is not using extraUrlParams
-      if (this.errorReportingStates_) {
-        try {
-          reportErrorTemp(requestUrl, this.errorReportingStates_);
-        } catch (e) {
-          dev().error(GOOGLE_ACTIVEVIEW_ERROR_TAG, e);
-        }
-        this.errorReportingStates_ = null;
       }
 
       // TODO: iframePing will not work with batch. Add a config validation.
@@ -326,7 +296,6 @@ export class RequestHandler {
   reset_() {
     this.queueSize_ = 0;
     this.baseUrlPromise_ = null;
-    this.baseUrlTemplatePromise_ = null;
     this.batchSegmentPromises_ = [];
     this.lastTrigger_ = null;
   }
@@ -544,62 +513,4 @@ function expandExtraUrlParams(
   }
 
   return Promise.all(requestPromises).then(() => newParams);
-}
-
-/**
- * TODO(#29618): Remove after ampim investigation
- * @param {string} url
- * @param {*} info
- */
-function reportErrorTemp(url, info) {
-  if (!isObject(info)) {
-    return;
-  }
-  const location = parseUrlDeprecated(url);
-  if (location.hostname != _GOOGLE_ACTIVEVIEW_HOSTNAME) {
-    return;
-  }
-  const queryString = parseQueryString(location.search);
-  const requestId = queryString['id'];
-  if (requestId != _GOOGLE_ACTIVEVIEW_REQUEST_ID) {
-    return;
-  }
-  const elementSize = queryString['d'] && queryString['d'].split(',');
-  const viewportSize = queryString['bs'] && queryString['bs'].split(',');
-  const REPORTING_THRESHOLD = 0.1;
-  if (isArray(elementSize)) {
-    const elementWidth = Number(elementSize[0]);
-    const elementHeight = Number(elementSize[1]);
-    if (elementWidth == 0 || elementHeight == 0) {
-      if (Math.random() > REPORTING_THRESHOLD) {
-        return;
-      }
-      dev().expectedError(
-        GOOGLE_ACTIVEVIEW_ERROR_TAG,
-        'Debugging: Activeview request with zero element size',
-        elementWidth,
-        elementHeight,
-        url,
-        JSON.stringify(/** @type {!JsonObject} */ (info))
-      );
-    }
-  }
-  if (isArray(viewportSize)) {
-    const viewportWidth = Number(viewportSize[0]);
-    const viewportHeight = Number(viewportSize[1]);
-
-    if (viewportWidth == 0 || viewportHeight == 0) {
-      if (Math.random() > REPORTING_THRESHOLD) {
-        return;
-      }
-      dev().expectedError(
-        GOOGLE_ACTIVEVIEW_ERROR_TAG,
-        'Debugging: Activeview request with zero viewport size',
-        viewportWidth,
-        viewportHeight,
-        url,
-        JSON.stringify(/** @type {!JsonObject} */ (info))
-      );
-    }
-  }
 }

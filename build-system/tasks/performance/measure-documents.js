@@ -16,7 +16,6 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
-const log = require('fancy-log');
 const {
   CDN_URL,
   CONTROL,
@@ -32,10 +31,11 @@ const {
   setupAnalyticsHandler,
   getAnalyticsMetrics,
 } = require('./analytics-handler');
-const {cyan, green} = require('ansi-colors');
+const {cyan, green} = require('kleur/colors');
+const {log} = require('../../common/logging');
 const {setupAdRequestHandler} = require('./ads-handler');
 
-// Require Puppeteer dynamically to prevent throwing error in Travis
+// Require Puppeteer dynamically to prevent throwing error during CI
 let puppeteer;
 
 function requirePuppeteer_() {
@@ -47,7 +47,7 @@ function requirePuppeteer_() {
  * observers need to be initialized before content begins to load to take
  * measurements.
  *
- * @param {Puppeteer.page} page
+ * @param {puppeteer.page} page
  * @return {Promise} Resolves when script is evaluated
  */
 const setupMeasurement = (page) =>
@@ -83,8 +83,8 @@ const setupMeasurement = (page) =>
   });
 
 /**
- * Intecepts requests for default extensions made by runtime,
- * and returns cached version (master and local).
+ * Intecepts requests for default extensions made by runtime and returns a
+ * cached version.
  * @param {Request} interceptedRequest
  * @param {string} version
  * @return {!Promise<boolean>}
@@ -142,6 +142,11 @@ const readMetrics = (page) =>
   page.evaluate(() => {
     const entries = performance.getEntries();
 
+    /**
+     *
+     * @param {string} name
+     * @return {nuber}
+     */
     function getMetric(name) {
       const entry = entries.find((entry) => entry.name === name);
       return entry ? entry.startTime : 0;
@@ -149,6 +154,9 @@ const readMetrics = (page) =>
 
     const firstContentfulPaint = getMetric('first-contentful-paint');
 
+    /**
+     * @return {number}
+     */
     function getMaxFirstInputDelay() {
       let longest = 0;
 
@@ -357,6 +365,9 @@ async function measureDocuments(urls, config) {
   );
 
   const startTime = Date.now();
+  /**
+   * @return {number}
+   */
   function timeLeft() {
     const elapsed = (Date.now() - startTime) / 1000;
     const secondsPerTask = elapsed / i;

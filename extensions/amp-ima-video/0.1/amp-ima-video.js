@@ -14,27 +14,37 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {ImaPlayerData} from '../../../ads/google/ima-player-data';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
 import {assertHttpsUrl} from '../../../src/url';
 import {
   childElementsByTag,
+  dispatchCustomEvent,
   isJsonScriptTag,
   removeElement,
 } from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isEnumValue, isObject, toArray} from '../../../src/types';
+import {isEnumValue, isObject} from '../../../src/core/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
+
+import {
+  observeContentSize,
+  unobserveContentSize,
+} from '../../../src/utils/size-observer';
+import {toArray} from '../../../src/core/types/array';
 
 /** @const */
 const TAG = 'amp-ima-video';
+
+const TYPE = 'ima-video';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -76,6 +86,11 @@ class AmpImaVideo extends AMP.BaseElement {
 
     /** @private {!ImaPlayerData} */
     this.playerData_ = new ImaPlayerData();
+
+    this.onResized_ = this.onResized_.bind(this);
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /** @override */
@@ -151,7 +166,7 @@ class AmpImaVideo extends AMP.BaseElement {
       preconnect.url(this.getAmpDoc(), this.preconnectTrack_);
     }
     preconnect.url(this.getAmpDoc(), element.getAttribute('data-tag'));
-    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
+    preloadBootstrap(this.win, TYPE, this.getAmpDoc(), preconnect);
   }
 
   /** @override */
@@ -175,7 +190,7 @@ class AmpImaVideo extends AMP.BaseElement {
       const iframe = getIframe(
         win,
         element,
-        'ima-video',
+        TYPE,
         {initialConsentState},
         {allowFullscreen: true}
       );
@@ -201,6 +216,7 @@ class AmpImaVideo extends AMP.BaseElement {
 
       installVideoManagerForDoc(element);
       Services.videoManagerForDoc(element).register(this);
+      observeContentSize(this.element, this.onResized_);
 
       return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
     });
@@ -215,19 +231,25 @@ class AmpImaVideo extends AMP.BaseElement {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
+    unobserveContentSize(this.element, this.onResized_);
 
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
+
+    this.pauseHelper_.updatePlaying(false);
+
     return true;
   }
 
-  /** @override */
-  onLayoutMeasure() {
+  /**
+   * @param {!../layout-rect.LayoutSizeDef} size
+   * @private
+   */
+  onResized_({width, height}) {
     if (!this.iframe_) {
       return;
     }
-    const {width, height} = this.getLayoutBox();
     this.sendCommand_('resize', {'width': width, 'height': height});
   }
 
@@ -278,15 +300,26 @@ class AmpImaVideo extends AMP.BaseElement {
 
     const videoEvent = eventData['event'];
     if (isEnumValue(VideoEvents, videoEvent)) {
-      if (videoEvent == VideoEvents.LOAD) {
-        this.playerReadyResolver_(this.iframe_);
+      switch (videoEvent) {
+        case VideoEvents.LOAD:
+          this.playerReadyResolver_(this.iframe_);
+          break;
+        case VideoEvents.AD_START:
+        case VideoEvents.PLAY:
+        case VideoEvents.PLAYING:
+          this.pauseHelper_.updatePlaying(true);
+          break;
+        case VideoEvents.PAUSE:
+        case VideoEvents.ENDED:
+          this.pauseHelper_.updatePlaying(false);
+          break;
       }
-      this.element.dispatchCustomEvent(videoEvent);
+      dispatchCustomEvent(this.element, videoEvent);
       return;
     }
     if (videoEvent == ImaPlayerData.IMA_PLAYER_DATA) {
       this.playerData_ = /** @type {!ImaPlayerData} */ (eventData['data']);
-      this.element.dispatchCustomEvent(VideoEvents.LOADEDMETADATA);
+      dispatchCustomEvent(this.element, VideoEvents.LOADEDMETADATA);
       return;
     }
     if (videoEvent == 'fullscreenchange') {

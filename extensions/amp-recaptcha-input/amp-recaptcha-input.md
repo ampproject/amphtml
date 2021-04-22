@@ -64,7 +64,7 @@ grecaptcha.execute('reCAPTCHA_site_key', {action: 'reCAPTCHA_example_action'});
 ```js
 {
   ...other form params
-  “reCAPTCHA_body_key”: “returned_reCAPTCHA_response_token”
+  "reCAPTCHA_body_key": "returned_reCAPTCHA_response_token"
 }
 ```
 
@@ -92,4 +92,4 @@ By default, the iframe loads the recaptcha api script using the `www.google.com`
 
 ## Validation
 
-See [`<amp-recaptcha-input>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-recaptcha-input/validator-amp-recaptcha-input.protoascii) rules in the AMP validator specification.
+See [`<amp-recaptcha-input>`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-recaptcha-input/validator-amp-recaptcha-input.protoascii) rules in the AMP validator specification.

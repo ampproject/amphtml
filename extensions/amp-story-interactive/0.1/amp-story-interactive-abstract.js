@@ -31,13 +31,18 @@ import {
   assertAbsoluteHttpOrHttpsUrl,
 } from '../../../src/url';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
+import {
+  buildInteractiveDisclaimer,
+  tryCloseDisclaimer,
+} from './interactive-disclaimer';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {deduplicateInteractiveIds} from './utils';
 import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {emojiConfetti} from './interactive-confetti';
-import {toArray} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
+import {toArray} from '../../../src/core/types/array';
 
 /** @const {string} */
 const TAG = 'amp-story-interactive';
@@ -142,9 +147,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected {?Promise<?InteractiveResponseType|?JsonObject|undefined>} */
     this.backendDataPromise_ = null;
 
-    /** @protected {?Promise<!../../../src/service/cid-impl.CidDef>} */
-    this.clientIdService_ = Services.cidForDoc(this.element);
-
     /** @protected {?Promise<JsonObject>} */
     this.clientIdPromise_ = null;
 
@@ -169,14 +171,17 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected {?Element} */
     this.rootEl_ = null;
 
+    /** @public {../../../src/service/localizationService} */
+    this.localizationService = null;
+
     /** @protected {?../../amp-story/1.0/amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = null;
 
     /** @protected {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
-    /** @protected {../../../src/service/url-impl.Url} */
-    this.urlService_ = Services.urlForDoc(this.element);
+    /** @protected {?../../../src/service/url-impl.Url} */
+    this.urlService_ = null;
 
     /** @protected {?../../amp-story/1.0/variable-service.AmpStoryVariableService} */
     this.variableService_ = null;
@@ -242,6 +247,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     devAssert(this.element.children.length == 0, 'Too many children');
 
     // Initialize all the services before proceeding, and update store with state
+    this.urlService_ = Services.urlForDoc(this.element);
     return Promise.all([
       Services.storyVariableServiceForOrNull(this.win).then((service) => {
         this.variableService_ = service;
@@ -255,6 +261,9 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       }),
       Services.storyAnalyticsServiceForOrNull(this.win).then((service) => {
         this.analyticsService_ = service;
+      }),
+      Services.localizationServiceForOrNull(this.element).then((service) => {
+        this.localizationService = service;
       }),
     ]).then(() => {
       this.rootEl_ = this.buildComponent();
@@ -363,6 +372,14 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (
+      isExperimentOn(this.win, 'amp-story-interactive-disclaimer') &&
+      this.element.hasAttribute('endpoint')
+    ) {
+      // Needs to be called after buildCallback to measure properly.
+      this.disclaimerEl_ = buildInteractiveDisclaimer(this);
+      this.rootEl_.prepend(this.disclaimerEl_);
+    }
     this.initializeListeners_();
     return (this.backendDataPromise_ = this.element.hasAttribute('endpoint')
       ? this.retrieveInteractiveData_()
@@ -376,7 +393,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    */
   getClientId_() {
     if (!this.clientIdPromise_) {
-      this.clientIdPromise_ = this.clientIdService_.then((data) => {
+      this.clientIdPromise_ = Services.cidForDoc(this.element).then((data) => {
         return data.get(
           {scope: 'amp-story', createCookieIfNotPresent: true},
           /* consent */ Promise.resolve()
@@ -448,7 +465,9 @@ export class AmpStoryInteractive extends AMP.BaseElement {
             INTERACTIVE_ACTIVE_CLASS,
             currPageId === this.getPageId_()
           );
+          this.toggleTabbableElements_(currPageId === this.getPageId_());
         });
+        tryCloseDisclaimer(this, this.disclaimerEl_);
       },
       true /** callToInitialize */
     );
@@ -485,6 +504,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
           confettiEmoji
         );
       }
+      tryCloseDisclaimer(this, this.disclaimerEl_);
     }
   }
 
@@ -522,7 +542,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @protected @abstract
    * @param {!Array<!InteractiveOptionType>} unusedOptionsData
    */
-  updateOptionPercentages_(unusedOptionsData) {
+  displayOptionsData(unusedOptionsData) {
     // Subclass must implement
   }
 
@@ -772,8 +792,11 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
     if (this.optionsData_) {
       this.rootEl_.classList.add('i-amphtml-story-interactive-has-data');
-      this.updateOptionPercentages_(this.optionsData_);
+      this.displayOptionsData(this.optionsData_);
     }
+    this.getOptionElements().forEach((el) => {
+      el.setAttribute('tabindex', -1);
+    });
   }
 
   /**
@@ -787,5 +810,23 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       type: this.interactiveType_,
     };
     this.storeService_.dispatch(Action.ADD_INTERACTIVE_REACT, update);
+  }
+
+  /**
+   * Toggles the tabbable elements (buttons, links, etc) to only reach them when page is active.
+   * @param {boolean} toggle
+   */
+  toggleTabbableElements_(toggle) {
+    this.rootEl_.querySelectorAll('button, a').forEach((el) => {
+      // Disable tabbing through options if already selected.
+      if (
+        el.classList.contains('i-amphtml-story-interactive-option') &&
+        this.hasUserSelection_
+      ) {
+        el.setAttribute('tabindex', -1);
+      } else {
+        el.setAttribute('tabindex', toggle ? 0 : -1);
+      }
+    });
   }
 }

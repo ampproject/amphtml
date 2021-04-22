@@ -48,8 +48,7 @@ import {
   removeFragment,
 } from '../../../src/url';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
+import {dict} from '../../../src/core/types/object';
 import {logo, showMoreArrow} from './images';
 import {
   observeWithSharedInOb,
@@ -106,13 +105,6 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    // EXPERIMENT
-    // AMP.toggleExperiment(EXPERIMENT, true); //for dev
-    userAssert(
-      isExperimentOn(this.win, 'amp-playbuzz'),
-      'Enable amp-playbuzz experiment'
-    );
-
     const e = this.element;
     const src = e.getAttribute('src');
     const itemId = e.getAttribute('data-item');

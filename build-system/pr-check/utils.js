@@ -15,163 +15,195 @@
  */
 'use strict';
 
-const colors = require('ansi-colors');
+const fs = require('fs-extra');
+const {
+  ciPullRequestSha,
+  circleciBuildNumber,
+  isCiBuild,
+  isCircleciBuild,
+  ciBuildSha,
+} = require('../common/ci');
 const {
   gitBranchCreationPoint,
   gitBranchName,
   gitCommitHash,
   gitDiffCommitLog,
-  gitDiffStatMaster,
-  gitTravisMasterBaseline,
+  gitDiffStatMain,
+  gitCiMainBaseline,
   shortSha,
 } = require('../common/git');
-const {
-  isTravisBuild,
-  travisBuildNumber,
-  travisPullRequestSha,
-} = require('../common/travis');
+const {cyan, green, yellow} = require('kleur/colors');
 const {execOrDie, execOrThrow, execWithError, exec} = require('../common/exec');
-const {replaceUrls, signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
+const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
+const {replaceUrls} = require('../tasks/pr-deploy-bot-utils');
 
-const BUILD_OUTPUT_FILE = isTravisBuild()
-  ? `amp_build_${travisBuildNumber()}.zip`
-  : '';
-const DIST_OUTPUT_FILE = isTravisBuild()
-  ? `amp_dist_${travisBuildNumber()}.zip`
-  : '';
-const ESM_DIST_OUTPUT_FILE = isTravisBuild()
-  ? `amp_esm_dist_${travisBuildNumber()}.zip`
-  : '';
+const UNMINIFIED_CONTAINER_DIRECTORY = 'unminified';
+const NOMODULE_CONTAINER_DIRECTORY = 'nomodule';
+const MODULE_CONTAINER_DIRECTORY = 'module';
 
-const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/';
-const APP_SERVING_DIRS = 'dist.tools/ examples/ test/manual/';
+const ARTIFACT_FILE_NAME = '/tmp/artifacts/amp_nomodule_build.tar.gz';
 
-const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
-const OUTPUT_STORAGE_KEY_FILE = 'sa-travis-key.json';
-const OUTPUT_STORAGE_PROJECT_ID = 'amp-travis-build-storage';
-const OUTPUT_STORAGE_SERVICE_ACCOUNT =
-  'sa-travis@amp-travis-build-storage.iam.gserviceaccount.com';
+// TODO(danielrozenberg): remove when Cloud Storage -> CircleCI Artifacts migration is complete.
+const NOMODULE_GCLOUD_OUTPUT_FILE = `amp_nomodule_${ciBuildSha()}.zip`;
+const GCLOUD_STORAGE_BUCKET = 'gs://amp-travis-builds';
+
+const BUILD_OUTPUT_DIRS = ['build', 'dist', 'dist.3p'];
+const APP_SERVING_DIRS = [
+  ...BUILD_OUTPUT_DIRS,
+  'dist.tools',
+  'examples',
+  'test/manual',
+  'test/fixtures/e2e',
+];
 
 const GIT_BRANCH_URL =
-  'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#create-a-git-branch';
+  'https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md#create-a-git-branch';
 
 /**
  * Prints a summary of files changed by, and commits included in the PR.
- * @param {string} fileName
  */
-function printChangeSummary(fileName) {
-  const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
+function printChangeSummary() {
+  const loggingPrefix = getLoggingPrefix();
   let commitSha;
 
-  if (isTravisBuild()) {
-    console.log(
-      `${fileLogPrefix} Latest commit from ${colors.cyan('master')} included ` +
-        `in this build: ${colors.cyan(shortSha(gitTravisMasterBaseline()))}`
+  if (isCiBuild()) {
+    logWithoutTimestamp(
+      `${loggingPrefix} Latest commit from ${cyan('main')} included ` +
+        `in this build: ${cyan(shortSha(gitCiMainBaseline()))}`
     );
-    commitSha = travisPullRequestSha();
+    commitSha = ciPullRequestSha();
   } else {
     commitSha = gitCommitHash();
   }
-  console.log(
-    `${fileLogPrefix} Testing the following changes at commit ` +
-      `${colors.cyan(shortSha(commitSha))}`
+  logWithoutTimestamp(
+    `${loggingPrefix} Testing the following changes at commit ` +
+      `${cyan(shortSha(commitSha))}`
   );
 
-  const filesChanged = gitDiffStatMaster();
-  console.log(filesChanged);
+  const filesChanged = gitDiffStatMain();
+  logWithoutTimestamp(filesChanged);
 
   const branchCreationPoint = gitBranchCreationPoint();
   if (branchCreationPoint) {
-    console.log(
-      `${fileLogPrefix} Commit log since branch`,
-      `${colors.cyan(gitBranchName())} was forked from`,
-      `${colors.cyan('master')} at`,
-      `${colors.cyan(shortSha(branchCreationPoint))}:`
+    logWithoutTimestamp(
+      `${loggingPrefix} Commit log since branch`,
+      `${cyan(gitBranchName())} was forked from`,
+      `${cyan('main')} at`,
+      `${cyan(shortSha(branchCreationPoint))}:`
     );
-    console.log(gitDiffCommitLog() + '\n');
+    logWithoutTimestamp(gitDiffCommitLog() + '\n');
   } else {
-    console.error(
-      fileLogPrefix,
-      colors.yellow('WARNING:'),
+    logWithoutTimestamp(
+      loggingPrefix,
+      yellow('WARNING:'),
       'Could not find a common ancestor for',
-      colors.cyan(gitBranchName()),
+      cyan(gitBranchName()),
       'and',
-      colors.cyan('master') + '. (This can happen with older PR branches.)'
+      cyan('main') + '. (This can happen with older PR branches.)'
     );
-    console.error(
-      fileLogPrefix,
-      colors.yellow('NOTE 1:'),
+    logWithoutTimestamp(
+      loggingPrefix,
+      yellow('NOTE 1:'),
       'If this causes unexpected test failures, try rebasing the PR branch on',
-      colors.cyan('master') + '.'
+      cyan('main') + '.'
     );
-    console.error(
-      fileLogPrefix,
-      colors.yellow('NOTE 2:'),
+    logWithoutTimestamp(
+      loggingPrefix,
+      yellow('NOTE 2:'),
       "If rebasing doesn't work, you may have to recreate the branch. See",
-      colors.cyan(GIT_BRANCH_URL) + '.\n'
+      cyan(GIT_BRANCH_URL) + '.\n'
     );
   }
 }
 
 /**
- * Starts a timer to measure the execution time of the given function.
- * @param {string} functionName
- * @param {string} fileName
+ * Signal to dependent jobs that they should be skipped. Uses an identifier that
+ * corresponds to the current job to eliminate conflicts if a parallel job also
+ * signals the same thing.
+ *
+ * Currently only relevant for CircleCI builds.
+ */
+function signalGracefulHalt() {
+  if (isCircleciBuild()) {
+    const loggingPrefix = getLoggingPrefix();
+    const sentinelFile = `/tmp/workspace/.CI_GRACEFULLY_HALT_${circleciBuildNumber()}`;
+    fs.closeSync(fs.openSync(sentinelFile, 'w'));
+    logWithoutTimestamp(
+      `${loggingPrefix} Created ${cyan(sentinelFile)} to signal graceful halt.`
+    );
+  }
+}
+
+/**
+ * Prints a message indicating why a job was skipped and mark its dependent jobs
+ * for skipping.
+ * @param {string} jobName
+ * @param {string} skipReason
+ */
+function skipDependentJobs(jobName, skipReason) {
+  const loggingPrefix = getLoggingPrefix();
+  logWithoutTimestamp(
+    `${loggingPrefix} Skipping ${cyan(jobName)} because ${skipReason}.`
+  );
+  signalGracefulHalt();
+}
+
+/**
+ * Starts a timer to measure the execution time of the given job / command.
+ * @param {string} jobNameOrCmd
  * @return {DOMHighResTimeStamp}
  */
-function startTimer(functionName, fileName) {
+function startTimer(jobNameOrCmd) {
   const startTime = Date.now();
-  const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
-  console.log(
-    '\n' + fileLogPrefix,
+  const loggingPrefix = getLoggingPrefix();
+  logWithoutTimestamp(
+    '\n' + loggingPrefix,
     'Running',
-    colors.cyan(functionName) + '...'
+    cyan(jobNameOrCmd) + '...'
   );
   return startTime;
 }
 
 /**
- * Stops the timer for the given function and prints the execution time.
- * @param {string} functionName
- * @param {string} fileName
+ * Stops the timer for the given job / command and prints the execution time.
+ * @param {string} jobNameOrCmd
  * @param {DOMHighResTimeStamp} startTime
- * @return {number}
  */
-function stopTimer(functionName, fileName, startTime) {
+function stopTimer(jobNameOrCmd, startTime) {
   const endTime = Date.now();
   const executionTime = endTime - startTime;
   const mins = Math.floor(executionTime / 60000);
   const secs = Math.floor((executionTime % 60000) / 1000);
-  const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
-  console.log(
-    fileLogPrefix,
+  const loggingPrefix = getLoggingPrefix();
+  logWithoutTimestamp(
+    loggingPrefix,
     'Done running',
-    colors.cyan(functionName),
+    cyan(jobNameOrCmd),
     'Total time:',
-    colors.green(mins + 'm ' + secs + 's')
+    green(mins + 'm ' + secs + 's')
   );
 }
 
 /**
- * Stops the Node process and timer
- * @param {string} fileName
- * @param {startTime} startTime
+ * Aborts the process after stopping the timer for a given job
+ * @param {string} jobName
+ * @param {number} startTime
  */
-function stopTimedJob(fileName, startTime) {
-  stopTimer(fileName, fileName, startTime);
+function abortTimedJob(jobName, startTime) {
+  stopTimer(jobName, startTime);
   process.exitCode = 1;
 }
 
 /**
  * Wraps an exec helper in a timer. Returns the result of the helper.
- * @param {!Function(string, string=): ?} execFn
- * @return {!Function(string, string=): ?}
+ * @param {function(string, string=): ?} execFn
+ * @return {function(string, string=): ?}
  */
 function timedExecFn(execFn) {
-  return (cmd, fileName, ...rest) => {
-    const startTime = startTimer(cmd, fileName);
+  return (cmd, ...rest) => {
+    const startTime = startTimer(cmd);
     const p = execFn(cmd, ...rest);
-    stopTimer(cmd, fileName, startTime);
+    stopTimer(cmd, startTime);
     return p;
   };
 }
@@ -180,7 +212,6 @@ function timedExecFn(execFn) {
  * Executes the provided command and times it. Errors, if any, are printed.
  * @function
  * @param {string} cmd
- * @param {string} fileName
  * @return {!Object} Node process
  */
 const timedExec = timedExecFn(exec);
@@ -189,7 +220,6 @@ const timedExec = timedExecFn(exec);
  * Executes the provided command and times it. Errors, if any, are returned.
  * @function
  * @param {string} cmd
- * @param {string} fileName
  * @return {!Object} Node process
  */
 const timedExecWithError = timedExecFn(execWithError);
@@ -199,7 +229,6 @@ const timedExecWithError = timedExecFn(execWithError);
  * failure.
  * @function
  * @param {string} cmd
- * @param {string} fileName
  */
 const timedExecOrDie = timedExecFn(execOrDie);
 
@@ -208,183 +237,125 @@ const timedExecOrDie = timedExecFn(execOrDie);
  * case of failure.
  * @function
  * @param {string} cmd
- * @param {string} fileName
  */
 const timedExecOrThrow = timedExecFn(execOrThrow);
 
 /**
- * Download output helper
- * @param {string} functionName
- * @param {string} outputFileName
- * @param {string} outputDirs
+ * Stores build files to the CI workspace.
+ * @param {string} containerDirectory
  * @private
  */
-function downloadOutput_(functionName, outputFileName, outputDirs) {
-  const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
-  const buildOutputDownloadUrl = `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`;
-  const dirsToUnzip = outputDirs.split(' ');
-
-  console.log(
-    `${fileLogPrefix} Downloading build output from ` +
-      colors.cyan(buildOutputDownloadUrl) +
-      '...'
-  );
-  exec('echo travis_fold:start:download_results && echo');
-  authenticateWithStorageLocation_();
-  execOrDie(`gsutil cp ${buildOutputDownloadUrl} ${outputFileName}`);
-  exec('echo travis_fold:end:download_results');
-
-  console.log(
-    `${fileLogPrefix} Extracting ` + colors.cyan(outputFileName) + '...'
-  );
-  exec('echo travis_fold:start:unzip_results && echo');
-  dirsToUnzip.forEach((dir) => {
-    execOrDie(`unzip -o ${outputFileName} '${dir.replace('/', '/*')}'`);
-  });
-  exec('echo travis_fold:end:unzip_results');
-
-  console.log(fileLogPrefix, 'Verifying extracted files...');
-  exec('echo travis_fold:start:verify_unzip_results && echo');
-  execOrDie(`ls -laR ${outputDirs}`);
-  exec('echo travis_fold:end:verify_unzip_results');
+function storeBuildToWorkspace_(containerDirectory) {
+  if (isCircleciBuild()) {
+    fs.ensureDirSync(`/tmp/workspace/builds/${containerDirectory}`);
+    for (const outputDir of BUILD_OUTPUT_DIRS) {
+      fs.moveSync(
+        `${outputDir}/`,
+        `/tmp/workspace/builds/${containerDirectory}/${outputDir}`
+      );
+    }
+  }
 }
 
 /**
- * Upload output helper
- * @param {string} functionName
- * @param {string} outputFileName
- * @param {string} outputDirs
- * @private
+ * Stores unminified build files to the CI workspace.
  */
-function uploadOutput_(functionName, outputFileName, outputDirs) {
-  const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
+function storeUnminifiedBuildToWorkspace() {
+  storeBuildToWorkspace_(UNMINIFIED_CONTAINER_DIRECTORY);
+}
 
-  console.log(
-    `\n${fileLogPrefix} Compressing ` +
-      colors.cyan(outputDirs.split(' ').join(', ')) +
+/**
+ * Stores nomodule build files to the CI workspace.
+ */
+function storeNomoduleBuildToWorkspace() {
+  storeBuildToWorkspace_(NOMODULE_CONTAINER_DIRECTORY);
+}
+
+/**
+ * Stores module build files to the CI workspace.
+ */
+function storeModuleBuildToWorkspace() {
+  storeBuildToWorkspace_(MODULE_CONTAINER_DIRECTORY);
+}
+
+/**
+ * Stores an experiment's build files to the CI workspace.
+ * @param {string} exp one of 'experimentA', 'experimentB', or 'experimentC'.
+ */
+function storeExperimentBuildToWorkspace(exp) {
+  storeBuildToWorkspace_(exp);
+}
+
+// TODO(danielrozenberg): remove when Cloud Storage -> CircleCI Artifacts migration is complete.
+function legacyProcessAndStoreBuildToArtifacts_() {
+  const loggingPrefix = getLoggingPrefix();
+
+  logWithoutTimestamp(
+    `\n${loggingPrefix} Compressing ` +
+      cyan(APP_SERVING_DIRS.join(', ')) +
       ' into ' +
-      colors.cyan(outputFileName) +
+      cyan(NOMODULE_GCLOUD_OUTPUT_FILE) +
       '...'
   );
-  exec('echo travis_fold:start:zip_results && echo');
-  execOrDie(`zip -r ${outputFileName} ${outputDirs}`);
-  exec('echo travis_fold:end:zip_results');
-
-  console.log(
-    `${fileLogPrefix} Uploading ` +
-      colors.cyan(outputFileName) +
-      ' to ' +
-      colors.cyan(OUTPUT_STORAGE_LOCATION) +
-      '...'
-  );
-  exec('echo travis_fold:start:upload_results && echo');
-  authenticateWithStorageLocation_();
-  execOrDie(`gsutil -m cp -r ${outputFileName} ${OUTPUT_STORAGE_LOCATION}`);
-  exec('echo travis_fold:end:upload_results');
-}
-
-function authenticateWithStorageLocation_() {
-  decryptTravisKey_();
   execOrDie(
-    'gcloud auth activate-service-account ' +
-      `--key-file ${OUTPUT_STORAGE_KEY_FILE}`
+    `zip -r -q ${NOMODULE_GCLOUD_OUTPUT_FILE} ${APP_SERVING_DIRS.join('/ ')}/`
   );
-  execOrDie(`gcloud config set account ${OUTPUT_STORAGE_SERVICE_ACCOUNT}`);
-  execOrDie('gcloud config set pass_credentials_to_gsutil true');
-  execOrDie(`gcloud config set project ${OUTPUT_STORAGE_PROJECT_ID}`);
-  execOrDie('gcloud config list');
+  execOrDie(`du -sh ${NOMODULE_GCLOUD_OUTPUT_FILE}`);
+
+  logWithoutTimestamp(
+    `${loggingPrefix} Uploading ` +
+      cyan(NOMODULE_GCLOUD_OUTPUT_FILE) +
+      ' to ' +
+      cyan(GCLOUD_STORAGE_BUCKET) +
+      '...'
+  );
+  execOrDie(
+    `gsutil -q -m cp -r ${NOMODULE_GCLOUD_OUTPUT_FILE} ${GCLOUD_STORAGE_BUCKET}`
+  );
 }
 
 /**
- * Downloads and unzips build output from storage
- * @param {string} functionName
+ * Replaces URLS in HTML files, compresses and stores nomodule build in CI artifacts.
  */
-function downloadBuildOutput(functionName) {
-  downloadOutput_(functionName, BUILD_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
-}
+async function processAndStoreBuildToArtifacts() {
+  if (!isCircleciBuild()) {
+    return;
+  }
 
-/**
- * Downloads and unzips dist output from storage
- * @param {string} functionName
- */
-function downloadDistOutput(functionName) {
-  downloadOutput_(functionName, DIST_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
-}
+  // TODO(danielrozenberg): remove when Cloud Storage -> CircleCI Artifacts migration is complete.
+  if (process.env.USE_LEGACY_GCLOUD_STORAGE) {
+    legacyProcessAndStoreBuildToArtifacts_();
+  }
 
-/**
- * Downloads and unzips esm dist output from storage
- * @param {string} functionName
- */
-function downloadEsmDistOutput(functionName) {
-  downloadOutput_(functionName, ESM_DIST_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
-}
-
-/**
- * Zips and uploads the build output to a remote storage location
- * @param {string} functionName
- */
-function uploadBuildOutput(functionName) {
-  uploadOutput_(functionName, BUILD_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
-}
-
-/**
- * Zips and uploads the dist output to a remote storage location
- * @param {string} functionName
- */
-function uploadDistOutput(functionName) {
-  const distOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
-  uploadOutput_(functionName, DIST_OUTPUT_FILE, distOutputDirs);
-}
-
-/**
- * Zips and uploads the esm dist output to a remote storage location
- * @param {string} functionName
- */
-function uploadEsmDistOutput(functionName) {
-  const esmDistOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
-  uploadOutput_(functionName, ESM_DIST_OUTPUT_FILE, esmDistOutputDirs);
-}
-
-/**
- * Replaces URLS in HTML files, zips and uploads dist output,
- * and signals to the AMP PR Deploy bot that the upload is complete.
- * @param {string} functionName
- */
-async function processAndUploadDistOutput(functionName) {
   await replaceUrls('test/manual');
   await replaceUrls('examples');
-  uploadDistOutput(functionName);
-  await signalDistUpload('success');
-}
 
-/**
- * Decrypts key used by storage service account
- */
-function decryptTravisKey_() {
-  // -md sha256 is required due to encryption differences between
-  // openssl 1.1.1a, which was used to encrypt the key, and
-  // openssl 1.0.2g, which is used by Travis to decrypt.
-  execOrDie(
-    `openssl aes-256-cbc -md sha256 -k ${process.env.GCP_TOKEN} -in ` +
-      `build-system/common/sa-travis-key.json.enc -out ` +
-      `${OUTPUT_STORAGE_KEY_FILE} -d`
+  const loggingPrefix = getLoggingPrefix();
+
+  logWithoutTimestamp(
+    `\n${loggingPrefix} Compressing ` +
+      cyan(APP_SERVING_DIRS.join(', ')) +
+      ' into ' +
+      cyan(ARTIFACT_FILE_NAME) +
+      '...'
   );
+  execOrDie(`tar -czf ${ARTIFACT_FILE_NAME} ${APP_SERVING_DIRS.join('/ ')}/`);
+  execOrDie(`du -sh ${ARTIFACT_FILE_NAME}`);
 }
 
 module.exports = {
-  downloadBuildOutput,
-  downloadDistOutput,
-  downloadEsmDistOutput,
+  abortTimedJob,
   printChangeSummary,
-  processAndUploadDistOutput,
+  skipDependentJobs,
   startTimer,
   stopTimer,
-  stopTimedJob,
   timedExec,
   timedExecOrDie,
   timedExecWithError,
   timedExecOrThrow,
-  uploadBuildOutput,
-  uploadDistOutput,
-  uploadEsmDistOutput,
+  storeUnminifiedBuildToWorkspace,
+  storeNomoduleBuildToWorkspace,
+  storeModuleBuildToWorkspace,
+  storeExperimentBuildToWorkspace,
+  processAndStoreBuildToArtifacts,
 };

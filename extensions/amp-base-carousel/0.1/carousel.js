@@ -32,8 +32,9 @@ import {CarouselEvents} from './carousel-events';
 import {backwardWrappingDistance, forwardWrappingDistance} from './array-util';
 import {clamp, mod} from '../../../src/utils/math';
 import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
-import {debounce} from '../../../src/utils/rate-limit';
-import {dict} from '../../../src/utils/object';
+import {debounce} from '../../../src/core/types/function';
+import {dev} from '../../../src/log';
+import {dict} from '../../../src/core/types/object';
 import {
   getStyle,
   setImportantStyles,
@@ -51,6 +52,8 @@ import {iterateCursor} from '../../../src/dom';
  * this value on Android / iOS.
  */
 const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
+
+const SPACER_CLASS = 'i-amphtml-carousel-spacer';
 
 /**
  * Runs a callback while disabling smooth scrolling by temporarily setting
@@ -152,7 +155,7 @@ export class Carousel {
    * }} config
    */
   constructor(config) {
-    const {win, element, scrollContainer, runMutate} = config;
+    const {win, element, scrollContainer, runMutate, initialIndex} = config;
     /** @private @const */
     this.win_ = win;
 
@@ -310,7 +313,7 @@ export class Carousel {
      * restingIndex to currentIndex.
      * @private {number}
      */
-    this.currentIndex_ = 0;
+    this.currentIndex_ = initialIndex || 0;
 
     /**
      * Whether or not looping is requested. Do not use directly, but rather use
@@ -405,17 +408,20 @@ export class Carousel {
     const atEnd = index === endIndex;
     const passingStart = newIndex < 0;
     const passingEnd = newIndex > endIndex;
+    const forwardWithinLastWindow =
+      delta > 0 && this.inLastWindow_(index) && this.inLastWindow_(newIndex);
 
     let slideIndex;
     if (this.isLooping()) {
       slideIndex = mod(newIndex, endIndex + 1);
     } else if (!allowWrap) {
-      slideIndex = clamp(newIndex, 0, endIndex);
-    } else if (
-      delta > 0 &&
-      this.inLastWindow_(index) &&
-      this.inLastWindow_(newIndex)
-    ) {
+      // We only need to bail out if both indices are in the
+      // the last window. If we didn't bail, we would attempt
+      // to scroll the container, when it shouldn't.
+      slideIndex = forwardWithinLastWindow
+        ? index
+        : clamp(newIndex, 0, endIndex);
+    } else if (forwardWithinLastWindow) {
       slideIndex = 0;
     } else if ((passingStart && atStart) || (passingEnd && !atEnd)) {
       slideIndex = endIndex;
@@ -607,9 +613,19 @@ export class Carousel {
    * @param {!Array<!Element>} slides
    */
   updateSlides(slides) {
+    const {length} = slides;
+    if (!length) {
+      const TAG = this.element_.tagName.toUpperCase();
+      dev().warn(TAG, 'No slides were found.');
+      return;
+    }
     this.slides_ = slides;
+    // Normalize current index to updated slide length.
+    this.currentIndex_ = this.isLooping()
+      ? mod(this.currentIndex_, length)
+      : clamp(this.currentIndex_, 0, length - 1) || 0;
     this.carouselAccessibility_.updateSlides(slides);
-    // TODO(sparhami) Should need to call `this.updateUi()` here.
+    this.updateUi();
   }
 
   /**
@@ -904,9 +920,7 @@ export class Carousel {
       return false;
     }
 
-    return this.forwards_
-      ? this.isScrollAtRightEdge()
-      : this.isScrollAtLeftEdge();
+    return this.isScrollAtEndingEdge_();
   }
 
   /**
@@ -918,29 +932,38 @@ export class Carousel {
       return false;
     }
 
-    return this.forwards_
-      ? this.isScrollAtLeftEdge()
-      : this.isScrollAtRightEdge();
+    return this.isScrollAtBeginningEdge_();
   }
 
   /**
    * @return {boolean} True if the scrolling is at the right edge of the
-   *    carousel. Note that this ignores RTL, and only checks for the right
-   *    edge.
+   *    carousel in LTR and left edge of the carousel if RTL.
+   * @private
    */
-  isScrollAtRightEdge() {
+  isScrollAtEndingEdge_() {
     const el = this.scrollContainer_;
-    const {width} = el./*OK*/ getBoundingClientRect();
-    return el./*OK*/ scrollLeft + Math.ceil(width) >= el./*OK*/ scrollWidth;
+    const vector =
+      el./*OK*/ getBoundingClientRect().width * (this.forwards_ ? 1 : -1);
+    const roundedVector = this.forwards_
+      ? Math.ceil(vector)
+      : Math.floor(vector);
+    const edgeClosestToEnd = el./*OK*/ scrollLeft + roundedVector;
+    const containerScrollWidth = el./*OK*/ scrollWidth;
+
+    const atEndingEdge = this.forwards_
+      ? edgeClosestToEnd >= containerScrollWidth
+      : edgeClosestToEnd <= -containerScrollWidth;
+    return atEndingEdge;
   }
 
   /**
    * @return {boolean} True if the scrolling is at the left edge of the
-   *    carousel. Note that this ignores RTL, and only checks for the left
-   *    edge.
+   *    carousel for LTR and right edge for RTL.
+   * @private
    */
-  isScrollAtLeftEdge() {
-    return this.scrollContainer_./*OK*/ scrollLeft <= 0;
+  isScrollAtBeginningEdge_() {
+    const currentScrollPos = this.scrollContainer_./*OK*/ scrollLeft;
+    return this.forwards_ ? currentScrollPos <= 0 : currentScrollPos >= 0;
   }
 
   /**
@@ -952,7 +975,7 @@ export class Carousel {
     const spacers = [];
     for (let i = 0; i < count; i++) {
       const spacer = document.createElement('div');
-      spacer.className = 'i-amphtml-carousel-spacer';
+      spacer.className = SPACER_CLASS;
       spacers.push(spacer);
     }
     return spacers;
@@ -1035,10 +1058,17 @@ export class Carousel {
       // If an item is at the start of the group, it gets an aligned.
       const shouldSnap = mod(slideIndex, this.snapBy_) === 0;
 
-      setStyles(child, {
-        'scroll-snap-align': shouldSnap ? this.alignment_ : 'none',
-        'scroll-snap-coordinate': shouldSnap ? coordinate : 'none',
-      });
+      // Only apply `snap` feature on non-looping carousels
+      // or only the spacers of the looping carousels.
+      // Adding `snap` feature to non-spacers in a looping carousel
+      // causes all weird behaviors due to non-homogenous siblings,
+      // i.e. <amp-img> with lots of non-fixed sized children, etc.
+      if (child.classList.contains(SPACER_CLASS) || !this.isLooping()) {
+        setStyles(child, {
+          'scroll-snap-align': shouldSnap ? this.alignment_ : 'none',
+          'scroll-snap-coordinate': shouldSnap ? coordinate : 'none',
+        });
+      }
     });
   }
 
@@ -1330,7 +1360,7 @@ export class Carousel {
   /**
    * Checks if a given index is in the last window of items. For example, if
    * showing two slides at a time with the slides [a, b, c, d], both slide
-   * b and c are in the last window.
+   * c and d are in the last window.
    * @param {number} index The index to check.
    * @return {boolean} True if the slide is in the last window, false
    *    otherwise.

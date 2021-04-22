@@ -87,8 +87,8 @@ is not loaded, try a different image or domain.
 
 Enables share icons.
 
-- `0`: Disable share icons.
-- `1`: Enable share icons
+-   `0`: Disable share icons.
+-   `1`: Enable share icons
 
 The default is `1`.
 
@@ -102,8 +102,8 @@ default value is `center`.
 When recommendations are supported, it disables embedly recommendations on video
 and rich cards. These are recommendations created by embedly.
 
-- `0`: Disables embedly recommendations.
-- `1`: Enables embedly recommendations.
+-   `0`: Disables embedly recommendations.
+-   `1`: Enables embedly recommendations.
 
 The default value is `1`.
 
@@ -129,4 +129,4 @@ extended to AMP components.
 
 ## Validation
 
-See [amp-embedly-card rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-embedly-card/validator-amp-embedly-card.protoascii) in the AMP validator specification.
+See [amp-embedly-card rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-embedly-card/validator-amp-embedly-card.protoascii) in the AMP validator specification.

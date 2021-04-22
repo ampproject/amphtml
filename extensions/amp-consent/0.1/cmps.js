@@ -57,7 +57,7 @@ CMP_CONFIG['didomi'] = {
 
 CMP_CONFIG['iubenda'] = {
   'consentInstanceId': 'iubenda',
-  'checkConsentHref': 'https://amp.iubenda.com/cs/amp/checkConsent',
+  'checkConsentHref': 'https://amp.iubenda.com/checkConsent',
   'promptUISrc': 'https://www.iubenda.com/en/help/22135-cookie-solution-amp',
 };
 
@@ -69,8 +69,8 @@ CMP_CONFIG['sirdata'] = {
 
 CMP_CONFIG['Marfeel'] = {
   'consentInstanceId': 'Marfeel',
-  'checkConsentHref': 'https://live.mrf.io/cmp/consents/amp',
-  'promptUISrc': 'https://marfeel.mgr.consensu.org/amp/index.html',
+  'checkConsentHref': 'https://live.mrf.io/cmp/marfeel/amp/check-consent',
+  'promptUISrc': 'https://live.mrf.io/cmp/marfeel/amp/index.html',
 };
 
 CMP_CONFIG['Ogury'] = {
@@ -91,6 +91,12 @@ CMP_CONFIG['opencmp'] = {
   'promptUISrc': 'https://cdn.opencmp.net/tcf-v2/amp/cmp.html',
 };
 
+CMP_CONFIG['pubtech'] = {
+  'consentInstanceId': 'pubtech',
+  'checkConsentHref': 'https://amp.pubtech.it/cmp-amp-check-consent',
+  'promptUISrc': 'https://cdn.pubtech.ai/amp/index.html',
+};
+
 CMP_CONFIG['quantcast'] = {
   'consentInstanceId': 'quantcast',
   'checkConsentHref':
@@ -102,6 +108,12 @@ CMP_CONFIG['SourcePoint'] = {
   'consentInstanceId': 'SourcePoint',
   'checkConsentHref': 'https://sourcepoint.mgr.consensu.org/consent/v2/amp',
   'promptUISrc': 'https://amp.pm.sourcepoint.mgr.consensu.org/',
+};
+
+CMP_CONFIG['UniConsent'] = {
+  'consentInstanceId': 'UniConsent',
+  'checkConsentHref': 'https://edge.uniconsent.com/amp/check-consent',
+  'promptUISrc': 'https://cmp.uniconsent.com/amp/index.html',
 };
 
 CMP_CONFIG['Usercentrics'] = {

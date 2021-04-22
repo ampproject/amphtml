@@ -26,7 +26,6 @@ describes.sandboxed('Viewport Observer', {}, (env) => {
     let ctorSpy;
     const noop = () => {};
 
-    const setIframed = () => (win.parent = {});
     beforeEach(() => {
       ctorSpy = env.sandbox.stub();
       win = {
@@ -36,53 +35,27 @@ describes.sandboxed('Viewport Observer', {}, (env) => {
       };
     });
 
-    it('When not iframed, uses null root.', () => {
+    it('Uses implicit root.', () => {
       createViewportObserver(noop, win);
-
-      expect(ctorSpy).calledWith(noop, {
-        root: null,
-        rootMargin: '25%',
-        threshold: undefined,
-      });
-    });
-
-    it('When iframed, use document root.', () => {
-      setIframed();
-      createViewportObserver(noop, win);
-
-      expect(ctorSpy).calledWith(noop, {
-        root: win.document,
-        rootMargin: '25%',
-        threshold: undefined,
-      });
-    });
-
-    it('If ctor throws, fallback to rootless', () => {
-      setIframed();
-      ctorSpy.callsFake((_cb, {root}) => {
-        if (root === win.document) {
-          throw new Error();
-        }
-      });
-      createViewportObserver(noop, win);
-
-      expect(ctorSpy).calledWith(noop, {
-        root: win.document,
-        rootMargin: '25%',
-        threshold: undefined,
-      });
-      expect(ctorSpy).calledWith(noop, {
-        rootMargin: '150px',
-        threshold: undefined,
-      });
+      expect(ctorSpy).calledWith(noop, {threshold: undefined, root: undefined});
     });
 
     it('Pass along threshold argument', () => {
-      createViewportObserver(noop, win, 0.5);
+      createViewportObserver(noop, win, {threshold: 0.5});
+      expect(ctorSpy).calledWith(noop, {threshold: 0.5, root: undefined});
+    });
+
+    it('Sets document root appropriately', () => {
+      // Implicit root when not iframed.
+      createViewportObserver(noop, win, {needsRootBounds: true});
+      expect(ctorSpy).calledWith(noop, {threshold: undefined, root: undefined});
+
+      // Document root when iframed.
+      win.parent = {};
+      createViewportObserver(noop, win, {needsRootBounds: true});
       expect(ctorSpy).calledWith(noop, {
-        root: null,
-        rootMargin: '25%',
-        threshold: 0.5,
+        threshold: undefined,
+        root: win.document,
       });
     });
   });
@@ -118,9 +91,7 @@ describes.sandboxed('Viewport Observer', {}, (env) => {
       const win = el.ownerDocument.defaultView;
       // Grabs the IO Callback shared by all the viewport observers.
       const ioCallback = win.IntersectionObserver.getCall(0).args[0];
-      if (tracked.has(el)) {
-        ioCallback([{target: el, isIntersecting: inViewport}]);
-      }
+      ioCallback([{target: el, isIntersecting: inViewport}]);
     }
 
     it('observed element should have its callback fired each time it enters/exist the viewport.', () => {
@@ -171,6 +142,15 @@ describes.sandboxed('Viewport Observer', {}, (env) => {
           'Assertion failed'
         );
       });
+    });
+
+    it('A quick observe and unobserve pair should not cause an error or fire the callback', () => {
+      const spy = env.sandbox.spy();
+      observeWithSharedInOb(el1, spy);
+      unobserveWithSharedInOb(el1);
+      toggleViewport(el1, true);
+
+      expect(spy).not.called;
     });
   });
 });

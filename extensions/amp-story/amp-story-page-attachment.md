@@ -29,9 +29,9 @@ limitations under the License.
 Story page attachments allow you to provide additional content in the form of a link or inline AMPHTML content to specific pages. This content can be revealed by users through a "swipe up" gesture, or a tap on the call to action element.
 A UI prompt to open the attachment will automatically be added at the bottom of every page that configured an attachment.
 
-<amp-img alt="AMP Story page attachment" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-page-attachment.gif" width="240" height="480">
+<amp-img alt="AMP Story page attachment" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment.gif" width="240" height="480">
   <noscript>
-    <img alt="AMP Story page attachment" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-page-attachment.gif" />
+    <img alt="AMP Story page attachment" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment.gif" />
   </noscript>
 </amp-img>
 
@@ -62,6 +62,10 @@ A UI prompt to open the attachment will automatically be added at the bottom of 
 ### Placement
 
 The `<amp-story-page-attachment>` element must be the last child of `<amp-story-page>`, and must have the `layout="nodisplay"` attribute. The attachment AMPHTML content is expected to be provided inline in your AMP Story, within this `<amp-story-page-attachment>` tag.
+
+[tip type="important"]
+Both [`amp-story-cta-layer`](amp-story-cta-layer.md) and `amp-story-page-attachment` must be the last child tag of an [`amp-story-page`](amp-story-page.md). Because of this, you may include neither or one, but not both.
+[/tip]
 
 ### Linked content
 
@@ -108,8 +112,6 @@ Story page attachments allow the same HTML elements as AMP Story along with addi
   <li><code>&lt;amp-gist></code></li>
   <li><code>&lt;amp-gist></code></li>
   <li><code>&lt;amp-google-document-embed></code></li>
-  <li><code>&lt;amp-google-vrview-image></code></li>
-  <li><code>&lt;amp-google-vrview-image></code></li>
   <li><code>&lt;amp-hulu></code></li>
   <li><code>&lt;amp-ima-video></code></li>
   <li><code>&lt;amp-image-slider></code></li>

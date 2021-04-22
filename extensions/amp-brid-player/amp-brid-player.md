@@ -44,15 +44,15 @@ The `width` and `height` attributes determine the aspect ratio of the player emb
 
 If this attribute is present, and the browser supports autoplay:
 
-- the video is automatically muted before autoplay starts
-- when the video is scrolled out of view, the video is paused
-- when the video is scrolled into view, the video resumes playback
-- when the user taps the video, the video is unmuted
-- if the user has interacted with the video (e.g., mutes/unmutes,
-  pauses/resumes, etc.), and the video is scrolled in or out of view, the
-  state of the video remains as how the user left it. For example, if the user
-  pauses the video, then scrolls the video out of view and returns to the
-  video, the video is still paused.
+-   the video is automatically muted before autoplay starts
+-   when the video is scrolled out of view, the video is paused
+-   when the video is scrolled into view, the video resumes playback
+-   when the user taps the video, the video is unmuted
+-   if the user has interacted with the video (e.g., mutes/unmutes,
+    pauses/resumes, etc.), and the video is scrolled in or out of view, the
+    state of the video remains as how the user left it. For example, if the user
+    pauses the video, then scrolls the video out of view and returns to the
+    video, the video is still paused.
 
 ### `data-partner`
 
@@ -64,17 +64,22 @@ The Brid.tv player ID. Specific to every partner.
 
 ### `data-video`
 
-The Brid.tv video ID. Embed code must either have `video`, `playlist` or
-`outstream` attribute.
+The Brid.tv video ID. Embed code must either have `video`, `playlist`, `carousel`
+or `outstream` attribute.
 
 ### `data-playlist`
 
 The Brid.tv playlist ID or custom string value for dynamic playlists. Embed code
-must either have `video`, `playlist` or `outstream` attribute.
+must either have `video`, `playlist`, `carousel` or `outstream` attribute.
+
+### `data-carousel`
+
+The Brid.tv carousel ID. Embed code must either have `video`, `playlist`, `carousel`
+or `outstream` attribute.
 
 ### `data-outstream`
 
-The Brid.tv outstream unit ID. Embed code must either have `video`, `playlist`
+The Brid.tv outstream unit ID. Embed code must either have `video`, `playlist`, `carousel`
 or `outstream` attribute.
 
 ### `data-dynamic`
@@ -112,10 +117,10 @@ Mutes the video.
 
 Unmutes the video.
 
-### `fullscreencenter`
+### `fullscreenenter`
 
 Takes the video to fullscreen.
 
 ## Validation
 
-See [amp-brid-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-brid-player/validator-amp-brid-player.protoascii) in the AMP validator specification.
+See [amp-brid-player rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-brid-player/validator-amp-brid-player.protoascii) in the AMP validator specification.

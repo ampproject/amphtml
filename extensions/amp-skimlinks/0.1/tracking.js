@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
-import {dict} from '../../../src/utils/object';
+import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
+import {dict} from '../../../src/core/types/object';
 import {generatePageImpressionId, isExcludedAnchorUrl} from './utils';
 
 import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
@@ -31,7 +31,7 @@ const NON_AFFILIATE_CLICK = 'non-affiliate-click';
  *  - Link impression tracking
  *  - Non-affiliate click tracking.
  *
- * It uses the amp-analytics internal API (https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-components-analytics.md)
+ * It uses the amp-analytics internal API (https://github.com/ampproject/amphtml/blob/main/extensions/amp-analytics/amp-components-analytics.md)
  * in order to send the tracking requests.
  */
 export class Tracking {
@@ -51,7 +51,7 @@ export class Tracking {
       customTrackingId: skimOptions.customTrackingId,
       guid: null,
       pageImpressionId: generatePageImpressionId(),
-      // https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md
+      // https://github.com/ampproject/amphtml/blob/main/spec/amp-var-substitutions.md
       pageUrl: 'CANONICAL_URL',
       pubcode: skimOptions.pubcode,
       referrer,

@@ -268,7 +268,7 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
   }
 
   /** @override */
-  updateOptionPercentages_(unusedOptionsData) {
+  displayOptionsData(unusedOptionsData) {
     // TODO(mszylkowski): Show percentages of categories if endpoint.
   }
 

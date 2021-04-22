@@ -26,7 +26,7 @@ min_validator_revision_required: 475
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 1115
+spec_file_revision: 1182
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed"
@@ -66,6 +66,8 @@ tags: {
   # on existing AMP documents.
   attrs: {
     name: "lang"
+    deprecation: "html"
+    deprecation_url: "https://github.com/ampproject/amphtml/issues/25926"
   }
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
 }
@@ -221,6 +223,7 @@ tags: {
         "components|"
         "import|"
         "manifest|"  # Handled separately below, has specific requirements.
+        "modulepreload|"  # Handled separately below, has specific requirements.
         "preload|"  # Handled separately below, has specific requirements.
         "serviceworker|"
         "stylesheet|"  # Handled separately below, has specific requirements.
@@ -288,6 +291,35 @@ tags: {
 }
 tags: {
   html_format: AMP
+  tag_name: "LINK"
+  spec_name: "link rel=modulepreload"
+  descriptive_name: "link rel=modulepreload"
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "as"
+    mandatory: true
+    value: "script"
+  }
+  attrs: {
+    name: "crossorigin"
+    mandatory: true
+    value: "anonymous"
+  }
+  attrs: {
+    name: "href"
+    mandatory: true
+    value_regex: ".*\\.mjs$"
+  }
+  attrs: {
+    name: "rel"
+    mandatory: true
+    value_casei: "modulepreload"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
+}
+tags: {
+  html_format: AMP
   html_format: AMP4ADS
   tag_name: "LINK"
   spec_name: "link rel=preload"
@@ -338,9 +370,9 @@ tags: {
                  "https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|"
                  "https://maxcdn\\.bootstrapcdn\\.com/font-awesome/"
                  "([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|"
-                 "https://(use|pro)\\.fontawesome\\.com/releases/v([0-9]+\\.?)+"
+                 "https://(use|pro|kit)\\.fontawesome\\.com/releases/v([0-9]+\\.?)+"
                  "/css/[0-9a-zA-Z-]+\\.css|"
-                 "https://(use|pro)\\.fontawesome\\.com/[0-9a-zA-Z-]+\\.css|"
+                 "https://(use|pro|kit)\\.fontawesome\\.com/[0-9a-zA-Z-]+\\.css|"
                  "https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css"
   }
   attrs: { name: "integrity" }  # SRI attribute (https://www.w3.org/TR/SRI/)
@@ -512,7 +544,7 @@ tags: {
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
 }
 # AMP & AMP4ADS metadata, name=amp-experiments-opt-in
-# https://github.com/lannka/amphtml/blob/master/tools/experiments/README.md
+# https://github.com/ampproject/amphtml/blob/main/tools/experiments/README.md
 tags: {
   html_format: AMP
   html_format: AMP4ADS
@@ -1704,14 +1736,16 @@ tags: {
 
 # 4.7 Embedded Content
 # AMP HTML allows embedded content only via its own tags (e.g. amp-img), with
-# the exception of tags inside of a <noscript> ancestor and transformed amp-img.
+# the exception of tags inside of a <noscript> or <amp-story-player> ancestor
+# and transformed amp-img.
 # 4.7.1 The img element
 tags: {
   html_format: AMP  # Disallowed in AMP4ADS because <noscript> is disallowed.
   tag_name: "IMG"
+  spec_name: "noscript > img"
+  descriptive_name: "img"
   mandatory_ancestor: "NOSCRIPT"
   mandatory_ancestor_suggested_alternative: "AMP-IMG"
-  spec_url: "https://amp.dev/documentation/components/amp-img/"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "border" }  # Not valid html5 but commonly used and supported.
@@ -1722,7 +1756,10 @@ tags: {
     value: "sync"
   }
   attrs: { name: "height" }  # Not valid html5 but commonly used and supported.
+  attrs: { name: "importance" }  # Not yet part of the html spec
   attrs: { name: "ismap" }
+  attrs: { name: "intrinsicsize" }  # Not yet part of the html spec
+  attrs: { name: "loading" }  # Not yet part of the html spec
   attrs: {
     name: "longdesc"
     value_url: {
@@ -1731,23 +1768,10 @@ tags: {
     }
     disallowed_value_regex: "__amp_source_origin"
   }
-  attrs: { name: "importance" }  # Not yet part of the html spec
-  attrs: { name: "intrinsicsize" }  # Not yet part of the html spec
-  attrs: { name: "loading" }  # Not yet part of the html spec
-  attrs: {
-    name: "src"
-    alternative_names: "srcset"
-    mandatory: true
-    value_url: {
-      protocol: "data"
-      protocol: "http" # For parity with amp-img's mandatory-src-or-srcset.
-      protocol: "https"
-      allow_relative: true
-    }
-    disallowed_value_regex: "__amp_source_origin"
-  }
   attrs: { name: "sizes" }
   attrs: { name: "width" }  # Not valid html5 but commonly used and supported.
+  attr_lists: "mandatory-src-or-srcset"
+  spec_url: "https://amp.dev/documentation/components/amp-img/"
 }
 # 4.7.2 The iframe element
 tags: {
@@ -2146,831 +2170,8 @@ tags: {
   spec_url: "https://amp.dev/documentation/components/amp-ima-video/"
 }
 
-
 # 4.7.15 SVG
-# We allow some limited embedded SVG tags. We do not allow inline styles
-# or embedding any external resources.
-# Attribute lists: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
-attr_lists: {
-  name: "svg-conditional-processing-attributes"
-  attrs: { name: "requiredextensions" }
-  attrs: { name: "requiredfeatures" }
-  attrs: { name: "systemlanguage" }
-}
-attr_lists: {
-  name: "svg-core-attributes"
-  attrs: { name: "xml:lang" }
-  attrs: { name: "xml:space" }
-  attrs: { name: "xmlns" }
-  attrs: { name: "xmlns:xlink" }
-}
-attr_lists: {
-  name: "svg-filter-primitive-attributes"
-  attrs: { name: "height" }
-  attrs: { name: "result" }
-  attrs: { name: "width" }
-  attrs: { name: "x" }
-  attrs: { name: "y" }
-}
-attr_lists: {
-  name: "svg-presentation-attributes"
-  attrs: { name: "alignment-baseline" }
-  attrs: { name: "baseline-shift" }
-  attrs: { name: "clip" }
-  attrs: { name: "clip-path" }
-  attrs: { name: "clip-rule" }
-  attrs: { name: "color" }
-  attrs: { name: "color-interpolation" }
-  attrs: { name: "color-interpolation-filters" }
-  attrs: { name: "color-profile" }
-  attrs: { name: "color-rendering" }
-  attrs: { name: "cursor" }
-  attrs: { name: "direction" }
-  attrs: { name: "display" }
-  attrs: { name: "dominant-baseline" }
-  attrs: { name: "enable-background" }
-  attrs: { name: "fill" }
-  attrs: { name: "fill-opacity" }
-  attrs: { name: "fill-rule" }
-  attrs: { name: "filter" }
-  attrs: { name: "flood-color" }
-  attrs: { name: "flood-opacity" }
-  attrs: { name: "focusable" }
-  attrs: { name: "font-family" }
-  attrs: { name: "font-size" }
-  attrs: { name: "font-size-adjust" }
-  attrs: { name: "font-stretch" }
-  attrs: { name: "font-style" }
-  attrs: { name: "font-variant" }
-  attrs: { name: "font-weight" }
-  attrs: { name: "glyph-orientation-horizontal" }
-  attrs: { name: "glyph-orientation-vertical" }
-  attrs: { name: "image-rendering" }
-  attrs: { name: "kerning" }
-  attrs: { name: "letter-spacing" }
-  attrs: { name: "lighting-color" }
-  attrs: { name: "marker-end" }
-  attrs: { name: "marker-mid" }
-  attrs: { name: "marker-start" }
-  attrs: { name: "mask" }
-  attrs: { name: "opacity" }
-  attrs: { name: "overflow" }
-  attrs: { name: "pointer-events" }
-  attrs: { name: "shape-rendering" }
-  attrs: { name: "stop-color" }
-  attrs: { name: "stop-opacity" }
-  attrs: { name: "stroke" }
-  attrs: { name: "stroke-dasharray" }
-  attrs: { name: "stroke-dashoffset" }
-  attrs: { name: "stroke-linecap" }
-  attrs: { name: "stroke-linejoin" }
-  attrs: { name: "stroke-miterlimit" }
-  attrs: { name: "stroke-opacity" }
-  attrs: { name: "stroke-width" }
-  attrs: { name: "text-anchor" }
-  attrs: { name: "text-decoration" }
-  attrs: { name: "text-rendering" }
-  attrs: { name: "unicode-bidi" }
-  attrs: { name: "vector-effect" }
-  attrs: { name: "visibility" }
-  attrs: { name: "word-spacing" }
-  attrs: { name: "writing-mode" }
-}
-attr_lists: {
-  name: "svg-transfer-function-attributes"
-  attrs: { name: "amplitude" }
-  attrs: { name: "exponent" }
-  attrs: { name: "intercept" }
-  attrs: { name: "offset" }
-  attrs: { name: "slope" }
-  attrs: { name: "table" }
-  attrs: { name: "tablevalues" }
-}
-attr_lists: {
-  name: "svg-xlink-attributes"
-  attrs: { name: "xlink:actuate" }
-  attrs: { name: "xlink:arcrole" }
-  attrs: {
-    name: "xlink:href"
-    # xlink:href is deprecated since SVG2 in favor of href.
-    alternative_names: "href"
-    value_url: {
-      protocol: "http"
-      protocol: "https"
-      allow_empty: false
-    }
-  }
-  attrs: { name: "xlink:role" }
-  attrs: { name: "xlink:show" }
-  attrs: { name: "xlink:title" }
-  attrs: { name: "xlink:type" }
-}
-# Style attributes are broadly disallowed, but specifically allowed
-# within SVG as SVG are commonly generated by tools.
-attr_lists: {
-  name: "svg-style-attr"
-  attrs: {
-    name: "style"
-    # `style` attribute value validated against Document Level CSS rules defined
-    # in validator-css.protoascii.
-    value_doc_svg_css: true
-  }
-}
-
-# Basics
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "G"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "transform" }
-  attr_lists: "svg-conditional-processing-attributes"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "GLYPH"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "arabic-form" }
-  attrs: { name: "d" }
-  attrs: { name: "glyph-name" }
-  attrs: { name: "horiz-adv-x" }
-  attrs: { name: "orientation" }
-  attrs: { name: "unicode" }
-  attrs: { name: "vert-adv-y" }
-  attrs: { name: "vert-origin-x" }
-  attrs: { name: "vert-origin-y" }
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "GLYPHREF"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "dx" }
-  attrs: { name: "dy" }
-  attrs: { name: "format" }
-  attrs: { name: "glyphref" }
-  attrs: { name: "x" }
-  attrs: { name: "y" }
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  attr_lists: "svg-xlink-attributes"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "IMAGE"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "height" }
-  attrs: { name: "preserveaspectratio" }
-  attrs: { name: "transform" }
-  attrs: { name: "width" }
-  attrs: { name: "x" }
-  attrs: { name: "xlink:actuate" }
-  attrs: { name: "xlink:arcrole" }
-  attrs: {
-    name: "xlink:href"
-    # xlink:href is deprecated since SVG2 in favor of href.
-    alternative_names: "href"
-    value_url: {
-      protocol: "data"
-      protocol: "http"
-      protocol: "https"
-      allow_empty: false
-    }
-    # Inline SVGs execute in a different context and can affect page elements.
-    disallowed_value_regex: "(^|\\s)data:image\\/svg\\+xml"
-  }
-  attrs: { name: "xlink:role" }
-  attrs: { name: "xlink:show" }
-  attrs: { name: "xlink:title" }
-  attrs: { name: "xlink:type" }
-  attrs: { name: "y" }
-  attr_lists: "svg-conditional-processing-attributes"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "MARKER"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "markerheight" }
-  attrs: { name: "markerunits" }
-  attrs: { name: "markerwidth" }
-  attrs: { name: "orient" }
-  attrs: { name: "preserveaspectratio" }
-  attrs: { name: "refx" }
-  attrs: { name: "refy" }
-  attrs: { name: "transform" }
-  attrs: { name: "viewbox" }
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "METADATA"
-  mandatory_ancestor: "SVG"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "PATH"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "d" }
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "pathlength" }
-  attrs: { name: "sketch:type" }
-  attrs: { name: "transform" }
-  attr_lists: "svg-conditional-processing-attributes"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "SOLIDCOLOR"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "solid-color" }
-  attrs: { name: "solid-opacity" }
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "SVG"
-  attrs: { name: "contentscripttype" }
-  attrs: { name: "contentstyletype" }
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "height" }
-  attrs: { name: "preserveaspectratio" }
-  attrs: {
-    name: "version"
-    value: "1.0"
-    value: "1.1"
-  }
-  attrs: { name: "viewbox" }
-  attrs: { name: "width" }
-  attrs: { name: "x" }
-  attrs: { name: "y" }
-  attrs: { name: "zoomandpan" }
-  attr_lists: "svg-conditional-processing-attributes"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "SWITCH"
-  mandatory_ancestor: "SVG"
-  attr_lists: "svg-conditional-processing-attributes"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "VIEW"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "preserveaspectratio" }
-  attrs: { name: "viewbox" }
-  attrs: { name: "viewtarget" }
-  attrs: { name: "zoomandpan" }
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-# Shapes
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "CIRCLE"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "cx" }
-  attrs: { name: "cy" }
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "r" }
-  attrs: { name: "sketch:type" }
-  attrs: { name: "transform" }
-  attr_lists: "svg-conditional-processing-attributes"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "ELLIPSE"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "cx" }
-  attrs: { name: "cy" }
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "rx" }
-  attrs: { name: "ry" }
-  attrs: { name: "sketch:type" }
-  attrs: { name: "transform" }
-  attr_lists: "svg-conditional-processing-attributes"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "LINE"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "sketch:type" }
-  attrs: { name: "transform" }
-  attrs: { name: "x1" }
-  attrs: { name: "x2" }
-  attrs: { name: "y1" }
-  attrs: { name: "y2" }
-  attr_lists: "svg-conditional-processing-attributes"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "POLYGON"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "points" }
-  attrs: { name: "sketch:type" }
-  attrs: { name: "transform" }
-  attr_lists: "svg-conditional-processing-attributes"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "POLYLINE"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "points" }
-  attrs: { name: "sketch:type" }
-  attrs: { name: "transform" }
-  attr_lists: "svg-conditional-processing-attributes"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "RECT"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "height" }
-  attrs: { name: "rx" }
-  attrs: { name: "ry" }
-  attrs: { name: "sketch:type" }
-  attrs: { name: "transform" }
-  attrs: { name: "width" }
-  attrs: { name: "x" }
-  attrs: { name: "y" }
-  attr_lists: "svg-conditional-processing-attributes"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-# Text
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "TEXT"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "dx" }
-  attrs: { name: "dy" }
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "lengthadjust" }
-  attrs: { name: "rotate" }
-  attrs: { name: "text-anchor" }
-  attrs: { name: "textlength" }
-  attrs: { name: "transform" }
-  attrs: { name: "x" }
-  attrs: { name: "y" }
-  attr_lists: "svg-conditional-processing-attributes"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "TEXTPATH"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "method" }
-  attrs: { name: "spacing" }
-  attrs: { name: "startoffset" }
-  attr_lists: "svg-conditional-processing-attributes"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  attr_lists: "svg-xlink-attributes"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "TREF"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "externalresourcesrequired" }
-  attr_lists: "svg-conditional-processing-attributes"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  attr_lists: "svg-xlink-attributes"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "TSPAN"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "dx" }
-  attrs: { name: "dy" }
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "lengthadjust" }
-  attrs: { name: "rotate" }
-  attrs: { name: "textlength" }
-  attrs: { name: "x" }
-  attrs: { name: "y" }
-  attr_lists: "svg-conditional-processing-attributes"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-# Rendering
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "CLIPPATH"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "clippathunits" }
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "transform" }
-  attr_lists: "svg-conditional-processing-attributes"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "FILTER"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "filterres" }
-  attrs: { name: "filterunits" }
-  attrs: { name: "height" }
-  attrs: { name: "primitiveunits" }
-  attrs: { name: "width" }
-  attrs: { name: "x" }
-  attrs: { name: "y" }
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  attr_lists: "svg-xlink-attributes"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "HKERN"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "g1" }
-  attrs: { name: "g2" }
-  attrs: { name: "k" }
-  attrs: { name: "u1" }
-  attrs: { name: "u2" }
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "LINEARGRADIENT"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "gradienttransform" }
-  attrs: { name: "gradientunits" }
-  attrs: { name: "spreadmethod" }
-  attrs: { name: "x1" }
-  attrs: { name: "x2" }
-  attrs: { name: "y1" }
-  attrs: { name: "y2" }
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  attr_lists: "svg-xlink-attributes"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "MASK"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "height" }
-  attrs: { name: "maskcontentunits" }
-  attrs: { name: "maskunits" }
-  attrs: { name: "width" }
-  attrs: { name: "x" }
-  attrs: { name: "y" }
-  attr_lists: "svg-conditional-processing-attributes"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "PATTERN"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "height" }
-  attrs: { name: "patterncontentunits" }
-  attrs: { name: "patterntransform" }
-  attrs: { name: "patternunits" }
-  attrs: { name: "preserveaspectratio" }
-  attrs: { name: "viewbox" }
-  attrs: { name: "width" }
-  attrs: { name: "x" }
-  attrs: { name: "y" }
-  attr_lists: "svg-conditional-processing-attributes"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  attr_lists: "svg-xlink-attributes"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "RADIALGRADIENT"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "cx" }
-  attrs: { name: "cy" }
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "fr" }
-  attrs: { name: "fx" }
-  attrs: { name: "fy" }
-  attrs: { name: "gradienttransform" }
-  attrs: { name: "gradientunits" }
-  attrs: { name: "r" }
-  attrs: { name: "spreadmethod" }
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  attr_lists: "svg-xlink-attributes"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "STOP"
-  spec_name: "lineargradient > stop"
-  mandatory_ancestor: "LINEARGRADIENT"
-  attrs: { name: "offset" }
-  attrs: { name: "stop-color" }
-  attrs: { name: "stop-opacity" }
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "STOP"
-  spec_name: "radialgradient > stop"
-  mandatory_ancestor: "RADIALGRADIENT"
-  attrs: { name: "offset" }
-  attrs: { name: "stop-color" }
-  attrs: { name: "stop-opacity" }
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "VKERN"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "g1" }
-  attrs: { name: "g2" }
-  attrs: { name: "k" }
-  attrs: { name: "u1" }
-  attrs: { name: "u2" }
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-# Special
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "DEFS"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "transform" }
-  attr_lists: "svg-conditional-processing-attributes"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "SYMBOL"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "height" }
-  attrs: { name: "preserveaspectratio" }
-  attrs: { name: "viewbox" }
-  attrs: { name: "width" }
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "USE"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "height" }
-  attrs: { name: "transform" }
-  attrs: { name: "width" }
-  attrs: { name: "x" }
-  attrs: { name: "y" }
-  attr_lists: "svg-conditional-processing-attributes"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  attr_lists: "svg-xlink-attributes"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-# Filters
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "FECOLORMATRIX"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "in" }
-  attrs: { name: "type" }
-  attrs: { name: "values" }
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-filter-primitive-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "FECOMPOSITE"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "in" }
-  attrs: { name: "in2" }
-  attrs: { name: "k1" }
-  attrs: { name: "k2" }
-  attrs: { name: "k3" }
-  attrs: { name: "k4" }
-  attrs: { name: "operator" }
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-filter-primitive-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "FEFLOOD"
-  mandatory_ancestor: "SVG"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-filter-primitive-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "FEGAUSSIANBLUR"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "edgemode" }
-  attrs: { name: "in" }
-  attrs: { name: "stddeviation" }
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-filter-primitive-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "FEMERGE"
-  mandatory_ancestor: "SVG"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-filter-primitive-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "FEMERGENODE"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "in" }
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "FEOFFSET"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "dx" }
-  attrs: { name: "dy" }
-  attrs: { name: "in" }
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-filter-primitive-attributes"
-  attr_lists: "svg-presentation-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-# ARIA
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "DESC"
-  mandatory_ancestor: "SVG"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "TITLE"
-  spec_name: "svg title"
-  mandatory_ancestor: "SVG"
-  attr_lists: "svg-core-attributes"
-  attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
-}
+# See validator-svg.protoascii.
 
 # 4.8 Links
 # Links are a concept, rather than a tag. See tagspecs for "LINK", "A", etc.
@@ -3844,7 +3045,7 @@ tags: {
 # Note that the type TEXT/PLAIN description is define in
 # validator-amp-mustache.protoascii.
 
-# The three tagspecs below all handle the runtime engine v0.js script. They
+# The three tagspecs below all handle the runtime engine script. They
 # enforce that exactly one runtime script must be included. This tagspec is
 # for the standard runtime, while the one below it is an identical spec but for
 # the LTS runtime, with the only difference being the src attribute. The third
@@ -3865,12 +3066,52 @@ attr_lists: {
     value_casei: "text/javascript"
   }
 }
+attr_lists: {
+  name: "amphtml-module-engine-attrs"
+  attrs: {
+    name: "async"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "crossorigin"
+    mandatory: true
+    value: "anonymous"
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "module"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+}
+attr_lists: {
+  name: "amphtml-nomodule-engine-attrs"
+  attrs: {
+    name: "async"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "crossorigin"
+    value: "anonymous"
+  }
+  attrs: {
+    name: "nomodule"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "type"
+    value_casei: "text/javascript"
+  }
+}
 tags: {
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amphtml engine v0.js script"
-  descriptive_name: "amphtml engine v0.js script"
-  mandatory_alternatives: "amphtml engine v0.js script"
+  spec_name: "amphtml engine script"
+  descriptive_name: "amphtml engine script"
+  mandatory_alternatives: "amphtml engine script"
   unique: true
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
@@ -3892,9 +3133,9 @@ tags: {
 tags: {
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amphtml engine v0.js lts script"
-  descriptive_name: "amphtml engine v0.js script"
-  mandatory_alternatives: "amphtml engine v0.js script"
+  spec_name: "amphtml engine script (LTS)"
+  descriptive_name: "amphtml engine script"
+  mandatory_alternatives: "amphtml engine script"
   unique: true
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
@@ -3914,10 +3155,110 @@ tags: {
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
 }
 tags: {
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "SCRIPT"
+  spec_name: "amphtml module engine script"
+  descriptive_name: "amphtml module engine script"
+  mandatory_alternatives: "amphtml engine script"
+  unique: true
+  mandatory_parent: "HEAD"
+  satisfies: "amphtml module engine script"
+  requires: "amphtml nomodule engine script"
+  attr_lists: "nonce-attr"
+  attr_lists: "amphtml-module-engine-attrs"
+  attrs: {
+    name: "src"
+    mandatory: true
+    value: "https://cdn.ampproject.org/v0.mjs"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  cdata: {
+    whitespace_only: true
+  }
+  # TODO(b/167681900): update spec_url to cover these script release versions
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
+}
+tags: {
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "SCRIPT"
+  spec_name: "amphtml nomodule engine script"
+  descriptive_name: "amphtml nomodule engine script"
+  mandatory_alternatives: "amphtml engine script"
+  unique: true
+  mandatory_parent: "HEAD"
+  satisfies: "amphtml nomodule engine script"
+  requires: "amphtml module engine script"
+  attr_lists: "nonce-attr"
+  attr_lists: "amphtml-nomodule-engine-attrs"
+  attrs: {
+    name: "src"
+    mandatory: true
+    value: "https://cdn.ampproject.org/v0.js"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  cdata: {
+    whitespace_only: true
+  }
+  # TODO(b/167681900): update spec_url to cover these script release versions
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
+}
+tags: {
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "SCRIPT"
+  spec_name: "amphtml module LTS engine script"
+  descriptive_name: "amphtml module LTS engine script"
+  mandatory_alternatives: "amphtml engine script"
+  unique: true
+  mandatory_parent: "HEAD"
+  satisfies: "amphtml module LTS engine script"
+  requires: "amphtml nomodule LTS engine script"
+  attr_lists: "nonce-attr"
+  attr_lists: "amphtml-module-engine-attrs"
+  attrs: {
+    name: "src"
+    mandatory: true
+    value: "https://cdn.ampproject.org/lts/v0.mjs"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  cdata: {
+    whitespace_only: true
+  }
+  # TODO(b/167681900): update spec_url to cover these script release versions
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
+}
+tags: {
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "SCRIPT"
+  spec_name: "amphtml nomodule LTS engine script"
+  descriptive_name: "amphtml nomdule LTS engine script"
+  mandatory_alternatives: "amphtml engine script"
+  unique: true
+  mandatory_parent: "HEAD"
+  satisfies: "amphtml nomodule LTS engine script"
+  requires: "amphtml module LTS engine script"
+  attr_lists: "nonce-attr"
+  attr_lists: "amphtml-nomodule-engine-attrs"
+  attrs: {
+    name: "src"
+    mandatory: true
+    value: "https://cdn.ampproject.org/lts/v0.js"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  cdata: {
+    whitespace_only: true
+  }
+  # TODO(b/167681900): update spec_url to cover these script release versions
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
+}
+tags: {
   html_format: AMP4EMAIL
   tag_name: "SCRIPT"
-  spec_name: "amphtml engine v0.js script [AMP4EMAIL]"
-  descriptive_name: "amphtml engine v0.js script"
+  spec_name: "amphtml engine script [AMP4EMAIL]"
+  descriptive_name: "amphtml engine script"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -3940,8 +3281,8 @@ tags: {
 tags: {
   html_format: AMP4ADS
   tag_name: "SCRIPT"
-  spec_name: "amp4ads engine amp4ads-v0.js script"
-  descriptive_name: "amphtml engine amp4ads-v0.js script"
+  spec_name: "amp4ads engine script"
+  descriptive_name: "amphtml engine script"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -4029,6 +3370,25 @@ tags: {
     }
   }
 }
+# Enables early styling on fast failure to load v0.js. See GitHub #22543.
+tags: {
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "script amp-onerror"
+  descriptive_name: "script amp-onerror"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-onerror"
+    value: ""
+    mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  cdata: {
+    mandatory_cdata: "document.querySelector(\"script[src*='/v0.js']\").onerror=function(){document.querySelector('style[amp-boilerplate]').textContent=''}"
+  }
+}
+
 # Specific script tags for custom elements and runtime imports.
 # 4.11.2 The noscript element
 tags: {
@@ -4316,6 +3676,7 @@ tags: {  # <amp-img>
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
@@ -4385,6 +3746,10 @@ tags: {
     }
     css_declaration: { name: "padding-top" }
   }
+  attrs: {
+    name: "i-amphtml-disable-ar"
+    value: ""
+  }
 }
 
 tags: {
@@ -4398,6 +3763,10 @@ tags: {
     value: "i-amphtml-sizer"
     mandatory: true
     dispatch_key: NAME_DISPATCH
+  }
+  attrs: {
+    name: "i-amphtml-disable-ar"
+    value: ""
   }
 }
 
@@ -4478,15 +3847,16 @@ tags: {
   attrs: { name: "attribution" }
   attrs: {
     name: "class"
-    mandatory: true
     value: "i-amphtml-blurry-placeholder"
+    mandatory: true
   }
   attrs: { name: "object-fit" }
   attrs: { name: "object-position" }
   attrs: {
     name: "placeholder"
-    mandatory: true
     value: ""
+    mandatory: true
+    dispatch_key: NAME_DISPATCH
   }
   attrs: { name: "referrerpolicy" }
   attrs: { name: "sizes" }
@@ -4526,8 +3896,7 @@ attr_lists: {
   }
 }
 
-# AMP Extension attributes. These attributes are used in every AMP
-# extension script tag
+# AMP Extension attributes.
 attr_lists: {
   name: "common-extension-attrs"
   attrs: {
@@ -5686,6 +5055,11 @@ attr_lists: {
   attrs: { name: "[class]" }
   attrs: { name: "[hidden]" }
   attrs: { name: "[text]" }
+  attrs: {
+    enabled_by: "transformed"
+    name: "i-amphtml-binding"
+    value: ""
+  }
   # <amp-sidebar>
   attrs: {
     name: "autoscroll"
@@ -5718,100 +5092,101 @@ error_specificity { code: WARNING_EXTENSION_UNUSED specificity: 16 }
 error_specificity { code: WARNING_EXTENSION_DEPRECATED_VERSION specificity: 17 }
 error_specificity { code: NON_LTS_SCRIPT_AFTER_LTS specificity: 18 }
 error_specificity { code: LTS_SCRIPT_AFTER_NON_LTS specificity: 19 }
-error_specificity { code: DISALLOWED_TAG specificity: 20 }
-error_specificity { code: DISALLOWED_ATTR specificity: 21 }
-error_specificity { code: INVALID_ATTR_VALUE specificity: 22 }
-error_specificity { code: DUPLICATE_ATTRIBUTE specificity: 23 }
-error_specificity { code: ATTR_VALUE_REQUIRED_BY_LAYOUT specificity: 24 }
-error_specificity { code: MANDATORY_ATTR_MISSING specificity: 25 }
-error_specificity { code: MANDATORY_ONEOF_ATTR_MISSING specificity: 26 }
-error_specificity { code: MANDATORY_ANYOF_ATTR_MISSING specificity: 27 }
-error_specificity { code: ATTR_REQUIRED_BUT_MISSING specificity: 28 }
-error_specificity { code: DUPLICATE_UNIQUE_TAG specificity: 29 }
-error_specificity { code: DUPLICATE_UNIQUE_TAG_WARNING specificity: 30 }
-error_specificity { code: STYLESHEET_TOO_LONG specificity: 31 }
-error_specificity { code: STYLESHEET_AND_INLINE_STYLE_TOO_LONG specificity: 32 }
-error_specificity { code: INLINE_STYLE_TOO_LONG specificity: 33 }
-error_specificity { code: INLINE_SCRIPT_TOO_LONG specificity: 34 }
-error_specificity { code: CSS_SYNTAX_INVALID_AT_RULE specificity: 35 }
+error_specificity { code: INCORRECT_SCRIPT_RELEASE_VERSION specificity: 20 }
+error_specificity { code: DISALLOWED_TAG specificity: 21 }
+error_specificity { code: DISALLOWED_ATTR specificity: 22 }
+error_specificity { code: INVALID_ATTR_VALUE specificity: 23 }
+error_specificity { code: DUPLICATE_ATTRIBUTE specificity: 24 }
+error_specificity { code: ATTR_VALUE_REQUIRED_BY_LAYOUT specificity: 25 }
+error_specificity { code: MANDATORY_ATTR_MISSING specificity: 26 }
+error_specificity { code: MANDATORY_ONEOF_ATTR_MISSING specificity: 27 }
+error_specificity { code: MANDATORY_ANYOF_ATTR_MISSING specificity: 28 }
+error_specificity { code: ATTR_REQUIRED_BUT_MISSING specificity: 29 }
+error_specificity { code: DUPLICATE_UNIQUE_TAG specificity: 30 }
+error_specificity { code: DUPLICATE_UNIQUE_TAG_WARNING specificity: 31 }
+error_specificity { code: STYLESHEET_TOO_LONG specificity: 32 }
+error_specificity { code: STYLESHEET_AND_INLINE_STYLE_TOO_LONG specificity: 33 }
+error_specificity { code: INLINE_STYLE_TOO_LONG specificity: 34 }
+error_specificity { code: INLINE_SCRIPT_TOO_LONG specificity: 35 }
+error_specificity { code: CSS_SYNTAX_INVALID_AT_RULE specificity: 36 }
 error_specificity {
-  code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE specificity: 36
+  code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE specificity: 37
 }
-error_specificity { code: INVALID_PROPERTY_VALUE_IN_ATTR_VALUE specificity: 37 }
-error_specificity { code: DISALLOWED_PROPERTY_IN_ATTR_VALUE specificity: 38 }
-error_specificity { code: MUTUALLY_EXCLUSIVE_ATTRS specificity: 39 }
-error_specificity { code: UNESCAPED_TEMPLATE_IN_ATTR_VALUE specificity: 40 }
-error_specificity { code: TEMPLATE_PARTIAL_IN_ATTR_VALUE specificity: 41 }
-error_specificity { code: TEMPLATE_IN_ATTR_NAME specificity: 42 }
+error_specificity { code: INVALID_PROPERTY_VALUE_IN_ATTR_VALUE specificity: 38 }
+error_specificity { code: DISALLOWED_PROPERTY_IN_ATTR_VALUE specificity: 39 }
+error_specificity { code: MUTUALLY_EXCLUSIVE_ATTRS specificity: 40 }
+error_specificity { code: UNESCAPED_TEMPLATE_IN_ATTR_VALUE specificity: 41 }
+error_specificity { code: TEMPLATE_PARTIAL_IN_ATTR_VALUE specificity: 42 }
+error_specificity { code: TEMPLATE_IN_ATTR_NAME specificity: 43 }
 error_specificity {
-  code: INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT specificity: 43
+  code: INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT specificity: 44
 }
-error_specificity { code: MISSING_LAYOUT_ATTRIBUTES specificity: 44 }
-error_specificity { code: IMPLIED_LAYOUT_INVALID specificity: 45 }
-error_specificity { code: SPECIFIED_LAYOUT_INVALID specificity: 46 }
-error_specificity { code: ATTR_DISALLOWED_BY_IMPLIED_LAYOUT specificity: 47 }
-error_specificity { code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT specificity: 48 }
-error_specificity { code: DUPLICATE_DIMENSION specificity: 49 }
-error_specificity { code: DISALLOWED_RELATIVE_URL specificity: 50 }
-error_specificity { code: MISSING_URL specificity: 51 }
-error_specificity { code: DISALLOWED_DOMAIN specificity: 52 }
-error_specificity { code: INVALID_URL_PROTOCOL specificity: 53 }
-error_specificity { code: INVALID_URL specificity: 54 }
-error_specificity { code: DISALLOWED_STYLE_ATTR specificity: 55 }
-error_specificity { code: CSS_SYNTAX_STRAY_TRAILING_BACKSLASH specificity: 56 }
-error_specificity { code: CSS_SYNTAX_UNTERMINATED_COMMENT specificity: 57 }
-error_specificity { code: CSS_SYNTAX_UNTERMINATED_STRING specificity: 58 }
-error_specificity { code: CSS_SYNTAX_BAD_URL specificity: 59 }
+error_specificity { code: MISSING_LAYOUT_ATTRIBUTES specificity: 45 }
+error_specificity { code: IMPLIED_LAYOUT_INVALID specificity: 46 }
+error_specificity { code: SPECIFIED_LAYOUT_INVALID specificity: 47 }
+error_specificity { code: ATTR_DISALLOWED_BY_IMPLIED_LAYOUT specificity: 48 }
+error_specificity { code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT specificity: 49 }
+error_specificity { code: DUPLICATE_DIMENSION specificity: 50 }
+error_specificity { code: DISALLOWED_RELATIVE_URL specificity: 51 }
+error_specificity { code: MISSING_URL specificity: 52 }
+error_specificity { code: DISALLOWED_DOMAIN specificity: 53 }
+error_specificity { code: INVALID_URL_PROTOCOL specificity: 54 }
+error_specificity { code: INVALID_URL specificity: 55 }
+error_specificity { code: DISALLOWED_STYLE_ATTR specificity: 56 }
+error_specificity { code: CSS_SYNTAX_STRAY_TRAILING_BACKSLASH specificity: 57 }
+error_specificity { code: CSS_SYNTAX_UNTERMINATED_COMMENT specificity: 58 }
+error_specificity { code: CSS_SYNTAX_UNTERMINATED_STRING specificity: 59 }
+error_specificity { code: CSS_SYNTAX_BAD_URL specificity: 60 }
 error_specificity {
-  code: CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE specificity: 60
+  code: CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE specificity: 61
 }
-error_specificity { code: CSS_SYNTAX_INVALID_DECLARATION specificity: 61 }
-error_specificity { code: CSS_SYNTAX_INCOMPLETE_DECLARATION specificity: 62 }
-error_specificity { code: CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR specificity: 63 }
-error_specificity { code: CSS_SYNTAX_MISSING_SELECTOR specificity: 64 }
-error_specificity { code: CSS_SYNTAX_NOT_A_SELECTOR_START specificity: 65 }
+error_specificity { code: CSS_SYNTAX_INVALID_DECLARATION specificity: 62 }
+error_specificity { code: CSS_SYNTAX_INCOMPLETE_DECLARATION specificity: 63 }
+error_specificity { code: CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR specificity: 64 }
+error_specificity { code: CSS_SYNTAX_MISSING_SELECTOR specificity: 65 }
+error_specificity { code: CSS_SYNTAX_NOT_A_SELECTOR_START specificity: 66 }
 error_specificity {
-  code: CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR specificity: 66
+  code: CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR specificity: 67
 }
-error_specificity { code: CSS_SYNTAX_MISSING_URL specificity: 67 }
-error_specificity { code: CSS_SYNTAX_DISALLOWED_DOMAIN specificity: 68 }
-error_specificity { code: CSS_SYNTAX_INVALID_URL specificity: 69 }
-error_specificity { code: CSS_SYNTAX_INVALID_URL_PROTOCOL specificity: 70 }
-error_specificity { code: CSS_SYNTAX_DISALLOWED_RELATIVE_URL specificity: 71 }
-error_specificity { code: INCORRECT_NUM_CHILD_TAGS specificity: 72 }
-error_specificity { code: DISALLOWED_CHILD_TAG_NAME specificity: 73 }
-error_specificity { code: DISALLOWED_FIRST_CHILD_TAG_NAME specificity: 74 }
-error_specificity { code: CSS_SYNTAX_INVALID_ATTR_SELECTOR specificity: 75 }
+error_specificity { code: CSS_SYNTAX_MISSING_URL specificity: 68 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_DOMAIN specificity: 69 }
+error_specificity { code: CSS_SYNTAX_INVALID_URL specificity: 70 }
+error_specificity { code: CSS_SYNTAX_INVALID_URL_PROTOCOL specificity: 71 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_RELATIVE_URL specificity: 72 }
+error_specificity { code: INCORRECT_NUM_CHILD_TAGS specificity: 73 }
+error_specificity { code: DISALLOWED_CHILD_TAG_NAME specificity: 74 }
+error_specificity { code: DISALLOWED_FIRST_CHILD_TAG_NAME specificity: 75 }
+error_specificity { code: CSS_SYNTAX_INVALID_ATTR_SELECTOR specificity: 76 }
 error_specificity {
-  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT specificity: 76
+  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT specificity: 77
 }
-error_specificity { code: MANDATORY_REFERENCE_POINT_MISSING specificity: 77 }
-error_specificity { code: DUPLICATE_REFERENCE_POINT specificity: 78 }
-error_specificity { code: TAG_REFERENCE_POINT_CONFLICT specificity: 79 }
+error_specificity { code: MANDATORY_REFERENCE_POINT_MISSING specificity: 78 }
+error_specificity { code: DUPLICATE_REFERENCE_POINT specificity: 79 }
+error_specificity { code: TAG_REFERENCE_POINT_CONFLICT specificity: 80 }
 error_specificity {
   code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR
-  specificity: 80
+  specificity: 81
 }
-error_specificity { code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE specificity: 81 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE specificity: 82 }
 error_specificity {
   code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT
-  specificity: 82
-}
-error_specificity {
-  code: CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE
   specificity: 83
 }
 error_specificity {
-  code: CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH
+  code: CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE
   specificity: 84
 }
 error_specificity {
-  code: CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION
+  code: CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH
   specificity: 85
 }
 error_specificity {
-  code: BASE_TAG_MUST_PRECEED_ALL_URLS
+  code: CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION
   specificity: 86
+}
+error_specificity {
+  code: BASE_TAG_MUST_PRECEED_ALL_URLS
+  specificity: 87
 }
 error_specificity { code: DISALLOWED_SCRIPT_TAG specificity: 102 }
 error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 103 }
@@ -5940,7 +5315,11 @@ error_formats {
           "deprecated version. Please use a more recent version of this "
           "extension. This may become an error in the future."
 }
-
+error_formats {
+  code: INCORRECT_SCRIPT_RELEASE_VERSION
+  format: "The script version for '%1' is a %2 version which mismatches "
+          "with the first script on the page using the %3 version."
+}
 error_formats {
   code: NON_LTS_SCRIPT_AFTER_LTS
   format: "'%1' must use the LTS version to correspond with the first script "
@@ -5951,7 +5330,6 @@ error_formats {
   format: "'%1' must use the non-LTS version to correspond with the first "
           "script in the page, which does not use LTS."
 }
-
 error_formats {
   code: ATTR_REQUIRED_BUT_MISSING
   format: "The attribute '%1' in tag '%2' is missing or incorrect, but "
@@ -6406,4 +5784,10 @@ error_formats {
   code: DEV_MODE_ONLY
   format: "Tag 'html' marked with attribute 'data-ampdevmode'. Validator "
           "will suppress errors regarding any other tag with this attribute."
+}
+error_formats {
+  code: AMP_EMAIL_MISSING_STRICT_CSS_ATTR
+  format: "Tag 'html' marked with attribute 'amp4email' is missing the "
+          "corresponding attribute 'data-css-strict' for enabling strict "
+          "CSS validation. This may become an error in the future."
 }

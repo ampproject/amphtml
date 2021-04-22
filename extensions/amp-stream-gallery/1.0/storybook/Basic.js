@@ -19,7 +19,7 @@ import {StreamGallery} from '../stream-gallery';
 import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
-const INSET_ARROW_VISIBILITY = ['auto', 'always', 'never'];
+const CONTROLS = ['auto', 'always', 'never'];
 
 export default {
   title: 'StreamGallery',
@@ -27,15 +27,32 @@ export default {
   decorators: [withA11y, withKnobs],
 };
 
+/**
+ * @param {!Object} props
+ * @return {*}
+ */
+function CarouselWithActions(props) {
+  // TODO(#30447): replace imperative calls with "button" knobs when the
+  // Storybook 6.1 is released.
+  const ref = Preact.useRef();
+  return (
+    <section>
+      <StreamGallery ref={ref} {...props} />
+      <div style={{marginTop: 8}}>
+        <button onClick={() => ref.current.goToSlide(3)}>goToSlide(3)</button>
+        <button onClick={() => ref.current.next()}>next</button>
+        <button onClick={() => ref.current.prev()}>prev</button>
+      </div>
+    </section>
+  );
+}
+
 export const _default = () => {
   const width = number('width', 735);
   const height = number('height', 225);
   const slideCount = number('slide count', 5, {min: 0, max: 99});
   const extraSpace = boolean('extra space around?', true);
-  const insetArrowVisibility = select(
-    'inset arrow visibility',
-    INSET_ARROW_VISIBILITY
-  );
+  const controls = select('controls', CONTROLS);
   const loop = boolean('loop', true);
   const snap = boolean('snap', true);
   const slideAlign = select('slide align', ['start', 'center']);
@@ -48,9 +65,9 @@ export const _default = () => {
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   return (
     <>
-      <StreamGallery
+      <CarouselWithActions
         extraSpace={extraSpace ? 'around' : ''}
-        insetArrowVisibility={insetArrowVisibility}
+        controls={controls}
         loop={loop}
         slideAlign={slideAlign}
         snap={snap}
@@ -74,7 +91,7 @@ export const _default = () => {
             ></div>
           );
         })}
-      </StreamGallery>
+      </CarouselWithActions>
     </>
   );
 };

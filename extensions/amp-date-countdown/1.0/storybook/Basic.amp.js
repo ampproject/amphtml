@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {date, select, text, withKnobs} from '@storybook/addon-knobs';
+import {boolean, date, select, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
@@ -28,7 +28,7 @@ export default {
       {name: 'amp-date-countdown', version: '1.0'},
       {name: 'amp-mustache', version: '0.2'},
     ],
-    experiments: ['amp-date-countdown-bento'],
+    experiments: ['bento'],
   },
 };
 
@@ -99,6 +99,7 @@ export const Default = () => {
     BIGGEST_UNIT_CONFIGURATIONS,
     BIGGEST_UNIT_CONFIGURATIONS[0]
   );
+  const countUp = boolean('count-up', false);
 
   return (
     <amp-date-countdown
@@ -112,6 +113,7 @@ export const Default = () => {
       locale={locale}
       when-ended={whenEnded}
       biggest-unit={biggestUnit}
+      count-up={countUp}
       layout="fixed-height"
       height="100"
     >
@@ -130,9 +132,7 @@ export const Default = () => {
   );
 };
 
-Default.story = {
-  name: 'default',
-};
+Default.storyName = 'default';
 
 export const DefaultRenderer = () => {
   const dateAttribute = select(
@@ -164,6 +164,7 @@ export const DefaultRenderer = () => {
     BIGGEST_UNIT_CONFIGURATIONS,
     BIGGEST_UNIT_CONFIGURATIONS[0]
   );
+  const countUp = boolean('count-up', false);
 
   return (
     <amp-date-countdown
@@ -177,15 +178,14 @@ export const DefaultRenderer = () => {
       locale={locale}
       when-ended={whenEnded}
       biggest-unit={biggestUnit}
+      count-up={countUp}
       layout="fixed-height"
       height="100"
     ></amp-date-countdown>
   );
 };
 
-DefaultRenderer.story = {
-  name: 'default renderer',
-};
+DefaultRenderer.storyName = 'default renderer';
 
 export const ExternalTemplate = () => {
   const template = select('template', ['template1', 'template2'], 'template1');
@@ -218,6 +218,7 @@ export const ExternalTemplate = () => {
     BIGGEST_UNIT_CONFIGURATIONS,
     BIGGEST_UNIT_CONFIGURATIONS[0]
   );
+  const countUp = boolean('count-up', false);
 
   return (
     <div>
@@ -246,6 +247,7 @@ export const ExternalTemplate = () => {
         locale={locale}
         when-ended={whenEnded}
         biggest-unit={biggestUnit}
+        count-up={countUp}
         template={template}
         layout="fixed-height"
         height="100"
@@ -254,6 +256,4 @@ export const ExternalTemplate = () => {
   );
 };
 
-ExternalTemplate.story = {
-  name: 'external template',
-};
+ExternalTemplate.storyName = 'external template';

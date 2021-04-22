@@ -62,8 +62,8 @@ The `story-focus` trigger is fired when clicking an element that opens a tooltip
 
 The current elements trackable by the `story-focus` and `story-click-through` triggers are:
 
-- `<a>`
-- `<amp-twitter>`
+-   `<a>`
+-   `<amp-twitter>`
 
 To use it, specify the trigger on your `"triggers"` property of your analytics configuration, accompanied by the `"tagName"` of the element you want to track.
 
@@ -121,11 +121,35 @@ Example:
 
 The `story-open` trigger is fired when opening a drawer or dialog inside a story. The components that are currently trackable by this are:
 
-- Page attachment
-- Bookend
-- Share dialog
-- Info dialog
-- Sidebar
+-   Page attachment (`<amp-story-page-attachment>`)
+-   Bookend (`<amp-story-bookend>`)
+-   Share dialog (`<amp-story-share-menu>`)
+-   Info dialog (`<amp-story-info-dialog>`)
+-   Sidebar (`<amp-sidebar>`)
+
+To use it, specify the trigger on your `"triggers"` property of your analytics configuration, accompanied by the `"tagName"` of the element you want to track.
+
+Example:
+
+```
+<amp-analytics id="my-analytics">
+  <script type="application/json">
+    {
+      "requests": {
+        "base": "https://example.com/my-endpoint"
+      },
+      "triggers": {
+        "trackShareOpen": {
+          "on": "story-open",
+          "tagName": "amp-story-share-menu",
+          "request": "base"
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+
+```
 
 ### Story close trigger (`"on": "story-close"`)
 
@@ -163,10 +187,10 @@ The `story-page-attachment-exit` trigger is fired when a page attachment is dism
 
 For the following event types, variables can be passed as part of the element level data attribute
 
-- story-focus
-- story-click-through
-- story-open
-- story-close
+-   story-focus
+-   story-click-through
+-   story-open
+-   story-close
 
 The variables passed as data attributes should follow the format `data-vars-*`.
 

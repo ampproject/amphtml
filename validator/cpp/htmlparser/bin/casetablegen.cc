@@ -12,14 +12,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the license.
-//
-
-// To regenerate casetable.h file, run:
-// bazel build htmlparser/bin:casetablegen
-// bazel-bin/htmlparser/bin/casetablegen
-//
-// TODO: Add a genrule to auto generate the header file every time
-// library/software is built.
 
 #include <fstream>
 #include <iostream>
@@ -171,23 +163,23 @@ int main(int argc, char** argv) {
   }
 
   std::ofstream fd("casetable.h");
-  htmlparser::Defer __([&]() {fd.close();});
+  htmlparser::Defer __([&]() { fd.close(); });
 
   fd << kFileHeader;
   fd << "inline constexpr std::pair<char32_t, char32_t> "
-     "kUppercaseToLowerTable[] {" << std::endl;
+        "kUppercaseToLowerTable[] {"
+     << std::endl;
   for (auto& entry : upper_to_lower) {
-    fd << "    {0x" << entry.upper_case
-       << ", 0x" << entry.lower_case << "},  // "
-       << entry.description << std::endl;
+    fd << "    {0x" << entry.upper_case << ", 0x" << entry.lower_case
+       << "},  // " << entry.description << std::endl;
   }
   fd << "};" << std::endl;
 
   fd << "inline constexpr std::pair<char32_t, char32_t> "
-     "kLowercaseToUpperTable[] {" << std::endl;
+        "kLowercaseToUpperTable[] {"
+     << std::endl;
   for (auto& entry : upper_to_lower) {
-    fd << "    {0x" << entry.lower_case
-       << ", 0x" << entry.upper_case
+    fd << "    {0x" << entry.lower_case << ", 0x" << entry.upper_case
        << "},  // " << entry.description << std::endl;
   }
   fd << "};" << std::endl;

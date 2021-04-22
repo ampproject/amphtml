@@ -256,6 +256,8 @@ google.ima.AdEvent.Type.AD_PROGRESS;
 google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED;
 google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED;
 google.ima.AdEvent.Type.LOADED;
+google.ima.AdEvent.Type.PAUSED;
+google.ima.AdEvent.Type.RESUMED;
 google.ima.AdEvent.Type.ALL_ADS_COMPLETED;
 google.ima.AdsManager;
 google.ima.AdsManager.getRemainingTime;
@@ -306,6 +308,17 @@ data.s;
 
 // adpicker.js
 data.ph;
+
+// adpushup.js
+window.adpushup = {};
+window.adpushup.initAmp = function (
+  global,
+  width,
+  height,
+  siteid,
+  slotpath,
+  totalampslots
+) {};
 
 // adreactor.js
 data.zid;
@@ -670,6 +683,9 @@ data.extraParams;
 data.slot.setVisibility;
 data.slot.setTargeting;
 data.slot.setExtraParameters;
+
+// verizonmedia.js
+window.jacData;
 
 // webediads.js
 var wads;

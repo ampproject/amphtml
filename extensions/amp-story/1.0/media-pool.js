@@ -32,7 +32,7 @@ import {Services} from '../../../src/services';
 import {Sources} from './sources';
 import {ampMediaElementFor} from './utils';
 import {dev, devAssert} from '../../../src/log';
-import {findIndex} from '../../../src/utils/array';
+import {findIndex} from '../../../src/core/types/array';
 import {isConnectedNode, matches} from '../../../src/dom';
 import {toWin} from '../../../src/types';
 import {userInteractedWith} from '../../../src/video-interface';
@@ -514,38 +514,41 @@ export class MediaPool {
     return this.enqueueMediaElementTask_(
       poolMediaEl,
       new SwapIntoDomTask(placeholderEl)
-    ).then(
-      () => {
+    )
+      .then(() =>
+        Promise.all([
+          this.maybeResetAmpMedia_(ampMediaForPoolEl),
+          this.maybeResetAmpMedia_(ampMediaForDomEl),
+        ])
+      )
+      .then(() =>
         this.enqueueMediaElementTask_(
           poolMediaEl,
           new UpdateSourcesTask(this.win_, sources)
-        );
-        this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()).then(() => {
-          this.maybeResetAmpMedia_(ampMediaForPoolEl);
-          this.maybeResetAmpMedia_(ampMediaForDomEl);
-        });
-      },
-      () => {
+        )
+      )
+      .then(() => this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()))
+      .catch(() => {
         this.forceDeallocateMediaElement_(poolMediaEl);
-      }
-    );
+      });
   }
 
   /**
    * @param {?Element} componentEl
+   * @return {!Promise}
    * @private
    */
   maybeResetAmpMedia_(componentEl) {
     if (!componentEl) {
-      return;
+      return Promise.resolve();
     }
 
     if (componentEl.tagName.toLowerCase() == 'amp-audio') {
       // TODO(alanorozco): Implement reset for amp-audio
-      return;
+      return Promise.resolve();
     }
 
-    componentEl.getImpl().then((impl) => {
+    return componentEl.getImpl().then((impl) => {
       if (impl.resetOnDomChange) {
         impl.resetOnDomChange();
       }

@@ -13,14 +13,14 @@ You probaby do **_not_** need to build your own player.
 
 The `amp-video-iframe` playback interface supports the following methods, which we believe cover the vast majority of cases AMP documents necessitate:
 
-- `play`
-- `pause`
-- `mute`
-- `unmute`
-- `showcontrols`
-- `hidecontrols`
-- `fullscreenenter`
-- `fullscreenexit`
+-   `play`
+-   `pause`
+-   `mute`
+-   `unmute`
+-   `showcontrols`
+-   `hidecontrols`
+-   `fullscreenenter`
+-   `fullscreenexit`
 
 `amp-video-iframe` can also [send custom namespaced analytics signals](<https://amp.dev/documentation/components/amp-video-iframe/#postanalyticsevent(eventtype[,-vars])>).
 
@@ -32,7 +32,7 @@ For guidance on accomplishing this, [refer to the component documentation.](http
 (If you _cannot_ support these playback methods, it's likely that a simple [`amp-iframe`](https://go.amp.dev/c/amp-iframe)
 can embed a separate video document just fine.)
 
-Once you host your integration document, you may provide a code sample for document authors to find your service [in the AMP documentation.](https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-iframe/amp-video-iframe.md)
+Once you host your integration document, you may provide a code sample for document authors to find your service [in the AMP documentation.](https://github.com/ampproject/amphtml/blob/main/extensions/amp-video-iframe/amp-video-iframe.md)
 
 ### When _should_ I build a vendor-specific player?
 
@@ -41,10 +41,10 @@ since `amp-video-iframe` [also has plumbing for that.](<https://amp.dev/document
 
 For example, these are some of the features that justify specific players:
 
-- **`amp-youtube`** loads initial-frame placeholder images based on a URL scheme for perceived performance.
-  Its underlying implementation also loads with lower-than-default priority, since it's rather large in binary size.
+-   **`amp-youtube`** loads initial-frame placeholder images based on a URL scheme for perceived performance.
+    Its underlying implementation also loads with lower-than-default priority, since it's rather large in binary size.
 
-- **`amp-ima-video`** embeds a generic host-less page that ships with the IMA SDK in order to transparently include standard IMA interface videos.
+-   **`amp-ima-video`** embeds a generic host-less page that ships with the IMA SDK in order to transparently include standard IMA interface videos.
 
 (Please note that most other 3p players historically exist before `amp-video-iframe` could fulfill their use case.)
 
@@ -54,7 +54,7 @@ For example, these are some of the features that justify specific players:
 
 You'll need to go through [the standard AMP contribution process](../CONTRIBUTING.md) when creating and submitting your component. For large features, such as a video player, you need to file an [I2I (intent-to-implement) issue](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+IMPLEMENT&template=intent-to-implement--i2i-.md&title=I2I:%20%3Cyour%20change/update%3E) that describes the overall workings of your component.
 
-Your player component is also shipped as an extension, so you should [become familiar with the process of building one.](https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md)
+Your player component is also shipped as an extension, so you should [become familiar with the process of building one.](https://github.com/ampproject/amphtml/blob/main/contributing/building-an-amp-extension.md)
 
 ### Write your implementation
 
@@ -64,11 +64,11 @@ Every player component talks to a single [`VideoManager`](../src/service/video-m
 
 This manager performs standard responsibilities for all videos, regardless of type:
 
-- accessible, managed autoplay
-- analytics tracking for playback
-- coordination with [`amp-story`](https://go.amp.dev/c/amp-story)
-- [docked video](https://amp.dev/documentation/components/amp-video-docking/)
-- rotate-to-fullscreen
+-   accessible, managed autoplay
+-   analytics tracking for playback
+-   coordination with [`amp-story`](https://go.amp.dev/c/amp-story)
+-   [docked video](https://amp.dev/documentation/components/amp-video-docking/)
+-   rotate-to-fullscreen
 
 #### Interface support
 

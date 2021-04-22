@@ -31,9 +31,9 @@ limitations under the License.
 The `amp-story-interactive` component provides a set of experiences, such as quizzes or polls, in [Web Stories](https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/?format=stories).
 
 <div layout="container" width="3" height="2">
-<div style="width:32%;display:inline-block"><amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/quiz-art.png" layout="responsive" width="200" height="350"/></div>
-<div style="width:32%;display:inline-block"><amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/animal-poll.png" layout="responsive" width="200" height="350"/></div>
-<div style="width:32%;display:inline-block"><amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/results-art.png" layout="responsive" width="200" height="350"/></div>
+<div style="width:32%;display:inline-block"><amp-img src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/quiz-art.png" layout="responsive" width="200" height="350"/></div>
+<div style="width:32%;display:inline-block"><amp-img src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/animal-poll.png" layout="responsive" width="200" height="350"/></div>
+<div style="width:32%;display:inline-block"><amp-img src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/results-art.png" layout="responsive" width="200" height="350"/></div>
 </div>
 
 ## Usage
@@ -50,7 +50,7 @@ The `amp-story-interactive-binary-poll` element provides a two option voting use
 
 Does not support pairing with `amp-story-interactive-results`, and can optionally have a prompt.
 
-<amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/binary-poll-raw.png" layout="intrinsic" width="400" height="230">
+<amp-img alt="An example of a binary poll: 'Like pizza?' with a button for 'Yes' and 'No'" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/binary-poll-raw.png" layout="intrinsic" width="400" height="230">
 
 ```html
 <amp-story-interactive-binary-poll
@@ -71,7 +71,7 @@ The `amp-story-interactive-poll` element provides a voting experience with 2-4 o
 
 Display different categories based on user poll answers by pairing `amp-story-interactive-poll` with `amp-story-interactive-results`. Add a prompt for extra context.
 
-<amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/poll-raw.png" layout="intrinsic" width="400" height="450">
+<amp-img alt="An example of an interactive poll: 'Pick a season' with options for each season, and their respective percentage votes" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/poll-raw.png" layout="intrinsic" width="400" height="450">
 
 [sourcecode:html]
 <amp-story-interactive-poll
@@ -92,7 +92,7 @@ The `amp-story-interactive-quiz` element provides a guessing experience with 2-4
 
 Display different categories based on percentage of correct user answers by pairing `amp-story-interactive-quiz` with `amp-story-interactive-results`. Add a prompt for extra context.
 
-<amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/quiz-raw.png" layout="intrinsic" width="400" height="450">
+<amp-img alt="Example of an interactive quiz: 'Who was the artist that created the famous painting The Last Supper?', with various options; the correct answer, 'Leonardo da Vinci', has a green tick next to it, compared to the wrong answers which have a red cross; all answers show a percentage of how many people picked that particular answer" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/quiz-raw.png" layout="intrinsic" width="400" height="450">
 
 [sourcecode:html]
 <amp-story-interactive-quiz
@@ -114,7 +114,7 @@ Each category specifies its content `option-{1/2/3/4}-{text/image/results-catego
 
 Results can feed its state from quizzes if all categories also specify `option-{1/2/3/4}-results-threshold`. If no categories have thresholds, the state will count the `option-{1/2/3/4}-results-category` from options selected in polls.
 
-<amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/results-raw.png" layout="intrinsic" width="400" height="500">
+<amp-img alt="Example of a result sheet: 'You are a Dog. You always have energery...'" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/results-raw.png" layout="intrinsic" width="400" height="500">
 
 [sourcecode:html]
 <amp-story-interactive-results
@@ -132,10 +132,10 @@ Results can feed its state from quizzes if all categories also specify `option-{
 All selectable interactive elements (`amp-story-interactive-binary-poll`, `amp-story-interactive-poll`, `amp-story-interactive-quiz`) show the percentage of users that selected each option. The backend specified with the `endpoint` attribute will store the aggregate data for the interaction following the API described below.
 To fetch the data for an interactive element, the necessary fields are:
 
-- <div id="interactiveId"></div> `interactiveId`: the `base64encode(CANONICAL_URL) + "+" + element.id`
-- `interactiveType`: enum from [amp-story-interactive-abstract:48](https://github.com/ampproject/amphtml/blob/3a86226fe428ce72adb67cffe2dd2f1fae278a35/extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js#L48)
-- `endpoint`: the attribute `element.getAttribute("endpoint")`
-- `ampId`: client ID that identifies the session, optional
+-   <div id="interactiveId"></div> `interactiveId`: the `base64encode(CANONICAL_URL) + "+" + element.id`
+-   `interactiveType`: enum from [amp-story-interactive-abstract:48](https://github.com/ampproject/amphtml/blob/3a86226fe428ce72adb67cffe2dd2f1fae278a35/extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js#L48)
+-   `endpoint`: the attribute `element.getAttribute("endpoint")`
+-   `ampId`: client ID that identifies the session, optional
 
 Then, the requests and responses are:
 
@@ -266,10 +266,10 @@ View and play with `amp-story-interactive` elements and styles in this [Codepen 
 
 Style all `amp-story-interactive` elements with CSS variables and attributes. Override default variables by assigning a class to the element.
 
-- `--interactive-accent-color`: The accent color of the component.
-- `--interactive-prompt-text-color`: Color of the top text where applicable (elements with prompts or results with thresholds).
-- `--interactive-prompt-background`: Background of the top text where applicable (elements with prompts or results with thresholds but no images). Can be a color (including transparent) or CSS gradient.
-- `--interactive-prompt-alignment`: Alignment of the prompt where applicable (elements with prompts). Will default to center if the component has the transparent style or if it's a binary poll, otherwise it will default to initial.
+-   `--interactive-accent-color`: The accent color of the component.
+-   `--interactive-prompt-text-color`: Color of the top text where applicable (elements with prompts or results with thresholds).
+-   `--interactive-prompt-background`: Background of the top text where applicable (elements with prompts or results with thresholds but no images). Can be a color (including transparent) or CSS gradient.
+-   `--interactive-prompt-alignment`: Alignment of the prompt where applicable (elements with prompts). Will default to center if the component has the transparent style or if it's a binary poll, otherwise it will default to initial.
 
 ### Themes
 
@@ -320,9 +320,9 @@ Enhance interactivity by adding an animation to the element when entering the pa
 
 The `amp-story-interactive` component elements support [`amp-analytics`](https://amp.dev/documentation/components/amp-analytics/). Report a selected option by adding the `story-interactive` event to your configuration:
 
-- `storyInteractiveId`: the element id
-- `storyInteractiveResponse`: the option selected
-- `storyInteractiveType`: the enum InteractiveType
+-   `storyInteractiveId`: the element id
+-   `storyInteractiveResponse`: the option selected
+-   `storyInteractiveType`: the enum InteractiveType
 
 ```html
 <amp-analytics id="my-analytics">
@@ -342,6 +342,10 @@ The `amp-story-interactive` component elements support [`amp-analytics`](https:/
 </amp-analytics>
 ```
 
+## Accessibility considerations
+
+Currently, this component lacks keyboard and screen reader accessibility.
+
 ## Validation
 
-See validation rules in [amp-story-interactive validator](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story-interactive/validator-amp-story-interactive.protoascii).
+See validation rules in [amp-story-interactive validator](https://github.com/ampproject/amphtml/blob/main/extensions/amp-story-interactive/validator-amp-story-interactive.protoascii).

@@ -16,8 +16,8 @@
 
 // This must load before all other tests.
 import '../src/polyfills';
+import * as coreError from '../src/core/error';
 import * as describes from '../testing/describes';
-import * as log from '../src/log';
 import {Services} from '../src/services';
 import {activateChunkingForTesting} from '../src/chunk';
 import {adoptWithMultidocDeps} from '../src/runtime';
@@ -33,12 +33,14 @@ import {removeElement} from '../src/dom';
 import {
   reportError,
   resetAccumulatedErrorMessagesForTesting,
-} from '../src/error';
+} from '../src/error-reporting';
 import {resetEvtListenerOptsSupportForTesting} from '../src/event-helper-listen';
 import {resetExperimentTogglesForTesting} from '../src/experiments';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {setReportError} from '../src/log';
+import AMP_CONFIG from '../build-system/global-configs/prod-config.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import PreactEnzyme from 'enzyme-adapter-preact-pure';
+import chaiAsPromised from 'chai-as-promised';
 import sinon from /*OK*/ 'sinon';
 import stringify from 'json-stable-stringify';
 
@@ -79,7 +81,12 @@ global.AMP.extension = function (name, version, installer) {
 };
 
 // Make amp section in karma config readable by tests.
-window.ampTestRuntimeConfig = parent.karma ? parent.karma.config.amp : {};
+if (parent.karma && !parent.__karma__) {
+  parent.__karma__ = parent.karma;
+}
+window.ampTestRuntimeConfig = parent.__karma__
+  ? parent.__karma__.config.amp
+  : {};
 
 /**
  * Helper class to skip or retry tests under specific environment.
@@ -117,6 +124,8 @@ class TestConfig {
 
     this.platform = Services.platformFor(window);
 
+    this.isModuleBuild = () => !!window.ampTestRuntimeConfig.isModuleBuild;
+
     /**
      * Predicate functions that determine whether to run tests on a platform.
      */
@@ -131,6 +140,10 @@ class TestConfig {
      * By default, IE is skipped. Individual tests may opt in.
      */
     this.skip(this.runOnIe);
+  }
+
+  skipModuleBuild() {
+    return this.skip(this.isModuleBuild);
   }
 
   skipChrome() {
@@ -170,6 +183,10 @@ class TestConfig {
   skip(fn) {
     this.skipMatchers.push(fn);
     return this;
+  }
+
+  ifModuleBuild() {
+    return this.if(this.isModuleBuild);
   }
 
   ifChrome() {
@@ -362,8 +379,8 @@ function maybeStubConsoleInfoLogWarn() {
 function preventAsyncErrorThrows() {
   self.stubAsyncErrorThrows = function () {
     rethrowAsyncSandbox = sinon.createSandbox();
-    rethrowAsyncSandbox.stub(log, 'rethrowAsync').callsFake((...args) => {
-      const error = log.createErrorVargs.apply(null, args);
+    rethrowAsyncSandbox.stub(coreError, 'rethrowAsync').callsFake((...args) => {
+      const error = coreError.createErrorVargs.apply(null, args);
       self.__AMP_REPORT_ERROR(error);
       throw error;
     });
@@ -402,8 +419,7 @@ function beforeTest() {
   activateChunkingForTesting();
   window.__AMP_MODE = undefined;
   window.context = undefined;
-  // eslint-disable-next-line no-undef
-  window.AMP_CONFIG = require('../build-system/global-configs/prod-config.json');
+  window.AMP_CONFIG = AMP_CONFIG;
   window.__AMP_TEST = true;
   installDocService(window, /* isSingleDoc */ true);
   const ampdoc = Services.ampdocServiceFor(window).getSingleDoc();
@@ -472,7 +488,7 @@ afterEach(function () {
   cancelTimersForTesting();
 });
 
-chai.use(require('chai-as-promised')); // eslint-disable-line
+chai.use(chaiAsPromised);
 
 chai.Assertion.addMethod('attribute', function (attr) {
   const obj = this._obj;

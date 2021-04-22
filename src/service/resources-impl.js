@@ -14,30 +14,29 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
+import {Deferred} from '../core/data-structures/promise';
 import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
+
 import {Resource, ResourceState} from './resource';
 import {Services} from '../services';
 import {TaskQueue} from './task-queue';
-import {VisibilityState} from '../visibility-state';
+import {VisibilityState} from '../core/constants/visibility-state';
 import {dev, devAssert} from '../log';
-import {dict} from '../utils/object';
+import {dict} from '../core/types/object';
 import {expandLayoutRect} from '../layout-rect';
-import {getMode} from '../mode';
 import {getSourceUrl} from '../url';
-import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
+import {hasNextNodeInDocumentOrder} from '../dom';
 import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
 import {ieMediaCheckAndFix} from './ie-media-bug';
-import {isBlockedByConsent, reportError} from '../error';
-import {isExperimentOn} from '../experiments';
+import {isBlockedByConsent, reportError} from '../error-reporting';
 import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
-import {remove} from '../utils/array';
+import {remove} from '../core/types/array';
 import {startupChunk} from '../chunk';
-import {throttle} from '../utils/rate-limit';
+import {throttle} from '../core/types/function';
 
 const TAG_ = 'Resources';
 const LAYOUT_TASK_ID_ = 'L';
@@ -50,7 +49,6 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
-const MAX_BUILD_CHUNK_SIZE = 10;
 
 /**
  * @implements {ResourcesInterface}
@@ -137,9 +135,6 @@ export class ResourcesImpl {
 
     /** @const @private {!Pass} */
     this.remeasurePass_ = new Pass(this.win, () => {
-      // With IntersectionObserver, "remeasuring" hack no longer needed.
-      devAssert(!this.intersectionObserver_);
-
       this.relayoutAll_ = true;
       this.schedulePass();
     });
@@ -150,7 +145,7 @@ export class ResourcesImpl {
     /** @const {!TaskQueue} */
     this.queue_ = new TaskQueue();
 
-    /** @const {!function(./task-queue.TaskDef):number} */
+    /** @const {function(./task-queue.TaskDef):number} */
     this.boundTaskScorer_ = this.calcTaskScore_.bind(this);
 
     /**
@@ -188,18 +183,6 @@ export class ResourcesImpl {
     /** @const @private {!Array<!Element>} */
     this.elementsThatScrolled_ = [];
 
-    /** @const @private {boolean} */
-    this.onlyBuildWhenCloseToViewport_ = isExperimentOn(
-      this.win,
-      'build-close-to-viewport'
-    );
-
-    /** @const @private {boolean} */
-    this.buildInChunks_ = isExperimentOn(this.win, 'build-in-chunks');
-
-    /** @const @private {boolean} */
-    this.removeTaskTimeout_ = isExperimentOn(this.win, 'remove-task-timeout');
-
     /** @const @private {!Deferred} */
     this.firstPassDone_ = new Deferred();
 
@@ -208,69 +191,27 @@ export class ResourcesImpl {
       this.ampdoc.getVisibilityState()
     );
 
-    /** @private {?IntersectionObserver} */
-    this.intersectionObserver_ = null;
-
-    /**
-     * True if the callback for intersectionObserver_ has fired at least once.
-     * @private {boolean}
-     */
-    this.intersectionObserverCallbackFired_ = false;
-
-    if (isExperimentOn(this.win, 'intersect-resources')) {
-      const iframed = isIframed(this.win);
-
-      // Classic IntersectionObserver doesn't support viewport tracking and
-      // rootMargin in x-origin iframes (#25428). As of 1/2020, only Chrome 81+
-      // supports it via {root: document}, which throws on other browsers.
-      const root = /** @type {?Element} */ (this.ampdoc.isSingleDoc() && iframed
-        ? /** @type {*} */ (this.win.document)
-        : null);
-      try {
-        this.intersectionObserver_ = new IntersectionObserver(
-          (e) => this.intersect(e),
-          // rootMargin matches size of loadRect: (150vw 300vh) * 1.25.
-          {root, rootMargin: '250% 31.25%'}
-        );
-
-        // Wait for intersection callback instead of measuring all elements
-        // during the first pass.
-        this.relayoutAll_ = false;
-      } catch (e) {
-        dev().warn(TAG_, 'Falling back to classic Resources:', e);
-      }
-    }
-
     // When user scrolling stops, run pass to check newly in-viewport elements.
     // When viewport is resized, we have to re-measure everything.
     this.viewport_.onChanged((event) => {
-      this.lastScrollTime_ = Date.now();
+      this.lastScrollTime_ = this.win.Date.now();
       this.lastVelocity_ = event.velocity;
       if (event.relayoutAll) {
         this.relayoutAll_ = true;
         this.maybeChangeHeight_ = true;
       }
 
-      // With IntersectionObserver, we only need to handle viewport resize.
-      if (this.relayoutAll_ || !this.intersectionObserver_) {
-        this.schedulePass();
-      }
-      // Unfortunately, a viewport size change invalidates all premeasurements.
-      if (this.relayoutAll_ && this.intersectionObserver_) {
-        this.resources_.forEach((resource) =>
-          resource.invalidatePremeasurement()
-        );
-      }
+      this.schedulePass();
     });
     this.viewport_.onScroll(() => {
-      this.lastScrollTime_ = Date.now();
+      this.lastScrollTime_ = this.win.Date.now();
     });
 
     // When document becomes visible, e.g. from "prerender" mode, do a
     // simple pass.
     this.ampdoc.onVisibilityChanged(() => {
       if (this.firstVisibleTime_ == -1 && this.ampdoc.isVisible()) {
-        this.firstVisibleTime_ = Date.now();
+        this.firstVisibleTime_ = this.win.Date.now();
       }
       this.schedulePass();
     });
@@ -290,51 +231,13 @@ export class ResourcesImpl {
 
     this.rebuildDomWhenReady_();
 
-    if (!this.intersectionObserver_) {
-      /** @private @const */
-      this.throttledScroll_ = throttle(this.win, (e) => this.scrolled_(e), 250);
+    /** @private @const */
+    this.throttledScroll_ = throttle(this.win, (e) => this.scrolled_(e), 250);
 
-      listen(this.win.document, 'scroll', this.throttledScroll_, {
-        capture: true,
-        passive: true,
-      });
-    }
-  }
-
-  /** @override */
-  isIntersectionExperimentOn() {
-    return !!this.intersectionObserver_;
-  }
-
-  /**
-   * @param {!Array<!IntersectionObserverEntry>} entries
-   * @visibleForTesting
-   */
-  intersect(entries) {
-    devAssert(this.intersectionObserver_);
-
-    if (getMode().localDev) {
-      const inside = [];
-      const outside = [];
-      entries.forEach((e) => {
-        const r = Resource.forElement(e.target);
-        (e.isIntersecting ? inside : outside).push({e, id: r.debugid});
-      });
-      dev().fine(TAG_, 'intersection', inside, outside);
-    }
-
-    this.intersectionObserverCallbackFired_ = true;
-
-    entries.forEach((entry) => {
-      const {boundingClientRect, target} = entry;
-
-      const r = Resource.forElement(target);
-      // Strangely, JSC is missing x/y from typedefs of boundingClientRect
-      // despite it being a DOMRectReadOnly (ClientRect) by spec.
-      r.premeasure(/** @type {!ClientRect} */ (boundingClientRect));
+    listen(this.win.document, 'scroll', this.throttledScroll_, {
+      capture: true,
+      passive: true,
     });
-
-    this.schedulePass();
   }
 
   /** @private */
@@ -354,37 +257,34 @@ export class ResourcesImpl {
 
       ieIntrinsicCheckAndFix(this.win);
 
-      // With IntersectionObserver, no need for remeasuring hacks.
-      if (!this.intersectionObserver_) {
-        const fixPromise = ieMediaCheckAndFix(this.win);
-        const remeasure = () => this.remeasurePass_.schedule();
-        if (fixPromise) {
-          fixPromise.then(remeasure);
-        } else {
-          // No promise means that there's no problem.
-          remeasure();
-        }
+      const fixPromise = ieMediaCheckAndFix(this.win);
+      const remeasure = () => this.remeasurePass_.schedule();
+      if (fixPromise) {
+        fixPromise.then(remeasure);
+      } else {
+        // No promise means that there's no problem.
+        remeasure();
+      }
 
-        // Safari 10 and under incorrectly estimates font spacing for
-        // `@font-face` fonts. This leads to wild measurement errors. The best
-        // course of action is to remeasure everything on window.onload or font
-        // timeout (3s), whichever is earlier. This has to be done on the global
-        // window because this is where the fonts are always added.
-        // Unfortunately, `document.fonts.ready` cannot be used here due to
-        // https://bugs.webkit.org/show_bug.cgi?id=174030.
-        // See https://bugs.webkit.org/show_bug.cgi?id=174031 for more details.
-        Promise.race([
-          loadPromise(this.win),
-          Services.timerFor(this.win).promise(3100),
-        ]).then(remeasure);
+      // Safari 10 and under incorrectly estimates font spacing for
+      // `@font-face` fonts. This leads to wild measurement errors. The best
+      // course of action is to remeasure everything on window.onload or font
+      // timeout (3s), whichever is earlier. This has to be done on the global
+      // window because this is where the fonts are always added.
+      // Unfortunately, `document.fonts.ready` cannot be used here due to
+      // https://bugs.webkit.org/show_bug.cgi?id=174030.
+      // See https://bugs.webkit.org/show_bug.cgi?id=174031 for more details.
+      Promise.race([
+        loadPromise(this.win),
+        Services.timerFor(this.win).promise(3100),
+      ]).then(remeasure);
 
-        // Remeasure the document when all fonts loaded.
-        if (
-          this.win.document.fonts &&
-          this.win.document.fonts.status != 'loaded'
-        ) {
-          this.win.document.fonts.ready.then(remeasure);
-        }
+      // Remeasure the document when all fonts loaded.
+      if (
+        this.win.document.fonts &&
+        this.win.document.fonts.status != 'loaded'
+      ) {
+        this.win.document.fonts.ready.then(remeasure);
       }
     });
   }
@@ -438,13 +338,7 @@ export class ResourcesImpl {
       dev().fine(TAG_, 'resource added:', resource.debugid);
     }
     this.resources_.push(resource);
-
-    if (this.intersectionObserver_) {
-      // The observer callback will schedule a pass to process this element.
-      this.intersectionObserver_.observe(element);
-    } else {
-      this.remeasurePass_.schedule(1000);
-    }
+    this.remeasurePass_.schedule(1000);
   }
 
   /**
@@ -453,9 +347,6 @@ export class ResourcesImpl {
    * @return {boolean}
    */
   isUnderBuildQuota_() {
-    if (this.buildInChunks_ && this.buildsThisPass_ >= MAX_BUILD_CHUNK_SIZE) {
-      return false;
-    }
     // For pre-render we want to limit the amount of CPU used, so we limit
     // the number of elements build. For pre-render to "seem complete"
     // we only need to build elements in the first viewport. We can't know
@@ -493,17 +384,6 @@ export class ResourcesImpl {
       resource.prerenderAllowed();
     if (!shouldBuildResource) {
       return;
-    }
-
-    if (this.onlyBuildWhenCloseToViewport_) {
-      const isCloseEnoughToViewport =
-        ignoreQuota ||
-        resource.isBuildRenderBlocking() ||
-        resource.renderOutsideViewport() ||
-        (this.isIdle_() && resource.idleRenderOutsideViewport());
-      if (!isCloseEnoughToViewport) {
-        return;
-      }
     }
 
     if (this.documentReady_) {
@@ -614,9 +494,9 @@ export class ResourcesImpl {
     if (resource.isBuilt()) {
       resource.pauseOnRemove();
     }
-    if (this.intersectionObserver_) {
-      // TODO(willchou): Fix observe/unobserve/remeasure churn in reparenting.
-      this.intersectionObserver_.unobserve(resource.element);
+
+    if (resource.getState() === ResourceState.LAYOUT_SCHEDULED) {
+      resource.layoutCanceled();
     }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev().fine(TAG_, 'resource removed:', resource.debugid);
@@ -736,6 +616,7 @@ export class ResourcesImpl {
         dict({
           'title': doc.title,
           'sourceUrl': getSourceUrl(this.ampdoc.getUrl()),
+          'isStory': doc.body.firstElementChild?.tagName === 'AMP-STORY',
           'serverLayout': doc.documentElement.hasAttribute('i-amphtml-element'),
           'linkRels': documentInfo.linkRels,
           'metaTags': {'viewport': documentInfo.viewport} /* deprecated */,
@@ -807,10 +688,6 @@ export class ResourcesImpl {
     if (
       this.documentReady_ &&
       this.ampInitialized_ &&
-      // With IntersectionObserver, elements are not measured until the first
-      // intersection callback.
-      (!this.intersectionObserver_ ||
-        this.intersectionObserverCallbackFired_) &&
       !this.ampdoc.signals().get(READY_SCAN_SIGNAL)
     ) {
       // This signal mainly signifies that most of elements have been measured
@@ -847,7 +724,7 @@ export class ResourcesImpl {
     // scroll adjustment to avoid active viewport changing without user's
     // action. The elements in the active viewport are not resized and instead
     // the overflow callbacks are called.
-    const now = Date.now();
+    const now = this.win.Date.now();
     const viewportRect = this.viewport_.getRect();
     const topOffset = viewportRect.height / 10;
     const bottomOffset = viewportRect.height / 10;
@@ -1000,7 +877,7 @@ export class ResourcesImpl {
                 // If the element has siblings, it's possible that a width-expansion will
                 // cause some of them to be pushed down.
                 const parentWidth =
-                  (parent.getLayoutWidth && parent.getLayoutWidth()) ||
+                  (parent.getLayoutSize && parent.getLayoutSize().width) ||
                   parent./*OK*/ offsetWidth;
                 let cumulativeWidth = widthDiff;
                 for (let i = 0; i < parent.childElementCount; i++) {
@@ -1133,13 +1010,12 @@ export class ResourcesImpl {
    * Always returns true unless the resource was previously displayed but is
    * not displayed now (i.e. the resource should be unloaded).
    * @param {!Resource} r
-   * @param {boolean} usePremeasuredRect
    * @return {boolean}
    * @private
    */
-  measureResource_(r, usePremeasuredRect = false) {
+  measureResource_(r) {
     const wasDisplayed = r.isDisplayed();
-    r.measure(usePremeasuredRect);
+    r.measure();
     return !(wasDisplayed && !r.isDisplayed());
   }
 
@@ -1175,7 +1051,7 @@ export class ResourcesImpl {
   discoverWork_() {
     // TODO(dvoytenko): vsync separation may be needed for different phases
 
-    const now = Date.now();
+    const now = this.win.Date.now();
 
     // Ensure all resources layout phase complete; when relayoutAll is requested
     // force re-layout.
@@ -1192,27 +1068,20 @@ export class ResourcesImpl {
     let remeasureCount = 0;
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
-      if (r.getState() == ResourceState.NOT_BUILT && !r.isBuilding()) {
+      if (
+        r.getState() == ResourceState.NOT_BUILT &&
+        !r.isBuilding() &&
+        !r.element.V1()
+      ) {
         this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
       }
-      if (this.intersectionObserver_) {
-        // With IntersectionObserver, we call applySizesAndMediaQuery() early
-        // in connectedCallback(), so we only need to re-apply on relayout.
-        // relayoutCount is also irrelevant and doesn't need an increment.
-        if (relayoutAll) {
-          r.applySizesAndMediaQuery();
-          dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
-        }
-      } else if (
+
+      if (
         relayoutAll ||
         !r.hasBeenMeasured() ||
         // NOT_LAID_OUT is the state after build() but before measure().
         r.getState() == ResourceState.NOT_LAID_OUT
       ) {
-        // TODO(willchou): We sometimes call this needlessly/repeatedly.
-        // All elements outside of the loading rect are NOT_LAID_OUT!
-        r.applySizesAndMediaQuery();
-        dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
         relayoutCount++;
       }
       if (r.isMeasureRequested()) {
@@ -1223,43 +1092,7 @@ export class ResourcesImpl {
     // Phase 2: Remeasure if there were any relayouts. Unfortunately, currently
     // there's no way to optimize this. All reads happen here.
     let toUnload;
-    if (this.intersectionObserver_) {
-      // The IntersectionObserver variant for phase 2 is just a simplification
-      // that ignores `relayoutTop` and `elementsThatScrolled`.
-      for (let i = 0; i < this.resources_.length; i++) {
-        const r = this.resources_[i];
-        const requested = r.isMeasureRequested();
-        if (r.hasOwner() && !requested) {
-          continue;
-        }
-        const premeasured = r.hasBeenPremeasured();
-        if (requested) {
-          dev().fine(TAG_, 'force remeasure:', r.debugid);
-        }
-        // Immediately measure (vs. waiting for async premeasure) for certain
-        // elements with sensitive time-to-measure.
-        const expediteFirstMeasure =
-          !r.hasBeenMeasured() && r.element.tagName == 'AMP-AD';
-        const needsMeasure =
-          premeasured || requested || this.relayoutAll_ || expediteFirstMeasure;
-        if (needsMeasure) {
-          const isDisplayed = this.measureResource_(
-            r,
-            /* usePremeasuredRect */ premeasured
-          );
-          if (!isDisplayed) {
-            devAssert(
-              r.getState() != ResourceState.NOT_BUILT,
-              'Should not unload unbuilt elements.'
-            );
-            if (!toUnload) {
-              toUnload = [];
-            }
-            toUnload.push(r);
-          }
-        }
-      }
-    } else if (
+    if (
       relayoutCount > 0 ||
       remeasureCount > 0 ||
       relayoutAll ||
@@ -1268,7 +1101,7 @@ export class ResourcesImpl {
     ) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        if (r.hasOwner() && !r.isMeasureRequested()) {
+        if ((r.hasOwner() && !r.isMeasureRequested()) || r.element.V1()) {
           // If element has owner, and measure is not requested, do nothing.
           continue;
         }
@@ -1326,10 +1159,14 @@ export class ResourcesImpl {
         expandLayoutRect(viewportRect, 0.25, 0.25)
       : viewportRect;
 
-    // Phase 3: Trigger "viewport enter/exit" events.
+    // Phase 3: Set inViewport status for resources.
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
-      if (r.getState() == ResourceState.NOT_BUILT || r.hasOwner()) {
+      if (
+        r.getState() == ResourceState.NOT_BUILT ||
+        r.hasOwner() ||
+        r.element.V1()
+      ) {
         continue;
       }
       // Note that when the document is not visible, neither are any of its
@@ -1354,6 +1191,7 @@ export class ResourcesImpl {
           !r.isBuilt() &&
           !r.isBuilding() &&
           !r.hasOwner() &&
+          !r.element.V1() &&
           r.hasBeenMeasured() &&
           r.isDisplayed() &&
           r.overlaps(loadRect)
@@ -1389,6 +1227,7 @@ export class ResourcesImpl {
         if (
           r.getState() == ResourceState.READY_FOR_LAYOUT &&
           !r.hasOwner() &&
+          !r.element.V1() &&
           r.isDisplayed() &&
           r.idleRenderOutsideViewport()
         ) {
@@ -1408,6 +1247,7 @@ export class ResourcesImpl {
         if (
           r.getState() == ResourceState.READY_FOR_LAYOUT &&
           !r.hasOwner() &&
+          !r.element.V1() &&
           r.isDisplayed()
         ) {
           dev().fine(TAG_, 'idle layout:', r.debugid);
@@ -1449,14 +1289,12 @@ export class ResourcesImpl {
    * @private
    */
   work_() {
-    const now = Date.now();
+    const now = this.win.Date.now();
 
     let timeout = -1;
     let task = this.queue_.peek(this.boundTaskScorer_);
     while (task) {
-      if (!this.removeTaskTimeout_) {
-        timeout = this.calcTaskTimeout_(task);
-      }
+      timeout = this.calcTaskTimeout_(task);
       dev().fine(
         TAG_,
         'peek from queue:',
@@ -1468,10 +1306,8 @@ export class ResourcesImpl {
         'timeout',
         timeout
       );
-      if (!this.removeTaskTimeout_) {
-        if (timeout > 16) {
-          break;
-        }
+      if (timeout > 16) {
+        break;
       }
 
       this.queue_.dequeue(task);
@@ -1486,20 +1322,10 @@ export class ResourcesImpl {
       } else {
         const {resource} = task;
 
-        let stillDisplayed = true;
-        if (this.intersectionObserver_) {
-          // With IntersectionObserver, peek at the premeasured rect to see
-          // if the resource is still displayed (has a non-zero size).
-          // The premeasured rect is most analogous to an immediate measure.
-          if (resource.hasBeenPremeasured()) {
-            stillDisplayed = resource.isDisplayed(
-              /* usePremeasuredRect */ true
-            );
-          }
-        } else {
-          // Remeasure can only update isDisplayed(), not in-viewport state.
-          resource.measure();
-        }
+        const stillDisplayed = true;
+        // Remeasure can only update isDisplayed(), not in-viewport state.
+        resource.measure();
+
         // Check if the element has exited the viewport or the page has changed
         // visibility since the layout was scheduled.
         if (
@@ -1534,12 +1360,10 @@ export class ResourcesImpl {
       this.exec_.getSize()
     );
 
-    if (!this.removeTaskTimeout_) {
-      if (timeout >= 0) {
-        // Still tasks in the queue, but we took too much time.
-        // Schedule the next work pass.
-        return timeout;
-      }
+    if (timeout >= 0) {
+      // Still tasks in the queue, but we took too much time.
+      // Schedule the next work pass.
+      return timeout;
     }
 
     // No tasks left in the queue.
@@ -1602,7 +1426,7 @@ export class ResourcesImpl {
    * @private
    */
   calcTaskTimeout_(task) {
-    const now = Date.now();
+    const now = this.win.Date.now();
 
     if (this.exec_.getSize() == 0) {
       // If we've never been visible, return 0. This follows the previous
@@ -1713,6 +1537,9 @@ export class ResourcesImpl {
     opt_parentPriority,
     opt_forceOutsideViewport
   ) {
+    if (resource.element.V1()) {
+      return;
+    }
     const isBuilt = resource.getState() != ResourceState.NOT_BUILT;
     const isDisplayed = resource.isDisplayed();
     if (!isBuilt || !isDisplayed) {
@@ -1776,7 +1603,7 @@ export class ResourcesImpl {
         Math.max(resource.getLayoutPriority(), parentPriority) + priorityOffset,
       forceOutsideViewport,
       callback,
-      scheduleTime: Date.now(),
+      scheduleTime: this.win.Date.now(),
       startTime: 0,
       promise: null,
     };
@@ -1790,11 +1617,7 @@ export class ResourcesImpl {
         this.queue_.dequeue(queued);
       }
       this.queue_.enqueue(task);
-      if (this.removeTaskTimeout_) {
-        this.schedulePass();
-      } else {
-        this.schedulePass(this.calcTaskTimeout_(task));
-      }
+      this.schedulePass(this.calcTaskTimeout_(task));
     }
     task.resource.layoutScheduled(task.scheduleTime);
   }

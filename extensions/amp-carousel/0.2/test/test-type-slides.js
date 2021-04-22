@@ -15,8 +15,10 @@
  */
 
 import '../amp-carousel';
-import {ActionTrust} from '../../../../src/action-constants';
+import * as Listen from '../../../../src/event-helper';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {CarouselEvents} from '../../../amp-base-carousel/0.1/carousel-events';
+import {Services} from '../../../../src/services';
 import {getDetail, listenOncePromise} from '../../../../src/event-helper';
 
 /**
@@ -32,8 +34,9 @@ import {getDetail, listenOncePromise} from '../../../../src/event-helper';
  */
 async function afterIndexUpdate(el, index) {
   const event = await listenOncePromise(el, CarouselEvents.INDEX_CHANGE);
-  await el.implementation_.mutateElement(() => {});
-  await el.implementation_.mutateElement(() => {});
+  const impl = await el.getImpl(false);
+  await impl.mutateElement(() => {});
+  await impl.mutateElement(() => {});
 
   if (index != undefined && getDetail(event)['index'] != index) {
     return afterIndexUpdate(el, index);
@@ -59,6 +62,13 @@ function getPrevTitle(el) {
 function getSlideWrappers(el) {
   return el.querySelectorAll(
     '.i-amphtml-carousel-scroll > .i-amphtml-carousel-slide-item'
+  );
+}
+
+function isScreenReaderHidden(element) {
+  const computedStyle = getComputedStyle(element);
+  return (
+    computedStyle.visibility === 'hidden' || computedStyle.display === 'none'
   );
 }
 
@@ -122,7 +132,7 @@ describes.realWin(
       }
 
       container.appendChild(carousel);
-      await carousel.build();
+      await carousel.buildInternal();
       carousel.updateLayoutBox({
         top: 0,
         left: 0,
@@ -156,13 +166,35 @@ describes.realWin(
       expect(slideWrappers[1].getAttribute('aria-hidden')).to.equal('true');
     });
 
+    it('should style snap for container and content correctly', async () => {
+      const carousel = await getCarousel({loop: true});
+      const slideWrappers = getSlideWrappers(carousel);
+      expect(slideWrappers.length).to.equal(5);
+
+      const slides = carousel.querySelector('.i-amphtml-carousel-scroll')
+        .children;
+
+      // Ensure that the spacers have the snap property and not the
+      // slides.
+      for (let i = 0; i < slides.length; i++) {
+        const slide = slides[i];
+        if (slide.classList.contains('i-amphtml-carousel-spacer')) {
+          // type=slides is always center alignment.
+          expect(slide.style.scrollSnapAlign).to.equal('center');
+        } else {
+          expect(slide.style.scrollSnapAlign).to.equal('');
+          expect(slide.children[0].style.scrollSnapAlign).to.equal('');
+        }
+      }
+    });
+
     it('should show focus outline and border on next and prev buttons', async () => {
       const carousel = await getCarousel({loop: false});
+      const impl = await carousel.getImpl();
 
-      carousel.implementation_.interactionNext();
+      impl.interactionNext();
       await afterIndexUpdate(carousel);
 
-      const impl = carousel.implementation_;
       impl.prevButton_.focus();
       expect(doc.activeElement).to.equal(impl.prevButton_);
       expect(win.getComputedStyle(impl.prevButton_).outline).to.equal(
@@ -217,13 +249,37 @@ describes.realWin(
 
       it('should disable the next button when at the end', async () => {
         const carousel = await getCarousel({loop: false});
+        const impl = await carousel.getImpl();
 
-        carousel.implementation_.goToSlide(4);
+        impl.goToSlide(4);
         await afterIndexUpdate(carousel);
 
         expect(getNextButton(carousel).getAttribute('aria-disabled')).to.equal(
           'true'
         );
+      });
+
+      it('should correctly style controls; focusable but not visible', async () => {
+        const carousel = await getCarousel({loop: false});
+        const impl = await carousel.getImpl();
+
+        getNextButton(carousel).focus();
+        impl.goToSlide(4);
+        await afterIndexUpdate(carousel);
+        expect(getNextButton(carousel).getAttribute('tabIndex')).to.equal('-1');
+        expect(getPrevButton(carousel).getAttribute('tabIndex')).to.equal('0');
+        expect(isScreenReaderHidden(getPrevButton(carousel))).to.be.false;
+        expect(isScreenReaderHidden(getNextButton(carousel))).to.be.false;
+        expect(doc.activeElement).to.equal(getNextButton(carousel));
+
+        getPrevButton(carousel).focus();
+        impl.goToSlide(0);
+        await afterIndexUpdate(carousel);
+        expect(getNextButton(carousel).getAttribute('tabIndex')).to.equal('0');
+        expect(getPrevButton(carousel).getAttribute('tabIndex')).to.equal('-1');
+        expect(isScreenReaderHidden(getPrevButton(carousel))).to.be.false;
+        expect(isScreenReaderHidden(getNextButton(carousel))).to.be.false;
+        expect(doc.activeElement).to.equal(getPrevButton(carousel));
       });
     });
 
@@ -236,22 +292,27 @@ describes.realWin(
         expect(eventSpy).to.have.not.been.called;
       });
 
-      it('should dispatch when changing slides', async () => {
-        const eventSpy = env.sandbox.spy();
-        container.addEventListener('slideChange', eventSpy);
+      it('should dispatch event with index and actionTrust when changing slides', async () => {
+        let event;
+        container.addEventListener('slideChange', (e) => {
+          expect(event).to.be.undefined;
+          event = e;
+        });
         const carousel = await getCarousel({loop: false});
+        const impl = await carousel.getImpl();
 
-        carousel.implementation_.interactionNext();
+        impl.interactionNext();
         await afterIndexUpdate(carousel);
 
-        expect(eventSpy).to.have.been.calledOnce;
+        expect(event.data.index).to.equal(1);
+        expect(event.data.actionTrust).to.equal(ActionTrust.HIGH);
       });
     });
 
     describe('goToSlide action', () => {
       it('should propagate high trust', async () => {
         const carousel = await getCarousel({loop: false});
-        const impl = carousel.implementation_;
+        const impl = await carousel.getImpl();
         const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
 
         impl.executeAction({
@@ -272,7 +333,7 @@ describes.realWin(
 
       it('should propagate low trust', async () => {
         const carousel = await getCarousel({loop: false});
-        const impl = carousel.implementation_;
+        const impl = await carousel.getImpl();
         const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
 
         impl.executeAction({
@@ -293,7 +354,7 @@ describes.realWin(
 
       it('should allow string-valued index', async () => {
         const carousel = await getCarousel({loop: false});
-        const impl = carousel.implementation_;
+        const impl = await carousel.getImpl();
         const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
 
         impl.executeAction({
@@ -314,7 +375,7 @@ describes.realWin(
 
       it('should cause error with invalid index', async () => {
         const carousel = await getCarousel({loop: false});
-        const impl = carousel.implementation_;
+        const impl = await carousel.getImpl();
         const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
 
         try {
@@ -428,8 +489,9 @@ describes.realWin(
 
         it('should have the correct values on the last index', async () => {
           const carousel = await getCarousel({loop: false, slideCount: 3});
+          const impl = await carousel.getImpl();
 
-          carousel.implementation_.goToSlide(2);
+          impl.goToSlide(2);
           await afterIndexUpdate(carousel);
 
           expect(getPrevTitle(carousel)).to.equal(
@@ -455,8 +517,9 @@ describes.realWin(
 
         it('should have the correct values on the last index', async () => {
           const carousel = await getCarousel({loop: true, slideCount: 3});
+          const impl = await carousel.getImpl();
 
-          carousel.implementation_.goToSlide(2);
+          impl.goToSlide(2);
           await afterIndexUpdate(carousel);
 
           expect(getPrevTitle(carousel)).to.equal(
@@ -466,6 +529,31 @@ describes.realWin(
             'Next item in carousel (1 of 3)'
           );
         });
+      });
+    });
+
+    describe('event propogation', () => {
+      it('should add touchmove event if in viewer', async () => {
+        env.sandbox.stub(Services, 'viewerForDoc').returns({
+          isEmbedded: () => true,
+        });
+        const listenSpy = env.sandbox.spy(Listen, 'listen');
+        const carousel = await getCarousel({loop: false});
+        const impl = await carousel.getImpl();
+
+        expect(listenSpy.lastCall.args[0]).to.equal(impl.scrollContainer_);
+        expect(listenSpy.lastCall.args[1]).to.equal('touchmove');
+        expect(listenSpy.args.length).to.equal(5);
+      });
+
+      it('should not add touchmove event if not in the viewer', async () => {
+        env.sandbox.stub(Services, 'viewerForDoc').returns({
+          isEmbedded: () => false,
+        });
+        const listenSpy = env.sandbox.spy(Listen, 'listen');
+        await getCarousel({loop: false});
+
+        expect(listenSpy.args.length).to.equal(4);
       });
     });
   }

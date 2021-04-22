@@ -18,7 +18,7 @@ import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
 import {VideoBaseElement} from '../../amp-video/1.0/base-element';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 
 /** @const {string} */
 const TAG = 'amp-video-iframe';

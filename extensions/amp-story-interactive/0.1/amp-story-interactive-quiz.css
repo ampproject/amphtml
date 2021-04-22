@@ -34,11 +34,12 @@
 }
 
 .i-amphtml-story-interactive-quiz-option {
+  font-family: inherit !important;
   position: relative !important;
   display: flex !important;
   justify-items: start !important;
   align-items: center !important;
-  border-radius: var(--i-amphtml-interactive-chip-radius) !important;
+  border-radius: 1.649em !important; /* On iOS inset shadows with border-radius require borders smaller than sides to render correctly. Issue #31036 */
   padding: 0.5em 1em 0.5em 0.5em !important;
   background-color: var(
     --i-amphtml-interactive-option-background-color
@@ -55,6 +56,9 @@
   line-height: 1.25em !important;
   overflow: hidden !important;
   z-index: 0 !important;
+  border: none !important;
+  outline: none !important;
+  text-align: start !important;
 }
 
 [dir='rtl'] .i-amphtml-story-interactive-quiz-option {
@@ -109,6 +113,7 @@
   padding-left: 1em !important;
   margin-left: auto !important;
   visibility: hidden !important;
+  flex-shrink: 0 !important;
 }
 
 .i-amphtml-story-interactive-quiz-option:not(.i-amphtml-story-interactive-option-selected) .i-amphtml-story-interactive-quiz-percentage-text {
@@ -180,10 +185,16 @@
 .i-amphtml-story-interactive-quiz-option::before {
   content: '' !important;
   position: absolute !important;
+  left: 0px !important;
   width: 100% !important;
   height: 100% !important;
   border-radius: var(--i-amphtml-interactive-chip-radius) !important;
   line-height: 1.25em !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-quiz-option:focus::before {
+    background: var(--i-amphtml-interactive-theme-shading) !important;
 }
 
 .i-amphtml-story-interactive-post-selection:not(.i-amphtml-story-interactive-has-data)
@@ -313,19 +324,19 @@
 }
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
-  .i-amphtml-story-interactive-option:nth-of-type(2) 
+  .i-amphtml-story-interactive-option:nth-of-type(2)
     .i-amphtml-story-interactive-quiz-answer-choice {
   animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el2) !important;
 }
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
-  .i-amphtml-story-interactive-option:nth-of-type(3) 
+  .i-amphtml-story-interactive-option:nth-of-type(3)
     .i-amphtml-story-interactive-quiz-answer-choice {
   animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el3) !important;
 }
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
-  .i-amphtml-story-interactive-option:nth-of-type(4) 
+  .i-amphtml-story-interactive-option:nth-of-type(4)
     .i-amphtml-story-interactive-quiz-answer-choice {
   animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el4) !important;
 }

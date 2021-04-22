@@ -17,14 +17,17 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
-const log = require('fancy-log');
-const {cyan, green, red} = require('ansi-colors');
+const {cyan, green, red} = require('kleur/colors');
 const {decode} = require('sourcemap-codec');
 const {execOrDie} = require('../common/exec');
+const {log} = require('../common/logging');
 
 // Compile related constants
-const distWithSourcemapsCmd = 'gulp dist --core_runtime_only --full_sourcemaps';
+const distWithSourcemapsCmd = 'amp dist --core_runtime_only --full_sourcemaps';
 const v0JsMap = 'dist/v0.js.map';
+const distEsmWithSourcemapsCmd =
+  'amp dist --core_runtime_only --full_sourcemaps --esm';
+const v0MjsMap = 'dist/v0.mjs.map';
 
 // Sourcemap URL related constants
 const sourcemapUrlMatcher =
@@ -33,18 +36,6 @@ const sourcemapUrlMatcher =
 // Mapping related constants
 const expectedFirstLineFile = 'src/polyfills/abort-controller.js'; // First file that is compiled into v0.js.
 const expectedFirstLineCode = 'class AbortController {'; // First line of code in that file.
-const expectedFirstLineColumn = "'use strict;'".length; // Column at which the first line is found (after an initial 'use strict;')
-
-/**
- * Throws an error with the given message
- *
- * @param {string} message
- */
-function throwError(message) {
-  const err = new Error(message);
-  err.showStack = false;
-  throw err;
-}
 
 /**
  * Build runtime with sourcemaps if needed.
@@ -53,36 +44,39 @@ function maybeBuild() {
   if (!argv.nobuild) {
     log('Compiling', cyan('v0.js'), 'with full sourcemaps...');
     execOrDie(distWithSourcemapsCmd, {'stdio': 'ignore'});
+    log('Compiling', cyan('v0.mjs'), 'with full sourcemaps...');
+    execOrDie(distEsmWithSourcemapsCmd, {'stdio': 'ignore'});
   }
 }
 
 /**
  * Verifies that the sourcemap file exists, and returns its contents.
- *
+ * @param {string} map The map filepath to check
  * @return {!Object}
  */
-function getSourcemapJson() {
-  if (!fs.existsSync(v0JsMap)) {
-    log(red('ERROR:'), 'Could not find', cyan(v0JsMap));
-    throwError('Could not find sourcemap file');
+function getSourcemapJson(map) {
+  if (!fs.existsSync(map)) {
+    log(red('ERROR:'), 'Could not find', cyan(map));
+    throw new Error(`Could not find sourcemap file '${map}'`);
   }
-  return JSON.parse(fs.readFileSync(v0JsMap, 'utf8'));
+  return JSON.parse(fs.readFileSync(map, 'utf8'));
 }
 
 /**
  * Verifies that a correctly formatted sourcemap URL is present in v0.js.map.
  *
  * @param {!Object} sourcemapJson
+ * @param {string} map The map filepath to check
  */
-function checkSourcemapUrl(sourcemapJson) {
-  log('Inspecting', cyan('sourceRoot'), 'in', cyan(v0JsMap) + '...');
+function checkSourcemapUrl(sourcemapJson, map) {
+  log('Inspecting', cyan('sourceRoot'), 'in', cyan(map) + '...');
   if (!sourcemapJson.sourceRoot) {
     log(red('ERROR:'), 'Could not find', cyan('sourceRoot'));
-    throwError('Could not find sourcemap URL');
+    throw new Error('Could not find sourcemap URL');
   }
   if (!sourcemapJson.sourceRoot.match(sourcemapUrlMatcher)) {
     log(red('ERROR:'), cyan(sourcemapJson.sourceRoot), 'is badly formatted');
-    throwError('Badly formatted sourcemap URL');
+    throw new Error('Badly formatted sourcemap URL');
   }
 }
 
@@ -90,12 +84,13 @@ function checkSourcemapUrl(sourcemapJson) {
  * Verifies all the paths in the sources field are as expected.
  *
  * @param {!Object} sourcemapJson
+ * @param {string} map The map filepath to check
  */
-function checkSourcemapSources(sourcemapJson) {
-  log('Inspecting', cyan('sources'), 'in', cyan(v0JsMap) + '...');
+function checkSourcemapSources(sourcemapJson, map) {
+  log('Inspecting', cyan('sources'), 'in', cyan(map) + '...');
   if (!sourcemapJson.sources) {
     log(red('ERROR:'), 'Could not find', cyan('sources'));
-    throwError('Could not find sources array');
+    throw new Error('Could not find sources array');
   }
   const invalidSources = sourcemapJson.sources
     .filter((source) => !source.match(/\[.*\]/)) // Ignore non-path sources '[...]'
@@ -107,7 +102,7 @@ function checkSourcemapSources(sourcemapJson) {
       cyan('sources') + ':',
       cyan(invalidSources.join(', '))
     );
-    throwError('Invalid paths in sources array');
+    throw new Error('Invalid paths in sources array');
   }
 }
 
@@ -126,27 +121,23 @@ function checkSourcemapSources(sourcemapJson) {
  * 5. Check if the filename, line of code, and column match expected sentinel values.
  *
  * @param {!Object} sourcemapJson
+ * @param {string} map The map filepath to check
  */
-function checkSourcemapMappings(sourcemapJson) {
-  log('Inspecting', cyan('mappings'), 'in', cyan(v0JsMap) + '...');
+function checkSourcemapMappings(sourcemapJson, map) {
+  log('Inspecting', cyan('mappings'), 'in', cyan(map) + '...');
   if (!sourcemapJson.mappings) {
     log(red('ERROR:'), 'Could not find', cyan('mappings'));
-    throwError('Could not find mappings array');
+    throw new Error('Could not find mappings array');
   }
 
   // Zeroth sub-array corresponds to ';' and has no mappings.
   // See https://www.npmjs.com/package/sourcemap-codec#usage
   const firstLineMapping = decode(sourcemapJson.mappings)[1][0];
-  const [
-    generatedCodeColumn,
-    sourceIndex,
-    sourceCodeLine,
-    sourceCodeColumn,
-  ] = firstLineMapping;
+  const [, sourceIndex, sourceCodeLine, sourceCodeColumn] = firstLineMapping;
 
   const firstLineFile = sourcemapJson.sources[sourceIndex];
   const contents = fs.readFileSync(firstLineFile, 'utf8').split('\n');
-  const firstLineCode = contents[sourceCodeLine];
+  const firstLineCode = contents[sourceCodeLine].slice(sourceCodeColumn);
   const helpMessage =
     'If this change is intentional, update the mapping related constants in ' +
     cyan('build-system/tasks/check-sourcemaps.js') +
@@ -156,33 +147,35 @@ function checkSourcemapMappings(sourcemapJson) {
     log('Actual:', cyan(firstLineFile));
     log('Expected:', cyan(expectedFirstLineFile));
     log(helpMessage);
-    throwError('Found mapping for incorrect file');
+    throw new Error('Found mapping for incorrect file');
   }
   if (firstLineCode != expectedFirstLineCode) {
     log(red('ERROR:'), 'Found mapping for incorrect code.');
     log('Actual:', cyan(firstLineCode));
     log('Expected:', cyan(expectedFirstLineCode));
     log(helpMessage);
-    throwError('Found mapping for incorrect code');
-  }
-  if (generatedCodeColumn != expectedFirstLineColumn || sourceCodeColumn != 0) {
-    log(red('ERROR:'), 'Found mapping for incorrect column.');
-    log('generatedCodeColumn:', cyan(generatedCodeColumn));
-    log('sourceCodeColumn:', cyan(sourceCodeColumn));
-    throwError('Found mapping for incorrect column');
+    throw new Error('Found mapping for incorrect code');
   }
 }
 
 /**
+ * @param {string} map The map filepath to check
+ */
+function checkSourceMap(map) {
+  const sourcemapJson = getSourcemapJson(map);
+  checkSourcemapUrl(sourcemapJson, map);
+  checkSourcemapSources(sourcemapJson, map);
+  checkSourcemapMappings(sourcemapJson, map);
+}
+
+/**
  * Checks sourcemaps generated during minified compilation for correctness.
- * Entry point for `gulp check-sourcemaps`.
+ * Entry point for `amp check-sourcemaps`.
  */
 async function checkSourcemaps() {
   maybeBuild();
-  const sourcemapJson = getSourcemapJson();
-  checkSourcemapUrl(sourcemapJson);
-  checkSourcemapSources(sourcemapJson);
-  checkSourcemapMappings(sourcemapJson);
+  checkSourceMap(v0JsMap);
+  checkSourceMap(v0MjsMap);
   log(green('SUCCESS:'), 'All sourcemaps checks passed.');
 }
 
@@ -193,5 +186,5 @@ module.exports = {
 checkSourcemaps.description =
   'Checks sourcemaps generated during minified compilation for correctness.';
 checkSourcemaps.flags = {
-  'nobuild': '  Skips building the runtime (checks previously built code)',
+  'nobuild': 'Skips building the runtime (checks previously built code)',
 };

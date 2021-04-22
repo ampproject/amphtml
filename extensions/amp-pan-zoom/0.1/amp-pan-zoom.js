@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-pan-zoom-0.1.css';
 import {
@@ -31,9 +31,14 @@ import {boundValue, distance, magnitude} from '../../../src/utils/math';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
+import {dispatchCustomEvent} from '../../../src/dom';
 import {layoutRectFromDomRect, layoutRectLtwh} from '../../../src/layout-rect';
 import {numeric} from '../../../src/transition';
+import {
+  observeContentSize,
+  unobserveContentSize,
+} from '../../../src/utils/size-observer';
 import {px, scale, setStyles, translate} from '../../../src/style';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
@@ -154,6 +159,8 @@ export class AmpPanZoom extends AMP.BaseElement {
 
     /** @private */
     this.mouseStartX_ = 0;
+
+    this.onResize_ = this.onResize_.bind(this);
   }
 
   /** @override */
@@ -210,13 +217,6 @@ export class AmpPanZoom extends AMP.BaseElement {
   }
 
   /** @override */
-  onMeasureChanged() {
-    if (this.resetOnResize_) {
-      this.resetContentDimensions_();
-    }
-  }
-
-  /** @override */
   layoutCallback() {
     this.createZoomButton_();
     Services.ownersForDoc(this.element).scheduleLayout(
@@ -256,6 +256,13 @@ export class AmpPanZoom extends AMP.BaseElement {
       layout == Layout.FILL ||
       layout == Layout.RESPONSIVE
     );
+  }
+
+  /** @private */
+  onResize_() {
+    if (this.resetOnResize_) {
+      this.resetContentDimensions_();
+    }
   }
 
   /**
@@ -466,6 +473,7 @@ export class AmpPanZoom extends AMP.BaseElement {
     this.unlistenMouseDown_ = listen(this.element, 'mousedown', (e) =>
       this.onMouseDown_(e)
     );
+    observeContentSize(this.element, this.onResize_);
   }
 
   /**
@@ -488,6 +496,7 @@ export class AmpPanZoom extends AMP.BaseElement {
     this.unlisten_(this.unlistenMouseDown_);
     this.unlisten_(this.unlistenMouseMove_);
     this.unlisten_(this.unlistenMouseUp_);
+    unobserveContentSize(this.element, this.onResize_);
   }
 
   /**
@@ -773,7 +782,7 @@ export class AmpPanZoom extends AMP.BaseElement {
       })
     );
     this.action_.trigger(this.element, 'transformEnd', event, ActionTrust.HIGH);
-    this.element.dispatchCustomEvent('transformEnd');
+    dispatchCustomEvent(this.element, 'transformEnd');
   }
 
   /**

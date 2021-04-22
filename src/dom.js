@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Deferred} from './utils/promise';
+import {Deferred} from './core/data-structures/promise';
 import {
   assertIsName,
   isScopeSelectorSupported,
   prependSelectorsWith,
 } from './css';
 import {dev, devAssert} from './log';
-import {dict} from './utils/object';
-import {includes} from './string';
+import {dict} from './core/types/object';
+import {includes} from './core/types/string';
 import {toWin} from './types';
 
 const HTML_ESCAPE_CHARS = {
@@ -42,6 +42,17 @@ export const UPGRADE_TO_CUSTOMELEMENT_PROMISE = '__AMP_UPG_PRM';
 export const UPGRADE_TO_CUSTOMELEMENT_RESOLVER = '__AMP_UPG_RES';
 
 /**
+ * @typedef {{
+ *   bubbles: (boolean|undefined),
+ *   cancelable: (boolean|undefined),
+ * }}
+ */
+export let CustomEventOptionsDef;
+
+/** @const {!CustomEventOptionsDef} */
+const DEFAULT_CUSTOM_EVENT_OPTIONS = {bubbles: true, cancelable: true};
+
+/**
  * Waits until the child element is constructed. Once the child is found, the
  * callback is executed.
  * @param {!Element} parent
@@ -55,7 +66,7 @@ export function waitForChild(parent, checkFunc, callback) {
   }
   /** @const {!Window} */
   const win = toWin(parent.ownerDocument.defaultView);
-  if (win.MutationObserver) {
+  if (IS_ESM || win.MutationObserver) {
     /** @const {MutationObserver} */
     const observer = new win.MutationObserver(() => {
       if (checkFunc(parent)) {
@@ -526,7 +537,7 @@ function scopedQuerySelectionFallback(root, selector) {
  * @return {?Element}
  */
 export function scopedQuerySelector(root, selector) {
-  if (isScopeSelectorSupported(root)) {
+  if (IS_ESM || isScopeSelectorSupported(root)) {
     return root./*OK*/ querySelector(prependSelectorsWith(selector, ':scope'));
   }
 
@@ -543,7 +554,7 @@ export function scopedQuerySelector(root, selector) {
  * @return {!NodeList<!Element>}
  */
 export function scopedQuerySelectorAll(root, selector) {
-  if (isScopeSelectorSupported(root)) {
+  if (IS_ESM || isScopeSelectorSupported(root)) {
     return root./*OK*/ querySelectorAll(
       prependSelectorsWith(selector, ':scope')
     );
@@ -767,7 +778,7 @@ export function isAmpElement(element) {
  * Return a promise that resolve when an AMP element upgrade from HTMLElement
  * to CustomElement
  * @param {!Element} element
- * @return {!Promise<!Element>}
+ * @return {!Promise<!AmpElement>}
  */
 export function whenUpgradedToCustomElement(element) {
   devAssert(isAmpElement(element), 'element is not AmpElement');
@@ -950,4 +961,33 @@ export function getVerticalScrollbarWidth(win) {
   const windowWidth = win./*OK*/ innerWidth;
   const documentWidth = documentElement./*OK*/ clientWidth;
   return windowWidth - documentWidth;
+}
+
+/**
+ * Dispatches a custom event.
+ *
+ * @param {!Node} node
+ * @param {string} name
+ * @param {!Object=} opt_data Event data.
+ * @param {!CustomEventOptionsDef=} opt_options
+ */
+export function dispatchCustomEvent(node, name, opt_data, opt_options) {
+  const data = opt_data || {};
+  // Constructors of events need to come from the correct window. Sigh.
+  const event = node.ownerDocument.createEvent('Event');
+  event.data = data;
+  const {bubbles, cancelable} = opt_options || DEFAULT_CUSTOM_EVENT_OPTIONS;
+  event.initEvent(name, bubbles, cancelable);
+  node.dispatchEvent(event);
+}
+
+/**
+ * Ensures the child is contained by the parent, but not the parent itself.
+ *
+ * @param {!Node} parent
+ * @param {!Node} child
+ * @return {boolean}
+ */
+export function containsNotSelf(parent, child) {
+  return child !== parent && parent.contains(child);
 }

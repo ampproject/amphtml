@@ -18,24 +18,22 @@
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
-import '../../extensions/amp-ad/0.1/amp-ad';
-import {AmpA4A} from '../../extensions/amp-a4a/0.1/amp-a4a';
-import {CONSENT_POLICY_STATE} from '../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../src/core/constants/consent-state';
 import {
   RTC_ERROR_ENUM,
   RealTimeConfigManager,
 } from '../../src/service/real-time-config/real-time-config-impl';
 import {Services} from '../../src/services';
 import {Xhr} from '../../src/service/xhr-impl';
+import {cancellation} from '../../src/error-reporting';
 import {createElementWithAttributes} from '../../src/dom';
 import {dev, user} from '../../src/log';
 import {isFiniteNumber} from '../../src/types';
 
 describes.realWin('real-time-config service', {amp: true}, (env) => {
   let element;
-  let a4aElement;
   let fetchJsonStub;
-  let getCalloutParam_, maybeExecuteRealTimeConfig_, validateRtcConfig_;
+  let getCalloutParam_, execute_, validateRtcConfig_;
   let truncUrl_, inflateAndSendRtc_, sendErrorMessage;
   let rtc;
 
@@ -44,6 +42,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
     env.win.__AMP_MODE.test = true;
 
     const doc = env.win.document;
+    doc.win = env.win;
     element = createElementWithAttributes(env.win.document, 'amp-ad', {
       'width': '200',
       'height': '50',
@@ -52,18 +51,17 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
     });
     doc.body.appendChild(element);
     fetchJsonStub = env.sandbox.stub(Xhr.prototype, 'fetchJson');
-    a4aElement = new AmpA4A(element);
 
     // RealTimeConfigManager uses the UrlReplacements service scoped to the A4A
     // (FIE), but for testing stub in the parent service for simplicity.
     const urlReplacements = Services.urlReplacementsForDoc(element);
     env.sandbox
       .stub(Services, 'urlReplacementsForDoc')
-      .withArgs(a4aElement.element)
+      .withArgs(doc)
       .returns(urlReplacements);
 
-    rtc = new RealTimeConfigManager(a4aElement);
-    maybeExecuteRealTimeConfig_ = rtc.maybeExecuteRealTimeConfig.bind(rtc);
+    rtc = new RealTimeConfigManager(doc);
+    execute_ = rtc.execute.bind(rtc);
     getCalloutParam_ = rtc.getCalloutParam_.bind(rtc);
     validateRtcConfig_ = rtc.validateRtcConfig_.bind(rtc);
     truncUrl_ = rtc.truncUrl_.bind(rtc);
@@ -124,7 +122,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
     });
   });
 
-  describe('#maybeExecuteRealTimeConfig_', () => {
+  describe('#execute_', () => {
     function executeTest(args) {
       const {
         urls,
@@ -147,7 +145,14 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
         );
       });
       const customMacros = args['customMacros'] || {};
-      const rtcResponsePromiseArray = maybeExecuteRealTimeConfig_(customMacros);
+      const rtcResponsePromiseArray = execute_(
+        element,
+        customMacros,
+        /* consentState */ undefined,
+        /* consentString */ undefined,
+        /* consentMetadata */ undefined,
+        () => {}
+      );
       return rtcResponsePromiseArray.then((rtcResponseArray) => {
         expect(rtcResponseArray.length).to.equal(expectedRtcArray.length);
         expect(fetchJsonStub.callCount).to.equal(calloutCount);
@@ -297,6 +302,30 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
         expectedRtcArray,
       });
     });
+
+    it('should fetch RTC from amp-script URIs', async () => {
+      const ampScriptFetch = env.sandbox.stub();
+      ampScriptFetch.returns(Promise.resolve({targeting: ['sports']}));
+      env.sandbox
+        .stub(Services, 'scriptForDocOrNull')
+        .returns(Promise.resolve({fetch: ampScriptFetch}));
+
+      const urls = ['amp-script:scriptId.functionName'];
+      setRtcConfig({urls, vendors: {}, timeoutMillis: 500});
+      const rtcResponse = await execute_(
+        element,
+        /* customMacros */ {},
+        /* consentState */ undefined,
+        /* consentString */ undefined,
+        /* consentMetadata */ undefined,
+        () => {}
+      );
+      expect(ampScriptFetch).calledWithExactly(
+        'amp-script:scriptId.functionName'
+      );
+      expect(rtcResponse[0].response).deep.equal({targeting: ['sports']});
+    });
+
     it('should send RTC callouts to inflated vendor URLs', () => {
       const vendors = {
         'fAkeVeNdOR': {SLOT_ID: 1, PAGE_ID: 2},
@@ -603,9 +632,13 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
     for (const consentState in CONSENT_POLICY_STATE) {
       it(`should handle consentState ${consentState}`, () => {
         setRtcConfig({urls: ['https://foo.com']});
-        const rtcResult = maybeExecuteRealTimeConfig_(
+        const rtcResult = execute_(
+          element,
           {},
-          CONSENT_POLICY_STATE[consentState]
+          CONSENT_POLICY_STATE[consentState],
+          /* consentString */ undefined,
+          /* consentMetadata */ undefined,
+          () => {}
         );
         switch (CONSENT_POLICY_STATE[consentState]) {
           case CONSENT_POLICY_STATE.SUFFICIENT:
@@ -761,12 +794,33 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
         timeoutMillis: 1000,
       };
       const macros = {};
-      // Simulate an unlayoutCallback call
-      inflateAndSendRtc_(url, macros);
-      a4aElement.promiseId_++;
+      inflateAndSendRtc_(url, macros, /* errorReportingUrl */ undefined, () => {
+        throw cancellation();
+      });
       return rtc.promiseArray_[0].then((errorResponse) => {
         expect(errorResponse).to.be.undefined;
       });
+    });
+
+    it('should expand globally allowed macros', async () => {
+      const url = 'https://www.foo.example/?cid=CLIENT_ID(foo)';
+      rtc.rtcConfig_ = {
+        timeoutMillis: 1000,
+      };
+      const macros = {};
+      inflateAndSendRtc_(
+        url,
+        macros,
+        /* errorReportingUrl */ undefined,
+        () => {} // checkStillCurrent
+      );
+      await rtc.promiseArray_[0];
+      expect(fetchJsonStub).to.be.called;
+      expect(
+        fetchJsonStub.calledWithMatch(
+          /https:\/\/www.foo.example\/\?cid=amp-\S+$/
+        )
+      ).to.be.true;
     });
   });
 
@@ -963,7 +1017,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
   });
 
   describe('sendErrorMessage', () => {
-    let imageStub, requestUrl;
+    let imageStub;
     let errorType, errorReportingUrl;
     let imageMock;
 
@@ -974,24 +1028,17 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
       env.sandbox.stub(Xhr.prototype, 'fetch');
       imageMock = {};
       imageStub = env.sandbox.stub(env.win, 'Image').returns(imageMock);
-
       errorType = RTC_ERROR_ENUM.TIMEOUT;
       errorReportingUrl = 'https://www.example.test?e=ERROR_TYPE&h=HREF';
-      const allowlist = {ERROR_TYPE: true, HREF: true};
-      const macros = {
-        ERROR_TYPE: errorType,
-        HREF: env.win.location.href,
-      };
-
-      requestUrl = Services.urlReplacementsForDoc(
-        a4aElement.element
-      ).expandUrlSync(errorReportingUrl, macros, allowlist);
     });
 
     it('should send error message pingback to correct url', () => {
       sendErrorMessage(errorType, errorReportingUrl);
       expect(imageStub).to.be.calledOnce;
-      expect(imageMock.src).to.equal(requestUrl);
+      const href = encodeURIComponent(env.win.location.href);
+      expect(imageMock.src).to.equal(
+        `https://www.example.test?e=${errorType}&h=${href}`
+      );
     });
   });
 });

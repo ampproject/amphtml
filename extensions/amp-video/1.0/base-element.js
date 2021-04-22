@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {CSS} from './autoplay.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {VideoWrapper} from './video-wrapper';
-import {isLayoutSizeDefined} from '../../../src/layout';
 
 /** @extends {PreactBaseElement<VideoWrapperDef.Api>} */
 export class VideoBaseElement extends PreactBaseElement {
@@ -40,7 +39,7 @@ export class VideoBaseElement extends PreactBaseElement {
   /**
    * @param {string} alias
    * @param {function(!VideoWrapperDef.Api, !../../../src/service/action-impl.ActionInvocation)} handler
-   * @param {!../../../src/action-constants.ActionTrust=} minTrust
+   * @param {!../../../src/core/constants/action-constants.ActionTrust=} minTrust
    * @private
    */
   registerApiAction_(alias, handler, minTrust = ActionTrust.HIGH) {
@@ -58,15 +57,13 @@ export class VideoBaseElement extends PreactBaseElement {
       minTrust
     );
   }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
-  }
 }
 
 /** @override */
 VideoBaseElement['Component'] = VideoWrapper;
+
+/** @override */
+VideoBaseElement['loadable'] = true;
 
 /** @override */
 VideoBaseElement['layoutSizeDefined'] = true;
@@ -84,14 +81,43 @@ VideoBaseElement['layoutSizeDefined'] = true;
 VideoBaseElement['staticProps'];
 
 /** @override */
+VideoBaseElement['props'] = {
+  'album': {attr: 'album'},
+  'alt': {attr: 'alt'},
+  'artist': {attr: 'artist'},
+  'artwork': {attr: 'artwork'},
+  'attribution': {attr: 'attribution'},
+  'autoplay': {attr: 'autoplay', type: 'boolean'},
+  'controls': {attr: 'controls', type: 'boolean'},
+  'controlslist': {attr: 'controlslist'},
+  'crossorigin': {attr: 'crossorigin'},
+  'disableremoteplayback': {attr: 'disableremoteplayback'},
+  'loop': {attr: 'loop', type: 'boolean'},
+  'noaudio': {attr: 'noaudio', type: 'boolean'},
+  'poster': {attr: 'poster'},
+};
+
+/** @override */
 VideoBaseElement['children'] = {
   'sources': {
-    name: 'sources',
     selector: 'source',
     single: false,
     clone: true,
+  },
+  'src': {attr: 'src'},
+  'title': {attr: 'title'},
+
+  // TODO(alanorozco): These props have no internal implementation yet.
+  'dock': {attr: 'dock', media: true},
+  'rotate-to-fullscreen': {
+    attr: 'rotate-to-fullscreen',
+    type: 'boolean',
+    media: true,
   },
 };
 
 /** @override */
 VideoBaseElement['shadowCss'] = CSS;
+
+/** @override */
+VideoBaseElement['usesShadowDom'] = true;

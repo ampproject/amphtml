@@ -1,0 +1,41 @@
+{
+  "2": {"string": "Dodirnite Dalje"},
+  "3": {"string": "Dodirnite Natrag"},
+  "4": {"string": "Veza se ne može kopirati u međuspremnik :("},
+  "5": {"string": "Veza je kopirana!"},
+  "6": {"string": "E-pošta"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Dohvati vezu"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "SMS"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {
+    "string": "Povećajte prozor u visinu i širinu da biste vidjeli taj sadržaj"
+  },
+  "19": {
+    "string": "Morate omogućiti eksperiment AMP priča da biste mogli vidjeti taj sadržaj."
+  },
+  "20": {"string": "Najbolje je pregledavati stranicu u portretnom načinu"},
+  "21": {"string": "Izgleda da vaš preglednik ne podržava tu značajku"},
+  "22": {"string": "Prihvaćam"},
+  "23": {"string": "Odbij"},
+  "25": {"string": "Pregledajte na izvornoj domeni:"},
+  "26": {"string": "Više o AMP rezultatima"},
+  "27": {"string": "Ipak nastavi"},
+  "28": {"string": "Promijenite postavke privatnosti za podatke"},
+  "29": {"string": "Postavke privatnosti"},
+  "30": {"string": "Više za čitanje"},
+  "31": {"string": "Zvuk isključen"},
+  "32": {"string": "Zvuk uključen"},
+  "33": {"string": "Ova stranica nema zvuk"},
+  "34": {"string": "Reproduciraj videozapis"},
+  "35": {"string": "Prijeđite prstom prema gore"},
+  "36": {"string": "Proširi tweet"},
+  "37": {"string": "Povećajte prozor u visinu da biste vidjeli taj sadržaj"},
+  "38": {"string": "Povećajte prozor u širinu da biste vidjeli taj sadržaj"},
+  "63": {"string": "Line"}
+}

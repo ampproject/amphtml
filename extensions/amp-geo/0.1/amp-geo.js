@@ -28,14 +28,14 @@
  *      "iceland": [ "is" ]
  *    }
  *  }
- *  </scirpt>
+ *  </script>
  * </amp-geo>
  * </code>
  *
  * the amp-geo element's layout type is nodisplay.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {Services} from '../../../src/services';
 
 /**
@@ -50,9 +50,10 @@ import {US_CA_CODE, ampGeoPresets} from './amp-geo-presets';
 import {GEO_IN_GROUP} from './amp-geo-in-group';
 import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {isArray, isObject} from '../../../src/types';
+import {isArray, isObject} from '../../../src/core/types';
 import {isCanary} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
+
 import {tryParseJson} from '../../../src/json';
 import {urls} from '../../../src/config';
 
@@ -98,6 +99,11 @@ const mode = {
 export let GeoDef;
 
 export class AmpGeo extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -114,11 +120,6 @@ export class AmpGeo extends AMP.BaseElement {
     this.matchedGroups_ = [];
     /** @private {Array<string>} */
     this.definedGroups_ = [];
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @override */

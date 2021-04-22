@@ -16,6 +16,7 @@
 
 import {ButtonTextFitter} from '../../extensions/amp-story-auto-ads/0.1/story-ad-button-text-fitter';
 import {
+  START_CTA_ANIMATION_ATTR,
   createCta,
   getStoryAdMetadataFromDoc,
   maybeCreateAttribution,
@@ -33,7 +34,7 @@ export function maybeRenderInaboxAsStoryAd(ampdoc) {
   const {win} = ampdoc;
   const doc = win.document;
   const storyAdMetadata = getStoryAdMetadataFromDoc(doc);
-  if (!validateCtaMetadata(storyAdMetadata)) {
+  if (!validateCtaMetadata(storyAdMetadata, true /* opt_inabox */)) {
     return;
   }
   installStylesForDoc(ampdoc, sharedCSS + inaboxCSS, () => {});
@@ -41,7 +42,14 @@ export function maybeRenderInaboxAsStoryAd(ampdoc) {
 
   const buttonFitter = new ButtonTextFitter(ampdoc);
   const ctaContainer = doc.createElement('div');
-  createCta(doc, buttonFitter, ctaContainer, storyAdMetadata);
+
+  // TODO(ccordry): maybe use inOb for visible signal to fire animation
+  // across amp & inabox environments.
+  createCta(doc, buttonFitter, ctaContainer, storyAdMetadata).then(
+    (ctaAnchor) =>
+      ctaAnchor && ctaAnchor.setAttribute(START_CTA_ANIMATION_ATTR, '')
+  );
+
   doc.body.appendChild(ctaContainer);
 
   if (win.parent) {

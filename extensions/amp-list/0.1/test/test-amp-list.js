@@ -15,11 +15,12 @@
  */
 
 import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {AmpDocService} from '../../../../src/service/ampdoc-impl';
-import {AmpEvents} from '../../../../src/amp-events';
+import {AmpEvents} from '../../../../src/core/constants/amp-events';
 import {AmpList} from '../amp-list';
-import {Deferred} from '../../../../src/utils/promise';
+import {AmpScriptService} from '../../../amp-script/0.1/amp-script';
+import {Deferred} from '../../../../src/core/data-structures/promise';
 import {Services} from '../../../../src/services';
 import {
   createElementWithAttributes,
@@ -66,7 +67,7 @@ describes.repeated(
             findAndRenderTemplate: env.sandbox.stub(),
             findAndRenderTemplateArray: env.sandbox.stub(),
           };
-          env.sandbox.stub(Services, 'templatesFor').returns(templates);
+          env.sandbox.stub(Services, 'templatesForDoc').returns(templates);
           env.sandbox
             .stub(AmpDocService.prototype, 'getAmpDoc')
             .returns(ampdoc);
@@ -315,11 +316,21 @@ describes.repeated(
 
                 it('should require placeholder', () => {
                   list.getPlaceholder = () => null;
-                  allowConsoleError(() => {
-                    expect(() => list.isLayoutSupported('container')).to.throw(
-                      /amp-list\[layout=container\] requires a placeholder/
+                  if (variant.type === 'experiment') {
+                    allowConsoleError(() => {
+                      expect(() =>
+                        list.isLayoutSupported('container')
+                      ).to.throw(
+                        /amp-list\[layout=container\] should have a placeholder/
+                      );
+                    });
+                  } else {
+                    expect(() =>
+                      list.isLayoutSupported('container')
+                    ).to.not.throw(
+                      /amp-list\[layout=container\] should have a placeholder/
                     );
-                  });
+                  }
                 });
 
                 it('should unlock height for layout=container with successful attemptChangeHeight', () => {
@@ -822,14 +833,14 @@ describes.repeated(
             it('should error if proxied fetch fails', () => {
               env.sandbox
                 .stub(ssrTemplateHelper, 'ssr')
-                .returns(Promise.reject());
+                .returns(Promise.reject(new Error('error')));
 
               listMock.expects('toggleLoading').withExactArgs(false).once();
 
               return expect(
                 list.layoutCallback()
               ).to.eventually.be.rejectedWith(
-                /Error proxying amp-list templates/
+                /XHR Failed fetching \(https:\/\/data.com\/\.\.\.\): error/
               );
             });
 
@@ -853,7 +864,7 @@ describes.repeated(
               return expect(
                 list.layoutCallback()
               ).to.eventually.be.rejectedWith(
-                /Error proxying amp-list templates with status/
+                /fetching JSON data \(https:\/\/data.com\/\.\.\.\): HTTP error 400/
               );
             });
 
@@ -1003,7 +1014,9 @@ describes.repeated(
             beforeEach(() => {
               resetExperimentTogglesForTesting(win);
 
-              env.sandbox.stub(Services, 'scriptForDocOrNull');
+              env.sandbox
+                .stub(Services, 'scriptForDocOrNull')
+                .returns(Promise.resolve(new AmpScriptService(env.ampdoc)));
               ampScriptEl = document.createElement('amp-script');
               ampScriptEl.setAttribute('id', 'example');
               doc.body.appendChild(ampScriptEl);
@@ -1523,7 +1536,8 @@ describes.realWin(
       env.sandbox.spy(element, 'enqueAction');
       env.sandbox.stub(element, 'getDefaultActionAlias').returns({'items': []});
       await whenUpgradedToCustomElement(element);
-      env.sandbox.stub(element.implementation_, 'fetchList_');
+      const impl = await element.getImpl(false);
+      env.sandbox.stub(impl, 'fetchList_');
 
       ['changeToLayoutContainer', 'refresh'].forEach((method) => {
         action.execute(

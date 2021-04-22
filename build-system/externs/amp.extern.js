@@ -31,7 +31,8 @@
  * @see https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch
  *
  * @typedef {{
- *   body: (!JsonObject|!FormData|!FormDataWrapperInterface|undefined|string),
+ *   responseType: (string|undefined),
+ *   body: (!JsonObject|!FormData|!FormDataWrapperInterface|!Array|string|undefined|null),
  *   cache: (string|undefined),
  *   credentials: (string|undefined),
  *   headers: (!JsonObject|undefined),
@@ -59,16 +60,6 @@ FormDataWrapperInterface.prototype.getFormData = function () {};
 FormData.prototype.entries = function () {};
 
 /**
- * A type for Objects that can be JSON serialized or that come from
- * JSON serialization. Requires the objects fields to be accessed with
- * bracket notation object['name'] to make sure the fields do not get
- * obfuscated.
- * @constructor
- * @dict
- */
-function JsonObject() {}
-
-/**
  * @typedef {{
  *   YOU_MUST_USE: string,
  *   jsonLiteral: function(),
@@ -83,6 +74,12 @@ var InternalJsonLiteralTypeDef;
  */
 Element.prototype.dataset;
 
+/** Needed for partial shadow DOM polyfill used in shadow docs. */
+Element.prototype.__AMP_SHADOW_ROOT;
+
+/** @type {?ShadowRoot} */
+Element.prototype.shadowRoot;
+
 /**
  * - n is the name.
  * - f is the function body of the extension.
@@ -96,20 +93,48 @@ Element.prototype.dataset;
  */
 function ExtensionPayload() {}
 
-/** @type {string} */
+/**
+ * Extension name.
+ * @type {string}
+ */
 ExtensionPayload.prototype.n;
 
-/** @type {function(!Object,!Object)} */
-ExtensionPayload.prototype.f;
+/**
+ * Extension version.
+ * @type {string}
+ */
+ExtensionPayload.prototype.ev;
 
-/** @type {string|undefined} */
+/**
+ * Whether this extension version is the latest version.
+ * @type {boolean}
+ */
+ExtensionPayload.prototype.l;
+
+/**
+ * Priority.
+ * @type {string|undefined}
+ */
 ExtensionPayload.prototype.p;
 
-/** @type {string} */
+/**
+ * RTV (release) version.
+ * @type {string}
+ */
 ExtensionPayload.prototype.v;
 
-/** @type {!Array<string>|string|undefined} */
-ExtensionPayload.prototype.i;
+/**
+ * If the value of "m" is 1 then the current extension is of type "module",
+ * else it is of type "nomodule".
+ * @type {number}
+ */
+ExtensionPayload.prototype.m;
+
+/**
+ * Install function.
+ * @type {function(!Object,!Object)}
+ */
+ExtensionPayload.prototype.f;
 
 /**
  * @typedef {?JsonObject|undefined|string|number|!Array<JsonValue>}
@@ -146,9 +171,6 @@ VideoAnalyticsDetailsDef.prototype.width;
 var process = {};
 process.env;
 process.env.NODE_ENV;
-
-/** @type {boolean|undefined} */
-window.IS_AMP_ALT;
 
 // Exposed to ads.
 // Preserve these filedNames so they can be accessed by 3p code.
@@ -191,12 +213,16 @@ window.sf_.cfg;
 window.draw3p;
 
 // AMP's globals
+window.testLocation;
+window.Location.originalHash;
 window.__AMP_SERVICES;
 window.__AMP_TEST;
 window.__AMP_TEST_IFRAME;
 window.__AMP_TAG;
 window.__AMP_TOP;
 window.__AMP_PARENT;
+window.__AMP_WEAKREF_ID;
+window.__AMP_URL_CACHE;
 window.AMP = {};
 window.AMP._ = {};
 window.AMP.push;
@@ -401,30 +427,157 @@ window.AMP.dependencies.inputmaskFactory = function (unusedElement) {};
 
 // Should have been defined in the closure compiler's extern file for
 // IntersectionObserverEntry, but appears to have been omitted.
+/** @type {?ClientRect} */
 IntersectionObserverEntry.prototype.rootBounds;
 
 // TODO (remove after we update closure compiler externs)
 window.PerformancePaintTiming;
 window.PerformanceObserver;
 Object.prototype.entryTypes;
+Window.prototype.origin;
+HTMLAnchorElement.prototype.origin;
 
 /** @typedef {number}  */
 var time;
 
 /**
- * This type signifies a callback that can be called to remove the listener.
- * @typedef {function()}
- */
-var UnlistenDef;
-
-/**
  * Just an element, but used with AMP custom elements..
- * @typedef {!Element}
+ * @constructor @extends {Element}
  */
-var AmpElement;
+var AmpElement = function () {};
+
+/** @return {boolean} */
+AmpElement.prototype.V1 = function () {};
+
+/** @return {boolean} */
+AmpElement.prototype.deferredMount = function () {};
 
 /** @return {!Signals} */
 AmpElement.prototype.signals = function () {};
+
+/** */
+AmpElement.prototype.pause = function () {};
+
+/** */
+AmpElement.prototype.unmount = function () {};
+
+/**
+ * @param {number=} opt_parentPriority
+ * @return {!Promise}
+ */
+AmpElement.prototype.ensureLoaded = function (opt_parentPriority) {};
+
+/** @return {?Element} */
+AmpElement.prototype.getPlaceholder = function () {};
+
+/** @param {boolean} show */
+AmpElement.prototype.togglePlaceholder = function (show) {};
+
+/** @return {{width: number, height: number}} */
+AmpElement.prototype.getLayoutSize = function () {};
+
+/**
+ * @param {boolean=} opt_waitForBuild
+ * @return {!Promise<!AMP.BaseElement>}
+ */
+AmpElement.prototype.getImpl = function (opt_waitForBuild) {};
+
+/** @return {!Promise} */
+AmpElement.prototype.buildInternal = function () {};
+
+/** @return {!Promise} */
+AmpElement.prototype.mountInternal = function () {};
+
+/** @return {boolean} */
+AmpElement.prototype.isBuilt = function () {};
+
+/** @return {boolean} */
+AmpElement.prototype.isBuilding = function () {};
+
+/** @return {number} */
+AmpElement.prototype.getBuildPriority = function () {};
+
+/** @return {number} */
+AmpElement.prototype.getLayoutPriority = function () {};
+
+/** @return {boolean} */
+AmpElement.prototype.isRelayoutNeeded = function () {};
+
+/** @return {boolean|number} */
+AmpElement.prototype.renderOutsideViewport = function () {};
+
+/** @return {boolean|number} */
+AmpElement.prototype.idleRenderOutsideViewport = function () {};
+
+/** @type {number|undefined} */
+AmpElement.prototype.layoutScheduleTime;
+
+/** @return {!Promise} */
+AmpElement.prototype.layoutCallback = function () {};
+
+/** */
+AmpElement.prototype.unlayoutCallback = function () {};
+
+/** @return {!Promise} */
+AmpElement.prototype.whenLoaded = function () {};
+
+/** @param {boolean} pretendDisconnected */
+AmpElement.prototype.disconnect = function (pretendDisconnected) {};
+
+/** @return {boolean} */
+AmpElement.prototype.reconstructWhenReparented = function () {};
+
+/** @return {boolean} */
+AmpElement.prototype.isBuildRenderBlocking = function () {};
+
+/** @return {boolean} */
+AmpElement.prototype.prerenderAllowed = function () {};
+
+/** @return {string} */
+AmpElement.prototype.getLayout = function () {};
+
+/**
+ * @param {{width: number, height: number, top: number, bottom: number}} layoutBox
+ * @param {boolean=} opt_sizeChanged
+ */
+AmpElement.prototype.updateLayoutBox = function (layoutBox, opt_sizeChanged) {};
+
+/** */
+AmpElement.prototype.collapsedCallback = function () {};
+
+/** @return {boolean} */
+AmpElement.prototype.isUpgraded = function () {};
+
+/** @return {number} */
+AmpElement.prototype.getUpgradeDelayMs = function () {};
+
+/**
+ * @param {boolean} overflown
+ * @param {number|undefined} requestedHeight
+ * @param {number|undefined} requestedWidth
+ */
+AmpElement.prototype.overflowCallback = function (
+  overflown,
+  requestedHeight,
+  requestedWidth
+) {};
+
+/**
+ * @param {number|undefined} newHeight
+ * @param {number|undefined} newWidth
+ * @param {?} opt_newMargins
+ */
+AmpElement.prototype.applySize = function (
+  newHeight,
+  newWidth,
+  opt_newMargins
+) {};
+
+/** */
+AmpElement.prototype.expand = function () {};
+
+/** */
+AmpElement.prototype.collapse = function () {};
 
 var Signals = class {};
 /**
@@ -643,8 +796,6 @@ AMP.AmpAdUIHandler = class {
   constructor(baseInstance) {}
 };
 
-AMP.RealTimeConfigManager;
-
 /**
  * Actual filled values for this exists in
  * src/service/real-time-config/real-time-config-impl.js
@@ -660,8 +811,8 @@ const RTC_ERROR_ENUM = {};
 var rtcResponseDef;
 
 /**
- * This symbol is exposed by browserify bundles transformed by
- * `scoped-require.js` to avoid polluting the global namespace with `require`.
+ * This symbol is exposed by bundles transformed by `scoped-require.js` to avoid
+ * polluting the global namespace with `require`.
  * It allows AMP extensions to consume code injected into their binaries that
  * cannot be run through Closure Compiler, e.g. React code with JSX.
  * @type {!function(string):?}
@@ -903,6 +1054,9 @@ class FeaturePolicy {
  */
 HTMLIFrameElement.prototype.featurePolicy;
 
+/** @type {boolean} */
+HTMLVideoElement.prototype.playsInline;
+
 /**
  * Going through the standardization process now.
  *
@@ -911,3 +1065,23 @@ HTMLIFrameElement.prototype.featurePolicy;
  * @param {string} cssText
  */
 CSSStyleSheet.prototype.replaceSync = function (cssText) {};
+
+/**
+ * @constructor @struct
+ */
+function ResizeObserverSize() {}
+
+/** @type {number} */
+ResizeObserverSize.prototype.inlineSize;
+
+/** @type {number} */
+ResizeObserverSize.prototype.blockSize;
+
+/** @type {!Array<!ResizeObserverSize>|undefined} */
+ResizeObserverEntry.prototype.borderBoxSize;
+
+/** @type {?function(!MediaQueryListEvent)} */
+MediaQueryList.prototype.onchange;
+
+/** @type {!Array<!CSSStyleSheet>|undefined} */
+ShadowRoot.prototype.adoptedStyleSheets;

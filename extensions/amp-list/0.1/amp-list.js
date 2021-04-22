@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {CSS} from '../../../build/amp-list-0.1.css';
 import {
   DIFFABLE_AMP_ELEMENTS,
@@ -23,7 +23,7 @@ import {
   DIFF_KEY,
   markElementForDiffing,
 } from '../../../src/purifier/sanitation';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {
   Layout,
   getLayoutClass,
@@ -48,12 +48,12 @@ import {
 } from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
-import {getSourceOrigin} from '../../../src/url';
+import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
 import {getValueForExpr} from '../../../src/json';
 import {isAmp4Email} from '../../../src/format';
-import {isArray, toArray} from '../../../src/types';
+import {isArray, toArray} from '../../../src/core/types/array';
 import {isExperimentOn} from '../../../src/experiments';
 import {px, setImportantStyles, setStyles, toggle} from '../../../src/style';
 import {setDOM} from '../../../third_party/set-dom/set-dom';
@@ -72,7 +72,6 @@ const TABBABLE_ELEMENTS_QUERY =
 
 // Technically the ':' is not considered part of the scheme, but it is useful to include.
 const AMP_STATE_URI_SCHEME = 'amp-state:';
-const AMP_SCRIPT_URI_SCHEME = 'amp-script:';
 
 /**
  * @typedef {{
@@ -120,8 +119,8 @@ export class AmpList extends AMP.BaseElement {
     /** @private {?Array} */
     this.renderedItems_ = null;
 
-    /** @const {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(this.win);
+    /** @private {?../../../src/service/template-impl.Templates} */
+    this.templates_ = null;
 
     /**
      * Has layoutCallback() been called yet?
@@ -194,17 +193,29 @@ export class AmpList extends AMP.BaseElement {
   isLayoutSupported(layout) {
     if (layout === Layout.CONTAINER) {
       const doc = this.element.ownerDocument;
+      const isEmail = doc && isAmp4Email(doc);
+      const hasPlaceholder =
+        this.getPlaceholder() ||
+        (this.element.hasAttribute('diffable') &&
+          this.queryDiffablePlaceholder_());
+      if (isEmail) {
+        if (!hasPlaceholder) {
+          user().warn(
+            TAG,
+            'amp-list[layout=container] should have a placeholder to establish an initial size. ' +
+              'See https://go.amp.dev/c/amp-list/#placeholder-and-fallback. %s',
+            this.element
+          );
+        }
+        return (this.enableManagedResizing_ = true);
+      }
       userAssert(
-        (doc && isAmp4Email(doc)) ||
-          isExperimentOn(this.win, 'amp-list-layout-container'),
+        isExperimentOn(this.win, 'amp-list-layout-container'),
         'Experiment "amp-list-layout-container" is not turned on.'
       );
-      const hasDiffablePlaceholder =
-        this.element.hasAttribute('diffable') &&
-        this.queryDiffablePlaceholder_();
       userAssert(
-        this.getPlaceholder() || hasDiffablePlaceholder,
-        'amp-list[layout=container] requires a placeholder to establish an initial size. ' +
+        hasPlaceholder,
+        'amp-list[layout=container] should have a placeholder to establish an initial size. ' +
           'See https://go.amp.dev/c/amp-list/#placeholder-and-fallback. %s',
         this.element
       );
@@ -215,6 +226,7 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.templates_ = Services.templatesForDoc(this.element);
     this.action_ = Services.actionServiceForDoc(this.element);
     this.owners_ = Services.ownersForDoc(this.element);
     /** If the element is in an email document,
@@ -421,17 +433,6 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * Returns true if element's src points to an amp-script function.
-   *
-   * @param {string} src
-   * @return {boolean}
-   * @private
-   */
-  isAmpScriptSrc_(src) {
-    return src.startsWith(AMP_SCRIPT_URI_SCHEME);
-  }
-
-  /**
    * Gets the json an amp-list that has an "amp-state:" uri. For example,
    * src="amp-state:json.path".
    *
@@ -481,25 +482,9 @@ export class AmpList extends AMP.BaseElement {
           !this.ssrTemplateHelper_.isEnabled(),
           '[amp-list]: "amp-script" URIs cannot be used in SSR mode.'
         );
-
-        const args = src.slice(AMP_SCRIPT_URI_SCHEME.length).split('.');
-        userAssert(
-          args.length === 2 && args[0].length > 0 && args[1].length > 0,
-          '[amp-list]: "amp-script" URIs must be of the format "scriptId.functionIdentifier".'
-        );
-
-        const ampScriptId = args[0];
-        const fnIdentifier = args[1];
-        const ampScriptEl = this.element
-          .getAmpDoc()
-          .getElementById(ampScriptId);
-        userAssert(
-          ampScriptEl && ampScriptEl.tagName === 'AMP-SCRIPT',
-          `[amp-list]: could not find <amp-script> with script set to ${ampScriptId}`
-        );
-        return ampScriptEl
-          .getImpl()
-          .then((impl) => impl.callFunction(fnIdentifier));
+        return Services.scriptForDocOrNull(
+          this.element
+        ).then((ampScriptService) => ampScriptService.fetch(src));
       })
       .then((json) => {
         userAssert(
@@ -754,7 +739,7 @@ export class AmpList extends AMP.BaseElement {
     } else {
       if (this.isAmpStateSrc_(elementSrc)) {
         fetch = this.getAmpStateJson_(elementSrc);
-      } else if (this.isAmpScriptSrc_(elementSrc)) {
+      } else if (isAmpScriptUri(elementSrc)) {
         fetch = this.getAmpScriptJson_(elementSrc);
       } else {
         fetch = this.prepareAndSendFetch_(refresh);
@@ -851,7 +836,8 @@ export class AmpList extends AMP.BaseElement {
         (response) => {
           userAssert(
             response,
-            'Error proxying amp-list templates, received no response.'
+            'Failed fetching JSON data: XHR Failed fetching ' +
+              `(${this.buildElidedUrl_(request)}): received no response.`
           );
           const init = response['init'];
           if (init) {
@@ -859,21 +845,28 @@ export class AmpList extends AMP.BaseElement {
             if (status >= 300) {
               /** HTTP status codes of 300+ mean redirects and errors. */
               throw user().createError(
-                'Error proxying amp-list templates with status: ',
+                `Failed fetching JSON data (${this.buildElidedUrl_(request)})` +
+                  ': HTTP error',
                 status
               );
             }
           }
           userAssert(
             typeof response['html'] === 'string',
-            'Expected response with format {html: <string>}. Received: ',
+            'Failed fetching JSON data: XHR Failed fetching ' +
+              `(${this.buildElidedUrl_(request)}): Expected response with ` +
+              'format {html: <string>}. Received: ',
             response
           );
           request.fetchOpt.responseType = 'application/json';
           return response;
         },
         (error) => {
-          throw user().createError('Error proxying amp-list templates', error);
+          throw user().createError(
+            'Failed fetching JSON data: XHR Failed fetching ' +
+              `(${this.buildElidedUrl_(request)})`,
+            error
+          );
         }
       )
       .then((data) => {
@@ -883,6 +876,17 @@ export class AmpList extends AMP.BaseElement {
         }
         return this.scheduleRender_(data, /* append */ false);
       });
+  }
+
+  /**
+   * Builds an elided, shortened URL suitable for display in error messages from
+   * the given request.
+   * @param {!FetchRequestDef} request
+   * @return {string}
+   */
+  buildElidedUrl_(request) {
+    const url = Services.urlForDoc(this.element).parse(request.xhrUrl);
+    return `${url.origin}/...`;
   }
 
   /**
@@ -1099,7 +1103,6 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   render_(elements, opt_append = false) {
-    dev().info(TAG, 'render:', this.element, elements);
     const container = dev().assertElement(this.container_);
 
     const renderAndResize = () => {

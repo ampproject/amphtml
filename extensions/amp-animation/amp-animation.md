@@ -224,29 +224,29 @@ Most CSS `@keyframes` match the JSON inline keyframes definition in the
 [Web Animations spec](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument)
 with the following nuances:
 
-- You may need vendor prefixes, such as `@-ms-keyframes {}` or
-  `-moz-transform` for broad-platform support. Vendor prefixes are not needed
-  and not allowed in the JSON format, but in CSS they could be necessary.
+-   You may need vendor prefixes, such as `@-ms-keyframes {}` or
+    `-moz-transform` for broad-platform support. Vendor prefixes are not needed
+    and not allowed in the JSON format, but in CSS they could be necessary.
 
-- In unsupported platforms, `amp-animation`'s polyfills will fail when using
-  `calc()` and `var()` with keyframes specified in CSS. Use fallback values in
-  CSS to avoid this.
+-   In unsupported platforms, `amp-animation`'s polyfills will fail when using
+    `calc()` and `var()` with keyframes specified in CSS. Use fallback values in
+    CSS to avoid this.
 
-- CSS extensions such as `width()`, `height()`, `x()`, `y()`, `num()`,
-  `rand()`, `index()`, and `length()` are not available to `@keyframes`.
+-   CSS extensions such as `width()`, `height()`, `x()`, `y()`, `num()`,
+    `rand()`, `index()`, and `length()` are not available to `@keyframes`.
 
 ##### Allowed properties for keyframes
 
 The amp-animation component restricts CSS allowable properties to optimize
 performance. Below is the allow-listed properties:
 
-- [`opacity`](https://developer.mozilla.org/en-US/docs/Web/CSS/opacity)
-- [`transform`](https://developer.mozilla.org/en-US/docs/Web/CSS/transform)
-- [`visibility`](https://developer.mozilla.org/en-US/docs/Web/CSS/visibility)
-- [`offset-distance`](https://developer.mozilla.org/en-US/docs/Web/CSS/offset-distance)
-- [`clip-path`](https://developer.mozilla.org/en-US/docs/Web/CSS/clip-path).
-  Only supported values are `inset()`, `circle()`, `ellipse()`, and
-  `polygon()`.
+-   [`opacity`](https://developer.mozilla.org/en-US/docs/Web/CSS/opacity)
+-   [`transform`](https://developer.mozilla.org/en-US/docs/Web/CSS/transform)
+-   [`visibility`](https://developer.mozilla.org/en-US/docs/Web/CSS/visibility)
+-   [`offset-distance`](https://developer.mozilla.org/en-US/docs/Web/CSS/offset-distance)
+-   [`clip-path`](https://developer.mozilla.org/en-US/docs/Web/CSS/clip-path).
+    Only supported values are `inset()`, `circle()`, `ellipse()`, and
+    `polygon()`.
 
 Use of vendor prefixed CSS properties is neither needed nor allowed.
 
@@ -389,15 +389,15 @@ may override the variable's value.
 
 In the example above:
 
-- The nested animation applies the var `--delay` to the delay of
-  `#target1` animation.
+-   The nested animation applies the var `--delay` to the delay of
+    `#target1` animation.
 
-- While `--x` propagates into the nested animation, it is overridden.
-  The ending translate value is `150px`.
+-   While `--x` propagates into the nested animation, it is overridden.
+    The ending translate value is `150px`.
 
-- `--y` is not specified anywhere in the `<amp-animation>` component.
-  It defaults to `0px` if the query does not find it defined as CSS
-  within the `<amp style-custom>` tags.
+-   `--y` is not specified anywhere in the `<amp-animation>` component.
+    It defaults to `0px` if the query does not find it defined as CSS
+    within the `<amp style-custom>` tags.
 
 Polyfills apply to both `var()` and `calc()` on supported platforms. As
 a best practice, include default values for `var()`.
@@ -488,16 +488,16 @@ The returned value is in pixels, e.g. `100px`.
 
 `amp-animation` supports the following forms:
 
-- `width()`, `height()`, `x()`, `y()` - width/height or coordinates of the
-  animated element.
+-   `width()`, `height()`, `x()`, `y()` - width/height or coordinates of the
+    animated element.
 
-- With a selector, such as `width('.selector')` or `x('.selector')` - dimension
-  or coordinate of the element specified by the selector. Any CSS selector is
-  usable. For instance, `height('#container > li')`.
+-   With a selector, such as `width('.selector')` or `x('.selector')` - dimension
+    or coordinate of the element specified by the selector. Any CSS selector is
+    usable. For instance, `height('#container > li')`.
 
-- With a closest selector, such as `height(closest('.selector'))` or
-  `y(closest('.selector'))` - dimension or coordinate of the element specified
-  by the closest selector.
+-   With a closest selector, such as `height(closest('.selector'))` or
+    `y(closest('.selector'))` - dimension or coordinate of the element specified
+    by the closest selector.
 
 The `width()` and `height()` are especially useful for transforms. The `left`,
 `top` and similar CSS properties that can use `%` values to express animations
@@ -520,9 +520,9 @@ expressions. For instance:
 The `num()` function returns a number representation of a CSS value. For
 instance:
 
-- `num(11px)` yields `11`;
-- `num(110ms)` yields `110`;
-- etc.
+-   `num(11px)` yields `11`;
+-   `num(110ms)` yields `110`;
+-   etc.
 
 For instance, the following expression calculates the delay in seconds
 proportional to the element's width:
@@ -559,15 +559,15 @@ space as valid `selector`s. Specify a subtarget by index or a CSS selector.
 
 In the example above:
 
-- The top-level animation defaults targets matched by `".target"` to a delay
-  of `100` and `"--y"` of `100px`.
+-   The top-level animation defaults targets matched by `".target"` to a delay
+    of `100` and `"--y"` of `100px`.
 
-- `"subtargets": []` includes the first target, `"index": 0`. This definition
-  overrides the default delay of `100` to `200`.
+-   `"subtargets": []` includes the first target, `"index": 0`. This definition
+    overrides the default delay of `100` to `200`.
 
-- `"subtargets": []` includes `"selector": ":nth-child(2n+1)"`. This
-  definition overrides the `--y` variable's default value of `100px` to
-  `200px`.
+-   `"subtargets": []` includes `"selector": ":nth-child(2n+1)"`. This
+    definition overrides the `--y` variable's default value of `100px` to
+    `200px`.
 
 Multiple subtargets can match one target `selector` element.
 
@@ -578,21 +578,21 @@ SVGs are awesome and we recommend their use for animations!
 The `amp-animation` component supports SVG animations with the allowed listed
 CSS keyframe properties, with the following nuances:
 
-- IE/Edge SVG elements
-  [do not support CSS `transform` properties](https://stackoverflow.com/questions/34434005/svg-transform-property-not-taking-acount-in-ie-edge).
-  While the `transform` animation itself is polyfilled, the initial state
-  defined in a stylesheet is not applied. If the initial transformed state is
-  important on IE/Edge, it's recommended to duplicate it via
-  [SVG `transform` attribute](https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform).
+-   IE/Edge SVG elements
+    [do not support CSS `transform` properties](https://stackoverflow.com/questions/34434005/svg-transform-property-not-taking-acount-in-ie-edge).
+    While the `transform` animation itself is polyfilled, the initial state
+    defined in a stylesheet is not applied. If the initial transformed state is
+    important on IE/Edge, it's recommended to duplicate it via
+    [SVG `transform` attribute](https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform).
 
-- It is impossible to polyfill `transform-origin` for IE/Edge. For
-  compatibility, use only the default `transform-origin`.
+-   It is impossible to polyfill `transform-origin` for IE/Edge. For
+    compatibility, use only the default `transform-origin`.
 
-- Use [CSS `transform-box`](https://developer.mozilla.org/en-US/docs/Web/CSS/transform-box)
-  to avoid `transform-origin` interpretation problems. See issues for
-  [Chrome](https://bugs.chromium.org/p/chromium/issues/detail?id=740300),
-  [Safari](https://bugs.webkit.org/show_bug.cgi?id=174285), and
-  [Firefox](https://bugzilla.mozilla.org/show_bug.cgi?id=1379340).
+-   Use [CSS `transform-box`](https://developer.mozilla.org/en-US/docs/Web/CSS/transform-box)
+    to avoid `transform-origin` interpretation problems. See issues for
+    [Chrome](https://bugs.chromium.org/p/chromium/issues/detail?id=740300),
+    [Safari](https://bugs.webkit.org/show_bug.cgi?id=174285), and
+    [Firefox](https://bugzilla.mozilla.org/show_bug.cgi?id=1379340).
 
 ### Compatibility and fallbacks
 
@@ -838,5 +838,5 @@ Cancels the animation.
 
 ## Validation
 
-See [`amp-animation` rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-animation/validator-amp-animation.protoascii)
+See [`amp-animation` rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-animation/validator-amp-animation.protoascii)
 in the AMP validator specification.

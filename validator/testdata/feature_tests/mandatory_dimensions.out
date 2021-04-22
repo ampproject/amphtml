@@ -18,7 +18,7 @@ FAIL
 |    Test Description:
 |    This test validates the complex rules around mandatory dimensions for
 |    responsive amp custom elements. See
-|    https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md.
+|    https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md.
 |  -->
 |  <!doctype html>
 |  <html ⚡>
@@ -248,6 +248,6 @@ feature_tests/mandatory_dimensions.html:146:4 The attribute 'foo' may not appear
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:150:6 The tag 'amp-ad extension .js script' is missing or incorrect, but required by 'amp-ad'. This will soon be an error. (see https://amp.dev/documentation/components/amp-ad/)
+feature_tests/mandatory_dimensions.html:150:6 The tag 'amp-ad extension script' is missing or incorrect, but required by 'amp-ad'. This will soon be an error. (see https://amp.dev/documentation/components/amp-ad/)
 >>       ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:150:6 The tag 'amp-video extension .js script' is missing or incorrect, but required by 'amp-video'. This will soon be an error. (see https://amp.dev/documentation/components/amp-video/)
+feature_tests/mandatory_dimensions.html:150:6 The tag 'amp-video extension script' is missing or incorrect, but required by 'amp-video'. This will soon be an error. (see https://amp.dev/documentation/components/amp-video/)

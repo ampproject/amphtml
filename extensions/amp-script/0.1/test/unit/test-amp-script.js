@@ -144,31 +144,27 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
 
   it('callFunction waits for initialization to complete before returning', async () => {
     element.setAttribute('script', 'local-script');
-    const result = script.callFunction('fetchData');
-    script.workerDom_ = {
-      callFunction(fnIdent) {
-        if (fnIdent === 'fetchData') {
-          return Promise.resolve(42);
-        }
-        return Promise.reject();
-      },
-    };
-    script.initialize_.resolve();
-    expect(await result).to.equal(42);
+    script.workerDom_ = {callFunction: env.sandbox.spy()};
+
+    script.callFunction('fetchData', true);
+    expect(script.workerDom_.callFunction).not.called;
+
+    await script.initialize_.resolve();
+    expect(script.workerDom_.callFunction).calledWithExactly('fetchData', true);
   });
 
   describe('Initialization skipped warning due to zero height/width', () => {
     it('should not warn when there is positive width/height', () => {
       const warnStub = env.sandbox.stub(user(), 'warn');
-      env.sandbox.stub(script, 'getLayoutBox').returns({height: 1, width: 1});
-      script.onMeasureChanged();
+      env.sandbox.stub(script, 'getLayoutSize').returns({height: 1, width: 1});
+      script.onLayoutMeasure();
       expect(warnStub).to.have.callCount(0);
     });
 
     it('should warn if there is zero width/height', () => {
       const warnStub = env.sandbox.stub(user(), 'warn');
-      env.sandbox.stub(script, 'getLayoutBox').returns({height: 0, width: 0});
-      script.onMeasureChanged();
+      env.sandbox.stub(script, 'getLayoutSize').returns({height: 0, width: 0});
+      script.onLayoutMeasure();
 
       expect(warnStub).calledWith(
         'amp-script',
@@ -183,7 +179,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
       allowConsoleError(() => {
         script.layoutCallback();
       });
-      script.onMeasureChanged();
+      script.onLayoutMeasure();
       expect(warnStub).to.have.callCount(0);
     });
   });

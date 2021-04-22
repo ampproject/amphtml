@@ -31,7 +31,7 @@ import {
   setShadowDomStreamingSupportedForTesting,
 } from '../../src/shadow-embed';
 import {installStylesForDoc} from '../../src/style-installer';
-import {toArray} from '../../src/types';
+import {toArray} from '../../src/core/types/array';
 
 describes.sandboxed('shadow-embed', {}, () => {
   afterEach(() => {
@@ -140,8 +140,6 @@ describes.sandboxed('shadow-embed', {}, () => {
               setShadowCssSupportedForTesting(false);
               const shadowRoot = createShadowRoot(hostElement);
               expect(shadowRoot.id).to.match(/i-amphtml-sd-\d+/);
-              // Browserify does not support arrow functions with params.
-              // Using Old School for
               const shadowRootClassListArray = toArray(
                 shadowRoot.host.classList
               );
@@ -376,8 +374,8 @@ describes.sandboxed('shadow-embed', {}, () => {
           },
         },
         __AMP_SERVICES: {
-          'platform': {obj: platform},
-          'vsync': {obj: {}},
+          'platform': {obj: platform, ctor: Object},
+          'vsync': {obj: {}, ctor: Object},
         },
       };
     });

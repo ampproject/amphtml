@@ -32,7 +32,7 @@ export default {
       {name: 'amp-mustache', version: '0.2'},
     ],
 
-    experiments: ['amp-date-display-bento'],
+    experiments: ['bento'],
   },
 };
 
@@ -63,9 +63,7 @@ export const Default = () => {
   );
 };
 
-Default.story = {
-  name: 'default',
-};
+Default.storyName = 'default';
 
 export const DefaultRenderer = () => {
   const datetime = new Date(date('Date/Time', new Date())).toISOString();
@@ -87,9 +85,7 @@ export const DefaultRenderer = () => {
   );
 };
 
-DefaultRenderer.story = {
-  name: 'default renderer',
-};
+DefaultRenderer.storyName = 'default renderer';
 
 export const ExternalTemplate = () => {
   const datetime = new Date(date('Date/Time', new Date())).toISOString();
@@ -121,6 +117,4 @@ export const ExternalTemplate = () => {
   );
 };
 
-ExternalTemplate.story = {
-  name: 'external template',
-};
+ExternalTemplate.storyName = 'external template';

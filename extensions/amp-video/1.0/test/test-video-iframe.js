@@ -16,6 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {VideoIframe} from '../video-iframe';
+import {createRef} from '../../../../src/preact';
 import {mount} from 'enzyme';
 
 function dispatchMessage(window, opt_event) {
@@ -24,8 +25,34 @@ function dispatchMessage(window, opt_event) {
   window.dispatchEvent(Object.assign(event, opt_event));
 }
 
-describes.sandboxed('VideoIframe Preact component', {}, (env) => {
-  beforeEach(() => {});
+describes.realWin('VideoIframe Preact component', {}, (env) => {
+  let window;
+  let document;
+
+  beforeEach(() => {
+    window = env.win;
+    document = window.document;
+  });
+
+  it('calls `onIframeLoad` once loaded', async () => {
+    const onIframeLoad = env.sandbox.spy();
+    const onCanPlay = env.sandbox.spy();
+    const makeMethodMessage = env.sandbox.spy();
+    const videoIframe = mount(
+      <VideoIframe
+        src="about:blank"
+        makeMethodMessage={makeMethodMessage}
+        onIframeLoad={onIframeLoad}
+        onCanPlay={onCanPlay}
+      />,
+      {attachTo: document.body}
+    );
+
+    await videoIframe.find('iframe').invoke('onCanPlay')();
+
+    expect(onCanPlay).to.be.calledOnce;
+    expect(onIframeLoad).to.be.calledOnce;
+  });
 
   it('unmutes per lack of `muted` prop', async () => {
     const makeMethodMessage = env.sandbox.spy();
@@ -149,6 +176,104 @@ describes.sandboxed('VideoIframe Preact component', {}, (env) => {
 
     videoIframe.unmount();
     expect(removeEventListener.withArgs('message')).to.have.been.calledOnce;
+  });
+
+  it('should reset an unloadOnPause-iframe on pause', () => {
+    const ref = createRef();
+
+    const makeMethodMessageStub = env.sandbox.stub();
+
+    const videoIframe = mount(
+      <VideoIframe
+        ref={ref}
+        src="about:blank"
+        makeMethodMessage={makeMethodMessageStub}
+        unloadOnPause={true}
+      />
+    );
+
+    const iframe = videoIframe.getDOMNode();
+    let iframeSrc = iframe.src;
+    const iframeSrcSetterSpy = env.sandbox.spy();
+    Object.defineProperty(iframe, 'src', {
+      get() {
+        return iframeSrc;
+      },
+      set(value) {
+        iframeSrc = value;
+        iframeSrcSetterSpy(value);
+      },
+    });
+
+    ref.current.pause();
+    expect(iframeSrcSetterSpy).to.be.calledOnce;
+    expect(makeMethodMessageStub).to.not.be.calledWith('pause');
+  });
+
+  describe('uses playerStateRef to read the imperative state', () => {
+    const makeMethodMessage = (method) => ({makeMethodMessageFor: method});
+
+    it('should NOT fail when player state is not available', () => {
+      const ref = createRef();
+
+      // no value.
+      mount(
+        <VideoIframe
+          ref={ref}
+          src="about:blank"
+          makeMethodMessage={makeMethodMessage}
+        />
+      );
+      expect(ref.current.currentTime).to.be.NaN;
+      expect(ref.current.duration).to.be.NaN;
+
+      // null value.
+      const playerStateRef = createRef();
+      mount(
+        <VideoIframe
+          ref={ref}
+          src="about:blank"
+          makeMethodMessage={makeMethodMessage}
+          playerStateRef={playerStateRef}
+        />
+      );
+      expect(ref.current.currentTime).to.be.NaN;
+      expect(ref.current.duration).to.be.NaN;
+
+      // empty value.
+      playerStateRef.current = {};
+      mount(
+        <VideoIframe
+          ref={ref}
+          src="about:blank"
+          makeMethodMessage={makeMethodMessage}
+          playerStateRef={playerStateRef}
+        />
+      );
+      expect(ref.current.currentTime).to.be.NaN;
+      expect(ref.current.duration).to.be.NaN;
+    });
+
+    it('should return the provided player state', () => {
+      const ref = createRef();
+      const playerStateRef = createRef();
+      playerStateRef.current = {duration: 111, currentTime: 11};
+      mount(
+        <VideoIframe
+          ref={ref}
+          src="about:blank"
+          makeMethodMessage={makeMethodMessage}
+          playerStateRef={playerStateRef}
+        />
+      );
+      expect(ref.current.currentTime).to.equal(11);
+      expect(ref.current.duration).to.equal(111);
+
+      // 0-values are ok.
+      playerStateRef.current = {duration: 0, currentTime: 0};
+      expect(ref.current.currentTime).to.equal(0);
+      expect(ref.current.duration).to.equal(0);
+    });
   });
 
   describe('uses makeMethodMessage to posts imperative handle methods', () => {

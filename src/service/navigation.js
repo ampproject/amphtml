@@ -22,14 +22,14 @@ import {
   tryFocus,
 } from '../dom';
 import {dev, user, userAssert} from '../log';
-import {dict} from '../utils/object';
+import {dict} from '../core/types/object';
 import {escapeCssSelectorIdent} from '../css';
 import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
 import {getMode} from '../mode';
 import {isLocalhostOrigin} from '../url';
 import {registerServiceBuilderForDoc} from '../service';
 import {toWin} from '../types';
-import PriorityQueue from '../utils/priority-queue';
+import PriorityQueue from '../core/data-structures/priority-queue';
 
 const TAG = 'navigation';
 
@@ -618,7 +618,7 @@ export class Navigation {
     // confusing behavior e.g. when pressing "tab" button.
     // @see https://humanwhocodes.com/blog/2013/01/15/fixing-skip-to-content-links/
     // @see https://github.com/ampproject/amphtml/issues/18671
-    if (Services.platformFor(this.ampdoc.win).isIe()) {
+    if (!IS_ESM && Services.platformFor(this.ampdoc.win).isIe()) {
       const id = toLocation.hash.substring(1);
       const elementWithId = this.ampdoc.getElementById(id);
       if (elementWithId) {
@@ -752,9 +752,11 @@ export class Navigation {
     const viewerHasCapability = this.viewer_.hasCapability(
       'interceptNavigation'
     );
-    const docOptedIn = this.ampdoc
-      .getRootNode()
-      .documentElement.hasAttribute('allow-navigation-interception');
+    const docOptedIn =
+      this.ampdoc.isSingleDoc() &&
+      this.ampdoc
+        .getRootNode()
+        .documentElement.hasAttribute('allow-navigation-interception');
 
     if (
       !viewerHasCapability ||

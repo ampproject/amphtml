@@ -19,8 +19,7 @@ import {Key} from '../../../../build-system/tasks/e2e/functional-test-controller
 describes.endtoend(
   'amp-date-picker',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-date-picker/blocked-dates.html',
+    fixture: 'amp-date-picker/blocked-dates.html',
     environments: ['single', 'viewer-demo'],
   },
   async (env) => {

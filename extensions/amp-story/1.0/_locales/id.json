@@ -1,0 +1,43 @@
+{
+  "2": {"string": "Tap Berikutnya"},
+  "3": {"string": "Tap Kembali."},
+  "4": {"string": "Tidak dapat menyalin link ke papan klip :("},
+  "5": {"string": "Link disalin!"},
+  "6": {"string": "Email"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Dapatkan Link"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "SMS"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {
+    "string": "Luaskan tinggi dan lebar jendela untuk menampilkan pengalaman ini"
+  },
+  "19": {
+    "string": "Anda harus mengaktifkan eksperimen cerita AMP untuk melihat konten ini."
+  },
+  "20": {"string": "Halaman ini ditampilkan paling baik dalam mode potret"},
+  "21": {
+    "string": "Maaf, sepertinya browser Anda tidak mendukung pengalaman ini"
+  },
+  "22": {"string": "Setuju"},
+  "23": {"string": "Tolak"},
+  "25": {"string": "Lihat di domain asal:"},
+  "26": {"string": "Lebih lanjut tentang hasil AMP"},
+  "27": {"string": "Tetap Lanjutkan"},
+  "28": {"string": "Ubah setelan privasi data"},
+  "29": {"string": "Setelan privasi"},
+  "30": {"string": "Artikel lain untuk dibaca"},
+  "31": {"string": "Suara nonaktif"},
+  "32": {"string": "Suara aktif"},
+  "33": {"string": "Suara tidak aktif di halaman ini"},
+  "34": {"string": "Putar video"},
+  "35": {"string": "Geser ke atas"},
+  "36": {"string": "Luaskan Tweet"},
+  "37": {"string": "Luaskan tinggi jendela untuk menampilkan pengalaman ini"},
+  "38": {"string": "Luaskan lebar jendela untuk menampilkan pengalaman ini"},
+  "63": {"string": "Line"}
+}

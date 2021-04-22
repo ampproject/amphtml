@@ -20,12 +20,12 @@ import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
-  title: 'amp-fit-text',
+  title: 'amp-fit-text-1_0',
   decorators: [withKnobs, withA11y, withAmp],
 
   parameters: {
     extensions: [{name: 'amp-fit-text', version: '1.0'}],
-    experiments: ['amp-fit-text-bento'],
+    experiments: ['bento'],
   },
 };
 
@@ -43,9 +43,7 @@ export const ScaleUpToCover = () => {
   );
 };
 
-ScaleUpToCover.story = {
-  name: 'Scale up to cover',
-};
+ScaleUpToCover.storyName = 'Scale up to cover';
 
 export const ScaleUpOverflowEllipsis = () => {
   const minFontSize = number('minFontSize', 42);
@@ -68,9 +66,7 @@ export const ScaleUpOverflowEllipsis = () => {
   );
 };
 
-ScaleUpOverflowEllipsis.story = {
-  name: 'Scale up + overflow + ellipsis',
-};
+ScaleUpOverflowEllipsis.storyName = 'Scale up + overflow + ellipsis';
 
 export const ScaleDown = () => {
   return (
@@ -90,9 +86,7 @@ export const ScaleDown = () => {
   );
 };
 
-ScaleDown.story = {
-  name: 'Scale down',
-};
+ScaleDown.storyName = 'Scale down';
 
 export const ScaleDownMore = () => {
   return (
@@ -107,9 +101,7 @@ export const ScaleDownMore = () => {
   );
 };
 
-ScaleDownMore.story = {
-  name: 'Scale down more',
-};
+ScaleDownMore.storyName = 'Scale down more';
 
 export const LayoutResponsive = () => {
   return (
@@ -131,6 +123,4 @@ export const LayoutResponsive = () => {
   );
 };
 
-LayoutResponsive.story = {
-  name: 'layout=responsive',
-};
+LayoutResponsive.storyName = 'layout=responsive';

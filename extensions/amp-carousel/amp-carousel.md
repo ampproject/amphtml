@@ -74,18 +74,20 @@ navigation arrow.
 
 ### Differences from `<amp-carousel>` 0.1
 
-- `autoplay` is allowed on `type="carousel"`
-- `loop` is allowed on `type="carousel"`
+-   `autoplay` is allowed on `type="carousel"`
+-   `loop` is allowed on `type="carousel"`
 
 #### Migration Notes
 
-- Update the required script from `amp-carousel-0.1` to `amp-carousel-0.2`.
-- Ensure any CSS for positioning next/previous arrows is still valid. See the
-  [styling](#styling) for more information on arrow positioning.
-- Ensure any CSS used to style the carousel is still valid. The internal DOM
-  structure of `<amp-carousel>` 0.2 differs from 0.1, effecting CSS selectors
-  targeting internal elements such as `amp-carousel > div`. Any selectors using
-  the `.amp-class-name` format should still work.
+-   Update the required script from `amp-carousel-0.1` to `amp-carousel-0.2`.
+-   Ensure any CSS for positioning next/previous arrows is still valid. See the
+    [styling](#styling) for more information on arrow positioning.
+-   Ensure any CSS used to style the carousel is still valid. The internal DOM
+    structure of `<amp-carousel>` 0.2 differs from 0.1, effecting CSS selectors
+    targeting internal elements such as `amp-carousel > div`. Any selectors using
+    the `.amp-class-name` format should still work.
+-   **NOTE**: Support for `amp-carousel-0.1` is limited, with the intent to
+    deprecate in the future.
 
 ### Advancing to a specific slide
 
@@ -176,10 +178,10 @@ Currently, an `<amp-carousel type="slides">` carousel is declared as an ARIA liv
 
 Specifies the display type for the carousel items, which can be:
 
-- carousel (default): All slides are shown and are scrollable horizontally. Each
-  slide may specify a different width using CSS.
-- slides: Shows a single slide at a time, with each slide snapping into place as
-  the user swipes.
+-   carousel (default): All slides are shown and are scrollable horizontally. Each
+    slide may specify a different width using CSS.
+-   slides: Shows a single slide at a time, with each slide snapping into place as
+    the user swipes.
 
 ### controls (optional)
 
@@ -215,13 +217,13 @@ manually changes slides, then autoplay is stopped.
 
 If present without a value:
 
-- By default, advances a slide in 5000 millisecond intervals (5 seconds); this
-  can be overridden by the `delay` attribute.
-- Requires at least 2 slides for autoplay to occur.
+-   By default, advances a slide in 5000 millisecond intervals (5 seconds); this
+    can be overridden by the `delay` attribute.
+-   Requires at least 2 slides for autoplay to occur.
 
 If present with a value:
 
-- Stops autoplaying after the requisite number of loops are made.
+-   Stops autoplaying after the requisite number of loops are made.
 
 ### delay (optional)
 
@@ -301,10 +303,10 @@ Event.index
 
 [filter formats="websites, ads"]
 
-- You may use the `amp-carousel` element selector to style it freely.
-- You may use the `.amp-carousel-slide` class selector to target carousel items.
-- The visual state of an `amp-carousel` button when it's disabled is hidden.
-- By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own SVG or image as in the example below.
+-   You may use the `amp-carousel` element selector to style it freely.
+-   You may use the `.amp-carousel-slide` class selector to target carousel items.
+-   The visual state of an `amp-carousel` button when it's disabled is hidden.
+-   By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own SVG or image as in the example below.
 
 _Example: Default `.amp-carousel-button` inlined SVG_
 
@@ -324,7 +326,7 @@ _Example: Overriding the default `.amp-carousel-button` inlined SVG_
 
 Note that the SVG content needs to have certain characters, including `<`, `>` and `#` encoded. This can be done using a tool like [SVGO](https://github.com/svg/svgo) or using [`encodeURIComponent`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent).
 
-- You can position the carousel buttons using align-self and/or relative positioning. Note that the carousel arrows are automatically flipped in RTL, so you should not change their flex order.
+-   You can position the carousel buttons using align-self and/or relative positioning. Note that the carousel arrows are automatically flipped in RTL, so you should not change their flex order.
 
 ```css
 .amp-carousel-button-prev {
@@ -338,10 +340,10 @@ Note that the SVG content needs to have certain characters, including `<`, `>` a
 
 [filter formats="email"]
 
-- You may use the `amp-carousel` element selector to style it freely.
-- You may use the `.amp-carousel-slide` class selector to target carousel items.
-- The visual state of an `amp-carousel` button when it's disabled is hidden.
-- By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own image. Some email clients may not support SVG.
+-   You may use the `amp-carousel` element selector to style it freely.
+-   You may use the `.amp-carousel-slide` class selector to target carousel items.
+-   The visual state of an `amp-carousel` button when it's disabled is hidden.
+-   By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own image. Some email clients may not support SVG.
 
 _Example: Overriding the default `.amp-carousel-button` inlined SVG_
 

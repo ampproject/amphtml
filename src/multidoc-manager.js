@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from './common-signals';
+import {CommonSignals} from './core/constants/common-signals';
 import {Services} from './services';
-import {VisibilityState} from './visibility-state';
+import {VisibilityState} from './core/constants/visibility-state';
 import {childElementsByTag, isConnectedNode} from './dom';
 import {
   createShadowDomWriter,
@@ -27,8 +27,9 @@ import {dev, user} from './log';
 import {disposeServicesForDoc, getServicePromiseOrNullForDoc} from './service';
 import {getMode} from './mode';
 import {installStylesForDoc} from './style-installer';
-import {isArray, isObject} from './types';
-import {parseExtensionUrl} from './service/extension-location';
+import {isArray, isObject} from './core/types';
+
+import {parseExtensionUrl} from './service/extension-script';
 import {parseUrlDeprecated} from './url';
 import {setStyle} from './style';
 
@@ -238,8 +239,7 @@ export class MultidocManager {
       opt_initParams,
       (amp, shadowRoot, ampdoc) => {
         // Install extensions.
-        const extensionIds = this.mergeShadowHead_(ampdoc, shadowRoot, doc);
-        this.extensions_.installExtensionsInDoc(ampdoc, extensionIds);
+        this.mergeShadowHead_(ampdoc, shadowRoot, doc);
 
         // Append body.
         if (doc.body) {
@@ -284,9 +284,7 @@ export class MultidocManager {
         amp['writer'] = writer;
         writer.onBody((doc) => {
           // Install extensions.
-          const extensionIds = this.mergeShadowHead_(ampdoc, shadowRoot, doc);
-          // Apply all doc extensions.
-          this.extensions_.installExtensionsInDoc(ampdoc, extensionIds);
+          this.mergeShadowHead_(ampdoc, shadowRoot, doc);
 
           // Append shallow body.
           const body = importShadowBody(
@@ -326,11 +324,9 @@ export class MultidocManager {
    * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!ShadowRoot} shadowRoot
    * @param {!Document} doc
-   * @return {!Array<string>}
    * @private
    */
   mergeShadowHead_(ampdoc, shadowRoot, doc) {
-    const extensionIds = [];
     if (doc.head) {
       shadowRoot.AMP.head = doc.head;
       const parentLinks = {};
@@ -430,30 +426,20 @@ export class MultidocManager {
               dev().fine(TAG, '- src script: ', n);
               const src = n.getAttribute('src');
               const urlParts = parseExtensionUrl(src);
-              const isRuntime = !urlParts.extensionId;
               // Note: Some extensions don't have [custom-element] or
               // [custom-template] e.g. amp-viewer-integration.
               const customElement = n.getAttribute('custom-element');
               const customTemplate = n.getAttribute('custom-template');
-              if (isRuntime) {
+              const extensionId = customElement || customTemplate;
+              if (!urlParts) {
                 dev().fine(TAG, '- ignore runtime script: ', src);
-              } else if (customElement || customTemplate) {
+              } else if (extensionId) {
                 // This is an extension.
                 this.extensions_.installExtensionForDoc(
                   ampdoc,
-                  customElement || customTemplate,
+                  extensionId,
                   urlParts.extensionVersion
                 );
-                dev().fine(
-                  TAG,
-                  '- load extension: ',
-                  customElement || customTemplate,
-                  ' ',
-                  urlParts.extensionVersion
-                );
-                if (customElement) {
-                  extensionIds.push(customElement);
-                }
               } else if (!n.hasAttribute('data-amp-report-test')) {
                 user().error(TAG, '- unknown script: ', n, src);
               }
@@ -463,7 +449,8 @@ export class MultidocManager {
               if (type.indexOf('javascript') == -1) {
                 shadowRoot.appendChild(this.win.document.importNode(n, true));
                 dev().fine(TAG, '- non-src script: ', n);
-              } else {
+              } else if (!n.hasAttribute('amp-onerror')) {
+                // Don't error on amp-onerror script (https://github.com/ampproject/amphtml/issues/31966)
                 user().error(TAG, '- unallowed inline javascript: ', n);
               }
             }
@@ -477,7 +464,7 @@ export class MultidocManager {
         }
       }
     }
-    return extensionIds;
+    ampdoc.setExtensionsKnown();
   }
 
   /**

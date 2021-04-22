@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {AutocompleteBindingDef} from './autocomplete-binding-def';
 import {AutocompleteBindingInline} from './autocomplete-binding-inline';
 import {AutocompleteBindingSingle} from './autocomplete-binding-single';
 import {CSS} from '../../../build/amp-autocomplete-0.1.css';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
@@ -31,13 +31,14 @@ import {
 import {addParamToUrl} from '../../../src/url';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict, hasOwn, map, ownProperty} from '../../../src/utils/object';
+import {dict, hasOwn, map, ownProperty} from '../../../src/core/types/object';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
-import {includes} from '../../../src/string';
+import {includes} from '../../../src/core/types/string';
 import {isAmp4Email} from '../../../src/format';
-import {isArray, isEnumValue} from '../../../src/types';
+import {isArray, isEnumValue} from '../../../src/core/types';
+
 import {mod} from '../../../src/utils/math';
-import {once} from '../../../src/utils/function';
+import {once} from '../../../src/core/types/function';
 import {removeChildren, tryFocus} from '../../../src/dom';
 import {
   setupAMPCors,
@@ -186,8 +187,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
      */
     this.initialAutocompleteAttr_ = null;
 
-    /** @const @private {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(this.win);
+    /** @private {?../../../src/service/template-impl.Templates} */
+    this.templates_ = null;
 
     /**
      * Whether a <template> or <script type="text/plain"> tag is present.
@@ -220,7 +221,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.viewport_ = null;
 
     /** @private {boolean} */
-    this.interacted_ = false;
+    this.hasFetchedInitialData_ = false;
 
     /**
      * To ensure that we provide an accessible experience,
@@ -236,6 +237,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.templates_ = Services.templatesForDoc(this.element);
+
     const doc = this.element.ownerDocument;
     const isEmail = doc && isAmp4Email(doc);
     userAssert(
@@ -532,6 +535,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
   layoutCallback() {
     // Disable autofill in browsers.
     this.inputElement_.setAttribute('autocomplete', 'off');
+
+    if (this.element.hasAttribute('prefetch')) {
+      this.checkFirstInteractionAndMaybeFetchData_();
+    }
+
     return this.autocomplete_(this.sourceData_, this.userInput_);
   }
 
@@ -693,9 +701,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   autocomplete_(data, opt_input = '') {
     this.clearAllItems_();
-    if (opt_input.length < this.minChars_ || !data) {
+    if (!data || opt_input.length < this.minChars_) {
       return Promise.resolve();
-    } else if (this.isSsr_) {
+    }
+    if (this.isSsr_) {
       return hasOwn(data, 'html')
         ? this.renderResults_(
             data,
@@ -703,9 +712,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
             opt_input
           )
         : Promise.resolve();
-    } else {
-      return this.filterDataAndRenderResults_(data, opt_input);
     }
+    return this.filterDataAndRenderResults_(data, opt_input);
   }
 
   /**
@@ -996,10 +1004,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   checkFirstInteractionAndMaybeFetchData_() {
-    if (this.interacted_ || !this.element.hasAttribute('src')) {
+    if (this.hasFetchedInitialData_ || !this.element.hasAttribute('src')) {
       return Promise.resolve();
     }
-    this.interacted_ = true;
+    this.hasFetchedInitialData_ = true;
     return this.getRemoteData_().then(
       (remoteData) => {
         this.sourceData_ = remoteData;

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
@@ -26,8 +27,9 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
+  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   getDataParamsFromAttributes,
@@ -83,6 +85,9 @@ class AmpPowrPlayer extends AMP.BaseElement {
 
     /** @private {?../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacements_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /** @override */
@@ -116,6 +121,8 @@ class AmpPowrPlayer extends AMP.BaseElement {
     this.unlistenMessage_ = listen(this.win, 'message', (e) =>
       this.handlePlayerMessage_(e)
     );
+
+    this.pauseHelper_.updatePlaying(true);
 
     return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
   }
@@ -191,7 +198,7 @@ class AmpPowrPlayer extends AMP.BaseElement {
         return;
       }
       this.muted_ = muted;
-      element.dispatchCustomEvent(mutedOrUnmutedEvent(this.muted_));
+      dispatchCustomEvent(element, mutedOrUnmutedEvent(this.muted_));
       return;
     }
   }
@@ -329,6 +336,8 @@ class AmpPowrPlayer extends AMP.BaseElement {
 
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
+
+    this.pauseHelper_.updatePlaying(false);
 
     return true; // Call layoutCallback again.
   }

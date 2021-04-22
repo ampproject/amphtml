@@ -15,7 +15,7 @@
  */
 import * as IframeHelper from '../../src/iframe-helper';
 import {createIframePromise} from '../../testing/iframe';
-import {generateSentinel} from '../../src/3p-frame.js';
+import {generateSentinel} from '../../src/3p-frame';
 
 describe
   .configure()
@@ -206,7 +206,8 @@ describe
       });
     });
 
-    it('should set sentinel on postMessage data', () => {
+    // TODO(wg-components, #32103): This fails regularly during CI
+    it.skip('should set sentinel on postMessage data', () => {
       insert(testIframe);
       const postMessageSpy = window.sandbox /*OK*/
         .spy(testIframe.contentWindow, 'postMessage');

@@ -152,7 +152,7 @@
   <h3>Image that is NOT blocked by consent</h3>
   <amp-img
     src="/examples/img/ima-poster.png" width=300 height=200></amp-img>
-    
+
     <amp-analytics>
       <script type="application/json">
       {
@@ -213,25 +213,25 @@
         }
       }
     }</script>
-    
+
     <div id="ui1">
         NA: Can I load the image??
-        <button on="tap:ABC.accept" role="button">Accept</button>
-        <button on="tap:ABC.reject" role="button">Reject</button>
-        <button on="tap:ABC.dismiss" role="button">Dismiss</button>
+        <button on="tap:ABC.accept">Accept</button>
+        <button on="tap:ABC.reject">Reject</button>
+        <button on="tap:ABC.dismiss">Dismiss</button>
       </div>
     <div id="ui2">
         EU: Can I load the image??
-        <button id="accept" on="tap:ABC.accept" role="button">Accept</button>
-        <button id="reject" on="tap:ABC.reject" role="button">Reject</button>
-        <button id="dismiss" on="tap:ABC.dismiss" role="button">Dismiss</button>
+        <button id="accept" on="tap:ABC.accept">Accept</button>
+        <button id="reject" on="tap:ABC.reject">Reject</button>
+        <button id="dismiss" on="tap:ABC.dismiss">Dismiss</button>
       </div>
       <div id="postPromptUI">
         Post Prompt UI
-        <button on="tap:ABC.prompt" role="button">Manage</button>
+        <button on="tap:ABC.prompt">Manage</button>
       </div>
   </amp-consent>
-  
+
   <article>
     <div class="content-container">
       <header>
@@ -245,7 +245,7 @@
 
       <div>
         Revoke consent
-        <button class="button" on="tap:ABC.prompt" role="button">Manage</button>
+        <button class="button" on="tap:ABC.prompt">Manage</button>
       </div>
 
       <div class="author">
@@ -272,7 +272,7 @@
         </p>
       </div>
     </div>
-    <button on="tap:ABC.prompt" role="button">Manage Consent</button>
+    <button on="tap:ABC.prompt">Manage Consent</button>
   </article>
 
   <amp-twitter

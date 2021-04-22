@@ -15,6 +15,10 @@
  */
 
 const fs = require('fs');
+const {
+  forbiddenTermsGlobal,
+  forbiddenTermsSrcInclusive,
+} = require('./build-system/test-configs/forbidden-terms');
 
 /**
  * Dynamically extracts experiment globals from the config file.
@@ -34,10 +38,11 @@ function getExperimentGlobals() {
 
 module.exports = {
   'root': true,
-  'parser': 'babel-eslint',
+  'parser': '@babel/eslint-parser',
   'plugins': [
     'chai-expect',
     'google-camelcase',
+    'import',
     'jsdoc',
     'local',
     'notice',
@@ -98,7 +103,6 @@ module.exports = {
           'export',
           'final',
           'nocollapse',
-          'noinline',
           'package',
           'record',
           'restricted',
@@ -140,6 +144,11 @@ module.exports = {
     'local/no-es2015-number-props': 2,
     'local/no-export-side-effect': 2,
     'local/no-for-of-statement': 2,
+    'local/no-forbidden-terms': [
+      2,
+      forbiddenTermsGlobal,
+      forbiddenTermsSrcInclusive,
+    ],
     'local/no-function-async': 2,
     'local/no-function-generator': 2,
     'local/no-global': 0,
@@ -148,7 +157,6 @@ module.exports = {
     'local/no-import-meta': 2,
     'local/no-import-rename': 2,
     'local/no-invalid-this': 2,
-    'local/no-is-amp-alt': 2,
     'local/no-log-array': 2,
     'local/no-mixed-interpolation': 2,
     'local/no-mixed-operators': 2,
@@ -160,6 +168,7 @@ module.exports = {
     'local/no-style-property-setting': 2,
     'local/no-swallow-return-from-allow-console-error': 2,
     'local/no-unload-listener': 2,
+    'local/objstr-literal': 2,
     'local/preact': 2,
     'local/prefer-deferred-promise': 0,
     'local/prefer-destructuring': 2,
@@ -207,13 +216,6 @@ module.exports = {
     'no-useless-concat': 2,
     'no-undef': 2,
     'no-var': 2,
-    'no-warning-comments': [
-      2,
-      {
-        'terms': ['do not submit'],
-        'location': 'anywhere',
-      },
-    ],
     'notice/notice': [
       2,
       {
@@ -274,6 +276,7 @@ module.exports = {
         'local/always-call-chai-methods': 2,
         'local/no-bigint': 0,
         'local/no-dynamic-import': 0,
+        'local/no-for-of-statement': 0,
         'local/no-function-async': 0,
         'local/no-function-generator': 0,
         'local/no-import-meta': 0,
@@ -306,13 +309,31 @@ module.exports = {
       },
     },
     {
-      'files': ['babel.config.js', '**/.eslintrc.js'],
+      'files': [
+        '**/test-*',
+        '**/_init_tests.js',
+        '**/*_test.js',
+        '**/testing/**',
+        '**/storybook/*.js',
+      ],
+      'rules': {
+        'local/no-forbidden-terms': [2, forbiddenTermsGlobal],
+      },
+    },
+    {
+      'files': [
+        '**/.eslintrc.js',
+        'amp.js',
+        'babel.config.js',
+        'package-scripts.js',
+      ],
       'globals': {
         'module': false,
         'process': false,
         'require': false,
       },
       'rules': {
+        'local/no-forbidden-terms': 0,
         'local/no-module-exports': 0,
       },
     },

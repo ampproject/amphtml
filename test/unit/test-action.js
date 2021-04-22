@@ -25,9 +25,9 @@ import {
   ActionTrust,
   DEFAULT_ACTION,
   RAW_OBJECT_ARGS_KEY,
-} from '../../src/action-constants';
+} from '../../src/core/constants/action-constants';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {Keys} from '../../src/utils/key-codes';
+import {Keys} from '../../src/core/constants/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
 import {htmlFor} from '../../src/static-template';
 import {whenCalled} from '../../testing/test-helper.js';
@@ -46,7 +46,7 @@ function actionService() {
       },
     },
     __AMP_SERVICES: {
-      vsync: {obj: {}},
+      vsync: {obj: {}, ctor: Object},
     },
   };
   return new ActionService(new AmpDocSingle(win), document);

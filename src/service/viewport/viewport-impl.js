@@ -15,13 +15,13 @@
  */
 
 import {Animation} from '../../animation';
-import {Observable} from '../../observable';
+import {Observable} from '../../core/data-structures/observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
 import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {ViewportInterface} from './viewport-interface';
-import {VisibilityState} from '../../visibility-state';
+import {VisibilityState} from '../../core/constants/visibility-state';
 import {clamp} from '../../utils/math';
 import {
   closestAncestorElementBySelector,
@@ -30,7 +30,7 @@ import {
 } from '../../dom';
 import {computedStyle, setStyle} from '../../style';
 import {dev, devAssert} from '../../log';
-import {dict} from '../../utils/object';
+import {dict} from '../../core/types/object';
 import {getFriendlyIframeEmbedOptional} from '../../iframe-helper';
 import {getMode} from '../../mode';
 import {
@@ -44,7 +44,7 @@ import {
   moveLayoutRect,
 } from '../../layout-rect';
 import {numeric} from '../../transition';
-import {tryResolve} from '../../utils/promise';
+import {tryResolve} from '../../core/data-structures/promise';
 
 const TAG_ = 'Viewport';
 const SCROLL_POS_TO_BLOCK = {
@@ -138,7 +138,7 @@ export class ViewportImpl {
     /** @private @const {!Observable<!./viewport-interface.ViewportResizedEventDef>} */
     this.resizeObservable_ = new Observable();
 
-    /** @private {?Element|undefined} */
+    /** @private {?HTMLMetaElement|undefined} */
     this.viewportMeta_ = undefined;
 
     /** @private {string|undefined} */
@@ -203,6 +203,19 @@ export class ViewportImpl {
       } catch (e) {
         // Ignore errors.
       }
+    }
+
+    // BF-cache navigation sometimes breaks clicks in an iframe on iOS. See
+    // https://github.com/ampproject/amphtml/issues/30838 for more details.
+    // The solution is to make a "fake" scrolling API call.
+    const isIframedIos = Services.platformFor(win).isIos() && isIframed(win);
+    // We dont want to scroll if we're in a shadow doc, so check that we're
+    // in a single doc. Fix for
+    // https://github.com/ampproject/amphtml/issues/32165.
+    if (isIframedIos && this.ampdoc.isSingleDoc()) {
+      this.ampdoc.whenReady().then(() => {
+        win./*OK*/ scrollTo(-0.1, 0);
+      });
     }
   }
 
@@ -341,14 +354,14 @@ export class ViewportImpl {
   }
 
   /** @override */
-  getLayoutRect(el, opt_premeasuredRect) {
+  getLayoutRect(el) {
     const scrollLeft = this.getScrollLeft();
     const scrollTop = this.getScrollTop();
 
     // Go up the window hierarchy through friendly iframes.
     const frameElement = getParentWindowFrameElement(el, this.ampdoc.win);
     if (frameElement) {
-      const b = this.binding_.getLayoutRect(el, 0, 0, opt_premeasuredRect);
+      const b = this.binding_.getLayoutRect(el, 0, 0);
       const c = this.binding_.getLayoutRect(
         frameElement,
         scrollLeft,
@@ -362,12 +375,7 @@ export class ViewportImpl {
       );
     }
 
-    return this.binding_.getLayoutRect(
-      el,
-      scrollLeft,
-      scrollTop,
-      opt_premeasuredRect
-    );
+    return this.binding_.getLayoutRect(el, scrollLeft, scrollTop);
   }
 
   /** @override */
@@ -850,7 +858,7 @@ export class ViewportImpl {
   }
 
   /**
-   * @return {?Element}
+   * @return {?HTMLMetaElement}
    * @private
    */
   getViewportMeta_() {
@@ -1191,7 +1199,7 @@ const ViewportType = {
    * that AMP sets when Viewer has requested "natural" viewport on a iOS
    * device.
    * See:
-   * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
+   * https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md
    */
   NATURAL_IOS_EMBED: 'natural-ios-embed',
 };

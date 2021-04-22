@@ -14,11 +14,20 @@
  * limitations under the License.
  */
 
-import {dict} from '../src/utils/object';
+import {dict} from '../src/core/types/object';
 import {getData} from '../src/event-helper';
 import {loadScript} from './3p';
 import {parseJson} from '../src/json';
 import {setStyles} from '../src/style';
+
+const libSourceUrl = dict({
+  'canvas':
+    'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.6/lottie_canvas.min.js',
+  'html':
+    'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.6/lottie_html.min.js',
+  'svg':
+    'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.6/lottie_svg.min.js',
+});
 
 /**
  * Produces the AirBnB Bodymovin Player SDK object for the passed in callback.
@@ -34,10 +43,7 @@ let animationHandler;
  * @param {!Function} cb
  */
 function getBodymovinAnimationSdk(global, renderer, cb) {
-  const scriptToLoad =
-    renderer === 'svg'
-      ? 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js'
-      : 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min.js';
+  const scriptToLoad = libSourceUrl[renderer] ?? libSourceUrl['svg'];
   loadScript(global, scriptToLoad, function () {
     cb(global.bodymovin);
   });

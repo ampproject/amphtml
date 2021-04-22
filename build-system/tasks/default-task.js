@@ -15,21 +15,20 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
-const log = require('fancy-log');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
-const {cyan, green} = require('ansi-colors');
+const {cyan, green} = require('kleur/colors');
 const {doServe} = require('./serve');
-const {maybeUpdatePackages} = require('./update-packages');
+const {log} = require('../common/logging');
 const {parseExtensionFlags} = require('./extension-helpers');
 const {printConfigHelp} = require('./helpers');
 const {runPreBuildSteps} = require('./build');
 const {runPreDistSteps} = require('./dist');
 
 /**
- * Prints a useful help message prior to the default gulp task
+ * Prints a useful help message prior to the default amp task
  */
 function printDefaultTaskHelp() {
-  log(green('Running the default ') + cyan('gulp ') + green('task.'));
+  log(green('Running the default ') + cyan('amp ') + green('task.'));
   log(
     green(
       '⤷ JS and extensions will be lazily built when requested from the server.'
@@ -38,15 +37,14 @@ function printDefaultTaskHelp() {
 }
 
 /**
- * The default task run when `gulp` is executed
+ * The default task run when `amp` is executed
  *
  * @return {!Promise}
  */
 async function defaultTask() {
-  maybeUpdatePackages();
-  createCtrlcHandler('gulp');
+  createCtrlcHandler('amp');
   process.env.NODE_ENV = 'development';
-  printConfigHelp('gulp');
+  printConfigHelp('amp');
   printDefaultTaskHelp();
   parseExtensionFlags(/* preBuild */ true);
   if (argv.compiled) {
@@ -67,25 +65,25 @@ module.exports = {
 defaultTask.description =
   'Starts the dev server, lazily builds JS and extensions when requested, and watches them for changes';
 defaultTask.flags = {
-  compiled: '  Compiles and serves minified binaries',
+  compiled: 'Compiles and serves minified binaries',
   pseudo_names:
-    '  Compiles with readable names. ' +
+    'Compiles with readable names. ' +
     'Great for profiling and debugging production code.',
   pretty_print:
-    '  Outputs compiled code with whitespace. ' +
+    'Outputs compiled code with whitespace. ' +
     'Great for debugging production code.',
-  fortesting: '  Compiles production binaries for local testing',
-  noconfig: '  Compiles production binaries without applying AMP_CONFIG',
-  config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-  closure_concurrency: '  Sets the number of concurrent invocations of closure',
-  extensions: '  Pre-builds the given extensions, lazily builds the rest.',
+  fortesting: 'Compiles production binaries for local testing',
+  noconfig: 'Compiles production binaries without applying AMP_CONFIG',
+  config: 'Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+  closure_concurrency: 'Sets the number of concurrent invocations of closure',
+  extensions: 'Pre-builds the given extensions, lazily builds the rest.',
   extensions_from:
-    '  Pre-builds the extensions used by the provided example page.',
-  full_sourcemaps: '  Includes source code content in sourcemaps',
-  version_override: '  Overrides the version written to AMP_CONFIG',
-  host: '  Host to serve the project on. localhost by default.',
-  port: '  Port to serve the project on. 8000 by default.',
-  https: ' Use https server. http by default.',
+    'Pre-builds the extensions used by the provided example page.',
+  full_sourcemaps: 'Includes source code content in sourcemaps',
+  version_override: 'Overrides the version written to AMP_CONFIG',
+  host: 'Host to serve the project on. localhost by default.',
+  port: 'Port to serve the project on. 8000 by default.',
+  https: 'Use https server. http by default.',
   define_experiment_constant:
-    '  Builds runtime with the EXPERIMENT constant set to true',
+    'Builds runtime with the EXPERIMENT constant set to true',
 };

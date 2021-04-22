@@ -16,7 +16,7 @@
 
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 import {dev, devAssert} from './log';
-import {map} from './utils/object.js';
+import {map} from './core/types/object';
 
 /** @type {Object<string, string>} */
 let propertyNameCache;
@@ -24,8 +24,12 @@ let propertyNameCache;
 /** @const {!Array<string>} */
 const vendorPrefixes = ['Webkit', 'webkit', 'Moz', 'moz', 'ms', 'O', 'o'];
 
+const EMPTY_CSS_DECLARATION = /** @type {!CSSStyleDeclaration} */ ({
+  'getPropertyPriority': () => '',
+  'getPropertyValue': () => '',
+});
+
 /**
- * @export
  * @param {string} camelCase camel cased string
  * @return {string} title cased string
  */
@@ -55,7 +59,6 @@ function getVendorJsPropertyName_(style, titleCase) {
  * Returns the possibly prefixed JavaScript property name of a style property
  * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
  * (ex. transitionDuration).
- * @export
  * @param {!Object} style
  * @param {string} camelCase the camel cased version of a css property name
  * @param {boolean=} opt_bypassCache bypass the memoized cache of property
@@ -99,7 +102,7 @@ export function setImportantStyles(element, styles) {
   for (const k in styles) {
     style.setProperty(
       getVendorJsPropertyName(style, k),
-      styles[k].toString(),
+      String(styles[k]),
       'important'
     );
   }
@@ -336,11 +339,11 @@ export function removeAlphaFromColor(rgbaColor) {
  *
  * @param {!Window} win
  * @param {!Element} el
- * @return {!Object<string, string>}
+ * @return {!CSSStyleDeclaration}
  */
 export function computedStyle(win, el) {
   const style = /** @type {?CSSStyleDeclaration} */ (win.getComputedStyle(el));
-  return /** @type {!Object<string, string>} */ (style) || map();
+  return style || EMPTY_CSS_DECLARATION;
 }
 
 /**

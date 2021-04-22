@@ -1,0 +1,9 @@
+URL: https://github.com/google/closure-library
+License: Apache License
+License File: https://github.com/google/closure-library/blob/master/LICENSE
+
+Description:
+Used to pull in selected functions related to goog.messaging from the closure library.
+We only check in the compiled version.
+Run compile.sh to generate a new version once https://github.com/ampproject/amphtml/pull/33153 is in.
+Currently we compile the code with Google internal tool.

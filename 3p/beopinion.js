@@ -107,7 +107,7 @@ function getBeOpinionAsyncInit(global, accountId) {
           });
       },
     });
-    global.BeOpinionSDK['watch'](); // global.BeOpinionSDK.watch() fails 'gulp check-types' validation
+    global.BeOpinionSDK['watch'](); // global.BeOpinionSDK.watch() fails 'amp check-types' validation
   };
 }
 

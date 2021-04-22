@@ -48,7 +48,6 @@ export class ResourcesInterface {
   /**
    * Returns a list of resources.
    * @return {!Array<!./resource.Resource>}
-   * @export
    */
   get() {}
 
@@ -110,7 +109,6 @@ export class ResourcesInterface {
    * @param {boolean} layout
    * @param {number=} opt_parentPriority
    * @param {boolean=} opt_forceOutsideViewport
-   * @package
    */
   scheduleLayoutOrPreload(
     resource,
@@ -177,11 +175,5 @@ export class ResourcesInterface {
    * @param {number} newLayoutPriority
    */
   updateLayoutPriority(element, newLayoutPriority) {}
-
-  /**
-   * https://github.com/ampproject/amphtml/issues/25428
-   * @return {boolean}
-   */
-  isIntersectionExperimentOn() {}
 }
 /* eslint-enable no-unused-vars */

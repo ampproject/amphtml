@@ -58,7 +58,6 @@
 <html><ruby>a<rb>b<span></ruby></html>
 #errors
 (1,6): expected-doctype-but-got-start-tag
-(1,31): unexpected-end-tag
 #document
 | <html>
 |   <head>
@@ -129,7 +128,6 @@
 <html><ruby>a<rt>b<span></ruby></html>
 #errors
 (1,6): expected-doctype-but-got-start-tag
-(1,31): unexpected-end-tag
 #document
 | <html>
 |   <head>
@@ -273,7 +271,6 @@
 <html><ruby>a<rp>b<span></ruby></html>
 #errors
 (1,6): expected-doctype-but-got-start-tag
-(1,31): unexpected-end-tag
 #document
 | <html>
 |   <head>

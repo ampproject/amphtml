@@ -13,12 +13,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 #
-tags: {  # amp-accordion
+
+tags: {  # amp-accordion for websites
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies: "amp-accordion 1.0"
+  excludes: "amp-accordion 0.1"
+  extension_spec: {
+    name: "amp-accordion"
+    version_name: "v1.0"
+    version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-accordion for ads
   html_format: AMP
   html_format: AMP4ADS
   tag_name: "SCRIPT"
+  satisfies: "amp-accordion 0.1"
+  excludes: "amp-accordion 1.0"
   extension_spec: {
     name: "amp-accordion"
+    version_name: "v0.1"
     version: "0.1"
     version: "latest"
     requires_usage: EXEMPTED
@@ -70,10 +86,20 @@ tags: {  # <amp-accordion> > <section>
   spec_name: "amp-accordion > section"
   descriptive_name: "amp-accordion > section"
   mandatory_parent: "AMP-ACCORDION"
+  attrs: {
+    # amp-access is disabled in AMP4EMAIL
+    disabled_by: "amp4email"
+    name: "access-hide"
+    value: ""
+  }
   attrs: { name: "expanded" value: "" }
   # amp-bind
-  attrs: {
+  attrs: { # binding to this attribute in 1.0 performs no action (see #33493)
     name: "[data-expand]"
+  }
+  # amp-bind
+  attrs: {
+    name: "[expanded]"
   }
   child_tags: {
     mandatory_num_child_tags: 2

@@ -41,7 +41,7 @@ describes.realWin(
       }
       doc.body.appendChild(izlesene);
       return izlesene
-        .build()
+        .buildInternal()
         .then(() => {
           return izlesene.layoutCallback();
         })
@@ -73,6 +73,18 @@ describes.realWin(
           /The data-videoid attribute is required for/
         );
       });
+    });
+
+    it('unlayout and relayout', async () => {
+      const izlesene = await getIzlesene('7221390');
+      expect(izlesene.querySelector('iframe')).to.exist;
+
+      const unlayoutResult = izlesene.unlayoutCallback();
+      expect(unlayoutResult).to.be.true;
+      expect(izlesene.querySelector('iframe')).to.not.exist;
+
+      await izlesene.layoutCallback();
+      expect(izlesene.querySelector('iframe')).to.exist;
     });
   }
 );

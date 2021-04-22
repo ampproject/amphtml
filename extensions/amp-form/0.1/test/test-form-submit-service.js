@@ -16,7 +16,7 @@
 
 import {FormSubmitService} from '../form-submit-service';
 
-describe('form-submit-service', () => {
+describes.sandboxed('form-submit-service', {}, (env) => {
   let submitService;
 
   beforeEach(() => {
@@ -28,7 +28,7 @@ describe('form-submit-service', () => {
   });
 
   it('should register & fire one callback', () => {
-    const cb = window.sandbox.spy();
+    const cb = env.sandbox.spy();
     submitService.beforeSubmit(cb);
 
     const fakeFormEl = {};
@@ -39,7 +39,7 @@ describe('form-submit-service', () => {
   });
 
   it('should register & fire many callbacks', () => {
-    const cb = window.sandbox.spy();
+    const cb = env.sandbox.spy();
     submitService.beforeSubmit(cb);
     submitService.beforeSubmit(cb);
     submitService.beforeSubmit(cb);

@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {boolean, withKnobs} from '@storybook/addon-knobs';
+import {boolean, select, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
@@ -29,39 +29,90 @@ export default {
       {name: 'amp-base-carousel', version: '1.0'},
     ],
 
-    experiments: ['amp-inline-gallery-bento', 'amp-base-carousel-bento'],
+    experiments: ['bento'],
   },
 };
 
 export const Default = () => {
   const topInset = boolean('top indicator inset?', false);
-  const bottomInset = boolean('bottom indicator inset?', false);
+  const bottomInset = boolean('bottom indicator inset?', true);
+  const autoAdvance = boolean('auto advance', false);
+  const autoAdvanceCount = text('auto advance count', 1);
+  const autoAdvanceInterval = text('auto advance interval', 1000);
+  const autoAdvanceLoops = text('auto advance loops', 3);
+  const loop = boolean('loop thumbnails', false);
+  const aspectRatio = text('thumbnails aspect ratio', undefined);
+  const orientation = select(
+    'orientation',
+    ['horizontal', 'vertical'],
+    'vertical'
+  );
   return (
-    <amp-inline-gallery layout="container">
+    <amp-inline-gallery style={{maxWidth: '360px'}} layout="container">
       <amp-inline-gallery-pagination
+        layout={topInset ? 'nodisplay' : 'fixed-height'}
+        height={topInset ? undefined : '24'}
         inset={topInset}
-        layout="fixed-height"
-        height="24"
       />
-      <amp-base-carousel width="440" height="225">
-        {['lightcoral', 'peachpuff', 'lavender'].map((color) => (
-          <amp-layout width="440" height="225">
-            <svg viewBox="0 0 440 225">
-              <rect style={{fill: color}} width="440" height="225" />
-              Sorry, your browser does not support inline SVG.
-            </svg>
-          </amp-layout>
-        ))}
+      <amp-inline-gallery-thumbnails
+        aspectRatio={aspectRatio}
+        loop={loop}
+        layout="fixed-height"
+        height="50"
+      />
+      <amp-base-carousel
+        auto-advance={autoAdvance}
+        auto-advance-count={autoAdvanceCount}
+        auto-advance-interval={autoAdvanceInterval}
+        auto-advance-loops={autoAdvanceLoops}
+        orientation={orientation}
+        width="360"
+        height="240"
+      >
+        <amp-img
+          width="360"
+          height="240"
+          src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80"
+          data-thumbnail-src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=120&q=80"
+        ></amp-img>
+        <amp-img
+          width="360"
+          height="240"
+          src="https://images.unsplash.com/photo-1583511666407-5f06533f2113?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+          data-thumbnail-src="https://images.unsplash.com/photo-1583511666407-5f06533f2113?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
+        ></amp-img>
+        <amp-img
+          width="360"
+          height="240"
+          src="https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjQwMzA0fQ&auto=format&fit=crop&w=1498&q=80"
+          data-thumbnail-src="https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjQwMzA0fQ&auto=format&fit=crop&w=1498&q=80"
+        ></amp-img>
+        <amp-img
+          width="360"
+          height="240"
+          src="https://images.unsplash.com/photo-1583512603806-077998240c7a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+          data-thumbnail-src="https://images.unsplash.com/photo-1583512603806-077998240c7a?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
+        ></amp-img>
+        <amp-img
+          width="360"
+          height="240"
+          src="https://images.unsplash.com/photo-1598133893773-de3574464ef0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+          data-thumbnail-src="https://images.unsplash.com/photo-1598133893773-de3574464ef0?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
+        ></amp-img>
+        <amp-img
+          width="360"
+          height="240"
+          src="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+          data-thumbnail-src="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
+        ></amp-img>
       </amp-base-carousel>
       <amp-inline-gallery-pagination
+        layout={bottomInset ? 'nodisplay' : 'fixed-height'}
+        height={bottomInset ? undefined : '24'}
         inset={bottomInset}
-        layout="fixed-height"
-        height="24"
       />
     </amp-inline-gallery>
   );
 };
 
-Default.story = {
-  name: 'default',
-};
+Default.storyName = 'default';

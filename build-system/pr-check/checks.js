@@ -16,104 +16,106 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script performs quick checks on the source code
- * prior to running unit and integration tests.
- * This is run during the CI stage = build; job = checks.
+ * @fileoverview Script that runs various checks during CI.
  */
 
-const {
-  printChangeSummary,
-  startTimer,
-  stopTimer,
-  stopTimedJob,
-  timedExecOrDie: timedExecOrDieBase,
-} = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
-const {isTravisPullRequestBuild} = require('../common/travis');
+const {buildTargetsInclude, Targets} = require('./build-targets');
 const {reportAllExpectedTests} = require('../tasks/report-test-status');
-const {runNpmChecks} = require('./npm-checks');
+const {runCiJob} = require('./ci-job');
+const {timedExecOrDie} = require('./utils');
 
-const FILENAME = 'checks.js';
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const jobName = 'checks.js';
 
-async function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-  if (!runNpmChecks(FILENAME)) {
-    stopTimedJob(FILENAME, startTime);
-    return;
-  }
-
-  if (!isTravisPullRequestBuild()) {
-    timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp check-exact-versions');
-    timedExecOrDie('gulp lint');
-    timedExecOrDie('gulp prettify');
-    timedExecOrDie('gulp presubmit');
-    timedExecOrDie('gulp ava');
-    timedExecOrDie('gulp babel-plugin-tests');
-    timedExecOrDie('gulp caches-json');
-    timedExecOrDie('gulp dev-dashboard-tests');
-    timedExecOrDie('gulp check-renovate-config');
-    timedExecOrDie('gulp server-tests');
-    timedExecOrDie('gulp dep-check');
-    timedExecOrDie('gulp check-types');
-    timedExecOrDie('gulp check-sourcemaps');
-    timedExecOrDie('gulp performance-urls');
-  } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
-    await reportAllExpectedTests(buildTargets);
-    timedExecOrDie('gulp update-packages');
-
-    timedExecOrDie('gulp check-exact-versions');
-    timedExecOrDie('gulp lint');
-    timedExecOrDie('gulp prettify');
-    timedExecOrDie('gulp presubmit');
-    timedExecOrDie('gulp performance-urls');
-
-    if (buildTargets.has('AVA')) {
-      timedExecOrDie('gulp ava');
-    }
-
-    if (buildTargets.has('BABEL_PLUGIN')) {
-      timedExecOrDie('gulp babel-plugin-tests');
-    }
-
-    if (buildTargets.has('CACHES_JSON')) {
-      timedExecOrDie('gulp caches-json');
-    }
-
-    // Check document links only for PR builds.
-    if (buildTargets.has('DOCS')) {
-      timedExecOrDie('gulp check-links --local_changes');
-    }
-
-    if (buildTargets.has('DEV_DASHBOARD')) {
-      timedExecOrDie('gulp dev-dashboard-tests');
-    }
-
-    // Validate owners syntax only for PR builds.
-    if (buildTargets.has('OWNERS')) {
-      timedExecOrDie('gulp check-owners --local_changes');
-    }
-
-    if (buildTargets.has('RENOVATE_CONFIG')) {
-      timedExecOrDie('gulp check-renovate-config');
-    }
-
-    if (buildTargets.has('SERVER')) {
-      timedExecOrDie('gulp server-tests');
-    }
-
-    if (buildTargets.has('RUNTIME')) {
-      timedExecOrDie('gulp dep-check');
-      timedExecOrDie('gulp check-types');
-      timedExecOrDie('gulp check-sourcemaps');
-    }
-  }
-
-  stopTimer(FILENAME, FILENAME, startTime);
+function pushBuildWorkflow() {
+  timedExecOrDie('amp presubmit');
+  timedExecOrDie('amp check-invalid-whitespaces');
+  timedExecOrDie('amp lint');
+  timedExecOrDie('amp prettify');
+  timedExecOrDie('amp ava');
+  timedExecOrDie('amp babel-plugin-tests');
+  timedExecOrDie('amp caches-json');
+  timedExecOrDie('amp dev-dashboard-tests');
+  timedExecOrDie('amp check-exact-versions');
+  timedExecOrDie('amp check-renovate-config');
+  timedExecOrDie('amp server-tests');
+  timedExecOrDie('amp dep-check');
+  timedExecOrDie('amp check-types');
+  timedExecOrDie('amp check-sourcemaps');
+  timedExecOrDie('amp performance-urls');
+  timedExecOrDie('amp check-analytics-vendors-list');
+  timedExecOrDie('amp check-video-interface-list');
+  timedExecOrDie('amp get-zindex');
+  timedExecOrDie('amp markdown-toc');
 }
 
-main();
+/**
+ * @return {Promise<void>}
+ */
+async function prBuildWorkflow() {
+  await reportAllExpectedTests();
+
+  if (buildTargetsInclude(Targets.PRESUBMIT)) {
+    timedExecOrDie('amp presubmit');
+  }
+
+  if (buildTargetsInclude(Targets.INVALID_WHITESPACES)) {
+    timedExecOrDie('amp check-invalid-whitespaces');
+  }
+
+  if (buildTargetsInclude(Targets.LINT)) {
+    timedExecOrDie('amp lint');
+  }
+
+  if (buildTargetsInclude(Targets.PRETTIFY)) {
+    timedExecOrDie('amp prettify');
+  }
+
+  if (buildTargetsInclude(Targets.AVA)) {
+    timedExecOrDie('amp ava');
+  }
+
+  if (buildTargetsInclude(Targets.BABEL_PLUGIN)) {
+    timedExecOrDie('amp babel-plugin-tests');
+  }
+
+  if (buildTargetsInclude(Targets.CACHES_JSON)) {
+    timedExecOrDie('amp caches-json');
+  }
+
+  if (buildTargetsInclude(Targets.DOCS)) {
+    timedExecOrDie('amp check-links --local_changes'); // only for PR builds
+    timedExecOrDie('amp markdown-toc');
+  }
+
+  if (buildTargetsInclude(Targets.DEV_DASHBOARD)) {
+    timedExecOrDie('amp dev-dashboard-tests');
+  }
+
+  if (buildTargetsInclude(Targets.OWNERS)) {
+    timedExecOrDie('amp check-owners --local_changes'); // only for PR builds
+  }
+
+  if (buildTargetsInclude(Targets.PACKAGE_UPGRADE)) {
+    timedExecOrDie('amp check-exact-versions');
+  }
+
+  if (buildTargetsInclude(Targets.RENOVATE_CONFIG)) {
+    timedExecOrDie('amp check-renovate-config');
+  }
+
+  if (buildTargetsInclude(Targets.SERVER)) {
+    timedExecOrDie('amp server-tests');
+  }
+
+  if (buildTargetsInclude(Targets.RUNTIME)) {
+    timedExecOrDie('amp dep-check');
+    timedExecOrDie('amp check-types');
+    timedExecOrDie('amp check-sourcemaps');
+    timedExecOrDie('amp performance-urls');
+    timedExecOrDie('amp check-analytics-vendors-list');
+    timedExecOrDie('amp check-video-interface-list');
+    timedExecOrDie('amp get-zindex');
+  }
+}
+
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

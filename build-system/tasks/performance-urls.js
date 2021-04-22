@@ -14,64 +14,42 @@
  * limitations under the License.
  */
 
-const colors = require('ansi-colors');
 const fs = require('fs');
-const gulp = require('gulp');
-const log = require('fancy-log');
 const path = require('path');
-const through2 = require('through2');
+const {green, red, cyan} = require('kleur/colors');
+const {log} = require('../common/logging');
 
-const CONFIG_PATH = 'build-system/tasks/performance/config.json';
+const CONFIG_PATH = './performance/config.json';
 const LOCAL_HOST_URL = 'http://localhost:8000/';
 
 /**
- * Throws an error with the given message. Duplicate function
- * located in check-sourcemaps.js
- *
- * @param {string} message
- */
-function throwError(message) {
-  const err = new Error(message);
-  err.showStack = false;
-  throw err;
-}
-
-/**
- * Entry point for 'gulp performance-urls'
+ * Entry point for 'amp performance-urls'
  * Check if all localhost urls in performance/config.json exist
- * @return {!Promise}
  */
 async function performanceUrls() {
-  return gulp.src([CONFIG_PATH]).pipe(
-    through2.obj(function (file) {
-      let obj;
-      try {
-        obj = JSON.parse(file.contents.toString());
-      } catch (e) {
-        log(colors.yellow(`Could not parse ${CONFIG_PATH}. `));
-        throwError(`Could not parse ${CONFIG_PATH}. `);
-        return;
-      }
-      const filepaths = obj.handlers.flatMap((handler) =>
-        handler.urls
-          .filter((url) => url.startsWith(LOCAL_HOST_URL))
-          .map((url) =>
-            path.join(__dirname, '../../', url.split(LOCAL_HOST_URL)[1])
-          )
-      );
-      for (const filepath of filepaths) {
-        if (!fs.existsSync(filepath)) {
-          log(colors.red(filepath + ' does not exist.'));
-          throwError(`${filepath} does not exist.`);
-          return;
-        }
-      }
-      log(
-        colors.green('SUCCESS:'),
-        'All local performance task urls are valid.'
-      );
-    })
+  let jsonContent;
+  try {
+    jsonContent = require(CONFIG_PATH);
+  } catch (e) {
+    log(red('ERROR:'), 'Could not parse', cyan(CONFIG_PATH));
+    process.exitCode = 1;
+    return;
+  }
+  const filepaths = jsonContent.handlers.flatMap((handler) =>
+    handler.urls
+      .filter((url) => url.startsWith(LOCAL_HOST_URL))
+      .map((url) =>
+        path.join(__dirname, '../../', url.split(LOCAL_HOST_URL)[1])
+      )
   );
+  for (const filepath of filepaths) {
+    if (!fs.existsSync(filepath)) {
+      log(red('ERROR:'), cyan(filepath), 'does not exist');
+      process.exitCode = 1;
+      return;
+    }
+  }
+  log(green('SUCCESS:'), 'All local performance task urls are valid.');
 }
 
 module.exports = {

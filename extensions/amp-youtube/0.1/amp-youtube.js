@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
@@ -28,8 +29,9 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
+  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   getDataParamsFromAttributes,
@@ -107,6 +109,9 @@ class AmpYoutube extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenLooping_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -151,14 +156,6 @@ class AmpYoutube extends AMP.BaseElement {
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
 
-    // TODO(aghassemi, #3216): amp-youtube has a special case where 404s are not
-    // easily caught hence the following hacky-solution.
-    // Please don't follow this behavior in other extensions, instead
-    // see BaseElement.createPlaceholderCallback.
-    if (!this.getPlaceholder() && this.videoid_) {
-      this.buildImagePlaceholder_();
-    }
-
     installVideoManagerForDoc(this.element);
   }
 
@@ -168,19 +165,11 @@ class AmpYoutube extends AMP.BaseElement {
    */
   getEmbedUrl_() {
     this.assertDatasourceExists_();
-    let urlSuffix = '';
-    if (this.getCredentials_() === 'omit') {
-      urlSuffix = '-nocookie';
-    }
+    const urlSuffix = this.getCredentials_() === 'omit' ? '-nocookie' : '';
     const baseUrl = `https://www.youtube${urlSuffix}.com/embed/`;
-    let descriptor = '';
-    if (this.videoid_) {
-      descriptor = `${encodeURIComponent(this.videoid_ || '')}?`;
-    } else {
-      descriptor =
-        'live_stream?channel=' +
-        `${encodeURIComponent(this.liveChannelid_ || '')}&`;
-    }
+    const descriptor = this.videoid_
+      ? `${encodeURIComponent(this.videoid_ || '')}?`
+      : `live_stream?channel=${encodeURIComponent(this.liveChannelid_ || '')}&`;
     return `${baseUrl}${descriptor}enablejsapi=1&amp=1`;
   }
 
@@ -298,7 +287,7 @@ class AmpYoutube extends AMP.BaseElement {
       .then(() => {
         // Tell YT that we want to receive messages
         this.listenToFrame_();
-        this.element.dispatchCustomEvent(VideoEvents.LOAD);
+        dispatchCustomEvent(this.element, VideoEvents.LOAD);
       });
     this.playerReadyResolver_(loaded);
     return loaded;
@@ -322,6 +311,9 @@ class AmpYoutube extends AMP.BaseElement {
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
+
+    this.pauseHelper_.updatePlaying(false);
+
     return true; // Call layoutCallback again.
   }
 
@@ -429,6 +421,16 @@ class AmpYoutube extends AMP.BaseElement {
 
     const playerState = info['playerState'];
     if (eventType == 'infoDelivery' && playerState != null) {
+      switch (playerState) {
+        case PlayerStates.PLAYING:
+          this.pauseHelper_.updatePlaying(true);
+          break;
+        case PlayerStates.PAUSED:
+        case PlayerStates.ENDED:
+          this.pauseHelper_.updatePlaying(false);
+          break;
+      }
+
       redispatch(element, playerState.toString(), {
         [PlayerStates.PLAYING]: VideoEvents.PLAYING,
         [PlayerStates.PAUSED]: VideoEvents.PAUSE,
@@ -444,13 +446,13 @@ class AmpYoutube extends AMP.BaseElement {
         return;
       }
       this.muted_ = muted;
-      element.dispatchCustomEvent(mutedOrUnmutedEvent(this.muted_));
+      dispatchCustomEvent(element, mutedOrUnmutedEvent(this.muted_));
       return;
     }
 
     if (eventType == 'initialDelivery') {
       this.info_ = info;
-      element.dispatchCustomEvent(VideoEvents.LOADEDMETADATA);
+      dispatchCustomEvent(element, VideoEvents.LOADEDMETADATA);
       return;
     }
 
@@ -478,8 +480,12 @@ class AmpYoutube extends AMP.BaseElement {
     );
   }
 
-  /** @private */
-  buildImagePlaceholder_() {
+  /** @override */
+  createPlaceholderCallback() {
+    if (!this.videoid_) {
+      return null;
+    }
+
     const {element: el} = this;
     const imgPlaceholder = htmlFor(el)`<img placeholder referrerpolicy=origin>`;
     const videoid = dev().assertString(this.videoid_);
@@ -495,10 +501,9 @@ class AmpYoutube extends AMP.BaseElement {
     // TODO(mkhatib): Maybe add srcset to allow the browser to
     // load the needed size or even better match YTPlayer logic for loading
     // player thumbnails for different screen sizes for a cache win!
-    imgPlaceholder.src =
-      'https://i.ytimg.com/vi/' +
-      encodeURIComponent(videoid) +
-      '/sddefault.jpg#404_is_fine';
+    imgPlaceholder.src = `https://i.ytimg.com/vi/${encodeURIComponent(
+      videoid
+    )}/sddefault.jpg#404_is_fine`;
 
     if (imgPlaceholder.hasAttribute('aria-label')) {
       imgPlaceholder.setAttribute(
@@ -509,7 +514,6 @@ class AmpYoutube extends AMP.BaseElement {
       imgPlaceholder.setAttribute('alt', 'Loading video');
     }
     this.applyFillContent(imgPlaceholder);
-    el.appendChild(imgPlaceholder);
 
     // Because sddefault.jpg isn't available for all videos, we try to load
     // it and fallback to hqdefault.jpg.
@@ -527,10 +531,9 @@ class AmpYoutube extends AMP.BaseElement {
         }
       })
       .catch(() => {
-        imgPlaceholder.src =
-          'https://i.ytimg.com/vi/' +
-          encodeURIComponent(videoid) +
-          '/hqdefault.jpg';
+        imgPlaceholder.src = `https://i.ytimg.com/vi/${encodeURIComponent(
+          videoid
+        )}/hqdefault.jpg`;
         return this.loadPromise(imgPlaceholder);
       })
       .then(() => {
@@ -540,6 +543,8 @@ class AmpYoutube extends AMP.BaseElement {
           });
         });
       });
+
+    return imgPlaceholder;
   }
 
   // VideoInterface Implementation. See ../src/video-interface.VideoInterface

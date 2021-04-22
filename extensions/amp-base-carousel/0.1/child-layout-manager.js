@@ -198,11 +198,6 @@ export class ChildLayoutManager {
    * @param {boolean} isIntersecting
    */
   triggerVisibility_(target, isIntersecting) {
-    this.owners_.updateInViewport(
-      this.ampElement_.element,
-      target,
-      isIntersecting
-    );
     this.viewportIntersectionCallback_(target, isIntersecting);
   }
 
@@ -359,6 +354,7 @@ export class ChildLayoutManager {
       const child = this.children_[i];
 
       if (child[IN_VIEWPORT_FLAG] == ViewportChangeState.ENTER) {
+        this.triggerLayout_(child, true);
         this.triggerVisibility_(child, true);
       } else if (child[IN_VIEWPORT_FLAG] == ViewportChangeState.LEAVE) {
         this.triggerVisibility_(child, false);

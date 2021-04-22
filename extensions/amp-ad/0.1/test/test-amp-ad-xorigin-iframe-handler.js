@@ -18,7 +18,7 @@ import {AmpAdUIHandler} from '../amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from '../amp-ad-xorigin-iframe-handler';
 import {BaseElement} from '../../../../src/base-element';
 import {Services} from '../../../../src/services';
-import {Signals} from '../../../../src/utils/signals';
+import {Signals} from '../../../../src/core/data-structures/signals';
 import {
   createIframeWithMessageStub,
   expectPostMessage,
@@ -59,10 +59,9 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     adImpl.lifecycleReporter = {
       addPingsForVisibility: (unusedElement) => {},
     };
-    adImpl.isStickyAd = () => false;
-    adImpl.onResizeSuccess = window.sandbox.spy();
     document.body.appendChild(adElement);
     adImpl.uiHandler = new AmpAdUIHandler(adImpl);
+    adImpl.uiHandler.onResizeSuccess = window.sandbox.spy();
     iframeHandler = new AmpAdXOriginIframeHandler(adImpl);
     testIndex++;
 
@@ -366,7 +365,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
             type: 'embed-size-changed',
             sentinel: 'amp3ptest' + testIndex,
           });
-          expect(adImpl.onResizeSuccess).to.be.called;
+          expect(adImpl.uiHandler.onResizeSuccess).to.be.called;
         });
     });
 
@@ -392,7 +391,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
             type: 'embed-size-changed',
             sentinel: 'amp3ptest' + testIndex,
           });
-          expect(adImpl.onResizeSuccess).to.be.called;
+          expect(adImpl.uiHandler.onResizeSuccess).to.be.called;
         });
     });
 

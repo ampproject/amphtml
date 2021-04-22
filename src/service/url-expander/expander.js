@@ -14,16 +14,38 @@
  * limitations under the License.
  */
 
-import {hasOwn} from '../../utils/object';
-import {rethrowAsync, user} from '../../log';
-import {trimStart} from '../../string';
-import {tryResolve} from '../../utils/promise';
+import {hasOwn} from '../../core/types/object';
+import {rethrowAsync} from '../../core/error';
+import {trimStart} from '../../core/types/string';
+import {tryResolve} from '../../core/data-structures/promise';
+import {user} from '../../log';
 
 /** @private @const {string} */
 const PARSER_IGNORE_FLAG = '`';
 
 /** @private @const {string} */
 const TAG = 'Expander';
+
+/**
+ * @typedef {{
+ *   name: string,
+ *   prioritized: (!BindingInfoDef|undefined),
+ *   encode: boolean,
+ *   sync: ../variable-source.SyncResolverDef,
+ *   async: ../variable-source.AsyncResolverDef,
+ * }}
+ */
+let BindingInfoDef;
+
+/**
+ * @typedef {{
+ *   start: number,
+ *   stop: number,
+ *   name: string,
+ *   length: number,
+ * }}
+ */
+let MatchDef;
 
 /** Rudamentary parser to handle nested Url replacement. */
 export class Expander {
@@ -34,7 +56,7 @@ export class Expander {
    * @param {!Object<string, *>=} opt_collectVars Object passed in to collect
    *   variable resolutions.
    * @param {boolean=} opt_sync If the method should resolve syncronously.
-   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of names
+   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of names
    *   that can be substituted.
    * @param {boolean=} opt_noEncode Should not urlEncode macro resolution.
    */
@@ -103,11 +125,10 @@ export class Expander {
    * Structures the regex matching into the desired format
    * @param {string} url url to be substituted
    * @param {RegExp} expression regex containing all keywords
-   * @return {Array<Object<string, string|number>>} array of objects representing
-   *  matching keywords
+   * @return {!Array<!MatchDef>} array of matching keywords.
    */
   findMatches_(url, expression) {
-    const matches = [];
+    const matches = /** @type {!Array<!MatchDef>} */ ([]);
     url.replace(expression, (match, name, startPosition) => {
       const {length} = match;
       const stopPosition = length + startPosition - 1;
@@ -124,8 +145,7 @@ export class Expander {
 
   /**
    * @param {string} url
-   * @param {!Array<Object<string, string|number>>} matches Array of objects
-   *   representing matching keywords.
+   * @param {!Array<!MatchDef>} matches Array of matching keywords.
    * @return {!Promise<string>|string}
    */
   parseUrlRecursively_(url, matches) {
@@ -157,20 +177,20 @@ export class Expander {
           // in optional bindings, or the global variable source.
           if (this.bindings_ && hasOwn(this.bindings_, match.name)) {
             // Macro is from optional bindings.
-            binding = {
+            binding = /** @type {!BindingInfoDef} */ ({
               // This construction helps us save the match name and determine
               // precedence of resolution choices in #expandBinding_ later.
               name: match.name,
               prioritized: this.bindings_[match.name],
               encode,
-            };
+            });
           } else {
             // Macro is from the global source.
-            binding = {
+            binding = /** @type {!BindingInfoDef} */ ({
               ...this.variableSource_.get(match.name),
               name: match.name,
               encode,
-            };
+            });
           }
 
           urlIndex = match.stop + 1;
@@ -278,7 +298,7 @@ export class Expander {
   /**
    * Called when a binding is ready to be resolved. Determines which version of
    * binding to use and if syncronous or asyncronous version should be called.
-   * @param {Object<string, *>} bindingInfo An object containing the name of
+   * @param {!BindingInfoDef} bindingInfo An object containing the name of
    *    macro and value to be resolved.
    * @param {Array=} opt_args Arguments passed to the macro. Arguments come as
    *    an array of arrays that will be eventually passed to a function.apply
@@ -332,12 +352,13 @@ export class Expander {
     let value;
     try {
       if (typeof binding === 'function') {
+        const bindingFunc = binding;
         if (opt_args) {
           value = this.processArgsAsync_(opt_args).then((args) =>
-            binding.apply(null, args)
+            bindingFunc.apply(null, args)
           );
         } else {
-          value = tryResolve(binding);
+          value = tryResolve(bindingFunc);
         }
       } else {
         value = Promise.resolve(binding);
@@ -401,7 +422,7 @@ export class Expander {
 
       let result;
 
-      if (value && value.then) {
+      if (value && typeof value.then == 'function') {
         // If binding is passed in as opt_binding we try to resolve it and it
         // may return a promise. NOTE: We do not collect this discarded value,
         // even if collectVars exists.

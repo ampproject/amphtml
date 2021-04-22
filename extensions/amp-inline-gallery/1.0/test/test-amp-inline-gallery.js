@@ -16,7 +16,7 @@
 import '../../../amp-base-carousel/1.0/amp-base-carousel';
 import '../amp-inline-gallery';
 import {ActionInvocation} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {CarouselContextProp} from '../../../amp-base-carousel/1.0/carousel-props';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {setStyles} from '../../../../src/style';
@@ -38,8 +38,8 @@ describes.realWin(
 
     beforeEach(async () => {
       win = env.win;
-      toggleExperiment(win, 'amp-inline-gallery-bento', true, true);
-      toggleExperiment(win, 'amp-base-carousel-bento', true, true);
+      toggleExperiment(win, 'bento-inline-gallery', true, true);
+      toggleExperiment(win, 'bento-carousel', true, true);
       carousel = createElementWithAttributes(
         win.document,
         'amp-base-carousel',
@@ -74,25 +74,26 @@ describes.realWin(
 
       // Wait until ready.
       win.document.body.appendChild(element);
-      await element.build();
-      await carousel.build();
-      await pagination.build();
+      await element.buildInternal();
+      await carousel.buildInternal();
+      await pagination.buildInternal();
 
       lastContext = null;
       subscribe(element, [CarouselContextProp], (context) => {
         lastContext = context;
       });
       await waitFor(
-        () => lastContext && lastContext.slideCount > 0,
-        'context and slideCount set'
+        () =>
+          lastContext && lastContext.slides && lastContext.slides.length > 0,
+        'context and slide set'
       );
       await waitFor(() => getScroller(), 'carousel rendered');
       await waitFor(() => getDots().length > 0, 'pagination rendered');
     });
 
     afterEach(() => {
-      toggleExperiment(win, 'amp-inline-gallery-bento', false, true);
-      toggleExperiment(win, 'amp-base-carousel-bento', false, true);
+      toggleExperiment(win, 'bento-inline-gallery', false, true);
+      toggleExperiment(win, 'bento-carousel', false, true);
     });
 
     function newSlide(id) {
@@ -138,7 +139,7 @@ describes.realWin(
     }
 
     it('should render the right number of slides', () => {
-      expect(lastContext.slideCount).to.equal(3);
+      expect(lastContext.slides.length).to.equal(3);
       const dots = getDots();
       expect(dots).to.have.lengthOf(3);
     });
@@ -181,7 +182,7 @@ describes.realWin(
       carousel.appendChild(newSlide('new'));
 
       // Context updated.
-      await waitFor(() => lastContext.slideCount == 4, 'slideCount == 4');
+      await waitFor(() => lastContext.slides.length == 4, 'slide.length == 4');
 
       // Pagination updated.
       await waitFor(() => getDots().length == 4, 'pagination updated');

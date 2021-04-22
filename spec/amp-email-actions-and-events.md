@@ -438,18 +438,16 @@ event.response</pre></td>
 
 <table>
   <tr>
-    <th width="25%">Event</th>
-    <th width="35%">Description</th>
-    <th width="40%">Data</th>
+    <th>Action</th>
+    <th>Description</th>
   </tr>
   <tr>
     <td><code>changeToLayoutContainer</code></td>
     <td>Update's <code>amp-list</code>'s layout to <code>layout="CONTAINTER"</code> to allow <a href="../extensions/amp-list/amp-list.md#dynamic-resizing">dynamic resizing</a>.</td>
   </tr>
   <tr>
-    <td><code>fetch-error</code>(low-trust)</td>
-    <td>Fired when fetching data fails.</td>
-    <td>None</td>
+    <td><code>refresh</code></td>
+    <td>Refreshes data from the <code>src</code> and re-renders the list.</td>
   </tr>
 </table>
 

@@ -26,19 +26,22 @@ const shellCmd = process.platform == 'win32' ? 'cmd' : '/bin/bash';
 
 /**
  * Spawns the given command in a child process with the given options.
+ * Special-cases the AMP task runner so that it is correctly spawned on all
+ * platforms (node shebangs do not work on Windows).
  *
  * @param {string} cmd
  * @param {?Object} options
  * @return {!Object}
  */
 function spawnProcess(cmd, options) {
-  return childProcess.spawnSync(cmd, {shell: shellCmd, ...options});
+  const cmdToSpawn = cmd.startsWith('amp ') ? `node ${cmd}` : cmd;
+  return childProcess.spawnSync(cmdToSpawn, {shell: shellCmd, ...options});
 }
 
 /**
  * Executes the provided command, returning the process object.
  * @param {string} cmd
- * @param {?Object} options
+ * @param {?Object=} options
  * @return {!Object}
  */
 function getOutput(cmd, options = {}) {
@@ -54,7 +57,7 @@ function getOutput(cmd, options = {}) {
 /**
  * Executes the provided command, returning its stdout.
  * @param {string} cmd
- * @param {?Object} options
+ * @param {?Object=} options
  * @return {string}
  */
 function getStdout(cmd, options) {
@@ -64,7 +67,7 @@ function getStdout(cmd, options) {
 /**
  * Executes the provided command, returning its stderr.
  * @param {string} cmd
- * @param {?Object} options
+ * @param {?Object=} options
  * @return {string}
  */
 function getStderr(cmd, options) {

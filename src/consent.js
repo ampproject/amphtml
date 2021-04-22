@@ -16,8 +16,9 @@
 
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-} from './consent-state';
+} from './core/constants/consent-state';
 import {Services} from './services';
+import {dict} from './core/types/object';
 
 /**
  * Returns a promise that resolve when all consent state the policy wait
@@ -59,10 +60,10 @@ export function getConsentPolicySharedData(element, policyId) {
 
 /**
  * @param {!Element|!ShadowRoot} element
- * @param {string} policyId
+ * @param {string=} policyId
  * @return {!Promise<string>}
  */
-export function getConsentPolicyInfo(element, policyId) {
+export function getConsentPolicyInfo(element, policyId = 'default') {
   // Return the stored consent string.
   return Services.consentPolicyServiceForDocOrNull(element).then(
     (consentPolicy) => {
@@ -93,6 +94,38 @@ export function getConsentMetadata(element, policyId = 'default') {
       );
     }
   );
+}
+
+/**
+ * Returns a set of consent values to forward to a 3rd party (like an iframe).
+ * @param {!Element} element
+ * @param {?string=} opt_policyId
+ * @return {!Promise<!JsonObject>}
+ *   See extensions/amp-consent/customizing-extension-behaviors-on-consent.md:
+ *    - consentMetadata
+ *    - consentString
+ *    - consentPolicyState
+ *    - consentPolicySharedData
+ */
+export function getConsentDataToForward(element, opt_policyId) {
+  return Services.consentPolicyServiceForDocOrNull(element).then((policy) => {
+    const gettersOrNull = dict({
+      'consentMetadata': policy && policy.getConsentMetadataInfo,
+      'consentString': policy && policy.getConsentStringInfo,
+      'consentPolicyState': policy && policy.whenPolicyResolved,
+      'consentPolicySharedData': policy && policy.getMergedSharedData,
+    });
+    if (!policy) {
+      return gettersOrNull;
+    }
+    return /** @type {!JsonObject} */ (Promise.all(
+      Object.keys(gettersOrNull).map((key) =>
+        gettersOrNull[key]
+          .call(policy, opt_policyId || 'default')
+          .then((value) => ({[key]: value}))
+      )
+    ).then((objs) => Object.assign.apply({}, objs)));
+  });
 }
 
 /**

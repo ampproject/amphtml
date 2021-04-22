@@ -43,11 +43,11 @@ The `width` and `height` attributes determine the aspect ratio of the player emb
 </amp-brightcove>
 ```
 
-### Configuration
+### Player Configuration
 
-To support AMP's video interface, which is recommended, make sure you configure players used with the AMP Support plugin. See [Brightcove's support documentation](https://support.brightcove.com/amp) for player configuration instructions.
+Make sure you configure players used with the AMP Support plugin to support AMP's video interface. See [Brightcove's support documentation](https://support.brightcove.com/amp) for player configuration instructions.
 
-## Attributes
+## Component Attributes
 
 ### `data-account`
 
@@ -96,16 +96,16 @@ such as ad parameters or video ids for Perform players.
 
 Keys and values will be URI encoded. Keys will be camel cased.
 
-- `data-param-language="de"` becomes `&language=de`
-- `data-param-custom-ad-data="key:value;key2:value2"` becomes
-  `&customAdData=key%3Avalue%3Bkey2%3Avalue2`
+-   `data-param-language="de"` becomes `&language=de`
+-   `data-param-custom-ad-data="key:value;key2:value2"` becomes
+    `&customAdData=key%3Avalue%3Bkey2%3Avalue2`
 
 ### `autoplay`
 
 If this attribute is present, and the browser supports autoplay, the video will
 be automatically played as soon as it becomes visible. There are some conditions
 that the component needs to meet to be played, [which are outlined in the Video
-in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay).
+in AMP spec](https://github.com/ampproject/amphtml/blob/main/spec/amp-video-interface.md#autoplay).
 
 ### `dock`
 
@@ -116,6 +116,10 @@ or an element when the user scrolls out of the video component's visual area.
 For more details, see
 [documentation on the docking extension itself](https://amp.dev/documentation/components/amp-video-docking).
 
+### `data-block-on-consent`
+
+If [amp-consent](https://amp.dev/documentation/components/amp-consent/) is used, adding `data-block-on-consent="_till_responded"` will delay player load until the consent state is resolved. The consent state is passed to the player's iframe as query parameters for customisation of advertising implementations in the player. See [Brightcove's support documentation](https://support.brightcove.com/amp) for player configuration instructions.
+
 ### Common attributes
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
@@ -123,4 +127,4 @@ extended to AMP components.
 
 ## Validation
 
-See [amp-brightcove rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/validator-amp-brightcove.protoascii) in the AMP validator specification.
+See [amp-brightcove rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-brightcove/validator-amp-brightcove.protoascii) in the AMP validator specification.

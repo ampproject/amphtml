@@ -22,18 +22,18 @@ import {
   StateProperty,
   UIType,
 } from '../amp-story-store-service';
-import {ActionTrust} from '../../../../src/action-constants';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {AdvancementMode} from '../story-analytics';
 import {AmpStory} from '../amp-story';
 import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryConsent} from '../amp-story-consent';
-import {CommonSignals} from '../../../../src/common-signals';
-import {Keys} from '../../../../src/utils/key-codes';
+import {CommonSignals} from '../../../../src/core/constants/common-signals';
+import {Keys} from '../../../../src/core/constants/key-codes';
 import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
 import {Services} from '../../../../src/services';
-import {VisibilityState} from '../../../../src/visibility-state';
+import {VisibilityState} from '../../../../src/core/constants/visibility-state';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {registerServiceBuilder} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -67,7 +67,7 @@ describes.realWin(
     async function createStoryWithPages(count, ids = [], autoAdvance = false) {
       element = win.document.createElement('amp-story');
 
-      Array(count)
+      const pageArray = Array(count)
         .fill(undefined)
         .map((unused, i) => {
           const page = win.document.createElement('amp-story-page');
@@ -81,6 +81,8 @@ describes.realWin(
 
       win.document.body.appendChild(element);
       story = await element.getImpl();
+
+      return pageArray;
     }
 
     /**
@@ -247,18 +249,17 @@ describes.realWin(
       await createStoryWithPages();
       const pages = story.element.querySelectorAll('amp-story-page');
 
-      element.build();
+      element.buildInternal();
 
       expect(pages[0].hasAttribute('active')).to.be.true;
       expect(pages[1].hasAttribute('active')).to.be.false;
 
       // Stubbing because we need to assert synchronously
-      env.sandbox
-        .stub(element.implementation_, 'mutateElement')
-        .callsFake((mutator) => {
-          mutator();
-          return Promise.resolve();
-        });
+      const impl = await element.getImpl(false);
+      env.sandbox.stub(impl, 'mutateElement').callsFake((mutator) => {
+        mutator();
+        return Promise.resolve();
+      });
 
       const eventObj = createEvent('keydown');
       eventObj.key = Keys.RIGHT_ARROW;
@@ -1145,6 +1146,40 @@ describes.realWin(
         });
       });
 
+      describe('#getElementDistance', () => {
+        it('should return -1 for elements without a page', async () => {
+          await createStoryWithPages(3);
+          await story.layoutCallback();
+          const elToFind = win.document.createElement('video');
+          const distance = story.getElementDistance(elToFind);
+          expect(distance).to.equal(-1);
+        });
+
+        it('should find elements inside organic pages', async () => {
+          const pageArray = await createStoryWithPages(3);
+          await story.layoutCallback();
+          const elToFind = win.document.createElement('video');
+          const hostPage = pageArray[1];
+          hostPage.setAttribute('distance', '4');
+          hostPage.appendChild(elToFind);
+          const distance = story.getElementDistance(elToFind);
+          expect(distance).to.equal(4);
+        });
+
+        it('should find elements inside ad pages / FIE', async () => {
+          const pageArray = await createStoryWithPages(3);
+          await story.layoutCallback();
+          const elToFind = win.document.createElement('video');
+          const hostPage = pageArray[1];
+          hostPage.setAttribute('distance', '4');
+          const iframe = win.document.createElement('iframe');
+          hostPage.appendChild(iframe);
+          iframe.contentDocument.body.appendChild(elToFind);
+          const distance = story.getElementDistance(elToFind);
+          expect(distance).to.equal(4);
+        });
+      });
+
       describe('amp-story NO_NEXT_PAGE', () => {
         describe('without #cap=swipe', () => {
           it('should open the bookend when tapping on the last page', async () => {
@@ -1656,14 +1691,6 @@ describes.realWin(
       });
 
       describe('amp-story rewriteStyles', () => {
-        beforeEach(() => {
-          toggleExperiment(win, 'amp-story-responsive-units', true);
-        });
-
-        afterEach(() => {
-          toggleExperiment(win, 'amp-story-responsive-units', false);
-        });
-
         it('should rewrite vw styles', async () => {
           await createStoryWithPages(1, ['cover']);
           const styleEl = win.document.createElement('style');

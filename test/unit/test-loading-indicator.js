@@ -16,20 +16,18 @@
 
 import {LoadingIndicatorImpl} from '../../src/service/loading-indicator';
 import {Services} from '../../src/services';
-import {pushIfNotExist, removeItem} from '../../src/utils/array';
+import {pushIfNotExist, removeItem} from '../../src/core/types/array';
 
 describes.realWin('LoadingIndicatorImpl', {amp: true}, (env) => {
   let ampdoc;
   let service;
   let loaderService;
   let io;
-  let failRoot;
   let el;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
 
-    failRoot = false;
     env.sandbox
       .stub(env.win, 'IntersectionObserver')
       .value(IntersectionObserverStub);
@@ -51,9 +49,6 @@ describes.realWin('LoadingIndicatorImpl', {amp: true}, (env) => {
 
   class IntersectionObserverStub {
     constructor(callback, options) {
-      if (options.root && failRoot) {
-        throw new Error('root is not allowed');
-      }
       this.callback = callback;
       this.options = options;
       this.observed = [];
@@ -81,20 +76,8 @@ describes.realWin('LoadingIndicatorImpl', {amp: true}, (env) => {
     return el.querySelector('.i-amphtml-loading-container');
   }
 
-  it('should use root when supported', () => {
-    failRoot = false;
+  it('tracking should observe an element', () => {
     service = new LoadingIndicatorImpl(ampdoc);
-    expect(io.options.root).to.equal(ampdoc.win.document);
-
-    service.track(el);
-    expect(io.observed).to.include(el);
-  });
-
-  it('should fail over when root is not supported', () => {
-    failRoot = true;
-    service = new LoadingIndicatorImpl(ampdoc);
-    expect(io.options.root).to.be.undefined;
-
     service.track(el);
     expect(io.observed).to.include(el);
   });
@@ -186,5 +169,18 @@ describes.realWin('LoadingIndicatorImpl', {amp: true}, (env) => {
     // Untrack.
     service.untrack(el);
     expect(getLoader()).to.not.exist;
+  });
+
+  it('should configure loader as a service element', async () => {
+    // Ensure loader is created.
+    io.record({
+      target: el,
+      isIntersecting: true,
+      boundingClientRect: {width: 100, height: 100},
+    });
+
+    const loader = getLoader();
+    expect(loader.getAttribute('slot')).to.equal('i-amphtml-svc');
+    expect(loader).to.have.class('i-amphtml-svc');
   });
 });

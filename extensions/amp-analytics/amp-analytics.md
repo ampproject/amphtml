@@ -194,10 +194,10 @@ etc.) see
 To load a remote configuration, in the `<amp-analytics>` element, specify the
 `config` attribute and the URL for the configuration data. The URL specified
 should use the HTTPS scheme. The URL may include
-[AMP URL vars](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md).
+[AMP URL vars](https://github.com/ampproject/amphtml/blob/main/spec/amp-var-substitutions.md).
 To access cookies, see the [`data-credentials`](#data-credentials) attribute.
 The response must follow the
-[AMP CORS security guidelines](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md).
+[AMP CORS security guidelines](https://github.com/ampproject/amphtml/blob/main/spec/amp-cors-requests.md).
 
 In this example, we specify the `config` attribute to load the configuration
 data from the specified URL.
@@ -333,12 +333,12 @@ that contains optional request configs.
 
 The properties for defining a request with an object are:
 
-- `baseUrl`: Defines the url of the request (required).
-- `reportWindow`: An optional property to specify the time (in seconds) to
-  stop reporting requests. The trigger with `important: true` overrides the
-  maximum report window constraint.
-- [`origin`](#request-origin): An optional property to specify the origin for
-  requests
+-   `baseUrl`: Defines the url of the request (required).
+-   `reportWindow`: An optional property to specify the time (in seconds) to
+    stop reporting requests. The trigger with `important: true` overrides the
+    maximum report window constraint.
+-   [`origin`](#request-origin): An optional property to specify the origin for
+    requests
 
 In this example, all requests are valid.
 
@@ -476,6 +476,13 @@ In addition, all of the variables supported by
 [AMP HTML Substitutions Guide](../../spec/amp-var-substitutions.md)
 are also supported.
 
+Variables are resolved asynchronously and can delay the request until they are
+fulfilled. For example, some metrics such as Cumulative Layout Shift and
+Largest Contentful Paint are calculated after the page is hidden. For First
+Input Delay, it is resolved after the user interacts with the page. For this
+reason these metrics might not be suitable for use with all triggers (for
+example, on timer or visible).
+
 The `vars` configuration object can be used to define new key-value pairs or
 override existing variables that can be referenced in `request` values. New
 variables are commonly used to specify publisher specific information. Arrays
@@ -538,19 +545,19 @@ each relevant trigger for more details.
 
 The selector properties are:
 
-- `selector` This property is used to find an element or a collection of
-  elements using CSS/DOM query. The semantics of how the element is matched
-  can be changed using `selectionMethod`. The value of this property can be
-  one of:
+-   `selector` This property is used to find an element or a collection of
+    elements using CSS/DOM query. The semantics of how the element is matched
+    can be changed using `selectionMethod`. The value of this property can be
+    one of:
 
-  - a valid CSS selector, e.g. `#ad1` or `amp-ad`.
-  - `:root` - a special selector that matches the document root.
+    -   a valid CSS selector, e.g. `#ad1` or `amp-ad`.
+    -   `:root` - a special selector that matches the document root.
 
-- `selectionMethod` When specified, this property can have one of two values:
-  `scope` or `closest`. `scope` allows selection of element within the parent
-  element of `amp-analytics` tag. `closest` searches for the closest ancestor
-  of the `amp-analytics` tag that satisfies the given selector. The default
-  value is `scope`.
+-   `selectionMethod` When specified, this property can have one of two values:
+    `scope` or `closest`. `scope` allows selection of element within the parent
+    element of `amp-analytics` tag. `closest` searches for the closest ancestor
+    of the `amp-analytics` tag that satisfies the given selector. The default
+    value is `scope`.
 
 ##### Available triggers <a name="available-triggers"></a>
 
@@ -603,11 +610,11 @@ contents of an AMP element or an AMP document have been loaded.
 The "initial load" is defined in relationship to the container and its initial
 size. More specifically:
 
-- For a document: all elements in the first viewport.
-- For an embed element: all content elements in the embed document that are
-  positioned within the initial size of the embed element.
-- For a simple AMP element (e.g. `amp-img`): the resources itself, such as an
-  image or a video.
+-   For a document: all elements in the first viewport.
+-   For an embed element: all content elements in the embed document that are
+    positioned within the initial size of the embed element.
+-   For a simple AMP element (e.g. `amp-img`): the resources itself, such as an
+    image or a video.
 
 The trigger for an embed or an AMP element must include a
 [`selector`](#element-selector) that points to the element:
@@ -674,18 +681,18 @@ that indicate the boundaries that triggered a request to be sent. Use
 
 `scrollSpec` is an object that contains the properties:
 
-- `horizontalBoundaries`, `verticalBoundaries` (At least one of these is
-  required for a scroll event to fire.)
+-   `horizontalBoundaries`, `verticalBoundaries` (At least one of these is
+    required for a scroll event to fire.)
 
-  These should be number arrays containing the percentage boundaries on which a scroll event is fired.
+    These should be number arrays containing the percentage boundaries on which a scroll event is fired.
 
-  (To keep the page performant, these percentages are rounded to multiples of `5`.)
+    (To keep the page performant, these percentages are rounded to multiples of `5`.)
 
-- `useInitialPageSize` (optional, default `false`)
+-   `useInitialPageSize` (optional, default `false`)
 
-  If set to `true`, scroll position is calculated based on
-  the initial sizing of the page, ignoring its new dimensions when
-  resized.
+    If set to `true`, scroll position is calculated based on
+    the initial sizing of the page, ignoring its new dimensions when
+    resized.
 
 [tip type="note"]
 When using `<amp-analytics>` with infinitely scrolling experiences such as
@@ -721,13 +728,13 @@ interval. Use `timerSpec` to control when this will fire.
 
 `timerSpec` Specification for triggers of type `timer`. Unless a `startSpec` is specified, the timer will trigger immediately (by default, can be unset) and then at a specified interval thereafter.
 
-- `interval` Length of the timer interval, in seconds.
-- `maxTimerLength` Maximum duration for which the timer will fire, in
-  seconds. An additional request will be triggered when the
-  `maxTimerLength` has been reached. The default is 2 hours. When a
-  `stopSpec` is present, but no `maxTimerLength` is specified, the default
-  will be infinity.
-- `immediate` trigger timer immediately or not. Boolean, defaults to true
+-   `interval` Length of the timer interval, in seconds.
+-   `maxTimerLength` Maximum duration for which the timer will fire, in
+    seconds. An additional request will be triggered when the
+    `maxTimerLength` has been reached. The default is 2 hours. When a
+    `stopSpec` is present, but no `maxTimerLength` is specified, the default
+    will be infinity.
+-   `immediate` trigger timer immediately or not. Boolean, defaults to true
 
 [tip type="note"]
 The timer trigger will continue to send out requests regardless of document state (inactive or hidden), until the `maxTimerLength` has been reached (default to 2 hours if `stopSpec` doesn't exist and inifity if it does) or `stopSpec` has been met. In the case of no `stopSpec`, the `maxTimerLength` will default to infinity.
@@ -750,12 +757,12 @@ See the following example:
 
 To configure a timer which times user events use:
 
-- `startSpec` Specification for triggering when a timer starts. Use the value of
-  `on` and `selector` to track specific events. A config with a `startSpec`
-  but no `stopSpec` will only stop after `maxTimerLength` has been reached.
-- `stopSpec` Specification for triggering when a timer stops. A config with a
-  `stopSpec` but no `startSpec` will start immediately but only stop on the
-  specified event.
+-   `startSpec` Specification for triggering when a timer starts. Use the value of
+    `on` and `selector` to track specific events. A config with a `startSpec`
+    but no `stopSpec` will only stop after `maxTimerLength` has been reached.
+-   `stopSpec` Specification for triggering when a timer stops. A config with a
+    `stopSpec` but no `startSpec` will start immediately but only stop on the
+    specified event.
 
 See the spec on [triggers](#triggers) for details on creating nested timer
 triggers. Note that using a timer trigger to start or stop a timer is not
@@ -827,17 +834,25 @@ using the `visibilitySpec`.
 }
 ```
 
-Notice that selector can be used to only specify a single element, not a
-collection. The element can be either an
-[AMP extended element](../../spec/amp-tag-addendum.md#amp-specific-tags)
-or a document root.
-
 The element visibility trigger waits for the signal specified by the `waitFor`
 property in `visibilitySpec` before tracking element visibility. If `waitFor` is
 not specified, it waits for element's [`ini-load`](#ini-load) signal. See
 `waitFor` docs for more details. If `reportWhen` is specified, the trigger waits
 for that signal before sending the event. This is useful, for example, in
 sending analytics events when the page is closed.
+
+`selector` can either be a single selector string (shown above) or an array of selector strings (shown below). If `selector` is a string, then it will be used to only specify a single element or a document root. If `selector` is an array of strings, each selector will specify all the elements in the doc that share the selector and have the `data-vars-*` attribute (useful for identifying elements).
+
+```json
+"triggers": {
+  "defaultPageview": {
+    "on": "visible",
+    "request": "adViewWithId",
+    "selector": ["amp-ad", "#myImg.red"],
+    "visibilitySpec": {/* optional visibility spec */}
+  }
+}
+```
 
 ###### `"on": "hidden"` trigger
 
@@ -900,14 +915,14 @@ reports errors from A4A iframe embeds, which are irrelevant to the page.
 
 ###### `"on":` Component-specific triggers
 
-- Access triggers: AMP Access system issues numerous events for different
-  states in the access flow. For details on access triggers
-  (`"on": "access-*"`), see
-  [AMP Access and Analytics](../amp-access/amp-access-analytics.md).
-- Video analytics triggers: Video analytics provides several triggers
-  (`"on": "video-*"`) that publishers can use to track different events
-  occurring during a video's lifecycle. More details are available in
-  [AMP Video Analytics](amp-video-analytics.md).
+-   Access triggers: AMP Access system issues numerous events for different
+    states in the access flow. For details on access triggers
+    (`"on": "access-*"`), see
+    [AMP Access and Analytics](../amp-access/amp-access-analytics.md).
+-   Video analytics triggers: Video analytics provides several triggers
+    (`"on": "video-*"`) that publishers can use to track different events
+    occurring during a video's lifecycle. More details are available in
+    [AMP Video Analytics](amp-video-analytics.md).
 
 ###### `request` trigger
 
@@ -949,17 +964,17 @@ sent. This setting allows sampling based on random input or other platform
 supported `vars`. The object contains configuration to specify an input that is
 used to generate a hash and a threshold that the hash must meet.
 
-- `sampleOn`: This string template is expanded by filling in the platform
-  variables and then hashed to generate a number for the purposes of the
-  sampling logic described under `threshold` below.
-- `threshold`: This configuration is used to filter out requests that do not
-  meet particular criteria. For a request to go through to the analytics
-  vendor, the following logic should be true `HASH(sampleOn) < threshold`.
+-   `sampleOn`: This string template is expanded by filling in the platform
+    variables and then hashed to generate a number for the purposes of the
+    sampling logic described under `threshold` below.
+-   `threshold`: This configuration is used to filter out requests that do not
+    meet particular criteria. For a request to go through to the analytics
+    vendor, the following logic should be true `HASH(sampleOn) < threshold`.
 
 ###### `videoSpec` trigger
 
 This configuration is used in conjunction with the
-[`video-*`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-video-analytics.md)
+[`video-*`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-analytics/amp-video-analytics.md)
 triggers. Used when `on` is set to `video-*`.
 
 #### Transport
@@ -967,22 +982,22 @@ triggers. Used when `on` is set to `video-*`.
 The `transport` configuration object specifies how to send a request. The value
 is an object with fields that indicate which transport methods are acceptable.
 
-- `beacon` Indicates
-  [`navigator.sendBeacon`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon)
-  can be used to transmit the request. This will send a POST request with
-  credentials. The request will be sent with an empty body unless `useBody` is
-  true. See [ Extra URL parameters](#extra-url-parameters) for more
-  information about `useBody`.
-- `xhrpost` Indicates `XMLHttpRequest` can be used to transmit the request.
-  This will send a POST request with credentials. The request will be sent
-  with an empty body unless `useBody` is true. See
-  [Extra URL parameters](#extra-url-parameters) for more information about
-  `useBody`.
-- `image` Indicates the request can be sent by generating an `Image` tag. This
-  will send a GET request. To suppress console warnings due to empty responses
-  or request failures, set `"image": {"suppressWarnings": true}`.
-- `iframe` Indicates that an `iframe` can be used to transmit the request. See
-  [`iframe`](#iframe) for details.
+-   `beacon` Indicates
+    [`navigator.sendBeacon`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon)
+    can be used to transmit the request. This will send a POST request with
+    credentials. The request will be sent with an empty body unless `useBody` is
+    true. See [ Extra URL parameters](#extra-url-parameters) for more
+    information about `useBody`.
+-   `xhrpost` Indicates `XMLHttpRequest` can be used to transmit the request.
+    This will send a POST request with credentials. The request will be sent
+    with an empty body unless `useBody` is true. See
+    [Extra URL parameters](#extra-url-parameters) for more information about
+    `useBody`.
+-   `image` Indicates the request can be sent by generating an `Image` tag. This
+    will send a GET request. To suppress console warnings due to empty responses
+    or request failures, set `"image": {"suppressWarnings": true}`.
+-   `iframe` Indicates that an `iframe` can be used to transmit the request. See
+    [`iframe`](#iframe) for details.
 
 If more than one of the above transport methods are enabled, the precedence is
 `iframe` > `beacon` > `xhrpost` > `image`. Only one transport method will be
@@ -1113,52 +1128,52 @@ to `visible` or `hidden` triggers to change when they fire. If multiple
 properties are specified, they must all be true in order for a request to fire.
 Configuration properties supported in `visibilitySpec` are:
 
-- `waitFor`: This property indicates that the visibility trigger should wait
-  for a certain signal before tracking visibility. The supported values are
-  `none`, `ini-load`, and `render-start`. If `waitFor` is undefined, it is
-  defaulted to [`ini-load`](#ini-load) (for AMP elements) when selector is specified, or to `none` otherwise. When tracking non-AMP elements, only `none` is supported, which is its default value. Tracking non-AMP elements may not always work as intended. For example, tracking a `<div>` element that contains an `<amp-iframe>`, may not accurately wait for the iframe to load before sending the signal out.
+-   `waitFor`: This property indicates that the visibility trigger should wait
+    for a certain signal before tracking visibility. The supported values are
+    `none`, `ini-load`, and `render-start`. If `waitFor` is undefined, it is
+    defaulted to [`ini-load`](#ini-load) (for AMP elements) when selector is specified, or to `none` otherwise. When tracking non-AMP elements, only `none` is supported, which is its default value. Tracking non-AMP elements may not always work as intended. For example, tracking a `<div>` element that contains an `<amp-iframe>`, may not accurately wait for the iframe to load before sending the signal out.
 
-- `reportWhen`: This property indicates that the visibility trigger should
-  wait for a certain signal before sending the trigger. The only supported
-  value is `documentExit`. `reportWhen` and `repeat` may not both be used in the
-  same `visibilitySpec`. Note that when `reportWhen` is specified, the report
-  will be sent at the time of the signal even if visibility requirements are
-  not met at that time or have not been met previously. Any relevant variables
-  (`totalVisibleTime`, etc.) will be populated according to the visibility
-  requirements in this `visibilitySpec`.
+-   `reportWhen`: This property indicates that the visibility trigger should
+    wait for a certain signal before sending the trigger. The only supported
+    value is `documentExit`. `reportWhen` and `repeat` may not both be used in the
+    same `visibilitySpec`. Note that when `reportWhen` is specified, the report
+    will be sent at the time of the signal even if visibility requirements are
+    not met at that time or have not been met previously. Any relevant variables
+    (`totalVisibleTime`, etc.) will be populated according to the visibility
+    requirements in this `visibilitySpec`.
 
-- `continuousTimeMin` and `continuousTimeMax`: These properties indicate that
-  a request should be fired when (any part of) an element has been within the
-  viewport for a continuous amount of time that is between the minimum and
-  maximum specified times. The times are expressed in milliseconds. The
-  `continuousTimeMin` is defaulted to `0` when not specified.
+-   `continuousTimeMin` and `continuousTimeMax`: These properties indicate that
+    a request should be fired when (any part of) an element has been within the
+    viewport for a continuous amount of time that is between the minimum and
+    maximum specified times. The times are expressed in milliseconds. The
+    `continuousTimeMin` is defaulted to `0` when not specified.
 
-- `totalTimeMin` and `totalTimeMax`: These properties indicate that a request
-  should be fired when (any part of) an element has been within the viewport
-  for a total amount of time that is between the minimum and maximum specified
-  times. The times are expressed in milliseconds. The `totalTimeMin` is
-  defaulted to `0` when not specified.
+-   `totalTimeMin` and `totalTimeMax`: These properties indicate that a request
+    should be fired when (any part of) an element has been within the viewport
+    for a total amount of time that is between the minimum and maximum specified
+    times. The times are expressed in milliseconds. The `totalTimeMin` is
+    defaulted to `0` when not specified.
 
-- `visiblePercentageMin` and `visiblePercentageMax`: These properties indicate
-  that a request should be fired when the proportion of an element that is
-  visible within the viewport is between the minimum and maximum specified
-  percentages. Percentage values between 0 and 100 are valid. Note that the
-  upper bound (`visiblePercentageMax`) is inclusive. The lower bound
-  (`visiblePercentageMin`) is exclusive, unless both bounds are set to 0 or
-  both are set to 100. If both bounds are set to 0, then the trigger fires
-  when the element is not visible. If both bounds are set to 100, the trigger
-  fires when the element is fully visible. When these properties are defined
-  along with other timing related properties, only the time when these
-  properties are met are counted. The default values for
-  `visiblePercentageMin` and `visiblePercentageMax` are `0` and `100`,
-  respectively.
+-   `visiblePercentageMin` and `visiblePercentageMax`: These properties indicate
+    that a request should be fired when the proportion of an element that is
+    visible within the viewport is between the minimum and maximum specified
+    percentages. Percentage values between 0 and 100 are valid. Note that the
+    upper bound (`visiblePercentageMax`) is inclusive. The lower bound
+    (`visiblePercentageMin`) is exclusive, unless both bounds are set to 0 or
+    both are set to 100. If both bounds are set to 0, then the trigger fires
+    when the element is not visible. If both bounds are set to 100, the trigger
+    fires when the element is fully visible. When these properties are defined
+    along with other timing related properties, only the time when these
+    properties are met are counted. The default values for
+    `visiblePercentageMin` and `visiblePercentageMax` are `0` and `100`,
+    respectively.
 
-- `repeat`: If this property is set to `true`, the trigger fires each time
-  that the `visibilitySpec` conditions are met. In the following example, if
-  the element is scrolled to 51% in view, then 49%, then 51% again, the
-  trigger fires twice. However, if `repeat` was `false`, the trigger fires
-  once. The default value of `repeat` is `false`. `reportWhen` and `repeat`
-  may not both be used in the same visibilitySpec.
+-   `repeat`: If this property is set to `true`, the trigger fires each time
+    that the `visibilitySpec` conditions are met. In the following example, if
+    the element is scrolled to 51% in view, then 49%, then 51% again, the
+    trigger fires twice. However, if `repeat` was `false`, the trigger fires
+    once. The default value of `repeat` is `false`. `reportWhen` and `repeat`
+    may not both be used in the same visibilitySpec.
 
 ```json
 "visibilitySpec": {

@@ -9,8 +9,18 @@
       "options": {"parser": "json5"}
     },
     {
+      "files": "build-system/tasks/make-extension/bento/amp-__component_name_hyphenated__/**",
+      "options": {
+        "requirePragma": true
+      }
+    },
+    {
       "files": "*.md",
-      "options": {"parser": "markdown", "embeddedLanguageFormatting": "off"}
+      "options": {
+        "parser": "markdown",
+        "embeddedLanguageFormatting": "off",
+        "tabWidth": 4
+      }
     },
     {
       "files": [".prettierrc", ".renovaterc.json", "*.json"],
@@ -18,11 +28,11 @@
     },
     {
       "files": [
+        ".circleci/config.yml",
         ".codecov.yml",
         ".github/workflows/continuous-integration-workflow.yml",
         ".lando.yml",
-        ".lgtm.yml",
-        ".travis.yml"
+        ".lgtm.yml"
       ],
       "options": {"parser": "yaml"}
     }

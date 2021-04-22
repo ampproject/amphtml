@@ -15,7 +15,7 @@
  */
 import {LogLevel, devAssert} from '../../../src/log';
 import {scopedQuerySelectorAll} from '../../../src/dom';
-import {tryResolve} from '../../../src/utils/promise';
+import {tryResolve} from '../../../src/core/data-structures/promise';
 
 /** @typedef {function(!Element): (boolean|!Promise<boolean>)} */
 let ElementPredicate_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase

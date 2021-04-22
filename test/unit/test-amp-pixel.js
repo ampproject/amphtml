@@ -23,9 +23,8 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
   let win;
   let whenFirstVisiblePromise, whenFirstVisibleResolver;
   let pixel;
-  let implementation;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     win = env.win;
     whenFirstVisiblePromise = new Promise((resolve) => {
       whenFirstVisibleResolver = resolve;
@@ -33,7 +32,9 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
     env.sandbox
       .stub(env.ampdoc, 'whenFirstVisible')
       .callsFake(() => whenFirstVisiblePromise);
-    createPixel('https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
+    await createPixel(
+      'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?'
+    );
   });
 
   function createPixel(src, referrerPolicy) {
@@ -43,9 +44,7 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
       pixel.setAttribute('referrerpolicy', referrerPolicy);
     }
     win.document.body.appendChild(pixel);
-    const buildPromise = pixel.build();
-    implementation = pixel.implementation_;
-    return buildPromise;
+    return pixel.buildInternal();
   }
 
   /**
@@ -57,10 +56,14 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
       pixel.setAttribute('src', opt_src);
     }
     whenFirstVisibleResolver();
-    return whenFirstVisiblePromise.then(() => {
-      expect(implementation.triggerPromise_).to.be.not.null;
-      return implementation.triggerPromise_;
-    });
+    return whenFirstVisiblePromise
+      .then(() => {
+        return pixel.getImpl(false);
+      })
+      .then((impl) => {
+        expect(impl.triggerPromise_).to.be.not.null;
+        return impl.triggerPromise_;
+      });
   }
 
   it('should be non-displayed', () => {
@@ -70,7 +73,8 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
     expect(pixel).to.have.display('none');
   });
 
-  it('should NOT trigger when src is empty', () => {
+  it('should NOT trigger when src is empty', async () => {
+    const implementation = await pixel.getImpl(false);
     expect(pixel.children).to.have.length(0);
     expect(implementation.triggerPromise_).to.be.null;
     return trigger('').then((img) => {
@@ -79,7 +83,8 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
     });
   });
 
-  it('should trigger when doc becomes visible', () => {
+  it('should trigger when doc becomes visible', async () => {
+    const implementation = await pixel.getImpl(false);
     expect(pixel.children).to.have.length(0);
     expect(implementation.triggerPromise_).to.be.null;
     return trigger().then((img) => {
@@ -167,7 +172,7 @@ describes.realWin(
     let pixel;
     let implementation;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       win = env.win;
 
       whenFirstVisiblePromise = new Promise((resolve) => {
@@ -177,7 +182,7 @@ describes.realWin(
         .stub(env.ampdoc, 'whenFirstVisible')
         .callsFake(() => whenFirstVisiblePromise);
 
-      installUrlReplacementsForEmbed(env.ampdoc, win, new TestVariableSource());
+      installUrlReplacementsForEmbed(env.ampdoc, new TestVariableSource());
 
       pixel = win.document.createElement('amp-pixel');
       pixel.setAttribute(
@@ -185,8 +190,8 @@ describes.realWin(
         'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?'
       );
       win.document.body.appendChild(pixel);
-      pixel.build();
-      implementation = pixel.implementation_;
+      await pixel.buildInternal();
+      implementation = await pixel.getImpl();
     });
 
     /**

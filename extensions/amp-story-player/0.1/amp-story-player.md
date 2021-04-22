@@ -27,9 +27,9 @@ limitations under the License.
 ## Usage
 
 <figure class="centered-fig">
-  <amp-anim alt="amp-story-player example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/spec/img/amp-story-player.gif">
+  <amp-anim alt="amp-story-player example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/spec/img/amp-story-player.gif">
     <noscript>
-    <img alt="amp-story-player example" src="https://github.com/ampproject/amphtml/raw/master/spec/img/amp-story-player.gif" />
+    <img alt="amp-story-player example" src="https://github.com/ampproject/amphtml/raw/main/spec/img/amp-story-player.gif" />
   </noscript>
   </amp-anim>
 </figure>
@@ -53,15 +53,15 @@ The code snippet below demonstrates an embed of `<amp-story-player>` in a AMP we
 </head>
 <body>
   <amp-story-player layout="fixed" width="360" height="600">
-    <a
-      href="https://preview.amp.dev/documentation/examples/introduction/stories_in_amp/"
-      style="--story-player-poster: url('https://amp.dev/static/samples/img/story_dog2_portrait.jpg')"
-    >
+    <a href="https://preview.amp.dev/documentation/examples/introduction/stories_in_amp/">
+      <img src="https://amp.dev/static/samples/img/story_dog2_portrait.jpg" width="360" height="600" loading="lazy" data-amp-story-player-poster-img>
       Stories in AMP - Hello World
     </a>
   </amp-story-player>
 </body>
 ```
+
+[/example]
 
 ### Specify embedded stories
 
@@ -84,4 +84,4 @@ Supports any of the size-defined layouts:
 
 ## Validation
 
-See [amp-story-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story-player/validator-amp-story-player.protoascii) in the AMP validator specification.
+See [amp-story-player rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-story-player/validator-amp-story-player.protoascii) in the AMP validator specification.

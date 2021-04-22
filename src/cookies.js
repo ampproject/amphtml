@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {endsWith} from './string';
+import {endsWith} from './core/types/string';
 import {
   getSourceOrigin,
   isProxyOrigin,
@@ -68,7 +68,6 @@ export function getCookie(win, name) {
  * This method should not be inlined to prevent TryCatch deoptimization.
  * @param {!Window} win
  * @return {string}
- * @noinline
  */
 function tryGetDocumentCookie_(win) {
   try {

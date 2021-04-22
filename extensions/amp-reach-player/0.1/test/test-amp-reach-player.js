@@ -43,7 +43,7 @@ describes.realWin(
       }
       doc.body.appendChild(reach);
       return reach
-        .build()
+        .buildInternal()
         .then(() => {
           reach.layoutCallback();
         })
@@ -74,6 +74,20 @@ describes.realWin(
         expect(iframe).to.not.be.null;
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });
+    });
+
+    it('unlayout and relayout', async () => {
+      const reach = await getReach({
+        'data-embed-id': 'default',
+      });
+      expect(reach.querySelector('iframe')).to.exist;
+
+      const unlayoutResult = reach.unlayoutCallback();
+      expect(unlayoutResult).to.be.true;
+      expect(reach.querySelector('iframe')).to.not.exist;
+
+      await reach.layoutCallback();
+      expect(reach.querySelector('iframe')).to.exist;
     });
   }
 );

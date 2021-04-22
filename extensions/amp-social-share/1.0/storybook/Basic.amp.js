@@ -25,7 +25,7 @@ export default {
 
   parameters: {
     extensions: [{name: 'amp-social-share', version: '1.0'}],
-    experiments: ['amp-social-share-bento'],
+    experiments: ['bento'],
   },
 };
 
@@ -100,6 +100,4 @@ export const Default = () => {
   );
 };
 
-Default.story = {
-  name: 'default',
-};
+Default.storyName = 'default';

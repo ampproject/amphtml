@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {rethrowAsync} from '../log';
+import {rethrowAsync} from '../core/error';
 
 /**
  * Creates a scheduling function that executes the callback based on the
@@ -51,7 +51,7 @@ export function throttleTail(handler, defaultScheduler = null) {
  * @param {function():*} callback
  * @return {*}
  */
-export function protectedNoInline(callback) {
+export function tryCallback(callback) {
   try {
     return callback();
   } catch (e) {
