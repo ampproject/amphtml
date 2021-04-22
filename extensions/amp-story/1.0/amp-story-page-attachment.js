@@ -26,6 +26,7 @@ import {getLocalizationService} from './amp-story-localization-service';
 import {getState} from '../../../src/history';
 import {htmlFor} from '../../../src/static-template';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-open-page-attachment';
+import {setImportantStyles} from '../../../src/style';
 import {toggle} from '../../../src/style';
 import {triggerClickFromLightDom} from './utils';
 
@@ -160,7 +161,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildRemote_() {
-    this.setDragCap_(48 /* pixels */);
     this.setOpenThreshold_(150 /* pixels */);
 
     this.headerEl_.classList.add(
@@ -176,13 +176,38 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     link.setAttribute('href', this.element.getAttribute('href'));
     this.contentEl_.appendChild(link);
 
-    this.contentEl_.querySelector(
-      '.i-amphtml-story-page-attachment-remote-title'
-    ).textContent =
-      this.element.getAttribute('data-title') ||
-      Services.urlForDoc(this.element).getSourceOrigin(
-        this.element.getAttribute('href')
+    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+      this.setDragCap_(56 /* pixels */);
+
+      const remoteLinkImgEl = this.win.document.createElement('span');
+      remoteLinkImgEl.classList.add(
+        'i-amphtml-story-page-attachment-remote-img'
       );
+      this.contentEl_
+        .querySelector('.i-amphtml-story-page-attachment-remote-content')
+        .prepend(remoteLinkImgEl);
+
+      const openImgAttr = this.element.getAttribute('cta-image');
+      if (openImgAttr) {
+        setImportantStyles(remoteLinkImgEl, {
+          'background-image': 'url(' + openImgAttr + ')',
+        });
+      }
+
+      this.contentEl_.querySelector(
+        '.i-amphtml-story-page-attachment-remote-title'
+      ).textContent = this.element.getAttribute('href');
+    } else {
+      this.setDragCap_(48 /* pixels */);
+
+      this.contentEl_.querySelector(
+        '.i-amphtml-story-page-attachment-remote-title'
+      ).textContent =
+        this.element.getAttribute('data-title') ||
+        Services.urlForDoc(this.element).getSourceOrigin(
+          this.element.getAttribute('href')
+        );
+    }
   }
 
   /**
@@ -286,18 +311,17 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     animationEl.classList.add('i-amphtml-story-page-attachment-expand');
     const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
 
-    this.mutateElement(() => {
-      storyEl.appendChild(animationEl);
-    }).then(() => {
+    this.mutateElement(() => {}).then(() => {
       // Give some time for the 120ms CSS animation to run (cf
       // amp-story-page-attachment.css). The navigation itself will take some
       // time, depending on the target and network conditions.
       this.win.setTimeout(() => {
+        storyEl.appendChild(animationEl);
         const clickTarget = this.element.parentElement
           .querySelector('.i-amphtml-story-page-open-attachment-host')
           .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
         triggerClickFromLightDom(clickTarget, this.element);
-      }, 50);
+      }, 1000);
     });
   }
 
