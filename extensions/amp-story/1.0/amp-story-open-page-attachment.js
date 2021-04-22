@@ -316,8 +316,16 @@ export const setCustomThemeStyles = (win, attachmentEl, openAttachmentEl) => {
       '--i-amphtml-outlink-cta-background-color': accentColor,
       '--i-amphtml-outlink-cta-text-color': contrastColor,
     });
+    setImportantStyles(attachmentEl, {
+      '--i-amphtml-outlink-cta-background-color': accentColor,
+      '--i-amphtml-outlink-cta-text-color': contrastColor,
+    });
   } else {
     setImportantStyles(openAttachmentEl, {
+      '--i-amphtml-outlink-cta-background-color': contrastColor,
+      '--i-amphtml-outlink-cta-text-color': accentColor,
+    });
+    setImportantStyles(attachmentEl, {
       '--i-amphtml-outlink-cta-background-color': contrastColor,
       '--i-amphtml-outlink-cta-text-color': accentColor,
     });
