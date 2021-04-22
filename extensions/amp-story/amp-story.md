@@ -836,7 +836,7 @@ If a composed animation is supposed to start after the end of a separate element
 
 ## Advanced animations
 
-You can create more advanced animations by using the `<amp-story-animation>` component. It lets you create [`<amp-animation>`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-animation/amp-animation.md) type animations inside your Web Story.
+You can create more advanced animations by using the `<amp-story-animation>` component. It lets you create [`<amp-animation>`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-animation/amp-animation.md)-type animations inside your Web Story.
 
 To use it, add a `<amp-story-animation layout="nodisplay" trigger="visibility">` tag under your `<amp-story-page>` with a child `<script type="application/json">` containing the JSON configuration describing your animation. In the following example, the "rotate with amp-story-animation" text will be rotated for 1 second using `<amp-story-animation>`:
 
