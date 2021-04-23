@@ -109,15 +109,15 @@
   flex-shrink: 0 !important;
   padding: 0px !important;
   border-radius: 50% !important;
-  background-size: cover;
-  background-repeat: no-repeat;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  overflow: hidden !important;
 }
 
-.i-amphtml-story-page-open-attachment-link-icon {
+.i-amphtml-amp-story-page-attachment-ui-v2 svg.i-amphtml-story-page-open-attachment-link-icon {
   width: 100%;
   height: 100%;
   fill: var(--i-amphtml-outlink-cta-text-color) !important;
-  stroke: var(--i-amphtml-outlink-cta-text-color) !important;
 }
 
 .i-amphtml-amp-story-page-attachment-ui-v2 svg.i-amphtml-story-page-open-attachment-link-icon {
