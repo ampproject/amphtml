@@ -47,9 +47,8 @@ const isAmpStateSrc = (src) => src && src.startsWith(AMP_STATE_URI_SCHEME);
  * @param {!AmpElement} element
  * @param {string} src
  * @return {Promise<!JsonObject>}
- * @private
  */
-function getAmpStateJson(element, src) {
+const getAmpStateJson = (element, src) => {
   return Services.bindForDocOrNull(element)
     .then((bind) => {
       userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
@@ -70,7 +69,7 @@ function getAmpStateJson(element, src) {
       );
       return json;
     });
-}
+};
 
 export class AmpRender extends BaseElement {
   /** @param {!AmpElement} element */
