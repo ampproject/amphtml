@@ -19,7 +19,7 @@ import {dict} from '../src/core/types/object';
 import {getData, listen} from '../src/event-helper';
 import {getMode} from '../src/mode';
 import {isFiniteNumber} from '../src/types';
-import {once} from '../src/utils/function';
+import {once} from '../src/core/types/function';
 import {tryParseJson} from '../src/json';
 import {tryResolve} from '../src/core/data-structures/promise';
 

@@ -829,7 +829,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-xhr.js',
       'test/unit/utils/test-base64.js',
       'test/unit/utils/test-bytes.js',
-      'test/unit/utils/test-rate-limit.js',
       'test/unit/web-worker/test-amp-worker.js',
     ],
     checkInTestFolder: true,
@@ -995,7 +994,7 @@ const forbiddenTermsSrcInclusive = {
       '.github/workflows/create-design-review-issue.js',
       'extensions/amp-timeago/0.1/amp-timeago.js',
       'extensions/amp-timeago/1.0/component.js',
-      'src/utils/date.js',
+      'src/core/types/date.js',
     ],
   },
   '\\.expandStringSync\\(': {
@@ -1148,6 +1147,8 @@ const forbiddenTermsSrcInclusive = {
     message:
       'Instead of fancy-log, use the logging functions in build-system/common/logging.js.',
   },
+  'withA11y':
+    'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',
 };
 
 /**

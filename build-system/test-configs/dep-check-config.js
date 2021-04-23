@@ -83,14 +83,14 @@ exports.rules = [
     filesMatching: '3p/**/*.js',
     mustNotDependOn: 'src/**/*.js',
     allowlist: [
-      '3p/**->src/utils/function.js',
       '3p/**->src/core/constants/amp-events.js',
       '3p/**->src/core/data-structures/observable.js',
       '3p/**->src/core/data-structures/promise.js',
       '3p/**->src/core/error.js',
+      '3p/**->src/core/types/function.js',
       '3p/**->src/core/types/index.js',
-      '3p/**->src/core/types/string.js',
       '3p/**->src/core/types/object.js',
+      '3p/**->src/core/types/string.js',
       '3p/**->src/log.js',
       '3p/**->src/style.js',
       '3p/**->src/url.js',
@@ -121,10 +121,10 @@ exports.rules = [
     allowlist: [
       'ads/**->src/utils/dom-fingerprint.js',
       'ads/**->src/core/error.js',
+      'ads/**->src/core/types/function.js',
       'ads/**->src/core/types/index.js',
       'ads/**->src/core/types/object.js',
       'ads/**->src/core/types/string.js',
-      'ads/**->src/utils/rate-limit.js',
       'ads/**->src/log.js',
       'ads/**->src/mode.js',
       'ads/**->src/url.js',
@@ -243,6 +243,7 @@ exports.rules = [
       // Facebook components
       'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
+      'extensions/amp-facebook-comments/1.0/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
 
       // Bento AMP Youtube
       'extensions/amp-youtube/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
@@ -321,6 +322,8 @@ exports.rules = [
         'src/service/extension-script.js',
       'extensions/amp-video/0.1/amp-video.js->' +
         'src/service/video-manager-impl.js',
+      'extensions/amp-video/0.1/video-cache.js->' +
+        'src/service/extension-script.js',
       'extensions/amp-video-iframe/0.1/amp-video-iframe.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-ooyala-player/0.1/amp-ooyala-player.js->' +

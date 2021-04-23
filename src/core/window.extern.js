@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-/** @externs */
+/**
+ * @fileoverview Externs for values expected to be on global self/window.
+ * @externs
+ */
 
-// Place externs here if they are only needed in legacy multi pass compilation.
+/** @type {undefined} */
+window.__AMP_ASSERTION_CHECK;
 
-var SomeBaseElementLikeClass;
-SomeBaseElementLikeClass.prototype.layout_;
-
-/** @type {boolean} */
-SomeBaseElementLikeClass.prototype.inViewport_;
-
-SomeBaseElementLikeClass.prototype.actionMap_;
-
-SomeBaseElementLikeClass.prototype.defaultActionAlias_;
-
-// Externed explicitly because this private property is read across
-// binaries.
-Element.prototype.impl_ = {};
+/** @type {undefined|function(this:Window,!Error,Element=)} */
+window.__AMP_REPORT_ERROR;

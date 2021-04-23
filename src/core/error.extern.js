@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,9 @@
  */
 
 /**
- * @fileoverview Delete this file when Closure Compiler ships with the
- * WeakRef extern.
+ * @fileoverview Externs for extra properties expected on errors.
+ * @externs
  */
 
-/** @externs */
-
-/**
- * @param {T} target
- * @constructor
- * @template T
- */
-function WeakRef(target) {}
-
-/** @return {T|undefined} */
-WeakRef.prototype.deref = function () {};
+/** @type {undefined|Array<*>} */
+Error.prototype.messageArray;
