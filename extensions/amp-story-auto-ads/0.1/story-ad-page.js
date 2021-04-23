@@ -321,13 +321,11 @@ export class StoryAdPage {
       this.win_,
       StoryAdAutoAdvance.ID
     );
-    console.log('branch', autoAdvanceExpBranch);
     if (
       autoAdvanceExpBranch &&
       autoAdvanceExpBranch !== StoryAdAutoAdvance.CONTROL
     ) {
       attributes['auto-advance-after'] = AdvanceExpToTime[autoAdvanceExpBranch];
-      console.log('branch', AdvanceExpToTime[autoAdvanceExpBranch]);
     }
 
     const page = createElementWithAttributes(
