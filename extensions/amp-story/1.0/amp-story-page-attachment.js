@@ -24,7 +24,7 @@ import {closest, removeElement} from '../../../src/dom';
 import {dev, devAssert} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getState} from '../../../src/history';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-open-page-attachment';
 import {setImportantStyles} from '../../../src/style';
 import {toggle} from '../../../src/style';
@@ -205,32 +205,37 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     // Use an anchor element to make this a real link in vertical rendering.
     const link = htmlFor(this.element)`
       <a class="i-amphtml-story-page-attachment-remote-content" target="_blank">
-        <span class="i-amphtml-story-page-attachment-remote-img">
+        <span class="i-amphtml-story-page-attachment-remote-img" ref="remoteImgEl">
           <svg class="i-amphtml-story-page-open-attachment-link-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
             <rect stroke-width="0" width="24" height="24" fill-opacity="0.1" rx="12"></rect>
             <path stroke-width=".25" d="M9.63 18s0 0 0 0c.98 0 1.9-.38 2.58-1.07l1.47-1.48a.55.55 0 000-.77.55.55 0 00-.77 0l-1.47 1.48a2.53 2.53 0 01-3.6 0 2.53 2.53 0 010-3.6l1.48-1.48a.54.54 0 000-.77.54.54 0 00-.77 0L7.07 11.8a3.62 3.62 0 000 5.14A3.6 3.6 0 009.63 18zM11.09 9.31l1.47-1.48a2.53 2.53 0 013.6 0 2.53 2.53 0 010 3.6l-1.48 1.48a.54.54 0 000 .77.55.55 0 00.77 0l1.48-1.47a3.62 3.62 0 000-5.14A3.61 3.61 0 0014.36 6s0 0 0 0c-.98 0-1.9.38-2.58 1.07l-1.47 1.48a.55.55 0 000 .77c.22.21.57.21.78 0z"></path>
             <path stroke-width=".25" d="M14.63 9.37a.55.55 0 00-.78 0l-4.48 4.48a.55.55 0 00.39.94c.13 0 .28-.06.38-.17l4.48-4.48a.54.54 0 000-.77z"></path>
           </svg>        
         </span>
-        <span class="i-amphtml-story-page-attachment-remote-title"></span>
+        <span class="i-amphtml-story-page-attachment-remote-title"><span ref="openStringEl"></span><span ref="urlStringEl"></span></span>
         <svg class="i-amphtml-story-page-attachment-remote-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="#000000"><path d="M0 0h48v48H0z" fill="none"/><path d="M38 38H10V10h14V6H10c-2.21 0-4 1.79-4 4v28c0 2.21 1.79 4 4 4h28c2.21 0 4-1.79 4-4V24h-4v14zM28 6v4h7.17L15.51 29.66l2.83 2.83L38 12.83V20h4V6H28z"/></svg>
       </a>`;
-    link.setAttribute('href', this.element.getAttribute('href'));
-    this.contentEl_.appendChild(link);
+
+    const overlayEls = htmlRefs(link);
+    const {remoteImgEl, openStringEl, urlStringEl} = overlayEls;
+    const hrefAttr = this.element.getAttribute('href');
+    link.setAttribute('href', hrefAttr);
 
     const openImgAttr = this.element.getAttribute('cta-image');
     if (openImgAttr) {
-      const ctaImgEl = link.querySelector(
-        '.i-amphtml-story-page-attachment-remote-img'
-      );
-      setImportantStyles(ctaImgEl, {
+      setImportantStyles(remoteImgEl, {
         'background-image': 'url(' + openImgAttr + ')',
       });
     }
 
-    this.contentEl_.querySelector(
-      '.i-amphtml-story-page-attachment-remote-title'
-    ).textContent = this.element.getAttribute('href');
+    const localizationService = getLocalizationService(devAssert(this.element));
+    const localizedOpenString = localizationService.getLocalizedString(
+      LocalizedStringId.AMP_STORY_OPEN_OUTLINK_TEXT
+    );
+    openStringEl.textContent = `${localizedOpenString}: `;
+    urlStringEl.textContent = hrefAttr;
+
+    this.contentEl_.appendChild(link);
   }
 
   /**

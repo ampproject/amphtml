@@ -134,9 +134,7 @@
   display: none !important;
 }
 
-.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-title:before {
-  /* TODO Make translated string */
-  content: "Opening: ";
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-title span:first-child {
   font-weight: bold;
 }
 
