@@ -33,6 +33,7 @@ export const buildGtagConfig = (gtagId) => ({
         'send_to': [gtagId],
       },
       'storySpec': {
+        // Makes sure the event is only fired once.
         'repeat': false,
       },
     },
@@ -46,6 +47,7 @@ export const buildGtagConfig = (gtagId) => ({
         'send_to': [gtagId],
       },
       'storySpec': {
+        // Makes sure the event is only fired once.
         'repeat': false,
       },
     },
@@ -59,21 +61,28 @@ export const buildGtagConfig = (gtagId) => ({
         'send_to': [gtagId],
       },
       'storySpec': {
+        // Makes sure the event is only fired once.
         'repeat': false,
       },
     },
   },
+  // Linkers stitch sessions between cache and origin together using cid.
   'linkers': {
     'ampStoryAutoAnalyticsLinker': {
       'ids': {
         'cid': '${clientId}',
       },
       'enabled': true,
+      // Makes sure URL is decorated from origin to cache. (Default is cache to
+      // origin only).
       'proxyOnly': false,
     },
   },
+  // CookieWriter config is used to extract the url params and store them into
+  // cookies.
   'cookies': {
     'ampStoryAutoAnalyticsCookies': {
+      // Reads URL linker params and stores them as cookies.
       'value': 'LINKER_PARAM(ampStoryAutoAnalyticsLinker, cid)',
     },
   },
