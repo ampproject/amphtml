@@ -63,14 +63,14 @@ export function getVimeoIframeSrc(videoid, autoplay, doNotTrack) {
 
 /**
  * @param {string} method
- * @param {?Object|string=} optParams
+ * @param {?Object|string=} params
  * @return {string}
  */
-export function makeVimeoMessage(method, optParams = null) {
+export function makeVimeoMessage(method, params = '') {
   return JSON.stringify(
     dict({
       'method': method,
-      'value': optParams || '',
+      'value': params,
     })
   );
 }

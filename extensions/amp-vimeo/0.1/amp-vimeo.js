@@ -328,11 +328,11 @@ class AmpVimeo extends AMP.BaseElement {
 
   /**
    * @param {string} method
-   * @param {?Object|string=} optParams
+   * @param {?Object|string=} params
    * @private
    */
-  sendCommand_(method, optParams = null) {
-    postMessageWhenAvailable(this.iframe_, makeVimeoMessage(method, optParams));
+  sendCommand_(method, params) {
+    postMessageWhenAvailable(this.iframe_, makeVimeoMessage(method, params));
   }
 
   /** @override */
