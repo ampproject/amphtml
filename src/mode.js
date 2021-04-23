@@ -74,11 +74,7 @@ function getMode_(win) {
   const runningTests =
     IS_FORTESTING && !!(AMP_CONFIG.test || win.__AMP_TEST || win.__karma__);
   const isLocalDev = IS_FORTESTING && (!!AMP_CONFIG.localDev || runningTests);
-  const hashQuery = parseQueryString_(
-    // location.originalHash is set by the viewer when it removes the fragment
-    // from the URL.
-    win.location['originalHash'] || win.location.hash
-  );
+  const hashQuery = parseQueryString_(win.location.hash);
 
   const searchQuery = parseQueryString_(win.location.search);
 

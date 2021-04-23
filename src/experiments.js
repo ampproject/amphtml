@@ -169,7 +169,7 @@ export function experimentToggles(win) {
     win.AMP_CONFIG['allow-url-opt-in'].length > 0
   ) {
     const allowed = win.AMP_CONFIG['allow-url-opt-in'];
-    const hash = win.location['originalHash'] || win.location.hash;
+    const hash = win.location.hash;
     const params = parseQueryString(hash);
     for (let i = 0; i < allowed.length; i++) {
       const param = params[`e-${allowed[i]}`];

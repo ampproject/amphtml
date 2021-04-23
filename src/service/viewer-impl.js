@@ -254,11 +254,6 @@ export class ViewerImpl {
     if (this.hashParams_['click']) {
       const newUrl = removeFragment(this.win.location.href);
       if (newUrl != this.win.location.href && this.win.history.replaceState) {
-        // Persist the hash that we removed has location.originalHash.
-        // This is currently used by mode.js to infer development mode.
-        if (!this.win.location['originalHash']) {
-          this.win.location['originalHash'] = this.win.location.hash;
-        }
         this.win.history.replaceState({}, '', newUrl);
         delete this.hashParams_['click'];
         dev().fine(TAG_, 'replace fragment:' + this.win.location.href);

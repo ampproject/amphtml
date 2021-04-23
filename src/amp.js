@@ -100,12 +100,6 @@ function bootstrap(ampdoc, perf) {
   });
 }
 
-// Store the originalHash as early as possible. Trying to debug:
-// https://github.com/ampproject/amphtml/issues/6070
-if (self.location) {
-  self.location['originalHash'] = self.location.hash;
-}
-
 /** @type {!./service/ampdoc-impl.AmpDocService} */
 let ampdocService;
 // We must under all circumstances call makeBodyVisible.

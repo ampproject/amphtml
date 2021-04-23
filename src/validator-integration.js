@@ -34,9 +34,7 @@ export function maybeValidate(win) {
   }
   let validatorUrl = null;
   if (getMode().development) {
-    const hash = parseQueryString(
-      win.location['originalHash'] || win.location.hash
-    );
+    const hash = parseQueryString(win.location.hash);
     if (hash['validate'] === 'wasm') {
       validatorUrl = `${urls.cdn}/v0/validator_wasm.js`;
     } else if (hash['validate'] !== '0') {
