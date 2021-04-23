@@ -16,14 +16,13 @@
 
 import * as Preact from '../../../../src/preact';
 import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 const CONTROLS = ['auto', 'always', 'never'];
 
 export default {
   title: 'amp-stream-gallery-1_0',
-  decorators: [withKnobs, withA11y, withAmp],
+  decorators: [withKnobs, withAmp],
 
   parameters: {
     extensions: [{name: 'amp-stream-gallery', version: '1.0'}],

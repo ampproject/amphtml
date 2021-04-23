@@ -17,7 +17,6 @@
 import * as Preact from '../../../../src/preact';
 import {BaseCarousel} from '../base-carousel';
 import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 
 const CONTROLS = ['auto', 'always', 'never'];
 const SNAP_ALIGN = ['start', 'center'];
@@ -26,7 +25,7 @@ const ORIENTATIONS = ['horizontal', 'vertical'];
 export default {
   title: 'BaseCarousel',
   component: BaseCarousel,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 /**

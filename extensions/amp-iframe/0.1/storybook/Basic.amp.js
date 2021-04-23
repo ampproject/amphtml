@@ -15,13 +15,12 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 import {withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'amp-iframe',
-  decorators: [withKnobs, withA11y, withAmp],
+  decorators: [withKnobs, withAmp],
 
   parameters: {
     extensions: [{name: 'amp-iframe', version: '0.1'}],

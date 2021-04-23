@@ -16,13 +16,12 @@
 
 import * as Preact from '../../../../src/preact';
 import {Render} from '../component';
-import {withA11y} from '@storybook/addon-a11y';
 import {withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'Render',
   component: Render,
-  decorators: [withKnobs, withA11y],
+  decorators: [withKnobs],
 };
 
 export const _default = () => {

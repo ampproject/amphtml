@@ -17,12 +17,11 @@
 import * as Preact from '../../../../src/preact';
 import {SocialShare} from '../social-share';
 import {color, object, select, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 
 export default {
   title: 'SocialShare',
   component: SocialShare,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 export const _default = () => {
