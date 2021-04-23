@@ -194,7 +194,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   }
 
   /**
-   * Builds remote page attachment's UI.
+   * Builds remote V2 page attachment's UI.
    * @private
    */
   buildRemoteV2_() {
@@ -234,10 +234,12 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     // Set url prevew text.
     const localizationService = getLocalizationService(devAssert(this.element));
-    const localizedOpenString = localizationService.getLocalizedString(
-      LocalizedStringId.AMP_STORY_OPEN_OUTLINK_TEXT
-    );
-    openStringEl.textContent = localizedOpenString;
+    if (localizationService) {
+      const localizedOpenString = localizationService.getLocalizedString(
+        LocalizedStringId.AMP_STORY_OPEN_OUTLINK_TEXT
+      );
+      openStringEl.textContent = localizedOpenString;
+    }
     urlStringEl.textContent = hrefAttr;
 
     this.contentEl_.appendChild(link);
