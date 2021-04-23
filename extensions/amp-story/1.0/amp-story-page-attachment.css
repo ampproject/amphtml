@@ -99,8 +99,9 @@
 
 .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-content {
   height: 56px !important;
-  padding: 0 12px !important;
-  background: var(--i-amphtml-outlink-cta-background-color)!important;
+  padding-inline-start: 12px !important;
+  padding-inline-end: 18px !important;
+  background: var(--i-amphtml-outlink-cta-background-color) !important;
 }
 
 .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-img {
@@ -118,39 +119,40 @@
   fill: var(--i-amphtml-outlink-cta-text-color) !important;
 }
 
-[cta-image].i-amphtml-amp-story-page-attachment-ui-v2 svg.i-amphtml-story-page-open-attachment-link-icon {
-  /* Hide svg if custom image. */
-  display: none !important;
-}
-
 [cta-image="none"].i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-img {
   display: none !important;
-}
-
-.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-title span:first-child {
-  font-weight: bold;
-}
+} 
 
 .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-title {
   font-size: 14px !important;
-  white-space: nowrap !important;
   padding: 0 12px !important;
   color: var(--i-amphtml-outlink-cta-text-color) !important;
+  /* For RTL support. */
+  display: flex !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-title :first-child {
+  font-weight: bold !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-title :first-child:after {
+  /* For RTL supportted space. */
+  content: "\00a0 " !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-title :nth-child(2) {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-icon {
-  width: 30px !important;
-  height: 30px !important;
+  margin-inline-start: auto !important;
+  width: 20px !important;
+  height: 20px !important;
+  flex-shrink: 0 !important;
   fill: var(--i-amphtml-outlink-cta-text-color) !important;
   background: none !important;
-}
-
-.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-icon {
-  border-radius: 50% !important;
-  width: 24px !important;
-  height: 24px !important;
-  border: 1px solid rgba(0, 0, 0, 6%) !important;
-  flex-shrink: 0 !important;
 }
 
 .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-attachment-remote.i-amphtml-story-draggable-drawer-open:before {
