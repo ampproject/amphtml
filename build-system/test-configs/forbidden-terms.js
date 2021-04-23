@@ -1245,13 +1245,13 @@ function matchForbiddenTerms(srcFile, contents, terms) {
       let index = 0;
       let line = 1;
       let column = 0;
-      const start = {line: -1, column: -1};
 
       const subject = checkProse ? contents : contentsWithoutComments;
       let result;
       while ((result = regex.exec(subject))) {
         const [match] = result;
 
+        const start = {line: -1, column: -1};
         for (index; index < result.index + match.length; index++) {
           if (index === result.index) {
             start.line = line;

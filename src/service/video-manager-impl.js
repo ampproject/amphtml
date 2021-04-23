@@ -778,7 +778,7 @@ class VideoEntry {
     isAutoplaySupported(this.ampdoc_.win).then((supportsAutoplay) => {
       const canAutoplay = this.hasAutoplay && !this.userInteracted();
 
-      if (canAutoplay && supportsAutoplay) {
+      if (canAutoplay && isAutoplaySupported) {
         this.autoplayLoadedVideoVisibilityChanged_();
       } else {
         this.nonAutoplayLoadedVideoVisibilityChanged_();
