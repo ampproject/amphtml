@@ -43,37 +43,47 @@ describes.endtoend(
 
       story = await controller.findElement('amp-story.i-amphtml-story-loaded');
       await controller.findElement('amp-story-page#page-1[active]');
-      // await controller.findElement(
-      //   '#video1 video.i-amphtml-replaced-content source'
-      // );
 
-      debugField = await controller.findElement(
-        'input[flexible-bitrate-debug]'
-      );
+      debugField = await controller.findElement('input#flexible-bitrate-debug');
     });
 
-    it('should play the highest bitrate video by default', async () => {
+    /**
+     * Tests for first load
+     */
+
+    it('when loading the page with good connection, the best quality source is played', async () => {
       const video1El = await controller.findElement('#video1 video');
       await expect(
         await controller.getElementProperty(video1El, 'currentSrc')
       ).contains('#high');
     });
 
-    it('should play a lower bitrate when video is downgraded', async () => {
+    it("when on the first page, a further video doesn't load", async () => {
+      const video4El = await controller.findElement('#video4 video');
+      await expect(
+        await controller.getElementProperty(video4El, 'currentSrc')
+      ).to.equal('');
+    });
+
+    /**
+     * Tests for downgrades on active video
+     */
+
+    it('when a video buffers, the video changes to a lower quality source', async () => {
       await forceEventOnVideo(VIDEO_EVENTS.UNLOAD, 1);
-      await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
 
       const video1El = await controller.findElement('#video1 video');
+
+      await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
 
       await expect(
         await controller.getElementProperty(video1El, 'currentSrc')
       ).contains('#med');
     });
 
-    it('should keep the currentTime when video is downgraded', async () => {
+    it('when a video buffers, the low quality source starts playing at the same place the previous source was stopped at', async () => {
       const video1El = await controller.findElement('#video1 video');
 
-      // Pass some time so currentTime is not 0
       await sleep(100);
 
       const currentTime = await controller.getElementProperty(
@@ -84,13 +94,33 @@ describes.endtoend(
       await forceEventOnVideo(VIDEO_EVENTS.UNLOAD, 1);
       await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
 
-      // Check that currentTime in new source is passed from old source.
       await expect(
         await controller.getElementProperty(video1El, 'currentTime')
       ).to.be.gte(currentTime);
     });
 
-    it('should lower quality on other videos when video is downgraded', async () => {
+    it("when a video buffers many times, it doesn't keep reloading", async () => {
+      await forceEventOnVideo(VIDEO_EVENTS.UNLOAD, 1);
+      await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
+      await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
+      await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
+
+      const video1El = await controller.findElement(
+        '#video1 video.i-amphtml-pool-video'
+      );
+
+      await expect(
+        await controller.getElementProperty(video1El, 'currentSrc')
+      ).contains('#low');
+      await expect(await controller.getElementProperty(video1El, 'paused')).is
+        .false;
+    });
+
+    /**
+     * Tests for downgrades on inactive videos
+     */
+
+    it('when a video buffers, other videos that are not already loaded lower the quality source', async () => {
       await forceEventOnVideo(VIDEO_EVENTS.UNLOAD, 2);
       await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
       await controller.click(story);
@@ -103,14 +133,43 @@ describes.endtoend(
       ).contains('#med');
     });
 
-    it('should not load video far away on init', async () => {
-      const video4El = await controller.findElement('#video4 video');
+    it("when a video buffers, other videos that are already loaded don't lower the quality source", async () => {
+      await forceEventOnVideo(VIDEO_EVENTS.LOAD, 2);
+      await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
+
+      const video4El = await controller.findElement(
+        '#video2 video.i-amphtml-pool-video'
+      );
+
       await expect(
         await controller.getElementProperty(video4El, 'currentSrc')
-      ).to.equal('');
+      ).contains('#high');
     });
 
-    it('should load video far away when advancing to the last page', async () => {
+    /**
+     * Tests on source generation
+     */
+
+    it('when a video contains a proxy url, it loads the cached sources', async () => {
+      await controller.click(story);
+      await controller.click(story);
+
+      await controller.findElement('amp-story-page#page-3[active]');
+
+      const video4SourceEl = await controller.findElement(
+        '#video3 video.i-amphtml-pool-media source'
+      );
+
+      await expect(
+        await controller.getElementProperty(video4SourceEl, 'src')
+      ).contains('amp-dev.cdn.ampproject.org');
+    });
+
+    /**
+     * Tests on navigation
+     */
+
+    it('when advancing to a further page, the video on that page loads', async () => {
       await controller.click(story);
       await controller.click(story);
       await controller.click(story);
@@ -126,7 +185,7 @@ describes.endtoend(
       ).contains('#high');
     });
 
-    it('should load lower bitrate video far away when advancing to the last page after a downgrade', async () => {
+    it('when the connection drops, advancing to a further page loads a low quality source on the further video', async () => {
       await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
       await forceEventOnVideo(VIDEO_EVENTS.UNLOAD, 4);
       await controller.click(story);
@@ -144,36 +203,6 @@ describes.endtoend(
       await expect(
         await controller.getElementProperty(video4El, 'currentSrc')
       ).contains('#med');
-    });
-
-    it('should not downgrade video that is already loaded when other video downgrades', async () => {
-      await forceEventOnVideo(VIDEO_EVENTS.LOAD, 2);
-      await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
-
-      const video4El = await controller.findElement(
-        '#video2 video.i-amphtml-pool-video'
-      );
-
-      await expect(
-        await controller.getElementProperty(video4El, 'currentSrc')
-      ).contains('#high');
-    });
-
-    it('should keep playing video when called downgrade past lower bitrate', async () => {
-      await forceEventOnVideo(VIDEO_EVENTS.UNLOAD, 1);
-      await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
-      await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
-      await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
-
-      const video1El = await controller.findElement(
-        '#video1 video.i-amphtml-pool-video'
-      );
-
-      await expect(
-        await controller.getElementProperty(video1El, 'currentSrc')
-      ).contains('#low');
-      await expect(await controller.getElementProperty(video1El, 'paused')).is
-        .false;
     });
 
     function sleep(ms) {

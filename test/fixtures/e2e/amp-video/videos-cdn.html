@@ -12,7 +12,7 @@
 
 	<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <style amp-custom>
-    input[flexible-bitrate-debug] {
+    input#flexible-bitrate-debug {
       position: absolute;
       right: 0;
       top: 0;
@@ -21,12 +21,12 @@
   <script>
     (self.AMP = self.AMP || []).push(function(AMP) {
       AMP.toggleExperiment('flexible-bitrate', true);
-      AMP.toggleExperiment('flexible-bitrate-debug', true);
     });
+    const IS_VIDEO_FULLY_LOADED_OVERRIDE_FOR_TESTING =
+      'i-amphtml-is-video-fully-loaded-override-for-testing';
+
     window.onload = () => {
-      const debugField = document.createElement('input');
-      debugField.setAttribute('flexible-bitrate-debug', '');
-      document.body.appendChild(debugField);
+      const debugField = document.querySelector('input#flexible-bitrate-debug');
       debugField.addEventListener('keyup', (e) => {
         const number = debugField.value.slice(0, -1);
         const videoEl = document.querySelector(`amp-video#video${number} video`);
@@ -36,21 +36,24 @@
         if (e.key === 'd') {
           videoEl.dispatchEvent(new Event('downgrade'));
         } else if (e.key === 'l') {
-          videoEl.setAttribute('i-amphtml-video-buffered-debug', 'true');
+          videoEl.setAttribute(IS_VIDEO_FULLY_LOADED_OVERRIDE_FOR_TESTING, 'true');
         } else if (e.key === 'u') {
-          videoEl.setAttribute('i-amphtml-video-buffered-debug', 'false');
-        } else if (e.key === 'i') {
-          alert(`Current source for ${videoEl.id}: ${videoEl.currentSrc}`);
+          videoEl.setAttribute(IS_VIDEO_FULLY_LOADED_OVERRIDE_FOR_TESTING, 'false');
         } else {
           return;
         }
         // If key was command, clean field.
         debugField.value = '';
       });
+      document.body.appendChild(debugField);
     }
+    Object.defineProperty(window.navigator.connection, 'effectiveType', {
+      get: () => '4g'
+    });
 </script>
 </head>
   <body>
+    <input id="flexible-bitrate-debug">
     <amp-story standalone id="cats" supports-landscape
         title="Key Highlights of AMP Conf 2018" publisher="The AMP team">
 
@@ -92,9 +95,8 @@
             height="750"
             poster="img-city1.jpeg#3"
             layout="fill">
-            <source src="/examples/av/ForBiggerJoyrides.mp4#med3" type="video/mp4" data-bitrate="720">
-            <source src="/examples/av/ForBiggerJoyrides.mp4#low3" type="video/mp4" data-bitrate="400">
-            <source src="/examples/av/ForBiggerJoyrides.mp4#high3" type="video/mp4" data-bitrate="2000">
+            <source src="https://amp-dev.cdn.ampproject.org/c/s/amp.dev/static/samples/video/tokyo.mp4"
+                amp-orig-src="https://amp.dev/static/samples/video/tokyo.mp4" type="video/mp4">
           </amp-video>
 				</amp-story-grid-layer>
 			</amp-story-page>
@@ -110,6 +112,20 @@
             <source src="/examples/av/ForBiggerJoyrides.mp4#low4" type="video/mp4" data-bitrate="400">
             <source src="/examples/av/ForBiggerJoyrides.mp4#med4" type="video/mp4" data-bitrate="720">
             <source src="/examples/av/ForBiggerJoyrides.mp4#high4" type="video/mp4" data-bitrate="2000">
+          </amp-video>
+				</amp-story-grid-layer>
+			</amp-story-page>
+
+      <amp-story-page id="page-5">
+        <amp-story-grid-layer template="fill">
+					<amp-video autoplay loop
+					id="video5"
+            width="400"
+            height="750"
+            poster="img-city1.jpeg#5"
+            layout="fill"
+            cache="google">
+            <source src="/examples/av/ForBiggerJoyrides.mp4">
           </amp-video>
 				</amp-story-grid-layer>
 			</amp-story-page>
