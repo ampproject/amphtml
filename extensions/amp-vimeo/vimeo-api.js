@@ -76,6 +76,9 @@ export function makeVimeoMessage(method, optParams = null) {
 }
 
 /**
+ * Sends a set of messages to the Vimeo iframe to listen to events.
+ * We need to explicitly listen to these so that we receive incoming event
+ * messages.
  * @param {!HTMLIFrameElement} iframe
  */
 export function listenToVimeoEvents(iframe) {
