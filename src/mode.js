@@ -22,7 +22,6 @@ import {parseQueryString_} from './url-parse-query-string';
  *   localDev: boolean,
  *   development: boolean,
  *   minified: boolean,
- *   lite: boolean,
  *   test: boolean,
  *   examiner: boolean,
  *   log: (string|undefined),

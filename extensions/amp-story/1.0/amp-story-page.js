@@ -904,7 +904,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   isAutoplaySupported_() {
     VideoUtils.resetIsAutoplaySupported();
-    return VideoUtils.isAutoplaySupported(this.win, getMode(this.win).lite);
+    return VideoUtils.isAutoplaySupported(this.win);
   }
 
   /**
