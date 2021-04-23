@@ -149,9 +149,9 @@ export class AmpIframely extends AMP.BaseElement {
     this.applyFillContent(this.iframe_);
     this.element.appendChild(this.iframe_);
 
-    this.unlistener_ = listen(this.win, 'message', event => {
+    this.unlistener_ = listen(this.win, 'message', (event) => {
       if (event.source === this.iframe_.contentWindow) {
-        this.handleEvent_(this, event);
+        this.handleEvent_(event);
       }
     });
     return this.loadPromise(this.iframe_);
@@ -174,7 +174,7 @@ export class AmpIframely extends AMP.BaseElement {
       const media = data['data']['media'] || null;
       if (media && media['aspect-ratio']) {
         const intersection = measureIntersection(this.element);
-        intersection.then(box => {
+        intersection.then((box) => {
           if (media['padding-bottom']) {
             /** Apply height for media with updated "aspect-ratio" and "padding-bottom". */
             const height =
@@ -290,7 +290,7 @@ export class AmpIframely extends AMP.BaseElement {
 
   /**
    * Validates that requested domain is a valid Iframely domain
-   * @param {string} domainName - of domain to check against a whitelist
+   * @param {string} domainName - CDN name alias, if differs from default Ifrarmely host and is allowed.
    * @return {boolean} if domain is valid
    * @private
    * */
@@ -309,6 +309,6 @@ export class AmpIframely extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpIframely);
 });
