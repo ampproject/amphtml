@@ -15,7 +15,6 @@
  */
 'using strict';
 
-const jquery = require('jquery');
 const {
   log,
   logLocalDev,
@@ -35,10 +34,10 @@ const {JSDOM} = require('jsdom');
  * @return {Promise<string>}
  */
 async function getAmpFormat(file) {
-  const doc = await JSDOM.fromFile(file);
-  const rootElement = jquery(doc.window)('html');
-  const isAds = typeof rootElement.attr('amp4ads') == 'string';
-  const isEmail = typeof rootElement.attr('amp4email') == 'string';
+  const jsdom = await JSDOM.fromFile(file);
+  const {documentElement} = jsdom.window.document;
+  const isAds = documentElement.hasAttribute('amp4ads');
+  const isEmail = documentElement.hasAttribute('amp4email');
   return isAds ? 'AMP4ADS' : isEmail ? 'AMP4EMAIL' : 'AMP';
 }
 
