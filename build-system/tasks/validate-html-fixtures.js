@@ -83,7 +83,7 @@ async function runCheck(filesToCheck) {
     }
   }
   if (foundValidationErrors) {
-    throw new Error('ERROR: Please address the errors listed above.');
+    throw new Error('Please address the errors listed above.');
   }
   log(green('SUCCESS:'), 'All HTML fixtures are valid.');
 }
