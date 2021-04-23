@@ -18,6 +18,14 @@ import {addParamsToUrl} from '../../src/url';
 import {dict} from '../../src/core/types/object';
 import {postMessageWhenAvailable} from '../../src/iframe-video';
 
+/**
+ * @fileoverview
+ * Definitions of messages and other utilities to talk to Vimeo embed iframes.
+ * See https://developer.vimeo.com/player/js-api
+ */
+
+// ⚠️ This module should not have side-effects.
+
 export const getVimeoOriginRegExp = () =>
   /^(https?:)?\/\/((player|www)\.)?vimeo.com(?=$|\/)/;
 
@@ -60,7 +68,6 @@ export function getVimeoIframeSrc(videoid, autoplay, doNotTrack) {
  */
 export function makeVimeoMessage(method, optParams = null) {
   return JSON.stringify(
-    // https://developer.vimeo.com/player/js-api
     dict({
       'method': method,
       'value': optParams || '',

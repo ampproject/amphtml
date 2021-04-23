@@ -21,7 +21,7 @@ import {
   getVimeoOriginRegExp,
   listenToVimeoEvents,
   makeVimeoMessage,
-} from '../def';
+} from '../vimeo-api';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
 import {dispatchCustomEvent} from '../../../src/dom';

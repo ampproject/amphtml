@@ -21,7 +21,7 @@ import {
   getVimeoOriginRegExp,
   listenToVimeoEvents,
   makeVimeoMessage,
-} from '../def';
+} from '../vimeo-api';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 import {VideoUtils} from '../../../src/utils/video';
 import {

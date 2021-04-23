@@ -143,7 +143,7 @@ const CLOSURE_SRC_GLOBS = [
   // Needed for VideoService
   'extensions/amp-video-service/**/*.js',
   // amp-vimeo 0.1 and 1.0 share this file.
-  'extensions/amp-vimeo/def.js',
+  'extensions/amp-vimeo/vimeo-api.js',
   // Needed to access ConsentPolicyManager from other extensions
   'extensions/amp-consent/**/*.js',
   // Needed to access AmpGeo type for service locator
