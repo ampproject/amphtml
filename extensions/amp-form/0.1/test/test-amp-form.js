@@ -2652,17 +2652,8 @@ describes.repeated(
               // wrong form
               clientIdField.removeAttribute('type');
 
-              // not an input
-              const randomField = createElement('textarea');
-              randomField.setAttribute('name', 'clientId');
-              randomField.setAttribute('type', 'hidden');
-              randomField.value = 'RANDOM';
-              randomField.setAttribute('data-amp-replace', 'RANDOM');
-              randomField.setAttribute('form', 'registration');
-
               env.ampdoc.getBody().appendChild(clientIdField);
               env.ampdoc.getBody().appendChild(canonicalUrlField);
-              env.ampdoc.getBody().appendChild(randomField);
 
               await ampForm.submit_(ActionTrust.HIGH);
               expect(ampForm.urlReplacement_.expandInputValueAsync).to.not.be
@@ -2670,7 +2661,6 @@ describes.repeated(
               await whenCalled(ampForm.xhr_.fetch);
               expect(ampForm.xhr_.fetch).to.be.called;
               expect(clientIdField.value).to.equal('CLIENT_ID(form)');
-              expect(randomField.value).to.equal('RANDOM');
               expect(canonicalUrlField.value).to.equal('CANONICAL_URL');
             });
           });

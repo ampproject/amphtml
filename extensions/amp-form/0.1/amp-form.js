@@ -1753,7 +1753,7 @@ export class AmpFormService {
             // then find the form by either querySelector for based upon 'form'
             // attribute on the element or traversing up.
             if (!form) {
-              dev.assertElement(e.target);
+              dev().assertElement(e.target);
               const formId = e.target.getAttribute('form');
               form = formId
                 ? this.ampdoc_.getRootNode().querySelector(formId)
