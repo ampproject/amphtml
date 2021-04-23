@@ -54,11 +54,6 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
       width: 0,
       height: 0,
     });
-    containerElement.getIntersectionChangeEntry = () => ({
-      rootBounds: {},
-      intersectionRect: {},
-      boundingClientRect: {},
-    });
     containerElement.isInViewport = () => true;
     containerElement.getAmpDoc = () => env.ampdoc;
     doc.body.appendChild(containerElement);

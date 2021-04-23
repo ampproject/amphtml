@@ -18,7 +18,6 @@ import {BaseElement} from '../../../../src/base-element';
 import {LegacyAdIntersectionObserverHost} from '../legacy-ad-intersection-observer-host';
 import {createAmpElementForTesting} from '../../../../src/custom-element';
 import {deserializeMessage} from '../../../../src/3p-frame-messaging';
-import {getIntersectionChangeEntry} from '../../../../src/utils/intersection-observer-3p-host';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 
 describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
@@ -40,7 +39,13 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
   function getInObEntry() {
     const rootBounds = layoutRectLtwh(198, 299, 100, 100);
     const layoutBox = layoutRectLtwh(50, 100, 150, 200);
-    return getIntersectionChangeEntry(layoutBox, null, rootBounds);
+    return {
+      time: Date.now(),
+      rootBounds,
+      boundingClientRect: layoutBox,
+      intersectionRect: {},
+      intersectionRatio: 0.5,
+    };
   }
 
   function getIframe(src) {
