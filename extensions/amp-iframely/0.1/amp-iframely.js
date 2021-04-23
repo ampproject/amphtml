@@ -290,7 +290,7 @@ export class AmpIframely extends AMP.BaseElement {
 
   /**
    * Validates that requested domain is a valid Iframely domain
-   * @param {string} domainName - CDN name alias, if differs from default Ifrarmely host and is allowed.
+   * @param {string} domainName - optional CDN alias, if different from the default Iframely host and is allowed.
    * @return {boolean} if domain is valid
    * @private
    * */
