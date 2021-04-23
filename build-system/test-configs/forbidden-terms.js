@@ -1149,6 +1149,16 @@ const forbiddenTermsSrcInclusive = {
   },
   'withA11y':
     'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',
+  'detectIsAutoplaySupported': {
+    message:
+      'Detecting autoplay support is expensive. Use the cached function "isAutoplaySupported" instead.',
+    allowlist: [
+      // The function itself is defined here.
+      'src/utils/video.js',
+      // TODO(alanorozco): Remove amp-story-page.js, see comment on caller.
+      'extensions/amp-story/1.0/amp-story-page.js',
+    ],
+  },
 };
 
 /**
