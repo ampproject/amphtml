@@ -18,12 +18,11 @@ import * as Preact from '../../../../src/preact';
 import {Lightbox} from '../component';
 import {boolean, select, text, withKnobs} from '@storybook/addon-knobs';
 import {useRef} from '../../../../src/preact';
-import {withA11y} from '@storybook/addon-a11y';
 
 export default {
   title: 'Lightbox',
   component: Lightbox,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 /**

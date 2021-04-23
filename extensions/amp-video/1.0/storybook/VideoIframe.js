@@ -25,12 +25,11 @@ import {VideoWrapper} from '../video-wrapper';
 import {boolean, text, withKnobs} from '@storybook/addon-knobs';
 import {createCustomEvent} from '../../../../src/event-helper';
 import {useCallback} from '../../../../src/preact';
-import {withA11y} from '@storybook/addon-a11y';
 
 export default {
   title: 'VideoIframe',
   component: VideoIframe,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 const AmpVideoIframeLike = ({unloadOnPause, ...rest}) => {

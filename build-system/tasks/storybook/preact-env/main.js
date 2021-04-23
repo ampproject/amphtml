@@ -20,7 +20,7 @@ module.exports = {
     '../../../../extensions/**/*.*/storybook/!(*.amp).js',
   ],
   addons: [
-    '@storybook/addon-a11y/register',
+    '@storybook/addon-a11y',
     '@storybook/addon-viewport/register',
     '@storybook/addon-knobs/register',
   ],

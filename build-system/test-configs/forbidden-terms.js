@@ -1147,6 +1147,8 @@ const forbiddenTermsSrcInclusive = {
     message:
       'Instead of fancy-log, use the logging functions in build-system/common/logging.js.',
   },
+  'withA11y':
+    'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',
 };
 
 /**

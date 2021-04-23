@@ -18,11 +18,9 @@ import * as Preact from '../';
 import {WithAmpContext, useAmpContext, useLoading} from '../context';
 import {boolean, select, withKnobs} from '@storybook/addon-knobs';
 
-import {withA11y} from '@storybook/addon-a11y';
-
 export default {
   title: '0/Context',
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 const IMG_SRC =

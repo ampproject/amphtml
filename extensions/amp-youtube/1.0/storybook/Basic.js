@@ -24,12 +24,11 @@ import {
 import {Youtube} from '../component';
 import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
 import {useRef, useState} from '../../../../src/preact';
-import {withA11y} from '@storybook/addon-a11y';
 
 export default {
   title: 'YouTube',
   component: Youtube,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 const VIDEOID = 'IAvf-rkzNck';
