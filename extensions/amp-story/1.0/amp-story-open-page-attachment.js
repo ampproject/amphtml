@@ -207,23 +207,16 @@ const renderOutlinkPageAttachmentUI = (
   // Adding image.
   const openImgAttr = attachmentEl.getAttribute('cta-image');
 
-  // Removes image if attribute is explicitly set to "none".
-  if (openImgAttr === 'none') {
-    chipEl.classList.add(
-      'i-amphtml-story-outlink-page-attachment-outlink-chip-no-image'
-    );
-  } else {
-    if (openImgAttr) {
-      const ctaImgEl = win.document.createElement('div');
-      ctaImgEl.classList.add('i-amphtml-story-outlink-page-attachment-img');
-      setImportantStyles(ctaImgEl, {
-        'background-image': 'url(' + openImgAttr + ')',
-      });
-      chipEl.prepend(ctaImgEl);
-    } else {
-      const linkImage = buildOpenAttachmentElementLinkIcon(attachmentEl);
-      chipEl.prepend(linkImage);
-    }
+  if (openImgAttr && openImgAttr !== 'none') {
+    const ctaImgEl = win.document.createElement('div');
+    ctaImgEl.classList.add('i-amphtml-story-outlink-page-attachment-img');
+    setImportantStyles(ctaImgEl, {
+      'background-image': 'url(' + openImgAttr + ')',
+    });
+    chipEl.prepend(ctaImgEl);
+  } else if (!openImgAttr) {
+    const linkImage = buildOpenAttachmentElementLinkIcon(attachmentEl);
+    chipEl.prepend(linkImage);
   }
 
   return openAttachmentEl;

@@ -346,15 +346,12 @@
   color: var(--i-amphtml-outlink-cta-text-color) !important;
 }
 
-.i-amphtml-story-outlink-page-attachment-outlink-chip-no-image {
-  padding-inline-start: 14px !important;
-}
-
-.i-amphtml-story-outlink-page-attachment-outlink-chip-no-image > * {
-  padding-inline-start: 0px !important;
+.i-amphtml-story-outlink-page-attachment-label:only-child {
+  padding-inline-start: 8px !important;
 }
 
 .i-amphtml-story-page-open-attachment-link-icon {
+  width: 24px;
+  height: 24px;
   fill: var(--i-amphtml-outlink-cta-text-color) !important;
-  stroke: var(--i-amphtml-outlink-cta-text-color) !important;
 }
