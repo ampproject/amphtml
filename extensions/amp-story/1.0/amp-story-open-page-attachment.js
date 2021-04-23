@@ -204,9 +204,8 @@ const renderOutlinkPageAttachmentUI = (
   ctaLabelEl.textContent = openLabel;
   openAttachmentEl.setAttribute('aria-label', openLabel);
 
-  // Adding image.
+  // Set image.
   const openImgAttr = attachmentEl.getAttribute('cta-image');
-
   if (openImgAttr && openImgAttr !== 'none') {
     const ctaImgEl = win.document.createElement('div');
     ctaImgEl.classList.add('i-amphtml-story-outlink-page-attachment-img');
@@ -215,6 +214,7 @@ const renderOutlinkPageAttachmentUI = (
     });
     chipEl.prepend(ctaImgEl);
   } else if (!openImgAttr) {
+    // Attach link icon SVG by default.
     const linkImage = buildOpenAttachmentElementLinkIcon(attachmentEl);
     chipEl.prepend(linkImage);
   }
