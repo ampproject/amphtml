@@ -15,7 +15,6 @@
  */
 
 import {A4AVariableSource} from './a4a-variable-source';
-import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
 import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
 import {Deferred, tryResolve} from '../../../src/core/data-structures/promise';
 import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
@@ -414,9 +413,10 @@ export class AmpA4A extends AMP.BaseElement {
     return this.isRelayoutNeededFlag;
   }
 
-  /** @override
-      @return {!Promise|undefined}
-  */
+  /**
+   * @override
+   * @return {!Promise|undefined}
+   */
   buildCallback() {
     this.creativeSize_ = {
       width: this.element.getAttribute('width'),
@@ -451,13 +451,7 @@ export class AmpA4A extends AMP.BaseElement {
     }
 
     this.isSinglePageStoryAd = this.element.hasAttribute('amp-story');
-
-    const asyncIntersection =
-      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
-      ADS_INITIAL_INTERSECTION_EXP.experiment;
-    this.initialIntersectionPromise_ = asyncIntersection
-      ? measureIntersection(this.element)
-      : Promise.resolve(this.element.getIntersectionChangeEntry());
+    this.initialIntersectionPromise_ = measureIntersection(this.element);
   }
 
   /** @override */
