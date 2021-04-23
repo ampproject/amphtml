@@ -201,7 +201,6 @@ const htmlFixtureGlobs = [
   'test/fixtures/e2e/**/*.html',
 
   // TODO(#25149): Fix these invalid files and remove them from this list.
-  '!examples/3q-player.amp.html',
   '!examples/accordion.amp.html',
   '!examples/ad-lightbox.amp.html',
   '!examples/alp.amp.html',
@@ -399,7 +398,6 @@ const htmlFixtureGlobs = [
   '!examples/social-share.amp.html',
   '!examples/standard-actions.amp.html',
   '!examples/sticky.ads.0.1.amp.html',
-  '!examples/timeago.amp.html',
   '!examples/travel-lb.amp.html',
   '!examples/travel.amp.html',
   '!examples/twitter.amp.html',
