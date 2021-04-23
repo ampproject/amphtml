@@ -106,7 +106,7 @@ import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
 import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
-import {isPageAttachmentUiV2ExperimentOn} from './amp-story-open-page-attachment';
+import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 import {parseQueryString} from '../../../src/url';
 import {
   removeAttributeInMutate,
