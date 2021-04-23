@@ -74,12 +74,12 @@ export function VimeoWithRef(
     autoplay,
   ]);
 
-  const isReadyRef = useRef(false);
+  const readyIframeRef = useRef(null);
   const onReadyMessage = useCallback((iframe) => {
-    if (isReadyRef.current) {
+    if (readyIframeRef.current === iframe) {
       return;
     }
-    isReadyRef.current = true;
+    readyIframeRef.current = iframe;
     dispatchEvent(iframe, 'canplay');
     listenToVimeoEvents(iframe);
   }, []);
@@ -104,6 +104,10 @@ export function VimeoWithRef(
     [onReadyMessage]
   );
 
+  const onIframeLoad = useCallback((e) => {
+    postMessageWhenAvailable(e.currentTarget, makeVimeoMessage('ping'));
+  }, []);
+
   return (
     <VideoWrapper
       ref={ref}
@@ -114,9 +118,7 @@ export function VimeoWithRef(
       src={src}
       onMessage={onMessage}
       makeMethodMessage={makeMethodMessage}
-      onIframeLoad={(e) => {
-        postMessageWhenAvailable(e.currentTarget, makeVimeoMessage('ping'));
-      }}
+      onIframeLoad={onIframeLoad}
       // Vimeo API does not have a way to hide controls, so they're always set
       controls
     />
