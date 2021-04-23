@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-iframely'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     const TestID = 'pHBVuFj';
     const paramsID = {
@@ -66,7 +66,7 @@ describes.realWin(
     }
 
     it('renders', () => {
-      return renderIframely(paramsID).then(iframely => {
+      return renderIframely(paramsID).then((iframely) => {
         testIframe(iframely.querySelector('iframe'), TestID);
       });
     });
@@ -112,7 +112,7 @@ describes.realWin(
     });
 
     it('builds url for key-url pair properly', () => {
-      return renderIframely(paramsKU).then(iframely => {
+      return renderIframely(paramsKU).then((iframely) => {
         const iframe = iframely.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).to.equal(
@@ -125,7 +125,7 @@ describes.realWin(
     });
 
     it('renders iframe properly', () => {
-      return renderIframely(paramsID).then(iframely => {
+      return renderIframely(paramsID).then((iframely) => {
         const iframe = iframely.querySelector('iframe');
         testIframe(iframe, TestID);
         expect(iframe.tagName).to.equal('IFRAME');
@@ -141,7 +141,7 @@ describes.realWin(
     });
 
     it('renders image placeholder', () => {
-      return renderIframely(paramsID).then(iframely => {
+      return renderIframely(paramsID).then((iframely) => {
         const image = iframely.querySelector('amp-img');
         expect(image).to.not.be.null;
         expect(image.tagName).to.equal('AMP-IMG');
@@ -150,7 +150,7 @@ describes.realWin(
     });
 
     it('renders image placeholder with proper URL for ID version', () => {
-      return renderIframely(paramsID).then(iframely => {
+      return renderIframely(paramsID).then((iframely) => {
         const image = iframely.querySelector('amp-img');
         expect(image).to.not.be.null;
         expect(image.getAttribute('src')).to.equal(
@@ -160,7 +160,7 @@ describes.realWin(
     });
 
     it('renders image placeholder with proper URL for Key-URL version', () => {
-      return renderIframely(paramsKU).then(iframely => {
+      return renderIframely(paramsKU).then((iframely) => {
         const image = iframely.querySelector('amp-img');
         expect(image).to.not.be.null;
         expect(image.getAttribute('src')).to.equal(
@@ -181,7 +181,7 @@ describes.realWin(
         'height': '100',
         'layout': 'responsive',
       };
-      return renderIframely(data).then(iframely => {
+      return renderIframely(data).then((iframely) => {
         const image = iframely.querySelector('amp-img');
         expect(image).to.not.be.null;
         expect(image.getAttribute('src')).to.equal(
@@ -201,7 +201,7 @@ describes.realWin(
         'height': '100',
         'layout': 'responsive',
       };
-      return renderIframely(data).then(iframely => {
+      return renderIframely(data).then((iframely) => {
         const image = iframely.querySelector('amp-img');
         expect(image).to.not.be.null;
         expect(image.getAttribute('src')).to.equal(
@@ -220,7 +220,7 @@ describes.realWin(
         'data-img': '',
         'layout': 'fill',
       };
-      return renderIframely(data).then(iframely => {
+      return renderIframely(data).then((iframely) => {
         const image = iframely.querySelector('amp-img');
         expect(image).to.not.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
@@ -235,7 +235,7 @@ describes.realWin(
         'width': '100',
         'layout': 'responsive',
       };
-      return renderIframely(data).then(iframely => {
+      return renderIframely(data).then((iframely) => {
         const image = iframely.querySelector('amp-img');
         expect(image).to.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
@@ -251,7 +251,7 @@ describes.realWin(
         'width': '100',
         'layout': 'responsive',
       };
-      return renderIframely(data).then(iframely => {
+      return renderIframely(data).then((iframely) => {
         const image = iframely.querySelector('amp-img');
         expect(image).to.not.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
@@ -265,7 +265,7 @@ describes.realWin(
         'width': '100',
         'layout': 'fixed',
       };
-      return renderIframely(data).then(iframely => {
+      return renderIframely(data).then((iframely) => {
         const image = iframely.querySelector('amp-img');
         expect(image).to.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
@@ -280,7 +280,7 @@ describes.realWin(
         'resizable': '',
         'layout': 'fixed',
       };
-      return renderIframely(data).then(iframely => {
+      return renderIframely(data).then((iframely) => {
         const image = iframely.querySelector('amp-img');
         expect(image).to.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
@@ -296,7 +296,7 @@ describes.realWin(
         'resizable': '',
         'layout': 'responsive',
       };
-      return renderIframely(data).then(iframely => {
+      return renderIframely(data).then((iframely) => {
         const image = iframely.querySelector('amp-img');
         expect(image).to.not.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
@@ -311,7 +311,7 @@ describes.realWin(
         'data-img': '',
         'layout': 'fixed',
       };
-      return renderIframely(data).then(iframely => {
+      return renderIframely(data).then((iframely) => {
         const image = iframely.querySelector('amp-img');
         expect(image).to.not.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
@@ -325,7 +325,7 @@ describes.realWin(
         'layout': 'fixed-height',
         'resizable': '',
       };
-      return renderIframely(data).then(iframely => {
+      return renderIframely(data).then((iframely) => {
         const image = iframely.querySelector('amp-img');
         expect(image).to.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
@@ -340,7 +340,7 @@ describes.realWin(
         'resizable': '',
         'layout': 'responsive',
       };
-      return renderIframely(data).then(iframely => {
+      return renderIframely(data).then((iframely) => {
         const image = iframely.querySelector('amp-img');
         expect(image).to.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
@@ -372,7 +372,7 @@ describes.realWin(
         'data-img': 'something',
         'layout': 'responsive',
       };
-      return renderIframely(data).then(iframely => {
+      return renderIframely(data).then((iframely) => {
         const image = iframely.querySelector('amp-img');
         const iframe = iframely.querySelector('iframe');
         expect(image).to.not.be.null;

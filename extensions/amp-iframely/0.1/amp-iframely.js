@@ -206,7 +206,7 @@ export class AmpIframely extends AMP.BaseElement {
     if (this.widgetId_) {
       return `${this.base_}${this.widgetId_}${
         slug !== '/iframe' ? slug : ''
-        }?amp=1`;
+      }?amp=1`;
     } else {
       return addParamsToUrl(`${this.base_}api${slug}`, {
         'url': this.url_,
@@ -224,7 +224,7 @@ export class AmpIframely extends AMP.BaseElement {
   parseAttributes_() {
     userAssert(
       this.element.getAttribute('data-id') ||
-      this.element.getAttribute('data-url'),
+        this.element.getAttribute('data-url'),
       '<%s> requires either "data-id" or a pair of "data-url" and "data-key" attributes for %s',
       TAG,
       this.element
