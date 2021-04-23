@@ -283,18 +283,6 @@ describes.realWin(
       });
 
       it('should create ad badge', () => {
-        expect(autoAds.getAdBadgeRoot()).not.to.have.attribute(
-          Attributes.AD_SHOWING
-        );
-        storeService.dispatch(Action.TOGGLE_AD, true);
-        expect(autoAds.getAdBadgeRoot()).to.have.attribute(
-          Attributes.AD_SHOWING
-        );
-      });
-
-      it('should create progress bar', () => {});
-
-      it('should create ad badge', () => {
         const adBadge = doc.querySelector('.i-amphtml-story-ad-badge');
         expect(adBadge).to.exist;
       });
