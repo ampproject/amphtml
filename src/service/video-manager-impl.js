@@ -43,7 +43,6 @@ import {createViewportObserver} from '../viewport-observer';
 import {dev, devAssert, user, userAssert} from '../log';
 import {dict, map} from '../core/types/object';
 import {dispatchCustomEvent, removeElement} from '../dom';
-import {getMode} from '../mode';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
 import {isFiniteNumber} from '../types';
 import {measureIntersection} from '../utils/intersection';
