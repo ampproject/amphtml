@@ -22,7 +22,7 @@ import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {VisibilityState} from '../../../src/visibility-state';
+import {VisibilityState} from '../../../src/core/constants/visibility-state';
 import {
   childElementByAttr,
   childElementsByTag,
@@ -198,6 +198,12 @@ export class NextPageService {
 
     // Create a reference to the host page
     this.hostPage_ = this.createHostPage();
+
+    // Set the current title page as the host page so we don't do replaceState and
+    // trigger `amp-next-page-scroll` event (in `setPageTitle` method) when
+    // next page is not even displayed (issue #33404).
+    this.currentTitlePage_ = this.hostPage_;
+
     this.toggleHiddenAndReplaceableElements(this.doc_);
     // Have the recommendation box be always visible
     insertAtStart(this.host_, this.recBox_);

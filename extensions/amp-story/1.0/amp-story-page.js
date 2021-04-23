@@ -35,7 +35,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {
   AmpStoryEmbeddedComponent,
   EMBED_ID_ATTRIBUTE_NAME,
@@ -43,8 +43,8 @@ import {
   expandableElementsSelectors,
 } from './amp-story-embedded-component';
 import {AnimationManager, hasAnimations} from './animation';
-import {CommonSignals} from '../../../src/common-signals';
-import {Deferred} from '../../../src/utils/promise';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {EventType, dispatch} from './events';
 import {Layout} from '../../../src/layout';
 import {LoadingSpinner} from './loading-spinner';
@@ -56,15 +56,14 @@ import {
   addAttributesToElement,
   closestAncestorElementBySelector,
   iterateCursor,
-  matches,
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {createShadowRootWithStyle, setTextBackgroundColor} from './utils';
-import {debounce} from '../../../src/utils/rate-limit';
+import {debounce} from '../../../src/core/types/function';
 import {delegateAutoplay} from '../../../src/video-interface';
 import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getAmpdoc} from '../../../src/service';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getLocalizationService} from './amp-story-localization-service';
@@ -112,7 +111,7 @@ export const Selectors = {
   ALL_PLAYBACK_MEDIA:
     '> audio, amp-story-grid-layer audio, amp-story-grid-layer video',
   ALL_VIDEO: 'amp-story-grid-layer video',
-  ALL_TABBABLE: 'a',
+  ALL_TABBABLE: 'a, amp-twitter > iframe',
 };
 
 /** @private @const {string} */
@@ -234,9 +233,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       (isActive) => this.toggleLoadingSpinner_(!!isActive),
       100
     );
-
-    /** @private {?boolean}  */
-    this.isLastStoryPage_ = null;
 
     /** @private {?LoadingSpinner} */
     this.loadingSpinner_ = null;
@@ -373,40 +369,48 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Reads the storyNextUp param and sets it as the auto-advance-after attribute
-   * if this is the last page and there isn't a value set by the publisher.
+   * Reads the storyNextUp param if provided and sets the auto-advance-after
+   * attribute if there isn't a value set by the publisher. The
+   * auto-advance-after attribute will be set to the id of the first
+   * video if there is one, or the value of the storyNextUp param otherwise.
    * @private
    */
   maybeSetStoryNextUp_() {
     const autoAdvanceAttr = this.element.getAttribute('auto-advance-after');
+    // This is a private param used for testing, it may be changed
+    // or removed without notice.
     const storyNextUpParam = Services.viewerForDoc(this.element).getParam(
       'storyNextUp'
     );
-    if (
-      autoAdvanceAttr === null &&
-      storyNextUpParam !== null &&
-      this.isLastPage_()
-    ) {
+    if (autoAdvanceAttr !== null || storyNextUpParam === null) {
+      return;
+    }
+    const video = this.getFirstAmpVideo_();
+    if (video === null) {
       addAttributesToElement(
         this.element,
         dict({'auto-advance-after': storyNextUpParam})
       );
+      return;
     }
+    if (video.id === '') {
+      video.id = this.element.id + '_firstVideo';
+    }
+    addAttributesToElement(
+      this.element,
+      dict({'auto-advance-after': video.id})
+    );
   }
 
   /**
-   * Returns true if the page is the last amp-story-page in the amp-story.
-   * @return {boolean}
+   * Returns the first amp-video in the amp-story-page if there is one, otherwise
+   * returns null.
+   * @return {?Element}
    * @private
    */
-  isLastPage_() {
-    if (this.isLastStoryPage_ === null) {
-      this.isLastStoryPage_ = matches(
-        this.element,
-        'amp-story-page:last-of-type'
-      );
-    }
-    return this.isLastStoryPage_;
+  getFirstAmpVideo_() {
+    const videos = this.getAllAmpVideos_();
+    return videos.length === 0 ? null : videos[0];
   }
 
   /**
@@ -866,6 +870,15 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
+   * Gets all amp video elements on this page.
+   * @return {!Array<?Element>}
+   * @private
+   */
+  getAllAmpVideos_() {
+    return this.getMediaBySelector_(Selectors.ALL_AMP_VIDEO);
+  }
+
+  /**
    * Gets media on page by given selector. Finds elements through friendly
    * iframe (if one exists).
    * @param {string} selector
@@ -904,7 +917,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   isAutoplaySupported_() {
     VideoUtils.resetIsAutoplaySupported();
-    return VideoUtils.isAutoplaySupported(this.win, getMode(this.win).lite);
+    return VideoUtils.isAutoplaySupported(this.win);
   }
 
   /**
@@ -1759,7 +1772,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       );
 
       const container = this.win.document.createElement('div');
-      container.classList.add('i-amphtml-page-attachment-host');
+      container.classList.add('i-amphtml-story-page-open-attachment-host');
       container.setAttribute('role', 'button');
 
       container.addEventListener('click', () => this.openAttachment());
@@ -1815,10 +1828,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   setPageDescription_() {
     if (this.isBotUserAgent_) {
-      renderPageDescription(
-        this,
-        this.getMediaBySelector_(Selectors.ALL_AMP_VIDEO)
-      );
+      renderPageDescription(this, this.getAllAmpVideos_());
     }
 
     if (!this.isBotUserAgent_ && this.element.hasAttribute('title')) {

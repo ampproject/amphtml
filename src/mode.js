@@ -22,7 +22,6 @@ import {parseQueryString_} from './url-parse-query-string';
  *   localDev: boolean,
  *   development: boolean,
  *   minified: boolean,
- *   lite: boolean,
  *   test: boolean,
  *   examiner: boolean,
  *   log: (string|undefined),
@@ -80,8 +79,6 @@ function getMode_(win) {
     win.location['originalHash'] || win.location.hash
   );
 
-  const searchQuery = parseQueryString_(win.location.search);
-
   if (!rtvVersion) {
     rtvVersion = getRtvVersion(win);
   }
@@ -106,9 +103,6 @@ function getMode_(win) {
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
     minified: IS_MINIFIED,
-    // Whether document is in an amp-lite viewer. It signal that the user
-    // would prefer to use less bandwidth.
-    lite: searchQuery['amp_lite'] != undefined,
     test: runningTests,
     log: hashQuery['log'],
     version: internalRuntimeVersion(),

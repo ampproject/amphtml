@@ -19,7 +19,7 @@ import {VideoEvents} from '../../../src/video-interface';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
 import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {dispatchCustomEvent} from '../../../src/dom';
 import {forwardRef} from '../../../src/preact/compat';
 import {mutedOrUnmutedEvent, objOrParseJson} from '../../../src/iframe-video';

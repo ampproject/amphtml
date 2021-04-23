@@ -35,14 +35,14 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
 import {
   AdvancementMode,
   StoryAnalyticsEvent,
   getAnalyticsService,
 } from './story-analytics';
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {AmpStoryAccess} from './amp-story-access';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
 import {AmpStoryConsent} from './amp-story-consent';
@@ -56,12 +56,12 @@ import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
 import {HistoryState, getHistoryState, setHistoryState} from './history';
 import {InfoDialog} from './amp-story-info-dialog';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Layout} from '../../../src/layout';
 import {LiveStoryManager} from './live-story-manager';
 import {MediaPool, MediaType} from './media-pool';
@@ -72,7 +72,7 @@ import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './amp-story-system-layer';
 import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
 import {ViewportWarningLayer} from './amp-story-viewport-warning-layer';
-import {VisibilityState} from '../../../src/visibility-state';
+import {VisibilityState} from '../../../src/core/constants/visibility-state';
 import {
   childElement,
   childElementByTag,
@@ -93,10 +93,10 @@ import {
   toggle,
 } from '../../../src/style';
 import {createPseudoLocale} from '../../../src/localized-strings';
-import {debounce} from '../../../src/utils/rate-limit';
+import {debounce} from '../../../src/core/types/function';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
-import {endsWith} from '../../../src/string';
+import {dict, map} from '../../../src/core/types/object';
+import {endsWith} from '../../../src/core/types/string';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex, lastItem, toArray} from '../../../src/core/types/array';
 import {getConsentPolicyState} from '../../../src/consent';
@@ -106,7 +106,7 @@ import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
 import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
-import {isPageAttachmentUiV2ExperimentOn} from './amp-story-open-page-attachment';
+import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 import {parseQueryString} from '../../../src/url';
 import {
   removeAttributeInMutate,
@@ -1197,6 +1197,9 @@ export class AmpStory extends AMP.BaseElement {
     );
     this.viewerMessagingHandler_ &&
       this.viewerMessagingHandler_.send('storyContentLoaded', dict({}));
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.STORY_CONTENT_LOADED
+    );
     this.signals().signal(CommonSignals.INI_LOAD);
     this.mutateElement(() => {
       this.element.classList.add(STORY_LOADED_CLASS_NAME);

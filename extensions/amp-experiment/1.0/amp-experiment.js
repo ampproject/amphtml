@@ -19,7 +19,7 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {applyExperimentToVariant} from './apply-experiment';
 import {devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {
   installOriginExperimentsForDoc,

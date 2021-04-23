@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../../src/amp-events';
+import {AmpEvents} from '../../../../src/core/constants/amp-events';
 import {
   AutoLightboxEvents,
   isActionableByTap,
 } from '../../../../src/auto-lightbox';
-import {CommonSignals} from '../../../../src/common-signals';
+import {CommonSignals} from '../../../../src/core/constants/common-signals';
 import {
   LIGHTBOX_THUMBNAIL_AD,
   LIGHTBOX_THUMBNAIL_UNKNOWN,
@@ -34,7 +34,7 @@ import {
   iterateCursor,
 } from '../../../../src/dom';
 import {dev, devAssert, userAssert} from '../../../../src/log';
-import {map} from '../../../../src/utils/object';
+import {map} from '../../../../src/core/types/object';
 import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
 import {toArray} from '../../../../src/core/types/array';
 

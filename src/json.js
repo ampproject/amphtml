@@ -20,7 +20,7 @@
  */
 
 import {childElementsByTag, isJsonScriptTag} from './dom';
-import {isObject} from './types';
+import {isObject} from './core/types';
 
 // NOTE Type are changed to {*} because of
 // https://github.com/google/closure-compiler/issues/1999

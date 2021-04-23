@@ -21,7 +21,7 @@ import {
 } from '../../src/3p-frame-messaging';
 import {canInspectWindow} from '../../src/iframe-helper';
 import {dev, devAssert} from '../../src/log';
-import {dict} from '../../src/utils/object';
+import {dict} from '../../src/core/types/object';
 import {getData} from '../../src/event-helper';
 import {getFrameOverlayManager} from './frame-overlay-manager';
 import {getPositionObserver} from './position-observer';

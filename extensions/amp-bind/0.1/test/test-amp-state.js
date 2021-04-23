@@ -15,7 +15,7 @@
  */
 
 import '../amp-bind';
-import {ActionTrust} from '../../../../src/action-constants';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {Services} from '../../../../src/services';
 import {UrlReplacementPolicy} from '../../../../src/batched-json';
 

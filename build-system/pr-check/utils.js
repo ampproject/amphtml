@@ -17,7 +17,6 @@
 
 const fs = require('fs-extra');
 const {
-  ciBuildSha,
   ciPullRequestSha,
   circleciBuildNumber,
   isCiBuild,
@@ -41,10 +40,7 @@ const UNMINIFIED_CONTAINER_DIRECTORY = 'unminified';
 const NOMODULE_CONTAINER_DIRECTORY = 'nomodule';
 const MODULE_CONTAINER_DIRECTORY = 'module';
 
-const UNMINIFIED_GCLOUD_OUTPUT_FILE = `amp_unminified_${ciBuildSha()}.zip`;
-const NOMODULE_GCLOUD_OUTPUT_FILE = `amp_nomodule_${ciBuildSha()}.zip`;
-const MODULE_GCLOUD_OUTPUT_FILE = `amp_module_${ciBuildSha()}.zip`;
-const EXPERIMENT_GCLOUD_OUTPUT_FILE = (exp) => `amp_${exp}_${ciBuildSha()}.zip`;
+const ARTIFACT_FILE_NAME = '/tmp/artifacts/amp_nomodule_build.tar.gz';
 
 const BUILD_OUTPUT_DIRS = ['build', 'dist', 'dist.3p'];
 const APP_SERVING_DIRS = [
@@ -54,9 +50,6 @@ const APP_SERVING_DIRS = [
   'test/manual',
   'test/fixtures/e2e',
 ];
-
-// TODO(rsimha, ampproject/amp-github-apps#1110): Update storage details.
-const GCLOUD_STORAGE_BUCKET = 'gs://amp-travis-builds';
 
 const GIT_BRANCH_URL =
   'https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md#create-a-git-branch';
@@ -243,41 +236,14 @@ const timedExecOrDie = timedExecFn(execOrDie);
 const timedExecOrThrow = timedExecFn(execOrThrow);
 
 /**
- * Upload output helper
+ * Stores build files to the CI workspace.
  * @param {string} containerDirectory
- * @param {string} gcloudOutputFileName
- * @param {!Array<string>} outputDirs
  * @private
  */
-function uploadOutput_(containerDirectory, gcloudOutputFileName, outputDirs) {
-  const loggingPrefix = getLoggingPrefix();
-
-  // TODO(danielrozenberg): remove this once deploy-bot uses CircleCI artifacts.
-  logWithoutTimestamp(
-    `\n${loggingPrefix} Compressing ` +
-      cyan(outputDirs.join(', ')) +
-      ' into ' +
-      cyan(gcloudOutputFileName) +
-      '...'
-  );
-  execOrDie(`zip -r -q ${gcloudOutputFileName} ${outputDirs.join('/ ')}/`);
-  execOrDie(`du -sh ${gcloudOutputFileName}`);
-
-  logWithoutTimestamp(
-    `${loggingPrefix} Uploading ` +
-      cyan(gcloudOutputFileName) +
-      ' to ' +
-      cyan(GCLOUD_STORAGE_BUCKET) +
-      '...'
-  );
-  execOrDie(
-    `gsutil -q -m cp -r ${gcloudOutputFileName} ${GCLOUD_STORAGE_BUCKET}`
-  );
-  // TODO(danielrozenberg): ...until here.
-
+function storeBuildToWorkspace_(containerDirectory) {
   if (isCircleciBuild()) {
     fs.ensureDirSync(`/tmp/workspace/builds/${containerDirectory}`);
-    for (const outputDir of outputDirs) {
+    for (const outputDir of BUILD_OUTPUT_DIRS) {
       fs.moveSync(
         `${outputDir}/`,
         `/tmp/workspace/builds/${containerDirectory}/${outputDir}`
@@ -287,70 +253,71 @@ function uploadOutput_(containerDirectory, gcloudOutputFileName, outputDirs) {
 }
 
 /**
- * Zips and uploads the build output to a remote storage location
+ * Stores unminified build files to the CI workspace.
  */
-function uploadUnminifiedOutput() {
-  uploadOutput_(
-    UNMINIFIED_CONTAINER_DIRECTORY,
-    UNMINIFIED_GCLOUD_OUTPUT_FILE,
-    BUILD_OUTPUT_DIRS
-  );
+function storeUnminifiedBuildToWorkspace() {
+  storeBuildToWorkspace_(UNMINIFIED_CONTAINER_DIRECTORY);
 }
 
 /**
- * Zips and uploads the nomodule output to a remote storage location
+ * Stores nomodule build files to the CI workspace.
  */
-function uploadNomoduleOutput() {
-  uploadOutput_(
-    NOMODULE_CONTAINER_DIRECTORY,
-    NOMODULE_GCLOUD_OUTPUT_FILE,
-    APP_SERVING_DIRS
-  );
+function storeNomoduleBuildToWorkspace() {
+  storeBuildToWorkspace_(NOMODULE_CONTAINER_DIRECTORY);
 }
 
 /**
- * Zips and uploads the module output to a remote storage location
+ * Stores module build files to the CI workspace.
  */
-function uploadModuleOutput() {
-  uploadOutput_(
-    MODULE_CONTAINER_DIRECTORY,
-    MODULE_GCLOUD_OUTPUT_FILE,
-    APP_SERVING_DIRS
-  );
+function storeModuleBuildToWorkspace() {
+  storeBuildToWorkspace_(MODULE_CONTAINER_DIRECTORY);
 }
 
 /**
- * Zips and uploads the output for the given experiment to a remote storage
- * location
- * @param {string} exp
+ * Stores an experiment's build files to the CI workspace.
+ * @param {string} exp one of 'experimentA', 'experimentB', or 'experimentC'.
  */
-function uploadExperimentOutput(exp) {
-  uploadOutput_(exp, EXPERIMENT_GCLOUD_OUTPUT_FILE(exp), APP_SERVING_DIRS);
+function storeExperimentBuildToWorkspace(exp) {
+  storeBuildToWorkspace_(exp);
 }
 
 /**
- * Replaces URLS in HTML files, zips and uploads nomodule output,
- * and signals to the AMP PR Deploy bot that the upload is complete.
+ * Replaces URLS in HTML files, compresses and stores nomodule build in CI artifacts.
  */
-async function processAndUploadNomoduleOutput() {
+async function processAndStoreBuildToArtifacts() {
+  if (!isCircleciBuild()) {
+    return;
+  }
+
   await replaceUrls('test/manual');
   await replaceUrls('examples');
-  uploadNomoduleOutput();
+
+  const loggingPrefix = getLoggingPrefix();
+
+  logWithoutTimestamp(
+    `\n${loggingPrefix} Compressing ` +
+      cyan(APP_SERVING_DIRS.join(', ')) +
+      ' into ' +
+      cyan(ARTIFACT_FILE_NAME) +
+      '...'
+  );
+  execOrDie(`tar -czf ${ARTIFACT_FILE_NAME} ${APP_SERVING_DIRS.join('/ ')}/`);
+  execOrDie(`du -sh ${ARTIFACT_FILE_NAME}`);
 }
 
 module.exports = {
   abortTimedJob,
   printChangeSummary,
   skipDependentJobs,
-  processAndUploadNomoduleOutput,
   startTimer,
   stopTimer,
   timedExec,
   timedExecOrDie,
   timedExecWithError,
   timedExecOrThrow,
-  uploadExperimentOutput,
-  uploadUnminifiedOutput,
-  uploadNomoduleOutput,
-  uploadModuleOutput,
+  storeUnminifiedBuildToWorkspace,
+  storeNomoduleBuildToWorkspace,
+  storeModuleBuildToWorkspace,
+  storeExperimentBuildToWorkspace,
+  processAndStoreBuildToArtifacts,
 };

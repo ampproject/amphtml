@@ -16,12 +16,11 @@
 
 import * as Preact from '../../../../src/preact';
 import {text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
   title: 'amp-render-1_0',
-  decorators: [withKnobs, withA11y, withAmp],
+  decorators: [withKnobs, withAmp],
 
   parameters: {
     extensions: [
@@ -136,3 +135,29 @@ export const WithAmpScriptSrc = () => {
 };
 
 WithAmpScriptSrc.storyName = 'With AMP script src';
+
+export const WithRefreshButton = () => {
+  return (
+    <>
+      <amp-render
+        id="my-amp-render"
+        src="https://amp.dev/static/samples/json/examples.json"
+        width="300"
+        height="200"
+        layout="fixed"
+      >
+        <template type="amp-mustache">
+          <ul>
+            {`{{#items}}`}
+            <li>{`{{title}}`}</li>
+            {`{{/items}}`}
+          </ul>
+        </template>
+      </amp-render>
+
+      <button on="tap:my-amp-render.refresh">Refresh data</button>
+    </>
+  );
+};
+
+WithBindableSrc.storyName = 'With bindable src';
