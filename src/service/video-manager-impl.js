@@ -989,13 +989,14 @@ class VideoEntry {
    */
   getAnalyticsDetails() {
     const {video} = this;
-    isAutoplaySupported(this.ampdoc_.win);
-    const intersection = measureIntersection(video.element);
-    return Promise.all([supportsAutoplay, intersection]).then((responses) => {
-      const supportsAutoplay = /** @type {boolean} */ (responses[0]);
+    return Promise.all([
+      isAutoplaySupported(this.ampdoc_.win),
+      measureIntersection(video.element),
+    ]).then((responses) => {
+      const isAutoplaySupported = /** @type {boolean} */ (responses[0]);
       const intersection = /** @type {!IntersectionObserverEntry} */ (responses[1]);
       const {width, height} = intersection.boundingClientRect;
-      const autoplay = this.hasAutoplay && supportsAutoplay;
+      const autoplay = this.hasAutoplay && isAutoplaySupported;
       const playedRanges = video.getPlayedRanges();
       const playedTotal = playedRanges.reduce(
         (acc, range) => acc + range[1] - range[0],
