@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import {CSS as COMPONENT_CSS} from './component.jss';
+import {VideoBaseElement} from '../../amp-video/1.0/base-element';
 import {Vimeo} from './component';
-import {PreactBaseElement} from '../../../src/preact/base-element';
 
-export class BaseElement extends PreactBaseElement {}
+export class BaseElement extends VideoBaseElement {}
 
 /** @override */
 BaseElement['Component'] = Vimeo;
 
 /** @override */
 BaseElement['props'] = {
-  'children': {passthrough: true},
-  // 'children': {passthroughNonEmpty: true},
-  // 'children': {selector: '...'},
+  'autoplay': {attr: 'autoplay', type: 'boolean'},
+  'controls': {attr: 'controls', type: 'boolean'},
+  'videoid': {attr: 'data-videoid'},
+  'doNotTrack': {attr: 'do-not-track'},
 };
 
 /** @override */
@@ -35,6 +35,3 @@ BaseElement['layoutSizeDefined'] = true;
 
 /** @override */
 BaseElement['usesShadowDom'] = true;
-
-/** @override */
-BaseElement['shadowCss'] = COMPONENT_CSS;

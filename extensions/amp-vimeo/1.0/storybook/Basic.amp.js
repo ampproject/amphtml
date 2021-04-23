@@ -15,38 +15,35 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {withA11y} from '@storybook/addon-a11y';
+import {boolean, text, withKnobs} from '@storybook/addon-knobs';
 import {withAmp} from '@ampproject/storybook-addon';
-import {withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'amp-vimeo-1_0',
-  decorators: [withKnobs, withA11y, withAmp],
+  decorators: [withKnobs, withAmp],
 
   parameters: {
-    extensions: [
-      {
-        name: 'amp-vimeo',
-        version: '1.0',
-      },
-    ],
+    extensions: [{name: 'amp-vimeo', version: '1.0'}],
     experiments: ['bento'],
   },
 };
 
-// DO NOT SUBMIT: This is example code only.
-export const ExampleUseCase = () => {
+export const _default = () => {
+  const videoid = text('videoid', '27246366');
+  const autoplay = boolean('autoplay', true);
+  const doNotTrack = boolean('do-not-track', false);
   return (
     <amp-vimeo
-      width="300"
-      height="200"
-      example-property="example string property value"
-    >
-      This text is inside.
-    </amp-vimeo>
+      width="16"
+      height="9"
+      layout="responsive"
+      autoplay={autoplay}
+      data-videoid={videoid}
+      do-not-track={doNotTrack}
+    />
   );
 };
 
-ExampleUseCase.story = {
-  name: 'Example use case story'
+_default.story = {
+  name: 'default',
 };

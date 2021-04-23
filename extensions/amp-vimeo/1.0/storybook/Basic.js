@@ -15,24 +15,27 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Vimeo} from '../component'
-import {withA11y} from '@storybook/addon-a11y';
-import {withKnobs} from '@storybook/addon-knobs';
+import {Vimeo} from '../component';
+import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'Vimeo',
   component: Vimeo,
-  decorators: [withKnobs, withA11y],
+  decorators: [withKnobs],
 };
 
 export const _default = () => {
-  // DO NOT SUBMIT: This is example code only.
+  const videoid = text('videoid', '27246366');
+  const width = number('width', 320);
+  const height = number('height', 180);
+  const autoplay = boolean('autoplay', true);
+  const doNotTrack = boolean('do-not-track', false);
   return (
     <Vimeo
-      style={{width: 300, height: 200}}
-      example-property="example string property value"
-    >
-      This text is inside.
-    </Vimeo>
+      style={{width, height}}
+      autoplay={autoplay}
+      doNotTrack={doNotTrack}
+      videoid={videoid}
+    />
   );
 };

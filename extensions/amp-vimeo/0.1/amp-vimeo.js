@@ -15,18 +15,24 @@
  */
 import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
+import {
+  VIMEO_EVENTS,
+  getVimeoIframeSrc,
+  getVimeoOriginRegExp,
+  listenToVimeoEvents,
+  makeVimeoMessage,
+} from '../def';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 import {VideoUtils} from '../../../src/utils/video';
-import {addParamToUrl} from '../../../src/url';
 import {
   createFrameFor,
   isJsonOrObj,
   mutedOrUnmutedEvent,
   objOrParseJson,
   originMatches,
+  postMessageWhenAvailable,
   redispatch,
 } from '../../../src/iframe-video';
-import {dict} from '../../../src/core/types/object';
 import {dispatchCustomEvent, removeElement} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
@@ -37,40 +43,6 @@ import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-vimeo';
 
-/**
- * Get the name of the method for a given getter or setter.
- * See https://developer.vimeo.com/player/js-api
- * @param {string} prop The name of the property.
- * @param {?string} optType Either “get” or “set”.
- * @return {string}
- */
-function getMethodName(prop, optType = null) {
-  if (!optType) {
-    return prop;
-  }
-  return (
-    optType.toLowerCase() + prop.substr(0, 1).toUpperCase() + prop.substr(1)
-  );
-}
-
-/**
- * Maps events coming from the Vimeo frame to events to be dispatched from the
- * component element.
- *
- * If the item does not have a value, the event will not be forwarded 1:1, but
- * it will be listened to.
- *
- * @private {!Object<string, ?string>}
- */
-const VIMEO_EVENTS = {
-  'play': VideoEvents.PLAYING,
-  'pause': VideoEvents.PAUSE,
-  'ended': VideoEvents.ENDED,
-  'volumechange': null,
-};
-
-const DO_NOT_TRACK_ATTRIBUTE = 'do-not-track';
-
 /** @implements {../../../src/video-interface.VideoInterface} */
 class AmpVimeo extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -79,9 +51,6 @@ class AmpVimeo extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.iframe_ = null;
-
-    /** @private {function():string} */
-    this.setVolumeMethod_ = once(() => getMethodName('volume', 'set'));
 
     /** @private {function()} */
     this.onReadyOnce_ = once(() => this.onReady_());
@@ -126,40 +95,29 @@ class AmpVimeo extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return this.isAutoplay_().then((isAutoplay) =>
-      this.buildIframe_(isAutoplay, this.isDoNotTrack_())
-    );
-  }
-
-  /**
-   * @param {boolean} isAutoplay
-   * @param {boolean} isDoNotTrack
-   * @return {!Promise}
-   * @private
-   */
-  buildIframe_(isAutoplay, isDoNotTrack) {
     const {element} = this;
-    const vidId = userAssert(
+    const videoid = userAssert(
       element.getAttribute('data-videoid'),
       'The data-videoid attribute is required for <amp-vimeo> %s',
       element
     );
+    return this.isAutoplay_().then((isAutoplay) =>
+      this.buildIframe_(
+        getVimeoIframeSrc(
+          videoid,
+          isAutoplay,
+          this.element.hasAttribute('do-not-track')
+        )
+      )
+    );
+  }
 
-    // See
-    // https://developer.vimeo.com/player/embedding
-
-    let src = `https://player.vimeo.com/video/${encodeURIComponent(vidId)}`;
-
-    if (isAutoplay) {
-      // Only muted videos are allowed to autoplay
-      this.muted_ = true;
-      src = addParamToUrl(src, 'muted', '1');
-    }
-
-    if (isDoNotTrack) {
-      src = addParamToUrl(src, 'dnt', '1');
-    }
-
+  /**
+   * @param {string} src
+   * @return {!Promise}
+   * @private
+   */
+  buildIframe_(src) {
     const iframe = createFrameFor(this, src);
 
     this.iframe_ = iframe;
@@ -201,21 +159,11 @@ class AmpVimeo extends AMP.BaseElement {
     return VideoUtils.isAutoplaySupported(win, getMode(win).lite);
   }
 
-  /**
-   * @return {boolean}
-   * @private
-   */
-  isDoNotTrack_() {
-    return this.element.hasAttribute(DO_NOT_TRACK_ATTRIBUTE);
-  }
-
   /** @private */
   onReady_() {
     const {element} = this;
 
-    Object.keys(VIMEO_EVENTS).forEach((event) => {
-      this.sendCommand_('addEventListener', event);
-    });
+    listenToVimeoEvents(this.iframe_);
 
     Services.videoManagerForDoc(element).register(this);
 
@@ -227,13 +175,7 @@ class AmpVimeo extends AMP.BaseElement {
    * @private
    */
   onMessage_(event) {
-    if (
-      !originMatches(
-        event,
-        this.iframe_,
-        /^(https?:)?\/\/((player|www)\.)?vimeo.com(?=$|\/)/
-      )
-    ) {
+    if (!originMatches(event, this.iframe_, getVimeoOriginRegExp())) {
       return;
     }
 
@@ -306,13 +248,13 @@ class AmpVimeo extends AMP.BaseElement {
       // that would disable autoplay on iOS.
       return;
     }
-    this.sendCommand_(this.setVolumeMethod_(), '0');
+    this.sendCommand_('setVolume', '0');
   }
 
   /** @override */
   unmute() {
     // TODO(alanorozco): Set based on volume before unmuting.
-    this.sendCommand_(this.setVolumeMethod_(), '1');
+    this.sendCommand_('setVolume', '1');
   }
 
   /** @override */
@@ -390,24 +332,7 @@ class AmpVimeo extends AMP.BaseElement {
    * @private
    */
   sendCommand_(method, optParams = null) {
-    // See
-    // https://developer.vimeo.com/player/js-api
-    if (!this.iframe_) {
-      return;
-    }
-    const {contentWindow} = this.iframe_;
-    if (!contentWindow) {
-      return;
-    }
-    contentWindow./*OK*/ postMessage(
-      JSON.stringify(
-        dict({
-          'method': method,
-          'value': optParams || '',
-        })
-      ),
-      '*'
-    );
+    postMessageWhenAvailable(this.iframe_, makeVimeoMessage(method, optParams));
   }
 
   /** @override */

@@ -15,7 +15,7 @@
  */
 
 import {BaseElement} from './base-element';
-import {dict} from '../../../src/core/types/object';
+import {CSS} from '../../../build/amp-vimeo-1.0.css';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
@@ -23,19 +23,6 @@ import {userAssert} from '../../../src/log';
 const TAG = 'amp-vimeo';
 
 class AmpVimeo extends BaseElement {
-  /** @override */
-  init() {
-    // DO NOT SUBMIT: This is example code only.
-    this.registerApiAction('exampleToggle', (api) =>
-      api./*OK*/ exampleToggle()
-    );
-
-    return dict({
-      // Extra props passed by wrapper AMP component
-      'exampleTagNameProp': this.element.tagName,
-    });
-  }
-
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
@@ -48,5 +35,5 @@ class AmpVimeo extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpVimeo);
+  AMP.registerElement(TAG, AmpVimeo, CSS);
 });

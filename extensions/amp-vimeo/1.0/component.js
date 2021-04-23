@@ -15,43 +15,112 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {ContainWrapper} from '../../../src/preact/component';
 import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from '../../../src/preact';
+  VIMEO_EVENTS,
+  getVimeoIframeSrc,
+  getVimeoOriginRegExp,
+  listenToVimeoEvents,
+  makeVimeoMessage,
+} from '../def';
+import {VideoIframe} from '../../amp-video/1.0/video-iframe';
+import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
+import {dispatchCustomEvent} from '../../../src/dom';
+import {forwardRef} from '../../../src/preact/compat';
+import {
+  objOrParseJson,
+  postMessageWhenAvailable,
+} from '../../../src/iframe-video';
+import {useMemo} from '../../../src/preact';
+
+/**
+ * @param {!HTMLIframeElement} iframe
+ * @param {string} type
+ */
+function dispatchEvent(iframe, type) {
+  dispatchCustomEvent(iframe, type, null, {
+    bubbles: true,
+    cancelable: false,
+  });
+}
+
+/**
+ * @param {!HTMLIframeElement} iframe
+ */
+function onReady(iframe) {
+  dispatchEvent(iframe, 'canplay');
+  listenToVimeoEvents(iframe);
+}
+
+/**
+ * @param {!MessageEvent} e
+ */
+function onMessage(e) {
+  const {currentTarget} = e;
+  const data = objOrParseJson(e.data);
+  if (!data) {
+    return;
+  }
+  const event = data['event'];
+  if (event == 'ready' || data['method'] == 'ping') {
+    onReady(currentTarget);
+    return;
+  }
+  if (VIMEO_EVENTS[event]) {
+    dispatchEvent(currentTarget, VIMEO_EVENTS[event]);
+    return;
+  }
+}
+
+/**
+ * @param {string} method
+ * @return {string}
+ */
+function makeMethodMessage(method) {
+  if (method === 'mute') {
+    return makeVimeoMessage('setVolume', '0');
+  }
+  if (method === 'unmute') {
+    return makeVimeoMessage('setVolume', '1');
+  }
+  return makeVimeoMessage(method);
+}
 
 /**
  * @param {!VimeoDef.Props} props
+ * @param {{current: (T|null)}} ref
  * @return {PreactDef.Renderable}
+ * @template T
  */
-export function Vimeo({exampleTagNameProp, ...rest}) {
-  // Examples of state and hooks
-  // DO NOT SUBMIT: This is example code only.
-  const [exampleValue, setExampleValue] = useState(0);
-  const exampleRef = useRef(null);
-
-  useCallback(() => {
-    /* Do things */
-  }, []);
-  useEffect(() => {
-    /* Do things */
-  }, []);
-  useLayoutEffect(() => {
-    /* Do things */
-  }, []);
-  useMemo(() => {
-    /* Do things */
-  }, []);
+export function VimeoWithRef(
+  {videoid, autoplay = false, doNotTrack = false, ...rest},
+  ref
+) {
+  const origin = useMemo(getVimeoOriginRegExp, []);
+  const src = useMemo(() => getVimeoIframeSrc(videoid, autoplay, doNotTrack), [
+    videoid,
+    doNotTrack,
+    autoplay,
+  ]);
 
   return (
-    <ContainWrapper layout size paint {...rest}>
-      {{exampleTagNameProp}}
-      <div className={`${styles.exampleContentHidden}`}>This is hidden</div>
-    </ContainWrapper>
+    <VideoWrapper
+      ref={ref}
+      {...rest}
+      origin={origin}
+      component={VideoIframe}
+      autoplay={autoplay}
+      src={src}
+      onMessage={onMessage}
+      makeMethodMessage={makeMethodMessage}
+      onIframeLoad={(e) => {
+        postMessageWhenAvailable(e.currentTarget, makeVimeoMessage('ping'));
+      }}
+      // Vimeo API does not have a way to hide controls, so they're always set
+      controls
+    />
   );
 }
+
+const Vimeo = forwardRef(VimeoWithRef);
+Vimeo.displayName = 'Vimeo'; // Make findable for tests.
+export {Vimeo};
