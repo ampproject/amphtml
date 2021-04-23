@@ -115,15 +115,14 @@ export class AmpRender extends BaseElement {
   }
 
   /**
-   * @param {!AmpElement} element
    * @param {boolean} shouldRefresh true to force refresh of browser cache.
    * @return {!BatchFetchOptionsDef} options object to pass to `batchFetchJsonFor` method.
    * @private
    */
-  buildOptionsObject_(element, shouldRefresh = false) {
+  buildOptionsObject_(shouldRefresh = false) {
     return {
-      xssiPrefix: element.getAttribute('xssi-prefix'),
-      expr: element.getAttribute('key') ?? '.',
+      xssiPrefix: this.element.getAttribute('xssi-prefix'),
+      expr: this.element.getAttribute('key') ?? '.',
       refresh: shouldRefresh,
       urlReplacement: this.getPolicy_(),
     };
@@ -156,7 +155,7 @@ export class AmpRender extends BaseElement {
       batchFetchJsonFor(
         element.getAmpDoc(),
         element,
-        this.buildOptionsObject_(element, shouldRefresh)
+        this.buildOptionsObject_(shouldRefresh)
       );
   }
 
