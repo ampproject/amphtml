@@ -17,12 +17,13 @@
 import {BaseElement} from './base-element';
 import {
   BatchFetchOptionsDef,
+  UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {Services} from '../../../src/services';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {isAmpScriptUri} from '../../../src/url';
+import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
 import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
@@ -37,83 +38,6 @@ const AMP_STATE_URI_SCHEME = 'amp-state:';
  */
 const isAmpStateSrc = (src) => src && src.startsWith(AMP_STATE_URI_SCHEME);
 
-/**
- * Gets the json from an "amp-state:" uri. For example, src="amp-state:json.path".
- *
- * TODO: this is similar to the implementation in amp-list. Move it
- * to a common file and import it.
- *
- * @param {!AmpElement} element
- * @param {string} src
- * @return {Promise<!JsonObject>}
- */
-const getAmpStateJson = (element, src) => {
-  return Services.bindForDocOrNull(element)
-    .then((bind) => {
-      userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
-      const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length);
-      return bind.getStateAsync(ampStatePath).catch((err) => {
-        const stateKey = ampStatePath.split('.')[0];
-        user().error(
-          TAG,
-          `'amp-state' element with id '${stateKey}' was not found.`
-        );
-        throw err;
-      });
-    })
-    .then((json) => {
-      userAssert(
-        json !== undefined,
-        `[amp-render] No data was found at provided uri: ${src}`
-      );
-      return json;
-    });
-};
-
-/**
- * @param {!AmpElement} element
- * @param {boolean} shouldRefresh true to force refresh of browser cache.
- * @return {!BatchFetchOptionsDef} options object to pass to `batchFetchJsonFor` method.
- */
-function buildOptionsObject(element, shouldRefresh = false) {
-  return {
-    xssiPrefix: element.getAttribute('xssi-prefix'),
-    expr: element.getAttribute('key') ?? '.',
-    refresh: shouldRefresh,
-  };
-}
-
-/**
- * Returns a function to fetch json from remote url, amp-state or
- * amp-script.
- *
- * @param {!AmpElement} element
- * @return {Function}
- */
-export function getJsonFn(element) {
-  const src = element.getAttribute('src');
-  if (!src) {
-    // TODO(dmanek): assert that src is provided instead of silently failing below.
-    return () => {};
-  }
-  if (isAmpStateSrc(src)) {
-    return (src) => getAmpStateJson(element, src);
-  }
-  if (isAmpScriptUri(src)) {
-    return (src) =>
-      Services.scriptForDocOrNull(element).then((ampScriptService) => {
-        userAssert(ampScriptService, 'AMP-SCRIPT is not installed');
-        return ampScriptService.fetch(src);
-      });
-  }
-  return (unusedSrc, shouldRefresh = false) =>
-    batchFetchJsonFor(
-      element.getAmpDoc(),
-      element,
-      buildOptionsObject(element, shouldRefresh)
-    );
-}
-
 export class AmpRender extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -124,6 +48,8 @@ export class AmpRender extends BaseElement {
 
     /** @private {?Element} */
     this.template_ = null;
+
+    this.initialSrc_ = '';
   }
 
   /** @override */
@@ -135,8 +61,106 @@ export class AmpRender extends BaseElement {
     return super.isLayoutSupported(layout);
   }
 
+  /**
+   * Gets the json from an "amp-state:" uri. For example, src="amp-state:json.path".
+   *
+   * TODO: this is similar to the implementation in amp-list. Move it
+   * to a common file and import it.
+   *
+   * @param {!AmpElement} element
+   * @param {string} src
+   * @return {Promise<!JsonObject>}
+   */
+  getAmpStateJson(element, src) {
+    return Services.bindForDocOrNull(element)
+      .then((bind) => {
+        userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
+        const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length);
+        return bind.getStateAsync(ampStatePath).catch((err) => {
+          const stateKey = ampStatePath.split('.')[0];
+          user().error(
+            TAG,
+            `'amp-state' element with id '${stateKey}' was not found.`
+          );
+          throw err;
+        });
+      })
+      .then((json) => {
+        userAssert(
+          json !== undefined,
+          `[amp-render] No data was found at provided uri: ${src}`
+        );
+        return json;
+      });
+  }
+
+  /**
+   * @return {!UrlReplacementPolicy}
+   */
+  getPolicy() {
+    const src = this.element.getAttribute('src');
+    // Require opt-in for URL variable replacements on CORS fetches triggered
+    // by [src] mutation. @see spec/amp-var-substitutions.md
+    let policy = UrlReplacementPolicy.OPT_IN;
+    if (
+      src == this.initialSrc_ ||
+      getSourceOrigin(src) == getSourceOrigin(this.getAmpDoc().win.location)
+    ) {
+      policy = UrlReplacementPolicy.ALL;
+    }
+    return policy;
+  }
+
+  /**
+   * @param {!AmpElement} element
+   * @param {boolean} shouldRefresh true to force refresh of browser cache.
+   * @return {!BatchFetchOptionsDef} options object to pass to `batchFetchJsonFor` method.
+   */
+  buildOptionsObject(element, shouldRefresh = false) {
+    return {
+      xssiPrefix: element.getAttribute('xssi-prefix'),
+      expr: element.getAttribute('key') ?? '.',
+      refresh: shouldRefresh,
+      urlReplacement: this.getPolicy(),
+    };
+  }
+
+  /**
+   * Returns a function to fetch json from remote url, amp-state or
+   * amp-script.
+   *
+   * @param {!AmpElement} element
+   * @return {Function}
+   */
+  getJsonFn(/* element */) {
+    const {element} = this;
+    const src = element.getAttribute('src');
+    if (!src) {
+      // TODO(dmanek): assert that src is provided instead of silently failing below.
+      return () => {};
+    }
+    if (isAmpStateSrc(src)) {
+      return (src) => this.getAmpStateJson(element, src);
+    }
+    if (isAmpScriptUri(src)) {
+      return (src) =>
+        Services.scriptForDocOrNull(element).then((ampScriptService) => {
+          userAssert(ampScriptService, 'AMP-SCRIPT is not installed');
+          return ampScriptService.fetch(src);
+        });
+    }
+    return (unusedSrc, shouldRefresh = false) =>
+      batchFetchJsonFor(
+        element.getAmpDoc(),
+        element,
+        this.buildOptionsObject(element, shouldRefresh)
+      );
+  }
+
   /** @override */
   init() {
+    this.initialSrc_ = this.element.getAttribute('src');
+
     this.registerApiAction('refresh', (api) => {
       const src = this.element.getAttribute('src');
       // There is an alternative way to do this using `mutationObserverCallback` while using a boolean
@@ -150,7 +174,7 @@ export class AmpRender extends BaseElement {
     });
 
     return dict({
-      'getJson': getJsonFn(this.element),
+      'getJson': this.getJsonFn(/* this.element */),
     });
   }
 
@@ -203,10 +227,10 @@ export class AmpRender extends BaseElement {
   }
 }
 
-AmpRender['props'] = {
-  ...BaseElement['props'],
-  'getJson': {attrs: ['src'], parseAttrs: getJsonFn},
-};
+// AmpRender['props'] = {
+//   ...BaseElement['props'],
+//   'getJson': {attrs: ['src'], parseAttrs: getJsonFn},
+// };
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpRender);
