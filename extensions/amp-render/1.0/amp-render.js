@@ -49,7 +49,8 @@ export class AmpRender extends BaseElement {
     /** @private {?Element} */
     this.template_ = null;
 
-    this.initialSrc_ = '';
+    /** @private {?string} */
+    this.initialSrc_ = null;
   }
 
   /** @override */
@@ -70,8 +71,9 @@ export class AmpRender extends BaseElement {
    * @param {!AmpElement} element
    * @param {string} src
    * @return {Promise<!JsonObject>}
+   * @private
    */
-  getAmpStateJson(element, src) {
+  getAmpStateJson_(element, src) {
     return Services.bindForDocOrNull(element)
       .then((bind) => {
         userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
@@ -96,8 +98,9 @@ export class AmpRender extends BaseElement {
 
   /**
    * @return {!UrlReplacementPolicy}
+   * @private
    */
-  getPolicy() {
+  getPolicy_() {
     const src = this.element.getAttribute('src');
     // Require opt-in for URL variable replacements on CORS fetches triggered
     // by [src] mutation. @see spec/amp-var-substitutions.md
@@ -115,13 +118,14 @@ export class AmpRender extends BaseElement {
    * @param {!AmpElement} element
    * @param {boolean} shouldRefresh true to force refresh of browser cache.
    * @return {!BatchFetchOptionsDef} options object to pass to `batchFetchJsonFor` method.
+   * @private
    */
-  buildOptionsObject(element, shouldRefresh = false) {
+  buildOptionsObject_(element, shouldRefresh = false) {
     return {
       xssiPrefix: element.getAttribute('xssi-prefix'),
       expr: element.getAttribute('key') ?? '.',
       refresh: shouldRefresh,
-      urlReplacement: this.getPolicy(),
+      urlReplacement: this.getPolicy_(),
     };
   }
 
@@ -129,10 +133,9 @@ export class AmpRender extends BaseElement {
    * Returns a function to fetch json from remote url, amp-state or
    * amp-script.
    *
-   * @param {!AmpElement} element
    * @return {Function}
    */
-  getJsonFn(/* element */) {
+  getFetchJsonFn() {
     const {element} = this;
     const src = element.getAttribute('src');
     if (!src) {
@@ -140,7 +143,7 @@ export class AmpRender extends BaseElement {
       return () => {};
     }
     if (isAmpStateSrc(src)) {
-      return (src) => this.getAmpStateJson(element, src);
+      return (src) => this.getAmpStateJson_(element, src);
     }
     if (isAmpScriptUri(src)) {
       return (src) =>
@@ -153,7 +156,7 @@ export class AmpRender extends BaseElement {
       batchFetchJsonFor(
         element.getAmpDoc(),
         element,
-        this.buildOptionsObject(element, shouldRefresh)
+        this.buildOptionsObject_(element, shouldRefresh)
       );
   }
 
@@ -174,7 +177,7 @@ export class AmpRender extends BaseElement {
     });
 
     return dict({
-      'getJson': this.getJsonFn(/* this.element */),
+      'getJson': this.getFetchJsonFn(),
     });
   }
 
@@ -226,11 +229,6 @@ export class AmpRender extends BaseElement {
     return !this.template_ || 'render' in props;
   }
 }
-
-// AmpRender['props'] = {
-//   ...BaseElement['props'],
-//   'getJson': {attrs: ['src'], parseAttrs: getJsonFn},
-// };
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpRender);
