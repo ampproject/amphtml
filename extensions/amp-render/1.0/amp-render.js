@@ -138,8 +138,8 @@ export class AmpRender extends BaseElement {
   getFetchJsonFn() {
     const {element} = this;
     const src = element.getAttribute('src');
+    userAssert(src, 'src is a require attribute for amp-render');
     if (!src) {
-      // TODO(dmanek): assert that src is provided instead of silently failing below.
       return () => {};
     }
     if (isAmpStateSrc(src)) {
