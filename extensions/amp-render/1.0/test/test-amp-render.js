@@ -358,5 +358,48 @@ describes.realWin(
       expect(options.expr).to.equal('fullName');
       expect(options.refresh).to.be.false;
     });
+
+    it('should perform url replacement in src', async () => {
+      const json = {
+        fullName: {
+          firstName: 'Joe',
+          lastName: 'Biden',
+        },
+      };
+
+      const fetchJsonStub = env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .callThrough();
+
+      env.sandbox.stub(Services, 'batchedXhrFor').returns({
+        fetchJson: () => Promise.resolve(json),
+      });
+
+      env.sandbox.stub(Services, 'xhrFor').returns({
+        fetch: () => Promise.resolve(json),
+        xssiJson: () => Promise.resolve(json),
+      });
+
+      element = html`
+        <amp-render
+          xssi-prefix=")]}"
+          key="fullName"
+          src="https://example.com/data.json?RANDOM"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache">{{lastName}}, {{firstName}}</template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      const text = await getRenderedData();
+      expect(text).to.equal('Biden, Joe');
+      const options = fetchJsonStub.getCall(0).args[2];
+      expect(options.urlReplacement).to.equal(
+        BatchedJsonModule.UrlReplacementPolicy.ALL
+      );
+    });
   }
 );
