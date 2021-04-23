@@ -1,4 +1,4 @@
-PASS
+FAIL
 |  <!doctype html>
 |  <html ⚡>
 |  <head>
@@ -16,6 +16,79 @@ PASS
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>
-|    <amp-tiktok layout="responsive" width="150" height="80"></amp-tiktok>
+|    <!-- Valid `amp-tiktok` components -->
+|    <amp-tiktok width="500" height="500" data-src="6943753342808034566">
+|    </amp-tiktok>
+|    <amp-tiktok
+|      width="700"
+|      height="800"
+|      data-src="https://www.tiktok.com/@scout2015/video/6943753342808034566"
+|    >
+|    </amp-tiktok>
+|    <amp-tiktok width="500" height="800">
+|      <blockquote
+|        placeholder
+|        class="tiktok-embed"
+|        cite="https://www.tiktok.com/@countingprimes/video/6948210747285441798"
+|        data-video-id="6948210747285441798"
+|        style="max-width: 605px; min-width: 325px"
+|      >
+|        <section>
+|          <a
+|            target="_blank"
+|            title="@countingprimes"
+|            href="https://www.tiktok.com/@countingprimes"
+|            >@countingprimes</a
+|          >
+|          <p>
+|            VIM is great.... right up until you start typing the commands into every
+|            single text editor you see. I’d like to apologize for all my unneeded
+|            “:wq”’s
+|          </p>
+|          <a
+|            target="_blank"
+|            title="♬ original sound - countingprimes"
+|            href="https://www.tiktok.com/music/original-sound-6948210588145175302"
+|            >♬ original sound - countingprimes</a
+|          >
+|        </section>
+|      </blockquote>
+|    </amp-tiktok> 
+|    
+|    <!-- Invalid `amp-tiktok` components -->
+|    <amp-tiktok data-src="6943753342808034566"> 
+>>   ^~~~~~~~~
+amp-tiktok/0.1/test/validator-amp-tiktok.html:58:2 Incomplete layout attributes specified for tag 'amp-tiktok'. For example, provide attributes 'width' and 'height'. (see https://amp.dev/documentation/components/amp-tiktok)
+|    </amp-tiktok>
+|    <amp-tiktok width="500" height="500">
+|    </amp-tiktok>
+|    <amp-tiktok width="500" height="800">
+|      <blockquote
+|        class="tiktok-embed"
+|        cite="https://www.tiktok.com/@countingprimes/video/6948210747285441798"
+|        data-video-id="6948210747285441798"
+|        style="max-width: 605px; min-width: 325px"
+|      >
+|        <section>
+|          <a
+|            target="_blank"
+|            title="@countingprimes"
+|            href="https://www.tiktok.com/@countingprimes"
+|            >@countingprimes</a
+|          >
+|          <p>
+|            VIM is great.... right up until you start typing the commands into every
+|            single text editor you see. I’d like to apologize for all my unneeded
+|            “:wq”’s
+|          </p>
+|          <a
+|            target="_blank"
+|            title="♬ original sound - countingprimes"
+|            href="https://www.tiktok.com/music/original-sound-6948210588145175302"
+|            >♬ original sound - countingprimes</a
+|          >
+|        </section>
+|      </blockquote>
+|    </amp-tiktok> 
 |  </body>
 |  </html>
