@@ -25,7 +25,7 @@ export const StoryAdAutoAdvance = {
   TEN_SECONDS: '31060907',
 };
 
-/** @const {string: string} */
+/** @const Object<string, string> */
 export const AdvanceExpToTime = {
   '31060905': '6s',
   '31060906': '8s',
