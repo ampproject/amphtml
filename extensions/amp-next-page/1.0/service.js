@@ -558,10 +558,9 @@ export class NextPageService {
    * @param {!Page} page
    * @param {!Document} content
    * @param {boolean=} force
-   * @param {string=} url
    * @return {!Promise<?../../../src/runtime.ShadowDoc>}
    */
-  attachDocumentToPage(page, content, force = false, url = '') {
+  attachDocumentToPage(page, content, force = false) {
     // If the user already scrolled to the bottom, prevent rendering
     if (this.getViewportsAway_() < NEAR_BOTTOM_VIEWPORT_COUNT && !force) {
       // TODO(wassgha): Append a "load next article" button?
@@ -601,7 +600,7 @@ export class NextPageService {
       const amp = this.multidocManager_.attachShadowDoc(
         shadowRoot,
         content,
-        url,
+        page.url,
         {
           visibilityState: VisibilityState.PRERENDER,
         }
