@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Action, StateProperty} from './amp-story-store-service';
+import {Action, StateProperty, UIType} from './amp-story-store-service';
 import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {HistoryState, setHistoryState} from './history';
 import {LocalizedStringId} from '../../../src/localized-strings';
@@ -342,24 +342,33 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   openRemote_() {
-    const animationEl = this.win.document.createElement('div');
-    animationEl.classList.add('i-amphtml-story-page-attachment-expand');
-    const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
     const clickTarget = this.element.parentElement
       .querySelector('.i-amphtml-story-page-open-attachment-host')
       .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
 
-    this.mutateElement(() => {
-      clickTarget.classList.add('i-amphtml-story-page-open-attachment-opening');
-    });
-
-    // Play post-tap animation before opening link.
-    this.win.setTimeout(() => {
-      this.mutateElement(() => {
-        storyEl.appendChild(animationEl);
-      });
+    const isMobileUI =
+      this.storeService_.get(StateProperty.UI_STATE) === UIType.MOBILE;
+    // Shows outlink url preview on mobile only.
+    if (!isMobileUI) {
       triggerClickFromLightDom(clickTarget, this.element);
-    }, 1000);
+    } else {
+      const animationEl = this.win.document.createElement('div');
+      animationEl.classList.add('i-amphtml-story-page-attachment-expand');
+      const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
+
+      this.mutateElement(() => {
+        clickTarget.classList.add(
+          'i-amphtml-story-page-open-attachment-opening'
+        );
+      });
+      // Play post-tap animation before opening link.
+      this.win.setTimeout(() => {
+        this.mutateElement(() => {
+          storyEl.appendChild(animationEl);
+        });
+        triggerClickFromLightDom(clickTarget, this.element);
+      }, 1000);
+    }
   }
 
   /**

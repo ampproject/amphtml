@@ -86,6 +86,11 @@
 
 /** For amp-story-outlink-page-attachment-v2 experiment elements. */
 
+amp-story[desktop] .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-attachment-remote  {
+  /* Shows outlink url preview on mobile only. */
+  display: none !important;
+}
+
 .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-attachment-remote {
   height: 56px !important;
   --i-amphtml-outlink-cta-background-color: white;
