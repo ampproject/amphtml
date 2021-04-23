@@ -97,6 +97,11 @@
   --i-amphtml-outlink-cta-text-color: white;
 }
 
+.i-amphtml-amp-story-page-attachment-ui-v2.amp-story-draggable-drawer-root.i-amphtml-story-draggable-drawer-open {
+  /* Faster duration for outlink drawer. */
+  transition-duration: .3s !important;
+}
+
 .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-content {
   height: 56px !important;
   padding-inline-start: 12px !important;

@@ -272,18 +272,28 @@
 .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
   --i-amphtml-outlink-cta-background-color: white !important;
   --i-amphtml-outlink-cta-text-color: black !important;
-  background: linear-gradient(0, rgba(0, 0, 0, 0.30), transparent) !important;
+  background: linear-gradient(0, rgba(0, 0, 0, 0.3), transparent) !important;
 }
 
 [theme="dark"].i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
   --i-amphtml-outlink-cta-background-color: black !important;
   --i-amphtml-outlink-cta-text-color: white !important;
-  background: linear-gradient(0, rgba(255, 255, 255, 0.30), transparent) !important;
+  background: linear-gradient(0, rgba(255, 255, 255, 0.3), transparent) !important;
 }
 
 [href].i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
   /* Outlink attachments do not need the linear gradient. */
   background: none !important;
+}
+
+.i-amphtml-story-page-open-attachment.i-amphtml-story-page-open-attachment-opening {
+  animation: fade-out 0.3s both !important;
+}
+
+@keyframes fade-out {
+  100% {
+    opacity: 0;
+  }
 }
 
 .i-amphtml-story-outlink-page-attachment-arrow {

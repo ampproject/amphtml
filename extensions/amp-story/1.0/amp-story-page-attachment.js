@@ -345,15 +345,19 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     const animationEl = this.win.document.createElement('div');
     animationEl.classList.add('i-amphtml-story-page-attachment-expand');
     const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
+    const clickTarget = this.element.parentElement
+      .querySelector('.i-amphtml-story-page-open-attachment-host')
+      .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
+
+    this.mutateElement(() => {
+      clickTarget.classList.add('i-amphtml-story-page-open-attachment-opening');
+    });
 
     // Play post-tap animation before opening link.
     this.win.setTimeout(() => {
       this.mutateElement(() => {
         storyEl.appendChild(animationEl);
       });
-      const clickTarget = this.element.parentElement
-        .querySelector('.i-amphtml-story-page-open-attachment-host')
-        .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
       triggerClickFromLightDom(clickTarget, this.element);
     }, 1000);
   }
