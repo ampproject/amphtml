@@ -775,7 +775,7 @@ class VideoEntry {
     if (!this.ampdoc_.isVisible()) {
       return;
     }
-    isAutoplaySupported(this.win).then((supportsAutoplay) => {
+    isAutoplaySupported(this.ampdoc_.win).then((supportsAutoplay) => {
       const canAutoplay = this.hasAutoplay && !this.userInteracted();
 
       if (canAutoplay && supportsAutoplay) {
@@ -800,7 +800,7 @@ class VideoEntry {
       this.video.hideControls();
     }
 
-    isAutoplaySupported(this.win).then((supportsAutoplay) => {
+    isAutoplaySupported(this.ampdoc_.win).then((supportsAutoplay) => {
       if (!supportsAutoplay && this.video.isInteractive()) {
         // Autoplay is not supported, show the controls so user can manually
         // initiate playback.
@@ -989,7 +989,7 @@ class VideoEntry {
    */
   getAnalyticsDetails() {
     const {video} = this;
-    isAutoplaySupported(this.win);
+    isAutoplaySupported(this.ampdoc_.win);
     const intersection = measureIntersection(video.element);
     return Promise.all([supportsAutoplay, intersection]).then((responses) => {
       const supportsAutoplay = /** @type {boolean} */ (responses[0]);
