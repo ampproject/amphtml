@@ -17,6 +17,7 @@
 import {BaseElement} from './base-element';
 import {
   BatchFetchOptionsDef,
+  UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {Services} from '../../../src/services';
@@ -73,13 +74,19 @@ const getAmpStateJson = (element, src) => {
 /**
  * @param {!AmpElement} element
  * @param {boolean} shouldRefresh true to force refresh of browser cache.
+ * @param {UrlReplacementPolicy} urlReplacementPolicy
  * @return {!BatchFetchOptionsDef} options object to pass to `batchFetchJsonFor` method.
  */
-function buildOptionsObject(element, shouldRefresh = false) {
+function buildOptionsObject(
+  element,
+  shouldRefresh = false,
+  urlReplacementPolicy = UrlReplacementPolicy.OPT_IN
+) {
   return {
     xssiPrefix: element.getAttribute('xssi-prefix'),
     expr: element.getAttribute('key') ?? '.',
     refresh: shouldRefresh,
+    urlReplacement: urlReplacementPolicy,
   };
 }
 
@@ -90,7 +97,7 @@ function buildOptionsObject(element, shouldRefresh = false) {
  * @param {!AmpElement} element
  * @return {Function}
  */
-export function getJsonFn(element) {
+export function getFetchJsonFn(element) {
   const src = element.getAttribute('src');
   if (!src) {
     // TODO(dmanek): assert that src is provided instead of silently failing below.
@@ -106,11 +113,15 @@ export function getJsonFn(element) {
         return ampScriptService.fetch(src);
       });
   }
-  return (unusedSrc, shouldRefresh = false) =>
+  return (
+    unusedSrc,
+    shouldRefresh = false,
+    urlReplacementPolicy = UrlReplacementPolicy.OPT_IN
+  ) =>
     batchFetchJsonFor(
       element.getAmpDoc(),
       element,
-      buildOptionsObject(element, shouldRefresh)
+      buildOptionsObject(element, shouldRefresh, urlReplacementPolicy)
     );
 }
 
@@ -149,9 +160,9 @@ export class AmpRender extends BaseElement {
       api.refresh();
     });
 
-    return dict({
-      'getJson': getJsonFn(this.element),
-    });
+    // return dict({
+    //   'getJson': getFetchJsonFn(this.element),
+    // });
   }
 
   /**
@@ -205,7 +216,7 @@ export class AmpRender extends BaseElement {
 
 AmpRender['props'] = {
   ...BaseElement['props'],
-  'getJson': {attrs: ['src'], parseAttrs: getJsonFn},
+  'getJson': {attrs: ['src'], parseAttrs: getFetchJsonFn},
 };
 
 AMP.extension(TAG, '1.0', (AMP) => {
