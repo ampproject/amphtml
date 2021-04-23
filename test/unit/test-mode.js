@@ -29,28 +29,6 @@ describe('getMode', () => {
     return win;
   }
 
-  it('CDN - lite mode on', () => {
-    const url =
-      'https://cdn.ampproject.org/v/www.example.com/amp.html?amp_js_v=5&amp_lite#origin=https://www.google.com';
-    expect(getMode(getWin(url)).lite).to.be.true;
-  });
-
-  it('CDN - lite mode off', () => {
-    const url =
-      'https://cdn.ampproject.org/v/www.example.com/amp.html?amp_js_v=5#origin=https://www.google.com';
-    expect(getMode(getWin(url)).lite).to.be.false;
-  });
-
-  it('Origin - lite mode on', () => {
-    const url = 'https://www.example.com/amp.html?amp_lite';
-    expect(getMode(getWin(url)).lite).to.be.true;
-  });
-
-  it('Origin - lite mode off', () => {
-    const url = 'https://www.example.com/amp.html';
-    expect(getMode(getWin(url)).lite).to.be.false;
-  });
-
   it('should support different html formats for development', () => {
     let url = 'https://www.amp-site.org#development=1';
     expect(getMode(getWin(url)).development).to.be.true;

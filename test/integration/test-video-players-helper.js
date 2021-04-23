@@ -33,7 +33,7 @@ import {toggleExperiment} from '../../src/experiments';
 function skipIfAutoplayUnsupported(win) {
   VideoUtils.resetIsAutoplaySupported();
 
-  return VideoUtils.isAutoplaySupported(win, false).then((isSupported) => {
+  return VideoUtils.isAutoplaySupported(win).then((isSupported) => {
     if (isSupported) {
       return;
     }
