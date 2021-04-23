@@ -25,7 +25,10 @@ import {dev, devAssert} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getState} from '../../../src/history';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
-import {isPageAttachmentUiV2ExperimentOn} from './amp-story-open-page-attachment';
+import {
+  buildOpenAttachmentElementLinkIcon,
+  isPageAttachmentUiV2ExperimentOn,
+} from './amp-story-open-page-attachment';
 import {setImportantStyles} from '../../../src/style';
 import {toggle} from '../../../src/style';
 import {triggerClickFromLightDom} from './utils';
@@ -205,12 +208,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     const link = htmlFor(this.element)`
       <a class="i-amphtml-story-page-attachment-remote-content" target="_blank">
-        <span class="i-amphtml-story-page-attachment-remote-img" ref="remoteImgEl">
-          <svg class="i-amphtml-story-page-open-attachment-link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" xml:space="preserve">
-            <path fill-opacity=".1" d="M12 0c6.6 0 12 5.4 12 12s-5.4 12-12 12S0 18.6 0 12 5.4 0 12 0z"/>
-            <path d="M13.8 14.6c.1.1.2.3.2.5s-.1.3-.2.5L12.3 17c-.7.7-1.7 1.1-2.7 1.1-1 0-1.9-.4-2.7-1.1-.7-.7-1.1-1.7-1.1-2.7 0-1 .4-1.9 1.1-2.7l1.5-1.5c.2 0 .3-.1.5-.1s.3.1.5.2c.1.1.2.3.2.5s-.1.4-.2.5l-1.5 1.5c-.5.5-.7 1.1-.7 1.7 0 .6.3 1.3.7 1.7.5.5 1.1.7 1.7.7s1.3-.3 1.7-.7l1.5-1.5c.3-.3.7-.3 1 0zM17 7c-.7-.7-1.7-1.1-2.7-1.1-1 0-1.9.4-2.7 1.1l-1.5 1.5c0 .1-.1.3-.1.4 0 .2.1.3.2.5.1.1.3.2.5.2s.3-.1.5-.2l1.5-1.5c.5-.5 1.1-.7 1.7-.7.6 0 1.3.3 1.7.7.5.5.7 1.1.7 1.7 0 .6-.3 1.3-.7 1.7l-1.5 1.5c-.1.1-.2.3-.2.5s.1.3.2.5c.1.1.3.2.5.2s.3-.1.5-.2l1.5-1.5c.7-.7 1.1-1.7 1.1-2.7-.1-1-.5-1.9-1.2-2.6zm-7.9 7.2c0 .2.1.3.2.5.1.1.3.2.5.2s.4-.1.5-.2l4.5-4.5c.1-.1.2-.3.2-.5s-.1-.4-.2-.5c-.3-.2-.8-.2-1 .1l-4.5 4.5c-.1.1-.2.3-.2.4z"/>
-          </svg>
-        </span>
+        <span class="i-amphtml-story-page-attachment-remote-img" ref="remoteImgEl"></span>
         <span class="i-amphtml-story-page-attachment-remote-title"><span ref="openStringEl"></span><span ref="urlStringEl"></span></span>
         <svg class="i-amphtml-story-page-attachment-remote-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="#000000"><path d="M0 0h48v48H0z" fill="none"/><path d="M38 38H10V10h14V6H10c-2.21 0-4 1.79-4 4v28c0 2.21 1.79 4 4 4h28c2.21 0 4-1.79 4-4V24h-4v14zM28 6v4h7.17L15.51 29.66l2.83 2.83L38 12.83V20h4V6H28z"/></svg>
       </a>`;
@@ -228,6 +226,10 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       setImportantStyles(remoteImgEl, {
         'background-image': 'url(' + openImgAttr + ')',
       });
+    } else {
+      // Attach link icon SVG by default.
+      const linkIcon = buildOpenAttachmentElementLinkIcon(link);
+      remoteImgEl.appendChild(linkIcon);
     }
 
     // Set url prevew text.

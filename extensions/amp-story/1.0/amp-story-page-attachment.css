@@ -120,11 +120,6 @@
   fill: var(--i-amphtml-outlink-cta-text-color) !important;
 }
 
-.i-amphtml-amp-story-page-attachment-ui-v2 svg.i-amphtml-story-page-open-attachment-link-icon {
-  width: 100% !important;
-  height: 100% !important;
-}
-
 [cta-image].i-amphtml-amp-story-page-attachment-ui-v2 svg.i-amphtml-story-page-open-attachment-link-icon {
   /* Hide svg if custom image. */
   display: none !important;
