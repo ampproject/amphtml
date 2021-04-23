@@ -75,8 +75,13 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     const theme = this.element.getAttribute('theme');
     if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
-      this.headerEl_.classList.add(DARK_THEME_CLASS);
-      this.element.classList.add(DARK_THEME_CLASS);
+      if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+        this.headerEl_.setAttribute('theme', theme.toLowerCase());
+        this.element.setAttribute('theme', theme.toLowerCase());
+      } else {
+        this.headerEl_.classList.add(DARK_THEME_CLASS);
+        this.element.classList.add(DARK_THEME_CLASS);
+      }
     }
 
     // URL will be validated and resolved based on the canonical URL if relative
