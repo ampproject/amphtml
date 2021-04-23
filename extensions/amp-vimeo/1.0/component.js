@@ -30,7 +30,7 @@ import {
   objOrParseJson,
   postMessageWhenAvailable,
 } from '../../../src/iframe-video';
-import {useMemo} from '../../../src/preact';
+import {useCallback, useMemo, useRef} from '../../../src/preact';
 
 /**
  * @param {!HTMLIframeElement} iframe
@@ -41,34 +41,6 @@ function dispatchEvent(iframe, type) {
     bubbles: true,
     cancelable: false,
   });
-}
-
-/**
- * @param {!HTMLIframeElement} iframe
- */
-function onReady(iframe) {
-  dispatchEvent(iframe, 'canplay');
-  listenToVimeoEvents(iframe);
-}
-
-/**
- * @param {!MessageEvent} e
- */
-function onMessage(e) {
-  const {currentTarget} = e;
-  const data = objOrParseJson(e.data);
-  if (!data) {
-    return;
-  }
-  const event = data['event'];
-  if (event == 'ready' || data['method'] == 'ping') {
-    onReady(currentTarget);
-    return;
-  }
-  if (VIMEO_EVENTS[event]) {
-    dispatchEvent(currentTarget, VIMEO_EVENTS[event]);
-    return;
-  }
 }
 
 /**
@@ -101,6 +73,36 @@ export function VimeoWithRef(
     doNotTrack,
     autoplay,
   ]);
+
+  const isReadyRef = useRef(false);
+  const onReadyMessage = useCallback((iframe) => {
+    if (isReadyRef.current) {
+      return;
+    }
+    isReadyRef.current = true;
+    dispatchEvent(iframe, 'canplay');
+    listenToVimeoEvents(iframe);
+  }, []);
+
+  const onMessage = useCallback(
+    (e) => {
+      const {currentTarget} = e;
+      const data = objOrParseJson(e.data);
+      if (!data) {
+        return;
+      }
+      const event = data['event'];
+      if (event == 'ready' || data['method'] == 'ping') {
+        onReadyMessage(currentTarget);
+        return;
+      }
+      if (VIMEO_EVENTS[event]) {
+        dispatchEvent(currentTarget, VIMEO_EVENTS[event]);
+        return;
+      }
+    },
+    [onReadyMessage]
+  );
 
   return (
     <VideoWrapper
