@@ -18,7 +18,6 @@ import {
   ADSENSE_MCRSPV_TAG,
   getMatchedContentResponsiveHeightAndUpdatePubParams,
 } from '../../../ads/google/utils';
-import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
 import {
@@ -48,7 +47,6 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getExperimentBranch} from '../../../src/experiments';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {
   intersectionEntryToJson,
@@ -219,12 +217,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       return this.attemptFullWidthSizeChange_();
     }
 
-    const asyncIntersection =
-      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
-      ADS_INITIAL_INTERSECTION_EXP.experiment;
-    this.initialIntersectionPromise_ = asyncIntersection
-      ? measureIntersection(this.element)
-      : Promise.resolve(this.element.getIntersectionChangeEntry());
+    this.initialIntersectionPromise_ = measureIntersection(this.element);
   }
 
   /**

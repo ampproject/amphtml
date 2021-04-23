@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
 import {Renderer} from './amp-ad-type-defs';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/core/types/object';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
-import {getExperimentBranch} from '../../../src/experiments';
 import {
   intersectionEntryToJson,
   measureIntersection,
@@ -57,15 +55,7 @@ export class NameFrameRenderer extends Renderer {
     );
     contextMetadata['creative'] = creative;
 
-    const asyncIntersection =
-      getExperimentBranch(
-        element.ownerDocument.defaultView,
-        ADS_INITIAL_INTERSECTION_EXP.id
-      ) === ADS_INITIAL_INTERSECTION_EXP.experiment;
-    const intersectionPromise = asyncIntersection
-      ? measureIntersection(element)
-      : Promise.resolve(element.getIntersectionChangeEntry());
-    return intersectionPromise.then((intersection) => {
+    return measureIntersection(element).then((intersection) => {
       contextMetadata['_context'][
         'initialIntersection'
       ] = intersectionEntryToJson(intersection);
