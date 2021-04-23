@@ -168,8 +168,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildRemote_() {
-    this.setOpenThreshold_(150 /* pixels */);
     this.setDragCap_(48 /* pixels */);
+    this.setOpenThreshold_(150 /* pixels */);
 
     this.headerEl_.classList.add(
       'i-amphtml-story-draggable-drawer-header-attachment-remote'
