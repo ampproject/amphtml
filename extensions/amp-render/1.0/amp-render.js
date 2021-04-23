@@ -38,6 +38,40 @@ const AMP_STATE_URI_SCHEME = 'amp-state:';
  */
 const isAmpStateSrc = (src) => src && src.startsWith(AMP_STATE_URI_SCHEME);
 
+/**
+ * Gets the json from an "amp-state:" uri. For example, src="amp-state:json.path".
+ *
+ * TODO: this is similar to the implementation in amp-list. Move it
+ * to a common file and import it.
+ *
+ * @param {!AmpElement} element
+ * @param {string} src
+ * @return {Promise<!JsonObject>}
+ * @private
+ */
+function getAmpStateJson(element, src) {
+  return Services.bindForDocOrNull(element)
+    .then((bind) => {
+      userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
+      const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length);
+      return bind.getStateAsync(ampStatePath).catch((err) => {
+        const stateKey = ampStatePath.split('.')[0];
+        user().error(
+          TAG,
+          `'amp-state' element with id '${stateKey}' was not found.`
+        );
+        throw err;
+      });
+    })
+    .then((json) => {
+      userAssert(
+        json !== undefined,
+        `[amp-render] No data was found at provided uri: ${src}`
+      );
+      return json;
+    });
+}
+
 export class AmpRender extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -60,40 +94,6 @@ export class AmpRender extends BaseElement {
       'Experiment "amp-render" is not turned on.'
     );
     return super.isLayoutSupported(layout);
-  }
-
-  /**
-   * Gets the json from an "amp-state:" uri. For example, src="amp-state:json.path".
-   *
-   * TODO: this is similar to the implementation in amp-list. Move it
-   * to a common file and import it.
-   *
-   * @param {!AmpElement} element
-   * @param {string} src
-   * @return {Promise<!JsonObject>}
-   * @private
-   */
-  getAmpStateJson_(element, src) {
-    return Services.bindForDocOrNull(element)
-      .then((bind) => {
-        userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
-        const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length);
-        return bind.getStateAsync(ampStatePath).catch((err) => {
-          const stateKey = ampStatePath.split('.')[0];
-          user().error(
-            TAG,
-            `'amp-state' element with id '${stateKey}' was not found.`
-          );
-          throw err;
-        });
-      })
-      .then((json) => {
-        userAssert(
-          json !== undefined,
-          `[amp-render] No data was found at provided uri: ${src}`
-        );
-        return json;
-      });
   }
 
   /**
@@ -138,12 +138,12 @@ export class AmpRender extends BaseElement {
   getFetchJsonFn() {
     const {element} = this;
     const src = element.getAttribute('src');
-    userAssert(src, 'src is a require attribute for amp-render');
     if (!src) {
+      // TODO(dmanek): assert that src is provided instead of silently failing below.
       return () => {};
     }
     if (isAmpStateSrc(src)) {
-      return (src) => this.getAmpStateJson_(element, src);
+      return (src) => getAmpStateJson(element, src);
     }
     if (isAmpScriptUri(src)) {
       return (src) =>
