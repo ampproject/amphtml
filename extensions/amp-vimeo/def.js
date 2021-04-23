@@ -16,6 +16,7 @@
 import {VideoEvents} from '../../src/video-interface';
 import {addParamsToUrl} from '../../src/url';
 import {dict} from '../../src/core/types/object';
+import {postMessageWhenAvailable} from '../../src/iframe-video';
 
 export const getVimeoOriginRegExp = () =>
   /^(https?:)?\/\/((player|www)\.)?vimeo.com(?=$|\/)/;
@@ -72,6 +73,9 @@ export function makeVimeoMessage(method, optParams = null) {
  */
 export function listenToVimeoEvents(iframe) {
   Object.keys(VIMEO_EVENTS).forEach((event) => {
-    sendVimeoMessage(iframe, 'addEventListener', event);
+    postMessageWhenAvailable(
+      iframe,
+      makeVimeoMessage('addEventListener', event)
+    );
   });
 }
