@@ -459,7 +459,8 @@ class VideoEntry {
 
     // eslint-disable-next-line jsdoc/require-returns
     /** @private @const {function(): !Promise<boolean>} */
-    this.isAutoplaySupported_ = () => VideoUtils.isAutoplaySupported(this.win);
+    this.isAutoplaySupported_ = () =>
+      VideoUtils.isAutoplaySupported(this.ampdoc_.win);
 
     /** @private @const {function(): !AnalyticsPercentageTracker} */
     this.getAnalyticsPercentageTracker_ = once(
