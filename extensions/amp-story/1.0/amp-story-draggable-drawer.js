@@ -171,8 +171,8 @@ export class DraggableDrawer extends AMP.BaseElement {
       }
       this.containerEl_.insertBefore(spacerEl, this.contentEl_);
       this.contentEl_.appendChild(headerShadowRootEl);
-      this.element.classList.add('amp-story-page-attachment-ui-v2');
-      this.headerEl_.classList.add('amp-story-page-attachment-ui-v2');
+      this.element.classList.add('i-amphtml-amp-story-page-attachment-ui-v2');
+      this.headerEl_.classList.add('i-amphtml-amp-story-page-attachment-ui-v2');
     } else {
       templateEl.insertBefore(headerShadowRootEl, templateEl.firstChild);
     }

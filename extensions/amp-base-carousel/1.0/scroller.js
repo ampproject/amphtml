@@ -22,7 +22,7 @@ import {
   scrollContainerToElement,
 } from './dimensions';
 import {LightboxGalleryContext} from '../../amp-lightbox-gallery/1.0/context';
-import {debounce} from '../../../src/utils/rate-limit';
+import {debounce} from '../../../src/core/types/function';
 import {forwardRef} from '../../../src/preact/compat';
 import {mod} from '../../../src/utils/math';
 import {setStyle} from '../../../src/style';

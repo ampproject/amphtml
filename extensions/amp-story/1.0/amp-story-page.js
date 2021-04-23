@@ -61,7 +61,7 @@ import {
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {createShadowRootWithStyle, setTextBackgroundColor} from './utils';
-import {debounce} from '../../../src/utils/rate-limit';
+import {debounce} from '../../../src/core/types/function';
 import {delegateAutoplay} from '../../../src/video-interface';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
@@ -112,7 +112,7 @@ export const Selectors = {
   ALL_PLAYBACK_MEDIA:
     '> audio, amp-story-grid-layer audio, amp-story-grid-layer video',
   ALL_VIDEO: 'amp-story-grid-layer video',
-  ALL_TABBABLE: 'a',
+  ALL_TABBABLE: 'a, amp-twitter > iframe',
 };
 
 /** @private @const {string} */

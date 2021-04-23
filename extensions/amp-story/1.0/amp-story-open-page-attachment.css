@@ -174,14 +174,45 @@
   --i-amphtml-chip-background-color: rgba(255, 255, 255, 0.5) !important;
   --i-amphtml-img-background-color: white !important;
   --i-amphtml-label-text-color: white !important;
+  --i-amphtml-arrow-color: black !important;
 }
 
 [theme="dark"].i-amphtml-story-page-open-attachment {
   --i-amphtml-chip-background-color: rgba(0, 0, 0, 0.5) !important;
   --i-amphtml-img-background-color: black !important;
   --i-amphtml-label-text-color: black !important;
+  --i-amphtml-arrow-color: white !important;
 }
 
+/** For amp-story-inline-page-attachment-v2 inline default. */
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-icon {
+  animation: none !important;
+  position: relative !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-label {
+  color: var(--i-amphtml-label-text-color) !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-icon::after {
+  animation: none !important;
+  background: var(--i-amphtml-label-text-color) !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-bar-left,
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-bar-right {
+  background: var(--i-amphtml-arrow-color) !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-bar-left {
+  animation: open-attachment-bar-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) both !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-bar-right {
+  animation: open-attachment-bar-right 0.3s cubic-bezier(0.4, 0, 0.2, 1) both !important;
+}
+
+/** For amp-story-inline-page-attachment-v2 inline with images. */
 .i-amphtml-story-inline-page-attachment-chip {
   background-color: var(--i-amphtml-chip-background-color) !important;
   display: flex !important;
@@ -237,10 +268,22 @@
   color: var(--i-amphtml-label-text-color) !important;
 }
 
-/** For amp-story-outlink-page-attachment-v2 experiment elements. */
-.i-amphtml-story-page-open-attachment {
+/** For amp-story-outlink-page-attachment-v2 outlink. */
+.i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
   --i-amphtml-outlink-cta-background-color: white !important;
   --i-amphtml-outlink-cta-text-color: black !important;
+  background: linear-gradient(0, rgba(0, 0, 0, 0.30), transparent) !important;
+}
+
+[theme="dark"].i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
+  --i-amphtml-outlink-cta-background-color: black !important;
+  --i-amphtml-outlink-cta-text-color: white !important;
+  background: linear-gradient(0, rgba(255, 255, 255, 0.30), transparent) !important;
+}
+
+[href].i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
+  /* Outlink attachments do not need the linear gradient. */
+  background: none !important;
 }
 
 .i-amphtml-story-outlink-page-attachment-arrow {
@@ -314,9 +357,4 @@
 .i-amphtml-story-page-open-attachment-link-icon {
   fill: var(--i-amphtml-outlink-cta-text-color) !important;
   stroke: var(--i-amphtml-outlink-cta-text-color) !important;
-}
-
-[theme="dark"] .i-amphtml-story-page-open-attachment {
-  --i-amphtml-outlink-cta-text-color: white !important;
-  --i-amphtml-outlink-cta-background-color: black !important;
 }

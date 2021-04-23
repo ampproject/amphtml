@@ -68,7 +68,7 @@
   transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
-.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option:focus::before {
     opacity: 1 !important;
     background-color: var(--i-amphtml-interactive-theme-shading) !important;
@@ -150,7 +150,7 @@
   visibility: hidden !important;
 }
 
-.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option::before {
   background-color: var(--i-amphtml-interactive-theme-shading-flash) !important;
   content: '' !important;
@@ -163,20 +163,20 @@
   animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el1) !important;
 }
 
-.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option:nth-of-type(2)::before {
   animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el2) !important;
-} 
+}
 
-.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option:nth-of-type(3)::before {
   animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el3) !important;
-} 
+}
 
-.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option:nth-of-type(4)::before {
   animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el4) !important;
-} 
+}
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option
@@ -187,19 +187,19 @@
 }
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
-  .i-amphtml-story-interactive-option:nth-of-type(2) 
+  .i-amphtml-story-interactive-option:nth-of-type(2)
     .i-amphtml-story-interactive-option-text {
     animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el2) !important;
 }
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
-  .i-amphtml-story-interactive-option:nth-of-type(3) 
+  .i-amphtml-story-interactive-option:nth-of-type(3)
     .i-amphtml-story-interactive-option-text {
     animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el3) !important;
 }
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
-  .i-amphtml-story-interactive-option:nth-of-type(4) 
+  .i-amphtml-story-interactive-option:nth-of-type(4)
     .i-amphtml-story-interactive-option-text {
     animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el4) !important;
 }

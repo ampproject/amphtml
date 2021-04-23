@@ -50,7 +50,7 @@ import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
-import {getSourceOrigin} from '../../../src/url';
+import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
 import {getValueForExpr} from '../../../src/json';
 import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray} from '../../../src/core/types/array';
@@ -72,7 +72,6 @@ const TABBABLE_ELEMENTS_QUERY =
 
 // Technically the ':' is not considered part of the scheme, but it is useful to include.
 const AMP_STATE_URI_SCHEME = 'amp-state:';
-const AMP_SCRIPT_URI_SCHEME = 'amp-script:';
 
 /**
  * @typedef {{
@@ -434,17 +433,6 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * Returns true if element's src points to an amp-script function.
-   *
-   * @param {string} src
-   * @return {boolean}
-   * @private
-   */
-  isAmpScriptSrc_(src) {
-    return src.startsWith(AMP_SCRIPT_URI_SCHEME);
-  }
-
-  /**
    * Gets the json an amp-list that has an "amp-state:" uri. For example,
    * src="amp-state:json.path".
    *
@@ -494,25 +482,9 @@ export class AmpList extends AMP.BaseElement {
           !this.ssrTemplateHelper_.isEnabled(),
           '[amp-list]: "amp-script" URIs cannot be used in SSR mode.'
         );
-
-        const args = src.slice(AMP_SCRIPT_URI_SCHEME.length).split('.');
-        userAssert(
-          args.length === 2 && args[0].length > 0 && args[1].length > 0,
-          '[amp-list]: "amp-script" URIs must be of the format "scriptId.functionIdentifier".'
-        );
-
-        const ampScriptId = args[0];
-        const fnIdentifier = args[1];
-        const ampScriptEl = this.element
-          .getAmpDoc()
-          .getElementById(ampScriptId);
-        userAssert(
-          ampScriptEl && ampScriptEl.tagName === 'AMP-SCRIPT',
-          `[amp-list]: could not find <amp-script> with script set to ${ampScriptId}`
-        );
-        return ampScriptEl
-          .getImpl()
-          .then((impl) => impl.callFunction(fnIdentifier));
+        return Services.scriptForDocOrNull(
+          this.element
+        ).then((ampScriptService) => ampScriptService.fetch(src));
       })
       .then((json) => {
         userAssert(
@@ -767,7 +739,7 @@ export class AmpList extends AMP.BaseElement {
     } else {
       if (this.isAmpStateSrc_(elementSrc)) {
         fetch = this.getAmpStateJson_(elementSrc);
-      } else if (this.isAmpScriptSrc_(elementSrc)) {
+      } else if (isAmpScriptUri(elementSrc)) {
         fetch = this.getAmpScriptJson_(elementSrc);
       } else {
         fetch = this.prepareAndSendFetch_(refresh);
