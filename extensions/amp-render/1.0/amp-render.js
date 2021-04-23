@@ -93,14 +93,19 @@ function getUrlReplacementPolicy(element, initialSrc) {
 /**
  * @param {!AmpElement} element
  * @param {boolean} shouldRefresh true to force refresh of browser cache.
+ * @param urlReplacementPolicy
  * @return {!BatchFetchOptionsDef} options object to pass to `batchFetchJsonFor` method.
  */
-function buildOptionsObject(element, shouldRefresh = false) {
+function buildOptionsObject(
+  element,
+  shouldRefresh = false,
+  urlReplacementPolicy = null
+) {
   return {
     xssiPrefix: element.getAttribute('xssi-prefix'),
     expr: element.getAttribute('key') ?? '.',
     refresh: shouldRefresh,
-    // urlReplacement: getUrlReplacementPolicy(element, initialSrc),
+    urlReplacement: urlReplacementPolicy,
   };
 }
 
@@ -109,9 +114,11 @@ function buildOptionsObject(element, shouldRefresh = false) {
  * amp-script.
  *
  * @param {!AmpElement} element
+ * @param urlReplacementPolicy
  * @return {Function}
  */
-export function getJsonFn(element) {
+export function getJsonFn(element, urlReplacementPolicy) {
+  console.log({urlReplacementPolicy});
   const src = element.getAttribute('src');
   if (!src) {
     // TODO(dmanek): assert that src is provided instead of silently failing below.
@@ -131,7 +138,7 @@ export function getJsonFn(element) {
     batchFetchJsonFor(
       element.getAmpDoc(),
       element,
-      buildOptionsObject(element, shouldRefresh)
+      buildOptionsObject(element, shouldRefresh, urlReplacementPolicy)
     );
 }
 
@@ -139,6 +146,8 @@ export class AmpRender extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
+    // console.log('constr');
 
     /** @private {?../../../src/service/template-impl.Templates} */
     this.templates_ = null;
@@ -148,6 +157,9 @@ export class AmpRender extends BaseElement {
 
     /** @private {?string} */
     this.initialSrc_ = this.element.getAttribute('src');
+
+    // /** @private {UrlReplacementPolicy} */
+    // this.urlReplacementPolicy_ = UrlReplacementPolicy.OPT_IN;
   }
 
   /** @override */
@@ -161,6 +173,7 @@ export class AmpRender extends BaseElement {
 
   /** @override */
   init() {
+    // console.log('init');
     this.registerApiAction('refresh', (api) => {
       const src = this.element.getAttribute('src');
       // There is an alternative way to do this using `mutationObserverCallback` while using a boolean
@@ -174,17 +187,54 @@ export class AmpRender extends BaseElement {
     });
 
     return dict({
-      'getJson': getJsonFn(this.element),
+      // 'getJson': this.getJsonFn_(this.element),
+      'getJson': this.getJsonFn_(),
     });
   }
 
+  /** @override */
+  mutationObserverCallback() {
+    const src = this.element.getAttribute('src');
+    console.log(
+      src === this.initialSrc_,
+      getSourceOrigin(src) ==
+        getSourceOrigin(this.element.getAmpDoc().win.location)
+    );
+  }
+
+  /**
+   *
+   * @return {Function}
+   * @private
+   */
+  getJsonFn_() {
+    const src = this.element.getAttribute('src');
+    // this.urlReplacementPolicy_ = this.getUrlReplacementPolicy(src);
+    return getJsonFn(this.element, this.getUrlReplacementPolicy_(src));
+  }
+
+  /**
+   *
+   * @param {string} src
+   * @return {UrlReplacementPolicy}
+   * @private
+   */
+  getUrlReplacementPolicy_(src) {
+    return src === this.initialSrc_ ||
+      getSourceOrigin(src) == getSourceOrigin(this.getAmpDoc().win.location)
+      ? UrlReplacementPolicy.ALL
+      : UrlReplacementPolicy.OPT_IN;
+  }
+
   // mutationObserverCallback() {
-  //   const src = this.element.getAttribute('src');
-  //   console.log(
-  //     src === this.initialSrc_,
-  //     getSourceOrigin(src) ==
-  //       getSourceOrigin(this.element.getAmpDoc().win.location)
-  //   );
+  // console.log('mobcb');
+  // const src = this.element.getAttribute('src');
+  // console.log(
+  //   src,
+  //   src === this.initialSrc_,
+  //   getSourceOrigin(src) ==
+  //     getSourceOrigin(this.element.getAmpDoc().win.location)
+  // );
   // }
 
   /**
