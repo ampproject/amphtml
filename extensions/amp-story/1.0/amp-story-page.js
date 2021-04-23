@@ -51,7 +51,6 @@ import {LoadingSpinner} from './loading-spinner';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {MediaPool} from './media-pool';
 import {Services} from '../../../src/services';
-import {VideoUtils} from '../../../src/utils/video';
 import {
   addAttributesToElement,
   closestAncestorElementBySelector,
@@ -63,6 +62,7 @@ import {
 import {createShadowRootWithStyle, setTextBackgroundColor} from './utils';
 import {debounce} from '../../../src/core/types/function';
 import {delegateAutoplay} from '../../../src/video-interface';
+import {detectIsAutoplaySupported} from '../../../src/utils/video';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getAmpdoc} from '../../../src/service';
@@ -903,8 +903,12 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   isAutoplaySupported_() {
-    VideoUtils.resetIsAutoplaySupported();
-    return VideoUtils.isAutoplaySupported(this.win, getMode(this.win).lite);
+    // We should not be detecting support each time, since it's slow.
+    // However, https://go.amp.dev/pr/23754 started resetting cached support
+    // checks likely to work around a race condition.
+    // TODO(alanorozco): Fix issue with cached `isAutoplaySupported`, and use
+    // that instead of `detectIsAutoplaySupported`.
+    return detectIsAutoplaySupported(this.win);
   }
 
   /**

@@ -36,14 +36,13 @@ import {
 } from '../video-interface';
 import {Services} from '../services';
 import {VideoSessionManager} from './video-session-manager';
-import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
 import {clamp} from '../utils/math';
 import {createCustomEvent, getData, listen, listenOnce} from '../event-helper';
 import {createViewportObserver} from '../viewport-observer';
 import {dev, devAssert, user, userAssert} from '../log';
 import {dict, map} from '../core/types/object';
 import {dispatchCustomEvent, removeElement} from '../dom';
-import {getMode} from '../mode';
+import {getInternalVideoElementFor, isAutoplaySupported} from '../utils/video';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
 import {isFiniteNumber} from '../types';
 import {measureIntersection} from '../utils/intersection';
@@ -457,13 +456,6 @@ class VideoEntry {
       analyticsEvent(this, VideoAnalyticsEvents.SESSION_VISIBLE)
     );
 
-    // eslint-disable-next-line jsdoc/require-returns
-    /** @private @const {function(): !Promise<boolean>} */
-    this.supportsAutoplay_ = () => {
-      const {win} = this.ampdoc_;
-      return VideoUtils.isAutoplaySupported(win, getMode(win).lite);
-    };
-
     /** @private @const {function(): !AnalyticsPercentageTracker} */
     this.getAnalyticsPercentageTracker_ = once(
       () => new AnalyticsPercentageTracker(this.ampdoc_.win, this)
@@ -783,7 +775,7 @@ class VideoEntry {
     if (!this.ampdoc_.isVisible()) {
       return;
     }
-    this.supportsAutoplay_().then((supportsAutoplay) => {
+    isAutoplaySupported(this.win).then((supportsAutoplay) => {
       const canAutoplay = this.hasAutoplay && !this.userInteracted();
 
       if (canAutoplay && supportsAutoplay) {
@@ -808,7 +800,7 @@ class VideoEntry {
       this.video.hideControls();
     }
 
-    this.supportsAutoplay_().then((supportsAutoplay) => {
+    isAutoplaySupported(this.win).then((supportsAutoplay) => {
       if (!supportsAutoplay && this.video.isInteractive()) {
         // Autoplay is not supported, show the controls so user can manually
         // initiate playback.
@@ -997,7 +989,7 @@ class VideoEntry {
    */
   getAnalyticsDetails() {
     const {video} = this;
-    const supportsAutoplay = this.supportsAutoplay_();
+    isAutoplaySupported(this.win);
     const intersection = measureIntersection(video.element);
     return Promise.all([supportsAutoplay, intersection]).then((responses) => {
       const supportsAutoplay = /** @type {boolean} */ (responses[0]);
