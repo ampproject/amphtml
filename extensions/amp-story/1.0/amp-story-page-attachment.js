@@ -220,7 +220,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     const overlayEls = htmlRefs(link);
     const {remoteImgEl, openStringEl, urlStringEl} = overlayEls;
 
-    // Set background image.
+    // Set image.
     const openImgAttr = this.element.getAttribute('cta-image');
     if (openImgAttr) {
       setImportantStyles(remoteImgEl, {
@@ -344,18 +344,16 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     animationEl.classList.add('i-amphtml-story-page-attachment-expand');
     const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
 
-    this.mutateElement(() => {}).then(() => {
-      // Give some time for the 120ms CSS animation to run (cf
-      // amp-story-page-attachment.css). The navigation itself will take some
-      // time, depending on the target and network conditions.
-      this.win.setTimeout(() => {
+    // Play post-tap animation before opening link.
+    this.win.setTimeout(() => {
+      this.mutateElement(() => {
         storyEl.appendChild(animationEl);
-        const clickTarget = this.element.parentElement
-          .querySelector('.i-amphtml-story-page-open-attachment-host')
-          .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
-        triggerClickFromLightDom(clickTarget, this.element);
-      }, 1000);
-    });
+      });
+      const clickTarget = this.element.parentElement
+        .querySelector('.i-amphtml-story-page-open-attachment-host')
+        .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
+      triggerClickFromLightDom(clickTarget, this.element);
+    }, 1000);
   }
 
   /**
