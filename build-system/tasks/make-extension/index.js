@@ -134,7 +134,8 @@ async function makeExtensionFromTemplates(templateDirs, destinationDir = '.') {
     '__component_name_hyphenated__': name,
     '__component_name_hyphenated_capitalized__': name.toUpperCase(),
     '__component_name_pascalcase__': dashToPascalCase(name),
-    // This allows generated code to contain "DO_NOT_SUBMIT", which will cause
+    // eslint-disable-next-line local/no-forbidden-terms
+    // This allows generated code to contain "DO NOT SUBMIT", which will cause
     // PRs to fail CI if example code isn't removed from the PR. We can't
     // actually write that out, here or in templates, without CI failing.
     // eslint-disable-next-line local/no-forbidden-terms
