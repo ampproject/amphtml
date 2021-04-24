@@ -254,6 +254,10 @@ exports.rules = [
       'extensions/amp-vimeo/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
       'extensions/amp-vimeo/1.0/component.js->extensions/amp-video/1.0/video-wrapper.js',
 
+      // Shared definition of Vimeo API
+      'extensions/amp-vimeo/0.1/amp-vimeo.js->extensions/amp-vimeo/vimeo-api.js',
+      'extensions/amp-vimeo/1.0/component.js->extensions/amp-vimeo/vimeo-api.js',
+
       // Amp geo in group enum
       'extensions/amp-a4a/0.1/amp-a4a.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
       'extensions/amp-consent/0.1/consent-config.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
