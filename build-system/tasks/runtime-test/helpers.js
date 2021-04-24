@@ -20,7 +20,7 @@ const fs = require('fs');
 const path = require('path');
 const {green, yellow, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../../common/ci');
-const {log} = require('../../common/logging');
+const {log, logWithoutTimestamp} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
 const {reportTestRunComplete} = require('../report-test-status');
 const {Server} = require('karma');
@@ -172,7 +172,7 @@ async function karmaBrowserComplete_(browser) {
  * @private
  */
 function karmaBrowserStart_() {
-  console./*OK*/ log('\n');
+  logWithoutTimestamp('\n');
   log(green('Done. Running tests...'));
 }
 
