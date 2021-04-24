@@ -80,6 +80,7 @@ createTask('storybook');
 createTask('sweep-experiments', 'sweepExperiments');
 createTask('test-report-upload', 'testReportUpload');
 createTask('unit');
+createTask('validate-html-fixtures', 'validateHtmlFixtures');
 createTask('validator');
 createTask('validator-cpp', 'validatorCpp', 'validator');
 createTask('validator-webui', 'validatorWebui', 'validator');
