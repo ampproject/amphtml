@@ -15,6 +15,7 @@
  */
 'using strict';
 
+const argv = require('minimist')(process.argv.slice(2));
 const {
   log,
   logLocalDev,
@@ -71,7 +72,7 @@ async function runCheck(filesToCheck) {
     if (fileGroups[format].length == 0) {
       continue;
     }
-    const files = fileGroups[format].join(' ');
+    const files = fileGroups[format].sort().join(' ');
     logLocalDev(green('Validating'), cyan(format), green('fixtures...'));
     const validateFixturesCmd = `FORCE_COLOR=1 npx amphtml-validator --html_format ${format} ${files}`;
     const result = getOutput(validateFixturesCmd);
@@ -92,7 +93,10 @@ async function runCheck(filesToCheck) {
  * Makes sure that HTML fixtures used during tests contain valid AMPHTML.
  */
 async function validateHtmlFixtures() {
-  const filesToCheck = getFilesToCheck(htmlFixtureGlobs, {}, '.gitignore');
+  const globs = argv.include_skipped
+    ? htmlFixtureGlobs.filter((glob) => !glob.startsWith('!'))
+    : htmlFixtureGlobs;
+  const filesToCheck = getFilesToCheck(globs, {}, '.gitignore');
   if (filesToCheck.length == 0) {
     return;
   }
@@ -103,6 +107,8 @@ validateHtmlFixtures.description =
   'Makes sure that HTML fixtures used during tests contain valid AMPHTML.';
 validateHtmlFixtures.flags = {
   'files': 'Checks just the specified files',
+  'include_skipped':
+    'Include skipped files while validating (can be used with --local_changes)',
   'local_changes': 'Checks just the files changed in the local branch',
 };
 
