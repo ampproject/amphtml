@@ -15,6 +15,7 @@
  */
 
 import '../amp-vimeo';
+import {htmlFor} from '../../../../src/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';
 
@@ -26,19 +27,31 @@ describes.realWin(
     },
   },
   (env) => {
-    let win, doc, element;
+    let html;
 
-    beforeEach(async function () {
-      win = env.win;
-      doc = win.document;
-      toggleExperiment(win, 'bento-vimeo', true, true);
+    const waitForRender = async (element) => {
+      await element.buildInternal();
+      const loadPromise = element.layoutCallback();
+      const {shadowRoot} = element;
+      await waitFor(() => shadowRoot.querySelector('iframe'), 'iframe mounted');
+      await loadPromise;
+    };
+
+    beforeEach(async () => {
+      html = htmlFor(env.win.document);
+      toggleExperiment(env.win, 'bento-vimeo', true, true);
     });
 
-    it('example test renders', async () => {
-      element = doc.createElement('amp-vimeo');
-      doc.body.appendChild(element);
-      await waitFor(() => element.isConnected, 'element connected');
-      expect(element.parentNode).to.equal(doc.body);
+    it('renders', async () => {
+      const element = html`
+        <amp-vimeo layout="responsive" width="16" height="9"></amp-vimeo>
+      `;
+      env.win.document.body.appendChild(element);
+
+      await waitForRender(element);
+
+      const iframe = element.shadowRoot.querySelector('iframe');
+      expect(iframe).to.not.be.null;
     });
   }
 );
