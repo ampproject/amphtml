@@ -29,6 +29,7 @@ const jobName = 'checks.js';
 function pushBuildWorkflow() {
   timedExecOrDie('amp presubmit');
   timedExecOrDie('amp check-invalid-whitespaces');
+  timedExecOrDie('amp validate-html-fixtures');
   timedExecOrDie('amp lint');
   timedExecOrDie('amp prettify');
   timedExecOrDie('amp ava');
@@ -60,6 +61,10 @@ async function prBuildWorkflow() {
 
   if (buildTargetsInclude(Targets.INVALID_WHITESPACES)) {
     timedExecOrDie('amp check-invalid-whitespaces');
+  }
+
+  if (buildTargetsInclude(Targets.HTML_FIXTURES)) {
+    timedExecOrDie('amp validate-html-fixtures');
   }
 
   if (buildTargetsInclude(Targets.LINT)) {

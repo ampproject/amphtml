@@ -59,6 +59,10 @@ async function prCheck() {
     runCheck('amp check-invalid-whitespaces --local_changes');
   }
 
+  if (buildTargetsInclude(Targets.HTML_FIXTURES)) {
+    runCheck('amp validate-html-fixtures --local_changes');
+  }
+
   if (buildTargetsInclude(Targets.LINT)) {
     runCheck('amp lint --local_changes');
   }

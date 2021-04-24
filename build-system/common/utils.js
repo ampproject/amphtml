@@ -68,13 +68,14 @@ function getValidExperiments() {
 
 /**
  * Gets the list of files changed on the current branch that match the given
- * array of glob patterns
+ * array of glob patterns using the given options.
  *
  * @param {!Array<string>} globs
+ * @param {!Object} options
  * @return {!Array<string>}
  */
-function getFilesChanged(globs) {
-  const allFiles = globby.sync(globs, {dot: true});
+function getFilesChanged(globs, options) {
+  const allFiles = globby.sync(globs, options);
   return gitDiffNameOnlyMain().filter((changedFile) => {
     return fs.existsSync(changedFile) && allFiles.includes(changedFile);
   });
@@ -132,7 +133,7 @@ function getFilesToCheck(globs, options = {}, ignoreFile = undefined) {
     return logFiles(ignored.filter(getFilesFromArgv()));
   }
   if (argv.local_changes) {
-    const filesChanged = ignored.filter(getFilesChanged(globs));
+    const filesChanged = ignored.filter(getFilesChanged(globs, options));
     if (filesChanged.length == 0) {
       log(green('INFO: ') + 'No files to check in this PR');
       return [];
