@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const path = require('path');
 const {execOrThrow} = require('../../common/exec');
+const {green, cyan} = require('kleur/colors');
+const {log} = require('../../common/logging');
 const {readJsonSync, writeJsonSync} = require('fs-extra');
 
 const extensionBundlesJson =
@@ -28,9 +31,13 @@ const extensionBundlesJson =
  *   latestVersion?: (string|undefined)
  *   options: ({hasCss: boolean}|undefined)
  * }} bundle
+ * @param {string=} destination
  */
-function insertExtensionBundlesConfig(bundle) {
-  const extensionBundles = readJsonSync(extensionBundlesJson);
+function insertExtensionBundlesConfig(
+  bundle,
+  destination = extensionBundlesJson
+) {
+  const extensionBundles = readJsonSync(destination);
 
   const existingOrNull = extensionBundles.find(
     ({name}) => name === bundle.name
@@ -45,7 +52,7 @@ function insertExtensionBundlesConfig(bundle) {
   });
 
   writeJsonSync(
-    extensionBundlesJson,
+    destination,
     extensionBundles.sort((a, b) => {
       if (!a.name) {
         return 1;
@@ -57,10 +64,14 @@ function insertExtensionBundlesConfig(bundle) {
     })
   );
 
+  const basename = path.basename(destination);
+
   execOrThrow(
-    `npx prettier --write ${extensionBundlesJson}`,
-    'Could not format extension bundle'
+    `npx prettier --write ${destination}`,
+    `Could not format ${basename}`
   );
+
+  log(green('SUCCESS:'), 'Wrote', cyan(basename));
 }
 
 module.exports = {insertExtensionBundlesConfig};
