@@ -15,6 +15,11 @@
  */
 
 import {
+  AdvanceExpToTime,
+  StoryAdAutoAdvance,
+  divertStoryAdAutoAdvance,
+} from '../../../src/experiments/story-ad-auto-advance';
+import {
   AnalyticsEvents,
   AnalyticsVars,
   STORY_AD_ANALYTICS,
@@ -35,9 +40,9 @@ import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {divertStoryAdPlacements} from '../../../src/experiments/story-ad-placements';
+import {getExperimentBranch} from '../../../src/experiments';
 import {getPlacementAlgo} from './algorithm-utils';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {isExperimentOn} from '../../../src/experiments';
 import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
 import {setStyle} from '../../../src/style';
 import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
@@ -141,6 +146,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
           this.config_
         );
         divertStoryAdPlacements(this.win);
+        divertStoryAdAutoAdvance(this.win);
         this.placementAlgorithm_ = getPlacementAlgo(
           this.win,
           this.storeService_,
@@ -340,9 +346,15 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * Create progress bar if auto advance exp is on.
    */
   maybeCreateProgressBar_() {
-    // TODO(ccordry): use experiment branch to set time value.
-    if (isExperimentOn(this.win, 'story-ad-auto-advance')) {
-      this.createProgressBar_('6s');
+    const autoAdvanceExpBranch = getExperimentBranch(
+      this.win,
+      StoryAdAutoAdvance.ID
+    );
+    if (
+      autoAdvanceExpBranch &&
+      autoAdvanceExpBranch !== StoryAdAutoAdvance.CONTROL
+    ) {
+      this.createProgressBar_(AdvanceExpToTime[autoAdvanceExpBranch]);
     }
   }
 

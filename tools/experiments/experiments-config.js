@@ -221,4 +221,9 @@ export const EXPERIMENTS = [
     name: 'Optimization of story ad placements',
     spec: 'https://github.com/ampproject/amphtml/issues/33147',
   },
+  {
+    id: 'story-ad-auto-advance',
+    name: 'Auto advancing story ads',
+    spec: 'https://github.com/ampproject/amphtml/issues/33969',
+  },
 ];
