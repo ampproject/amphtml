@@ -775,7 +775,7 @@ class VideoEntry {
     if (!this.ampdoc_.isVisible()) {
       return;
     }
-    isAutoplaySupported(this.ampdoc_.win).then((supportsAutoplay) => {
+    isAutoplaySupported(this.ampdoc_.win).then((isAutoplaySupported) => {
       const canAutoplay = this.hasAutoplay && !this.userInteracted();
 
       if (canAutoplay && isAutoplaySupported) {
@@ -800,8 +800,8 @@ class VideoEntry {
       this.video.hideControls();
     }
 
-    isAutoplaySupported(this.ampdoc_.win).then((supportsAutoplay) => {
-      if (!supportsAutoplay && this.video.isInteractive()) {
+    isAutoplaySupported(this.ampdoc_.win).then((isAutoplaySupported) => {
+      if (!isAutoplaySupported && this.video.isInteractive()) {
         // Autoplay is not supported, show the controls so user can manually
         // initiate playback.
         this.video.showControls();
