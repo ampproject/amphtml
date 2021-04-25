@@ -16,7 +16,7 @@
 
 import {BaseElement} from '../src/base-element';
 import {Layout, isLayoutSizeDefined} from '../src/layout';
-import {ReadyState} from '../src/ready-state';
+import {ReadyState} from '../src/core/constants/ready-state';
 import {Services} from '../src/services';
 import {dev} from '../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
@@ -53,6 +53,11 @@ export class AmpImg extends BaseElement {
 
   /** @override @nocollapse */
   static prerenderAllowed() {
+    return true;
+  }
+
+  /** @override @nocollapse */
+  static usesLoading() {
     return true;
   }
 
@@ -176,18 +181,19 @@ export class AmpImg extends BaseElement {
   /**
    * Create the actual image element and set up instance variables.
    * Called lazily in the first `#layoutCallback`.
+   * @return {!Image}
    */
   initialize_() {
     if (this.img_) {
-      return;
+      return this.img_;
     }
     // If this amp-img IS the fallback then don't allow it to have its own
     // fallback to stop from nested fallback abuse.
     this.allowImgLoadFallback_ = !this.element.hasAttribute('fallback');
 
-    // For inabox SSR, image will have been written directly to DOM so no need
-    // to recreate.  Calling appendChild again will have no effect.
-    if (this.element.hasAttribute('i-amphtml-ssr')) {
+    // For SSR, image will have been written directly to DOM so no need to recreate.
+    const serverRendered = this.element.hasAttribute('i-amphtml-ssr');
+    if (serverRendered) {
       this.img_ = scopedQuerySelector(this.element, '> img:not([placeholder])');
     }
     this.img_ = this.img_ || new Image();
@@ -218,7 +224,10 @@ export class AmpImg extends BaseElement {
     this.applyFillContent(this.img_, true);
     propagateObjectFitStyles(this.element, this.img_);
 
-    this.element.appendChild(this.img_);
+    if (!serverRendered) {
+      this.element.appendChild(this.img_);
+    }
+    return this.img_;
   }
 
   /**
@@ -229,6 +238,12 @@ export class AmpImg extends BaseElement {
    * @private
    */
   maybeGenerateSizes_(sync) {
+    if (V1_IMG_DEFERRED_BUILD) {
+      // The `getLayoutSize()` is not available for a V1 element. Skip this
+      // codepath. Also: is this feature at all useful? E.g. it doesn't even
+      // execute in the `i-amphtml-ssr` mode.
+      return;
+    }
     if (!this.img_) {
       return;
     }
@@ -294,29 +309,41 @@ export class AmpImg extends BaseElement {
   }
 
   /** @override */
-  buildCallback() {
-    if (!AmpImg.V1()) {
-      return;
+  mountCallback() {
+    const initialized = !!this.img_;
+    const img = this.initialize_();
+    if (!initialized) {
+      listen(img, 'load', () => {
+        this.setReadyState(ReadyState.COMPLETE);
+        this.firstLayoutCompleted();
+        this.hideFallbackImg_();
+      });
+      listen(img, 'error', (reason) => {
+        this.setReadyState(ReadyState.ERROR, reason);
+        this.onImgLoadingError_();
+      });
     }
-
-    // A V1 amp-img loads and reloads automatically.
-    this.setReadyState(ReadyState.LOADING);
-    this.initialize_();
-    const img = dev().assertElement(this.img_);
     if (img.complete) {
       this.setReadyState(ReadyState.COMPLETE);
       this.firstLayoutCompleted();
       this.hideFallbackImg_();
+    } else {
+      this.setReadyState(ReadyState.LOADING);
     }
-    listen(img, 'load', () => {
-      this.setReadyState(ReadyState.COMPLETE);
-      this.firstLayoutCompleted();
-      this.hideFallbackImg_();
-    });
-    listen(img, 'error', (reason) => {
-      this.setReadyState(ReadyState.ERROR, reason);
-      this.onImgLoadingError_();
-    });
+  }
+
+  /** @override */
+  unmountCallback() {
+    // Interrupt retrieval of incomplete images to free network resources when
+    // navigating pages in a PWA. Opt for tiny dataURI image instead of empty
+    // src to prevent the viewer from detecting a load error.
+    const img = this.img_;
+    if (img && !img.complete) {
+      img.src =
+        'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=';
+      removeElement(img);
+      this.img_ = null;
+    }
   }
 
   /** @override */

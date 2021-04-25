@@ -38,9 +38,6 @@ const {setupAdRequestHandler} = require('./ads-handler');
 // Require Puppeteer dynamically to prevent throwing error during CI
 let puppeteer;
 
-/**
- * @return {void}
- */
 function requirePuppeteer_() {
   puppeteer = require('puppeteer');
 }
@@ -50,7 +47,7 @@ function requirePuppeteer_() {
  * observers need to be initialized before content begins to load to take
  * measurements.
  *
- * @param {Puppeteer.page} page
+ * @param {puppeteer.page} page
  * @return {Promise} Resolves when script is evaluated
  */
 const setupMeasurement = (page) =>
@@ -86,8 +83,8 @@ const setupMeasurement = (page) =>
   });
 
 /**
- * Intecepts requests for default extensions made by runtime,
- * and returns cached version (master and local).
+ * Intecepts requests for default extensions made by runtime and returns a
+ * cached version.
  * @param {Request} interceptedRequest
  * @param {string} version
  * @return {!Promise<boolean>}

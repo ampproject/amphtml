@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {pureDevAssert as devAssert} from './core/assert';
-import {map} from './utils/object.js';
+import {devAssert} from './log';
+import {map} from './core/types/object';
 
 let htmlContainer;
 let svgContainer;

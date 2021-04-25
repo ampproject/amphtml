@@ -28,11 +28,11 @@ import {ContainWrapper} from '../../../src/preact/component';
 import {Scroller} from './scroller';
 import {WithAmpContext} from '../../../src/preact/context';
 import {WithLightbox} from '../../amp-lightbox-gallery/1.0/component';
-import {forwardRef} from '../../../src/preact/compat';
+import {forwardRef, toChildArray} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
 import {mod} from '../../../src/utils/math';
+import {toWin} from '../../../src/types';
 import {
-  toChildArray,
   useCallback,
   useContext,
   useEffect,
@@ -42,7 +42,6 @@ import {
   useRef,
   useState,
 } from '../../../src/preact';
-import {toWin} from '../../../src/types';
 import {useStyles} from './base-carousel.jss';
 
 /**
@@ -84,8 +83,8 @@ const MIN_AUTO_ADVANCE_INTERVAL = 1000;
 function BaseCarouselWithRef(
   {
     advanceCount = 1,
-    arrowPrev,
-    arrowNext,
+    arrowPrevAs,
+    arrowNextAs,
     autoAdvance: shouldAutoAdvance = false,
     autoAdvanceCount = 1,
     autoAdvanceInterval: customAutoAdvanceInterval = MIN_AUTO_ADVANCE_INTERVAL,
@@ -102,7 +101,7 @@ function BaseCarouselWithRef(
     onSlideChange,
     onTouchStart,
     orientation = Orientation.HORIZONTAL,
-    outsetArrows,
+    outsetArrows = false,
     snap = true,
     snapAlign = Alignment.START,
     snapBy = 1,
@@ -331,8 +330,8 @@ function BaseCarouselWithRef(
       {!hideControls && (
         <Arrow
           advance={prev}
+          as={arrowPrevAs}
           by={-advanceCount}
-          customArrow={arrowPrev}
           disabled={disableForDir(-1)}
           outsetArrows={outsetArrows}
           rtl={rtl}
@@ -341,7 +340,6 @@ function BaseCarouselWithRef(
       <Scroller
         advanceCount={advanceCount}
         alignment={snapAlign}
-        autoAdvanceCount={autoAdvanceCount}
         axis={axis}
         lightbox={lightbox}
         loop={loop}
@@ -363,7 +361,7 @@ function BaseCarouselWithRef(
 
           Note: We naively display all slides for mixedLength as multiple
           can be visible within the carousel viewport - eventually these can also
-          be optimized to only display the minimum necessary for the current 
+          be optimized to only display the minimum necessary for the current
           and next viewport.
         */}
         {childrenArray.map((child, index) =>
@@ -389,7 +387,7 @@ function BaseCarouselWithRef(
         <Arrow
           advance={next}
           by={advanceCount}
-          customArrow={arrowNext}
+          as={arrowNextAs}
           disabled={disableForDir(1)}
           outsetArrows={outsetArrows}
           rtl={rtl}

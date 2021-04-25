@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
@@ -25,24 +26,12 @@
  *       so it must work with vanilla NodeJS code.
  * github.com/ampproject/amphtml/pull/19386
  */
-const fs = require('fs');
 const https = require('https');
 const {getStdout} = require('./process');
 
 const setupInstructionsUrl =
-  'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md#one-time-setup';
+  'https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-quick.md#one-time-setup';
 const nodeDistributionsUrl = 'https://nodejs.org/dist/index.json';
-const gulpHelpUrl =
-  'https://medium.com/gulpjs/gulp-sips-command-line-interface-e53411d4467';
-
-const wrongGulpPaths = [
-  '/bin/',
-  '/sbin/',
-  '/usr/bin/',
-  '/usr/sbin/',
-  '/usr/local/bin/',
-  '/usr/local/sbin/',
-];
 
 const warningDelaySecs = 10;
 
@@ -224,128 +213,14 @@ function logNpmVersion() {
 }
 
 /**
- * Gets the PATH variable from the parent shell of the node process
- *
- * @return {string}
- */
-function getParentShellPath() {
-  const nodePath = process.env.PATH;
-  const pathSeparator = process.platform == 'win32' ? ';' : ':';
-  // nodejs adds a few extra variables to $PATH, ending with '../../bin/node-gyp-bin'.
-  // See https://github.com/nodejs/node-convergence-archive/blob/master/deps/npm/lib/utils/lifecycle.js#L81-L85
-  return nodePath.split(`node-gyp-bin${pathSeparator}`).pop();
-}
-
-/**
- * Checks for the absence of global gulp, and the presence of gulp-cli and local
- * gulp.
- */
-function runGulpChecks() {
-  const firstInstall = !fs.existsSync('node_modules');
-  const globalPackages = getStdout('npm list --global --depth 0').trim();
-  const globalGulp = globalPackages.match(/gulp@.*/);
-  const globalGulpCli = globalPackages.match(/gulp-cli@.*/);
-  const defaultGulpPath = getStdout('which gulp', {
-    'env': {'PATH': getParentShellPath()},
-  }).trim();
-  const wrongGulp = wrongGulpPaths.some((path) =>
-    defaultGulpPath.startsWith(path)
-  );
-  if (globalGulp) {
-    console.log(
-      yellow('WARNING: Detected a global install of'),
-      cyan('gulp') + yellow('. It is recommended that you use'),
-      cyan('gulp-cli'),
-      yellow('instead.')
-    );
-    console.log(
-      yellow('⤷ To fix this, run'),
-      cyan('"npm uninstall --global gulp"'),
-      yellow('followed by'),
-      cyan('"npm install --global gulp-cli"') + yellow('.')
-    );
-    console.log(
-      yellow('⤷ See'),
-      cyan(gulpHelpUrl),
-      yellow('for more information.')
-    );
-    updatesNeeded.add('gulp');
-  } else if (!globalGulpCli) {
-    const whichGulp = getStdout('which gulp').trim();
-    if (!whichGulp.match(/\/gulp/)) {
-      // User is missing a global gulp install on a terminal supporting `which`.
-      // Or they do not have it installed via NPM.
-      console.log(
-        yellow('WARNING: Could not find a global install of'),
-        cyan('gulp-cli') + yellow('.')
-      );
-      console.log(
-        yellow('⤷ To fix this, run'),
-        cyan('"npm install --global gulp-cli"') + yellow('.')
-      );
-      updatesNeeded.add('gulp-cli');
-    }
-  } else {
-    printGulpVersion('gulp-cli');
-  }
-  if (wrongGulp) {
-    console.log(
-      yellow('WARNING: Found'),
-      cyan('gulp'),
-      yellow('in an unexpected location:'),
-      cyan(defaultGulpPath) + yellow('.')
-    );
-    console.log(
-      yellow('⤷ To fix this, consider removing'),
-      cyan(defaultGulpPath),
-      yellow('from your default'),
-      cyan('$PATH') + yellow(', or deleting it.')
-    );
-    console.log(
-      yellow('⤷ Run'),
-      cyan('"which gulp"'),
-      yellow('for more information.')
-    );
-    updatesNeeded.add('gulp');
-  }
-  if (!firstInstall) {
-    printGulpVersion('gulp');
-  }
-}
-
-/**
- * Prints version info for the given gulp command
- *
- * @param {string} gulpCmd
- */
-function printGulpVersion(gulpCmd) {
-  const versionRegex =
-    gulpCmd == 'gulp' ? /Local version[:]? (.*?)$/ : /^CLI version[:]? (.*?)\n/;
-  const gulpVersions = getStdout('gulp --version').trim();
-  const gulpVersion = gulpVersions.match(versionRegex);
-  if (gulpVersion && gulpVersion.length == 2) {
-    console.log(
-      green('Detected'),
-      cyan(gulpCmd),
-      green('version'),
-      cyan(gulpVersion[1]) + green('.')
-    );
-  } else {
-    console.log(
-      yellow(`WARNING: Could not determine the version of ${gulpCmd}.`)
-    );
-  }
-}
-
-/**
  * Checks if the local version of python is 2.7 or 3
  */
 function checkPythonVersion() {
   // Python 2.7 is EOL but still supported
-  // Python 3.5+ are still supported (TODO: deprecate 3.5 on 2020-09-13)
+  // Python 3.6+ are still supported
   // https://devguide.python.org/#status-of-python-branches
-  const recommendedVersion = '2.7 or 3.5+';
-  const recommendedVersionRegex = /^2\.7|^3\.[5-9]/;
+  const recommendedVersion = '2.7 or 3.6+';
+  const recommendedVersionRegex = /^2\.7|^3\.(?:[6-9]|1\d)/;
 
   // Python2 prints its version to stderr (fixed in Python 3.4)
   // See: https://bugs.python.org/issue18338
@@ -394,7 +269,6 @@ function checkPythonVersion() {
 async function main() {
   ensureNpm();
   await checkNodeVersion();
-  runGulpChecks();
   checkPythonVersion();
   logNpmVersion();
   if (updatesNeeded.size) {

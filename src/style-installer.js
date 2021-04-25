@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from './common-signals';
+import {CommonSignals} from './core/constants/common-signals';
 import {Services} from './services';
-import {TickLabel} from './enums';
-import {dev, devAssert, rethrowAsync} from './log';
+import {TickLabel} from './core/constants/enums';
+import {dev, devAssert} from './log';
 import {getAmpdoc} from './service';
 import {insertAfterOrAtStart, waitForBodyOpenPromise} from './dom';
-import {map} from './utils/object';
+import {map} from './core/types/object';
+import {rethrowAsync} from './core/error';
 import {setStyles} from './style';
 import {waitForServices} from './render-delaying-services';
 
@@ -213,6 +214,12 @@ export function makeBodyVisible(doc) {
     })
     .then((services) => {
       bodyMadeVisible = true;
+      if (INI_LOAD_INOB) {
+        // Force sync measurement to ensure that style recalc is complete
+        // before showing body, which would trigger FCP. This should reduce
+        // make it less likely that a CLS would be triggered after FCP.
+        doc.body./*OK*/ getBoundingClientRect();
+      }
       setBodyVisibleStyles(doc);
       const ampdoc = getAmpdoc(doc);
       ampdoc.signals().signal(CommonSignals.RENDER_START);

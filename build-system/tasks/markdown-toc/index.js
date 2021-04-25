@@ -17,7 +17,7 @@ const globby = require('globby');
 const path = require('path');
 const prettier = require('prettier');
 const toc = require('markdown-toc');
-const {getStdout} = require('../../common/exec');
+const {getStdout} = require('../../common/process');
 const {green} = require('kleur/colors');
 const {logOnSameLineLocalDev} = require('../../common/logging');
 const {readFile} = require('fs-extra');
@@ -29,7 +29,7 @@ const header = `<!--
   (Do not remove or edit this comment.)
 
   This table-of-contents is automatically generated. To generate it, run:
-    gulp markdown-toc --fix
+    amp markdown-toc --fix
 -->`;
 
 // Case-insensitive, allows multiple newlines and arbitrary indentation.
@@ -61,7 +61,7 @@ function getFrontmatter(content) {
 }
 
 /**
- * @param {string} maybeComment
+ * @param {?string} maybeComment
  * @return {?Object}
  */
 function isolateCommentJson(maybeComment) {
@@ -84,12 +84,12 @@ function isolateCommentJson(maybeComment) {
 
 /**
  * @param {string} content
- * @return {string}
+ * @return {Promise<string|null>}
  */
 async function overrideToc(content) {
   const headerMatch = content.match(headerRegexp);
 
-  if (!headerMatch) {
+  if (!headerMatch || !headerMatch.length || headerMatch.index === undefined) {
     return null;
   }
 
@@ -133,7 +133,7 @@ async function overrideToc(content) {
 
 /**
  * @param {string} cwd
- * @return {Object<string, ?string>}
+ * @return {Promise<Object<string, ?string>>}
  */
 async function overrideTocGlob(cwd) {
   const glob = [
@@ -147,6 +147,7 @@ async function overrideTocGlob(cwd) {
     .trim()
     .split('\n');
 
+  /** @type {Object<string, ?string>} */
   const result = {};
 
   for (const filename of filesIncludingString) {
@@ -197,5 +198,5 @@ markdownToc.description =
   'Finds Markdown files that contain table of contents and updates them.';
 
 markdownToc.flags = {
-  'fix': '  Write to file',
+  'fix': 'Write to file',
 };

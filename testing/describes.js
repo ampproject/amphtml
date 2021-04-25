@@ -794,10 +794,16 @@ class AmpFixture {
     /**
      * Installs the specified extension.
      * @param {string} extensionId
-     * @param {string=} opt_version
+     * @param {string=} version
+     * @param {boolean=} latest
+     * @param {boolean=} auto
      */
-    env.installExtension = function (extensionId, opt_version) {
-      const version = opt_version || '0.1';
+    env.installExtension = function (
+      extensionId,
+      version = '0.1',
+      latest = false,
+      auto = true
+    ) {
       const installer = extensionsBuffer[`${extensionId}:${version}`];
       if (!installer) {
         throw new Error(
@@ -805,13 +811,13 @@ class AmpFixture {
             ' Make sure the module is imported'
         );
       }
-      if (env.ampdoc) {
+      if (env.ampdoc && auto) {
         env.ampdoc.declareExtension(extensionId, version);
       }
       env.extensions.registerExtension(
         extensionId,
         version,
-        /* latest */ false,
+        latest,
         installer,
         win.AMP
       );
@@ -880,10 +886,8 @@ class AmpFixture {
       );
       const {ampdoc} = ret;
       env.ampdoc = ampdoc;
-      // TODO(#33020): pass the `extensions` array directly.
-      const extensionIds = extensions.map(({extensionId}) => extensionId);
       const promise = Promise.all([
-        env.extensions.installExtensionsInDoc(ampdoc, extensionIds),
+        env.extensions.installExtensionsInDoc(ampdoc, extensions),
         ampdoc.whenReady(),
       ]);
       ampdoc.setExtensionsKnown();

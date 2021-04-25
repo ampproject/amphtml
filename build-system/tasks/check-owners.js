@@ -15,36 +15,33 @@
  */
 
 /**
- * @fileoverview This file implements the `gulp check-owners` task, which checks
+ * @fileoverview This file implements the `amp check-owners` task, which checks
  * all OWNERS files in the repo for correctness, as determined by the parsing
  * API provided by the AMP owners bot.
  */
 
 'use strict';
 
+const fetch = require('node-fetch');
 const fs = require('fs-extra');
 const JSON5 = require('json5');
-const request = require('request');
-const util = require('util');
 const {cyan, red, green} = require('kleur/colors');
 const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
 const {log, logLocalDev} = require('../common/logging');
-
-const requestPost = util.promisify(request.post);
 
 const OWNERS_SYNTAX_CHECK_URI =
   'http://ampproject-owners-bot.appspot.com/v0/syntax';
 
 /**
  * Checks OWNERS files for correctness using the owners bot API.
- * The cumulative result is returned to the `gulp` process via process.exitCode
+ * The cumulative result is returned to the `amp` process via process.exitCode
  * so that all OWNERS files can be checked / fixed.
  */
 async function checkOwners() {
   if (!usesFilesOrLocalChanges('check-owners')) {
     return;
   }
-  const filesToCheck = getFilesToCheck('**/OWNERS');
+  const filesToCheck = getFilesToCheck(['**/OWNERS']);
   for (const file of filesToCheck) {
     await checkFile(file);
   }
@@ -71,20 +68,23 @@ async function checkFile(file) {
   }
 
   try {
-    const response = await requestPost({
-      uri: OWNERS_SYNTAX_CHECK_URI,
-      json: true,
-      body: {path: file, contents},
+    const response = await fetch(OWNERS_SYNTAX_CHECK_URI, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({path: file, contents}),
     });
 
-    if (response.statusCode < 200 || response.statusCode >= 300) {
+    if (!response.ok) {
       log(red('ERROR:'), 'Could not reach the owners syntax check API');
       throw new Error(
-        `${response.statusCode} ${response.statusMessage}: ` + response.body
+        `${response.status} ${response.statusText}: ${await response.text()}`
       );
     }
 
-    const {requestErrors, fileErrors, rules} = response.body;
+    const {requestErrors, fileErrors, rules} = await response.json();
 
     if (requestErrors) {
       requestErrors.forEach((err) => log(red(err)));
@@ -100,7 +100,7 @@ async function checkFile(file) {
       cyan(file),
       'successfully; produced',
       cyan(rules.length),
-      'rules.'
+      'rule(s).'
     );
   } catch (error) {
     log(red('FAILURE:'), error);
@@ -114,6 +114,6 @@ module.exports = {
 
 checkOwners.description = 'Checks all OWNERS files in the repo for correctness';
 checkOwners.flags = {
-  'files': '  Checks only the specified OWNERS files',
-  'local_changes': '  Checks just the OWNERS files changed in the local branch',
+  'files': 'Checks only the specified OWNERS files',
+  'local_changes': 'Checks just the OWNERS files changed in the local branch',
 };

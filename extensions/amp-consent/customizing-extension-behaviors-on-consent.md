@@ -32,7 +32,7 @@ Note: Currently, only the `default` consent policy is supported.
 
 AMP provides the consent state information for vendors to customize their behavior based on user control.
 
-This is `null` when no `<amp-consent>` tag is included. Otherwise, its value is one of [`CONSENT_POLICY_STATE`](../../src/consent-state.js):
+This is `null` when no `<amp-consent>` tag is included. Otherwise, its value is one of [`CONSENT_POLICY_STATE`](../../src/core/constants/consent-state.js):
 
 -   `SUFFICIENT` (`1`): Consent is granted
 -   `INSUFFICIENT` (`2`): Consent is not granted
@@ -45,7 +45,7 @@ Use the `getConsentPolicyState` API. It returns a promise with one of the valid 
 
 #### If you integrate with AMP as a third party ad vendor
 
-Access the value within the ad iframe using `window.context.initialConsentState`. Check [this](https://github.com/ampproject/amphtml/blob/master/ads/README.md#amp-consent-integration) for more details.
+Access the value within the ad iframe using `window.context.initialConsentState`. Check [this](https://github.com/ampproject/amphtml/blob/main/ads/README.md#amp-consent-integration) for more details.
 
 #### If you integrate with AMP as an analytics vendor
 
@@ -80,7 +80,7 @@ Get the value using `CONSENT_STRING` macro, or `${consentString}`. A request wit
 
 In addition to the consent state and consent string, AMP extensions can also use the
 `getConsentPolicySharedData` API to receive additional consent related information about
-the user from the page owner. See [this](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#response) for details about the `shareData`.
+the user from the page owner. See [this](https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/amp-consent.md#response) for details about the `shareData`.
 
 ### On Consent Metadata
 

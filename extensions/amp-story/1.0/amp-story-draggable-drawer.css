@@ -127,3 +127,50 @@
 [desktop] .i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-content {
   padding-top: 0 !important;
 }
+
+/* For amp-story-page-attachment-ui-v2 experiment. */
+
+[desktop] .i-amphtml-amp-story-page-attachment-ui-v2.amp-story-draggable-drawer-root {
+  background: none !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-container {
+  border-radius: 16px !important;
+  height: 100% !important;
+}
+
+amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-container {
+  border-radius: 16px 16px 0 0 !important;
+}
+
+amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-container {
+  background: none !important;
+  /* This makes the spacer elmement take up all available space to push content to the bottom of the screen. */
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-spacer {
+  /* Removes default button background. */
+  background: none !important;
+  /* This placeholder element takes up all available space when drawer-content is less than 80vh. */
+  display: block !important;
+  height: calc(var(--story-page-vh) * 100) !important;
+  /* Sets the minimum size of the placeholder element */
+  min-height: calc(var(--story-page-vh) * 20) !important;
+}
+
+body:not(.amp-mode-keyboard-active) amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-spacer {
+  /* Remove outline if user is not navigating via keyboard */
+  outline: none !important;
+}
+
+amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-content {
+  border-radius: inherit !important;
+  background: #fff !important;
+}
+
+amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-content {
+  padding-top: 0 !important;
+  background: none !important;
+}

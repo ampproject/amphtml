@@ -31,72 +31,60 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
     nvm install --lts
     ```
 
-5. If you have a global install of [Gulp](https://gulpjs.com/), uninstall it. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md). See [this article](https://medium.com/gulpjs/gulp-sips-command-line-interface-e53411d4467) for why.)
+5. Create your own fork of the [amphtml repository](https://github.com/ampproject/amphtml) by clicking "Fork" in the Web UI. During local development, this will be referred to by `git` as `origin`.
 
-    ```shell
-    npm uninstall --global gulp
-    ```
-
-6. Install the [Gulp](https://gulpjs.com/) command line tool, which will automatically use the version of `gulp` packaged with the the amphtml repository. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md))
-
-    ```shell
-    npm install --global gulp-cli
-    ```
-
-    An alternative to installing `gulp-cli` is to invoke each Gulp command in this guide with `npx gulp` during local
-    development. This will also use the version of `gulp` packaged with the amphtml repository.
-
-7. Create your own fork of the [amphtml repository](https://github.com/ampproject/amphtml) by clicking "Fork" in the Web UI. During local development, this will be referred to by `git` as `origin`.
-
-8. Download your fork to a local repository.
+6. Download your fork to a local repository.
 
     ```shell
     git clone git@github.com:<your username>/amphtml.git
     ```
 
-9. Add an alias called `upstream` to refer to the main `ampproject/amphtml` repository. Go to the root directory of the
-   newly created local repository directory and run:
+7. Add an alias called `upstream` to refer to the main `ampproject/amphtml` repository. Go to the root directory of the newly created local repository directory and run:
 
     ```shell
     git remote add upstream git@github.com:ampproject/amphtml.git
     ```
 
-10. Fetch data from the `upstream` remote:
+8. Fetch data from the `upstream` remote:
 
     ```shell
-    git fetch upstream master
+    git fetch upstream main
     ```
 
-11. Set up your local `master` branch to track `upstream/master` instead of `origin/master` (which will rapidly become
-    outdated).
+9. Set up your local `main` branch to track `upstream/main` instead of `origin/main` (which will rapidly become outdated).
 
     ```shell
-    git branch -u upstream/master master
+    git branch -u upstream/main main
     ```
+
+10. Sign in to these services that are used to validate `amphtml` pull requests.
+    - **CLA Assistant:** Mandatory step, used by AMP's contributor license agreement. Sign in [here](https://cla-assistant.io/ampproject/amphtml) using your GitHub credentials.
+    - **CircleCI:** Mandatory step, used to perform continuous integration testing. Sign in [here](https://app.circleci.com/pipelines/github/ampproject/amphtml) using your GitHub credentials.
+    - **Percy:** Optional step, only needed to approve visual diffs introduced by a PR. Sign in [here](https://percy.io/ampproject/amphtml) using your GitHub credentials and link it to a Browserstack profile.
 
 ## Branch (do this each time you want a new branch)
 
 Create and go to the branch:
 
 ```shell
-git checkout -b <branch name> master
+git checkout -b <branch name> main
 ```
 
 ## Build AMP & run a local server
 
 1. Make sure you have the latest packages (after you pull): `npm install`
-1. Start the server: `gulp`
+1. Start the server: `amp`
 1. Access your server at [http://localhost:8000](http://localhost:8000)
 1. Access your sample pages at [http://localhost:8000/examples](http://localhost:8000/examples)
 
 ## Test AMP
 
--   Run the unit tests: `gulp unit` (doesn't build the runtime)
--   Run the integration tests: `gulp integration` (builds the runtime)
--   Run integration tests, but skip building after having done so previously: `gulp integration --nobuild`
--   Run the tests in a specified set of files: `gulp [unit|integration] --files=<test-files-path-glob>`
--   Add the `--watch` flag to `gulp [unit|integration]` to automatically re-run the tests when a file changes
--   To run only a certain set of Mocha tests, change `describe` to `describe.only` for the tests you want to run; combine this with `gulp [unit|integration] --watch` to automatically rerun your test when files are changed (but make sure to run all the tests before sending your change for review)
+-   Run the unit tests: `amp unit` (doesn't build the runtime)
+-   Run the integration tests: `amp integration` (builds the runtime)
+-   Run integration tests, but skip building after having done so previously: `amp integration --nobuild`
+-   Run the tests in a specified set of files: `amp [unit|integration] --files=<test-files-path-glob>`
+-   Add the `--watch` flag to `amp [unit|integration]` to automatically re-run the tests when a file changes
+-   To run only a certain set of Mocha tests, change `describe` to `describe.only` for the tests you want to run; combine this with `amp [unit|integration] --watch` to automatically rerun your test when files are changed (but make sure to run all the tests before sending your change for review)
 
 ## Create commits to contain your changes
 
@@ -112,10 +100,10 @@ git checkout -b <branch name> master
 
 ## Pull the latest changes
 
-1.  Check out the master branch: `git checkout master`
+1.  Check out the main branch: `git checkout main`
 2.  Pull the latest changes: `git pull`
 3.  Check out your branch: `git checkout <branch name>`
-4.  Merge the changes to your branch: `git merge master`
+4.  Merge the changes to your branch: `git merge main`
 
     **Note**: You may need to resolve conflicting changes at this point.
 
@@ -130,8 +118,8 @@ git checkout -b <branch name> master
     ```
 
 3.  Go to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and in the banner indicating you've recently pushed a branch, click the "Compare & pull request" (if this banner does not appear, go to your fork at `https://github.com/<your username>/amphtml`, choose your branch from the "Branch" dropdown and click "New pull request")
-4.  Make sure you've signed the [CLA](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#contributor-license-agreement) (using the same email address as your git config indicates)
-5.  [Find people to review your code](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#code-review-and-approval) and add them as a reviewer on the PR (if you can) or cc them (by adding `/cc @username` in the PR description/comment). If your run into any issues finding the reviewers or have any other questions, ping the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/) on [Slack](https://bit.ly/amp-slack-signup).
+4.  Make sure you've signed the [CLA](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md#contributor-license-agreement) (using the same email address as your git config indicates)
+5.  [Find people to review your code](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md#code-review-and-approval) and add them as a reviewer on the PR (if you can) or cc them (by adding `/cc @username` in the PR description/comment). If your run into any issues finding the reviewers or have any other questions, ping the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/) on [Slack](https://bit.ly/amp-slack-signup).
 6.  If a reviewer requests changes make them locally and then repeat the steps in this section to push the changes to your branch back up to GitHub again.
 7.  For pushes after the first, just use `git push`
 8.  If you don't get a new review within 2 business days, feel free to ping the pull request by adding a comment.
@@ -140,7 +128,7 @@ git checkout -b <branch name> master
 
 ## Delete your branch after your changes are merged (optional)
 
-1.  Go to the master branch: `git checkout master`
+1.  Go to the main branch: `git checkout main`
 2.  Delete your local branch: `git branch -D <branch name>`
 3.  Delete the corresponding GitHub fork branch: `git push -d origin <branch name>`
 

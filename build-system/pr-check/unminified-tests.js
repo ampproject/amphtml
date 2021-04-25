@@ -20,8 +20,7 @@
  */
 
 const {
-  downloadUnminifiedOutput,
-  printSkipMessage,
+  skipDependentJobs,
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
@@ -30,19 +29,14 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'unminified-tests.js';
 
-/**
- * @return {void}
- */
 function pushBuildWorkflow() {
-  downloadUnminifiedOutput();
-
   try {
     timedExecOrThrow(
-      'gulp integration --nobuild --headless --coverage --report',
+      'amp integration --nobuild --headless --coverage --report',
       'Integration tests failed!'
     );
     timedExecOrThrow(
-      'gulp codecov-upload',
+      'amp codecov-upload',
       'Failed to upload code coverage to Codecov!'
     );
   } catch (e) {
@@ -50,20 +44,16 @@ function pushBuildWorkflow() {
       process.exitCode = e.status;
     }
   } finally {
-    timedExecOrDie('gulp test-report-upload');
+    timedExecOrDie('amp test-report-upload');
   }
 }
 
-/**
- * @return {void}
- */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
-    downloadUnminifiedOutput();
-    timedExecOrDie('gulp integration --nobuild --headless --coverage');
-    timedExecOrDie('gulp codecov-upload');
+    timedExecOrDie('amp integration --nobuild --headless --coverage');
+    timedExecOrDie('amp codecov-upload');
   } else {
-    printSkipMessage(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime or integration tests'
     );

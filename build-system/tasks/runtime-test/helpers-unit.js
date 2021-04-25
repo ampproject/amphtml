@@ -23,7 +23,7 @@ const path = require('path');
 const testConfig = require('../../test-configs/config');
 const {execOrDie} = require('../../common/exec');
 const {extensions, maybeInitializeExtensions} = require('../extension-helpers');
-const {gitDiffNameOnlyMaster} = require('../../common/git');
+const {gitDiffNameOnlyMain} = require('../../common/git');
 const {green, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../../common/ci');
 const {log, logLocalDev} = require('../../common/logging');
@@ -40,7 +40,7 @@ let testsToRun = null;
  * @return {boolean}
  */
 function isLargeRefactor() {
-  const filesChanged = gitDiffNameOnlyMaster();
+  const filesChanged = gitDiffNameOnlyMain();
   return filesChanged.length >= LARGE_REFACTOR_THRESHOLD;
 }
 
@@ -51,8 +51,9 @@ function isLargeRefactor() {
  * @return {!Object<string, string>}
  */
 function extractCssJsFileMap() {
-  execOrDie('gulp css', {'stdio': 'ignore'});
+  execOrDie('amp css', {'stdio': 'ignore'});
   maybeInitializeExtensions(extensions);
+  /** @type {Object<string, string>} */
   const cssJsFileMap = {};
 
   /**
@@ -61,7 +62,6 @@ function extractCssJsFileMap() {
    * @param {Object} cssData
    * @param {string} cssBinaryName
    * @param {Object} cssJsFileMap
-   * @return {void}
    */
   function addCssJsEntry(cssData, cssBinaryName, cssJsFileMap) {
     const cssFilePath =
@@ -135,7 +135,7 @@ function getJsFilesFor(cssFile, cssJsFileMap) {
 
 /**
  * Computes the list of unit tests to run under difference scenarios
- * @return {Array<string>|undefined}
+ * @return {Promise<Array<string>|void>}
  */
 async function getUnitTestsToRun() {
   log(green('INFO:'), 'Determining which unit tests to run...');
@@ -186,7 +186,7 @@ function unitTestsToRun() {
     return testsToRun;
   }
   const cssJsFileMap = extractCssJsFileMap();
-  const filesChanged = gitDiffNameOnlyMaster();
+  const filesChanged = gitDiffNameOnlyMain();
   const {unitTestPaths} = testConfig;
   testsToRun = [];
   let srcFiles = [];

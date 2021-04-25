@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import {AMPDOC_SINGLETON_NAME} from '../../../src/enums';
-import {ActionTrust} from '../../../src/action-constants';
+import {AMPDOC_SINGLETON_NAME} from '../../../src/core/constants/enums';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
 import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {MessageType} from '../../../src/3p-frame-messaging';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {endsWith} from '../../../src/string';
+import {dict} from '../../../src/core/types/object';
+import {endsWith} from '../../../src/core/types/string';
 import {getConsentDataToForward} from '../../../src/consent';
 import {
   isAdLike,
@@ -124,10 +125,11 @@ export class AmpIframe extends AMP.BaseElement {
      */
     this.targetOrigin_ = null;
 
-    /**
-     * @private {boolean}
-     */
+    /** @private {boolean} */
     this.hasErroredEmbedSize_ = false;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /** @override */
@@ -161,7 +163,7 @@ export class AmpIframe extends AMP.BaseElement {
         (origin != containerUrl.origin && protocol != 'data:'),
       'Origin of <amp-iframe> must not be equal to container %s' +
         ' if allow-same-origin is set. See https://github.com/ampproject/' +
-        'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.',
+        'amphtml/blob/main/spec/amp-iframe-origin-policy.md for details.',
       element
     );
     userAssert(
@@ -186,7 +188,7 @@ export class AmpIframe extends AMP.BaseElement {
         'of the viewport or 600px from the top (whichever is smaller): %s ' +
         ' Current position %s. Min: %s' +
         "Positioning rules don't apply for iframes that use `placeholder`." +
-        'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'See https://github.com/ampproject/amphtml/blob/main/extensions/' +
         'amp-iframe/amp-iframe.md#iframe-with-placeholder for details.',
       this.element,
       pos.top,
@@ -491,6 +493,8 @@ export class AmpIframe extends AMP.BaseElement {
           });
         }, 1000);
       }
+
+      this.pauseHelper_.updatePlaying(true);
     });
   }
 
@@ -585,6 +589,7 @@ export class AmpIframe extends AMP.BaseElement {
         this.intersectionObserverHostApi_ = null;
       }
     }
+    this.pauseHelper_.updatePlaying(false);
     return true;
   }
 

@@ -98,7 +98,6 @@ module.exports = {
 
     /**
      * @param {Map[]} maps
-     * @return {void}
      */
     function processMaps(maps) {
       for (let i = 0; i < maps.length; i++) {
@@ -111,7 +110,6 @@ module.exports = {
     /**
      * @param {*} struct
      * @param {*} base
-     * @return {void}
      */
     function processVariables(struct, base) {
       const {names, nodes, declarations, node} = struct;
@@ -153,7 +151,6 @@ module.exports = {
     return {
       /**
        * @param {CompilerNode} node
-       * @return {void}
        */
       VariableDeclarator(node) {
         if (!shouldBeDestructure(node)) {
@@ -180,7 +177,6 @@ module.exports = {
 
       /**
        * @param {CompilerNode} node
-       * @return {void}
        */
       'BlockStatement, Program': function (node) {
         const {body} = node;

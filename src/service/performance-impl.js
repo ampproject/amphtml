@@ -15,17 +15,17 @@
  */
 
 import {Services} from '../services';
-import {Signals} from '../utils/signals';
-import {TickLabel} from '../enums';
-import {VisibilityState} from '../visibility-state';
+import {Signals} from '../core/data-structures/signals';
+import {TickLabel} from '../core/constants/enums';
+import {VisibilityState} from '../core/constants/visibility-state';
 import {createCustomEvent} from '../event-helper';
 import {dev, devAssert} from '../log';
-import {dict, map} from '../utils/object';
+import {dict, map} from '../core/types/object';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
 import {isStoryDocument} from '../utils/story';
 import {layoutRectLtwh} from '../layout-rect';
-import {throttle} from '../utils/rate-limit';
+import {throttle} from '../core/types/function';
 import {whenContentIniLoad} from '../ini-load';
 import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
 
@@ -35,9 +35,6 @@ import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
  * be forwarded to the actual `tick` function when it is set.
  */
 const QUEUE_LIMIT = 50;
-
-/** @const {string} */
-const VISIBILITY_CHANGE_EVENT = 'visibilitychange';
 
 const TAG = 'Performance';
 
@@ -107,12 +104,10 @@ export class Performance {
     this.shiftScoresTicked_ = 0;
 
     /**
-     * The sum of all layout shift fractions triggered on the page from the
-     * Layout Instability API.
-     *
-     * @private {number}
+     * The collection of layout shift events from the Layout Instability API.
+     * @private {Array<LayoutShift>}
      */
-    this.aggregateShiftScore_ = 0;
+    this.layoutShifts_ = [];
 
     const supportedEntryTypes =
       (this.win.PerformanceObserver &&
@@ -196,7 +191,6 @@ export class Performance {
      */
     this.largestContentfulPaintRenderTime_ = null;
 
-    this.boundOnVisibilityChange_ = this.onVisibilityChange_.bind(this);
     this.onAmpDocVisibilityChange_ = this.onAmpDocVisibilityChange_.bind(this);
 
     // Add RTV version as experiment ID, so we can slice the data by version.
@@ -241,11 +235,6 @@ export class Performance {
 
     this.ampdoc_.whenFirstVisible().then(() => {
       this.tick(TickLabel.ON_FIRST_VISIBLE);
-      // TODO(#33207): Remove after data collection
-      this.tick(
-        TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_VISIBLE,
-        this.aggregateShiftScore_
-      );
       this.flush();
     });
 
@@ -254,12 +243,6 @@ export class Performance {
     // Register a handler to record metrics when the page enters the hidden
     // lifecycle state.
     if (registerVisibilityChangeListener) {
-      this.win.addEventListener(
-        VISIBILITY_CHANGE_EVENT,
-        this.boundOnVisibilityChange_,
-        {capture: true}
-      );
-
       this.ampdoc_.onVisibilityChanged(this.onAmpDocVisibilityChange_);
     }
 
@@ -355,13 +338,6 @@ export class Performance {
         this.tickDelta(TickLabel.FIRST_CONTENTFUL_PAINT, value);
         this.tickSinceVisible(TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE, value);
         recordedFirstContentfulPaint = true;
-
-        // TODO(#33207): remove after data collection
-        // On the first contentful paint, report cumulative CLS score
-        this.tickDelta(
-          TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_FCP,
-          this.aggregateShiftScore_
-        );
       } else if (
         entry.entryType === 'first-input' &&
         !recordedFirstInputDelay
@@ -372,8 +348,9 @@ export class Performance {
       } else if (entry.entryType === 'layout-shift') {
         // Ignore layout shift that occurs within 500ms of user input, as it is
         // likely in response to the user's action.
-        if (!entry.hadRecentInput) {
-          this.aggregateShiftScore_ += entry.value;
+        // 1000 here is a magic number to prevent unbounded growth. We don't expect it to be reached.
+        if (!entry.hadRecentInput && this.layoutShifts_.length < 1000) {
+          this.layoutShifts_.push(entry);
         }
       } else if (entry.entryType === 'largest-contentful-paint') {
         if (entry.loadTime) {
@@ -477,23 +454,16 @@ export class Performance {
   }
 
   /**
-   * When the visibility state of the document changes to hidden,
-   * send the layout scores.
-   * @private
-   */
-  onVisibilityChange_() {
-    if (this.win.document.visibilityState === 'hidden') {
-      this.tickCumulativeMetrics_();
-    }
-  }
-
-  /**
-   * When the viewer visibility state of the document changes to inactive,
+   * When the viewer visibility state of the document changes to inactive or hidden,
    * send the layout score.
    * @private
    */
   onAmpDocVisibilityChange_() {
-    if (this.ampdoc_.getVisibilityState() === VisibilityState.INACTIVE) {
+    const state = this.ampdoc_.getVisibilityState();
+    if (
+      state === VisibilityState.INACTIVE ||
+      state === VisibilityState.HIDDEN
+    ) {
       this.tickCumulativeMetrics_();
     }
   }
@@ -524,27 +494,37 @@ export class Performance {
    * amount of visibility into this metric.
    */
   tickLayoutShiftScore_() {
+    const cls = this.layoutShifts_.reduce((sum, entry) => sum + entry.value, 0);
+    const fcp = this.metrics_.get(TickLabel.FIRST_CONTENTFUL_PAINT) ?? 0; // fallback to 0, so that we never overcount.
+    const ofv = this.metrics_.get(TickLabel.ON_FIRST_VISIBLE) ?? 0;
+
+    // TODO(#33207): Remove after data collection
+    const clsBeforeFCP = this.layoutShifts_.reduce((sum, entry) => {
+      if (entry.startTime < fcp) {
+        return sum + entry.value;
+      }
+      return sum;
+    }, 0);
+    const clsBeforeOFV = this.layoutShifts_.reduce((sum, entry) => {
+      if (entry.startTime < ofv) {
+        return sum + entry.value;
+      }
+      return sum;
+    }, 0);
+
     if (this.shiftScoresTicked_ === 0) {
+      this.tick(TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_VISIBLE, clsBeforeOFV);
       this.tickDelta(
-        TickLabel.CUMULATIVE_LAYOUT_SHIFT,
-        this.aggregateShiftScore_
+        TickLabel.CUMULATIVE_LAYOUT_SHIFT_BEFORE_FCP,
+        clsBeforeFCP
       );
+      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT, cls);
       this.flush();
       this.shiftScoresTicked_ = 1;
     } else if (this.shiftScoresTicked_ === 1) {
-      this.tickDelta(
-        TickLabel.CUMULATIVE_LAYOUT_SHIFT_2,
-        this.aggregateShiftScore_
-      );
+      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_2, cls);
       this.flush();
       this.shiftScoresTicked_ = 2;
-
-      // No more work to do, so clean up event listeners.
-      this.win.removeEventListener(
-        VISIBILITY_CHANGE_EVENT,
-        this.boundOnVisibilityChange_,
-        {capture: true}
-      );
     }
   }
 
@@ -696,7 +676,7 @@ export class Performance {
       data['value'] = this.timeOrigin_ + delta;
     }
 
-    // Emit events. Used by `gulp performance`.
+    // Emit events. Used by `amp performance`.
     this.win.dispatchEvent(
       createCustomEvent(
         this.win,

@@ -39,7 +39,7 @@ import {
 } from '../amp-a4a';
 import {AmpAdXOriginIframeHandler} from '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {AmpDoc, installDocService} from '../../../../src/service/ampdoc-impl';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../../../src/core/constants/consent-state';
 import {Extensions} from '../../../../src/service/extensions-impl';
 import {FetchMock, networkFailure} from './fetch-mock';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
@@ -47,8 +47,8 @@ import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {LayoutPriority} from '../../../../src/layout';
 import {MockA4AImpl, TEST_URL} from './utils';
 import {Services} from '../../../../src/services';
-import {Signals} from '../../../../src/utils/signals';
-import {cancellation} from '../../../../src/error';
+import {Signals} from '../../../../src/core/data-structures/signals';
+import {cancellation} from '../../../../src/error-reporting';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';
 import {dev, user} from '../../../../src/log';
@@ -1527,6 +1527,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             consentState: null,
             consentString: null,
             gdprApplies: null,
+            consentStringType: null,
             additionalConsent: null,
           },
           rtcResponse
@@ -1707,6 +1708,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         isStickyAd: () => false,
         maybeInitStickyAd: () => {},
       };
+      await a4a.buildCallback();
       await a4a.layoutCallback();
       expect(
         renderNonAmpCreativeSpy.calledOnce,
@@ -2778,6 +2780,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             consentState: CONSENT_POLICY_STATE.SUFFICIENT,
             consentString,
             gdprApplies,
+            consentStringType: consentMetadata['consentStringType'],
             additionalConsent: consentMetadata['additionalConsent'],
           })
         ).calledOnce;
@@ -2831,6 +2834,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             consentState: CONSENT_POLICY_STATE.SUFFICIENT,
             consentString,
             gdprApplies,
+            consentStringType: consentMetadata['consentStringType'],
             additionalConsent: consentMetadata['additionalConsent'],
           })
         ).calledOnce;
@@ -2875,6 +2879,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           getAdUrlSpy.withArgs({
             consentState: CONSENT_POLICY_STATE.UNKNOWN,
             consentString: null,
+            consentStringType: null,
             gdprApplies: null,
             additionalConsent: null,
           })

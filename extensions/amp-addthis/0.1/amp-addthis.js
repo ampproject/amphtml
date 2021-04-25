@@ -56,7 +56,7 @@ import {callEng} from './addthis-utils/eng';
 import {callLojson} from './addthis-utils/lojson';
 import {callPjson} from './addthis-utils/pjson';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   getAddThisMode,
   isProductCode,
@@ -70,7 +70,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
 import {setStyle} from '../../../src/style';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 // The following items will be shared by all AmpAddThis elements on a page, to
 // prevent unnecessary HTTP requests, get accurate analytics, etc., and hence

@@ -17,7 +17,7 @@ import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getVariableService} from './variable-service';
-import {map} from '../../../src/utils/object';
+import {map} from '../../../src/core/types/object';
 import {registerServiceBuilder} from '../../../src/service';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
@@ -38,6 +38,7 @@ export const StoryAnalyticsEvent = {
   PAGE_ATTACHMENT_EXIT: 'story-page-attachment-exit',
   PAGE_VISIBLE: 'story-page-visible',
   INTERACTIVE: 'story-interactive',
+  STORY_CONTENT_LOADED: 'story-content-loaded',
   STORY_MUTED: 'story-audio-muted',
   STORY_UNMUTED: 'story-audio-unmuted',
 };
@@ -122,7 +123,8 @@ export class StoryAnalyticsService {
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_ID,
       (pageId) => {
-        if (!pageId) {
+        const isAd = this.storeService_.get(StateProperty.AD_STATE);
+        if (!pageId || isAd) {
           return;
         }
 

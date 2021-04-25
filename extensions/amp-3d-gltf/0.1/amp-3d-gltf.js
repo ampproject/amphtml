@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ActionTrust} from '../../../src/action-constants';
-import {Deferred} from '../../../src/utils/promise';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
@@ -33,6 +33,7 @@ import {
 import {removeElement} from '../../../src/dom';
 
 const TAG = 'amp-3d-gltf';
+const TYPE = '3d-gltf';
 
 const isWebGLSupported = () => {
   const canvas = document.createElement('canvas');
@@ -70,7 +71,7 @@ export class Amp3dGltf extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     const preconnect = Services.preconnectFor(this.win);
-    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
+    preloadBootstrap(this.win, TYPE, this.getAmpDoc(), preconnect);
     preconnect.url(
       this.getAmpDoc(),
       'https://cdnjs.cloudflare.com/ajax/libs/three.js/91/three.js',
@@ -166,7 +167,7 @@ export class Amp3dGltf extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    const iframe = getIframe(this.win, this.element, '3d-gltf', this.context_);
+    const iframe = getIframe(this.win, this.element, TYPE, this.context_);
     iframe.title = this.element.title || 'GLTF 3D model';
     this.applyFillContent(iframe, true);
     this.iframe_ = iframe;

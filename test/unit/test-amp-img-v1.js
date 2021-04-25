@@ -61,13 +61,18 @@ describes.realWin('amp-img V1', {amp: true}, (env) => {
     img.onerror = sandbox.spy();
 
     doc.body.appendChild(img);
-    await img.build();
+    await img.mount();
     return img;
   }
 
   it('testElementV1', () => {
     testElementV1(AmpImg, {
-      exceptions: ['Must not use getLayoutSize'],
+      exceptions: [
+        'Must not have preconnectCallback',
+        'Must not have layoutCallback',
+        'Must not have unlayoutCallback',
+        'Must not use getLayoutSize',
+      ],
     });
   });
 
@@ -104,6 +109,63 @@ describes.realWin('amp-img V1', {amp: true}, (env) => {
     expect(ampImg.onerror).to.not.be.called;
     expect(toggleFallbackSpy).to.not.be.called;
     expect(togglePlaceholderSpy).to.be.calledOnce.calledWith(false);
+  });
+
+  it('should unload the img on unmount before loaded', async () => {
+    const ampImg = await getImg({
+      src: '/examples/img/sample.jpg',
+      width: 300,
+      height: 200,
+      alt: 'An image',
+      title: 'Image title',
+      referrerpolicy: 'origin',
+    });
+    const iniImg = ampImg.querySelector('img');
+    expect(iniImg).to.exist;
+
+    ampImg.unmount();
+    expect(ampImg.querySelector('img')).to.not.exist;
+    expect(iniImg.src).to.contain('data:image/gif;');
+  });
+
+  it('should NOT unload the img on unmount after loaded', async () => {
+    const ampImg = await getImg({
+      src: '/examples/img/sample.jpg',
+      width: 300,
+      height: 200,
+      alt: 'An image',
+      title: 'Image title',
+      referrerpolicy: 'origin',
+    });
+    const iniImg = ampImg.querySelector('img');
+    expect(iniImg).to.exist;
+
+    Object.defineProperty(iniImg, 'complete', {value: true});
+
+    ampImg.unmount();
+    expect(ampImg.querySelector('img')).to.equal(iniImg);
+    expect(iniImg.src).to.not.contain('data:image/gif;');
+  });
+
+  it('should set eager loading on ensureLoaded', async () => {
+    const ampImg = await getImg({
+      src: '/examples/img/sample.jpg',
+      width: 300,
+      height: 200,
+      alt: 'An image',
+      title: 'Image title',
+      referrerpolicy: 'origin',
+    });
+
+    const img = ampImg.querySelector('img');
+    expect(img.loading == 'auto' || !img.loading).to.be.true;
+
+    const promise = ampImg.ensureLoaded();
+    await new Promise(setTimeout);
+    expect(img.loading).to.equal('eager');
+
+    dispatchCustomEvent(img, 'load', null, {bubbles: false});
+    await promise;
   });
 
   it('should fail when img fails', async () => {
@@ -378,9 +440,14 @@ describes.realWin('amp-img V1', {amp: true}, (env) => {
      *     placeholder attribute.
      * @param {boolean} addBlurClass Whether the child should have the
      *     class that allows it to be a blurred placeholder.
+     * @param {boolean} serverRendered If the image is server rendered.
      * @return {AmpImg} An amp-img object potentially with a blurry placeholder
      */
-    function getImgWithBlur(addPlaceholder, addBlurClass) {
+    function getImgWithBlur(
+      addPlaceholder,
+      addBlurClass,
+      serverRendered = false
+    ) {
       const el = createImg({
         src: '/examples/img/sample.jpg',
         id: 'img1',
@@ -400,6 +467,12 @@ describes.realWin('amp-img V1', {amp: true}, (env) => {
         img.classList.add('i-amphtml-blurry-placeholder');
       }
       el.appendChild(img);
+      if (serverRendered) {
+        const serverRenderedImg = doc.createElement('img');
+        serverRenderedImg.setAttribute('src', '/examples/img/sample.jpg');
+        el.appendChild(serverRenderedImg);
+        el.setAttribute('i-amphtml-ssr', '');
+      }
       doc.body.appendChild(el);
       return el;
     }
@@ -444,7 +517,6 @@ describes.realWin('amp-img V1', {amp: true}, (env) => {
 
     it('does not interfere with SSR img creation', async () => {
       const ampImg = getImgWithBlur(true, true);
-      ampImg.setAttribute('i-amphtml-ssr', '');
       await ampImg.build();
 
       expect(ampImg.querySelector('img[src*="sample.jpg"]')).to.exist;

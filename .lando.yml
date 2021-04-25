@@ -1,6 +1,6 @@
 # This is a configuration file for a Lando-based local dev environment for amphtml.
 # It is an alternative to the existing local development environment to what is described in the Getting Started
-# End-to-end guide <https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md>.
+# End-to-end guide <https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md>.
 #
 # This environment allows you to encapsulate the amphtml development environment inside of a Docker container.
 # Instead of accessing <http://localhost:8000>, this environment can be accessed via <https://amphtml.lando.site>.
@@ -15,8 +15,8 @@
 # 5. You should then be able to access <https://amphtml.lando.site> in your browser.
 # 6. If using the Local AMP Chrome Extension, open the popup and configure the Base URL to be https://amphtml.lando.site/
 #
-# Now instead of running `gulp` commands directly, you instead run `lando gulp`. Additionally, some of the common gulp
-# commands have shortcuts, so you can run `lando watch` instead of `lando gulp build --watch`. For a full list of the
+# Now instead of running `amp` commands directly, you instead run `lando amp`. Additionally, some of the common amp
+# commands have shortcuts, so you can run `lando watch` instead of `lando amp build --watch`. For a full list of the
 # shortcuts run `lando help`.
 #
 # For details on the file format, see <https://docs.lando.dev/config/lando.html>.
@@ -31,47 +31,46 @@ services:
       - apt-get update && apt-get install -y openjdk-8-jdk && apt-get install -y ant && apt-get clean
       - apt-get install -y openjdk-7-jre protobuf-compiler python2.7 python-protobuf
     build:
-      - npm install --global gulp-cli
       - npm install
     run_as_root:
       - echo "127.0.0.1 amphtml.lndo.site" >> /etc/hosts
-    command: cd /app && gulp serve --port=80 --host=0.0.0.0
+    command: cd /app && amp serve --port=80 --host=0.0.0.0
 
 tooling:
-  gulp:
+  amp:
     service: appserver
-    cmd: 'gulp'
+    cmd: 'amp'
   watch:
     service: appserver
-    cmd: 'gulp build --watch'
+    cmd: 'amp build --watch'
     description: 'Builds unminified code, watches for changes in files, re-builds when detected'
   watch-minified:
     service: appserver
-    cmd: 'gulp dist --watch'
+    cmd: 'amp dist --watch'
     description: 'Builds minified code, watches for changes in files, re-builds when detected'
   lint:
     service: appserver
-    cmd: 'gulp lint'
+    cmd: 'amp lint'
     description: 'Validates against Google Closure Linter'
   check-types:
     service: appserver
-    cmd: 'gulp check-types'
+    cmd: 'amp check-types'
     description: 'Check source code for JS type errors'
   dist:
     service: appserver
-    cmd: 'gulp dist'
+    cmd: 'amp dist'
     description: 'Build production binaries'
   unit:
     service: appserver
-    cmd: 'gulp unit'
+    cmd: 'amp unit'
     description: 'Run unit tests'
   integration:
     service: appserver
-    cmd: 'gulp integration'
+    cmd: 'amp integration'
     description: 'Run integration tests'
   e2e:
     service: appserver
-    cmd: 'gulp e2e'
+    cmd: 'amp e2e'
     description: 'Runs e2e tests'
 
 proxy:

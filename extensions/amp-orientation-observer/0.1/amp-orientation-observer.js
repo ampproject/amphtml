@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {Services} from '../../../src/services';
 import {clamp, sum} from '../../../src/utils/math';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '../../../src/utils/object';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dict} from '../../../src/core/types/object';
+import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-orientation-observer';
 /**

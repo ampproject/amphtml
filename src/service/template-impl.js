@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
+import {Deferred} from '../core/data-structures/promise';
 import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
 import {rootNodeFor, scopedQuerySelector} from '../dom';
-import {pureUserAssert as userAssert} from '../core/assert';
+import {userAssert} from '../log';
 
 /**
  * @fileoverview
@@ -37,7 +37,7 @@ const EMPTY_FUNC = () => {};
 /**
  */
 export class Templates {
-  /** @param {!AmpDoc} ampdoc */
+  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
   constructor(ampdoc) {
     /** @private @const */
     this.ampdoc_ = ampdoc;
@@ -215,7 +215,10 @@ export class Templates {
   maybeFindTemplate(parent, opt_querySelector) {
     const templateId = parent.getAttribute('template');
     if (templateId) {
-      return rootNodeFor(parent).getElementById(templateId);
+      const rootNode = /** @type {!Document|!ShadowRoot} */ (rootNodeFor(
+        parent
+      ));
+      return rootNode.getElementById(templateId);
     } else if (opt_querySelector) {
       return scopedQuerySelector(parent, opt_querySelector);
     } else {
@@ -326,7 +329,7 @@ export class Templates {
 }
 
 /**
- * @param {!AmpDoc} ampdoc
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installTemplatesServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, 'templates', Templates);
@@ -335,7 +338,7 @@ export function installTemplatesServiceForDoc(ampdoc) {
 /**
  * Registers an extended template. This function should typically be called
  * through the registerTemplate method on the AMP runtime.
- * @param {!AmpDoc} ampdoc
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {string} type
  * @param {typeof ../base-template.BaseTemplate} templateClass
  * @return {undefined}

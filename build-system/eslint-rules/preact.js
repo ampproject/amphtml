@@ -37,7 +37,6 @@ module.exports = {
   create(context) {
     /**
      * @param {*} node
-     * @return {void}
      */
     function requirePreact(node) {
       if (imported) {

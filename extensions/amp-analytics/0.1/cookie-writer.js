@@ -16,12 +16,12 @@
 
 import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
 import {ChunkPriority, chunk} from '../../../src/chunk';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {SameSite, setCookie} from '../../../src/cookies';
 import {Services} from '../../../src/services';
-import {hasOwn} from '../../../src/utils/object';
+import {hasOwn} from '../../../src/core/types/object';
 import {isCookieAllowed} from './cookie-reader';
-import {isObject} from '../../../src/types';
+import {isObject} from '../../../src/core/types';
 import {user} from '../../../src/log';
 import {variableServiceForDoc} from './variables';
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {
   AmpGwdRuntimeService,
   GWD_SERVICE_NAME,
@@ -27,7 +27,7 @@ import {
   getParentWindowFrameElement,
   getServiceForDocOrNull,
 } from '../../../src/service';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 /**
  * Returns a value at any level in an object structure addressed by dot-notation

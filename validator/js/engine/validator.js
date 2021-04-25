@@ -5985,8 +5985,12 @@ class ParsedValidatorRules {
       for (let tagSpecId = 0; tagSpecId < numTags; ++tagSpecId) {
         let tagSpec = this.rules_.tags[tagSpecId];
         if (tagSpec.extensionSpec == null) continue;
+        let baseSpecName = tagSpec.extensionSpec.name;
+        if (tagSpec.extensionSpec.versionName !== null)
+          baseSpecName = tagSpec.extensionSpec.name + ' ' +
+              tagSpec.extensionSpec.versionName;
         if (tagSpec.specName === null)
-          tagSpec.specName = tagSpec.extensionSpec.name + ' extension script';
+          tagSpec.specName = baseSpecName + ' extension script';
         if (tagSpec.descriptiveName === null)
           tagSpec.descriptiveName = tagSpec.specName;
         tagSpec.mandatoryParent = 'HEAD';
@@ -7322,7 +7326,7 @@ function errorLine(filenameOrUrl, error) {
 /**
  * Renders the validation results into an array of human readable strings.
  * Careful when modifying this - it's called from
- * https://github.com/ampproject/amphtml/blob/master/test/integration/test-example-validation.js.
+ * https://github.com/ampproject/amphtml/blob/main/test/integration/test-example-validation.js.
  *
  * WARNING: This is exported; htmlparser changes may break downstream users
  * like https://www.npmjs.com/package/amphtml-validator and

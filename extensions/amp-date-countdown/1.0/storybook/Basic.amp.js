@@ -16,12 +16,11 @@
 
 import * as Preact from '../../../../src/preact';
 import {boolean, date, select, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
   title: 'amp-date-countdown-1_0',
-  decorators: [withKnobs, withA11y, withAmp],
+  decorators: [withKnobs, withAmp],
 
   parameters: {
     extensions: [
@@ -132,9 +131,7 @@ export const Default = () => {
   );
 };
 
-Default.story = {
-  name: 'default',
-};
+Default.storyName = 'default';
 
 export const DefaultRenderer = () => {
   const dateAttribute = select(
@@ -187,9 +184,7 @@ export const DefaultRenderer = () => {
   );
 };
 
-DefaultRenderer.story = {
-  name: 'default renderer',
-};
+DefaultRenderer.storyName = 'default renderer';
 
 export const ExternalTemplate = () => {
   const template = select('template', ['template1', 'template2'], 'template1');
@@ -260,6 +255,4 @@ export const ExternalTemplate = () => {
   );
 };
 
-ExternalTemplate.story = {
-  name: 'external template',
-};
+ExternalTemplate.storyName = 'external template';

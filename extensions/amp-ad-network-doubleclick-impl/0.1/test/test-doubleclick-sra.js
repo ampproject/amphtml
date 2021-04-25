@@ -26,7 +26,7 @@ import {
   resetSraStateForTesting,
 } from '../amp-ad-network-doubleclick-impl';
 import {BaseElement} from '../../../../src/base-element';
-import {Deferred} from '../../../../src/utils/promise';
+import {Deferred} from '../../../../src/core/data-structures/promise';
 import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
 import {MANUAL_EXPERIMENT_ID} from '../../../../ads/google/a4a/traffic-experiments';
 import {SignatureVerifier} from '../../../amp-a4a/0.1/signature-verifier';
@@ -50,7 +50,7 @@ import {
 } from '../sra-utils';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {pureDevAssert as devAssert} from '../../../../src/core/assert';
+import {devAssert} from '../../../../src/log';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
 

@@ -15,7 +15,7 @@
  */
 
 import * as dom from './dom';
-import {extensionScriptsInNode} from './service/extension-script';
+import {extensionScriptInNode} from './service/extension-script';
 import {
   getAmpdoc,
   getService,
@@ -25,7 +25,7 @@ import {
   getServicePromiseOrNull,
   getServicePromiseOrNullForDoc,
 } from './service';
-import {pureUserAssert as userAssert} from './core/assert';
+import {userAssert} from './log';
 
 /**
  * Same as getElementService but produces null if the given element is not
@@ -170,22 +170,6 @@ function assertService(service, id, extension) {
     extension,
     extension
   ));
-}
-
-/**
- * Verifies that an extension script is present in head for
- * installation.
- * @param {!Window} win
- * @param {string} id
- * @param {string} version
- * @return {boolean}
- * @private
- */
-function extensionScriptInNode(win, id, version) {
-  return extensionScriptsInNode(win.document.head).some(
-    ({extensionId, extensionVersion}) =>
-      id == extensionId && version == extensionVersion
-  );
 }
 
 /**

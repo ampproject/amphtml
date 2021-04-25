@@ -27,7 +27,7 @@ import {
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {measurePageLayoutBox} from '../../../src/utils/page-layout-box';
 
 /** @const */
@@ -194,6 +194,11 @@ export class Placement {
    */
   placeAd(baseAttributes, sizing, adTracker, isResponsiveEnabled) {
     return this.getEstimatedPosition().then((yPosition) => {
+      // TODO(powerivq@) Remove this after fixing ad resizing
+      if (this.ampdoc.win./*OK*/ scrollY > yPosition) {
+        this.state_ = PlacementState.UNUSED;
+        return this.state_;
+      }
       return adTracker.isTooNearAnAd(yPosition).then((tooNear) => {
         if (tooNear) {
           this.state_ = PlacementState.TOO_NEAR_EXISTING_AD;

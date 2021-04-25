@@ -15,8 +15,8 @@
  */
 
 import * as dom from './dom';
-import {AmpEvents} from './amp-events';
-import {CommonSignals} from './common-signals';
+import {AmpEvents} from './core/constants/amp-events';
+import {CommonSignals} from './core/constants/common-signals';
 import {ElementStub} from './element-stub';
 import {
   Layout,
@@ -26,26 +26,28 @@ import {
   isLoadingAllowed,
 } from './layout';
 import {MediaQueryProps} from './utils/media-query-props';
-import {ReadyState} from './ready-state';
+import {ReadyState} from './core/constants/ready-state';
 import {ResourceState} from './service/resource';
 import {Services} from './services';
-import {Signals} from './utils/signals';
+import {Signals} from './core/data-structures/signals';
 import {
   blockedByConsentError,
   cancellation,
   isBlockedByConsent,
+  isCancellation,
   reportError,
-} from './error';
-import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
-import {getBuilderForDoc} from './service/builder';
+} from './error-reporting';
+import {dev, devAssert, user, userAssert} from './log';
 import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
 import {getMode} from './mode';
+import {getSchedulerForDoc} from './service/scheduler';
 import {isExperimentOn} from './experiments';
+import {rethrowAsync} from './core/error';
 import {setStyle} from './style';
 import {shouldBlockOnConsentByMeta} from './consent';
 import {startupChunk} from './chunk';
 import {toWin} from './types';
-import {tryResolve} from './utils/promise';
+import {tryResolve} from './core/data-structures/promise';
 
 const TAG = 'CustomElement';
 
@@ -60,6 +62,7 @@ const UpgradeState = {
 };
 
 const NO_BUBBLES = {bubbles: false};
+const RETURN_TRUE = () => true;
 
 /**
  * Caches whether the template tag is supported to avoid memory allocations.
@@ -146,6 +149,19 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       /** @private {?Promise} */
       this.buildingPromise_ = null;
 
+      /**
+       * Indicates that the `mountCallback()` has been called and it hasn't
+       * been reversed with an `unmountCallback()` call.
+       * @private {boolean}
+       */
+      this.mounted_ = false;
+
+      /** @private {?Promise} */
+      this.mountPromise_ = null;
+
+      /** @private {?AbortController} */
+      this.mountAbortController_ = null;
+
       /** @private {!ReadyState} */
       this.readyState_ = ReadyState.UPGRADING;
 
@@ -172,9 +188,6 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
       /** @private {boolean} */
       this.isFirstLayoutCompleted_ = false;
-
-      /** @private {boolean} */
-      this.paused_ = false;
 
       /** @public {boolean} */
       this.warnOnMissingOverflow = true;
@@ -531,11 +544,11 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           this.signals_.signal(CommonSignals.BUILT);
 
           if (this.V1()) {
-            // If the implementation hasn't changed the readyState to, e.g.,
-            // "loading", then update the state to "complete".
-            if (this.readyState_ == ReadyState.BUILDING) {
-              this.setReadyStateInternal(ReadyState.COMPLETE);
-            }
+            this.setReadyStateInternal(
+              this.readyState_ != ReadyState.BUILDING
+                ? this.readyState_
+                : ReadyState.MOUNTING
+            );
           } else {
             this.setReadyStateInternal(ReadyState.LOADING);
             this.preconnect(/* onLayout */ false);
@@ -591,11 +604,158 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       );
       return readyPromise.then(() => {
         if (this.V1()) {
-          const builder = getBuilderForDoc(this.getAmpDoc());
-          builder.scheduleAsap(this);
+          const scheduler = getSchedulerForDoc(this.getAmpDoc());
+          scheduler.scheduleAsap(this);
         }
         return this.whenBuilt();
       });
+    }
+
+    /**
+     * Mounts the element by calling the `BaseElement.mountCallback` method.
+     *
+     * Can only be called on a upgraded element. May only be called from
+     * scheduler.js.
+     *
+     * @return {!Promise}
+     * @final
+     * @restricted
+     */
+    mountInternal() {
+      if (this.mountPromise_) {
+        return this.mountPromise_;
+      }
+      this.mountAbortController_ =
+        this.mountAbortController_ || new AbortController();
+      const {signal} = this.mountAbortController_;
+      return (this.mountPromise_ = this.buildInternal()
+        .then(() => {
+          devAssert(this.V1());
+          if (signal.aborted) {
+            // Mounting has been canceled.
+            return;
+          }
+          this.setReadyStateInternal(
+            this.readyState_ != ReadyState.MOUNTING
+              ? this.readyState_
+              : this.implClass_.usesLoading(this)
+              ? ReadyState.LOADING
+              : ReadyState.MOUNTING
+          );
+          this.mounted_ = true;
+          const result = this.impl_.mountCallback(signal);
+          // The promise supports the V0 format for easy migration. If the
+          // `mountCallback` returns a promise, the assumption is that the
+          // element has finished loading when the promise completes.
+          return result ? result.then(RETURN_TRUE) : false;
+        })
+        .then((hasLoaded) => {
+          this.mountAbortController_ = null;
+          if (signal.aborted) {
+            throw cancellation();
+          }
+          this.signals_.signal(CommonSignals.MOUNTED);
+          if (!this.implClass_.usesLoading(this) || hasLoaded) {
+            this.setReadyStateInternal(ReadyState.COMPLETE);
+          }
+        })
+        .catch((reason) => {
+          this.mountAbortController_ = null;
+          if (isCancellation(reason)) {
+            this.mountPromise_ = null;
+          } else {
+            this.signals_.rejectSignal(
+              CommonSignals.MOUNTED,
+              /** @type {!Error} */ (reason)
+            );
+            this.setReadyStateInternal(ReadyState.ERROR, reason);
+          }
+          throw reason;
+        }));
+    }
+
+    /**
+     * Requests the element to be mounted as soon as possible.
+     * @return {!Promise}
+     * @final
+     */
+    mount() {
+      if (this.mountPromise_) {
+        return this.mountPromise_;
+      }
+
+      // Create the abort controller right away to ensure that we the unmount
+      // will properly cancel this operation.
+      this.mountAbortController_ =
+        this.mountAbortController_ || new AbortController();
+      const {signal} = this.mountAbortController_;
+
+      const readyPromise = this.signals_.whenSignal(
+        CommonSignals.READY_TO_UPGRADE
+      );
+      return readyPromise.then(() => {
+        if (!this.V1()) {
+          return this.whenBuilt();
+        }
+        if (signal.aborted) {
+          throw cancellation();
+        }
+        const scheduler = getSchedulerForDoc(this.getAmpDoc());
+        scheduler.scheduleAsap(this);
+        return this.whenMounted();
+      });
+    }
+
+    /**
+     * Unmounts the element and makes it ready for the next mounting
+     * operation.
+     * @final
+     */
+    unmount() {
+      // Ensure that the element is paused.
+      if (this.isConnected_) {
+        this.pause();
+      }
+
+      // Legacy pre-V1 elements simply unlayout.
+      if (!this.V1()) {
+        this.unlayout_();
+        return;
+      }
+
+      // Cancel the currently mounting operation.
+      if (this.mountAbortController_) {
+        this.mountAbortController_.abort();
+        this.mountAbortController_ = null;
+      }
+
+      // Unschedule a currently pending mount request.
+      const scheduler = getSchedulerForDoc(this.getAmpDoc());
+      scheduler.unschedule(this);
+
+      // Try to unmount if the element has been built already.
+      if (this.mounted_) {
+        this.impl_.unmountCallback();
+      }
+
+      // Complete unmount and reset the state.
+      this.mounted_ = false;
+      this.mountPromise_ = null;
+      this.reset_();
+
+      // Prepare for the next mount if the element is connected.
+      if (this.isConnected_) {
+        this.upgradeOrSchedule_(/* opt_disablePreload */ true);
+      }
+    }
+
+    /**
+     * Returns the promise that's resolved when the element has been mounted. If
+     * the mount fails, the resulting promise is rejected.
+     * @return {!Promise}
+     */
+    whenMounted() {
+      return this.signals_.whenSignal(CommonSignals.MOUNTED);
     }
 
     /**
@@ -614,9 +774,11 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @final
      */
     ensureLoaded(opt_parentPriority) {
-      return this.build().then(() => {
+      return this.mount().then(() => {
         if (this.V1()) {
-          this.impl_.ensureLoaded();
+          if (this.implClass_.usesLoading(this)) {
+            this.impl_.ensureLoaded();
+          }
           return this.whenLoaded();
         }
 
@@ -649,6 +811,29 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     }
 
     /**
+     * See `BaseElement.setAsContainer`.
+     *
+     * @param {!Element=} opt_scroller A child of the container that should be
+     * monitored. Typically a scrollable element.
+     * @restricted
+     * @final
+     */
+    setAsContainerInternal(opt_scroller) {
+      const builder = getSchedulerForDoc(this.getAmpDoc());
+      builder.setContainer(this, opt_scroller);
+    }
+
+    /**
+     * See `BaseElement.removeAsContainer`.
+     * @restricted
+     * @final
+     */
+    removeAsContainerInternal() {
+      const builder = getSchedulerForDoc(this.getAmpDoc());
+      builder.removeContainer(this);
+    }
+
+    /**
      * Update the internal ready state.
      *
      * @param {!ReadyState} state
@@ -678,7 +863,11 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           this.dispatchCustomEventForTesting(AmpEvents.LOAD_START);
           return;
         case ReadyState.COMPLETE:
+          // LOAD_START is set just in case. It won't be overwritten if
+          // it had been set before.
+          this.signals_.signal(CommonSignals.LOAD_START);
           this.signals_.signal(CommonSignals.LOAD_END);
+          this.signals_.reset(CommonSignals.UNLOAD);
           this.classList.add('i-amphtml-layout');
           this.toggleLoading(false);
           dom.dispatchCustomEvent(this, 'load', null, NO_BUBBLES);
@@ -729,13 +918,13 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     }
 
     /**
-     * See `BaseElement.deferredBuild()`.
+     * See `BaseElement.deferredMount()`.
      *
      * @return {boolean}
      * @final
      */
-    deferredBuild() {
-      return this.implClass_ ? this.implClass_.deferredBuild(this) : false;
+    deferredMount() {
+      return this.implClass_ ? this.implClass_.deferredMount(this) : false;
     }
 
     /**
@@ -983,12 +1172,13 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           this.reset_();
         }
         if (this.isUpgraded()) {
-          if (reconstruct) {
+          if (reconstruct && !this.V1()) {
             this.getResources().upgraded(this);
           }
           this.connected_();
           this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
-        } else if (this.implClass_ && this.V1()) {
+        }
+        if (this.implClass_ && this.V1()) {
           this.upgradeOrSchedule_();
         }
       } else {
@@ -1033,40 +1223,55 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
     /**
      * Upgrade or schedule element based on V1.
+     * @param {boolean=} opt_disablePreload
      * @private @final
      */
-    upgradeOrSchedule_() {
+    upgradeOrSchedule_(opt_disablePreload) {
       if (!this.V1()) {
         this.tryUpgrade_();
         return;
       }
-      if (this.buildingPromise_) {
-        // Already building.
+
+      if (this.mountPromise_) {
+        // Already mounting.
         return;
       }
 
-      // Schedule build.
-      this.setReadyStateInternal(ReadyState.BUILDING);
-      const builder = getBuilderForDoc(this.getAmpDoc());
-      builder.schedule(this);
+      // Schedule build and mount.
+      const scheduler = getSchedulerForDoc(this.getAmpDoc());
+      scheduler.schedule(this);
 
-      // Schedule preconnects.
-      const urls = this.implClass_.getPreconnects(this);
-      if (urls && urls.length > 0) {
-        // If we do early preconnects we delay them a bit. This is kind of
-        // an unfortunate trade off, but it seems faster, because the DOM
-        // operations themselves are not free and might delay
-        const ampdoc = this.getAmpDoc();
-        startupChunk(ampdoc, () => {
-          const {win} = ampdoc;
-          if (!win) {
-            return;
+      if (this.buildingPromise_) {
+        // Already built or building: just needs to be mounted.
+        this.setReadyStateInternal(
+          this.implClass_ && this.implClass_.usesLoading(this)
+            ? ReadyState.LOADING
+            : ReadyState.MOUNTING
+        );
+      } else {
+        // Not built yet: execute prebuild steps.
+        this.setReadyStateInternal(ReadyState.BUILDING);
+
+        // Schedule preconnects.
+        if (!opt_disablePreload) {
+          const urls = this.implClass_.getPreconnects(this);
+          if (urls && urls.length > 0) {
+            // If we do early preconnects we delay them a bit. This is kind of
+            // an unfortunate trade off, but it seems faster, because the DOM
+            // operations themselves are not free and might delay
+            const ampdoc = this.getAmpDoc();
+            startupChunk(ampdoc, () => {
+              const {win} = ampdoc;
+              if (!win) {
+                return;
+              }
+              const preconnect = Services.preconnectFor(win);
+              urls.forEach((url) =>
+                preconnect.url(ampdoc, url, /* alsoConnecting */ false)
+              );
+            });
           }
-          const preconnect = Services.preconnectFor(win);
-          urls.forEach((url) =>
-            preconnect.url(ampdoc, url, /* alsoConnecting */ false)
-          );
-        });
+        }
       }
     }
 
@@ -1169,9 +1374,8 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       if (this.impl_) {
         this.impl_.detachedCallback();
       }
-      if (!this.built_ && this.V1()) {
-        const builder = getBuilderForDoc(this.getAmpDoc());
-        builder.unschedule(this);
+      if (this.V1()) {
+        this.unmount();
       }
       this.toggleLoading(false);
       this.disposeMediaAttrs_();
@@ -1322,6 +1526,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * should be called again when layout changes.
      * @return {boolean}
      * @package @final
+     * TODO(#31915): remove once V1 migration is complete.
      */
     isRelayoutNeeded() {
       return this.impl_ ? this.impl_.isRelayoutNeeded() : false;
@@ -1384,6 +1589,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @param {!AbortSignal} signal
      * @return {!Promise}
      * @package @final
+     * TODO(#31915): remove once V1 migration is complete.
      */
     layoutCallback(signal) {
       assertNotTemplate(this);
@@ -1446,29 +1652,21 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     }
 
     /**
-     * Whether the resource is currently paused.
-     * @return {boolean}
-     * @final @package
-     */
-    isPaused() {
-      return this.paused_;
-    }
-
-    /**
-     * Requests the resource to stop its activity when the document goes into
-     * inactive state. The scope is up to the actual component. Among other
-     * things the active playback of video or audio content must be stopped.
+     * Pauses the element.
      *
      * @package @final
      */
-    pauseCallback() {
-      assertNotTemplate(this);
-      if (this.paused_) {
+    pause() {
+      if (!this.isBuilt()) {
+        // Not built yet.
         return;
       }
-      this.paused_ = true;
-      if (this.isBuilt()) {
-        this.impl_.pauseCallback();
+
+      this.impl_.pauseCallback();
+
+      // Legacy unlayoutOnPause support.
+      if (!this.V1() && this.impl_.unlayoutOnPause()) {
+        this.unlayout_();
       }
     }
 
@@ -1480,15 +1678,11 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      *
      * @package @final
      */
-    resumeCallback() {
-      assertNotTemplate(this);
-      if (!this.paused_) {
+    resume() {
+      if (!this.isBuilt()) {
         return;
       }
-      this.paused_ = false;
-      if (this.isBuilt()) {
-        this.impl_.resumeCallback();
-      }
+      this.impl_.resumeCallback();
     }
 
     /**
@@ -1499,6 +1693,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      *
      * @return {boolean}
      * @package @final
+     * TODO(#31915): remove once V1 migration is complete.
      */
     unlayoutCallback() {
       assertNotTemplate(this);
@@ -1515,25 +1710,22 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     }
 
     /** @private */
+    unlayout_() {
+      this.getResource_().unlayout();
+      if (this.isConnected_ && this.resources_) {
+        this.resources_./*OK*/ schedulePass();
+      }
+    }
+
+    /** @private */
     reset_() {
       this.layoutCount_ = 0;
       this.isFirstLayoutCompleted_ = false;
+      this.signals_.reset(CommonSignals.MOUNTED);
       this.signals_.reset(CommonSignals.RENDER_START);
       this.signals_.reset(CommonSignals.LOAD_START);
       this.signals_.reset(CommonSignals.LOAD_END);
       this.signals_.reset(CommonSignals.INI_LOAD);
-    }
-
-    /**
-     * Whether to call {@link unlayoutCallback} when pausing the element.
-     * Certain elements cannot properly pause (like amp-iframes with unknown
-     * video content), and so we must unlayout to stop playback.
-     *
-     * @return {boolean}
-     * @package @final
-     */
-    unlayoutOnPause() {
-      return this.impl_ ? this.impl_.unlayoutOnPause() : false;
     }
 
     /**
@@ -1678,11 +1870,12 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
     /**
      * Get the purpose consents that should be granted.
-     * @return {?Array<string>}
+     * @return {Array<string>|undefined}
      */
     getPurposesConsent_() {
-      const purposes = this.getAttribute('data-block-on-consent-purposes');
-      return purposes ? purposes.split(',') : null;
+      const purposes =
+        this.getAttribute('data-block-on-consent-purposes') || null;
+      return purposes?.replace(/\s+/g, '')?.split(',');
     }
 
     /**

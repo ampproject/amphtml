@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {InaboxResources} from '../../../src/inabox/inabox-resources';
 import {ResourceState} from '../../../src/service/resource';
 import {macroTask} from '../../../testing/yield';
@@ -119,18 +119,18 @@ describes.realWin('inabox-resources', {amp: true}, (env) => {
     resources.add(element1);
     resources.add(element2);
 
-    env.sandbox.stub(element1, 'pauseCallback');
-    env.sandbox.stub(element1, 'resumeCallback');
-    env.sandbox.stub(element2, 'pauseCallback');
-    env.sandbox.stub(element2, 'resumeCallback');
+    env.sandbox.stub(element1, 'pause');
+    env.sandbox.stub(element1, 'resume');
+    env.sandbox.stub(element2, 'pause');
+    env.sandbox.stub(element2, 'resume');
 
     env.ampdoc.overrideVisibilityState('paused');
-    expect(element1.pauseCallback).to.be.calledOnce;
-    expect(element2.pauseCallback).to.be.calledOnce;
+    expect(element1.pause).to.be.calledOnce;
+    expect(element2.pause).to.be.calledOnce;
 
     env.ampdoc.overrideVisibilityState('visible');
-    expect(element1.resumeCallback).to.be.calledOnce;
-    expect(element2.resumeCallback).to.be.calledOnce;
+    expect(element1.resume).to.be.calledOnce;
+    expect(element2.resume).to.be.calledOnce;
   });
 
   it('should unload all resources on dispose', async () => {

@@ -20,7 +20,7 @@ import {createAmpElementForTesting} from '../../src/custom-element';
 import {loadPromise} from '../../src/event-helper';
 import {setScopeSelectorSupportedForTesting} from '../../src/css';
 import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
-import {toArray} from '../../src/types';
+import {toArray} from '../../src/core/types/array';
 
 describes.sandboxed('DOM', {}, (env) => {
   afterEach(() => {
@@ -1196,6 +1196,26 @@ describes.sandboxed('DOM', {}, (env) => {
       expect(spans[1].innerHTML).to.equal('456<em>789</em>');
     }
   );
+
+  it('should implement containsNotSelf', () => {
+    const parent = document.createElement('div');
+    const child = document.createElement('div');
+    const uncle = document.createElement('div');
+    const grandparent = document.createElement('div');
+    grandparent.appendChild(parent);
+    grandparent.appendChild(uncle);
+    parent.appendChild(child);
+
+    expect(dom.containsNotSelf(grandparent, grandparent)).to.be.false;
+    expect(dom.containsNotSelf(grandparent, parent)).to.be.true;
+    expect(dom.containsNotSelf(grandparent, uncle)).to.be.true;
+    expect(dom.containsNotSelf(grandparent, child)).to.be.true;
+
+    expect(dom.containsNotSelf(parent, parent)).to.be.false;
+    expect(dom.containsNotSelf(parent, uncle)).to.be.false;
+    expect(dom.containsNotSelf(parent, grandparent)).to.be.false;
+    expect(dom.containsNotSelf(parent, child)).to.be.true;
+  });
 
   describe('domOrderComparator', () => {
     it('should sort elements by dom order', () => {

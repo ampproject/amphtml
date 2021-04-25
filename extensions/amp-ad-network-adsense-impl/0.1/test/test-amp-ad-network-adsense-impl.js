@@ -30,7 +30,10 @@ import {
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+import {
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '../../../../src/core/constants/consent-state';
 import {Services} from '../../../../src/services';
 import {
   addAttributesToElement,
@@ -920,6 +923,36 @@ describes.realWin(
         impl.getAdUrl({}).then((url) => {
           expect(url).to.not.match(/(\?|&)addtl_consent=(&|$)/);
         }));
+
+      it('should include us_privacy, if consentStringType matches', () =>
+        impl
+          .getAdUrl({
+            consentStringType: CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+            consentString: 'usPrivacyString',
+          })
+          .then((url) => {
+            expect(url).to.match(/(\?|&)us_privacy=usPrivacyString(&|$)/);
+            expect(url).to.not.match(/(\?|&)gdpr_consent=/);
+          }));
+
+      it('should include gdpr_consent, if consentStringType is not US_PRIVACY_STRING', () =>
+        impl
+          .getAdUrl({
+            consentStringType: CONSENT_STRING_TYPE.TCF_V2,
+            consentString: 'gdprString',
+          })
+          .then((url) => {
+            expect(url).to.match(/(\?|&)gdpr_consent=gdprString(&|$)/);
+            expect(url).to.not.match(/(\?|&)us_privacy=/);
+          }));
+
+      it('should include gdpr_consent, if consentStringType is undefined', () =>
+        impl
+          .getAdUrl({consentStringType: undefined, consentString: 'gdprString'})
+          .then((url) => {
+            expect(url).to.match(/(\?|&)gdpr_consent=gdprString(&|$)/);
+            expect(url).to.not.match(/(\?|&)us_privacy=/);
+          }));
 
       it('should have spsa and size 1x1 when single page story ad', () => {
         impl.isSinglePageStoryAd = true;

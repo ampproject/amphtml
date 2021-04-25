@@ -836,7 +836,11 @@ Finishes the animation.
 
 Cancels the animation.
 
+## amp-story usage
+
+If you want to use `<amp-animation>` with `<amp-story>`, please note that you should use `<amp-story-animation>` instead. More information on how to use it at the [Advanced animations](https://github.com/ampproject/amphtml/blob/main/extensions/amp-story/amp-story.md#Advanced-animations) section of the documentation.
+
 ## Validation
 
-See [`amp-animation` rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-animation/validator-amp-animation.protoascii)
+See [`amp-animation` rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-animation/validator-amp-animation.protoascii)
 in the AMP validator specification.

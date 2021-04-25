@@ -19,7 +19,7 @@ import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Slot} from '../../../src/preact/slot';
 import {createElementWithAttributes} from '../../../src/dom';
 import {htmlFor} from '../../../src/static-template';
-import {omit} from '../../../src/utils/object';
+import {omit} from '../../../src/core/types/object';
 import {testElementV1} from '../../../testing/element-v1';
 import {upgradeOrRegisterElement} from '../../../src/service/custom-element-registry';
 import {waitFor} from '../../../testing/test-helper';
@@ -873,7 +873,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(children).to.have.lengthOf(1);
       const child = children[0];
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({});
+      expect(child.props).to.deep.equal({loading: 'lazy'});
       expect(element.querySelector('b').slot).to.equal('');
     });
 
@@ -888,7 +888,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(children).to.have.lengthOf(1);
       const child = children[0];
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({});
+      expect(child.props).to.deep.equal({loading: 'lazy'});
     });
 
     it('should re-render on empty content', async () => {
@@ -902,7 +902,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(children).to.have.lengthOf(1);
       const child = children[0];
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({});
+      expect(child.props).to.deep.equal({loading: 'lazy'});
     });
 
     it('should ignore service children mutations', async () => {
@@ -956,7 +956,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(children).to.have.lengthOf(1);
       const child = children[0];
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({});
+      expect(child.props).to.deep.equal({loading: 'lazy'});
     });
 
     it('should pass children as undefined when empty', async () => {
@@ -978,7 +978,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(children).to.have.lengthOf(1);
       const child = children[0];
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({});
+      expect(child.props).to.deep.equal({loading: 'lazy'});
     });
 
     it('should ignore service children mutations', async () => {
@@ -1136,7 +1136,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(children).to.have.lengthOf(1);
       const child = children[0];
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({});
+      expect(child.props).to.deep.equal({loading: 'lazy'});
       expect(element.querySelector('#child1').slot).to.equal('');
       expect(element.querySelector('#child2').slot).to.equal('');
       expect(element.textContent).to.contain('text (should be passed through)');
@@ -1163,7 +1163,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
       // New child.
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({});
+      expect(child.props).to.deep.equal({loading: 'lazy'});
       expect(element.querySelector('#child3').slot).to.equal('');
 
       // No changes.
@@ -1189,7 +1189,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
       // New child.
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({});
+      expect(child.props).to.deep.equal({loading: 'lazy'});
       expect(element.textContent).to.contain('more text');
 
       // No changes.
@@ -1213,7 +1213,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(children).to.have.lengthOf(1);
       const child = children[0];
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({});
+      expect(child.props).to.deep.equal({loading: 'lazy'});
 
       // No changes.
       expect(element.querySelector('#child2').slot).to.equal('');
@@ -1240,7 +1240,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(children).to.have.lengthOf(1);
       const child = children[0];
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({});
+      expect(child.props).to.deep.equal({loading: 'lazy'});
 
       // No changes, except for ordering
       expect(child1.slot).to.equal('');

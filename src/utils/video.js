@@ -14,25 +14,21 @@
  * limitations under the License.
  */
 import {dev} from '../log';
-import {once} from './function';
+import {once} from '../core/types/function';
 import {setStyles} from '../style';
 
 /**
  * @param {!Window} win
- * @param {boolean} isLiteViewer
  * @return {!Promise<boolean>}
  */
-function isAutoplaySupportedImpl(win, isLiteViewer) {
-  // We do not support autoplay in amp-lite viewer regardless of platform.
-  if (isLiteViewer) {
-    return Promise.resolve(false);
-  }
-
+function isAutoplaySupportedImpl(win) {
   // To detect autoplay, we create a video element and call play on it, if
   // `paused` is true after `play()` call, autoplay is supported. Although
   // this is unintuitive, it works across browsers and is currently the lightest
   // way to detect autoplay without using a data source.
-  const detectionElement = win.document.createElement('video');
+  const detectionElement = /** @type {!HTMLVideoElement} */ (win.document.createElement(
+    'video'
+  ));
 
   // NOTE(aghassemi): We need both attributes and properties due to Chrome and
   // Safari differences when dealing with non-attached elements.
@@ -43,8 +39,9 @@ function isAutoplaySupportedImpl(win, isLiteViewer) {
   detectionElement.setAttribute('width', '0');
 
   detectionElement.muted = true;
-  detectionElement.playsinline = true;
-  detectionElement.webkitPlaysinline = true;
+  detectionElement.playsInline = true;
+  detectionElement['playsinline'] = true;
+  detectionElement['webkitPlaysinline'] = true;
 
   setStyles(detectionElement, {
     position: 'fixed',
@@ -87,14 +84,13 @@ export class VideoUtils {
    * when autoplay has been disabled by the user.
    *
    * @param {!Window} win
-   * @param {boolean} isLiteViewer
    * @return {!Promise<boolean>}
    */
-  static isAutoplaySupported(win, isLiteViewer) {
+  static isAutoplaySupported(win) {
     if (!isAutoplaySupported) {
       setIsAutoplaySupported();
     }
-    return isAutoplaySupported(win, isLiteViewer);
+    return isAutoplaySupported(win);
   }
 
   /** @visibleForTesting */

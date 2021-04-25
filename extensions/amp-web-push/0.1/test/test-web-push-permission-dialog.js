@@ -104,7 +104,7 @@ describes.realWin(
       });
     });
 
-    // TODO(jasonpang): This fails on master under headless Chrome.
+    // TODO(jasonpang): This fails during CI under headless Chrome.
     it.skip('should request notification permissions, when opened as popup', () => {
       return setupPermissionDialogFrame().then(() => {
         env.sandbox
@@ -121,7 +121,7 @@ describes.realWin(
       });
     });
 
-    // TODO(jasonpang): This fails on master under headless Chrome.
+    // TODO(jasonpang): This fails during CI under headless Chrome.
     it.skip('should request notification permissions when redirected', () => {
       return setupPermissionDialogFrame().then(() => {
         env.sandbox
@@ -142,7 +142,7 @@ describes.realWin(
       });
     });
 
-    // TODO(jasonpang): This fails on master under headless Chrome.
+    // TODO(jasonpang): This fails during CI under headless Chrome.
     it.skip('should redirect back to original site, when redirected', () => {
       let spy = null;
       return setupPermissionDialogFrame()

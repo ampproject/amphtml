@@ -68,7 +68,7 @@ async function writeDiffOrFail(
 
   if (!argv.fix) {
     log(red('ERROR:'), cyan(filepath), 'is missing the changes above.');
-    log('⤷ To automatically apply them, run', cyan(`gulp ${callerTask} --fix`));
+    log('⤷ To automatically apply them, run', cyan(`amp ${callerTask} --fix`));
     throw new Error(`${filepath} is outdated`);
   }
 

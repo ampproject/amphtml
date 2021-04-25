@@ -16,7 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const requestPromise = require('request-promise');
+const fetch = require('node-fetch');
 const {
   isCircleciBuild,
   isPullRequestBuild,
@@ -31,9 +31,9 @@ const {log} = require('../common/logging');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 
-const IS_GULP_INTEGRATION = argv._[0] === 'integration';
-const IS_GULP_UNIT = argv._[0] === 'unit';
-const IS_GULP_E2E = argv._[0] === 'e2e';
+const IS_AMP_INTEGRATION = argv._[0] === 'integration';
+const IS_AMP_UNIT = argv._[0] === 'unit';
+const IS_AMP_E2E = argv._[0] === 'e2e';
 
 const TEST_TYPE_SUBTYPES = isGithubActionsBuild()
   ? new Map([
@@ -69,11 +69,11 @@ const TEST_TYPE_BUILD_TARGETS = new Map([
  */
 function inferTestType() {
   // Determine type (early exit if there's no match).
-  const type = IS_GULP_E2E
+  const type = IS_AMP_E2E
     ? 'e2e'
-    : IS_GULP_INTEGRATION
+    : IS_AMP_INTEGRATION
     ? 'integration'
-    : IS_GULP_UNIT
+    : IS_AMP_UNIT
     ? 'unit'
     : null;
   if (type == null) {
@@ -126,17 +126,17 @@ async function postReport(type, action) {
     const commitHash = gitCommitHash();
 
     try {
-      const body = await requestPromise({
+      const url = `${reportBaseUrl}/${commitHash}/${type}/${action}`;
+      const response = await fetch(url, {
         method: 'POST',
-        uri: `${reportBaseUrl}/${commitHash}/${type}/${action}`,
         body: JSON.stringify({
           ciJobUrl: ciJobUrl(),
         }),
         headers: {
           'Content-Type': 'application/json',
         },
-        // Do not use `json: true` because the response is a string, not JSON.
       });
+      const body = await response.text();
 
       log('Reported', cyan(`${type}/${action}`), 'to GitHub');
       if (body.length > 0) {
@@ -209,12 +209,12 @@ async function reportAllExpectedTests() {
 
 /**
  * Callback to the Karma.Server on('run_complete') event for simple test types.
+ * Optionally takes an object containing test results if they were run.
  *
- * @param {!any} browsers
- * @param {!Karma.TestResults} results
+ * @param {?Karma.TestResults} results
  */
-async function reportTestRunComplete(browsers, results) {
-  if (results.error) {
+async function reportTestRunComplete(results) {
+  if (!results || results.error) {
     await reportTestErrored();
   } else {
     await reportTestFinished(results.success, results.failed);

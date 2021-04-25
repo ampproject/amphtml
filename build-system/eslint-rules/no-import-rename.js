@@ -21,19 +21,19 @@ const path = require('path');
 // name. This aids in writing lint rules for these imports.
 //
 // GOOD
-// import { dict } from 'src/utils/object';
+// import { dict } from 'src/core/types/object';
 // dict();
 //
 // BAD
-// import * as obj from 'src/utils/object';
+// import * as obj from 'src/core/types/object';
 // obj.dict()
 //
 // Bad
-// import { dict as otherName } from 'src/utils/object';
+// import { dict as otherName } from 'src/core/types/object';
 // otherName()
 
 const imports = {
-  'src/utils/object': ['dict'],
+  'src/core/types/object': ['dict'],
   'src/static-template': ['htmlFor'],
   'src/experiments': ['isExperimentOn'],
   'src/style': [
@@ -55,7 +55,6 @@ module.exports = function (context) {
    * @param {*} node
    * @param {string} modulePath
    * @param {*} mods
-   * @return {void}
    */
   function ImportSpecifier(node, modulePath, mods) {
     const {imported, local} = node;

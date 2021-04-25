@@ -15,15 +15,17 @@
  */
 'use strict';
 
+const fetch = require('node-fetch');
 const fs = require('fs-extra');
 const path = require('path');
-const request = require('request-promise');
-const {ciBuildSha} = require('../common/ci');
+const {ciBuildSha, circleciBuildNumber} = require('../common/ci');
 const {cyan} = require('kleur/colors');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {replaceUrls: replaceUrlsAppUtil} = require('../server/app-utils');
 
 const hostNamePrefix = 'https://storage.googleapis.com/amp-test-website-1';
+const prDeployBotBaseUrl =
+  'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
 
 /**
  * @param {string} dest
@@ -59,14 +61,7 @@ async function replace(filePath) {
   const data = await fs.readFile(filePath, 'utf8');
   const hostName = getBaseUrl();
   const inabox = false;
-  const storyV1 = true;
-  const result = replaceUrlsAppUtil(
-    'compiled',
-    data,
-    hostName,
-    inabox,
-    storyV1
-  );
+  const result = replaceUrlsAppUtil('compiled', data, hostName, inabox);
 
   await fs.writeFile(filePath, result, 'utf8');
 }
@@ -95,9 +90,9 @@ async function signalPrDeployUpload(result) {
     'to the pr-deploy GitHub App...'
   );
   const sha = ciBuildSha();
-  const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
-  const url = `${baseUrl}headshas/${sha}/${result}`;
-  await request.post(url);
+  const maybeJobId = result == 'success' ? `/${circleciBuildNumber()}` : '';
+  const url = `${prDeployBotBaseUrl}headshas/${sha}/${result}${maybeJobId}`;
+  await fetch(url, {method: 'POST'});
 }
 
 module.exports = {

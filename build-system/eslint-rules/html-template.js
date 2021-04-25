@@ -31,7 +31,6 @@ const {
 module.exports = function (context) {
   /**
    * @param {CompilerNode} node
-   * @return {void}
    */
   function tagCannotBeCalled(node) {
     const {name} = node.callee;
@@ -47,7 +46,6 @@ module.exports = function (context) {
 
   /**
    * @param {CompilerNode} node
-   * @return {void}
    */
   function factoryUsage(node) {
     const {parent} = node;
@@ -56,7 +54,8 @@ module.exports = function (context) {
     const expectedTagName = staticTemplateFactories[name];
 
     if (parent.type === 'TaggedTemplateExpression' && parent.tag === node) {
-      return tagUsage(parent, `${name}()`);
+      tagUsage(parent, `${name}()`);
+      return;
     }
 
     if (
@@ -89,7 +88,6 @@ module.exports = function (context) {
   /**
    * @param {CompilerNode} node
    * @param {string} opt_name
-   * @return {void}
    */
   function tagUsage(node, opt_name) {
     const {quasi, tag} = node;

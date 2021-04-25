@@ -23,7 +23,7 @@ import {
   mockWindowInterface,
 } from '../../../../testing/test-helper';
 import {Services} from '../../../../src/services';
-import {hasOwn} from '../../../../src/utils/object';
+import {hasOwn} from '../../../../src/core/types/object';
 import {macroTask} from '../../../../testing/yield';
 import VENDOR_REQUESTS from './vendor-requests.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 
@@ -135,7 +135,7 @@ describes.realWin(
                 'Request for ' +
                   vendor +
                   ' not found. Please make sure you run ' +
-                  '"gulp analytics-vendor-configs" or build amp-analytics ' +
+                  '"amp analytics-vendor-configs" or build amp-analytics ' +
                   'before running the test'
               );
             }

@@ -15,7 +15,7 @@
  */
 
 import {AnimationRunner} from './animation-runner';
-import {Observable} from '../../../../src/observable';
+import {Observable} from '../../../../src/core/data-structures/observable';
 import {
   WebAnimationDef,
   WebAnimationPlayState,
@@ -29,7 +29,7 @@ import {
   WebSwitchAnimationDef,
 } from '../web-animation-types';
 import {assertDoesNotContainDisplay, setStyles} from '../../../../src/style';
-import {pureDevAssert as devAssert} from '../../../../src/core/assert';
+import {devAssert} from '../../../../src/log';
 import {getTotalDuration} from './utils';
 
 /**

@@ -20,6 +20,8 @@
 .i-amphtml-story-system-layer {
   background: linear-gradient(to bottom, rgba(0, 0, 0, 0.32), transparent) !important;
   position: absolute !important;
+  display: flex !important;
+  justify-content: space-between !important;
   top: 0 !important;
   left: 0 !important;
   right: 0 !important;
@@ -51,6 +53,58 @@
 
 .i-amphtml-story-desktop-panels.i-amphtml-story-bookend-active.i-amphtml-story-system-layer {
   opacity: 0 !important;
+}
+
+.i-amphtml-story-attribution {
+  top: 0 !important;
+  border: none !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  padding: 6px 8px 0 !important;
+  height: 48px !important;
+  place-items: center !important;
+  display: flex !important;
+  text-decoration: none !important;
+  overflow: hidden !important;
+  visibility: hidden !important;
+}
+
+.i-amphtml-story-attribution-visible {
+  visibility: visible !important;
+}
+
+[desktop] .i-amphtml-story-attribution {
+  padding: 6px 6px 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+}
+
+.i-amphtml-story-attribution > * {
+  margin: 0px 4px !important;
+}
+
+.i-amphtml-story-attribution-logo-container {
+  display: grid !important;
+  place-items: center !important;
+}
+
+.i-amphtml-story-attribution-logo {
+  border-radius: 100% !important;
+  border: 1px solid #D4D4D4 !important;
+  width: 28px !important;
+  height: 28px !important;
+  object-fit: cover !important;
+  box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.12) !important;
+}
+
+.i-amphtml-story-attribution-text {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.16) !important;
+  color: #FFFF !important;
 }
 
 .i-amphtml-story-system-layer-buttons,
@@ -113,7 +167,8 @@
   z-index: 100001 !important;
 }
 
-[ad-showing] .i-amphtml-story-progress-bar {
+[ad-showing] .i-amphtml-story-progress-bar,
+[ad-showing] .i-amphtml-story-attribution {
   visibility: hidden !important;
 }
 
@@ -261,6 +316,10 @@
 
 .i-amphtml-story-has-playback-ui:not([paused]) .i-amphtml-story-pause-control,
 .i-amphtml-story-has-playback-ui[paused] .i-amphtml-story-play-control {
+  display: block !important;
+}
+
+.amp-mode-keyboard-active:not([desktop]) .i-amphtml-paused-display {
   display: block !important;
 }
 
@@ -448,7 +507,8 @@
 }
 
 .i-amphtml-story-desktop-panels.i-amphtml-story-system-layer .i-amphtml-story-system-layer-buttons,
-.i-amphtml-story-desktop-panels.i-amphtml-story-system-layer .i-amphtml-story-system-layer-buttons-start-position
+.i-amphtml-story-desktop-panels.i-amphtml-story-system-layer .i-amphtml-story-system-layer-buttons-start-position,
+.i-amphtml-story-desktop-panels.i-amphtml-story-system-layer .i-amphtml-story-attribution
  {
   position: fixed !important;
   top: 0 !important;

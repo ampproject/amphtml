@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {pureDevAssert as devAssert} from '../../src/core/assert';
+import {devAssert} from '../../src/log';
 import {getStyle, setStyle, setStyles} from '../../src/style';
 import {loadScript, validateData} from '../../3p/3p';
 import {tryParseJson} from '../../src/json.js';

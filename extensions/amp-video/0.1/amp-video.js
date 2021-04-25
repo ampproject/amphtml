@@ -15,9 +15,10 @@
  */
 
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {VisibilityState} from '../../../src/visibility-state';
+import {VisibilityState} from '../../../src/core/constants/visibility-state';
 import {addParamsToUrl} from '../../../src/url';
 import {
   childElement,
@@ -32,6 +33,7 @@ import {
 } from '../../../src/dom';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert, user} from '../../../src/log';
+import {fetchCachedSources} from './video-cache';
 import {getBitrateManager} from './flexible-bitrate';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
@@ -40,16 +42,12 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen, listenOncePromise} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {
-  observeContentSize,
-  unobserveContentSize,
-} from '../../../src/utils/size-observer';
-import {
   propagateObjectFitStyles,
   setImportantStyles,
   setInitialDisplay,
   setStyles,
 } from '../../../src/style';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 const TAG = 'amp-video';
 
@@ -166,13 +164,11 @@ export class AmpVideo extends AMP.BaseElement {
     /** @visibleForTesting {?Element} */
     this.posterDummyImageForTesting_ = null;
 
-    /** @private {boolean} */
-    this.isPlaying_ = false;
-
     /** @private {?boolean} whether there are sources that will use a BitrateManager */
     this.hasBitrateSources_ = null;
 
-    this.pauseWhenNoSize_ = this.pauseWhenNoSize_.bind(this);
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -264,11 +260,17 @@ export class AmpVideo extends AMP.BaseElement {
     // Cached so mediapool operations (eg: swapping sources) don't interfere with this bool.
     this.hasBitrateSources_ =
       !!this.element.querySelector('source[data-bitrate]') ||
-      this.hasAnyCachedSources_();
+      this.hasAnyCachedSources_() ||
+      this.element.hasAttribute('cache');
 
     installVideoManagerForDoc(element);
 
     Services.videoManagerForDoc(element).register(this);
+
+    // Fetch and add cached sources URLs if opted-in, and if the sources don't already contained cached URLs from the AMP Cache.
+    if (this.element.hasAttribute('cache') && !this.hasAnyCachedSources_()) {
+      return fetchCachedSources(this.element, this.win);
+    }
   }
 
   /**
@@ -699,26 +701,7 @@ export class AmpVideo extends AMP.BaseElement {
     if (this.isManagedByPool_()) {
       return;
     }
-    if (isPlaying === this.isPlaying_) {
-      return;
-    }
-    this.isPlaying_ = isPlaying;
-    if (isPlaying) {
-      observeContentSize(this.element, this.pauseWhenNoSize_);
-    } else {
-      unobserveContentSize(this.element, this.pauseWhenNoSize_);
-    }
-  }
-
-  /**
-   * @param {!../../../src/layout-rect.LayoutSizeDef} size
-   * @private
-   */
-  pauseWhenNoSize_({width, height}) {
-    const hasSize = width > 0 && height > 0;
-    if (!hasSize && this.video_) {
-      this.video_.pause();
-    }
+    this.pauseHelper_.updatePlaying(isPlaying);
   }
 
   /** @private */

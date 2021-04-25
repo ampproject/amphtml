@@ -22,9 +22,9 @@
  * Instead, the runtime loads it when encountering an <amp-img>.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {AutoLightboxEvents} from '../../../src/auto-lightbox';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Services} from '../../../src/services';
 import {
   closestAncestorElementBySelector,
@@ -32,7 +32,8 @@ import {
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
-import {toArray} from '../../../src/types';
+import {measureIntersectionNoRoot} from '../../../src/utils/intersection-no-root';
+import {toArray} from '../../../src/core/types/array';
 import {tryParseJson} from '../../../src/json';
 
 const TAG = 'amp-auto-lightbox';
@@ -124,11 +125,13 @@ const getRootNode = (ampdoc) => ampdoc.getRootNode();
 export class Criteria {
   /**
    * @param {!Element} element
+   * @param {number} renderWidth
+   * @param {number} renderHeight
    * @return {boolean}
    */
-  static meetsAll(element) {
+  static meetsAll(element, renderWidth, renderHeight) {
     return (
-      Criteria.meetsSizingCriteria(element) &&
+      Criteria.meetsSizingCriteria(element, renderWidth, renderHeight) &&
       Criteria.meetsTreeShapeCriteria(element)
     );
   }
@@ -152,14 +155,14 @@ export class Criteria {
 
   /**
    * @param {!Element} element
+   * @param {number} renderWidth
+   * @param {number} renderHeight
    * @return {boolean}
    */
-  static meetsSizingCriteria(element) {
+  static meetsSizingCriteria(element, renderWidth, renderHeight) {
     const {naturalWidth, naturalHeight} = getMaxNaturalDimensions(
       dev().assertElement(element.querySelector('img'))
     );
-
-    const {width: renderWidth, height: renderHeight} = element.getLayoutSize();
 
     const viewport = Services.viewportForDoc(element);
     const {width: vw, height: vh} = viewport.getSize();
@@ -435,16 +438,21 @@ export function apply(ampdoc, element) {
 export function runCandidates(ampdoc, candidates) {
   return candidates.map((candidate) =>
     whenLoaded(candidate).then(() => {
-      // <amp-img> will change the img's src inline data on unlayout and remove
-      // it from DOM, but a LOAD_END event would still be triggered afterwards.
-      if (candidate.signals().get(CommonSignals.UNLOAD)) {
-        return;
-      }
-      if (!Criteria.meetsAll(candidate)) {
-        return;
-      }
-      dev().info(TAG, 'apply', candidate);
-      return apply(ampdoc, candidate);
+      return measureIntersectionNoRoot(candidate).then(
+        ({boundingClientRect}) => {
+          // <amp-img> will change the img's src inline data on unlayout and
+          // remove it from DOM.
+          if (!candidate.signals().get(CommonSignals.LOAD_END)) {
+            return;
+          }
+          const {width, height} = boundingClientRect;
+          if (!Criteria.meetsAll(candidate, width, height)) {
+            return;
+          }
+          dev().info(TAG, 'apply', candidate);
+          return apply(ampdoc, candidate);
+        }
+      );
     }, NOOP)
   );
 }

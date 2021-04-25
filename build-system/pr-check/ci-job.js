@@ -21,11 +21,15 @@ const {
   startTimer,
   stopTimer,
 } = require('./utils');
+const {
+  logWithoutTimestamp,
+  setLoggingPrefix,
+  getLoggingPrefix,
+} = require('../common/logging');
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
-const {runNpmChecks} = require('./npm-checks');
-const {setLoggingPrefix} = require('../common/logging');
-const {updatePackages} = require('../tasks/update-packages');
+const {red} = require('kleur/colors');
+const {updatePackages} = require('../common/update-packages');
 
 /**
  * Helper used by all CI job scripts. Runs the PR / push build workflow.
@@ -36,19 +40,20 @@ const {updatePackages} = require('../tasks/update-packages');
 async function runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow) {
   setLoggingPrefix(jobName);
   const startTime = startTimer(jobName);
-  updatePackages();
-  if (!runNpmChecks()) {
+  try {
+    updatePackages();
+    if (isPullRequestBuild()) {
+      printChangeSummary();
+      determineBuildTargets();
+      await prBuildWorkflow();
+    } else {
+      await pushBuildWorkflow();
+    }
+    stopTimer(jobName, startTime);
+  } catch (err) {
+    logWithoutTimestamp(getLoggingPrefix(), red('ERROR:'), err);
     abortTimedJob(jobName, startTime);
-    return;
   }
-  if (isPullRequestBuild()) {
-    printChangeSummary();
-    determineBuildTargets();
-    await prBuildWorkflow();
-  } else {
-    await pushBuildWorkflow();
-  }
-  stopTimer(jobName, startTime);
 }
 
 module.exports = {

@@ -15,10 +15,11 @@
  */
 import '../amp-sidebar';
 import {ActionInvocation} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
+import {createElementWithAttributes} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {waitFor, whenCalled} from '../../../../testing/test-helper';
 
 describes.realWin(
   'amp-sidebar:1.0',
@@ -31,6 +32,10 @@ describes.realWin(
     async function waitForOpen(el, open) {
       const isOpenOrNot = () => el.hasAttribute('open') === open;
       await waitFor(isOpenOrNot, 'element open updated');
+    }
+
+    function isMounted(win, container) {
+      return win.getComputedStyle(container)['display'] !== 'none';
     }
 
     describe('basic actions', () => {
@@ -100,7 +105,7 @@ describes.realWin(
         win.document.body.appendChild(fullHtml);
         await element.buildInternal();
 
-        container = element.shadowRoot.firstElementChild;
+        container = element.shadowRoot.firstElementChild.firstElementChild;
         openButton = fullHtml.querySelector('#open');
         closeButton = fullHtml.querySelector('#close');
         toggleButton = fullHtml.querySelector('#toggle');
@@ -114,51 +119,74 @@ describes.realWin(
       it('open attribute is synced with component mounted', async () => {
         // sidebar is initially closed
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
 
         openButton.click();
         await waitForOpen(element, true);
 
         expect(element).to.have.attribute('open');
-        expect(container.children.length).to.not.equal(0);
+        expect(isMounted(win, container)).to.equal(true);
 
         closeButton.click();
         await waitForOpen(element, false);
 
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
       });
 
       it('should open and close when "open" attribute is set', async () => {
         // sidebar is initially closed
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
+        env.sandbox.stub(element, 'setAsContainerInternal');
+        env.sandbox.stub(element, 'removeAsContainerInternal');
+
+        // Sidebar has a child.
+        const child = createElementWithAttributes(win.document, 'amp-img', {
+          layout: 'nodisplay',
+        });
+        element.appendChild(child);
+        env.sandbox.stub(child, 'pause');
+        env.sandbox.stub(child, 'unmount');
 
         element.setAttribute('open', '');
         await waitForOpen(element, true);
 
         expect(element).to.have.attribute('open');
-        expect(container.children.length).to.not.equal(0);
+        expect(isMounted(win, container)).to.equal(true);
+
+        await whenCalled(element.setAsContainerInternal);
+        const sidebar = element.shadowRoot.querySelector('[part=sidebar]');
+        expect(sidebar).to.exist;
+        expect(element.setAsContainerInternal).to.be.calledOnce.calledWith(
+          sidebar
+        );
+        expect(element.removeAsContainerInternal).to.not.be.called;
 
         element.removeAttribute('open');
         await waitForOpen(element, false);
 
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
+
+        expect(element.removeAsContainerInternal).to.be.calledOnce;
+        expect(element.setAsContainerInternal).to.be.calledOnce; // no change.
+        expect(child.pause).to.be.calledOnce;
+        expect(child.unmount).to.not.be.called;
       });
 
       it('should close when the backdrop is clicked', async () => {
         element.enqueAction(invocation('open'));
         await waitForOpen(element, true);
 
-        expect(container.children.length).to.equal(2);
+        expect(isMounted(win, container)).to.equal(true);
         const backdrop = container.children[1];
         backdrop.click();
 
         await waitForOpen(element, false);
 
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
       });
 
       it('should close the sidebar when the esc key is pressed', async () => {
@@ -166,7 +194,7 @@ describes.realWin(
         await waitForOpen(element, true);
 
         // sidebar is opened, wait for eventListener to be attached
-        expect(container.children.length).to.equal(2);
+        expect(isMounted(win, container)).to.equal(true);
         const sidebar = container.children[0];
         const doc = sidebar.ownerDocument;
         const addListenerSpy = env.sandbox.spy(doc, 'addEventListener');
@@ -185,12 +213,12 @@ describes.realWin(
         // verify sidebar is closed
         await waitForOpen(element, false);
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
       });
 
       it('should render all children of the sidebar', async () => {
         // closed sidebar should not render any content
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
 
         // open the sidebar
         openButton.click();
@@ -198,7 +226,7 @@ describes.realWin(
         expect(element).to.have.attribute('open');
 
         // confirm slot within the shadow root
-        expect(container.children.length).to.equal(2);
+        expect(isMounted(win, container)).to.equal(true);
         expect(container.children[0].firstElementChild).to.be.ok;
         expect(container.children[0].firstElementChild.firstElementChild).to.be
           .ok;
@@ -383,7 +411,7 @@ describes.realWin(
         element = fullHtml.firstElementChild;
         win.document.body.appendChild(fullHtml);
         await element.buildInternal();
-        container = element.shadowRoot.firstElementChild;
+        container = element.shadowRoot.firstElementChild.firstElementChild;
         openButton = fullHtml.querySelector('#open');
 
         // open the sidebar
@@ -413,7 +441,7 @@ describes.realWin(
         element = fullHtml.firstElementChild;
         win.document.body.appendChild(fullHtml);
         await element.buildInternal();
-        container = element.shadowRoot.firstElementChild;
+        container = element.shadowRoot.firstElementChild.firstElementChild;
         openButton = fullHtml.querySelector('#open');
 
         // open the sidebar
@@ -595,7 +623,7 @@ describes.realWin(
         win.document.body.appendChild(fullHtml);
         await element.buildInternal();
 
-        container = element.shadowRoot.firstElementChild;
+        container = element.shadowRoot.firstElementChild.firstElementChild;
         openButton = fullHtml.querySelector('#open');
         closeButton = fullHtml.querySelector('#close');
       });
@@ -616,7 +644,7 @@ describes.realWin(
 
         // sidebar is initially closed
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
 
         openButton.click();
         await waitForOpen(element, true);
@@ -626,7 +654,7 @@ describes.realWin(
         animation.onfinish();
 
         expect(element).to.have.attribute('open');
-        expect(container.children.length).to.not.equal(0);
+        expect(isMounted(win, container)).to.equal(true);
       });
 
       it('should animate collapse', async () => {
@@ -635,7 +663,7 @@ describes.realWin(
 
         // sidebar is initially closed
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
 
         // synchronous open
         openButton.click();
@@ -655,12 +683,12 @@ describes.realWin(
 
         // still displayed while animating
         expect(element).to.have.attribute('open');
-        expect(container.children.length).to.not.equal(0);
+        expect(isMounted(win, container)).to.equal(true);
 
         animation.onfinish();
         await waitForOpen(element, false);
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
       });
 
       it('should reverse animations if closed while opening', async () => {
@@ -672,7 +700,7 @@ describes.realWin(
 
         // sidebar is initially closed
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
 
         // begin open animation
         openButton.click();
@@ -698,7 +726,7 @@ describes.realWin(
 
         // sidebar is initially closed
         expect(element).to.not.have.attribute('open');
-        expect(container.children.length).to.equal(0);
+        expect(isMounted(win, container)).to.equal(false);
 
         // synchronous open
         openButton.click();
@@ -712,7 +740,7 @@ describes.realWin(
 
         // sidebar is initially opened
         expect(element).to.have.attribute('open');
-        expect(container.children.length).to.not.equal(0);
+        expect(isMounted(win, container)).to.equal(true);
 
         // begin close animation
         closeButton.click();

@@ -18,26 +18,27 @@
 const compiler = require('@ampproject/google-closure-compiler');
 const vinylFs = require('vinyl-fs');
 const {cyan, red, yellow} = require('kleur/colors');
-const {getBabelCacheDir} = require('./pre-closure-babel');
-const {highlight} = require('cli-highlight');
+const {getBabelOutputDir} = require('./pre-closure-babel');
 const {log, logWithoutTimestamp} = require('../common/logging');
 
 /**
- * Logs a closure compiler error message after formatting it into a more
- * readable form by dropping the plugin's logging prefix, normalizing paths,
- * emphasizing errors and warnings, and syntax highlighting the error text.
+ * Logs a closure compiler error message after syntax highlighting it and then
+ * formatting it into a more readable form by dropping the plugin's logging
+ * prefix, normalizing paths, and emphasizing errors and warnings.
  * @param {string} message
  */
 function logClosureCompilerError(message) {
   log(red('ERROR:'));
-  const babelCacheDir = `${getBabelCacheDir()}/`;
+  const babelOutputDir = `${getBabelOutputDir()}/`;
   const loggingPrefix = /^.*?gulp-google-closure-compiler.*?: /;
-  const formattedMessage = message
+  const {highlight} = require('cli-highlight'); // Lazy-required to speed up task loading.
+  const highlightedMessage = highlight(message, {ignoreIllegals: true});
+  const formattedMessage = highlightedMessage
     .replace(loggingPrefix, '')
-    .replace(new RegExp(babelCacheDir, 'g'), '')
+    .replace(new RegExp(babelOutputDir, 'g'), '')
     .replace(/ ERROR /g, red(' ERROR '))
     .replace(/ WARNING /g, yellow(' WARNING '));
-  logWithoutTimestamp(highlight(formattedMessage, {ignoreIllegals: true}));
+  logWithoutTimestamp(formattedMessage);
 }
 
 /**
@@ -86,7 +87,7 @@ function initializeClosure(flags) {
 function runClosure(outputFilename, options, flags, srcFiles) {
   return new Promise((resolve, reject) => {
     vinylFs
-      .src(srcFiles, {base: getBabelCacheDir()})
+      .src(srcFiles, {base: getBabelOutputDir()})
       .pipe(initializeClosure(flags))
       .on('error', (err) => {
         const reason = handleClosureCompilerError(err, outputFilename, options);

@@ -24,11 +24,11 @@ import {
   serializeQueryString,
 } from '../../../src/url';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
-import {isArray} from '../../../src/types';
+import {isArray} from '../../../src/core/types';
 import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
