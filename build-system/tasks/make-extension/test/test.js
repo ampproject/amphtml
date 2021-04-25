@@ -37,30 +37,144 @@ test('writeFromTemplateDir', async (t) =>
     t.is(await readFile(`${dir}/file-bazzzzz.txt`, 'utf-8'), 'Constant.\n');
   }));
 
-test('insertExtensionBundlesConfig', async (t) =>
-  tempy.directory.task(async (dir) => {
-    const destination = path.join(dir, 'bundles.json');
+test('insertExtensionBundlesConfig inserts new entry', async (t) =>
+  tempy.file.task(
+    async (destination) => {
+      await writeJson(destination, [
+        {
+          name: '_',
+        },
+        {
+          name: 'z',
+        },
+      ]);
 
-    await writeJson(destination, [{name: '_'}, {name: 'z'}]);
+      await insertExtensionBundlesConfig(
+        {
+          name: 'a',
+          version: 'x',
+          options: {hasCss: true},
+        },
+        destination
+      );
 
-    await insertExtensionBundlesConfig(
-      {
-        name: 'a',
-        version: 'x',
-        options: {hasCss: true},
-      },
-      destination
-    );
+      t.deepEqual(await readJson(destination), [
+        // inserted in lexicographical order by name:
+        {
+          name: '_',
+        },
+        {
+          name: 'a',
+          version: 'x',
+          latestVersion: 'x',
+          options: {hasCss: true},
+        },
+        {
+          name: 'z',
+        },
+      ]);
+    },
+    {extension: 'json'}
+  ));
 
-    t.deepEqual(await readJson(destination), [
-      {name: '_'},
-      // inserted in lexicographical order by name:
-      {
-        name: 'a',
-        version: 'x',
-        latestVersion: 'x',
-        options: {hasCss: true},
-      },
-      {name: 'z'},
-    ]);
-  }));
+test('insertExtensionBundlesConfig uses existing latestVersion', async (t) =>
+  tempy.file.task(
+    async (destination) => {
+      await writeJson(destination, [
+        {
+          name: 'foo',
+          version: 'existing version',
+          latestVersion: 'existing version',
+        },
+      ]);
+
+      await insertExtensionBundlesConfig(
+        {
+          name: 'foo',
+          version: 'new version',
+        },
+        destination
+      );
+
+      t.deepEqual(await readJson(destination), [
+        {
+          name: 'foo',
+          version: 'existing version',
+          latestVersion: 'existing version',
+        },
+        {
+          name: 'foo',
+          version: 'new version',
+          latestVersion: 'existing version',
+        },
+      ]);
+    },
+    {extension: 'json'}
+  ));
+
+test('insertExtensionBundlesConfig uses passed latestVersion', async (t) =>
+  tempy.file.task(
+    async (destination) => {
+      await writeJson(destination, [
+        {
+          name: 'foo',
+          version: '_',
+        },
+      ]);
+
+      await insertExtensionBundlesConfig(
+        {
+          name: 'foo',
+          version: 'new version',
+          latestVersion: 'new version',
+        },
+        destination
+      );
+
+      t.deepEqual(await readJson(destination), [
+        {
+          name: 'foo',
+          version: '_',
+        },
+        {
+          name: 'foo',
+          version: 'new version',
+          latestVersion: 'new version',
+        },
+      ]);
+    },
+    {extension: 'json'}
+  ));
+
+test('insertExtensionBundlesConfig uses version as latestVersion', async (t) =>
+  tempy.file.task(
+    async (destination) => {
+      await writeJson(destination, [
+        {
+          name: 'foo',
+          version: '_',
+        },
+      ]);
+
+      await insertExtensionBundlesConfig(
+        {
+          name: 'foo',
+          version: 'new version',
+        },
+        destination
+      );
+
+      t.deepEqual(await readJson(destination), [
+        {
+          name: 'foo',
+          version: '_',
+        },
+        {
+          name: 'foo',
+          version: 'new version',
+          latestVersion: 'new version',
+        },
+      ]);
+    },
+    {extension: 'json'}
+  ));
