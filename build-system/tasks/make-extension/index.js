@@ -113,15 +113,24 @@ async function writeFromTemplateDir(
 /**
  * @param {Array<string>} templateDirs
  * @param {string=} destinationDir
+ * @param {{
+ *   version: (string|undefined),
+ *   bento: (boolean|undefined),
+ *   name: (string|undefined),
+ * }} options
  * @return {Promise<{
  *   name: string,
  *   version: string,
  *   options: ({hasCss: boolean}|undefined)
  * }|void>}
  */
-async function makeExtensionFromTemplates(templateDirs, destinationDir = '.') {
-  const version = argv.version || argv.bento ? '1.0' : '0.1';
-  const name = (argv.name || '').replace(/^amp-/, '');
+async function makeExtensionFromTemplates(
+  templateDirs,
+  destinationDir = '.',
+  options = argv
+) {
+  const version = options.version || options.bento ? '1.0' : '0.1';
+  const name = (options.name || '').replace(/^amp-/, '');
   if (!name) {
     log(red('ERROR:'), 'Must specify component name with', cyan('--name'));
     return;
@@ -171,7 +180,7 @@ ${green('FINISHED:')} Boilerplate for your new ${cyan(
 
   const unitTestFile = `extensions/amp-${name}/${version}/test/test-amp-${name}.js`;
   try {
-    fs.access(unitTestFile);
+    await fs.access(unitTestFile);
     log(`
 You can run tests on your new component with the following command:
     ${cyan(`amp unit --files=${unitTestFile}`)}
@@ -217,9 +226,10 @@ async function makeExtension() {
 }
 
 module.exports = {
-  writeFromTemplateDir,
-  makeExtension,
   insertExtensionBundlesConfig,
+  makeExtension,
+  makeExtensionFromTemplates,
+  writeFromTemplateDir,
 };
 
 makeExtension.description = 'Create an extension skeleton';
