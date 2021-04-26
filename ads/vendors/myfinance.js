@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {validateData, writeScript} from '../../3p/3p';
+import { validateData, writeScript } from '../../3p/3p';
 
 const mandatoryFields = ['adType'];
 
@@ -29,6 +29,9 @@ export function myfinance(global, data) {
   if (!data['mf_referrer']) {
     data['mf_referrer'] =
       global.context.canonicalUrl || global.context.sourceUrl;
+  }
+  if (!data['ampClientId']) {
+    data['ampClientId'] = global.context.clientId;
   }
   const url = buildUrl(data);
   global.MF_AMP_DATA = data;
