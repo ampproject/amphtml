@@ -67,7 +67,7 @@ amp-story:not([desktop]) .i-amphtml-story-button-move,
   pointer-events: none !important;
   background-repeat: no-repeat !important;
   position: absolute !important;
-  border-radius: 50% !important;
+  border-radius: 5px !important;
   width: 100% !important;
   height: 100% !important;
   background-color: transparent !important;
