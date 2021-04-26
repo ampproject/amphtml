@@ -18,10 +18,10 @@ export default {
   // These files need equivalents for CI in build-system/pr-check/build-targets.js
   // (see targetMatchers[Targets.AVA])
   files: [
-    // 'build-system/tasks/get-zindex/get-zindex.test.js',
+    'build-system/tasks/get-zindex/get-zindex.test.js',
     'build-system/tasks/make-extension/test/test.js',
-    // 'build-system/tasks/markdown-toc/test/test.js',
-    // 'build-system/tasks/prepend-global/prepend-global.test.js',
+    'build-system/tasks/markdown-toc/test/test.js',
+    'build-system/tasks/prepend-global/prepend-global.test.js',
   ],
   ignoredByWatcher: [
     '.*-cache/**',
