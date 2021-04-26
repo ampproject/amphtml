@@ -23,6 +23,7 @@ const {
 } = require('./insert-extension-bundles-config');
 const {cyan, green, red, yellow} = require('kleur/colors');
 const {execOrThrow} = require('../../common/exec');
+const {format} = require('./format');
 const {log} = require('../../common/logging');
 
 /**
@@ -168,12 +169,7 @@ async function makeExtensionFromTemplates(
     .filter((filename) => !filename.endsWith('.html'));
 
   if (formattable.length > 0) {
-    log('Formatting...');
-
-    execOrThrow(
-      `npx prettier --ignore-unknown --write ${formattable.join(' ')}`,
-      'Could not format files'
-    );
+    format(formattable);
   }
 
   log(`

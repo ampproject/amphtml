@@ -13,239 +13,255 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const ava = require('ava');
 const path = require('path');
 const tempy = require('tempy');
-const test = require('ava');
 const {readFile, writeJson, readJson, writeFile, mkdirp} = require('fs-extra');
 
-async function captureLog(fn) {
+/**
+ * Disables logging since it clutters the test output.
+ * @param {*} fn
+ * @param  {...any} args
+ */
+async function captureLog(fn, ...args) {
   const logging = require('../../../common/logging');
   const originalLog = logging.log;
   logging.log = () => {};
-  await fn();
+  await fn(...args);
   logging.log = originalLog;
 }
 
+/**
+ * Disables prettier since it's slow.
+ * @param {*} fn
+ * @param  {...any} args
+ */
+async function captureFormat(fn, ...args) {
+  const format = require('../format');
+  const originalFormat = format.format;
+  format.format = () => ({stdout: '', stderr: ''});
+  await fn(...args);
+  format.format = originalFormat;
+}
+
+function test(name, cb) {
+  return ava(name, (t) => captureFormat((t) => captureLog(cb, t), t));
+}
+
 test('writeFromTemplateDir', (t) =>
-  tempy.directory.task((dir) =>
-    captureLog(async () => {
-      const {writeFromTemplateDir} = require('..');
-      await writeFromTemplateDir(
-        path.join(__dirname, 'template/test-1'),
-        {
-          '__foo__': 'value-of-foo',
-          '__bar__': 'bar-value',
-          '__baz__': 'bazzzzz',
-        },
-        dir
-      );
-      t.is(
-        await readFile(`${dir}/x-value-of-foo/bar-value.txt`, 'utf-8'),
-        'This file is generated with values value-of-foo, bar-value, bazzzzz.\n'
-      );
-      t.is(await readFile(`${dir}/file-bazzzzz.txt`, 'utf-8'), 'Constant.\n');
-    })
-  ));
+  tempy.directory.task(async (dir) => {
+    const {writeFromTemplateDir} = require('..');
+    await writeFromTemplateDir(
+      path.join(__dirname, 'template/test-1'),
+      {
+        '__foo__': 'value-of-foo',
+        '__bar__': 'bar-value',
+        '__baz__': 'bazzzzz',
+      },
+      dir
+    );
+    t.is(
+      await readFile(`${dir}/x-value-of-foo/bar-value.txt`, 'utf-8'),
+      'This file is generated with values value-of-foo, bar-value, bazzzzz.\n'
+    );
+    t.is(await readFile(`${dir}/file-bazzzzz.txt`, 'utf-8'), 'Constant.\n');
+  }));
 
 test('writeFromTemplateDir skips existing files', (t) =>
-  tempy.directory.task((dir) =>
-    captureLog(async () => {
-      const {writeFromTemplateDir} = require('..');
-      await mkdirp(`${dir}/x-value-of-foo/`);
-      await writeFile(`${dir}/x-value-of-foo/bar-value.txt`, 'Original.\n');
-      await writeFromTemplateDir(
-        path.join(__dirname, 'template/test-1'),
-        {
-          '__foo__': 'value-of-foo',
-          '__bar__': 'bar-value',
-          '__baz__': 'bazzzzz',
-        },
-        dir
-      );
-      t.is(
-        await readFile(`${dir}/x-value-of-foo/bar-value.txt`, 'utf-8'),
-        'Original.\n'
-      );
-      t.is(await readFile(`${dir}/file-bazzzzz.txt`, 'utf-8'), 'Constant.\n');
-    })
-  ));
+  tempy.directory.task(async (dir) => {
+    const {writeFromTemplateDir} = require('..');
+    await mkdirp(`${dir}/x-value-of-foo/`);
+    await writeFile(`${dir}/x-value-of-foo/bar-value.txt`, 'Original.\n');
+    await writeFromTemplateDir(
+      path.join(__dirname, 'template/test-1'),
+      {
+        '__foo__': 'value-of-foo',
+        '__bar__': 'bar-value',
+        '__baz__': 'bazzzzz',
+      },
+      dir
+    );
+    t.is(
+      await readFile(`${dir}/x-value-of-foo/bar-value.txt`, 'utf-8'),
+      'Original.\n'
+    );
+    t.is(await readFile(`${dir}/file-bazzzzz.txt`, 'utf-8'), 'Constant.\n');
+  }));
 
 test('makeExtensionFromTemplates merges multiple templates', (t) =>
-  tempy.directory.task((dir) =>
-    captureLog(async () => {
-      const {makeExtensionFromTemplates} = require('..');
-      await makeExtensionFromTemplates(
-        [
-          path.join(__dirname, 'template/test-1'),
-          path.join(__dirname, 'template/test-2'),
-        ],
-        dir,
+  tempy.directory.task(async (dir) => {
+    const {makeExtensionFromTemplates} = require('..');
+    await makeExtensionFromTemplates(
+      [
+        path.join(__dirname, 'template/test-1'),
+        path.join(__dirname, 'template/test-2'),
+      ],
+      dir,
+      {
+        name: 'my-extension-name',
+      }
+    );
+
+    t.is(
+      await readFile(`${dir}/from-test-2/my-extension-name.txt`, 'utf-8'),
+      'foo\n'
+    );
+
+    // Replacement keys for test-1 are placeholders and are not set by
+    // makeExtensionTemplates, so they remain in the generated files.
+    t.is(
+      await readFile(`${dir}/x-__foo__/__bar__.txt`, 'utf-8'),
+      'This file is generated with values __foo__, __bar__, __baz__.\n'
+    );
+    t.is(await readFile(`${dir}/file-__baz__.txt`, 'utf-8'), 'Constant.\n');
+  }));
+
+test(
+  'insertExtensionBundlesConfig inserts new entry',
+  (t) =>
+    tempy.file.task(async (destination) => {
+      const {insertExtensionBundlesConfig} = require('..');
+      await writeJson(destination, [
         {
-          name: 'my-extension-name',
-        }
+          name: '_',
+        },
+        {
+          name: 'z',
+        },
+      ]);
+
+      await insertExtensionBundlesConfig(
+        {
+          name: 'a',
+          version: 'x',
+          options: {hasCss: true},
+        },
+        destination
       );
 
-      t.is(
-        await readFile(`${dir}/from-test-2/my-extension-name.txt`, 'utf-8'),
-        'foo\n'
+      t.deepEqual(await readJson(destination), [
+        // inserted in lexicographical order by name:
+        {
+          name: '_',
+        },
+        {
+          name: 'a',
+          version: 'x',
+          latestVersion: 'x',
+          options: {hasCss: true},
+        },
+        {
+          name: 'z',
+        },
+      ]);
+    }),
+  {extension: 'json'}
+);
+
+test(
+  'insertExtensionBundlesConfig uses existing latestVersion',
+  (t) =>
+    tempy.file.task(async (destination) => {
+      const {insertExtensionBundlesConfig} = require('..');
+      await writeJson(destination, [
+        {
+          name: 'foo',
+          version: 'existing version',
+          latestVersion: 'existing version',
+        },
+      ]);
+
+      await insertExtensionBundlesConfig(
+        {
+          name: 'foo',
+          version: 'new version',
+        },
+        destination
       );
 
-      // Replacement keys for test-1 are placeholders and are not set by
-      // makeExtensionTemplates, so they remain in the generated files.
-      t.is(
-        await readFile(`${dir}/x-__foo__/__bar__.txt`, 'utf-8'),
-        'This file is generated with values __foo__, __bar__, __baz__.\n'
+      t.deepEqual(await readJson(destination), [
+        {
+          name: 'foo',
+          version: 'existing version',
+          latestVersion: 'existing version',
+        },
+        {
+          name: 'foo',
+          version: 'new version',
+          latestVersion: 'existing version',
+        },
+      ]);
+    }),
+  {extension: 'json'}
+);
+
+test(
+  'insertExtensionBundlesConfig uses passed latestVersion',
+  (t) =>
+    tempy.file.task(async (destination) => {
+      const {insertExtensionBundlesConfig} = require('..');
+      await writeJson(destination, [
+        {
+          name: 'foo',
+          version: '_',
+        },
+      ]);
+
+      await insertExtensionBundlesConfig(
+        {
+          name: 'foo',
+          version: 'new version',
+          latestVersion: 'new version',
+        },
+        destination
       );
-      t.is(await readFile(`${dir}/file-__baz__.txt`, 'utf-8'), 'Constant.\n');
-    })
-  ));
 
-test('insertExtensionBundlesConfig inserts new entry', (t) =>
-  tempy.file.task(
-    (destination) =>
-      captureLog(async () => {
-        const {insertExtensionBundlesConfig} = require('..');
-        await writeJson(destination, [
-          {
-            name: '_',
-          },
-          {
-            name: 'z',
-          },
-        ]);
+      t.deepEqual(await readJson(destination), [
+        {
+          name: 'foo',
+          version: '_',
+        },
+        {
+          name: 'foo',
+          version: 'new version',
+          latestVersion: 'new version',
+        },
+      ]);
+    }),
+  {extension: 'json'}
+);
 
-        await insertExtensionBundlesConfig(
-          {
-            name: 'a',
-            version: 'x',
-            options: {hasCss: true},
-          },
-          destination
-        );
+test(
+  'insertExtensionBundlesConfig uses version as latestVersion',
+  (t) =>
+    tempy.file.task(async (destination) => {
+      const {insertExtensionBundlesConfig} = require('..');
+      await writeJson(destination, [
+        {
+          name: 'foo',
+          version: '_',
+        },
+      ]);
 
-        t.deepEqual(await readJson(destination), [
-          // inserted in lexicographical order by name:
-          {
-            name: '_',
-          },
-          {
-            name: 'a',
-            version: 'x',
-            latestVersion: 'x',
-            options: {hasCss: true},
-          },
-          {
-            name: 'z',
-          },
-        ]);
-      }),
-    {extension: 'json'}
-  ));
+      await insertExtensionBundlesConfig(
+        {
+          name: 'foo',
+          version: 'new version',
+        },
+        destination
+      );
 
-test('insertExtensionBundlesConfig uses existing latestVersion', (t) =>
-  tempy.file.task(
-    (destination) =>
-      captureLog(async () => {
-        const {insertExtensionBundlesConfig} = require('..');
-        await writeJson(destination, [
-          {
-            name: 'foo',
-            version: 'existing version',
-            latestVersion: 'existing version',
-          },
-        ]);
-
-        await insertExtensionBundlesConfig(
-          {
-            name: 'foo',
-            version: 'new version',
-          },
-          destination
-        );
-
-        t.deepEqual(await readJson(destination), [
-          {
-            name: 'foo',
-            version: 'existing version',
-            latestVersion: 'existing version',
-          },
-          {
-            name: 'foo',
-            version: 'new version',
-            latestVersion: 'existing version',
-          },
-        ]);
-      }),
-    {extension: 'json'}
-  ));
-
-test('insertExtensionBundlesConfig uses passed latestVersion', (t) =>
-  tempy.file.task(
-    (destination) =>
-      captureLog(async () => {
-        const {insertExtensionBundlesConfig} = require('..');
-        await writeJson(destination, [
-          {
-            name: 'foo',
-            version: '_',
-          },
-        ]);
-
-        await insertExtensionBundlesConfig(
-          {
-            name: 'foo',
-            version: 'new version',
-            latestVersion: 'new version',
-          },
-          destination
-        );
-
-        t.deepEqual(await readJson(destination), [
-          {
-            name: 'foo',
-            version: '_',
-          },
-          {
-            name: 'foo',
-            version: 'new version',
-            latestVersion: 'new version',
-          },
-        ]);
-      }),
-    {extension: 'json'}
-  ));
-
-test('insertExtensionBundlesConfig uses version as latestVersion', (t) =>
-  tempy.file.task(
-    (destination) =>
-      captureLog(async () => {
-        const {insertExtensionBundlesConfig} = require('..');
-        await writeJson(destination, [
-          {
-            name: 'foo',
-            version: '_',
-          },
-        ]);
-
-        await insertExtensionBundlesConfig(
-          {
-            name: 'foo',
-            version: 'new version',
-          },
-          destination
-        );
-
-        t.deepEqual(await readJson(destination), [
-          {
-            name: 'foo',
-            version: '_',
-          },
-          {
-            name: 'foo',
-            version: 'new version',
-            latestVersion: 'new version',
-          },
-        ]);
-      }),
-    {extension: 'json'}
-  ));
+      t.deepEqual(await readJson(destination), [
+        {
+          name: 'foo',
+          version: '_',
+        },
+        {
+          name: 'foo',
+          version: 'new version',
+          latestVersion: 'new version',
+        },
+      ]);
+    }),
+  {extension: 'json'}
+);

@@ -15,6 +15,7 @@
  */
 const path = require('path');
 const {execOrThrow} = require('../../common/exec');
+const {format} = require('./format');
 const {green, cyan} = require('kleur/colors');
 const {log} = require('../../common/logging');
 const {readJsonSync, writeJsonSync} = require('fs-extra');
@@ -66,10 +67,7 @@ function insertExtensionBundlesConfig(
 
   const basename = path.basename(destination);
 
-  execOrThrow(
-    `npx prettier --write ${destination}`,
-    `Could not format ${basename}`
-  );
+  format([destination]);
 
   log(green('SUCCESS:'), 'Wrote', cyan(basename));
 }
