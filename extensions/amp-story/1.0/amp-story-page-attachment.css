@@ -189,7 +189,6 @@ amp-story[desktop] .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-pa
 }
 
 amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-attachment-remote .i-amphtml-story-draggable-drawer-spacer {
-    /* Spacer is not needed for remote attachment.  */
-    height: 0 !important;
-    min-height: 0 !important;
+    /* Hide spacer in remote attachment. */
+    display: none !important;
 }
