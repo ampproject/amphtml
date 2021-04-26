@@ -14,26 +14,13 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
-import {Render} from '../component';
-import {withKnobs} from '@storybook/addon-knobs';
+import {isExperimentOn} from '../../../src/experiments';
 
-export default {
-  title: 'Render',
-  component: Render,
-  decorators: [withKnobs],
-};
-
-export const _default = () => {
-  return (
-    <Render
-      src={'http://example.com'}
-      getJson={() => Promise.resolve({name: 'George'})}
-      render={(data) => `Hi ${data.name}!`}
-    ></Render>
-  );
-};
-
-export const defaultRenderAndGetJson = () => {
-  return <Render src={'/examples/amp-render-data.json'}></Render>;
+/**
+ * Returns true if new inline attachment UI is enabled.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export const isPageAttachmentUiV2ExperimentOn = (win) => {
+  return isExperimentOn(win, 'amp-story-page-attachment-ui-v2');
 };

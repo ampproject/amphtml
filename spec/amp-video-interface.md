@@ -44,7 +44,6 @@ these players implement.
 -   [amp-viqeo-player](https://amp.dev/documentation/components/amp-viqeo-player)
 -   [amp-wistia-player](https://amp.dev/documentation/components/amp-wistia-player)
 -   [amp-youtube](https://amp.dev/documentation/components/amp-youtube)
--   [amp-foo](https://amp.dev/documentation/components/amp-foo)
 
 <!-- markdown-link-check-enable -->
 
