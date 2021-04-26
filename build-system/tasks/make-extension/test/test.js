@@ -112,6 +112,96 @@ test('makeExtensionFromTemplates merges multiple templates', (t) =>
     t.is(await readFile(`${dir}/file-__baz__.txt`, 'utf-8'), 'Constant.\n');
   }));
 
+test('makeExtensionFromTemplates does not print unit test blurb if a test file is not created', (t) =>
+  tempy.directory.task(async (dir) => {
+    const {makeExtensionFromTemplates} = require('..');
+    await makeExtensionFromTemplates(
+      [path.join(__dirname, 'template/test-1')],
+      dir,
+      {name: 'my-extension-name'}
+    );
+    t.false(
+      !!stubbedCalls.log.find((args) =>
+        args.find((arg) => arg.includes('amp unit --files'))
+      )
+    );
+  }));
+
+test('makeExtensionFromTemplates prints unit test blurb if a test file is created', (t) =>
+  tempy.directory.task(async (dir) => {
+    const {makeExtensionFromTemplates} = require('..');
+    await makeExtensionFromTemplates(
+      [path.join(__dirname, '../template/bento')],
+      dir,
+      {name: 'my-extension-name'}
+    );
+    t.true(
+      !!stubbedCalls.log.find((args) =>
+        args.find((arg) => arg.includes('amp unit --files'))
+      )
+    );
+  }));
+
+test('makeExtensionFromTemplates does not print Storybook blurb if a Storybook file is not created', (t) =>
+  tempy.directory.task(async (dir) => {
+    const {makeExtensionFromTemplates} = require('..');
+    await makeExtensionFromTemplates(
+      [path.join(__dirname, 'template/test-1')],
+      dir,
+      {name: 'my-extension-name'}
+    );
+    t.false(
+      !!stubbedCalls.log.find((args) =>
+        args.find((arg) => arg.includes('amp storybook'))
+      )
+    );
+  }));
+
+test('makeExtensionFromTemplates prints Storybook blurb if a Storybook file is created', (t) =>
+  tempy.directory.task(async (dir) => {
+    const {makeExtensionFromTemplates} = require('..');
+    await makeExtensionFromTemplates(
+      [path.join(__dirname, '../template/bento')],
+      dir,
+      {name: 'my-extension-name'}
+    );
+    t.true(
+      !!stubbedCalls.log.find((args) =>
+        args.find((arg) => arg.includes('amp storybook'))
+      )
+    );
+  }));
+
+test('makeExtensionFromTemplates does not print validator blurb if a validator-*.html file is not created', (t) =>
+  tempy.directory.task(async (dir) => {
+    const {makeExtensionFromTemplates} = require('..');
+    await makeExtensionFromTemplates(
+      [path.join(__dirname, 'template/test-1')],
+      dir,
+      {name: 'my-extension-name'}
+    );
+    t.false(
+      !!stubbedCalls.log.find((args) =>
+        args.find((arg) => arg.includes('amp validator --update_tests'))
+      )
+    );
+  }));
+
+test('makeExtensionFromTemplates prints validator blurb if a validator-*.html file is created', (t) =>
+  tempy.directory.task(async (dir) => {
+    const {makeExtensionFromTemplates} = require('..');
+    await makeExtensionFromTemplates(
+      [path.join(__dirname, '../template/classic')],
+      dir,
+      {name: 'my-extension-name'}
+    );
+    t.true(
+      !!stubbedCalls.log.find((args) =>
+        args.find((arg) => arg.includes('amp validator --update_tests'))
+      )
+    );
+  }));
+
 test('insertExtensionBundlesConfig inserts new entry', (t) =>
   tempy.file.task(
     async (destination) => {
