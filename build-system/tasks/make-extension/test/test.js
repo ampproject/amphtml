@@ -47,9 +47,7 @@ const test = (name, cb) =>
   );
 
 async function affectsExistingPaths(paths, fn) {
-  const stashStdout = getStdout(
-    `git stash push ${paths.join(' ')} --keep-index`
-  );
+  const stashStdout = getStdout(`git stash push --keep-index`);
 
   await fn();
 
