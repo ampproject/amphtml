@@ -15,29 +15,32 @@
  */
 
 import '../amp-__component_name_hyphenated__';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {htmlFor} from '../../../../src/static-template';
 
 describes.realWin(
-  'amp-__component_name_hyphenated__',
+  'amp-__component_name_hyphenated__-v__component_version__',
   {
     amp: {
       runtimeOn: true,
-      extensions: ['amp-__component_name_hyphenated__'],
+      extensions: ['amp-__component_name_hyphenated__:__component_version__:'],
     },
   },
   (env) => {
     let win;
-    let element;
+    let doc;
+    let html;
 
     beforeEach(() => {
       win = env.win;
-      element = createElementWithAttributes(win.document, 'amp-__component_name_hyphenated__', {
-        layout: 'responsive',
-      });
-      win.document.body.appendChild(element);
+      doc = win.document;
+      html = htmlFor(doc);
     });
-
+    
     it('should contain "hello world" when built', async () => {
+      const element = html`
+        <amp-__component_name_hyphenated__></amp-__component_name_hyphenated__>
+      `;
+      doc.body.appendChild(element);
       await element.whenBuilt();
       expect(element.querySelector('div').textContent).to.equal('hello world');
     });
