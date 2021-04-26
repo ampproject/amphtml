@@ -185,17 +185,17 @@ ${green('FINISHED:')} Boilerplate for your new ${cyan(
     filename.includes('test/test-')
   );
   if (unitTestFile) {
-    blurb.push(`You can run tests on your new component with the following command:
+    blurb.push(`- You can run tests on your new component with the following command:
     ${cyan(`amp unit --files=${unitTestFile}`)}
 
-If the component was generated successfully, the example test should pass.`);
+  If the component was generated successfully, the example test should pass.`);
   }
 
   const storybookFile = writtenFiles.find((filename) =>
     filename.includes('/storybook/')
   );
   if (storybookFile) {
-    blurb.push(`You may also view the component during development in storybook:
+    blurb.push(`- You may view the component during development in storybook:
     ${cyan(`amp storybook`)}`);
   }
 
@@ -203,7 +203,7 @@ If the component was generated successfully, the example test should pass.`);
     (filename) => filename.includes('/validator-') && filename.endsWith('.html')
   );
   if (validatorHtmlFile) {
-    blurb.push(`You should generate accompanying validator test result files by running:
+    blurb.push(`- You should generate accompanying validator test result files by running:
     ${cyan(`amp validator --update_tests`)}`);
   }
 
