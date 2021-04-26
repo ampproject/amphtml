@@ -59,15 +59,23 @@ amp-story:not([desktop]) .i-amphtml-story-button-container {
   pointer-events: none !important;
 }
 
-/* Navigation button element. Visibly hidden on mobile but focusable by screen readers. */
+/* Navigation button element. Hidden on mobile unless navigating with keyboard. Focusable by screen readers. */
 amp-story:not([desktop]) .i-amphtml-story-button-move,
 [dir=rtl] amp-story:not([desktop]) .i-amphtml-story-button-move {
-  width: 100% !important;
-  height: 100% !important;
   border: none !important;
-  background: none !important;
   padding: 0 !important;
   pointer-events: none !important;
+  background-repeat: no-repeat !important;
+  position: absolute !important;
+  border-radius: 50% !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-color: transparent !important;
+}
+
+body:not(.amp-mode-keyboard-active) amp-story:not([desktop]) .i-amphtml-story-button-move {
+  /* Hides background unles navigating with keyboard. */
+  background: none !important;
 }
 
 [desktop] .i-amphtml-story-button-move {
