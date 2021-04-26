@@ -23,12 +23,7 @@ const {execOrDie} = require('../common/exec');
  */
 async function ava() {
   execOrDie(
-    [
-      'npx ava debug',
-      '--color',
-      '--fail-fast',
-      argv.watch ? '--watch' : '',
-    ].join(' ')
+    ['npx ava', '--color', '--fail-fast', argv.watch ? '--watch' : ''].join(' ')
   );
 }
 
