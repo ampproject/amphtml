@@ -47,7 +47,7 @@ If you also include an `<amp-user-notification>` element on the page, the UI ass
 
 To implement granular consent, define a set of **consent purposes**. Choose a name for each purpose. Create a UI that allows the user to make choices for each, and use the `setPurpose()` action to save each choice.
 
-The other actions that `<amp-consent>` supports apply to both granular and global consent. Thus, a webpage can implement both types simultaneously. 
+The other actions that `<amp-consent>` supports apply to both granular and global consent. Thus, a webpage can implement both types simultaneously.
 
 ## Consent configuration
 
@@ -461,7 +461,7 @@ or
 For granular consent, use the `data-block-on-consent-purposes` attribute with a comma-separated list of consent purposes. For example, the following will block an `amp-pixel` component until the user accepts purposes named `performance` and `marketing`:
 
 ```html
-<amp-pixel data-block-on-consent-purposes="performance, marketing">
+<amp-pixel data-block-on-consent-purposes="performance, marketing"></amp-pixel>
 ```
 
 ### Advanced predefined consent blocking behaviors
