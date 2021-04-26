@@ -68,6 +68,9 @@ async function* walkDir(dir) {
 
 const getTemplateDir = (template) => path.join(__dirname, 'template', template);
 
+const TEMPLATES_BENTO = [getTemplateDir('shared'), getTemplateDir('bento')];
+const TEMPLATES_CLASSIC = [getTemplateDir('shared'), getTemplateDir('classic')];
+
 /**
  * @param {string} templateDir
  * @param {Object<string, string>} replacements
@@ -278,9 +281,6 @@ async function affectsExistingPaths(paths, fn) {
     getOutput('git stash pop');
   }
 }
-
-const TEMPLATES_BENTO = [getTemplateDir('shared'), getTemplateDir('bento')];
-const TEMPLATES_CLASSIC = [getTemplateDir('shared'), getTemplateDir('bento')];
 
 /**
  * Generates and tests an extension.
