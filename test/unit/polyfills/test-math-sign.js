@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {sign} from '../../src/polyfills/math-sign';
+import {sign} from '../src/polyfills/math-sign';
 
-describe('Math.sign', () => {
+describes.sandboxed('Math.sign', {}, () => {
   it('returns 1 for positive x', () => {
     expect(sign(1)).to.equal(1);
     expect(sign(10)).to.equal(1);

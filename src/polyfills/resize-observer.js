@@ -22,7 +22,7 @@
 import {
   installStub,
   shouldLoadPolyfill,
-} from '../polyfillstub/resize-observer-stub';
+} from '../polyfills/stubs/resize-observer-stub';
 
 /**
  * Installs the ResizeObserver polyfill. There are a few different modes of

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {values} from '../../src/polyfills/object-values';
+import {values} from '../src/polyfills/object-values';
 
-describe('Object.values', () => {
+describes.sandboxed('Object.values', {}, () => {
   it('should disallow null and undefined', () => {
     expect(() => values(null)).to.throw();
     expect(() => values(undefined)).to.throw();

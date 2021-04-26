@@ -20,7 +20,7 @@ import {
   resetStubsForTesting,
   shouldLoadPolyfill,
   upgradePolyfill,
-} from '../../../src/polyfillstub/resize-observer-stub';
+} from '../../../src/polyfills/stubs/resize-observer-stub';
 import {
   install,
   installForChildWin,
