@@ -65,11 +65,9 @@ function insertExtensionBundlesConfig(
     })
   );
 
-  const basename = path.basename(destination);
-
   format([destination]);
 
-  log(green('SUCCESS:'), 'Wrote', cyan(basename));
+  log(green('SUCCESS:'), 'Wrote', cyan(path.basename(destination)));
 }
 
 module.exports = {insertExtensionBundlesConfig};
