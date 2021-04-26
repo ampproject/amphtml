@@ -18,35 +18,31 @@ const path = require('path');
 const tempy = require('tempy');
 const {readFile, writeJson, readJson, writeFile, mkdirp} = require('fs-extra');
 
-/**
- * Disables logging since it clutters the test output.
- * @param {*} fn
- * @param  {...any} args
- */
-async function captureLog(fn, ...args) {
-  const logging = require('../../../common/logging');
-  const originalLog = logging.log;
-  logging.log = () => {};
-  await fn(...args);
-  logging.log = originalLog;
+const stubbedCalls = {};
+
+async function stubModule(path, name, fn, callsFake = () => {}) {
+  const imported = require(path);
+  const original = imported[name];
+  imported[name] = (...args) => {
+    const calls = stubbedCalls[name] || (stubbedCalls[name] = []);
+    calls.push(args);
+    return callsFake(...args);
+  };
+  await fn();
+  imported.log = original;
 }
 
-/**
- * Disables prettier since it's slow.
- * @param {*} fn
- * @param  {...any} args
- */
-async function captureFormat(fn, ...args) {
-  const format = require('../format');
-  const originalFormat = format.format;
-  format.format = () => ({stdout: '', stderr: ''});
-  await fn(...args);
-  format.format = originalFormat;
-}
-
-function test(name, cb) {
-  return ava(name, (t) => captureFormat((t) => captureLog(cb, t), t));
-}
+const test = (name, cb) =>
+  ava(name, (t) =>
+    // Disable logging since it clutters the test output.
+    stubModule('../../../common/logging', 'log', () =>
+      // Disable prettier formatting since it's slow.
+      stubModule('../format', 'format', () =>
+        // Run test
+        cb(t)
+      )
+    )
+  );
 
 test('writeFromTemplateDir', (t) =>
   tempy.directory.task(async (dir) => {
