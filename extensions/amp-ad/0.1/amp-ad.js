@@ -19,8 +19,8 @@ import {CSS} from '../../../build/amp-ad-0.1.css';
 import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
 import {getA4ARegistry} from '../../../ads/_a4a-config';
-import {hasOwn} from '../../../src/utils/object';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {hasOwn} from '../../../src/core/types/object';
+import {userAssert} from '../../../src/log';
 
 /**
  * Construct ad network type-specific tag and script name.  Note that this

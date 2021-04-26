@@ -29,8 +29,8 @@ import {
   trackerTypeForTesting,
 } from '../events';
 import {AmpdocAnalyticsRoot} from '../analytics-root';
-import {Deferred} from '../../../../src/utils/promise';
-import {Signals} from '../../../../src/utils/signals';
+import {Deferred} from '../../../../src/core/data-structures/promise';
+import {Signals} from '../../../../src/core/data-structures/signals';
 import {macroTask} from '../../../../testing/yield';
 import {toggleExperiment} from '../../../../src/experiments';
 

@@ -32,7 +32,7 @@ import {Services} from '../../../src/services';
 import {Sources} from './sources';
 import {ampMediaElementFor} from './utils';
 import {dev, devAssert} from '../../../src/log';
-import {findIndex} from '../../../src/utils/array';
+import {findIndex} from '../../../src/core/types/array';
 import {isConnectedNode, matches} from '../../../src/dom';
 import {toWin} from '../../../src/types';
 import {userInteractedWith} from '../../../src/video-interface';

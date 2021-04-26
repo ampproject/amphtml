@@ -44,9 +44,14 @@ const tempDir = tempy.directory();
 
 /**
  * Checks files for formatting (and optionally fixes them) with Prettier.
+ * Explicitly makes sure the API doesn't check files in `.prettierignore`.
  */
 async function prettify() {
-  const filesToCheck = getFilesToCheck(prettifyGlobs, {dot: true});
+  const filesToCheck = getFilesToCheck(
+    prettifyGlobs,
+    {dot: true},
+    '.prettierignore'
+  );
   if (filesToCheck.length == 0) {
     return;
   }
@@ -106,7 +111,7 @@ function printFixMessages() {
     yellow('NOTE 4:'),
     'For more information, read',
     cyan(
-      'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#code-quality-and-style\n'
+      'https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md#code-quality-and-style\n'
     )
   );
 }

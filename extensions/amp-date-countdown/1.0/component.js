@@ -16,8 +16,8 @@
 
 import * as Preact from '../../../src/preact';
 import {Wrapper, useRenderer} from '../../../src/preact/component';
-import {dict} from '../../../src/utils/object';
-import {getDate} from '../../../src/utils/date';
+import {dict} from '../../../src/core/types/object';
+import {getDate} from '../../../src/core/types/date';
 import {getLocaleStrings} from './messages';
 import {useAmpContext} from '../../../src/preact/context';
 import {useEffect, useMemo, useRef, useState} from '../../../src/preact';

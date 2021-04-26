@@ -1,20 +1,40 @@
-# Output directories
-build/**
-dist/**
-dist.3p/**
-dist.tools/**
-firebase/**
-out/**
-test/coverage/**
+# Local cache directories
+# Keep this list in sync with .gitignore, .prettierignore, and build-system/tasks/clean.js
+.babel-cache
+.css-cache
+.pre-closure-cache
 
-# Code directories
-build-system/tasks/visual-diff/snippets/*.js
+# Output directories
+# Keep this list in sync with .gitignore, .prettierignore, and build-system/tasks/clean.js
+.amp-dep-check
+build
+build-system/dist
+build-system/server/new-server/transforms/dist
+build-system/tasks/performance/cache
+build-system/tasks/performance/results.json
+build-system/global-configs/custom-config.json
+dist
+dist.3p
+dist.tools
+export
+examples/storybook
+extensions/**/dist
+release
+result-reports
+src/purifier/dist
+test/coverage
+test/coverage-e2e
+validator/**/dist
+validator/export
+
+# Files and directories explicitly ignored by eslint
 build-system/babel-plugins/**/fixtures/**/*.js
 build-system/babel-plugins/**/fixtures/**/*.mjs
 build-system/server/app-index/test/*.js
+build-system/tasks/make-extension/template/**/*
+build-system/tasks/visual-diff/snippets/*.js
 extensions/amp-a4a/0.1/test/testdata/**
 src/purifier/noop.js
 testing/local-amp-chrome-extension/**
 third_party/**
 validator/**
-build-system/tasks/extension-generator/bento/amp-__component_name_hyphenated__/**/*

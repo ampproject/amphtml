@@ -147,6 +147,32 @@ describes.realWin('TemplateValidator', realWinConfig, (env) => {
     });
   });
 
+  it('should add elements in creativeMetaData to extensions if not present', async () => {
+    const templateHelper = getAmpAdTemplateHelper(env.ampdoc);
+    const response = data.adTemplate.replace(
+      /"customElementExtensions" : \[\]/,
+      '"customElementExtensions" : ["amp-cats"]'
+    );
+    env.sandbox.stub(templateHelper, 'fetch').resolves(response);
+    const validatorOutput = await validator.validate(
+      {win: env.win},
+      containerElement,
+      utf8Encode(
+        JSON.stringify({
+          templateUrl,
+          data: {url: 'https://buy.com/buy-1'},
+          analytics: {foo: 'bar'},
+        })
+      ),
+      headers
+    );
+    const {creativeMetadata} = validatorOutput.creativeData;
+    expect(creativeMetadata.extensions).to.deep.include({
+      'custom-element': 'amp-cats',
+      'src': 'https://cdn.ampproject.org/v0/amp-cats-0.1.js',
+    });
+  });
+
   describe('Non-AMP Result', () => {
     it('should have NON_AMP validator result due to lack of headers', () => {
       return validator

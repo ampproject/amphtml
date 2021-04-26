@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {ownProperty} from '../../../src/utils/object';
+import {ownProperty} from '../../../src/core/types/object';
 import {tryFocus} from '../../../src/dom';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-autocomplete';
 

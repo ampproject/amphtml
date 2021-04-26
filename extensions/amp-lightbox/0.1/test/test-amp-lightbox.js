@@ -17,8 +17,8 @@
 import '../amp-lightbox';
 import * as dom from '../../../../src/dom';
 import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
-import {Keys} from '../../../../src/utils/key-codes';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
+import {Keys} from '../../../../src/core/constants/key-codes';
 import {Services} from '../../../../src/services';
 import {whenCalled} from '../../../../testing/test-helper.js';
 
@@ -85,6 +85,13 @@ describes.realWin(
       env.sandbox.spy(element, 'enqueAction');
       env.sandbox.stub(element, 'getDefaultActionAlias');
       await dom.whenUpgradedToCustomElement(element);
+      const impl = await element.getImpl(true);
+      impl.getHistory_ = () => {
+        return {
+          pop: () => {},
+          push: () => Promise.resolve(11),
+        };
+      };
 
       ['open', 'close'].forEach((method) => {
         action.execute(
@@ -96,6 +103,7 @@ describes.realWin(
           'event',
           ActionTrust.HIGH
         );
+        expect(element.enqueAction.callCount).to.be.above(0);
         expect(element.enqueAction).to.be.calledWith(
           env.sandbox.match({
             actionEventType: '?',
@@ -113,7 +121,7 @@ describes.realWin(
 
     it('should close on ESC', async () => {
       const lightbox = createLightbox();
-      const impl = await lightbox.getImpl(false);
+      const impl = await lightbox.getImpl(true);
       impl.getHistory_ = () => {
         return {
           pop: () => {},
@@ -137,7 +145,7 @@ describes.realWin(
       myLink.setAttribute('autofocus', '');
       lightbox.appendChild(myLink);
 
-      const impl = await lightbox.getImpl(false);
+      const impl = await lightbox.getImpl(true);
       impl.getHistory_ = () => {
         return {
           pop: () => {},
@@ -164,7 +172,7 @@ describes.realWin(
       const lightbox = createLightbox();
       const closeButton = createCloseButton();
       lightbox.appendChild(closeButton);
-      const impl = await lightbox.getImpl(false);
+      const impl = await lightbox.getImpl(true);
 
       const tryFocusSpy = env.sandbox.spy(dom, 'tryFocus');
       const finalizeSpy = env.sandbox.spy(impl, 'finalizeOpen_');
@@ -195,7 +203,7 @@ describes.realWin(
 
     it('should create close button and focus on it if no handmade focus and no close button', async () => {
       const lightbox = createLightbox();
-      const impl = await lightbox.getImpl(false);
+      const impl = await lightbox.getImpl(true);
 
       const tryFocusSpy = env.sandbox.spy(dom, 'tryFocus');
       const finalizeSpy = env.sandbox.spy(impl, 'finalizeOpen_');
@@ -228,7 +236,7 @@ describes.realWin(
       const lightbox = createLightbox();
       const insideLink = createLink('insideLink');
       lightbox.appendChild(insideLink);
-      const impl = await lightbox.getImpl(false);
+      const impl = await lightbox.getImpl(true);
 
       const outsideLink = createLink('outsideLink');
       doc.body.appendChild(outsideLink);
@@ -269,7 +277,7 @@ describes.realWin(
       const lightbox = createLightbox();
       const closeButton = createCloseButton();
       lightbox.appendChild(closeButton);
-      const impl = await lightbox.getImpl(false);
+      const impl = await lightbox.getImpl(true);
 
       const openSpy = env.sandbox.spy(impl, 'finalizeOpen_');
       const closeSpy = env.sandbox.spy(impl, 'finalizeClose_');
@@ -292,7 +300,7 @@ describes.realWin(
     it('should create `i-amphtml-ad-close-header` but no close button if param then focus on it', async () => {
       const lightbox = createLightbox();
       lightbox.setAttribute('close-button', '');
-      const impl = await lightbox.getImpl(false);
+      const impl = await lightbox.getImpl(true);
 
       const tryFocusSpy = env.sandbox.spy(dom, 'tryFocus');
       const finalizeSpy = env.sandbox.spy(impl, 'finalizeOpen_');
@@ -321,6 +329,74 @@ describes.realWin(
         expect(tieSpy).to.be.calledOnce;
         expect(tryFocusSpy).to.be.calledWith(impl.closeButtonHeader_);
       });
+    });
+
+    it('should set itself as a container when fully opened', async () => {
+      const lightbox = createLightbox();
+      const impl = await lightbox.getImpl(true);
+      env.sandbox.stub(lightbox, 'setAsContainerInternal');
+
+      const finalizeSpy = env.sandbox.spy(impl, 'finalizeOpen_');
+      impl.getHistory_ = () => {
+        return {
+          pop: () => {},
+          push: () => Promise.resolve(11),
+        };
+      };
+
+      const args = {};
+      const openInvocation = {
+        method: 'open',
+        args,
+        satisfiesTrust: () => true,
+      };
+      impl.executeAction(openInvocation);
+
+      expect(lightbox.setAsContainerInternal).to.not.be.called;
+
+      await whenCalled(finalizeSpy);
+
+      expect(lightbox.setAsContainerInternal).to.be.calledOnce;
+    });
+
+    it('should set and remove itself as a container and unmount children', async () => {
+      const lightbox = createLightbox();
+
+      // Lightbox has a child.
+      const child = dom.createElementWithAttributes(doc, 'amp-img', {
+        layout: 'nodisplay',
+      });
+      lightbox.appendChild(child);
+      env.sandbox.stub(child, 'unmount');
+
+      const openButton = createOpeningButton('openingButton');
+      const closeButton = createCloseButton();
+      lightbox.appendChild(closeButton);
+
+      const impl = await lightbox.getImpl(true);
+      env.sandbox.stub(lightbox, 'setAsContainerInternal');
+      env.sandbox.stub(lightbox, 'removeAsContainerInternal');
+
+      const openSpy = env.sandbox.spy(impl, 'finalizeOpen_');
+      const closeSpy = env.sandbox.spy(impl, 'finalizeClose_');
+      impl.getHistory_ = () => {
+        return {
+          pop: () => {},
+          push: () => Promise.resolve(11),
+        };
+      };
+
+      openButton.click();
+      expect(lightbox.setAsContainerInternal).to.not.be.called;
+      await whenCalled(openSpy);
+      expect(lightbox.setAsContainerInternal).to.be.calledOnce;
+
+      closeButton.click();
+      expect(lightbox.removeAsContainerInternal).to.not.be.called;
+      expect(child.unmount).to.not.be.called;
+      await whenCalled(closeSpy);
+      expect(lightbox.removeAsContainerInternal).to.be.calledOnce;
+      expect(child.unmount).to.be.calledOnce;
     });
   }
 );

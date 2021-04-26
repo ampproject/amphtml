@@ -15,14 +15,13 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Sidebar} from '../component';
-import {boolean, color, select, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
+import {Sidebar, SidebarToolbar} from '../component';
+import {boolean, color, select, text, withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'Sidebar',
   component: Sidebar,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 /**
@@ -76,6 +75,33 @@ export const _default = () => {
         style={{color: foregroundColor, backgroundColor}}
         backdropStyle={{backgroundColor: backdropColor}}
       />
+    </main>
+  );
+};
+
+export const toolbar = () => {
+  const sideConfigurations = ['left', 'right', undefined];
+  const side = select('side', sideConfigurations, sideConfigurations[0]);
+  const toolbarMedia = text('toolbar media', '(max-width: 500px)');
+  const foregroundColor = color('color');
+  const backgroundColor = color('background');
+  const backdropColor = color('backdrop color');
+
+  return (
+    <main>
+      <SidebarWithActions
+        side={side}
+        style={{color: foregroundColor, backgroundColor}}
+        backdropStyle={{backgroundColor: backdropColor}}
+      >
+        <SidebarToolbar toolbar={toolbarMedia} toolbarTarget="toolbar-target">
+          <ul>
+            <li>Toolbar Item 1</li>
+            <li>Toolbar Item 2</li>
+          </ul>
+        </SidebarToolbar>
+      </SidebarWithActions>
+      <div id="toolbar-target"></div>
     </main>
   );
 };

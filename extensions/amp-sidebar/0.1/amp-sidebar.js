@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {Direction, Orientation, SwipeToDismiss} from './swipe-to-dismiss';
 import {Gestures} from '../../../src/gesture';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
 import {SwipeDef, SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {Toolbar} from './toolbar';
@@ -29,10 +29,10 @@ import {
   tryFocus,
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
-import {debounce} from '../../../src/utils/rate-limit';
+import {debounce} from '../../../src/core/types/function';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {handleAutoscroll} from './autoscroll';
 import {
   observeContentSize,
@@ -41,7 +41,8 @@ import {
 import {removeFragment} from '../../../src/url';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {setStyles, toggle} from '../../../src/style';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
+import {unmountAll} from '../../../src/utils/resource-container-helper';
 
 /** @private @const {string} */
 const TAG = 'amp-sidebar toolbar';
@@ -469,6 +470,9 @@ export class AmpSidebar extends AMP.BaseElement {
     this.triggerEvent_(SidebarEvents.OPEN, trust);
     this.element.setAttribute('i-amphtml-sidebar-opened', '');
     this.getMaskElement_().setAttribute('i-amphtml-sidebar-opened', '');
+
+    // Set as a container for scheduler to load children elements.
+    this.setAsContainer();
   }
 
   /**
@@ -504,6 +508,13 @@ export class AmpSidebar extends AMP.BaseElement {
       this.getRealChildren()
     );
     this.triggerEvent_(SidebarEvents.CLOSE, trust);
+
+    // Undo `setAsContainer`.
+    this.removeAsContainer();
+
+    // Unmount all children when the sidebar is closed. They will automatically
+    // remount when the sidebar is opened again.
+    unmountAll(this.element, /* includeSelf */ false);
   }
 
   /**

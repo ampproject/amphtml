@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {BaseCarousel} from './base-carousel';
 import {CSS as COMPONENT_CSS} from './base-carousel.jss';
 import {CSS} from '../../../build/amp-base-carousel-1.0.css';
 import {CarouselContextProp} from './carousel-props';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
+import {cloneElement} from '../../../src/preact';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {dispatchCustomEvent} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-base-carousel';
@@ -82,6 +83,17 @@ class AmpBaseCarousel extends PreactBaseElement {
     this.slide_ = slide;
     if (!isNaN(slide)) {
       this.api().goToSlide(slide);
+    }
+  }
+
+  /** @override */
+  updatePropsForRendering(props) {
+    const {arrowPrev, arrowNext} = props;
+    if (arrowPrev) {
+      props['arrowPrevAs'] = (props) => cloneElement(arrowPrev, props);
+    }
+    if (arrowNext) {
+      props['arrowNextAs'] = (props) => cloneElement(arrowNext, props);
     }
   }
 }

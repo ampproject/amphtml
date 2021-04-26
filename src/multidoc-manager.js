@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from './common-signals';
+import {CommonSignals} from './core/constants/common-signals';
 import {Services} from './services';
-import {VisibilityState} from './visibility-state';
+import {VisibilityState} from './core/constants/visibility-state';
 import {childElementsByTag, isConnectedNode} from './dom';
 import {
   createShadowDomWriter,
@@ -27,7 +27,8 @@ import {dev, user} from './log';
 import {disposeServicesForDoc, getServicePromiseOrNullForDoc} from './service';
 import {getMode} from './mode';
 import {installStylesForDoc} from './style-installer';
-import {isArray, isObject} from './types';
+import {isArray, isObject} from './core/types';
+
 import {parseExtensionUrl} from './service/extension-script';
 import {parseUrlDeprecated} from './url';
 import {setStyle} from './style';

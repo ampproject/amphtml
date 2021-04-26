@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {Observable} from '../../../src/observable';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
-import {dict} from '../../../src/utils/object';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {Observable} from '../../../src/core/data-structures/observable';
+import {devAssert} from '../../../src/log';
+import {dict} from '../../../src/core/types/object';
 
 /**
  * This class implements visibility calculations based on the

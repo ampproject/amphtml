@@ -16,7 +16,7 @@
     "<details>",
     "<summary>How to resolve breaking changes</summary>",
     "This PR may introduce breaking changes that require manual intervention. In such cases, you will need to check out this branch, fix the cause of the breakage, and commit the fix to ensure a green CI build. To check out and update this PR, follow the steps below:",
-    "```sh\n# Check out the PR branch (these steps are from GitHub)\ngit checkout -b renovate-bot-{{{branchName}}} master\ngit pull https://github.com/renovate-bot/amphtml.git {{{branchName}}}\n\n# Directly make fixes and commit them\namp lint --fix # For lint errors in JS files\namp prettify --fix # For prettier errors in non-JS files\n# Edit source code in case of new compiler warnings / errors\n\n# Push the changes to the branch\ngit push git@github.com:renovate-bot/amphtml.git renovate-bot-{{{branchName}}}:{{{branchName}}}\n```",
+    "```sh\n# Check out the PR branch (these steps are from GitHub)\ngit checkout -b renovate-bot-{{{branchName}}} main\ngit pull https://github.com/renovate-bot/amphtml.git {{{branchName}}}\n\n# Directly make fixes and commit them\namp lint --fix # For lint errors in JS files\namp prettify --fix # For prettier errors in non-JS files\n# Edit source code in case of new compiler warnings / errors\n\n# Push the changes to the branch\ngit push git@github.com:renovate-bot/amphtml.git renovate-bot-{{{branchName}}}:{{{branchName}}}\n```",
     "</details>"
   ],
 
@@ -24,6 +24,7 @@
     {
       "groupName": "subpackage devDependencies",
       "matchPaths": ["**/*"],
+      "automerge": true,
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "subpackage-"
@@ -33,6 +34,7 @@
       "groupName": "build system devDependencies",
       "matchPaths": ["build-system/**"],
       "labels": ["WG: infra"],
+      "automerge": true,
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "build-system-"
@@ -42,6 +44,7 @@
       "groupName": "validator devDependencies",
       "matchPaths": ["validator/**"],
       "labels": ["WG: caching"],
+      "automerge": true,
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "validator-"
@@ -50,6 +53,7 @@
     {
       "groupName": "core devDependencies",
       "matchPaths": ["+(package.json)"],
+      "automerge": true,
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "core-"
@@ -58,6 +62,7 @@
     {
       "groupName": "linting devDependencies",
       "matchPackagePatterns": ["\\b(prettier|eslint)\\b"],
+      "automerge": true,
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "linting-"
@@ -66,6 +71,7 @@
     {
       "groupName": "babel devDependencies",
       "matchPackagePatterns": ["\\bbabel"],
+      "automerge": true,
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "babel-"
@@ -73,6 +79,7 @@
     },
     {
       "excludePackagePatterns": ["^@ampproject/"],
+      "automerge": false,
       "matchDepTypes": ["dependencies"],
       "enabled": false
     },
@@ -80,6 +87,7 @@
       "groupName": "ampproject devDependencies",
       "matchPackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["devDependencies"],
+      "automerge": true,
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "ampproject-"
@@ -89,6 +97,7 @@
       "groupName": "ampproject dependencies",
       "matchPackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["dependencies"],
+      "automerge": false,
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "ampproject-"

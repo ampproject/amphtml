@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {Deferred} from '../../../src/utils/promise';
+import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
@@ -84,6 +85,9 @@ class AmpBridPlayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -127,6 +131,8 @@ class AmpBridPlayer extends AMP.BaseElement {
       feedType = this.element.getAttribute('data-dynamic');
     } else if (this.element.hasAttribute('data-playlist')) {
       feedType = 'playlist';
+    } else if (this.element.hasAttribute('data-carousel')) {
+      feedType = 'carousel';
     } else if (this.element.hasAttribute('data-outstream')) {
       feedType = 'outstream';
     }
@@ -169,8 +175,9 @@ class AmpBridPlayer extends AMP.BaseElement {
     this.feedID_ = userAssert(
       element.getAttribute('data-video') ||
         element.getAttribute('data-playlist') ||
+        element.getAttribute('data-carousel') ||
         element.getAttribute('data-outstream'),
-      'Either the data-video or the data-playlist or the data-outstream ' +
+      'Either the data-video, data-playlist, data-carousel or data-outstream ' +
         'attributes must be specified for <amp-brid-player> %s',
       element
     );
@@ -211,6 +218,9 @@ class AmpBridPlayer extends AMP.BaseElement {
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
+
+    this.pauseHelper_.updatePlaying(false);
+
     return true; // Call layoutCallback again.
   }
 
@@ -337,11 +347,20 @@ class AmpBridPlayer extends AMP.BaseElement {
     const params = eventData.split('|');
 
     if (params[2] == 'trigger') {
-      if (params[3] == 'ready') {
-        this.playerReadyResolver_(this.iframe_);
-      }
-      if (params[3] == 'requestAMPGDPR') {
-        this.getConsentData_();
+      switch (params[3]) {
+        case 'ready':
+          this.playerReadyResolver_(this.iframe_);
+          break;
+        case 'requestAMPGDPR':
+          this.getConsentData_();
+          break;
+        case 'play':
+          this.pauseHelper_.updatePlaying(true);
+          break;
+        case 'pause':
+        case 'ended':
+          this.pauseHelper_.updatePlaying(false);
+          break;
       }
       redispatch(element, params[3], {
         'ready': VideoEvents.LOAD,

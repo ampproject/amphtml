@@ -17,12 +17,11 @@
 import * as Preact from '../../../../src/preact';
 import {DateDisplay} from '../component';
 import {date, select, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 
 export default {
   title: 'DateDisplay',
   component: DateDisplay,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 const DISPLAY_IN_OPTIONS = ['utc', 'local'];

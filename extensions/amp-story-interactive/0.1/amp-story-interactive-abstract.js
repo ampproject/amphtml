@@ -39,10 +39,10 @@ import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {deduplicateInteractiveIds} from './utils';
 import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {emojiConfetti} from './interactive-confetti';
 import {isExperimentOn} from '../../../src/experiments';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 /** @const {string} */
 const TAG = 'amp-story-interactive';

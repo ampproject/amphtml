@@ -3,11 +3,11 @@ $category@: social
 formats:
   - websites
 teaser:
-  text: Displays a TikTok embed.  
+  text: Displays a TikTok video embed.
 experimental: true
 ---
 
-<!--
+<!---
 Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,35 +25,36 @@ limitations under the License.
 
 # amp-tiktok
 
-<!--
-  If the component is relevant for more than one format and operates differently between these
-  formats, include and filter multiple content blocks and code samples.
--->
-
 ## Usage
 
-The simplest usage of the `amp-tiktok` component has the `width`, `height` and `data-src` attributes. This will display the Tiktok embed inside of an iframe on the page.
+The `amp-tiktok` component embeds a [TikTok](https://www.tiktok.com/about) video on your page.
 
 ```html
- <amp-tiktok width="325" height="575" data-src="6718335390845095173">
+<amp-tiktok
+  width="325"
+  height="575"
+  data-src="6718335390845095173"
+></amp-tiktok>
 ```
-
-`amp-tiktok` does not support autoplay and requires user interaction to play videos.
 
 ### Behavior
 
+The `amp-tiktok` component displays the TikTok video in an iframe. You may specify the `width`, `height` and `data-src` attributes. `amp-tiktok` does not support autoplay and requires user interaction to play videos.
+
 ## Avoiding Layout shift
 
-The `width` and `height` attributes determine the initial laid out height of the Tiktok embedded in the page.
+Prevent layout shift by matching the `width` and `height` attributes on the `amp-tiktok` element to the size of the video player.
 
-However, we set the width of the Tiktok iframe player to be 325px wide. This results in a height of roughly 575px for the video player, however the full height of the player depends on the length and content of the Tiktok caption. (These values represent current behavior and subject to change).
-
-In order to show the entire height of the video, this component will resize its height to include the full player height. Therefore in order to avoid layout shift it is best to match the `width` and `height` attributes to those values.
+By default, the width of the `amp-tiktok` iframe is 325px, resulting in a hight of roughly 575px. The default height of the embedded TikTok video player depends on the length and content of the TikTok caption. To show the entire video, the `amp-tiktok` component resizes to match the player height. You can avoid this by defining the width and height to match the video player.
 
 [example preview="inline" playground="true" imports="amp-tiktok"]
 
 ```html
-<amp-tiktok width="325" height="731" data-src="6718335390845095173"></amp-tiktok>
+<amp-tiktok
+  width="325"
+  height="731"
+  data-src="6718335390845095173"
+></amp-tiktok>
 ```
 
 [/example]
@@ -66,14 +67,18 @@ If you choose to set the height of to a value which is which is greater than the
 
 ### `data-src`
 
-The `data-src` attribute can contain one of two values: a **video id** or a **full URL** to a Tiktok detail page.
+The `data-src` attribute can contain one of two values: a **video id** or a **full URL** to a TikTok detail page.
 
 Example with video-id
 
 [example preview="inline" playground="true" imports="amp-tiktok"]
 
 ```html
-<amp-tiktok width="325" height="575" data-src="6718335390845095173"></amp-tiktok>
+<amp-tiktok
+  width="325"
+  height="575"
+  data-src="6948210747285441798"
+></amp-tiktok>
 ```
 
 [\example]
@@ -86,7 +91,7 @@ Example with source url:
 <amp-tiktok
   width="325 "
   height="575"
-  data-src="https://www.tiktok.com/@scout2015/video/6718335390845095173"
+  data-src="https://www.tiktok.com/@scout2015/video/6948210747285441798"
 ></amp-tiktok>
 ```
 
@@ -105,49 +110,32 @@ To use this method copy the blockquote from the TikTok Embed code:
 
 ```html
 <amp-tiktok width="300" height="800">
-  <blockquote
-    placeholder
-    class="tiktok-embed"
-    cite="https://www.tiktok.com/@scout2015/video/6718335390845095173"
-    data-video-id="6718335390845095173"
-    style="max-width: 605px; min-width: 325px"
-  >
-    <section>
-      <a
-        target="_blank"
-        title="@scout2015"
-        href="https://www.tiktok.com/@scout2015"
-        >@scout2015</a
-      >
-      <p>
-        Scramble up ur name & I’ll try to guess it😍❤️
-        <a
-          title="foryoupage"
-          target="_blank"
-          href="https://www.tiktok.com/tag/foryoupage"
-          >#foryoupage</a
-        >
-        <a
-          title="petsoftiktok"
-          target="_blank"
-          href="https://www.tiktok.com/tag/petsoftiktok"
-          >#petsoftiktok</a
-        >
-        <a
-          title="aesthetic"
-          target="_blank"
-          href="https://www.tiktok.com/tag/aesthetic"
-          >#aesthetic</a
-        >
-      </p>
-      <a
-        target="_blank"
-        title="♬ original sound - tiff"
-        href="https://www.tiktok.com/music/original-sound-6689804660171082501"
-        >♬ original sound - tiff</a
-      >
-    </section>
-  </blockquote>
+<blockquote
+  placeholder
+  class="tiktok-embed"
+  cite="https://www.tiktok.com/@countingprimes/video/6948210747285441798"
+  data-video-id="6948210747285441798"
+>
+  <section>
+    <a
+      target="_blank"
+      title="@countingprimes"
+      href="https://www.tiktok.com/@countingprimes"
+      >@countingprimes</a
+    >
+    <p>
+      VIM is great.... right up until you start typing the commands into every
+      single text editor you see. I’d like to apologize for all my unneeded
+      “:wq”’s
+    </p>
+    <a
+      target="_blank"
+      title="♬ original sound - countingprimes"
+      href="https://www.tiktok.com/music/original-sound-6948210588145175302"
+      >♬ original sound - countingprimes</a
+    >
+  </section>
+</blockquote>
 </amp-tiktok>
 ```
 
@@ -157,7 +145,3 @@ To use this method copy the blockquote from the TikTok Embed code:
 
 If the user provides an `aria-label` then that label will be propogated to the `iframe`.
 Otherwise the `aria-label` will default to 'TikTok'.
-
-## Validation
-
-See [amp-tiktok rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-tiktok/validator-amp-tiktok.protoascii) in the AMP validator specification.

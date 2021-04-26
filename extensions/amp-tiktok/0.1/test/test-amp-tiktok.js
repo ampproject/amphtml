@@ -16,8 +16,10 @@
 
 import '../amp-tiktok';
 import * as dom from '../../../../src/dom';
-import {Services} from '../../../../src/services';
+import {computedStyle} from '../../../../src/style';
 import {isAmpElement} from '../../../../src/dom';
+
+const VIDEOID = '6948210747285441798';
 
 describes.realWin(
   'amp-tiktok',
@@ -69,40 +71,52 @@ describes.realWin(
     }
 
     it('renders with videoId', async () => {
-      const videoId = '6718335390845095173';
-      const player = await getTiktok({'data-src': videoId});
+      const player = await getTiktok({'data-src': VIDEOID});
       const iframe = player.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.getAttribute('src')).to.contain(videoId);
+      expect(iframe.getAttribute('src')).to.contain(VIDEOID);
       expect(iframe.getAttribute('src')).to.contain('en-US');
     });
 
     it('renders with videoId', async () => {
-      const videoId = '6718335390845095173';
       const videoSrc =
-        'https://www.tiktok.com/@scout2015/video/6718335390845095173';
+        'https://www.tiktok.com/@scout2015/video/6948210747285441798';
       const player = await getTiktok({'data-src': videoSrc});
       const iframe = player.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.getAttribute('src')).to.contain(videoId);
+      expect(iframe.getAttribute('src')).to.contain(VIDEOID);
       expect(iframe.getAttribute('src')).to.contain('en-US');
     });
 
     it('renders with videoId and locale', async () => {
-      const videoId = '6718335390845095173';
       const player = await getTiktok({
-        'data-src': videoId,
+        'data-src': VIDEOID,
         'data-locale': 'fr-FR',
       });
       const iframe = player.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.getAttribute('src')).to.contain(videoId);
+      expect(iframe.getAttribute('src')).to.contain(VIDEOID);
       expect(iframe.getAttribute('src')).to.contain('fr-FR');
     });
 
+    it('resizes using the fallback mechanism when no messages are received', async () => {
+      const player = await getTiktok({'data-src': VIDEOID});
+      const playerIframe = player.querySelector('iframe');
+      const impl = await player.getImpl(false);
+      env.sandbox.stub(impl, 'handleTiktokMessages_');
+
+      // Wait 1100ms for resize fallback to be invoked.
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, 1100);
+      });
+
+      expect(computedStyle(win, playerIframe).height).to.equal('775.25px');
+    });
+
     it('removes iframe after unlayoutCallback', async () => {
-      const videoId = '6718335390845095173';
-      const player = await getTiktok({'data-src': videoId});
+      const player = await getTiktok({'data-src': VIDEOID});
       const playerIframe = player.querySelector('iframe');
       expect(playerIframe).to.not.be.null;
 

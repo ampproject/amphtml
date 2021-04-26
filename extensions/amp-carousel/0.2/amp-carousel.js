@@ -15,7 +15,7 @@
  */
 
 import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
 import {Carousel} from '../../amp-base-carousel/0.1/carousel.js';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
@@ -26,9 +26,9 @@ import {
   dispatchCustomEvent,
 } from '../../../src/dom';
 import {computedStyle} from '../../../src/style';
-import {createCustomEvent, getDetail} from '../../../src/event-helper';
+import {createCustomEvent, getDetail, listen} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
@@ -129,6 +129,9 @@ class AmpCarousel extends AMP.BaseElement {
      * @private {boolean}
      */
     this.showControls_ = false;
+
+    /** If the ampdoc is in the Viewer */
+    this.isViewerEmbeded_ = Services.viewerForDoc(element).isEmbedded();
   }
 
   /** @override */
@@ -154,7 +157,7 @@ class AmpCarousel extends AMP.BaseElement {
       win,
       element,
       scrollContainer: dev().assertElement(this.scrollContainer_),
-      initialIndex: Number(this.element.getAttribute('slide')),
+      initialIndex: Number(this.element.getAttribute('slide') || '0'),
       runMutate: (cb) => this.mutateElement(cb),
     });
     this.configureCarousel_(slides);
@@ -175,6 +178,7 @@ class AmpCarousel extends AMP.BaseElement {
     );
     this.prevButton_.addEventListener('click', () => this.interactionPrev());
     this.nextButton_.addEventListener('click', () => this.interactionNext());
+    this.handlePropagationInViewer_();
 
     const owners = Services.ownersForDoc(element);
     this.childLayoutManager_ = new ChildLayoutManager({
@@ -630,6 +634,19 @@ class AmpCarousel extends AMP.BaseElement {
       actionSource == ActionSource.TOUCH ||
       actionSource == ActionSource.GENERIC_HIGH_TRUST
     );
+  }
+
+  /**
+   * Attach singal onto touchmove event to stop propagation to viewer
+   * to be handled at the viewer integration layer in bubble phase.
+   */
+  handlePropagationInViewer_() {
+    if (!this.isViewerEmbeded_) {
+      return;
+    }
+    listen(this.scrollContainer_, 'touchmove', (event) => {
+      event.shouldViewerCancelPropagation = true;
+    });
   }
 
   /**

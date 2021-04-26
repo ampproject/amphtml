@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dict} from '../../../../src/utils/object';
+import {dict} from '../../../../src/core/types/object';
 
 const overrideKeys = [
   'backgroundColor',

@@ -64,7 +64,7 @@ async function maybeMergeAndRemoveVendorConfig(tag, script) {
 async function alterAnalyticsTags(url, version, extraUrlParams) {
   const cachePath = urlToCachePath(url, version);
   const document = fs.readFileSync(cachePath);
-  const {JSDOM} = require('jsdom'); // Lazy-required to speed up task loading.
+  const {JSDOM} = await import('jsdom'); // Lazy-imported to speed up task loading.
   const dom = new JSDOM(document);
 
   const analyticsTags = Array.from(

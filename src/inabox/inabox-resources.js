@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
-import {Observable} from '../observable';
+import {Deferred} from '../core/data-structures/promise';
+import {Observable} from '../core/data-structures/observable';
 import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL} from '../service/resources-interface';
 import {Resource, ResourceState} from '../service/resource';
 import {Services} from '../services';
-import {VisibilityState} from '../visibility-state';
+import {VisibilityState} from '../core/constants/visibility-state';
 import {dev} from '../log';
 import {getMode} from '../mode';
 import {hasNextNodeInDocumentOrder} from '../dom';
@@ -199,11 +199,6 @@ export class InaboxResources {
    */
   whenFirstPass() {
     return this.firstPassDone_.promise;
-  }
-
-  /** @override */
-  isIntersectionExperimentOn() {
-    return false;
   }
 
   /**

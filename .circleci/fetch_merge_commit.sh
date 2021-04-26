@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 
-# This script fetches the merge commit of a PR branch with master to make sure
-# PRs are tested against all the latest changes on CircleCI.
+# This script fetches the merge commit of a PR branch with the main branch to
+# make sure PRs are tested against all the latest changes on CircleCI.
 
 set -e
 err=0
@@ -36,12 +36,12 @@ fi
 
 # If PR_NUMBER exists, but the merge commit file doesn't exist, the PR was
 # created after the first stage of CI was run. There is nothing more to do.
-if [[ ! -f .CIRCLECI_MERGE_COMMIT ]]; then
+if [[ ! -f /tmp/restored-workspace/.CIRCLECI_MERGE_COMMIT ]]; then
   exit 0
 fi
 
 # Extract the merge commit for this workflow and make it visible to other steps.
-CIRCLECI_MERGE_COMMIT="$(cat .CIRCLECI_MERGE_COMMIT)"
+CIRCLECI_MERGE_COMMIT="$(cat /tmp/restored-workspace/.CIRCLECI_MERGE_COMMIT)"
 echo "export CIRCLECI_MERGE_COMMIT=$CIRCLECI_MERGE_COMMIT" >> $BASH_ENV
 
 # Fetch the merge commit. This ensures that all CI stages use the same commit.
@@ -51,9 +51,9 @@ echo $(GREEN "Fetching merge commit $CIRCLECI_MERGE_COMMIT...")
 # If a clean merge is not possible, do not proceed with the build. GitHub's UI
 # will show an error indicating there was a merge conflict.
 if [[ "$err" -ne "0" ]]; then
-  echo $(RED "Detected a merge conflict between $CIRCLE_BRANCH and master.")
+  echo $(RED "Detected a merge conflict between $CIRCLE_BRANCH and the main branch.")
   echo $(RED "Please rebase your PR branch.")
   exit $err
 fi
 
-echo $(GREEN "Successfully fetched merge commit of $CIRCLE_BRANCH with master.")
+echo $(GREEN "Successfully fetched merge commit of $CIRCLE_BRANCH with the main branch.")

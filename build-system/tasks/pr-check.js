@@ -17,18 +17,17 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
-  abortTimedJob,
+  buildTargetsInclude,
+  determineBuildTargets,
+  Targets,
+} = require('../pr-check/build-targets');
+const {
   printChangeSummary,
   startTimer,
   stopTimer,
   timedExec,
 } = require('../pr-check/utils');
-const {
-  buildTargetsInclude,
-  determineBuildTargets,
-  Targets,
-} = require('../pr-check/build-targets');
-const {runNpmChecks} = require('../pr-check/npm-checks');
+const {runNpmChecks} = require('../common/npm-checks');
 const {setLoggingPrefix} = require('../common/logging');
 
 const jobName = 'pr-check.js';
@@ -36,36 +35,32 @@ const jobName = 'pr-check.js';
 /**
  * This file runs tests against the local workspace to mimic the CI build as
  * closely as possible.
- * @param {Function} cb
  */
-async function prCheck(cb) {
-  setLoggingPrefix(jobName);
-
-  const failTask = () => {
-    stopTimer(jobName, startTime);
-    const err = new Error('Local PR check failed. See logs above.');
-    err.showStack = false;
-    cb(err);
-  };
-
+async function prCheck() {
   const runCheck = (cmd) => {
     const {status} = timedExec(cmd);
     if (status != 0) {
-      failTask();
+      stopTimer(jobName, startTime);
+      throw new Error('Local PR check failed. See logs above.');
     }
   };
 
+  setLoggingPrefix(jobName);
   const startTime = startTimer(jobName);
-  if (!runNpmChecks()) {
-    abortTimedJob(jobName, startTime);
-    failTask();
-  }
-
+  runNpmChecks();
   printChangeSummary();
   determineBuildTargets();
 
   if (buildTargetsInclude(Targets.PRESUBMIT)) {
     runCheck('amp presubmit');
+  }
+
+  if (buildTargetsInclude(Targets.INVALID_WHITESPACES)) {
+    runCheck('amp check-invalid-whitespaces --local_changes');
+  }
+
+  if (buildTargetsInclude(Targets.HTML_FIXTURES)) {
+    runCheck('amp validate-html-fixtures --local_changes');
   }
 
   if (buildTargetsInclude(Targets.LINT)) {

@@ -1,6 +1,6 @@
-import {pureDevAssert as devAssert} from './core/assert';
+import {devAssert} from './log';
 import {isConnectedNode, rootNodeFor} from './dom';
-import {toArray} from './types';
+import {toArray} from './core/types/array';
 
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.

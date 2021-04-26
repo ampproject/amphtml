@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 import {getData, listen} from './../../../src/event-helper';
-import {isFiniteNumber, isObject} from '../../../src/types';
+import {isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {isObject} from '../../../src/core/types';
 import {removeElement} from '../../../src/dom';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 export class AmpRiddleQuiz extends AMP.BaseElement {
   /** @param {!AmpElement} element */

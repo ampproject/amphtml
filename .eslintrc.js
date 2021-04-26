@@ -15,6 +15,10 @@
  */
 
 const fs = require('fs');
+const {
+  forbiddenTermsGlobal,
+  forbiddenTermsSrcInclusive,
+} = require('./build-system/test-configs/forbidden-terms');
 
 /**
  * Dynamically extracts experiment globals from the config file.
@@ -140,6 +144,11 @@ module.exports = {
     'local/no-es2015-number-props': 2,
     'local/no-export-side-effect': 2,
     'local/no-for-of-statement': 2,
+    'local/no-forbidden-terms': [
+      2,
+      forbiddenTermsGlobal,
+      forbiddenTermsSrcInclusive,
+    ],
     'local/no-function-async': 2,
     'local/no-function-generator': 2,
     'local/no-global': 0,
@@ -207,13 +216,6 @@ module.exports = {
     'no-useless-concat': 2,
     'no-undef': 2,
     'no-var': 2,
-    'no-warning-comments': [
-      2,
-      {
-        'terms': ['do not submit'],
-        'location': 'anywhere',
-      },
-    ],
     'notice/notice': [
       2,
       {
@@ -308,10 +310,21 @@ module.exports = {
     },
     {
       'files': [
+        '**/test-*',
+        '**/_init_tests.js',
+        '**/*_test.js',
+        '**/testing/**',
+        '**/storybook/*.js',
+      ],
+      'rules': {
+        'local/no-forbidden-terms': [2, forbiddenTermsGlobal],
+      },
+    },
+    {
+      'files': [
         '**/.eslintrc.js',
         'amp.js',
         'babel.config.js',
-        'gulp-deprecated.js',
         'package-scripts.js',
       ],
       'globals': {
@@ -320,6 +333,7 @@ module.exports = {
         'require': false,
       },
       'rules': {
+        'local/no-forbidden-terms': 0,
         'local/no-module-exports': 0,
       },
     },

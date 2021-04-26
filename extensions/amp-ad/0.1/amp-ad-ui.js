@@ -24,8 +24,8 @@ import {
   createElementWithAttributes,
   removeElement,
 } from '../../../src/dom';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
-import {dict} from '../../../src/utils/object';
+import {devAssert} from '../../../src/log';
+import {dict} from '../../../src/core/types/object';
 import {getExperimentBranch} from '../../../src/experiments';
 
 import {getAdContainer} from '../../../src/ad-helper';

@@ -15,9 +15,9 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {AmpEvents} from '../../src/amp-events';
+import {AmpEvents} from '../../src/core/constants/amp-events';
 import {BaseElement} from '../../src/base-element';
-import {CommonSignals} from '../../src/common-signals';
+import {CommonSignals} from '../../src/core/constants/common-signals';
 import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
@@ -714,19 +714,42 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           toggleExperiment(win, 'amp-consent-granular-consent', false);
         });
 
-        it('should find the correct purposes', () => {
-          const element = new ElementClass();
-          expect(element.getPurposesConsent_()).to.be.null;
-          element.setAttribute('data-block-on-consent-purposes', '');
-          expect(element.getPurposesConsent_()).to.be.null;
-          element.setAttribute(
-            'data-block-on-consent-purposes',
-            'purpose-foo,purpose-bar'
-          );
-          expect(element.getPurposesConsent_()).to.deep.equals([
-            'purpose-foo',
-            'purpose-bar',
-          ]);
+        describe('getPurposeConsent_', () => {
+          let element;
+          beforeEach(() => {
+            element = new ElementClass();
+          });
+
+          it('should find no consent purposes w/ no attribute', () => {
+            expect(element.getPurposesConsent_()).to.be.undefined;
+          });
+
+          it('should find no consent purposes w/ no value on attribute', () => {
+            element.setAttribute('data-block-on-consent-purposes', '');
+            expect(element.getPurposesConsent_()).to.be.undefined;
+          });
+
+          it('should find correct consent purposes', () => {
+            element.setAttribute(
+              'data-block-on-consent-purposes',
+              'purpose-foo,purpose-bar'
+            );
+            expect(element.getPurposesConsent_()).to.deep.equals([
+              'purpose-foo',
+              'purpose-bar',
+            ]);
+          });
+
+          it('should find correct consent purposes w/ whitespaces', () => {
+            element.setAttribute(
+              'data-block-on-consent-purposes',
+              '     purpose-foo, purpose-bar'
+            );
+            expect(element.getPurposesConsent_()).to.deep.equals([
+              'purpose-foo',
+              'purpose-bar',
+            ]);
+          });
         });
 
         it('should default to policyId', () => {
@@ -1655,10 +1678,47 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
             element.getResource_(),
             'unlayout'
           );
+          const schedulePassStub = env.sandbox.stub(resources, 'schedulePass');
 
           element.unmount();
           expect(testElementPauseCallback).to.be.calledOnce;
           expect(resourceUnlayoutStub).to.be.calledOnce;
+          expect(schedulePassStub).to.be.calledOnce;
+        });
+
+        it('should pause and unlayout on unmount with unlayoutOnPause', async () => {
+          const element = new ElementClass();
+          container.appendChild(element);
+          await element.buildInternal();
+          element.getResource_().layoutScheduled(Date.now());
+          const impl = await element.getImpl();
+          env.sandbox.stub(impl, 'unlayoutOnPause').returns(true);
+          const schedulePassStub = env.sandbox.stub(resources, 'schedulePass');
+
+          element.unmount();
+          expect(testElementPauseCallback).to.be.calledOnce;
+          expect(testElementUnlayoutCallback).to.be.calledOnce;
+          // `schedulePass` is triggered twice: once for pause and once for
+          // unlayout. However, it's benign because only one pass will be
+          // scheduled as a result.
+          expect(schedulePassStub).to.be.calledTwice;
+        });
+
+        it('should NOT schedule pass on unmount when disconnected', async () => {
+          const element = new ElementClass();
+          container.appendChild(element);
+          await element.buildInternal();
+          const resourceUnlayoutStub = env.sandbox.stub(
+            element.getResource_(),
+            'unlayout'
+          );
+          const schedulePassStub = env.sandbox.stub(resources, 'schedulePass');
+
+          container.removeChild(element);
+          element.unmount();
+          expect(testElementPauseCallback).to.be.calledOnce;
+          expect(resourceUnlayoutStub).to.be.calledOnce;
+          expect(schedulePassStub).to.not.be.called;
         });
       });
 

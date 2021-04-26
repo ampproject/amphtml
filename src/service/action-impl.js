@@ -19,20 +19,21 @@ import {
   DEFAULT_ACTION,
   RAW_OBJECT_ARGS_KEY,
   actionTrustToString,
-} from '../action-constants';
-import {Keys} from '../utils/key-codes';
+} from '../core/constants/action-constants';
+import {Keys} from '../core/constants/key-codes';
 import {Services} from '../services';
-import {debounce, throttle} from '../utils/rate-limit';
+import {debounce, throttle} from '../core/types/function';
 import {dev, devAssert, user, userAssert} from '../log';
-import {dict, hasOwn, map} from '../utils/object';
+import {dict, hasOwn, map} from '../core/types/object';
 import {getDetail} from '../event-helper';
 import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
 import {isAmp4Email} from '../format';
-import {isArray, isFiniteNumber, toArray, toWin} from '../types';
+import {isArray, toArray} from '../core/types/array';
 import {isEnabled} from '../dom';
+import {isFiniteNumber, toWin} from '../types';
 import {registerServiceBuilderForDoc} from '../service';
-import {reportError} from '../error';
+import {reportError} from '../error-reporting';
 
 /** @const {string} */
 const TAG_ = 'Action';

@@ -12,7 +12,7 @@ assignees: ''
 MUST: Replace *everything* in angle brackets in the title AND body of this issue.
 MUST: Update issue labels to indicate which channels the cherry-pick is going into.
 
-If you have any questions see the [cherry-pick documentation](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#Cherry-picks).
+If you have any questions see the [cherry-pick documentation](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md#Cherry-picks).
 -->
 
 # Cherry-pick request
@@ -25,7 +25,7 @@ TIP: Cherry-picks into Stable most likely require a cherry-pick into Beta / Expe
 | :---------------: | :------------: | :------------------: | :----------: | :----------: | ------------------------------------------------------------------------------- |
 | #<_ISSUE_NUMBER_> | #<_PR_NUMBER_> |     **<YES/NO>**     | **<YES/NO>** | **<YES/NO>** | #<_RELEASE_ISSUE_>                                                              |
 
-## Why does this issue meet the [cherry-pick criteria](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#Cherry-picks)?
+## Why does this issue meet the [cherry-pick criteria](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md#Cherry-picks)?
 
 <!--
 TIP: Be specific.

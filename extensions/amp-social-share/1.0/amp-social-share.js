@@ -20,13 +20,13 @@ import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {SocialShare} from './social-share';
 import {addParamsToUrl, parseQueryString} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getSocialConfig} from './social-share-config';
 import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
 import {toggle} from '../../../src/style';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-social-share';

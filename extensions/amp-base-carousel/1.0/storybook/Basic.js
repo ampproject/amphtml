@@ -17,7 +17,6 @@
 import * as Preact from '../../../../src/preact';
 import {BaseCarousel} from '../base-carousel';
 import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 
 const CONTROLS = ['auto', 'always', 'never'];
 const SNAP_ALIGN = ['start', 'center'];
@@ -26,7 +25,7 @@ const ORIENTATIONS = ['horizontal', 'vertical'];
 export default {
   title: 'BaseCarousel',
   component: BaseCarousel,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 /**
@@ -170,6 +169,7 @@ export const provideArrows = () => {
     color: 'white',
     width: '30px',
     height: '30px',
+    padding: '1px 6px',
   };
   const MyButton = (props) => {
     const {children} = props;
@@ -184,8 +184,8 @@ export const provideArrows = () => {
       controls={controls}
       style={{width, height}}
       outsetArrows={outsetArrows}
-      arrowPrev={<MyButton>←</MyButton>}
-      arrowNext={<MyButton>→</MyButton>}
+      arrowPrevAs={(props) => <MyButton {...props}>←</MyButton>}
+      arrowNextAs={(props) => <MyButton {...props}>→</MyButton>}
     >
       {['lightcoral', 'peachpuff', 'lavender'].map((color) => (
         <div style={{backgroundColor: color, width, height}}></div>

@@ -16,7 +16,6 @@
 
 import * as Preact from '../../../../src/preact';
 import {date, select, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 const DISPLAY_IN_OPTIONS = ['utc', 'local'];
@@ -24,7 +23,7 @@ const LOCALES = ['en-US', 'en-GB', 'fr', 'ru', 'ar', 'he', 'ja'];
 
 export default {
   title: 'amp-date-display-1_0',
-  decorators: [withKnobs, withA11y, withAmp],
+  decorators: [withKnobs, withAmp],
 
   parameters: {
     extensions: [
@@ -63,9 +62,7 @@ export const Default = () => {
   );
 };
 
-Default.story = {
-  name: 'default',
-};
+Default.storyName = 'default';
 
 export const DefaultRenderer = () => {
   const datetime = new Date(date('Date/Time', new Date())).toISOString();
@@ -87,9 +84,7 @@ export const DefaultRenderer = () => {
   );
 };
 
-DefaultRenderer.story = {
-  name: 'default renderer',
-};
+DefaultRenderer.storyName = 'default renderer';
 
 export const ExternalTemplate = () => {
   const datetime = new Date(date('Date/Time', new Date())).toISOString();
@@ -121,6 +116,4 @@ export const ExternalTemplate = () => {
   );
 };
 
-ExternalTemplate.story = {
-  name: 'external template',
-};
+ExternalTemplate.storyName = 'external template';

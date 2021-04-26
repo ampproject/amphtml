@@ -20,8 +20,8 @@ import {LayoutPriority} from '../../src/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {ResourcesImpl} from '../../src/service/resources-impl';
 import {Services} from '../../src/services';
-import {Signals} from '../../src/utils/signals';
-import {VisibilityState} from '../../src/visibility-state';
+import {Signals} from '../../src/core/data-structures/signals';
+import {VisibilityState} from '../../src/core/constants/visibility-state';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 
@@ -724,44 +724,6 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     expect(resource1.hasBeenMeasured()).to.be.true;
   });
 
-  describe('intersect-resources', () => {
-    beforeEach(() => {
-      // Enable "intersect-resources" experiment.
-      resources.intersectionObserver_ = {};
-      resource1.intersect_ = resource2.intersect_ = true;
-    });
-
-    it('should not force relayout after build', () => {
-      resources.relayoutAll_ = false;
-
-      // Unmeasured elements.
-      env.sandbox.stub(resource1, 'hasBeenMeasured').returns(false);
-
-      // Measured elements that need relayout.
-      env.sandbox.stub(resource2, 'hasBeenMeasured').returns(true);
-      env.sandbox
-        .stub(resource2, 'getState')
-        .returns(ResourceState.NOT_LAID_OUT);
-
-      resources.discoverWork_();
-    });
-
-    it('should invalidate premeasurements after resize event', () => {
-      resource1.premeasure({});
-      expect(resource1.hasBeenPremeasured()).true;
-      expect(resource1.isMeasureRequested()).false;
-      resources.viewport_.changeObservable_.fire({relayoutAll_: true});
-      expect(resource1.hasBeenPremeasured()).false;
-      expect(resource1.isMeasureRequested()).true;
-    });
-
-    it('should schedule a pass after resize event', () => {
-      const schedulePassStub = sandbox.stub(resources, 'schedulePass');
-      resources.viewport_.changeObservable_.fire({relayoutAll_: false});
-      expect(schedulePassStub).calledOnce;
-    });
-  });
-
   it('should render two screens when visible', () => {
     resources.visible_ = true;
     sandbox
@@ -951,45 +913,6 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     resources.work_();
     expect(resource1.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
     expect(resource1.element.layoutScheduleTime).to.be.greaterThan(0);
-  });
-
-  describe('intersect-resources', () => {
-    beforeEach(() => {
-      // Enables the "intersect-resources" experiment.
-      resources.intersectionObserver_ = {};
-    });
-
-    it('should not remeasure before layout', () => {
-      sandbox.stub(resource1, 'hasBeenPremeasured').returns(false);
-      sandbox.stub(resource1, 'measure');
-
-      resources.scheduleLayoutOrPreload(resource1, /* layout */ true);
-      resources.work_();
-
-      expect(resources.exec_.getSize()).to.equal(1);
-      expect(resource1.measure).to.not.be.called;
-      expect(resource1.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
-    });
-
-    it('should check premeasured rect before layout', () => {
-      sandbox.stub(resource1, 'hasBeenMeasured').returns(true);
-      sandbox.stub(resource1, 'hasBeenPremeasured').returns(true);
-      sandbox.stub(resource1, 'isDisplayed').returns(true);
-      resource1.isDisplayed
-        .withArgs(/* usePremeasuredRect */ true)
-        .returns(false);
-      sandbox.spy(resource1, 'layoutCanceled');
-
-      resources.scheduleLayoutOrPreload(resource1, /* layout */ true);
-      resources.work_();
-
-      expect(resources.exec_.getSize()).to.equal(0);
-      expect(resource1.isDisplayed).to.be.calledWith(
-        /* usePremeasuredRect */ true
-      );
-      expect(resource1.layoutCanceled).to.be.calledOnce;
-      expect(resource1.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
-    });
   });
 
   it('should not schedule resource execution outside viewport', () => {
@@ -1517,22 +1440,6 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       expect(resource2.isBuilding()).to.be.false;
     }
   );
-
-  it('should observe element after adding it', () => {
-    // Enables the 'intersect-resources' experiment.
-    const observer = (resources.intersectionObserver_ = {
-      observe: env.sandbox.spy(),
-    });
-    // Avoid creating a new Resource, which is tricky to spy on.
-    env.sandbox.stub(child1, 'reconstructWhenReparented').returns(false);
-    env.sandbox.stub(resource1, 'getState').returns(ResourceState.NOT_LAID_OUT);
-    env.sandbox.spy(resource1, 'requestMeasure');
-
-    resources.add(child1);
-
-    expect(resource1.requestMeasure).to.be.calledOnce;
-    expect(observer.observe).to.be.calledOnceWith(child1);
-  });
 
   describe('buildReadyResources_', () => {
     let schedulePassStub;

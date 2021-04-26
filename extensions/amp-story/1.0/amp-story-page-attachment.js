@@ -25,7 +25,9 @@ import {dev, devAssert} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getState} from '../../../src/history';
 import {htmlFor} from '../../../src/static-template';
+import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 import {toggle} from '../../../src/style';
+import {triggerClickFromLightDom} from './utils';
 
 /** @const {string} */
 const DARK_THEME_CLASS = 'i-amphtml-story-draggable-drawer-theme-dark';
@@ -33,9 +35,10 @@ const DARK_THEME_CLASS = 'i-amphtml-story-draggable-drawer-theme-dark';
 /**
  * @enum {string}
  */
-const AttachmentTheme = {
+export const AttachmentTheme = {
   LIGHT: 'light', // default
   DARK: 'dark',
+  CUSTOM: 'custom',
 };
 
 /**
@@ -107,13 +110,15 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildInline_() {
-    const closeButtonEl = this.headerEl_.appendChild(
-      htmlFor(this.element)`
+    const closeButtonEl = htmlFor(this.element)`
           <button class="i-amphtml-story-page-attachment-close-button" aria-label="close"
               role="button">
-          </button>`
-    );
+          </button>`;
     const localizationService = getLocalizationService(devAssert(this.element));
+
+    const titleEl = htmlFor(this.element)`
+    <span class="i-amphtml-story-page-attachment-title"></span>`;
+
     if (localizationService) {
       const localizedCloseString = localizationService.getLocalizedString(
         LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
@@ -121,15 +126,20 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       closeButtonEl.setAttribute('aria-label', localizedCloseString);
     }
 
-    this.headerEl_.appendChild(
-      htmlFor(this.element)`
-          <span class="i-amphtml-story-page-attachment-title"></span>`
-    );
-
     if (this.element.hasAttribute('data-title')) {
-      this.headerEl_.querySelector(
-        '.i-amphtml-story-page-attachment-title'
-      ).textContent = this.element.getAttribute('data-title');
+      titleEl.textContent = this.element.getAttribute('data-title');
+    }
+
+    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+      const titleAndCloseWrapperEl = this.headerEl_.appendChild(
+        htmlFor(this.element)`
+            <div class="i-amphtml-story-draggable-drawer-header-title-and-close"></div>`
+      );
+      titleAndCloseWrapperEl.appendChild(closeButtonEl);
+      titleAndCloseWrapperEl.appendChild(titleEl);
+    } else {
+      this.headerEl_.appendChild(closeButtonEl);
+      this.headerEl_.appendChild(titleEl);
     }
 
     const templateEl = this.element.querySelector(
@@ -283,11 +293,10 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       // amp-story-page-attachment.css). The navigation itself will take some
       // time, depending on the target and network conditions.
       this.win.setTimeout(() => {
-        const navigationService = Services.navigationForDoc(this.getAmpDoc());
-        navigationService.navigateTo(
-          this.win,
-          this.element.getAttribute('href')
-        );
+        const clickTarget = this.element.parentElement
+          .querySelector('.i-amphtml-story-page-open-attachment-host')
+          .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
+        triggerClickFromLightDom(clickTarget, this.element);
       }, 50);
     });
   }

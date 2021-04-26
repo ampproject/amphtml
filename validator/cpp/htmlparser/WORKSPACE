@@ -10,9 +10,9 @@ http_archive(
 
 http_archive(
     name = "com_google_googletest",
-    sha256 = "6cc75292babf34535bb41364b9e991a84afcd1aca1e929ffcf965c7a3425690c",
-    strip_prefix = "googletest-3ff1e8b98a3d1d3abc24a5bacb7651c9b32faedd",
-    urls = ["https://github.com/google/googletest/archive/3ff1e8b98a3d1d3abc24a5bacb7651c9b32faedd.zip"],  # 2019-01-07
+    sha256 = "4b8eee57ff7afdd797ea52b8c50a8f572e6582ab00a4a932fb9117d14b423f93",
+    strip_prefix = "googletest-252ce9c52d304659eff6be558209c811b7191963",
+    urls = ["https://github.com/google/googletest/archive/252ce9c52d304659eff6be558209c811b7191963.zip"],  # 2019-01-07
 )
 
 http_archive(

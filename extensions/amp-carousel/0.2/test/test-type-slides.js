@@ -15,8 +15,10 @@
  */
 
 import '../amp-carousel';
-import {ActionTrust} from '../../../../src/action-constants';
+import * as Listen from '../../../../src/event-helper';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {CarouselEvents} from '../../../amp-base-carousel/0.1/carousel-events';
+import {Services} from '../../../../src/services';
 import {getDetail, listenOncePromise} from '../../../../src/event-helper';
 
 /**
@@ -527,6 +529,31 @@ describes.realWin(
             'Next item in carousel (1 of 3)'
           );
         });
+      });
+    });
+
+    describe('event propogation', () => {
+      it('should add touchmove event if in viewer', async () => {
+        env.sandbox.stub(Services, 'viewerForDoc').returns({
+          isEmbedded: () => true,
+        });
+        const listenSpy = env.sandbox.spy(Listen, 'listen');
+        const carousel = await getCarousel({loop: false});
+        const impl = await carousel.getImpl();
+
+        expect(listenSpy.lastCall.args[0]).to.equal(impl.scrollContainer_);
+        expect(listenSpy.lastCall.args[1]).to.equal('touchmove');
+        expect(listenSpy.args.length).to.equal(5);
+      });
+
+      it('should not add touchmove event if not in the viewer', async () => {
+        env.sandbox.stub(Services, 'viewerForDoc').returns({
+          isEmbedded: () => false,
+        });
+        const listenSpy = env.sandbox.spy(Listen, 'listen');
+        await getCarousel({loop: false});
+
+        expect(listenSpy.args.length).to.equal(4);
       });
     });
   }

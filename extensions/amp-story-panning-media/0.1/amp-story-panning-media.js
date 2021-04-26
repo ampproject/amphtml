@@ -20,7 +20,7 @@ import {
   UIType,
 } from '../../../extensions/amp-story/1.0/amp-story-store-service';
 import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
@@ -33,6 +33,9 @@ const TAG = 'AMP_STORY_PANNING_MEDIA';
 
 /** @const {string}  */
 const DURATION_MS = 1000;
+
+/** @const {number}  */
+const DISTANCE_TO_CENTER_EDGE_PERCENT = 50;
 
 /**
  * A small number used to calculate zooming out to 0.
@@ -53,6 +56,17 @@ const MIN_INTEGER = -100000;
  */
 export let panningMediaPositionDef;
 
+/**
+ * Max distances to keep image in viewport.
+ * horizontal: Percentage between [-50; 50]
+ * vertical: Percentage between [-50; 50]
+ * @typedef {{
+ *   horizontal: float,
+ *   vertical: float,
+ * }}
+ */
+export let panningMediaMaxBoundsPercentDef;
+
 export class AmpStoryPanningMedia extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -66,6 +80,9 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
     /** @private {?panningMediaPositionDef} Position to animate to. */
     this.animateTo_ = {};
+
+    /** @private {?{width: number, height: number}} */
+    this.pageSize_ = null;
 
     /** @private {?panningMediaPositionDef} Current animation state. */
     this.animationState_ = {};
@@ -91,14 +108,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.animateTo_ = {
-      x: parseFloat(this.element_.getAttribute('x')) || 0,
-      y: parseFloat(this.element_.getAttribute('y')) || 0,
-      zoom: this.element_.hasAttribute('zoom')
-        ? parseFloat(this.element_.getAttribute('zoom'))
-        : 1,
-    };
-
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => {
         this.storeService_ = storeService;
@@ -111,11 +120,13 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.ampImgEl_ = dev().assertElement(
       this.element_.querySelector('amp-img')
     );
+
     this.groupId_ =
       this.element_.getAttribute('group-id') ||
       this.ampImgEl_.getAttribute('src');
 
     this.initializeListeners_();
+
     return whenUpgradedToCustomElement(this.ampImgEl_)
       .then(() => this.ampImgEl_.signals().whenSignal(CommonSignals.LOAD_END))
       .then(() => {
@@ -135,10 +146,19 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   /** @private */
   initializeListeners_() {
     this.storeService_.subscribe(
+      StateProperty.PAGE_SIZE,
+      (pageSize) => {
+        this.pageSize_ = pageSize;
+        this.setAnimateTo_();
+        this.animate_();
+      },
+      true /** callToInitialize */
+    );
+    this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_ID,
       (currPageId) => {
         this.isOnActivePage_ = currPageId === this.getPageId_();
-        this.onPageNavigation_();
+        this.animate_();
       },
       true /** callToInitialize */
     );
@@ -167,10 +187,54 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   }
 
   /** @private */
-  onPageNavigation_() {
-    if (this.isOnActivePage_) {
-      this.animate_();
+  setAnimateTo_() {
+    const x = parseFloat(this.element_.getAttribute('x') || 0);
+    const y = parseFloat(this.element_.getAttribute('y') || 0);
+    const zoom = parseFloat(this.element_.getAttribute('zoom') || 1);
+    const lockBounds = this.element_.hasAttribute('lock-bounds');
+
+    if (lockBounds) {
+      // Zoom must be set to calculate maxBounds.
+      this.animateTo_.zoom = zoom < 1 ? 1 : zoom;
+      const {horizontal, vertical} = this.getMaxBounds_();
+      this.animateTo_.x = Math.max(-horizontal, Math.min(x, horizontal));
+      this.animateTo_.y = Math.max(-vertical, Math.min(y, vertical));
+    } else {
+      this.animateTo_ = {x, y, zoom};
     }
+  }
+
+  /**
+   * Calculates max distances to keep image in viewport.
+   * @private
+   * @return {panningMediaMaxBoundsPercentDef}
+   */
+  getMaxBounds_() {
+    // Calculations to clamp image to edge of container.
+    const {width: containerWidth, height: containerHeight} = this.pageSize_;
+
+    const ampImgWidth = this.ampImgEl_.getAttribute('width');
+    const ampImgHeight = this.ampImgEl_.getAttribute('height');
+    if (!ampImgWidth || !ampImgHeight) {
+      user().error(
+        TAG,
+        '"lock-bounds" requires "width" and "height" to be set on the amp-img child.'
+      );
+    }
+    // TODO(#31515): When aspect ratio is portrait, containerWidth will be used for this.
+    const percentScaledToFitViewport = containerHeight / ampImgHeight;
+    const scaledImageWidth = percentScaledToFitViewport * ampImgWidth;
+    const scaledImageHeight = percentScaledToFitViewport * ampImgHeight;
+
+    const widthFraction =
+      1 - containerWidth / (scaledImageWidth * this.animateTo_.zoom);
+    const heightFraction =
+      1 - containerHeight / (scaledImageHeight * this.animateTo_.zoom);
+
+    return {
+      horizontal: DISTANCE_TO_CENTER_EDGE_PERCENT * widthFraction,
+      vertical: DISTANCE_TO_CENTER_EDGE_PERCENT * heightFraction,
+    };
   }
 
   /**
@@ -178,6 +242,9 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    * @private
    */
   animate_() {
+    if (!this.isOnActivePage_) {
+      return;
+    }
     const startPos = this.storeService_.get(StateProperty.PANNING_MEDIA_STATE)[
       this.groupId_
     ];
@@ -291,7 +358,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    * @private
    */
   prefersReducedMotion_() {
-    return this.win.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return this.win.matchMedia('(prefers-reduced-motion: reduce)')?.matches;
   }
 
   /** @override */

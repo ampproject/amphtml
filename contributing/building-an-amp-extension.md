@@ -40,7 +40,7 @@ rating viewer, you'd do this by building an extension.
 
 This document describes how to create a new AMP extension, which is one of the most common ways of adding a new feature to AMP.
 
-Before diving into the details on creating a new AMP extension, please familiarize yourself with the [general process for contributing code and features to AMP](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md). Since you are adding a new extension you will likely need to follow the [process for making a significant change](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#process-for-significant-changes), including filing an ["Intent to Implement" issue](https://github.com/ampproject/amphtml/labels/INTENT%20TO%20IMPLEMENT) and finding a guide before you start significant development.
+Before diving into the details on creating a new AMP extension, please familiarize yourself with the [general process for contributing code and features to AMP](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md). Since you are adding a new extension you will likely need to follow the [process for making a significant change](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md#process-for-significant-changes), including filing an ["Intent to Implement" issue](https://github.com/ampproject/amphtml/labels/INTENT%20TO%20IMPLEMENT) and finding a guide before you start significant development.
 
 To bootstrap the creation of a new component, the following command will create the directory structure and boilerplate code for you:
 
@@ -84,7 +84,7 @@ Almost all AMP extensions extend AMP.BaseElement, which provides some
 hookups and callbacks for you to override in order to implement and
 customize your element behavior. These callbacks are explained below in
 the BaseElement Callbacks section, and are also explained inline in the
-[BaseElement](https://github.com/ampproject/amphtml/blob/master/src/base-element.js#L26)
+[BaseElement](https://github.com/ampproject/amphtml/blob/main/src/base-element.js#L26)
 class.
 
 ### Element class
@@ -139,7 +139,7 @@ AMP.extension('amp-my-element', '0.1', (AMP) => {
 
 -   **Default**: Does nothing
 -   **Override**: Rarely.
--   **[Vsync](https://github.com/ampproject/amphtml/blob/master/src/service/vsync-impl.js) Context**: None
+-   **[Vsync](https://github.com/ampproject/amphtml/blob/main/src/service/vsync-impl.js) Context**: None
 -   **Usage**: If your extension provides different implementations
     depending on a late runtime condition (e.g. type attribute on the
     element, platform)
@@ -172,7 +172,7 @@ AMP.extension('amp-my-element', '0.1', (AMP) => {
     to get a performance boost by preconnecting, preloading and prefetching
     resources via preconnect service.
 -   **Example Usage**: [Instagram uses this to
-    preconnect](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/0.1/amp-instagram.js)
+    preconnect](https://github.com/ampproject/amphtml/blob/main/extensions/amp-instagram/0.1/amp-instagram.js)
     to instagram hosts.
 
 #### createPlaceholderCallback
@@ -183,7 +183,7 @@ AMP.extension('amp-my-element', '0.1', (AMP) => {
     create a lightweight placeholder. This gets called only if the element
     doesn't already have a publisher-provided placeholder (through [the
     placeholder
-    attribute](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#placeholder)).
+    attribute](https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md#placeholder)).
 -   **Usage**: Create placeholder DOM and return it. For example,
     amp-instagram uses this to create a placeholder dynamically by creating
     an amp-img placeholder instead of loading the iframe, leaving the iframe
@@ -215,7 +215,7 @@ AMP.extension('amp-my-element', '0.1', (AMP) => {
     be different from element to element. Note that load events usually are
     fired very early so if there's another event that your element can
     listen to that have a better meaning of ready-ness, use that to resolve
-    your promise instead - for example: [amp-youtube](https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/0.1/amp-youtube.js) uses the
+    your promise instead - for example: [amp-youtube](https://github.com/ampproject/amphtml/blob/main/extensions/amp-youtube/0.1/amp-youtube.js) uses the
     playerready event that the underlying YT Player
     iframe sends to resolve the layoutCallback promise.
 
@@ -304,7 +304,7 @@ AMP.extension('amp-carousel', '0.1', (AMP) => {
 ## Actions and events
 
 AMP provides a framework for [elements to fire their own
-events](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md)
+events](https://github.com/ampproject/amphtml/blob/main/spec/amp-actions-and-events.md)
 to allow users of that element to listen and react to the events. For
 example, amp-form extension fires a few events on &lt;form&gt; elements
 like `submit-success`. This allow publishers to listen to that event
@@ -421,11 +421,11 @@ nested amp-elements that are placeholders.
 
 One of AMP's features is that a document can be checked against
 validation rules to confirm it's valid AMP. When you implement your
-element, the [AMP Validator](https://github.com/ampproject/amphtml/blob/master/validator/README.md)
+element, the [AMP Validator](https://github.com/ampproject/amphtml/blob/main/validator/README.md)
 needs to be updated to add rules for your element to keep documents
 using your element valid. Create your own rules by following the
 directions at
-[Contributing Component Validator Rules](https://github.com/ampproject/amphtml/blob/master/contributing/component-validator-rules.md).
+[Contributing Component Validator Rules](https://github.com/ampproject/amphtml/blob/main/contributing/component-validator-rules.md).
 
 ## Performance considerations
 
@@ -446,7 +446,7 @@ placeholder for itself (in case a placeholder wasn't provided by the
 developer/publisher who is using your element). This allows elements to
 display content as fast as possible and allow prerendering that
 placeholder. Learn [more about placeholder
-elements](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#placeholder).
+elements](https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md#placeholder).
 
 NOTE: Make sure not to request external resources in the pre-render
 phase. Requests to the publisher's origin itself are OK. If in doubt,
@@ -515,7 +515,7 @@ HTML-native `img` tag which will be out of AMP resource management.
 Consider showing a loading indicator if your element is expected to take
 a long time to load (for example, loading a GIF, video or iframe). AMP
 has a built-in mechanism to show a loading indicator simply by
-whitelisting your element to show it. You can do that inside layout.js
+listing your element so it's allowed to show it. You can do that inside the `layout.js`
 file in the `LOADING_ELEMENTS_` object.
 
 ```javascript
@@ -586,7 +586,7 @@ security and performance reasons. Take a look at adding
 extension PR for examples of 3p integration.
 
 Read about [Inclusion of third party software, embeds and services into
-AMP](https://github.com/ampproject/amphtml/blob/master/3p/README.md).
+AMP](https://github.com/ampproject/amphtml/blob/main/3p/README.md).
 
 For contrast, take a look at amp-instagram which does NOT require an SDK
 to be loaded in order to embed a post, instead it provides an
@@ -599,9 +599,9 @@ AMP defines different layouts that elements can choose whether or not to
 support Your element needs to announce which layouts it supports through
 overriding the `isLayoutSupported(layout)` callback and returning true
 if the element supports that layout. [Read more about AMP Layout
-System](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md)
+System](https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md)
 and [Layout
-Types](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#layout).
+Types](https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md#layout).
 
 ### What layout should your element support?
 
@@ -636,7 +636,7 @@ class AmpSlides extends AMP.BaseElement {
 ## Experiments
 
 Most newly created elements are initially launched as
-[experiments](https://github.com/ampproject/amphtml/blob/master/tools/experiments/README.md).
+[experiments](https://github.com/ampproject/amphtml/blob/main/tools/experiments/README.md).
 This allows people to experiment with using the new element and provide
 the author(s) with feedback. It also provides the AMP Team with the
 opportunity to monitor for any potential errors. This is especially
@@ -656,7 +656,7 @@ const EXPERIMENTS = [
     id: 'amp-my-element',
     name: 'AMP My Element',
     spec:
-      'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+      'https://github.com/ampproject/amphtml/blob/main/extensions/' +
       'amp-my-element/amp-my-element.md',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/XXXYYY',
   },
@@ -668,7 +668,7 @@ And then protecting your code with a check `isExperimentOn(win, 'amp-my-element'
 
 ```javascript
 import {isExperimentOn} from '../../../src/experiments';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 /** @const */
 const EXPERIMENT = 'amp-my-element';
@@ -732,7 +732,7 @@ Create a .md file that serves as the main documentation for your element. This d
 -   Attributes to specify (optional and required)
 -   Validation
 
-For samples of element documentation, see: [amp-list](https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md), [amp-instagram](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md), [amp-carousel](https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/amp-carousel.md)
+For samples of element documentation, see: [amp-list](https://github.com/ampproject/amphtml/blob/main/extensions/amp-list/amp-list.md), [amp-instagram](https://github.com/ampproject/amphtml/blob/main/extensions/amp-instagram/amp-instagram.md), [amp-carousel](https://github.com/ampproject/amphtml/blob/main/extensions/amp-carousel/amp-carousel.md)
 
 ## Example of using your extension
 

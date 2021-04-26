@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-import {ActionTrust, DEFAULT_ACTION} from '../../../src/action-constants';
+import {
+  ActionTrust,
+  DEFAULT_ACTION,
+} from '../../../src/core/constants/action-constants';
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-lightbox-1.0.css';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
