@@ -141,8 +141,9 @@ export class MediaPerformanceMetricsService {
    * method has to be called right before trying to play the media. This allows
    * to reliably record joint latency (time to play), as well initial buffering.
    * @param {!HTMLMediaElement} media
+   * @param {boolean=} isActivePage
    */
-  startMeasuring(media) {
+  startMeasuring(media, isActivePage = false) {
     // Media must start paused in order to determine the joint latency, and
     // initial buffering, if any.
     if (!media.paused) {
@@ -151,7 +152,7 @@ export class MediaPerformanceMetricsService {
     }
 
     const unlisteners = this.listen_(media);
-    const mediaEntry = this.getNewMediaEntry_(media, unlisteners);
+    const mediaEntry = this.getNewMediaEntry_(media, unlisteners, isActivePage);
     this.mediaMap_.set(media, mediaEntry);
 
     // Checks if the media already errored (eg: could have failed the source
@@ -163,6 +164,7 @@ export class MediaPerformanceMetricsService {
       mediaEntry.metrics.error = media.error ? media.error.code : 0;
       mediaEntry.status = Status.ERRORED;
     }
+    mediaEntry.metrics.isActivePage = isActivePage;
   }
 
   /**
@@ -217,6 +219,10 @@ export class MediaPerformanceMetricsService {
     this.performanceService_.tickDelta(
       TickLabel.VIDEO_CACHE_STATE,
       videoCacheState
+    );
+    this.performanceService_.tickDelta(
+      TickLabel.VIDEO_IS_FIRST_PAGE,
+      mediaEntry.metrics.isActivePage ? 1 : 0
     );
 
     // If the media errored.
@@ -300,6 +306,7 @@ export class MediaPerformanceMetricsService {
         rebuffers: 0,
         rebufferTime: 0,
         watchTime: 0,
+        isActivePage: false,
       },
     };
   }
