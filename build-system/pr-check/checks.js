@@ -112,6 +112,13 @@ async function prBuildWorkflow() {
     timedExecOrDie('amp server-tests');
   }
 
+  if (
+    buildTargetsInclude(Targets.AVA) ||
+    buildTargetsInclude(Targets.RUNTIME)
+  ) {
+    timedExecOrDie('amp make-extension-e2e');
+  }
+
   if (buildTargetsInclude(Targets.RUNTIME)) {
     timedExecOrDie('amp dep-check');
     timedExecOrDie('amp check-types');
