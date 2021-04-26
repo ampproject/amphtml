@@ -15,14 +15,17 @@
  */
 
 import {Services} from '../../../src/services';
+import {addParamsToUrl, resolveRelativeUrl} from '../../../src/url';
 import {createElementWithAttributes, matches} from '../../../src/dom';
 import {extensionScriptInNode} from '../../../src/service/extension-script';
-import {resolveRelativeUrl} from '../../../src/url';
 import {toArray} from '../../../src/core/types/array';
 import {user} from '../../../src/log';
 
 /**
  * Add the caching sources to the video if opted in.
+ * The request is sent to the AMP cache url with /mbv path prefix,
+ * and appends the document canonical url as the queryParam `amp_video_host_url`.
+ *
  * @param {!Element} videoEl
  * @param {!Window} win
  * @return {!Promise}
@@ -35,13 +38,15 @@ export function fetchCachedSources(videoEl, win) {
     user().error('AMP-VIDEO', 'Video cache not properly configured');
     return Promise.resolve();
   }
-  const {sourceUrl} = Services.documentInfoForDoc(win.document);
+  const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(win.document);
   const servicePromise = Services.cacheUrlServicePromiseForDoc(videoEl);
   const videoUrl = resolveRelativeUrl(selectVideoSource(videoEl), sourceUrl);
   return servicePromise
     .then((service) => service.createCacheUrl(videoUrl))
     .then((cacheUrl) => {
-      const requestUrl = cacheUrl.replace('/c/', '/mbv/');
+      const requestUrl = addParamsToUrl(cacheUrl.replace('/c/', '/mbv/'), {
+        'amp_video_host_url': /* document url that contains the video */ canonicalUrl,
+      });
       return Services.xhrFor(win).fetch(requestUrl);
     })
     .then((response) => response.json())
