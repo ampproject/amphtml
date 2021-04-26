@@ -61,7 +61,6 @@ import {
 import {createShadowRootWithStyle, setTextBackgroundColor} from './utils';
 import {debounce} from '../../../src/core/types/function';
 import {delegateAutoplay} from '../../../src/video-interface';
-import {detectIsAutoplaySupported} from '../../../src/utils/video';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getAmpdoc} from '../../../src/service';
@@ -71,6 +70,7 @@ import {getLogEntries} from './logging';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
+import {isAutoplaySupported} from '../../../src/utils/video';
 import {isExperimentOn} from '../../../src/experiments';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen} from '../../../src/event-helper';
@@ -916,12 +916,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   isAutoplaySupported_() {
-    // We should not be detecting support each time, since it's slow.
-    // However, https://go.amp.dev/pr/23754 started resetting cached support
-    // checks likely to work around a race condition.
-    // TODO(alanorozco): Fix issue with cached `isAutoplaySupported`, and use
-    // that instead of `detectIsAutoplaySupported`.
-    return detectIsAutoplaySupported(this.win);
+    return isAutoplaySupported(this.win);
   }
 
   /**

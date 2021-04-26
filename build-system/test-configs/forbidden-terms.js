@@ -1155,8 +1155,6 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       // The function itself is defined here.
       'src/utils/video.js',
-      // TODO(alanorozco): Unlist amp-story-page.js, see comment on caller.
-      'extensions/amp-story/1.0/amp-story-page.js',
     ],
   },
 };
