@@ -182,8 +182,8 @@ ${green('FINISHED:')} Boilerplate for your new ${cyan(
     `amp-${name}`
   )} component has been created in ${cyan(`amphtml/extensions/amp-${name}/`)}`);
 
-  const unitTestFile = writtenFiles.find(
-    (filename) => filename.indexOf('test/test-') > -1
+  const unitTestFile = writtenFiles.find((filename) =>
+    filename.includes('test/test-')
   );
   if (unitTestFile) {
     log(`
@@ -193,8 +193,8 @@ You can run tests on your new component with the following command:
 If the component was generated successfully, the example test should pass.`);
   }
 
-  const storybookFile = writtenFiles.find(
-    (filename) => filename.indexOf('/storybook/') > -1
+  const storybookFile = writtenFiles.find((filename) =>
+    filename.includes('/storybook/')
   );
   if (storybookFile) {
     log(`
