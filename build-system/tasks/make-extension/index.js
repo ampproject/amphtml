@@ -16,10 +16,13 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const del = require('del');
 const fs = require('fs-extra');
 const path = require('path');
 const {cyan, green, red, yellow} = require('kleur/colors');
+const {execOrThrow} = require('../../common/exec');
 const {format} = require('./format');
+const {getStdout, getOutput} = require('../../common/process');
 const {log} = require('../../common/logging');
 
 const extensionBundlesJson =
@@ -263,6 +266,61 @@ async function makeExtensionFromTemplates(
   return writtenFiles;
 }
 
+async function affectsExistingPaths(paths, fn) {
+  const stashStdout = getStdout(`git stash push --keep-index`);
+
+  await fn();
+
+  const head = getStdout('git rev-parse HEAD').trim();
+  getOutput(`git checkout ${head} ${paths.join(' ')}`);
+
+  if (!stashStdout.startsWith('No local changes')) {
+    getOutput('git stash pop');
+  }
+}
+
+/**
+ * Generates and tests an extension.
+ * (Unit tests for the generator are located in test/test.js)
+ *
+ * @return {!Promise}
+ */
+function runMakeExtensionTests() {
+  return affectsExistingPaths([extensionBundlesJson], async () => {
+    const name = 'amp-generated-for-test';
+
+    const writtenFiles = [
+      ...(await makeExtensionFromTemplates(
+        [getTemplateDir('shared'), getTemplateDir('classic')],
+        '.',
+        {
+          name,
+          version: '0.1',
+        }
+      )),
+      ...(await makeExtensionFromTemplates(
+        [getTemplateDir('shared'), getTemplateDir('bento')],
+        '.',
+        {
+          name,
+          version: '1.0',
+          bento: true,
+        }
+      )),
+    ];
+
+    for (const command of [
+      `amp build --extensions=${name} --core_runtime_only`,
+      `amp unit --nohelp --headless --files="extensions/${name}/**/test/test-*.js"`,
+    ]) {
+      log(cyan(command));
+      execOrThrow(command);
+    }
+
+    await del([...writtenFiles, `extensions/${name}/**`]);
+  });
+}
+
 /**
  * @return {Promise<void>}
  */
@@ -287,6 +345,7 @@ module.exports = {
   insertExtensionBundlesConfig,
   makeExtension,
   makeExtensionFromTemplates,
+  runMakeExtensionTests,
   writeFromTemplateDir,
 };
 

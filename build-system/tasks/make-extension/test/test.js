@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 const ava = require('ava');
-const del = require('del');
 const path = require('path');
 const tempy = require('tempy');
-const {getOutput, getStdout} = require('../../../common/process');
 const {readFile, writeJson, readJson, writeFile, mkdirp} = require('fs-extra');
 
 const stubbedCalls = {};
@@ -45,19 +43,6 @@ const test = (name, cb) =>
       )
     )
   );
-
-async function affectsExistingPaths(paths, fn) {
-  const stashStdout = getStdout(`git stash push --keep-index`);
-
-  await fn();
-
-  const head = getStdout('git rev-parse HEAD').trim();
-  getOutput(`git checkout ${head} ${paths.join(' ')}`);
-
-  if (!stashStdout.startsWith('No local changes')) {
-    getOutput('git stash pop');
-  }
-}
 
 test('writeFromTemplateDir', (t) =>
   tempy.directory.task(async (dir) => {
@@ -362,47 +347,3 @@ test('insertExtensionBundlesConfig uses version as latestVersion', (t) =>
     },
     {extension: 'json'}
   ));
-
-test('tests pass for generated extension', (t) => {
-  const {extensionBundlesJson, makeExtensionFromTemplates} = require('..');
-  return affectsExistingPaths([extensionBundlesJson], async () => {
-    const name = 'amp-generated-for-test';
-
-    const writtenFiles = [
-      ...(await makeExtensionFromTemplates(
-        [
-          path.join(__dirname, '../template/shared'),
-          path.join(__dirname, '../template/classic'),
-        ],
-        '.',
-        {
-          name,
-          version: '0.1',
-        }
-      )),
-      ...(await makeExtensionFromTemplates(
-        [
-          path.join(__dirname, '../template/shared'),
-          path.join(__dirname, '../template/bento'),
-        ],
-        '.',
-        {
-          name,
-          version: '1.0',
-          bento: true,
-        }
-      )),
-    ];
-
-    const generatedTestFiles = `extensions/${name}/**/test/test-*.js`;
-
-    const testCommand =
-      `amp build --extensions=${name} --core_runtime_only` +
-      ` && amp unit --nohelp --headless --files="${generatedTestFiles}"`;
-    const result = getOutput(testCommand);
-
-    t.is(result.status, 0, `${testCommand}\n\n${result.stdout}`);
-
-    await del([...writtenFiles, `extensions/${name}/**`]);
-  });
-});
