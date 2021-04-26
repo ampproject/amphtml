@@ -45,6 +45,6 @@ export class Amp__component_name_pascalcase__ extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, __component_version__, AMP => {
+AMP.extension(TAG, '__component_version__', AMP => {
   AMP.registerElement(TAG, Amp__component_name_pascalcase__, CSS);
 });
