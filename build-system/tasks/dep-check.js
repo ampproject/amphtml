@@ -153,10 +153,7 @@ Rule.prototype.matchBadDeps = function (moduleName, deps) {
           }
         }
         mustNotDependErrors.push(
-          cyan(moduleName) +
-            `[${this.config_.filesMatching} X ${this.config_.mustNotDependOn}]` +
-            ' must not depend on ' +
-            cyan(dep)
+          cyan(moduleName) + ' must not depend on ' + cyan(dep)
         );
       }
     });
