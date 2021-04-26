@@ -62,80 +62,68 @@ const TYPE_CHECK_TARGETS = {
   // Goal: Remove 'QUIET' from all of them.
   // To test a target locally:
   //   `amp check-types --target=src-foo-bar --warning_level=verbose`
-  'src-amp-story-player': () => ({
+  'src-amp-story-player': {
     srcGlobs: ['src/amp-story-player{,/**}/*.js'],
-    externGlobs: [],
     warningLevel: 'QUIET',
-  }),
-  'src-context': () => ({
+  },
+  'src-context': {
     srcGlobs: ['src/context{,/**}/*.js'],
-    externGlobs: [],
     warningLevel: 'QUIET',
-  }),
-  'src-core': () => ({
+  },
+  'src-core': {
     srcGlobs: ['src/core{,/**}/*.js'],
     externGlobs: [CORE_EXTERNS_GLOB],
-  }),
-  'src-examiner': () => ({
+  },
+  'src-examiner': {
     srcGlobs: ['src/examiner{,/**}/*.js'],
-    externGlobs: [],
     warningLevel: 'QUIET',
-  }),
-  'src-experiments': () => ({
+  },
+  'src-experiments': {
     srcGlobs: ['src/experiments{,/**}/*.js'],
-    externGlobs: [],
     warningLevel: 'QUIET',
-  }),
-  'src-inabox': () => ({
+  },
+  'src-inabox': {
     srcGlobs: ['src/inabox{,/**}/*.js'],
-    externGlobs: [],
     warningLevel: 'QUIET',
-  }),
-  'src-polyfills': () => ({
+  },
+  'src-polyfills': {
     srcGlobs: ['src/polyfills{,/**}/*.js'],
-    externGlobs: [],
     warningLevel: 'QUIET',
-  }),
-  'src-polyfillstub': () => ({
+  },
+  'src-polyfillstub': {
     srcGlobs: ['src/polyfillstub{,/**}/*.js'],
-    externGlobs: [],
     warningLevel: 'QUIET',
-  }),
-  'src-preact': () => ({
+  },
+  'src-preact': {
     srcGlobs: ['src/preact{,/**}/*.js'],
-    externGlobs: [],
     warningLevel: 'QUIET',
-  }),
-  'src-purifier': () => ({
+  },
+  'src-purifier': {
     srcGlobs: ['src/purifier{,/**}/*.js'],
-    externGlobs: [],
     warningLevel: 'QUIET',
-  }),
-  'src-service': () => ({
+  },
+  'src-service': {
     srcGlobs: ['src/service{,/**}/*.js'],
-    externGlobs: [],
     warningLevel: 'QUIET',
-  }),
-  'src-utils': () => ({
+  },
+  'src-utils': {
     srcGlobs: ['src/utils{,/**}/*.js'],
-    externGlobs: [],
     warningLevel: 'QUIET',
-  }),
-  'src-web-worker': () => ({
+  },
+  'src-web-worker': {
     srcGlobs: ['src/web-worker{,/**}/*.js'],
-    externGlobs: [],
     warningLevel: 'QUIET',
-  }),
+  },
 
   // Opposite of `shame.extern.js`. This target is a catch-all for files that
   // are currently passing, but whose parent directories are not fully passing.
   // Adding a file or glob here will cause CI to fail if type errors are
   // introduced. It is okay to remove a file from this list only when fixing a
   // bug for cherry-pick.
-  'pride': () => ({
+  'pride': {
     srcGlobs: PRIDE_FILES_GLOBS,
     externGlobs: [CORE_EXTERNS_GLOB, 'build-system/externs/*.extern.js'],
-  }),
+  },
 
   // TODO(#33631): Targets below this point are not expected to pass.
   // They can possibly be removed?
