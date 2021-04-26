@@ -332,7 +332,7 @@ class AmpBrightcove extends AMP.BaseElement {
       `https://players.brightcove.net/${encodeURIComponent(account)}` +
       `/${encodeURIComponent(this.playerId_)}` +
       `_${encodeURIComponent(embed)}/index.html` +
-      '?amp=1&autoplay=false' +
+      '?amp=1' +
       // These are encodeURIComponent'd in encodeId_().
       (el.getAttribute('data-playlist-id')
         ? '&playlistId=' + this.encodeId_(el.getAttribute('data-playlist-id'))
@@ -365,6 +365,10 @@ class AmpBrightcove extends AMP.BaseElement {
     }
 
     el.setAttribute('data-param-playsinline', 'true');
+
+    if (el.hasAttribute('data-param-autoplay')) {
+      el.removeAttribute('style');
+    }
 
     // Pass through data-param-* attributes as params for plugin use
     return addParamsToUrl(src, getDataParamsFromAttributes(el));
@@ -456,8 +460,8 @@ class AmpBrightcove extends AMP.BaseElement {
   }
 
   /** @override */
-  play(unusedIsAutoplay) {
-    this.sendCommand_('play');
+  play(isAutoplay) {
+    this.sendCommand_('play', isAutoplay);
   }
 
   /** @override */
