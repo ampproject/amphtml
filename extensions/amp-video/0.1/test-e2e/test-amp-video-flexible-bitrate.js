@@ -165,6 +165,21 @@ describes.endtoend(
       ).contains('amp-dev.cdn.ampproject.org');
     });
 
+    it('when a video contains a cache attribute, it fetches the cache', async () => {
+      await controller.click(story);
+      await controller.click(story);
+      await controller.click(story);
+      await controller.click(story);
+
+      await controller.findElement('amp-story-page#page-5[active]');
+
+      await controller.findElement('#video5 video.i-amphtml-pool-media');
+
+      await expect(
+        'https://amp-dev.cdn.ampproject.org/mbv/s/amp.dev/static/samples/video/tokyo.mp4?__amp_source_origin=http%3A%2F%2Flocalhost%3A8000'
+      ).to.have.been.sent;
+    });
+
     /**
      * Tests on navigation
      */
