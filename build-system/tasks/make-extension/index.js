@@ -174,18 +174,20 @@ async function insertExtensionBundlesConfig(
  *   bento: (boolean|undefined),
  *   name: (string|undefined),
  * }} options
- * @return {Promise<boolean>}
+ * @return {Promise<?Array<string>>}
  */
 async function makeExtensionFromTemplates(
   templateDirs,
   destinationDir = '.',
   options = argv
 ) {
-  const version = options.version || options.bento ? '1.0' : '0.1';
+  const version = (
+    options.version || (options.bento ? '1.0' : '0.1')
+  ).toString();
   const name = (options.name || '').replace(/^amp-/, '');
   if (!name) {
     log(red('ERROR:'), 'Must specify component name with', cyan('--name'));
-    return false;
+    return null;
   }
 
   const replacements = {
@@ -258,7 +260,7 @@ async function makeExtensionFromTemplates(
 
   log(`${blurb.join('\n\n')}\n`);
 
-  return true;
+  return writtenFiles;
 }
 
 /**
@@ -281,6 +283,7 @@ async function makeExtension() {
 }
 
 module.exports = {
+  extensionBundlesJson,
   insertExtensionBundlesConfig,
   makeExtension,
   makeExtensionFromTemplates,

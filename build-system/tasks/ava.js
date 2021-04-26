@@ -22,19 +22,11 @@ const {execOrDie} = require('../common/exec');
  * Runs ava tests.
  */
 async function ava() {
-  // These need equivalents for CI in build-system/pr-check/build-targets.js
-  // (see targetMatchers[Targets.AVA])
-  const testFiles = [
-    'build-system/tasks/get-zindex/get-zindex.test.js',
-    'build-system/tasks/make-extension/test/test.js',
-    'build-system/tasks/markdown-toc/test/test.js',
-    'build-system/tasks/prepend-global/prepend-global.test.js',
-  ];
   execOrDie(
     [
-      'npx ava',
-      ...testFiles,
-      '--color --fail-fast',
+      'npx ava debug',
+      '--color',
+      '--fail-fast',
       argv.watch ? '--watch' : '',
     ].join(' ')
   );
