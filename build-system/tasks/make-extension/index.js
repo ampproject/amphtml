@@ -86,22 +86,26 @@ async function writeFromTemplateDir(
   for await (const templatePath of walkDir(templateDir)) {
     const destination = destinationPath(templatePath);
 
-    // Skip if the destination file already exists
-    try {
-      await fs.access(destination);
+    await fs.mkdirp(path.dirname(destination), {recursive: true});
 
+    // Skip if the destination file already exists
+    let fileHandle;
+    try {
+      fileHandle = await fs.open(destination, 'wx');
+    } catch (e) {
+      if (e.code !== 'EEXIST') {
+        throw e;
+      }
       if (!argv.overwrite) {
         log(yellow('WARNING:'), 'Skipping existing file', cyan(destination));
         continue;
       }
-
       log(yellow('WARNING:'), 'Overwriting existing file', cyan(destination));
-    } catch {}
-
-    await fs.mkdirp(path.dirname(destination), {recursive: true});
+    }
 
     const template = await fs.readFile(templatePath, 'utf8');
-    await fs.writeFile(destination, replace(template, replacements));
+    await fs.write(fileHandle, replace(template, replacements));
+    await fs.close(fileHandle);
 
     log(green('SUCCESS:'), 'Created file', cyan(destination));
 
