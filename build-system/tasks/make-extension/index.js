@@ -242,5 +242,6 @@ makeExtension.flags = {
   name: 'The name of the extension. Preferably prefixed with `amp-*`',
   bento: 'Generate a Bento component',
   version: 'Sets the version number (default: 0.1; or 1.0 with --bento)',
-  overwrite: 'Overwrites existing files at the destination, if present. Otherwise skips them.',
+  overwrite:
+    'Overwrites existing files at the destination, if present. Otherwise skips them.',
 };
