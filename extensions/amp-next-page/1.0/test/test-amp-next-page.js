@@ -603,10 +603,11 @@ describes.realWin(
       });
 
       it('propagates viewer cid capabilties', async () => {
-        // Fake Cid
-        ampdoc.params_['cap'] = 'cid';
+        // Fake capabilities
+        ampdoc.params_['cap'] = 'swipe,cid';
         await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
-        // Don't need to check the host page
+        // Don't need to check the host page.
+        // Will only be forwarded `cid`
         [1, 2].forEach((index) => {
           expect(
             service.pages_[index].shadowDoc.ampdoc.getParam('cap')
