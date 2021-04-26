@@ -32,6 +32,7 @@ const {typecheckNewServer} = require('../server/typescript-compile');
 
 /**
  * Files that pass type-checking but don't belong to a passing directory target.
+ * Note: This is a TEMPORARY holding point during the transition to type-safety.
  * @type {!Array<string>}
  */
 const PRIDE_FILES_GLOBS = ['src/resolved-promise.js', 'src/types.js'];
