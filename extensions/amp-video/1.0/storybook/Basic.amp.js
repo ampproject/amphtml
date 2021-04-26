@@ -16,12 +16,11 @@
 
 import * as Preact from '../../../../src/preact';
 import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
   title: 'amp-video-1_0',
-  decorators: [withA11y, withKnobs, withAmp],
+  decorators: [withKnobs, withAmp],
   parameters: {
     extensions: [
       {name: 'amp-video', version: '1.0'},

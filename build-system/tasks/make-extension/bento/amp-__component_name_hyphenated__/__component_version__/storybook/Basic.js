@@ -16,13 +16,12 @@
 
 import * as Preact from '../../../../src/preact';
 import {__component_name_pascalcase__} from '../component'
-import {withA11y} from '@storybook/addon-a11y';
 import {withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: '__component_name_pascalcase__',
   component: __component_name_pascalcase__,
-  decorators: [withKnobs, withA11y],
+  decorators: [withKnobs],
 };
 
 export const _default = () => {

@@ -17,12 +17,11 @@
 import * as Preact from '../../../../src/preact';
 import {Sidebar, SidebarToolbar} from '../component';
 import {boolean, color, select, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 
 export default {
   title: 'Sidebar',
   component: Sidebar,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 /**

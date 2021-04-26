@@ -23,7 +23,7 @@ import {computedStyle, setImportantStyles} from '../../../src/style';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getRGBFromCssColorValue, getTextColorForRGB} from './utils';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
+import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 
 /**
  * @enum {string}
@@ -277,15 +277,6 @@ const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
   }
 
   return openAttachmentEl;
-};
-
-/**
- * Returns true if new inline attachment UI is enabled.
- * @param {!Window} win
- * @return {boolean}
- */
-export const isPageAttachmentUiV2ExperimentOn = (win) => {
-  return isExperimentOn(win, 'amp-story-page-attachment-ui-v2');
 };
 
 /**
