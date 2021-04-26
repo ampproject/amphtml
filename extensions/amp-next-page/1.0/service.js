@@ -82,6 +82,9 @@ export class NextPageService {
      */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
+    /** @private {!../../../src/service/viewer-interface.ViewerInterface} */
+    this.viewer_ = Services.viewerForDoc(ampdoc);
+
     /**
      * @private
      * @const {!../../../src/service/mutator-interface.MutatorInterface}
@@ -559,11 +562,11 @@ export class NextPageService {
    * @return {?string}
    */
   getCapabilities_() {
-    const viewerCapabilities = this.ampdoc_.getParam('cap');
-    if (viewerCapabilities && viewerCapabilities.indexOf('cid' > -1)) {
-      return 'cid'
+    const hasCidCapabilities = this.viewer_.hasCapability('cid');
+    if (hasCidCapabilities) {
+      return 'cid';
     }
-    return null
+    return null;
   }
 
   /**
@@ -617,7 +620,7 @@ export class NextPageService {
         '',
         {
           visibilityState: VisibilityState.PRERENDER,
-          cap: this.getCapabilities_()
+          cap: this.getCapabilities_(),
         }
       );
 
