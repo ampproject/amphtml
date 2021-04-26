@@ -72,7 +72,7 @@ export class AmpTiktok extends AMP.BaseElement {
         'pointer-events',
       ]);
       this.iframe_.removeAttribute('aria-hidden');
-      this.iframe_.setAttribute('aria-title', 'Tiktok');
+      this.iframe_.title = this.element.title || 'TikTok';
       this.iframe_.classList.remove('i-amphtml-tiktok-unresolved');
       this.iframe_.classList.add('i-amphtml-tiktok-centered');
       this.forceChangeHeight(height);
@@ -91,16 +91,19 @@ export class AmpTiktok extends AMP.BaseElement {
   static createLoaderLogoCallback(element) {
     const html = htmlFor(element);
     return {
-      color: '#000000',
+      color: '#FFFFFF',
       content: html`<svg
-        width="44"
-        height="44"
+        width="38"
+        height="38"
+        viewBox="0 0 72 72"
         fill="none"
+        style="margin: 17px;"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
           d="M22.96.04C25.35 0 27.72.02 30.09 0c.14 2.8 1.14 5.67 3.18 7.65 2.04 2.03 4.93 2.96 7.73 3.28v7.38a19.26 19.26 0 01-10.6-3.48c-.02 5.36.01 10.7-.04 16.04a14.01 14.01 0 01-2.47 7.23 13.55 13.55 0 01-10.77 5.88A13.2 13.2 0 019.7 42.1a13.82 13.82 0 01-6.65-10.47c-.04-.92-.06-1.84-.02-2.73a13.77 13.77 0 014.7-9.1 13.5 13.5 0 0111.21-3.16c.04 2.72-.07 5.43-.07 8.15a6.32 6.32 0 00-5.5.68 6.35 6.35 0 00-2.49 3.2c-.38.94-.27 1.97-.25 2.96.44 3 3.31 5.53 6.38 5.26a6.14 6.14 0 005.05-2.95c.34-.6.73-1.23.75-1.95.18-3.28.1-6.54.13-9.82.01-7.4-.02-14.76.03-22.13z"
           fill="#fff"
+          style="transform: translate(14px, 13px);"
         />
       </svg>`,
     };
