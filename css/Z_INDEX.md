@@ -47,6 +47,7 @@
 `amp-story[standalone] .i-amphtml-story-developer-log` | 100002 | [extensions/amp-story/1.0/amp-story.css](/extensions/amp-story/1.0/amp-story.css)
 `.i-amphtml-story-button-container` | 100002 | [extensions/amp-story/1.0/pagination-buttons.css](/extensions/amp-story/1.0/pagination-buttons.css)
 `.i-amphtml-ad-overlay-container` | 100001 | [extensions/amp-story-auto-ads/0.1/amp-story-auto-ads-ad-badge.css](/extensions/amp-story-auto-ads/0.1/amp-story-auto-ads-ad-badge.css)
+`.i-amphtml-story-ad-progress-background` | 100001 | [extensions/amp-story-auto-ads/0.1/amp-story-auto-ads-progress-bar.css](/extensions/amp-story-auto-ads/0.1/amp-story-auto-ads-progress-bar.css)
 `.i-amphtml-story-bookend` | 100001 | [extensions/amp-story/1.0/amp-story-bookend.css](/extensions/amp-story/1.0/amp-story-bookend.css)
 `.i-amphtml-story-info-dialog` | 100001 | [extensions/amp-story/1.0/amp-story-info-dialog.css](/extensions/amp-story/1.0/amp-story-info-dialog.css)
 `.i-amphtml-story-progress-bar` | 100001 | [extensions/amp-story/1.0/amp-story-system-layer.css](/extensions/amp-story/1.0/amp-story-system-layer.css)

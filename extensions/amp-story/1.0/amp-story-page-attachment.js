@@ -25,8 +25,9 @@ import {dev, devAssert} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getState} from '../../../src/history';
 import {htmlFor} from '../../../src/static-template';
-import {isPageAttachmentUiV2ExperimentOn} from './amp-story-open-page-attachment';
+import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 import {toggle} from '../../../src/style';
+import {triggerClickFromLightDom} from './utils';
 
 /** @const {string} */
 const DARK_THEME_CLASS = 'i-amphtml-story-draggable-drawer-theme-dark';
@@ -292,10 +293,10 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       // amp-story-page-attachment.css). The navigation itself will take some
       // time, depending on the target and network conditions.
       this.win.setTimeout(() => {
-        this.element.parentElement
+        const clickTarget = this.element.parentElement
           .querySelector('.i-amphtml-story-page-open-attachment-host')
-          .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment')
-          .click();
+          .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
+        triggerClickFromLightDom(clickTarget, this.element);
       }, 50);
     });
   }

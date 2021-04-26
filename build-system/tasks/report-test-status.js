@@ -209,11 +209,12 @@ async function reportAllExpectedTests() {
 
 /**
  * Callback to the Karma.Server on('run_complete') event for simple test types.
+ * Optionally takes an object containing test results if they were run.
  *
- * @param {!Karma.TestResults} results
+ * @param {?Karma.TestResults} results
  */
 async function reportTestRunComplete(results) {
-  if (results.error) {
+  if (!results || results.error) {
     await reportTestErrored();
   } else {
     await reportTestFinished(results.success, results.failed);

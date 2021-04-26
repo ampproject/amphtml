@@ -22,7 +22,7 @@ import {
   createElementWithAttributes,
   removeElement,
 } from '../../../src/dom';
-import {debounce} from '../../../src/utils/rate-limit';
+import {debounce} from '../../../src/core/types/function';
 import {getData, listen} from '../../../src/event-helper';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';

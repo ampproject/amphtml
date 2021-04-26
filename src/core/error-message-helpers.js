@@ -34,6 +34,7 @@ export const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
 export function elementStringOrPassThru(val) {
   // Do check equivalent to `val instanceof Element` without cross-window bug
   if (val?.nodeType == 1) {
+    val = /** @type {Element} */ (val);
     return val.tagName.toLowerCase() + (val.id ? `#${val.id}` : '');
   }
   return val;
