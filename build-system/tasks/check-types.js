@@ -73,7 +73,11 @@ const TYPE_CHECK_TARGETS = {
   },
   'src-core': {
     srcGlobs: ['src/core{,/**}/*.js'],
-    externGlobs: [CORE_EXTERNS_GLOB],
+    externGlobs: [
+      CORE_EXTERNS_GLOB,
+      // Needed for CSS escape polyfill; this should be handled differently
+      'third_party/css-escape/css-escape.js',
+    ],
   },
   'src-examiner': {
     srcGlobs: ['src/examiner{,/**}/*.js'],
@@ -140,6 +144,18 @@ const TYPE_CHECK_TARGETS = {
     extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
     warningLevel: 'QUIET',
   },
+<<<<<<< HEAD
+=======
+  'src-core': () => ({
+    externs: globby.sync(EXTERNS_GLOB),
+    extraGlobs: [
+      // Include all core JS files
+      'src/core/{,**/}*.js',
+      // Exclude all core extern files (already included via externs)
+      `!${EXTERNS_GLOB}`,
+    ],
+  }),
+>>>>>>> eb0891f5b (Move cssEscape helper around)
   'extensions': () => ({
     entryPoints: getExtensionSrcPaths(),
     extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],

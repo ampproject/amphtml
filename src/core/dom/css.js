@@ -14,18 +14,8 @@
  * limitations under the License.
  */
 
-import {cssEscape} from '../third_party/css-escape/css-escape';
-import {devAssert} from './log';
-
-/**
- * Asserts that name is just an alphanumeric word, and does not contain
- * advanced CSS selector features like attributes, psuedo-classes, class names,
- * nor ids.
- * @param {string} name
- */
-export function assertIsName(name) {
-  devAssert(/^[\w-]+$/.test(name));
-}
+import {cssEscape} from '../../../third_party/css-escape/css-escape';
+import {pureDevAssert as devAssert} from '../assert';
 
 /**
  * @type {boolean|undefined}
