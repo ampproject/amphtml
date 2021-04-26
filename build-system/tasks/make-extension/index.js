@@ -22,7 +22,6 @@ const {
   insertExtensionBundlesConfig,
 } = require('./insert-extension-bundles-config');
 const {cyan, green, red, yellow} = require('kleur/colors');
-const {execOrThrow} = require('../../common/exec');
 const {format} = require('./format');
 const {log} = require('../../common/logging');
 

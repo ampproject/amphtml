@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 const path = require('path');
-const {execOrThrow} = require('../../common/exec');
 const {format} = require('./format');
 const {green, cyan} = require('kleur/colors');
 const {log} = require('../../common/logging');
