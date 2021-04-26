@@ -15,7 +15,7 @@
  */
 
 import '../amp-vimeo';
-import {VideoUtils} from '../../../../src/utils/video';
+import * as VideoUtils from '../../../../src/utils/video';
 
 describes.realWin(
   'amp-vimeo',
@@ -25,13 +25,12 @@ describes.realWin(
     },
   },
   (env) => {
-    let win, doc, videoUtilsMock;
+    let win, doc;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      videoUtilsMock = env.sandbox.stub(VideoUtils, 'isAutoplaySupported');
-      videoUtilsMock.returns(Promise.resolve(true));
+      env.sandbox.stub(VideoUtils, 'isAutoplaySupported').resolves(true);
     });
 
     async function getVimeo(
