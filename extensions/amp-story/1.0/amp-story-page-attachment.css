@@ -112,7 +112,6 @@ amp-story[desktop] .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-pa
   padding-inline-start: 12px !important;
   padding-inline-end: 18px !important;
   background: var(--i-amphtml-outlink-cta-background-color) !important;
-  pointer-events: none !important;
 }
 
 .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-img, 
