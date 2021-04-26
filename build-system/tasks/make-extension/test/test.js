@@ -112,31 +112,6 @@ test('makeExtensionFromTemplates merges multiple templates', (t) =>
     t.is(await readFile(`${dir}/file-__baz__.txt`, 'utf-8'), 'Constant.\n');
   }));
 
-test('makeExtensionFromTemplates does not print unit test blurb if no test file is created', (t) =>
-  tempy.directory.task(async (dir) => {
-    const {makeExtensionFromTemplates} = require('..');
-    await makeExtensionFromTemplates(
-      [path.join(__dirname, 'template/test-1')],
-      dir,
-      {
-        name: 'my-extension-name',
-      }
-    );
-
-    t.is(
-      await readFile(`${dir}/from-test-2/my-extension-name.txt`, 'utf-8'),
-      'foo\n'
-    );
-
-    // Replacement keys for test-1 are placeholders and are not set by
-    // makeExtensionFromTemplates, so they remain in the generated files.
-    t.is(
-      await readFile(`${dir}/x-__foo__/__bar__.txt`, 'utf-8'),
-      'This file is generated with values __foo__, __bar__, __baz__.\n'
-    );
-    t.is(await readFile(`${dir}/file-__baz__.txt`, 'utf-8'), 'Constant.\n');
-  }));
-
 test('insertExtensionBundlesConfig inserts new entry', (t) =>
   tempy.file.task(
     async (destination) => {

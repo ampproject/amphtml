@@ -18,12 +18,12 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
 const path = require('path');
-const {
-  insertExtensionBundlesConfig,
-} = require('./insert-extension-bundles-config');
 const {cyan, green, red, yellow} = require('kleur/colors');
 const {format} = require('./format');
 const {log} = require('../../common/logging');
+
+const extensionBundlesJson =
+  'build-system/compile/bundles.config.extensions.json';
 
 /**
  * Convert dash-case-name to PascalCaseName.
@@ -115,6 +115,53 @@ async function writeFromTemplateDir(
 }
 
 /**
+ * Inserts an extension entry into bundles.config.extensions.json
+ *
+ * @param {{
+ *   name: string,
+ *   version: string,
+ *   latestVersion?: (string|undefined)
+ *   options: ({hasCss: boolean}|undefined)
+ * }} bundle
+ * @param {string=} destination
+ */
+function insertExtensionBundlesConfig(
+  bundle,
+  destination = extensionBundlesJson
+) {
+  const extensionBundles = fs.readJsonSync(destination);
+
+  const existingOrNull = extensionBundles.find(
+    ({name}) => name === bundle.name
+  );
+
+  extensionBundles.push({
+    ...bundle,
+    latestVersion:
+      (existingOrNull && existingOrNull.latestVersion) ||
+      bundle.latestVersion ||
+      bundle.version,
+  });
+
+  fs.writeJsonSync(
+    destination,
+    extensionBundles.sort((a, b) => {
+      if (!a.name) {
+        return 1;
+      }
+      if (!b.name) {
+        return -1;
+      }
+      return a.name.localeCompare(b.name);
+    })
+  );
+
+  format([destination]);
+
+  log(green('SUCCESS:'), 'Wrote', cyan(path.basename(destination)));
+}
+
+/**
  * @param {Array<string>} templateDirs
  * @param {string=} destinationDir
  * @param {{
@@ -168,11 +215,14 @@ async function makeExtensionFromTemplates(
     format(writtenFiles);
   }
 
-  insertExtensionBundlesConfig({
-    name: `amp-${name}`,
-    version,
-    options: {hasCss: true},
-  });
+  insertExtensionBundlesConfig(
+    {
+      name: `amp-${name}`,
+      version,
+      options: {hasCss: true},
+    },
+    path.join(destinationDir, extensionBundlesJson)
+  );
 
   const blurb = [];
 
