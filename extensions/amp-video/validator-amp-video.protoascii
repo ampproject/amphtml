@@ -14,14 +14,30 @@
 # limitations under the license.
 #
 
-tags: {  # amp-video
+tags: {  # amp-video 1.0
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies: "amp-video 1.0"
+  excludes: "amp-video 0.1"
+  extension_spec: {
+    name: "amp-video"
+    version_name: "v1.0"
+    version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+tags: {  # amp-video 0.1
   html_format: AMP
   html_format: AMP4ADS
   tag_name: "SCRIPT"
+  satisfies: "amp-video 0.1"
+  excludes: "amp-video 1.0"
   extension_spec: {
     name: "amp-video"
     version: "0.1"
     version: "latest"
+    version_name: "v0.1"
     requires_usage: NONE
   }
   attr_lists: "common-extension-attrs"
@@ -107,9 +123,6 @@ tags: {  # <amp-video> not in amp-story.
   tag_name: "AMP-VIDEO"
   # There is an alternate spec for amp-video in amp-story.
   disallowed_ancestor: "AMP-STORY"
-  # Typically we'd require the extension j/s, but for historical reasons
-  # many pages don't have it, so it ends up late loaded and we warn, instead
-  # of making this a validation error.
   requires_extension: "amp-video"
   attrs: { name: "poster" }
   attr_lists: "extended-amp-global"
