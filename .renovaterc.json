@@ -24,6 +24,7 @@
     {
       "groupName": "subpackage devDependencies",
       "matchPaths": ["**/*"],
+      "automerge": true,
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "subpackage-"
@@ -33,6 +34,7 @@
       "groupName": "build system devDependencies",
       "matchPaths": ["build-system/**"],
       "labels": ["WG: infra"],
+      "automerge": true,
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "build-system-"
@@ -42,6 +44,7 @@
       "groupName": "validator devDependencies",
       "matchPaths": ["validator/**"],
       "labels": ["WG: caching"],
+      "automerge": true,
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "validator-"
@@ -50,6 +53,7 @@
     {
       "groupName": "core devDependencies",
       "matchPaths": ["+(package.json)"],
+      "automerge": true,
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "core-"
@@ -58,6 +62,7 @@
     {
       "groupName": "linting devDependencies",
       "matchPackagePatterns": ["\\b(prettier|eslint)\\b"],
+      "automerge": true,
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "linting-"
@@ -66,6 +71,7 @@
     {
       "groupName": "babel devDependencies",
       "matchPackagePatterns": ["\\bbabel"],
+      "automerge": true,
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "babel-"
@@ -73,6 +79,7 @@
     },
     {
       "excludePackagePatterns": ["^@ampproject/"],
+      "automerge": false,
       "matchDepTypes": ["dependencies"],
       "enabled": false
     },
@@ -80,6 +87,7 @@
       "groupName": "ampproject devDependencies",
       "matchPackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["devDependencies"],
+      "automerge": true,
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "ampproject-"
@@ -89,6 +97,7 @@
       "groupName": "ampproject dependencies",
       "matchPackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["dependencies"],
+      "automerge": false,
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "ampproject-"
