@@ -107,7 +107,7 @@ async function writeFromTemplateDir(
     await fs.write(fileHandle, replace(template, replacements));
     await fs.close(fileHandle);
 
-    log(green('SUCCESS:'), 'Created file', cyan(destination));
+    log(green('SUCCESS:'), 'Created', cyan(destination));
 
     written.push(destination);
   }
