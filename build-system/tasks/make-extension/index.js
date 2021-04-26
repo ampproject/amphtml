@@ -198,6 +198,15 @@ You may also view the component during development in storybook:
     ${cyan(`amp storybook`)}`);
   }
 
+  const validatorHtmlFile = writtenFiles.find(
+    (filename) => filename.includes('/validator-') && filename.endsWith('.html')
+  );
+  if (validatorHtmlFile) {
+    log(`
+You should generate accompanying validator test result files by running:
+    ${cyan(`amp validator --update_tests`)}`);
+  }
+
   // Return the resulting extension bundle config.
   return {
     name: `amp-${name}`,
