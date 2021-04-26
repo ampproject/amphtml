@@ -116,10 +116,9 @@ test('makeExtensionFromTemplates merges multiple templates', (t) =>
     t.is(await readFile(`${dir}/file-__baz__.txt`, 'utf-8'), 'Constant.\n');
   }));
 
-test(
-  'insertExtensionBundlesConfig inserts new entry',
-  (t) =>
-    tempy.file.task(async (destination) => {
+test('insertExtensionBundlesConfig inserts new entry', (t) =>
+  tempy.file.task(
+    async (destination) => {
       const {insertExtensionBundlesConfig} = require('..');
       await writeJson(destination, [
         {
@@ -154,14 +153,13 @@ test(
           name: 'z',
         },
       ]);
-    }),
-  {extension: 'json'}
-);
+    },
+    {extension: 'json'}
+  ));
 
-test(
-  'insertExtensionBundlesConfig uses existing latestVersion',
-  (t) =>
-    tempy.file.task(async (destination) => {
+test('insertExtensionBundlesConfig uses existing latestVersion', (t) =>
+  tempy.file.task(
+    async (destination) => {
       const {insertExtensionBundlesConfig} = require('..');
       await writeJson(destination, [
         {
@@ -191,14 +189,13 @@ test(
           latestVersion: 'existing version',
         },
       ]);
-    }),
-  {extension: 'json'}
-);
+    },
+    {extension: 'json'}
+  ));
 
-test(
-  'insertExtensionBundlesConfig uses passed latestVersion',
-  (t) =>
-    tempy.file.task(async (destination) => {
+test('insertExtensionBundlesConfig uses passed latestVersion', (t) =>
+  tempy.file.task(
+    async (destination) => {
       const {insertExtensionBundlesConfig} = require('..');
       await writeJson(destination, [
         {
@@ -227,14 +224,13 @@ test(
           latestVersion: 'new version',
         },
       ]);
-    }),
-  {extension: 'json'}
-);
+    },
+    {extension: 'json'}
+  ));
 
-test(
-  'insertExtensionBundlesConfig uses version as latestVersion',
-  (t) =>
-    tempy.file.task(async (destination) => {
+test('insertExtensionBundlesConfig uses version as latestVersion', (t) =>
+  tempy.file.task(
+    async (destination) => {
       const {insertExtensionBundlesConfig} = require('..');
       await writeJson(destination, [
         {
@@ -262,6 +258,6 @@ test(
           latestVersion: 'new version',
         },
       ]);
-    }),
-  {extension: 'json'}
-);
+    },
+    {extension: 'json'}
+  ));
