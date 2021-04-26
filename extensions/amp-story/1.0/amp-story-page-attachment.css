@@ -102,7 +102,7 @@ amp-story[desktop] .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-pa
   --i-amphtml-outlink-cta-text-color: white !important;
 }
 
-.i-amphtml-amp-story-page-attachment-ui-v2.amp-story-draggable-drawer-root.i-amphtml-story-draggable-drawer-open {
+[href].i-amphtml-amp-story-page-attachment-ui-v2.amp-story-draggable-drawer-root.i-amphtml-story-draggable-drawer-open {
   /* Faster duration for outlink drawer. */
   transition-duration: .3s !important;
 }
@@ -112,6 +112,7 @@ amp-story[desktop] .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-pa
   padding-inline-start: 12px !important;
   padding-inline-end: 18px !important;
   background: var(--i-amphtml-outlink-cta-background-color) !important;
+  pointer-events: none !important;
 }
 
 .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-img, 

@@ -51,6 +51,10 @@ amp-story[i-amphtml-vertical].i-amphtml-element amp-story-page.i-amphtml-element
   display: block !important;
 }
 
+[i-amphtml-vertical] .i-amphtml-story-draggable-drawer-content > * {
+  pointer-events: all !important;
+}
+
 [i-amphtml-vertical] amp-story-bookend,
 [i-amphtml-vertical] amp-story-page-attachment {
   display: block !important;
