@@ -338,7 +338,7 @@ const forbiddenTermsGlobal = {
     message: 'Usages must be reviewed.',
     allowlist: [
       // viewer-impl.sendMessage
-      'src/error.js',
+      'src/error-reporting.js',
       'src/service/navigation.js',
       'src/service/viewport/viewport-impl.js',
       'src/service/performance-impl.js',
@@ -399,7 +399,7 @@ const forbiddenTermsGlobal = {
     message: requiresReviewPrivacy,
     allowlist: [
       'extensions/amp-bind/0.1/bind-impl.js',
-      'src/error.js',
+      'src/error-reporting.js',
       'src/utils/xhr-utils.js',
       'src/service/navigation.js',
       'src/service/viewer-impl.js',
@@ -499,7 +499,7 @@ const forbiddenTermsGlobal = {
       'ads/google/a4a/utils.js',
       'src/inabox/inabox-viewer.js',
       'src/service/viewer-impl.js',
-      'src/error.js',
+      'src/error-reporting.js',
       'src/window-interface.js',
     ],
   },
@@ -782,7 +782,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-describes.js',
       'test/unit/test-document-info.js',
       'test/unit/test-document-ready.js',
-      'test/unit/test-error.js',
       'test/unit/test-event-helper.js',
       'test/unit/test-experiments.js',
       'test/unit/test-exponential-backoff.js',
@@ -804,7 +803,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-mode.js',
       'test/unit/test-motion.js',
       'test/unit/test-mustache.js',
-      'test/unit/test-observable.js',
       'test/unit/test-pass.js',
       'test/unit/test-platform.js',
       'test/unit/test-polyfill-document-contains.js',
@@ -831,10 +829,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-xhr.js',
       'test/unit/utils/test-base64.js',
       'test/unit/utils/test-bytes.js',
-      'test/unit/utils/test-lru-cache.js',
-      'test/unit/utils/test-pem.js',
-      'test/unit/utils/test-priority-queue.js',
-      'test/unit/utils/test-rate-limit.js',
       'test/unit/web-worker/test-amp-worker.js',
     ],
     checkInTestFolder: true,
@@ -1000,7 +994,7 @@ const forbiddenTermsSrcInclusive = {
       '.github/workflows/create-design-review-issue.js',
       'extensions/amp-timeago/0.1/amp-timeago.js',
       'extensions/amp-timeago/1.0/component.js',
-      'src/utils/date.js',
+      'src/core/types/date.js',
     ],
   },
   '\\.expandStringSync\\(': {
@@ -1153,6 +1147,8 @@ const forbiddenTermsSrcInclusive = {
     message:
       'Instead of fancy-log, use the logging functions in build-system/common/logging.js.',
   },
+  'withA11y':
+    'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',
 };
 
 /**
@@ -1239,13 +1235,13 @@ function matchForbiddenTerms(srcFile, contents, terms) {
       let index = 0;
       let line = 1;
       let column = 0;
-      const start = {line: -1, column: -1};
 
       const subject = checkProse ? contents : contentsWithoutComments;
       let result;
       while ((result = regex.exec(subject))) {
         const [match] = result;
 
+        const start = {line: -1, column: -1};
         for (index; index < result.index + match.length; index++) {
           if (index === result.index) {
             start.line = line;

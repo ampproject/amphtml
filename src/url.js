@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LruCache} from './utils/lru-cache';
+import {LruCache} from './core/data-structures/lru-cache';
 import {dict, hasOwn} from './core/types/object';
 import {endsWith} from './core/types/string';
 import {getMode} from './mode';
@@ -404,6 +404,14 @@ export function isProxyOrigin(url) {
     url = parseUrlDeprecated(url);
   }
   return urls.cdnProxyRegex.test(url.origin);
+}
+
+/**
+ * @param {string} uri
+ * @return {boolean}
+ */
+export function isAmpScriptUri(uri) {
+  return uri.startsWith('amp-script:');
 }
 
 /**

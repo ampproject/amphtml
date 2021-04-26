@@ -46,8 +46,8 @@ import {
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
-} from '../../../../src/consent-state';
-import {Deferred} from '../../../../src/utils/promise';
+} from '../../../../src/core/constants/consent-state';
+import {Deferred} from '../../../../src/core/data-structures/promise';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {Layout} from '../../../../src/layout';
 import {SafeframeHostApi} from '../safeframe-host';

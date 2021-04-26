@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {AutocompleteBindingDef} from './autocomplete-binding-def';
 import {AutocompleteBindingInline} from './autocomplete-binding-inline';
 import {AutocompleteBindingSingle} from './autocomplete-binding-single';
 import {CSS} from '../../../build/amp-autocomplete-0.1.css';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
@@ -38,7 +38,7 @@ import {isAmp4Email} from '../../../src/format';
 import {isArray, isEnumValue} from '../../../src/core/types';
 
 import {mod} from '../../../src/utils/math';
-import {once} from '../../../src/utils/function';
+import {once} from '../../../src/core/types/function';
 import {removeChildren, tryFocus} from '../../../src/dom';
 import {
   setupAMPCors,

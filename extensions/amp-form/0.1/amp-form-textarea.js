@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {Services} from '../../../src/services';
 import {computedStyle, px, setStyle} from '../../../src/style';
 import {dev, devAssert, user} from '../../../src/log';
 import {iterateCursor, removeElement} from '../../../src/dom';
 import {listen, listenOncePromise} from '../../../src/event-helper';
-import {throttle} from '../../../src/utils/rate-limit';
+import {throttle} from '../../../src/core/types/function';
 import {toArray} from '../../../src/core/types/array';
 
 const AMP_FORM_TEXTAREA_EXPAND_ATTR = 'autoexpand';

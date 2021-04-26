@@ -22,9 +22,9 @@
  * Instead, the runtime loads it when encountering an <amp-img>.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {AutoLightboxEvents} from '../../../src/auto-lightbox';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Services} from '../../../src/services';
 import {
   closestAncestorElementBySelector,
@@ -438,13 +438,13 @@ export function apply(ampdoc, element) {
 export function runCandidates(ampdoc, candidates) {
   return candidates.map((candidate) =>
     whenLoaded(candidate).then(() => {
-      // <amp-img> will change the img's src inline data on unlayout and remove
-      // it from DOM, but a LOAD_END event would still be triggered afterwards.
-      if (candidate.signals().get(CommonSignals.UNLOAD)) {
-        return;
-      }
       return measureIntersectionNoRoot(candidate).then(
         ({boundingClientRect}) => {
+          // <amp-img> will change the img's src inline data on unlayout and
+          // remove it from DOM.
+          if (!candidate.signals().get(CommonSignals.LOAD_END)) {
+            return;
+          }
           const {width, height} = boundingClientRect;
           if (!Criteria.meetsAll(candidate, width, height)) {
             return;

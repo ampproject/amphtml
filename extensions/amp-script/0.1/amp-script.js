@@ -16,13 +16,13 @@
 
 import * as WorkerDOM from '@ampproject/worker-dom/dist/amp-production/main.mjs';
 import {CSS} from '../../../build/amp-script-0.1.css';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Purifier} from '../../../src/purifier/purifier';
 import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
 import {calculateExtensionScriptUrl} from '../../../src/service/extension-script';
-import {cancellation} from '../../../src/error';
+import {cancellation} from '../../../src/error-reporting';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/core/types/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
@@ -30,6 +30,7 @@ import {getMode} from '../../../src/mode';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {tryParseJson} from '../../../src/json';
+import {urls} from '../../../src/config';
 import {utf8Encode} from '../../../src/utils/bytes';
 
 /** @const {string} */
@@ -120,6 +121,15 @@ export class AmpScript extends AMP.BaseElement {
      * @private {boolean}
      */
     this.nodom_ = false;
+
+    /**
+     * If true, signals that worker-dom should activate sandboxed mode.
+     * In this mode the Worker lives in its own crossorigin iframe, creating
+     * a strong security boundary.
+     *
+     * @private {boolean}
+     */
+    this.sandboxed_ = false;
   }
 
   /** @override */
@@ -130,6 +140,7 @@ export class AmpScript extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.nodom_ = this.element.hasAttribute('nodom');
+    this.sandboxed_ = this.element.hasAttribute('sandboxed');
     this.development_ =
       this.element.hasAttribute('data-ampdevmode') ||
       this.element.ownerDocument.documentElement.hasAttribute(
@@ -197,15 +208,15 @@ export class AmpScript extends AMP.BaseElement {
     return this.userActivation_;
   }
 
-  // * @param {Array<*>} args
-
   /**
    * Calls the specified function on this amp-script's worker-dom instance.
+   * Accepts variable number of args to pass along to the underlying worker.
    *
-   * @param {string} unused - function identifier
+   * @param {string} unusedFnId - function identifier
+   * @param {...*} unusedFnArgs
    * @return {!Promise<*>}
    */
-  callFunction(unused /*, ...args */) {
+  callFunction(unusedFnId, unusedFnArgs) {
     return this.initialize_.promise.then(() => {
       return this.workerDom_.callFunction.apply(this.workerDom_, arguments);
     });
@@ -271,6 +282,15 @@ export class AmpScript extends AMP.BaseElement {
 
     const sandbox = this.element.getAttribute('sandbox') || '';
     const sandboxTokens = sandbox.split(' ').map((s) => s.trim());
+    let iframeUrl;
+    if (getMode().localDev) {
+      const folder = getMode().minified ? 'current-min' : 'current';
+      iframeUrl = `/dist.3p/${folder}/amp-script-proxy-iframe.html`;
+    } else {
+      iframeUrl = `${urls.thirdParty}/${
+        getMode().version
+      }/amp-script-proxy-iframe.html`;
+    }
 
     // @see src/main-thread/configuration.WorkerDOMConfiguration in worker-dom.
     const config = {
@@ -291,6 +311,7 @@ export class AmpScript extends AMP.BaseElement {
       onReceiveMessage: (data) => {
         dev().info(TAG, 'From worker:', data);
       },
+      sandbox: this.sandboxed_ && {iframeUrl},
     };
 
     // Create worker and hydrate.
@@ -370,7 +391,7 @@ export class AmpScript extends AMP.BaseElement {
           id
         );
         const text = local.textContent;
-        if (this.development_) {
+        if (this.development_ || this.sandboxed_) {
           return Promise.resolve(text);
         } else {
           return this.service_.checkSha384(text, debugId).then(() => text);
@@ -543,6 +564,9 @@ export class AmpScriptService {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc}  */
+    this.ampdoc_ = ampdoc;
+
     /** @private {number} */
     this.cumulativeSize_ = 0;
 
@@ -552,10 +576,8 @@ export class AmpScriptService {
     // Query the meta tag once per document.
     const allowedHashes = ampdoc.getMetaByName('amp-script-src');
     if (allowedHashes) {
-      this.sources_ = allowedHashes
-        .split(' ')
-        .map((s) => s.trim())
-        .filter((s) => s.length);
+      // Allow newlines between hashes for readability/diffs
+      this.sources_ = allowedHashes.split(/\s+/).filter(Boolean);
     }
 
     /** @private @const {!../../../src/service/crypto-impl.Crypto} */
@@ -594,6 +616,40 @@ export class AmpScriptService {
   sizeLimitExceeded(size) {
     this.cumulativeSize_ += size;
     return this.cumulativeSize_ > MAX_TOTAL_SCRIPT_SIZE;
+  }
+
+  /**
+   * Fetches an amp-script URI by finding the associated amp-script and
+   * calling the specified function.
+   *
+   * Note: the amp-script URI does not yet support function args,
+   *       even though worker-dom's callFunction does. Therefore we allow it
+   *       via extra args.
+   *
+   * @param {string} uri
+   * @param {...*} unusedArgs
+   * @return {Promise<*>}
+   */
+  fetch(uri, unusedArgs) {
+    const uriParts = uri.slice('amp-script:'.length).split('.');
+    userAssert(
+      uriParts.length === 2 && uriParts[0].length > 0 && uriParts[1].length > 0,
+      `[${TAG}]: "amp-script" URIs must be of the format "scriptId.functionIdentifier".`
+    );
+
+    const ampScriptId = uriParts[0];
+    const fnIdentifier = uriParts[1];
+    const ampScriptEl = this.ampdoc_.getElementById(ampScriptId);
+    userAssert(
+      ampScriptEl && ampScriptEl.tagName === 'AMP-SCRIPT',
+      `[${TAG}]: could not find <amp-script> with script set to ${ampScriptId}`
+    );
+    const args = Array.prototype.slice.call(arguments, 1);
+    return ampScriptEl
+      .getImpl()
+      .then((impl) =>
+        impl.callFunction.apply(impl, [fnIdentifier].concat(args))
+      );
   }
 }
 

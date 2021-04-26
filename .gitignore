@@ -1,23 +1,8 @@
-# OS level files
-.DS_Store
-.g4ignore
-*.swp
-*.swo
-
-# Development environment files
-**/node_modules
-npm-debug.log
-
-# Firebase directories
-.firebaserc
-.firebase
-firebase
-firebase.json
-
 # Local cache directories
 # Keep this list in sync with .eslintignore, .prettierignore, and build-system/tasks/clean.js
 .babel-cache
 .css-cache
+.pre-closure-cache
 
 # Output directories
 # Keep this list in sync with .eslintignore, .prettierignore, and build-system/tasks/clean.js
@@ -41,3 +26,19 @@ test/coverage
 test/coverage-e2e
 validator/**/dist
 validator/export
+
+# OS level files
+.DS_Store
+.g4ignore
+*.swp
+*.swo
+
+# Development environment files
+**/node_modules
+npm-debug.log
+
+# Firebase directories
+.firebaserc
+.firebase
+firebase
+firebase.json

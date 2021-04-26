@@ -53,15 +53,15 @@ module.exports = {
       'files': [
         './preact/base-element.js',
         './preact/slot.js',
-        './core/contextprops.js',
         './context/node.js',
-        './context/scheduler.js',
-        './context/values.js',
         // TEMPORARY, follow tracking issue #33631
         './preact/component/3p-frame.js',
-        './preact/component/iframe.js',
       ],
       'rules': {'import/no-restricted-paths': isCiBuild() ? 0 : 1},
+    },
+    {
+      'files': ['./core/window.extern.js'],
+      'rules': {'local/no-global': 0},
     },
   ],
 };

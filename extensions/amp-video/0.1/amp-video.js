@@ -18,7 +18,7 @@ import {EMPTY_METADATA} from '../../../src/mediasession-helper';
 import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {VisibilityState} from '../../../src/visibility-state';
+import {VisibilityState} from '../../../src/core/constants/visibility-state';
 import {addParamsToUrl} from '../../../src/url';
 import {
   childElement,
@@ -33,6 +33,7 @@ import {
 } from '../../../src/dom';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert, user} from '../../../src/log';
+import {fetchCachedSources} from './video-cache';
 import {getBitrateManager} from './flexible-bitrate';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
@@ -259,11 +260,17 @@ export class AmpVideo extends AMP.BaseElement {
     // Cached so mediapool operations (eg: swapping sources) don't interfere with this bool.
     this.hasBitrateSources_ =
       !!this.element.querySelector('source[data-bitrate]') ||
-      this.hasAnyCachedSources_();
+      this.hasAnyCachedSources_() ||
+      this.element.hasAttribute('cache');
 
     installVideoManagerForDoc(element);
 
     Services.videoManagerForDoc(element).register(this);
+
+    // Fetch and add cached sources URLs if opted-in, and if the sources don't already contained cached URLs from the AMP Cache.
+    if (this.element.hasAttribute('cache') && !this.hasAnyCachedSources_()) {
+      return fetchCachedSources(this.element, this.win);
+    }
   }
 
   /**

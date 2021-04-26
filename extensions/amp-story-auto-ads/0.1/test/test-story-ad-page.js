@@ -22,11 +22,13 @@ import {
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {ButtonTextFitter} from '../story-ad-button-text-fitter';
-import {CommonSignals} from '../../../../src/common-signals';
+import {CommonSignals} from '../../../../src/core/constants/common-signals';
 import {Gestures} from '../../../../src/gesture';
 import {StoryAdAnalytics} from '../story-ad-analytics';
+import {StoryAdAutoAdvance} from '../../../../src/experiments/story-ad-auto-advance';
 import {StoryAdLocalization} from '../story-ad-localization';
 import {StoryAdPage} from '../story-ad-page';
+import {forceExperimentBranch} from '../../../../src/experiments';
 import {macroTask} from '../../../../testing/yield';
 
 const NOOP = () => {};
@@ -75,6 +77,8 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
       expect(pageElement).to.have.attribute('ad');
       expect(pageElement).to.have.attribute('distance', 2);
       expect(pageElement).to.have.attribute('id', 'i-amphtml-ad-page-1');
+      // TODO(#33969) remove when launched.
+      expect(pageElement).not.to.have.attribute('auto-advance-after');
 
       const contentGridLayer = pageElement.firstChild;
       expect(contentGridLayer.tagName).to.equal('AMP-STORY-GRID-LAYER');
@@ -92,6 +96,17 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
 
       const glassPane = glassPaneGridLayer.firstChild;
       expect(glassPane).to.have.class('i-amphtml-glass-pane');
+    });
+
+    it('sets auto-advance if in the experiment', () => {
+      // TODO(#33969) remove when launched.
+      forceExperimentBranch(
+        win,
+        StoryAdAutoAdvance.ID,
+        StoryAdAutoAdvance.SIX_SECONDS
+      );
+      const pageElement = storyAdPage.build();
+      expect(pageElement).to.have.attribute('auto-advance-after');
     });
   });
 

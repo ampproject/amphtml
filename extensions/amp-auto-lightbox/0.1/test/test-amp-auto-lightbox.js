@@ -15,7 +15,7 @@
  */
 
 import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
-import {CommonSignals} from '../../../../src/common-signals';
+import {CommonSignals} from '../../../../src/core/constants/common-signals';
 import {
   Criteria,
   DocMetaAnnotations,
@@ -33,11 +33,11 @@ import {
   scan,
 } from '../amp-auto-lightbox';
 import {Services} from '../../../../src/services';
-import {Signals} from '../../../../src/utils/signals';
+import {Signals} from '../../../../src/core/data-structures/signals';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
 import {isArray} from '../../../../src/core/types';
-import {tryResolve} from '../../../../src/utils/promise';
+import {tryResolve} from '../../../../src/core/data-structures/promise';
 
 const TAG = 'amp-auto-lightbox';
 
@@ -517,10 +517,16 @@ describes.realWin(
         const signals = new Signals();
         img.signals = () => signals;
 
-        signals.signal(CommonSignals.UNLOAD);
         signals.signal(CommonSignals.LOAD_END);
 
-        const elected = await Promise.all(runCandidates(env.ampdoc, [img]));
+        const candidatePromise = Promise.all(runCandidates(env.ampdoc, [img]));
+
+        // Skip microtask and reset LOAD_END to emulate unloading in the middle
+        // of the candidate's measurement.
+        await new Promise((resolve) => resolve());
+        signals.reset(CommonSignals.LOAD_END);
+
+        const elected = await candidatePromise;
         expect(elected[0]).to.be.undefined;
       });
 

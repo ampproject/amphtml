@@ -23,11 +23,15 @@ import {
   validateCtaMetadata,
 } from './story-ad-ui';
 import {
+  AdvanceExpToTime,
+  StoryAdAutoAdvance,
+} from '../../../src/experiments/story-ad-auto-advance';
+import {
   AnalyticsEvents,
   AnalyticsVars,
   STORY_AD_ANALYTICS,
 } from './story-ad-analytics';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Gestures} from '../../../src/gesture';
 import {
   StateProperty,
@@ -44,6 +48,7 @@ import {
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/core/types/object';
 import {getData, listen} from '../../../src/event-helper';
+import {getExperimentBranch} from '../../../src/experiments';
 import {getFrameDoc, localizeCtaText} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {parseJson} from '../../../src/json';
@@ -311,6 +316,17 @@ export class StoryAdPage {
       'i-amphtml-loading': '',
       'id': this.id_,
     });
+
+    const autoAdvanceExpBranch = getExperimentBranch(
+      this.win_,
+      StoryAdAutoAdvance.ID
+    );
+    if (
+      autoAdvanceExpBranch &&
+      autoAdvanceExpBranch !== StoryAdAutoAdvance.CONTROL
+    ) {
+      attributes['auto-advance-after'] = AdvanceExpToTime[autoAdvanceExpBranch];
+    }
 
     const page = createElementWithAttributes(
       this.doc_,

@@ -19,12 +19,12 @@ amp-story-panning-media {
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
-  /* 
+  /*
   This gives a 3d reference point for the translate3d z value on the child.
   A reference point is necessary for the effect of 3d space.
-  The calculation to convert scale to zoom is: 
+  The calculation to convert scale to zoom is:
   perspective * (zoom - 1) / zoom
-  1 is used here to simplify the calculation in updateTransform_ to be: 
+  1 is used here to simplify the calculation in updateTransform_ to be:
   (zoom - 1) / zoom
   */
   perspective: 1px !important;

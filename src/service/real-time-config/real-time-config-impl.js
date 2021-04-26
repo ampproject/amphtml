@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CONSENT_POLICY_STATE} from '../../consent-state';
+import {CONSENT_POLICY_STATE} from '../../core/constants/consent-state';
 import {RTC_VENDORS} from './callout-vendors';
 import {Services} from '../../services';
 import {dev, user, userAssert} from '../../log';
 import {getMode} from '../../mode';
+import {isAmpScriptUri} from '../../../src/url';
 import {isArray, isObject} from '../../core/types';
-import {isCancellation} from '../../error';
-
+import {isCancellation} from '../../error-reporting';
 import {registerServiceBuilderForDoc} from '../../service';
 import {tryParseJson} from '../../json';
 
@@ -313,8 +313,9 @@ export class RealTimeConfigManager {
    * Manages sending the RTC callouts for the Custom URLs.
    * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} customMacros The ad-network specified macro
    * @param {!Function} checkStillCurrent
+   * @param {!Element} element
    */
-  handleRtcForCustomUrls(customMacros, checkStillCurrent) {
+  handleRtcForCustomUrls(customMacros, checkStillCurrent, element) {
     // For each publisher defined URL, inflate the url using the macros,
     // and send the RTC request.
     (this.rtcConfig_.urls || []).forEach((urlObj) => {
@@ -331,7 +332,9 @@ export class RealTimeConfigManager {
         url,
         customMacros,
         errorReportingUrl,
-        checkStillCurrent
+        checkStillCurrent,
+        /* opt_vendor */ undefined,
+        element
       );
     });
   }
@@ -395,6 +398,7 @@ export class RealTimeConfigManager {
    * @param {string} errorReportingUrl
    * @param {!Function} checkStillCurrent
    * @param {string=} opt_vendor
+   * @param {!Element=} opt_element
    * @private
    */
   inflateAndSendRtc_(
@@ -402,7 +406,8 @@ export class RealTimeConfigManager {
     macros,
     errorReportingUrl,
     checkStillCurrent,
-    opt_vendor
+    opt_vendor,
+    opt_element
   ) {
     let {timeoutMillis} = this.rtcConfig_;
     const callout = opt_vendor || this.getCalloutParam_(url);
@@ -422,7 +427,10 @@ export class RealTimeConfigManager {
           errorReportingUrl
         );
       }
-      if (!Services.urlForDoc(this.ampDoc_).isSecure(url)) {
+      if (
+        !Services.urlForDoc(this.ampDoc_).isSecure(url) &&
+        !isAmpScriptUri(url)
+      ) {
         return this.buildErrorResponse_(
           RTC_ERROR_ENUM.INSECURE_URL,
           callout,
@@ -440,12 +448,14 @@ export class RealTimeConfigManager {
       if (url.length > MAX_URL_LENGTH) {
         url = this.truncUrl_(url);
       }
+
       return this.sendRtcCallout_(
         url,
         timeoutMillis,
         callout,
         checkStillCurrent,
-        errorReportingUrl
+        errorReportingUrl,
+        opt_element
       );
     };
 
@@ -494,6 +504,7 @@ export class RealTimeConfigManager {
    * @param {string} callout
    * @param {!Function} checkStillCurrent
    * @param {string} errorReportingUrl
+   * @param {!Element=} opt_element
    * @return {!Promise<!rtcResponseDef>}
    * @private
    */
@@ -502,45 +513,67 @@ export class RealTimeConfigManager {
     timeoutMillis,
     callout,
     checkStillCurrent,
-    errorReportingUrl
+    errorReportingUrl,
+    opt_element
   ) {
+    let rtcFetch;
+    if (isAmpScriptUri(url)) {
+      rtcFetch = Services.scriptForDocOrNull(opt_element)
+        .then((service) => {
+          userAssert(service, 'AMP-SCRIPT is not installed.');
+          return service.fetch(url);
+        })
+        .then((json) => {
+          checkStillCurrent();
+          const rtcTime = Date.now() - this.rtcStartTime_;
+          if (typeof json !== 'object') {
+            return this.buildErrorResponse_(
+              RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE,
+              callout,
+              errorReportingUrl,
+              rtcTime
+            );
+          }
+          return {response: json, rtcTime, callout};
+        });
+    } else {
+      rtcFetch = Services.xhrFor(this.win_)
+        .fetchJson(
+          // NOTE(bradfrizzell): we could include ampCors:false allowing
+          // the request to be cached across sites but for now assume that
+          // is not a required feature.
+          url,
+          {credentials: 'include'}
+        )
+        .then((res) => {
+          checkStillCurrent();
+          return res.text().then((text) => {
+            checkStillCurrent();
+            const rtcTime = Date.now() - this.rtcStartTime_;
+            // An empty text response is allowed, not an error.
+            if (!text) {
+              return {rtcTime, callout};
+            }
+            const response = tryParseJson(text);
+            return response
+              ? {response, rtcTime, callout}
+              : this.buildErrorResponse_(
+                  RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE,
+                  callout,
+                  errorReportingUrl,
+                  rtcTime
+                );
+          });
+        });
+    }
+
     /**
      * Note: Timeout is enforced by timerFor, not the value of
      *   rtcTime. There are situations where rtcTime could thus
      *   end up being greater than timeoutMillis.
      */
     return Services.timerFor(this.win_)
-      .timeoutPromise(
-        timeoutMillis,
-        Services.xhrFor(this.win_)
-          .fetchJson(
-            // NOTE(bradfrizzell): we could include ampCors:false allowing
-            // the request to be cached across sites but for now assume that
-            // is not a required feature.
-            url,
-            {credentials: 'include'}
-          )
-          .then((res) => {
-            checkStillCurrent();
-            return res.text().then((text) => {
-              checkStillCurrent();
-              const rtcTime = Date.now() - this.rtcStartTime_;
-              // An empty text response is allowed, not an error.
-              if (!text) {
-                return {rtcTime, callout};
-              }
-              const response = tryParseJson(text);
-              return response
-                ? {response, rtcTime, callout}
-                : this.buildErrorResponse_(
-                    RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE,
-                    callout,
-                    errorReportingUrl,
-                    rtcTime
-                  );
-            });
-          })
-      )
+      .timeoutPromise(timeoutMillis, rtcFetch)
       .catch((error) => {
         return isCancellation(error)
           ? undefined
@@ -589,7 +622,7 @@ export class RealTimeConfigManager {
     this.modifyRtcConfigForConsentStateSettings();
     customMacros = this.assignMacros(customMacros);
     this.rtcStartTime_ = Date.now();
-    this.handleRtcForCustomUrls(customMacros, checkStillCurrent);
+    this.handleRtcForCustomUrls(customMacros, checkStillCurrent, element);
     this.handleRtcForVendorUrls(customMacros, checkStillCurrent);
     return Promise.all(this.promiseArray_);
   }

@@ -21,7 +21,7 @@ import {
   VisibilityManagerForEmbed,
   provideVisibilityManager,
 } from '../visibility-manager';
-import {VisibilityState} from '../../../../src/visibility-state';
+import {VisibilityState} from '../../../../src/core/constants/visibility-state';
 import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
 import {setParentWindow} from '../../../../src/service';
 

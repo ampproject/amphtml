@@ -15,13 +15,18 @@
  */
 
 import {
+  AdvanceExpToTime,
+  StoryAdAutoAdvance,
+  divertStoryAdAutoAdvance,
+} from '../../../src/experiments/story-ad-auto-advance';
+import {
   AnalyticsEvents,
   AnalyticsVars,
   STORY_AD_ANALYTICS,
   StoryAdAnalytics,
 } from './story-ad-analytics';
 import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {EventType, dispatch} from '../../amp-story/1.0/events';
 import {Services} from '../../../src/services';
 import {
@@ -35,8 +40,11 @@ import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {divertStoryAdPlacements} from '../../../src/experiments/story-ad-placements';
+import {getExperimentBranch} from '../../../src/experiments';
 import {getPlacementAlgo} from './algorithm-utils';
 import {getServicePromiseForDoc} from '../../../src/service';
+import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
+import {setStyle} from '../../../src/style';
 import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
 
 /** @const {string} */
@@ -77,6 +85,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.adBadgeContainer_ = null;
+
+    /** @private {?Element} */
+    this.progressBarBackground_ = null;
 
     /** @private {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
@@ -135,6 +146,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
           this.config_
         );
         divertStoryAdPlacements(this.win);
+        divertStoryAdAutoAdvance(this.win);
         this.placementAlgorithm_ = getPlacementAlgo(
           this.win,
           this.storeService_,
@@ -149,6 +161,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
           STORY_AD_ANALYTICS
         );
         this.createAdOverlay_();
+        this.maybeCreateProgressBar_();
         this.initializeListeners_();
         this.initializePages_();
       });
@@ -261,9 +274,17 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   onAdStateUpdate_(isAd) {
     this.mutateElement(() => {
-      isAd
-        ? this.adBadgeContainer_.setAttribute(Attributes.AD_SHOWING, '')
-        : this.adBadgeContainer_.removeAttribute(Attributes.AD_SHOWING);
+      if (isAd) {
+        this.adBadgeContainer_.setAttribute(Attributes.AD_SHOWING, '');
+        // TODO(#33969) can no longer be null when launched.
+        this.progressBarBackground_ &&
+          this.progressBarBackground_.setAttribute(Attributes.AD_SHOWING, '');
+      } else {
+        this.adBadgeContainer_.removeAttribute(Attributes.AD_SHOWING);
+        // TODO(#33969) can no longer be null when launched.
+        this.progressBarBackground_ &&
+          this.progressBarBackground_.removeAttribute(Attributes.AD_SHOWING);
+      }
     });
   }
 
@@ -289,22 +310,17 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   onUIStateUpdate_(uiState) {
     this.mutateElement(() => {
       const {DESKTOP_PANELS} = Attributes;
-      const root = this.adBadgeContainer_;
-
-      root.removeAttribute(DESKTOP_PANELS);
+      this.adBadgeContainer_.removeAttribute(DESKTOP_PANELS);
+      // TODO(#33969) can no longer be null when launched.
+      this.progressBarBackground_ &&
+        this.progressBarBackground_.removeAttribute(DESKTOP_PANELS);
 
       if (uiState === UIType.DESKTOP_PANELS) {
-        root.setAttribute(DESKTOP_PANELS, '');
+        this.adBadgeContainer_.setAttribute(DESKTOP_PANELS, '');
+        this.progressBarBackground_ &&
+          this.progressBarBackground_.setAttribute(DESKTOP_PANELS, '');
       }
     });
-  }
-
-  /**
-   * @visibleForTesting
-   * @return {Element}
-   */
-  getAdBadgeRoot() {
-    return this.adBadgeContainer_;
   }
 
   /**
@@ -324,6 +340,43 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.adBadgeContainer_.appendChild(badge);
     createShadowRootWithStyle(root, this.adBadgeContainer_, adBadgeCSS);
     this.ampStory_.element.appendChild(root);
+  }
+
+  /**
+   * Create progress bar if auto advance exp is on.
+   */
+  maybeCreateProgressBar_() {
+    const autoAdvanceExpBranch = getExperimentBranch(
+      this.win,
+      StoryAdAutoAdvance.ID
+    );
+    if (
+      autoAdvanceExpBranch &&
+      autoAdvanceExpBranch !== StoryAdAutoAdvance.CONTROL
+    ) {
+      this.createProgressBar_(AdvanceExpToTime[autoAdvanceExpBranch]);
+    }
+  }
+
+  /**
+   * Create progress bar that will be shown when ad is advancing.
+   * @param {string} time
+   */
+  createProgressBar_(time) {
+    const progressBar = this.doc_.createElement('div');
+    progressBar.className = 'i-amphtml-story-ad-progress-bar';
+    setStyle(progressBar, 'animationDuration', time);
+
+    this.progressBarBackground_ = this.doc_.createElement('div');
+    this.progressBarBackground_.className =
+      'i-amphtml-story-ad-progress-background';
+
+    const host = this.doc_.createElement('div');
+    host.className = 'i-amphtml-story-ad-progress-bar-host';
+
+    this.progressBarBackground_.appendChild(progressBar);
+    createShadowRootWithStyle(host, this.progressBarBackground_, progessBarCSS);
+    this.ampStory_.element.appendChild(host);
   }
 
   /**

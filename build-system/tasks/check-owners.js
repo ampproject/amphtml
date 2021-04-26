@@ -100,7 +100,7 @@ async function checkFile(file) {
       cyan(file),
       'successfully; produced',
       cyan(rules.length),
-      'rules.'
+      'rule(s).'
     );
   } catch (error) {
     log(red('FAILURE:'), error);
