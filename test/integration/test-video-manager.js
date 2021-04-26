@@ -16,9 +16,12 @@
 
 import {PlayingStates, VideoEvents} from '../../src/video-interface';
 import {Services} from '../../src/services';
-import {VideoUtils} from '../../src/utils/video';
 import {dispatchCustomEvent} from '../../src/dom';
 import {installVideoManagerForDoc} from '../../src/service/video-manager-impl';
+import {
+  isAutoplaySupported,
+  resetIsAutoplaySupported,
+} from '../../src/utils/video';
 import {isLayoutSizeDefined} from '../../src/layout';
 import {listenOncePromise} from '../../src/event-helper';
 import {runVideoPlayerIntegrationTests} from './test-video-players-helper';
@@ -317,15 +320,15 @@ describe
       setAttributeSpy = window.sandbox.spy(video, 'setAttribute');
       playStub = window.sandbox.stub(video, 'play');
 
-      VideoUtils.resetIsAutoplaySupported();
+      resetIsAutoplaySupported(win);
     });
 
     afterEach(() => {
-      VideoUtils.resetIsAutoplaySupported();
+      resetIsAutoplaySupported(win);
     });
 
     it('should create an invisible test video element', () => {
-      return VideoUtils.isAutoplaySupported(win).then(() => {
+      return isAutoplaySupported(win).then(() => {
         expect(video.style.position).to.equal('fixed');
         expect(video.style.top).to.equal('0');
         expect(video.style.width).to.equal('0');
@@ -351,7 +354,7 @@ describe
 
     it('should return false if `paused` is true after `play()` call', () => {
       video.paused = true;
-      return VideoUtils.isAutoplaySupported(win).then((supportsAutoplay) => {
+      return isAutoplaySupported(win).then((supportsAutoplay) => {
         expect(supportsAutoplay).to.be.false;
         expect(playStub.called).to.be.true;
         expect(createElementSpy.called).to.be.true;
@@ -360,7 +363,7 @@ describe
 
     it('should return true if `paused` is false after `play()` call', () => {
       video.paused = false;
-      return VideoUtils.isAutoplaySupported(win).then((supportsAutoplay) => {
+      return isAutoplaySupported(win).then((supportsAutoplay) => {
         expect(supportsAutoplay).to.be.true;
         expect(playStub.called).to.be.true;
         expect(createElementSpy.called).to.be.true;
@@ -370,7 +373,7 @@ describe
     it('should suppress errors if detection play call throws', () => {
       playStub.throws();
       video.paused = true;
-      return VideoUtils.isAutoplaySupported(win).then((supportsAutoplay) => {
+      return isAutoplaySupported(win).then((supportsAutoplay) => {
         expect(supportsAutoplay).to.be.false;
         expect(playStub.called).to.be.true;
         expect(createElementSpy.called).to.be.true;
@@ -383,7 +386,7 @@ describe
       );
       playStub.returns(p);
       video.paused = true;
-      return VideoUtils.isAutoplaySupported(win).then((supportsAutoplay) => {
+      return isAutoplaySupported(win).then((supportsAutoplay) => {
         expect(supportsAutoplay).to.be.false;
         expect(playStub.called).to.be.true;
         expect(createElementSpy.called).to.be.true;

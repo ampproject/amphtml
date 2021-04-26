@@ -16,7 +16,6 @@
 import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
-import {VideoUtils} from '../../../src/utils/video';
 import {addParamToUrl} from '../../../src/url';
 import {
   createFrameFor,
@@ -30,6 +29,7 @@ import {dict} from '../../../src/core/types/object';
 import {dispatchCustomEvent, removeElement} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
+import {isAutoplaySupported} from '../../../src/utils/video';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {once} from '../../../src/core/types/function';
 import {userAssert} from '../../../src/log';
@@ -196,7 +196,7 @@ class AmpVimeo extends AMP.BaseElement {
     if (!this.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
       return Promise.resolve(false);
     }
-    return VideoUtils.isAutoplaySupported(this.win);
+    return isAutoplaySupported(this.win);
   }
 
   /**
