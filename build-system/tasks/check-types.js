@@ -30,7 +30,13 @@ const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
 const {log} = require('../common/logging');
 const {typecheckNewServer} = require('../server/typescript-compile');
 
-const EXTERNS_GLOB = 'src/core{,/**}/*.extern.js';
+/**
+ * Files that pass type-checking but don't belong to a passing directory target.
+ * Note: This is a TEMPORARY holding point during the transition to type-safety.
+ * @type {!Array<string>}
+ */
+const PRIDE_FILES_GLOBS = ['src/resolved-promise.js', 'src/types.js'];
+const CORE_EXTERNS_GLOB = 'src/core{,/**}/*.extern.js';
 
 /**
  * Generates a list of source file paths for extensions to type-check
@@ -52,6 +58,76 @@ const getExtensionSrcPaths = () =>
  * @type {Object<string, Object|function():Object>}
  */
 const TYPE_CHECK_TARGETS = {
+  // Below are targets containing individual directories which are fully passing
+  // type-checking. Do not remove or disable anything on this list.
+  // Goal: Remove 'QUIET' from all of them.
+  // To test a target locally:
+  //   `amp check-types --target=src-foo-bar --warning_level=verbose`
+  'src-amp-story-player': {
+    srcGlobs: ['src/amp-story-player{,/**}/*.js'],
+    warningLevel: 'QUIET',
+  },
+  'src-context': {
+    srcGlobs: ['src/context{,/**}/*.js'],
+    warningLevel: 'QUIET',
+  },
+  'src-core': {
+    srcGlobs: ['src/core{,/**}/*.js'],
+    externGlobs: [CORE_EXTERNS_GLOB],
+  },
+  'src-examiner': {
+    srcGlobs: ['src/examiner{,/**}/*.js'],
+    warningLevel: 'QUIET',
+  },
+  'src-experiments': {
+    srcGlobs: ['src/experiments{,/**}/*.js'],
+    warningLevel: 'QUIET',
+  },
+  'src-inabox': {
+    srcGlobs: ['src/inabox{,/**}/*.js'],
+    warningLevel: 'QUIET',
+  },
+  'src-polyfills': {
+    srcGlobs: ['src/polyfills{,/**}/*.js'],
+    warningLevel: 'QUIET',
+  },
+  'src-polyfillstub': {
+    srcGlobs: ['src/polyfillstub{,/**}/*.js'],
+    warningLevel: 'QUIET',
+  },
+  'src-preact': {
+    srcGlobs: ['src/preact{,/**}/*.js'],
+    warningLevel: 'QUIET',
+  },
+  'src-purifier': {
+    srcGlobs: ['src/purifier{,/**}/*.js'],
+    warningLevel: 'QUIET',
+  },
+  'src-service': {
+    srcGlobs: ['src/service{,/**}/*.js'],
+    warningLevel: 'QUIET',
+  },
+  'src-utils': {
+    srcGlobs: ['src/utils{,/**}/*.js'],
+    warningLevel: 'QUIET',
+  },
+  'src-web-worker': {
+    srcGlobs: ['src/web-worker{,/**}/*.js'],
+    warningLevel: 'QUIET',
+  },
+
+  // Opposite of `shame.extern.js`. This target is a catch-all for files that
+  // are currently passing, but whose parent directories are not fully passing.
+  // Adding a file or glob here will cause CI to fail if type errors are
+  // introduced. It is okay to remove a file from this list only when fixing a
+  // bug for cherry-pick.
+  'pride': {
+    srcGlobs: PRIDE_FILES_GLOBS,
+    externGlobs: [CORE_EXTERNS_GLOB, 'build-system/externs/*.extern.js'],
+  },
+
+  // TODO(#33631): Targets below this point are not expected to pass.
+  // They can possibly be removed?
   'src': {
     entryPoints: [
       'src/amp.js',
@@ -64,15 +140,6 @@ const TYPE_CHECK_TARGETS = {
     extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
     warningLevel: 'QUIET',
   },
-  'src-core': () => ({
-    externs: globby.sync(EXTERNS_GLOB),
-    extraGlobs: [
-      // Include all core JS files
-      'src/core/{,**/}*.js',
-      // Exclude all core extern files (already included via externs)
-      `!${EXTERNS_GLOB}`,
-    ],
-  }),
   'extensions': () => ({
     entryPoints: getExtensionSrcPaths(),
     extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
@@ -117,7 +184,15 @@ async function typeCheck(targetName) {
     );
   }
 
-  const {entryPoints = [], ...opts} = target;
+  const {entryPoints = [], srcGlobs = [], externGlobs = [], ...opts} = target;
+
+  // If srcGlobs and externGlobs are defined, determine the externs/extraGlobs
+  if (srcGlobs.length || externGlobs.length) {
+    opts.eterns = externGlobs.flatMap(globby.sync);
+    // Included globs should explicitly exclude any externs
+    opts.extraGlobs = externGlobs.map((glob) => `!${glob}`).concat(srcGlobs);
+  }
+
   // If no entry point is defined, we want to scan the globs provided without
   // injecting extra dependencies.
   const noAddDeps = !entryPoints.length;

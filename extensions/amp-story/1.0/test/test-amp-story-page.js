@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as VideoUtils from '../../../../src/utils/video';
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
@@ -23,7 +24,6 @@ import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/core/data-structures/signals';
-import {VideoUtils} from '../../../../src/utils/video';
 import {
   addAttributesToElement,
   createElementWithAttributes,
@@ -593,9 +593,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
   it('play message should have role="button" to prevent story page navigation', async () => {
     env.sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
-    env.sandbox
-      .stub(VideoUtils, 'isAutoplaySupported')
-      .returns(Promise.resolve(false));
+    env.sandbox.stub(VideoUtils, 'isAutoplaySupported').resolves(false);
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp4');
     gridLayerEl.appendChild(videoEl);

@@ -1,5 +1,5 @@
 /**
- * Copyright __current_year__ The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-/* __do_not_submit__
- * If you don't require this CSS file, remove {hasCss: true} from
- * bundles.config.js. Otherwise, remove this comment.
- */
+import {isExperimentOn} from '../../../src/experiments';
 
-amp-__component_name_hyphenated__ {
-  /** Component styles */
-}
+/**
+ * Returns true if new inline attachment UI is enabled.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export const isPageAttachmentUiV2ExperimentOn = (win) => {
+  return isExperimentOn(win, 'amp-story-page-attachment-ui-v2');
+};

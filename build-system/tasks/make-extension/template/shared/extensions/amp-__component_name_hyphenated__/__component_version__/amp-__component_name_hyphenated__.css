@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright __current_year__ The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,11 @@
  * limitations under the License.
  */
 
-/** @externs */
+/* __do_not_submit__
+ * If you don't require this CSS file, remove {hasCss: true} from
+ * bundles.config.extensions.json. Otherwise, remove this comment.
+ */
 
-// Place externs here if they are only needed in legacy multi pass compilation.
-
-var SomeBaseElementLikeClass;
-SomeBaseElementLikeClass.prototype.layout_;
-
-/** @type {boolean} */
-SomeBaseElementLikeClass.prototype.inViewport_;
-
-SomeBaseElementLikeClass.prototype.actionMap_;
-
-SomeBaseElementLikeClass.prototype.defaultActionAlias_;
-
-// Externed explicitly because this private property is read across
-// binaries.
-Element.prototype.impl_ = {};
+amp-__component_name_hyphenated__ {
+  /** Component styles */
+}

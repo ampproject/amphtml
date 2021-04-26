@@ -1,5 +1,5 @@
 /**
- * Copyright __current_year__ The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +15,31 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {__component_name_pascalcase__} from '../component'
+import {FacebookComments} from '../component';
+import {boolean, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
-import {withKnobs} from '@storybook/addon-knobs';
 
 export default {
-  title: '__component_name_pascalcase__',
-  component: __component_name_pascalcase__,
+  title: 'FacebookComments',
+  component: FacebookComments,
   decorators: [withKnobs, withA11y],
 };
 
 export const _default = () => {
-  // __do_not_submit__: This is example code only.
+  const href = text(
+    'href',
+    'http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html'
+  );
+  const numPosts = boolean('show 5 comments max') ? 5 : undefined;
+  const orderBy = boolean('order by time') ? 'time' : undefined;
+  const locale = boolean('french locale') ? 'fr_FR' : undefined;
   return (
-    <__component_name_pascalcase__
-      style={{width: 300, height: 200}}
-      example-property="example string property value"
-    >
-      This text is inside.
-    </__component_name_pascalcase__>
+    <FacebookComments
+      href={href}
+      locale={locale}
+      numPosts={numPosts}
+      orderBy={orderBy}
+      style={{width: '400px', height: '400px'}}
+    ></FacebookComments>
   );
 };

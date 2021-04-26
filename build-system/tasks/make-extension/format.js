@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-/**
- * @fileoverview Delete this file when Closure Compiler ships with the
- * WeakRef extern.
- */
-
-/** @externs */
+const {getOutput} = require('../../common/process');
 
 /**
- * @param {T} target
- * @constructor
- * @template T
+ * @param {Array<string>} files
+ * @return {Object}
  */
-function WeakRef(target) {}
+function format(files) {
+  return getOutput(`npx prettier --ignore-unknown --write ${files.join(' ')}`);
+}
 
-/** @return {T|undefined} */
-WeakRef.prototype.deref = function () {};
+module.exports = {
+  format,
+};
