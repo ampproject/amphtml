@@ -1,5 +1,5 @@
 /**
- * Copyright __current_year__ The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-/* __do_not_submit__
- * If you don't require this CSS file, remove {hasCss: true} from
- * bundles.config.js. Otherwise, remove this comment.
- */
+const {getOutput} = require('../../common/process');
 
-amp-__component_name_hyphenated__ {
-  /** Component styles */
+/**
+ * @param {Array<string>} files
+ * @return {Object}
+ */
+function format(files) {
+  return getOutput(`npx prettier --ignore-unknown --write ${files.join(' ')}`);
 }
+
+module.exports = {
+  format,
+};

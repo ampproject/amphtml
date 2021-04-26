@@ -9,7 +9,7 @@
       "options": {"parser": "json5"}
     },
     {
-      "files": "build-system/tasks/make-extension/bento/amp-__component_name_hyphenated__/**",
+      "files": "build-system/tasks/make-extension/template/**",
       "options": {
         "requirePragma": true
       }
