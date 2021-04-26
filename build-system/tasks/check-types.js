@@ -35,7 +35,7 @@ const {typecheckNewServer} = require('../server/typescript-compile');
  * @type {!Array<string>}
  */
 const PRIDE_FILES_GLOBS = ['src/resolved-promise.js', 'src/types.js'];
-const CORE_EXTERNS_GLOB = ['src/core{,/**}/*.extern.js'];
+const CORE_EXTERNS_GLOB = 'src/core{,/**}/*.extern.js';
 
 /**
  * Generates a list of source file paths for extensions to type-check
