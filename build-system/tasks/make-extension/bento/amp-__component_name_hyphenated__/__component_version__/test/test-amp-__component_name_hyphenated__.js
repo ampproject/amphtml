@@ -15,6 +15,7 @@
  */
 
 import '../amp-__component_name_hyphenated__';
+import {htmlFor} from '../../../../src/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';
 
@@ -26,16 +27,21 @@ describes.realWin(
     },
   },
   (env) => {
-    let win, doc, element;
+    let win;
+    let doc;
+    let html;
 
-    beforeEach(async function () {
+    beforeEach(async () => {
       win = env.win;
       doc = win.document;
+      html = htmlFor(doc);
       toggleExperiment(win, 'bento-__component_name_hyphenated__', true, true);
     });
 
     it('example test renders', async () => {
-      element = doc.createElement('amp-__component_name_hyphenated__');
+      const element = html`
+        <amp-__component_name_hyphenated__></amp-__component_name_hyphenated__>
+      `;
       doc.body.appendChild(element);
       await waitFor(() => element.isConnected, 'element connected');
       expect(element.parentNode).to.equal(doc.body);
