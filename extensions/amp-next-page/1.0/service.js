@@ -600,7 +600,7 @@ export class NextPageService {
       const amp = this.multidocManager_.attachShadowDoc(
         shadowRoot,
         content,
-        '',
+        page.url,
         {
           visibilityState: VisibilityState.PRERENDER,
         }
