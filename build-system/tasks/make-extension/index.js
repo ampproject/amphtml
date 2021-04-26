@@ -154,6 +154,11 @@ async function makeExtensionFromTemplates(
     // actually write that out, here or in templates, without CI failing.
     // eslint-disable-next-line local/no-forbidden-terms
     '__do_not_submit__': 'DO NOT SUBMIT',
+    // A rule on OWNERS assigns all filenames starting with "/validator-*" to
+    // belong to wg-caching. We don't require this group to review these
+    // template files, so using the __validator__ placeholder helps us exclude
+    // them from ownership.
+    '__validator__': 'validator',
   };
 
   const writtenFiles = (
