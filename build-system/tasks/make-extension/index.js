@@ -269,6 +269,11 @@ async function makeExtensionFromTemplates(
   return writtenFiles;
 }
 
+/**
+ * @param {Array<string>} paths
+ * @param {function(...*):*} fn
+ * @return {Promise}
+ */
 async function affectsExistingPaths(paths, fn) {
   const stashStdout = getStdout(`git stash push --keep-index`);
 
