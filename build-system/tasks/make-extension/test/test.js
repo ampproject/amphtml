@@ -108,7 +108,7 @@ test('makeExtensionFromTemplates merges multiple templates', (t) =>
     );
 
     // Replacement keys for test-1 are placeholders and are not set by
-    // makeExtensionTemplates, so they remain in the generated files.
+    // makeExtensionFromTemplates, so they remain in the generated files.
     t.is(
       await readFile(`${dir}/x-__foo__/__bar__.txt`, 'utf-8'),
       'This file is generated with values __foo__, __bar__, __baz__.\n'
