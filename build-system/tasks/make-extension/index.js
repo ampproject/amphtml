@@ -229,36 +229,30 @@ async function makeExtensionFromTemplates(
     path.join(destinationDir, extensionBundlesJson)
   );
 
-  const blurb = [];
+  const findWrittenFilesByRegex = (regex) => {
+    const filenames = writtenFiles.filter((filename) => regex.test(filename));
+    return filenames.length < 1 ? null : filenames;
+  };
 
-  blurb.push(`========================================
-${green('FINISHED:')} Boilerplate for your new ${cyan(
-    `amp-${name}`
-  )} component has been created in ${cyan(`amphtml/extensions/amp-${name}/`)}`);
+  const blurb = [
+    `${green('FINISHED:')} Created extension ${cyan(`<amp-${name}>`)}`,
+    `Boilerplate for your new component has been created in:
+    ${cyan(`extensions/amp-${name}/`)}`,
+  ];
 
-  const unitTestFile = writtenFiles.find((filename) =>
-    filename.includes('test/test-')
-  );
-  if (unitTestFile) {
-    blurb.push(`- You can run tests on your new component with the following command:
-    ${cyan(`amp unit --files=${unitTestFile}`)}
-
-  If the component was generated successfully, the example test should pass.`);
+  const unitTestFiles = findWrittenFilesByRegex(new RegExp('test/test-'));
+  if (unitTestFiles) {
+    blurb.push(`You can run tests on your new component with the following command:
+    ${cyan(`amp unit --files="${unitTestFiles.join(',')}"`)}`);
   }
 
-  const storybookFile = writtenFiles.find((filename) =>
-    filename.includes('/storybook/')
-  );
-  if (storybookFile) {
-    blurb.push(`- You may view the component during development in storybook:
+  if (findWrittenFilesByRegex(new RegExp('/storybook/'))) {
+    blurb.push(`You may view the component during development in storybook:
     ${cyan(`amp storybook`)}`);
   }
 
-  const validatorHtmlFile = writtenFiles.find(
-    (filename) => filename.includes('/validator-') && filename.endsWith('.html')
-  );
-  if (validatorHtmlFile) {
-    blurb.push(`- You should generate accompanying validator test result files by running:
+  if (findWrittenFilesByRegex(new RegExp('/validator-(.+)\\.html$'))) {
+    blurb.push(`You should generate accompanying validator test result files by running:
     ${cyan(`amp validator --update_tests`)}`);
   }
 
