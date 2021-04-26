@@ -164,12 +164,8 @@ async function makeExtensionFromTemplates(
     )
   ).flat();
 
-  const formattable = writtenFiles
-    // Don't format .html because AMP boilerplate would expand into multiple lines.
-    .filter((filename) => !filename.endsWith('.html'));
-
-  if (formattable.length > 0) {
-    format(formattable);
+  if (writtenFiles.length > 0) {
+    format(writtenFiles);
   }
 
   log(`
