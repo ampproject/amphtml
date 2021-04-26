@@ -86,7 +86,7 @@ async function writeFromTemplateDir(
   for await (const templatePath of walkDir(templateDir)) {
     const destination = destinationPath(templatePath);
 
-    await fs.mkdirp(path.dirname(destination), {recursive: true});
+    await fs.mkdirp(path.dirname(destination));
 
     // Skip if the destination file already exists
     let fileHandle;
