@@ -217,8 +217,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     const hrefAttr = this.element.getAttribute('href');
     link.setAttribute('href', hrefAttr);
 
-    const overlayEls = htmlRefs(link);
-    const {remoteImgEl, openStringEl, urlStringEl} = overlayEls;
+    const {remoteImgEl, openStringEl, urlStringEl} = htmlRefs(link);
 
     // Set image.
     const openImgAttr = this.element.getAttribute('cta-image');
