@@ -29,7 +29,7 @@ import {createShadowRootWithStyle} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
-import {isPageAttachmentUiV2ExperimentOn} from './amp-story-open-page-attachment';
+import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 import {listen} from '../../../src/event-helper';
 import {resetStyles, setImportantStyles, toggle} from '../../../src/style';
 
@@ -171,8 +171,8 @@ export class DraggableDrawer extends AMP.BaseElement {
       }
       this.containerEl_.insertBefore(spacerEl, this.contentEl_);
       this.contentEl_.appendChild(headerShadowRootEl);
-      this.element.classList.add('amp-story-page-attachment-ui-v2');
-      this.headerEl_.classList.add('amp-story-page-attachment-ui-v2');
+      this.element.classList.add('i-amphtml-amp-story-page-attachment-ui-v2');
+      this.headerEl_.classList.add('i-amphtml-amp-story-page-attachment-ui-v2');
     } else {
       templateEl.insertBefore(headerShadowRootEl, templateEl.firstChild);
     }

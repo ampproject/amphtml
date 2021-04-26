@@ -21,7 +21,6 @@ const argv = require('minimist')(process.argv.slice(2));
 const chrome = require('selenium-webdriver/chrome');
 const fetch = require('node-fetch');
 const firefox = require('selenium-webdriver/firefox');
-const puppeteer = require('puppeteer');
 const selenium = require('selenium-webdriver');
 const {
   clearLastExpectError,
@@ -35,7 +34,6 @@ const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
 const {HOST, PORT} = require('../serve');
 const {installRepl, uninstallRepl} = require('./repl');
 const {isCiBuild} = require('../../common/ci');
-const {PuppeteerController} = require('./puppeteer-controller');
 const {Builder, Capabilities, logging} = selenium;
 
 /** Should have something in the name, otherwise nothing is shown. */
@@ -56,26 +54,9 @@ if (argv.coverage) {
 }
 
 /**
- * TODO(cvializ): Firefox now experimentally supports puppeteer.
- * When it's more mature we might want to support it.
- * {@link https://github.com/puppeteer/puppeteer/blob/main/experimental/puppeteer-firefox/README.md}
- */
-const PUPPETEER_BROWSERS = new Set(['chrome']);
-
-/**
- * Engine types for e2e testing.
- * @enum {string}
- */
-const EngineType = {
-  SELENIUM: 'selenium',
-  PUPPETEER: 'puppeteer',
-};
-
-/**
  * @typedef {{
  *  browsers: string,
  *  headless: boolean,
- *  engine: string,
  * }}
  */
 let DescribesConfigDef;
@@ -122,21 +103,6 @@ function getConfig() {
   }
 
   return describesConfig;
-}
-
-/**
- * Configure and launch a Puppeteer instance
- * @param {!PuppeteerConfigDef=} opt_config
- * @return {!Promise<puppeteer.Browser>}
- */
-async function createPuppeteer(opt_config = {}) {
-  const browser = await puppeteer.launch({
-    headless: opt_config.headless || false,
-    devtools: false,
-    defaultViewport: null,
-    timeout: 0,
-  });
-  return browser;
 }
 
 /**
@@ -462,22 +428,11 @@ function describeEnv(factory) {
      * @return {Set<string>}
      */
     function getAllowedBrowsers() {
-      const {engine, browsers} = getConfig();
+      const {browsers} = getConfig();
 
       const allowedBrowsers = browsers
         ? new Set(browsers.split(',').map((x) => x.trim()))
         : supportedBrowsers;
-
-      if (engine === EngineType.PUPPETEER) {
-        const result = intersect(allowedBrowsers, PUPPETEER_BROWSERS);
-        if (result.size === 0) {
-          const browsersList = Array.from(allowedBrowsers).join(',');
-          throw new Error(
-            `browsers ${browsersList} not supported by Puppeteer`
-          );
-        }
-        return result;
-      }
 
       if (process.platform !== 'darwin' && allowedBrowsers.has('safari')) {
         // silently skip safari tests
@@ -629,10 +584,7 @@ class EndToEndFixture {
   async setup(env, browserName, retries = 0) {
     const config = getConfig();
     const driver = getDriver(config, browserName, this.spec.deviceName);
-    const controller =
-      config.engine == EngineType.PUPPETEER
-        ? new PuppeteerController(driver)
-        : new SeleniumWebDriverController(driver);
+    const controller = new SeleniumWebDriverController(driver);
     const ampDriver = new AmpDriver(controller);
     env.controller = controller;
     env.ampDriver = ampDriver;
@@ -695,20 +647,10 @@ class EndToEndFixture {
  * @param {!DescribesConfigDef} describesConfig
  * @param {string} browserName
  * @param {string|undefined} deviceName
- * @return {!selenium.WebDriver|Promise<puppeteer.Browser>}
+ * @return {!selenium.WebDriver}
  */
-function getDriver(
-  {engine = EngineType.SELENIUM, headless = false},
-  browserName,
-  deviceName
-) {
-  if (engine == EngineType.PUPPETEER) {
-    return createPuppeteer({headless});
-  }
-
-  if (engine == EngineType.SELENIUM) {
-    return createSelenium(browserName, {headless}, deviceName);
-  }
+function getDriver({headless = false}, browserName, deviceName) {
+  return createSelenium(browserName, {headless}, deviceName);
 }
 
 /**
@@ -763,17 +705,6 @@ async function toggleExperiments(ampDriver, testUrl, experiments) {
   for (const experiment of experiments) {
     await ampDriver.toggleExperiment(experiment, true);
   }
-}
-
-/**
- * Intersection of two sets
- * @param {Set<T>} a
- * @param {Set<T>} b
- * @return {Set<T>}
- * @template T
- */
-function intersect(a, b) {
-  return new Set(Array.from(a).filter((aItem) => b.has(aItem)));
 }
 
 module.exports = {

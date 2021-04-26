@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-/** @externs */
+import {isExperimentOn} from '../../../src/experiments';
 
-// Place externs here if they are only needed in legacy multi pass compilation.
-
-var SomeBaseElementLikeClass;
-SomeBaseElementLikeClass.prototype.layout_;
-
-/** @type {boolean} */
-SomeBaseElementLikeClass.prototype.inViewport_;
-
-SomeBaseElementLikeClass.prototype.actionMap_;
-
-SomeBaseElementLikeClass.prototype.defaultActionAlias_;
-
-// Externed explicitly because this private property is read across
-// binaries.
-Element.prototype.impl_ = {};
+/**
+ * Returns true if new inline attachment UI is enabled.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export const isPageAttachmentUiV2ExperimentOn = (win) => {
+  return isExperimentOn(win, 'amp-story-page-attachment-ui-v2');
+};

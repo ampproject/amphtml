@@ -18,7 +18,7 @@ import {CommonSignals} from './core/constants/common-signals';
 import {Deferred} from './core/data-structures/promise';
 import {FIE_EMBED_PROP} from './iframe-helper';
 import {Services} from './services';
-import {Signals} from './utils/signals';
+import {Signals} from './core/data-structures/signals';
 import {VisibilityState} from './core/constants/visibility-state';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {dev, devAssert, userAssert} from './log';
@@ -124,30 +124,12 @@ export function getFieSafeScriptSrcs() {
  * @param {!Array<{extensionId: string, extensionVersion: string}>} extensions
  */
 export function preloadFriendlyIframeEmbedExtensions(win, extensions) {
-  // TODO(#33020): Use the format directly and preload with the specified
-  // version.
-  preloadFriendlyIframeEmbedExtensionIdsDeprecated(
-    win,
-    extensions.map(({extensionId}) => extensionId)
-  );
-}
-
-/**
- * @param {!Window} win
- * @param {!Array<string>} extensionIds
- * TODO(#33020): remove this method in favor `preloadFriendlyIframeEmbedExtensions`.
- * @visibleForTesting
- */
-export function preloadFriendlyIframeEmbedExtensionIdsDeprecated(
-  win,
-  extensionIds
-) {
   const extensionsService = Services.extensionsFor(win);
 
   // Load any extensions; do not wait on their promises as this
   // is just to prefetch.
-  extensionIds.forEach((extensionId) =>
-    extensionsService.preloadExtension(extensionId)
+  extensions.forEach(({extensionId, extensionVersion}) =>
+    extensionsService.preloadExtension(extensionId, extensionVersion)
   );
 }
 
@@ -180,8 +162,10 @@ export function installFriendlyIframeEmbed(
   iframe.setAttribute('marginheight', '0');
   iframe.setAttribute('marginwidth', '0');
 
+  const extensions = spec.extensions || [];
+
   // Pre-load extensions.
-  preloadFriendlyIframeEmbedExtensions(win, spec.extensions || []);
+  preloadFriendlyIframeEmbedExtensions(win, extensions);
 
   const html = spec.skipHtmlMerge ? spec.html : mergeHtml(spec);
   // Receive the signal when iframe is ready: it's document is formed.
@@ -265,7 +249,7 @@ export function installFriendlyIframeEmbed(
       embed,
       extensionsService,
       ampdoc,
-      spec.extensions,
+      extensions,
       opt_preinstallCallback
     ).then(() => {
       if (!childWin.frameElement) {
@@ -754,9 +738,6 @@ export class Installers {
     const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
     setParentWindow(childWin, parentWin);
     const getDelayPromise = getDelayPromiseProducer();
-    // TODO(#33020): remove this when we pass full extensions object
-    // to installation service
-    const extensionIds = extensions.map(({extensionId}) => extensionId);
 
     return getDelayPromise(undefined)
       .then(() => {
@@ -810,7 +791,7 @@ export class Installers {
         if (!childWin.frameElement) {
           return;
         }
-        extensionsService.preinstallEmbed(ampdoc, extensionIds);
+        extensionsService.preinstallEmbed(ampdoc, extensions);
       })
       .then(getDelayPromise)
       .then(() => {
@@ -829,7 +810,7 @@ export class Installers {
         // It's enough of initialization done to return the embed.
         const promise = extensionsService.installExtensionsInDoc(
           ampdoc,
-          extensionIds
+          extensions
         );
         ampdoc.setExtensionsKnown();
         if (opt_installComplete) {

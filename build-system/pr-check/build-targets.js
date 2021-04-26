@@ -38,6 +38,8 @@ let buildTargets;
  * Used to prevent the repeated expansion of globs during PR jobs.
  */
 let lintFiles;
+let htmlFixtureFiles;
+let invalidWhitespaceFiles;
 let presubmitFiles;
 let prettifyFiles;
 
@@ -53,7 +55,9 @@ const Targets = {
   DEV_DASHBOARD: 'DEV_DASHBOARD',
   DOCS: 'DOCS',
   E2E_TEST: 'E2E_TEST',
+  HTML_FIXTURES: 'HTML_FIXTURES',
   INTEGRATION_TEST: 'INTEGRATION_TEST',
+  INVALID_WHITESPACES: 'INVALID_WHITESPACES',
   LINT: 'LINT',
   OWNERS: 'OWNERS',
   PACKAGE_UPGRADE: 'PACKAGE_UPGRADE',
@@ -187,6 +191,13 @@ const targetMatchers = {
       })
     );
   },
+  [Targets.HTML_FIXTURES]: (file) => {
+    return (
+      htmlFixtureFiles.includes(file) ||
+      file == 'build-system/tasks/validate-html-fixtures.js' ||
+      file.startsWith('build-system/test-configs')
+    );
+  },
   [Targets.INTEGRATION_TEST]: (file) => {
     if (isOwnersFile(file)) {
       return false;
@@ -198,6 +209,13 @@ const targetMatchers = {
       config.integrationTestPaths.some((pattern) => {
         return minimatch(file, pattern);
       })
+    );
+  },
+  [Targets.INVALID_WHITESPACES]: (file) => {
+    return (
+      invalidWhitespaceFiles.includes(file) ||
+      file == 'build-system/tasks/check-invalid-whitespaces.js' ||
+      file.startsWith('build-system/test-configs')
     );
   },
   [Targets.LINT]: (file) => {
@@ -312,6 +330,8 @@ function determineBuildTargets() {
   }
   buildTargets = new Set();
   lintFiles = globby.sync(config.lintGlobs);
+  htmlFixtureFiles = globby.sync(config.htmlFixtureGlobs);
+  invalidWhitespaceFiles = globby.sync(config.invalidWhitespaceGlobs);
   presubmitFiles = globby.sync(config.presubmitGlobs);
   prettifyFiles = globby.sync(config.prettifyGlobs);
   const filesChanged = gitDiffNameOnlyMain();

@@ -17,7 +17,7 @@
 import * as Preact from './index';
 import {ActionTrust} from '../core/constants/action-constants';
 import {AmpEvents} from '../core/constants/amp-events';
-import {CanPlay, CanRender, LoadingProp} from '../core/contextprops';
+import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
 import {Deferred} from '../core/data-structures/promise';
 import {Layout, isLayoutSizeDefined} from '../layout';
 import {Loading} from '../core/loading-instructions';
@@ -43,7 +43,7 @@ import {
 import {dashToCamelCase} from '../core/types/string';
 import {devAssert} from '../log';
 import {dict, hasOwn, map} from '../core/types/object';
-import {getDate} from '../utils/date';
+import {getDate} from '../core/types/date';
 import {getMode} from '../mode';
 import {hydrate, render} from './index';
 import {installShadowStyle} from '../shadow-embed';
