@@ -122,11 +122,7 @@ async function writeFromTemplateDir(
  *   bento: (boolean|undefined),
  *   name: (string|undefined),
  * }} options
- * @return {Promise<{
- *   name: string,
- *   version: string,
- *   options: ({hasCss: boolean}|undefined)
- * }|void>}
+ * @return {Promise<boolean>}
  */
 async function makeExtensionFromTemplates(
   templateDirs,
@@ -137,7 +133,7 @@ async function makeExtensionFromTemplates(
   const name = (options.name || '').replace(/^amp-/, '');
   if (!name) {
     log(red('ERROR:'), 'Must specify component name with', cyan('--name'));
-    return;
+    return false;
   }
 
   const replacements = {
@@ -172,8 +168,15 @@ async function makeExtensionFromTemplates(
     format(writtenFiles);
   }
 
-  log(`
-========================================
+  insertExtensionBundlesConfig({
+    name: `amp-${name}`,
+    version,
+    options: {hasCss: true},
+  });
+
+  const blurb = [];
+
+  blurb.push(`========================================
 ${green('FINISHED:')} Boilerplate for your new ${cyan(
     `amp-${name}`
   )} component has been created in ${cyan(`amphtml/extensions/amp-${name}/`)}`);
@@ -182,8 +185,7 @@ ${green('FINISHED:')} Boilerplate for your new ${cyan(
     filename.includes('test/test-')
   );
   if (unitTestFile) {
-    log(`
-You can run tests on your new component with the following command:
+    blurb.push(`You can run tests on your new component with the following command:
     ${cyan(`amp unit --files=${unitTestFile}`)}
 
 If the component was generated successfully, the example test should pass.`);
@@ -193,8 +195,7 @@ If the component was generated successfully, the example test should pass.`);
     filename.includes('/storybook/')
   );
   if (storybookFile) {
-    log(`
-You may also view the component during development in storybook:
+    blurb.push(`You may also view the component during development in storybook:
     ${cyan(`amp storybook`)}`);
   }
 
@@ -202,24 +203,20 @@ You may also view the component during development in storybook:
     (filename) => filename.includes('/validator-') && filename.endsWith('.html')
   );
   if (validatorHtmlFile) {
-    log(`
-You should generate accompanying validator test result files by running:
+    blurb.push(`You should generate accompanying validator test result files by running:
     ${cyan(`amp validator --update_tests`)}`);
   }
 
-  // Return the resulting extension bundle config.
-  return {
-    name: `amp-${name}`,
-    version,
-    options: {hasCss: true},
-  };
+  log(`${blurb.join('\n\n')}\n`);
+
+  return true;
 }
 
 /**
  * @return {Promise<void>}
  */
 async function makeExtension() {
-  const bundleConfig = await (argv.bento
+  const created = await (argv.bento
     ? makeExtensionFromTemplates([
         getTemplateDir('shared'),
         getTemplateDir('bento'),
@@ -228,11 +225,10 @@ async function makeExtension() {
         getTemplateDir('shared'),
         getTemplateDir('classic'),
       ]));
-  if (!bundleConfig) {
+  if (!created) {
     log(yellow('WARNING:'), 'Could not write extension files.');
     return;
   }
-  insertExtensionBundlesConfig(bundleConfig);
 }
 
 module.exports = {
