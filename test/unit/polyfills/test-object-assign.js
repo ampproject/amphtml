@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {assign} from '../../src/polyfills/object-assign';
+import {assign} from '../src/polyfills/object-assign';
 
-describe('Object.assign', () => {
+describes.sandboxed('Object.assign', {}, () => {
   it('should throw an error if target is null or undefined', () => {
     expect(() => assign(null, {a: 1})).to.throw(
       /Cannot convert undefined or null to object/

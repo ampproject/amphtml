@@ -428,7 +428,7 @@ exports.rules = [
     mustNotDependOn: 'src/base-element.js',
   },
   {
-    filesMatching: 'src/polyfills/**/*.js',
+    filesMatching: 'src/polyfills/*.js',
     mustNotDependOn: '**/*.js',
     allowlist: [
       'src/polyfills/fetch.js->src/log.js',
@@ -436,24 +436,24 @@ exports.rules = [
       'src/polyfills/fetch.js->src/core/types/index.js',
       'src/polyfills/fetch.js->src/core/types/object.js',
       'src/polyfills/fetch.js->src/utils/bytes.js',
-      'src/polyfills/intersection-observer.js->src/polyfillstub/intersection-observer-stub.js',
-      'src/polyfills/resize-observer.js->src/polyfillstub/resize-observer-stub.js',
+      'src/polyfills/intersection-observer.js->src/polyfills/stubs/intersection-observer-stub.js',
+      'src/polyfills/resize-observer.js->src/polyfills/stubs/resize-observer-stub.js',
       'src/polyfills/custom-elements.js->src/resolved-promise.js',
     ],
   },
   {
-    filesMatching: 'src/polyfillstub/**/*.js',
+    filesMatching: 'src/polyfills/stubs/**/*.js',
     mustNotDependOn: '**/*.js',
     allowlist: [
-      'src/polyfillstub/intersection-observer-stub.js->src/services.js',
-      'src/polyfillstub/intersection-observer-stub.js->src/resolved-promise.js',
-      'src/polyfillstub/resize-observer-stub.js->src/services.js',
-      'src/polyfillstub/resize-observer-stub.js->src/resolved-promise.js',
+      'src/polyfills/stubs/intersection-observer-stub.js->src/services.js',
+      'src/polyfills/stubs/intersection-observer-stub.js->src/resolved-promise.js',
+      'src/polyfills/stubs/resize-observer-stub.js->src/services.js',
+      'src/polyfills/stubs/resize-observer-stub.js->src/resolved-promise.js',
     ],
   },
   {
     filesMatching: '**/*.js',
-    mustNotDependOn: 'src/polyfills/**/*.js',
+    mustNotDependOn: 'src/polyfills/*.js',
     allowlist: [
       // DO NOT add extensions/ files
       '3p/polyfills.js->src/polyfills/math-sign.js',

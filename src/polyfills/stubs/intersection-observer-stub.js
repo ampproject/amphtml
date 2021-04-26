@@ -23,7 +23,7 @@
  * amp-intersection-observer-polyfill extension.
  */
 
-import {Services} from '../services';
+import {Services} from '../../services';
 
 const UPGRADERS = '_upgraders';
 const NATIVE = '_native';

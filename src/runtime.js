@@ -40,8 +40,8 @@ import {
 import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {reportErrorForWin} from './error-reporting';
-import {scheduleUpgradeIfNeeded as scheduleInObUpgradeIfNeeded} from './polyfillstub/intersection-observer-stub';
-import {scheduleUpgradeIfNeeded as scheduleResObUpgradeIfNeeded} from './polyfillstub/resize-observer-stub';
+import {scheduleUpgradeIfNeeded as scheduleInObUpgradeIfNeeded} from './polyfills/stubs/intersection-observer-stub';
+import {scheduleUpgradeIfNeeded as scheduleResObUpgradeIfNeeded} from './polyfills/stubs/resize-observer-stub';
 import {setStyle} from './style';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
