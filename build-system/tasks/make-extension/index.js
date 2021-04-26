@@ -288,8 +288,10 @@ const TEMPLATES_CLASSIC = [getTemplateDir('shared'), getTemplateDir('bento')];
  *
  * @return {!Promise}
  */
-function runMakeExtensionTests() {
-  return affectsExistingPaths([extensionBundlesJson], async () => {
+async function runMakeExtensionTests() {
+  let error;
+
+  await affectsExistingPaths([extensionBundlesJson], async () => {
     const name = 'amp-generated-for-test';
 
     const writtenFiles = [
@@ -309,11 +311,20 @@ function runMakeExtensionTests() {
       `amp unit --nohelp --headless --files="extensions/${name}/**/test/test-*.js"`,
     ]) {
       log(cyan(command));
-      execOrThrow(command);
+      try {
+        execOrThrow(command);
+      } catch (e) {
+        error = e;
+        break;
+      }
     }
 
     await del([...writtenFiles, `extensions/${name}/**`]);
   });
+
+  if (error) {
+    throw error;
+  }
 }
 
 /**
