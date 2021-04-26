@@ -59,7 +59,7 @@ amp-story:not([desktop]) .i-amphtml-story-button-container {
   pointer-events: none !important;
 }
 
-/* A11y pagination element. Hidden on mobile unless navigating with keyboard. Focusable by screen readers. */
+/* A11y pagination element. Focusable by screen readers. Visibly Hidden on mobile unless navigating with keyboard. */
 amp-story:not([desktop]) .i-amphtml-story-button-move,
 [dir=rtl] amp-story:not([desktop]) .i-amphtml-story-button-move {
   width: 100% !important;
