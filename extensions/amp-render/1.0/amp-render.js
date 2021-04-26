@@ -186,7 +186,8 @@ export class AmpRender extends BaseElement {
     const isSrcMutated = mutations.some(
       (mutation) => mutation.attributeName === 'src'
     );
-    if (isSrcMutated) {
+    const src = this.element.getAttribute('src');
+    if (isSrcMutated && !isAmpStateSrc(src) && !isAmpScriptUri(src)) {
       this.mutateProps(dict({'getJson': this.getFetchJsonFn()}));
     }
   }
