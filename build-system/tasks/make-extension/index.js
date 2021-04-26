@@ -279,6 +279,9 @@ async function affectsExistingPaths(paths, fn) {
   }
 }
 
+const TEMPLATES_BENTO = [getTemplateDir('shared'), getTemplateDir('bento')];
+const TEMPLATES_CLASSIC = [getTemplateDir('shared'), getTemplateDir('bento')];
+
 /**
  * Generates and tests an extension.
  * (Unit tests for the generator are located in test/test.js)
@@ -290,23 +293,15 @@ function runMakeExtensionTests() {
     const name = 'amp-generated-for-test';
 
     const writtenFiles = [
-      ...(await makeExtensionFromTemplates(
-        [getTemplateDir('shared'), getTemplateDir('classic')],
-        '.',
-        {
-          name,
-          version: '0.1',
-        }
-      )),
-      ...(await makeExtensionFromTemplates(
-        [getTemplateDir('shared'), getTemplateDir('bento')],
-        '.',
-        {
-          name,
-          version: '1.0',
-          bento: true,
-        }
-      )),
+      ...(await makeExtensionFromTemplates(TEMPLATES_CLASSIC, '.', {
+        name,
+        version: '0.1',
+      })),
+      ...(await makeExtensionFromTemplates(TEMPLATES_BENTO, '.', {
+        name,
+        version: '1.0',
+        bento: true,
+      })),
     ];
 
     for (const command of [
@@ -326,14 +321,8 @@ function runMakeExtensionTests() {
  */
 async function makeExtension() {
   const created = await (argv.bento
-    ? makeExtensionFromTemplates([
-        getTemplateDir('shared'),
-        getTemplateDir('bento'),
-      ])
-    : makeExtensionFromTemplates([
-        getTemplateDir('shared'),
-        getTemplateDir('classic'),
-      ]));
+    ? makeExtensionFromTemplates(TEMPLATES_BENTO)
+    : makeExtensionFromTemplates(TEMPLATES_CLASSIC));
   if (!created) {
     log(yellow('WARNING:'), 'Could not write extension files.');
     return;
