@@ -9,7 +9,7 @@
     "pageview": {
       "on": "visible",
       "request": "loadamptrkhtml",
-      "iframePing":true
+      "iframePing": true
     }
   },
   "transport": {
