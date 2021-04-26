@@ -30,6 +30,9 @@ export function myfinance(global, data) {
     data['mf_referrer'] =
       global.context.canonicalUrl || global.context.sourceUrl;
   }
+  if (!data['ampClientId']) {
+    data['ampClientId'] = global.context.clientId;
+  }
   const url = buildUrl(data);
   global.MF_AMP_DATA = data;
   writeScript(global, url);
