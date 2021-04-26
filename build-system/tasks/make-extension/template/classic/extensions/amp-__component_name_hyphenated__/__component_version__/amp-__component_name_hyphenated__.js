@@ -22,6 +22,7 @@ const TAG = 'amp-__component_name_hyphenated__';
 export class Amp__component_name_pascalcase__ extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
+    // __do_not_submit__: This is example code only.
     super(element);
 
     /** @private {string} */
