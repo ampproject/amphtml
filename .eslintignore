@@ -31,7 +31,7 @@ validator/export
 build-system/babel-plugins/**/fixtures/**/*.js
 build-system/babel-plugins/**/fixtures/**/*.mjs
 build-system/server/app-index/test/*.js
-build-system/tasks/make-extension/bento/amp-__component_name_hyphenated__/**/*
+build-system/tasks/make-extension/template/**/*
 build-system/tasks/visual-diff/snippets/*.js
 extensions/amp-a4a/0.1/test/testdata/**
 src/purifier/noop.js
