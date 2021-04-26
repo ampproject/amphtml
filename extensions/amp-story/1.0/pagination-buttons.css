@@ -59,7 +59,7 @@ amp-story:not([desktop]) .i-amphtml-story-button-container {
   pointer-events: none !important;
 }
 
-/* Navigation button element. Hidden on mobile unless navigating with keyboard. Focusable by screen readers. */
+/* A11y pagination element. Hidden on mobile unless navigating with keyboard. Focusable by screen readers. */
 amp-story:not([desktop]) .i-amphtml-story-button-move,
 [dir=rtl] amp-story:not([desktop]) .i-amphtml-story-button-move {
   border: none !important;
@@ -71,6 +71,8 @@ amp-story:not([desktop]) .i-amphtml-story-button-move,
   width: 100% !important;
   height: 100% !important;
   background-color: transparent !important;
+  /* Contrast protection. */
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, .5)) !important;
 }
 
 body:not(.amp-mode-keyboard-active) amp-story:not([desktop]) .i-amphtml-story-button-move {
