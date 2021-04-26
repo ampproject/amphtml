@@ -125,11 +125,14 @@ async function writeFromTemplateDir(
  * }} bundle
  * @param {string=} destination
  */
-function insertExtensionBundlesConfig(
+async function insertExtensionBundlesConfig(
   bundle,
   destination = extensionBundlesJson
 ) {
-  const extensionBundles = fs.readJsonSync(destination);
+  let extensionBundles = [];
+  try {
+    extensionBundles = await fs.readJson(destination, {throws: false});
+  } catch (_) {}
 
   const existingOrNull = extensionBundles.find(
     ({name}) => name === bundle.name
@@ -143,7 +146,9 @@ function insertExtensionBundlesConfig(
       bundle.version,
   });
 
-  fs.writeJsonSync(
+  await fs.mkdirp(path.dirname(destination));
+
+  await fs.writeJson(
     destination,
     extensionBundles.sort((a, b) => {
       if (!a.name) {
@@ -215,7 +220,7 @@ async function makeExtensionFromTemplates(
     format(writtenFiles);
   }
 
-  insertExtensionBundlesConfig(
+  await insertExtensionBundlesConfig(
     {
       name: `amp-${name}`,
       version,
