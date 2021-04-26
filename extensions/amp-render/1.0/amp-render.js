@@ -103,6 +103,8 @@ export class AmpRender extends BaseElement {
     const src = this.element.getAttribute('src');
     // Require opt-in for URL variable replacements on CORS fetches triggered
     // by [src] mutation. @see spec/amp-var-substitutions.md
+    // TODO(dmanek): Update spec/amp-var-substitutions.md with this information
+    // and add a `Substitution` sections in this component's markdown file.
     let policy = UrlReplacementPolicy.OPT_IN;
     if (
       src == this.initialSrc_ ||
@@ -177,6 +179,16 @@ export class AmpRender extends BaseElement {
     return dict({
       'getJson': this.getFetchJsonFn(),
     });
+  }
+
+  /** @override */
+  mutationObserverCallback(mutations) {
+    const isSrcMutated = mutations.some(
+      (mutation) => mutation.attributeName === 'src'
+    );
+    if (isSrcMutated) {
+      this.mutateProps(dict({'getJson': this.getFetchJsonFn()}));
+    }
   }
 
   /**
