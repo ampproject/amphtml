@@ -310,6 +310,7 @@ const adConfig = jsonConfiguration({
   },
   'amplified': {
     preconnect: 'https://srv.clickfuse.com',
+    renderStartImplemented: true,
   },
   'aniview': {
     renderStartImplemented: true,

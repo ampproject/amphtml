@@ -22,23 +22,46 @@ import {validateData, writeScript} from '../../3p/3p';
  */
 export function amplified(global, data) {
   validateData(data, ['amplified_id']);
+  observeAmplified(global);
 
-  // const {document} = global;
   const adUnitId = data['amplified_id'];
   const params = data['amplified_params'];
 
   global.adUnitId = adUnitId;
   global.params = JSON.parse(params);
 
+  setAmplifiedParams(global);
+  createAmplifiedContainer(global);
+  buildAmplifiedQuery(global);
+
+  writeScript(
+    global,
+    'http://srv.clickfuse.local/ads/ampsrv.php?' + global.queryString
+  );
+
+  global.context.observeIntersection((changes) => {
+    console.warn('Intersection was observed:', changes);
+  });
+}
+
+/**
+ * Creates the container where the amplified script will inject the creative.
+ * @param {!Window} global
+ */
+function createAmplifiedContainer(global) {
   const container = global.document.getElementById('c');
   const ad = global.document.createElement('div');
 
   ad.setAttribute('id', 'amplified_' + adUnitId);
 
   container.appendChild(ad);
+}
 
-  //writeScript(global, 'https://srv.clickfuse.com/ads/ads.js');
-
+/**
+ * Sets the value of global.adParams.
+ * @param {!Window} global
+ */
+function setAmplifiedParams(global) {
   const adParams = {
     id: adUnitId,
     song: global.params.song ? global.params.song : '',
@@ -52,41 +75,48 @@ export function amplified(global, data) {
     t: Date.now(),
   };
   global.adParams = adParams;
-
-  global.queryString = new URLSearchParams(global.adParams).toString();
-
-  writeScript(
-    global,
-    'http://srv.clickfuse.local/ads/ampsrv.php?' + global.queryString
-  );
 }
 
-// function runScripts(container) {
-//   const cont = document.getElementById(container);
-//   const scripts = cont.getElementsByTagName('script');
+/**
+ * Sets the value of global.queryString.
+ * @param {!Window} global
+ */
+function buildAmplifiedQuery(global) {
+  global.queryString = new URLSearchParams(global.adParams).toString();
+}
 
-//   // scripts.forEach((script) => {
-//   //   const newScript = document.createElement('script');
-//   //   newScript.text = script.innerText;
-//   //   document.body.appendChild(newScript);
-//   // });
-//   for (const script of scripts) {
-//     const newScript = document.createElement('script');
-//     newScript.text = script.innerText;
-//     document.body.appendChild(newScript);
-//   }
-// }
+/**
+ * Enable the amplified utils necessary for creatives.
+ * @param {!Window} global
+ */
+function enableAmplifiedUtils(global) {
+  const ampS = global.document.getElementById('amplified-script');
+  const s = global.document.createElement('script');
+  s.textContent = ampS.textContent;
+  global.document.body.append(s);
+}
 
-// function observeMutations() {
-//   const container = document.getElementById('c');
-//   const config = {childList: true, subtree: true};
-//   const callback = function (mutationsList, observer) {
-//     console.warn(mutationsList);
-//     mutationsList.forEach((mutation) => {
-//       runScripts(mutation.target.id);
-//     });
-//     observer.disconnect();
-//   };
-//   const observer = new MutationObserver(callback);
-//   observer.observe(container, config);
-// }
+/**
+ * Watch for the js utils script to be available.
+ * @param {!Window} global
+ */
+function observeAmplified(global) {
+  const observer = new MutationObserver((mutations, observer) => {
+    mutations.forEach((mutation) => {
+      if (!mutation.addedNodes) {
+        return;
+      }
+      for (let i = 0; i < mutation.addedNodes.length; i++) {
+        const node = mutation.addedNodes[i];
+        if (
+          node.id === 'amplified-script' ||
+          node.id === 'disconnect-amplified'
+        ) {
+          enableAmplifiedUtils(global);
+          observer.disconnect();
+        }
+      }
+    });
+  });
+  observer.observe(global.document.body, {childList: true, subtree: true});
+}
