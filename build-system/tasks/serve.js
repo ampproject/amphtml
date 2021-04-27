@@ -39,7 +39,6 @@ const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green, red} = require('kleur/colors');
 const {logServeMode, setServeMode} = require('../server/app-utils');
 const {log} = require('../common/logging');
-const {shutdownCache} = require('../server/routes/test-cache');
 const {watchDebounceDelay} = require('./helpers');
 const {watch} = require('chokidar');
 
@@ -162,7 +161,6 @@ function resetServerFiles() {
 async function stopServer() {
   if (url) {
     connect.serverClose();
-    shutdownCache();
     log(green('Stopped server at'), cyan(url));
     url = null;
   }

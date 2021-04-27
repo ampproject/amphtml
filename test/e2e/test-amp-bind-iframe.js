@@ -32,7 +32,8 @@ describes.endtoend(
         const ampIframe = await controller.findElement('#ampIframe');
         const iframe = await controller.findElement('#ampIframe iframe');
 
-        const newSrc = 'https://giphy.com/embed/DKG1OhBUmxL4Q';
+        const newSrc =
+          'https://test.cache/test-cache/https://giphy.com/embed/DKG1OhBUmxL4Q';
         await expect(
           controller.getElementAttribute(ampIframe, 'src')
         ).to.not.contain(newSrc);
