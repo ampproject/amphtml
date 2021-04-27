@@ -23,12 +23,11 @@ import {
 } from '../../../amp-accordion/1.0/component';
 import {VideoWrapper} from '../video-wrapper';
 import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 
 export default {
   title: 'Video Wrapper',
   component: VideoWrapper,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 const VideoTagPlayer = ({i}) => {

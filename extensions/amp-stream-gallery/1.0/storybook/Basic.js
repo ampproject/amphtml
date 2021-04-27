@@ -17,14 +17,13 @@
 import * as Preact from '../../../../src/preact';
 import {StreamGallery} from '../stream-gallery';
 import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 
 const CONTROLS = ['auto', 'always', 'never'];
 
 export default {
   title: 'StreamGallery',
   component: StreamGallery,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 /**
