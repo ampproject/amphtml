@@ -67,6 +67,7 @@ const AMP_EMBED_ALLOWED = {
   pubexchange: true,
   pulse: true,
   rbinfox: true,
+  rcmwidget: true,
   readmo: true,
   recreativ: true,
   runative: true,

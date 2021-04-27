@@ -424,6 +424,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Rakuten Unified Ads](../../ads/vendors/rakutenunifiedads.md)
 -   [Rambler&Co](../../ads/vendors/capirs.md)
 -   [RbInfoxSg](../../ads/vendors/rbinfox.md)
+-   [Rcmwidget](../../ads/vendors/rcmwidget.md)
 -   [Realclick](../../ads/vendors/realclick.md)
 -   [recomAD](../../ads/vendors/recomad.md)
 -   [recreativ](../../ads/vendors/recreativ.md)

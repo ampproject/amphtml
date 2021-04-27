@@ -986,6 +986,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'rcmwidget': {
+    prefetch: 'https://rcmjs.rambler.ru/static/rcmw/rcmw-amp.js',
+    renderStartImplemented: true,
+  },
+
   'readmo': {
     renderStartImplemented: true,
   },
