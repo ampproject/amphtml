@@ -393,9 +393,10 @@ async function finishBundle(
     );
     endBuildStep(logPrefix, `${destFilename} → ${latestName}`, startTime);
   } else {
-    const loggingName = destFilename.startsWith('component-')
-      ? `${options.name} → ${destFilename}`
-      : destFilename;
+    const loggingName =
+      options.npm && !destFilename.startsWith('amp-')
+        ? `${options.name} → ${destFilename}`
+        : destFilename;
     endBuildStep(logPrefix, loggingName, startTime);
   }
 
