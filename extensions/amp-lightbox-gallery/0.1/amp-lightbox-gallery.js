@@ -274,11 +274,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   cloneLightboxableElement_(element) {
-    const fallback = element.getFallback();
-    const shouldCloneFallback =
-      element.classList.contains('amp-notsupported') && !!fallback;
-    if (shouldCloneFallback) {
-      element = fallback;
+    if (element.classList.contains('amp-notsupported')) {
+      const fallback = element.getFallback();
+      if (!!fallback) {
+        element = fallback;
+      }
     }
     const deepClone = !element.classList.contains('i-amphtml-element');
     const clonedNode = element.cloneNode(deepClone);
