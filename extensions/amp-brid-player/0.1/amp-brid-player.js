@@ -42,6 +42,7 @@ import {getData, listen} from '../../../src/event-helper';
 import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {propagateAttributes} from '../../../src/core/dom/propagateAttributes';
 
 const TAG = 'amp-brid-player';
 
@@ -249,7 +250,7 @@ class AmpBridPlayer extends AMP.BaseElement {
         </amp-img>
       </amp-img>`;
 
-    this.propagateAttributes(['aria-label'], placeholder);
+    propagateAttributes(['aria-label'], this.element, placeholder);
     this.applyFillContent(placeholder);
 
     placeholder.setAttribute(

@@ -46,6 +46,7 @@ import {
   observeContentSize,
   unobserveContentSize,
 } from '../../../src/utils/size-observer';
+import {propagateAttributes} from '../../../src/core/dom/propagateAttributes';
 import {setStyles} from '../../../src/style';
 import {srcsetFromElement} from '../../../src/srcset';
 
@@ -321,7 +322,7 @@ export class AmpImageViewer extends AMP.BaseElement {
       st.toggle(ampImg, false);
       this.element.appendChild(this.image_);
       return ampImg.getImpl().then((ampImg) => {
-        ampImg.propagateAttributes(ARIA_ATTRIBUTES, this.image_);
+        propagateAttributes(ARIA_ATTRIBUTES, ampImg, this.image_);
       });
     });
   }

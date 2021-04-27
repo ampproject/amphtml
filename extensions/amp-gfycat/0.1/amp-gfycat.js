@@ -26,6 +26,7 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {propagateAttributes} from '../../../src/core/dom/propagateAttributes';
 
 const TAG = 'amp-gfycat';
 
@@ -89,7 +90,7 @@ class AmpGfycat extends AMP.BaseElement {
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('amp-img');
     const videoid = dev().assertString(this.videoid_);
-    this.propagateAttributes(['alt', 'aria-label'], placeholder);
+    propagateAttributes(['alt', 'aria-label'], this.element, placeholder);
     placeholder.setAttribute(
       'src',
       'https://thumbs.gfycat.com/' + encodeURIComponent(videoid) + '-poster.jpg'

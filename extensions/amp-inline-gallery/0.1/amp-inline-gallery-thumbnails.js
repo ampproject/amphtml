@@ -21,6 +21,7 @@ import {dict} from '../../../src/core/types/object';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {matches, scopedQuerySelector} from '../../../src/dom';
+import {propagateAttributes} from '../../../src/core/dom/propagateAttributes';
 import {setStyle} from '../../../src/style';
 
 /**
@@ -246,7 +247,7 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
 
     // We create with loop defaulting to false above, and allow it to be
     // overwriten.
-    this.propagateAttributes(['loop'], this.carousel_);
+    propagateAttributes(['loop'], this.element, this.carousel_);
     this.element.appendChild(this.carousel_);
   }
 }

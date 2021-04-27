@@ -42,6 +42,7 @@ import {getMode} from '../../../src/mode';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {once} from '../../../src/core/types/function';
+import {propagateAttributes} from '../../../src/core/dom/propagateAttributes';
 
 const JWPLAYER_EVENTS = {
   'ready': VideoEvents.LOAD,
@@ -349,7 +350,7 @@ class AmpJWPlayer extends AMP.BaseElement {
       return;
     }
     const placeholder = this.win.document.createElement('amp-img');
-    this.propagateAttributes(['aria-label'], placeholder);
+    propagateAttributes(['aria-label'], this.element, placeholder);
     placeholder.setAttribute(
       'src',
       'https://content.jwplatform.com/thumbs/' +

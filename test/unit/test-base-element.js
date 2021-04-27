@@ -22,6 +22,7 @@ import {Services} from '../../src/services';
 import {createAmpElementForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {listenOncePromise} from '../../src/event-helper';
+import {propagateAttributes} from '../../src/core/dom/propagateAttributes';
 
 describes.realWin('BaseElement', {amp: true}, (env) => {
   let win, doc;
@@ -54,10 +55,10 @@ describes.realWin('BaseElement', {amp: true}, (env) => {
     const target = doc.createElement('div');
     expect(target.hasAttributes()).to.be.false;
 
-    element.propagateAttributes(['data-test1'], target);
+    propagateAttributes(['data-test1'], element, target);
     expect(target.hasAttributes()).to.be.false;
 
-    element.propagateAttributes(['data-test2', 'data-test3'], target);
+    propagateAttributes(['data-test2', 'data-test3'], element, target);
     expect(target.hasAttributes()).to.be.false;
   });
 
@@ -69,14 +70,14 @@ describes.realWin('BaseElement', {amp: true}, (env) => {
     customElement.setAttribute('data-test2', 'xyz');
     customElement.setAttribute('data-test3', '123');
 
-    element.propagateAttributes('data-test1', target);
+    propagateAttributes('data-test1', element, target);
     expect(target.hasAttributes()).to.be.true;
 
     expect(target.getAttribute('data-test1')).to.equal('abc');
     expect(target.getAttribute('data-test2')).to.be.null;
     expect(target.getAttribute('data-test3')).to.be.null;
 
-    element.propagateAttributes(['data-test2', 'data-test3'], target);
+    propagateAttributes(['data-test2', 'data-test3'], element, target);
     expect(target.getAttribute('data-test2')).to.equal('xyz');
     expect(target.getAttribute('data-test3')).to.equal('123');
   });
