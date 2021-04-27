@@ -21,7 +21,7 @@ import {dict} from '../../../src/core/types/object';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {matches, scopedQuerySelector} from '../../../src/dom';
-import {propagateAttributes} from '../../../src/core/dom/propagateAttributes';
+import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {setStyle} from '../../../src/style';
 
 /**

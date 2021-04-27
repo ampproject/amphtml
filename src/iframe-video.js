@@ -20,7 +20,7 @@ import {dispatchCustomEvent} from './dom';
 import {htmlFor} from './static-template';
 import {isArray, isObject} from './core/types';
 
-import {propagateAttributes} from './core/dom/propagateAttributes';
+import {propagateAttributes} from './core/dom/propagate-attributes';
 import {tryParseJson} from './json';
 
 /** @enum {string} */

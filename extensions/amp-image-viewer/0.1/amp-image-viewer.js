@@ -46,7 +46,7 @@ import {
   observeContentSize,
   unobserveContentSize,
 } from '../../../src/utils/size-observer';
-import {propagateAttributes} from '../../../src/core/dom/propagateAttributes';
+import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {setStyles} from '../../../src/style';
 import {srcsetFromElement} from '../../../src/srcset';
 

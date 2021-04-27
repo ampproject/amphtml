@@ -22,7 +22,7 @@ import {Services} from '../../src/services';
 import {createAmpElementForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {listenOncePromise} from '../../src/event-helper';
-import {propagateAttributes} from '../../src/core/dom/propagateAttributes';
+import {propagateAttributes} from '../../src/core/dom/propagate-attributes';
 
 describes.realWin('BaseElement', {amp: true}, (env) => {
   let win, doc;

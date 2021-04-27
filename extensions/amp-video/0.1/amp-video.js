@@ -41,7 +41,7 @@ import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen, listenOncePromise} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
-import {propagateAttributes} from '../../../src/core/dom/propagateAttributes';
+import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {
   propagateObjectFitStyles,
   setImportantStyles,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isArray} from '../types';
+import {arrayOrSingleItemToArray} from '../types/array';
 
 /**
  * Utility method that propagates attributes from a source element
@@ -25,7 +25,6 @@ import {isArray} from '../types';
  * @param {!Element} sourceElement
  * @param {!Element} updateElement
  * @param {boolean=} opt_removeMissingAttrs
- * @public @final
  */
 export function propagateAttributes(
   attributes,
@@ -33,7 +32,7 @@ export function propagateAttributes(
   updateElement,
   opt_removeMissingAttrs
 ) {
-  attributes = isArray(attributes) ? attributes : [attributes];
+  attributes = arrayOrSingleItemToArray(attributes);
   for (let i = 0; i < attributes.length; i++) {
     const attr = attributes[i];
     const val = sourceElement.getAttribute(attr);

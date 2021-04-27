@@ -31,7 +31,7 @@ import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {dev, userAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {propagateAttributes} from '../../../src/core/dom/propagateAttributes';
+import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {removeElement} from '../../../src/dom';
 
 export const TAG = 'amp-google-document-embed';
