@@ -212,7 +212,6 @@ export class NextPageService {
     insertAtStart(this.host_, this.recBox_);
 
     this.history_ = Services.historyForDoc(this.ampdoc_);
-    this.initializeHistory();
 
     this.navigation_ = Services.navigationForDoc(this.ampdoc_);
 
@@ -489,15 +488,6 @@ export class NextPageService {
       }),
       /** enableDataVars */ false
     );
-  }
-
-  /**
-   * Adds an initial entry in history that sub-pages can
-   * replace when they become visible
-   */
-  initializeHistory() {
-    const {title, url} = this.hostPage_;
-    this.history_.push(undefined /** opt_onPop */, {title, url});
   }
 
   /**
