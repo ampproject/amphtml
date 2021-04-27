@@ -17,5 +17,6 @@
   "amp-consent-granular-consent": 1,
   "amp-cid-backup": 1,
   "3p-vendor-split": 0.1,
-  "story-ad-placements": 0.01
+  "story-ad-placements": 0.01,
+  "auto-ads-no-insertion-above": 0.2
 }
