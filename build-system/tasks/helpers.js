@@ -393,7 +393,11 @@ async function finishBundle(
     );
     endBuildStep(logPrefix, `${destFilename} → ${latestName}`, startTime);
   } else {
-    endBuildStep(logPrefix, destFilename, startTime);
+    const loggingName =
+      options.npm && !destFilename.startsWith('amp-')
+        ? `${options.name} → ${destFilename}`
+        : destFilename;
+    endBuildStep(logPrefix, loggingName, startTime);
   }
 
   const targets = options.minify ? MINIFIED_TARGETS : UNMINIFIED_TARGETS;
