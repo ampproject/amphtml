@@ -36,10 +36,12 @@ const test = (name, cb) =>
   ava(name, (t) =>
     // Disable logging since it clutters the test output.
     stubModule('../../../common/logging', 'log', () =>
-      // Disable prettier formatting since it's slow.
-      stubModule('../format', 'format', () =>
-        // Run test
-        cb(t)
+      stubModule('../../../common/logging', 'logLocalDev', () =>
+        // Disable prettier formatting since it's slow.
+        stubModule('../format', 'format', () =>
+          // Run test
+          cb(t)
+        )
       )
     )
   );
@@ -121,7 +123,7 @@ test('makeExtensionFromTemplates does not print unit test blurb if a test file i
       {name: 'my-extension-name'}
     );
     t.false(
-      !!stubbedCalls.log.find((args) =>
+      !!stubbedCalls.logLocalDev.find((args) =>
         args.find((arg) => arg.includes('amp unit --files'))
       )
     );
@@ -136,7 +138,7 @@ test('makeExtensionFromTemplates prints unit test blurb if a test file is create
       {name: 'my-extension-name'}
     );
     t.true(
-      !!stubbedCalls.log.find((args) =>
+      !!stubbedCalls.logLocalDev.find((args) =>
         args.find((arg) => arg.includes('amp unit --files'))
       )
     );
@@ -151,7 +153,7 @@ test('makeExtensionFromTemplates does not print Storybook blurb if a Storybook f
       {name: 'my-extension-name'}
     );
     t.false(
-      !!stubbedCalls.log.find((args) =>
+      !!stubbedCalls.logLocalDev.find((args) =>
         args.find((arg) => arg.includes('amp storybook'))
       )
     );
@@ -166,7 +168,7 @@ test('makeExtensionFromTemplates prints Storybook blurb if a Storybook file is c
       {name: 'my-extension-name'}
     );
     t.true(
-      !!stubbedCalls.log.find((args) =>
+      !!stubbedCalls.logLocalDev.find((args) =>
         args.find((arg) => arg.includes('amp storybook'))
       )
     );
@@ -181,7 +183,7 @@ test('makeExtensionFromTemplates does not print validator blurb if a validator-*
       {name: 'my-extension-name'}
     );
     t.false(
-      !!stubbedCalls.log.find((args) =>
+      !!stubbedCalls.logLocalDev.find((args) =>
         args.find((arg) => arg.includes('amp validator --update_tests'))
       )
     );
@@ -196,7 +198,7 @@ test('makeExtensionFromTemplates prints validator blurb if a validator-*.html fi
       {name: 'my-extension-name'}
     );
     t.true(
-      !!stubbedCalls.log.find((args) =>
+      !!stubbedCalls.logLocalDev.find((args) =>
         args.find((arg) => arg.includes('amp validator --update_tests'))
       )
     );
