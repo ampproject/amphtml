@@ -78,6 +78,15 @@
       }
     },
     {
+      "groupName": "esbuild devDependencies",
+      "matchPackagePatterns": ["\\besbuild\\b"],
+      "automerge": true,
+      "major": {
+        "groupName": null,
+        "additionalBranchPrefix": "esbuild-"
+      }
+    },
+    {
       "excludePackagePatterns": ["^@ampproject/"],
       "automerge": false,
       "matchDepTypes": ["dependencies"],
