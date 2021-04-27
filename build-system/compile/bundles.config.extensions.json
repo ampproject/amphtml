@@ -712,7 +712,12 @@
     "options": {"hasCss": true}
   },
   {"name": "amp-video-iframe", "version": "0.1", "latestVersion": "0.1"},
-  {"name": "amp-video-iframe", "version": "1.0", "latestVersion": "0.1"},
+  {
+    "name": "amp-video-iframe",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {"hasCss": true}
+  },
   {
     "name": "amp-viewer-integration",
     "version": "0.1",

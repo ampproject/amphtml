@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {BUBBLE_MESSAGE_EVENTS} from '../0.1/amp-video-iframe';
+import {CSS} from '../../../build/amp-video-iframe-1.0.css';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
 import {VideoBaseElement} from '../../amp-video/1.0/base-element';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
@@ -130,5 +131,5 @@ AmpVideoIframe['props'] = {
 };
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpVideoIframe);
+  AMP.registerElement(TAG, AmpVideoIframe, CSS);
 });
