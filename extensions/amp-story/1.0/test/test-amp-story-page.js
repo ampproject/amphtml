@@ -643,7 +643,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(openAttachmentEl).to.exist;
   });
 
-  it.only('page attachment should have target="top" to navigate in top window', async () => {
+  it('should build the open attachment UI with target="_top" to navigate in top window', async () => {
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
     );
@@ -657,25 +657,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     const openAttachmentEl = element.querySelector(
       '.i-amphtml-story-page-open-attachment'
     );
+
     expect(openAttachmentEl.getAttribute('target')).to.eql('_top');
-    expect(openAttachmentEl).to.exist;
-  });
-
-  it.only('should build the open attachment UI with target="_top"', async () => {
-    const attachmentEl = win.document.createElement(
-      'amp-story-page-attachment'
-    );
-    attachmentEl.setAttribute('layout', 'nodisplay');
-    element.appendChild(attachmentEl);
-
-    page.buildCallback();
-    await page.layoutCallback();
-    page.setState(PageState.PLAYING);
-
-    const openAttachmentEl = element.querySelector(
-      '.i-amphtml-story-page-open-attachment[target="_top]'
-    );
-    expect(openAttachmentEl).to.exist;
   });
 
   it('should build the inline page attachment UI with one image', async () => {
