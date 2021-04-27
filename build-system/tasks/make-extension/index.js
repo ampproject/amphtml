@@ -391,7 +391,7 @@ makeExtension.flags = {
   cleanup:
     'Remove the generated extension before exiting. This is useful when using --test on CI',
   bento: 'Generate a Bento component',
-  test: 'Built and test the generated extension',
+  test: 'Build and test the generated extension',
   version: 'Sets the version number (default: 0.1; or 1.0 with --bento)',
   overwrite:
     'Overwrites existing files at the destination, if present. Otherwise skips them.',
