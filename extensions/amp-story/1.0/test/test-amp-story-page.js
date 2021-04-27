@@ -645,6 +645,44 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(openAttachmentEl).to.exist;
   });
 
+  it('should build the open attachment UI with target="_top" to navigate in top window', async () => {
+    const attachmentEl = win.document.createElement(
+      'amp-story-page-attachment'
+    );
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    element.appendChild(attachmentEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    expect(openAttachmentEl.getAttribute('target')).to.eql('_top');
+  });
+
+  it('should build the new default outlink page attachment UI with target="_top" to navigate in top window', async () => {
+    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
+
+    const attachmentEl = win.document.createElement(
+      'amp-story-page-attachment'
+    );
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    element.appendChild(attachmentEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    expect(openAttachmentEl.getAttribute('target')).to.eql('_top');
+  });
+
   it('should build the inline page attachment UI with one image', async () => {
     toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
 
