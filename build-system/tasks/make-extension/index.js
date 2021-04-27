@@ -344,11 +344,9 @@ async function runExtensionTests(name) {
  * @return {Promise<void>}
  */
 async function makeExtension() {
-  const {test, cleanup} = argv;
-
-  const withCleanup = cleanup ? affectsWorkingTree : (fn) => fn();
-
   let error;
+
+  const withCleanup = argv.cleanup ? affectsWorkingTree : (fn) => fn();
   await withCleanup(async () => {
     const result = await makeExtensionFromTemplates(
       argv.bento
@@ -357,7 +355,7 @@ async function makeExtension() {
     );
     if (!result) {
       const warningOrError = 'Could not write extension files.';
-      if (test) {
+      if (argv.test) {
         error = warningOrError;
       } else {
         log(yellow('WARNING:'), warningOrError);
@@ -365,7 +363,7 @@ async function makeExtension() {
       return null;
     }
     const {bundleConfig, created, modified} = result;
-    if (test) {
+    if (argv.test) {
       error = await runExtensionTests(bundleConfig.name);
     }
     return {created, modified};
