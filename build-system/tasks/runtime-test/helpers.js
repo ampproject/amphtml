@@ -18,7 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
 const path = require('path');
-const {green, yellow, cyan} = require('kleur/colors');
+const {green, yellow, cyan, red} = require('kleur/colors');
 const {isCiBuild} = require('../../common/ci');
 const {log, logWithoutTimestamp} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
@@ -157,10 +157,10 @@ async function karmaBrowserComplete_(browser) {
   const result = browser.lastResult;
   result.total = result.success + result.failed + result.skipped;
   // This used to be a warning with karma-browserify. See #16851 and #24957.
-  // Now, with karma-esbuild, this is a fatal error.
+  // Now, with karma-esbuild, this is a fatal error. See #34040.
   if (result.total == 0) {
     const message = 'Karma returned a status with zero tests.';
-    log(yellow('ERROR:'), message, cyan(JSON.stringify(result)));
+    log(red('ERROR:'), message, cyan(JSON.stringify(result)));
     throw new Error(message);
   }
 }
