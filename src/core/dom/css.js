@@ -91,8 +91,11 @@ export function prependSelectorsWith(selector, distribute) {
  *
  * @param {string} ident
  * @return {string}
+ * @suppress {uselessCode}
  */
 export function escapeCssSelectorIdent(ident) {
+  // This gets rewritten to true/false during compilation. It will trigger an
+  // JSC_UNREACHABLE_CODE warning, but that's intentional for DCE.
   if (IS_ESM) {
     return CSS.escape(ident);
   }
