@@ -61,14 +61,22 @@ FAIL
 |    <amp-img src="image.png" height="100" width="300" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic">
 |      <i-amphtml-sizer class="i-amphtml-sizer"><img alt="" aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="image.png"></i-amphtml-sizer>
 >>                                              ^~~~~~~~~
-transformed_feature_tests/server_side_rendering.html:61:45 The attribute 'src' in tag 'img' is set to the invalid value 'image.png'.
+transformed_feature_tests/server_side_rendering.html:61:45 The mandatory attribute 'height' is missing in tag 'img'.
+>>                                              ^~~~~~~~~
+transformed_feature_tests/server_side_rendering.html:61:45 The mandatory attribute 'loading' is missing in tag 'img'.
+>>                                              ^~~~~~~~~
+transformed_feature_tests/server_side_rendering.html:61:45 The mandatory attribute 'width' is missing in tag 'img'.
 |    </amp-img>
 |    <!-- Invalid intrinsic i-amphtml-sizer inside responsive sizer  -->
 |    <amp-img src="image.png" height="100" width="300" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic">
 |      <i-amphtml-sizer style=display:block;padding-top:171.4370%;>
 |      <img alt="" aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;charset=utf-8,<svg height='100' width='300' xmlns='http://www.w3.org/2000/svg' version='1.1'/>">
 >>     ^~~~~~~~~
-transformed_feature_tests/server_side_rendering.html:66:4 The parent tag of tag 'img' is 'i-amphtml-sizer', but it can only be 'i-amphtml-sizer-intrinsic'.
+transformed_feature_tests/server_side_rendering.html:66:4 The mandatory attribute 'height' is missing in tag 'img'.
+>>     ^~~~~~~~~
+transformed_feature_tests/server_side_rendering.html:66:4 The mandatory attribute 'loading' is missing in tag 'img'.
+>>     ^~~~~~~~~
+transformed_feature_tests/server_side_rendering.html:66:4 The mandatory attribute 'width' is missing in tag 'img'.
 |      </i-amphtml-sizer>
 |    </amp-img>
 |    <!-- Invalid i-amphtml-sizer > img  does not specify class -->

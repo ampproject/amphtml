@@ -1,4 +1,4 @@
-PASS
+FAIL
 |  <!--
 |    Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 |
@@ -50,6 +50,12 @@ PASS
 |  <p amp-access="lemur"></p>
 |  <noscript>
 |    <img src="https://example.com/" amp-access="lemur" />
+>>   ^~~~~~~~~
+amp-access-laterpay/0.1/test/validator-amp-access-laterpay.html:51:2 The mandatory attribute 'height' is missing in tag 'img'.
+>>   ^~~~~~~~~
+amp-access-laterpay/0.1/test/validator-amp-access-laterpay.html:51:2 The mandatory attribute 'loading' is missing in tag 'img'.
+>>   ^~~~~~~~~
+amp-access-laterpay/0.1/test/validator-amp-access-laterpay.html:51:2 The mandatory attribute 'width' is missing in tag 'img'.
 |  </noscript>
 |
 |  <!-- test some other attributes -->

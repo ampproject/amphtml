@@ -123,16 +123,24 @@ feature_tests/leaks.html:80:8 The attribute 'background' may not appear in tag '
 |  -->
 |  <img src="https://leaking.via/img-src">
 >> ^~~~~~~~~
-feature_tests/leaks.html:87:0 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
+feature_tests/leaks.html:87:0 The mandatory attribute 'height' is missing in tag 'img'.
+>> ^~~~~~~~~
+feature_tests/leaks.html:87:0 The mandatory attribute 'loading' is missing in tag 'img'.
+>> ^~~~~~~~~
+feature_tests/leaks.html:87:0 The mandatory attribute 'width' is missing in tag 'img'.
 |  <img dynsrc="https://leaking.via/img-dynsrc">
 >> ^~~~~~~~~
-feature_tests/leaks.html:88:0 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
+feature_tests/leaks.html:88:0 The attribute 'dynsrc' may not appear in tag 'img'.
 |  <img lowsrc="https://leaking.via/img-lowsrc">
 >> ^~~~~~~~~
-feature_tests/leaks.html:89:0 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
+feature_tests/leaks.html:89:0 The attribute 'lowsrc' may not appear in tag 'img'.
 |  <img src="data:image/svg+xml,<svg%20xmlns='%68ttp:%2f/www.w3.org/2000/svg'%20xmlns:xlink='%68ttp:%2f/www.w3.org/1999/xlink'><image%20xlink:hr%65f='%68ttp:%2f/leaking.via/svg-via-data'></image></svg>">
 >> ^~~~~~~~~
-feature_tests/leaks.html:90:0 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
+feature_tests/leaks.html:90:0 The mandatory attribute 'height' is missing in tag 'img'.
+>> ^~~~~~~~~
+feature_tests/leaks.html:90:0 The mandatory attribute 'loading' is missing in tag 'img'.
+>> ^~~~~~~~~
+feature_tests/leaks.html:90:0 The mandatory attribute 'width' is missing in tag 'img'.
 |
 |  <image src="https://leaking.via/image-src"></image>
 >> ^~~~~~~~~
@@ -143,22 +151,34 @@ feature_tests/leaks.html:93:0 The tag 'image' may only appear as a descendant of
 |
 |  <picture>
 >> ^~~~~~~~~
-feature_tests/leaks.html:95:0 The parent tag of tag 'picture' is 'body', but it can only be 'noscript'. (see https://amp.dev/documentation/components/amp-img/)
+feature_tests/leaks.html:95:0 The tag 'picture' is disallowed.
 |      <source srcset="https://leaking.via/picture-source-srcset">
 |  </picture>
 |  <picture>
 >> ^~~~~~~~~
-feature_tests/leaks.html:98:0 The parent tag of tag 'picture' is 'body', but it can only be 'noscript'. (see https://amp.dev/documentation/components/amp-img/)
+feature_tests/leaks.html:98:0 The tag 'picture' is disallowed.
 |      <img srcset="https://leaking.via/picture-img-srcset">
 >>     ^~~~~~~~~
-feature_tests/leaks.html:99:4 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
+feature_tests/leaks.html:99:4 The mandatory attribute 'height' is missing in tag 'img'.
+>>     ^~~~~~~~~
+feature_tests/leaks.html:99:4 The mandatory attribute 'loading' is missing in tag 'img'.
+>>     ^~~~~~~~~
+feature_tests/leaks.html:99:4 The mandatory attribute 'width' is missing in tag 'img'.
 |  </picture>
 |  <img srcset=",,,,,https://leaking.via/img-srcset">
 >> ^~~~~~~~~
-feature_tests/leaks.html:101:0 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
+feature_tests/leaks.html:101:0 The mandatory attribute 'height' is missing in tag 'img'.
+>> ^~~~~~~~~
+feature_tests/leaks.html:101:0 The mandatory attribute 'loading' is missing in tag 'img'.
+>> ^~~~~~~~~
+feature_tests/leaks.html:101:0 The mandatory attribute 'width' is missing in tag 'img'.
 |  <img src="#" longdesc="https://leaking.via/img-longdesc">
 >> ^~~~~~~~~
-feature_tests/leaks.html:102:0 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
+feature_tests/leaks.html:102:0 The mandatory attribute 'height' is missing in tag 'img'.
+>> ^~~~~~~~~
+feature_tests/leaks.html:102:0 The mandatory attribute 'loading' is missing in tag 'img'.
+>> ^~~~~~~~~
+feature_tests/leaks.html:102:0 The mandatory attribute 'width' is missing in tag 'img'.
 |  <!-- longdesc works on Firefox but requires right-click, "View Description" -->
 |
 |  <!--

@@ -92,7 +92,7 @@ amp-live-list/0.1/test/validator-amp-live-list.html:70:2 The reference point 'AM
 |    <amp-live-list id="my-live-list-4" data-poll-interval="15000" data-max-items-per-page="20">
 |      <img update src="button.gif" onclick="javascript:alert('u have updates!')">
 >>     ^~~~~~~~~
-amp-live-list/0.1/test/validator-amp-live-list.html:82:4 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
+amp-live-list/0.1/test/validator-amp-live-list.html:82:4 The attribute 'onclick' may not appear in tag 'img'.
 |      <script items>
 >>     ^~~~~~~~~
 amp-live-list/0.1/test/validator-amp-live-list.html:83:4 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
