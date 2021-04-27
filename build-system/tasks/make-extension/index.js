@@ -384,8 +384,7 @@ module.exports = {
 makeExtension.description = 'Create an extension skeleton';
 makeExtension.flags = {
   name: 'The name of the extension. Preferably prefixed with `amp-*`',
-  cleanup:
-    'Remove the generated extension before exiting. This is useful when using --test',
+  cleanup: 'Undo file changes before exiting. This is useful alongside --test',
   bento: 'Generate a Bento component',
   test: 'Build and test the generated extension',
   version: 'Sets the version number (default: 0.1; or 1.0 with --bento)',
