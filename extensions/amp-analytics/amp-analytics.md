@@ -127,7 +127,7 @@ documentation.
 
 If the analytics vendor hasn’t integrated with AMP, reach out to the vendor to
 ask for their support. We also encourage you to let us know by
-[filing an issue](../../CONTRIBUTING.md#report-a-bug)
+[filing an issue](../../docs/contributing.md#report-a-bug)
 requesting that the vendor be added. See also
 [Integrating your analytics tools in AMP HTML](integrating-analytics.md).
 Alternatively, work with your vendor to send the data to their specified URL.

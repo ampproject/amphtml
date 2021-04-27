@@ -20,17 +20,17 @@ limitations under the License.
 
 Before you start developing in AMP, check out these resources:
 
--   [CONTRIBUTING.md](../CONTRIBUTING.md) has details on various ways you can contribute to the AMP open source project.
+-   [contributing.md](./contributing.md) has details on various ways you can contribute to the AMP open source project.
     -   If you're developing in AMP, you should read the [Contributing code and features](./contributing-code.md) documentation, which includes information on code reviews and approvals.
-    -   The [Ongoing participation](../CONTRIBUTING.md#ongoing-participation) section has details on various ways of getting in touch with others in the community including email and Slack.
-    -   **If you are new to open source projects, Git/GitHub, etc.**, check out the [Tips for new open source contributors](../CONTRIBUTING.md#tips-for-new-open-source-contributors) which includes information on getting help and finding your first bug to work on.
+    -   The [Ongoing participation](./contributing.md#ongoing-participation) section has details on various ways of getting in touch with others in the community including email and Slack.
+    -   **If you are new to open source projects, Git/GitHub, etc.**, check out the [Tips for new open source contributors](./contributing.md#tips-for-new-open-source-contributors) which includes information on getting help and finding your first bug to work on.
 -   The [Getting Started Quick Start Guide](getting-started-quick.md) has installation steps and basic instructions for [one-time setup](getting-started-quick.md#one-time-setup), how to [build AMP & run a local server](getting-started-quick.md#build-amp--run-a-local-server) and how to [test AMP](getting-started-quick.md#test-amp).
 
 ## Guidelines & Style
 
 Before you start writing code, consult these resources for guidance and guidelines on:
 
--   **Design**: [AMP Design Principles](DESIGN_PRINCIPLES.md)
+-   **Design**: [AMP Design Principles](design-principles.md)
 -   **JavaScript**: [Google JavaScript Code Style Guide](https://google.github.io/styleguide/jsguide.html)
 -   **CSS**: [Writing CSS For AMP Runtime](writing-css.md)
 -   **Creating new components**:
@@ -42,7 +42,7 @@ Before you start writing code, consult these resources for guidance and guidelin
 
 For most developers, the instructions in the [Getting Started Quick Start Guide](getting-started-quick.md) will be sufficient for building/running/testing during development.
 
-For detailed information on testing, see [TESTING.md](TESTING.md).
+For detailed information on testing, see [testing.md](testing.md).
 
 ## Repository Layout
 
@@ -50,24 +50,24 @@ For detailed information on testing, see [TESTING.md](TESTING.md).
   3p/             - Implementation of third party sandbox iframes.
   ads/            - Modules implementing specific ad networks used in <amp-ad>
   build/          - (generated) intermediate generated files
-  build-system/   - build infrastructure
-  builtins/       - tags built into the core AMP runtime
-      *.md        - documentation for use of the builtin
-      *.js        - source code for builtin tag
-  contributing/   - docs for people contributing to AMP
-  css/            - default css
-  dist/           - (generated) main JS binaries are created here. This is what
+  build-system/   - Build infrastructure
+  builtins/       - Tags built into the core AMP runtime
+      *.md        - Documentation for use of the builtin
+      *.js        - Source code for builtin tag
+  css/            - Default css
+  dist/           - (generated) Main JS binaries are created here. This is what
                     gets deployed to cdn.ampproject.org.
   dist.3p/        - (generated) JS binaries and HTML files for 3p embeds and ads
                     This is what gets deployed to 3p.ampproject.net.
-  examples/       - example AMP HTML files and corresponding assets
-  extensions/     - plugins which extend the AMP HTML runtime's core set of tags
+  docs/           - Docs for people contributing to AMP
+  examples/       - Example AMP HTML files and corresponding assets
+  extensions/     - Plugins which extend the AMP HTML runtime's core set of tags
   spec/           - The AMP HTML Specification files
-  src/            - source code for the AMP runtime
-  test/           - tests for the AMP runtime and builtins
-  testing/        - testing infrastructure
-  third_party/    - third party code used in AMP
-  tools/          - code for AMP related tools
+  src/            - Source code for the AMP runtime
+  test/           - Tests for the AMP runtime and builtins
+  testing/        - Testing infrastructure
+  third_party/    - Third party code used in AMP
+  tools/          - Code for AMP related tools
   validator/      - AMP Validator runners and tools
 
 </pre>

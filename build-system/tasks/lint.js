@@ -111,7 +111,7 @@ function summarizeResults(results, fixedFiles) {
         cyan('prettier/prettier'),
         'errors, read',
         cyan(
-          'https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md#code-quality-and-style'
+          'https://github.com/ampproject/amphtml/blob/main/docs/getting-started-e2e.md#code-quality-and-style'
         )
       );
     }

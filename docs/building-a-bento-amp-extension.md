@@ -92,7 +92,7 @@ In most cases you'll only create the required (req'd) files. If your element doe
 
 ## Extend AMP.PreactBaseElement
 
-Most AMP component extend `AMP.BaseElement`. `AMP.BaseElement` provides hookups and callbacks needed to implement and customize behavior. Callback explanations are in the BaseElement Callbacks section of [Building an AMP Extension](https://github.com/ampproject/amphtml/blob/main/contributing/building-an-amp-extension.md), and inlined in the [BaseElement](https://github.com/ampproject/amphtml/blob/main/src/base-element.js)
+Most AMP component extend `AMP.BaseElement`. `AMP.BaseElement` provides hookups and callbacks needed to implement and customize behavior. Callback explanations are in the BaseElement Callbacks section of [Building an AMP Extension](https://github.com/ampproject/amphtml/blob/main/docs/building-an-amp-extension.md), and inlined in the [BaseElement](https://github.com/ampproject/amphtml/blob/main/src/base-element.js)
 class.
 
 Important: Bento-enabled AMP components built upon a Preact component must also be usable in insolation in React development contexts.
@@ -388,7 +388,7 @@ You must document your element's actions and events in its own reference documen
 
 One of AMP's features is documentation validation checks to confirm it's valid AMP. When you implement your element, you must update the [AMP Validator](https://github.com/ampproject/amphtml/blob/main/validator/README.md)
 to include rules for your element. Otherwise documents using your extended component become invalid. Create your own rules by following the directions at
-[Contributing Component Validator Rules](https://github.com/ampproject/amphtml/blob/main/contributing/component-validator-rules.md).
+[Contributing Component Validator Rules](https://github.com/ampproject/amphtml/blob/main/docs/component-validator-rules.md).
 
 ## Performance considerations
 
@@ -616,7 +616,7 @@ to only run your extensions' tests.
 $ amp unit --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
 ```
 
-Please also reference [Testing in AMP HTML](https://github.com/ampproject/amphtml/blob/main/contributing/TESTING.md) for the full range of testing commands available.
+Please also reference [Testing in AMP HTML](https://github.com/ampproject/amphtml/blob/main/docs/testing.md) for the full range of testing commands available.
 
 ## Linting and formatting
 
