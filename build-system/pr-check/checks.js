@@ -39,6 +39,12 @@ function pushBuildWorkflow() {
   timedExecOrDie('amp check-exact-versions');
   timedExecOrDie('amp check-renovate-config');
   timedExecOrDie('amp server-tests');
+  timedExecOrDie(
+    'amp make-extension --test --cleanup --name=amp-generated-for-test'
+  );
+  timedExecOrDie(
+    'amp make-extension --test --cleanup --name=amp-generated-for-test --bento'
+  );
   timedExecOrDie('amp dep-check');
   timedExecOrDie('amp check-types');
   timedExecOrDie('amp check-sourcemaps');
