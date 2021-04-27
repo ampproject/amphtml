@@ -18,6 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const del = require('del');
 const fs = require('fs-extra');
+const objstr = require('obj-str');
 const path = require('path');
 const {cyan, green, red, yellow} = require('kleur/colors');
 const {format} = require('./format');
@@ -204,11 +205,14 @@ async function makeExtensionFromTemplates(
   const version = (
     options.version || (options.bento ? '1.0' : '0.1')
   ).toString();
+  const {'no_css': noCss} = options;
   const name = (options.name || '').replace(/^amp-/, '');
   if (!name) {
     log(red('ERROR:'), 'Must specify component name with', cyan('--name'));
     return null;
   }
+
+  const namePascalCase = dashToPascalCase(name);
 
   const replacements = {
     '__current_year__': `${new Date().getFullYear()}`,
@@ -216,7 +220,29 @@ async function makeExtensionFromTemplates(
     '__component_version_snakecase__': version.replace(/\./g, '_'),
     '__component_name_hyphenated__': name,
     '__component_name_hyphenated_capitalized__': name.toUpperCase(),
-    '__component_name_pascalcase__': dashToPascalCase(name),
+    '__component_name_pascalcase__': namePascalCase,
+    ...(!noCss
+      ? {
+          '__jss_import_component_css__': `import {CSS as COMPONENT_CSS} from './component.jss'`,
+          '__jss_component_css__': 'COMPONENT_CSS',
+          '__jss_import_use_styles__': `import {useStyles} from './component.jss'`,
+          '__jss_styles_use_styles__': 'const styles = useStyles()',
+          '__jss_styles_example_or_placeholder__':
+            '`${styles.exampleContentHidden}`',
+          '__css_import__': `import {CSS} from '../../../build/amp-${name}-${version}.css'`,
+          '__css_id__': `CSS`,
+          '__register_element_args__': `TAG, Amp${namePascalCase}, CSS`,
+        }
+      : {
+          '__jss_import_component_css_': '',
+          '__jss_component_css__': 'null',
+          '__jss_import_use_styles__': '',
+          '__jss_styles_use_styles__': '',
+          '__jss_styles_example_or_placeholder__': `'my-classname'`,
+          '__css_import__': '',
+          '__css_id__': '',
+          '__register_element_args__': `TAG, Amp${namePascalCase}`,
+        }),
     // eslint-disable-next-line local/no-forbidden-terms
     // This allows generated code to contain "DO NOT SUBMIT", which will cause
     // PRs to fail CI if example code isn't removed from the PR. We can't
@@ -245,8 +271,11 @@ async function makeExtensionFromTemplates(
   const bundleConfig = {
     name: `amp-${name}`,
     version,
-    options: {hasCss: true},
   };
+
+  if (!noCss) {
+    bundleConfig.options = {hasCss: true};
+  }
 
   await insertExtensionBundlesConfig(
     bundleConfig,
@@ -346,10 +375,17 @@ async function runExtensionTests(name) {
 async function makeExtension() {
   let testError;
 
-  const templateDirs = [
-    getTemplateDir('shared'),
-    getTemplateDir(argv.bento ? 'bento' : 'classic'),
-  ];
+  const {bento, 'no_css': noCss} = argv;
+
+  const templateDirs = objstr({
+    shared: true,
+    bento,
+    classic: !bento,
+    css: !noCss,
+    jss: bento && !noCss,
+  })
+    .split(/\s+/)
+    .map((name) => getTemplateDir(name));
 
   const withCleanup = argv.cleanup ? affectsWorkingTree : (fn) => fn();
   await withCleanup(async () => {
@@ -395,6 +431,7 @@ makeExtension.flags = {
   name: 'The name of the extension. Preferably prefixed with `amp-*`',
   cleanup: 'Undo file changes before exiting. This is useful alongside --test',
   bento: 'Generate a Bento component',
+  'no_css': 'Exclude extension-specific CSS',
   test: 'Build and test the generated extension',
   version: 'Sets the version number (default: 0.1; or 1.0 with --bento)',
   overwrite:
