@@ -304,7 +304,7 @@ exports.rules = [
       // VideoWrapper
       'extensions/amp-video-iframe/1.0/amp-video-iframe.js->extensions/amp-video-iframe/0.1/amp-video-iframe.js',
       'extensions/amp-video-iframe/1.0/amp-video-iframe.js->extensions/amp-video/1.0/base-element.js',
-      'extensions/amp-video-iframe/1.0/amp-video-iframe.js->extensions/amp-video/1.0/video-iframe.js',
+      'extensions/amp-video-iframe/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
     ],
   },
   {

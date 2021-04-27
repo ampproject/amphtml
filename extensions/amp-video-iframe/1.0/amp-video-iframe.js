@@ -17,7 +17,7 @@ import {BUBBLE_MESSAGE_EVENTS} from '../0.1/amp-video-iframe';
 import {CSS} from '../../../build/amp-video-iframe-1.0.css';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
 import {VideoBaseElement} from '../../amp-video/1.0/base-element';
-import {VideoIframe} from '../../amp-video/1.0/video-iframe';
+import {VideoIframeWrapper} from './component';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/core/types/object';
 import {isExperimentOn} from '../../../src/experiments';
@@ -112,7 +112,7 @@ const makeMethodMessage = (method) =>
   });
 
 AmpVideoIframe['staticProps'] = dict({
-  'component': VideoIframe,
+  'component': VideoIframeWrapper,
   'onMessage': onMessage,
   'makeMethodMessage': makeMethodMessage,
 });
