@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-// This must load before all other tests.
+// These must load before all other tests.
 import '../src/polyfills';
+import './_setup_test_framework';
+
 import * as coreError from '../src/core/error';
 import * as describes from '../testing/describes';
 import {Services} from '../src/services';
