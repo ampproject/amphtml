@@ -54,22 +54,9 @@ describes.fakeWin('validator-integration', {}, (env) => {
       expect(loadScriptStub).to.have.been.called;
     });
 
-    it('should load JavaScript validator by default', () => {
+    it('should load WebAssembly validator', () => {
       modeStub.returns({development: true, test: true});
       win.location = 'https://www.example.com/#development=1';
-      maybeValidate(win);
-      expect(loadScriptStub).to.have.been.calledWith(
-        env.sandbox.match(
-          (el) =>
-            el.getAttribute('src') ===
-            'https://cdn.ampproject.org/v0/validator.js'
-        )
-      );
-    });
-
-    it('should load WebAssembly validator when specified', () => {
-      modeStub.returns({development: true, test: true});
-      win.location = 'https://www.example.com/#development=1&validate=wasm';
       maybeValidate(win);
       expect(loadScriptStub).to.have.been.calledWith(
         env.sandbox.match(
