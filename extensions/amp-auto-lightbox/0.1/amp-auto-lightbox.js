@@ -109,6 +109,9 @@ const DISABLED_ANCESTORS = [
   'amp-carousel',
 ].join(',');
 
+/** @type {Set<string>} */
+const NATIVE_ELEMENTS_SUPPORTED = new Set(['img']);
+
 const SCRIPT_LD_JSON = 'script[type="application/ld+json"]';
 const META_OG_TYPE = 'meta[property="og:type"]';
 
@@ -161,7 +164,7 @@ export class Criteria {
    */
   static meetsSizingCriteria(element, renderWidth, renderHeight) {
     const {naturalWidth, naturalHeight} = getMaxNaturalDimensions(
-      dev().assertElement(element.querySelector('img'))
+      dev().assertElement(element.querySelector('img') || element)
     );
 
     const viewport = Services.viewportForDoc(element);
@@ -273,18 +276,13 @@ function markAsVisited(candidate) {
 }
 
 /**
- * @param {string} tagName
- * @return {string}
- */
-function candidateSelector(tagName) {
-  return `${tagName}:not([${LIGHTBOXABLE_ATTR}]):not([${VISITED_ATTR}])`;
-}
-
-/**
  * @param {!Element} element
  * @return {!Promise}
  */
 function whenLoaded(element) {
+  if (NATIVE_ELEMENTS_SUPPORTED.has(element.tagName.toLowerCase())) {
+    return Promise.resolve();
+  }
   return whenUpgradedToCustomElement(element).then((element) =>
     element.signals().whenSignal(CommonSignals.LOAD_END)
   );
@@ -298,7 +296,7 @@ export class Scanner {
    * @return {!Array<!Element>}
    */
   static getCandidates(root) {
-    const selector = candidateSelector('amp-img');
+    const selector = `amp-img:not([${LIGHTBOXABLE_ATTR}]):not([${VISITED_ATTR}]),img:not([${LIGHTBOXABLE_ATTR}]):not([${VISITED_ATTR}])`;
     const candidates = toArray(root.querySelectorAll(selector));
     // TODO(alanorozco): DOM mutations should be wrapped in mutate contexts.
     // Alternatively, use in-memory "visited" marker instead of attribute.
@@ -440,11 +438,16 @@ export function runCandidates(ampdoc, candidates) {
     whenLoaded(candidate).then(() => {
       return measureIntersectionNoRoot(candidate).then(
         ({boundingClientRect}) => {
-          // <amp-img> will change the img's src inline data on unlayout and
-          // remove it from DOM.
-          if (!candidate.signals().get(CommonSignals.LOAD_END)) {
+          if (NATIVE_ELEMENTS_SUPPORTED.has(candidate.tagName.toLowerCase())) {
+            if (!candidate.complete) {
+              return;
+            }
+          } else if (!candidate.signals().get(CommonSignals.LOAD_END)) {
+            // <amp-img> will change the img's src inline data on unlayout and
+            // remove it from DOM.
             return;
           }
+
           const {width, height} = boundingClientRect;
           if (!Criteria.meetsAll(candidate, width, height)) {
             return;

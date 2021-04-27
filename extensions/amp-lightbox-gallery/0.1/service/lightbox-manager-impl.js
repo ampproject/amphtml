@@ -38,18 +38,14 @@ import {map} from '../../../../src/core/types/object';
 import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
 import {toArray} from '../../../../src/core/types/array';
 
-const LIGHTBOX_ELIGIBLE_TAGS = {
-  'AMP-IMG': true,
-};
+const LIGHTBOX_ELIGIBLE_TAGS = new Set(['AMP-IMG']);
+const LIGHTBOX_ELGIBLE_NATIVE_ELEMENTS = new Set(['IMG']);
 
-export const ELIGIBLE_TAP_TAGS = {
-  'AMP-IMG': true,
-};
+// eslint-disable-next-line local/no-export-side-effect
+export const ELIGIBLE_TAP_TAGS = new Set(['AMP-IMG']);
 
-export const VIDEO_TAGS = {
-  'AMP-YOUTUBE': true,
-  'AMP-VIDEO': true,
-};
+// eslint-disable-next-line local/no-export-side-effect
+export const VIDEO_TAGS = new Set(['AMP-YOUTUBE', 'AMP-VIDEO']);
 
 const GALLERY_TAG = 'amp-lightbox-gallery';
 const CAROUSEL_TAGS = ['AMP-CAROUSEL', 'AMP-BASE-CAROUSEL'];
@@ -179,7 +175,10 @@ export class LightboxManager {
    * @private
    */
   baseElementIsSupported_(element) {
-    return LIGHTBOX_ELIGIBLE_TAGS[element.tagName];
+    return (
+      LIGHTBOX_ELIGIBLE_TAGS.has(element.tagName) ||
+      LIGHTBOX_ELGIBLE_NATIVE_ELEMENTS.has(element.tagName)
+    );
   }
 
   /**
