@@ -112,6 +112,15 @@ async function prBuildWorkflow() {
     timedExecOrDie('amp server-tests');
   }
 
+  if (buildTargetsInclude(Targets.AVA, Targets.RUNTIME)) {
+    timedExecOrDie(
+      'amp make-extension --test --cleanup --name=amp-generated-for-test'
+    );
+    timedExecOrDie(
+      'amp make-extension --test --cleanup --name=amp-generated-for-test --bento'
+    );
+  }
+
   if (buildTargetsInclude(Targets.RUNTIME)) {
     timedExecOrDie('amp dep-check');
     timedExecOrDie('amp check-types');
