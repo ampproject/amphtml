@@ -20,7 +20,6 @@ const del = require('del');
 const fs = require('fs-extra');
 const path = require('path');
 const {cyan, green, red, yellow} = require('kleur/colors');
-const {execOrThrow} = require('../../common/exec');
 const {format} = require('./format');
 const {getStdout, getOutput} = require('../../common/process');
 const {log, logLocalDev} = require('../../common/logging');
@@ -67,9 +66,6 @@ async function* walkDir(dir) {
 }
 
 const getTemplateDir = (template) => path.join(__dirname, 'template', template);
-
-const TEMPLATES_BENTO = [getTemplateDir('shared'), getTemplateDir('bento')];
-const TEMPLATES_CLASSIC = [getTemplateDir('shared'), getTemplateDir('classic')];
 
 /**
  * @param {string} templateDir
@@ -354,9 +350,11 @@ async function makeExtension() {
 
   let error;
   await withCleanup(async () => {
-    const result = await (argv.bento
-      ? makeExtensionFromTemplates(TEMPLATES_BENTO)
-      : makeExtensionFromTemplates(TEMPLATES_CLASSIC));
+    const result = await makeExtensionFromTemplates(
+      argv.bento
+        ? [getTemplateDir('shared'), getTemplateDir('bento')]
+        : [getTemplateDir('shared'), getTemplateDir('classic')]
+    );
     if (!result) {
       const warningOrError = 'Could not write extension files.';
       if (test) {
