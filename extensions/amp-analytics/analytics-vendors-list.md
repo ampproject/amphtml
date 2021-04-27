@@ -119,7 +119,7 @@ Type attribute value: `blueconic`
 
 Type attribute value: `bluetriangle` 
 
-Adds support for blue Triangle. More details can be found at[help.bluetriangle.com](https://help.bluetriangle.com).
+Adds support for blue Triangle. More details can be found at [help.bluetriangle.com](https://help.bluetriangle.com/hc/en-us/articles/1500006133061).
 
 ### Browsi
 
