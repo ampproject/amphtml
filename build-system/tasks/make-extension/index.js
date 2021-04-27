@@ -293,17 +293,22 @@ async function makeExtensionFromTemplates(
 }
 
 /**
- * @param {function(...*):{modified: Array<string>, created: Array<string>}} fn
+ * @param {function(...*):?{modified: ?Array<string>, created: ?Array<string>}} fn
  * @return {Promise}
  */
 async function affectsWorkingTree(fn) {
   const stashStdout = getStdout(`git stash push --keep-index`);
 
-  const {modified, created} = await fn();
-  await del(created);
+  const {modified, created} = (await fn()) || {};
 
-  const head = getStdout('git rev-parse HEAD').trim();
-  getOutput(`git checkout ${head} ${modified.join(' ')}`);
+  if (created) {
+    await del(created);
+  }
+
+  if (modified) {
+    const head = getStdout('git rev-parse HEAD').trim();
+    getOutput(`git checkout ${head} ${modified.join(' ')}`);
+  }
 
   if (!stashStdout.startsWith('No local changes')) {
     getOutput('git stash pop');
@@ -359,9 +364,10 @@ async function makeExtension() {
       } else {
         log(yellow('WARNING:'), warningOrError);
       }
+      return null;
     }
     const {bundleConfig, created, modified} = result;
-    if (!error && test) {
+    if (test) {
       error = await runExtensionTests(bundleConfig.name);
     }
     return {created, modified};
