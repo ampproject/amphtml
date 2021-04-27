@@ -66,7 +66,6 @@ createTask('get-zindex', 'getZindex');
 createTask('integration');
 createTask('lint');
 createTask('make-extension', 'makeExtension');
-createTask('make-extension-e2e', 'runMakeExtensionTests', 'make-extension');
 createTask('markdown-toc', 'markdownToc');
 createTask('performance');
 createTask('performance-urls', 'performanceUrls');
