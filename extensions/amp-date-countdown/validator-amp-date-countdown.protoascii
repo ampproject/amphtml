@@ -37,6 +37,7 @@ tags: {  # <amp-date-countdown>
     value_casei: "seconds"
   }
   attrs: {  # attribute is not used in version 0.1 of the component (see #33480)
+    disabled_by: "amp4email"
     name: "count-up"
     value: ""
   }
