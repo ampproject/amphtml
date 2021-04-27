@@ -348,11 +348,10 @@ async function makeExtension() {
 
   const withCleanup = argv.cleanup ? affectsWorkingTree : (fn) => fn();
   await withCleanup(async () => {
-    const result = await makeExtensionFromTemplates(
-      argv.bento
-        ? [getTemplateDir('shared'), getTemplateDir('bento')]
-        : [getTemplateDir('shared'), getTemplateDir('classic')]
-    );
+    const result = await makeExtensionFromTemplates([
+      getTemplateDir('shared'),
+      getTemplateDir(argv.bento ? 'bento' : 'classic'),
+    ]);
     if (!result) {
       const warningOrError = 'Could not write extension files.';
       if (argv.test) {
