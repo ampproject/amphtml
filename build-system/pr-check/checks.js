@@ -112,11 +112,13 @@ async function prBuildWorkflow() {
     timedExecOrDie('amp server-tests');
   }
 
-  if (
-    buildTargetsInclude(Targets.AVA) ||
-    buildTargetsInclude(Targets.RUNTIME)
-  ) {
-    timedExecOrDie('amp make-extension-e2e');
+  if (buildTargetsInclude(Targets.AVA, Targets.RUNTIME)) {
+    timedExecOrDie(
+      'amp make-extension --test --cleanup --name=amp-generated-for-test'
+    );
+    timedExecOrDie(
+      'amp make-extension --test --cleanup --name=amp-generated-for-test --bento'
+    );
   }
 
   if (buildTargetsInclude(Targets.RUNTIME)) {
