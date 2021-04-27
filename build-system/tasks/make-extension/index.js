@@ -18,11 +18,12 @@
 const argv = require('minimist')(process.argv.slice(2));
 const del = require('del');
 const fs = require('fs-extra');
+const globby = require('globby');
 const path = require('path');
 const {cyan, green, red, yellow} = require('kleur/colors');
 const {format} = require('./format');
 const {getStdout, getOutput} = require('../../common/process');
-const {log, logLocalDev} = require('../../common/logging');
+const {log, logLocalDev, logWithoutTimestamp} = require('../../common/logging');
 
 const extensionBundlesJson =
   'build-system/compile/bundles.config.extensions.json';
@@ -344,18 +345,20 @@ async function runExtensionTests(name) {
  * @return {Promise<void>}
  */
 async function makeExtension() {
-  let error;
+  let testError;
+
+  const templateDirs = [
+    getTemplateDir('shared'),
+    getTemplateDir(argv.bento ? 'bento' : 'classic'),
+  ];
 
   const withCleanup = argv.cleanup ? affectsWorkingTree : (fn) => fn();
   await withCleanup(async () => {
-    const result = await makeExtensionFromTemplates([
-      getTemplateDir('shared'),
-      getTemplateDir(argv.bento ? 'bento' : 'classic'),
-    ]);
+    const result = await makeExtensionFromTemplates(templateDirs);
     if (!result) {
       const warningOrError = 'Could not write extension files.';
       if (argv.test) {
-        error = warningOrError;
+        testError = warningOrError;
       } else {
         log(yellow('WARNING:'), warningOrError);
       }
@@ -363,13 +366,26 @@ async function makeExtension() {
     }
     const {bundleConfig, created, modified} = result;
     if (argv.test) {
-      error = await runExtensionTests(bundleConfig.name);
+      testError = await runExtensionTests(bundleConfig.name);
     }
     return {created, modified};
   });
 
-  if (error) {
-    throw new Error(error);
+  if (testError) {
+    const templateTestFiles = await globby(
+      templateDirs.map((dir) => path.join(dir, '**/test**.js'))
+    );
+
+    logWithoutTimestamp(testError);
+
+    throw new Error(
+      'Failed testing generated extension\n' +
+        yellow(`⤷ Try updating the following template files:\n\n`) +
+        templateTestFiles
+          .map((filename) => `  ${path.relative(__dirname, filename)}`)
+          .join('\n') +
+        '\n'
+    );
   }
 }
 
