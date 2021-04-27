@@ -1755,6 +1755,7 @@ tags: {
   }
   attrs: {
     name: "height"
+    mandatory: true,
     value_regex: "[0-9]+"
   }
   attrs: { name: "importance" }  # Not yet part of the html spec
@@ -1777,6 +1778,7 @@ tags: {
   attrs: { name: "sizes" }
   attrs: {
     name: "width"
+    mandatory: true,
     value_regex: "[0-9]+"
   }
   attr_lists: "mandatory-src-or-srcset"
