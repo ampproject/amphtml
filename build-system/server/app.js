@@ -46,6 +46,7 @@ const {
   recaptchaRouter,
 } = require('./recaptcha-router');
 const {getServeMode} = require('./app-utils');
+const {getUrl} = require('./routes/test-cache');
 const {logWithoutTimestamp} = require('../common/logging');
 const {log} = require('../common/logging');
 const {red} = require('kleur/colors');
@@ -1604,5 +1605,7 @@ app.use(
     }
   }
 );
+
+app.use('/test-cache', getUrl);
 
 module.exports = app;
