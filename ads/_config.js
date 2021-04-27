@@ -810,6 +810,7 @@ const adConfig = jsonConfiguration({
       'https://www.myfinance.com',
     ],
     renderStartImplemented: true,
+    clientIdScope: 'AMP_ECID_GOOGLE',
   },
 
   'myoffrz': {
