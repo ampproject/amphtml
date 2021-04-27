@@ -82,6 +82,9 @@ export class NextPageService {
      */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
+    /** @private {!../../../src/service/viewer-interface.ViewerInterface} */
+    this.viewer_ = Services.viewerForDoc(ampdoc);
+
     /**
      * @private
      * @const {!../../../src/service/mutator-interface.MutatorInterface}
@@ -553,6 +556,20 @@ export class NextPageService {
   }
 
   /**
+   * Forward the allowlisted capabilities from the viewer
+   * to the multidoc's ampdocs (i.e. CID), so they know
+   * the viewer supports it for the multidoc.
+   * @return {?string}
+   */
+  getCapabilities_() {
+    const hasCidCapabilities = this.viewer_.hasCapability('cid');
+    if (hasCidCapabilities) {
+      return 'cid';
+    }
+    return null;
+  }
+
+  /**
    * Appends the given document to the host page and installs
    * a visibility observer to monitor it
    * @param {!Page} page
@@ -603,6 +620,7 @@ export class NextPageService {
         page.url,
         {
           visibilityState: VisibilityState.PRERENDER,
+          cap: this.getCapabilities_(),
         }
       );
 
