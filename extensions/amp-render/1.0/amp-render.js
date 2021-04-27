@@ -84,6 +84,9 @@ export class AmpRender extends BaseElement {
 
     /** @private {?string} */
     this.initialSrc_ = null;
+
+    /** @private {?string} */
+    this.src_ = null;
   }
 
   /** @override */
@@ -136,7 +139,6 @@ export class AmpRender extends BaseElement {
    * @return {Function}
    */
   getFetchJsonFn() {
-    console.log('getFetchJsonFn');
     const {element} = this;
     const src = element.getAttribute('src');
     if (!src) {
@@ -164,6 +166,7 @@ export class AmpRender extends BaseElement {
   /** @override */
   init() {
     this.initialSrc_ = this.element.getAttribute('src');
+    this.src_ = this.initialSrc_;
 
     this.registerApiAction('refresh', (api) => {
       const src = this.element.getAttribute('src');
@@ -183,15 +186,13 @@ export class AmpRender extends BaseElement {
   }
 
   /** @override */
-  mutationObserverCallback(mutations) {
-    console.table(mutations);
-    const isSrcMutated = mutations.some(
-      (mutation) => mutation.attributeName === 'src'
-    );
+  mutationObserverCallback() {
     const src = this.element.getAttribute('src');
-    if (isSrcMutated && !isAmpStateSrc(src) && !isAmpScriptUri(src)) {
-      this.mutateProps(dict({'getJson': this.getFetchJsonFn()}));
+    if (src === this.src_) {
+      return;
     }
+    this.src_ = src;
+    this.mutateProps(dict({'getJson': this.getFetchJsonFn()}));
   }
 
   /**
