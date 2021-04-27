@@ -698,6 +698,7 @@
       ],
     },
     {
+      "flaky": true, // #34033. See https://percy.io/ampproject/amphtml/builds/10102542/changed/568786603
       "url": "examples/visual-tests/amp-story/amp-story-dev-tools.html#development=1&url=https://preview.amp.dev/documentation/examples/introduction/stories_in_amp",
       "name": "amp-story-dev-tools: preview tab loading and running",
       "viewport": {"width": 1080, "height": 720},
@@ -706,6 +707,7 @@
       ]
     },
     {
+      "flaky": true, // #34033. See https://percy.io/ampproject/amphtml/builds/10102542/changed/568786603
       "url": "examples/visual-tests/amp-story/amp-story-dev-tools.html#development=1&url=https://preview.amp.dev/documentation/examples/introduction/stories_in_amp&devices=desktop;ipad",
       "name": "amp-story-dev-tools: preview tab loading and running with a desktop and ipad layout",
       "viewport": {"width": 1080, "height": 720},
