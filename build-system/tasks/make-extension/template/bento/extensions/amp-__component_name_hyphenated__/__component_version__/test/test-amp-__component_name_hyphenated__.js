@@ -44,7 +44,7 @@ describes.realWin(
       `;
       doc.body.appendChild(element);
       await waitFor(() => element.isConnected, 'element connected');
-      expect(element.parentNode).to.equal(null);
+      expect(element.parentNode).to.equal(doc.body);
     });
   }
 );
