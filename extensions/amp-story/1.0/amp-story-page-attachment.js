@@ -128,6 +128,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     if (this.element.hasAttribute('title')) {
       titleEl.textContent = this.element.getAttribute('title');
+    } else if (this.element.hasAttribute('data-title')) {
+      titleEl.textContent = this.element.getAttribute('data-title');
     }
 
     if (isPageAttachmentUiV2ExperimentOn(this.win)) {
@@ -180,6 +182,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       '.i-amphtml-story-page-attachment-remote-title'
     ).textContent =
       this.element.getAttribute('title') ||
+      this.element.getAttribute('data-title') ||
       Services.urlForDoc(this.element).getSourceOrigin(
         this.element.getAttribute('href')
       );

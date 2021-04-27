@@ -770,6 +770,26 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(openAttachmentLabelEl.textContent).to.equal('Custom label');
   });
 
+  it('should use cta-text attribute when data-cta-text also exist', async () => {
+    const attachmentEl = win.document.createElement(
+      'amp-story-page-attachment'
+    );
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    attachmentEl.setAttribute('cta-text', 'CTA text');
+    attachmentEl.setAttribute('data-cta-text', 'data CTA text');
+    element.appendChild(attachmentEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentLabelEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment-label'
+    );
+
+    expect(openAttachmentLabelEl.textContent).to.equal('CTA text');
+  });
+
   it('should start tracking media performance when entering the page', async () => {
     expectAsyncConsoleError(/source must start with/, 1);
 

@@ -86,7 +86,7 @@
           </p>
         </amp-story-grid-layer>
         <amp-story-page-attachment
-          data-title="Lorem ipsum"
+          title="Lorem ipsum"
           layout="nodisplay"
           theme="dark"
         >
@@ -112,9 +112,9 @@
           </p>
         </amp-story-grid-layer>
         <amp-story-page-attachment
-          data-title="Lorem ipsum"
+          title="Lorem ipsum"
           layout="nodisplay"
-          data-cta-text="Buy a Sweater"
+          cta-text="Buy a Sweater"
           cta-image="img/sweater.jpg"
           >
           <div class="attachment-content">
@@ -141,9 +141,9 @@
           </p>
         </amp-story-grid-layer>
         <amp-story-page-attachment
-          data-title="Lorem ipsum"
+          title="Lorem ipsum"
           layout="nodisplay"
-          data-cta-text="Buy a Sweater"
+          cta-text="Buy a Sweater"
           cta-image="img/sweater.jpg"
           cta-image-2="img/boot.jpg"
           theme="dark"
@@ -170,13 +170,13 @@
           </p>
         </amp-story-grid-layer>
         <amp-story-page-attachment
-          data-title="Link Description"
+          title="Link Description"
           href="https://www.google.com"
           layout="nodisplay">
         </amp-story-page-attachment>
       </amp-story-page>
 
-      <amp-story-page id="outlink-custo-icon-custom-text">
+      <amp-story-page id="outlink-custom-icon-custom-text">
         <amp-story-grid-layer template="fill">
           <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat2.jpg"></amp-img>
         </amp-story-grid-layer>
@@ -187,9 +187,9 @@
           </p>
         </amp-story-grid-layer>
         <amp-story-page-attachment
-          data-title="Link Description"
+          title="Link Description"
           href="https://www.google.com"
-          data-cta-text="Shop at Forbes"
+          cta-text="Shop at Forbes"
           cta-image="img/logo.jpg"
           layout="nodisplay">
         </amp-story-page-attachment>
@@ -206,7 +206,7 @@
           </p>
         </amp-story-grid-layer>
         <amp-story-page-attachment
-          data-title="Link Description"
+          title="Link Description"
           href="https://www.google.com"
           cta-image="none"
           layout="nodisplay">
@@ -224,7 +224,7 @@
           </p>
         </amp-story-grid-layer>
         <amp-story-page-attachment
-          data-title="Link Description"
+          title="Link Description"
           href="https://www.google.com"
           theme="dark"
           layout="nodisplay">
@@ -242,7 +242,7 @@
           </p>
         </amp-story-grid-layer>
         <amp-story-page-attachment
-          data-title="Link Description"
+          title="Link Description"
           href="https://www.google.com"
           theme="custom"
           cta-accent-color="pink"
@@ -262,7 +262,7 @@
           </p>
         </amp-story-grid-layer>
         <amp-story-page-attachment
-          data-title="Link Description"
+          title="Link Description"
           href="https://www.google.com"
           theme="custom"
           cta-accent-color="pink"
@@ -282,7 +282,7 @@
           </p>
         </amp-story-grid-layer>
         <amp-story-page-attachment
-          data-title="Link Description"
+          title="Link Description"
           href="https://www.google.com"
           theme="custom"
           cta-accent-color="navy"
@@ -302,11 +302,32 @@
           </p>
         </amp-story-grid-layer>
         <amp-story-page-attachment
-          data-title="Link Description"
+          title="Link Description"
           href="https://www.google.com"
           theme="custom"
           cta-accent-color="navy"
           cta-accent-element="text"
+          layout="nodisplay">
+        </amp-story-page-attachment>
+      </amp-story-page>
+
+      <amp-story-page id="cta-without-data-attributes">
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat2.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="center">
+          <p>
+            <span data-text-background-color="crimson">Outlink CTA: logo & custom text.</span></br></br>
+            <span data-text-background-color="#00A3AB">Enable experiment by pasting AMP.toggleExperiment('amp-story-page-attachment-ui-v2', true) in console and refreshing.</span>
+          </p>
+        </amp-story-grid-layer>
+        <amp-story-page-attachment
+          title="Link Description"
+          data-title="Data-Title"
+          href="https://www.google.com"
+          cta-text="Shop at Forbes"
+          data-cta-text="Data-CTA-Text"
+          cta-image="img/logo.jpg"
           layout="nodisplay">
         </amp-story-page-attachment>
       </amp-story-page>
