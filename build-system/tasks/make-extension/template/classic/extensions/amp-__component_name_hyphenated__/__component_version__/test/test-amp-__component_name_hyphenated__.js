@@ -47,7 +47,7 @@ describes.realWin(
       `;
       doc.body.appendChild(element);
       await element.whenBuilt();
-      expect(element.querySelector('div').textContent).to.equal('hello world');
+      expect(element.querySelector('div').textContent).to.equal('fff world');
     });
   }
 );

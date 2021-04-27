@@ -18,7 +18,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 const del = require('del');
 const fs = require('fs-extra');
-const globby = require('globby');
 const path = require('path');
 const {cyan, green, red, yellow} = require('kleur/colors');
 const {format} = require('./format');
@@ -66,7 +65,8 @@ async function* walkDir(dir) {
   }
 }
 
-const getTemplateDir = (template) => path.join(__dirname, 'template', template);
+const getTemplateDir = (template) =>
+  path.join(path.relative(process.cwd(), __dirname), 'template', template);
 
 /**
  * @param {string} templateDir
@@ -174,7 +174,7 @@ async function insertExtensionBundlesConfig(
 
   format([destination]);
 
-  log(green('SUCCESS:'), 'Wrote', cyan(path.basename(destination)));
+  logLocalDev(green('SUCCESS:'), 'Wrote', cyan(path.basename(destination)));
 }
 
 /**
@@ -323,8 +323,7 @@ async function runExtensionTests(name) {
     `amp build --extensions=${name} --core_runtime_only`,
     `amp unit --nohelp --headless --files="extensions/${name}/**/test/test-*.js" --report`,
   ]) {
-    log('Running...');
-    log(cyan(command));
+    log('Running', cyan(command) + '...');
     const result = getOutput(command);
     if (result.status !== 0) {
       return result.stderr || result.stdout;
@@ -372,19 +371,15 @@ async function makeExtension() {
   });
 
   if (testError) {
-    const templateTestFiles = await globby(
-      templateDirs.map((dir) => path.join(dir, '**/test**.js'))
-    );
-
     logWithoutTimestamp(testError);
-
     throw new Error(
-      'Failed testing generated extension\n' +
-        yellow(`⤷ Try updating the following template files:\n\n`) +
-        templateTestFiles
-          .map((filename) => `  ${path.relative(__dirname, filename)}`)
-          .join('\n') +
-        '\n'
+      [
+        'Failed testing generated extension',
+        '',
+        yellow('⤷ Try updating the template files located in:'),
+        '',
+        ...templateDirs.map((dir) => '\t' + dir),
+      ].join('\n')
     );
   }
 }
