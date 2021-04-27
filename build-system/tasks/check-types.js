@@ -95,10 +95,6 @@ const TYPE_CHECK_TARGETS = {
     srcGlobs: ['src/polyfills{,/**}/*.js'],
     warningLevel: 'QUIET',
   },
-  'src-polyfillstub': {
-    srcGlobs: ['src/polyfillstub{,/**}/*.js'],
-    warningLevel: 'QUIET',
-  },
   'src-preact': {
     srcGlobs: ['src/preact{,/**}/*.js'],
     warningLevel: 'QUIET',
@@ -144,18 +140,6 @@ const TYPE_CHECK_TARGETS = {
     extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
     warningLevel: 'QUIET',
   },
-<<<<<<< HEAD
-=======
-  'src-core': () => ({
-    externs: globby.sync(EXTERNS_GLOB),
-    extraGlobs: [
-      // Include all core JS files
-      'src/core/{,**/}*.js',
-      // Exclude all core extern files (already included via externs)
-      `!${EXTERNS_GLOB}`,
-    ],
-  }),
->>>>>>> eb0891f5b (Move cssEscape helper around)
   'extensions': () => ({
     entryPoints: getExtensionSrcPaths(),
     extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
