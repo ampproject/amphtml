@@ -23,7 +23,7 @@
  * amp-resize-observer-polyfill extension.
  */
 
-import {Services} from '../services';
+import {Services} from '../../services';
 
 const UPGRADERS = '_upgraders';
 const STUB = '_stub';
