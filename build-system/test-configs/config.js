@@ -107,7 +107,7 @@ const unitTestPaths = [
 
 // TODO(amphtml): Opt-in more unit tests to run on Safari / FF / Edge.
 const unitTestCrossBrowserPaths = [
-  'test/unit/test-error.js',
+  'test/unit/core/test-error.js',
   'test/unit/test-log.js',
 ];
 
