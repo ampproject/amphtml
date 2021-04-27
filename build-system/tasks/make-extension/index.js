@@ -389,10 +389,10 @@ makeExtension.description = 'Create an extension skeleton';
 makeExtension.flags = {
   name: 'The name of the extension. Preferably prefixed with `amp-*`',
   cleanup:
-    'Remove the generated extension before exiting. This is useful when using --test on CI',
+    'Remove the generated extension before exiting. This is useful when using --test',
   bento: 'Generate a Bento component',
   test: 'Build and test the generated extension',
   version: 'Sets the version number (default: 0.1; or 1.0 with --bento)',
   overwrite:
-    'Overwrites existing files at the destination, if present. Otherwise skips them.',
+    'Overwrites existing files at the destination, if present. Otherwise skips them',
 };
