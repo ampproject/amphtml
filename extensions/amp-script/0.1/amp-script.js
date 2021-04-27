@@ -125,7 +125,7 @@ export class AmpScript extends AMP.BaseElement {
     /**
      * If true, signals that worker-dom should activate sandboxed mode.
      * In this mode the Worker lives in its own crossorigin iframe, creating
-     * a strong security boundary.
+     * a strong security boundary. It also forces nodom mode.
      *
      * @private {boolean}
      */
@@ -139,8 +139,8 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.nodom_ = this.element.hasAttribute('nodom');
     this.sandboxed_ = this.element.hasAttribute('sandboxed');
+    this.nodom_ = this.element.hasAttribute('nodom') || this.sandboxed_;
     this.development_ =
       this.element.hasAttribute('data-ampdevmode') ||
       this.element.ownerDocument.documentElement.hasAttribute(
