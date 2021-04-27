@@ -105,8 +105,11 @@ const unitTestPaths = [
   'extensions/**/test/unit/*.js',
 ];
 
-// TODO(rsimha, #28838): Refine this opt-in mechanism.
-const unitTestCrossBrowserPaths = ['test/unit/test-error.js'];
+// TODO(amphtml): Opt-in more unit tests to run on Safari / FF / Edge.
+const unitTestCrossBrowserPaths = [
+  'test/unit/test-error.js',
+  'test/unit/test-log.js',
+];
 
 const integrationTestPaths = [
   'test/integration/**/*.js',
