@@ -1763,6 +1763,18 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
+    // To prevent 'title' attribute from being used by browser, copy value to 'data-title' and remove.
+    if (
+      attachmentEl.hasAttribute('title') &&
+      !attachmentEl.hasAttribute('data-title')
+    ) {
+      attachmentEl.setAttribute(
+        'data-title',
+        attachmentEl.getAttribute('title')
+      );
+      attachmentEl.removeAttribute('title');
+    }
+
     if (!this.openAttachmentEl_) {
       this.openAttachmentEl_ = renderPageAttachmentUI(
         this.win,

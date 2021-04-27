@@ -126,9 +126,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       closeButtonEl.setAttribute('aria-label', localizedCloseString);
     }
 
-    if (this.element.hasAttribute('title')) {
-      titleEl.textContent = this.element.getAttribute('title');
-    } else if (this.element.hasAttribute('data-title')) {
+    if (this.element.hasAttribute('data-title')) {
       titleEl.textContent = this.element.getAttribute('data-title');
     }
 
@@ -181,7 +179,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     this.contentEl_.querySelector(
       '.i-amphtml-story-page-attachment-remote-title'
     ).textContent =
-      this.element.getAttribute('title') ||
       this.element.getAttribute('data-title') ||
       Services.urlForDoc(this.element).getSourceOrigin(
         this.element.getAttribute('href')
