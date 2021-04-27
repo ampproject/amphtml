@@ -136,6 +136,7 @@ export class AmpRender extends BaseElement {
    * @return {Function}
    */
   getFetchJsonFn() {
+    console.log('getFetchJsonFn');
     const {element} = this;
     const src = element.getAttribute('src');
     if (!src) {
@@ -183,6 +184,7 @@ export class AmpRender extends BaseElement {
 
   /** @override */
   mutationObserverCallback(mutations) {
+    console.table(mutations);
     const isSrcMutated = mutations.some(
       (mutation) => mutation.attributeName === 'src'
     );

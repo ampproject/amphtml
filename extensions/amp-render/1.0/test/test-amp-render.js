@@ -401,5 +401,92 @@ describes.realWin(
         BatchedJsonModule.UrlReplacementPolicy.ALL
       );
     });
+
+    it.only('should update url replacement policy when src mutates', async () => {
+      const json = {
+        firstName: 'Joe',
+        lastName: 'Biden',
+      };
+
+      const fetchJsonStub = env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .callThrough();
+
+      env.sandbox.stub(Services, 'batchedXhrFor').returns({
+        fetchJson: () => Promise.resolve(json),
+      });
+
+      env.sandbox.stub(Services, 'xhrFor').returns({
+        fetch: () => Promise.resolve(json),
+        xssiJson: () => Promise.resolve(json),
+      });
+
+      const ampState = html`
+        <amp-state id="president">
+          <script type="application/json">
+            {
+              "firstName": "Bill",
+              "lastName": "Clinton"
+            }
+          </script>
+        </amp-state>
+      `;
+      doc.body.appendChild(ampState);
+
+      element = html`
+        <amp-render
+          src="amp-state:president"
+          [src]="srcUrl"
+          width="auto"
+          height="100"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache">{{lastName}}, {{firstName}}</template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      // const buttonHtml = html` <button
+      //   id="changeSrc"
+      //   on="tap:AMP.setState({ srcUrl: 'https://example.com/data.json' })"
+      // >
+      //   Change source
+      // </button>`;
+      // doc.body.appendChild(buttonHtml);
+
+      await whenUpgradedToCustomElement(ampState);
+      await ampState.buildInternal();
+
+      let text = await getRenderedData();
+      expect(text).to.equal('Clinton, Bill');
+      expect(fetchJsonStub).not.to.have.been.called;
+      // const options = fetchJsonStub.getCall(0).args[2];
+      // expect(options.urlReplacement).to.equal(
+      //   BatchedJsonModule.UrlReplacementPolicy.ALL
+      // );
+
+      // const elementStub = env.sandbox
+      //   .stub(element.impl_, 'getFetchJsonFn')
+      //   .callThrough();
+
+      const mutations = [
+        {
+          attributeName: 'src',
+        },
+      ];
+      element.setAttribute('src', 'https://example.com/data.json');
+      text = await getRenderedData();
+      expect(text).to.equal('Biden, Joe');
+      // expect(elementStub).to.have.been.called;
+      // element.impl_.mutationObserverCallback(mutations);
+
+      // doc.getElementById('changeSrc').click();
+      // const openButton = doc.querySelector('#changeSrc');
+      // openButton.click();
+
+      // text = await getRenderedData();
+      // // expect(fetchJsonStub).to.have.been.called;
+      // expect(text).to.equal('Biden, Joe');
+    });
   }
 );
