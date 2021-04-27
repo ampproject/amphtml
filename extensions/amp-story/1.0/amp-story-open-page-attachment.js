@@ -41,7 +41,7 @@ export const buildOpenDefaultAttachmentElement = (element) =>
   htmlFor(element)`
     <a class="
         i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
-        role="button">
+        role="button" target="_top">
       <span class="i-amphtml-story-page-open-attachment-icon">
         <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
         <span class="i-amphtml-story-page-open-attachment-bar-right"></span>
