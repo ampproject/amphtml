@@ -607,7 +607,7 @@ Fired when the player detects a touchstart event.
 
 ```javascript
 player.addEventListener('amp-story-player-touchstart', (event) => {
-  console.log('Coordinates:' event.detail.coordinates);
+  console.log('Coordinates:', event.detail.coordinates);
 })
 ```
 
@@ -617,7 +617,7 @@ Fired when the player detects a touchmove event.
 
 ```javascript
 player.addEventListener('amp-story-player-touchmove', (event) => {
-  console.log('Coordinates:' event.detail.coordinates);
+  console.log('Coordinates:', event.detail.coordinates);
 })
 ```
 
@@ -682,8 +682,8 @@ Fired when the player changes to a new story and provides the `index`, the playe
 ```javascript
 player.addEventListener('navigation', (event) => {
   console.log('Navigated from story 0 to story 1 of 3');
-  console.log('Current story:' event.index); // 1
-  console.log('Current story:' event.remaining); // 1
+  console.log('Current story:', event.detail.index); // 1
+  console.log('Current story:', event.detail.remaining); // 1
 })
 ```
 
@@ -694,8 +694,8 @@ Fired when the story inside the player changes to a new page. It provides the `p
 ```javascript
 player.addEventListener('storyNavigation', (event) => {
   console.log('User navigated from one page to the other.');
-  console.log('Current page id:' event.pageId); // page-2
-  console.log('Story progress:' event.progress); // Number from 0 to 1.
+  console.log('Current page id:', event.detail.pageId); // page-2
+  console.log('Story progress:', event.detail.progress); // Number from 0 to 1.
 })
 ```
 
