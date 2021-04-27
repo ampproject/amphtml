@@ -94,9 +94,9 @@ The example below demonstrates `amp-__component_name_hyphenated__` component in 
 <script async custom-element="amp-__component_name_hyphenated__" src="https://cdn.ampproject.org/v0/amp-__component_name_hyphenated__-__component_version__.js"></script>
 ...
 </head>
-<amp-bento-component>
+<amp-__component_name_hyphenated__>
   ...
-</amp-bento-component>
+</amp-__component_name_hyphenated__>
 <button id="element-id">
   Event Trigger
 </button>

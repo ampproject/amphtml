@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {install} from '../../src/polyfills/array-includes';
+import {install} from '../src/polyfills/array-includes';
 
 describes.fakeWin('Array.includes', {}, (env) => {
   beforeEach(() => {
