@@ -144,3 +144,11 @@ export function addUnsafeAllowAutoplay(iframe) {
   val += 'autoplay;';
   iframe.setAttribute('allow', val);
 }
+
+/**
+ * @param {?HTMLIFrameElement=} iframe
+ * @param {*} message
+ */
+export function postMessageWhenAvailable(iframe, message) {
+  iframe?.contentWindow?./*OK*/ postMessage(message, '*');
+}
