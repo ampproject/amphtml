@@ -375,10 +375,9 @@ async function makeExtension() {
     throw new Error(
       [
         'Failed testing generated extension',
-        '',
         yellow('⤷ Try updating the template files located in:'),
-        '',
         ...templateDirs.map((dir) => '\t' + dir),
+        '',
       ].join('\n')
     );
   }
