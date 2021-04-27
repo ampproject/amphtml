@@ -757,7 +757,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
       'amp-story-page-attachment'
     );
     attachmentEl.setAttribute('layout', 'nodisplay');
-    attachmentEl.setAttribute('data-cta-text', 'Custom label');
+    attachmentEl.setAttribute('cta-text', 'Custom label');
     element.appendChild(attachmentEl);
 
     page.buildCallback();
