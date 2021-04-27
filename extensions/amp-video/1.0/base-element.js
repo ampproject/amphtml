@@ -95,10 +95,7 @@ VideoBaseElement['props'] = {
   'loop': {attr: 'loop', type: 'boolean'},
   'noaudio': {attr: 'noaudio', type: 'boolean'},
   'poster': {attr: 'poster'},
-};
 
-/** @override */
-VideoBaseElement['children'] = {
   'sources': {
     selector: 'source',
     single: false,
