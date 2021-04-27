@@ -156,15 +156,12 @@ function maybePrintArgvMessages() {
 async function karmaBrowserComplete_(browser) {
   const result = browser.lastResult;
   result.total = result.success + result.failed + result.skipped;
-  // Initially we were reporting an error with reportTestErrored() when zero tests were detected (see #16851),
-  // but since Karma sometimes returns a transient, recoverable state, we will
-  // print a warning without reporting an error to the github test status. (see #24957)
+  // This used to be a warning with karma-browserify. See #16851 and #24957.
+  // Now, with karma-esbuild, this is a fatal error.
   if (result.total == 0) {
-    log(
-      yellow('WARNING:'),
-      'Received a status with zero tests:',
-      cyan(JSON.stringify(result))
-    );
+    const message = 'Karma returned a status with zero tests.';
+    log(yellow('ERROR:'), message, cyan(JSON.stringify(result)));
+    throw new Error(message);
   }
 }
 
