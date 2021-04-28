@@ -200,12 +200,17 @@ export class Extensions {
    */
   waitForExtension(extensionId, version) {
     const wait = this.waitFor_(this.getExtensionHolder_(extensionId, version));
-    const timeout = new Promise((r) => this.win.setTimeout(r, 16000)).then(
-      () => {
+
+    return Services.timerFor(this.win)
+      .timeoutPromise(16000, wait)
+      .catch((err) => {
+        if (!err.message.includes('timeout')) {
+          throw err;
+        }
+
         user().error(TAG, `Waited over 16s to load extension ${extensionId}.`);
-      }
-    );
-    return Promise.race([wait, timeout]).then(() => wait);
+        return wait;
+      });
   }
 
   /**
