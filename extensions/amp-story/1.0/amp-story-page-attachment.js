@@ -35,6 +35,25 @@ import {triggerClickFromLightDom} from './utils';
 const DARK_THEME_CLASS = 'i-amphtml-story-draggable-drawer-theme-dark';
 
 /**
+ * Distance in pixels to swipe before opening attachment.
+ * @const {number}
+ */
+const OPEN_THRESHOLD = 150;
+
+/**
+ * Max pixels to transform the remote attachment URL preview. Equivilent to the height of preview element.
+ * @const {number}
+ */
+const DRAG_CAP = 48;
+
+/**
+ * Max pixels to transform the remote attachment URL preview. Equivilent to the height of preview element.
+ * Used for the amp-story-outlink-page-attachment-v2 experiment.
+ * @const {number}
+ */
+const DRAG_CAP_V2 = 56;
+
+/**
  * @enum {string}
  */
 export const AttachmentTheme = {
@@ -166,8 +185,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildRemote_() {
-    this.setDragCap_(48 /* pixels */);
-    this.setOpenThreshold_(150 /* pixels */);
+    this.setDragCap_(DRAG_CAP);
+    this.setOpenThreshold_(OPEN_THRESHOLD);
 
     this.headerEl_.classList.add(
       'i-amphtml-story-draggable-drawer-header-attachment-remote'
@@ -196,8 +215,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildRemoteV2_() {
-    this.setOpenThreshold_(150 /* pixels */);
-    this.setDragCap_(56 /* pixels */);
+    this.setDragCap_(DRAG_CAP_V2);
+    this.setOpenThreshold_(OPEN_THRESHOLD);
 
     this.headerEl_.classList.add(
       'i-amphtml-story-draggable-drawer-header-attachment-remote'
