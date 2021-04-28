@@ -80,6 +80,25 @@ Element.prototype.__AMP_SHADOW_ROOT;
 /** @type {?ShadowRoot} */
 Element.prototype.shadowRoot;
 
+// Fullscreen methods
+Document.prototype.cancelFullScreen = function () {};
+Document.prototype.webkitExitFullscreen = function () {};
+Element.prototype.cancelFullScreen = function () {};
+Element.prototype.exitFullscreen = function () {};
+Element.prototype.webkitExitFullscreen = function () {};
+Element.prototype.webkitCancelFullScreen = function () {};
+Element.prototype.mozCancelFullScreen = function () {};
+Element.prototype.msExitFullscreen = function () {};
+Element.prototype.requestFullscreen = function () {};
+Element.prototype.requestFullScreen = function () {};
+Element.prototype.webkitRequestFullscreen = function () {};
+Element.prototype.webkitEnterFullscreen = function () {};
+Element.prototype.msRequestFullscreen = function () {};
+Element.prototype.mozRequestFullScreen = function () {};
+
+/** @type {boolean|undefined} */
+Element.prototype.webkitDisplayingFullscreen;
+
 /**
  * - n is the name.
  * - f is the function body of the extension.

@@ -64,6 +64,7 @@ function assertIsName(name) {
  * @param {!Element} parent
  * @param {function(!Element):boolean} checkFunc
  * @param {function()} callback
+ * @suppress {suspiciousCode}
  */
 export function waitForChild(parent, checkFunc, callback) {
   if (checkFunc(parent)) {
@@ -541,6 +542,8 @@ function scopedQuerySelectionFallback(root, selector) {
  * @param {!Element|!ShadowRoot} root
  * @param {string} selector
  * @return {?Element}
+ *
+ * @suppress {suspiciousCode}
  */
 export function scopedQuerySelector(root, selector) {
   if (IS_ESM || isScopeSelectorSupported(root)) {
@@ -558,6 +561,8 @@ export function scopedQuerySelector(root, selector) {
  * @param {!Element|!ShadowRoot} root
  * @param {string} selector
  * @return {!NodeList<!Element>}
+ *
+ * @suppress {suspiciousCode}
  */
 export function scopedQuerySelectorAll(root, selector) {
   if (IS_ESM || isScopeSelectorSupported(root)) {
