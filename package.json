@@ -21,7 +21,7 @@
     "@ampproject/worker-dom": "0.29.2",
     "@webcomponents/webcomponentsjs": "2.5.0",
     "dompurify": "2.2.6",
-    "google-closure-library": "20210202.0.0",
+    "google-closure-library": "20210406.0.0",
     "intersection-observer": "0.12.0",
     "jss": "10.3.0",
     "jss-preset-default": "10.4.0",
