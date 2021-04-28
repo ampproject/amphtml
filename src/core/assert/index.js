@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import {USER_ERROR_SENTINEL} from '../error-message-helpers';
-import {assert} from './base';
-import {isMinifiedMode} from '../minified-mode';
+// import {USER_ERROR_SENTINEL} from '../error-message-helpers';
+// import {assert} from './base';
+// import {isMinifiedMode} from '../minified-mode';
+
+export {assert as pureDevAssert} from './dev';
+export {assert as pureUserAssert} from './user';
 
 /**
  * Throws a user error if the first argument isn't trueish. Mirrors userAssert
@@ -37,34 +40,34 @@ import {isMinifiedMode} from '../minified-mode';
  * @throws {UserError} when shouldBeTruthy is not truthy.
  * @closurePrimitive {asserts.truthy}
  */
-export function pureUserAssert(
-  shouldBeTruthy,
-  opt_message,
-  opt_1,
-  opt_2,
-  opt_3,
-  opt_4,
-  opt_5,
-  opt_6,
-  opt_7,
-  opt_8,
-  opt_9
-) {
-  return assert(
-    USER_ERROR_SENTINEL,
-    shouldBeTruthy,
-    opt_message,
-    opt_1,
-    opt_2,
-    opt_3,
-    opt_4,
-    opt_5,
-    opt_6,
-    opt_7,
-    opt_8,
-    opt_9
-  );
-}
+// export function pureUserAssert(
+//   shouldBeTruthy,
+//   opt_message,
+//   opt_1,
+//   opt_2,
+//   opt_3,
+//   opt_4,
+//   opt_5,
+//   opt_6,
+//   opt_7,
+//   opt_8,
+//   opt_9
+// ) {
+//   return assert(
+//     USER_ERROR_SENTINEL,
+//     shouldBeTruthy,
+//     opt_message,
+//     opt_1,
+//     opt_2,
+//     opt_3,
+//     opt_4,
+//     opt_5,
+//     opt_6,
+//     opt_7,
+//     opt_8,
+//     opt_9
+//   );
+// }
 
 /**
  * Throws an error if the first argument isn't trueish. Mirrors devAssert in
@@ -85,44 +88,44 @@ export function pureUserAssert(
  * @throws {Error} when shouldBeTruthy is not truthy.
  * @closurePrimitive {asserts.truthy}
  */
-export function pureDevAssert(
-  shouldBeTruthy,
-  opt_message,
-  opt_1,
-  opt_2,
-  opt_3,
-  opt_4,
-  opt_5,
-  opt_6,
-  opt_7,
-  opt_8,
-  opt_9
-) {
-  if (isMinifiedMode()) {
-    return shouldBeTruthy;
-  }
+// export function pureDevAssert(
+//   shouldBeTruthy,
+//   opt_message,
+//   opt_1,
+//   opt_2,
+//   opt_3,
+//   opt_4,
+//   opt_5,
+//   opt_6,
+//   opt_7,
+//   opt_8,
+//   opt_9
+// ) {
+//   if (isMinifiedMode()) {
+//     return shouldBeTruthy;
+//   }
 
-  if (self.__AMP_ASSERTION_CHECK) {
-    // This will never execute regardless, but will be included on unminified
-    // builds. It will be DCE'd away from minified builds, and so can be used to
-    // validate that Babel is properly removing dev assertions in minified
-    // builds.
-    console /*OK*/
-      .log('__devAssert_sentinel__');
-  }
+//   if (self.__AMP_ASSERTION_CHECK) {
+//     // This will never execute regardless, but will be included on unminified
+//     // builds. It will be DCE'd away from minified builds, and so can be used to
+//     // validate that Babel is properly removing dev assertions in minified
+//     // builds.
+//     console /*OK*/
+//       .log('__devAssert_sentinel__');
+//   }
 
-  return assert(
-    null,
-    shouldBeTruthy,
-    opt_message,
-    opt_1,
-    opt_2,
-    opt_3,
-    opt_4,
-    opt_5,
-    opt_6,
-    opt_7,
-    opt_8,
-    opt_9
-  );
-}
+//   return assert(
+//     null,
+//     shouldBeTruthy,
+//     opt_message,
+//     opt_1,
+//     opt_2,
+//     opt_3,
+//     opt_4,
+//     opt_5,
+//     opt_6,
+//     opt_7,
+//     opt_8,
+//     opt_9
+//   );
+// }
