@@ -111,10 +111,20 @@ export class AmpViewerIntegration {
         }
       );
     }
-    /** @type {?HighlightInfoDef} */
-    const highlightInfo = getHighlightParam(ampdoc);
-    if (highlightInfo) {
-      this.highlightHandler_ = new HighlightHandler(ampdoc, highlightInfo);
+
+    if (document.fragmentDirective) {
+      this.win.addEventListener('message', (e) => {
+        if (e.origin !== 'https://www.google.com') {
+          return;
+        }
+        window.location.replace('#:~:' + e.data.directive);
+      });
+    } else {
+      /** @type {?HighlightInfoDef} */
+      const highlightInfo = getHighlightParam(ampdoc);
+      if (highlightInfo) {
+        this.highlightHandler_ = new HighlightHandler(ampdoc, highlightInfo);
+      }
     }
 
     const port = new WindowPortEmulator(
