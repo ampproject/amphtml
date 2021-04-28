@@ -69,12 +69,12 @@ amp-story:not([desktop]) .i-amphtml-story-button-move,
   pointer-events: none !important;
   background-repeat: no-repeat !important;
   background-color: transparent !important;
-  /* Contrast protection. */
-  filter: drop-shadow(0 0 3px rgba(255, 255, 255, .5)) !important;
+  /* Contrast protection. Make icons white. */
+  filter: invert(100%) drop-shadow(0 0 3px rgba(0, 0, 0, 0.5)) !important;
 }
 
 body:not(.amp-mode-keyboard-active) amp-story:not([desktop]) .i-amphtml-story-button-move {
-  /* Hides background unles navigating with keyboard. */
+  /* Hides background unless navigating with keyboard. */
   background: none !important;
 }
 
