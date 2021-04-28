@@ -23,7 +23,7 @@ const {default: ignore} = require('ignore');
 const {doBuild} = require('../tasks/build');
 const {doDist} = require('../tasks/dist');
 const {gitDiffNameOnlyMain} = require('./git');
-const {green, cyan, yellow} = require('kleur/colors');
+const {green, cyan, red, yellow} = require('kleur/colors');
 const {log, logLocalDev} = require('./logging');
 
 /**
@@ -96,21 +96,24 @@ function logFiles(files) {
 }
 
 /**
- * Extracts the list of files from argv.files.
+ * Extracts the list of files from argv.files. Throws an error if no matching
+ * files were found.
  *
  * @return {Array<string>}
  */
 function getFilesFromArgv() {
-  // TODO: https://github.com/ampproject/amphtml/issues/30223
-  // Switch from globby to a lib that supports Windows.
+  if (!argv.files) {
+    return [];
+  }
+  // TODO(#30223): globby only takes posix globs. Find a Windows alternative.
   const toPosix = (str) => str.replace(/\\\\?/g, '/');
-  return argv.files
-    ? globby.sync(
-        (Array.isArray(argv.files) ? argv.files : argv.files.split(','))
-          .map((s) => s.trim())
-          .map(toPosix)
-      )
-    : [];
+  const globs = Array.isArray(argv.files) ? argv.files : argv.files.split(',');
+  const files = globby.sync(globs.map((glob) => glob.trim()).map(toPosix));
+  if (files.length == 0) {
+    log(red('ERROR:'), 'Argument(s)', cyan(argv.files), 'matched zero files.');
+    throw new Error('No tests to run.');
+  }
+  return files;
 }
 
 /**
