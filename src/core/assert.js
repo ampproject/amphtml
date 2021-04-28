@@ -39,7 +39,7 @@ import {remove} from './types/array';
  * @template T
  * @throws {Error} when shouldBeTruthy is not truthy.
  */
-function assertion(
+export function assertion(
   sentinel,
   shouldBeTruthy,
   opt_message = 'Assertion failed',

@@ -18,13 +18,13 @@ import {
   USER_ERROR_SENTINEL,
   elementStringOrPassThru,
 } from './core/error-message-helpers';
+import {assertion} from './core/assert';
 import {createErrorVargs, duplicateErrorIfNecessary} from './core/error';
 import {findIndex, isArray} from './core/types/array';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
 import {isEnumValue} from './core/types';
 import {once} from './core/types/function';
-import {pureDevAssert, pureUserAssert} from './core/assert';
 import {urls} from './config';
 
 const noop = () => {};
@@ -402,8 +402,7 @@ export class Log {
       );
     }
 
-    const assertion = this == logs.user ? pureUserAssert : pureDevAssert;
-    return assertion.apply(null, arguments);
+    return assertion.bind(null, this.suffix_).apply(null, arguments);
   }
 
   /**
