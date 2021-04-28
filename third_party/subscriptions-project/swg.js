@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.157 */
+/** Version: 0.1.22.158 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -876,14 +876,12 @@ class EntitlementsRequest {
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.usedEntitlement_ ? this.usedEntitlement_.toArray(includeLabel) :
-                              [],  // field 1 - used_entitlement
-      this.clientEventTime_ ? this.clientEventTime_.toArray(includeLabel) :
-                              [],  // field 2 - client_event_time
-      this.entitlementSource_,     // field 3 - entitlement_source
-      this.entitlementResult_,     // field 4 - entitlement_result
-      this.token_,                 // field 5 - token
-      this.isUserRegistered_,      // field 6 - is_user_registered
+        this.usedEntitlement_ ? this.usedEntitlement_.toArray(includeLabel) : [], // field 1 - used_entitlement
+        this.clientEventTime_ ? this.clientEventTime_.toArray(includeLabel) : [], // field 2 - client_event_time
+        this.entitlementSource_, // field 3 - entitlement_source
+        this.entitlementResult_, // field 4 - entitlement_result
+        this.token_, // field 5 - token
+        this.isUserRegistered_, // field 6 - is_user_registered
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -913,6 +911,9 @@ class EntitlementsResponse {
 
     /** @private {?string} */
     this.jwt_ = data[base] == null ? null : data[base];
+
+    /** @private {?string} */
+    this.swgUserToken_ = data[1 + base] == null ? null : data[1 + base];
   }
 
   /**
@@ -930,6 +931,20 @@ class EntitlementsResponse {
   }
 
   /**
+   * @return {?string}
+   */
+  getSwgUserToken() {
+    return this.swgUserToken_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setSwgUserToken(value) {
+    this.swgUserToken_ = value;
+  }
+
+  /**
    * @param {boolean} includeLabel
    * @return {!Array<?>}
    * @override
@@ -937,6 +952,7 @@ class EntitlementsResponse {
   toArray(includeLabel = true) {
     const arr = [
         this.jwt_, // field 1 - jwt
+        this.swgUserToken_, // field 2 - swg_user_token
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -981,6 +997,9 @@ class EventParams {
 
     /** @private {?boolean} */
     this.isUserRegistered_ = data[5 + base] == null ? null : data[5 + base];
+
+    /** @private {?string} */
+    this.subscriptionFlow_ = data[6 + base] == null ? null : data[6 + base];
   }
 
   /**
@@ -1068,6 +1087,20 @@ class EventParams {
   }
 
   /**
+   * @return {?string}
+   */
+  getSubscriptionFlow() {
+    return this.subscriptionFlow_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setSubscriptionFlow(value) {
+    this.subscriptionFlow_ = value;
+  }
+
+  /**
    * @param {boolean} includeLabel
    * @return {!Array<?>}
    * @override
@@ -1080,6 +1113,7 @@ class EventParams {
         this.sku_, // field 4 - sku
         this.oldTransactionId_, // field 5 - old_transaction_id
         this.isUserRegistered_, // field 6 - is_user_registered
+        this.subscriptionFlow_, // field 7 - subscription_flow
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -4467,7 +4501,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.157',
+    '_client': 'SwG 0.1.22.158',
   });
 }
 
@@ -4530,10 +4564,11 @@ const RecurrenceMapping = {
 
 /**
  * @param {string} sku
+ * @param {?string=} subscriptionFlow
  * @return {!EventParams}
  */
-function getEventParams$1(sku) {
-  return new EventParams([, , , , sku]);
+function getEventParams$1(sku, subscriptionFlow = null) {
+  return new EventParams([, , , , sku, , , subscriptionFlow]);
 }
 
 /**
@@ -4685,7 +4720,12 @@ class PayCompleteFlow {
           eventManager.logSwgEvent(
             AnalyticsEvent.ACTION_PAYMENT_COMPLETE,
             true,
-            getEventParams$1(sku || '')
+            getEventParams$1(
+              sku || '',
+              response.productType == ProductType.UI_CONTRIBUTION
+                ? SubscriptionFlows.CONTRIBUTE
+                : SubscriptionFlows.SUBSCRIBE
+            )
           );
           flow.start(response);
         },
@@ -5197,6 +5237,21 @@ class OffersFlow {
   }
 
   /**
+   * @param {!EntitlementsResponse} response
+   * @private
+   */
+  handleEntitlementsResponse_(response) {
+    const jwt = response.getJwt();
+    if (jwt) {
+      this.deps_.entitlementsManager().pushNextEntitlements(jwt);
+      const swgUserToken = response.getSwgUserToken();
+      if (swgUserToken) {
+        this.deps_.storage().set(Constants$1.USER_TOKEN, swgUserToken, true);
+      }
+    }
+  }
+
+  /**
    * Starts the offers flow or alreadySubscribed flow.
    * @return {!Promise}
    */
@@ -5228,6 +5283,10 @@ class OffersFlow {
         activityIframeView.on(
           ViewSubscriptionsResponse,
           this.startNativeFlow_.bind(this)
+        );
+        activityIframeView.on(
+          EntitlementsResponse,
+          this.handleEntitlementsResponse_.bind(this)
         );
 
         return this.dialogManager_.openView(activityIframeView);
@@ -5659,7 +5718,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.157',
+        '_client': 'SwG 0.1.22.158',
         'supportsEventManager': true,
       },
       args || {}
@@ -5957,6 +6016,7 @@ class ClientEventManager {
 
   /**
    * @overrides
+   * @param {!../api/client-event-manager-api.ClientEvent} event
    */
   logEvent(event) {
     validateEvent(event);
@@ -6506,7 +6566,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.157');
+    context.setClientVersion('SwG 0.1.22.158');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -15216,16 +15276,21 @@ class PayClient {
     /** @private @const {!Preconnect} */
     this.preconnect_ = new Preconnect(this.win_.document);
 
+    // If the page is started from a redirect, immediately initialize
+    // client to avoid dropping user state.
+    if (
+      isExperimentOn(this.win_, ExperimentFlags.PAY_CLIENT_REDIRECT) &&
+      this.pageIsInitializedFromPayRedirect_()
+    ) {
+      this.preconnect(this.preconnect_);
+      this.initializePaymentsClient_();
+    }
+
     // Prepare new verifier pair.
     this.redirectVerifierHelper_.prepare();
 
     /** @private @const {!./client-event-manager.ClientEventManager} */
     this.eventManager_ = deps.eventManager();
-
-    if (isExperimentOn(this.win_, ExperimentFlags.PAY_CLIENT_REDIRECT)) {
-      // Bind handleResponse_ in ctor to catch redirects.
-      this.handleResponse_ = this.handleResponse_.bind(this);
-    }
   }
 
   /**
@@ -15259,6 +15324,36 @@ class PayClient {
   }
 
   /**
+   * Initializes Payments client.
+   */
+  initializePaymentsClient_() {
+    this.client_ = this.createClient_(
+      /** @type {!PaymentOptions} */
+      ({
+        environment: 'PRODUCTION',
+        'i': {
+          'redirectKey': this.redirectVerifierHelper_.restoreKey(),
+        },
+      }),
+      this.analytics_.getTransactionId(),
+      this.handleResponse_.bind(this)
+    );
+  }
+
+  /**
+   * Detects if the window is started from a Pay redirect by
+   * checking window's hash for Web Activities information.
+   */
+  pageIsInitializedFromPayRedirect_() {
+    const hash = this.win_.location.hash;
+    const hasRedirectEncryptedCallbackData = /redirectEncryptedCallbackData/.test(
+      hash
+    );
+    const hasSwgRequest = /swgRequest/.test(hash);
+    return hasRedirectEncryptedCallbackData && hasSwgRequest;
+  }
+
+  /**
    * @return {string}
    */
   getType() {
@@ -15275,19 +15370,7 @@ class PayClient {
 
     if (!this.client_) {
       this.preconnect(this.preconnect_);
-      this.client_ = this.createClient_(
-        /** @type {!PaymentOptions} */
-        ({
-          environment: 'PRODUCTION',
-          'i': {
-            'redirectKey': this.redirectVerifierHelper_.restoreKey(),
-          },
-        }),
-        this.analytics_.getTransactionId(),
-        isExperimentOn(this.win_, ExperimentFlags.PAY_CLIENT_REDIRECT)
-          ? this.handleResponse_
-          : this.handleResponse_.bind(this)
-      );
+      this.initializePaymentsClient_();
     }
     if (options.forceRedirect) {
       paymentRequest = Object.assign(paymentRequest, {
