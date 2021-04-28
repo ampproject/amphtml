@@ -573,7 +573,8 @@ const forbiddenTermsGlobal = {
   '/\\*\\* @type \\{\\!Element\\} \\*/': {
     message: 'Use assertElement instead of casting to !Element.',
     allowlist: [
-      'src/log.js', // Has actual implementation of assertElement.
+      // 'src/log(.js', // Has actual implementation of assertElement.
+      'src/core/assert/base.js', // Has actual implementation of assertElement.
       'src/polyfills/custom-elements.js',
       'ads/google/imaVideo.js', // Required until #22277 is fixed.
       '3p/twitter.js', // Runs in a 3p window context, so cannot import log.js.

@@ -16,6 +16,7 @@
 
 import {elementStringOrPassThru} from '../error-message-helpers';
 import {includes} from '../types/string';
+import {isArray, isElement, isEnumValue, isString} from '../types';
 import {remove} from '../types/array';
 
 /**
@@ -77,4 +78,178 @@ export function assert(
     self.__AMP_REPORT_ERROR(error);
   }
   throw error;
+}
+
+/**
+ * Asserts types, backbone of `assertNumber`, `assertString`, etc.
+ *
+ * It does not yet understand array-based "id"-contracted messages.
+ *
+ * Otherwise creates a sprintf syntax string containing the optional message or the
+ * default. The `subject` of the assertion is added at the end.
+ *
+ * @param {?string} sentinel
+ * @param {T} subject
+ * @param {*} shouldBeTruthy
+ * @param {string} defaultMessage
+ * @param {Array|string=} opt_message
+ * @return {T}
+ * @template T
+ * @private
+ */
+function assertType_(
+  sentinel,
+  subject,
+  shouldBeTruthy,
+  defaultMessage,
+  opt_message
+) {
+  assert(
+    sentinel,
+    shouldBeTruthy,
+    `${opt_message || defaultMessage}: %s`,
+    subject
+  );
+
+  return /** @type {T} */ (subject);
+}
+
+/**
+ * Throws an error if the first argument isn't an Element.
+ *
+ * For more details see `assert`.
+ *
+ * @param {?string} sentinel
+ * @param {*} shouldBeElement
+ * @param {Array|string=} opt_message The assertion message
+ * @return {!Element} The value of shouldBeTrueish.
+ * @throws {Error} when shouldBeElement is not an Element
+ * @closurePrimitive {asserts.matchesReturn}
+ */
+export function assertElement(sentinel, shouldBeElement, opt_message) {
+  return /** @type {!Element} */ (assertType_(
+    sentinel,
+    shouldBeElement,
+    isElement(shouldBeElement),
+    'Element expected',
+    opt_message
+  ));
+}
+
+/**
+ * Throws an error if the first argument isn't a string. The string can
+ * be empty.
+ *
+ * For more details see `assert`.
+ *
+ * @param {?string} sentinel
+ * @param {*} shouldBeString
+ * @param {Array|string=} opt_message The assertion message
+ * @return {string} The string value. Can be an empty string.
+ * @throws {Error} when shouldBeString is not an String
+ * @closurePrimitive {asserts.matchesReturn}
+ */
+export function assertString(sentinel, shouldBeString, opt_message) {
+  return /** @type {string} */ (assertType_(
+    sentinel,
+    shouldBeString,
+    isString(shouldBeString),
+    'String expected',
+    opt_message
+  ));
+}
+
+/**
+ * Throws an error if the first argument isn't a number. The allowed values
+ * include `0` and `NaN`.
+ *
+ * For more details see `assert`.
+ *
+ * @param {?string} sentinel
+ * @param {*} shouldBeNumber
+ * @param {Array|string=} opt_message The assertion message
+ * @return {number} The number value. The allowed values include `0`
+ *   and `NaN`.
+ * @throws {Error} when shouldBeNumber is not an Number
+ * @closurePrimitive {asserts.matchesReturn}
+ */
+export function assertNumber(sentinel, shouldBeNumber, opt_message) {
+  return /** @type {number} */ (assertType_(
+    sentinel,
+    shouldBeNumber,
+    typeof shouldBeNumber == 'number',
+    'Number expected',
+    opt_message
+  ));
+}
+
+/**
+ * Throws an error if the first argument is not an array.
+ * The array can be empty.
+ *
+ * For more details see `assert`.
+ *
+ * @param {?string} sentinel
+ * @param {*} shouldBeArray
+ * @param {Array|string=} opt_message The assertion message
+ * @return {!Array} The array value
+ * @throws {Error} when shouldBeArray is not an Array
+ * @closurePrimitive {asserts.matchesReturn}
+ */
+export function assertArray(sentinel, shouldBeArray, opt_message) {
+  return /** @type {!Array} */ (assertType_(
+    sentinel,
+    shouldBeArray,
+    isArray(shouldBeArray),
+    'Array expected',
+    opt_message
+  ));
+}
+
+/**
+ * Throws an error if the first argument isn't a boolean.
+ *
+ * For more details see `assert`.
+ *
+ * @param {?string} sentinel
+ * @param {*} shouldBeBoolean
+ * @param {Array|string=} opt_message The assertion message
+ * @return {boolean} The boolean value.
+ * @throws {Error} when shouldBeBoolean is not an Boolean
+ * @closurePrimitive {asserts.matchesReturn}
+ */
+export function assertBoolean(sentinel, shouldBeBoolean, opt_message) {
+  return /** @type {boolean} */ (assertType_(
+    sentinel,
+    shouldBeBoolean,
+    !!shouldBeBoolean === shouldBeBoolean,
+    'Boolean expected',
+    opt_message
+  ));
+}
+
+/**
+ * Asserts and returns the enum value. If the enum doesn't contain such a
+ * value, the error is thrown.
+ *
+ * @param {?string} sentinel
+ * @param {*} shouldBeEnum
+ * @param {!Object<T>} enumObj
+ * @param {string=} opt_enumName
+ * @return {T}
+ * @template T
+ * @closurePrimitive {asserts.matchesReturn}
+ */
+export function assertEnumValue(
+  sentinel,
+  enumObj,
+  shouldBeEnum,
+  opt_enumName = 'enum'
+) {
+  return assertType_(
+    sentinel,
+    shouldBeEnum,
+    isEnumValue(enumObj, shouldBeEnum),
+    `Unknown ${opt_enumName} value: "${shouldBeEnum}"`
+  );
 }

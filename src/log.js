@@ -22,7 +22,7 @@ import {
 import {createErrorVargs, duplicateErrorIfNecessary} from './core/error';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
-import {isArray, isElement, isEnumValue, isString} from './core/types';
+import {isArray /*, isElement, isEnumValue, isString*/} from './core/types';
 import {once} from './core/types/function';
 import {urls} from './config';
 
@@ -418,13 +418,7 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertElement(shouldBeElement, opt_message) {
-    this.assertType_(
-      shouldBeElement,
-      isElement(shouldBeElement),
-      'Element expected',
-      opt_message
-    );
-    return /** @type {!Element} */ (shouldBeElement);
+    return assertions.assertElement(this.suffix_, shouldBeElement, opt_message);
   }
 
   /**
@@ -439,13 +433,7 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertString(shouldBeString, opt_message) {
-    this.assertType_(
-      shouldBeString,
-      isString(shouldBeString),
-      'String expected',
-      opt_message
-    );
-    return /** @type {string} */ (shouldBeString);
+    return assertions.assertString(this.suffix_, shouldBeString, opt_message);
   }
 
   /**
@@ -461,13 +449,7 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertNumber(shouldBeNumber, opt_message) {
-    this.assertType_(
-      shouldBeNumber,
-      typeof shouldBeNumber == 'number',
-      'Number expected',
-      opt_message
-    );
-    return /** @type {number} */ (shouldBeNumber);
+    return assertions.assertNumber(this.suffix_, shouldBeNumber, opt_message);
   }
 
   /**
@@ -480,13 +462,7 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertArray(shouldBeArray, opt_message) {
-    this.assertType_(
-      shouldBeArray,
-      isArray(shouldBeArray),
-      'Array expected',
-      opt_message
-    );
-    return /** @type {!Array} */ (shouldBeArray);
+    return assertions.assertArray(this.suffix_, shouldBeArray, opt_message);
   }
 
   /**
@@ -500,13 +476,7 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertBoolean(shouldBeBoolean, opt_message) {
-    this.assertType_(
-      shouldBeBoolean,
-      !!shouldBeBoolean === shouldBeBoolean,
-      'Boolean expected',
-      opt_message
-    );
-    return /** @type {boolean} */ (shouldBeBoolean);
+    return assertions.assertBoolean(this.suffix_, shouldBeBoolean, opt_message);
   }
 
   /**
@@ -521,10 +491,7 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertEnumValue(enumObj, s, opt_enumName) {
-    if (isEnumValue(enumObj, s)) {
-      return s;
-    }
-    this.assert(false, 'Unknown %s value: "%s"', opt_enumName || 'enum', s);
+    return assertions.assertEnumValue(this.suffix_, enumObj, s, opt_enumName);
   }
 
   /**
@@ -583,27 +550,6 @@ export class Log {
       return [this.messages_[id]].concat(parts);
     }
     return [`More info at ${externalMessageUrl(id, parts)}`];
-  }
-
-  /**
-   * Asserts types, backbone of `assertNumber`, `assertString`, etc.
-   *
-   * It understands array-based "id"-contracted messages.
-   *
-   * Otherwise creates a sprintf syntax string containing the optional message or the
-   * default. An interpolation token is added at the end to include the `subject`.
-   * @param {*} subject
-   * @param {*} assertion
-   * @param {string} defaultMessage
-   * @param {!Array|string=} opt_message
-   * @private
-   */
-  assertType_(subject, assertion, defaultMessage, opt_message) {
-    if (isArray(opt_message)) {
-      this.assert(assertion, opt_message.concat(subject));
-    } else {
-      this.assert(assertion, `${opt_message || defaultMessage}: %s`, subject);
-    }
   }
 }
 
