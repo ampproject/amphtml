@@ -19,10 +19,5 @@
  * @externs
  */
 
-Error.prototype.expected;
-Error.prototype.never;
-Error.prototype.fromAssert;
-Error.prototype.associatedElement;
-
 /** @type {undefined|Array<*>} */
 Error.prototype.messageArray;
