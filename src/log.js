@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+import * as assertions from './core/assert/base';
 import {
   USER_ERROR_SENTINEL,
   elementStringOrPassThru,
 } from './core/error-message-helpers';
-import {assert as baseAssert} from './core/assert/base';
 import {createErrorVargs, duplicateErrorIfNecessary} from './core/error';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
-import {isArray, isElement, isEnumValue} from './core/types';
+import {isArray, isElement, isEnumValue, isString} from './core/types';
 import {once} from './core/types/function';
 import {urls} from './config';
 
@@ -401,7 +401,7 @@ export class Log {
       );
     }
 
-    return baseAssert.apply(
+    return assertions.assert.apply(
       null,
       [this.suffix_].concat(Array.prototype.slice.call(arguments))
     );
@@ -441,7 +441,7 @@ export class Log {
   assertString(shouldBeString, opt_message) {
     this.assertType_(
       shouldBeString,
-      typeof shouldBeString == 'string',
+      isString(shouldBeString),
       'String expected',
       opt_message
     );
