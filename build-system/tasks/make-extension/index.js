@@ -220,6 +220,13 @@ async function makeExtensionFromTemplates(
     '__component_name_hyphenated__': name,
     '__component_name_hyphenated_capitalized__': name.toUpperCase(),
     '__component_name_pascalcase__': namePascalCase,
+    // TODO(alanorozco): Remove __storybook_experiments...__ once we stop
+    // requiring the bento experiment.
+    '__storybook_experiments_do_not_add_trailing_comma__':
+      // Don't add a trailing comma in the template, instead we add it here.
+      // This is because the property added is optional, and a double comma would
+      // cause a syntax error.
+      options.bento ? "experiments: ['bento']," : '',
     ...(!options.nocss
       ? {
           '__jss_import_component_css__': `import {CSS as COMPONENT_CSS} from './component.jss'`,
@@ -341,29 +348,21 @@ async function affectsWorkingTree(fn) {
 }
 
 /**
- * Builds and tests a generated extension.
- * (Unit tests for the generator are located in test/test.js)
+ * Generates an extension with the given name and runs all unit tests located in
+ * the generated extension directory.
  * @param {string} name
- * @return {!Promise{?string}} stderr or null if passing
+ * @return {!Promise{?string}} stderr if failing, null if passing
  */
 async function runExtensionTests(name) {
   for (const command of [
     `amp build --extensions=${name} --core_runtime_only`,
-    `amp unit --nohelp --headless --files="extensions/${name}/**/test/test-*.js" --report`,
+    `amp unit --headless --files="extensions/${name}/**/test/test-*.js"`,
   ]) {
     log('Running', cyan(command) + '...');
     const result = getOutput(command);
     if (result.status !== 0) {
       return result.stderr || result.stdout;
     }
-  }
-  const report = await fs.readJson('result-reports/unit.json');
-  if (!report.summary.success) {
-    return `Zero tests succeeded\n${JSON.stringify(
-      report,
-      /* replacer */ undefined,
-      /* space */ 2
-    )}`;
   }
   return null;
 }
