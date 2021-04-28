@@ -54,7 +54,7 @@ const DEFAULT_CUSTOM_EVENT_OPTIONS = {bubbles: true, cancelable: true};
  * nor ids.
  * @param {string} name
  */
-export function assertIsName(name) {
+function assertIsName(name) {
   devAssert(/^[\w-]+$/.test(name));
 }
 
