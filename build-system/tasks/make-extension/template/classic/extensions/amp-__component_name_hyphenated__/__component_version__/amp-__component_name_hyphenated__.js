@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-__component_name_hyphenated__-__component_version__.css';
+__css_import__;
 import {Layout} from '../../../src/layout';
 
 const TAG = 'amp-__component_name_hyphenated__';
@@ -47,5 +47,5 @@ export class Amp__component_name_pascalcase__ extends AMP.BaseElement {
 }
 
 AMP.extension(TAG, '__component_version__', AMP => {
-  AMP.registerElement(TAG, Amp__component_name_pascalcase__, CSS);
+  AMP.registerElement(__register_element_args__);
 });
