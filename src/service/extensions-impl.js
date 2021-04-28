@@ -200,9 +200,11 @@ export class Extensions {
    */
   waitForExtension(extensionId, version) {
     const wait = this.waitFor_(this.getExtensionHolder_(extensionId, version));
-    const timeout = new Promise((r) => setTimeout(r, 16000)).then(() => {
-      user().createError(`Waited over 16s to load extension ${extensionId}.`);
-    });
+    const timeout = new Promise((r) => this.win.setTimeout(r, 16000)).then(
+      () => {
+        user().error(TAG, `Waited over 16s to load extension ${extensionId}.`);
+      }
+    );
     return Promise.race([wait, timeout]).then(() => wait);
   }
 
