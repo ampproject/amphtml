@@ -26,5 +26,5 @@ export {isObject} from './object';
  * @return {boolean}
  */
 export function isElement(value) {
-  return value?.tagName == /* Node.ELEMENT_NODE */ 1;
+  return value?.nodeType == /* Node.ELEMENT_NODE */ 1;
 }
