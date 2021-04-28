@@ -158,8 +158,8 @@ export class AmpTiktok extends AMP.BaseElement {
     );
 
     Promise.resolve(this.oEmbedResponsePromise_).then((data) => {
-      if (data && data.title) {
-        iframe.setAttribute('aria-title', `TikTok: ${data.title}`);
+      if (data && data['title']) {
+        iframe.setAttribute('aria-title', `TikTok: ${data['title']}`);
       }
     });
 
