@@ -72,12 +72,12 @@ const TYPE_CHECK_TARGETS = {
     warningLevel: 'QUIET',
   },
   'src-core': {
-    srcGlobs: ['src/core{,/**}/*.js'],
-    externGlobs: [
-      CORE_EXTERNS_GLOB,
-      // Needed for CSS escape polyfill; this should be handled differently
+    srcGlobs: [
+      'src/core{,/**}/*.js',
+      // Needed for CSS escape polyfill
       'third_party/css-escape/css-escape.js',
     ],
+    externGlobs: [CORE_EXTERNS_GLOB],
   },
   'src-examiner': {
     srcGlobs: ['src/examiner{,/**}/*.js'],
