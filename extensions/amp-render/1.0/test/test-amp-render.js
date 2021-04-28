@@ -53,6 +53,11 @@ describes.realWin(
       return element.querySelector('div');
     }
 
+    async function waitForText(el, txt) {
+      const hasText = () => el.querySelector('div').textContent === txt;
+      await waitFor(hasText, 'element text updated');
+    }
+
     async function getRenderedData() {
       const wrapper = await waitRendered();
       return wrapper.textContent;
@@ -402,17 +407,15 @@ describes.realWin(
       );
     });
 
-    it.skip('should update url replacement policy when src mutates', async () => {
-      const json = {
-        firstName: 'Joe',
-        lastName: 'Biden',
-      };
-
+    it('should render updates when src mutates', async () => {
       const fetchJsonStub = env.sandbox.stub(
         BatchedJsonModule,
         'batchFetchJsonFor'
       );
-      fetchJsonStub.resolves(json);
+      fetchJsonStub.resolves({
+        firstName: 'Joe',
+        lastName: 'Biden',
+      });
 
       const ampState = html`
         <amp-state id="president">
@@ -447,8 +450,8 @@ describes.realWin(
       expect(fetchJsonStub).not.to.have.been.called;
 
       element.setAttribute('src', 'https://example.com/data.json');
-      text = await getRenderedData();
-      expect(text).to.equal('Biden, Joe');
+
+      await waitForText(element, 'Biden, Joe');
       expect(fetchJsonStub).to.have.been.called;
     });
   }
