@@ -45,26 +45,24 @@ export class PremiumadsNetworkConfig {
   /** @override */
   getConfigUrl() {
     const data = this.autoAmpAdsElement_.dataset;
-    return buildUrl(
-      data.host || 'https://tags.premiumads.com.br/autoads/' + data.publisher,
-      {},
-      4096
-    );
+    const host = data.host || 'https://tags.premiumads.com.br';
+    return buildUrl(`${host}/autoads/${data.publisher}`, {}, 4096);
   }
 
   /** @override */
   getAttributes() {
     const data = this.autoAmpAdsElement_.dataset;
-    const attributesObj = dict({
+    return dict({
       'type': 'doubleclick',
       'data-ad': 'premiumads',
       'width': data.width || 336,
       'height': data.height || 280,
-      'layout': data.layout || Layout.RESPONSIVE,
-      'sizes': data.sizes || '(min-width: 320px) 320px, 100vw',
-      'style': data['style'] || 'position:relative!important',
+      'layout': data.layout || Layout.FIXED,
+      'sizes': data.sizes || '(min-width: 320px) 336px, 100vw',
+      'style':
+        data['style'] ||
+        'margin: 15px auto; position: relative !important; display: block !important;',
     });
-    return attributesObj;
   }
 
   /** @override */
