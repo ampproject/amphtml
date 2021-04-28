@@ -14,74 +14,9 @@
  * limitations under the License.
  */
 
-import {
-  USER_ERROR_SENTINEL,
-  elementStringOrPassThru,
-} from './error-message-helpers';
-import {includes} from './types/string';
-import {isMinifiedMode} from './minified-mode';
-import {remove} from './types/array';
-
-/**
- * Throws an error if the second argument isn't trueish.
- *
- * Supports argument substitution into the message via %s placeholders.
- *
- * Throws an error object that has two extra properties:
- * - messageArray: The elements of the substituted message as non-stringified
- *   elements in an array. When e.g. passed to console.error this yields
- *   native displays of things like HTML elements.
- * @param {?string} sentinel
- * @param {T} shouldBeTruthy
- * @param {string} opt_message
- * @param {...*} var_args Arguments substituted into %s in the message
- * @return {T}
- * @template T
- * @throws {Error} when shouldBeTruthy is not truthy.
- */
-export function assertion(
-  sentinel,
-  shouldBeTruthy,
-  opt_message = 'Assertion failed',
-  var_args
-) {
-  if (shouldBeTruthy) {
-    return shouldBeTruthy;
-  }
-
-  // Include the sentinel string if provided and not already present
-  if (sentinel && !includes(opt_message, sentinel)) {
-    opt_message += sentinel;
-  }
-
-  // Skip the first 3 arguments to isolate format params
-  // const messageArgs = Array.prototype.slice.call(arguments, 3);
-  // Index at which message args start
-  let i = 3;
-
-  // Substitute provided values into format string in message
-  const splitMessage = opt_message.split('%s');
-  let message = splitMessage.shift();
-  const messageArray = [message];
-
-  while (splitMessage.length) {
-    const subValue = arguments[i++];
-    const nextConstant = splitMessage.shift();
-
-    message += elementStringOrPassThru(subValue) + nextConstant;
-    messageArray.push(subValue, nextConstant.trim());
-  }
-
-  const error = new Error(message);
-  error.messageArray = remove(messageArray, (x) => x !== '');
-  // __AMP_REPORT_ERROR is installed globally per window in the entry point in
-  // AMP documents. It may not be present for Bento/Preact elements on non-AMP
-  // pages.
-  if (self.__AMP_REPORT_ERROR) {
-    self.__AMP_REPORT_ERROR(error);
-  }
-  throw error;
-}
+import {USER_ERROR_SENTINEL} from '../error-message-helpers';
+import {assert} from './base';
+import {isMinifiedMode} from '../minified-mode';
 
 /**
  * Throws a user error if the first argument isn't trueish. Mirrors userAssert
@@ -115,7 +50,7 @@ export function pureUserAssert(
   opt_8,
   opt_9
 ) {
-  return assertion(
+  return assert(
     USER_ERROR_SENTINEL,
     shouldBeTruthy,
     opt_message,
@@ -176,7 +111,7 @@ export function pureDevAssert(
       .log('__devAssert_sentinel__');
   }
 
-  return assertion(
+  return assert(
     null,
     shouldBeTruthy,
     opt_message,

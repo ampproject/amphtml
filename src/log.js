@@ -18,7 +18,7 @@ import {
   USER_ERROR_SENTINEL,
   elementStringOrPassThru,
 } from './core/error-message-helpers';
-import {assertion} from './core/assert';
+import {assert as baseAssert} from './core/assert/base';
 import {createErrorVargs, duplicateErrorIfNecessary} from './core/error';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
@@ -401,7 +401,7 @@ export class Log {
       );
     }
 
-    return assertion.apply(
+    return baseAssert.apply(
       null,
       [this.suffix_].concat(Array.prototype.slice.call(arguments))
     );
