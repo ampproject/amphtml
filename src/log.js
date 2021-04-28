@@ -20,7 +20,6 @@ import {
 } from './core/error-message-helpers';
 import {assertion} from './core/assert';
 import {createErrorVargs, duplicateErrorIfNecessary} from './core/error';
-import {findIndex} from './core/types/array';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
 import {isArray, isElement, isEnumValue} from './core/types';
