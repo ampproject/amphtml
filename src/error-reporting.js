@@ -26,6 +26,7 @@ import {dict} from './core/types/object';
 import {duplicateErrorIfNecessary} from './core/error';
 import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
 import {exponentialBackoff} from './exponential-backoff';
+import {findIndex} from './core/types/array';
 import {getMode} from './mode';
 import {isLoadErrorMessage} from './event-helper';
 import {isProxyOrigin} from './url';
@@ -183,6 +184,15 @@ export function reportError(error, opt_associatedElement) {
     }
     error.reported = true;
 
+    // `associatedElement` is used to add the i-amphtml-error class; in
+    // `#development=1` mode, it also adds `i-amphtml-element-error` to the
+    // element and sets the `error-message` attribute.
+    if (error.messageArray) {
+      const elIndex = findIndex(error.messageArray, (item) => item?.tagName);
+      if (elIndex > -1) {
+        error.associatedElement = error.messageArray[elIndex];
+      }
+    }
     // Update element.
     const element = opt_associatedElement || error.associatedElement;
     if (element && element.classList) {
