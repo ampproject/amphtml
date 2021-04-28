@@ -19,3 +19,12 @@ export {isArray} from './array';
 export {isEnumValue} from './enum';
 export {isString} from './string';
 export {isObject} from './object';
+
+/**
+ * Determines if value is an ELement
+ * @param {*} value
+ * @return {boolean}
+ */
+export function isElement(value) {
+  return value?.tagName == 1;
+}
