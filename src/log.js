@@ -402,15 +402,8 @@ export class Log {
       );
     }
 
-    try {
-      const assertion = this == logs.user ? pureUserAssert : pureDevAssert;
-      return assertion.apply(null, arguments);
-    } catch (e) {
-      this.prepareError_(e);
-      // __AMP_REPORT_ERROR is installed globally per window in the entry point.
-      self.__AMP_REPORT_ERROR(e);
-      throw e;
-    }
+    const assertion = this == logs.user ? pureUserAssert : pureDevAssert;
+    return assertion.apply(null, arguments);
   }
 
   /**
