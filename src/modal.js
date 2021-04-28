@@ -172,7 +172,6 @@ export function setModalAsOpen(element) {
   devAssert(isConnectedNode(element));
 
   element.setAttribute('aria-modal', 'true');
-  element.setAttribute('role', 'dialog');
 
   const elements = getElementsToAriaHide(element);
   const ancestry = getAncestors(element).filter(
@@ -237,7 +236,6 @@ export function setModalAsClosed(element) {
   devAssert(topModalElement === element);
 
   element.removeAttribute('aria-modal');
-  element.removeAttribute('role');
 
   // Put aria-hidden back to how it was before the call.
   hiddenElementInfos.forEach((hiddenElementInfo) => {
