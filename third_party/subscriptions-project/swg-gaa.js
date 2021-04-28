@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.157 */
+/** Version: 0.1.22.158 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -72,7 +72,7 @@ const I18N_STRINGS = {
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
- * Licensed under the Apache License,2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
