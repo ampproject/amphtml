@@ -209,7 +209,6 @@ export class AmpStoryEducation extends AMP.BaseElement {
             this.storyPausedStateToRestore_
           );
           setModalAsClosed(this.element);
-          this.element.removeAttribute('aria-modal');
         });
         break;
       case State.NAVIGATION_TAP:
@@ -282,7 +281,6 @@ export class AmpStoryEducation extends AMP.BaseElement {
       this.containerEl_.appendChild(template);
       if (!this.element.hasAttribute('aria-modal')) {
         setModalAsOpen(this.element);
-        this.element.setAttribute('aria-modal', 'true');
       }
     });
   }
