@@ -14,27 +14,6 @@
  * limitations under the License.
  */
 
-__jss_import_component_css__;
-import {__component_name_pascalcase__} from './component';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-
-export class BaseElement extends PreactBaseElement {}
-
-/** @override */
-BaseElement['Component'] = __component_name_pascalcase__;
-
-/** @override */
-BaseElement['props'] = {
-  'children': {passthrough: true},
-  // 'children': {passthroughNonEmpty: true},
-  // 'children': {selector: '...'},
-};
-
-/** @override */
-BaseElement['layoutSizeDefined'] = true;
-
-/** @override */
-BaseElement['usesShadowDom'] = true;
-
-/** @override */
-BaseElement['shadowCss'] = __jss_component_css__;
+amp-__component_name_hyphenated__ {
+  /** Component styles */
+}

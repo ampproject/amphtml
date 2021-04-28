@@ -1,5 +1,5 @@
 /**
- * Copyright __current_year__ The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-/* __do_not_submit__
- * If you don't require this CSS file, remove {hasCss: true} from
- * bundles.config.extensions.json. Otherwise, remove this comment.
- */
+/* eslint-disable */
+import chai from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
 
-amp-__component_name_hyphenated__ {
-  /** Component styles */
-}
+chai.use(sinonChai);
+window.chai = chai;
+window.should = chai.should();
+window.expect = chai.expect;
+window.assert = chai.assert;
+window.sinon = sinon;
+

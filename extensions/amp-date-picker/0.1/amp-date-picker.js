@@ -40,7 +40,7 @@ import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/core/types/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/core/types/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {once} from '../../../src/core/types/function';
 import {requireExternal} from '../../../src/module';
 
