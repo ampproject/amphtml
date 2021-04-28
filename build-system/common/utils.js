@@ -111,7 +111,7 @@ function getFilesFromArgv() {
   const files = globby.sync(globs.map((glob) => toPosix(glob.trim())));
   if (files.length == 0) {
     log(red('ERROR:'), 'Argument(s)', cyan(argv.files), 'matched zero files.');
-    throw new Error('No tests to run.');
+    throw new Error('Argument(s) matched zero files.');
   }
   return files;
 }
