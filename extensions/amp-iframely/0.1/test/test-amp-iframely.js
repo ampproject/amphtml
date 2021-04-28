@@ -53,10 +53,10 @@ describes.realWin(
         iframely.setAttribute(param, params[param]);
       }
       doc.body.appendChild(iframely);
-      return iframely
-        .build()
-        .then(() => iframely.layoutCallback())
-        .then(() => iframely);
+      return iframely.buildInternal().then(() => {
+        iframely.layoutCallback();
+        return iframely;
+      });
     }
 
     function testIframe(iframe, id) {
@@ -83,6 +83,7 @@ describes.realWin(
       return allowConsoleError(() => {
         return renderIframely({
           'data-url': 'https//some.url/',
+          'layout': 'fixed',
         }).should.eventually.be.rejectedWith(
           /Iframely data-key must also be set/
         );
@@ -93,7 +94,10 @@ describes.realWin(
       return allowConsoleError(() => {
         return renderIframely({
           'data-key': 'some-StRiNg/',
-        }).should.eventually.be.rejectedWith(/Iframely requires either/);
+          'layout': 'fixed',
+        }).should.eventually.be.rejectedWith(
+          /<amp-iframely> requires either "data-id" /
+        );
       });
     });
 
@@ -132,11 +136,6 @@ describes.realWin(
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
         // Border render cleared
         expect(iframe.getAttribute('style')).to.equal('border: 0px;');
-        // Allow string for iframe
-        expect(iframe.getAttribute('allow')).to.equal(
-          'encrypted-media *; accelerometer *; gyroscope *; picture-in-picture *; camera *; microphone *;'
-        );
-        expect(iframe.getAttribute('allow')).to.not.include('autoplay');
       });
     });
 
@@ -145,7 +144,9 @@ describes.realWin(
         const image = iframely.querySelector('amp-img');
         expect(image).to.not.be.null;
         expect(image.tagName).to.equal('AMP-IMG');
-        expect(image.className).to.match(/amp-hidden/);
+        expect(image.className).to.match(
+          /i-amphtml-element i-amphtml-notbuilt amp-notbuilt i-amphtml-layout-fill i-amphtml-layout-size-defined/
+        );
       });
     });
 
@@ -211,8 +212,6 @@ describes.realWin(
         expect(iframe.src).to.equal(`https://${domain}/${TestID}?amp=1`);
       });
     });
-
-    // TODO: url-key and domain
 
     it('renders placeholder with data-img key set', () => {
       const data = {
@@ -352,12 +351,12 @@ describes.realWin(
         'data-url': 'https://some-url.com',
         'height': '100',
         'width': '100',
-        'data-key': '747',
+        'data-key': '',
         'layout': 'fixed',
       };
       return allowConsoleError(() => {
         return renderIframely(data).should.eventually.be.rejectedWith(
-          /Iframely data-key should be between/
+          /Iframely data-key must also be set when you specify data-url parameter/
         );
       });
     });
@@ -377,7 +376,7 @@ describes.realWin(
         const iframe = iframely.querySelector('iframe');
         expect(image).to.not.be.null;
         expect(iframe).to.not.be.null;
-        expect(iframe.src.includes('&optionone=value&option-two=value')).to.be
+        expect(iframe.src.includes('&optionone=value&optionTwo=value')).to.be
           .true;
       });
     });
