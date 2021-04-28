@@ -392,7 +392,7 @@ module.exports = {
 
 makeExtension.description = 'Create an extension skeleton';
 makeExtension.flags = {
-  name: 'The name of the extension. Preferably prefixed with `amp-*`',
+  name: 'The name of the extension. The prefix `amp-*` is added if necessary',
   cleanup: 'Undo file changes before exiting. This is useful alongside --test',
   bento: 'Generate a Bento component',
   test: 'Build and test the generated extension',
