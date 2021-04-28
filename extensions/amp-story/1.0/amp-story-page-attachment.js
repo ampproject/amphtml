@@ -35,23 +35,23 @@ import {triggerClickFromLightDom} from './utils';
 const DARK_THEME_CLASS = 'i-amphtml-story-draggable-drawer-theme-dark';
 
 /**
- * Distance in pixels to swipe before opening attachment.
+ * Distance to swipe before opening attachment.
  * @const {number}
  */
-const OPEN_THRESHOLD = 150;
+const OPEN_THRESHOLD_PX = 150;
 
 /**
  * Max pixels to transform the remote attachment URL preview. Equivilent to the height of preview element.
  * @const {number}
  */
-const DRAG_CAP = 48;
+const DRAG_CAP_PX = 48;
 
 /**
  * Max pixels to transform the remote attachment URL preview. Equivilent to the height of preview element.
  * Used for the amp-story-outlink-page-attachment-v2 experiment.
  * @const {number}
  */
-const DRAG_CAP_V2 = 56;
+const DRAG_CAP_PX_V2 = 56;
 
 /**
  * @enum {string}
@@ -185,8 +185,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildRemote_() {
-    this.setDragCap_(DRAG_CAP);
-    this.setOpenThreshold_(OPEN_THRESHOLD);
+    this.setDragCap_(DRAG_CAP_PX);
+    this.setOpenThreshold_(OPEN_THRESHOLD_PX);
 
     this.headerEl_.classList.add(
       'i-amphtml-story-draggable-drawer-header-attachment-remote'
@@ -215,8 +215,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildRemoteV2_() {
-    this.setDragCap_(DRAG_CAP_V2);
-    this.setOpenThreshold_(OPEN_THRESHOLD);
+    this.setDragCap_(DRAG_CAP_PX_V2);
+    this.setOpenThreshold_(OPEN_THRESHOLD_PX);
 
     this.headerEl_.classList.add(
       'i-amphtml-story-draggable-drawer-header-attachment-remote'
@@ -368,7 +368,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       triggerClickFromLightDom(clickTarget, this.element);
     } else {
       const animationEl = this.win.document.createElement('div');
-      animationEl.classList.add('i-amphtml-story-page-attachment-expand');
       const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
 
       this.mutateElement(() => {
@@ -379,6 +378,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       // Play post-tap animation before opening link.
       this.win.setTimeout(() => {
         this.mutateElement(() => {
+          animationEl.classList.add('i-amphtml-story-page-attachment-expand');
           storyEl.appendChild(animationEl);
         });
         triggerClickFromLightDom(clickTarget, this.element);
