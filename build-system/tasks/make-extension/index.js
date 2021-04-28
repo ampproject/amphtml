@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
+const argv = require('minimist')(process.argv.slice(2), {string: ['version']});
 const del = require('del');
 const fs = require('fs-extra');
 const objstr = require('obj-str');
@@ -205,7 +205,6 @@ async function makeExtensionFromTemplates(
   const version = (
     options.version || (options.bento ? '1.0' : '0.1')
   ).toString();
-  const {'no_css': noCss} = options;
   const name = (options.name || '').replace(/^amp-/, '');
   if (!name) {
     log(red('ERROR:'), 'Must specify component name with', cyan('--name'));
@@ -221,7 +220,7 @@ async function makeExtensionFromTemplates(
     '__component_name_hyphenated__': name,
     '__component_name_hyphenated_capitalized__': name.toUpperCase(),
     '__component_name_pascalcase__': namePascalCase,
-    ...(!noCss
+    ...(!options.nocss
       ? {
           '__jss_import_component_css__': `import {CSS as COMPONENT_CSS} from './component.jss'`,
           '__jss_component_css__': 'COMPONENT_CSS',
@@ -273,7 +272,7 @@ async function makeExtensionFromTemplates(
     version,
   };
 
-  if (!noCss) {
+  if (!options.nocss) {
     bundleConfig.options = {hasCss: true};
   }
 
@@ -375,14 +374,14 @@ async function runExtensionTests(name) {
 async function makeExtension() {
   let testError;
 
-  const {bento, 'no_css': noCss} = argv;
+  const {bento, nocss} = argv;
 
   const templateDirs = objstr({
     shared: true,
     bento,
     classic: !bento,
-    css: !noCss,
-    jss: bento && !noCss,
+    css: !nocss,
+    jss: bento && !nocss,
   })
     .split(/\s+/)
     .map((name) => getTemplateDir(name));
@@ -431,7 +430,7 @@ makeExtension.flags = {
   name: 'The name of the extension. Preferably prefixed with `amp-*`',
   cleanup: 'Undo file changes before exiting. This is useful alongside --test',
   bento: 'Generate a Bento component',
-  'no_css': 'Exclude extension-specific CSS',
+  nocss: 'Exclude extension-specific CSS',
   test: 'Build and test the generated extension',
   version: 'Sets the version number (default: 0.1; or 1.0 with --bento)',
   overwrite:
