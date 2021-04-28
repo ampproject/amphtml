@@ -87,7 +87,7 @@ export class BaseTemplate {
         }
       } else if (n.nodeType == /* COMMENT */ 8) {
         // Ignore comments.
-      } else if (n.nodeType == /* ELEMENT */ 1) {
+      } else if (isElement(n)) {
         callback(dev().assertElement(n));
       }
     }
