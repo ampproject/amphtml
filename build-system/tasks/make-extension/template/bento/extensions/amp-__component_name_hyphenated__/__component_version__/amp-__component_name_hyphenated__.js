@@ -15,7 +15,7 @@
  */
 
 import {BaseElement} from './base-element';
-import {CSS} from '../../../build/amp-__component_name_hyphenated__-__component_version__.css';
+__css_import__;
 import {dict} from '../../../src/core/types/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
@@ -47,5 +47,5 @@ class Amp__component_name_pascalcase__ extends BaseElement {
 }
 
 AMP.extension(TAG, '__component_version__', (AMP) => {
-  AMP.registerElement(TAG, Amp__component_name_pascalcase__, CSS);
+  AMP.registerElement(__register_element_args__);
 });
