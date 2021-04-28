@@ -60,15 +60,6 @@ FormDataWrapperInterface.prototype.getFormData = function () {};
 FormData.prototype.entries = function () {};
 
 /**
- * @typedef {{
- *   YOU_MUST_USE: string,
- *   jsonLiteral: function(),
- *   TO_MAKE_THIS_TYPE: string,
- * }}
- */
-var InternalJsonLiteralTypeDef;
-
-/**
  * Force the dataset property to be handled as a JsonObject.
  * @type {!JsonObject}
  */
