@@ -193,7 +193,7 @@ test('makeExtensionFromTemplates prints validator blurb if a validator-*.html fi
   tempy.directory.task(async (dir) => {
     const {makeExtensionFromTemplates} = require('..');
     await makeExtensionFromTemplates(
-      [path.join(__dirname, '../template/classic')],
+      [path.join(__dirname, '../template/shared')],
       dir,
       {name: 'my-extension-name'}
     );
