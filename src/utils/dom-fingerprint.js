@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {isElement} from '../core/types';
 import {stringHash32} from '../core/types/string';
 
 /**
@@ -49,7 +50,7 @@ import {stringHash32} from '../core/types/string';
 export function domFingerprintPlain(element) {
   const ids = [];
   let level = 0;
-  while (element && element.nodeType == /* element */ 1 && level < 25) {
+  while (isElement(element) && level < 25) {
     let id = '';
     if (element.id) {
       id = `/${element.id}`;

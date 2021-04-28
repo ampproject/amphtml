@@ -1,5 +1,6 @@
 import {devAssert} from './log';
 import {isConnectedNode, rootNodeFor} from './dom';
+import {isElement} from './core/types';
 import {toArray} from './core/types/array';
 
 /**
@@ -172,9 +173,7 @@ export function setModalAsOpen(element) {
   devAssert(isConnectedNode(element));
 
   const elements = getElementsToAriaHide(element);
-  const ancestry = getAncestors(element).filter(
-    (n) => n.nodeType == Node.ELEMENT_NODE
-  );
+  const ancestry = getAncestors(element).filter(isElement);
   const focusableElements = getPotentiallyFocusableElements(element);
   // Get the elements that are internally focusable, and have been made
   // non-focusable; we want to unhide these.

@@ -47,6 +47,7 @@ import {getDate} from '../core/types/date';
 import {getMode} from '../mode';
 import {hydrate, render} from './index';
 import {installShadowStyle} from '../shadow-embed';
+import {isElement} from '../core/types';
 import {sequentialIdGenerator} from '../utils/id-generator';
 import {toArray} from '../core/types/array';
 
@@ -1228,7 +1229,7 @@ function matchChild(element, defs) {
 function shouldMutationForNodeListBeRerendered(nodeList) {
   for (let i = 0; i < nodeList.length; i++) {
     const node = nodeList[i];
-    if (node.nodeType == /* ELEMENT */ 1) {
+    if (isElement(node)) {
       // Ignore service elements, e.g. `<i-amphtml-svc>` or
       // `<x slot="i-amphtml-svc">`.
       if (
