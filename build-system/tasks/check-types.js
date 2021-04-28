@@ -171,10 +171,7 @@ const TYPE_CHECK_TARGETS = {
   // bug for cherry-pick.
   'pride': {
     srcGlobs: [...PRIDE_FILES_GLOBS],
-    externGlobs: [
-      ...globby.sync('build-system/externs/*.js'),
-      CORE_EXTERNS_GLOB,
-    ],
+    externGlobs: ['build-system/externs/*.js', CORE_EXTERNS_GLOB],
   },
 
   // TODO(#33631): Targets below this point are not expected to pass.
