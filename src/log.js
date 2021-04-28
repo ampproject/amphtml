@@ -401,7 +401,10 @@ export class Log {
       );
     }
 
-    return assertion.bind(null, this.suffix_).apply(null, arguments);
+    return assertion.apply(
+      null,
+      [this.suffix_].concat(Array.prototype.slice.call(arguments))
+    );
   }
 
   /**
