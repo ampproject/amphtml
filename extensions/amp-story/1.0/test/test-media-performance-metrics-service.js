@@ -420,4 +420,19 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
       expect(tickStub).to.have.been.calledWithExactly('vcs', 2);
     });
   });
+
+  describe('First page', () => {
+    it('should report the video is on the first page', () => {
+      const video = win.document.createElement('video');
+      const source = win.document.createElement('source');
+      source.setAttribute('src', 'foo.mp4');
+      video.appendChild(source);
+      env.sandbox.stub(video, 'currentSrc').value('foo.mp4');
+
+      service.startMeasuring(video, true);
+      service.stopMeasuring(video);
+
+      expect(tickStub).to.have.been.calledWithExactly('vifp', 1);
+    });
+  });
 });

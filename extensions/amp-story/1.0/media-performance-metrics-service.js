@@ -220,10 +220,9 @@ export class MediaPerformanceMetricsService {
       TickLabel.VIDEO_CACHE_STATE,
       videoCacheState
     );
-    this.performanceService_.tickDelta(
-      TickLabel.VIDEO_IS_FIRST_PAGE,
-      mediaEntry.metrics.isActivePage ? 1 : 0
-    );
+    if (mediaEntry.metrics.isActivePage) {
+      this.performanceService_.tickDelta(TickLabel.VIDEO_IS_FIRST_PAGE, 1);
+    }
 
     // If the media errored.
     if (metrics.error !== null) {
