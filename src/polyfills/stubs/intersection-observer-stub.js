@@ -106,6 +106,7 @@ export function supportsDocumentRoot(win) {
     new win.IntersectionObserver(
       () => {},
       // TODO: closure does not yet know about root: Document.
+      // Remove this after closure support lands: https://github.com/google/closure-compiler/pull/3804.
       /** @type ?*/ ({root: win.document})
     );
     return true;
