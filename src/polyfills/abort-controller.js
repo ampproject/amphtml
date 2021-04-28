@@ -36,7 +36,7 @@ class AbortController {
         'target': this.signal_,
         'currentTarget': this.signal_,
       };
-      this.signal_.onabort_(/**@type {?}*/ (event));
+      this.signal_.onabort_(event);
     }
   }
 
