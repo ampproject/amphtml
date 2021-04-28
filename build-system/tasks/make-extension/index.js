@@ -348,29 +348,21 @@ async function affectsWorkingTree(fn) {
 }
 
 /**
- * Builds and tests a generated extension.
- * (Unit tests for the generator are located in test/test.js)
+ * Generates an extension with the given name and runs all unit tests located in
+ * the generated extension directory.
  * @param {string} name
- * @return {!Promise{?string}} stderr or null if passing
+ * @return {!Promise{?string}} stderr if failing, null if passing
  */
 async function runExtensionTests(name) {
   for (const command of [
     `amp build --extensions=${name} --core_runtime_only`,
-    `amp unit --nohelp --headless --files="extensions/${name}/**/test/test-*.js" --report`,
+    `amp unit --headless --files="extensions/${name}/**/test/test-*.js"`,
   ]) {
     log('Running', cyan(command) + '...');
     const result = getOutput(command);
     if (result.status !== 0) {
       return result.stderr || result.stdout;
     }
-  }
-  const report = await fs.readJson('result-reports/unit.json');
-  if (!report.summary.success) {
-    return `Zero tests succeeded\n${JSON.stringify(
-      report,
-      /* replacer */ undefined,
-      /* space */ 2
-    )}`;
   }
   return null;
 }
