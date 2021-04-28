@@ -18,6 +18,7 @@
   "tcf-post-message-proxy-api": 1,
   "amp-consent-granular-consent": 1,
   "disable-a4a-non-sd": 1,
-  "3p-vendor-split": 0.1,
+  "3p-vendor-split": 1,
+  "story-ad-auto-advance": 1,
   "story-ad-placements": 1
 }

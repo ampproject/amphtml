@@ -17,11 +17,10 @@
 import * as Preact from '../';
 import {ContainWrapper, Wrapper} from '../component';
 import {boolean, object, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 
 export default {
   title: '0/Wrappers',
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 export const wrapper = () => {

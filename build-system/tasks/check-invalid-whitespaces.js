@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'using strict';
+
 const {getFilesToCheck} = require('../common/utils');
 const {getStdout} = require('../common/process');
 const {green, red} = require('kleur/colors');
@@ -45,7 +47,11 @@ function runCheck(filesToCheck) {
  * Checks multiple kinds of files for invalid whitespaces.
  */
 function checkInvalidWhitespaces() {
-  const filesToCheck = getFilesToCheck(invalidWhitespaceGlobs);
+  const filesToCheck = getFilesToCheck(
+    invalidWhitespaceGlobs,
+    {dot: true},
+    '.gitignore'
+  );
   if (filesToCheck.length == 0) {
     return;
   }

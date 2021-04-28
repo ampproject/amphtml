@@ -82,7 +82,6 @@ const forbiddenTermsGlobal = {
       'build-system/server/amp4test.js',
       'build-system/server/app-index/boilerplate.js',
       'build-system/server/variable-substitution.js',
-      'build-system/tasks/make-extension/index.js',
       'extensions/amp-pinterest/0.1/amp-pinterest.css',
       'extensions/amp-pinterest/0.1/follow-button.js',
       'extensions/amp-pinterest/0.1/pin-widget.js',
@@ -777,7 +776,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-callout-vendors.js',
       'test/unit/test-chunk.js',
       'test/unit/test-cid.js',
-      'test/unit/test-css.js',
       'test/unit/test-curve.js',
       'test/unit/test-describes.js',
       'test/unit/test-document-info.js',
@@ -805,10 +803,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-mustache.js',
       'test/unit/test-pass.js',
       'test/unit/test-platform.js',
-      'test/unit/test-polyfill-document-contains.js',
-      'test/unit/test-polyfill-math-sign.js',
-      'test/unit/test-polyfill-object-assign.js',
-      'test/unit/test-polyfill-object-values.js',
       'test/unit/test-pull-to-refresh.js',
       'test/unit/test-purifier.js',
       'test/unit/test-render-delaying-services.js',
@@ -829,7 +823,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-xhr.js',
       'test/unit/utils/test-base64.js',
       'test/unit/utils/test-bytes.js',
-      'test/unit/utils/test-rate-limit.js',
       'test/unit/web-worker/test-amp-worker.js',
     ],
     checkInTestFolder: true,
@@ -956,8 +949,8 @@ const forbiddenTermsSrcInclusive = {
     message: bannedTermsHelpString,
     allowlist: [
       'src/friendly-iframe-embed.js',
-      'src/polyfillstub/intersection-observer-stub.js',
-      'src/polyfillstub/resize-observer-stub.js',
+      'src/polyfills/stubs/intersection-observer-stub.js',
+      'src/polyfills/stubs/resize-observer-stub.js',
       'src/service/extensions-impl.js',
       'src/service/crypto-impl.js',
     ],
@@ -995,7 +988,7 @@ const forbiddenTermsSrcInclusive = {
       '.github/workflows/create-design-review-issue.js',
       'extensions/amp-timeago/0.1/amp-timeago.js',
       'extensions/amp-timeago/1.0/component.js',
-      'src/utils/date.js',
+      'src/core/types/date.js',
     ],
   },
   '\\.expandStringSync\\(': {
@@ -1041,7 +1034,6 @@ const forbiddenTermsSrcInclusive = {
       'build-system/server/shadow-viewer.js',
       'build-system/server/variable-substitution.js',
       'build-system/tasks/dist.js',
-      'build-system/tasks/make-extension/index.js',
       'build-system/tasks/helpers.js',
       'build-system/tasks/performance/helpers.js',
       'src/3p-frame.js',
@@ -1148,6 +1140,16 @@ const forbiddenTermsSrcInclusive = {
     message:
       'Instead of fancy-log, use the logging functions in build-system/common/logging.js.',
   },
+  'withA11y':
+    'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',
+  'detectIsAutoplaySupported': {
+    message:
+      'Detecting autoplay support is expensive. Use the cached function "isAutoplaySupported" instead.',
+    allowlist: [
+      // The function itself is defined here.
+      'src/utils/video.js',
+    ],
+  },
 };
 
 /**
@@ -1234,13 +1236,13 @@ function matchForbiddenTerms(srcFile, contents, terms) {
       let index = 0;
       let line = 1;
       let column = 0;
-      const start = {line: -1, column: -1};
 
       const subject = checkProse ? contents : contentsWithoutComments;
       let result;
       while ((result = regex.exec(subject))) {
         const [match] = result;
 
+        const start = {line: -1, column: -1};
         for (index; index < result.index + match.length; index++) {
           if (index === result.index) {
             start.line = line;

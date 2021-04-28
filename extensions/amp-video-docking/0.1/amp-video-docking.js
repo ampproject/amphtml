@@ -42,13 +42,13 @@ import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
 import {createViewportRect} from './viewport-rect';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {getInternalVideoElementFor} from '../../../src/utils/video';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isRTL, removeElement, scopedQuerySelector} from '../../../src/dom';
 import {layoutRectEquals, rectIntersection} from '../../../src/layout-rect';
-import {once} from '../../../src/utils/function';
+import {once} from '../../../src/core/types/function';
 import {
   px,
   resetStyles,
