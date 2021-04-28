@@ -27,7 +27,7 @@ import {Services} from '../../../src/services';
 import {WebPushWidgetVisibilities} from './amp-web-push-widget';
 import {WindowMessenger} from './window-messenger';
 import {dev, user} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {installStylesForDoc} from '../../../src/style-installer';

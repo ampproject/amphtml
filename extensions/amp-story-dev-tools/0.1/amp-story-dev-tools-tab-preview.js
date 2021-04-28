@@ -21,7 +21,7 @@ import {
   updateHash,
 } from './utils';
 import {closest} from '../../../src/dom';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {htmlFor} from '../../../src/static-template';
 import {observeContentSize} from '../../../src/utils/size-observer';
 import {setStyles} from '../../../src/style';
