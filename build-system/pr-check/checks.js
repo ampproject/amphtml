@@ -39,6 +39,8 @@ function pushBuildWorkflow() {
   timedExecOrDie('amp check-exact-versions');
   timedExecOrDie('amp check-renovate-config');
   timedExecOrDie('amp server-tests');
+  timedExecOrDie('amp make-extension --name=t --test --cleanup');
+  timedExecOrDie('amp make-extension --name=t --test --cleanup --bento');
   timedExecOrDie('amp dep-check');
   timedExecOrDie('amp check-types');
   timedExecOrDie('amp check-sourcemaps');
@@ -113,12 +115,8 @@ async function prBuildWorkflow() {
   }
 
   if (buildTargetsInclude(Targets.AVA, Targets.RUNTIME)) {
-    timedExecOrDie(
-      'amp make-extension --test --cleanup --name=amp-generated-for-test'
-    );
-    timedExecOrDie(
-      'amp make-extension --test --cleanup --name=amp-generated-for-test --bento'
-    );
+    timedExecOrDie('amp make-extension --name=t --test --cleanup');
+    timedExecOrDie('amp make-extension --name=t --test --cleanup --bento');
   }
 
   if (buildTargetsInclude(Targets.RUNTIME)) {
