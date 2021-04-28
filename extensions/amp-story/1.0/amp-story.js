@@ -97,7 +97,7 @@ import {debounce} from '../../../src/core/types/function';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from '../../../src/core/types/object';
 import {endsWith} from '../../../src/core/types/string';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {findIndex, lastItem, toArray} from '../../../src/core/types/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';

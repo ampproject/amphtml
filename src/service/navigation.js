@@ -23,7 +23,7 @@ import {
 } from '../dom';
 import {dev, user, userAssert} from '../log';
 import {dict} from '../core/types/object';
-import {escapeCssSelectorIdent} from '../css';
+import {escapeCssSelectorIdent} from '../core/dom/css';
 import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
 import {getMode} from '../mode';
 import {isLocalhostOrigin} from '../url';

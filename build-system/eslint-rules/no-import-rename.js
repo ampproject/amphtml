@@ -44,7 +44,7 @@ const imports = {
     'setStyle',
     'setStyles',
   ],
-  'src/css': ['escapeCssSelectorIdent', 'escapeCssSelectorNth'],
+  'src/core/dom/css': ['escapeCssSelectorIdent', 'escapeCssSelectorNth'],
   'src/dom': ['scopedQuerySelector', 'scopedQuerySelectorAll'],
   'src/log': ['user', 'dev'],
   'src/mode': ['getMode'],
