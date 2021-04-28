@@ -58,7 +58,6 @@ export class PremiumadsNetworkConfig {
       'width': data.width || 336,
       'height': data.height || 280,
       'layout': data.layout || Layout.FIXED,
-      'sizes': data.sizes || '(min-width: 320px) 336px, 100vw',
       'style':
         data['style'] ||
         'margin: 15px auto; position: relative !important; display: block !important;',
