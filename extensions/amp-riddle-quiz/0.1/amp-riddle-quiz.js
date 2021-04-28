@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 import {getData, listen} from './../../../src/event-helper';
-import {isFiniteNumber, isObject} from '../../../src/types';
+import {isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {isObject} from '../../../src/core/types';
 import {removeElement} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 

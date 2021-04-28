@@ -36,7 +36,7 @@ const {cyan, green, red, yellow} = require('kleur/colors');
 const {dotWrappingWidth} = require('../../common/logging');
 const {getEsbuildBabelPlugin} = require('../../common/esbuild-babel');
 const {getFilesFromArgv} = require('../../common/utils');
-const {isCiBuild} = require('../../common/ci');
+const {isCiBuild, isCircleciBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
 const {reportTestStarted} = require('../report-test-status');
 const {SERVER_TRANSFORM_PATH} = require('../../server/typescript-compile');
@@ -62,7 +62,7 @@ let transform;
  */
 function updatePreprocessors(config) {
   const createHtmlTransformer = function () {
-    return function (content, file, done) {
+    return function (content, _file, done) {
       if (!transform) {
         const outputDir = `../../../${SERVER_TRANSFORM_PATH}/dist/transform`;
         transform = require(outputDir).transformSync;
@@ -171,6 +171,14 @@ function updateReporters(config) {
     !isCiBuild()
   ) {
     config.reporters = ['mocha'];
+  }
+
+  if (isCircleciBuild()) {
+    config.reporters.push('junit');
+    config.junitReporter = {
+      outputFile: `result-reports/${config.testType}.xml`,
+      useBrowserName: false,
+    };
   }
 
   if (argv.coverage) {
@@ -391,11 +399,9 @@ class RuntimeTestRunner {
     await stopServer();
     exitCtrlcHandler(this.env.get('handlerProcess'));
     if (this.exitCode != 0) {
-      log(
-        red('ERROR:'),
-        yellow(`Karma test failed with exit code ${this.exitCode}`)
-      );
-      process.exitCode = this.exitCode;
+      const message = `Karma test failed with exit code ${this.exitCode}`;
+      log(red('ERROR:'), yellow(message));
+      throw new Error(message);
     }
   }
 }

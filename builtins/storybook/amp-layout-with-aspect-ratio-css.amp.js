@@ -16,12 +16,11 @@
 
 import * as Preact from '../../src/preact';
 import {number, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
   title: '0/amp-layout with aspect ratio CSS',
-  decorators: [withA11y, withKnobs, withAmp],
+  decorators: [withKnobs, withAmp],
   parameters: {
     experiments: ['layout-aspect-ratio-css'],
   },

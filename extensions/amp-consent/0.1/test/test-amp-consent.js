@@ -24,11 +24,11 @@ import {
   constructMetadata,
   getConsentStateValue,
 } from '../consent-info';
-import {CONSENT_STRING_TYPE} from '../../../../src/consent-state';
+import {CONSENT_STRING_TYPE} from '../../../../src/core/constants/consent-state';
 import {ConsentStateManager} from '../consent-state-manager';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {dev, user} from '../../../../src/log';
-import {dict} from '../../../../src/utils/object';
+import {dict} from '../../../../src/core/types/object';
 import {macroTask} from '../../../../testing/yield';
 import {
   registerServiceBuilder,

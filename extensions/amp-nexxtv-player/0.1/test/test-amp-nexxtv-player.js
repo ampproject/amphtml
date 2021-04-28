@@ -15,6 +15,7 @@
  */
 
 import '../amp-nexxtv-player';
+import * as consent from '../../../../src/consent';
 import {VideoEvents} from '../../../../src/video-interface';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {listenOncePromise} from '../../../../src/event-helper';
@@ -60,6 +61,7 @@ describes.realWin(
       const element = await getNexxtvPlayer({
         'data-mediaid': '71QQG852413DU7J',
         'data-client': '761',
+        'data-streamtype': 'video',
       });
       const playerIframe = element.querySelector('iframe');
       expect(playerIframe).to.not.be.null;
@@ -70,7 +72,7 @@ describes.realWin(
             element.getAttribute('data-client') +
               '/video/' +
               element.getAttribute('data-mediaid') +
-              '\\?dataMode=static&platform=amp' +
+              '\\?platform=amp' +
               '$' // suffix
           )
         );
@@ -109,6 +111,20 @@ describes.realWin(
       const p4 = listenOncePromise(nexxtv, VideoEvents.UNMUTED);
       await sendFakeMessage(nexxtv, iframe, {event: 'unmute'});
       return p4;
+    });
+
+    it('should pass consent value to iframe', () => {
+      env.sandbox.stub(consent, 'getConsentPolicyInfo').resolves('testinfo');
+
+      return getNexxtvPlayer({
+        'data-mediaid': '71QQG852413DU7J',
+        'data-client': '761',
+        'data-block-on-consent': '_till_accepted',
+      }).then((nexxplayer) => {
+        const iframe = nexxplayer.querySelector('iframe');
+
+        expect(iframe.src).to.contain('consentString=testinfo');
+      });
     });
 
     async function sendFakeMessage(nexxtv, iframe, command) {

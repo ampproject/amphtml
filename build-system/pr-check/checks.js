@@ -28,6 +28,8 @@ const jobName = 'checks.js';
 
 function pushBuildWorkflow() {
   timedExecOrDie('amp presubmit');
+  timedExecOrDie('amp check-invalid-whitespaces');
+  timedExecOrDie('amp validate-html-fixtures');
   timedExecOrDie('amp lint');
   timedExecOrDie('amp prettify');
   timedExecOrDie('amp ava');
@@ -37,6 +39,8 @@ function pushBuildWorkflow() {
   timedExecOrDie('amp check-exact-versions');
   timedExecOrDie('amp check-renovate-config');
   timedExecOrDie('amp server-tests');
+  timedExecOrDie('amp make-extension --name=t --test --cleanup');
+  timedExecOrDie('amp make-extension --name=t --test --cleanup --bento');
   timedExecOrDie('amp dep-check');
   timedExecOrDie('amp check-types');
   timedExecOrDie('amp check-sourcemaps');
@@ -55,6 +59,14 @@ async function prBuildWorkflow() {
 
   if (buildTargetsInclude(Targets.PRESUBMIT)) {
     timedExecOrDie('amp presubmit');
+  }
+
+  if (buildTargetsInclude(Targets.INVALID_WHITESPACES)) {
+    timedExecOrDie('amp check-invalid-whitespaces');
+  }
+
+  if (buildTargetsInclude(Targets.HTML_FIXTURES)) {
+    timedExecOrDie('amp validate-html-fixtures');
   }
 
   if (buildTargetsInclude(Targets.LINT)) {
@@ -86,9 +98,8 @@ async function prBuildWorkflow() {
     timedExecOrDie('amp dev-dashboard-tests');
   }
 
-  // Validate owners syntax only for PR builds.
   if (buildTargetsInclude(Targets.OWNERS)) {
-    timedExecOrDie('amp check-owners --local_changes');
+    timedExecOrDie('amp check-owners --local_changes'); // only for PR builds
   }
 
   if (buildTargetsInclude(Targets.PACKAGE_UPGRADE)) {
@@ -101,6 +112,11 @@ async function prBuildWorkflow() {
 
   if (buildTargetsInclude(Targets.SERVER)) {
     timedExecOrDie('amp server-tests');
+  }
+
+  if (buildTargetsInclude(Targets.AVA, Targets.RUNTIME)) {
+    timedExecOrDie('amp make-extension --name=t --test --cleanup');
+    timedExecOrDie('amp make-extension --name=t --test --cleanup --bento');
   }
 
   if (buildTargetsInclude(Targets.RUNTIME)) {

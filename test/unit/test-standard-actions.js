@@ -15,7 +15,7 @@
  */
 
 import {AmpDocService, AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {RAW_OBJECT_ARGS_KEY} from '../../src/action-constants';
+import {RAW_OBJECT_ARGS_KEY} from '../../src/core/constants/action-constants';
 import {Services} from '../../src/services';
 import {
   StandardActions,
@@ -698,7 +698,10 @@ describes.sandboxed('StandardActions', {}, (env) => {
           });
         yield standardActions.handleAmpTarget_(invocation);
         expect(navigator.navigateTo).to.be.calledTwice;
-        expect(userError).to.be.calledWith('STANDARD-ACTIONS', 'Fake error.');
+        expect(userError).to.be.calledWith(
+          'STANDARD-ACTIONS',
+          env.sandbox.match((arg) => arg.message === 'Fake error.')
+        );
       });
     });
 

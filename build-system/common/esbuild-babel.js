@@ -16,18 +16,14 @@
 
 const babel = require('@babel/core');
 const path = require('path');
+const {debug} = require('../compile/debug-compilation-lifecycle');
 const {TransformCache, batchedRead, md5} = require('./transform-cache');
 
 /**
- * Directory where the babel filecache lives.
- */
-const CACHE_DIR = path.resolve(__dirname, '..', '..', '.babel-cache');
-
-/**
  * Used to cache babel transforms done by esbuild.
- * @const {!TransformCache}
+ * @const {TransformCache}
  */
-const transformCache = new TransformCache(CACHE_DIR, '.js');
+let transformCache;
 
 /**
  * Creates a babel plugin for esbuild for the given caller. Optionally enables
@@ -44,7 +40,11 @@ function getEsbuildBabelPlugin(
   preSetup = () => {},
   postLoad = () => {}
 ) {
-  function transformContents(contents, hash, babelOptions) {
+  if (!transformCache) {
+    transformCache = new TransformCache('.babel-cache', '.js');
+  }
+
+  async function transformContents(filename, contents, hash, babelOptions) {
     if (enableCache) {
       const cached = transformCache.get(hash);
       if (cached) {
@@ -52,9 +52,14 @@ function getEsbuildBabelPlugin(
       }
     }
 
+    debug('pre-babel', filename, contents);
     const promise = babel
       .transformAsync(contents, babelOptions)
-      .then((result) => result.code);
+      .then((result) => {
+        const {code, map} = result;
+        debug('post-babel', filename, code, map);
+        return code;
+      });
 
     if (enableCache) {
       transformCache.set(hash, promise);
@@ -78,7 +83,7 @@ function getEsbuildBabelPlugin(
       build.onLoad({filter: /\.[cm]?js$/, namespace: ''}, async (file) => {
         const filename = file.path;
         const {contents, hash} = await batchedRead(filename, optionsHash);
-        const transformed = await transformContents(contents, hash, {
+        const transformed = await transformContents(filename, contents, hash, {
           ...babelOptions,
           filename,
           filenameRelative: path.basename(filename),

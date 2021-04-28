@@ -15,14 +15,15 @@
  */
 
 import * as Preact from './index';
-import {ActionTrust} from '../action-constants';
-import {AmpEvents} from '../amp-events';
-import {CanPlay, CanRender, LoadingProp} from '../core/contextprops';
-import {Deferred} from '../utils/promise';
+import {ActionTrust} from '../core/constants/action-constants';
+import {AmpEvents} from '../core/constants/amp-events';
+import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
+import {Deferred} from '../core/data-structures/promise';
 import {Layout, isLayoutSizeDefined} from '../layout';
 import {Loading} from '../core/loading-instructions';
 import {MediaQueryProps} from '../utils/media-query-props';
-import {ReadyState} from '../ready-state';
+import {PauseHelper} from '../utils/pause-helper';
+import {ReadyState} from '../core/constants/ready-state';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
 import {
@@ -39,16 +40,15 @@ import {
   matches,
   parseBooleanAttribute,
 } from '../dom';
-import {dashToCamelCase} from '../string';
+import {dashToCamelCase} from '../core/types/string';
 import {devAssert} from '../log';
-import {dict, hasOwn, map} from '../utils/object';
-import {getDate} from '../utils/date';
+import {dict, hasOwn, map} from '../core/types/object';
+import {getDate} from '../core/types/date';
 import {getMode} from '../mode';
 import {hydrate, render} from './index';
 import {installShadowStyle} from '../shadow-embed';
-import {observeContentSize, unobserveContentSize} from '../utils/size-observer';
 import {sequentialIdGenerator} from '../utils/id-generator';
-import {toArray} from '../types';
+import {toArray} from '../core/types/array';
 
 /**
  * The following combinations are allowed.
@@ -288,13 +288,11 @@ export class PreactBaseElement extends AMP.BaseElement {
     /** @protected {?MutationObserver} */
     this.observer = null;
 
-    /** @private {boolean} */
-    this.isPlaying_ = false;
+    /** @private {!PauseHelper} */
+    this.pauseHelper_ = new PauseHelper(element);
 
     /** @protected {?MediaQueryProps} */
     this.mediaQueryProps_ = null;
-
-    this.pauseWhenNoSize_ = this.pauseWhenNoSize_.bind(this);
   }
 
   /**
@@ -847,31 +845,12 @@ export class PreactBaseElement extends AMP.BaseElement {
    * @private
    */
   updateIsPlaying_(isPlaying) {
-    if (isPlaying === this.isPlaying_) {
-      return;
-    }
-    this.isPlaying_ = isPlaying;
-    if (isPlaying) {
-      observeContentSize(this.element, this.pauseWhenNoSize_);
-    } else {
-      unobserveContentSize(this.element, this.pauseWhenNoSize_);
-    }
-  }
-
-  /**
-   * @param {!../../../src/layout-rect.LayoutSizeDef} size
-   * @private
-   */
-  pauseWhenNoSize_({width, height}) {
-    const hasSize = width > 0 && height > 0;
-    if (!hasSize) {
-      this.pauseCallback();
-    }
+    this.pauseHelper_.updatePlaying(isPlaying);
   }
 }
 
 /**
- * @param {tyepof PreactBaseElement} baseElement
+ * @param {typeof PreactBaseElement} baseElement
  * @param {!Object} api
  * @param {string} key
  */

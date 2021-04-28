@@ -29,7 +29,7 @@
 // for these checks.
 //
 // The draft specification for A4A is located here:
-// https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md
+// https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/amp-a4a-format.md
 //
 
 namespace htmlparser::css {

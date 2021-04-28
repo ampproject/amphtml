@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../../src/action-constants';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {AmpIframe, setTrackingIframeTimeoutForTesting} from '../amp-iframe';
-import {CommonSignals} from '../../../../src/common-signals';
+import {CommonSignals} from '../../../../src/core/constants/common-signals';
 import {LayoutPriority} from '../../../../src/layout';
 import {Services} from '../../../../src/services';
 import {
@@ -1093,9 +1093,14 @@ describes.realWin(
         await waitForAmpIframeLayoutPromise(doc, ampIframe);
         expect(ampIframe.pause).to.not.be.called;
 
+        // First send "size" event and then "no size".
         resizeObserverStub.notifySync({
           target: ampIframe,
-          contentRect: {width: 0, height: 0},
+          borderBoxSize: [{inlineSize: 10, blockSize: 100}],
+        });
+        resizeObserverStub.notifySync({
+          target: ampIframe,
+          borderBoxSize: [{inlineSize: 0, blockSize: 0}],
         });
         expect(ampIframe.pause).to.be.calledOnce;
       });

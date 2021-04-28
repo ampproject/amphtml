@@ -33,13 +33,21 @@ As a publisher, you can use the `<amp-consent>` component to implement user cont
 -   Capture the user’s consent decision.
 -   Makes the user’s setting available to elements on the AMP page to modify the page’s behavior.
 
-If you are a vendor that wants to customize your component's behavior based on amp-consent, or need to collect more advanced consent information you can read more [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md).
+If you are a vendor that wants to customize your component's behavior based on amp-consent, or need to collect more advanced consent information you can read more [here](https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/customizing-extension-behaviors-on-consent.md).
 
 ## Usage
 
 Only a single `<amp-consent>` element is allowed on the page, and that element must specify a unique `id`.
 
 If you also include an `<amp-user-notification>` element on the page, the UI associated with the `<amp-consent>` and `<amp-user-notification>` will not be deterministic. Avoid using `<amp-consent>` with `<amp-user-notification>` if this would be problematic.
+
+## Granular and global consent
+
+`<amp-consent>` supports **global consent**, in which users can make a single consent choice for a website. It also supports **granular consent**, allowing users to make a set of choices.
+
+To implement granular consent, define a set of **consent purposes**. Choose a name for each purpose. Create a UI that allows the user to make choices for each, and use the `setPurpose()` action to save each choice.
+
+The other actions that `<amp-consent>` supports apply to both granular and global consent. Thus, a webpage can implement both types simultaneously.
 
 ## Consent configuration
 
@@ -118,6 +126,8 @@ AMP expects the response to be a JSON object like the following:
 }
 ```
 
+For granular consent, this response can also contain a map of `purposeConsent` choices.
+
 **Note: The legacy `promptIfUnknown` is migrating to `consentRequired` as prompt is no longer strictly required to manage consents.**
 
 The `consentStateValue` can be thought of as a signal for the runtime to block and unblock components. The value `accepted` instructs AMP that the user has given consent (or doesn't revoke consent in the opt-out case). This can be used to serve personalized ads in some scenarios. The value `rejected` means the user doesn't give consent (or has revoked consent in the opt-out case) and vendors may decide to not serve personalized ads.
@@ -152,6 +162,16 @@ useful when publishers want to use their own server to decide if consent is requ
 
 Note that this value will be ignored if there is previous consent state stored in client cache (see [Client caching](#client-caching) section for examples).
 
+#### purposeConsentRequired
+
+For [granular consent](#granular-and-global-consent), `purposeConsentRequired` lets you specify an array of consent purposes. Until the user has made a choice for each, the [consent UI](#prompt-ui) will appear each time they visit your webpage.
+
+For example, if you want to make sure the user makes a choice for consent purposes you've called `purpose-analytics` and `purpose-marketing`, your JSON would include:
+
+```json
+"purposeConsentRequired": ["purpose-analytics", "purpose-marketing"]
+```
+
 #### onUpdateHref
 
 `onUpdateHref`: Instructs AMP to make a CORS HTTPS POST request with credentials to the specified URL whenever the stored consent state changes.
@@ -176,7 +196,7 @@ The consent decisions collected from user via this prompt UI will be stored in `
 
 `geoOverride` provides a way to utilize the `<amp-geo>` component to detect user's geo location to assist client side decisions.
 
-`geoOverride` is a JSON object keyed by geo group codes which are defined in `<amp-geo>` (details [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md)). Each geo override should be a valid `<amp-consent>` config object. AMP will take all the values in the corresponding `geoOverride` to override the existing config. The only exception here is that the `consentInstanceId` cannot be overwritten by `geoOverride` config, because AMP only manage and store consent information in a single instance.
+`geoOverride` is a JSON object keyed by geo group codes which are defined in `<amp-geo>` (details [here](https://github.com/ampproject/amphtml/blob/main/extensions/amp-geo/amp-geo.md)). Each geo override should be a valid `<amp-consent>` config object. AMP will take all the values in the corresponding `geoOverride` to override the existing config. The only exception here is that the `consentInstanceId` cannot be overwritten by `geoOverride` config, because AMP only manage and store consent information in a single instance.
 
 Two important tips when configuring `amp-geo`:
 
@@ -345,16 +365,36 @@ _Example_: Displays a prompt user interface on an AMP Story
 
 #### Prompt Actions
 
-There are three types of user actions that are associated with the consent prompt: `accept`, `reject` and `dismiss`.
+Three user actions apply to both granular and global consent: `accept`, `reject` and `dismiss`.
 
 To enable the user to choose a consent state and hide the prompt UI, add an `on` attribute to a button with the
 following value scheme `on="event:idOfAmpConsentElement.accept/reject/dismiss"`
 
 -   `accept`: publisher instructs AMP to remember the accept decision to the consent, unblocks components waiting for the consent, and hides the prompt UI.
 
--   `reject`: publisher instructs AMP to remember the reject decision to the consent, cancels `buildCallback` (AMP lifecycle callback to [build AMP components](https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md#buildcallback)) of components waiting for the consent, and hides the prompt UI.
+-   `reject`: publisher instructs AMP to remember the reject decision to the consent, cancels `buildCallback` (AMP lifecycle callback to [build AMP components](https://github.com/ampproject/amphtml/blob/main/contributing/building-an-amp-extension.md#buildcallback)) of components waiting for the consent, and hides the prompt UI.
 
 -   `dismiss`: instruct AMP to cancel `buildCallback` of components waiting for the consent, and hides the prompt UI.
+
+The `setPurpose` action is used in [granular consent](#granular-and-global-consent). You can use it to temporarily store the user's choice for an individual consent purpose. This action takes the form `setPurpose({purpose name}={boolean value})`. Setting a purpose to `true` marks it as accepted; setting it to `false` marks it as rejected.
+
+For example, to mark a consent purpose called `performanceCookies` as `true`, you would use
+
+```js
+myConsent.setPurpose(performanceCookies=true)
+```
+
+The `accept` and `reject` actions, which accept or deny global consent, both save granular consent choices as well. If you pass either of these the argument `(purposeConsentDefault={boolean value})`, any consent purposes for which the user has not made a choice will be assigned that boolean value.
+
+For example, the action
+
+```js
+myConsent.accept(purposeConsentDefault=false)
+```
+
+will reject any consent purposes for which the user has not made a choice.
+
+If you don't use `purposeConsentDefault`, any purposes for which the user has not made a choice will remain unset. For this reason, especially when the prompt UI is a form with checkboxes, it's generally recommended that you include this argument.
 
 ### Post-prompt UI (optional)
 
@@ -398,9 +438,11 @@ A couple of implications with this behavior:
 -   When a user travels, `<amp-consent>` will use the stored consent. It's up to the `checkConsentHref` response to erase stored value using `expireCache: true` and `consentRequired: false`.
 -   If a promptUI is used to collect user consent. Using `expireCache: true` will prompt consent dialog and block users from content on their following visits.
 
+`<amp-consent>` stores consent choices in a key called `amp-store:{xxx}`, where `{xxx}` is your domain. The value is base64-encoded JSON.
+
 ### Basic blocking behaviors
 
-To block components, either add the `data-block-on-consent` attribute to the AMP component or add the `amp-consent-blocking` meta tag with the list of extensions to be blocked. Note, that if you're using the `type` attribute for CMP integration, you must also include the `amp-consent-blocking` meta tag. This ensures that `buildCallback` of the component isn't called until consent has been accepted, or if consent is not required for the user based on the `consentRequired` value. In effect, this means that all behaviors of the element (e.g. sending analytics pings for `<amp-analytics>` or the loading of an `<amp-ad>`) are delayed until the relevant consent instance is accepted.
+In global consent, to block components, either add the `data-block-on-consent` attribute to the AMP component or add the `amp-consent-blocking` meta tag with the list of extensions to be blocked. Note, that if you're using the `type` attribute for CMP integration, you must also include the `amp-consent-blocking` meta tag. This ensures that `buildCallback` of the component isn't called until consent has been accepted, or if consent is not required for the user based on the `consentRequired` value. In effect, this means that all behaviors of the element (e.g. sending analytics pings for `<amp-analytics>` or the loading of an `<amp-ad>`) are delayed until the relevant consent instance is accepted.
 
 Individual components may override this behavior to provide more specialized handling. Please refer to each component's documentation for details.
 
@@ -414,6 +456,12 @@ or
 
 ```html
 <meta name="amp-consent-blocking" content="amp-analytics,amp-ad" />
+```
+
+For granular consent, use the `data-block-on-consent-purposes` attribute with a comma-separated list of consent purposes. For example, the following will block an `amp-pixel` component until the user accepts purposes named `performance` and `marketing`:
+
+```html
+<amp-pixel data-block-on-consent-purposes="performance, marketing"></amp-pixel>
 ```
 
 ### Advanced predefined consent blocking behaviors
@@ -503,12 +551,12 @@ When used as an object. `timeout` object supports two attributes
 
 The table below lists the vendors and components that are integrated with amp-consent
 
-| Integration                       | Prod Availability | Documentation                                                                                          | Ready For Testing |
-| --------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------ | ----------------- |
-| DoubleClick & AdSense Integration | 05/10/18          | [Link](https://support.google.com/dfp_premium/answer/7678538)                                          | Yes               |
-| AMP IMA Video Integration         | 05/15/18          | [Link](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ima-video/consent-blocking.md) | Yes               |
-| AMP Geo                           | 05/10/18          | [Link](https://amp.dev/documentation/examples/user-consent/geolocation-based_consent_flow/)            | Yes               |
-| AMP Stories                       | 05/15/18          | [Link](#prompt-ui-for-stories)                                                                         | Yes               |
+| Integration                       | Prod Availability | Documentation                                                                                        | Ready For Testing |
+| --------------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------- | ----------------- |
+| DoubleClick & AdSense Integration | 05/10/18          | [Link](https://support.google.com/dfp_premium/answer/7678538)                                        | Yes               |
+| AMP IMA Video Integration         | 05/15/18          | [Link](https://github.com/ampproject/amphtml/blob/main/extensions/amp-ima-video/consent-blocking.md) | Yes               |
+| AMP Geo                           | 05/10/18          | [Link](https://amp.dev/documentation/examples/user-consent/geolocation-based_consent_flow/)          | Yes               |
+| AMP Stories                       | 05/15/18          | [Link](#prompt-ui-for-stories)                                                                       | Yes               |
 
 ## FAQs
 

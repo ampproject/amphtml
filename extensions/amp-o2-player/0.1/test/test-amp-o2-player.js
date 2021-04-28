@@ -16,7 +16,7 @@
 
 import '../amp-o2-player';
 import * as iframeHelper from '../../../../src/iframe-helper';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../../../src/core/constants/consent-state';
 import {MessageType} from '../../../../src/3p-frame-messaging';
 
 describes.realWin(
@@ -151,6 +151,22 @@ describes.realWin(
       expect(iframe.src).to.equal(
         'https://delivery.dev.vidible.tv/htmlembed/pid=123/456.html'
       );
+    });
+
+    it('unlayout and relayout', async () => {
+      const o2 = await getO2player({
+        'data-pid': '123',
+        'data-bcid': '456',
+        'data-env': 'stage',
+      });
+      expect(o2.querySelector('iframe')).to.exist;
+
+      const unlayoutResult = o2.unlayoutCallback();
+      expect(unlayoutResult).to.be.true;
+      expect(o2.querySelector('iframe')).to.not.exist;
+
+      await o2.layoutCallback();
+      expect(o2.querySelector('iframe')).to.exist;
     });
 
     describe('sends a consent-data', () => {

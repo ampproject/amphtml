@@ -20,37 +20,33 @@ import {
   VideoEvents,
   VideoInterface,
 } from '../../src/video-interface';
-import {VideoUtils} from '../../src/utils/video';
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
   poll,
 } from '../../testing/iframe';
+import {detectIsAutoplaySupported} from '../../src/utils/video';
 import {getData, listenOncePromise} from '../../src/event-helper';
 import {removeElement} from '../../src/dom';
 import {toggleExperiment} from '../../src/experiments';
 
 function skipIfAutoplayUnsupported(win) {
-  VideoUtils.resetIsAutoplaySupported();
-
-  return VideoUtils.isAutoplaySupported(win, false).then((isSupported) => {
-    if (isSupported) {
-      return;
+  return detectIsAutoplaySupported(win).then((isSupported) => {
+    if (!isSupported) {
+      this.skipTest();
     }
-    this.skipTest();
   });
 }
 
 export function runVideoPlayerIntegrationTests(
   createVideoElementFunc,
-  opt_experiment
+  opt_experiment,
+  timeout = 2000
 ) {
   /**
    * @const {number} Height of the fixture iframe
    */
   const FRAME_HEIGHT = 1000;
-
-  const TIMEOUT = 20000;
 
   let fixtureGlobal;
   let videoGlobal;
@@ -67,10 +63,10 @@ export function runVideoPlayerIntegrationTests(
     .skipIfPropertiesObfuscated()
     .ifChrome()
     .run('Video Interface', function () {
-      this.timeout(TIMEOUT);
+      this.timeout(timeout);
 
       it('should override the video interface methods', function () {
-        this.timeout(TIMEOUT);
+        this.timeout(timeout);
         return getVideoPlayer({outsideView: false, autoplay: true})
           .then((r) => {
             return r.video.getImpl(false);
@@ -95,7 +91,7 @@ export function runVideoPlayerIntegrationTests(
     .configure()
     .ifChrome()
     .run('Actions', function () {
-      this.timeout(TIMEOUT);
+      this.timeout(timeout);
 
       // TODO(cvializ, #14827): Fails on Chrome 66.
       it.skip('should support mute, play, pause, unmute actions', function () {
@@ -139,7 +135,7 @@ export function runVideoPlayerIntegrationTests(
       // would be considered a user-initiated action, but no way to do that in a
       // scripted test environment.
       before(function () {
-        this.timeout(TIMEOUT);
+        this.timeout(timeout);
         return skipIfAutoplayUnsupported.call(this, window);
       });
 
@@ -151,7 +147,7 @@ export function runVideoPlayerIntegrationTests(
     .skipIfPropertiesObfuscated()
     .ifChrome()
     .run('Analytics Triggers', function () {
-      this.timeout(TIMEOUT);
+      this.timeout(timeout);
       let video;
 
       // TODO(cvializ, #14827): Fails on Chrome 66.
@@ -375,7 +371,7 @@ export function runVideoPlayerIntegrationTests(
 
   const t = describe.configure().ifChrome().skipIfPropertiesObfuscated();
   t.run('Autoplay', function () {
-    this.timeout(TIMEOUT);
+    this.timeout(timeout);
 
     describe('play/pause', () => {
       it('should play when in view port initially', () => {
@@ -470,14 +466,14 @@ export function runVideoPlayerIntegrationTests(
               return iconElement.classList.contains('amp-video-eq-play');
             },
             undefined,
-            TIMEOUT
+            timeout
           );
         }
       });
     });
 
     before(function () {
-      this.timeout(TIMEOUT);
+      this.timeout(timeout);
       // Skip autoplay tests if browser does not support autoplay.
       return skipIfAutoplayUnsupported.call(this, window);
     });
@@ -489,7 +485,7 @@ export function runVideoPlayerIntegrationTests(
     .configure()
     .ifChrome()
     .run('Rotate-to-fullscreen', function () {
-      this.timeout(TIMEOUT);
+      this.timeout(timeout);
 
       let video;
       let playButton;
@@ -548,7 +544,7 @@ export function runVideoPlayerIntegrationTests(
       // would be considered a user-initiated action, but no way to do that in a
       // scripted test environment.
       before(function () {
-        this.timeout(TIMEOUT);
+        this.timeout(timeout);
         // Skip autoplay tests if browser does not support autoplay.
         return skipIfAutoplayUnsupported.call(this, window);
       });
@@ -564,7 +560,7 @@ export function runVideoPlayerIntegrationTests(
         if (opt_experiment) {
           toggleExperiment(fixture.win, opt_experiment, true);
         }
-        return expectBodyToBecomeVisible(fixture.win, TIMEOUT);
+        return expectBodyToBecomeVisible(fixture.win, timeout);
       })
       .then(() => {
         const video = createVideoElementFunc(fixture);
@@ -604,8 +600,6 @@ export function runVideoPlayerIntegrationTests(
   }
 
   function cleanUp() {
-    VideoUtils.resetIsAutoplaySupported();
-
     try {
       if (fixtureGlobal) {
         if (opt_experiment) {

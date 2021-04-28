@@ -15,7 +15,7 @@
  */
 
 import {ActionInvocation} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {AmpActionMacro} from '../amp-action-macro';
 import {Services} from '../../../../src/services';
 

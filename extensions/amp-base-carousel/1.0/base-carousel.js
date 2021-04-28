@@ -83,8 +83,8 @@ const MIN_AUTO_ADVANCE_INTERVAL = 1000;
 function BaseCarouselWithRef(
   {
     advanceCount = 1,
-    arrowPrev,
-    arrowNext,
+    arrowPrevAs,
+    arrowNextAs,
     autoAdvance: shouldAutoAdvance = false,
     autoAdvanceCount = 1,
     autoAdvanceInterval: customAutoAdvanceInterval = MIN_AUTO_ADVANCE_INTERVAL,
@@ -101,7 +101,7 @@ function BaseCarouselWithRef(
     onSlideChange,
     onTouchStart,
     orientation = Orientation.HORIZONTAL,
-    outsetArrows,
+    outsetArrows = false,
     snap = true,
     snapAlign = Alignment.START,
     snapBy = 1,
@@ -330,8 +330,8 @@ function BaseCarouselWithRef(
       {!hideControls && (
         <Arrow
           advance={prev}
+          as={arrowPrevAs}
           by={-advanceCount}
-          customArrow={arrowPrev}
           disabled={disableForDir(-1)}
           outsetArrows={outsetArrows}
           rtl={rtl}
@@ -340,7 +340,6 @@ function BaseCarouselWithRef(
       <Scroller
         advanceCount={advanceCount}
         alignment={snapAlign}
-        autoAdvanceCount={autoAdvanceCount}
         axis={axis}
         lightbox={lightbox}
         loop={loop}
@@ -388,7 +387,7 @@ function BaseCarouselWithRef(
         <Arrow
           advance={next}
           by={advanceCount}
-          customArrow={arrowNext}
+          as={arrowNextAs}
           disabled={disableForDir(1)}
           outsetArrows={outsetArrows}
           rtl={rtl}

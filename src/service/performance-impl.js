@@ -15,17 +15,17 @@
  */
 
 import {Services} from '../services';
-import {Signals} from '../utils/signals';
-import {TickLabel} from '../enums';
-import {VisibilityState} from '../visibility-state';
+import {Signals} from '../core/data-structures/signals';
+import {TickLabel} from '../core/constants/enums';
+import {VisibilityState} from '../core/constants/visibility-state';
 import {createCustomEvent} from '../event-helper';
 import {dev, devAssert} from '../log';
-import {dict, map} from '../utils/object';
+import {dict, map} from '../core/types/object';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
 import {isStoryDocument} from '../utils/story';
 import {layoutRectLtwh} from '../layout-rect';
-import {throttle} from '../utils/rate-limit';
+import {throttle} from '../core/types/function';
 import {whenContentIniLoad} from '../ini-load';
 import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
 
@@ -35,9 +35,6 @@ import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
  * be forwarded to the actual `tick` function when it is set.
  */
 const QUEUE_LIMIT = 50;
-
-/** @const {string} */
-const VISIBILITY_CHANGE_EVENT = 'visibilitychange';
 
 const TAG = 'Performance';
 
@@ -194,7 +191,6 @@ export class Performance {
      */
     this.largestContentfulPaintRenderTime_ = null;
 
-    this.boundOnVisibilityChange_ = this.onVisibilityChange_.bind(this);
     this.onAmpDocVisibilityChange_ = this.onAmpDocVisibilityChange_.bind(this);
 
     // Add RTV version as experiment ID, so we can slice the data by version.
@@ -247,12 +243,6 @@ export class Performance {
     // Register a handler to record metrics when the page enters the hidden
     // lifecycle state.
     if (registerVisibilityChangeListener) {
-      this.win.addEventListener(
-        VISIBILITY_CHANGE_EVENT,
-        this.boundOnVisibilityChange_,
-        {capture: true}
-      );
-
       this.ampdoc_.onVisibilityChanged(this.onAmpDocVisibilityChange_);
     }
 
@@ -464,23 +454,16 @@ export class Performance {
   }
 
   /**
-   * When the visibility state of the document changes to hidden,
-   * send the layout scores.
-   * @private
-   */
-  onVisibilityChange_() {
-    if (this.win.document.visibilityState === 'hidden') {
-      this.tickCumulativeMetrics_();
-    }
-  }
-
-  /**
-   * When the viewer visibility state of the document changes to inactive,
+   * When the viewer visibility state of the document changes to inactive or hidden,
    * send the layout score.
    * @private
    */
   onAmpDocVisibilityChange_() {
-    if (this.ampdoc_.getVisibilityState() === VisibilityState.INACTIVE) {
+    const state = this.ampdoc_.getVisibilityState();
+    if (
+      state === VisibilityState.INACTIVE ||
+      state === VisibilityState.HIDDEN
+    ) {
       this.tickCumulativeMetrics_();
     }
   }
@@ -542,13 +525,6 @@ export class Performance {
       this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_2, cls);
       this.flush();
       this.shiftScoresTicked_ = 2;
-
-      // No more work to do, so clean up event listeners.
-      this.win.removeEventListener(
-        VISIBILITY_CHANGE_EVENT,
-        this.boundOnVisibilityChange_,
-        {capture: true}
-      );
     }
   }
 

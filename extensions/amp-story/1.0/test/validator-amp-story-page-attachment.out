@@ -71,6 +71,35 @@ PASS
 |          >
 |        </amp-story-page-attachment>
 |      </amp-story-page>
+|      <amp-story-page id="outlink-cta-button">
+|        <amp-story-grid-layer template="vertical">
+|          <h1>fill</h1>
+|        </amp-story-grid-layer>
+|        <amp-story-page-attachment
+|          href="https://www.google.com"
+|          data-title="Page attachment title"
+|          layout="nodisplay"
+|          data-cta-text="Call To Action"
+|          cta-image="https://website.com/image.png"
+|          >
+|        </amp-story-page-attachment>
+|      </amp-story-page>
+|      <amp-story-page id="outlink-cta-button-custom-theme">
+|        <amp-story-grid-layer template="vertical">
+|          <h1>fill</h1>
+|        </amp-story-grid-layer>
+|        <amp-story-page-attachment
+|          href="https://www.google.com"
+|          data-title="Page attachment title"
+|          layout="nodisplay"
+|          theme="custom"
+|          cta-accent-color="pink"
+|          cta-accent-element="background"
+|          data-cta-text="Call To Action"
+|          cta-image="https://website.com/image.png"
+|          >
+|        </amp-story-page-attachment>
+|      </amp-story-page>
 |    </amp-story>
 |  </body>
 |  </html>

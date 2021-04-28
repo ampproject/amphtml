@@ -17,11 +17,12 @@
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
-} from '../../../src/consent-state';
-import {Deferred} from '../../../src/utils/promise';
+} from '../../../src/core/constants/consent-state';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
@@ -94,6 +95,9 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     this.playerReadyResolver_ = null;
 
     this.onResized_ = this.onResized_.bind(this);
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -300,6 +304,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     this.bindToAmpConsent_();
 
     observeContentSize(this.element, this.onResized_);
+    this.pauseHelper_.updatePlaying(true);
 
     return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
   }
@@ -322,7 +327,12 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
+    if (!this.iframe_) {
+      return;
+    }
     this.sendCommand_('ampPause');
+    // The player doesn't appear to respect "ampPause" message.
+    this.iframe_.src = this.iframe_.src;
   }
 
   /** @override */
@@ -334,6 +344,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     this.playerReadyResolver_ = deferred.resolve;
 
     unobserveContentSize(this.element, this.onResized_);
+    this.pauseHelper_.updatePlaying(false);
 
     return true;
   }

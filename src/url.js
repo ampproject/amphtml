@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {LruCache} from './utils/lru-cache';
-import {dict, hasOwn} from './utils/object';
-import {endsWith} from './string';
+import {LruCache} from './core/data-structures/lru-cache';
+import {dict, hasOwn} from './core/types/object';
+import {endsWith} from './core/types/string';
 import {getMode} from './mode';
-import {isArray} from './types';
+import {isArray} from './core/types';
 import {parseQueryString_} from './url-parse-query-string';
 import {tryDecodeUriComponent_} from './url-try-decode-uri-component';
 import {urls} from './config';
@@ -121,7 +121,7 @@ export function parseUrlDeprecated(url, opt_nocache) {
 export function parseUrlWithA(a, url, opt_cache) {
   if (IS_ESM) {
     a.href = '';
-    return /** @type {!Location} */ (new URL(url, a.href));
+    return /** @type {?} */ (new URL(url, a.href));
   }
 
   if (opt_cache && opt_cache.has(url)) {
@@ -404,6 +404,14 @@ export function isProxyOrigin(url) {
     url = parseUrlDeprecated(url);
   }
   return urls.cdnProxyRegex.test(url.origin);
+}
+
+/**
+ * @param {string} uri
+ * @return {boolean}
+ */
+export function isAmpScriptUri(uri) {
+  return uri.startsWith('amp-script:');
 }
 
 /**

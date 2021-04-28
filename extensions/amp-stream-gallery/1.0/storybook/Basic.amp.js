@@ -16,14 +16,13 @@
 
 import * as Preact from '../../../../src/preact';
 import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 const CONTROLS = ['auto', 'always', 'never'];
 
 export default {
   title: 'amp-stream-gallery-1_0',
-  decorators: [withKnobs, withA11y, withAmp],
+  decorators: [withKnobs, withAmp],
 
   parameters: {
     extensions: [{name: 'amp-stream-gallery', version: '1.0'}],
@@ -91,6 +90,30 @@ export const Default = () => {
   );
 };
 
-Default.story = {
-  name: 'default',
+export const customArrows = () => {
+  const width = number('width', 400);
+  const height = number('height', 200);
+  const slideCount = number('slide count', 7, {min: 0, max: 99});
+  const colorIncrement = Math.floor(255 / (slideCount + 1));
+  return (
+    <amp-stream-gallery max-visible-count={3} width={width} height={height}>
+      {Array.from({length: slideCount}, (x, i) => {
+        const v = colorIncrement * (i + 1);
+        return (
+          <div
+            style={{
+              backgroundColor: `rgb(${v}, 100, 100)`,
+              border: 'solid white 1px',
+              width: '100%',
+              height: '100%',
+            }}
+          ></div>
+        );
+      })}
+      <button slot="next-arrow">Next</button>
+      <button slot="prev-arrow">Prev</button>
+    </amp-stream-gallery>
+  );
 };
+
+Default.storyName = 'default';

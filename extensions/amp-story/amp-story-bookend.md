@@ -28,9 +28,9 @@ limitations under the License.
 The `amp-story-bookend` is the last screen of the story. It contains related links, sharing options, call to action links, and more.
 
 <figure class="centered-fig">
-  <amp-anim alt="related article example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/related-articles.gif">
+  <amp-anim alt="related article example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/related-articles.gif">
     <noscript>
-    <img alt="related article example" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/related-articles.gif" />
+    <img alt="related article example" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/related-articles.gif" />
   </noscript>
   </amp-anim>
 </figure>
@@ -103,7 +103,7 @@ The `heading` component has a `text` field, which can be used to append a title 
 ```
 
 <amp-img alt="Bookend heading component" layout="fixed"
-src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-heading.png" width="386" height="123">
+src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-bookend-component-heading.png" width="386" height="123">
 <noscript>
 <img alt="Bookend heading component" src="img/amp-story-bookend-component-heading.png" />
 </noscript>
@@ -124,7 +124,7 @@ The `small` component can be used to link to related articles. This component re
 ```
 
 <amp-img alt="Bookend small component" layout="fixed"
-src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-small.png" width="379" height="192">
+src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-bookend-component-small.png" width="379" height="192">
 <noscript>
 <img alt="Bookend small component" src="img/amp-story-bookend-component-small.png" />
 </noscript>
@@ -146,7 +146,7 @@ The `landscape` component can be used for alternative formats of content, like v
 ```
 
 <amp-img alt="Bookend landscape component" layout="fixed"
-src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-landscape.png" width="388" height="410">
+src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-bookend-component-landscape.png" width="388" height="410">
 <noscript>
 <img alt="Bookend landscape component" src="img/amp-story-bookend-component-landscape.png" />
 </noscript>
@@ -168,7 +168,7 @@ The `portrait` component can be used to link to other stories. This component re
 ```
 
 <amp-img alt="Bookend portrait component" layout="fixed"
-src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-portrait.png" width="382" height="522">
+src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-bookend-component-portrait.png" width="382" height="522">
 <noscript>
 <img alt="Bookend portrait component" src="img/amp-story-bookend-component-portrait.png" />
 </noscript>
@@ -195,7 +195,7 @@ The `cta-link` component lets you specify links for call to actions (e.g., `Read
 ```
 
 <amp-img alt="Bookend cta-links component" layout="fixed"
-src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-cta-links.png" width="381" height="81">
+src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-bookend-component-cta-links.png" width="381" height="81">
 <noscript>
 <img alt="Bookend cta-links component" src="img/amp-story-bookend-component-cta-links.png" />
 </noscript>
@@ -218,7 +218,7 @@ The `textbox` component lets you specify text inside the bookend (for example, p
 ```
 
 <amp-img alt="Bookend textbox component" layout="fixed"
-src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-textbox.png" width="591" height="358">
+src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-bookend-component-textbox.png" width="591" height="358">
 <noscript>
 <img alt="Bookend textbox component" src="img/amp-story-bookend-component-textbox.png" />
 </noscript>
