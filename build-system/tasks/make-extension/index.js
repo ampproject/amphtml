@@ -220,6 +220,13 @@ async function makeExtensionFromTemplates(
     '__component_name_hyphenated__': name,
     '__component_name_hyphenated_capitalized__': name.toUpperCase(),
     '__component_name_pascalcase__': namePascalCase,
+    // TODO(alanorozco): Remove __storybook_experiments...__ once we stop
+    // requiring the bento experiment.
+    '__storybook_experiments_do_not_add_trailing_comma__':
+      // Don't add a trailing comma in the template, instead we add it here.
+      // This is because the property added is optional, and a double comma would
+      // cause a syntax error.
+      options.bento ? "experiments: ['bento']," : '',
     ...(!options.nocss
       ? {
           '__jss_import_component_css__': `import {CSS as COMPONENT_CSS} from './component.jss'`,
