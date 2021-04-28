@@ -108,12 +108,16 @@ function getFilesFromArgv() {
   // TODO(#30223): globby only takes posix globs. Find a Windows alternative.
   const toPosix = (str) => str.replace(/\\\\?/g, '/');
   const globs = Array.isArray(argv.files) ? argv.files : argv.files.split(',');
-  const files = globby.sync(globs.map((glob) => toPosix(glob.trim())));
-  if (files.length == 0) {
-    log(red('ERROR:'), 'Argument(s)', cyan(argv.files), 'matched zero files.');
-    throw new Error('Argument(s) matched zero files.');
+  const allFiles = [];
+  for (const glob of globs) {
+    const files = globby.sync(toPosix(glob.trim()));
+    if (files.length == 0) {
+      log(red('ERROR:'), 'Argument', cyan(glob), 'matched zero files.');
+      throw new Error('Argument matched zero files.');
+    }
+    allFiles.push(...files);
   }
-  return files;
+  return allFiles;
 }
 
 /**
