@@ -42,7 +42,11 @@ import {
   EXPANDABLE_COMPONENTS,
   expandableElementsSelectors,
 } from './amp-story-embedded-component';
-import {AnimationManager, hasAnimations} from './animation';
+import {
+  AnimationManager,
+  hasAnimations,
+  prefersReducedMotion,
+} from './animation';
 import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {EventType, dispatch} from './events';
@@ -308,17 +312,20 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   maybeCreateAnimationManager_() {
-    if (!this.animationManager_) {
-      if (!hasAnimations(this.element)) {
-        return;
-      }
-
-      this.animationManager_ = AnimationManager.create(
-        this.element,
-        this.getAmpDoc(),
-        this.getAmpDoc().getUrl()
-      );
+    if (this.animationManager_) {
+      return;
     }
+    if (prefersReducedMotion(this.win)) {
+      return;
+    }
+    if (!hasAnimations(this.element)) {
+      return;
+    }
+    this.animationManager_ = AnimationManager.create(
+      this.element,
+      this.getAmpDoc(),
+      this.getAmpDoc().getUrl()
+    );
   }
 
   /** @override */
@@ -564,9 +571,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           });
         });
       });
-      this.prefersReducedMotion_()
-        ? this.maybeFinishAnimations_()
-        : this.maybeStartAnimations_();
+      this.maybeStartAnimations_();
       this.checkPageHasAudio_();
       this.checkPageHasElementWithPlayback_();
       this.renderOpenAttachmentUI_();
@@ -1208,10 +1213,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   maybeStartAnimations_() {
-    if (!this.animationManager_) {
-      return;
-    }
-    this.animationManager_.animateIn();
+    this.animationManager_?.animateIn();
   }
 
   /**
@@ -1229,15 +1231,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       .then(() => {
         this.animationManager_.finishAll();
       });
-  }
-
-  /**
-   * Whether the device opted in prefers-reduced-motion.
-   * @return {boolean}
-   * @private
-   */
-  prefersReducedMotion_() {
-    return this.win.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
   /**

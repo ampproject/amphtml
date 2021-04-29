@@ -839,3 +839,16 @@ export class AnimationSequence {
     return this.subscriptionPromises_[id];
   }
 }
+
+/**
+ * Detect prefers-reduced-motion.
+ * Native animations will not run when a device is set up to reduced motion.
+ * In that case, we need to disable all animation treatment, and whatever
+ * setup changes that depend on an animation running later on.
+ * @param {!Window} win
+ * @return {boolean}
+ * TODO(alanorozco): This is probably a global utility, move it.
+ */
+export function prefersReducedMotion(win) {
+  return win.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
