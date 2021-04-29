@@ -76,7 +76,9 @@ export class AmpTiktok extends AMP.BaseElement {
         'pointer-events',
       ]);
       this.iframe_.removeAttribute('aria-hidden');
-      this.iframe_.setAttribute('aria-title', 'Tiktok');
+      if (!this.iframe_.getAttribute('aria-title')) {
+        this.iframe_.setAttribute('aria-title', 'TikTok');
+      }
       this.iframe_.classList.remove('i-amphtml-tiktok-unresolved');
       this.iframe_.classList.add('i-amphtml-tiktok-centered');
       this.forceChangeHeight(height);

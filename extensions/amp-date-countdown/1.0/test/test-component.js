@@ -23,7 +23,7 @@ describes.sandboxed('DateCountdown 1.0 preact component', {}, (env) => {
   let clock;
 
   function render(data) {
-    return JSON.stringify(
+    .stringify(
       data,
       (key, value) => {
         if (typeof value === 'number') {

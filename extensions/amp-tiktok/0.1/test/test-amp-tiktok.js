@@ -16,8 +16,8 @@
 
 import '../amp-tiktok';
 import * as dom from '../../../../src/dom';
+import {Services} from '../../../../src/services';
 import {computedStyle} from '../../../../src/style';
-import {isAmpElement} from '../../../../src/dom';
 
 const VIDEOID = '6948210747285441798';
 
@@ -49,7 +49,13 @@ describes.realWin(
           return createElementWithAttributes(document, tagName, attributes);
         });
 
-      env.sandbox.stub(dom, '');
+      const oEmbedJsonResponse = {
+        'thumbnail_url': '/examples/img/ampicon.png',
+        'title': 'Test TikTok Title',
+      };
+      env.sandbox
+        .stub(Services.xhrFor(win), 'fetchJson')
+        .resolves({json: () => Promise.resolve(oEmbedJsonResponse)});
     });
 
     async function getTiktok(attrs = {}) {
@@ -80,7 +86,7 @@ describes.realWin(
       expect(iframe.getAttribute('src')).to.contain('en-US');
     });
 
-    it('renders with videoId', async () => {
+    it('renders with video src url', async () => {
       const videoSrc =
         'https://www.tiktok.com/@scout2015/video/6948210747285441798';
       const player = await getTiktok({'data-src': videoSrc});
@@ -118,24 +124,44 @@ describes.realWin(
     });
 
     it('renders placeholder', async () => {
-      const player = await getTiktok({'data-src': VIDEOID});
-      const placeHolder = player.querySelector('amp-img');
-      expect(placeHolder).to.not.be.null;
+      const videoSrc =
+        'https://www.tiktok.com/@scout2015/video/6948210747285441798';
+      const player = await getTiktok({'data-src': videoSrc});
+      const placeholder = player.querySelector('img');
+      expect(placeholder).to.not.be.null;
+      expect(placeholder.getAttribute('src')).to.equal(
+        '/examples/img/ampicon.png'
+      );
     });
 
-    it('renders aria title', async () => {
+    it('renders aria title without oEmbed Request', async () => {
       const player = await getTiktok({'data-src': VIDEOID});
 
-      // Wait 1100ms for resize fallback to be invoked.
+      // Wait 1100ms for resize fallback to be invoked because aria-title is set in that call.
       await new Promise((resolve) => {
         setTimeout(() => {
           resolve();
         }, 1100);
       });
+      const playerIframe = player.querySelector('iframe');
+      const ariaTitle = playerIframe.getAttribute('aria-title');
+      expect(ariaTitle).to.equal('TikTok');
+    });
 
-      const ariaTitle = player.getAttribute('aria-title');
-      console.log(ariaTitle);
-      expect(ariaTitle).to.contain('TikTok');
+    it('renders aria title with oEmbed request', async () => {
+      const videoSrc =
+        'https://www.tiktok.com/@scout2015/video/6948210747285441798';
+      const player = await getTiktok({'data-src': videoSrc});
+
+      // Wait 1100ms for resize fallback to be invoked because aria-title is set in that call.
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, 1100);
+      });
+      const playerIframe = player.querySelector('iframe');
+      const ariaTitle = playerIframe.getAttribute('aria-title');
+      expect(ariaTitle).to.equal('TikTok: Test TikTok Title');
     });
 
     it('removes iframe after unlayoutCallback', async () => {
