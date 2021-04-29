@@ -40,20 +40,6 @@ const PRIDE_FILES_GLOBS = [
   // Core
   'src/core/**/*.js',
 
-  // Polyfills
-  'src/polyfills/abort-controller.js',
-  'src/polyfills/abort-controller.js',
-  'src/polyfills/array-includes.js',
-  'src/polyfills/document-contains.js',
-  'src/polyfills/domtokenlist.js',
-  'src/polyfills/map-set.js',
-  'src/polyfills/math-sign.js',
-  'src/polyfills/object-assign.js',
-  'src/polyfills/object-values.js',
-  'src/polyfills/set-add.js',
-  'src/polyfills/string-starts-with.js',
-  'src/polyfills/weakmap-set.js',
-
   // Runtime
   'build/amp-loader-0.1.css.js',
   'build/ampdoc.css.js',

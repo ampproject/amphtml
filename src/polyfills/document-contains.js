@@ -20,7 +20,7 @@
  * See https://developer.mozilla.org/en-US/docs/Web/API/Node/contains
  * @param {?Node} node
  * @return {boolean}
- * @this {Document}
+ * @this {Node}
  */
 function documentContainsPolyfill(node) {
   // Per spec, "contains" method is inclusionary
