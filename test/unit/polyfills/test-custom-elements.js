@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {copyProperties, install} from '../src/polyfills/custom-elements';
+import {copyProperties, install} from '../../../src/polyfills/custom-elements';
 
 describes.realWin(
   'install patches',

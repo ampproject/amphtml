@@ -14,18 +14,8 @@
  * limitations under the License.
  */
 
-import {cssEscape} from '../third_party/css-escape/css-escape';
-import {devAssert} from './log';
-
-/**
- * Asserts that name is just an alphanumeric word, and does not contain
- * advanced CSS selector features like attributes, psuedo-classes, class names,
- * nor ids.
- * @param {string} name
- */
-export function assertIsName(name) {
-  devAssert(/^[\w-]+$/.test(name));
-}
+import {cssEscape} from '../../../third_party/css-escape/css-escape';
+import {pureDevAssert as devAssert} from '../assert';
 
 /**
  * @type {boolean|undefined}
@@ -101,8 +91,11 @@ export function prependSelectorsWith(selector, distribute) {
  *
  * @param {string} ident
  * @return {string}
+ * @suppress {uselessCode}
  */
 export function escapeCssSelectorIdent(ident) {
+  // This gets rewritten to true/false during compilation. It will trigger an
+  // JSC_UNREACHABLE_CODE warning, but that's intentional for DCE.
   if (IS_ESM) {
     return CSS.escape(ident);
   }
