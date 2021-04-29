@@ -37,9 +37,6 @@ const {typecheckNewServer} = require('../server/typescript-compile');
  * @type {!Array<string>}
  */
 const PRIDE_FILES_GLOBS = [
-  // Core
-  'src/core/**/*.js',
-
   // Polyfills
   'src/polyfills/abort-controller.js',
   'src/polyfills/abort-controller.js',
@@ -170,8 +167,11 @@ const TYPE_CHECK_TARGETS = {
   // introduced. It is okay to remove a file from this list only when fixing a
   // bug for cherry-pick.
   'pride': {
-    srcGlobs: [...PRIDE_FILES_GLOBS],
-    externGlobs: ['build-system/externs/*.js', CORE_EXTERNS_GLOB],
+    srcGlobs: [
+      ...PRIDE_FILES_GLOBS,
+      ...globby.sync('src/core/**/*.js').filter((p) => !p.includes('extern')),
+    ],
+    externGlobs: [CORE_EXTERNS_GLOB, 'build-system/externs/*.extern.js'],
   },
 
   // TODO(#33631): Targets below this point are not expected to pass.
@@ -236,7 +236,7 @@ async function typeCheck(targetName) {
 
   // If srcGlobs and externGlobs are defined, determine the externs/extraGlobs
   if (srcGlobs.length || externGlobs.length) {
-    opts.eterns = externGlobs.flatMap(globby.sync);
+    opts.externs = externGlobs.flatMap(globby.sync);
     // Included globs should explicitly exclude any externs
     opts.extraGlobs = externGlobs.map((glob) => `!${glob}`).concat(srcGlobs);
   }

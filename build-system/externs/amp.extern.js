@@ -45,6 +45,15 @@
  */
 var FetchInitDef;
 
+// TODO: add MediaQueryListEvent to closure's builtin externs.
+/**
+ * @typedef {{
+ *   matches: function():boolean,
+ *   media: string
+ * }}
+ */
+var MediaQueryListEvent;
+
 /**
  * Externed due to being passed across component/runtime boundary.
  * @typedef {{xhrUrl: string, fetchOpt: !FetchInitDef}}
@@ -184,6 +193,7 @@ process.env.NODE_ENV;
 
 // Exposed to ads.
 // Preserve these filedNames so they can be accessed by 3p code.
+/** * @type {!Object} */
 window.context = {};
 window.context.sentinel;
 window.context.clientId;
@@ -213,9 +223,7 @@ window.context.tagName;
 
 // Safeframe
 // TODO(bradfrizzell) Move to its own extern. Not relevant to all AMP.
-/** @type {?Object} */
-window.sf_ = {};
-/** @type {?Object} */
+window.sf_;
 window.sf_.cfg;
 
 // Exposed to custom ad iframes.
@@ -233,7 +241,18 @@ window.__AMP_TOP;
 window.__AMP_PARENT;
 window.__AMP_WEAKREF_ID;
 window.__AMP_URL_CACHE;
-window.AMP = {};
+window.__AMP_LOG;
+
+/** @type {boolean} */
+window.ENABLE_LOG;
+
+/** @type {../../src/mode.ModeDef} */
+window.__AMP_MODE;
+
+/** @type {boolean|undefined} */
+window.AMP_DEV_MODE;
+
+window.AMP;
 window.AMP._ = {};
 window.AMP.push;
 window.AMP.title;
@@ -251,10 +270,19 @@ window.AMP.toggleExperiment;
 window.AMP.setLogLevel;
 window.AMP.setTickFunction;
 window.AMP.viewer;
-window.AMP.viewport = {};
+window.AMP.viewport;
 window.AMP.viewport.getScrollLeft;
 window.AMP.viewport.getScrollWidth;
 window.AMP.viewport.getWidth;
+
+/**
+ * This symbol is exposed by bundles transformed by `scoped-require.js` to avoid
+ * polluting the global namespace with `require`.
+ * It allows AMP extensions to consume code injected into their binaries that
+ * cannot be run through Closure Compiler, e.g. React code with JSX.
+ * @type {!function(string):?}
+ */
+window.AMP.require;
 
 /** @type {function(!HTMLElement, !Document, !string, Object)} */
 window.AMP.attachShadowDoc = function (element, document, url, options) {};
@@ -379,7 +407,7 @@ RRule.prototype.after = function (unusedDt, unusedInc) {};
 let PropTypes = {};
 
 /**
- * @@dict
+ * @dict
  */
 let ReactDates = {};
 
@@ -435,11 +463,6 @@ window.AMP.dependencies = {};
  */
 window.AMP.dependencies.inputmaskFactory = function (unusedElement) {};
 
-// Should have been defined in the closure compiler's extern file for
-// IntersectionObserverEntry, but appears to have been omitted.
-/** @type {?ClientRect} */
-IntersectionObserverEntry.prototype.rootBounds;
-
 // TODO (remove after we update closure compiler externs)
 window.PerformancePaintTiming;
 window.PerformanceObserver;
@@ -487,8 +510,14 @@ AmpElement.prototype.togglePlaceholder = function (show) {};
 AmpElement.prototype.getLayoutSize = function () {};
 
 /**
+ * TODO: remove this when typechecking is restored to AMP.BaseElement.
+ * @typedef {*}
+ */
+var BaseElement;
+
+/**
  * @param {boolean=} opt_waitForBuild
- * @return {!Promise<!AMP.BaseElement>}
+ * @return {!Promise<!BaseElement>}
  */
 AmpElement.prototype.getImpl = function (opt_waitForBuild) {};
 
@@ -762,49 +791,50 @@ AmpStoryVariableService.prototype.onStateChange = function (event) {};
 AmpStoryVariableService.pageIndex;
 AmpStoryVariableService.pageId;
 
-var AMP = {};
-window.AMP;
-// Externed explicitly because we do not export Class shaped names
-// by default.
-/**
- * This uses the internal name of the type, because there appears to be no
- * other way to reference an ES6 type from an extern that is defined in
- * the app.
- * @constructor @struct
- * @extends {BaseElement$$module$src$base_element}
- */
-AMP.BaseElement = class {
-  /** @param {!AmpElement} element */
-  constructor(element) {}
-};
+// TODO: uncomment when typechecking restored to BaseElement.
+// // Externed explicitly because we do not export Class shaped names
+// // by default.
+// /**
+//  * This uses the internal name of the type, because there appears to be no
+//  * other way to reference an ES6 type from an extern that is defined in
+//  * the app.
+//  * @constructor @struct
+//  * @extends {BaseElement$$module$src$base_element}
+//  */
+// AMP.BaseElement = class {
+//   /** @param {!AmpElement} element */
+//   constructor(element) {}
+// };
 
-/**
- * This uses the internal name of the type, because there appears to be no
- * other way to reference an ES6 type from an extern that is defined in
- * the app.
- * @constructor @struct
- * @extends {AmpAdXOriginIframeHandler$$module$extensions$amp_ad$0_1$amp_ad_xorigin_iframe_handler}
- */
-AMP.AmpAdXOriginIframeHandler = class {
-  /**
-   * @param {!AmpAd3PImpl$$module$extensions$amp_ad$0_1$amp_ad_3p_impl|!AmpA4A$$module$extensions$amp_a4a$0_1$amp_a4a} baseInstance
-   */
-  constructor(baseInstance) {}
-};
+// TODO: uncomment when typechecking restored to AmpAdXOriginIframeHandler.
+// /**
+//  * This uses the internal name of the type, because there appears to be no
+//  * other way to reference an ES6 type from an extern that is defined in
+//  * the app.
+//  * @constructor @struct
+//  * @extends {AmpAdXOriginIframeHandler$$module$extensions$amp_ad$0_1$amp_ad_xorigin_iframe_handler}
+//  */
+// AMP.AmpAdXOriginIframeHandler = class {
+//   /**
+//    * @param {!AmpAd3PImpl$$module$extensions$amp_ad$0_1$amp_ad_3p_impl|!AmpA4A$$module$extensions$amp_a4a$0_1$amp_a4a} baseInstance
+//    */
+//   constructor(baseInstance) {}
+// };
 
-/**
- * This uses the internal name of the type, because there appears to be no
- * other way to reference an ES6 type from an extern that is defined in
- * the app.
- * @constructor @struct
- * @extends {AmpAdUIHandler$$module$extensions$amp_ad$0_1$amp_ad_ui}
- */
-AMP.AmpAdUIHandler = class {
-  /**
-   * @param {!AMP.BaseElement} baseInstance
-   */
-  constructor(baseInstance) {}
-};
+// TODO: uncomment when typechecking is restored to AmpAdUIHandler.
+// /**
+//  * This uses the internal name of the type, because there appears to be no
+//  * other way to reference an ES6 type from an extern that is defined in
+//  * the app.
+//  * @constructor @struct
+//  * @extends {AmpAdUIHandler$$module$extensions$amp_ad$0_1$amp_ad_ui}
+//  */
+// AMP.AmpAdUIHandler = class {
+//   /**
+//    * @param {!AMP.BaseElement} baseInstance
+//    */
+//   constructor(baseInstance) {}
+// };
 
 /**
  * Actual filled values for this exists in
@@ -819,15 +849,6 @@ const RTC_ERROR_ENUM = {};
       callout: string,
       error: (RTC_ERROR_ENUM|undefined)}} */
 var rtcResponseDef;
-
-/**
- * This symbol is exposed by bundles transformed by `scoped-require.js` to avoid
- * polluting the global namespace with `require`.
- * It allows AMP extensions to consume code injected into their binaries that
- * cannot be run through Closure Compiler, e.g. React code with JSX.
- * @type {!function(string):?}
- */
-AMP.require;
 
 /**
  * TransitionDef function that accepts normtime, typically between 0 and 1 and
@@ -1058,11 +1079,6 @@ class FeaturePolicy {
    */
   getAllowlistForFeature(feature) {}
 }
-
-/**
- * @type {?FeaturePolicy}
- */
-HTMLIFrameElement.prototype.featurePolicy;
 
 /** @type {boolean} */
 HTMLVideoElement.prototype.playsInline;
