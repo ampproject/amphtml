@@ -482,9 +482,9 @@ exports.rules = [
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/core/assert/base.js',
     allowlist: [
-      'src/core/assert/dev.js',
-      'src/core/assert/user.js',
-      'src/log.js',
+      'src/core/assert/dev.js->src/core/assert/base.js',
+      'src/core/assert/user.js->src/core/assert/base.js',
+      'src/log.js->src/core/assert/base.js',
     ],
   },
 
