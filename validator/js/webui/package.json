@@ -23,7 +23,7 @@
     "@polymer/iron-icon": "0.0.3",
     "@polymer/iron-icons": "0.0.3",
     "@polymer/iron-iconset-svg": "0.0.3",
-    "@polymer/iron-input": "0.0.3",
+    "@polymer/iron-input": "0.0.4",
     "@polymer/iron-menu-behavior": "0.0.3",
     "@polymer/iron-meta": "0.0.3",
     "@polymer/iron-overlay-behavior": "0.0.3",
