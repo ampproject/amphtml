@@ -43,7 +43,7 @@
  *   prerenderSafe: (boolean|undefined),
  * }}
  */
-var FetchInitDef;
+let FetchInitDef;
 
 // TODO: add MediaQueryListEvent to closure's builtin externs.
 /**
@@ -52,16 +52,16 @@ var FetchInitDef;
  *   media: string
  * }}
  */
-var MediaQueryListEvent;
+let MediaQueryListEvent;
 
 /**
  * Externed due to being passed across component/runtime boundary.
  * @typedef {{xhrUrl: string, fetchOpt: !FetchInitDef}}
  */
-var FetchRequestDef;
+let FetchRequestDef;
 
 /** @constructor */
-var FormDataWrapperInterface = function () {};
+let FormDataWrapperInterface = function () {};
 
 FormDataWrapperInterface.prototype.entries = function () {};
 FormDataWrapperInterface.prototype.getFormData = function () {};
@@ -81,20 +81,21 @@ Element.prototype.__AMP_SHADOW_ROOT;
 Element.prototype.shadowRoot;
 
 // Fullscreen methods
-Document.prototype.cancelFullScreen = function () {};
-Document.prototype.webkitExitFullscreen = function () {};
-Element.prototype.cancelFullScreen = function () {};
-Element.prototype.exitFullscreen = function () {};
-Element.prototype.webkitExitFullscreen = function () {};
-Element.prototype.webkitCancelFullScreen = function () {};
-Element.prototype.mozCancelFullScreen = function () {};
-Element.prototype.msExitFullscreen = function () {};
-Element.prototype.requestFullscreen = function () {};
-Element.prototype.requestFullScreen = function () {};
-Element.prototype.webkitRequestFullscreen = function () {};
-Element.prototype.webkitEnterFullscreen = function () {};
-Element.prototype.msRequestFullscreen = function () {};
-Element.prototype.mozRequestFullScreen = function () {};
+// TODO: upstream these types to closure.
+Document.prototype.cancelFullScreen;
+Document.prototype.webkitExitFullscreen;
+Element.prototype.cancelFullScreen;
+Element.prototype.exitFullscreen;
+Element.prototype.webkitExitFullscreen;
+Element.prototype.webkitCancelFullScreen;
+Element.prototype.mozCancelFullScreen;
+Element.prototype.msExitFullscreen;
+Element.prototype.requestFullscreen;
+Element.prototype.requestFullScreen;
+Element.prototype.webkitRequestFullscreen;
+Element.prototype.webkitEnterFullscreen;
+Element.prototype.msRequestFullscreen;
+Element.prototype.mozRequestFullScreen;
 
 /** @type {boolean|undefined} */
 Element.prototype.webkitDisplayingFullscreen;
@@ -158,7 +159,7 @@ ExtensionPayload.prototype.f;
 /**
  * @typedef {?JsonObject|undefined|string|number|!Array<JsonValue>}
  */
-var JsonValue;
+let JsonValue;
 
 /**
  * @constructor
@@ -187,7 +188,7 @@ VideoAnalyticsDetailsDef.prototype.state;
 VideoAnalyticsDetailsDef.prototype.width;
 
 // Node.js global
-var process = {};
+let process = {};
 process.env;
 process.env.NODE_ENV;
 
@@ -246,6 +247,8 @@ window.__AMP_LOG;
 window.ENABLE_LOG;
 
 // TODO: uncomment line below when src/mode.js is added to typechecking.
+// https://github.com/ampproject/amphtml/issues/34099
+
 // /** @type {undefined|../../src/mode.ModeDef} */
 window.__AMP_MODE;
 
@@ -441,7 +444,7 @@ ReactDatesConstants.HORIZONTAL_ORIENTATION;
 /**
  * @constructor
  */
-var Inputmask = class {};
+let Inputmask = class {};
 
 /** @param {!Object} unusedOpts */
 Inputmask.extendAliases = function (unusedOpts) {};
@@ -471,13 +474,13 @@ Window.prototype.origin;
 HTMLAnchorElement.prototype.origin;
 
 /** @typedef {number}  */
-var time;
+let time;
 
 /**
  * Just an element, but used with AMP custom elements..
  * @constructor @extends {HTMLElement}
  */
-var AmpElement = function () {};
+let AmpElement = function () {};
 
 /** @return {boolean} */
 AmpElement.prototype.V1 = function () {};
@@ -513,7 +516,7 @@ AmpElement.prototype.getLayoutSize = function () {};
  * TODO: remove this when typechecking is restored to AMP.BaseElement.
  * @typedef {*}
  */
-var BaseElement;
+let BaseElement;
 
 /**
  * @param {boolean=} opt_waitForBuild
@@ -618,7 +621,7 @@ AmpElement.prototype.expand = function () {};
 /** */
 AmpElement.prototype.collapse = function () {};
 
-var Signals = class {};
+let Signals = class {};
 /**
  * @param {string} unusedName
  * @return {number|!Error|null}
@@ -648,19 +651,19 @@ Signals.prototype.reset = function (unusedName) {};
 
 // Temp until we figure out forward declarations
 /** @constructor */
-var AccessService = function () {};
+let AccessService = function () {};
 /** @constructor @struct */
-var UserNotificationManager = function () {};
+let UserNotificationManager = function () {};
 UserNotificationManager.prototype.get;
 /** @constructor @struct */
-var Cid = function () {};
+let Cid = function () {};
 /** @constructor @struct */
-var Activity = function () {};
+let Activity = function () {};
 /** @constructor */
-var AmpStoryVariableService = function () {};
+let AmpStoryVariableService = function () {};
 
 // data
-var data;
+let data;
 data.tweetid;
 data.requestedHeight;
 data.requestedWidth;
@@ -708,7 +711,7 @@ data.sitekey;
 data.fortesting;
 
 // 3p code
-var twttr;
+let twttr;
 twttr.events;
 twttr.events.bind;
 twttr.widgets;
@@ -716,26 +719,26 @@ twttr.widgets.createTweet;
 twttr.widgets.createMoment;
 twttr.widgets.createTimeline;
 
-var FB;
+let FB;
 FB.init;
 
-var gist;
+let gist;
 gist.gistid;
 
-var bodymovin;
+let bodymovin;
 bodymovin.loadAnimation;
-var animationHandler;
+let animationHandler;
 animationHandler.play;
 animationHandler.pause;
 animationHandler.stop;
 animationHandler.goToAndStop;
 animationHandler.totalFrames;
 
-var grecaptcha;
+let grecaptcha;
 grecaptcha.execute;
 
 // Validator
-var amp;
+let amp;
 amp.validator;
 amp.validator.validateUrlAndLog = function (string, doc) {};
 
@@ -757,7 +760,7 @@ AccessService.prototype.getAuthdataField = function (field) {};
  *   cookieName: (string|undefined),
  * }}
  */
-var GetCidDef;
+let GetCidDef;
 /**
  * @param {string|!GetCidDef} externalCidScope Name of the fallback cookie
  *     for the case where this doc is not served by an AMP proxy. GetCidDef
@@ -792,6 +795,8 @@ AmpStoryVariableService.pageIndex;
 AmpStoryVariableService.pageId;
 
 // TODO: uncomment when typechecking restored to BaseElement.
+// https://github.com/ampproject/amphtml/issues/34099
+
 // // Externed explicitly because we do not export Class shaped names
 // // by default.
 // /**
@@ -807,6 +812,8 @@ AmpStoryVariableService.pageId;
 // };
 
 // TODO: uncomment when typechecking restored to AmpAdXOriginIframeHandler.
+// https://github.com/ampproject/amphtml/issues/34099
+
 // /**
 //  * This uses the internal name of the type, because there appears to be no
 //  * other way to reference an ES6 type from an extern that is defined in
@@ -822,6 +829,8 @@ AmpStoryVariableService.pageId;
 // };
 
 // TODO: uncomment when typechecking is restored to AmpAdUIHandler.
+// https://github.com/ampproject/amphtml/issues/34099
+
 // /**
 //  * This uses the internal name of the type, because there appears to be no
 //  * other way to reference an ES6 type from an extern that is defined in
@@ -848,7 +857,7 @@ const RTC_ERROR_ENUM = {};
       rtcTime: number,
       callout: string,
       error: (RTC_ERROR_ENUM|undefined)}} */
-var rtcResponseDef;
+let rtcResponseDef;
 
 /**
  * TransitionDef function that accepts normtime, typically between 0 and 1 and
@@ -858,7 +867,7 @@ var rtcResponseDef;
  * transition and "false" for ongoing.
  * @typedef {function(number, boolean):?|function(number):?}
  */
-var TransitionDef;
+let TransitionDef;
 
 ///////////////////
 // amp-bind externs
@@ -937,7 +946,7 @@ let BindSetStateOptionsDef;
  *   !WebKeyframeAnimationDef
  * }
  */
-var WebAnimationDef;
+let WebAnimationDef;
 
 /**
  * @mixes WebAnimationSelectorDef
@@ -948,7 +957,7 @@ var WebAnimationDef;
  *   animations: !Array<!WebAnimationDef>,
  * }}
  */
-var WebMultiAnimationDef;
+let WebMultiAnimationDef;
 
 /**
  * @mixes WebAnimationSelectorDef
@@ -959,7 +968,7 @@ var WebMultiAnimationDef;
  *   switch: !Array<!WebAnimationDef>,
  * }}
  */
-var WebSwitchAnimationDef;
+let WebSwitchAnimationDef;
 
 /**
  * @mixes WebAnimationSelectorDef
@@ -970,7 +979,7 @@ var WebSwitchAnimationDef;
  *   animation: string,
  * }}
  */
-var WebCompAnimationDef;
+let WebCompAnimationDef;
 
 /**
  * @mixes WebAnimationSelectorDef
@@ -981,12 +990,12 @@ var WebCompAnimationDef;
  *   keyframes: (string|!WebKeyframesDef),
  * }}
  */
-var WebKeyframeAnimationDef;
+let WebKeyframeAnimationDef;
 
 /**
  * @typedef {!Object<string, *>|!Array<!Object<string, *>>}
  */
-var WebKeyframesDef;
+let WebKeyframesDef;
 
 /**
  * See https://developer.mozilla.org/en-US/docs/Web/API/AnimationEffectTimingProperties
@@ -1003,7 +1012,7 @@ var WebKeyframesDef;
  *   fill: (?|undefined),
  * }}
  */
-var WebAnimationTimingDef;
+let WebAnimationTimingDef;
 
 /**
  * Indicates an extension to a type that allows specifying vars. Vars are
@@ -1012,7 +1021,7 @@ var WebAnimationTimingDef;
  * @mixin
  * @typedef {Object}
  */
-var WebAnimationVarsDef;
+let WebAnimationVarsDef;
 
 /**
  * Defines media parameters for an animation.
@@ -1023,7 +1032,7 @@ var WebAnimationVarsDef;
  *   supports: (string|undefined),
  * }}
  */
-var WebAnimationConditionalDef;
+let WebAnimationConditionalDef;
 
 /**
  * @typedef {{
@@ -1032,7 +1041,7 @@ var WebAnimationConditionalDef;
  *   subtargets: (!Array<!WebAnimationSubtargetDef>|undefined),
  * }}
  */
-var WebAnimationSelectorDef;
+let WebAnimationSelectorDef;
 
 /**
  * @mixes WebAnimationTimingDef
@@ -1043,9 +1052,9 @@ var WebAnimationSelectorDef;
  *   selector: (string|undefined),
  * }}
  */
-var WebAnimationSubtargetDef;
+let WebAnimationSubtargetDef;
 
-var ampInaboxPositionObserver;
+let ampInaboxPositionObserver;
 ampInaboxPositionObserver.observe;
 ampInaboxPositionObserver.getTargetRect;
 ampInaboxPositionObserver.getViewportRect;

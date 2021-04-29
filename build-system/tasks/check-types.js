@@ -44,6 +44,7 @@ const PRIDE_FILES_GLOBS = [
   'src/resolved-promise.js',
   'src/types.js',
   'src/url-parse-query-string.js',
+  'src/url-try-decode-uri-component.js',
 
   // Third Party
   'third_party/css-escape/css-escape.js',
