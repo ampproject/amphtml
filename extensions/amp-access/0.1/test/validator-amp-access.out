@@ -1,4 +1,4 @@
-FAIL
+PASS
 |  <!--
 |    Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 |
@@ -47,12 +47,6 @@ FAIL
 |  <p amp-access="lemur"></p>
 |  <noscript>
 |    <img src="https://example.com/" amp-access="lemur" />
->>   ^~~~~~~~~
-amp-access/0.1/test/validator-amp-access.html:48:2 The mandatory attribute 'height' is missing in tag 'img'.
->>   ^~~~~~~~~
-amp-access/0.1/test/validator-amp-access.html:48:2 The mandatory attribute 'loading' is missing in tag 'img'.
->>   ^~~~~~~~~
-amp-access/0.1/test/validator-amp-access.html:48:2 The mandatory attribute 'width' is missing in tag 'img'.
 |  </noscript>
 |
 |  <!-- test some other attributes -->

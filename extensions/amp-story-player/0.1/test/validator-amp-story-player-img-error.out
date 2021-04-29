@@ -32,7 +32,7 @@ FAIL
 |      <!-- This should fail, since img tags are not allowed in AMP yet. -->
 |      <img alt aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjYwMCIgd2lkdGg9IjM2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiLz4=">
 >>     ^~~~~~~~~
-amp-story-player/0.1/test/validator-amp-story-player-img-error.html:32:4 The attribute 'class' in tag 'img' is set to the invalid value 'i-amphtml-intrinsic-sizer'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/#disallowed-styles)
+amp-story-player/0.1/test/validator-amp-story-player-img-error.html:32:4 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
 |  </amp-story-player>
 |  </body>
 |  </html>

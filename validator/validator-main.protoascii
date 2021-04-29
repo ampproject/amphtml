@@ -1740,10 +1740,12 @@ tags: {
 # and transformed amp-img.
 # 4.7.1 The img element
 tags: {
-  html_format: AMP
+  html_format: AMP  # Disallowed in AMP4ADS because <noscript> is disallowed.
   tag_name: "IMG"
-  spec_name: "img"
+  spec_name: "noscript > img"
   descriptive_name: "img"
+  mandatory_ancestor: "NOSCRIPT"
+  mandatory_ancestor_suggested_alternative: "AMP-IMG"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "border" }  # Not valid html5 but commonly used and supported.
@@ -1753,20 +1755,11 @@ tags: {
     value: "auto"
     value: "sync"
   }
-  attrs: {
-    name: "height"
-    mandatory: true,
-    value_regex: "[0-9]+"
-  }
+  attrs: { name: "height" }  # Not valid html5 but commonly used and supported.
   attrs: { name: "importance" }  # Not yet part of the html spec
   attrs: { name: "ismap" }
   attrs: { name: "intrinsicsize" }  # Not yet part of the html spec
-  attrs: {
-    name: "loading"
-    mandatory: true
-    value: "lazy"
-    value: "eager"
-  }
+  attrs: { name: "loading" }  # Not yet part of the html spec
   attrs: {
     name: "longdesc"
     value_url: {
@@ -1776,14 +1769,10 @@ tags: {
     disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "sizes" }
-  attrs: {
-    name: "width"
-    mandatory: true,
-    value_regex: "[0-9]+"
-  }
+  attrs: { name: "width" }  # Not valid html5 but commonly used and supported.
   attr_lists: "mandatory-src-or-srcset"
+  spec_url: "https://amp.dev/documentation/components/amp-img/"
 }
-
 # 4.7.2 The iframe element
 tags: {
   html_format: AMP  # Disallowed in AMP4ADS because <noscript> is disallowed.
@@ -1883,6 +1872,14 @@ tags: {
     disallowed_value_regex: "__amp_source_origin"
   }
   spec_url: "https://amp.dev/documentation/components/amp-audio/"
+}
+# 4.7.7 The picture element
+# Only allowed in noscript tags which support img tags.
+tags: {
+  html_format: AMP
+  tag_name: "PICTURE"
+  mandatory_parent: "NOSCRIPT"
+  spec_url: "https://amp.dev/documentation/components/amp-img/"
 }
 # 4.7.8 The source element
 tags: {

@@ -57,11 +57,7 @@ transformed_feature_tests/blurry_image_placeholder.html:48:4 The attribute 'clas
 |    <amp-img class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" height=30 i-amphtml-layout=fixed src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg width=40 i-amphtml-ssr>
 |      <img class=i-amphtml-blurry-placeholder src="data:...">
 >>     ^~~~~~~~~
-transformed_feature_tests/blurry_image_placeholder.html:53:4 The mandatory attribute 'height' is missing in tag 'img'.
->>     ^~~~~~~~~
-transformed_feature_tests/blurry_image_placeholder.html:53:4 The mandatory attribute 'loading' is missing in tag 'img'.
->>     ^~~~~~~~~
-transformed_feature_tests/blurry_image_placeholder.html:53:4 The mandatory attribute 'width' is missing in tag 'img'.
+transformed_feature_tests/blurry_image_placeholder.html:53:4 The attribute 'class' in tag 'img' is set to the invalid value 'i-amphtml-blurry-placeholder'.
 |    </amp-img>
 |
 |    <!-- Invalid: placeholder attribute with invalid value as direct child of <amp-img> -->
