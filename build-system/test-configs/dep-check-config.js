@@ -249,16 +249,16 @@ exports.rules = [
       'extensions/amp-video-iframe/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
       'extensions/amp-video-iframe/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
 
-      // Bento Youtube, amp-youtube
-      'extensions/amp-youtube/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
-      'extensions/amp-youtube/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
-
       // Bento Vimeo, amp-vimeo
       'extensions/amp-vimeo/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
       'extensions/amp-vimeo/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
       // Shared definition of Vimeo API
       'extensions/amp-vimeo/0.1/amp-vimeo.js->extensions/amp-vimeo/vimeo-api.js',
       'extensions/amp-vimeo/1.0/component.js->extensions/amp-vimeo/vimeo-api.js',
+
+      // Bento Youtube, amp-youtube
+      'extensions/amp-youtube/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
+      'extensions/amp-youtube/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
 
       // Amp geo in group enum
       'extensions/amp-a4a/0.1/amp-a4a.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
