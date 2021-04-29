@@ -51,6 +51,10 @@
   animation: grow linear;
 }
 
+[paused] .i-amphtml-story-ad-progress-bar {
+  animation-play-state: paused;
+}
+
 @keyframes grow {
   from {
     width: 0%;
