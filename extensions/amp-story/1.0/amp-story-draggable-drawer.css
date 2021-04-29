@@ -141,7 +141,7 @@
 
 [theme="dark"].i-amphtml-amp-story-page-attachment-ui-v2.amp-story-draggable-drawer-root {
   --i-amphtml-draggable-drawer-background-color: #202125 !important;
-  --i-amphtml-draggable-drawer-text-color: white !important;
+  --i-amphtml-draggable-drawer-text-color: #fff !important;
 }
 
 amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-container {
