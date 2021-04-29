@@ -20,17 +20,14 @@
  * See https://developer.mozilla.org/en-US/docs/Web/API/Node/contains
  * @param {?Node} node
  * @return {boolean}
- * @this {Node}
+ * @this {Document}
  */
 function documentContainsPolyfill(node) {
   // Per spec, "contains" method is inclusionary
   // i.e. `node.contains(node) == true`. However, we still need to test
   // equality to the document itself.
-
-  return (
-    node == this || // eslint-disable-line local/no-invalid-this
-    /**@type {!Document} */ (this).documentElement.contains(node) // eslint-disable-line local/no-invalid-this
-  );
+  // eslint-disable-next-line local/no-invalid-this
+  return node == this || this.documentElement.contains(node);
 }
 
 /**
