@@ -22,7 +22,7 @@ import {assertion} from './core/assert';
 import {createErrorVargs, duplicateErrorIfNecessary} from './core/error';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
-import {isArray, isEnumValue} from './core/types';
+import {isArray, isElement, isEnumValue} from './core/types';
 import {once} from './core/types/function';
 import {urls} from './config';
 
@@ -412,16 +412,15 @@ export class Log {
    *
    * Otherwise see `assert` for usage
    *
-   * @param {?} shouldBeElement
+   * @param {*} shouldBeElement
    * @param {!Array|string=} opt_message The assertion message
    * @return {!Element} The value of shouldBeTrueish.
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertElement(shouldBeElement, opt_message) {
-    const shouldBeTrueish = shouldBeElement && shouldBeElement.nodeType == 1;
     this.assertType_(
       shouldBeElement,
-      shouldBeTrueish,
+      isElement(shouldBeElement),
       'Element expected',
       opt_message
     );
