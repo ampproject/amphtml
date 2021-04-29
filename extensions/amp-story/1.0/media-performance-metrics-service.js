@@ -52,8 +52,8 @@ const CacheState = {
  * @enum
  */
 const FirstPageState = {
-  NOT_IN_FIRST_PAGE: 0, // Video is not in the first page.
-  IN_FIRST_PAGE: 1, // Video is in the first page.
+  NOT_ON_FIRST_PAGE: 0, // Video is not on the first page.
+  ON_FIRST_PAGE: 1, // Video is on the first page.
 };
 
 /**
@@ -228,10 +228,10 @@ export class MediaPerformanceMetricsService {
       videoCacheState
     );
     this.performanceService_.tickDelta(
-      TickLabel.VIDEO_IS_FIRST_PAGE,
+      TickLabel.VIDEO_ON_FIRST_PAGE,
       matches(media, `amp-story-page:first-of-type ${media.tagName}`)
-        ? FirstPageState.IN_FIRST_PAGE
-        : FirstPageState.NOT_IN_FIRST_PAGE
+        ? FirstPageState.ON_FIRST_PAGE
+        : FirstPageState.NOT_ON_FIRST_PAGE
     );
 
     // If the media errored.

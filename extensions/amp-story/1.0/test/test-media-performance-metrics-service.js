@@ -433,7 +433,7 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
       service.startMeasuring(video);
       service.stopMeasuring(video);
 
-      expect(tickStub).to.have.been.calledWithExactly('vifp', 1);
+      expect(tickStub).to.have.been.calledWithExactly('vofp', 1);
     });
   });
 });
