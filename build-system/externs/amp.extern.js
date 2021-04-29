@@ -193,8 +193,7 @@ process.env.NODE_ENV;
 
 // Exposed to ads.
 // Preserve these filedNames so they can be accessed by 3p code.
-/** * @type {!Object} */
-window.context = {};
+window.context;
 window.context.sentinel;
 window.context.clientId;
 window.context.initialLayoutRect;

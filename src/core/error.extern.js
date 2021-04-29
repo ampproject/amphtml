@@ -22,6 +22,5 @@
 /** @type {undefined|Array<*>} */
 Error.prototype.messageArray;
 
-// Error prototype extended by AMP
 /** @type {undefined|boolean} */
 Error.prototype.expected;

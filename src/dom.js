@@ -247,13 +247,17 @@ export function rootNodeFor(node) {
   }
   let n;
   // Check isShadowRoot() is only needed for the polyfill case.
-  for (n = node; !!n.parentNode && !isShadowRoot(n); n = n.parentNode) {}
+  for (
+    n = node;
+    !!n.parentNode && !isShadowRoot(/** @type {HTMLElement} */ (n));
+    n = n.parentNode
+  ) {}
   return n;
 }
 
 /**
  * Determines if value is actually a `ShadowRoot` node.
- * @param {?} value
+ * @param {HTMLElement} value
  * @return {boolean}
  */
 export function isShadowRoot(value) {
