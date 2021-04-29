@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@polymer/font-roboto": "0.0.3",
-    "@polymer/iron-a11y-announcer": "0.0.3",
+    "@polymer/iron-a11y-announcer": "0.0.4",
     "@polymer/iron-a11y-keys-behavior": "0.0.3",
     "@polymer/iron-behaviors": "0.0.3",
     "@polymer/iron-dropdown": "0.0.3",
