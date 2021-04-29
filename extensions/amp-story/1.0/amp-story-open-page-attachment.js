@@ -23,7 +23,7 @@ import {computedStyle, setImportantStyles} from '../../../src/style';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getRGBFromCssColorValue, getTextColorForRGB} from './utils';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
+import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 
 /**
  * @enum {string}
@@ -41,7 +41,7 @@ export const buildOpenDefaultAttachmentElement = (element) =>
   htmlFor(element)`
     <a class="
         i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
-        role="button">
+        role="button" target="_top">
       <span class="i-amphtml-story-page-open-attachment-icon">
         <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
         <span class="i-amphtml-story-page-open-attachment-bar-right"></span>
@@ -71,7 +71,7 @@ export const buildOpenInlineAttachmentElement = (element) =>
 const buildOpenOutlinkAttachmentElement = (element) =>
   htmlFor(element)`
      <a class="i-amphtml-story-page-open-attachment i-amphtml-amp-story-page-attachment-ui-v2"
-         role="button">
+         role="button" target="_top">
        <span class="i-amphtml-story-outlink-page-attachment-arrow">
          <span class="i-amphtml-story-outlink-page-open-attachment-bar-left"></span>
          <span class="i-amphtml-story-outlink-page-open-attachment-bar-right"></span>
@@ -113,6 +113,16 @@ export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
  */
 const renderDefaultPageAttachmentUI = (win, pageEl, attachmentEl) => {
   const openAttachmentEl = buildOpenDefaultAttachmentElement(pageEl);
+  if (isPageAttachmentUiV2ExperimentOn(win)) {
+    openAttachmentEl.classList.add(
+      '.i-amphtml-amp-story-page-attachment-ui-v2'
+    );
+    // Setting theme
+    const theme = attachmentEl.getAttribute('theme');
+    if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
+      openAttachmentEl.setAttribute('theme', AttachmentTheme.DARK);
+    }
+  }
   // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
   const attachmentHref = attachmentEl.getAttribute('href');
   if (attachmentHref) {
@@ -270,15 +280,6 @@ const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
   }
 
   return openAttachmentEl;
-};
-
-/**
- * Returns true if new inline attachment UI is enabled.
- * @param {!Window} win
- * @return {boolean}
- */
-export const isPageAttachmentUiV2ExperimentOn = (win) => {
-  return isExperimentOn(win, 'amp-story-page-attachment-ui-v2');
 };
 
 /**

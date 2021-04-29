@@ -11,8 +11,8 @@
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
 </head>
 <body>
-  <!-- 
-    Macros in `vars` are now resolved asynchronously before macros in `requests`. As a result 
+  <!--
+    Macros in `vars` are now resolved asynchronously before macros in `requests`. As a result
     it is possible to have expensive macros in `vars` that will delay macro resolution in requests
     by a meaningful amount of time. In the example below `ts2` will be resolved slightly ahead of `ts1`.
     This would be further delayed if there were more complicated nested macros inside of the `vars` config.
@@ -49,7 +49,7 @@
           "adjacent": "${ts2}sometext${ts2}"
         }
       }
-    </script> 
+    </script>
   </amp-analytics>
   <h1>Nested macros in analytics</h1>
 </body>

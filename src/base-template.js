@@ -16,6 +16,7 @@
 
 import {Services} from './services';
 import {dev} from './log';
+import {isElement} from './core/types';
 
 /**
  * The interface that is implemented by all templates.
@@ -87,7 +88,7 @@ export class BaseTemplate {
         }
       } else if (n.nodeType == /* COMMENT */ 8) {
         // Ignore comments.
-      } else if (n.nodeType == /* ELEMENT */ 1) {
+      } else if (isElement(n)) {
         callback(dev().assertElement(n));
       }
     }

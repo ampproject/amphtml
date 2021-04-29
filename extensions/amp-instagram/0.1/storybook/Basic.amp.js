@@ -16,12 +16,11 @@
 
 import * as Preact from '../../../../src/preact';
 import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
   title: 'amp-instagram-0_1',
-  decorators: [withA11y, withKnobs, withAmp],
+  decorators: [withKnobs, withAmp],
 
   parameters: {
     extensions: [{name: 'amp-instagram', version: '0.1'}],

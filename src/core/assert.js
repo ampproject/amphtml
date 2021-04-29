@@ -28,19 +28,18 @@ import {remove} from './types/array';
  * Supports argument substitution into the message via %s placeholders.
  *
  * Throws an error object that has two extra properties:
- * - associatedElement: This is the first element provided in the var args.
- *   It can be used for improved display of error messages.
  * - messageArray: The elements of the substituted message as non-stringified
  *   elements in an array. When e.g. passed to console.error this yields
  *   native displays of things like HTML elements.
- * @param {string} sentinel
+ * @param {?string} sentinel
  * @param {T} shouldBeTruthy
  * @param {string} opt_message
  * @param {...*} var_args Arguments substituted into %s in the message
  * @return {T}
+ * @template T
  * @throws {Error} when shouldBeTruthy is not truthy.
  */
-function assertion(
+export function assertion(
   sentinel,
   shouldBeTruthy,
   opt_message = 'Assertion failed',
@@ -75,6 +74,12 @@ function assertion(
 
   const error = new Error(message);
   error.messageArray = remove(messageArray, (x) => x !== '');
+  // __AMP_REPORT_ERROR is installed globally per window in the entry point in
+  // AMP documents. It may not be present for Bento/Preact elements on non-AMP
+  // pages.
+  if (self.__AMP_REPORT_ERROR) {
+    self.__AMP_REPORT_ERROR(error);
+  }
   throw error;
 }
 
@@ -93,6 +98,7 @@ function assertion(
  * @param {*=} opt_8 Optional argument
  * @param {*=} opt_9 Optional argument
  * @return {T}
+ * @template T
  * @throws {UserError} when shouldBeTruthy is not truthy.
  * @closurePrimitive {asserts.truthy}
  */
@@ -140,6 +146,7 @@ export function pureUserAssert(
  * @param {*=} opt_8 Optional argument
  * @param {*=} opt_9 Optional argument
  * @return {T}
+ * @template T
  * @throws {Error} when shouldBeTruthy is not truthy.
  * @closurePrimitive {asserts.truthy}
  */

@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 import {dev} from '../log';
-import {once} from './function';
 import {setStyles} from '../style';
 
 /**
  * @param {!Window} win
- * @param {boolean} isLiteViewer
  * @return {!Promise<boolean>}
  */
-function isAutoplaySupportedImpl(win, isLiteViewer) {
-  // We do not support autoplay in amp-lite viewer regardless of platform.
-  if (isLiteViewer) {
-    return Promise.resolve(false);
-  }
-
+export function detectIsAutoplaySupported(win) {
   // To detect autoplay, we create a video element and call play on it, if
   // `paused` is true after `play()` call, autoplay is supported. Although
   // this is unintuitive, it works across browsers and is currently the lightest
@@ -66,51 +59,36 @@ function isAutoplaySupportedImpl(win, isLiteViewer) {
   return Promise.resolve(!detectionElement.paused);
 }
 
-/** @private {?(function(Window, boolean):!Promise<boolean>)} */
-let isAutoplaySupported = null;
+const AUTOPLAY_SUPPORTED_WIN_PROP = '__AMP_AUTOPLAY';
 
 /**
- * Sets if autoplay is supported.
+ * Determines autoplay support.
+ *
+ * Note that even if platfrom supports autoplay, users or browsers can disable
+ * autoplay to save data / battery. This detects both platfrom support and
+ * when autoplay has been disabled by the user.
+ *
+ * @param {!Window} win
+ * @return {!Promise<boolean>}
  */
-function setIsAutoplaySupported() {
-  isAutoplaySupported = /** @type {function(Window, boolean):!Promise<boolean>} */ (once(
-    isAutoplaySupportedImpl
-  ));
+export function isAutoplaySupported(win) {
+  if (win[AUTOPLAY_SUPPORTED_WIN_PROP] == null) {
+    win[AUTOPLAY_SUPPORTED_WIN_PROP] = detectIsAutoplaySupported(win);
+  }
+  return win[AUTOPLAY_SUPPORTED_WIN_PROP];
 }
 
 /**
- * Wrapper around static utilities for testability.
+ * @param {!Window} win
+ * @visibleForTesting
  */
-export class VideoUtils {
-  /**
-   * Determines autoplay support.
-   *
-   * Note that even if platfrom supports autoplay, users or browsers can disable
-   * autoplay to save data / battery. This detects both platfrom support and
-   * when autoplay has been disabled by the user.
-   *
-   * @param {!Window} win
-   * @param {boolean} isLiteViewer
-   * @return {!Promise<boolean>}
-   */
-  static isAutoplaySupported(win, isLiteViewer) {
-    if (!isAutoplaySupported) {
-      setIsAutoplaySupported();
-    }
-    return isAutoplaySupported(win, isLiteViewer);
-  }
-
-  /** @visibleForTesting */
-  static resetIsAutoplaySupported() {
-    setIsAutoplaySupported();
-  }
+export function resetIsAutoplaySupported(win) {
+  delete win[AUTOPLAY_SUPPORTED_WIN_PROP];
 }
 
 /**
  * @param {!Element} element
  * @return {!Element}
- * Note: Not included in `VideoUtils` as we don't need to test a
- * static selector.
  */
 export function getInternalVideoElementFor(element) {
   return dev().assertElement(element.querySelector('video, iframe'));

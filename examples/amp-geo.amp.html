@@ -19,13 +19,13 @@
       transform: rotate(180deg);
       transition: transform .5s .2s;
     }
-    
+
   </style>
   <script async custom-element="amp-geo" src="https://cdn.ampproject.org/v0/amp-geo-0.1.js"></script>
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
-  
+
 </head>
 <body>
   <amp-geo layout="nodisplay">
@@ -65,7 +65,7 @@
       append #amp-geo=&lt;code&gt; to the url and reload the page
       (eg #amp-geo=nz)
   </p>
-  
+
 
   <button on="tap:AMP.setState({myCountry: ampGeo.ISOCountry})">Where am I?</button>
   <p [text]="'The country code is: ' + myCountry "></p>
