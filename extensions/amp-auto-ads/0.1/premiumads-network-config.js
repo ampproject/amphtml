@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
@@ -39,7 +38,7 @@ export class PremiumadsNetworkConfig {
    * True if responsive is enabled for auto-ads
    */
   isResponsiveEnabled() {
-    return true;
+    return false;
   }
 
   /** @override */
@@ -55,8 +54,6 @@ export class PremiumadsNetworkConfig {
     return dict({
       'type': 'doubleclick',
       'data-ad': 'premiumads',
-      'width': data.width || 336,
-      'height': data.height || 280,
       'layout': data.layout || Layout.FIXED,
       'style':
         data['style'] ||
