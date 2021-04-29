@@ -1061,7 +1061,11 @@ const forbiddenTermsSrcInclusive = {
   '\\.indexOf\\(.*===?.*\\.length': 'use endsWith helper in src/string.js',
   '/url-parse-query-string': {
     message: 'Import parseQueryString from `src/url.js`',
-    allowlist: ['src/url.js', 'src/mode.js'],
+    allowlist: [
+      'build-system/tasks/check-types.js',
+      'src/mode.js',
+      'src/url.js',
+    ],
   },
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
