@@ -59,6 +59,7 @@ let TimeStampsDef;
 /**
  * @typedef {{
  *   error: ?number,
+ *   isActivePage: boolean,
  *   jointLatency: number,
  *   rebuffers: number,
  *   rebufferTime: number,
@@ -220,9 +221,10 @@ export class MediaPerformanceMetricsService {
       TickLabel.VIDEO_CACHE_STATE,
       videoCacheState
     );
-    if (mediaEntry.metrics.isActivePage) {
-      this.performanceService_.tickDelta(TickLabel.VIDEO_IS_FIRST_PAGE, 1);
-    }
+    this.performanceService_.tickDelta(
+      TickLabel.VIDEO_IS_FIRST_PAGE,
+      mediaEntry.metrics.isActivePage ? 1 : 0
+    );
 
     // If the media errored.
     if (metrics.error !== null) {
