@@ -58,7 +58,7 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
     clock.tick(300);
     service.stopMeasuring(video);
 
-    expect(tickStub).to.have.callCount(6);
+    expect(tickStub).to.have.callCount(7);
     expect(flushStub).to.have.been.calledOnce;
   });
 
@@ -72,7 +72,7 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
     clock.tick(10000);
     service.stopMeasuring(video);
 
-    expect(tickStub).to.have.callCount(2);
+    expect(tickStub).to.have.callCount(3);
     expect(flushStub).to.have.been.calledOnce;
   });
 
@@ -92,7 +92,7 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
     video2.dispatchEvent(new Event('playing'));
     service.stopMeasuring(video2);
 
-    expect(tickStub).to.have.callCount(11);
+    expect(tickStub).to.have.callCount(13);
     expect(flushStub).to.have.been.calledTwice;
   });
 
