@@ -44,7 +44,7 @@ After a successful sign-in, [`amp-access`](https://go.amp.dev/c/amp-access) and/
 <table>
   <tr>
     <td width="40%"><strong>data-src (required)</strong></td>
-    <td>The URL of the intermediate iframe.</td>
+    <td>The URL of the intermediate iframe. You can use <a href="https://github.com/ampproject/amphtml/blob/main/spec/amp-var-substitutions.md">URL substitution variables</a> to pass values like <code>ACCESS_READER_ID</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
