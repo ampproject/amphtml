@@ -89,7 +89,7 @@ export function assert(
 /**
  * Asserts types, backbone of `assertNumber`, `assertString`, etc.
  *
- * It does not yet understand array-based "id"-contracted messages.
+ * It understands array-based "id"-contracted messages.
  *
  * Otherwise creates a sprintf syntax string containing the optional message or the
  * default. The `subject` of the assertion is added at the end.
@@ -98,7 +98,7 @@ export function assert(
  * @param {T} subject
  * @param {*} shouldBeTruthy
  * @param {string} defaultMessage
- * @param {Array|string=} opt_message
+ * @param {!Array<*>|string=} opt_message
  * @return {T}
  * @template T
  * @private
@@ -110,7 +110,15 @@ function assertType_(
   defaultMessage,
   opt_message
 ) {
-  assertFn(shouldBeTruthy, `${opt_message || defaultMessage}: %s`, subject);
+  if (isArray(opt_message)) {
+    assertFn(
+      shouldBeTruthy,
+      /** @type {!Array} */ (opt_message).concat([subject])
+    );
+  } else {
+    assertFn(shouldBeTruthy, `${opt_message || defaultMessage}: %s`, subject);
+  }
+
   return subject;
 }
 
@@ -121,7 +129,7 @@ function assertType_(
  *
  * @param {!AssertionFunction} assertFn underlying assertion function to call
  * @param {*} shouldBeElement
- * @param {Array|string=} opt_message The assertion message
+ * @param {!Array<*>|string=} opt_message The assertion message
  * @return {!Element} The value of shouldBeTrueish.
  * @throws {Error} when shouldBeElement is not an Element
  * @closurePrimitive {asserts.matchesReturn}
@@ -144,7 +152,7 @@ export function assertElement(assertFn, shouldBeElement, opt_message) {
  *
  * @param {!AssertionFunction} assertFn underlying assertion function to call
  * @param {*} shouldBeString
- * @param {Array|string=} opt_message The assertion message
+ * @param {!Array<*>|string=} opt_message The assertion message
  * @return {string} The string value. Can be an empty string.
  * @throws {Error} when shouldBeString is not an String
  * @closurePrimitive {asserts.matchesReturn}
@@ -167,7 +175,7 @@ export function assertString(assertFn, shouldBeString, opt_message) {
  *
  * @param {!AssertionFunction} assertFn underlying assertion function to call
  * @param {*} shouldBeNumber
- * @param {Array|string=} opt_message The assertion message
+ * @param {!Array<*>|string=} opt_message The assertion message
  * @return {number} The number value. The allowed values include `0`
  *   and `NaN`.
  * @throws {Error} when shouldBeNumber is not an Number
@@ -191,7 +199,7 @@ export function assertNumber(assertFn, shouldBeNumber, opt_message) {
  *
  * @param {!AssertionFunction} assertFn underlying assertion function to call
  * @param {*} shouldBeArray
- * @param {Array|string=} opt_message The assertion message
+ * @param {!Array<*>|string=} opt_message The assertion message
  * @return {!Array} The array value
  * @throws {Error} when shouldBeArray is not an Array
  * @closurePrimitive {asserts.matchesReturn}
@@ -213,7 +221,7 @@ export function assertArray(assertFn, shouldBeArray, opt_message) {
  *
  * @param {!AssertionFunction} assertFn underlying assertion function to call
  * @param {*} shouldBeBoolean
- * @param {Array|string=} opt_message The assertion message
+ * @param {!Array<*>|string=} opt_message The assertion message
  * @return {boolean} The boolean value.
  * @throws {Error} when shouldBeBoolean is not an Boolean
  * @closurePrimitive {asserts.matchesReturn}

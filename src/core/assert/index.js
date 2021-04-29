@@ -14,9 +14,5 @@
  * limitations under the License.
  */
 
-// import {USER_ERROR_SENTINEL} from '../error-message-helpers';
-// import {assert} from './base';
-// import {isMinifiedMode} from '../minified-mode';
-
 export {assert as pureDevAssert} from './dev';
 export {assert as pureUserAssert} from './user';
