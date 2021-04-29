@@ -711,8 +711,12 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         name: 'i-amphtml-specialAs',
       });
 
-      const node = element.querySelector('[special3]');
-      node.setAttribute('value-with-def', 'CUSTOM');
+      // Mutate slot prop, but this won't trigger a rerender
+      element
+        .querySelector('[special3]')
+        .setAttribute('value-with-def', 'CUSTOM');
+      // Mutate an observed attr to trigger rerender
+      element.setAttribute('prop-a', 'B');
 
       await waitFor(() => component.callCount > 1, 'component re-rendered');
       expect(component).to.be.calledTwice;
