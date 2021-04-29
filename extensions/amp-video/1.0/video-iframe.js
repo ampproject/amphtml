@@ -184,8 +184,10 @@ function VideoIframeInternalWithRef(
   );
 }
 
+/** @visibleForTesting */
 const VideoIframeInternal = forwardRef(VideoIframeInternalWithRef);
 VideoIframeInternal.displayName = 'VideoIframeInternal';
+export {VideoIframeInternal};
 
 /**
  * VideoWrapper using an <iframe> for implementation.
