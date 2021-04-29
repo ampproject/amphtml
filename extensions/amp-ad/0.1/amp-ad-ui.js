@@ -22,7 +22,6 @@ import {
 } from '../../../src/dom';
 import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {getExperimentBranch} from '../../../src/experiments';
 
 import {getAdContainer} from '../../../src/ad-helper';
 import {listen} from '../../../src/event-helper';
