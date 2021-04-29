@@ -41,10 +41,26 @@ const PRIDE_FILES_GLOBS = [
   'src/core/**/*.js',
 
   // Runtime
+  'build/amp-loader-0.1.css.js',
+  'build/ampdoc.css.js',
+  'build/ampshared.css.js',
+  'src/config.js',
+  'src/document-ready.js',
+  'src/dom.js',
+  'src/exponential-backoff.js',
+  'src/format.js',
+  'src/history.js',
+  'src/internal-version.js',
+  'src/json.js',
+  'src/log.js',
+  'src/mode.js',
   'src/resolved-promise.js',
+  'src/time.js',
   'src/types.js',
   'src/url-parse-query-string.js',
   'src/url-try-decode-uri-component.js',
+  'src/utils/bytes.js',
+  'src/utils/img.js',
 
   // Third Party
   'third_party/css-escape/css-escape.js',
