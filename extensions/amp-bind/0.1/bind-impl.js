@@ -103,14 +103,10 @@ let BoundElementDef;
  * - constrain: If provided, restricts application to children of the provided elements.
  * - evaluateOnly: If provided, caches the evaluated result on each bound element and skips the actual DOM updates.
  *
- * @typedef {Object} ApplyOptionsDef
+ * @typedef {Record} ApplyOptionsDef
  * @property {boolean=} skipAmpState - If true, skips <amp-state> elements.
  * @property {Array<!Element>=} constrain
  * @property {boolean=} evaluateOnly
- *   skipAmpState: boolean=,
- *   constrain: Array<!Element>=,
- *   evaluateOnly: boolean=
- * }}
  */
 
 /**

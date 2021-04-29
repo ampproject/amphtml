@@ -37,6 +37,9 @@ const {typecheckNewServer} = require('../server/typescript-compile');
  * @type {!Array<string>}
  */
 const PRIDE_FILES_GLOBS = [
+  // Core
+  'src/core/**/*.js',
+
   // Polyfills
   'src/polyfills/abort-controller.js',
   'src/polyfills/abort-controller.js',
@@ -166,10 +169,7 @@ const TYPE_CHECK_TARGETS = {
   // introduced. It is okay to remove a file from this list only when fixing a
   // bug for cherry-pick.
   'pride': {
-    srcGlobs: [
-      ...PRIDE_FILES_GLOBS,
-      ...globby.sync('src/core/**/*.js').filter((p) => !p.includes('extern')),
-    ],
+    srcGlobs: PRIDE_FILES_GLOBS,
     externGlobs: [CORE_EXTERNS_GLOB, 'build-system/externs/*.extern.js'],
   },
 

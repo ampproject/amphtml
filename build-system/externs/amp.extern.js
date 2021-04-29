@@ -1110,3 +1110,6 @@ MediaQueryList.prototype.onchange;
 
 /** @type {!Array<!CSSStyleSheet>|undefined} */
 ShadowRoot.prototype.adoptedStyleSheets;
+
+/** @type {undefined|boolean} */
+Error.prototype.expected;

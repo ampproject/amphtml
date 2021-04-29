@@ -21,6 +21,3 @@
 
 /** @type {undefined|Array<*>} */
 Error.prototype.messageArray;
-
-/** @type {undefined|boolean} */
-Error.prototype.expected;
