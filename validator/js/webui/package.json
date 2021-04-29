@@ -28,7 +28,7 @@
     "@polymer/iron-meta": "0.0.3",
     "@polymer/iron-overlay-behavior": "0.0.3",
     "@polymer/iron-resizable-behavior": "0.0.3",
-    "@polymer/iron-selector": "0.0.3",
+    "@polymer/iron-selector": "0.0.4",
     "@polymer/iron-validatable-behavior": "0.0.3",
     "@polymer/neon-animation": "0.0.3",
     "@polymer/paper-behaviors": "0.0.3",
