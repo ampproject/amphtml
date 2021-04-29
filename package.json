@@ -29,7 +29,7 @@
     "obj-str": "1.0.3",
     "preact": "10.2.1",
     "promise-pjs": "1.1.4",
-    "react-dates": "15.5.3",
+    "react-dates": "21.8.0",
     "react-jss": "10.3.0",
     "resize-observer-polyfill": "1.5.1",
     "rrule": "2.6.6",
