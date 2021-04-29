@@ -447,7 +447,7 @@ exports.rules = [
       'src/polyfills/fetch.js->src/utils/bytes.js',
       'src/polyfills/intersection-observer.js->src/polyfills/stubs/intersection-observer-stub.js',
       'src/polyfills/resize-observer.js->src/polyfills/stubs/resize-observer-stub.js',
-      'src/polyfills/custom-elements.js->src/resolved-promise.js',
+      'src/polyfills/custom-elements.js->src/core/data-structures/promise.js',
     ],
   },
   {
@@ -455,9 +455,9 @@ exports.rules = [
     mustNotDependOn: '**/*.js',
     allowlist: [
       'src/polyfills/stubs/intersection-observer-stub.js->src/services.js',
-      'src/polyfills/stubs/intersection-observer-stub.js->src/resolved-promise.js',
+      'src/polyfills/stubs/intersection-observer-stub.js->src/core/data-structures/promise.js',
       'src/polyfills/stubs/resize-observer-stub.js->src/services.js',
-      'src/polyfills/stubs/resize-observer-stub.js->src/resolved-promise.js',
+      'src/polyfills/stubs/resize-observer-stub.js->src/core/data-structures/promise.js',
     ],
   },
   {
