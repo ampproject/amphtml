@@ -424,11 +424,11 @@ The background preset is mostly useful for designing layouts with both backgroun
 
 ##### Foreground
 
-Use the `2021-foreground` preset for foreground elements. This layer will always be fully visible and expand to the borders either horizontally or vertically, maximizing the size without cropping. The attribute `anchor` is useful to pin foreground layers to the page corners or borders, such that elements can be positioned relative to those borders or corners (eg: logos or footnotes).
+Use the `2021-foreground` preset for foreground elements. This layer will always be fully visible and expand to the borders either horizontally or vertically, maximizing the size without cropping. The attribute `anchor` can be used to pin foreground layers to the page corners or borders, such that elements can be positioned relative to those borders or corners (which is useful for logos or footnotes).
 
 ##### Background
 
-Use the `2021-background` preset for the background layer. This preset covers the entire screen on all mobile phones with the background asset. It does so without letterboxing, and keeps positioning consistent with the foreground elements.
+Use the `2021-background` preset for the background layer. This preset covers the entire screen on most mobile phones with the background asset. It does so without letterboxing, and keeps positioning consistent with the foreground elements.
 While this technique provides the most consistent user experience, it may crop up to 7% of one or all borders of your background. Keep this in mind when designing and picking your assets.
 
 <div layout="container" width="3" height="2">
