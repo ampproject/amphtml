@@ -29,7 +29,7 @@ Embeds and displays [**Iframely.com**](https://iframely.com)-powered rich media 
 
 [tip type="note"]
 
-**`<amp-iframely>`** embeds content through the vendor **Iframely.com**. It should not be confused with [**`<amp-iframe>`**](https://go.amp.dev/c/amp-iframe), which can embed any URL.
+**`<amp-iframely>`** embeds content through the third-party vendor **Iframely.com**. It should not be confused with [**`<amp-iframe>`**](https://go.amp.dev/c/amp-iframe), which embeds any URL directly.
 
 [/tip]
 
