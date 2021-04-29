@@ -71,7 +71,7 @@ function getMode_(win) {
   const IS_MINIFIED = false;
 
   const runningTests =
-    IS_FORTESTING && !!(AMP_CONFIG.test || win.__AMP_TEST || win.__karma__);
+    IS_FORTESTING && !!(AMP_CONFIG.test || win.__AMP_TEST || win['__karma__']);
   const isLocalDev = IS_FORTESTING && (!!AMP_CONFIG.localDev || runningTests);
   const hashQuery = parseQueryString_(
     // location.originalHash is set by the viewer when it removes the fragment

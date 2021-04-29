@@ -75,7 +75,7 @@ export const LogLevel = {
 /**
  * Sets reportError function. Called from error.js to break cyclic
  * dependency.
- * @param {function(*, !Element=)|undefined} fn
+ * @param {function(this:Window, Error, (Element|null)=): ?|undefined} fn
  */
 export function setReportError(fn) {
   self.__AMP_REPORT_ERROR = fn;
@@ -415,7 +415,6 @@ export class Log {
    * @param {*} shouldBeElement
    * @param {!Array|string=} opt_message The assertion message
    * @return {!Element} The value of shouldBeTrueish.
-   * @template T
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertElement(shouldBeElement, opt_message) {
