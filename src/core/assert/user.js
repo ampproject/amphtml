@@ -33,6 +33,11 @@ import * as assertions from './base';
 import {USER_ERROR_SENTINEL} from '../error-message-helpers';
 
 /**
+ * @fileoverview This file provides the entrypoint for user assertions. It's
+ * designed so all functions are pure function calls to improve inlining.
+ */
+
+/**
  * Throws a user error if the first argument isn't trueish. Mirrors userAssert
  * in src/log.js.
  * @param {T} shouldBeTruthy

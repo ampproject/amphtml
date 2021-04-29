@@ -20,6 +20,12 @@ import {isArray, isElement, isEnumValue, isString} from '../types';
 import {remove} from '../types/array';
 
 /**
+ * @fileoverview This file provides the base implementation for assertion
+ * functions. Most files should never import from this; instead, import from
+ * `dev` or `user`. It is also used by the Log class for its assertions.
+ */
+
+/**
  * Throws an error if the second argument isn't trueish.
  *
  * Supports argument substitution into the message via %s placeholders.

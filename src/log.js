@@ -182,6 +182,11 @@ export class Log {
         });
     });
 
+    // This bound assertion function is capable of handling the format used when
+    // error/assertion messages are extracted. This logic hasn't yet been
+    // migrated to an AMP-independent form for use in core. This binding allows
+    // Log assertion helpers to maintain message-extraction capabilities until
+    // that logic can be moved to core.
     this.boundAssertFn_ = /** @type {!AssertionFunction} */ (this.assert.bind(
       this
     ));

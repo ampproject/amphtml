@@ -18,6 +18,11 @@ import * as assertions from './base';
 import {isMinifiedMode} from '../minified-mode';
 
 /**
+ * @fileoverview This file provides the entrypoint for dev assertions. It's
+ * designed so all functions are pure function calls to improve inlining.
+ */
+
+/**
  * Throws an error if the first argument isn't trueish. Mirrors devAssert in
  * src/log.js.
  * @param {T} shouldBeTruthy
