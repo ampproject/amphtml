@@ -483,9 +483,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         if (this.state_ === PageState.PAUSED) {
           this.advancement_.start();
           this.playAllMedia_();
-          if (this.animationManager_) {
-            this.animationManager_.resumeAll();
-          }
+          this.animationManager_?.resumeAll();
         }
 
         this.state_ = state;
@@ -497,9 +495,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         const canResume = !this.storeService_.get(StateProperty.BOOKEND_STATE);
         this.advancement_.stop(canResume);
         this.pauseAllMedia_(false /** rewindToBeginning */);
-        if (this.animationManager_) {
-          this.animationManager_.pauseAll();
-        }
+        this.animationManager_?.pauseAll();
         this.state_ = state;
         break;
       default:
@@ -537,9 +533,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.muteAllMedia();
     }
 
-    if (this.animationManager_) {
-      this.animationManager_.cancelAll();
-    }
+    this.animationManager_?.cancelAll();
   }
 
   /**
@@ -1234,10 +1228,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @return {!Promise}
    */
   maybeApplyFirstAnimationFrame() {
-    if (!this.animationManager_) {
-      return Promise.resolve();
-    }
-    return this.animationManager_.applyFirstFrame();
+    return Promise.resolve(this.animationManager_?.applyFirstFrame());
   }
 
   /**
