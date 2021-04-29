@@ -45,20 +45,14 @@ function usePropRef(prop) {
 }
 
 /**
- * Goes inside a VideoWrapper.
- *
- *    import {VideoIframe} from '.../video-iframe';
- *    import {VideoWrapper} from '.../video-wrapper';
- *    render(<VideoWrapper component={VideoIframe} ... />)
- *
+ * VideoWrapper using an <iframe> for implementation
  * Usable on the AMP layer through VideoBaseElement.
- *
  * @param {!VideoIframeDef.Props} props
  * @param {{current: (T|null)}} ref
  * @return {PreactDef.Renderable}
  * @template T
  */
-function VideoIframeWithRef(
+function VideoIframeInternalWithRef(
   {
     loading,
     unloadOnPause = false,
@@ -191,6 +185,19 @@ function VideoIframeWithRef(
   );
 }
 
+const VideoIframeInternal = forwardRef(VideoIframeInternalWithRef);
+VideoIframeInternal.displayName = 'VideoIframeInternal';
+
+/**
+ * @param {VideoIframeDef.Props} props
+ * @param {{current: T|null}} ref
+ * @return {PreactDef.Renderable}
+ * @template T
+ */
+function VideoIframeWithRef(props, ref) {
+  return <VideoWrapper ref={ref} {...props} component={VideoIframeInternal} />;
+}
+
 const VideoIframe = forwardRef(VideoIframeWithRef);
-VideoIframe.displayName = 'VideoIframe'; // Make findable for tests.
+VideoIframe.displayName = 'VideoIframe';
 export {VideoIframe};
