@@ -1,32 +1,32 @@
 {
-    "name": "@ampproject/amp-accordion",
-    "version": "VERSION",
-    "description": "AMP Accordion Component",
-    "author": "The AMP HTML Authors",
-    "license": "Apache-2.0",
-    "main": "dist/component.js",
-    "module": "dist/component.mjs",
-    "exports": {
+  "name": "@ampproject/amp-accordion",
+  "version": "VERSION",
+  "description": "AMP Accordion Component",
+  "author": "The AMP HTML Authors",
+  "license": "Apache-2.0",
+  "main": "dist/component.js",
+  "module": "dist/component.mjs",
+  "exports": {
       ".": "./preact",
       "./preact": {
-        "import": "dist/component-preact.mjs",
-        "require": "dist/component-preact.js"
+      "import": "dist/component-preact.mjs",
+      "require": "dist/component-preact.js"
       },
       "./react": {
-        "import": "dist/component-react.mjs",
-        "require": "dist/component-react.js"
+      "import": "dist/component-react.mjs",
+      "require": "dist/component-react.js"
       }
-    },
-    "files": ["dist/*"],
-    "repository": {
+  },
+  "files": ["dist/*"],
+  "repository": {
       "type": "git",
       "url": "https://github.com/ampproject/amphtml.git",
       "directory": "extensions/amp-accordion/1.0"
-    },
-    "homepage": "https://github.com/ampproject/amphtml/tree/main/extensions/amp-accordion/1.0",
-    "peerDependencies": {
+  },
+  "homepage": "https://github.com/ampproject/amphtml/tree/main/extensions/amp-accordion/1.0",
+  "peerDependencies": {
       "preact": "^10.2.1",
       "react": "^17.0.0"
-    }
   }
+}
   
