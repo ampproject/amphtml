@@ -56,7 +56,6 @@ const PRIDE_FILES_GLOBS = [
   'build/ampdoc.css.js',
   'build/ampshared.css.js',
   'src/config.js',
-  'src/css.js',
   'src/document-ready.js',
   'src/dom.js',
   'src/exponential-backoff.js',
