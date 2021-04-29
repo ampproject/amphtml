@@ -236,9 +236,10 @@ async function typeCheck(targetName) {
   // If srcGlobs and externGlobs are defined, determine the externs/extraGlobs
   if (srcGlobs.length || externGlobs.length) {
     opts.externs = externGlobs.flatMap(globby.sync);
-    const externSet = new Set(opts.externs);
+
     // Included globs should explicitly exclude any externs
-    opts.extraGlobs = srcGlobs.flatMap(globby.sync).filter(file => !externSet.has(file));
+    const excludedExterns = externGlobs.map((s) => `!${s}`);
+    opts.extraGlobs = globby.sync(srcGlobs.concat(excludedExterns));
   }
 
   // If no entry point is defined, we want to scan the globs provided without
