@@ -121,7 +121,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(page.animationManager_).to.exist;
   });
 
-  it('should build the animation manager if an element is animated, but `prefers-reduced-motion` is on', async () => {
+  it('should not build the animation manager if `prefers-reduced-motion` is on', async () => {
     env.sandbox.stub(Animation, 'prefersReducedMotion').returns(true);
 
     const animatedEl = html`<div animate-in="fade-in"></div>`;
