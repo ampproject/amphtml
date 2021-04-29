@@ -248,12 +248,10 @@ exports.rules = [
       // Bento AMP Youtube
       'extensions/amp-youtube/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
       'extensions/amp-youtube/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
-      'extensions/amp-youtube/1.0/component.js->extensions/amp-video/1.0/video-wrapper.js',
 
       // Bento Vimeo
       'extensions/amp-vimeo/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
       'extensions/amp-vimeo/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
-      'extensions/amp-vimeo/1.0/component.js->extensions/amp-video/1.0/video-wrapper.js',
 
       // Shared definition of Vimeo API
       'extensions/amp-vimeo/0.1/amp-vimeo.js->extensions/amp-vimeo/vimeo-api.js',
