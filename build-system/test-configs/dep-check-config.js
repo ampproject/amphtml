@@ -245,14 +245,17 @@ exports.rules = [
       'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-comments/1.0/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
 
-      // Bento AMP Youtube
+      // Bento VideoIframe, amp-video-iframe
+      'extensions/amp-video-iframe/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
+      'extensions/amp-video-iframe/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
+
+      // Bento Youtube, amp-youtube
       'extensions/amp-youtube/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
       'extensions/amp-youtube/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
 
-      // Bento Vimeo
+      // Bento Vimeo, amp-vimeo
       'extensions/amp-vimeo/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
       'extensions/amp-vimeo/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
-
       // Shared definition of Vimeo API
       'extensions/amp-vimeo/0.1/amp-vimeo.js->extensions/amp-vimeo/vimeo-api.js',
       'extensions/amp-vimeo/1.0/component.js->extensions/amp-vimeo/vimeo-api.js',
