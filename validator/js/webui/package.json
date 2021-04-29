@@ -20,7 +20,7 @@
     "@polymer/iron-fit-behavior": "0.0.3",
     "@polymer/iron-flex-layout": "0.0.3",
     "@polymer/iron-form-element-behavior": "0.0.3",
-    "@polymer/iron-icon": "0.0.3",
+    "@polymer/iron-icon": "0.0.4",
     "@polymer/iron-icons": "0.0.3",
     "@polymer/iron-iconset-svg": "0.0.3",
     "@polymer/iron-input": "0.0.3",
