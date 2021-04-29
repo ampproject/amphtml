@@ -45,7 +45,7 @@
     },
     {
       "groupName": "core devDependencies",
-      "matchPaths": ["+(package.json)"],
+      "matchFiles": ["package.json"],
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "major": {"groupName": null},
       "labels": ["WG: infra"],
@@ -54,6 +54,7 @@
     },
     {
       "groupName": "linting devDependencies",
+      "matchFiles": ["package.json"],
       "matchPackagePatterns": ["\\b(prettier|eslint)\\b"],
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "major": {"groupName": null},
@@ -63,6 +64,7 @@
     },
     {
       "groupName": "babel devDependencies",
+      "matchFiles": ["package.json"],
       "matchPackagePatterns": ["\\bbabel"],
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "major": {"groupName": null},
@@ -72,6 +74,7 @@
     },
     {
       "groupName": "esbuild devDependencies",
+      "matchFiles": ["package.json"],
       "matchPackagePatterns": ["\\besbuild\\b"],
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "major": {"groupName": null},
@@ -81,6 +84,7 @@
     },
     {
       "groupName": "ampproject devDependencies",
+      "matchFiles": ["package.json"],
       "matchPackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["devDependencies"],
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
@@ -91,6 +95,7 @@
     },
     {
       "groupName": "ampproject dependencies",
+      "matchFiles": ["package.json"],
       "matchPackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["dependencies"],
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
@@ -101,6 +106,7 @@
     },
     {
       "groupName": "core dependencies",
+      "matchFiles": ["package.json"],
       "excludePackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["dependencies"],
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
