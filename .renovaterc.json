@@ -4,14 +4,11 @@
     "supportPolicy": ["lts_latest"]
   },
   "ignoreDeps": ["ubuntu-2004"],
-
   "commitMessagePrefix": "📦",
   "timezone": "America/Los_Angeles",
   "schedule": "after 12am every weekday",
-
   "dependencyDashboard": true,
   "prBodyColumns": ["Package", "Update", "Type", "Change", "Package file"],
-  "separateMinorPatch": true,
   "prBodyNotes": [
     "<details>",
     "<summary>How to resolve breaking changes</summary>",
@@ -19,80 +16,104 @@
     "```sh\n# Check out the PR branch (these steps are from GitHub)\ngit checkout -b renovate-bot-{{{branchName}}} main\ngit pull https://github.com/renovate-bot/amphtml.git {{{branchName}}}\n\n# Directly make fixes and commit them\namp lint --fix # For lint errors in JS files\namp prettify --fix # For prettier errors in non-JS files\n# Edit source code in case of new compiler warnings / errors\n\n# Push the changes to the branch\ngit push git@github.com:renovate-bot/amphtml.git renovate-bot-{{{branchName}}}:{{{branchName}}}\n```",
     "</details>"
   ],
-
+  "major": {
+    "packageRules": [
+      {
+        "matchDepTypes": ["devDependencies"],
+        "labels": ["WG: infra"],
+        "automerge": true,
+        "assignAutomerge": true
+      },
+      {
+        "matchDepTypes": ["dependencies"],
+        "labels": ["WG: bento", "WG: performance"],
+        "automerge": false,
+        "assignAutomerge": false
+      }
+    ]
+  },
   "packageRules": [
     {
       "groupName": "subpackage devDependencies",
       "matchPaths": ["**/*"],
-      "major": {
-        "groupName": null,
-        "additionalBranchPrefix": "subpackage-"
-      }
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": true,
+      "assignAutomerge": true
     },
     {
-      "groupName": "build system devDependencies",
+      "groupName": "build-system devDependencies",
       "matchPaths": ["build-system/**"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "labels": ["WG: infra"],
-      "major": {
-        "groupName": null,
-        "additionalBranchPrefix": "build-system-"
-      }
+      "automerge": true,
+      "assignAutomerge": true
     },
     {
       "groupName": "validator devDependencies",
       "matchPaths": ["validator/**"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "labels": ["WG: caching"],
-      "major": {
-        "groupName": null,
-        "additionalBranchPrefix": "validator-"
-      }
+      "automerge": true,
+      "assignAutomerge": true
     },
     {
       "groupName": "core devDependencies",
       "matchPaths": ["+(package.json)"],
-      "major": {
-        "groupName": null,
-        "additionalBranchPrefix": "core-"
-      }
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "labels": ["WG: infra"],
+      "automerge": true,
+      "assignAutomerge": true
     },
     {
       "groupName": "linting devDependencies",
       "matchPackagePatterns": ["\\b(prettier|eslint)\\b"],
-      "major": {
-        "groupName": null,
-        "additionalBranchPrefix": "linting-"
-      }
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "labels": ["WG: infra"],
+      "automerge": true,
+      "assignAutomerge": true
     },
     {
       "groupName": "babel devDependencies",
       "matchPackagePatterns": ["\\bbabel"],
-      "major": {
-        "groupName": null,
-        "additionalBranchPrefix": "babel-"
-      }
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "labels": ["WG: infra", "WG: performance"],
+      "automerge": true,
+      "assignAutomerge": true
     },
     {
-      "excludePackagePatterns": ["^@ampproject/"],
-      "matchDepTypes": ["dependencies"],
-      "enabled": false
+      "groupName": "esbuild devDependencies",
+      "matchPackagePatterns": ["\\besbuild\\b"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "labels": ["WG: infra", "WG: performance"],
+      "automerge": true,
+      "assignAutomerge": true
     },
     {
       "groupName": "ampproject devDependencies",
       "matchPackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["devDependencies"],
-      "major": {
-        "groupName": null,
-        "additionalBranchPrefix": "ampproject-"
-      }
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "labels": ["WG: bento", "WG: performance"],
+      "automerge": true,
+      "assignAutomerge": true
     },
     {
       "groupName": "ampproject dependencies",
       "matchPackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["dependencies"],
-      "major": {
-        "groupName": null,
-        "additionalBranchPrefix": "ampproject-"
-      }
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "labels": ["WG: bento", "WG: performance"],
+      "automerge": false,
+      "assignAutomerge": false
+    },
+    {
+      "groupName": "core dependencies",
+      "excludePackagePatterns": ["^@ampproject/"],
+      "matchDepTypes": ["dependencies"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "labels": ["WG: bento", "WG: performance"],
+      "automerge": false,
+      "assignAutomerge": false
     }
   ]
 }

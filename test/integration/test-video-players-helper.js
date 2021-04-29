@@ -20,24 +20,21 @@ import {
   VideoEvents,
   VideoInterface,
 } from '../../src/video-interface';
-import {VideoUtils} from '../../src/utils/video';
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
   poll,
 } from '../../testing/iframe';
+import {detectIsAutoplaySupported} from '../../src/utils/video';
 import {getData, listenOncePromise} from '../../src/event-helper';
 import {removeElement} from '../../src/dom';
 import {toggleExperiment} from '../../src/experiments';
 
 function skipIfAutoplayUnsupported(win) {
-  VideoUtils.resetIsAutoplaySupported();
-
-  return VideoUtils.isAutoplaySupported(win, false).then((isSupported) => {
-    if (isSupported) {
-      return;
+  return detectIsAutoplaySupported(win).then((isSupported) => {
+    if (!isSupported) {
+      this.skipTest();
     }
-    this.skipTest();
   });
 }
 
@@ -603,8 +600,6 @@ export function runVideoPlayerIntegrationTests(
   }
 
   function cleanUp() {
-    VideoUtils.resetIsAutoplaySupported();
-
     try {
       if (fixtureGlobal) {
         if (opt_experiment) {
