@@ -14,23 +14,4 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {VideoIframe} from '../../amp-video/1.0/video-iframe';
-import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
-import {forwardRef} from '../../../src/preact/compat';
-
-/**
- * @param {VideoIframeDef.Props} props
- * @param {{current: T|null}} ref
- * @return {PreactDef.Renderable}
- * @template T
- * TODO(alanorozco): VideoIframe should be VideoIframeWrapper, but other
- * components (amp-youtube, etc.) need to be updated as well.
- */
-function VideoIframeWrapperWithRef(props, ref) {
-  return <VideoWrapper ref={ref} {...props} component={VideoIframe} />;
-}
-
-const VideoIframeWrapper = forwardRef(VideoIframeWrapperWithRef);
-VideoIframeWrapper.displayName = 'VideoIframeWrapper';
-export {VideoIframeWrapper};
+export {VideoIframe} from '../../amp-video/1.0/video-iframe';

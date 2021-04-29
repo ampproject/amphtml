@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 import {BUBBLE_MESSAGE_EVENTS} from '../0.1/amp-video-iframe';
+import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-video-iframe-1.0.css';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
-import {VideoBaseElement} from '../../amp-video/1.0/base-element';
-import {VideoIframeWrapper} from './component';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/core/types/object';
 import {isExperimentOn} from '../../../src/experiments';
@@ -42,7 +41,7 @@ function getIntersectionRatioMinAutoplay(element) {
   );
 }
 
-class AmpVideoIframe extends VideoBaseElement {
+class AmpVideoIframe extends BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
@@ -114,23 +113,9 @@ const makeMethodMessage = (method) =>
   });
 
 AmpVideoIframe['staticProps'] = dict({
-  'component': VideoIframeWrapper,
   'onMessage': onMessage,
   'makeMethodMessage': makeMethodMessage,
 });
-
-/** @override */
-AmpVideoIframe['props'] = {
-  'autoplay': {attr: 'autoplay', type: 'boolean'},
-  'referrerpolicy': {attr: 'referrerpolicy'},
-  'implements-media-session': {attr: 'mediasession', type: 'boolean'},
-  'poster': {attr: 'poster'},
-  'src': {attr: 'src'},
-
-  // TODO(alanorozco): These props have no internal implementation yet.
-  'dock': {attr: 'dock'},
-  'rotate-to-fullscreen': {attr: 'rotate-to-fullscreen', type: 'boolean'},
-};
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpVideoIframe, CSS);
