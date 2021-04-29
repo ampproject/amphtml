@@ -29,6 +29,7 @@ export function amplified(global, data) {
 
   global.adUnitId = adUnitId;
   global.params = JSON.parse(params);
+  global.disconnectAmplified = disconnectAmplified;
 
   setAmplifiedParams(global);
   createAmplifiedContainer(global);
@@ -101,7 +102,10 @@ function enableAmplifiedUtils(global) {
  * @param {!Window} global
  */
 function observeAmplified(global) {
-  const observer = new MutationObserver((mutations, observer) => {
+  const ampObserver = new MutationObserver((mutations, observer) => {
+    if (!global.amplifiedObserver) {
+      global.amplifiedObserver = observer;
+    }
     mutations.forEach((mutation) => {
       if (!mutation.addedNodes) {
         return;
@@ -112,11 +116,24 @@ function observeAmplified(global) {
           node.id === 'amplified-script' ||
           node.id === 'disconnect-amplified'
         ) {
-          enableAmplifiedUtils(global);
+          if (node.id === 'amplified-script') {
+            enableAmplifiedUtils(global);
+          }
           observer.disconnect();
+          global.amplifiedObserver = null;
         }
       }
     });
   });
-  observer.observe(global.document.body, {childList: true, subtree: true});
+  ampObserver.observe(global.document.body, {childList: true, subtree: true});
+}
+
+/**
+ *
+ * @param {!Window} global
+ */
+function disconnectAmplified(global) {
+  const el = document.createElement('div');
+  el.id = 'disconnect-amplified';
+  global.document.body.append(el);
 }
