@@ -776,7 +776,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-callout-vendors.js',
       'test/unit/test-chunk.js',
       'test/unit/test-cid.js',
-      'test/unit/test-css.js',
       'test/unit/test-curve.js',
       'test/unit/test-describes.js',
       'test/unit/test-document-info.js',

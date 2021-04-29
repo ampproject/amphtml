@@ -73,7 +73,7 @@ exports.rules = [
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/aes_gcm.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/config.js',
       'extensions/amp-google-assistant-assistjs/**/*.js->third_party/closure-responding-channel/closure-bundle.js',
-      'src/css.js->third_party/css-escape/css-escape.js',
+      'src/core/dom/css.js->third_party/css-escape/css-escape.js',
       'src/sanitizer.js->third_party/caja/html-sanitizer.js',
       'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
     ],
@@ -249,6 +249,15 @@ exports.rules = [
       'extensions/amp-youtube/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
       'extensions/amp-youtube/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
       'extensions/amp-youtube/1.0/component.js->extensions/amp-video/1.0/video-wrapper.js',
+
+      // Bento Vimeo
+      'extensions/amp-vimeo/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
+      'extensions/amp-vimeo/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
+      'extensions/amp-vimeo/1.0/component.js->extensions/amp-video/1.0/video-wrapper.js',
+
+      // Shared definition of Vimeo API
+      'extensions/amp-vimeo/0.1/amp-vimeo.js->extensions/amp-vimeo/vimeo-api.js',
+      'extensions/amp-vimeo/1.0/component.js->extensions/amp-vimeo/vimeo-api.js',
 
       // Amp geo in group enum
       'extensions/amp-a4a/0.1/amp-a4a.js->extensions/amp-geo/0.1/amp-geo-in-group.js',

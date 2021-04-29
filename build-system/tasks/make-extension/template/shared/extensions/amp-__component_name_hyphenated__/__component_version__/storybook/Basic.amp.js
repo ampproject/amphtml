@@ -24,12 +24,9 @@ export default {
 
   parameters: {
     extensions: [
-      {
-        name: 'amp-__component_name_hyphenated__',
-        version: '__component_version__',
-      },
+      {name: 'amp-__component_name_hyphenated__', version: '__component_version__'},
     ],
-    experiments: ['bento'],
+    __storybook_experiments_do_not_add_trailing_comma__
   },
 };
 

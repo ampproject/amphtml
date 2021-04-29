@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {parseQueryString} from '../../../src/url';
 import {toWin} from '../../../src/types';
 
