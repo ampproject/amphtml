@@ -275,5 +275,5 @@ function toggleOnChange(expr, callback, on) {
  * @return {boolean}
  */
 export function prefersReducedMotion(win) {
-  return win.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return !!win.matchMedia('(prefers-reduced-motion: reduce)')?.matches;
 }
