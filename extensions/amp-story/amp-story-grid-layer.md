@@ -403,11 +403,11 @@ Example:
 
 #### Modern aspect-ratio
 
-Responsive presets on grid-layers maximize usable screen space and scale assets consistently.
+Responsive presets on grid-layers maximize usable screen space for foreground elements and scale assets consistently.
 
 ```html
 <amp-story-grid-layer preset="2021-background" template="fill">
-    <amp-img src="cat.jpg" alt="...">
+    <amp-img src="cat.jpg" layout="fill" alt="...">
 </amp-story-grid-layer>
 <amp-story-grid-layer preset="2021-foreground">
     <h1>This will stay consistent with the bg</h1>
@@ -424,11 +424,11 @@ The background preset is mostly useful for designing layouts with both backgroun
 
 ##### Foreground
 
-Use the `2021-foreground` preset for foreground elements. This anchors foreground layers to pin items, such as logos or footnotes, to the page corners or borders.
+Use the `2021-foreground` preset for foreground elements. This layer will always be fully visible and expand to the borders either horizontally or vertically, maximizing the size without cropping. The attribute `anchor` is useful to pin foreground layers to the page corners or borders, such that elements can be positioned relative to those borders or corners (eg: logos or footnotes).
 
 ##### Background
 
-Use the `2021-background` preset for the background layer. This preset covers the entire screen on all mobile devices with the background asset. It does so without letterboxing and keeps scaling consistent with the foreground elements.
+Use the `2021-background` preset for the background layer. This preset covers the entire screen on all mobile phones with the background asset. It does so without letterboxing, and keeps positioning consistent with the foreground elements.
 While this technique provides the most consistent user experience, it may crop up to 7% of one or all borders of your background. Keep this in mind when designing and picking your assets.
 
 <div layout="container" width="3" height="2">
