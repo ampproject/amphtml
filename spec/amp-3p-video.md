@@ -32,7 +32,7 @@ For guidance on accomplishing this, [refer to the component documentation.](http
 (If you _cannot_ support these playback methods, it's likely that a simple [`amp-iframe`](https://go.amp.dev/c/amp-iframe)
 can embed a separate video document just fine.)
 
-Once you host your integration document, you may provide a code sample for document authors to find your service [in the AMP documentation.](https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-iframe/amp-video-iframe.md)
+Once you host your integration document, you may provide a code sample for document authors to find your service [in the AMP documentation.](https://github.com/ampproject/amphtml/blob/main/extensions/amp-video-iframe/amp-video-iframe.md)
 
 ### When _should_ I build a vendor-specific player?
 
@@ -54,7 +54,7 @@ For example, these are some of the features that justify specific players:
 
 You'll need to go through [the standard AMP contribution process](../CONTRIBUTING.md) when creating and submitting your component. For large features, such as a video player, you need to file an [I2I (intent-to-implement) issue](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+IMPLEMENT&template=intent-to-implement--i2i-.md&title=I2I:%20%3Cyour%20change/update%3E) that describes the overall workings of your component.
 
-Your player component is also shipped as an extension, so you should [become familiar with the process of building one.](https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md)
+Your player component is also shipped as an extension, so you should [become familiar with the process of building one.](https://github.com/ampproject/amphtml/blob/main/contributing/building-an-amp-extension.md)
 
 ### Write your implementation
 

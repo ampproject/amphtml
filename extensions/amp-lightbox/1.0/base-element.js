@@ -17,9 +17,10 @@
 import {CSS as COMPONENT_CSS} from './component.jss';
 import {Lightbox} from './component';
 import {PreactBaseElement} from '../../../src/preact/base-element';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {toggle} from '../../../src/style';
 import {toggleAttribute} from '../../../src/dom';
+import {unmountAll} from '../../../src/utils/resource-container-helper';
 
 export class BaseElement extends PreactBaseElement {
   /** @param {!AmpElement} element */
@@ -33,9 +34,15 @@ export class BaseElement extends PreactBaseElement {
   /** @override */
   init() {
     return dict({
-      'onBeforeOpen': this.toggle_.bind(this, true),
-      'onAfterClose': this.toggle_.bind(this, false),
+      'onBeforeOpen': () => this.beforeOpen_(),
+      'onAfterOpen': () => this.afterOpen_(),
+      'onAfterClose': () => this.afterClose_(),
     });
+  }
+
+  /** @override */
+  unmountCallback() {
+    this.removeAsContainer();
   }
 
   /** @override */
@@ -43,14 +50,32 @@ export class BaseElement extends PreactBaseElement {
     props['closeButtonAs'] = () => props['closeButton'];
   }
 
-  /**
-   * Toggle open/closed attributes.
-   * @param {boolean} opt_state
-   */
-  toggle_(opt_state) {
-    this.open_ = toggleAttribute(this.element, 'open', opt_state);
-    toggle(this.element, this.open_);
-    this.triggerEvent(this.element, this.open_ ? 'open' : 'close');
+  /** @private */
+  beforeOpen_() {
+    this.open_ = true;
+    toggleAttribute(this.element, 'open', true);
+    toggle(this.element, true);
+    this.triggerEvent(this.element, 'open');
+  }
+
+  /** @private */
+  afterOpen_() {
+    const scroller = this.element.shadowRoot.querySelector('[part=scroller]');
+    this.setAsContainer(scroller);
+  }
+
+  /** @private */
+  afterClose_() {
+    this.open_ = false;
+    toggleAttribute(this.element, 'open', false);
+    toggle(this.element, false);
+    this.triggerEvent(this.element, 'close');
+
+    this.removeAsContainer();
+
+    // Unmount all children when the lightbox is closed. They will automatically
+    // remount when the lightbox is opened again.
+    unmountAll(this.element, /* includeSelf */ false);
   }
 
   /** @override */
@@ -72,7 +97,6 @@ BaseElement['props'] = {
   'animation': {attr: 'animation', media: true, default: 'fade-in'},
   'closeButton': {selector: '[slot="close-button"]', single: true},
   'children': {passthrough: true},
-  'id': {attr: 'id'},
 };
 
 /** @override */

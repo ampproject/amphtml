@@ -21,8 +21,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
-  downloadNomoduleOutput,
-  printSkipMessage,
+  skipDependentJobs,
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
@@ -42,7 +41,6 @@ function prependConfig() {
 }
 
 function pushBuildWorkflow() {
-  downloadNomoduleOutput();
   prependConfig();
   try {
     timedExecOrThrow(
@@ -60,13 +58,12 @@ function pushBuildWorkflow() {
 
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
-    downloadNomoduleOutput();
     prependConfig();
     timedExecOrDie(
       `amp integration --nobuild --compiled --headless --config=${argv.config}`
     );
   } else {
-    printSkipMessage(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime or integration tests'
     );

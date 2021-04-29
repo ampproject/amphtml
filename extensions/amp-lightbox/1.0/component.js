@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {ContainWrapper, useValueRef} from '../../../src/preact/component';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {forwardRef} from '../../../src/preact/compat';
 import {setStyle} from '../../../src/style';
 import {tryFocus} from '../../../src/dom';
@@ -46,6 +46,8 @@ const ANIMATION_PRESETS = {
 
 const DEFAULT_CLOSE_LABEL = 'Close the modal';
 
+const CONTENT_PROPS = {'part': 'scroller'};
+
 /**
  * @param {!LightboxDef.Props} props
  * @param {{current: (!LightboxDef.LightboxApi|null)}} ref
@@ -58,6 +60,7 @@ function LightboxWithRef(
     closeButtonAs,
     onBeforeOpen,
     onAfterClose,
+    onAfterOpen,
     ...rest
   },
   ref
@@ -77,14 +80,13 @@ function LightboxWithRef(
   const animationRef = useValueRef(animation);
   const onBeforeOpenRef = useValueRef(onBeforeOpen);
   const onAfterCloseRef = useValueRef(onAfterClose);
+  const onAfterOpenRef = useValueRef(onAfterOpen);
 
   useImperativeHandle(
     ref,
     () => ({
       open: () => {
-        if (onBeforeOpenRef.current) {
-          onBeforeOpenRef.current();
-        }
+        onBeforeOpenRef.current?.();
         setMounted(true);
         setVisible(true);
       },
@@ -108,6 +110,7 @@ function LightboxWithRef(
         setStyle(element, 'opacity', 1);
         setStyle(element, 'visibility', 'visible');
         tryFocus(element);
+        onAfterOpenRef.current?.();
       };
       if (!element.animate) {
         postVisibleAnim();
@@ -147,7 +150,7 @@ function LightboxWithRef(
         animation.cancel();
       }
     };
-  }, [visible, animationRef, onAfterCloseRef]);
+  }, [visible, animationRef, onAfterCloseRef, onAfterOpenRef]);
 
   return (
     mounted && (
@@ -159,6 +162,7 @@ function LightboxWithRef(
         part="lightbox"
         contentClassName={classes.content}
         wrapperClassName={classes.wrapper}
+        contentProps={CONTENT_PROPS}
         role="dialog"
         tabIndex="0"
         onKeyDown={(event) => {

@@ -17,11 +17,21 @@
 /**
  * @fileoverview Helper for amp-story rendering of page-attachment UI.
  */
+import {AttachmentTheme} from './amp-story-page-attachment';
 import {LocalizedStringId} from '../../../src/localized-strings';
+import {computedStyle, setImportantStyles} from '../../../src/style';
 import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
-import {setImportantStyles} from '../../../src/style';
+import {getRGBFromCssColorValue, getTextColorForRGB} from './utils';
+import {htmlFor, htmlRefs} from '../../../src/static-template';
+import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
+
+/**
+ * @enum {string}
+ */
+const CtaAccentElement = {
+  TEXT: 'text',
+  BACKGROUND: 'background',
+};
 
 /**
  * @param {!Element} element
@@ -31,7 +41,7 @@ export const buildOpenDefaultAttachmentElement = (element) =>
   htmlFor(element)`
     <a class="
         i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
-        role="button">
+        role="button" target="_top">
       <span class="i-amphtml-story-page-open-attachment-icon">
         <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
         <span class="i-amphtml-story-page-open-attachment-bar-right"></span>
@@ -46,13 +56,41 @@ export const buildOpenDefaultAttachmentElement = (element) =>
 export const buildOpenInlineAttachmentElement = (element) =>
   htmlFor(element)`
     <a class="
-        i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
+        i-amphtml-story-page-open-attachment i-amphtml-story-system-reset i-amphtml-amp-story-page-attachment-ui-v2"
         role="button">
       <div class="i-amphtml-story-inline-page-attachment-chip">
         <div class="i-amphtml-story-inline-page-attachment-img"></div>
         <div class="i-amphtml-story-inline-page-attachment-arrow"></div>
       </div>
     </a>`;
+
+/**
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildOpenOutlinkAttachmentElement = (element) =>
+  htmlFor(element)`
+     <a class="i-amphtml-story-page-open-attachment i-amphtml-amp-story-page-attachment-ui-v2"
+         role="button" target="_top">
+       <span class="i-amphtml-story-outlink-page-attachment-arrow">
+         <span class="i-amphtml-story-outlink-page-open-attachment-bar-left"></span>
+         <span class="i-amphtml-story-outlink-page-open-attachment-bar-right"></span>
+       </span>
+       <div class="i-amphtml-story-outlink-page-attachment-outlink-chip" ref="chipEl">
+        <div class="i-amphtml-story-outlink-page-attachment-label" ref="ctaLabelEl"></div>
+       </div>
+     </a>`;
+
+/**
+ * @param {!Element} element
+ * @return {!Element}
+ */
+export const buildOpenAttachmentElementLinkIcon = (element) =>
+  htmlFor(element)`
+  <svg class="i-amphtml-story-page-open-attachment-link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path fill-opacity=".1" d="M12 0c6.6 0 12 5.4 12 12s-5.4 12-12 12S0 18.6 0 12 5.4 0 12 0z"></path>
+    <path d="M13.8 14.6c.1.1.2.3.2.5s-.1.3-.2.5L12.3 17c-.7.7-1.7 1.1-2.7 1.1-1 0-1.9-.4-2.7-1.1-.7-.7-1.1-1.7-1.1-2.7 0-1 .4-1.9 1.1-2.7l1.5-1.5c.2 0 .3-.1.5-.1s.3.1.5.2c.1.1.2.3.2.5s-.1.4-.2.5l-1.5 1.5c-.5.5-.7 1.1-.7 1.7 0 .6.3 1.3.7 1.7.5.5 1.1.7 1.7.7s1.3-.3 1.7-.7l1.5-1.5c.3-.3.7-.3 1 0zM17 7c-.7-.7-1.7-1.1-2.7-1.1-1 0-1.9.4-2.7 1.1l-1.5 1.5c0 .1-.1.3-.1.4 0 .2.1.3.2.5.1.1.3.2.5.2s.3-.1.5-.2l1.5-1.5c.5-.5 1.1-.7 1.7-.7.6 0 1.3.3 1.7.7.5.5.7 1.1.7 1.7 0 .6-.3 1.3-.7 1.7l-1.5 1.5c-.1.1-.2.3-.2.5s.1.3.2.5c.1.1.3.2.5.2s.3-.1.5-.2l1.5-1.5c.7-.7 1.1-1.7 1.1-2.7-.1-1-.5-1.9-1.2-2.6zm-7.9 7.2c0 .2.1.3.2.5.1.1.3.2.5.2s.4-.1.5-.2l4.5-4.5c.1-.1.2-.3.2-.5s-.1-.4-.2-.5c-.3-.2-.8-.2-1 .1l-4.5 4.5c-.1.1-.2.3-.2.4z"></path>
+  </svg>`;
 
 /**
  * Determines which open attachment UI to render.
@@ -64,21 +102,38 @@ export const buildOpenInlineAttachmentElement = (element) =>
 export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
   const openImgAttr = attachmentEl.getAttribute('cta-image');
   const attachmentHref = attachmentEl.getAttribute('href');
-  if (isPageAttachmentUiV2ExperimentOn(win) && !attachmentHref && openImgAttr) {
+  if (isPageAttachmentUiV2ExperimentOn(win) && attachmentHref) {
+    return renderOutlinkPageAttachmentUI(
+      win,
+      pageEl,
+      attachmentEl,
+      attachmentHref
+    );
+  } else if (isPageAttachmentUiV2ExperimentOn(win) && openImgAttr) {
     return renderPageAttachmentUiWithImages(win, pageEl, attachmentEl);
-  } else {
-    return renderDefaultPageAttachmentUI(pageEl, attachmentEl);
   }
+  return renderDefaultPageAttachmentUI(win, pageEl, attachmentEl);
 };
 
 /**
  * Renders default page attachment UI.
+ * @param {!Window} win
  * @param {!Element} pageEl
  * @param {!Element} attachmentEl
  * @return {!Element}
  */
-const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
+const renderDefaultPageAttachmentUI = (win, pageEl, attachmentEl) => {
   const openAttachmentEl = buildOpenDefaultAttachmentElement(pageEl);
+  if (isPageAttachmentUiV2ExperimentOn(win)) {
+    openAttachmentEl.classList.add(
+      '.i-amphtml-amp-story-page-attachment-ui-v2'
+    );
+    // Setting theme
+    const theme = attachmentEl.getAttribute('theme');
+    if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
+      openAttachmentEl.setAttribute('theme', AttachmentTheme.DARK);
+    }
+  }
   // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
   const attachmentHref = attachmentEl.getAttribute('href');
   if (attachmentHref) {
@@ -97,6 +152,73 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
     );
 
   textEl.textContent = openLabel;
+
+  if (isPageAttachmentUiV2ExperimentOn(win)) {
+    openAttachmentEl.classList.add('i-amphtml-amp-story-page-attachment-ui-v2');
+  }
+  return openAttachmentEl;
+};
+
+/**
+ * Renders inline page attachment UI.
+ * @param {!Window} win
+ * @param {!Element} pageEl
+ * @param {!Element} attachmentEl
+ * @param {!Element} attachmentHref
+ * @return {!Element}
+ */
+const renderOutlinkPageAttachmentUI = (
+  win,
+  pageEl,
+  attachmentEl,
+  attachmentHref
+) => {
+  const openAttachmentEl = buildOpenOutlinkAttachmentElement(pageEl);
+
+  // Copy href to the element so it can be previewed on hover and long press.
+  if (attachmentHref) {
+    openAttachmentEl.setAttribute('href', attachmentHref);
+  }
+
+  // Getting elements
+  const {chipEl, ctaLabelEl} = htmlRefs(openAttachmentEl);
+
+  // Setting theme
+  let themeAttribute = attachmentEl.getAttribute('theme');
+  if (themeAttribute) {
+    themeAttribute = themeAttribute.toLowerCase();
+  }
+  openAttachmentEl.setAttribute('theme', themeAttribute);
+
+  if (themeAttribute === AttachmentTheme.CUSTOM) {
+    setCustomThemeStyles(win, attachmentEl, openAttachmentEl);
+  }
+
+  // Appending text & aria-label.
+  const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
+  const openLabel = openLabelAttr
+    ? openLabelAttr.trim()
+    : getLocalizationService(pageEl).getLocalizedString(
+        LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
+      );
+  ctaLabelEl.textContent = openLabel;
+  openAttachmentEl.setAttribute('aria-label', openLabel);
+
+  // Set image.
+  const openImgAttr = attachmentEl.getAttribute('cta-image');
+  if (openImgAttr && openImgAttr !== 'none') {
+    const ctaImgEl = win.document.createElement('div');
+    ctaImgEl.classList.add('i-amphtml-story-outlink-page-attachment-img');
+    setImportantStyles(ctaImgEl, {
+      'background-image': 'url(' + openImgAttr + ')',
+    });
+    chipEl.prepend(ctaImgEl);
+  } else if (!openImgAttr) {
+    // Attach link icon SVG by default.
+    const linkImage = buildOpenAttachmentElementLinkIcon(attachmentEl);
+    chipEl.prepend(linkImage);
+  }
+
   return openAttachmentEl;
 };
 
@@ -109,6 +231,12 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
  */
 const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
   const openAttachmentEl = buildOpenInlineAttachmentElement(pageEl);
+
+  // Setting theme
+  const theme = attachmentEl.getAttribute('theme');
+  if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
+    openAttachmentEl.setAttribute('theme', AttachmentTheme.DARK);
+  }
 
   // Appending text & aria-label.
   const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
@@ -152,10 +280,47 @@ const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
 };
 
 /**
- * Returns true if new inline attachment UI is enabled.
+ * Sets custom theme attributes.
  * @param {!Window} win
- * @return {boolean}
+ * @param {!Element} attachmentEl
+ * @param {!Element} openAttachmentEl
  */
-export const isPageAttachmentUiV2ExperimentOn = (win) => {
-  return isExperimentOn(win, 'amp-story-page-attachment-ui-v2');
+export const setCustomThemeStyles = (win, attachmentEl, openAttachmentEl) => {
+  const accentColor = attachmentEl.getAttribute('cta-accent-color');
+
+  // Calculating contrast color (black or white) needed for outlink CTA UI.
+  let contrastColor = null;
+  if (accentColor) {
+    setImportantStyles(attachmentEl, {
+      'background-color': attachmentEl.getAttribute('cta-accent-color'),
+    });
+    const styles = computedStyle(win, attachmentEl);
+    const rgb = getRGBFromCssColorValue(styles['background-color']);
+    contrastColor = getTextColorForRGB(rgb);
+    setImportantStyles(attachmentEl, {
+      'background-color': '',
+    });
+  }
+  if (
+    attachmentEl.getAttribute('cta-accent-element') ===
+    CtaAccentElement.BACKGROUND
+  ) {
+    setImportantStyles(openAttachmentEl, {
+      '--i-amphtml-outlink-cta-background-color': accentColor,
+      '--i-amphtml-outlink-cta-text-color': contrastColor,
+    });
+    setImportantStyles(attachmentEl, {
+      '--i-amphtml-outlink-cta-background-color': accentColor,
+      '--i-amphtml-outlink-cta-text-color': contrastColor,
+    });
+  } else {
+    setImportantStyles(openAttachmentEl, {
+      '--i-amphtml-outlink-cta-background-color': contrastColor,
+      '--i-amphtml-outlink-cta-text-color': accentColor,
+    });
+    setImportantStyles(attachmentEl, {
+      '--i-amphtml-outlink-cta-background-color': contrastColor,
+      '--i-amphtml-outlink-cta-text-color': accentColor,
+    });
+  }
 };

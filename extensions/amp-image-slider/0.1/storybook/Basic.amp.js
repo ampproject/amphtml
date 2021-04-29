@@ -16,12 +16,11 @@
 
 import * as Preact from '../../../../src/preact';
 import {text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
   title: 'Image Slider',
-  decorators: [withKnobs, withA11y, withAmp],
+  decorators: [withKnobs, withAmp],
 
   parameters: {
     extensions: [{name: 'amp-image-slider', version: 0.1}],
@@ -46,9 +45,7 @@ export const Default = () => {
   );
 };
 
-Default.story = {
-  name: 'default',
-};
+Default.storyName = 'default';
 
 export const CustomHints = () => {
   const first = text(
@@ -90,6 +87,4 @@ export const CustomHints = () => {
   );
 };
 
-CustomHints.story = {
-  name: 'custom-hints',
-};
+CustomHints.storyName = 'custom-hints';

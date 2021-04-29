@@ -16,7 +16,7 @@
 
 import '../amp-carousel';
 import * as Listen from '../../../../src/event-helper';
-import {ActionTrust} from '../../../../src/action-constants';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {CarouselEvents} from '../../../amp-base-carousel/0.1/carousel-events';
 import {Services} from '../../../../src/services';
 import {getDetail, listenOncePromise} from '../../../../src/event-helper';
@@ -535,9 +535,7 @@ describes.realWin(
     describe('event propogation', () => {
       it('should add touchmove event if in viewer', async () => {
         env.sandbox.stub(Services, 'viewerForDoc').returns({
-          isEmbedded: () => {
-            return true;
-          },
+          isEmbedded: () => true,
         });
         const listenSpy = env.sandbox.spy(Listen, 'listen');
         const carousel = await getCarousel({loop: false});
@@ -550,9 +548,7 @@ describes.realWin(
 
       it('should not add touchmove event if not in the viewer', async () => {
         env.sandbox.stub(Services, 'viewerForDoc').returns({
-          isEmbedded: () => {
-            return false;
-          },
+          isEmbedded: () => false,
         });
         const listenSpy = env.sandbox.spy(Listen, 'listen');
         await getCarousel({loop: false});

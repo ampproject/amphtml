@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact/index';
-import {CanRender} from '../../../src/core/contextprops';
+import {CanRender} from '../../../src/context/contextprops';
 import {
   PreactBaseElement,
   whenUpgraded,
@@ -78,6 +78,19 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       });
     });
   }
+
+  it('preact ref passing vnode smoke test', () => {
+    function App() {
+      // Don't call useImperativeHandle.
+    }
+    const ref = env.sandbox.spy();
+    Preact.render(<App ref={ref} />, document.body);
+    // When this test fails, that means Preact has fixed their ref setting.
+    // See https://github.com/preactjs/preact/issues/3084
+    // Please remove the hack in src/preact/base-element.js inside `checkApiWrapper_`,
+    // and add a `.not` below so we don't regress again.
+    expect(ref).to.be.called;
+  });
 
   describe('context', () => {
     let element;
@@ -342,14 +355,14 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       // Non-zero size.
       resizeObserverStub.notifySync({
         target: element,
-        contentRect: {width: 10, height: 10},
+        borderBoxSize: [{inlineSize: 10, blockSize: 10}],
       });
       expect(pauseStub).to.not.be.called;
 
       // Zero size.
       resizeObserverStub.notifySync({
         target: element,
-        contentRect: {width: 0, height: 0},
+        borderBoxSize: [{inlineSize: 0, blockSize: 0}],
       });
       expect(pauseStub).to.be.calledOnce;
     });

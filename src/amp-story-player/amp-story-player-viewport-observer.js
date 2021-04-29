@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {throttle} from '../utils/rate-limit';
+import {throttle} from '../core/types/function';
 
 /** @const {number} */
 const SCROLL_THROTTLE_MS = 500;
@@ -77,7 +77,7 @@ export class AmpStoryPlayerViewportObserver {
 
   /**
    * Fallback for when IntersectionObserver is not supported. Calls
-   * layoutCallback on the element when it is close to the viewport.
+   * layoutPlayer on the element when it is close to the viewport.
    * @private
    */
   createInObFallback_() {

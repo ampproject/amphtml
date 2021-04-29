@@ -33,7 +33,7 @@ import {installPlatformService} from '../../src/service/platform-impl';
 import {installTemplatesServiceForDoc} from '../../src/service/template-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
-import {toArray} from '../../src/types';
+import {toArray} from '../../src/core/types/array';
 import {vsyncForTesting} from '../../src/service/vsync-impl';
 
 describes.fakeWin(
@@ -612,7 +612,7 @@ describes.fakeWin(
         await extensions.waitForExtension('amp-ext', '0.1');
 
         // Extension is added immediately. Can't find for micro-tasks here.
-        const extHolder = extensions.extensions_['amp-ext'];
+        const extHolder = extensions.extensions_['amp-ext:0.1'];
         const ext = extHolder.extension;
         expect(ext.elements['amp-ext']).not.exist;
 
@@ -654,7 +654,7 @@ describes.fakeWin(
         yield extensions.waitForExtension('amp-ext', '0.1');
 
         // Extension is added immediately. Can't find for micro-tasks here.
-        const ext = extensions.extensions_['amp-ext'].extension;
+        const ext = extensions.extensions_['amp-ext:0.1'].extension;
         expect(ext.elements['amp-ext']).exist;
         expect(ext.elements['amp-ext'].implementationClass).to.equal(
           win.AMP.BaseElement
@@ -699,7 +699,7 @@ describes.fakeWin(
 
         // Extension is added immediately. Can't find for micro-tasks here.
         yield extensions.waitForExtension('amp-ext', '0.1');
-        const ext = extensions.extensions_['amp-ext'].extension;
+        const ext = extensions.extensions_['amp-ext:0.1'].extension;
         expect(ext.elements['amp-ext']).exist;
         expect(ext.elements['amp-ext'].implementationClass).to.equal(
           win.AMP.BaseElement
@@ -747,7 +747,7 @@ describes.fakeWin(
 
         // No factories
         yield extensions.waitForExtension('amp-ext', '0.1');
-        const extHolder = extensions.extensions_['amp-ext'];
+        const extHolder = extensions.extensions_['amp-ext:0.1'];
         expect(extHolder.docFactories).to.have.length(1);
 
         // Already installed.
@@ -779,7 +779,7 @@ describes.fakeWin(
 
         // No factories
         yield extensions.waitForExtension('amp-ext', '0.1');
-        const extHolder = extensions.extensions_['amp-ext'];
+        const extHolder = extensions.extensions_['amp-ext:0.1'];
         expect(extHolder.docFactories).to.have.length(1);
 
         // Already installed.
@@ -832,7 +832,7 @@ describes.fakeWin(
 
         // Extension is added immediately. Can't find for micro-tasks here.
         yield extensions.waitForExtension('amp-ext', '0.1');
-        const extHolder = extensions.extensions_['amp-ext'];
+        const extHolder = extensions.extensions_['amp-ext:0.1'];
         const ext = extHolder.extension;
         expect(ext.elements['amp-ext']).exist;
         expect(ext.elements['amp-ext'].implementationClass).to.equal(
@@ -882,7 +882,7 @@ describes.fakeWin(
 
         // Extension is added immediately. Can't find for micro-tasks here.
         yield extensions.waitForExtension('amp-ext', '0.1');
-        const extHolder = extensions.extensions_['amp-ext'];
+        const extHolder = extensions.extensions_['amp-ext:0.1'];
         const ext = extHolder.extension;
         expect(ext.elements['amp-ext']).exist;
         expect(ext.elements['amp-ext'].implementationClass).to.equal(
@@ -935,7 +935,7 @@ describes.fakeWin(
 
         // Factory recorded.
         yield extensions.waitForExtension('amp-ext', '0.1');
-        const extHolder = extensions.extensions_['amp-ext'];
+        const extHolder = extensions.extensions_['amp-ext:0.1'];
         expect(extHolder.docFactories).to.have.length(1);
 
         const shadowRoot = document.createDocumentFragment();

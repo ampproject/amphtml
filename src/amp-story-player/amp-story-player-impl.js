@@ -16,10 +16,10 @@
 
 import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
 import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
-import {Deferred} from '../utils/promise';
+import {Deferred} from '../core/data-structures/promise';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {PageScroller} from './page-scroller';
-import {VisibilityState} from '../visibility-state';
+import {VisibilityState} from '../core/constants/visibility-state';
 import {
   addParamsToUrl,
   getFragment,
@@ -32,16 +32,15 @@ import {
 } from '../url';
 import {applySandbox} from '../3p-frame';
 import {createCustomEvent} from '../event-helper';
-import {dict} from '../utils/object';
+import {dict} from '../core/types/object';
 import {isJsonScriptTag, tryFocus} from '../dom';
 // Source for this constant is css/amp-story-player-iframe.css
 import {cssText} from '../../build/amp-story-player-iframe.css';
 import {dev} from '../log';
-import {findIndex} from '../utils/array';
+import {findIndex, toArray} from '../core/types/array';
 import {getMode} from '../../src/mode';
 import {parseJson} from '../json';
 import {resetStyles, setStyle, setStyles} from '../style';
-import {toArray} from '../types';
 import {urls} from '../config';
 
 /** @enum {string} */
@@ -236,6 +235,9 @@ export class AmpStoryPlayer {
     /** @private {boolean} */
     this.autoplay_ = true;
 
+    /** @private {?string} */
+    this.attribution_ = null;
+
     return this.element_;
   }
 
@@ -244,8 +246,8 @@ export class AmpStoryPlayer {
    * @private
    */
   attachCallbacksToElement_() {
-    this.element_.buildCallback = this.buildCallback.bind(this);
-    this.element_.layoutCallback = this.layoutCallback.bind(this);
+    this.element_.buildPlayer = this.buildPlayer.bind(this);
+    this.element_.layoutPlayer = this.layoutPlayer.bind(this);
     this.element_.getElement = this.getElement.bind(this);
     this.element_.getStories = this.getStories.bind(this);
     this.element_.load = this.load.bind(this);
@@ -273,8 +275,8 @@ export class AmpStoryPlayer {
     if (!!this.element_.isBuilt_) {
       throw new Error(`[${TAG}] calling load() on an already loaded element.`);
     }
-    this.buildCallback();
-    this.layoutCallback();
+    this.buildPlayer();
+    this.layoutPlayer();
   }
 
   /**
@@ -365,7 +367,7 @@ export class AmpStoryPlayer {
   }
 
   /** @public */
-  buildCallback() {
+  buildPlayer() {
     if (!!this.element_.isBuilt_) {
       return;
     }
@@ -377,6 +379,7 @@ export class AmpStoryPlayer {
     this.readPlayerConfig_();
     this.maybeFetchMoreStories_(this.stories_.length - this.currentIdx_ - 1);
     this.initializeAutoplay_();
+    this.initializeAttribution_();
     this.initializePageScroll_();
     this.initializeCircularWrapping_();
     this.signalReady_();
@@ -595,6 +598,11 @@ export class AmpStoryPlayer {
             false
           );
 
+          messaging.sendRequest(
+            'onDocumentState',
+            dict({'state': STORY_MESSAGE_STATE_TYPE.MUTED_STATE})
+          );
+
           messaging.registerHandler('documentStateUpdate', (event, data) => {
             this.onDocumentStateUpdate_(
               /** @type {!DocumentStateTypeDef} */ (data),
@@ -682,7 +690,7 @@ export class AmpStoryPlayer {
   /**
    * @public
    */
-  layoutCallback() {
+  layoutPlayer() {
     if (!!this.element_.isLaidOut_) {
       return;
     }
@@ -1189,6 +1197,10 @@ export class AmpStoryPlayer {
       'cap': 'swipe',
     };
 
+    if (this.attribution_ === 'auto') {
+      playerFragmentParams['attribution'] = 'auto';
+    }
+
     const originalFragmentString = getFragment(href);
     const originalFragments = parseQueryString(originalFragmentString);
 
@@ -1367,6 +1379,9 @@ export class AmpStoryPlayer {
           messaging
         );
         break;
+      case STORY_MESSAGE_STATE_TYPE.MUTED_STATE:
+        this.onMutedStateUpdate_(/** @type {string} */ (data.value));
+        break;
       case AMP_STORY_PLAYER_EVENT:
         this.onPlayerEvent_(/** @type {string} */ (data.value));
         break;
@@ -1392,6 +1407,17 @@ export class AmpStoryPlayer {
         );
         break;
     }
+  }
+
+  /**
+   * Reacts to mute/unmute events coming from the story.
+   * @param {string} muted
+   * @private
+   */
+  onMutedStateUpdate_(muted) {
+    this.element_.dispatchEvent(
+      createCustomEvent(this.win_, 'amp-story-muted-state', {muted})
+    );
   }
 
   /**
@@ -1707,6 +1733,19 @@ export class AmpStoryPlayer {
 
     if (behavior && typeof behavior.autoplay === 'boolean') {
       this.autoplay_ = behavior.autoplay;
+    }
+  }
+
+  /** @private */
+  initializeAttribution_() {
+    if (!this.playerConfig_) {
+      return;
+    }
+
+    const {display} = this.playerConfig_;
+
+    if (display && display.attribution === 'auto') {
+      this.attribution_ = 'auto';
     }
   }
 

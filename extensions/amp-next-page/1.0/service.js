@@ -22,7 +22,7 @@ import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {VisibilityState} from '../../../src/visibility-state';
+import {VisibilityState} from '../../../src/core/constants/visibility-state';
 import {
   childElementByAttr,
   childElementsByTag,
@@ -33,8 +33,8 @@ import {
   scopedQuerySelector,
 } from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {findIndex} from '../../../src/utils/array';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {findIndex, toArray} from '../../../src/core/types/array';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
@@ -43,7 +43,7 @@ import {
   parseSchemaImage,
 } from '../../../src/mediasession-helper';
 import {setStyles, toggle} from '../../../src/style';
-import {toArray} from '../../../src/types';
+
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryParseJson} from '../../../src/json';
 import {validatePage, validateUrl} from './utils';
@@ -81,6 +81,9 @@ export class NextPageService {
      * @const {!../../../src/service/viewport/viewport-interface.ViewportInterface}
      */
     this.viewport_ = Services.viewportForDoc(ampdoc);
+
+    /** @private {!../../../src/service/viewer-interface.ViewerInterface} */
+    this.viewer_ = Services.viewerForDoc(ampdoc);
 
     /**
      * @private
@@ -198,12 +201,17 @@ export class NextPageService {
 
     // Create a reference to the host page
     this.hostPage_ = this.createHostPage();
+
+    // Set the current title page as the host page so we don't do replaceState and
+    // trigger `amp-next-page-scroll` event (in `setPageTitle` method) when
+    // next page is not even displayed (issue #33404).
+    this.currentTitlePage_ = this.hostPage_;
+
     this.toggleHiddenAndReplaceableElements(this.doc_);
     // Have the recommendation box be always visible
     insertAtStart(this.host_, this.recBox_);
 
     this.history_ = Services.historyForDoc(this.ampdoc_);
-    this.initializeHistory();
 
     this.navigation_ = Services.navigationForDoc(this.ampdoc_);
 
@@ -483,15 +491,6 @@ export class NextPageService {
   }
 
   /**
-   * Adds an initial entry in history that sub-pages can
-   * replace when they become visible
-   */
-  initializeHistory() {
-    const {title, url} = this.hostPage_;
-    this.history_.push(undefined /** opt_onPop */, {title, url});
-  }
-
-  /**
    * Creates the initial (host) page based on the window's metadata
    * @return {!HostPage}
    */
@@ -547,6 +546,20 @@ export class NextPageService {
   }
 
   /**
+   * Forward the allowlisted capabilities from the viewer
+   * to the multidoc's ampdocs (i.e. CID), so they know
+   * the viewer supports it for the multidoc.
+   * @return {?string}
+   */
+  getCapabilities_() {
+    const hasCidCapabilities = this.viewer_.hasCapability('cid');
+    if (hasCidCapabilities) {
+      return 'cid';
+    }
+    return null;
+  }
+
+  /**
    * Appends the given document to the host page and installs
    * a visibility observer to monitor it
    * @param {!Page} page
@@ -594,9 +607,10 @@ export class NextPageService {
       const amp = this.multidocManager_.attachShadowDoc(
         shadowRoot,
         content,
-        '',
+        page.url,
         {
           visibilityState: VisibilityState.PRERENDER,
+          cap: this.getCapabilities_(),
         }
       );
 

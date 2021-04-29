@@ -15,9 +15,9 @@
  */
 
 import {dev} from '../src/log';
-import {dict} from '../src/utils/object.js';
+import {dict} from '../src/core/types/object';
 import {getMode} from '../src/mode';
-import {once} from '../src/utils/function.js';
+import {once} from '../src/core/types/function.js';
 import {parseJson} from '../src/json';
 import {parseUrlDeprecated} from '../src/url';
 

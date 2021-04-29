@@ -16,7 +16,8 @@
 
 import {CountPagesAlgorithm} from './algorithm-count-pages';
 import {PredeterminedPositionAlgorithm} from './algorithm-predetermined';
-import {isExperimentOn} from '../../../src/experiments';
+import {StoryAdPlacements} from '../../../src/experiments/story-ad-placements';
+import {getExperimentBranch} from '../../../src/experiments';
 
 /**
  * Choose placement algorithm implementation.
@@ -26,9 +27,16 @@ import {isExperimentOn} from '../../../src/experiments';
  * @return {!StoryAdPlacementAlgorithm}
  */
 export function getPlacementAlgo(win, storeService, pageManager) {
-  // TODO(ccordry): Update to use experiment branching.
-  if (isExperimentOn(win, 'story-ad-placements')) {
-    return new PredeterminedPositionAlgorithm(storeService, pageManager);
+  const placementsExpBranch = getExperimentBranch(win, StoryAdPlacements.ID);
+  if (
+    placementsExpBranch &&
+    placementsExpBranch !== StoryAdPlacements.CONTROL
+  ) {
+    return new PredeterminedPositionAlgorithm(
+      storeService,
+      pageManager,
+      placementsExpBranch
+    );
   }
   return new CountPagesAlgorithm(storeService, pageManager);
 }

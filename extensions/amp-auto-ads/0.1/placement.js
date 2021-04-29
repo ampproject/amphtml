@@ -20,6 +20,7 @@ import {
   cloneLayoutMarginsChangeDef,
 } from '../../../src/layout-rect';
 import {Services} from '../../../src/services';
+import {addExperimentIdToElement} from '../../../ads/google/a4a/traffic-experiments';
 import {
   closestAncestorElementBySelector,
   createElementWithAttributes,
@@ -27,7 +28,12 @@ import {
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
+import {
+  getExperimentBranch,
+  isExperimentOn,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
 import {measurePageLayoutBox} from '../../../src/utils/page-layout-box';
 
 /** @const */
@@ -194,6 +200,32 @@ export class Placement {
    */
   placeAd(baseAttributes, sizing, adTracker, isResponsiveEnabled) {
     return this.getEstimatedPosition().then((yPosition) => {
+      // TODO(powerivq@) Remove this after finishing the experiment
+      const controlBranch = '31060868';
+      const expBranch = '31060869';
+      const holdbackExp = isExperimentOn(
+        this.ampdoc.win,
+        'auto-ads-no-insertion-above'
+      );
+      if (holdbackExp) {
+        const expInfoList = /** @type {!Array<!../../../experiments.ExperimentInfo>} */ ([
+          {
+            experimentId: 'auto-ads-no-insertion-above',
+            isTrafficEligible: () => true,
+            branches: [controlBranch, expBranch],
+          },
+        ]);
+        randomlySelectUnsetExperiments(this.ampdoc.win, expInfoList);
+      }
+      if (
+        (!holdbackExp ||
+          getExperimentBranch(this.ampdoc.win, 'auto-ads-no-insertion-above') ==
+            expBranch) &&
+        this.ampdoc.win./*OK*/ scrollY > yPosition
+      ) {
+        this.state_ = PlacementState.UNUSED;
+        return this.state_;
+      }
       return adTracker.isTooNearAnAd(yPosition).then((tooNear) => {
         if (tooNear) {
           this.state_ = PlacementState.TOO_NEAR_EXISTING_AD;
@@ -206,6 +238,12 @@ export class Placement {
         this.adElement_ = shouldUseFullWidthResponsive
           ? this.createFullWidthResponsiveAdElement_(baseAttributes)
           : this.createAdElement_(baseAttributes, sizing.width);
+        if (holdbackExp) {
+          addExperimentIdToElement(
+            getExperimentBranch(this.ampdoc.win, 'auto-ads-no-insertion-above'),
+            this.getAdElement()
+          );
+        }
 
         this.injector_(this.anchorElement_, this.getAdElement());
 

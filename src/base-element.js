@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {ActionTrust, DEFAULT_ACTION} from './action-constants';
+import {ActionTrust, DEFAULT_ACTION} from './core/constants/action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
 import {devAssert, user, userAssert} from './log';
 import {dispatchCustomEvent} from './dom';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
-import {isArray, toWin} from './types';
+import {isArray} from './core/types';
+import {toWin} from './types';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting
@@ -108,8 +109,8 @@ export class BaseElement {
    * Whether this element supports V1 protocol, which includes:
    * 1. Layout/unlayout are not managed by the runtime, but instead are
    *    implemented by the element as needed.
-   * 2. The element can defer its build until later. See `deferredBuild`.
-   * 3. The construction of the element is delayed until build.
+   * 2. The element can defer its build until later. See `deferredMount`.
+   * 3. The construction of the element is delayed until mount.
    *
    * Notice, in this mode `layoutCallback`, `pauseCallback`, `onLayoutMeasure`,
    * `getLayoutSize`, and other methods are deprecated. The element must
@@ -133,7 +134,7 @@ export class BaseElement {
    * @return {boolean}
    * @nocollapse
    */
-  static deferredBuild(unusedElement) {
+  static deferredMount(unusedElement) {
     return true;
   }
 

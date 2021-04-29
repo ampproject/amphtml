@@ -263,8 +263,8 @@ export class Srcset {
 /**
  * Sorts by width
  *
- * @param {number} s1
- * @param {number} s2
+ * @param {!SrcsetSourceDef} s1
+ * @param {!SrcsetSourceDef} s2
  * @return {number}
  */
 function sortByWidth(s1, s2) {
@@ -275,8 +275,8 @@ function sortByWidth(s1, s2) {
 /**
  * Sorts by dpr
  *
- * @param {!Object} s1
- * @param {!Object} s2
+ * @param {!SrcsetSourceDef} s1
+ * @param {!SrcsetSourceDef} s2
  * @return {number}
  */
 function sortByDpr(s1, s2) {

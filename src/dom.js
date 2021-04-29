@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-import {Deferred} from './utils/promise';
-import {
-  assertIsName,
-  isScopeSelectorSupported,
-  prependSelectorsWith,
-} from './css';
+import {Deferred} from './core/data-structures/promise';
 import {dev, devAssert} from './log';
-import {dict} from './utils/object';
-import {includes} from './string';
+import {dict} from './core/types/object';
+import {includes} from './core/types/string';
+import {isScopeSelectorSupported, prependSelectorsWith} from './core/dom/css';
 import {toWin} from './types';
 
 const HTML_ESCAPE_CHARS = {
@@ -51,6 +47,16 @@ export let CustomEventOptionsDef;
 
 /** @const {!CustomEventOptionsDef} */
 const DEFAULT_CUSTOM_EVENT_OPTIONS = {bubbles: true, cancelable: true};
+
+/**
+ * Asserts that name is just an alphanumeric word, and does not contain
+ * advanced CSS selector features like attributes, psuedo-classes, class names,
+ * nor ids.
+ * @param {string} name
+ */
+function assertIsName(name) {
+  devAssert(/^[\w-]+$/.test(name));
+}
 
 /**
  * Waits until the child element is constructed. Once the child is found, the
@@ -778,7 +784,7 @@ export function isAmpElement(element) {
  * Return a promise that resolve when an AMP element upgrade from HTMLElement
  * to CustomElement
  * @param {!Element} element
- * @return {!Promise<!Element>}
+ * @return {!Promise<!AmpElement>}
  */
 export function whenUpgradedToCustomElement(element) {
   devAssert(isAmpElement(element), 'element is not AmpElement');

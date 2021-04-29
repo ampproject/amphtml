@@ -15,8 +15,10 @@
  */
 
 import * as Preact from './index';
-import {CanPlay, CanRender, LoadingProp} from '../core/contextprops';
+import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
+import {Loading} from '../core/loading-instructions';
 import {pureDevAssert as devAssert} from '../core/assert';
+import {isElement} from '../core/types';
 import {
   loadAll,
   pauseAll,
@@ -26,6 +28,8 @@ import {rediscoverChildren, removeProp, setProp} from '../context';
 import {useAmpContext} from './context';
 import {useEffect, useLayoutEffect, useRef} from './index';
 
+const EMPTY = {};
+
 /**
  * @param {!Element} element
  * @param {string} name
@@ -34,7 +38,7 @@ import {useEffect, useLayoutEffect, useRef} from './index';
  */
 export function createSlot(element, name, props) {
   element.setAttribute('slot', name);
-  return <Slot {...(props || {})} name={name} />;
+  return <Slot {...(props || EMPTY)} name={name} />;
 }
 
 /**
@@ -46,7 +50,7 @@ export function createSlot(element, name, props) {
 export function Slot(props) {
   const ref = useRef(/** @type {?Element} */ (null));
 
-  useSlotContext(ref);
+  useSlotContext(ref, props);
 
   useEffect(() => {
     // Post-rendering cleanup, if any.
@@ -60,14 +64,16 @@ export function Slot(props) {
 
 /**
  * @param {{current:?}} ref
+ * @param {!JsonObject=} opt_props
  */
-export function useSlotContext(ref) {
+export function useSlotContext(ref, opt_props) {
+  const {'loading': loading} = opt_props || EMPTY;
   const context = useAmpContext();
 
   // Context changes.
   useLayoutEffect(() => {
     const slot = ref.current;
-    devAssert(slot?.nodeType == 1, 'Element expected');
+    devAssert(isElement(slot), 'Element expected');
 
     setProp(slot, CanRender, Slot, context.renderable);
     setProp(slot, CanPlay, Slot, context.playable);
@@ -90,21 +96,25 @@ export function useSlotContext(ref) {
     };
   }, [ref, context]);
 
-  // Unmount and unmount. Keep it at the bottom because it's much better to
+  // Mount and unmount. Keep it at the bottom because it's much better to
   // execute `pause` before `unmount` in this case.
   // This has to be a layout-effect to capture the old `Slot.assignedElements`
   // before the browser undistributes them.
   useLayoutEffect(() => {
     const slot = ref.current;
-    devAssert(slot?.nodeType == 1, 'Element expected');
+    devAssert(isElement(slot), 'Element expected');
 
-    // TODO(#31915): switch to `mount`.
-    execute(slot, loadAll);
+    // Mount children, unless lazy loading requested. If so the element should
+    // use `BaseElement.setAsContainer`.
+    if (loading != Loading.LAZY) {
+      // TODO(#31915): switch to `mount`.
+      execute(slot, loadAll);
+    }
 
     return () => {
       execute(slot, unmountAll);
     };
-  }, [ref]);
+  }, [ref, loading]);
 }
 
 /**

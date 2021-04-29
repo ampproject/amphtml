@@ -75,8 +75,8 @@ describes.sandboxed('Extensions', {}, () => {
       expect(factoryExecuted).to.be.true;
       expect(extensions.currentExtensionId_).to.be.null;
 
-      const holder = extensions.extensions_['amp-ext'];
-      expect(extensions.getExtensionHolder_('amp-ext')).to.equal(holder);
+      const holder = extensions.extensions_['amp-ext:0.1'];
+      expect(extensions.getExtensionHolder_('amp-ext', '0.1')).to.equal(holder);
       expect(currentHolder).to.equal(holder);
       expect(holder.loaded).to.be.true;
       expect(holder.error).to.be.undefined;
@@ -97,13 +97,15 @@ describes.sandboxed('Extensions', {}, () => {
       const factoryStub = env.sandbox.stub();
       extensions.registerExtension('amp-ext', '0.1', true, factoryStub, amp);
       expect(factoryStub).to.be.calledOnce;
-      const holder1 = extensions.extensions_['amp-ext'];
-      expect(extensions.getExtensionHolder_('amp-ext')).to.equal(holder1);
+      const holder1 = extensions.extensions_['amp-ext:0.1'];
+      expect(extensions.getExtensionHolder_('amp-ext', '0.1')).to.equal(
+        holder1
+      );
 
       // Try register again.
       extensions.registerExtension('amp-ext', '0.1', true, factoryStub, amp);
       expect(factoryStub).to.be.calledOnce; // no change.
-      const holder2 = extensions.extensions_['amp-ext'];
+      const holder2 = extensions.extensions_['amp-ext:0.1'];
       expect(holder2).to.equal(holder1);
     });
 
@@ -112,7 +114,7 @@ describes.sandboxed('Extensions', {}, () => {
       extensions.registerExtension('amp-ext', '0.1', true, () => {}, {});
       expect(extensions.currentExtensionId_).to.be.null;
 
-      const holder = extensions.extensions_['amp-ext'];
+      const holder = extensions.extensions_['amp-ext:0.1'];
       expect(holder.loaded).to.be.true;
       expect(holder.error).to.be.undefined;
       expect(holder.resolve).to.exist;
@@ -139,8 +141,8 @@ describes.sandboxed('Extensions', {}, () => {
       }).to.throw(/intentional/);
       expect(extensions.currentExtensionId_).to.be.null;
 
-      const holder = extensions.extensions_['amp-ext'];
-      expect(extensions.getExtensionHolder_('amp-ext')).to.equal(holder);
+      const holder = extensions.extensions_['amp-ext:0.1'];
+      expect(extensions.getExtensionHolder_('amp-ext', '0.1')).to.equal(holder);
       expect(holder.error).to.exist;
       expect(holder.error.message).to.equal('intentional');
       expect(holder.loaded).to.be.undefined;
@@ -174,7 +176,7 @@ describes.sandboxed('Extensions', {}, () => {
       }).to.throw(/intentional/);
       expect(extensions.currentExtensionId_).to.be.null;
 
-      const holder = extensions.extensions_['amp-ext'];
+      const holder = extensions.extensions_['amp-ext:0.1'];
       expect(holder.error).to.exist;
       expect(holder.error.message).to.equal('intentional');
       expect(holder.loaded).to.be.undefined;
@@ -193,20 +195,223 @@ describes.sandboxed('Extensions', {}, () => {
       );
     });
 
-    it('should fail on timeout', () => {
+    it('should redirect "latest" holder when exists', async () => {
+      const iniPromise = extensions.waitForExtension('amp-ext', 'latest');
+      const iniHolder = extensions.getExtensionHolder_('amp-ext', 'latest');
+      expect(iniHolder.latest).to.be.true;
+
+      const amp = {};
+      let factoryExecuted = false;
+      let currentHolder;
+      extensions.registerExtension(
+        'amp-ext',
+        '0.2',
+        true,
+        (arg) => {
+          expect(factoryExecuted).to.be.false;
+          expect(arg).to.equal(amp);
+          expect(extensions.currentExtensionId_).to.equal('amp-ext');
+          currentHolder = extensions.getCurrentExtensionHolder_();
+          factoryExecuted = true;
+        },
+        amp
+      );
+      expect(factoryExecuted).to.be.true;
+      expect(extensions.currentExtensionId_).to.be.null;
+
+      const versionHolder = extensions.getExtensionHolder_('amp-ext', '0.2');
+      const latestHolder = extensions.getExtensionHolder_('amp-ext', 'latest');
+      expect(iniHolder).to.not.equal(versionHolder);
+      expect(latestHolder).to.equal(versionHolder);
+      expect(currentHolder).to.equal(versionHolder);
+      expect(versionHolder.latest).to.be.true;
+
+      // "auto" is inherited from the "latest" holder.
+      expect(versionHolder.auto).to.be.false;
+
+      expect(versionHolder.loaded).to.be.true;
+      expect(versionHolder.error).to.be.undefined;
+
+      // However, the promise is created lazily.
+      const extension = await extensions.waitForExtension('amp-ext', '0.2');
+      expect(extension).to.exist;
+      expect(extension.elements).to.exist;
+
+      await extensions.waitForExtension('amp-ext', 'latest');
+
+      // Initial "latest" promise has been resolved as well.
+      await iniPromise;
+    });
+
+    it('should create "latest" when does not exists', async () => {
+      const amp = {};
+      let factoryExecuted = false;
+      let currentHolder;
+      extensions.registerExtension(
+        'amp-ext',
+        '0.2',
+        true,
+        (arg) => {
+          expect(factoryExecuted).to.be.false;
+          expect(arg).to.equal(amp);
+          expect(extensions.currentExtensionId_).to.equal('amp-ext');
+          currentHolder = extensions.getCurrentExtensionHolder_();
+          factoryExecuted = true;
+        },
+        amp
+      );
+      expect(factoryExecuted).to.be.true;
+      expect(extensions.currentExtensionId_).to.be.null;
+
+      const versionHolder = extensions.getExtensionHolder_('amp-ext', '0.2');
+      const latestHolder = extensions.getExtensionHolder_('amp-ext', 'latest');
+      expect(latestHolder).to.equal(versionHolder);
+      expect(currentHolder).to.equal(versionHolder);
+      expect(versionHolder.latest).to.be.true;
+
+      // "auto" is defaulted to true.
+      expect(versionHolder.auto).to.be.true;
+
+      expect(versionHolder.loaded).to.be.true;
+      expect(versionHolder.error).to.be.undefined;
+
+      // However, the promise is created lazily.
+      const extension = await extensions.waitForExtension('amp-ext', '0.2');
+      expect(extension).to.exist;
+      expect(extension.elements).to.exist;
+
+      const latest = await extensions.waitForExtension('amp-ext', 'latest');
+      expect(latest).to.equal(extension);
+    });
+
+    it('should NOT create "latest" holder when not latest version', async () => {
+      const amp = {};
+      let factoryExecuted = false;
+      let currentHolder;
+      extensions.registerExtension(
+        'amp-ext',
+        '0.2',
+        false,
+        (arg) => {
+          expect(factoryExecuted).to.be.false;
+          expect(arg).to.equal(amp);
+          expect(extensions.currentExtensionId_).to.equal('amp-ext');
+          currentHolder = extensions.getCurrentExtensionHolder_();
+          factoryExecuted = true;
+        },
+        amp
+      );
+      expect(factoryExecuted).to.be.true;
+      expect(extensions.currentExtensionId_).to.be.null;
+
+      const versionHolder = extensions.getExtensionHolder_('amp-ext', '0.2');
+      expect(currentHolder).to.equal(versionHolder);
+      expect(versionHolder.latest).to.be.false;
+
+      // "auto" is defaulted to true.
+      expect(versionHolder.auto).to.be.true;
+
+      expect(versionHolder.loaded).to.be.true;
+      expect(versionHolder.error).to.be.undefined;
+
+      // However, the promise is created lazily.
+      const extension = await extensions.waitForExtension('amp-ext', '0.2');
+      expect(extension).to.exist;
+      expect(extension.elements).to.exist;
+
+      // "latest" was never created.
+      expect(extensions.extensions_['amp-ext:latest']).to.not.exist;
+    });
+
+    it('should NOT redirect "latest" holder when not latest version', async () => {
+      const iniHolder = extensions.getExtensionHolder_('amp-ext', 'latest');
+      expect(iniHolder.latest).to.be.true;
+
+      const amp = {};
+      let factoryExecuted = false;
+      let currentHolder;
+      extensions.registerExtension(
+        'amp-ext',
+        '0.2',
+        false,
+        (arg) => {
+          expect(factoryExecuted).to.be.false;
+          expect(arg).to.equal(amp);
+          expect(extensions.currentExtensionId_).to.equal('amp-ext');
+          currentHolder = extensions.getCurrentExtensionHolder_();
+          factoryExecuted = true;
+        },
+        amp
+      );
+      expect(factoryExecuted).to.be.true;
+      expect(extensions.currentExtensionId_).to.be.null;
+
+      const versionHolder = extensions.getExtensionHolder_('amp-ext', '0.2');
+      expect(currentHolder).to.equal(versionHolder);
+      expect(versionHolder.latest).to.be.false;
+
+      expect(versionHolder.loaded).to.be.true;
+      expect(versionHolder.error).to.be.undefined;
+
+      // "auto" is defaulted to true.
+      expect(versionHolder.auto).to.be.true;
+
+      // However, the promise is created lazily.
+      const extension = await extensions.waitForExtension('amp-ext', '0.2');
+      expect(extension).to.exist;
+      expect(extension.elements).to.exist;
+
+      // "latest" was never created.
+      expect(extensions.extensions_['amp-ext:latest']).to.equal(iniHolder);
+      expect(iniHolder).to.not.equal(versionHolder);
+      expect(iniHolder.loaded).to.be.undefined;
+    });
+
+    it('should install a doc factory from a "latest" version', async () => {
+      const shadowRoot = document.createDocumentFragment();
+      const ampdoc = new AmpDocShadow(win, 'https://a.org/', shadowRoot);
+      const promise = extensions.installExtensionInDoc(
+        ampdoc,
+        'amp-ext',
+        'latest'
+      );
+
+      const docFactoryStub = env.sandbox.stub();
+
+      const amp = {};
+      let factoryExecuted = false;
+      extensions.registerExtension(
+        'amp-ext',
+        '0.2',
+        true,
+        () => {
+          extensions.addDocFactory(docFactoryStub);
+          factoryExecuted = true;
+        },
+        amp
+      );
+      expect(factoryExecuted).to.be.true;
+
+      await promise;
+
+      expect(docFactoryStub).to.be.calledOnce.calledWith(ampdoc);
+    });
+
+    it('should log on timeout', async () => {
+      expectAsyncConsoleError(/Waited over/);
+
       timeoutCallback = null;
-      const promise = extensions.waitForExtension('amp-ext', '0.1');
+      let promiseCompleted = false;
+      extensions.waitForExtension('amp-ext', '0.1').then(
+        () => (promiseCompleted = true),
+        () => (promiseCompleted = true)
+      );
+
       expect(timeoutCallback).to.be.a('function');
       timeoutCallback();
+      await new Promise(setTimeout);
 
-      return promise.then(
-        () => {
-          throw new Error('must have been rejected');
-        },
-        (reason) => {
-          expect(reason.message).to.match(/^Render timeout/);
-        }
-      );
+      expect(promiseCompleted).to.be.false; // Still waiting for extension to load.
     });
 
     it('should add element in registration', () => {
@@ -230,8 +435,8 @@ describes.sandboxed('Extensions', {}, () => {
     it('should add element out of registration', () => {
       const ctor = function () {};
       allowConsoleError(() => extensions.addElement('e1', ctor));
-      expect(Object.keys(extensions.extensions_)).to.deep.equal(['_UNKNOWN_']);
-      const unknown = extensions.extensions_['_UNKNOWN_'];
+      expect(Object.keys(extensions.extensions_)).to.deep.equal(['_UNKNOWN_:']);
+      const unknown = extensions.extensions_['_UNKNOWN_:'];
       expect(unknown.extension.elements['e1']).to.exist;
       expect(unknown.extension.elements['e1'].implementationClass).to.equal(
         ctor
@@ -255,7 +460,7 @@ describes.sandboxed('Extensions', {}, () => {
       );
       await extensions.waitForExtension('amp-ext', '0.1');
 
-      const holder = extensions.getExtensionHolder_('amp-ext');
+      const holder = extensions.getExtensionHolder_('amp-ext', '0.1');
       expect(holder.docFactories).to.have.length(1);
 
       const implClass = await getTemplateClassForTesting(templates, 'e1');
@@ -268,7 +473,7 @@ describes.sandboxed('Extensions', {}, () => {
 
       const ctor = function () {};
       allowConsoleError(() => extensions.addTemplate('e1', ctor));
-      expect(Object.keys(extensions.extensions_)).to.deep.equal(['_UNKNOWN_']);
+      expect(Object.keys(extensions.extensions_)).to.deep.equal(['_UNKNOWN_:']);
     });
 
     it('should install template in shadow doc', async () => {
@@ -280,7 +485,7 @@ describes.sandboxed('Extensions', {}, () => {
       const ctor = function () {};
       extensions.registerExtension(
         'amp-test',
-        '0.1',
+        '0.2',
         true,
         () => {
           extensions.addTemplate('amp-test', ctor);
@@ -292,10 +497,14 @@ describes.sandboxed('Extensions', {}, () => {
       const shadowRoot = document.createDocumentFragment();
       const ampdoc = new AmpDocShadow(win, 'https://a.org/', shadowRoot);
       installTemplatesServiceForDoc(ampdoc);
-      await extensions.installExtensionsInDoc(ampdoc, ['amp-test']);
+      const promise = extensions.installExtensionsInDoc(ampdoc, [
+        {extensionId: 'amp-test', extensionVersion: '0.2'},
+      ]);
 
-      // Extension is now declared.
-      expect(ampdoc.declaresExtension('amp-test')).to.be.true;
+      // Extension is immediately declared.
+      expect(ampdoc.declaresExtension('amp-test', '0.2')).to.be.true;
+
+      await promise;
 
       const templates = Services.templatesForDoc(ampdoc);
       const implClass = await getTemplateClassForTesting(templates, 'amp-test');
@@ -428,7 +637,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(ampdoc.declaresExtension('amp-test')).to.be.true;
     });
 
-    it('should install elements in shadow doc', () => {
+    it('should install elements in shadow doc', async () => {
       env.sandbox
         .stub(Services.ampdocServiceFor(win), 'isSingleDoc')
         .callsFake(() => false);
@@ -444,7 +653,7 @@ describes.sandboxed('Extensions', {}, () => {
       // Resolve the promise.
       extensions.registerExtension(
         'amp-test',
-        '0.1',
+        '0.2',
         true,
         () => {
           extensions.addElement('amp-test', AmpTest);
@@ -465,16 +674,18 @@ describes.sandboxed('Extensions', {}, () => {
       const shadowRoot = document.createDocumentFragment();
       installRuntimeStylesTo(shadowRoot);
       const ampdoc = new AmpDocShadow(win, 'https://a.org/', shadowRoot);
-      const promise = extensions.installExtensionsInDoc(ampdoc, ['amp-test']);
-      return promise.then(() => {
-        // Resolved later.
-        expect(win.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(AmpTest);
-        expect(win.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.equal(
-          AmpTestSub
-        );
-        // Extension is now declared.
-        expect(ampdoc.declaresExtension('amp-test')).to.be.true;
-      });
+      const promise = extensions.installExtensionsInDoc(ampdoc, [
+        {extensionId: 'amp-test', extensionVersion: '0.2'},
+      ]);
+
+      // Extension is immediately declared.
+      expect(ampdoc.declaresExtension('amp-test', '0.2')).to.be.true;
+
+      await promise;
+
+      // Resolved later.
+      expect(win.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(AmpTest);
+      expect(win.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.equal(AmpTestSub);
     });
 
     it('should add doc factory in registration', () => {
@@ -489,7 +700,7 @@ describes.sandboxed('Extensions', {}, () => {
         {}
       );
 
-      const holder = extensions.getExtensionHolder_('amp-ext');
+      const holder = extensions.getExtensionHolder_('amp-ext', '0.1');
       expect(holder.docFactories).to.exist;
       expect(holder.docFactories).to.have.length(1);
       expect(holder.docFactories[0]).to.equal(factory);
@@ -499,14 +710,14 @@ describes.sandboxed('Extensions', {}, () => {
       const factory = function () {};
       allowConsoleError(() => extensions.addDocFactory(factory));
 
-      const holder = extensions.getExtensionHolder_('_UNKNOWN_');
+      const holder = extensions.getExtensionHolder_('_UNKNOWN_', '');
       expect(holder.docFactories).to.exist;
       expect(holder.docFactories).to.have.length(1);
       expect(holder.docFactories[0]).to.equal(factory);
     });
 
     // TODO(#16916): Make this test work with synchronous throws.
-    it.skip('should install all doc factories to shadow doc', () => {
+    it.skip('should install all doc factories to shadow doc', async () => {
       env.sandbox
         .stub(Services.ampdocServiceFor(win), 'isSingleDoc')
         .callsFake(() => false);
@@ -517,7 +728,7 @@ describes.sandboxed('Extensions', {}, () => {
       const factory3 = env.sandbox.spy();
       extensions.registerExtension(
         'amp-ext',
-        '0.1',
+        '0.2',
         true,
         () => {
           extensions.addDocFactory(factory1);
@@ -529,14 +740,16 @@ describes.sandboxed('Extensions', {}, () => {
 
       const shadowRoot = document.createDocumentFragment();
       const ampdoc = new AmpDocShadow(win, 'https://a.org/', shadowRoot);
-      const promise = extensions.installExtensionsInDoc(ampdoc, ['amp-ext']);
-      return promise.then(() => {
-        expect(factory1).to.be.calledOnce;
-        expect(factory1.args[0][0]).to.equal(ampdoc);
-        // Should survive errors in one factory.
-        expect(factory3).to.be.calledOnce;
-        expect(factory3.args[0][0]).to.equal(ampdoc);
-      });
+      await extensions.installExtensionsInDoc(ampdoc, [
+        {extensionId: 'amp-ext', extensionVersion: '0.2'},
+      ]);
+
+      expect(factory1).to.be.calledOnce;
+      expect(factory1.args[0][0]).to.equal(ampdoc);
+
+      // Should survive errors in one factory.
+      expect(factory3).to.be.calledOnce;
+      expect(factory3.args[0][0]).to.equal(ampdoc);
     });
 
     it('should add service factory in registration', () => {
@@ -551,7 +764,7 @@ describes.sandboxed('Extensions', {}, () => {
         {}
       );
 
-      const holder = extensions.getExtensionHolder_('amp-ext');
+      const holder = extensions.getExtensionHolder_('amp-ext', '0.1');
       expect(holder.extension.services).to.exist;
       expect(holder.extension.services).to.have.length(1);
       expect(holder.extension.services[0]).to.deep.equal({
@@ -564,7 +777,7 @@ describes.sandboxed('Extensions', {}, () => {
       const factory = function () {};
       allowConsoleError(() => extensions.addService('service1', factory));
 
-      const holder = extensions.getExtensionHolder_('_UNKNOWN_');
+      const holder = extensions.getExtensionHolder_('_UNKNOWN_', '');
       expect(holder.extension.services).to.exist;
       expect(holder.extension.services).to.have.length(1);
       expect(holder.extension.services[0]).to.deep.equal({
@@ -669,7 +882,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     // TODO(#16916): Make this test work with synchronous throws.
-    it.skip('should install all services to doc', () => {
+    it.skip('should install all services to doc', async () => {
       env.sandbox
         .stub(Services.ampdocServiceFor(win), 'isSingleDoc')
         .callsFake(() => false);
@@ -682,7 +895,7 @@ describes.sandboxed('Extensions', {}, () => {
       const factory3 = env.sandbox.spy();
       extensions.registerExtension(
         'amp-ext',
-        '0.1',
+        '0.2',
         true,
         () => {
           extensions.addService('service1', factory1);
@@ -695,15 +908,17 @@ describes.sandboxed('Extensions', {}, () => {
       // Install into shadow doc.
       const shadowRoot = document.createDocumentFragment();
       const ampdoc = new AmpDocShadow(win, 'https://a.org/', shadowRoot);
-      const promise = extensions.installExtensionsInDoc(ampdoc, ['amp-ext']);
-      return promise.then(() => {
-        expect(factory1).to.be.calledOnce;
-        expect(factory1.args[0][0]).to.equal(ampdoc);
-        // Should survive errors in one factory.
-        expect(factory2Spy).to.be.calledOnce;
-        expect(factory3).to.be.calledOnce;
-        expect(factory3.args[0][0]).to.equal(ampdoc);
-      });
+      await extensions.installExtensionsInDoc(ampdoc, [
+        {extensionId: 'amp-ext', extensionVersion: '0.2'},
+      ]);
+
+      expect(factory1).to.be.calledOnce;
+      expect(factory1.args[0][0]).to.equal(ampdoc);
+
+      // Should survive errors in one factory.
+      expect(factory2Spy).to.be.calledOnce;
+      expect(factory3).to.be.calledOnce;
+      expect(factory3.args[0][0]).to.equal(ampdoc);
     });
 
     it('should load extension class via load extension', () => {
@@ -1021,7 +1236,7 @@ describes.sandboxed('Extensions', {}, () => {
         expect(
           doc.head.querySelectorAll('[custom-element="amp-test"]')
         ).to.have.length(0);
-        expect(extensions.extensions_['amp-test']).to.be.undefined;
+        expect(extensions.extensions_['amp-test:0.1']).to.be.undefined;
         extensions.preloadExtension('amp-test');
         expect(
           doc.head.querySelectorAll('[custom-element="amp-test"]')
@@ -1031,7 +1246,7 @@ describes.sandboxed('Extensions', {}, () => {
             .querySelector('[custom-element="amp-test"]')
             .getAttribute('src')
         ).to.contain('-0.1');
-        expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+        expect(extensions.extensions_['amp-test:0.1'].scriptPresent).to.be.true;
         expect(win.customElements.elements['amp-test']).to.be.undefined;
       });
 
@@ -1039,7 +1254,7 @@ describes.sandboxed('Extensions', {}, () => {
         expect(
           doc.head.querySelectorAll('[custom-element="amp-test"]')
         ).to.have.length(0);
-        expect(extensions.extensions_['amp-test']).to.be.undefined;
+        expect(extensions.extensions_['amp-test:0.2']).to.be.undefined;
         extensions.preloadExtension('amp-test', '0.2');
         expect(
           doc.head.querySelectorAll('[custom-element="amp-test"]')
@@ -1049,7 +1264,7 @@ describes.sandboxed('Extensions', {}, () => {
             .querySelector('[custom-element="amp-test"]')
             .getAttribute('src')
         ).to.contain('-0.2');
-        expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+        expect(extensions.extensions_['amp-test:0.2'].scriptPresent).to.be.true;
         expect(win.customElements.elements['amp-test']).to.be.undefined;
       });
 
@@ -1057,12 +1272,13 @@ describes.sandboxed('Extensions', {}, () => {
         expect(
           doc.head.querySelectorAll('[custom-template="amp-mustache"]')
         ).to.have.length(0);
-        expect(extensions.extensions_['amp-mustache']).to.be.undefined;
+        expect(extensions.extensions_['amp-mustache:0.1']).to.be.undefined;
         extensions.preloadExtension('amp-mustache');
         expect(
           doc.head.querySelectorAll('[custom-template="amp-mustache"]')
         ).to.have.length(1);
-        expect(extensions.extensions_['amp-mustache'].scriptPresent).to.be.true;
+        expect(extensions.extensions_['amp-mustache:0.1'].scriptPresent).to.be
+          .true;
         expect(win.customElements.elements['amp-mustache']).to.be.undefined;
       });
 
@@ -1084,7 +1300,7 @@ describes.sandboxed('Extensions', {}, () => {
         expect(
           doc.head.querySelectorAll('[custom-element="amp-test"]')
         ).to.have.length(0);
-        expect(extensions.extensions_['amp-test']).to.be.undefined;
+        expect(extensions.extensions_['amp-test:1.0']).to.be.undefined;
         extensions.preloadExtension('amp-test', '1.0');
         expect(
           doc.head.querySelectorAll('[custom-element="amp-test"][src*="0.1"]')
@@ -1092,7 +1308,7 @@ describes.sandboxed('Extensions', {}, () => {
         expect(
           doc.head.querySelectorAll('[custom-element="amp-test"][src*="1.0"]')
         ).to.have.length(1);
-        expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+        expect(extensions.extensions_['amp-test:1.0'].scriptPresent).to.be.true;
         expect(win.customElements.elements['amp-test']).to.be.undefined;
       });
 
@@ -1114,13 +1330,13 @@ describes.sandboxed('Extensions', {}, () => {
         expect(
           doc.head.querySelectorAll('[custom-element="amp-test"]')
         ).to.have.length(0);
-        expect(extensions.extensions_['amp-test']).to.be.undefined;
+        expect(extensions.extensions_['amp-test:0.1']).to.be.undefined;
 
         extensions.preloadExtension('amp-test');
         expect(
           doc.head.querySelectorAll('[custom-element="amp-test"]')
         ).to.have.length(1);
-        expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+        expect(extensions.extensions_['amp-test:0.1'].scriptPresent).to.be.true;
 
         extensions.preloadExtension('amp-test');
         expect(
@@ -1132,7 +1348,7 @@ describes.sandboxed('Extensions', {}, () => {
         expect(
           doc.head.querySelectorAll('[custom-element="amp-test"]')
         ).to.have.length(0);
-        expect(extensions.extensions_['amp-test']).to.be.undefined;
+        expect(extensions.extensions_['amp-test:0.1']).to.be.undefined;
 
         extensions.preloadExtension('amp-test');
         expect(
@@ -1143,7 +1359,7 @@ describes.sandboxed('Extensions', {}, () => {
             .querySelector('[custom-element="amp-test"]')
             .getAttribute('src')
         ).to.contain('-0.1');
-        expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+        expect(extensions.extensions_['amp-test:0.1'].scriptPresent).to.be.true;
 
         extensions.preloadExtension('amp-test', '0.1');
         expect(
@@ -1164,7 +1380,7 @@ describes.sandboxed('Extensions', {}, () => {
         expect(
           doc.head.querySelectorAll('[custom-element="amp-test"]')
         ).to.have.length(1);
-        expect(extensions.extensions_['amp-test']).to.be.undefined;
+        expect(extensions.extensions_['amp-test:0.1']).to.be.undefined;
 
         extensions.preloadExtension('amp-test');
         expect(
@@ -1177,7 +1393,7 @@ describes.sandboxed('Extensions', {}, () => {
               '[i-amphtml-inserted]'
           )
         ).to.have.length(1);
-        expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+        expect(extensions.extensions_['amp-test:0.1'].scriptPresent).to.be.true;
         expect(win.customElements.elements['amp-test']).to.not.exist;
         expect(win.__AMP_EXTENDED_ELEMENTS['amp-test']).to.be.undefined;
       });
@@ -1206,13 +1422,13 @@ describes.sandboxed('Extensions', {}, () => {
         expect(
           doc.head.querySelectorAll('[custom-element="amp-ad"]')
         ).to.have.length(1);
-        expect(extensions.extensions_['amp-ad'].scriptPresent).to.be.true;
+        expect(extensions.extensions_['amp-ad:0.1'].scriptPresent).to.be.true;
 
         // The amp-embed module has never been created.
         expect(
           doc.head.querySelectorAll('[custom-element="amp-embed"]')
         ).to.have.length(0);
-        expect(extensions.extensions_['amp-embed']).to.be.undefined;
+        expect(extensions.extensions_['amp-embed:0.1']).to.be.undefined;
       });
     }
   );
@@ -1301,7 +1517,7 @@ describes.sandboxed('Extensions', {}, () => {
         expect(
           doc.head.querySelectorAll('[custom-element="amp-test"]')
         ).to.have.length(0);
-        expect(extensions.extensions_['amp-test']).to.be.undefined;
+        expect(extensions.extensions_['amp-test:0.1']).to.be.undefined;
         extensions.installExtensionForDoc(ampdoc, 'amp-test');
         expect(loadSpy).to.be.calledOnce;
         expect(loadSpy).to.be.calledWithExactly('amp-test', '0.1');
@@ -1313,7 +1529,7 @@ describes.sandboxed('Extensions', {}, () => {
             .querySelector('[custom-element="amp-test"]')
             .getAttribute('src')
         ).to.contain('-0.1');
-        expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+        expect(extensions.extensions_['amp-test:0.1'].scriptPresent).to.be.true;
         expect(win.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
       });
 
@@ -1322,7 +1538,7 @@ describes.sandboxed('Extensions', {}, () => {
         expect(
           doc.head.querySelectorAll('[custom-element="amp-test"]')
         ).to.have.length(0);
-        expect(extensions.extensions_['amp-test']).to.be.undefined;
+        expect(extensions.extensions_['amp-test:0.2']).to.be.undefined;
         extensions.installExtensionForDoc(ampdoc, 'amp-test', '0.2');
 
         // Extension is declared immediately.
@@ -1338,7 +1554,7 @@ describes.sandboxed('Extensions', {}, () => {
             .querySelector('[custom-element="amp-test"]')
             .getAttribute('src')
         ).to.contain('-0.2');
-        expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+        expect(extensions.extensions_['amp-test:0.2'].scriptPresent).to.be.true;
         expect(win.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
       });
 
@@ -1347,7 +1563,7 @@ describes.sandboxed('Extensions', {}, () => {
         expect(
           doc.head.querySelectorAll('[custom-element="amp-test"]')
         ).to.have.length(0);
-        expect(extensions.extensions_['amp-test']).to.be.undefined;
+        expect(extensions.extensions_['amp-test:0.2']).to.be.undefined;
         extensions.installExtensionForDoc(ampdoc, 'amp-test', '0.2');
         expect(loadSpy).to.be.calledOnce;
         expect(loadSpy).to.be.calledWithExactly('amp-test', '0.2');
@@ -1359,12 +1575,12 @@ describes.sandboxed('Extensions', {}, () => {
             .querySelector('[custom-element="amp-test"]')
             .getAttribute('src')
         ).to.contain('-0.2');
-        expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+        expect(extensions.extensions_['amp-test:0.2'].scriptPresent).to.be.true;
         expect(win.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
       });
 
       it('should stub main extension immediately', () => {
-        const extHolder = extensions.getExtensionHolder_('amp-test');
+        const extHolder = extensions.getExtensionHolder_('amp-test', '0.1');
         extHolder.scriptPresent = true;
         expect(ampdoc.declaresExtension('amp-test')).to.be.false;
         const promise = extensions.installExtensionForDoc(ampdoc, 'amp-test');
@@ -1401,7 +1617,7 @@ describes.sandboxed('Extensions', {}, () => {
 
       it('should reuse the load if already started', () => {
         const loadSpy = env.sandbox.spy(extensions, 'preloadExtension');
-        const extHolder = extensions.getExtensionHolder_('amp-test');
+        const extHolder = extensions.getExtensionHolder_('amp-test', '0.1');
         extHolder.scriptPresent = true;
         const promise1 = extensions.installExtensionForDoc(ampdoc, 'amp-test');
         const promise2 = extensions.installExtensionForDoc(ampdoc, 'amp-test');
@@ -1433,7 +1649,7 @@ describes.sandboxed('Extensions', {}, () => {
           return {a: 2};
         };
 
-        const extHolder = extensions.getExtensionHolder_('amp-test');
+        const extHolder = extensions.getExtensionHolder_('amp-test', '0.1');
         extHolder.scriptPresent = true;
         expect(ampdoc.declaresExtension('amp-test')).to.be.false;
         const promise = extensions.installExtensionForDoc(ampdoc, 'amp-test');
@@ -1493,7 +1709,7 @@ describes.sandboxed('Extensions', {}, () => {
           return {a: 3};
         };
 
-        const extHolder = extensions.getExtensionHolder_('amp-test');
+        const extHolder = extensions.getExtensionHolder_('amp-test', '0.1');
         extHolder.scriptPresent = true;
         const promise = extensions.installExtensionForDoc(ampdoc, 'amp-test');
         extensions.registerExtension(
@@ -1519,6 +1735,52 @@ describes.sandboxed('Extensions', {}, () => {
           // Extension is marked as declared.
           expect(ampdoc.declaresExtension('amp-test')).to.be.true;
         });
+      });
+    }
+  );
+
+  describes.realWin(
+    'preinstallEmbed',
+    {
+      amp: true,
+      fakeRegisterElement: true,
+    },
+    (env) => {
+      let win, extensions;
+      let ampdoc;
+
+      beforeEach(() => {
+        win = env.win;
+        ampdoc = env.ampdoc;
+        extensions = env.extensions;
+        win.customElements.elements = {};
+        win.__AMP_EXTENDED_ELEMENTS = {};
+
+        const shadowRoot = document.createDocumentFragment();
+        ampdoc = new AmpDocShadow(win, 'https://a.org/', shadowRoot);
+      });
+
+      it('should install builtins', () => {
+        extensions.preinstallEmbed(ampdoc, []);
+        expect(win.customElements.elements['amp-img']).to.exist;
+      });
+
+      it('should install legacy elements', () => {
+        extensions.preinstallEmbed(ampdoc, []);
+        expect(win.customElements.elements['amp-video']).to.exist;
+      });
+
+      it('should declare and stub extensions', () => {
+        extensions.preinstallEmbed(ampdoc, [
+          {extensionId: 'amp-test', extensionVersion: '0.2'},
+          {extensionId: 'amp-other', extensionVersion: '0.3'},
+        ]);
+
+        expect(ampdoc.declaresExtension('amp-test', '0.2')).to.be.true;
+        expect(win.customElements.elements['amp-test']).to.not.be.undefined;
+
+        expect(ampdoc.declaresExtension('amp-other', '0.3')).to.be.true;
+        expect(win.customElements.elements['amp-other']).to.not.be.undefined;
       });
     }
   );

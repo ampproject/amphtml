@@ -35,13 +35,14 @@ const dayOfWeek = /* wednesday */ 3; // sunday = 0, monday = 1, ...
 
 const sessionDurationHours = 1;
 
+// Times in this rotation are adjusted according to Daylight Savings
 const timeRotationUtc = [
   ['Americas', '21:00'],
   ['Asia/Oceania', '01:00'],
   ['Africa/Europe/western Asia', '16:30'],
 ];
 
-const timeRotationStartYyyyMmDd = '2021-03-17';
+const timeRotationStartYyyyMmDd = '2021-03-31';
 
 // All previous weeks have already been handled.
 const generateWeeksFromNow = 3;
@@ -60,14 +61,46 @@ const createBody = ({timeUtc, timeUrl, calendarUrl}) =>
 Time: [${timeUtc} UTC](${timeUrl}) ([add to Google Calendar](${calendarUrl}))
 Location: [Video conference via Google Meet](${vcUrl})
 
-The AMP community holds weekly engineering [design reviews](https://github.com/ampproject/amphtml/blob/master/contributing/design-reviews.md). **We encourage everyone in the community to participate in these design reviews.**
+The AMP community holds weekly engineering [design reviews](https://github.com/ampproject/amphtml/blob/main/contributing/design-reviews.md). **We encourage everyone in the community to participate in these design reviews.**
 
-If you are interested in bringing your design to design review, read the [design review documentation](https://github.com/ampproject/amphtml/blob/master/contributing/design-reviews.md) and add a link to your design doc or issue by the Monday before your design review.
+If you are interested in bringing your design to design review, read the [design review documentation](https://github.com/ampproject/amphtml/blob/main/contributing/design-reviews.md) and add a link to your design doc or issue by the Monday before your design review.
 
 When attending a design review please read through the designs _before_ the design review starts. This allows us to spend more time on discussion of the design.
 
-We rotate our design review between times that work better for different parts of the world as described in our [design review documentation](https://github.com/ampproject/amphtml/blob/master/contributing/design-reviews.md), but you are welcome to attend any design review. If you cannot make any of the design reviews but have a design to discuss please let mrjoro@ know on [Slack](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#discussion-channels) and we will find a time that works for you.
+We rotate our design review between times that work better for different parts of the world as described in our [design review documentation](https://github.com/ampproject/amphtml/blob/main/contributing/design-reviews.md), but you are welcome to attend any design review. If you cannot make any of the design reviews but have a design to discuss please let mrjoro@ know on [Slack](https://github.com/ampproject/amphtml/blob/main/CONTRIBUTING.md#discussion-channels) and we will find a time that works for you.
 `.trim();
+
+function leadingZero(number) {
+  return number.toString().padStart(2, '0');
+}
+
+function isDaylightSavingsUsa(date) {
+  // [start, end] ranges of Daylight Savings in (most of) the USA
+  // https://www.timeanddate.com/time/dst/2021.html
+  const ranges = [
+    ['2021/3/14', '2021/11/7'],
+    ['2022/3/13', '2022/11/6'],
+    ['2023/3/12', '2023/11/5'],
+    ['2024/3/10', '2024/11/3'],
+    ['2025/3/9', '2025/11/2'],
+    ['2026/3/8', '2026/11/1'],
+    ['2027/3/14', '2027/11/7'],
+    ['2028/3/12', '2028/11/5'],
+    ['2029/3/11', '2029/11/4'],
+  ];
+  return ranges.some(([start, end]) => {
+    const time = date.getTime();
+    return (
+      time > parseYyyyMmDd(start, /* hours */ 2, /* minutes */ 0).getTime() &&
+      time < parseYyyyMmDd(end, /* hours */ 2, /* minutes */ 0).getTime()
+    );
+  });
+}
+
+function parseYyyyMmDd(yyyyMmDd, hours = 0, minutes = 0) {
+  const [yyyy, mm, dd] = yyyyMmDd.split('/', 3).map(Number);
+  return new Date(yyyy, mm - 1, dd, hours, minutes);
+}
 
 function httpsRequest(url, options, data) {
   return new Promise((resolve, reject) => {
@@ -142,9 +175,7 @@ function getRotation(date, startYyyyMmDd) {
 }
 
 const timeZ = (yyyy, mm, dd, hours, minutes) =>
-  `${yyyy + mm + dd}T${
-    hours.toString().padStart(2, '0') + minutes.toString().padStart(2, '0')
-  }Z`;
+  `${yyyy + mm + dd}T${leadingZero(hours) + leadingZero(minutes)}Z`;
 
 function getNextIssueData() {
   const today = new Date();
@@ -154,12 +185,21 @@ function getNextIssueData() {
   today.setDate(today.getDate() + 1);
 
   const nextDay = getNextDayOfWeek(today, dayOfWeek, generateWeeksFromNow);
-  const [region, timeUtc] = getRotation(nextDay, timeRotationStartYyyyMmDd);
-  const [hours, minutes] = timeUtc.split(':').map(Number);
+  const [region, timeUtcNoDst] = getRotation(
+    nextDay,
+    timeRotationStartYyyyMmDd
+  );
+
+  let [hours, minutes] = timeUtcNoDst.split(':').map(Number);
+  if (isDaylightSavingsUsa(nextDay)) {
+    hours -= 1;
+  }
 
   const yyyy = nextDay.getFullYear();
-  const mm = (nextDay.getMonth() + 1).toString().padStart(2, '0');
-  const dd = nextDay.getDate().toString().padStart(2, '0');
+  const mm = leadingZero(nextDay.getMonth() + 1);
+  const dd = leadingZero(nextDay.getDate());
+
+  const timeUtc = `${leadingZero(hours)}:${leadingZero(minutes)}`;
 
   const timeUrl = `https://www.timeanddate.com/worldclock/meeting.html?year=${yyyy}&month=${mm}&day=${dd}&iv=0`;
 
@@ -194,15 +234,17 @@ function env(key) {
 }
 
 async function createDesignReviewIssue() {
-  const repo = env('GITHUB_REPOSITORY');
-  if (repo !== 'ampproject/amphtml') {
-    // don't run on forks.
+  const nextIssueData = getNextIssueData();
+
+  if (process.argv.includes('--dry-run')) {
+    console./*OK*/ log(nextIssueData);
     return;
   }
+
   const {title, 'html_url': htmlUrl} = await postGithubIssue(
     env('GITHUB_TOKEN'),
-    repo,
-    getNextIssueData()
+    env('GITHUB_REPOSITORY'),
+    nextIssueData
   );
   console./*OK*/ log(title);
   console./*OK*/ log(htmlUrl);

@@ -16,11 +16,10 @@
 
 import {LayoutPriority} from '../layout';
 import {READY_SCAN_SIGNAL} from './resources-interface';
-import {VisibilityState} from '../visibility-state';
+import {VisibilityState} from '../core/constants/visibility-state';
 import {containsNotSelf, hasNextNodeInDocumentOrder, isIframed} from '../dom';
-import {devAssert} from '../log';
 import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
-import {removeItem} from '../utils/array';
+import {removeItem} from '../core/types/array';
 
 const ID = 'scheduler';
 
@@ -39,7 +38,7 @@ export class Scheduler {
     this.observer_ = new win.IntersectionObserver((e) => this.observed_(e), {
       // Root bounds are not important, so we can use the `root:null` for a
       // top-level window.
-      root: isIframed(win) ? win.document : null,
+      root: isIframed(win) ? /** @type {?} */ (win.document) : null,
       rootMargin: ROOT_MARGIN,
     });
 
@@ -53,6 +52,8 @@ export class Scheduler {
     this.parsingTargets_ = [];
 
     /** @private {boolean} */
+    this.scheduledReady_ = false;
+
     ampdoc.whenReady().then(() => this.checkParsing_());
 
     /** @private {?UnlistenDef} */
@@ -87,7 +88,7 @@ export class Scheduler {
       return;
     }
 
-    if (target.deferredBuild()) {
+    if (target.deferredMount()) {
       this.targets_.set(target, {asap: false, isIntersecting: false});
       this.observer_.observe(target);
       if (this.containerMap_.size > 0) {
@@ -135,7 +136,6 @@ export class Scheduler {
    * @param {!Element=} opt_scroller
    */
   setContainer(container, opt_scroller) {
-    devAssert(!opt_scroller || container.contains(opt_scroller));
     if (this.containerMap_.has(container)) {
       return;
     }
@@ -245,18 +245,19 @@ export class Scheduler {
   observed_(entries) {
     for (let i = 0; i < entries.length; i++) {
       const {target, isIntersecting: isThisIntersecting} = entries[i];
+      const ampTarget = /** @type {!AmpElement} */ (target);
 
-      const current = this.targets_.get(target);
+      const current = this.targets_.get(ampTarget);
       if (!current) {
         continue;
       }
 
       const isIntersecting = isThisIntersecting || current.isIntersecting;
       if (isIntersecting !== current.isIntersecting) {
-        this.targets_.set(target, {asap: current.asap, isIntersecting});
+        this.targets_.set(ampTarget, {asap: current.asap, isIntersecting});
       }
       if (isIntersecting) {
-        this.maybeBuild_(target);
+        this.maybeBuild_(ampTarget);
       }
     }
   }

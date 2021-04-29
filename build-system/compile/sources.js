@@ -65,6 +65,7 @@ const COMMON_GLOBS = [
   'node_modules/@ampproject/worker-dom/dist/amp-production/main.mjs',
   'node_modules/preact/package.json',
   'node_modules/preact/dist/*.js',
+  'node_modules/preact/dom/*.js',
   'node_modules/preact/hooks/package.json',
   'node_modules/preact/hooks/dist/*.js',
   'node_modules/preact/compat/package.json',
@@ -141,6 +142,8 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-video/1.0/**/*.js',
   // Needed for VideoService
   'extensions/amp-video-service/**/*.js',
+  // amp-vimeo 0.1 and 1.0 share this file.
+  'extensions/amp-vimeo/vimeo-api.js',
   // Needed to access ConsentPolicyManager from other extensions
   'extensions/amp-consent/**/*.js',
   // Needed to access AmpGeo type for service locator
@@ -157,6 +160,7 @@ const CLOSURE_SRC_GLOBS = [
   // Not sure what these files are, but they seem to duplicate code
   // one level below and confuse the compiler.
   '!node_modules/core-js/modules/library/**.js',
+  '!extensions/**/dist/**/*.js',
 ].concat(COMMON_GLOBS);
 
 module.exports = {

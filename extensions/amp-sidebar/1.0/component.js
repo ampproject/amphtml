@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {ContainWrapper, useValueRef} from '../../../src/preact/component';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Side} from './sidebar-config';
 import {createPortal, forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
@@ -42,6 +42,7 @@ function SidebarWithRef(
     as: Comp = 'div',
     side: sideProp,
     onBeforeOpen,
+    onAfterOpen,
     onAfterClose,
     backdropStyle,
     backdropClassName,
@@ -68,9 +69,7 @@ function SidebarWithRef(
   const onBeforeOpenRef = useValueRef(onBeforeOpen);
 
   const open = useCallback(() => {
-    if (onBeforeOpenRef.current) {
-      onBeforeOpenRef.current();
-    }
+    onBeforeOpenRef.current?.();
     setMounted(true);
     setOpened(true);
   }, [onBeforeOpenRef]);
@@ -106,6 +105,7 @@ function SidebarWithRef(
   useSidebarAnimation(
     mounted,
     opened,
+    onAfterOpen,
     onAfterClose,
     side,
     sidebarRef,

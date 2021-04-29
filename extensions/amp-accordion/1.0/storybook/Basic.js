@@ -22,12 +22,11 @@ import {
   AccordionSection,
 } from '../component';
 import {boolean, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 
 export default {
   title: 'Accordion',
   component: Accordion,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 /**
@@ -62,13 +61,11 @@ function AccordionWithActions(props) {
 export const _default = () => {
   const expandSingleSection = boolean('expandSingleSection', false);
   const animate = boolean('animate', false);
-  const experimentDisplayLocking = boolean('experimentDisplayLocking', false);
   return (
     <main>
       <AccordionWithActions
         expandSingleSection={expandSingleSection}
         animate={animate}
-        experimentDisplayLocking={experimentDisplayLocking}
       >
         <AccordionSection id="section1" key={1}>
           <AccordionHeader>
@@ -155,13 +152,11 @@ function AccordionWithEvents(props) {
 export const events = () => {
   const expandSingleSection = boolean('expandSingleSection', false);
   const animate = boolean('animate', false);
-  const experimentDisplayLocking = boolean('experimentDisplayLocking', false);
   return (
     <main>
       <AccordionWithEvents
         expandSingleSection={expandSingleSection}
         animate={animate}
-        experimentDisplayLocking={experimentDisplayLocking}
       ></AccordionWithEvents>
     </main>
   );

@@ -15,6 +15,7 @@
  */
 
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
+import {StoryAdPlacements} from '../../../src/experiments/story-ad-placements';
 
 /** @const {number} */
 const BEGINNING_OF_STORY_BUFFER = 3;
@@ -71,13 +72,12 @@ export function getNumberOfAds(pageCount, targetInterval) {
  */
 export class PredeterminedPositionAlgorithm {
   /** @override */
-  constructor(storeService, pageManager) {
+  constructor(storeService, pageManager, placementsExpBranch) {
     /** @private {!StoryAdPageManager} */
     this.pageManager_ = pageManager;
 
-    // TODO(ccordry): experimentally set interval at 12 based on branch.
     /** @private {number} */
-    this.targetInterval_ = 8;
+    this.targetInterval_ = this.getIntervalFromExpId_(placementsExpBranch);
 
     /** @private {!Array<string>} */
     this.storyPageIds_ = storeService.get(StateProperty.PAGE_IDS);
@@ -135,6 +135,21 @@ export class PredeterminedPositionAlgorithm {
   onNewAdView(unusedPageIndex) {
     if (this.pagesCreated_ < this.adPositions_.length) {
       this.createNextPage_();
+    }
+  }
+
+  /**
+   * Map branches to the interval from experiment branch.
+   * @param {string} branchId
+   * @return {number}
+   */
+  getIntervalFromExpId_(branchId) {
+    if (branchId === StoryAdPlacements.PREDETERMINED_EIGHT) {
+      return 8;
+    } else if (branchId === StoryAdPlacements.PREDETERMINED_TEN) {
+      return 10;
+    } else if (branchId === StoryAdPlacements.PREDETERMINED_TWELVE) {
+      return 12;
     }
   }
 }

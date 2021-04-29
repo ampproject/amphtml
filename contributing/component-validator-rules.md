@@ -8,9 +8,9 @@ of the most common rules used when creating a new AMP Extended Component.
 ## Getting Started
 
 Before writing any of your `.protoascii` or `validator-*.html` files, please
-[see the Installation and Usage sections of the AMP Validator](https://github.com/ampproject/amphtml/blob/master/validator/README.md).
+[see the Installation and Usage sections of the AMP Validator](https://github.com/ampproject/amphtml/blob/main/validator/README.md).
 
-This repo uses a [python script](https://github.com/ampproject/amphtml/blob/master/validator/build.py) to run golden tests using the AMP validator.
+This repo uses a [python script](https://github.com/ampproject/amphtml/blob/main/validator/build.py) to run golden tests using the AMP validator.
 Thus it is a good idea to ensure,
 that your development environment is configured correctly,
 before writing new tests to avoid any confusion.
@@ -41,7 +41,7 @@ this code in the amphtml src tree at the location of
 `amphtml/extensions/amp-cat/0.1/`. This document only describes how to specify
 validation rules for an extended component - it does not cover implementing its
 runtime behavior. For the latter, see the [Building an AMP
-Extension](https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md)
+Extension](https://github.com/ampproject/amphtml/blob/main/contributing/building-an-amp-extension.md)
 guide.
 
 ## Validation Rules
@@ -276,7 +276,7 @@ tags.
 
 This section adds validation rules for the various layout options available to
 amp tags. See
-[AMP HTML Layout System](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md)
+[AMP HTML Layout System](https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md)
 to determine which options make sense for your tag.
 
 ### Attribute Validation Options
@@ -429,7 +429,7 @@ It is a good idea to contribute test files along with your validator rules
 which at minimum demonstrate a correct usage of your validator rules.
 
 A good place to start is to copy
-[minimum_valid_amp.html](https://github.com/ampproject/amphtml/blob/master/validator/testdata/feature_tests/minimum_valid_amp.html) to a new file named, for example:
+[minimum_valid_amp.html](https://github.com/ampproject/amphtml/blob/main/validator/testdata/feature_tests/minimum_valid_amp.html) to a new file named, for example:
 
 <pre>
 amphtml/extensions/<b>amp-cat</b>/0.1/test/validator-<b>amp-cat</b>.html
@@ -502,4 +502,4 @@ This document attempts to summarize some of the more commonly used rules for
 creating validator extended components. More complex rules are possible and new rule
 types can even be added as needed. If your goals are not met by the rules in
 this document, [don't hesitate to
-contact](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#discussion-channels) the AMP developers and ask for suggestions.
+contact](https://github.com/ampproject/amphtml/blob/main/CONTRIBUTING.md#discussion-channels) the AMP developers and ask for suggestions.

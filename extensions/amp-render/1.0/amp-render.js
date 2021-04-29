@@ -15,17 +15,20 @@
  */
 
 import {BaseElement} from './base-element';
+import {
+  BatchFetchOptionsDef,
+  batchFetchJsonFor,
+} from '../../../src/batched-json';
 import {Services} from '../../../src/services';
-import {batchFetchJsonFor} from '../../../src/batched-json';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
+import {isAmpScriptUri} from '../../../src/url';
 import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-render';
 
 const AMP_STATE_URI_SCHEME = 'amp-state:';
-const AMP_SCRIPT_URI_SCHEME = 'amp-script:';
 
 /**
  * Returns true if element's src points to amp-state.
@@ -35,13 +38,83 @@ const AMP_SCRIPT_URI_SCHEME = 'amp-script:';
 const isAmpStateSrc = (src) => src && src.startsWith(AMP_STATE_URI_SCHEME);
 
 /**
- * Returns true if element's src points to an amp-script function.
- * @param {?string} src
- * @return {boolean}
+ * Gets the json from an "amp-state:" uri. For example, src="amp-state:json.path".
+ *
+ * TODO: this is similar to the implementation in amp-list. Move it
+ * to a common file and import it.
+ *
+ * @param {!AmpElement} element
+ * @param {string} src
+ * @return {Promise<!JsonObject>}
  */
-const isAmpScriptSrc = (src) => src && src.startsWith(AMP_SCRIPT_URI_SCHEME);
+const getAmpStateJson = (element, src) => {
+  return Services.bindForDocOrNull(element)
+    .then((bind) => {
+      userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
+      const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length);
+      return bind.getStateAsync(ampStatePath).catch((err) => {
+        const stateKey = ampStatePath.split('.')[0];
+        user().error(
+          TAG,
+          `'amp-state' element with id '${stateKey}' was not found.`
+        );
+        throw err;
+      });
+    })
+    .then((json) => {
+      userAssert(
+        json !== undefined,
+        `[amp-render] No data was found at provided uri: ${src}`
+      );
+      return json;
+    });
+};
 
-class AmpRender extends BaseElement {
+/**
+ * @param {!AmpElement} element
+ * @param {boolean} shouldRefresh true to force refresh of browser cache.
+ * @return {!BatchFetchOptionsDef} options object to pass to `batchFetchJsonFor` method.
+ */
+function buildOptionsObject(element, shouldRefresh = false) {
+  return {
+    xssiPrefix: element.getAttribute('xssi-prefix'),
+    expr: element.getAttribute('key') ?? '.',
+    refresh: shouldRefresh,
+  };
+}
+
+/**
+ * Returns a function to fetch json from remote url, amp-state or
+ * amp-script.
+ *
+ * @param {!AmpElement} element
+ * @return {Function}
+ */
+export function getJsonFn(element) {
+  const src = element.getAttribute('src');
+  if (!src) {
+    // TODO(dmanek): assert that src is provided instead of silently failing below.
+    return () => {};
+  }
+  if (isAmpStateSrc(src)) {
+    return (src) => getAmpStateJson(element, src);
+  }
+  if (isAmpScriptUri(src)) {
+    return (src) =>
+      Services.scriptForDocOrNull(element).then((ampScriptService) => {
+        userAssert(ampScriptService, 'AMP-SCRIPT is not installed');
+        return ampScriptService.fetch(src);
+      });
+  }
+  return (unusedSrc, shouldRefresh = false) =>
+    batchFetchJsonFor(
+      element.getAmpDoc(),
+      element,
+      buildOptionsObject(element, shouldRefresh)
+    );
+}
+
+export class AmpRender extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -64,36 +137,25 @@ class AmpRender extends BaseElement {
 
   /** @override */
   init() {
+    this.registerApiAction('refresh', (api) => {
+      const src = this.element.getAttribute('src');
+      // There is an alternative way to do this using `mutationObserverCallback` while using a boolean
+      // variable `canRefresh`. See https://github.com/ampproject/amphtml/pull/33776#discussion_r614087734
+      // for more context. This approach may be better if src does not mutate often. But the alternative might
+      // be better if src mutatates often and component user does not use `refresh` action.
+      if (!src || isAmpStateSrc(src) || isAmpScriptUri(src)) {
+        return;
+      }
+      api.refresh();
+    });
+
     return dict({
-      'getJson': this.getJsonFn_(),
+      'getJson': getJsonFn(this.element),
     });
   }
 
   /**
-   * Returns the correct fetch function for amp-state, amp-script or
-   * to fetch remote JSON.
-   *
-   * @return {Function}
-   * @private
-   */
-  getJsonFn_() {
-    const src = this.element.getAttribute('src');
-    if (!src) {
-      // TODO(dmanek): assert that src is provided instead of silently failing below.
-      return () => {};
-    }
-    if (isAmpStateSrc(src)) {
-      return this.getAmpStateJson.bind(null, this.element);
-    }
-    if (isAmpScriptSrc(src)) {
-      // TODO(dmanek): implement this
-      return () => {};
-    }
-    return batchFetchJsonFor.bind(null, this.getAmpDoc(), this.element);
-  }
-
-  /**
-   * TODO: this implementation is identical to one in amp-data-display &
+   * TODO: this implementation is identical to one in amp-date-display &
    * amp-date-countdown. Move it to a common file and import it.
    *
    * @override
@@ -103,85 +165,48 @@ class AmpRender extends BaseElement {
       this.templates_ ||
       (this.templates_ = Services.templatesForDoc(this.element));
     const template = templates.maybeFindTemplate(this.element);
-    if (template != this.template_) {
-      this.template_ = template;
-      if (template) {
-        // Only overwrite `render` when template is ready to minimize FOUC.
-        templates.whenReady(template).then(() => {
-          if (template != this.template_) {
-            // A new template has been set while the old one was initializing.
-            return;
-          }
-          this.mutateProps(
-            dict({
-              'render': (data) => {
-                return templates
-                  .renderTemplateAsString(dev().assertElement(template), data)
-                  .then((html) => dict({'__html': html}));
-              },
-            })
-          );
-        });
-      } else {
-        this.mutateProps(dict({'render': null}));
-      }
+    if (template === this.template_) {
+      return;
     }
+    this.template_ = template;
+    if (!template) {
+      this.mutateProps(dict({'render': null}));
+      return;
+    }
+    // Only overwrite `render` when template is ready to minimize FOUC.
+    templates.whenReady(template).then(() => {
+      if (template != this.template_) {
+        // A new template has been set while the old one was initializing.
+        return;
+      }
+      this.mutateProps(
+        dict({
+          'render': (data) => {
+            return templates
+              .renderTemplateAsString(dev().assertElement(template), data)
+              .then((html) => dict({'__html': html}));
+          },
+        })
+      );
+    });
   }
 
   /**
-   * TODO: this implementation is identical to one in amp-data-display &
+   * TODO: this implementation is identical to one in amp-date-display &
    * amp-date-countdown. Move it to a common file and import it.
    *
    * @override
    */
   isReady(props) {
-    if (this.template_ && !('render' in props)) {
-      // The template is specified, but not available yet.
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   * Gets the json an amp-list that has an "amp-state:" uri. For example,
-   * src="amp-state:json.path".
-   *
-   * TODO: this implementation is identical to one in amp-list. Move it
-   * to a common file and import it
-   *
-   * TODO: Add src as a param once this method is moved out of this class
-   * to support src binding (https://github.com/ampproject/amphtml/pull/33189#discussion_r598743971).
-   *
-   * @param {!AmpElement} element
-   * @return {Promise<!JsonObject>}
-   */
-  getAmpStateJson(element) {
-    const src = element.getAttribute('src');
-    if (!src) {
-      return Promise.resolve({});
-    }
-    return Services.bindForDocOrNull(element)
-      .then((bind) => {
-        userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
-        const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length);
-        return bind.getStateAsync(ampStatePath).catch((err) => {
-          const stateKey = ampStatePath.split('.')[0];
-          user().error(
-            TAG,
-            `'amp-state' element with id '${stateKey}' was not found.`
-          );
-          throw err;
-        });
-      })
-      .then((json) => {
-        userAssert(
-          typeof json !== 'undefined',
-          `[amp-render] No data was found at provided uri: ${src}`
-        );
-        return json;
-      });
+    // If a template is specified, then it must be available.
+    return !this.template_ || 'render' in props;
   }
 }
+
+AmpRender['props'] = {
+  ...BaseElement['props'],
+  'getJson': {attrs: ['src'], parseAttrs: getJsonFn},
+};
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpRender);

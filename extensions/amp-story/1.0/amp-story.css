@@ -289,7 +289,8 @@ amp-story-page [data-text-background-color] {
 }
 
 /* TODO(gmajoulet): move the overlay to the bookend styles. */
-.i-amphtml-story-bookend-active amp-story-page[active]::after {
+.i-amphtml-story-bookend-active amp-story-page[active]::after,
+.i-amphtml-story-attachment-active amp-story-page[active]::after {
   content: '' !important;
   display: block !important;
   left: 0 !important;
@@ -309,6 +310,22 @@ amp-story-page [data-text-background-color] {
 
   100% {
     opacity: 0.75;
+  }
+}
+
+/* Overrides for amp-story-page-attachment-ui-v2 experiment. */
+.i-amphtml-story-attachment-active amp-story-page[active]::after {
+  z-index: 3 !important;
+  animation: i-amphtml-attachment-overlay-opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) forwards !important;
+}
+
+@keyframes i-amphtml-attachment-overlay-opacity {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 0.5;
   }
 }
 
@@ -399,8 +416,8 @@ amp-story-grid-layer[anchor*="right"] {
 }
 
 /**
- * Prevents pre-load placeholders from pushing content offscreen. 
- * Prevents preload placeholders from pushing content offscreen. 
+ * Prevents pre-load placeholders from pushing content offscreen.
+ * Prevents preload placeholders from pushing content offscreen.
  */
 .i-amphtml-story-grid-template-fill amp-img img,
 .i-amphtml-story-grid-template-fill amp-video video {

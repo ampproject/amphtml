@@ -34,7 +34,7 @@ const {
 const {
   gitBranchName,
   gitCommitterEmail,
-  gitCiMasterBaseline,
+  gitCiMainBaseline,
   shortSha,
 } = require('../../common/git');
 const {buildRuntime} = require('../../common/utils');
@@ -126,7 +126,7 @@ function maybeOverridePercyEnvironmentVariables() {
  * as baselines for future builds.
  */
 function setPercyBranch() {
-  if (!process.env['PERCY_BRANCH'] && (!argv.master || !isCiBuild())) {
+  if (!process.env['PERCY_BRANCH'] && (!argv.main || !isCiBuild())) {
     const userName = gitCommitterEmail();
     const branchName = gitBranchName();
     process.env['PERCY_BRANCH'] = userName + '-' + branchName;
@@ -139,13 +139,13 @@ function setPercyBranch() {
  * This will let Percy determine which build to use as the baseline for this new
  * build.
  *
- * Only does something during CI, and for non-master branches, since master
+ * Only does something during CI, and for non-main branches, since main branch
  * builds are always built on top of the previous commit (we use the squash and
  * merge method for pull requests.)
  */
 function setPercyTargetCommit() {
-  if (isCiBuild() && !argv.master) {
-    process.env['PERCY_TARGET_COMMIT'] = gitCiMasterBaseline();
+  if (isCiBuild() && !argv.main) {
+    process.env['PERCY_TARGET_COMMIT'] = gitCiMainBaseline();
   }
 }
 
@@ -422,7 +422,7 @@ async function runVisualTests(browser, webpages) {
     );
   }
 
-  if (argv.master) {
+  if (argv.main) {
     const page = await newPage(browser);
     await page.goto(
       `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`
@@ -719,7 +719,7 @@ async function createEmptyBuild(browser) {
 async function visualDiff() {
   const handlerProcess = createCtrlcHandler('visual-diff');
   await ensureOrBuildAmpRuntimeInTestMode_();
-  const browserFetcher = await installDependencies_();
+  const browserFetcher = await loadBrowserFetcher_();
   maybeOverridePercyEnvironmentVariables();
   setPercyBranch();
   setPercyTargetCommit();
@@ -804,21 +804,14 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
  *
  * @return {!Promise<!puppeteer.BrowserFetcher>}
  */
-async function installDependencies_() {
+async function loadBrowserFetcher_() {
   puppeteer = require('puppeteer');
   percySnapshot = require('@percy/puppeteer');
   Percy = require('@percy/core');
 
   const browserFetcher = puppeteer.createBrowserFetcher();
-  if (argv.noinstall) {
-    return browserFetcher;
-  }
-
-  if (
-    (await browserFetcher.localRevisions()).includes(
-      PUPPETEER_CHROMIUM_REVISION
-    )
-  ) {
+  const chromiumRevisions = await browserFetcher.localRevisions();
+  if (chromiumRevisions.includes(PUPPETEER_CHROMIUM_REVISION)) {
     log(
       'info',
       'Using Percy-compatible version of Chromium',
@@ -848,7 +841,7 @@ module.exports = {
 
 visualDiff.description = 'Runs the AMP visual diff tests.';
 visualDiff.flags = {
-  'master': 'Includes a blank snapshot (baseline for skipped builds)',
+  'main': 'Includes a blank snapshot (baseline for skipped builds)',
   'empty': 'Creates a dummy Percy build with only a blank snapshot',
   'config':
     'Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',

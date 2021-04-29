@@ -33,9 +33,7 @@ With the responsive layout, the width and height from the example should yield c
   data-mediaid="71QQG852413DU7J"
   data-client="761"
   data-streamtype="video"
-  data-seek-to="2"
   data-mode="static"
-  data-origin="https://embed.nexx.cloud/"
   data-disable-ads="1"
   data-streaming-filter="nxp-bitrate-2500"
   layout="responsive"
@@ -52,32 +50,26 @@ With the responsive layout, the width and height from the example should yield c
     <td>Represents the ID of the media you want to play.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-client (required)</strong></td>
+    <td width="40%"><strong>data-client OR data-domain-id(required)</strong></td>
     <td>Your domain ID.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-streamtype (optional)</strong></td>
     <td><p>Indicates the media streaming type, which can be one of the following:</p>
-<ul>
-  <li>`video` (default)</li>
-  <li>`audio`</li>
-  <li>`playlist`</li>
-  <li>`playlist-masked`: A playlist without the option to skip or choose video.</li>
-  <li>`live`</li>
-  <li>`album`: An audio playlist.</li>
-</ul></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-seek-to (optional)</strong></td>
-    <td>Indicates the starting point of your media (in seconds). For example, video starting 1:30min.</td>
+  <ul>
+    <li>`video` (default)</li>
+    <li>`audio`</li>
+    <li>`playlist`</li>
+    <li>`audioalbum`: An audio playlist</li>
+    <li>`live`</li>
+    <li>`radio`</li>
+    <li>`set`</li>
+    <li>`collection`: collection of media items</li>
+  </ul></td>
   </tr>
   <tr>
     <td width="40%"><strong>data-mode (optional)</strong></td>
     <td>Indicates the data mode, which can be <code>static</code> (default) or <code>api</code>.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-origin (optional)</strong></td>
-    <td>Indicates the source from which the embedded domain media is played. By default this is set to <code>https://embed.nexx.cloud/</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-disable-ads (optional)</strong></td>
@@ -88,6 +80,14 @@ With the responsive layout, the width and height from the example should yield c
     <td>Set streaming filter e.g. "nxp-bitrate-0750" for max 750kbit max bitrate.</td>
   </tr>
   <tr>
+    <td width="40%"><strong>data-exit-mode (optional)</strong></td>
+    <td><p>Defines player exit screen</p>
+  <ul>
+    <li>`replay`</li>
+    <li>`loop`</li>
+    <li>`load`</li>
+  </ul></td>
+  <tr>
     <td width="40%"><strong>common attributes</strong></td>
     <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
@@ -95,4 +95,4 @@ With the responsive layout, the width and height from the example should yield c
 
 ## Validation
 
-See [amp-nexxtv-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-nexxtv-player/validator-amp-nexxtv-player.protoascii) in the AMP validator specification.
+See [amp-nexxtv-player rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-nexxtv-player/validator-amp-nexxtv-player.protoascii) in the AMP validator specification.

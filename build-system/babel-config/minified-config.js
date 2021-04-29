@@ -25,11 +25,21 @@ const {getReplacePlugin} = require('./helpers');
  */
 function getMinifiedConfig() {
   const replacePlugin = getReplacePlugin();
+  const reactJsxPlugin = [
+    '@babel/plugin-transform-react-jsx',
+    {
+      pragma: 'Preact.createElement',
+      pragmaFrag: 'Preact.Fragment',
+      useSpread: true,
+    },
+  ];
+
   const plugins = [
     'optimize-objstr',
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
     '@babel/plugin-transform-react-constant-elements',
+    reactJsxPlugin,
     argv.esm
       ? './build-system/babel-plugins/babel-plugin-transform-dev-methods'
       : null,
@@ -65,7 +75,7 @@ function getMinifiedConfig() {
         ],
     argv.fortesting
       ? null
-      : './build-system/babel-plugins/babel-plugin-is_dev-constant-transformer',
+      : './build-system/babel-plugins/babel-plugin-is_fortesting-constant-transformer',
   ].filter(Boolean);
   const presetEnv = [
     '@babel/preset-env',

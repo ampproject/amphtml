@@ -127,7 +127,9 @@
 }
 
 .i-amphtml-story-page-open-attachment-bar-left,
-.i-amphtml-story-page-open-attachment-bar-right {
+.i-amphtml-story-page-open-attachment-bar-right,
+.i-amphtml-story-outlink-page-open-attachment-bar-left,
+.i-amphtml-story-outlink-page-open-attachment-bar-right {
   position: absolute !important;
   display: block !important;
   height: 3px !important;
@@ -168,8 +170,51 @@
 }
 
 /** For amp-story-inline-page-attachment-v2 experiment elements. */
+.i-amphtml-story-page-open-attachment {
+  --i-amphtml-chip-background-color: rgba(255, 255, 255, 0.5) !important;
+  --i-amphtml-img-background-color: white !important;
+  --i-amphtml-label-text-color: white !important;
+  --i-amphtml-arrow-color: black !important;
+}
+
+[theme="dark"].i-amphtml-story-page-open-attachment {
+  --i-amphtml-chip-background-color: rgba(0, 0, 0, 0.5) !important;
+  --i-amphtml-img-background-color: black !important;
+  --i-amphtml-label-text-color: black !important;
+  --i-amphtml-arrow-color: white !important;
+}
+
+/** For amp-story-inline-page-attachment-v2 inline default. */
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-icon {
+  animation: none !important;
+  position: relative !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-label {
+  color: var(--i-amphtml-label-text-color) !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-icon::after {
+  animation: none !important;
+  background: var(--i-amphtml-label-text-color) !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-bar-left,
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-bar-right {
+  background: var(--i-amphtml-arrow-color) !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-bar-left {
+  animation: open-attachment-bar-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) both !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-bar-right {
+  animation: open-attachment-bar-right 0.3s cubic-bezier(0.4, 0, 0.2, 1) both !important;
+}
+
+/** For amp-story-inline-page-attachment-v2 inline with images. */
 .i-amphtml-story-inline-page-attachment-chip {
-  background-color: rgba(255, 255, 255, 0.5) !important;
+  background-color: var(--i-amphtml-chip-background-color) !important;
   display: flex !important;
   border-radius: 24px !important;
   align-items: center !important;
@@ -190,7 +235,7 @@
 .i-amphtml-story-inline-page-attachment-img {
   height: 48px !important;
   width: 48px !important;
-  background-color: white !important;
+  background-color: var(--i-amphtml-img-background-color) !important;
 }
 
 .i-amphtml-story-inline-page-attachment-img:nth-child(2) {
@@ -205,6 +250,10 @@
   background-position: center !important;
 }
 
+[theme="dark"] .i-amphtml-story-inline-page-attachment-arrow {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 32 32"><path d="M16 32a16 16 0 100-32 16 16 0 000 32z" fill="black"/><path d="M7 19v-2l8-5a1 1 0 112 3l-8 4H7z" fill="white"/><path d="M15 13l2-1 8 5a1 1 0 11-2 2l-8-4v-2z" fill="white"/></svg>') !important;
+}
+
 .i-amphtml-story-inline-page-attachment-label {
   font-family: 'Roboto', sans-serif !important;
   font-size: 16px !important;
@@ -216,4 +265,103 @@
   white-space: nowrap !important;
   max-width: 210px !important;
   margin-bottom: 20px !important;
+  color: var(--i-amphtml-label-text-color) !important;
+}
+
+/** For amp-story-outlink-page-attachment-v2 outlink. */
+.i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
+  --i-amphtml-outlink-cta-background-color: white !important;
+  --i-amphtml-outlink-cta-text-color: black !important;
+  background: linear-gradient(0, rgba(0, 0, 0, 0.3), transparent) !important;
+}
+
+[theme="dark"].i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
+  --i-amphtml-outlink-cta-background-color: black !important;
+  --i-amphtml-outlink-cta-text-color: white !important;
+  background: linear-gradient(0, rgba(255, 255, 255, 0.3), transparent) !important;
+}
+
+[href].i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
+  /* Outlink attachments do not need the linear gradient. */
+  background: none !important;
+}
+
+.i-amphtml-story-page-open-attachment.i-amphtml-story-page-open-attachment-opening {
+  animation: fade-out 0.3s both !important;
+}
+
+@keyframes fade-out {
+  100% {
+    opacity: 0;
+  }
+}
+
+.i-amphtml-story-outlink-page-attachment-arrow {
+  display: block !important;
+  height: 32px !important;
+  width: 32px !important;
+  cursor: pointer !important;
+  position: relative !important;
+}
+
+.i-amphtml-story-outlink-page-open-attachment-bar-left,
+.i-amphtml-story-outlink-page-open-attachment-bar-right {
+  background-color: var(--i-amphtml-outlink-cta-background-color) !important;
+}
+
+.i-amphtml-story-outlink-page-open-attachment-bar-left {
+  left: 6px !important;
+  animation: open-attachment-bar-left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+}
+
+.i-amphtml-story-outlink-page-open-attachment-bar-right {
+  right: 6px !important;
+  animation: open-attachment-bar-right 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+}
+
+.i-amphtml-story-outlink-page-attachment-outlink-chip {
+  display: flex !important;
+  position: relative !important;
+  padding: 10px 6px 10px 6px !important;
+  margin: 0 0 20px 0 !important;
+  height: 16px !important;
+  max-width: calc(100% - 64px) !important;
+  border-radius: 30px !important;
+  background: var(--i-amphtml-outlink-cta-background-color) !important;
+  place-items: center !important;
+}
+
+.i-amphtml-story-outlink-page-attachment-img {
+  height: 24px !important;
+  width: 24px !important;
+  vertical-align: middle !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  border-radius: 50% !important;
+}
+
+.i-amphtml-story-outlink-page-attachment-label {
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  letter-spacing: 0.3px;
+  line-height: 16px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  max-width: 210px !important;
+  padding-inline-start: 6px !important;
+  padding-inline-end: 8px !important;
+  color: var(--i-amphtml-outlink-cta-text-color) !important;
+}
+
+.i-amphtml-story-outlink-page-attachment-label:only-child {
+  padding-inline-start: 8px !important;
+}
+
+.i-amphtml-story-page-open-attachment-link-icon {
+  width: 24px;
+  height: 24px;
+  fill: var(--i-amphtml-outlink-cta-text-color) !important;
 }
