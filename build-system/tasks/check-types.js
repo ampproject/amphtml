@@ -66,7 +66,7 @@ const PRIDE_FILES_GLOBS = [
   'src/history.js',
   'src/internal-version.js',
   'src/json.js',
-  // 'src/log.js',
+  'src/log.js',
   'src/mode.js',
   'src/resolved-promise.js',
   'src/time.js',
@@ -236,8 +236,9 @@ async function typeCheck(targetName) {
   // If srcGlobs and externGlobs are defined, determine the externs/extraGlobs
   if (srcGlobs.length || externGlobs.length) {
     opts.externs = externGlobs.flatMap(globby.sync);
+    const externSet = new Set(opts.externs);
     // Included globs should explicitly exclude any externs
-    opts.extraGlobs = externGlobs.map((glob) => `!${glob}`).concat(srcGlobs);
+    opts.extraGlobs = srcGlobs.flatMap(globby.sync).filter(file => !externSet.has(file));
   }
 
   // If no entry point is defined, we want to scan the globs provided without
