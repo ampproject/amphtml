@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {VideoIframe, VideoIframeInternal} from '../video-iframe';
+import {VideoIframeInternal} from '../video-iframe';
 import {createRef} from '../../../../src/preact';
 import {mount} from 'enzyme';
 
