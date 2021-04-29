@@ -56,7 +56,7 @@ class AmpVideoIframe extends VideoBaseElement {
 /**
  * @param {!MessageEvent} e
  */
-const onMessage = (e) => {
+function onMessage(e) {
   const {currentTarget} = e;
   const method = e.data?.['method'];
   const messageId = e.data?.['id'];
@@ -99,7 +99,7 @@ const onMessage = (e) => {
     );
     return;
   }
-};
+}
 
 /**
  * @param {string} method
