@@ -409,7 +409,12 @@ describes.realWin('createSlot', {}, (env) => {
 
   it('should update cached slot function with new defaultProps', () => {
     const element = doc.createElement('div');
-    const slotComp = createSlot(element, 'element', {}, /* as */ true);
+    const slotComp = createSlot(
+      element,
+      'element',
+      {'propA': false},
+      /* as */ true
+    );
     const slotComp2 = createSlot(
       element,
       'element',
