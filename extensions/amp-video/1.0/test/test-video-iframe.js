@@ -25,7 +25,7 @@ function dispatchMessage(window, opt_event) {
   window.dispatchEvent(Object.assign(event, opt_event));
 }
 
-describes.realWin('VideoIframe Preact component', {}, (env) => {
+describes.realWin('VideoIframeInternal Preact component', {}, (env) => {
   let window;
   let document;
 
