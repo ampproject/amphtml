@@ -38,7 +38,7 @@ const {typecheckNewServer} = require('../server/typescript-compile');
  */
 const PRIDE_FILES_GLOBS = [
   // Core
-  'src/core{,/**}/*.js',
+  'src/core/**/*.js',
 
   // Runtime
   'src/resolved-promise.js',
