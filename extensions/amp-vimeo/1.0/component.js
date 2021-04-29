@@ -23,7 +23,6 @@ import {
   makeVimeoMessage,
 } from '../vimeo-api';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
-import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
 import {dispatchCustomEvent} from '../../../src/dom';
 import {forwardRef} from '../../../src/preact/compat';
 import {
@@ -109,11 +108,10 @@ export function VimeoWithRef(
   }, []);
 
   return (
-    <VideoWrapper
+    <VideoIframe
       ref={ref}
       {...rest}
       origin={origin}
-      component={VideoIframe}
       autoplay={autoplay}
       src={src}
       onMessage={onMessage}

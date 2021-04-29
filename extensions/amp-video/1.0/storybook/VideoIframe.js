@@ -21,7 +21,6 @@ import {
   AccordionSection,
 } from '../../../amp-accordion/1.0/component';
 import {VideoIframe} from '../video-iframe';
-import {VideoWrapper} from '../video-wrapper';
 import {boolean, text, withKnobs} from '@storybook/addon-knobs';
 import {createCustomEvent} from '../../../../src/event-helper';
 import {useCallback} from '../../../../src/preact';
@@ -59,10 +58,9 @@ const AmpVideoIframeLike = ({unloadOnPause, ...rest}) => {
   );
 
   return (
-    <VideoWrapper
+    <VideoIframe
       {...rest}
       unloadOnPause={unloadOnPause}
-      component={VideoIframe}
       allow="autoplay" // this is not safe for a generic frame
       onMessage={onMessage}
       makeMethodMessage={makeMethodMessage}
