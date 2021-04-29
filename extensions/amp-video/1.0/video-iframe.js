@@ -198,6 +198,12 @@ function VideoIframeWithRef(props, ref) {
   return <VideoWrapper ref={ref} {...props} component={VideoIframeInternal} />;
 }
 
+/**
+ * VideoWrapper using an <iframe> for implementation.
+ * Usable on the AMP layer through VideoBaseElement.
+ * @param {VideoIframeDef.Props} props
+ * @return {PreactDef.Renderable}=
+ */
 const VideoIframe = forwardRef(VideoIframeWithRef);
 VideoIframe.displayName = 'VideoIframe';
 export {VideoIframe};
