@@ -265,3 +265,15 @@ function toggleOnChange(expr, callback, on) {
     }
   }
 }
+
+/**
+ * Detect prefers-reduced-motion.
+ * Native animations will not run when a device is set up to reduced motion.
+ * In that case, we need to disable all animation treatment, and whatever
+ * setup changes that depend on an animation running later on.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function prefersReducedMotion(win) {
+  return win.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}

@@ -26,7 +26,7 @@ import {Services} from '../../../src/services';
 import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
 import {deepEquals} from '../../../src/json';
 import {dev, user} from '../../../src/log';
-import {prefersReducedMotion} from '../../amp-story/1.0/animation';
+import {prefersReducedMotion} from '../../../src/utils/media-query-props';
 import {setImportantStyles} from '../../../src/style';
 
 /** @const {string} */

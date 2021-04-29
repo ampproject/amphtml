@@ -42,11 +42,7 @@ import {
   EXPANDABLE_COMPONENTS,
   expandableElementsSelectors,
 } from './amp-story-embedded-component';
-import {
-  AnimationManager,
-  hasAnimations,
-  prefersReducedMotion,
-} from './animation';
+import {AnimationManager, hasAnimations} from './animation';
 import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {EventType, dispatch} from './events';
@@ -79,6 +75,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen} from '../../../src/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
+import {prefersReducedMotion} from '../../../src/utils/media-query-props';
 import {px, toggle} from '../../../src/style';
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';

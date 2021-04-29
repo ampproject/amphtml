@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as Animation from '../animation';
 import * as VideoUtils from '../../../../src/utils/video';
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
@@ -34,6 +33,8 @@ import {htmlFor} from '../../../../src/static-template';
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
+import * from MediaQueryPropsimport { MediaQueryProps } from '../../../../src/utils/media-query-props';
+ from '../../../../src/utils/media-query-props';
 
 const extensions = ['amp-story:1.0', 'amp-audio'];
 
@@ -122,7 +123,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   });
 
   it('should not build the animation manager if `prefers-reduced-motion` is on', async () => {
-    env.sandbox.stub(Animation, 'prefersReducedMotion').returns(true);
+    env.sandbox.stub(MediaQueryProps, 'prefersReducedMotion').returns(true);
 
     const animatedEl = html`<div animate-in="fade-in"></div>`;
 
