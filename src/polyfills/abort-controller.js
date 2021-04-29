@@ -29,13 +29,13 @@ class AbortController {
     }
     this.signal_.isAborted_ = true;
     if (this.signal_.onabort_) {
-      const event = {
+      const event = /** @type {!Event} */ ({
         'type': 'abort',
         'bubbles': false,
         'cancelable': false,
         'target': this.signal_,
         'currentTarget': this.signal_,
-      };
+      });
       this.signal_.onabort_(event);
     }
   }
