@@ -242,10 +242,10 @@ window.__AMP_WEAKREF_ID;
 window.__AMP_URL_CACHE;
 window.__AMP_LOG;
 
-/** @type {boolean} */
+/** @type {undefined|boolean} */
 window.ENABLE_LOG;
 
-/** @type {../../src/mode.ModeDef} */
+/** @type {undefined|../../src/mode.ModeDef} */
 window.__AMP_MODE;
 
 /** @type {boolean|undefined} */
@@ -408,7 +408,7 @@ let PropTypes = {};
 /**
  * @dict
  */
-let ReactDates = {};
+let ReactDates;
 
 /** @constructor */
 ReactDates.DayPickerSingleDateController;

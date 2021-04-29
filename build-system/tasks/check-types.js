@@ -66,7 +66,7 @@ const PRIDE_FILES_GLOBS = [
   'src/history.js',
   'src/internal-version.js',
   'src/json.js',
-  'src/log.js',
+  // 'src/log.js',
   'src/mode.js',
   'src/resolved-promise.js',
   'src/time.js',
