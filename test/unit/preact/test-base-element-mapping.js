@@ -700,6 +700,35 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       );
     });
 
+    it('should pass new functional prop slot for "as" on mutation', async () => {
+      const {specialAs: prevComp} = lastProps;
+      const prevSpecial3 = prevComp();
+      expect(prevSpecial3.props).to.deep.equal({
+        valueWithDef: 'DEFAULT',
+        propA: 'A',
+        minFontSize: 72,
+        disabled: true,
+        name: 'i-amphtml-specialAs',
+      });
+
+      const node = element.querySelector('[special3]');
+      node.setAttribute('value-with-def', 'CUSTOM');
+
+      await waitFor(() => component.callCount > 1, 'component re-rendered');
+      expect(component).to.be.calledTwice;
+
+      const {specialAs: Comp} = lastProps;
+      expect(Comp).not.to.deep.equal(prevComp);
+      const special3 = Comp();
+      expect(special3.props).to.deep.equal({
+        valueWithDef: 'CUSTOM',
+        propA: 'A',
+        minFontSize: 72,
+        disabled: true,
+        name: 'i-amphtml-specialAs',
+      });
+    });
+
     it('should pass children as prop slot array and parse attributes', () => {
       const {children} = lastProps;
       expect(children).to.have.lengthOf(2);
@@ -1196,7 +1225,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     it('should rerender on new children', async () => {
       await waitFor(() => component.callCount > 0, 'component rendered');
-      const {children: prevChildren} = lastProps;
+      const {children: prevChildren, specialAs: prevSpecialAs} = lastProps;
       expect(prevChildren).to.have.lengthOf(1);
 
       const newChild = createElementWithAttributes(doc, 'div', {
@@ -1209,7 +1238,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       await waitFor(() => component.callCount > 1, 'component re-rendered');
       expect(component).to.be.calledTwice;
 
-      const {children} = lastProps;
+      const {children, specialAs} = lastProps;
       expect(children).to.have.lengthOf(1);
       const child = children[0];
 
@@ -1222,6 +1251,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(element.querySelector('#child1').slot).to.equal('');
       expect(element.querySelector('#child2').slot).to.equal('');
       expect(element.textContent).to.contain('text (should be passed through)');
+      expect(specialAs).to.deep.equal(prevSpecialAs);
     });
 
     it('should rerender on text change', async () => {

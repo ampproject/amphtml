@@ -94,6 +94,7 @@ let ChildDef;
 /** @const {!MutationObserverInit} */
 const CHILDREN_MUTATION_INIT = {
   childList: true,
+  subtree: true,
 };
 
 /** @const {!MutationObserverInit} */
@@ -1269,23 +1270,35 @@ function shouldMutationBeRerendered(Ctor, m) {
     }
     // Check if the attribute is mapped to one of the properties.
     const props = Ctor['props'];
-    for (const name in props) {
-      const def = /** @type {!AmpElementPropDef} */ (props[name]);
-      if (
-        m.attributeName == def.attr ||
-        (def.attrs && def.attrs.includes(devAssert(m.attributeName))) ||
-        matchesAttrPrefix(m.attributeName, def.attrPrefix)
-      ) {
-        return true;
-      }
-    }
-    return false;
+    return checkPropsForAttribute(props, m.attributeName);
   }
   if (type == 'childList') {
     return (
       shouldMutationForNodeListBeRerendered(m.addedNodes) ||
       shouldMutationForNodeListBeRerendered(m.removedNodes)
     );
+  }
+  return false;
+}
+
+/**
+ * @param {!Object<string, !AmpElementPropDef>} props
+ * @param {string} attributeName
+ * @return {boolean}
+ */
+function checkPropsForAttribute(props, attributeName) {
+  for (const name in props) {
+    const def = props[name];
+    if (
+      attributeName == def.attr ||
+      (def.attrs && def.attrs.includes(devAssert(attributeName))) ||
+      matchesAttrPrefix(attributeName, def.attrPrefix)
+    ) {
+      return true;
+    }
+    if (def.props) {
+      return checkPropsForAttribute(def.props, attributeName);
+    }
   }
   return false;
 }

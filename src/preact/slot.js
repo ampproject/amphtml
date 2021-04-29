@@ -37,10 +37,10 @@ const cache = new WeakMap();
  * @param {!Element} element
  * @param {string} name
  * @param {!Object|undefined} defaultProps
- * @param {boolean} as
+ * @param {boolean|undefined} as
  * @return {!PreactDef.VNode|!PreactDef.FunctionalComponent}
  */
-export function createSlot(element, name, defaultProps, as) {
+export function createSlot(element, name, defaultProps, as = false) {
   element.setAttribute('slot', name);
   if (!as) {
     return <Slot {...(defaultProps || EMPTY)} name={name} />;
