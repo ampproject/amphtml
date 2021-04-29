@@ -1,5 +1,5 @@
-import { resolvedPromise as _resolvedPromise2 } from "./../../../../../../../src/resolved-promise";
-import { resolvedPromise as _resolvedPromise } from "./../../../../../../../src/resolved-promise";
+import { resolvedPromise as _resolvedPromise2 } from "./../../../../../../../src/core/data-structures/promise";
+import { resolvedPromise as _resolvedPromise } from "./../../../../../../../src/core/data-structures/promise";
 
 /**
  * Copyright 2020 The AMP HTML Authors. All Rights Reserved.

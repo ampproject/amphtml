@@ -14,6 +14,27 @@
  * limitations under the License.
  */
 
+let resolved;
+
+/**
+ * Returns a cached resolved promise.
+ * Babel converts direct calls to Promise.resolve() (with no arguments) into
+ * calls to this.
+ *
+ * @return {!Promise<undefined>}
+ */
+export function resolvedPromise() {
+  if (resolved) {
+    return resolved;
+  }
+
+  // It's important that we call with `undefined` here, to prevent a transform
+  // recursion. If we didn't pass an arg, then the transformer would replace
+  // this callsite with a call to `resolvedPromise()`.
+  resolved = Promise.resolve(undefined);
+  return resolved;
+}
+
 /**
  * Returns a Deferred struct, which holds a pending promise and its associated
  * resolve and reject functions.
