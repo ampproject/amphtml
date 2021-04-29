@@ -310,11 +310,6 @@ exports.rules = [
       // amp-smartlinks depends on amp-skimlinks/link-rewriter
       'extensions/amp-smartlinks/0.1/amp-smartlinks.js->extensions/amp-skimlinks/0.1/link-rewriter/link-rewriter-manager.js',
       'extensions/amp-smartlinks/0.1/linkmate.js->extensions/amp-skimlinks/0.1/link-rewriter/two-steps-response.js',
-
-      // VideoWrapper
-      'extensions/amp-video-iframe/1.0/amp-video-iframe.js->extensions/amp-video-iframe/0.1/amp-video-iframe.js',
-      'extensions/amp-video-iframe/1.0/amp-video-iframe.js->extensions/amp-video/1.0/base-element.js',
-      'extensions/amp-video-iframe/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
     ],
   },
   {
