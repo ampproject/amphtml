@@ -425,11 +425,12 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
     it('should report the video is on the first page', () => {
       const video = win.document.createElement('video');
       const source = win.document.createElement('source');
+      const firstPage = win.document.createElement('amp-story-page');
       source.setAttribute('src', 'foo.mp4');
       video.appendChild(source);
-      env.sandbox.stub(video, 'currentSrc').value('foo.mp4');
+      firstPage.appendChild(video);
 
-      service.startMeasuring(video, true);
+      service.startMeasuring(video);
       service.stopMeasuring(video);
 
       expect(tickStub).to.have.been.calledWithExactly('vifp', 1);

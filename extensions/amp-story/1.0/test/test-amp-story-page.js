@@ -793,15 +793,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     const poolVideoEl = element.querySelector('video');
     // Not called with the original video.
-    expect(startMeasuringStub).to.not.have.been.calledOnceWithExactly(
-      videoEl,
-      true
-    );
+    expect(startMeasuringStub).to.not.have.been.calledOnceWithExactly(videoEl);
     // Called with the media pool replaced video.
-    expect(startMeasuringStub).to.have.been.calledOnceWithExactly(
-      poolVideoEl,
-      true
-    );
+    expect(startMeasuringStub).to.have.been.calledOnceWithExactly(poolVideoEl);
   });
 
   it('should stop tracking media performance when leaving the page', async () => {

@@ -1561,25 +1561,23 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    const isActivePage = isPrerenderActivePage(this.element);
     const videoEls = /** @type {!Array<!HTMLMediaElement>} */ (this.getAllVideos_());
     for (let i = 0; i < videoEls.length; i++) {
-      this.startMeasuringVideoPerformance_(videoEls[i], isActivePage);
+      this.startMeasuringVideoPerformance_(videoEls[i]);
     }
   }
 
   /**
    * @param {!HTMLMediaElement} videoEl
-   * @param {boolean} activePage
    * @private
    */
-  startMeasuringVideoPerformance_(videoEl, activePage) {
+  startMeasuringVideoPerformance_(videoEl) {
     if (!this.mediaPerformanceMetricsService_.isPerformanceTrackingOn()) {
       return;
     }
 
     this.performanceTrackedVideos_.push(videoEl);
-    this.mediaPerformanceMetricsService_.startMeasuring(videoEl, activePage);
+    this.mediaPerformanceMetricsService_.startMeasuring(videoEl);
   }
 
   /**
