@@ -475,7 +475,7 @@ var time;
 
 /**
  * Just an element, but used with AMP custom elements..
- * @constructor @extends {Element}
+ * @constructor @extends {HTMLElement}
  */
 var AmpElement = function () {};
 

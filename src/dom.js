@@ -788,14 +788,14 @@ export function isAmpElement(element) {
 /**
  * Return a promise that resolve when an AMP element upgrade from HTMLElement
  * to CustomElement
- * @param {?} element
+ * @param {!HTMLElement} element
  * @return {!Promise<!AmpElement>}
  */
 export function whenUpgradedToCustomElement(element) {
   devAssert(isAmpElement(element), 'element is not AmpElement');
   if (element.createdCallback) {
     // Element already is CustomElement;
-    return Promise.resolve(element);
+    return Promise.resolve(/**@type {!AmpElement} */ (element));
   }
   // If Element is still HTMLElement, wait for it to upgrade to customElement
   // Note: use pure string to avoid obfuscation between versions.
@@ -985,8 +985,11 @@ export function getVerticalScrollbarWidth(win) {
 export function dispatchCustomEvent(node, name, opt_data, opt_options) {
   const data = opt_data || {};
   // Constructors of events need to come from the correct window. Sigh.
-  const event = /** @type {?}*/ (node.ownerDocument.createEvent('Event'));
-  event.data = data;
+  const event = node.ownerDocument.createEvent('Event');
+
+  // Technically .data is not a property of Event.
+  /**@type {?}*/ (event).data = data;
+
   const {bubbles, cancelable} = opt_options || DEFAULT_CUSTOM_EVENT_OPTIONS;
   event.initEvent(name, bubbles, cancelable);
   node.dispatchEvent(event);
