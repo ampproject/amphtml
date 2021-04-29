@@ -33,5 +33,9 @@
         {name: 'ampproject/wg-components'},
       ],
     },
+    {
+      pattern: 'localized-strings.js',
+      owners: [{name: 'ampproject/wg-stories'}],
+    },    
   ],
 }
