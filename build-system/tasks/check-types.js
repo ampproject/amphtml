@@ -28,6 +28,7 @@ const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {cyan, green, yellow, red} = require('kleur/colors');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
+const {logClosureCompilerError} = require('../compile/closure-compile');
 const {log} = require('../common/logging');
 const {typecheckNewServer} = require('../server/typescript-compile');
 
@@ -257,6 +258,44 @@ async function typeCheck(targetName) {
 }
 
 /**
+ * Typechecks all JS files within src and extensions for a specific set
+ * of closure errors.
+ *
+ * This is a temporary measure while we restore 100% typechecking.
+ *
+ * @param {Array<string>} entryPoints
+ */
+async function ensureMinTypeQuality(entryPoints) {
+  const srcGlobs = ['src/**/*.js', 'extensions/**/*.js'];
+  const errorsToCheckFor = [
+    'JSC_BAD_JSDOC_ANNOTATION',
+    'JSC_INVALID_PARAM',
+    'JSC_TYPE_PARSE_ERROR',
+  ];
+
+  let msg = '';
+  await closureCompile(entryPoints, './dist', `check-types.js`, {
+    include3pDirectories: false,
+    includePolyfills: false,
+    typeCheckOnly: true,
+    extraGlobs: globby.sync(srcGlobs),
+    warningLevel: 'VERBOSE',
+    logger: (str) => (msg = str),
+  }).catch(() => {});
+
+  const targetErrors = msg
+    .split('\n')
+    .filter((s) => errorsToCheckFor.some((error) => s.includes(error)))
+    .join('\n')
+    .trim();
+
+  if (targetErrors.length) {
+    logClosureCompilerError(targetErrors);
+    throw new Error('Found parse errors');
+  }
+}
+
+/**
  * Runs closure compiler's type checker against all AMP code.
  * @return {!Promise<void>}
  */
@@ -278,6 +317,7 @@ async function checkTypes() {
   log(`Checking types for targets: ${targets.map(cyan).join(', ')}`);
   displayLifecycleDebugging();
 
+  await ensureMinTypeQuality(['src/amp.js']);
   await Promise.all(targets.map(typeCheck));
   exitCtrlcHandler(handlerProcess);
 }
