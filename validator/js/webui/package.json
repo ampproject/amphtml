@@ -17,7 +17,7 @@
     "@polymer/iron-a11y-keys-behavior": "0.0.3",
     "@polymer/iron-behaviors": "0.0.3",
     "@polymer/iron-dropdown": "0.0.3",
-    "@polymer/iron-fit-behavior": "0.0.3",
+    "@polymer/iron-fit-behavior": "0.0.4",
     "@polymer/iron-flex-layout": "0.0.3",
     "@polymer/iron-form-element-behavior": "0.0.3",
     "@polymer/iron-icon": "0.0.3",
