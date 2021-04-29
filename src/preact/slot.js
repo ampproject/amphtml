@@ -18,6 +18,7 @@ import * as Preact from './index';
 import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
 import {Loading} from '../core/loading-instructions';
 import {pureDevAssert as devAssert} from '../core/assert';
+import {isElement} from '../core/types';
 import {
   loadAll,
   pauseAll,
@@ -95,7 +96,7 @@ export function useSlotContext(ref, opt_props) {
   // Context changes.
   useLayoutEffect(() => {
     const slot = ref.current;
-    devAssert(slot?.nodeType == 1, 'Element expected');
+    devAssert(isElement(slot), 'Element expected');
 
     setProp(slot, CanRender, Slot, context.renderable);
     setProp(slot, CanPlay, Slot, context.playable);
@@ -124,7 +125,7 @@ export function useSlotContext(ref, opt_props) {
   // before the browser undistributes them.
   useLayoutEffect(() => {
     const slot = ref.current;
-    devAssert(slot?.nodeType == 1, 'Element expected');
+    devAssert(isElement(slot), 'Element expected');
 
     // Mount children, unless lazy loading requested. If so the element should
     // use `BaseElement.setAsContainer`.
