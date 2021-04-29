@@ -4,7 +4,7 @@ formats:
   - websites
   - stories
 teaser:
-  text: Displays Iframely-powered rich media embeds from over 1900 publishers and card previews for other URLs
+  text: Displays Iframely.com-powered rich media embeds
 ---
 
 <!--
@@ -25,7 +25,13 @@ limitations under the License.
 
 # amp-iframely
 
-Embeds and displays <a href="https://iframely.com">Iframely</a>-powered rich media from over 1900 third party publishers. Shows URL previews as summary card for any other URL.
+Embeds and displays [**Iframely.com**](https://iframely.com)-powered rich media embeds from over 1900 third-party publishers. Shows URL previews as summary card for any other URL.
+
+[tip type="note"]
+
+**`<amp-iframely>`** embeds content through the third-party vendor **Iframely.com**. It should not be confused with [**`<amp-iframe>`**](https://go.amp.dev/c/amp-iframe), which embeds any URL directly.
+
+[/tip]
 
 <table>
   <tr>
