@@ -181,6 +181,10 @@ export class Log {
           }
         });
     });
+
+    this.boundAssertFn_ = /** @type {!AssertionFunction} */ (this.assert.bind(
+      this
+    ));
   }
 
   /**
@@ -418,7 +422,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertElement(shouldBeElement, opt_message) {
-    return assertions.assertElement(this.suffix_, shouldBeElement, opt_message);
+    return assertions.assertElement(
+      this.boundAssertFn_,
+      shouldBeElement,
+      opt_message
+    );
   }
 
   /**
@@ -433,7 +441,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertString(shouldBeString, opt_message) {
-    return assertions.assertString(this.suffix_, shouldBeString, opt_message);
+    return assertions.assertString(
+      this.boundAssertFn_,
+      shouldBeString,
+      opt_message
+    );
   }
 
   /**
@@ -449,7 +461,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertNumber(shouldBeNumber, opt_message) {
-    return assertions.assertNumber(this.suffix_, shouldBeNumber, opt_message);
+    return assertions.assertNumber(
+      this.boundAssertFn_,
+      shouldBeNumber,
+      opt_message
+    );
   }
 
   /**
@@ -462,7 +478,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertArray(shouldBeArray, opt_message) {
-    return assertions.assertArray(this.suffix_, shouldBeArray, opt_message);
+    return assertions.assertArray(
+      this.boundAssertFn_,
+      shouldBeArray,
+      opt_message
+    );
   }
 
   /**
@@ -476,7 +496,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertBoolean(shouldBeBoolean, opt_message) {
-    return assertions.assertBoolean(this.suffix_, shouldBeBoolean, opt_message);
+    return assertions.assertBoolean(
+      this.boundAssertFn_,
+      shouldBeBoolean,
+      opt_message
+    );
   }
 
   /**
@@ -491,7 +515,12 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertEnumValue(enumObj, s, opt_enumName) {
-    return assertions.assertEnumValue(this.suffix_, enumObj, s, opt_enumName);
+    return assertions.assertEnumValue(
+      this.boundAssertFn_,
+      enumObj,
+      s,
+      opt_enumName
+    );
   }
 
   /**

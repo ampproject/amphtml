@@ -17,8 +17,6 @@
 import * as assertions from './base';
 import {isMinifiedMode} from '../minified-mode';
 
-const DEV_ERROR_SENTINEL = '';
-
 /**
  * Throws an error if the first argument isn't trueish. Mirrors devAssert in
  * src/log.js.
@@ -65,7 +63,7 @@ export function assert(
   }
 
   return assertions.assert(
-    DEV_ERROR_SENTINEL,
+    '',
     shouldBeTruthy,
     opt_message,
     opt_1,
@@ -94,7 +92,7 @@ export function assert(
  */
 export function assertElement(sentinel, shouldBeElement, opt_message) {
   return assertions.assertElement(
-    DEV_ERROR_SENTINEL,
+    /** @type {!AssertionFunction} */ (assert),
     shouldBeElement,
     opt_message
   );
@@ -115,7 +113,7 @@ export function assertElement(sentinel, shouldBeElement, opt_message) {
  */
 export function assertString(sentinel, shouldBeString, opt_message) {
   return assertions.assertString(
-    DEV_ERROR_SENTINEL,
+    /** @type {!AssertionFunction} */ (assert),
     shouldBeString,
     opt_message
   );
@@ -137,7 +135,7 @@ export function assertString(sentinel, shouldBeString, opt_message) {
  */
 export function assertNumber(sentinel, shouldBeNumber, opt_message) {
   return assertions.assertNumber(
-    DEV_ERROR_SENTINEL,
+    /** @type {!AssertionFunction} */ (assert),
     shouldBeNumber,
     opt_message
   );
@@ -157,7 +155,11 @@ export function assertNumber(sentinel, shouldBeNumber, opt_message) {
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertArray(sentinel, shouldBeArray, opt_message) {
-  return assertions.assertArray(DEV_ERROR_SENTINEL, shouldBeArray, opt_message);
+  return assertions.assertArray(
+    /** @type {!AssertionFunction} */ (assert),
+    shouldBeArray,
+    opt_message
+  );
 }
 
 /**
@@ -174,7 +176,7 @@ export function assertArray(sentinel, shouldBeArray, opt_message) {
  */
 export function assertBoolean(sentinel, shouldBeBoolean, opt_message) {
   return assertions.assertBoolean(
-    DEV_ERROR_SENTINEL,
+    /** @type {!AssertionFunction} */ (assert),
     shouldBeBoolean,
     opt_message
   );
@@ -185,18 +187,18 @@ export function assertBoolean(sentinel, shouldBeBoolean, opt_message) {
  * value, the error is thrown.
  *
  * @param {?string} sentinel
- * @param {*} shouldBeEnum
  * @param {!Object<T>} enumObj
+ * @param {*} shouldBeEnum
  * @param {string=} opt_enumName
  * @return {T}
  * @template T
  * @closurePrimitive {asserts.matchesReturn}
  */
-export function assertEnumValue(sentinel, shouldBeEnum, enumObj, opt_enumName) {
+export function assertEnumValue(sentinel, enumObj, shouldBeEnum, opt_enumName) {
   return assertions.assertEnumValue(
-    DEV_ERROR_SENTINEL,
-    shouldBeEnum,
+    /** @type {!AssertionFunction} */ (assert),
     enumObj,
+    shouldBeEnum,
     opt_enumName
   );
 }

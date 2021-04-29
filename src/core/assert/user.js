@@ -94,7 +94,7 @@ export function assert(
  */
 export function assertElement(sentinel, shouldBeElement, opt_message) {
   return assertions.assertElement(
-    USER_ERROR_SENTINEL,
+    /** @type {!AssertionFunction} */ (assert),
     shouldBeElement,
     opt_message
   );
@@ -115,7 +115,7 @@ export function assertElement(sentinel, shouldBeElement, opt_message) {
  */
 export function assertString(sentinel, shouldBeString, opt_message) {
   return assertions.assertString(
-    USER_ERROR_SENTINEL,
+    /** @type {!AssertionFunction} */ (assert),
     shouldBeString,
     opt_message
   );
@@ -137,7 +137,7 @@ export function assertString(sentinel, shouldBeString, opt_message) {
  */
 export function assertNumber(sentinel, shouldBeNumber, opt_message) {
   return assertions.assertNumber(
-    USER_ERROR_SENTINEL,
+    /** @type {!AssertionFunction} */ (assert),
     shouldBeNumber,
     opt_message
   );
@@ -158,7 +158,7 @@ export function assertNumber(sentinel, shouldBeNumber, opt_message) {
  */
 export function assertArray(sentinel, shouldBeArray, opt_message) {
   return assertions.assertArray(
-    USER_ERROR_SENTINEL,
+    /** @type {!AssertionFunction} */ (assert),
     shouldBeArray,
     opt_message
   );
@@ -178,7 +178,7 @@ export function assertArray(sentinel, shouldBeArray, opt_message) {
  */
 export function assertBoolean(sentinel, shouldBeBoolean, opt_message) {
   return assertions.assertBoolean(
-    USER_ERROR_SENTINEL,
+    /** @type {!AssertionFunction} */ (assert),
     shouldBeBoolean,
     opt_message
   );
@@ -189,18 +189,18 @@ export function assertBoolean(sentinel, shouldBeBoolean, opt_message) {
  * value, the error is thrown.
  *
  * @param {?string} sentinel
- * @param {*} shouldBeEnum
  * @param {!Object<T>} enumObj
+ * @param {*} shouldBeEnum
  * @param {string=} opt_enumName
  * @return {T}
  * @template T
  * @closurePrimitive {asserts.matchesReturn}
  */
-export function assertEnumValue(sentinel, shouldBeEnum, enumObj, opt_enumName) {
+export function assertEnumValue(sentinel, enumObj, shouldBeEnum, opt_enumName) {
   return assertions.assertEnumValue(
-    USER_ERROR_SENTINEL,
-    shouldBeEnum,
+    /** @type {!AssertionFunction} */ (assert),
     enumObj,
+    shouldBeEnum,
     opt_enumName
   );
 }
