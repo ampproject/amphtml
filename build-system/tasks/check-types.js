@@ -238,8 +238,8 @@ async function typeCheck(targetName) {
     opts.externs = externGlobs.flatMap(globby.sync);
 
     // Included globs should explicitly exclude any externs
-    const excludedExterns = externGlobs.map((s) => `!${s}`);
-    opts.extraGlobs = globby.sync(srcGlobs.concat(excludedExterns));
+    const excludedExterns = externGlobs.map((glob) => `!${glob}`);
+    opts.extraGlobs = srcGlobs.concat(excludedExterns);
   }
 
   // If no entry point is defined, we want to scan the globs provided without
