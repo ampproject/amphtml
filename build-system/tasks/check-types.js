@@ -72,7 +72,11 @@ const TYPE_CHECK_TARGETS = {
     warningLevel: 'QUIET',
   },
   'src-core': {
-    srcGlobs: ['src/core{,/**}/*.js'],
+    srcGlobs: [
+      'src/core{,/**}/*.js',
+      // Needed for CSS escape polyfill
+      'third_party/css-escape/css-escape.js',
+    ],
     externGlobs: [CORE_EXTERNS_GLOB],
   },
   'src-examiner': {
@@ -89,10 +93,6 @@ const TYPE_CHECK_TARGETS = {
   },
   'src-polyfills': {
     srcGlobs: ['src/polyfills{,/**}/*.js'],
-    warningLevel: 'QUIET',
-  },
-  'src-polyfillstub': {
-    srcGlobs: ['src/polyfillstub{,/**}/*.js'],
     warningLevel: 'QUIET',
   },
   'src-preact': {

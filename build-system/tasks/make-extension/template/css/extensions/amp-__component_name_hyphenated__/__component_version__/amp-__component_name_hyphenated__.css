@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-/* __do_not_submit__
- * If you don't require this CSS file, remove {hasCss: true} from
- * bundles.config.extensions.json. Otherwise, remove this comment.
- */
-
 amp-__component_name_hyphenated__ {
   /** Component styles */
 }
