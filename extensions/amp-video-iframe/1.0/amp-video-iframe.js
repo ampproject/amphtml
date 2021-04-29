@@ -22,6 +22,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/core/types/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {measureIntersection} from '../../../src/utils/intersection';
+import {postMessageWhenAvailable} from '../../../src/iframe-video';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -65,7 +66,8 @@ function onMessage(e) {
       // TODO(alanorozco): Throttle
       getIntersectionRatioMinAutoplay(currentTarget).then(
         (intersectionRatio) => {
-          currentTarget.contentWindow./*OK*/ postMessage(
+          postMessageWhenAvailable(
+            currentTarget,
             JSON.stringify(
               dict({
                 'id': messageId,
