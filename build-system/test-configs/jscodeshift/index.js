@@ -27,14 +27,14 @@ const command = (args = []) =>
 
 /**
  * @param {Array<string>} args
- * @param {Object} opts
- * @return {string}
+ * @param {?Object=} opts
+ * @return {!Object}
  */
 const jscodeshift = (args = [], opts) => getOutput(command(args), opts);
 
 /**
  * @param {Array<string>} args
- * @param {?Object=} opts
+ * @param {Object} opts
  * @return {ReturnType<execScriptAsync>}
  */
 const jscodeshiftAsync = (args = [], opts) =>

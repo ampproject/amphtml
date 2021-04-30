@@ -105,6 +105,18 @@ async function startServer(
     started = resolve;
   });
   setServeMode(modeOptions);
+  /**
+   * @type {{
+   *   name: string,
+   *   root: string,
+   *   host: string,
+   *   port: number,
+   *   https: string,
+   *   preferHttp1: boolean,
+   *   silent: boolean,
+   *   middleware: function[],
+   * }}
+   */
   const options = {
     name: 'AMP Dev Server',
     root: process.cwd(),
@@ -161,7 +173,7 @@ function resetServerFiles() {
 async function stopServer() {
   if (url) {
     connect.serverClose();
-    log(green('Stopped server at'), cyan(url));
+    log(green('Stopped server at'), cyan(/** @type {string} */ (url)));
     url = null;
   }
 }
