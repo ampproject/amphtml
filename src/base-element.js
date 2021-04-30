@@ -903,15 +903,6 @@ export class BaseElement {
   }
 
   /**
-   * Returns the layout rectangle used for when calculating this element's
-   * intersection with the viewport.
-   * @return {!./layout-rect.LayoutRectDef}
-   */
-  getIntersectionElementLayoutBox() {
-    return this.getLayoutBox();
-  }
-
-  /**
    * Collapses the element, setting it to `display: none`, and notifies its
    * owner (if there is one) through {@link collapsedCallback} that the element
    * is no longer visible.

@@ -100,18 +100,14 @@ describes.realWin(
           return Promise.reject(new Error('No token'));
         },
       });
-      env.sandbox
-        .stub(impl, 'getIntersectionElementLayoutBox')
-        .callsFake(() => {
-          return {
-            top: 0,
-            bottom: 0,
-            left: 0,
-            right: 0,
-            width: 320,
-            height: 50,
-          };
-        });
+      impl.getLayoutBox = () => ({
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        width: 320,
+        height: 50,
+      });
     });
 
     /**

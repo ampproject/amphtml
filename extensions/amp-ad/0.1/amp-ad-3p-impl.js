@@ -33,7 +33,7 @@ import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/utils/math';
 import {computedStyle, setStyle} from '../../../src/style';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getAdCid} from '../../../src/ad-cid';
 import {getAdContainer, isAdPositionAllowed} from '../../../src/ad-helper';
@@ -54,7 +54,6 @@ import {
   intersectionEntryToJson,
   measureIntersection,
 } from '../../../src/utils/intersection';
-import {moveLayoutRect} from '../../../src/layout-rect';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
@@ -106,12 +105,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isInFixedContainer_ = false;
-
-    /**
-     * The (relative) layout box of the ad iframe to the amp-ad tag.
-     * @private {?../../../src/layout-rect.LayoutRectDef}
-     */
-    this.iframeLayoutBox_ = null;
 
     /**
      * Call to stop listening to viewport changes.
@@ -292,9 +285,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (this.container_ === undefined) {
       this.container_ = getAdContainer(this.element);
     }
-    // We remeasured this tag, let's also remeasure the iframe. Should be
-    // free now and it might have changed.
-    this.measureIframeLayoutBox_();
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.onLayoutMeasure();
     }
@@ -322,41 +312,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         {direction: ''}
       );
     }
-  }
-
-  /**
-   * Measure the layout box of the iframe if we rendered it already.
-   * @private
-   */
-  measureIframeLayoutBox_() {
-    if (this.xOriginIframeHandler_ && this.xOriginIframeHandler_.iframe) {
-      const iframeBox = this.getViewport().getLayoutRect(
-        this.xOriginIframeHandler_.iframe
-      );
-      const box = this.getLayoutBox();
-      // Cache the iframe's relative position to the amp-ad. This is
-      // necessary for fixed-position containers which "move" with the
-      // viewport.
-      this.iframeLayoutBox_ = moveLayoutRect(iframeBox, -box.left, -box.top);
-    }
-  }
-
-  /**
-   * @override
-   */
-  getIntersectionElementLayoutBox() {
-    if (!this.xOriginIframeHandler_ || !this.xOriginIframeHandler_.iframe) {
-      return super.getIntersectionElementLayoutBox();
-    }
-    const box = this.getLayoutBox();
-    if (!this.iframeLayoutBox_) {
-      this.measureIframeLayoutBox_();
-    }
-
-    const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */ (devAssert(
-      this.iframeLayoutBox_
-    ));
-    return moveLayoutRect(iframe, box.left, box.top);
   }
 
   /** @override */

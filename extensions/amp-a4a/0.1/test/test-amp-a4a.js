@@ -82,7 +82,7 @@ describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
     doc.body.appendChild(element);
     a4a = new AmpA4A(element);
     // Make the ad think it has size.
-    env.sandbox.stub(a4a, 'getIntersectionElementLayoutBox').returns({
+    element.getLayoutBox = () => ({
       height: 250,
       width: 300,
     });

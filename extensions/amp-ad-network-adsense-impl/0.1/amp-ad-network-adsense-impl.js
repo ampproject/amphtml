@@ -336,7 +336,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     ) {
       this.size_ = {width, height};
     } else {
-      this.size_ = this.getIntersectionElementLayoutBox();
+      this.size_ = this.getLayoutBox();
     }
 
     const sizeToSend = this.isSinglePageStoryAd

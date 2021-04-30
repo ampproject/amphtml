@@ -23,7 +23,6 @@ import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';
-import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {endsWith} from '../../../src/core/types/string';
 import {getConsentDataToForward} from '../../../src/consent';
@@ -34,12 +33,12 @@ import {
 } from '../../../src/iframe-helper';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isExperimentOn} from '../../../src/experiments';
-import {moveLayoutRect} from '../../../src/layout-rect';
 import {parseJson} from '../../../src/json';
 import {removeElement} from '../../../src/dom';
 import {removeFragment} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {urls} from '../../../src/config';
+import {user, userAssert} from '../../../src/log';
 import {utf8Encode} from '../../../src/utils/bytes.js';
 
 /** @const {string} */
@@ -83,12 +82,6 @@ export class AmpIframe extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isDisallowedAsAd_ = false;
-
-    /**
-     * The (relative) layout box of the ad iframe to the amp-ad tag.
-     * @private {?../../../src/layout-rect.LayoutRectDef}
-     */
-    this.iframeLayoutBox_ = null;
 
     /** @private  {?HTMLIFrameElement} */
     this.iframe_ = null;
@@ -309,10 +302,6 @@ export class AmpIframe extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    // We remeasured this tag, lets also remeasure the iframe. Should be
-    // free now and it might have changed.
-    this.measureIframeLayoutBox_();
-
     const {element} = this;
 
     this.isAdLike_ = isAdLike(element);
@@ -328,37 +317,6 @@ export class AmpIframe extends AMP.BaseElement {
   looksLikeTrackingIframe_() {
     // It may be tempting to inline this method, but it's referenced in tests.
     return looksLikeTrackingIframe(this.element);
-  }
-
-  /**
-   * Measure the layout box of the iframe if we rendered it already.
-   * @private
-   */
-  measureIframeLayoutBox_() {
-    if (this.iframe_) {
-      const iframeBox = this.getViewport().getLayoutRect(this.iframe_);
-      const box = this.getLayoutBox();
-      // Cache the iframe's relative position to the amp-iframe. This is
-      // necessary for fixed-position containers which "move" with the
-      // viewport.
-      this.iframeLayoutBox_ = moveLayoutRect(iframeBox, -box.left, -box.top);
-    }
-  }
-
-  /** @override */
-  getIntersectionElementLayoutBox() {
-    if (!this.iframe_) {
-      return super.getIntersectionElementLayoutBox();
-    }
-    const box = this.getLayoutBox();
-    if (!this.iframeLayoutBox_) {
-      this.measureIframeLayoutBox_();
-    }
-
-    const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */ (devAssert(
-      this.iframeLayoutBox_
-    ));
-    return moveLayoutRect(iframe, box.left, box.top);
   }
 
   /** @override */

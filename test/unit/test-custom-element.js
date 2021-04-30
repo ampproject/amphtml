@@ -40,7 +40,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       let resources;
       let resourcesMock;
       let clock;
-      let testElementGetInsersectionElementLayoutBox;
       let container;
       let ElementClass, StubElementClass, ElementClassWithReUpgrade;
 
@@ -80,10 +79,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         }
         firstLayoutCompleted() {
           testElementFirstLayoutCompleted();
-        }
-        getIntersectionElementLayoutBox() {
-          testElementGetInsersectionElementLayoutBox();
-          return {top: 10, left: 10, width: 11, height: 1};
         }
         unlayoutCallback() {
           testElementUnlayoutCallback();
@@ -156,7 +151,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         testElementCreatePlaceholderCallback = env.sandbox.spy();
         testElementLayoutCallback = env.sandbox.spy();
         testElementFirstLayoutCompleted = env.sandbox.spy();
-        testElementGetInsersectionElementLayoutBox = env.sandbox.spy();
         testElementUnlayoutCallback = env.sandbox.spy();
         testElementPauseCallback = env.sandbox.spy();
         testElementResumeCallback = env.sandbox.spy();
@@ -388,14 +382,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(element.isFirstLayoutCompleted_).to.be.true;
         expect(element.signals().get(CommonSignals.RENDER_START)).to.be.ok;
         expect(element.signals().get(CommonSignals.LOAD_END)).to.be.ok;
-      });
-
-      it('Element - getIntersectionChangeEntry', () => {
-        const element = new ElementClass();
-        container.appendChild(element);
-        element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
-        element.getIntersectionChangeEntry();
-        expect(testElementGetInsersectionElementLayoutBox).to.be.calledOnce;
       });
 
       it('Element - updateLayoutBox', () => {
