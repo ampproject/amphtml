@@ -21,7 +21,6 @@ import {CSS as GALLERY_CSS} from './stream-gallery.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {StreamGallery} from './stream-gallery';
-import {cloneElement} from '../../../src/preact';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/core/types/object';
 import {dispatchCustomEvent} from '../../../src/dom';
@@ -62,17 +61,6 @@ class AmpStreamGallery extends PreactBaseElement {
     );
     return super.isLayoutSupported(layout);
   }
-
-  /** @override */
-  updatePropsForRendering(props) {
-    const {arrowPrev, arrowNext} = props;
-    if (arrowPrev) {
-      props['arrowPrevAs'] = (props) => cloneElement(arrowPrev, props);
-    }
-    if (arrowNext) {
-      props['arrowNextAs'] = (props) => cloneElement(arrowNext, props);
-    }
-  }
 }
 
 /**
@@ -109,13 +97,15 @@ AmpStreamGallery['layoutSizeDefined'] = true;
 
 /** @override */
 AmpStreamGallery['props'] = {
-  'arrowPrev': {
+  'arrowPrevAs': {
     selector: '[slot="prev-arrow"]',
     single: true,
+    as: true,
   },
-  'arrowNext': {
+  'arrowNextAs': {
     selector: '[slot="next-arrow"]',
     single: true,
+    as: true,
   },
   'controls': {attr: 'controls', type: 'string', media: true},
   'extraSpace': {attr: 'extra-space', type: 'string', media: true},
