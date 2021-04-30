@@ -79,6 +79,7 @@ tags: {  # <amp-lightbox>
     value_casei: "fly-in-top"
   }
   attrs: {
+    disabled_by: "amp4email"
     name: "animation" # 1.0 only
     value_casei: "fade-in"
     value_casei: "fly-in-bottom"
