@@ -66,7 +66,6 @@ import {
   RefreshManager, // eslint-disable-line no-unused-vars
   getRefreshManager,
 } from '../../amp-a4a/0.1/refresh-manager';
-import {STICKY_AD_TRANSITION_EXP} from '../../../ads/google/a4a/sticky-ad-transition-exp';
 import {SafeframeHostApi} from './safeframe-host';
 import {Services} from '../../../src/services';
 import {
@@ -498,14 +497,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           );
         },
         branches: Object.values(IDLE_CWV_EXP_BRANCHES),
-      },
-      {
-        experimentId: STICKY_AD_TRANSITION_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          STICKY_AD_TRANSITION_EXP.control,
-          STICKY_AD_TRANSITION_EXP.experiment,
-        ],
       },
     ]);
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);
