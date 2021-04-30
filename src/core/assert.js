@@ -19,7 +19,7 @@ import {
   elementStringOrPassThru,
 } from './error-message-helpers';
 import {includes} from './types/string';
-import {isMinifiedMode} from './minified-mode';
+import {isMinifiedMode} from './mode/minified';
 import {remove} from './types/array';
 
 /**
