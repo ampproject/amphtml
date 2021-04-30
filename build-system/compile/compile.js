@@ -154,13 +154,13 @@ function getSrcs(entryModuleFilenames, outputDir, outputFilename, options) {
   // this works fine.
   if (options.includePolyfills) {
     srcs.push(
-      '!build/fake-module/src/polyfills.js',
+      '!build/fake-module/src/polyfills/index.js',
       '!build/fake-module/src/polyfills/**/*.js',
       '!build/fake-polyfills/**/*.js'
     );
   } else {
-    srcs.push('!src/polyfills.js', '!build/fake-polyfills/**/*.js');
-    unneededFiles.push('build/fake-module/src/polyfills.js');
+    srcs.push('!src/polyfills/index.js', '!build/fake-polyfills/**/*.js');
+    unneededFiles.push('build/fake-module/src/polyfills/index.js');
   }
   // Negative globstars must come at the end.
   srcs.push(
