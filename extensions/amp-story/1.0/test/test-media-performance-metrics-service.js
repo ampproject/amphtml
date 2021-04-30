@@ -438,16 +438,19 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
     });
 
     it('should report the video is not on the first page', () => {
+      // Create first page with unregistered video
+      const firstPage = win.document.createElement('amp-story-page');
+      firstPage.appendChild(win.document.createElement('video'));
+      win.document.body.appendChild(firstPage);
+
+      // Create second page with registered video
       const video = win.document.createElement('video');
       const source = win.document.createElement('source');
       const secondPage = win.document.createElement('amp-story-page');
-      win.document.body.appendChild(
-        win.document.createElement('amp-story-page')
-      );
-      win.document.body.appendChild(secondPage);
       source.setAttribute('src', 'foo.mp4');
       video.appendChild(source);
       secondPage.appendChild(video);
+      win.document.body.appendChild(secondPage);
 
       service.startMeasuring(video);
       service.stopMeasuring(video);
