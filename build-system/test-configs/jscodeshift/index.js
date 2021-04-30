@@ -27,15 +27,15 @@ const command = (args = []) =>
 
 /**
  * @param {Array<string>} args
- * @param {Object} opts
- * @return {string}
+ * @param {?Object=} opts
+ * @return {!Object}
  */
 const jscodeshift = (args = [], opts) => getOutput(command(args), opts);
 
 /**
  * @param {Array<string>} args
  * @param {Object} opts
- * @return {ChildProcess}
+ * @return {ReturnType<execScriptAsync>}
  */
 const jscodeshiftAsync = (args = [], opts) =>
   execScriptAsync(command(args), opts);
@@ -44,7 +44,7 @@ const stripColors = (str) => str.replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
 
 /**
  * @param {string} line
- * @return {Array<string>} [filename, report]
+ * @return {Array<string>|null} [filename, report]
  */
 function getJscodeshiftReport(line) {
   const stripped = stripColors(line);
