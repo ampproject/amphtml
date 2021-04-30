@@ -95,7 +95,7 @@ If you have advanced hosting capabilities or would like to manually assign a ver
 
 ### Option 3: Manually copy the framework from cdn.ampproject.org
 
-The AMP framework can be copied from `cdn.ampproject.org`. The latest weekly release is always served from the root of `cdn.ampproject.org`. All [non-deprecated releases](https://github.com/ampproject/amphtml/blob/main/spec/amp-versioning-policy.md#version-deprecations) can be found in versioned URLs: `cdn.ampproject.org/rtv/<rtv>`, where `<rtv>` is the runtime version.
+The AMP framework can be copied from `cdn.ampproject.org`. The latest weekly release is always served from the root of `cdn.ampproject.org`. All [non-deprecated releases](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-versioning-policy.md#version-deprecations) can be found in versioned URLs: `cdn.ampproject.org/rtv/<rtv>`, where `<rtv>` is the runtime version.
 
 Note: The AMP Project is looking into options for packaging releases ([#27726](https://github.com/ampproject/amphtml/issues/27726)).
 
@@ -257,7 +257,7 @@ If location detection and file modification at time of delivery are not possible
 
 The API must meet the following requirements:
 
--   Satisfy [CORS security in AMP](https://github.com/ampproject/amphtml/blob/main/spec/amp-cors-requests.md)
+-   Satisfy [CORS security in AMP](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-cors-requests.md)
 -   Be secure (HTTPS)
 -   Return `application/json` content conforming to the following schema:
     ```
@@ -310,7 +310,7 @@ There are trade-offs in accuracy and performance when you set the client cache t
 In addition to following [TLS best practices](https://infosec.mozilla.org/guidelines/web_security), consider the following headers when hosting the AMP framework:
 
 -   `content-security-policy`: If your pages implement [AMP's CSP](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/secure-pages/), apply a matching content security policy to your hosted framework responses. Inspect the headers on `https://cdn.ampproject.org/v0.js` for a base policy that should be expanded to include resources served from your host.
--   `access-control-allow-origin`: Some runtime components are fetched via XHR. If your AMP pages will be served from a different host than your framework, be sure to include CORS headers (see also [CORS Requests in AMP](https://github.com/ampproject/amphtml/blob/main/spec/amp-cors-requests.md)).
+-   `access-control-allow-origin`: Some runtime components are fetched via XHR. If your AMP pages will be served from a different host than your framework, be sure to include CORS headers (see also [CORS Requests in AMP](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-cors-requests.md)).
 -   `content-type`: There are a few resources served without file extensions, or with extensions that may not be recognized by all web servers. In addition to [common types](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types), you may want to include special handling for the following:
 
     -   `/rtv/metadata` - `application/json`

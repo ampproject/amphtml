@@ -276,7 +276,7 @@ tags.
 
 This section adds validation rules for the various layout options available to
 amp tags. See
-[AMP HTML Layout System](https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md)
+[AMP HTML Layout System](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-layout.md)
 to determine which options make sense for your tag.
 
 ### Attribute Validation Options

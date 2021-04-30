@@ -10,7 +10,7 @@ Before you can add your analytics service to AMP HTML runtime, you may need to:
 
 -   Identify the kinds of [variables](analytics-vars.md) and [requests](amp-analytics.md#requests) you'll need in an AMP HTML document for your analytics service.
 -   Identify the triggers that result in analytics requests being sent from a page that would be relevant for your service.
--   Consider if and how you will [track users across](https://github.com/ampproject/amphtml/blob/main/spec/amp-managing-user-state.md) first-party and third-party AMP contexts.
+-   Consider if and how you will [track users across](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-managing-user-state.md) first-party and third-party AMP contexts.
 -   Determine how your analytics dashboard handles AMP traffic.
 -   Identify any missing functionality in `amp-analytics`, and [file requests](https://github.com/ampproject/amphtml/issues/new) for needed features.
 -   AMP Analytics sends its variables to a preconfigured endpoint. If you do not already have an existing endpoint, review [this sample](https://github.com/ampproject/amp-publisher-sample#amp-analytics-sample) for an overview on how to build one.
@@ -58,7 +58,7 @@ To take this approach, review the documentation for publishers' integration with
 ## Further Resources
 
 -   Deep Dive: [Why not just use an iframe?](why-not-iframe.md)
--   Deep Dive: [Managing non-authenticated user state with AMP](https://github.com/ampproject/amphtml/blob/main/spec/amp-managing-user-state.md)
+-   Deep Dive: [Managing non-authenticated user state with AMP](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-managing-user-state.md)
 -   [amp-analytics sample](https://github.com/ampproject/amp-publisher-sample#amp-analytics-sample)
 -   [amp-analytics](https://amp.dev/documentation/components/amp-analytics) reference documentation
 -   [amp-analytics variables](analytics-vars.md) reference documentation

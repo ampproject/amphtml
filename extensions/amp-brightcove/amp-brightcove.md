@@ -105,7 +105,7 @@ Keys and values will be URI encoded. Keys will be camel cased.
 If this attribute is present, and the browser supports autoplay, the video will
 be automatically played as soon as it becomes visible. There are some conditions
 that the component needs to meet to be played, [which are outlined in the Video
-in AMP spec](https://github.com/ampproject/amphtml/blob/main/spec/amp-video-interface.md#autoplay).
+in AMP spec](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-video-interface.md#autoplay).
 
 ### `dock`
 

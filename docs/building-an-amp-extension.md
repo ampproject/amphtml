@@ -54,7 +54,7 @@ All AMP extensions (and built-in elements) have their tag names prefixed
 with `amp-`. Make sure to choose an accurate and clear name for your
 extension.
 
-Extensions that embed a third-party service must follow the [guidelines for naming a third-party component](../spec/amp-3p-naming.md).
+Extensions that embed a third-party service must follow the [guidelines for naming a third-party component](../docs/spec/amp-3p-naming.md).
 
 ## Directory structure
 
@@ -183,7 +183,7 @@ AMP.extension('amp-my-element', '0.1', (AMP) => {
     create a lightweight placeholder. This gets called only if the element
     doesn't already have a publisher-provided placeholder (through [the
     placeholder
-    attribute](https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md#placeholder)).
+    attribute](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-layout.md#placeholder)).
 -   **Usage**: Create placeholder DOM and return it. For example,
     amp-instagram uses this to create a placeholder dynamically by creating
     an amp-img placeholder instead of loading the iframe, leaving the iframe
@@ -304,7 +304,7 @@ AMP.extension('amp-carousel', '0.1', (AMP) => {
 ## Actions and events
 
 AMP provides a framework for [elements to fire their own
-events](https://github.com/ampproject/amphtml/blob/main/spec/amp-actions-and-events.md)
+events](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-actions-and-events.md)
 to allow users of that element to listen and react to the events. For
 example, amp-form extension fires a few events on &lt;form&gt; elements
 like `submit-success`. This allow publishers to listen to that event
@@ -446,7 +446,7 @@ placeholder for itself (in case a placeholder wasn't provided by the
 developer/publisher who is using your element). This allows elements to
 display content as fast as possible and allow prerendering that
 placeholder. Learn [more about placeholder
-elements](https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md#placeholder).
+elements](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-layout.md#placeholder).
 
 NOTE: Make sure not to request external resources in the pre-render
 phase. Requests to the publisher's origin itself are OK. If in doubt,
@@ -599,9 +599,9 @@ AMP defines different layouts that elements can choose whether or not to
 support Your element needs to announce which layouts it supports through
 overriding the `isLayoutSupported(layout)` callback and returning true
 if the element supports that layout. [Read more about AMP Layout
-System](https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md)
+System](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-layout.md)
 and [Layout
-Types](https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md#layout).
+Types](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-layout.md#layout).
 
 ### What layout should your element support?
 

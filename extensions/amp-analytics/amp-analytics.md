@@ -194,10 +194,10 @@ etc.) see
 To load a remote configuration, in the `<amp-analytics>` element, specify the
 `config` attribute and the URL for the configuration data. The URL specified
 should use the HTTPS scheme. The URL may include
-[AMP URL vars](https://github.com/ampproject/amphtml/blob/main/spec/amp-var-substitutions.md).
+[AMP URL vars](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-var-substitutions.md).
 To access cookies, see the [`data-credentials`](#data-credentials) attribute.
 The response must follow the
-[AMP CORS security guidelines](https://github.com/ampproject/amphtml/blob/main/spec/amp-cors-requests.md).
+[AMP CORS security guidelines](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-cors-requests.md).
 
 In this example, we specify the `config` attribute to load the configuration
 data from the specified URL.
@@ -251,7 +251,7 @@ Analytics providers need to create a new `varGroups` object inside of the
 `configRewriter` configuration to enable this feature. Publishers can then
 include any named analytic provider created `varGroups` they wish to enable in
 their analytics configuration. All of the variables supported by
-[AMP HTML Substitutions Guide](../../spec/amp-var-substitutions.md)
+[AMP HTML Substitutions Guide](../../docs/spec/amp-var-substitutions.md)
 can be used. _Important note:_ the `${varName}` variants will not work.
 
 For example we may have a vendor whose configuration looks like this:
@@ -473,7 +473,7 @@ The `amp-analytics` component defines many basic variables that can be used in
 requests. A list of all such variables is available in the
 [`amp-analytics` Variables Guide](analytics-vars.md).
 In addition, all of the variables supported by
-[AMP HTML Substitutions Guide](../../spec/amp-var-substitutions.md)
+[AMP HTML Substitutions Guide](../../docs/spec/amp-var-substitutions.md)
 are also supported.
 
 Variables are resolved asynchronously and can delay the request until they are
@@ -1273,7 +1273,7 @@ created is illustrated in
 ### Cookies
 
 The `cookies` feature supports writing cookies to the origin domain by
-extracting [`QUERY_PARAM`](../../spec/amp-var-substitutions.md#query-parameter)
+extracting [`QUERY_PARAM`](../../docs/spec/amp-var-substitutions.md#query-parameter)
 and [`LINKER_PARAM`](linker-id-receiving.md#linker-param)
 information from the document url. It can be used along with `linkers` features
 to perform ID syncing from the AMP proxied domain to AMP pages on a publisher's
@@ -1301,9 +1301,9 @@ Specifies the type of vendor. For details, see the list of
 This is an optional attribute that can be used to load a configuration from a
 specified remote URL. The URL specified should use the HTTPS scheme. See also
 the `data-include-credentials` attribute below. The URL may include
-[AMP URL vars](../../spec/amp-var-substitutions.md).
+[AMP URL vars](../../docs/spec/amp-var-substitutions.md).
 The response must follow the
-[AMP CORS security guidelines](../../spec/amp-cors-requests.md).
+[AMP CORS security guidelines](../../docs/spec/amp-cors-requests.md).
 
 ```html
 <amp-analytics
