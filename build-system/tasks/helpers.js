@@ -350,7 +350,7 @@ function handleBundleError(err, continueOnError, destFilename) {
     // Drop the node_modules call stack, which begins with '    at'.
     message = err.stack.replace(/    at[^]*/, '').trim();
   }
-  log(red('ERROR:'), message, '\n');
+  log(red('ERROR:'), message.toString(), '\n');
   const reasonMessage = `Could not compile ${cyan(destFilename)}`;
   if (continueOnError) {
     log(red('ERROR:'), reasonMessage);
