@@ -17,7 +17,6 @@
 import * as Preact from '../../../src/preact';
 import {VideoEvents} from '../../../src/video-interface';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
-import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/core/types/object';
 import {dispatchCustomEvent} from '../../../src/dom';
@@ -181,10 +180,9 @@ function YoutubeWithRef(
   };
 
   return (
-    <VideoWrapper
+    <VideoIframe
       ref={ref}
       {...rest}
-      component={VideoIframe}
       autoplay={autoplay}
       src={src}
       onMessage={onMessage}
@@ -203,7 +201,7 @@ function YoutubeWithRef(
       }}
       sandbox="allow-scripts allow-same-origin allow-presentation"
       playerStateRef={playerStateRef}
-    ></VideoWrapper>
+    />
   );
 }
 
