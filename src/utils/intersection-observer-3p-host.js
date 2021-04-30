@@ -15,6 +15,7 @@
  */
 
 import {MessageType} from '../3p-frame-messaging';
+import {Services} from '../services';
 import {SubscriptionApi} from '../iframe-helper';
 import {dict} from '../core/types/object';
 import {layoutRectLtwh, moveLayoutRect, rectIntersection} from '../layout-rect';
@@ -71,19 +72,35 @@ const INIT_TIME = Date.now();
 
 /**
  * A function to get the element's current IntersectionObserverEntry
- * regardless of the intersetion ratio. Only available when element is not
+ * regardless of the intersection ratio. Only available when element is not
  * nested in a container iframe.
  * @param {!../layout-rect.LayoutRectDef} element element's rect
  * @param {?../layout-rect.LayoutRectDef} owner element's owner rect
  * @param {!../layout-rect.LayoutRectDef} hostViewport hostViewport's rect
  * @return {!IntersectionObserverEntry} A change entry.
  */
-export function getIntersectionChangeEntry(element, owner, hostViewport) {
+function getIntersectionChangeEntryHelper(element, owner, hostViewport) {
   const intersection =
     rectIntersection(element, owner, hostViewport) ||
     layoutRectLtwh(0, 0, 0, 0);
   const ratio = intersectionRatio(intersection, element);
   return calculateChangeEntry(element, hostViewport, intersection, ratio);
+}
+
+/**
+ * A function to get the element's current IntersectionObserverEntry.
+ * @param {AmpElement} element
+ * @return {!IntersectionChangeEntry} a change entry
+ */
+export function getIntersectionChangeEntry(element) {
+  const box = element.getLayoutBox();
+  const owner = element.getOwner();
+  const viewport = Services.viewportForDoc(element);
+  const viewportBox = viewport.getRect();
+
+  // TODO(jridgewell, #4826): We may need to make this recursive.
+  const ownerBox = owner && owner.getLayoutBox();
+  return getIntersectionChangeEntryHelper(box, ownerBox, viewportBox);
 }
 
 /**

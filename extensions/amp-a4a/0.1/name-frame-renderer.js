@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
 import {Renderer} from './amp-ad-type-defs';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/core/types/object';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
-import {getExperimentBranch} from '../../../src/experiments';
-import {
-  intersectionEntryToJson,
-  measureIntersection,
-} from '../../../src/utils/intersection';
+import {getIntersectionChangeEntry} from '../../../src/utils/intersection-observer-3p-host.js';
+import {intersectionEntryToJson} from '../../../src/utils/intersection';
 import {utf8Decode} from '../../../src/utils/bytes';
 
 /**
@@ -57,40 +53,32 @@ export class NameFrameRenderer extends Renderer {
     );
     contextMetadata['creative'] = creative;
 
-    const asyncIntersection =
-      getExperimentBranch(
-        element.ownerDocument.defaultView,
-        ADS_INITIAL_INTERSECTION_EXP.id
-      ) === ADS_INITIAL_INTERSECTION_EXP.experiment;
-    const intersectionPromise = asyncIntersection
-      ? measureIntersection(element)
-      : Promise.resolve(element.getIntersectionChangeEntry());
-    return intersectionPromise.then((intersection) => {
-      contextMetadata['_context'][
-        'initialIntersection'
-      ] = intersectionEntryToJson(intersection);
-      const attributes = dict({
-        'src': srcPath,
-        'name': JSON.stringify(contextMetadata),
-        'height': context.size.height,
-        'width': context.size.width,
-        'frameborder': '0',
-        'allowfullscreen': '',
-        'allowtransparency': '',
-        'scrolling': 'no',
-        'marginwidth': '0',
-        'marginheight': '0',
-      });
-      if (crossDomainData.sentinel) {
-        attributes['data-amp-3p-sentinel'] = crossDomainData.sentinel;
-      }
-      const iframe = createElementWithAttributes(
-        /** @type {!Document} */ (element.ownerDocument),
-        'iframe',
-        /** @type {!JsonObject} */ (attributes)
-      );
-      // TODO(glevitzky): Ensure that applyFillContent or equivalent is called.
-      element.appendChild(iframe);
+    const intersection = getIntersectionChangeEntry(element);
+    contextMetadata['_context'][
+      'initialIntersection'
+    ] = intersectionEntryToJson(intersection);
+    const attributes = dict({
+      'src': srcPath,
+      'name': JSON.stringify(contextMetadata),
+      'height': context.size.height,
+      'width': context.size.width,
+      'frameborder': '0',
+      'allowfullscreen': '',
+      'allowtransparency': '',
+      'scrolling': 'no',
+      'marginwidth': '0',
+      'marginheight': '0',
     });
+    if (crossDomainData.sentinel) {
+      attributes['data-amp-3p-sentinel'] = crossDomainData.sentinel;
+    }
+    const iframe = createElementWithAttributes(
+      /** @type {!Document} */ (element.ownerDocument),
+      'iframe',
+      /** @type {!JsonObject} */ (attributes)
+    );
+    // TODO(glevitzky): Ensure that applyFillContent or equivalent is called.
+    element.appendChild(iframe);
+    return Promise.resolve();
   }
 }

@@ -20,6 +20,7 @@ import {
   getIntersectionChangeEntry,
   intersectionRatio,
 } from '../../src/utils/intersection-observer-3p-host';
+import {Services} from '../../src/services';
 import {installHiddenObserverForDoc} from '../../src/service/hidden-observer-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
 
@@ -120,29 +121,32 @@ describes.sandboxed('getIntersectionChangeEntry', {}, (env) => {
   beforeEach(() => {
     env.sandbox.stub(performance, 'now').callsFake(() => 100);
     env.sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(fakeAmpDoc);
+
+    env.sandbox.stub(Services, 'viewportForDoc').returns({
+      getRect() {
+        return layoutRectLtwh(0, 100, 100, 100);
+      },
+    });
   });
 
   it('without owner', () => {
-    expect(
-      getIntersectionChangeEntry(
-        layoutRectLtwh(0, 100, 50, 50),
-        null,
-        layoutRectLtwh(0, 100, 100, 100)
-      )
-    ).to.jsonEqual({
+    const element1 = {
+      getOwner: () => null,
+      getLayoutBox: () => layoutRectLtwh(0, 100, 50, 50),
+    };
+    expect(getIntersectionChangeEntry(element1)).to.jsonEqual({
       time: 100,
       rootBounds: layoutRectLtwh(0, 0, 100, 100),
       boundingClientRect: layoutRectLtwh(0, 0, 50, 50),
       intersectionRect: layoutRectLtwh(0, 0, 50, 50),
       intersectionRatio: 1,
     });
-    expect(
-      getIntersectionChangeEntry(
-        layoutRectLtwh(50, 200, 150, 200),
-        null,
-        layoutRectLtwh(0, 100, 100, 100)
-      )
-    ).to.jsonEqual({
+
+    const element2 = {
+      getOwner: () => null,
+      getLayoutBox: () => layoutRectLtwh(50, 200, 150, 200),
+    };
+    expect(getIntersectionChangeEntry(element2)).to.jsonEqual({
       time: 100,
       rootBounds: layoutRectLtwh(0, 0, 100, 100),
       boundingClientRect: layoutRectLtwh(50, 100, 150, 200),
@@ -150,14 +154,17 @@ describes.sandboxed('getIntersectionChangeEntry', {}, (env) => {
       intersectionRatio: 0,
     });
   });
+
   it('with owner', () => {
-    expect(
-      getIntersectionChangeEntry(
-        layoutRectLtwh(50, 50, 150, 200),
-        layoutRectLtwh(0, 50, 100, 100),
-        layoutRectLtwh(0, 100, 100, 100)
-      )
-    ).to.jsonEqual({
+    const element = {
+      getLayoutBox: () => layoutRectLtwh(50, 50, 150, 200),
+      getOwner() {
+        return {
+          getLayoutBox: () => layoutRectLtwh(0, 50, 100, 100),
+        };
+      },
+    };
+    expect(getIntersectionChangeEntry(element)).to.jsonEqual({
       time: 100,
       rootBounds: layoutRectLtwh(0, 0, 100, 100),
       boundingClientRect: layoutRectLtwh(50, -50, 150, 200),

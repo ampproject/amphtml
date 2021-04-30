@@ -1080,19 +1080,20 @@ const forbiddenTermsSrcInclusive = {
   '\\.getLayoutBox': {
     message: measurementApiDeprecated,
     allowlist: [
+      'extensions/amp-ad-network-adsense-impl/0.1/responsive-state.js',
+      'extensions/amp-ad/0.1/amp-ad-3p-impl.js',
+      'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
+      'extensions/amp-iframe/0.1/amp-iframe.js',
+      'extensions/amp-next-page/1.0/visibility-observer.js',
+      'extensions/amp-playbuzz/0.1/amp-playbuzz.js',
+      'extensions/amp-story/1.0/page-advancement.js',
       'src/base-element.js',
       'src/custom-element.js',
       'src/friendly-iframe-embed.js',
       'src/service/mutator-impl.js',
       'src/service/resource.js',
       'src/service/resources-impl.js',
-      'extensions/amp-ad/0.1/amp-ad-3p-impl.js',
-      'extensions/amp-ad-network-adsense-impl/0.1/responsive-state.js',
-      'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
-      'extensions/amp-iframe/0.1/amp-iframe.js',
-      'extensions/amp-next-page/1.0/visibility-observer.js',
-      'extensions/amp-playbuzz/0.1/amp-playbuzz.js',
-      'extensions/amp-story/1.0/page-advancement.js',
+      'src/utils/intersection-observer-3p-host.js',
     ],
   },
   '\\.getLayoutSize': {
@@ -1132,7 +1133,6 @@ const forbiddenTermsSrcInclusive = {
   '\\.getIntersectionElementLayoutBox': {
     message: measurementApiDeprecated,
     allowlist: [
-      'src/custom-element.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad/0.1/amp-ad-3p-impl.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',

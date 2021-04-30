@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import {ADS_INITIAL_INTERSECTION_EXP} from '../../src/experiments/ads-initial-intersection-exp';
 import {Services} from '../../src/services';
 import {createCustomEvent} from '../../src/event-helper';
 import {createFixtureIframe, poll} from '../../testing/iframe';
-import {forceExperimentBranch} from '../../src/experiments';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
 
@@ -38,11 +36,6 @@ describe('amp-ad 3P', () => {
     return createFixture().then((f) => {
       fixture = f;
       installPlatformService(fixture.win);
-      forceExperimentBranch(
-        fixture.win,
-        ADS_INITIAL_INTERSECTION_EXP.id,
-        ADS_INITIAL_INTERSECTION_EXP.experiment
-      );
     });
   });
 
@@ -98,18 +91,7 @@ describe('amp-ad 3P', () => {
         });
         const {initialIntersection} = context;
         expect(initialIntersection.rootBounds).to.deep.equal(
-          layoutRectLtwh(
-            0,
-            0,
-            Math.min(
-              iframe.ownerDocument.body.clientWidth,
-              iframe.ownerDocument.defaultView.innerWidth
-            ),
-            Math.min(
-              iframe.ownerDocument.body.clientHeight,
-              iframe.ownerDocument.defaultView.innerHeight
-            )
-          )
+          layoutRectLtwh(0, 0, 500, 3000)
         );
 
         expect(initialIntersection.boundingClientRect).to.deep.equal(

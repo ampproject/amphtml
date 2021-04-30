@@ -390,14 +390,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(element.signals().get(CommonSignals.LOAD_END)).to.be.ok;
       });
 
-      it('Element - getIntersectionChangeEntry', () => {
-        const element = new ElementClass();
-        container.appendChild(element);
-        element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
-        element.getIntersectionChangeEntry();
-        expect(testElementGetInsersectionElementLayoutBox).to.be.calledOnce;
-      });
-
       it('Element - updateLayoutBox', () => {
         const element = new ElementClass();
         container.appendChild(element);

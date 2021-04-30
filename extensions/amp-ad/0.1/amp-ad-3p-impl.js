@@ -18,7 +18,6 @@ import {
   ADSENSE_MCRSPV_TAG,
   getMatchedContentResponsiveHeightAndUpdatePubParams,
 } from '../../../ads/google/utils';
-import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
 import {
@@ -48,12 +47,9 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getExperimentBranch} from '../../../src/experiments';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {
-  intersectionEntryToJson,
-  measureIntersection,
-} from '../../../src/utils/intersection';
+import {getIntersectionChangeEntry} from '../../../src/utils/intersection-observer-3p-host.js';
+import {intersectionEntryToJson} from '../../../src/utils/intersection';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {
   observeWithSharedInOb,
@@ -150,9 +146,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
      * @private {boolean}
      */
     this.isFullWidthRequested_ = false;
-
-    /** @private {Promise<!IntersectionObserverEntry>} */
-    this.initialIntersectionPromise_ = null;
   }
 
   /** @override */
@@ -218,13 +211,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (this.isFullWidthRequested_) {
       return this.attemptFullWidthSizeChange_();
     }
-
-    const asyncIntersection =
-      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
-      ADS_INITIAL_INTERSECTION_EXP.experiment;
-    this.initialIntersectionPromise_ = asyncIntersection
-      ? measureIntersection(this.element)
-      : Promise.resolve(this.element.getIntersectionChangeEntry());
   }
 
   /**
@@ -419,20 +405,19 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         // here, though, allows us to measure the impact of ad throttling via
         // incrementLoadingAds().
 
-        return this.initialIntersectionPromise_.then((intersection) => {
-          const iframe = getIframe(
-            toWin(this.element.ownerDocument.defaultView),
-            this.element,
-            this.type_,
-            opt_context,
-            {
-              initialIntersection: intersectionEntryToJson(intersection),
-            }
-          );
-          iframe.title = this.element.title || 'Advertisement';
-          this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
-          return this.xOriginIframeHandler_.init(iframe);
-        });
+        const intersection = getIntersectionChangeEntry(this.element);
+        const iframe = getIframe(
+          toWin(this.element.ownerDocument.defaultView),
+          this.element,
+          this.type_,
+          opt_context,
+          {
+            initialIntersection: intersectionEntryToJson(intersection),
+          }
+        );
+        iframe.title = this.element.title || 'Advertisement';
+        this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
+        return this.xOriginIframeHandler_.init(iframe);
       })
       .then(() => {
         observeWithSharedInOb(this.element, (inViewport) =>

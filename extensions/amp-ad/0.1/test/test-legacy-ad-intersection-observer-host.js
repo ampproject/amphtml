@@ -18,7 +18,6 @@ import {BaseElement} from '../../../../src/base-element';
 import {LegacyAdIntersectionObserverHost} from '../legacy-ad-intersection-observer-host';
 import {createAmpElementForTesting} from '../../../../src/custom-element';
 import {deserializeMessage} from '../../../../src/3p-frame-messaging';
-import {getIntersectionChangeEntry} from '../../../../src/utils/intersection-observer-3p-host';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 
 describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
@@ -38,9 +37,13 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
   let stubFireInOb;
 
   function getInObEntry() {
-    const rootBounds = layoutRectLtwh(198, 299, 100, 100);
-    const layoutBox = layoutRectLtwh(50, 100, 150, 200);
-    return getIntersectionChangeEntry(layoutBox, null, rootBounds);
+    return {
+      time: Date.now(),
+      rootBounds: layoutRectLtwh(0, 0, 0, 0),
+      boundingClientRect: layoutRectLtwh(0, 0, 0, 0),
+      intersectionRect: layoutRectLtwh(0, 0, 0, 0),
+      intersectionRatio: 1,
+    };
   }
 
   function getIframe(src) {
@@ -72,6 +75,8 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
         },
       };
     };
+    element.getLayoutBox = () => ({});
+    element.getOwner = () => null;
 
     stubFireInOb = (host) => {
       let fireObserved = false;
