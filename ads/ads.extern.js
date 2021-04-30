@@ -374,8 +374,7 @@ data.sid;
 
 // amplified.js
 data.amplified_id;
-data.amplified_artist;
-data.amplified_song;
+data.amplified_params;
 
 // appnexus.js
 data.tagid;
