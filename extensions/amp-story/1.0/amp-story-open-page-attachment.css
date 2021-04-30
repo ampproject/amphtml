@@ -170,14 +170,16 @@
 }
 
 /** For amp-story-inline-page-attachment-v2 experiment elements. */
-.i-amphtml-story-page-open-attachment {
+.i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
   --i-amphtml-chip-background-color: rgba(255, 255, 255, 0.5) !important;
   --i-amphtml-img-background-color: white !important;
   --i-amphtml-label-text-color: white !important;
   --i-amphtml-arrow-color: black !important;
+  --i-amphtml-page-attachment-ui-animation-delay: 1s !important;
+  --i-amphtml-page-attachment-ui-animation-duration: .6s !important;
 }
 
-[theme="dark"].i-amphtml-story-page-open-attachment {
+[theme="dark"].i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
   --i-amphtml-chip-background-color: rgba(0, 0, 0, 0.5) !important;
   --i-amphtml-img-background-color: black !important;
   --i-amphtml-label-text-color: black !important;
@@ -208,7 +210,7 @@
   align-items: center !important;
   overflow: hidden !important;
   margin-bottom: 12px !important;
-  animation: animate-scale .7s both !important;
+  animation: tap-scale var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
 }
 
 .i-amphtml-story-inline-page-attachment-chip:only-child {
@@ -242,15 +244,6 @@
   margin: 8px !important;
 }
 
-@keyframes animate-scale {
-  0%, 100% {
-    transform: scale(1);
-  } 
-  45% {
-    transform: scale(.9);
-  }
-}
-
 .i-amphtml-story-inline-page-attachment-arrow:before {
   content: '' !important;
   position: absolute !important;
@@ -262,22 +255,7 @@
   background-position: center !important;
   background-size: auto !important;
   background-repeat: no-repeat !important;
-  animation: move-up-arrow-in-circle .7s both !important;
-}
-
-@keyframes move-up-arrow-in-circle {
-  0%, 100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  45% {
-    opacity: 0;
-    transform: translateY(-3px);
-  }
-  45.1% {
-    opacity: 0;
-    transform: translateY(3px);
-  }
+  animation: move-up-arrow-in-circle var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
 }
 
 [theme="dark"] .i-amphtml-story-inline-page-attachment-arrow:before {
@@ -305,7 +283,7 @@
 [href].i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
   /* Outlink attachments do not need the linear gradient. */
   background: none !important;
-  animation: animate-scale .7s both !important;
+  animation: tap-scale var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
 }
 
 .i-amphtml-story-page-open-attachment.i-amphtml-story-page-open-attachment-opening {
@@ -323,7 +301,7 @@
   cursor: pointer !important;
   margin-bottom: 10px !important;
   fill: var(--i-amphtml-outlink-cta-background-color) !important;
-  animation: move-up-arrow .7s both !important;  
+  animation: move-up-arrow var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;  
 }
 
 @keyframes move-up-arrow {
@@ -335,9 +313,31 @@
     opacity: 0;
     transform: translateY(-7px);
   }
-  45.1% {
-    opacity: 0;
+  45.01% {
     transform: translateY(5px);
+  }
+}
+
+@keyframes move-up-arrow-in-circle {
+  0%, 100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  45% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  45.01% {
+    transform: translateY(3px);
+  }
+}
+
+@keyframes tap-scale {
+  0%, 100% {
+    transform: scale(1);
+  } 
+  45% {
+    transform: scale(.9);
   }
 }
 
