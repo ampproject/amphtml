@@ -15,7 +15,7 @@
  */
 
 import {internalRuntimeVersion} from './internal-version';
-import {isFortestingMode, isMinifiedMode} from './core/mode';
+import {isEsmMode, isFortestingMode, isMinifiedMode} from './core/mode';
 import {parseQueryString_} from './url-parse-query-string';
 
 /**
@@ -95,7 +95,7 @@ function getMode_(win) {
       ) >= 0 || win.AMP_DEV_MODE
     ),
     examiner: hashQuery['development'] == '2',
-    esm: IS_ESM,
+    esm: isEsmMode(),
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
     minified: isMinifiedMode(),
