@@ -184,32 +184,20 @@
   --i-amphtml-arrow-color: white !important;
 }
 
-/** For amp-story-inline-page-attachment-v2 inline default. */
-.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-icon {
+.i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment[active] {
   animation: none !important;
-  position: relative !important;
 }
 
-.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-label {
-  color: var(--i-amphtml-label-text-color) !important;
-}
-
-.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-icon::after {
-  animation: none !important;
-  background: var(--i-amphtml-label-text-color) !important;
-}
-
-.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-bar-left,
-.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-bar-right {
-  background: var(--i-amphtml-arrow-color) !important;
-}
-
-.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-bar-left {
-  animation: open-attachment-bar-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) both !important;
-}
-
-.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-bar-right {
-  animation: open-attachment-bar-right 0.3s cubic-bezier(0.4, 0, 0.2, 1) both !important;
+.i-amphtml-story-page-attachment-label {
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.3px;
+  line-height: 16px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  max-width: 210px !important;
 }
 
 /** For amp-story-inline-page-attachment-v2 inline with images. */
@@ -220,14 +208,14 @@
   align-items: center !important;
   overflow: hidden !important;
   margin-bottom: 12px !important;
+  animation: animate-scale .7s both !important;
 }
 
 .i-amphtml-story-inline-page-attachment-chip:only-child {
   margin-bottom: 20px !important;
 }
 
-.i-amphtml-story-inline-page-attachment-img,
-.i-amphtml-story-inline-page-attachment-arrow {
+.i-amphtml-story-inline-page-attachment-img {
   background-size: contain !important;
   background-repeat: no-repeat !important;
 }
@@ -243,27 +231,60 @@
 }
 
 .i-amphtml-story-inline-page-attachment-arrow {
+  position: relative !important;
   height: 32px !important;
   width: 32px !important;
+  border-radius: 50% !important;
+  background-color: var(--i-amphtml-img-background-color) !important;
+}
+
+.i-amphtml-story-inline-page-attachment-arrow:not(:only-child) {
   margin: 8px !important;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M16 32C24.8366 32 32 24.8366 32 16C32 7.16344 24.8366 0 16 0C7.16344 0 0 7.16344 0 16C0 24.8366 7.16344 32 16 32Z" fill="white"/> <path d="M6.74612 18.796C6.33376 18.0797 6.57889 17.1649 7.29412 16.7508L15.0632 12.2529C15.7808 11.8374 16.6995 12.0835 17.1132 12.8022C17.5256 13.5184 17.2805 14.4333 16.5652 14.8474L8.7962 19.3453C8.07854 19.7608 7.15989 19.5146 6.74612 18.796Z" fill="black"/> <path d="M14.724 12.8022C15.1377 12.0835 16.0564 11.8374 16.774 12.2528L24.5431 16.7508C25.2583 17.1648 25.5034 18.0797 25.0911 18.7959C24.6773 19.5146 23.7587 19.7607 23.041 19.3452L15.272 14.8473C14.5567 14.4332 14.3116 13.5184 14.724 12.8022Z" fill="black"/> </svg>') !important;
+}
+
+@keyframes animate-scale {
+  0%, 100% {
+    transform: scale(1);
+  } 
+  45% {
+    transform: scale(.9);
+  }
+}
+
+.i-amphtml-story-inline-page-attachment-arrow:before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18.7px" height="7.5px" viewBox="0 0 18.7 7.5"><path d="M18,4.7l-7.8-4.5C10,0,9.7,0,9.4,0C9.1,0,8.8,0,8.5,0.2L0.7,4.7C0,5.1-0.2,6,0.2,6.7c0.4,0.7,1.3,1,2.1,0.5l7.1-4.1l7.1,4.1c0.7,0.4,1.6,0.2,2.1-0.5C19,6,18.7,5.1,18,4.7z"/></svg>') !important;
   background-position: center !important;
+  background-size: auto !important;
+  background-repeat: no-repeat !important;
+  animation: move-up-arrow-in-circle .7s both !important;
 }
 
-[theme="dark"] .i-amphtml-story-inline-page-attachment-arrow {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 32 32"><path d="M16 32a16 16 0 100-32 16 16 0 000 32z" fill="black"/><path d="M7 19v-2l8-5a1 1 0 112 3l-8 4H7z" fill="white"/><path d="M15 13l2-1 8 5a1 1 0 11-2 2l-8-4v-2z" fill="white"/></svg>') !important;
+@keyframes move-up-arrow-in-circle {
+  0%, 100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  45% {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  45.1% {
+    opacity: 0;
+    transform: translateY(3px);
+  }
 }
 
-.i-amphtml-story-inline-page-attachment-label {
-  font-family: 'Roboto', sans-serif !important;
-  font-size: 16px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.25px !important;
-  line-height: 16px !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  max-width: 210px !important;
+[theme="dark"] .i-amphtml-story-inline-page-attachment-arrow:before {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="white" width="18.7px" height="7.5px" viewBox="0 0 18.7 7.5"><path d="M18,4.7l-7.8-4.5C10,0,9.7,0,9.4,0C9.1,0,8.8,0,8.5,0.2L0.7,4.7C0,5.1-0.2,6,0.2,6.7c0.4,0.7,1.3,1,2.1,0.5l7.1-4.1l7.1,4.1c0.7,0.4,1.6,0.2,2.1-0.5C19,6,18.7,5.1,18,4.7z"/></svg>') !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2:not([href]) .i-amphtml-story-page-attachment-label {
   margin-bottom: 20px !important;
   color: var(--i-amphtml-label-text-color) !important;
 }
@@ -284,6 +305,7 @@
 [href].i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
   /* Outlink attachments do not need the linear gradient. */
   background: none !important;
+  animation: animate-scale .7s both !important;
 }
 
 .i-amphtml-story-page-open-attachment.i-amphtml-story-page-open-attachment-opening {
@@ -298,25 +320,25 @@
 
 .i-amphtml-story-outlink-page-attachment-arrow {
   display: block !important;
-  height: 32px !important;
-  width: 32px !important;
   cursor: pointer !important;
-  position: relative !important;
+  margin-bottom: 10px !important;
+  fill: var(--i-amphtml-outlink-cta-background-color) !important;
+  animation: move-up-arrow .7s both !important;  
 }
 
-.i-amphtml-story-outlink-page-open-attachment-bar-left,
-.i-amphtml-story-outlink-page-open-attachment-bar-right {
-  background-color: var(--i-amphtml-outlink-cta-background-color) !important;
-}
-
-.i-amphtml-story-outlink-page-open-attachment-bar-left {
-  left: 6px !important;
-  animation: open-attachment-bar-left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
-}
-
-.i-amphtml-story-outlink-page-open-attachment-bar-right {
-  right: 6px !important;
-  animation: open-attachment-bar-right 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+@keyframes move-up-arrow {
+  0%, 100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  45% {
+    opacity: 0;
+    transform: translateY(-7px);
+  }
+  45.1% {
+    opacity: 0;
+    transform: translateY(5px);
+  }
 }
 
 .i-amphtml-story-outlink-page-attachment-outlink-chip {
@@ -328,7 +350,7 @@
   max-width: calc(100% - 64px) !important;
   border-radius: 30px !important;
   background: var(--i-amphtml-outlink-cta-background-color) !important;
-  place-items: center !important;
+  place-items: center !important; 
 }
 
 .i-amphtml-story-outlink-page-attachment-img {
@@ -341,16 +363,7 @@
   border-radius: 50% !important;
 }
 
-.i-amphtml-story-outlink-page-attachment-label {
-  font-family: 'Roboto', sans-serif !important;
-  font-size: 16px !important;
-  font-weight: bold !important;
-  letter-spacing: 0.3px;
-  line-height: 16px !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  max-width: 210px !important;
+[href] .i-amphtml-story-page-attachment-label {
   padding-inline-start: 6px !important;
   padding-inline-end: 8px !important;
   color: var(--i-amphtml-outlink-cta-text-color) !important;
