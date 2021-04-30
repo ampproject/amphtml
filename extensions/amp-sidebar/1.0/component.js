@@ -18,7 +18,7 @@ import * as Preact from '../../../src/preact';
 import {ContainWrapper, useValueRef} from '../../../src/preact/component';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {Side} from './sidebar-config';
-import {createPortal, forwardRef} from '../../../src/preact/compat';
+import {forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
 import {
   useCallback,
@@ -191,44 +191,49 @@ export function SidebarToolbar({
   ...rest
 }) {
   const ref = useRef();
-  const [matches, setMatches] = useState(false);
-  const [targetEl, setTargetEl] = useState(null);
+  const [target, setTarget] = useState();
 
   useEffect(() => {
-    const window = ref.current?.ownerDocument?.defaultView;
-    if (!window) {
-      return;
-    }
-
-    const mediaQueryList = window.matchMedia(mediaQueryProp);
-    const updateMatches = () => setMatches(mediaQueryList.matches);
-    mediaQueryList.addEventListener('change', updateMatches);
-    setMatches(mediaQueryList.matches);
-    return () => mediaQueryList.removeEventListener('change', updateMatches);
-  }, [mediaQueryProp]);
-
-  useEffect(() => {
-    const document = ref.current?.ownerDocument;
-    if (!document) {
-      return;
-    }
-
     const selector = `#${CSS.escape(toolbarTarget)}`;
-    const newTargetEl = document.querySelector(selector);
-    setTargetEl(newTargetEl);
+    const newTarget = document.querySelector(selector);
+    setTarget(newTarget);
   }, [toolbarTarget]);
 
+  useEffect(() => {
+    const element = ref.current;
+    const doc = ref.current?.ownerDocument;
+    if (!element || !doc || !target) {
+      return;
+    }
+
+    const clone = element.cloneNode(true);
+    const style = doc.createElement('style');
+    style./*OK*/ innerHTML = `
+    #${toolbarTarget} {
+        display: none;
+    }
+    @media ${mediaQueryProp} {
+      #${toolbarTarget} {
+        display: initial;
+      }
+    }`;
+
+    target.appendChild(clone);
+    target.appendChild(style);
+    return () => {
+      target.removeChild(clone);
+      target.removeChild(style);
+    };
+  }, [mediaQueryProp, toolbarTarget, target]);
+
   return (
-    <>
-      <nav
-        ref={ref}
-        toolbar={mediaQueryProp}
-        toolbar-target={toolbarTarget}
-        {...rest}
-      >
-        {children}
-      </nav>
-      {matches && targetEl && createPortal(children, targetEl)}
-    </>
+    <nav
+      ref={ref}
+      toolbar={mediaQueryProp}
+      toolbar-target={toolbarTarget}
+      {...rest}
+    >
+      {children}
+    </nav>
   );
 }
