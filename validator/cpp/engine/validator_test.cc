@@ -7,6 +7,7 @@
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "absl/strings/cord.h"
+#include "absl/strings/escaping.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
@@ -55,16 +56,19 @@ TestCase FindOrDie(std::map<std::string, TestCase> cases,
 #define EXPECT_NULL(p) EXPECT_TRUE((p) == nullptr)
 #define EXPECT_NOT_NULL(p) EXPECT_FALSE((p) == nullptr)
 
-void MaybeGenerateFailuresFor(const std::string& output,
+void MaybeGenerateFailuresFor(const std::string& actual,
                               const std::string& expected,
-                              const std::string& test_case_name) {
-  if (output == expected) return;
-  auto path = fs::path(test_case_name);
-  path.replace_extension(".out");
-  std::string out_file = path.string();
-  ADD_FAILURE_AT(out_file.c_str(), 1) << "expected:\n"
-                                      << expected << "\nsaw:\n"
-                                      << output;
+                              const std::string& test_case_output_file) {
+  if (actual == expected) return;
+  std::string out_file =
+      StrReplaceAll(test_case_output_file,
+                    {{"external/validator/testdata/", "validator/testdata/"},
+                     {"external/amphtml-extensions/", "extensions/"}});
+  ADD_FAILURE_AT(out_file.c_str(), 1)
+      << "Please use the following command to overwrite the output file by the "
+         "actual output of AMP validator.\n"
+      << "echo " << absl::Base64Escape(actual) << " | base64 --decode > "
+      << out_file;
 }
 
 TEST(ValidatorTest, Testdata_ValidatorTest_TestCases) {
@@ -79,7 +83,8 @@ TEST(ValidatorTest, Testdata_ValidatorTest_TestCases) {
     // If this fails, then an integrate command into a branch probably
     // went wrong.
     EXPECT_LE(55, result.spec_file_revision());
-    MaybeGenerateFailuresFor(output, test_case.output_content, test_case.name);
+    MaybeGenerateFailuresFor(output, test_case.output_content,
+                             test_case.output_file);
   }
 }
 
