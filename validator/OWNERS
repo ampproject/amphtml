@@ -6,5 +6,9 @@
     {
       owners: [{name: 'ampproject/wg-caching', required: true}],
     },
+    {
+      pattern: '{package.json,package-lock.json}',
+      owners: [{name: 'ampproject/wg-caching', requestReviews: false}],
+    },
   ],
 }
