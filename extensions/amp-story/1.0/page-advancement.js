@@ -905,6 +905,22 @@ export class TimeBasedAdvancement extends AdvancementConfig {
   }
 
   /**
+   * Updates the delay (and derived values) from the given auto-advance string.
+   *
+   * @param {string} autoAdvanceStr The value of the updated auto-advance-after attribute.
+   */
+  updateTimeDelay(autoAdvanceStr) {
+    const newDelayMs = timeStrToMillis(autoAdvanceStr);
+    if (newDelayMs === undefined || isNaN(newDelayMs)) {
+      return;
+    }
+    if (this.remainingDelayMs_) {
+      this.remainingDelayMs_ += newDelayMs - this.delayMs_;
+    }
+    this.delayMs_ = newDelayMs;
+  }
+
+  /**
    * Gets an instance of TimeBasedAdvancement based on the value of the
    * auto-advance string (from the 'auto-advance-after' attribute on the page).
    * @param {string} autoAdvanceStr The value of the auto-advance-after
