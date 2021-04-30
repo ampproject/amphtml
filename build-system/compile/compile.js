@@ -248,7 +248,7 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     language_out: argv.esm || argv.sxg ? 'NO_TRANSPILE' : 'ECMASCRIPT5_STRICT',
     // We do not use the polyfills provided by closure compiler.
     // If you need a polyfill. Manually include them in the
-    // respective top level polyfills.js files.
+    // respective top level polyfills/*.js files.
     rewrite_polyfills: false,
     externs,
     js_module_root: [
