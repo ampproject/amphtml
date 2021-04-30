@@ -42,6 +42,7 @@ t.run('AMPHTML ad on AMP Page', () => {
     },
     () => {
       afterEach(() => {
+        // Just adds a comment.
         return RequestBank.tearDown();
       });
 
