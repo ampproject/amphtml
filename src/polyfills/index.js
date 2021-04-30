@@ -33,9 +33,9 @@ import {install as installResizeObserver} from './resize-observer';
 import {install as installSetAdd} from './set-add';
 import {install as installStringStartsWith} from './string-starts-with';
 import {install as installWeakMapSet} from './weakmap-set';
-import {isSxgMode} from '../core/mode';
+import {isEsmMode, isSxgMode} from '../core/mode';
 
-if (!IS_ESM) {
+if (!isEsmMode()) {
   installFetch(self);
   installMathSign(self);
   installObjectAssign(self);
@@ -50,7 +50,7 @@ if (!IS_ESM) {
 
 // Polyfills that depend on DOM availability
 if (self.document) {
-  if (!IS_ESM) {
+  if (!isEsmMode()) {
     installDOMTokenList(self);
     installDocContains(self);
     installGetBoundingClientRect(self);

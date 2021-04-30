@@ -18,6 +18,7 @@ import {Deferred} from './core/data-structures/promise';
 import {dev, devAssert} from './log';
 import {dict} from './core/types/object';
 import {includes} from './core/types/string';
+import {isEsmMode} from './core/mode';
 import {isScopeSelectorSupported, prependSelectorsWith} from './core/dom/css';
 import {toWin} from './types';
 
@@ -73,7 +74,7 @@ export function waitForChild(parent, checkFunc, callback) {
   }
   /** @const {!Window} */
   const win = toWin(parent.ownerDocument.defaultView);
-  if (IS_ESM || win.MutationObserver) {
+  if (isEsmMode() || win.MutationObserver) {
     /** @const {MutationObserver} */
     const observer = new win.MutationObserver(() => {
       if (checkFunc(parent)) {
@@ -550,7 +551,7 @@ function scopedQuerySelectionFallback(root, selector) {
  * @suppress {suspiciousCode}
  */
 export function scopedQuerySelector(root, selector) {
-  if (IS_ESM || isScopeSelectorSupported(root)) {
+  if (isEsmMode() || isScopeSelectorSupported(root)) {
     return root./*OK*/ querySelector(prependSelectorsWith(selector, ':scope'));
   }
 
@@ -569,7 +570,7 @@ export function scopedQuerySelector(root, selector) {
  * @suppress {suspiciousCode}
  */
 export function scopedQuerySelectorAll(root, selector) {
-  if (IS_ESM || isScopeSelectorSupported(root)) {
+  if (isEsmMode() || isScopeSelectorSupported(root)) {
     return root./*OK*/ querySelectorAll(
       prependSelectorsWith(selector, ':scope')
     );

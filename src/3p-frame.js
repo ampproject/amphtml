@@ -24,6 +24,7 @@ import {
   getRequiredSandboxFlags,
 } from './core/3p-frame';
 import {internalRuntimeVersion} from './internal-version';
+import {isEsmMode} from './core/mode';
 import {isExperimentOn} from './experiments';
 import {setStyle} from './style';
 import {tryParseJson} from './json';
@@ -210,10 +211,10 @@ export function getBootstrapUrl(type, win) {
     const filename = getMode().minified
       ? `./vendor/${type}.`
       : `./vendor/${type}.max.`;
-    return IS_ESM ? filename + 'mjs' : filename + 'js';
+    return isEsmMode() ? filename + 'mjs' : filename + 'js';
   }
   if (isExperimentOn(win, '3p-vendor-split')) {
-    return IS_ESM
+    return isEsmMode()
       ? `${urls.thirdParty}/${internalRuntimeVersion()}/vendor/${type}.mjs`
       : `${urls.thirdParty}/${internalRuntimeVersion()}/vendor/${type}.js`;
   }

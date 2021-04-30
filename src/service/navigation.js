@@ -26,6 +26,7 @@ import {dict} from '../core/types/object';
 import {escapeCssSelectorIdent} from '../core/dom/css';
 import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
 import {getMode} from '../mode';
+import {isEsmMode} from '../core/mode';
 import {isLocalhostOrigin} from '../url';
 import {registerServiceBuilderForDoc} from '../service';
 import {toWin} from '../types';
@@ -618,7 +619,7 @@ export class Navigation {
     // confusing behavior e.g. when pressing "tab" button.
     // @see https://humanwhocodes.com/blog/2013/01/15/fixing-skip-to-content-links/
     // @see https://github.com/ampproject/amphtml/issues/18671
-    if (!IS_ESM && Services.platformFor(this.ampdoc.win).isIe()) {
+    if (!isEsmMode() && Services.platformFor(this.ampdoc.win).isIe()) {
       const id = toLocation.hash.substring(1);
       const elementWithId = this.ampdoc.getElementById(id);
       if (elementWithId) {

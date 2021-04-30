@@ -46,7 +46,8 @@ import {
   makeBodyVisibleRecovery,
 } from './style-installer';
 import {internalRuntimeVersion} from './internal-version';
-import {isSxgMode} from './core/mode';
+import {isEsmMode, isSxgMode} from './core/mode';
+
 import {maybeTrackImpression} from './impression';
 import {maybeValidate} from './validator-integration';
 import {preconnectToOrigin} from './preconnect';
@@ -135,12 +136,12 @@ startupChunk(self.document, function initial() {
   if (self.document.documentElement.hasAttribute('i-amphtml-no-boilerplate')) {
     perf.addEnabledExperiment('no-boilerplate');
   }
-  if (IS_ESM) {
+  if (isEsmMode()) {
     perf.addEnabledExperiment('esm');
   }
   fontStylesheetTimeout(self);
   perf.tick(TickLabel.INSTALL_STYLES);
-  if (IS_ESM) {
+  if (isEsmMode()) {
     bootstrap(ampdoc, perf);
   } else {
     installStylesForDoc(
@@ -165,7 +166,7 @@ if (self.console) {
 }
 // This code is eleminated in prod build through a babel transformer.
 if (getMode().localDev) {
-  self.document.documentElement.setAttribute('esm', IS_ESM ? 1 : 0);
+  self.document.documentElement.setAttribute('esm', isEsmMode() ? 1 : 0);
 }
 self.document.documentElement.setAttribute(
   'amp-version',

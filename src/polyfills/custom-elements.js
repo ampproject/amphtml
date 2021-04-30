@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {isEsmMode} from '../core/mode';
+
 /**
  * @typedef {{
  *   promise: !Promise<undefined>,
@@ -884,7 +886,7 @@ function supportsUnderProto() {
  * @param {!Object} prototype
  */
 function setPrototypeOf(obj, prototype) {
-  if (IS_ESM || Object.setPrototypeOf) {
+  if (isEsmMode() || Object.setPrototypeOf) {
     // Every decent browser.
     Object.setPrototypeOf(obj, prototype);
   } else if (supportsUnderProto()) {

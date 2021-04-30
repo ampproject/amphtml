@@ -15,6 +15,7 @@
  */
 
 import {getMode} from './mode';
+import {isEsmMode} from './core/mode';
 
 /**
  * Provides info about the current app. This return value may be cached and
@@ -26,7 +27,7 @@ export function getModeObject(opt_win) {
   return {
     localDev: getMode(opt_win).localDev,
     development: getMode(opt_win).development,
-    esm: IS_ESM,
+    esm: isEsmMode(),
     minified: getMode(opt_win).minified,
     test: getMode(opt_win).test,
     log: getMode(opt_win).log,

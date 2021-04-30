@@ -24,8 +24,9 @@ import {install as installMathSign} from '../polyfills/math-sign';
 import {install as installObjectAssign} from '../polyfills/object-assign';
 import {install as installObjectValues} from '../polyfills/object-values';
 import {install as installStringStartsWith} from '../polyfills/string-starts-with';
+import {isEsmMode} from '../core/mode';
 
-if (!IS_ESM) {
+if (!isEsmMode()) {
   installArrayIncludes(self);
   installObjectAssign(self);
   installObjectValues(self);

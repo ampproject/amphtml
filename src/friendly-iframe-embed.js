@@ -39,7 +39,8 @@ import {installForChildWin as installResizeObserver} from './polyfills/resize-ob
 import {installStylesForDoc} from './style-installer';
 import {installTimerInEmbedWindow} from './service/timer-impl';
 import {isDocumentReady} from './document-ready';
-import {isSxgMode} from './core/mode';
+import {isEsmMode, isSxgMode} from './core/mode';
+
 import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
 import {loadPromise} from './event-helper';
 import {
@@ -696,7 +697,7 @@ export class FriendlyIframeEmbed {
  * @param {!Window} childWin
  */
 function installPolyfillsInChildWindow(parentWin, childWin) {
-  if (!IS_ESM) {
+  if (!isEsmMode()) {
     installDocContains(childWin);
     installDOMTokenList(childWin);
   }
@@ -747,7 +748,7 @@ export class Installers {
       })
       .then(getDelayPromise)
       .then(() => {
-        if (IS_ESM) {
+        if (isEsmMode()) {
           // TODO: This is combined (ampdoc + shared), not just shared
           // const css = parentWin.document.querySelector('style[amp-runtime]')
           // .textContent;

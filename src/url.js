@@ -19,6 +19,7 @@ import {dict, hasOwn} from './core/types/object';
 import {endsWith} from './core/types/string';
 import {getMode} from './mode';
 import {isArray} from './core/types';
+import {isEsmMode} from './core/mode';
 import {parseQueryString_} from './url-parse-query-string';
 import {tryDecodeUriComponent_} from './url-try-decode-uri-component';
 import {urls} from './config';
@@ -98,12 +99,12 @@ export function getWinOrigin(win) {
 export function parseUrlDeprecated(url, opt_nocache) {
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
-    cache = IS_ESM
+    cache = isEsmMode()
       ? null
       : self.__AMP_URL_CACHE || (self.__AMP_URL_CACHE = new LruCache(100));
   }
 
-  return parseUrlWithA(a, url, IS_ESM || opt_nocache ? null : cache);
+  return parseUrlWithA(a, url, isEsmMode() || opt_nocache ? null : cache);
 }
 
 /**
@@ -119,7 +120,7 @@ export function parseUrlDeprecated(url, opt_nocache) {
  * @restricted
  */
 export function parseUrlWithA(a, url, opt_cache) {
-  if (IS_ESM) {
+  if (isEsmMode()) {
     a.href = '';
     return /** @type {?} */ (new URL(url, a.href));
   }
@@ -585,7 +586,7 @@ export function resolveRelativeUrl(relativeUrlString, baseUrl) {
   if (typeof baseUrl == 'string') {
     baseUrl = parseUrlDeprecated(baseUrl);
   }
-  if (IS_ESM || typeof URL == 'function') {
+  if (isEsmMode() || typeof URL == 'function') {
     return new URL(relativeUrlString, baseUrl.href).toString();
   }
   return resolveRelativeUrlFallback_(relativeUrlString, baseUrl);

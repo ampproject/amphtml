@@ -26,6 +26,7 @@ import {
   parseUrlWithA,
   resolveRelativeUrl,
 } from '../url';
+import {isEsmMode} from '../core/mode';
 import {registerServiceBuilderForDoc} from '../service';
 import {urls} from '../config';
 
@@ -45,7 +46,7 @@ export class Url {
     this.anchor_ = /** @type {!HTMLAnchorElement} */ (doc.createElement('a'));
 
     /** @private @const {?LruCache} */
-    this.cache_ = IS_ESM ? null : new LruCache(100);
+    this.cache_ = isEsmMode() ? null : new LruCache(100);
   }
 
   /**
@@ -60,7 +61,7 @@ export class Url {
     return parseUrlWithA(
       this.anchor_,
       url,
-      IS_ESM || opt_nocache ? null : this.cache_
+      isEsmMode() || opt_nocache ? null : this.cache_
     );
   }
 

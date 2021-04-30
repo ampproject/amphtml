@@ -28,9 +28,10 @@ import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
 import {exponentialBackoff} from './exponential-backoff';
 import {findIndex} from './core/types/array';
 import {getMode} from './mode';
+import {isEsmMode, isSxgMode} from './core/mode';
 import {isLoadErrorMessage} from './event-helper';
 import {isProxyOrigin} from './url';
-import {isSxgMode} from './core/mode';
+
 import {makeBodyVisibleRecovery} from './style-installer';
 import {triggerAnalyticsEvent} from './analytics';
 import {urls} from './config';
@@ -562,7 +563,7 @@ export function getErrorReportData(
   if (isSxgMode()) {
     runtime = 'sxg';
     data['sxg'] = '1';
-  } else if (IS_ESM) {
+  } else if (isEsmMode()) {
     runtime = 'esm';
     data['esm'] = '1';
   } else if (self.context && self.context.location) {

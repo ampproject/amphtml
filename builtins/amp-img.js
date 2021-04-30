@@ -20,6 +20,7 @@ import {ReadyState} from '../src/core/constants/ready-state';
 import {Services} from '../src/services';
 import {dev} from '../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
+import {isEsmMode} from '../src/core/mode';
 import {listen} from '../src/event-helper';
 import {propagateObjectFitStyles, setImportantStyles} from '../src/style';
 import {registerElement} from '../src/service/custom-element-registry';
@@ -137,7 +138,7 @@ export class AmpImg extends BaseElement {
       );
       this.propagateDataset(this.img_);
 
-      if (!IS_ESM) {
+      if (!isEsmMode()) {
         guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
       }
 
@@ -218,7 +219,7 @@ export class AmpImg extends BaseElement {
     this.maybeGenerateSizes_(/* sync setAttribute */ true);
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     this.propagateDataset(this.img_);
-    if (!IS_ESM) {
+    if (!isEsmMode()) {
       guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
     }
     this.applyFillContent(this.img_, true);

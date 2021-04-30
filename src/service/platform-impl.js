@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {isEsmMode} from '../core/mode';
 import {registerServiceBuilder} from '../service';
 
 /**
@@ -100,7 +101,7 @@ export class Platform {
    * @return {boolean}
    */
   isIe() {
-    if (IS_ESM) {
+    if (isEsmMode()) {
       return false;
     }
     return /Trident|MSIE|IEMobile/i.test(this.navigator_.userAgent);

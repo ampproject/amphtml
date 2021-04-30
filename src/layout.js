@@ -21,6 +21,7 @@
 
 import {dev, devAssert, userAssert} from './log';
 import {htmlFor} from './static-template';
+import {isEsmMode} from './core/mode';
 import {isExperimentOn} from './experiments';
 import {isFiniteNumber, toWin} from './types';
 import {setStyle, setStyles, toggle} from './style';
@@ -544,7 +545,7 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
     const intrinsicSizer = sizer.firstElementChild;
     intrinsicSizer.setAttribute(
       'src',
-      !IS_ESM && fixIeIntrinsic && element.ownerDocument
+      !isEsmMode() && fixIeIntrinsic && element.ownerDocument
         ? transparentPng(
             element.ownerDocument,
             dev().assertNumber(getLengthNumeral(width)),
