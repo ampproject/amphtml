@@ -21,7 +21,6 @@ import {CSS} from '../../../build/amp-base-carousel-1.0.css';
 import {CarouselContextProp} from './carousel-props';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
-import {cloneElement} from '../../../src/preact';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/core/types/object';
 import {dispatchCustomEvent} from '../../../src/dom';
@@ -85,17 +84,6 @@ class AmpBaseCarousel extends PreactBaseElement {
       this.api().goToSlide(slide);
     }
   }
-
-  /** @override */
-  updatePropsForRendering(props) {
-    const {arrowPrev, arrowNext} = props;
-    if (arrowPrev) {
-      props['arrowPrevAs'] = (props) => cloneElement(arrowPrev, props);
-    }
-    if (arrowNext) {
-      props['arrowNextAs'] = (props) => cloneElement(arrowNext, props);
-    }
-  }
 }
 
 /** @override */
@@ -107,13 +95,15 @@ AmpBaseCarousel['layoutSizeDefined'] = true;
 /** @override */
 AmpBaseCarousel['props'] = {
   'advanceCount': {attr: 'advance-count', type: 'number', media: true},
-  'arrowPrev': {
+  'arrowPrevAs': {
     selector: '[slot="prev-arrow"]',
     single: true,
+    as: true,
   },
-  'arrowNext': {
+  'arrowNextAs': {
     selector: '[slot="next-arrow"]',
     single: true,
+    as: true,
   },
   'autoAdvance': {attr: 'auto-advance', type: 'boolean', media: true},
   'autoAdvanceCount': {attr: 'auto-advance-count', type: 'number', media: true},
