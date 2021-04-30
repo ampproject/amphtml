@@ -21,7 +21,7 @@ import {
 import {Services} from '../../../src/services';
 import {TickLabel} from '../../../src/core/constants/enums';
 import {dev} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {lastChildElement, matches} from '../../../src/dom';
 import {registerServiceBuilder} from '../../../src/service';
 import {urls} from '../../../src/config';
