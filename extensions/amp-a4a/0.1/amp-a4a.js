@@ -22,10 +22,6 @@ import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
-import {
-  STICKY_AD_TRANSITION_EXP,
-  divertStickyAdTransition,
-} from '../../../ads/google/a4a/sticky-ad-transition-exp';
 import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {
@@ -1812,12 +1808,7 @@ export class AmpA4A extends AMP.BaseElement {
       height,
       width
     );
-    divertStickyAdTransition(this.win);
-    if (
-      !this.uiHandler.isStickyAd() ||
-      getExperimentBranch(this.win, STICKY_AD_TRANSITION_EXP.id) !==
-        STICKY_AD_TRANSITION_EXP.experiment
-    ) {
+    if (!this.uiHandler.isStickyAd()) {
       this.applyFillContent(this.iframe);
     }
 
@@ -1906,12 +1897,7 @@ export class AmpA4A extends AMP.BaseElement {
         'title': this.getIframeTitle(),
       })
     ));
-    divertStickyAdTransition(this.win);
-    if (
-      !this.uiHandler.isStickyAd() ||
-      getExperimentBranch(this.win, STICKY_AD_TRANSITION_EXP.id) !==
-        STICKY_AD_TRANSITION_EXP.experiment
-    ) {
+    if (!this.uiHandler.isStickyAd()) {
       this.applyFillContent(this.iframe);
     }
     const fontsArray = [];

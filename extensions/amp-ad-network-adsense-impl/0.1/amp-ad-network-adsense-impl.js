@@ -47,7 +47,6 @@ import {
   maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
 import {ResponsiveState} from './responsive-state';
-import {STICKY_AD_TRANSITION_EXP} from '../../../ads/google/a4a/sticky-ad-transition-exp';
 import {Services} from '../../../src/services';
 import {StoryAdAutoAdvance} from '../../../src/experiments/story-ad-auto-advance';
 import {StoryAdPlacements} from '../../../src/experiments/story-ad-placements';
@@ -233,14 +232,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    */
   divertExperiments() {
     const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
-      {
-        experimentId: STICKY_AD_TRANSITION_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          STICKY_AD_TRANSITION_EXP.control,
-          STICKY_AD_TRANSITION_EXP.experiment,
-        ],
-      },
       {
         experimentId: ADS_INITIAL_INTERSECTION_EXP.id,
         isTrafficEligible: () => true,
