@@ -8,10 +8,7 @@
     },
     {
       pattern: '{package.json,package-lock.json}',
-      owners: [
-        {name: 'renovate-approve'},
-        {name: 'ampproject/wg-infra', requestReviews: false},
-      ],
+      owners: [{name: 'ampproject/wg-infra', requestReviews: false}],
     },
   ],
 }

@@ -6,7 +6,6 @@
     {
       pattern: '{package.json,package-lock.json}',
       owners: [
-        {name: 'renovate-approve'},
         {name: 'ampproject/wg-infra', requestReviews: false},
         {name: 'ampproject/wg-performance', requestReviews: false},
       ],

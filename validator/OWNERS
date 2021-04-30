@@ -8,10 +8,7 @@
     },
     {
       pattern: '{package.json,package-lock.json}',
-      owners: [
-        {name: 'renovate-approve'},
-        {name: 'ampproject/wg-caching', requestReviews: false},
-      ],
+      owners: [{name: 'ampproject/wg-caching', requestReviews: false}],
     },
   ],
 }
