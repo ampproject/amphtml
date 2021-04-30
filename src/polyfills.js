@@ -22,7 +22,7 @@ import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';
 import {install as installDocContains} from './polyfills/document-contains';
 import {install as installFetch} from './polyfills/fetch';
-import {install as installGetBoundingClientRect} from './get-bounding-client-rect';
+import {install as installGetBoundingClientRect} from './polyfills/get-bounding-client-rect';
 import {install as installIntersectionObserver} from './polyfills/intersection-observer';
 import {install as installMapSet} from './polyfills/map-set';
 import {install as installMathSign} from './polyfills/math-sign';
