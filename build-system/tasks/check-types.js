@@ -262,10 +262,8 @@ async function typeCheck(targetName) {
  * of closure errors.
  *
  * This is a temporary measure while we restore 100% typechecking.
- *
- * @param {Array<string>} entryPoints
  */
-async function ensureMinTypeQuality(entryPoints) {
+async function ensureMinTypeQuality() {
   const srcGlobs = ['src/**/*.js', 'extensions/**/*.js'];
   const errorsToCheckFor = [
     'JSC_BAD_JSDOC_ANNOTATION',
@@ -274,7 +272,7 @@ async function ensureMinTypeQuality(entryPoints) {
   ];
 
   let msg = '';
-  await closureCompile(entryPoints, './dist', `check-types.js`, {
+  await closureCompile('src/amp.js', './dist', `check-types.js`, {
     include3pDirectories: false,
     includePolyfills: false,
     typeCheckOnly: true,
@@ -317,7 +315,7 @@ async function checkTypes() {
   log(`Checking types for targets: ${targets.map(cyan).join(', ')}`);
   displayLifecycleDebugging();
 
-  await ensureMinTypeQuality(['src/amp.js']);
+  await ensureMinTypeQuality();
   await Promise.all(targets.map(typeCheck));
   exitCtrlcHandler(handlerProcess);
 }

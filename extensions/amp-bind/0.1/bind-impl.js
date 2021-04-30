@@ -99,14 +99,11 @@ let BoundElementDef;
 
 /**
  * The options bag for binding application.
- * - skipAmpState: If true, skips <amp-state> elements.
- * - constrain: If provided, restricts application to children of the provided elements.
- * - evaluateOnly: If provided, caches the evaluated result on each bound element and skips the actual DOM updates.
  *
  * @typedef {Record} ApplyOptionsDef
- * @property {boolean=} skipAmpState - If true, skips <amp-state> elements.
- * @property {Array<!Element>=} constrain
- * @property {boolean=} evaluateOnly
+ * @property {boolean=} skipAmpState If true, skips <amp-state> elements.
+ * @property {Array<!Element>=} constrain If provided, restricts application to children of the provided elements.
+ * @property {boolean=} evaluateOnly If provided, caches the evaluated result on each bound element and skips the actual DOM updates.
  */
 
 /**
