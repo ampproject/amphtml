@@ -33,6 +33,7 @@ import {install as installResizeObserver} from './resize-observer';
 import {install as installSetAdd} from './set-add';
 import {install as installStringStartsWith} from './string-starts-with';
 import {install as installWeakMapSet} from './weakmap-set';
+import {isSxgMode} from '../core/mode';
 
 if (!IS_ESM) {
   installFetch(self);
@@ -56,7 +57,7 @@ if (self.document) {
   }
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
-  if (!IS_SXG) {
+  if (!isSxgMode()) {
     installCustomElements(self, class {});
     installIntersectionObserver(self);
     installResizeObserver(self);

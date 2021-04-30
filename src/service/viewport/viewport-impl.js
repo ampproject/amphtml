@@ -38,6 +38,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../../service';
 import {isExperimentOn} from '../../experiments';
+import {isSxgMode} from '../../core/mode';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
@@ -417,7 +418,7 @@ export class ViewportImpl {
 
   /** @override */
   scrollIntoView(element) {
-    if (IS_SXG) {
+    if (isSxgMode()) {
       element./* OK */ scrollIntoView();
       return Promise.resolve();
     } else {
@@ -444,7 +445,7 @@ export class ViewportImpl {
 
   /** @override */
   animateScrollIntoView(element, pos = 'top', opt_duration, opt_curve) {
-    if (IS_SXG) {
+    if (isSxgMode()) {
       return new Promise((resolve, opt_) => {
         element./* OK */ scrollIntoView({
           block: SCROLL_POS_TO_BLOCK[pos],
@@ -1175,7 +1176,7 @@ function createViewport(ampdoc) {
   if (
     ampdoc.isSingleDoc() &&
     getViewportType(win, viewer) == ViewportType.NATURAL_IOS_EMBED &&
-    !IS_SXG
+    !isSxgMode()
   ) {
     binding = new ViewportBindingIosEmbedWrapper_(win);
   } else {

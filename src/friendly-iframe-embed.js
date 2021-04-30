@@ -39,6 +39,7 @@ import {installForChildWin as installResizeObserver} from './polyfills/resize-ob
 import {installStylesForDoc} from './style-installer';
 import {installTimerInEmbedWindow} from './service/timer-impl';
 import {isDocumentReady} from './document-ready';
+import {isSxgMode} from './core/mode';
 import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
 import {loadPromise} from './event-helper';
 import {
@@ -701,7 +702,7 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
   }
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
-  if (!IS_SXG) {
+  if (!isSxgMode()) {
     installCustomElements(childWin, class {});
     installIntersectionObserver(parentWin, childWin);
     installResizeObserver(parentWin, childWin);

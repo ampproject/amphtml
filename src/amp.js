@@ -46,6 +46,7 @@ import {
   makeBodyVisibleRecovery,
 } from './style-installer';
 import {internalRuntimeVersion} from './internal-version';
+import {isSxgMode} from './core/mode';
 import {maybeTrackImpression} from './impression';
 import {maybeValidate} from './validator-integration';
 import {preconnectToOrigin} from './preconnect';
@@ -80,7 +81,7 @@ function bootstrap(ampdoc, perf) {
   startupChunk(
     self.document,
     function final() {
-      if (!IS_SXG) {
+      if (!isSxgMode()) {
         installPullToRefreshBlocker(self);
       }
       installAutoLightboxExtension(ampdoc);

@@ -30,6 +30,7 @@ import {findIndex} from './core/types/array';
 import {getMode} from './mode';
 import {isLoadErrorMessage} from './event-helper';
 import {isProxyOrigin} from './url';
+import {isSxgMode} from './core/mode';
 import {makeBodyVisibleRecovery} from './style-installer';
 import {triggerAnalyticsEvent} from './analytics';
 import {urls} from './config';
@@ -558,7 +559,7 @@ export function getErrorReportData(
   data['dw'] = detachedWindow ? '1' : '0';
 
   let runtime = '1p';
-  if (IS_SXG) {
+  if (isSxgMode()) {
     runtime = 'sxg';
     data['sxg'] = '1';
   } else if (IS_ESM) {
