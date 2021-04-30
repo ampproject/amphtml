@@ -39,6 +39,10 @@
       ],
     },
     {
+      pattern: '**/package{,-lock}.json',
+      owners: [{name: 'renovate-bot'}],
+    },
+    {
       pattern: '**/OWNERS',
       owners: [{name: 'mrjoro', requestReviews: false}],
     },
