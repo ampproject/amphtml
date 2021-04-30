@@ -34,7 +34,7 @@ const jscodeshift = (args = [], opts) => getOutput(command(args), opts);
 
 /**
  * @param {Array<string>} args
- * @param {Object} opts
+ * @param {?Object=} opts
  * @return {ReturnType<execScriptAsync>}
  */
 const jscodeshiftAsync = (args = [], opts) =>

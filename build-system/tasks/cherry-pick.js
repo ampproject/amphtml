@@ -114,7 +114,7 @@ async function cherryPick() {
         'Pushing branch',
         cyan(branch),
         'to remote',
-        cyan(remote)
+        cyan(/** @type {string} */ (remote))
       );
       execOrThrow(
         `git push --set-upstream ${remote} ${branch}`,

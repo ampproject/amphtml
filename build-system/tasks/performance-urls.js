@@ -35,6 +35,7 @@ async function performanceUrls() {
     process.exitCode = 1;
     return;
   }
+  /** @type {string[]} */
   const filepaths = jsonContent.handlers.flatMap((handler) =>
     handler.urls
       .filter((url) => url.startsWith(LOCAL_HOST_URL))

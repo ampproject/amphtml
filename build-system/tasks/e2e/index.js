@@ -128,7 +128,7 @@ async function fetchCoverage_(outDir) {
   const zipFilename = path.join(outDir, 'coverage.zip');
   const zipFile = fs.createWriteStream(zipFilename);
 
-  await new Promise((resolve, reject) => {
+  await /** @type {Promise<void>} */ (new Promise((resolve, reject) => {
     http
       .get(
         {
@@ -148,7 +148,7 @@ async function fetchCoverage_(outDir) {
         fs.unlinkSync(zipFilename);
         reject(err);
       });
-  });
+  }));
   execOrDie(`unzip -o ${zipFilename} -d ${outDir}`);
 }
 
@@ -192,7 +192,7 @@ async function runTests_() {
 async function runWatch_() {
   const filesToWatch = argv.files ? getFilesFromArgv() : config.e2eTestPaths;
 
-  log('Watching', cyan(filesToWatch), 'for changes...');
+  log('Watching', cyan(filesToWatch.join(', ')), 'for changes...');
   watch(filesToWatch).on('change', (file) => {
     log('Detected a change in', cyan(file));
     const mocha = createMocha_();

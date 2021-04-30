@@ -75,7 +75,11 @@ function checkSourcemapUrl(sourcemapJson, map) {
     throw new Error('Could not find sourcemap URL');
   }
   if (!sourcemapJson.sourceRoot.match(sourcemapUrlMatcher)) {
-    log(red('ERROR:'), cyan(sourcemapJson.sourceRoot), 'is badly formatted');
+    log(
+      red('ERROR:'),
+      cyan(/** @type {string} */ (sourcemapJson.sourceRoot)),
+      'is badly formatted'
+    );
     throw new Error('Badly formatted sourcemap URL');
   }
 }
@@ -92,6 +96,7 @@ function checkSourcemapSources(sourcemapJson, map) {
     log(red('ERROR:'), 'Could not find', cyan('sources'));
     throw new Error('Could not find sources array');
   }
+  /** @type {string[]} */
   const invalidSources = sourcemapJson.sources
     .filter((source) => !source.match(/\[.*\]/)) // Ignore non-path sources '[...]'
     .filter((source) => !fs.existsSync(source)); // All source paths should exist
@@ -133,7 +138,12 @@ function checkSourcemapMappings(sourcemapJson, map) {
   // Zeroth sub-array corresponds to ';' and has no mappings.
   // See https://www.npmjs.com/package/sourcemap-codec#usage
   const firstLineMapping = decode(sourcemapJson.mappings)[1][0];
-  const [, sourceIndex, sourceCodeLine, sourceCodeColumn] = firstLineMapping;
+  const [
+    ,
+    sourceIndex = 0,
+    sourceCodeLine = 0,
+    sourceCodeColumn,
+  ] = firstLineMapping;
 
   const firstLineFile = sourcemapJson.sources[sourceIndex];
   const contents = fs.readFileSync(firstLineFile, 'utf8').split('\n');
@@ -144,14 +154,14 @@ function checkSourcemapMappings(sourcemapJson, map) {
     '.';
   if (firstLineFile != expectedFirstLineFile) {
     log(red('ERROR:'), 'Found mapping for incorrect file.');
-    log('Actual:', cyan(firstLineFile));
+    log('Actual:', cyan(/** @type {string} */ (firstLineFile)));
     log('Expected:', cyan(expectedFirstLineFile));
     log(helpMessage);
     throw new Error('Found mapping for incorrect file');
   }
   if (firstLineCode != expectedFirstLineCode) {
     log(red('ERROR:'), 'Found mapping for incorrect code.');
-    log('Actual:', cyan(firstLineCode));
+    log('Actual:', cyan(/** @type {string} */ (firstLineCode)));
     log('Expected:', cyan(expectedFirstLineCode));
     log(helpMessage);
     throw new Error('Found mapping for incorrect code');
