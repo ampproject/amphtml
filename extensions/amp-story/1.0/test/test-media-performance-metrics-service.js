@@ -421,7 +421,7 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
     });
   });
 
-  describe('First page', () => {
+  describe('Video on first page', () => {
     it('should report the video is on the first page', () => {
       const video = win.document.createElement('video');
       const source = win.document.createElement('source');
@@ -429,11 +429,30 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
       source.setAttribute('src', 'foo.mp4');
       video.appendChild(source);
       firstPage.appendChild(video);
+      win.document.body.appendChild(firstPage);
 
       service.startMeasuring(video);
       service.stopMeasuring(video);
 
       expect(tickStub).to.have.been.calledWithExactly('vofp', 1);
+    });
+
+    it('should report the video is not on the first page', () => {
+      const video = win.document.createElement('video');
+      const source = win.document.createElement('source');
+      const secondPage = win.document.createElement('amp-story-page');
+      win.document.body.appendChild(
+        win.document.createElement('amp-story-page')
+      );
+      win.document.body.appendChild(secondPage);
+      source.setAttribute('src', 'foo.mp4');
+      video.appendChild(source);
+      secondPage.appendChild(video);
+
+      service.startMeasuring(video);
+      service.stopMeasuring(video);
+
+      expect(tickStub).to.have.been.calledWithExactly('vofp', 0);
     });
   });
 });
