@@ -62,14 +62,6 @@ FAIL
 |        layout="responsive"
 |        width="480" height="270">
 |    </amp-brid-player>
-|    <!-- Alternate valid example using a carousel. -->
-|    <amp-brid-player
-|        data-partner="264"
-|        data-player="4144"
-|        data-carousel="255"
-|        layout="responsive"
-|        width="480" height="270">
-|    </amp-brid-player>
 |    <!-- Alternate valid example using a outstream. -->
 |    <amp-brid-player
 |        data-partner="6205"
