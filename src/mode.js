@@ -15,7 +15,7 @@
  */
 
 import {internalRuntimeVersion} from './internal-version';
-import {isMinifiedMode} from './core/mode';
+import {isFortestingMode, isMinifiedMode} from './core/mode';
 import {parseQueryString_} from './url-parse-query-string';
 
 /**
@@ -64,15 +64,11 @@ function getMode_(win) {
   // TODO(erwinmombay): simplify the logic here
   const AMP_CONFIG = self.AMP_CONFIG || {};
 
-  // Magic constants that are replaced by closure compiler.
-  // IS_MINIFIED is always replaced with true when closure compiler is used
-  // while IS_FORTESTING is only replaced when `amp dist` is called without the
-  // --fortesting flag.
-  const IS_FORTESTING = true;
-
   const runningTests =
-    IS_FORTESTING && !!(AMP_CONFIG.test || win.__AMP_TEST || win['__karma__']);
-  const isLocalDev = IS_FORTESTING && (!!AMP_CONFIG.localDev || runningTests);
+    isFortestingMode() &&
+    !!(AMP_CONFIG.test || win.__AMP_TEST || win['__karma__']);
+  const isLocalDev =
+    isFortestingMode() && (!!AMP_CONFIG.localDev || runningTests);
   const hashQuery = parseQueryString_(
     // location.originalHash is set by the viewer when it removes the fragment
     // from the URL.
