@@ -248,12 +248,10 @@ exports.rules = [
       // Bento AMP Youtube
       'extensions/amp-youtube/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
       'extensions/amp-youtube/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
-      'extensions/amp-youtube/1.0/component.js->extensions/amp-video/1.0/video-wrapper.js',
 
       // Bento Vimeo
       'extensions/amp-vimeo/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
       'extensions/amp-vimeo/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
-      'extensions/amp-vimeo/1.0/component.js->extensions/amp-video/1.0/video-wrapper.js',
 
       // Shared definition of Vimeo API
       'extensions/amp-vimeo/0.1/amp-vimeo.js->extensions/amp-vimeo/vimeo-api.js',
@@ -447,7 +445,7 @@ exports.rules = [
       'src/polyfills/fetch.js->src/utils/bytes.js',
       'src/polyfills/intersection-observer.js->src/polyfills/stubs/intersection-observer-stub.js',
       'src/polyfills/resize-observer.js->src/polyfills/stubs/resize-observer-stub.js',
-      'src/polyfills/custom-elements.js->src/resolved-promise.js',
+      'src/polyfills/custom-elements.js->src/core/data-structures/promise.js',
     ],
   },
   {
@@ -455,9 +453,9 @@ exports.rules = [
     mustNotDependOn: '**/*.js',
     allowlist: [
       'src/polyfills/stubs/intersection-observer-stub.js->src/services.js',
-      'src/polyfills/stubs/intersection-observer-stub.js->src/resolved-promise.js',
+      'src/polyfills/stubs/intersection-observer-stub.js->src/core/data-structures/promise.js',
       'src/polyfills/stubs/resize-observer-stub.js->src/services.js',
-      'src/polyfills/stubs/resize-observer-stub.js->src/resolved-promise.js',
+      'src/polyfills/stubs/resize-observer-stub.js->src/core/data-structures/promise.js',
     ],
   },
   {
