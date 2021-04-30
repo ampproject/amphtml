@@ -15,6 +15,7 @@
  */
 
 import {internalRuntimeVersion} from './internal-version';
+import {isMinifiedMode} from './core/mode';
 import {parseQueryString_} from './url-parse-query-string';
 
 /**
@@ -68,7 +69,6 @@ function getMode_(win) {
   // while IS_FORTESTING is only replaced when `amp dist` is called without the
   // --fortesting flag.
   const IS_FORTESTING = true;
-  const IS_MINIFIED = false;
 
   const runningTests =
     IS_FORTESTING && !!(AMP_CONFIG.test || win.__AMP_TEST || win['__karma__']);
@@ -102,7 +102,7 @@ function getMode_(win) {
     esm: IS_ESM,
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
-    minified: IS_MINIFIED,
+    minified: isMinifiedMode(),
     test: runningTests,
     log: hashQuery['log'],
     version: internalRuntimeVersion(),
