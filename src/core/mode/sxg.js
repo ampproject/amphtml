@@ -16,13 +16,14 @@
 
 /** @fileoverview Magic constant that is replaced by babel. */
 
-// IS_MINIFIED is replaced with true when closure compiler is used.
-const IS_MINIFIED = false;
+// IS_SXG is replaced with true when `amp dist` is called with the --sxg flag.
+const IS_SXG = false;
 
 /**
- * Returns true whenever closure compiler is used (ie. DCE is enabled).
+ * Returns true whenever `amp dist` is called with `--sxg`. If this is true,
+ * isEsmMode() is guaranteed to also be true.
  * @return {boolean}
  */
-export function isMinifiedMode() {
-  return IS_MINIFIED;
+export function isSxgMode() {
+  return IS_SXG;
 }

@@ -16,3 +16,5 @@
 
 export {isMinifiedMode} from './minified';
 export {isFortestingMode} from './fortesting';
+export {isEsmMode} from './esm';
+export {isSxgMode} from './sxg';

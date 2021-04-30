@@ -16,13 +16,13 @@
 
 /** @fileoverview Magic constant that is replaced by babel. */
 
-// IS_MINIFIED is replaced with true when closure compiler is used.
-const IS_MINIFIED = false;
+// IS_ESM is replaced with true when `amp dist` is called with the --esm flag.
+const IS_ESM = false;
 
 /**
- * Returns true whenever closure compiler is used (ie. DCE is enabled).
+ * Returns true whenever `amp dist` is called with `--esm`.
  * @return {boolean}
  */
-export function isMinifiedMode() {
-  return IS_MINIFIED;
+export function isEsmMode() {
+  return IS_ESM;
 }

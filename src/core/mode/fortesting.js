@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-// Magic constant that is replaced by babel.
+/** @fileoverview Magic constant that is replaced by babel. */
+
 // IS_FORTESTING is replaced with false when `amp dist` is called without the
 // --fortesting flag.
 const IS_FORTESTING = true;
