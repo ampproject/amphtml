@@ -137,11 +137,16 @@ const forbiddenTermsGlobal = {
     message: realiasGetMode,
     allowlist: ['src/mode-object.js', 'src/iframe-attributes.js'],
   },
-  '(?:var|let|const) +IS_FORTESTING +=': {
+  'IS_(FORTESTING|MINIFIED|ESM|SXG)': {
     message:
-      'IS_FORTESTING local var only allowed in mode.js and ' +
-      'dist.3p/current/integration.js',
-    allowlist: ['src/mode.js'],
+      'Compiler constants only allowed in src/core/mode; ' +
+      'use isFortestingMode(), isEsmMode(), etc. from src/core/mode instead.',
+    allowlist: [
+      'src/core/mode/fortesting.js',
+      'src/core/mode/minified.js',
+      'src/core/mode/esm.js',
+      'src/core/mode/sxg.js',
+    ],
   },
   '\\.prefetch\\(': {
     message: 'Do not use preconnect.prefetch, use preconnect.preload instead.',
