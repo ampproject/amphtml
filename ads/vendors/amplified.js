@@ -41,7 +41,7 @@ export function amplified(global, data) {
 
   writeScript(
     global,
-    'http://srv.clickfuse.local/ads/ampsrv.php?' + global.queryString
+    'https://srv.clickfuse.com/ads/ampsrv.php?' + global.queryString
   );
 }
 
