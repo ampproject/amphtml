@@ -389,6 +389,7 @@ function createElementRules_() {
           'web+mastodon': true,
           'wh': true,
           'whatsapp': true,
+          'microsoft-edge': true,
         },
       },
     },
