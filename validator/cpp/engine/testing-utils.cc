@@ -58,25 +58,18 @@ std::string RenderErrorWithPosition(const std::string& filename,
                           RenderError(error));
 }
 
-std::string RenderRevision(const ValidationResult& result) {
-  return absl::StrCat("validator_revision: ", result.validator_revision(),
-                      "\nspec_file_revision: ", result.spec_file_revision());
-}
-
-std::string RenderResult(const std::string& filename, bool include_revisions,
+std::string RenderResult(const std::string& filename,
                          const ValidationResult& result) {
   std::string out;
   absl::StrAppend(&out, ValidationResult::Status_Name(result.status()));
   for (const ValidationError& error : result.errors()) {
     absl::StrAppend(&out, "\n", RenderErrorWithPosition(filename, error));
   }
-  if (include_revisions) absl::StrAppend(&out, "\n", RenderRevision(result));
   return out;
 }
 
 std::string RenderInlineResult(const std::string& filename,
                                const std::string& filecontents,
-                               bool include_revisions,
                                const ValidationResult& result) {
   std::string out;
   absl::StrAppend(&out, ValidationResult::Status_Name(result.status()));
@@ -105,7 +98,6 @@ std::string RenderInlineResult(const std::string& filename,
     }
     lines_emitted++;
   }
-  if (include_revisions) absl::StrAppend(&out, "\n", RenderRevision(result));
   return out;
 }
 

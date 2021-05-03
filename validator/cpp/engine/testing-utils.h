@@ -42,13 +42,11 @@ std::string RenderError(const amp::validator::ValidationError& error);
 // Emits:
 // - overall status
 // - filename, line, col, rendered error for each error
-// - validator and spec file revision iff |include_revions|.
-std::string RenderResult(const std::string& filename, bool include_revisions,
+std::string RenderResult(const std::string& filename,
                          const amp::validator::ValidationResult& result);
 // Like RenderResult, except inlines any error messages into the input document.
 std::string RenderInlineResult(const std::string& filename,
                                const std::string& filecontents,
-                               bool include_revisions,
                                const amp::validator::ValidationResult& result);
 
 // Returns the test cases that are available to this test binary.
