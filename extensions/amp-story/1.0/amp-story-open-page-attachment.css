@@ -301,7 +301,7 @@
   cursor: pointer !important;
   margin-bottom: 10px !important;
   fill: var(--i-amphtml-outlink-cta-background-color) !important;
-  animation: move-up-arrow var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;  
+  animation: move-up-arrow var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
 }
 
 @keyframes move-up-arrow {
@@ -335,7 +335,7 @@
 @keyframes tap-scale {
   0%, 100% {
     transform: scale(1);
-  } 
+  }
   45% {
     transform: scale(.9);
   }
@@ -350,7 +350,7 @@
   max-width: calc(100% - 64px) !important;
   border-radius: 30px !important;
   background: var(--i-amphtml-outlink-cta-background-color) !important;
-  place-items: center !important; 
+  place-items: center !important;
 }
 
 .i-amphtml-story-outlink-page-attachment-img {
