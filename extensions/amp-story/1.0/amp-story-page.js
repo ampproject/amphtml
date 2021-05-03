@@ -1740,9 +1740,9 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   renderOpenAttachmentUI_() {
     // AttachmentEl can be either amp-story-page-attachment or amp-story-page-outlink
-    const attachmentEl = this.element.querySelectorAll(
+    const attachmentEl = this.element.querySelector(
       'amp-story-page-attachment, amp-story-page-outlink'
-    )[0];
+    );
     if (!attachmentEl) {
       return;
     }
