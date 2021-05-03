@@ -184,6 +184,22 @@
   --i-amphtml-arrow-color: white !important;
 }
 
+.i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-direction: column !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  background: linear-gradient(0, rgba(0, 0, 0, 0.15), transparent) !important;
+  pointer-events: none !important;
+  z-index: 3 !important;
+  -webkit-touch-callout: default !important; /* Allow long pressing the button to open context menu in iOS */
+  text-decoration: none !important;
+}
+
 /** For amp-story-inline-page-attachment-v2 inline default. */
 .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-icon {
   animation: none !important;
