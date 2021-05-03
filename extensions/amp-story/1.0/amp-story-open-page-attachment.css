@@ -195,7 +195,6 @@
   width: 100% !important;
   background: linear-gradient(0, rgba(0, 0, 0, 0.15), transparent) !important;
   pointer-events: none !important;
-  z-index: 3 !important;
   -webkit-touch-callout: default !important; /* Allow long pressing the button to open context menu in iOS */
   text-decoration: none !important;
 }
