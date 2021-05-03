@@ -52,6 +52,8 @@ To bootstrap the creation of a new component (or the Bento version of an existin
 $ amp make-extension --bento --name=amp-my-element
 ```
 
+This generates CSS used by the AMP element `<amp-my-element>`, and JSS used by the Preact component `<MyElement>`. To exclude either, you may additionally specify `--nocss` and/or `--nojss`.
+
 ## Naming
 
 All Bento AMP component extensions have their tag names prefixed with `amp-`.
