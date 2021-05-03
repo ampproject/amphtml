@@ -25,6 +25,7 @@ const {
 } = require('../compile/debug-compilation-lifecycle');
 const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
+const {compileJison} = require('./compile-jison');
 const {cyan, green, yellow, red} = require('kleur/colors');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
 const {log} = require('../common/logging');
@@ -35,7 +36,39 @@ const {typecheckNewServer} = require('../server/typescript-compile');
  * Note: This is a TEMPORARY holding point during the transition to type-safety.
  * @type {!Array<string>}
  */
-const PRIDE_FILES_GLOBS = ['src/resolved-promise.js', 'src/types.js'];
+const PRIDE_FILES_GLOBS = [
+  // Core
+  'src/core/**/*.js',
+
+  // Runtime
+  'build/amp-loader-0.1.css.js',
+  'build/ampdoc.css.js',
+  'build/ampshared.css.js',
+  'src/config.js',
+  'src/document-ready.js',
+  'src/dom.js',
+  'src/exponential-backoff.js',
+  'src/format.js',
+  'src/history.js',
+  'src/internal-version.js',
+  'src/json.js',
+  'src/log.js',
+  'src/mode.js',
+  'src/resolved-promise.js',
+  'src/time.js',
+  'src/types.js',
+  'src/url-parse-query-string.js',
+  'src/url-try-decode-uri-component.js',
+  'src/utils/bytes.js',
+  'src/utils/img.js',
+
+  // Third Party
+  'third_party/css-escape/css-escape.js',
+  'third_party/webcomponentsjs/ShadowCSS.js',
+  'node_modules/promise-pjs/package.json',
+  'node_modules/promise-pjs/promise.mjs',
+];
+
 const CORE_EXTERNS_GLOB = 'src/core{,/**}/*.extern.js';
 
 /**
@@ -188,9 +221,11 @@ async function typeCheck(targetName) {
 
   // If srcGlobs and externGlobs are defined, determine the externs/extraGlobs
   if (srcGlobs.length || externGlobs.length) {
-    opts.eterns = externGlobs.flatMap(globby.sync);
+    opts.externs = externGlobs.flatMap(globby.sync);
+
     // Included globs should explicitly exclude any externs
-    opts.extraGlobs = externGlobs.map((glob) => `!${glob}`).concat(srcGlobs);
+    const excludedExterns = externGlobs.map((glob) => `!${glob}`);
+    opts.extraGlobs = srcGlobs.concat(excludedExterns);
   }
 
   // If no entry point is defined, we want to scan the globs provided without
@@ -233,7 +268,7 @@ async function checkTypes() {
   cleanupBuildDir();
   maybeInitializeExtensions();
   typecheckNewServer();
-  await compileCss();
+  await Promise.all([compileCss(), compileJison()]);
 
   // Use the list of targets if provided, otherwise check all targets
   const targets = argv.targets

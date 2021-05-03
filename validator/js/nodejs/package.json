@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "colors": "1.4.0",
-    "commander": "2.15.1",
+    "commander": "7.2.0",
     "promise": "8.0.1"
   },
   "devDependencies": {

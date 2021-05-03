@@ -61,6 +61,7 @@ export const Attributes = {
   AD_SHOWING: 'ad-showing',
   DESKTOP_PANELS: 'desktop-panels',
   DIR: 'dir',
+  PAUSED: 'paused',
 };
 
 export class AmpStoryAutoAds extends AMP.BaseElement {
@@ -377,6 +378,26 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.progressBarBackground_.appendChild(progressBar);
     createShadowRootWithStyle(host, this.progressBarBackground_, progessBarCSS);
     this.ampStory_.element.appendChild(host);
+
+    // TODO(#33969) move this to init listeners when no longer conditional.
+    this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
+      this.onPauseStateUpdate_(isPaused);
+    });
+  }
+
+  /**
+   * If video is paused and ad is showing pause the progress bar.
+   * @param {boolean} isPaused
+   */
+  onPauseStateUpdate_(isPaused) {
+    const adShowing = this.storeService_.get(StateProperty.AD_STATE);
+    if (!adShowing) {
+      return;
+    }
+
+    isPaused
+      ? this.progressBarBackground_.setAttribute(Attributes.PAUSED, '')
+      : this.progressBarBackground_.removeAttribute(Attributes.PAUSED);
   }
 
   /**
