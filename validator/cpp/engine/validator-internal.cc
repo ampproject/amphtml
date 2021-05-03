@@ -2124,7 +2124,7 @@ class Context {
   // always return incomplete in that case.
   void SetExitEarly() { exit_early_ = true; }
 
-  // For each tag that the parse master processes, we compute the line/column
+  // For each tag that the htmlparser processes, we compute the line/column
   // information by counting the newline characters. Prior to calling the
   // function, |current_token_start_| actually points at the start of the
   // previous token, so effectively the body of AdvanceTo restores the invariant
@@ -5848,8 +5848,8 @@ class Validator {
 
   const ValidationResult& Result() const { return result_; }
 
-  // While the validator instance is tied forever to a given parse
-  // master and seemingly not reusable, the parse master can be used
+  // While the validator instance is tied forever to a given htmlparser
+  // and seemingly not reusable, the htmlparser can be used
   // to parse multiple documents, so in case a new document arrives
   // we clear out the state.
   void Clear() {
@@ -5937,7 +5937,7 @@ class Validator {
 
   void EndDocument() {
     if (context_.Progress(result_).complete) return;
-    // It's not clear whether the following is necessary as the parse master may
+    // It's not clear whether the following is necessary as the htmlparser may
     // close the tags automatically. But we do it anyway, for paranoia.
     context_.mutable_tag_stack()->ExitRemainingTags(context_, &result_);
     rules_->MaybeEmitGlobalTagValidationErrors(&context_, &result_);
