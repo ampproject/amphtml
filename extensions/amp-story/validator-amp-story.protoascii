@@ -860,6 +860,12 @@ tags: {  # <amp-story-page-attachment> with href
     value: "light"
   }
   attrs: {
+    name: "cta-text"
+  }
+  attrs: {
+    name: "title"
+  }
+  attrs: {
     name: "cta-accent-color"
   }
   attrs: {
@@ -894,6 +900,12 @@ tags: {  # <amp-story-page-attachment> with no href
   mandatory_ancestor: "AMP-STORY-PAGE"
   descendant_tag_list: "amp-story-page-attachment-allowed-descendants"
   mandatory_last_child: true
+  attrs: {
+    name: "cta-text"
+  }
+  attrs: {
+    name: "title"
+  }
   attrs: {
     name: "cta-image"
     value_url: {
