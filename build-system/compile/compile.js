@@ -154,13 +154,13 @@ function getSrcs(entryModuleFilenames, outputDir, outputFilename, options) {
   // this works fine.
   if (options.includePolyfills) {
     srcs.push(
-      '!build/fake-module/src/polyfills.js',
+      '!build/fake-module/src/polyfills/index.js',
       '!build/fake-module/src/polyfills/**/*.js',
       '!build/fake-polyfills/**/*.js'
     );
   } else {
-    srcs.push('!src/polyfills.js', '!build/fake-polyfills/**/*.js');
-    unneededFiles.push('build/fake-module/src/polyfills.js');
+    srcs.push('!src/polyfills/index.js', '!build/fake-polyfills/**/*.js');
+    unneededFiles.push('build/fake-module/src/polyfills/index.js');
   }
   // Negative globstars must come at the end.
   srcs.push(
@@ -248,7 +248,7 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     language_out: argv.esm || argv.sxg ? 'NO_TRANSPILE' : 'ECMASCRIPT5_STRICT',
     // We do not use the polyfills provided by closure compiler.
     // If you need a polyfill. Manually include them in the
-    // respective top level polyfills.js files.
+    // respective top level polyfills/*.js files.
     rewrite_polyfills: false,
     externs,
     js_module_root: [

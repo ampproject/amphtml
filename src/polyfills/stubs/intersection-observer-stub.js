@@ -23,8 +23,6 @@
  * amp-intersection-observer-polyfill extension.
  */
 
-import {Services} from '../../services';
-
 const UPGRADERS = '_upgraders';
 const NATIVE = '_native';
 const STUB = '_stub';
@@ -107,17 +105,6 @@ export function supportsDocumentRoot(win) {
     return true;
   } catch {
     return false;
-  }
-}
-
-/**
- * @param {!Window} win
- */
-export function scheduleUpgradeIfNeeded(win) {
-  if (shouldLoadPolyfill(win)) {
-    Services.extensionsFor(win).preloadExtension(
-      'amp-intersection-observer-polyfill'
-    );
   }
 }
 

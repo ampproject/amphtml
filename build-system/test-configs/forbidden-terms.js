@@ -949,8 +949,7 @@ const forbiddenTermsSrcInclusive = {
     message: bannedTermsHelpString,
     allowlist: [
       'src/friendly-iframe-embed.js',
-      'src/polyfills/stubs/intersection-observer-stub.js',
-      'src/polyfills/stubs/resize-observer-stub.js',
+      'src/runtime.js',
       'src/service/extensions-impl.js',
       'src/service/crypto-impl.js',
     ],
