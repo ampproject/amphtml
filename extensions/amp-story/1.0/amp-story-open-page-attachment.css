@@ -201,7 +201,7 @@
 }
 
 .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment:not([active]) {
-  /* Prevent tabbing to innactive page's buttons */
+  /* Prevent tabbing to inactive page's buttons */
   visibility: hidden !important;
 }
 
