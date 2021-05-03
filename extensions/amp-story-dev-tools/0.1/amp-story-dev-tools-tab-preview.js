@@ -236,7 +236,7 @@ const MAX_DEVICE_SPACES = 4;
  *  deviceHeight: ?number,
  *  deviceSpaces: number,
  * }} DeviceInfo
- * 
+ *
  * Contains the data related to the device.
  * Width and height refer to the story viewport, while deviceHeight is the device screen height.
  * The deviceSpaces refers to the MAX_DEVICE_SPACES, ensuring the devices on screen don't go over the max space set.
