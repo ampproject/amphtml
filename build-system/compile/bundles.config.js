@@ -27,7 +27,7 @@ const {VERSION: internalRuntimeVersion} = require('./internal-version');
 exports.jsBundles = {
   'polyfills.js': {
     srcDir: './src/',
-    srcFilename: 'polyfills.js',
+    srcFilename: 'polyfills/index.js',
     destDir: './build/',
     minifiedDestDir: './build/',
   },

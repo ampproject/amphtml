@@ -22,7 +22,7 @@
 import {
   installStub,
   shouldLoadPolyfill,
-} from '../polyfills/stubs/intersection-observer-stub';
+} from './stubs/intersection-observer-stub';
 
 /**
  * Installs the IntersectionObserver polyfill. There are a few different modes of operation.

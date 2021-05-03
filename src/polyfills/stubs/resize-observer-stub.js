@@ -23,8 +23,6 @@
  * amp-resize-observer-polyfill extension.
  */
 
-import {Services} from '../../services';
-
 const UPGRADERS = '_upgraders';
 const STUB = '_stub';
 
@@ -49,17 +47,6 @@ export function installStub(win) {
 
   win.ResizeObserver = ResizeObserverStub;
   win.ResizeObserver[STUB] = ResizeObserverStub;
-}
-
-/**
- * @param {!Window} win
- */
-export function scheduleUpgradeIfNeeded(win) {
-  if (shouldLoadPolyfill(win)) {
-    Services.extensionsFor(win).preloadExtension(
-      'amp-resize-observer-polyfill'
-    );
-  }
 }
 
 /**
