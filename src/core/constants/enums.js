@@ -61,6 +61,7 @@ export const TickLabel = {
   TIME_ORIGIN: 'timeOrigin',
   VIDEO_CACHE_STATE: 'vcs',
   VIDEO_ERROR: 'verr',
+  VIDEO_ON_FIRST_PAGE: 'vofp',
   VIDEO_JOINT_LATENCY: 'vjl',
   VIDEO_MEAN_TIME_BETWEEN_REBUFFER: 'vmtbrb',
   VIDEO_REBUFFERS: 'vrb',

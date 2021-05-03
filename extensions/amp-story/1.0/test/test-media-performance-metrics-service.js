@@ -58,7 +58,7 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
     clock.tick(300);
     service.stopMeasuring(video);
 
-    expect(tickStub).to.have.callCount(6);
+    expect(tickStub).to.have.callCount(7);
     expect(flushStub).to.have.been.calledOnce;
   });
 
@@ -72,7 +72,7 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
     clock.tick(10000);
     service.stopMeasuring(video);
 
-    expect(tickStub).to.have.callCount(2);
+    expect(tickStub).to.have.callCount(3);
     expect(flushStub).to.have.been.calledOnce;
   });
 
@@ -92,7 +92,7 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
     video2.dispatchEvent(new Event('playing'));
     service.stopMeasuring(video2);
 
-    expect(tickStub).to.have.callCount(11);
+    expect(tickStub).to.have.callCount(13);
     expect(flushStub).to.have.been.calledTwice;
   });
 
@@ -418,6 +418,44 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
       service.stopMeasuring(video);
 
       expect(tickStub).to.have.been.calledWithExactly('vcs', 2);
+    });
+  });
+
+  describe('Video on first page', () => {
+    it('should report the video is on the first page', () => {
+      const video = win.document.createElement('video');
+      const source = win.document.createElement('source');
+      const firstPage = win.document.createElement('amp-story-page');
+      source.setAttribute('src', 'foo.mp4');
+      video.appendChild(source);
+      firstPage.appendChild(video);
+      win.document.body.appendChild(firstPage);
+
+      service.startMeasuring(video);
+      service.stopMeasuring(video);
+
+      expect(tickStub).to.have.been.calledWithExactly('vofp', 1);
+    });
+
+    it('should report the video is not on the first page', () => {
+      // Create first page with unregistered video
+      const firstPage = win.document.createElement('amp-story-page');
+      firstPage.appendChild(win.document.createElement('video'));
+      win.document.body.appendChild(firstPage);
+
+      // Create second page with registered video
+      const video = win.document.createElement('video');
+      const source = win.document.createElement('source');
+      const secondPage = win.document.createElement('amp-story-page');
+      source.setAttribute('src', 'foo.mp4');
+      video.appendChild(source);
+      secondPage.appendChild(video);
+      win.document.body.appendChild(secondPage);
+
+      service.startMeasuring(video);
+      service.stopMeasuring(video);
+
+      expect(tickStub).to.have.been.calledWithExactly('vofp', 0);
     });
   });
 });
