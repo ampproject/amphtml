@@ -726,13 +726,14 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       // Toolbar target now has 3 nodes, 1 existing, 2 appended from toolbar
       expect(target.hasChildNodes()).to.be.true;
       expect(target.childElementCount).to.equal(3);
+      expect(target.firstElementChild.nodeName).to.equal('SPAN');
       expect(target.children[1].nodeName).to.equal('NAV');
       expect(target.lastElementChild.nodeName).to.equal('STYLE');
     });
 
     it('verify toolbar target content is removed on unmount', () => {
       // this media query is always false
-      mediaQuery = 'false';
+      mediaQuery = '(max-height: 0px)';
       wrapper = mount(
         <>
           <Sidebar ref={ref} side="left">

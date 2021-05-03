@@ -18,6 +18,7 @@ import * as Preact from '../../../src/preact';
 import {ContainWrapper, useValueRef} from '../../../src/preact/component';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {Side} from './sidebar-config';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
 import {
@@ -190,11 +191,11 @@ export function SidebarToolbar({
   children,
   ...rest
 }) {
-  const ref = useRef();
+  const ref = useRef(null);
   const [target, setTarget] = useState();
 
   useEffect(() => {
-    const selector = `#${CSS.escape(toolbarTarget)}`;
+    const selector = `#${escapeCssSelectorIdent(toolbarTarget)}`;
     const newTarget = document.querySelector(selector);
     setTarget(newTarget);
   }, [toolbarTarget]);
@@ -208,21 +209,17 @@ export function SidebarToolbar({
 
     const clone = element.cloneNode(true);
     const style = doc.createElement('style');
-    style./*OK*/ innerHTML = `
-    #${toolbarTarget} {
-        display: none;
-    }
-    @media ${mediaQueryProp} {
-      #${toolbarTarget} {
-        display: initial;
-      }
-    }`;
+    style./*OK*/ textContent =
+      `#${toolbarTarget}{display: none;}` +
+      `@media ${mediaQueryProp}{#${toolbarTarget}{display: initial;}}`;
 
     target.appendChild(clone);
     target.appendChild(style);
     return () => {
-      target.removeChild(clone);
-      target.removeChild(style);
+      if (target) {
+        clone && target.removeChild(clone);
+        style && target.removeChild(style);
+      }
     };
   }, [mediaQueryProp, toolbarTarget, target]);
 
