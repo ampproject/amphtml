@@ -3,7 +3,7 @@
     "aid": ""
   },
   "requests": {
-    "loadamptrkhtml": "https://c3.taboola.com/amp/amp-analytics-taboola.html?url=${canonicalUrl}&aid=${aid}&consent=${consent}"
+    "loadamptrkhtml": "https://c3.taboola.com/amp/amp-analytics-taboola.html?url=${canonicalUrl}&aid=${aid}&consent=${consentString}"
   },
   "triggers": {
     "pageview": {
