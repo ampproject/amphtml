@@ -2,7 +2,7 @@
 // https://github.com/ampproject/amp-github-apps/blob/main/owners/OWNERS.example
 
 {
-  reviewerTeam: 'ampproject/reviewers-amphtml',
+  reviewerPool: ['ampproject/reviewers-amphtml', 'renovate-bot'],
   rules: [
     {
       owners: [
