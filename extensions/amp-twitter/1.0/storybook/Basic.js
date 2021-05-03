@@ -26,6 +26,11 @@ export default {
 
 export const _default = () => {
   return (
-    <Twitter style={{width: 300, height: 200}} tweetId="638793490521001985" />
+    <Twitter
+      bootstrap="https://3p.ampproject.net/2104170104001/f.js"
+      tweetid="1356304203044499462"
+      src="https://d-41929527682976137678.ampproject.net/2104170104001/frame.html"
+      style={{width: '300px', height: '200px'}}
+    />
   );
 };
