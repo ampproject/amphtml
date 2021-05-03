@@ -35,6 +35,7 @@
     {
       "groupName": "validator devDependencies",
       "matchPaths": ["validator/**"],
+      "excludePackageNames": ["amp-validator-webui"],
       "major": {"automerge": false, "assignAutomerge": false},
       "labels": ["WG: caching"],
       "automerge": true,
