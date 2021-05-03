@@ -63,9 +63,9 @@ PASS
 |          <h1>fill</h1>
 |        </amp-story-grid-layer>
 |        <amp-story-page-attachment
-|          data-title="Page attachment title"
+|          title="Page attachment title"
 |          layout="nodisplay"
-|          data-cta-text="Call To Action"
+|          cta-text="Call To Action"
 |          cta-image="https://i.ytimg.com/vi/Wm1fWz-7nLQ/hqdefault_live.jpg"
 |          cta-image-2="https://i.ytimg.com/vi/Wm1fWz-7nLQ/hqdefault_live.jpg"
 |          >
@@ -77,9 +77,9 @@ PASS
 |        </amp-story-grid-layer>
 |        <amp-story-page-attachment
 |          href="https://www.google.com"
-|          data-title="Page attachment title"
+|          title="Page attachment title"
 |          layout="nodisplay"
-|          data-cta-text="Call To Action"
+|          cta-text="Call To Action"
 |          cta-image="https://website.com/image.png"
 |          >
 |        </amp-story-page-attachment>
@@ -90,12 +90,12 @@ PASS
 |        </amp-story-grid-layer>
 |        <amp-story-page-attachment
 |          href="https://www.google.com"
-|          data-title="Page attachment title"
+|          title="Page attachment title"
 |          layout="nodisplay"
 |          theme="custom"
 |          cta-accent-color="pink"
 |          cta-accent-element="background"
-|          data-cta-text="Call To Action"
+|          cta-text="Call To Action"
 |          cta-image="https://website.com/image.png"
 |          >
 |        </amp-story-page-attachment>
