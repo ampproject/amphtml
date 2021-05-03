@@ -200,6 +200,11 @@
   text-decoration: none !important;
 }
 
+.i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment:not([active]) {
+  /* Prevent tabbing to innactive page's buttons */
+  visibility: hidden !important;
+}
+
 /** For amp-story-inline-page-attachment-v2 inline default. */
 .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-icon {
   animation: none !important;
