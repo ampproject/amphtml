@@ -33,8 +33,8 @@ const MATCHES_MESSAGING_ORIGIN = () => true;
  * @param {{current: (!TwitterDef.Api|null)}} ref
  * @return {PreactDef.Renderable}
  */
-function TwitterWithRef({requestResize, title, ...rest}, ref) {
-  const [height, setHeight] = useState(FULL_HEIGHT);
+function TwitterWithRef({requestResize, style, title, ...rest}, ref) {
+  const [height, setHeight] = useState(null);
   const messageHandler = useCallback(
     (event) => {
       const data = deserializeMessage(event.data);
@@ -61,7 +61,7 @@ function TwitterWithRef({requestResize, title, ...rest}, ref) {
       matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
       messageHandler={messageHandler}
       type={TYPE}
-      wrapperStyle={{height}}
+      style={height ? {...style, height} : style}
     />
   );
 }
