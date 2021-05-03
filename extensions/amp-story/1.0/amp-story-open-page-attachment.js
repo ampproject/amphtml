@@ -144,7 +144,9 @@ const renderDefaultPageAttachmentUI = (win, pageEl, attachmentEl) => {
     '.i-amphtml-story-page-open-attachment-label'
   );
 
-  const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
+  const openLabelAttr =
+    attachmentEl.getAttribute('cta-text') ||
+    attachmentEl.getAttribute('data-cta-text');
   const openLabel =
     (openLabelAttr && openLabelAttr.trim()) ||
     getLocalizationService(pageEl).getLocalizedString(
@@ -195,7 +197,9 @@ const renderOutlinkPageAttachmentUI = (
   }
 
   // Appending text & aria-label.
-  const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
+  const openLabelAttr =
+    attachmentEl.getAttribute('cta-text') ||
+    attachmentEl.getAttribute('data-cta-text');
   const openLabel = openLabelAttr
     ? openLabelAttr.trim()
     : getLocalizationService(pageEl).getLocalizedString(
@@ -239,7 +243,9 @@ const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
   }
 
   // Appending text & aria-label.
-  const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
+  const openLabelAttr =
+    attachmentEl.getAttribute('cta-text') ||
+    attachmentEl.getAttribute('data-cta-text');
   const openLabel =
     (openLabelAttr && openLabelAttr.trim()) ||
     getLocalizationService(pageEl).getLocalizedString(
