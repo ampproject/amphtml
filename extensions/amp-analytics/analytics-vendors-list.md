@@ -615,8 +615,4 @@ Type attribute value: `webtrekk_v2`
 
 [/tip]
 
-<!--
-(The following link 404s, it's unclear whether vendor is still supported or if docs are now private.)
-
-Adds support for Webtrekk. Configuration details can be found at [supportcenter.webtrekk.com](`https://supportcenter.webtrekk.com/en/public/amp-analytics.html`).
--->
+Adds support for Webtrekk. Configuration details can be found at [supportcenter.webtrekk.com](https://supportcenter.webtrekk.com/en/public/amp-analytics.html).
