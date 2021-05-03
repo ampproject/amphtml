@@ -91,6 +91,7 @@ exports.rules = [
       '3p/**->src/core/types/index.js',
       '3p/**->src/core/types/object.js',
       '3p/**->src/core/types/string.js',
+      '3p/**->src/core/mode/index.js',
       '3p/**->src/log.js',
       '3p/**->src/style.js',
       '3p/**->src/url.js',
