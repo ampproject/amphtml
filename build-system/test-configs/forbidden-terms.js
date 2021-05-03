@@ -146,6 +146,8 @@ const forbiddenTermsGlobal = {
       'src/core/mode/minified.js',
       'src/core/mode/esm.js',
       'src/core/mode/sxg.js',
+      'build-system/babel-plugins/babel-plugin-is_minified-constant-transformer/index.js',
+      'build-system/babel-plugins/babel-plugin-is_fortesting-constant-transformer/index.js',
     ],
   },
   '\\.prefetch\\(': {
