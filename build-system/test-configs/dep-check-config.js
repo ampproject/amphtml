@@ -248,6 +248,9 @@ exports.rules = [
       // Bento VideoIframe, amp-video-iframe
       'extensions/amp-video-iframe/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
       'extensions/amp-video-iframe/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
+      // Shared definition of the iframe integration API
+      'extensions/amp-video-iframe/0.1/amp-video-iframe.js->extensions/amp-video-iframe/amp-video-iframe-api.js',
+      'extensions/amp-video-iframe/1.0/component.js->extensions/amp-video-iframe/amp-video-iframe-api.js',
 
       // Bento Vimeo, amp-vimeo
       'extensions/amp-vimeo/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',

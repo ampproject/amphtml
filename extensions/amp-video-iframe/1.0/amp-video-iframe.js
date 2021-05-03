@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {BUBBLE_MESSAGE_EVENTS} from '../0.1/amp-video-iframe';
+import {BUBBLE_MESSAGE_EVENTS} from '../amp-video-iframe-api';
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-video-iframe-1.0.css';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
