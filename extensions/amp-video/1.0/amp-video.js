@@ -49,6 +49,11 @@ AmpVideo['props'] = {
   'loop': {attr: 'loop', type: 'boolean'},
   'noaudio': {attr: 'noaudio', type: 'boolean'},
   'poster': {attr: 'poster'},
+  'sources': {
+    selector: 'source',
+    single: false,
+    clone: true,
+  },
   'src': {attr: 'src'},
   'title': {attr: 'title'},
 

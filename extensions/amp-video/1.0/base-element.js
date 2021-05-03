@@ -96,14 +96,6 @@ VideoBaseElement['props'] = {
   'noaudio': {attr: 'noaudio', type: 'boolean'},
   'poster': {attr: 'poster'},
 
-  'sources': {
-    selector: 'source',
-    single: false,
-    clone: true,
-  },
-  'src': {attr: 'src'},
-  'title': {attr: 'title'},
-
   // TODO(alanorozco): These props have no internal implementation yet.
   'dock': {attr: 'dock', media: true},
   'rotate-to-fullscreen': {
