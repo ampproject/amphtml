@@ -1371,6 +1371,7 @@ tags: {
       protocol: "web+mastodon"  # See GitHub issue #14793
       protocol: "wh"
       protocol: "whatsapp"
+      protocol: "microsoft-edge"
       allow_empty: true
     }
     disallowed_value_regex: "__amp_source_origin"
