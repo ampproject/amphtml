@@ -22,7 +22,7 @@ import {
 import {createErrorVargs, duplicateErrorIfNecessary} from './core/error';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
-import {isArray /*, isElement, isEnumValue, isString*/} from './core/types';
+import {isArray} from './core/types';
 import {once} from './core/types/function';
 import {urls} from './config';
 
