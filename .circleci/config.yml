@@ -19,7 +19,7 @@ push_builds_only: &push_builds_only
 executors:
   amphtml-docker-small-executor:
     docker:
-      - image: cimg/base:2021.04
+      - image: cimg/base:2021.05
     resource_class: small
   amphtml-medium-executor:
     machine:
@@ -77,12 +77,6 @@ commands:
           root: /tmp
           paths:
             - workspace
-  setup_gcloud_storage:
-    # TODO(danielrozenberg): remove this after deploy-bot can use CircleCI artifacts.
-    steps:
-      - run:
-          name: 'Setup Google Cloud Storage'
-          command: ./.circleci/setup_storage.sh
   install_chrome:
     steps:
       - browser-tools/install-chrome:
@@ -128,7 +122,6 @@ jobs:
       - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
-      - setup_gcloud_storage
       - run:
           name: 'Unminified Build'
           command: node build-system/pr-check/unminified-build.js
@@ -141,7 +134,6 @@ jobs:
       - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
-      - setup_gcloud_storage
       - run:
           name: 'Create Artifacts Directory'
           command: mkdir -p /tmp/artifacts
@@ -159,7 +151,6 @@ jobs:
       - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
-      - setup_gcloud_storage
       - run:
           name: 'Module Build'
           command: node build-system/pr-check/module-build.js
@@ -313,7 +304,6 @@ jobs:
       - restore_workspace
       - maybe_gracefully_halt
       - setup_vm
-      - setup_gcloud_storage
       - run:
           name: 'Experiment << parameters.exp >> Build'
           command: node build-system/pr-check/experiment-build.js --experiment=experiment<< parameters.exp >>
