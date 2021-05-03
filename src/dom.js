@@ -15,14 +15,10 @@
  */
 
 import {Deferred} from './core/data-structures/promise';
-import {
-  assertIsName,
-  isScopeSelectorSupported,
-  prependSelectorsWith,
-} from './css';
 import {dev, devAssert} from './log';
 import {dict} from './core/types/object';
 import {includes} from './core/types/string';
+import {isScopeSelectorSupported, prependSelectorsWith} from './core/dom/css';
 import {toWin} from './types';
 
 const HTML_ESCAPE_CHARS = {
@@ -53,11 +49,22 @@ export let CustomEventOptionsDef;
 const DEFAULT_CUSTOM_EVENT_OPTIONS = {bubbles: true, cancelable: true};
 
 /**
+ * Asserts that name is just an alphanumeric word, and does not contain
+ * advanced CSS selector features like attributes, psuedo-classes, class names,
+ * nor ids.
+ * @param {string} name
+ */
+function assertIsName(name) {
+  devAssert(/^[\w-]+$/.test(name));
+}
+
+/**
  * Waits until the child element is constructed. Once the child is found, the
  * callback is executed.
  * @param {!Element} parent
  * @param {function(!Element):boolean} checkFunc
  * @param {function()} callback
+ * @suppress {suspiciousCode}
  */
 export function waitForChild(parent, checkFunc, callback) {
   if (checkFunc(parent)) {
@@ -240,13 +247,17 @@ export function rootNodeFor(node) {
   }
   let n;
   // Check isShadowRoot() is only needed for the polyfill case.
-  for (n = node; !!n.parentNode && !isShadowRoot(n); n = n.parentNode) {}
+  for (
+    n = node;
+    !!n.parentNode && !isShadowRoot(/** @type {HTMLElement} */ (n));
+    n = n.parentNode
+  ) {}
   return n;
 }
 
 /**
  * Determines if value is actually a `ShadowRoot` node.
- * @param {*} value
+ * @param {HTMLElement} value
  * @return {boolean}
  */
 export function isShadowRoot(value) {
@@ -535,6 +546,8 @@ function scopedQuerySelectionFallback(root, selector) {
  * @param {!Element|!ShadowRoot} root
  * @param {string} selector
  * @return {?Element}
+ *
+ * @suppress {suspiciousCode}
  */
 export function scopedQuerySelector(root, selector) {
   if (IS_ESM || isScopeSelectorSupported(root)) {
@@ -552,6 +565,8 @@ export function scopedQuerySelector(root, selector) {
  * @param {!Element|!ShadowRoot} root
  * @param {string} selector
  * @return {!NodeList<!Element>}
+ *
+ * @suppress {suspiciousCode}
  */
 export function scopedQuerySelectorAll(root, selector) {
   if (IS_ESM || isScopeSelectorSupported(root)) {
@@ -567,7 +582,7 @@ export function scopedQuerySelectorAll(root, selector) {
 /**
  * Returns element data-param- attributes as url parameters key-value pairs.
  * e.g. data-param-some-attr=value -> {someAttr: value}.
- * @param {!Element} element
+ * @param {!HTMLElement} element
  * @param {function(string):string=} opt_computeParamNameFunc to compute the
  *    parameter name, get passed the camel-case parameter name.
  * @param {!RegExp=} opt_paramPattern Regex pattern to match data attributes.
@@ -777,14 +792,14 @@ export function isAmpElement(element) {
 /**
  * Return a promise that resolve when an AMP element upgrade from HTMLElement
  * to CustomElement
- * @param {!Element} element
+ * @param {!HTMLElement} element
  * @return {!Promise<!AmpElement>}
  */
 export function whenUpgradedToCustomElement(element) {
   devAssert(isAmpElement(element), 'element is not AmpElement');
   if (element.createdCallback) {
     // Element already is CustomElement;
-    return Promise.resolve(element);
+    return Promise.resolve(/**@type {!AmpElement} */ (element));
   }
   // If Element is still HTMLElement, wait for it to upgrade to customElement
   // Note: use pure string to avoid obfuscation between versions.
@@ -875,7 +890,7 @@ export function isFullscreenElement(element) {
  * Returns true if node is not disabled.
  *
  * IE8 can return false positives, see {@link matches}.
- * @param {!Element} element
+ * @param {!HTMLInputElement} element
  * @return {boolean}
  * @see https://www.w3.org/TR/html5/forms.html#concept-fe-disabled
  */
@@ -975,7 +990,10 @@ export function dispatchCustomEvent(node, name, opt_data, opt_options) {
   const data = opt_data || {};
   // Constructors of events need to come from the correct window. Sigh.
   const event = node.ownerDocument.createEvent('Event');
-  event.data = data;
+
+  // Technically .data is not a property of Event.
+  /**@type {?}*/ (event).data = data;
+
   const {bubbles, cancelable} = opt_options || DEFAULT_CUSTOM_EVENT_OPTIONS;
   event.initEvent(name, bubbles, cancelable);
   node.dispatchEvent(event);

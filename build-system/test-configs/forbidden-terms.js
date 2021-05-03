@@ -776,7 +776,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-callout-vendors.js',
       'test/unit/test-chunk.js',
       'test/unit/test-cid.js',
-      'test/unit/test-css.js',
       'test/unit/test-curve.js',
       'test/unit/test-describes.js',
       'test/unit/test-document-info.js',
@@ -1062,7 +1061,11 @@ const forbiddenTermsSrcInclusive = {
   '\\.indexOf\\(.*===?.*\\.length': 'use endsWith helper in src/string.js',
   '/url-parse-query-string': {
     message: 'Import parseQueryString from `src/url.js`',
-    allowlist: ['src/url.js', 'src/mode.js'],
+    allowlist: [
+      'build-system/tasks/check-types.js',
+      'src/mode.js',
+      'src/url.js',
+    ],
   },
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
