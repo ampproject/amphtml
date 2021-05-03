@@ -146,6 +146,9 @@ const forbiddenTermsGlobal = {
       'src/core/mode/minified.js',
       'src/core/mode/esm.js',
       'src/core/mode/sxg.js',
+      'build-system/tasks/storybook/preact-env/webpack.config.js',
+      // TODO(rcebulko): Condense all these plugins
+      'build-system/babel-config/helpers.js',
       'build-system/babel-plugins/babel-plugin-is_minified-constant-transformer/index.js',
       'build-system/babel-plugins/babel-plugin-is_fortesting-constant-transformer/index.js',
     ],
