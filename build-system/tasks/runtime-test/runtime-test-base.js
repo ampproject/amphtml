@@ -78,6 +78,7 @@ class RuntimeTestConfig {
     this.updateBrowsers();
     this.updateReporters();
     this.updateFiles();
+    this.updatePreprocessors();
     this.updateEsbuildConfig();
     this.updateClient();
     this.updateMiddleware();
