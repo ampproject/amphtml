@@ -68,7 +68,7 @@ The directory structure is below:
 
 ```sh
 /extensions/amp-my-element/
-├── 0.1/
+├── 1.0/
 |   ├── storybook/                       # Element's manual sample playground (req'd)
 |   |   ├── Basic.js                     # Preact usage examples
 |   |   ├── Basic.amp.js                 # AMP usage examples
