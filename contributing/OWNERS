@@ -5,8 +5,8 @@
   rules: [
     {
       owners: [
-        {name: 'cathyxz', requestReviews: false},
         {name: 'mrjoro'},
+        {name: 'ampproject/wg-bento', requestReviews: false},
         {name: 'ampproject/wg-infra', requestReviews: false},
         {name: 'ampproject/wg-outreach', requestReviews: false},
       ],
