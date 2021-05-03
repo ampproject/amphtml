@@ -20,7 +20,7 @@ import {
   resetStubsForTesting,
   shouldLoadPolyfill,
   upgradePolyfill,
-} from '../../../src/polyfillstub/intersection-observer-stub';
+} from '../../../src/polyfills/stubs/intersection-observer-stub';
 import {Services} from '../../../src/services';
 import {
   install,

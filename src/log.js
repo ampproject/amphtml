@@ -18,13 +18,12 @@ import {
   USER_ERROR_SENTINEL,
   elementStringOrPassThru,
 } from './core/error-message-helpers';
+import {assertion} from './core/assert';
 import {createErrorVargs, duplicateErrorIfNecessary} from './core/error';
-import {findIndex, isArray} from './core/types/array';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
-import {isEnumValue} from './core/types';
+import {isArray, isElement, isEnumValue} from './core/types';
 import {once} from './core/types/function';
-import {pureDevAssert, pureUserAssert} from './core/assert';
 import {urls} from './config';
 
 const noop = () => {};
@@ -76,7 +75,7 @@ export const LogLevel = {
 /**
  * Sets reportError function. Called from error.js to break cyclic
  * dependency.
- * @param {function(*, !Element=)|undefined} fn
+ * @param {function(this:Window, Error, (Element|null)=): ?|undefined} fn
  */
 export function setReportError(fn) {
   self.__AMP_REPORT_ERROR = fn;
@@ -402,15 +401,10 @@ export class Log {
       );
     }
 
-    try {
-      const assertion = this == logs.user ? pureUserAssert : pureDevAssert;
-      return assertion.apply(null, arguments);
-    } catch (e) {
-      this.prepareError_(e);
-      // __AMP_REPORT_ERROR is installed globally per window in the entry point.
-      self.__AMP_REPORT_ERROR(e);
-      throw e;
-    }
+    return assertion.apply(
+      null,
+      [this.suffix_].concat(Array.prototype.slice.call(arguments))
+    );
   }
 
   /**
@@ -421,14 +415,12 @@ export class Log {
    * @param {*} shouldBeElement
    * @param {!Array|string=} opt_message The assertion message
    * @return {!Element} The value of shouldBeTrueish.
-   * @template T
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertElement(shouldBeElement, opt_message) {
-    const shouldBeTrueish = shouldBeElement && shouldBeElement.nodeType == 1;
     this.assertType_(
       shouldBeElement,
-      shouldBeTrueish,
+      isElement(shouldBeElement),
       'Element expected',
       opt_message
     );
@@ -542,15 +534,6 @@ export class Log {
   prepareError_(error) {
     error = duplicateErrorIfNecessary(error);
 
-    // `associatedElement` is used to add the i-amphtml-error class; in
-    // `#development=1` mode, it also adds `i-amphtml-element-error` to the
-    // element and sets the `error-message` attribute.
-    if (error.messageArray) {
-      const elIndex = findIndex(error.messageArray, (item) => item?.tagName);
-      if (elIndex > -1) {
-        error.associatedElement = error.messageArray[elIndex];
-      }
-    }
     if (this.suffix_) {
       if (!error.message) {
         error.message = this.suffix_;
