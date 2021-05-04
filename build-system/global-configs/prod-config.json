@@ -17,6 +17,5 @@
   "amp-cid-backup": 1,
   "3p-vendor-split": 0.1,
   "story-ad-placements": 0.01,
-  "auto-ads-no-insertion-above": 0.2,
-  "enable-text-fragments": 0
+  "auto-ads-no-insertion-above": 0.2
 }
