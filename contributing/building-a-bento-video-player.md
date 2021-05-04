@@ -156,7 +156,7 @@ However, it's more likely that you load a third-party iframe and you communicate
 
 > ⚠️ Components may **not** embed scripts from a third-party location into host documents. If a third-party script is absolutely required, like on `<amp-ima-video>`, it must be inserted in an intermediate iframe, which we call a **proxy frame**.
 >
-> Proxy frames on Bento have not yet been tested as video player components, so they're not covered in this guide. If you wish to use one, please get in touch with `@alanorozco` via a Github issue or on Slack.
+> Proxy frames on Bento have not yet been tested as video player components, so they're not covered in this guide. If you wish to use one, please get in touch with `@alanorozco` via a Github issue or on on [Slack](https://bit.ly/amp-slack-signup) in the [`#contributing` channel](https://amphtml.slack.com/messages/C9HRJ1GPN/).
 
 ### Forwarding `ref`
 
