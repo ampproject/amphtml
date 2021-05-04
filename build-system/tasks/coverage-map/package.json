@@ -5,6 +5,6 @@
   "description": "amp coverage map.",
   "devDependencies": {
     "puppeteer": "9.0.0",
-    "source-map-explorer": "2.4.2"
+    "source-map-explorer": "2.5.2"
   }
 }
