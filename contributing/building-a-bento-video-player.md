@@ -566,11 +566,11 @@ When we click the following button on an AMP document:
 
 We call the corresponding function `play`:
 
+> The AMP action `my-element.play` is declared to be forwarded to the Preact component's method. See the [`init()` method on `VideoBaseElement`](../extensions/amp-video/1.0/base-element.js) for a list of the supported actions.
+
 ```
 -> FantasticPlayer.play()
 ```
-
-> The AMP action `my-element.play` is declared to be forwarded to the Preact component's method. See the [`init()` method on `VideoBaseElement`](../extensions/amp-video/1.0/base-element.js) for a list of the supported actions.
 
 Since we don't call `useImperativeHandle` at this layer, its `ref` forwards to `VideoWrapper`:
 
