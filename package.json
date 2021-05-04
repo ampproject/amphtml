@@ -76,7 +76,7 @@
     "check-dependencies": "1.1.0",
     "chokidar": "3.5.1",
     "cli-highlight": "2.1.11",
-    "codecov": "3.8.1",
+    "codecov": "3.8.2",
     "commander": "7.2.0",
     "connect-header": "0.0.5",
     "css-what": "5.0.0",
