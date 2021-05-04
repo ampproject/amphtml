@@ -192,18 +192,23 @@ export function SidebarToolbar({
   ...rest
 }) {
   const ref = useRef(null);
-  const [target, setTarget] = useState();
+  const [target, setTarget] = useState(null);
 
   useEffect(() => {
+    const doc = ref.current?.ownerDocument;
+    if (!doc) {
+      return;
+    }
+
     const selector = `#${escapeCssSelectorIdent(toolbarTarget)}`;
-    const newTarget = document.querySelector(selector);
+    const newTarget = doc.querySelector(selector);
     setTarget(newTarget);
   }, [toolbarTarget]);
 
   useEffect(() => {
     const element = ref.current;
     const doc = ref.current?.ownerDocument;
-    if (!element || !doc || !target) {
+    if (!doc || !target) {
       return;
     }
 
