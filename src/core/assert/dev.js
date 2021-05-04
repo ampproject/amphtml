@@ -19,8 +19,21 @@ import {isMinifiedMode} from '../minified-mode';
 
 /**
  * @fileoverview This file provides the entrypoint for dev assertions. It's
- * designed so all functions are pure function calls to improve inlining.
+ * designed so all functions are pure function calls to improve inlining. All
+ * functions in this file get DCE'd away during compilation.
  */
+
+/*
+ * This will never execute regardless, but will be included on unminified builds
+ * builds. It will be DCE'd away from minified builds, and so can be used to
+ * validate that Babel is properly removing dev assertions in minified builds.
+ */
+function devAssertDceCheck() {
+  if (self.__AMP_ASSERTION_CHECK) {
+    console /*OK*/
+      .log('__devAssert_sentinel__');
+  }
+}
 
 /**
  * Throws an error if the first argument isn't trueish. Mirrors devAssert in
@@ -57,15 +70,7 @@ export function assert(
   if (isMinifiedMode()) {
     return shouldBeTruthy;
   }
-
-  if (self.__AMP_ASSERTION_CHECK) {
-    // This will never execute regardless, but will be included on unminified
-    // builds. It will be DCE'd away from minified builds, and so can be used to
-    // validate that Babel is properly removing dev assertions in minified
-    // builds.
-    console /*OK*/
-      .log('__devAssert_sentinel__');
-  }
+  devAssertDceCheck();
 
   return assertions.assert(
     '',
@@ -95,6 +100,11 @@ export function assert(
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertElement(shouldBeElement, opt_message) {
+  if (isMinifiedMode()) {
+    return shouldBeElement;
+  }
+  devAssertDceCheck();
+
   return assertions.assertElement(
     /** @type {!AssertionFunction} */ (assert),
     shouldBeElement,
@@ -115,6 +125,11 @@ export function assertElement(shouldBeElement, opt_message) {
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertString(shouldBeString, opt_message) {
+  if (isMinifiedMode()) {
+    return shouldBeString;
+  }
+  devAssertDceCheck();
+
   return assertions.assertString(
     /** @type {!AssertionFunction} */ (assert),
     shouldBeString,
@@ -136,6 +151,11 @@ export function assertString(shouldBeString, opt_message) {
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertNumber(shouldBeNumber, opt_message) {
+  if (isMinifiedMode()) {
+    return shouldBeNumber;
+  }
+  devAssertDceCheck();
+
   return assertions.assertNumber(
     /** @type {!AssertionFunction} */ (assert),
     shouldBeNumber,
@@ -156,6 +176,11 @@ export function assertNumber(shouldBeNumber, opt_message) {
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertArray(shouldBeArray, opt_message) {
+  if (isMinifiedMode()) {
+    return shouldBeArray;
+  }
+  devAssertDceCheck();
+
   return assertions.assertArray(
     /** @type {!AssertionFunction} */ (assert),
     shouldBeArray,
@@ -175,6 +200,11 @@ export function assertArray(shouldBeArray, opt_message) {
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertBoolean(shouldBeBoolean, opt_message) {
+  if (isMinifiedMode()) {
+    return shouldBeBoolean;
+  }
+  devAssertDceCheck();
+
   return assertions.assertBoolean(
     /** @type {!AssertionFunction} */ (assert),
     shouldBeBoolean,
@@ -194,6 +224,11 @@ export function assertBoolean(shouldBeBoolean, opt_message) {
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertEnumValue(enumObj, shouldBeEnum, opt_enumName) {
+  if (isMinifiedMode()) {
+    return shouldBeEnum;
+  }
+  devAssertDceCheck();
+
   return assertions.assertEnumValue(
     /** @type {!AssertionFunction} */ (assert),
     enumObj,
