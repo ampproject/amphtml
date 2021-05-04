@@ -160,7 +160,7 @@ However, it's more likely that you load a third-party iframe and you communicate
 
 ### Forwarding `ref`
 
-To enable AMP actions (`my-element.play`) and the Preact component's imperative handle (`myPlayerRef.current.play()`), you'll have to [`forwardRef`](https://preactjs.com/guide/v10/switching-to-preact/#forwardref). Rename `FantasticPlayer` to `FantasticPlayerWithRef`, and export a `FantasticPlayer` that forwards a `ref` into the former.
+To enable AMP actions (`my-element.play`) and the Preact component's imperative handle (`myPlayerRef.current.play()`), you'll have to [`forwardRef`](https://reactjs.org/docs/forwarding-refs.html). Rename `FantasticPlayer` to `FantasticPlayerWithRef`, and export a `FantasticPlayer` that forwards a `ref` into the former.
 
 ```diff
 + import {forwardRef} from '../../../src/preact/compat';
@@ -516,7 +516,7 @@ You may similarly choose to pass or override properties at the higher level, pas
 
 #### Imperative handle
 
-AMP actions execute methods on the Preact component because they `forwardRef` to an element that defines them, or because they define them with `useImperativeHandle`. Methods executed down the Preact component chain cascade the same way.
+AMP actions execute methods on the Preact component because they `forwardRef` to an element that defines them, or because they define them with [`useImperativeHandle`](https://reactjs.org/docs/hooks-reference.html#useimperativehandle). Methods executed down the Preact component chain cascade the same way.
 
 When we click the following button on an AMP document:
 
