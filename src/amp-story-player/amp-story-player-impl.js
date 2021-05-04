@@ -144,7 +144,6 @@ let StoryDef;
  *   endpoint: ?string,
  *   pageScroll: ?boolean,
  *   autoplay: ?boolean,
- *   programmaticNavigationAnimation: ?boolean,
  * }}
  */
 let BehaviorDef;
