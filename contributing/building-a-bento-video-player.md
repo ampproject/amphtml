@@ -59,7 +59,7 @@ This guide covers how to implement video player components that are internally i
 
 Start by generating an extension specifying `--bento` and `--nojss`. We name our extension **`amp-fantastic-player`**, ending with `-player` according to our [guidelines for naming a third-party component](../spec/amp-3p-naming.md).
 
-```shell
+```console
 amp make-extension --bento --nojss --name=amp-fantastic-player
 ```
 
@@ -67,7 +67,7 @@ amp make-extension --bento --nojss --name=amp-fantastic-player
 
 A [full directory for a Bento component](./building-a-bento-amp-extension.md#directory-structure) is generated, but this guide will cover the following files in particular:
 
-```shell
+```
 /extensions/amp-fantastic-player/1.0/
  ├── base-element.js               # Preact base element
  ├── component.js                  # Preact implementation
