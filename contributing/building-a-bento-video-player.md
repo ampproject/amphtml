@@ -337,11 +337,15 @@ function FantasticPlayerWithRef(
 
 #### Handling events with `onMessage`
 
+Upstream events originated by the iframe are received as messages. You should define a function that interprets these messages and dispatches [`HTMLMediaElement` events](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement#events).
+
 ```ts
 type OnMessageFunction = (event: MessageEvent) => void;
 ```
 
 > ⚠️ **This is an incomplete [`MessageEvent`](https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent).** It's a copy that contains `currentTarget` (the originating `<iframe>`), `target` (same as `currentTarget`) and `data` (the data sent by the iframe with `postMessage`). If you need to copy other properties, add them to the appropriate place in [`video-iframe.js`](../extensions/amp-video/1.0/video-iframe.js) and add `@alanorozco` as a reviewer on your pull request.
+
+Here we implement the `canplay`, `play` and `pause` events for an iframe that posts them as the message `{"event": "play"}`.
 
 ```js
 function onMessage(event) {
@@ -372,6 +376,8 @@ function FantasticPlayerWithRef(
   );
 }
 ```
+
+The API that your iframe's document uses to post messages is likely different, but it should always dispatch [`HTMLMediaElement` events](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement#events) upstream.
 
 ### Use `VideoWrapper` directly
 
