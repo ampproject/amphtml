@@ -78,7 +78,9 @@ async function tsickleTask() {
   const result = {};
   const {externs} = tsickle.emit(program, transformerHost);
   for (const filename in externs) {
-    const writeToFilename = filename.replace(/\.d\.ts$/, 'type.js');
+    const writeToFilename = path
+      .relative(__dirname, filename)
+      .replace(/\.d\.ts$/, '.type.js');
     result[writeToFilename] = await prettierFormatJs(
       writeToFilename,
       [
