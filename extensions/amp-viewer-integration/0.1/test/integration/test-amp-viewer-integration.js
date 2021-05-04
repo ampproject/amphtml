@@ -232,15 +232,13 @@ describes.realWin(
           });
       });
 
-      // TODO(dmanek): move these tests out of the `ifChrome` section once other major
-      // browsers support text fragments (i.e. 'fragmentDirective' in document = true)
-      describe
-        .configure()
+      // TODO(dmanek): remove `ifChrome` once other major browsers support
+      // text fragments (i.e. 'fragmentDirective' in document = true)
+      it.configure()
         .ifChrome()
-        .run('Text Fragments', () => {
-          const mockEvent = new CustomEvent('message');
-
-          it('should update url based on text fragment post message', async () => {
+        .run(
+          'should update url based on text fragment post message',
+          async () => {
             toggleExperiment(win, 'enable-text-fragments', true, true);
 
             const updateUrlWithTextFragmentSpy = env.sandbox.spy();
@@ -250,6 +248,8 @@ describes.realWin(
             const message = {
               directive: text,
             };
+
+            const mockEvent = new CustomEvent('message');
             mockEvent.origin = 'https://www.google.com';
             mockEvent.data = message;
 
@@ -260,43 +260,49 @@ describes.realWin(
             expect(updateUrlWithTextFragmentSpy.getCall(0).args[0]).to.equal(
               text
             );
-          });
+          }
+        );
 
-          it('should not update url if origin it not google.com', async () => {
-            toggleExperiment(win, 'enable-text-fragments', true, true);
+      it.configure()
+        .ifChrome()
+        .run('should not update url if origin it not google.com', async () => {
+          toggleExperiment(win, 'enable-text-fragments', true, true);
 
-            const updateUrlWithTextFragmentSpy = env.sandbox.spy();
-            ampViewerIntegration.updateUrlWithTextFragment_ = updateUrlWithTextFragmentSpy;
+          const updateUrlWithTextFragmentSpy = env.sandbox.spy();
+          ampViewerIntegration.updateUrlWithTextFragment_ = updateUrlWithTextFragmentSpy;
 
-            ampViewerIntegration.init();
+          ampViewerIntegration.init();
 
-            const message = {
-              directive: 'will this highglight?',
-            };
-            mockEvent.origin = 'https://www.goøgle.com';
-            mockEvent.data = message;
+          const message = {
+            directive: 'will this highglight?',
+          };
+          const mockEvent = new CustomEvent('message');
+          mockEvent.origin = 'https://www.goøgle.com';
+          mockEvent.data = message;
 
-            win.dispatchEvent(mockEvent);
-            expect(updateUrlWithTextFragmentSpy.callCount).to.equal(0);
-          });
+          win.dispatchEvent(mockEvent);
+          expect(updateUrlWithTextFragmentSpy.callCount).to.equal(0);
+        });
 
-          it('should not update url if text fragment is empty', async () => {
-            toggleExperiment(win, 'enable-text-fragments', true, true);
+      it.configure()
+        .ifChrome()
+        .run('should not update url if text fragment is empty', async () => {
+          toggleExperiment(win, 'enable-text-fragments', true, true);
 
-            const updateUrlWithTextFragmentSpy = env.sandbox.spy();
-            ampViewerIntegration.updateUrlWithTextFragment_ = updateUrlWithTextFragmentSpy;
+          const updateUrlWithTextFragmentSpy = env.sandbox.spy();
+          ampViewerIntegration.updateUrlWithTextFragment_ = updateUrlWithTextFragmentSpy;
 
-            ampViewerIntegration.init();
+          ampViewerIntegration.init();
 
-            const message = {
-              directive: '',
-            };
-            mockEvent.origin = 'https://www.google.com';
-            mockEvent.data = message;
+          const message = {
+            directive: '',
+          };
+          const mockEvent = new CustomEvent('message');
+          mockEvent.origin = 'https://www.google.com';
+          mockEvent.data = message;
 
-            win.dispatchEvent(mockEvent);
-            expect(updateUrlWithTextFragmentSpy.callCount).to.equal(0);
-          });
+          win.dispatchEvent(mockEvent);
+          expect(updateUrlWithTextFragmentSpy.callCount).to.equal(0);
         });
     });
   }
