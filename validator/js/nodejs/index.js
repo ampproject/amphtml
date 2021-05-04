@@ -447,12 +447,12 @@ function main() {
     if (item === '-') {
       inputs.push(readFromStdin());
     } else if (isHttpOrHttpsUrl(item)) {
-      inputs.push(readFromUrl(item, program.userAgent));
+      inputs.push(readFromUrl(item, opts.userAgent));
     } else {
       inputs.push(readFromFile(item));
     }
   }
-  getInstance(program.validator_js, program.userAgent)
+  getInstance(opts.validator_js, opts.userAgent)
       .then(function(validator) {
         return validator.init().then(() => validator);
       })
