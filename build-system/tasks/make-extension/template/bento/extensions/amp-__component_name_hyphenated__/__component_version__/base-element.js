@@ -36,5 +36,9 @@ BaseElement['layoutSizeDefined'] = true;
 /** @override */
 BaseElement['usesShadowDom'] = true;
 
+// __do_not_submit__: If BaseElement['shadowCss']  is set to `null`, remove the
+// following declaration.
+// Otherwise, keep it when defined to an actual value like `COMPONENT_CSS`.
+// Once addressed, remove this set of comments.
 /** @override */
 BaseElement['shadowCss'] = __jss_component_css__;

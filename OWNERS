@@ -2,7 +2,7 @@
 // https://github.com/ampproject/amp-github-apps/blob/main/owners/OWNERS.example
 
 {
-  reviewerTeam: 'ampproject/reviewers-amphtml',
+  reviewerPool: ['ampproject/reviewers-amphtml', 'renovate-approve'],
   rules: [
     {
       owners: [
@@ -25,11 +25,22 @@
       owners: [{name: 'ampproject/wg-infra'}],
     },
     {
-      pattern: '{babel.config.js,package.json,package-lock.json,package-scripts.js}',
+      pattern: '{babel.config.js,package-scripts.js}',
       owners: [
         {name: 'ampproject/wg-infra'},
         {name: 'ampproject/wg-performance'},
       ],
+    },
+    {
+      pattern: '{package.json,package-lock.json}',
+      owners: [
+        {name: 'ampproject/wg-infra', requestReviews: false},
+        {name: 'ampproject/wg-performance', requestReviews: false},
+      ],
+    },
+    {
+      pattern: '**/package{,-lock}.json',
+      owners: [{name: 'renovate-bot'}],
     },
     {
       pattern: '**/OWNERS',
