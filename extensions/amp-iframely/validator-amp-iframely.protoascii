@@ -36,6 +36,9 @@ tags: {  # <amp-iframely>
   attrs: { # iframe url to build widget from
     name: "data-url"
     mandatory_oneof: "['data-id', 'data-url']"
+    trigger: {
+      also_requires_attr: "data-key"
+    }
   }
   attrs: { name: "data-key" } # iframely key hash
 
