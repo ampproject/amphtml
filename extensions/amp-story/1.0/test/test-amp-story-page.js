@@ -673,7 +673,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(openAttachmentEl.getAttribute('target')).to.eql('_top');
   });
 
-  it('should build the new outlink page attachment UI with target="_top" to navigate in top window', async () => {
+  it('should build the new outlink page attachment UI with target="_top" to navigate in top level browsing context', async () => {
     toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
 
     const attachmentEl = win.document.createElement(
