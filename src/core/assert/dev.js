@@ -88,14 +88,13 @@ export function assert(
  *
  * For more details see `assert`.
  *
- * @param {?string} sentinel
  * @param {*} shouldBeElement
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {!Element} The value of shouldBeTrueish.
  * @throws {Error} when shouldBeElement is not an Element
  * @closurePrimitive {asserts.matchesReturn}
  */
-export function assertElement(sentinel, shouldBeElement, opt_message) {
+export function assertElement(shouldBeElement, opt_message) {
   return assertions.assertElement(
     /** @type {!AssertionFunction} */ (assert),
     shouldBeElement,
@@ -109,14 +108,13 @@ export function assertElement(sentinel, shouldBeElement, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {?string} sentinel
  * @param {*} shouldBeString
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {string} The string value. Can be an empty string.
  * @throws {Error} when shouldBeString is not an String
  * @closurePrimitive {asserts.matchesReturn}
  */
-export function assertString(sentinel, shouldBeString, opt_message) {
+export function assertString(shouldBeString, opt_message) {
   return assertions.assertString(
     /** @type {!AssertionFunction} */ (assert),
     shouldBeString,
@@ -130,7 +128,6 @@ export function assertString(sentinel, shouldBeString, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {?string} sentinel
  * @param {*} shouldBeNumber
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {number} The number value. The allowed values include `0`
@@ -138,7 +135,7 @@ export function assertString(sentinel, shouldBeString, opt_message) {
  * @throws {Error} when shouldBeNumber is not an Number
  * @closurePrimitive {asserts.matchesReturn}
  */
-export function assertNumber(sentinel, shouldBeNumber, opt_message) {
+export function assertNumber(shouldBeNumber, opt_message) {
   return assertions.assertNumber(
     /** @type {!AssertionFunction} */ (assert),
     shouldBeNumber,
@@ -152,14 +149,13 @@ export function assertNumber(sentinel, shouldBeNumber, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {?string} sentinel
  * @param {*} shouldBeArray
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {!Array} The array value
  * @throws {Error} when shouldBeArray is not an Array
  * @closurePrimitive {asserts.matchesReturn}
  */
-export function assertArray(sentinel, shouldBeArray, opt_message) {
+export function assertArray(shouldBeArray, opt_message) {
   return assertions.assertArray(
     /** @type {!AssertionFunction} */ (assert),
     shouldBeArray,
@@ -172,14 +168,13 @@ export function assertArray(sentinel, shouldBeArray, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {?string} sentinel
  * @param {*} shouldBeBoolean
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {boolean} The boolean value.
  * @throws {Error} when shouldBeBoolean is not an Boolean
  * @closurePrimitive {asserts.matchesReturn}
  */
-export function assertBoolean(sentinel, shouldBeBoolean, opt_message) {
+export function assertBoolean(shouldBeBoolean, opt_message) {
   return assertions.assertBoolean(
     /** @type {!AssertionFunction} */ (assert),
     shouldBeBoolean,
@@ -191,7 +186,6 @@ export function assertBoolean(sentinel, shouldBeBoolean, opt_message) {
  * Asserts and returns the enum value. If the enum doesn't contain such a
  * value, the error is thrown.
  *
- * @param {?string} sentinel
  * @param {!Object<T>} enumObj
  * @param {*} shouldBeEnum
  * @param {string=} opt_enumName
@@ -199,7 +193,7 @@ export function assertBoolean(sentinel, shouldBeBoolean, opt_message) {
  * @template T
  * @closurePrimitive {asserts.matchesReturn}
  */
-export function assertEnumValue(sentinel, enumObj, shouldBeEnum, opt_enumName) {
+export function assertEnumValue(enumObj, shouldBeEnum, opt_enumName) {
   return assertions.assertEnumValue(
     /** @type {!AssertionFunction} */ (assert),
     enumObj,
