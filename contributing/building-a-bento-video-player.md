@@ -116,7 +116,7 @@ This enables support for AMP actions and analytics, once we map attributes to th
 
 ### Pre-upgrade CSS
 
-Bento components must specify certain layout properties in order to prevent CLS. Video extensions must include the following in the generated **`amp-fantastic-player.css`**:
+Bento components must specify certain layout properties in order to prevent [Cumulative Layout Shift (CLS)](https://web.dev/cls). Video extensions must include the following in the generated **`amp-fantastic-player.css`**:
 
 ```css
 /*
