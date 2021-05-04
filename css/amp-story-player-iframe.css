@@ -42,6 +42,10 @@
   transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.i-amphtml-story-player-loaded.i-amphtml-story-player-no-navigation-transition iframe {
+  transition: none;
+}
+
 .i-amphtml-story-player-main-container iframe:nth-of-type(1),
 .i-amphtml-story-player-main-container .story-player-iframe[i-amphtml-iframe-position="0"] {
   transform: translate3d(0, 0, 1px);
