@@ -41,6 +41,11 @@
       "assignAutomerge": true
     },
     {
+      "groupName": "validator webui",
+      "matchPaths": ["validator/js/webui/**"],
+      "enabled": false
+    },
+    {
       "groupName": "core devDependencies",
       "matchFiles": ["package.json"],
       "major": {"automerge": false, "assignAutomerge": false},
