@@ -72,11 +72,12 @@ import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isAutoplaySupported} from '../../../src/utils/video';
 import {isExperimentOn} from '../../../src/experiments';
+import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen} from '../../../src/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {prefersReducedMotion} from '../../../src/utils/media-query-props';
-import {px, toggle} from '../../../src/style';
+import {px, setImportantStyles, toggle} from '../../../src/style';
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
 import {toArray} from '../../../src/core/types/array';
@@ -670,9 +671,17 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   onUIStateUpdate_(uiState) {
-    // On vertical rendering, render all the animations with their final state.
+    // For bot rendering.
     if (uiState === UIType.VERTICAL) {
+      // Render all animations in their final state.
       this.maybeFinishAnimations_();
+      if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+        // Render open attachment element and make it visible.
+        this.renderOpenAttachmentUI_();
+        if (this.openAttachmentEl_) {
+          setImportantStyles(this.openAttachmentEl_, {'visibility': 'visible'});
+        }
+      }
     }
   }
 

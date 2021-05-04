@@ -62,7 +62,7 @@ amp-story[i-amphtml-vertical].i-amphtml-element amp-story-page.i-amphtml-element
   overflow: visible !important;
 }
 
-[i-amphtml-vertical] .amp-story-draggable-drawer-root {
+[i-amphtml-vertical] .amp-story-draggable-drawer-root:not(.i-amphtml-amp-story-page-attachment-ui-v2) {
   visibility: visible !important;
 }
 
