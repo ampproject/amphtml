@@ -154,7 +154,7 @@ If you need to directly insert nodes to the document, like a `<video>` element, 
 
 However, it's more likely that you load a third-party iframe and you communicate with the host via `postMessage`. In this case you should use a `<VideoIframe>` as opposed to a `<VideoWrapper>`.
 
-> Components may **not** embed scripts from a third-party location into host documents. If a third-party script is absolutely required, like on `<amp-ima-video>`, it must be inserted in an intermediate iframe, which we call a **proxy frame**.
+> ⚠️ Components may **not** embed scripts from a third-party location into host documents. If a third-party script is absolutely required, like on `<amp-ima-video>`, it must be inserted in an intermediate iframe, which we call a **proxy frame**.
 >
 > Proxy frames on Bento have not yet been tested as video player components, so they're not covered in this guide. If you wish to use one, please get in touch with `@alanorozco` via a Github issue or on Slack.
 
@@ -341,7 +341,7 @@ function FantasticPlayerWithRef(
 type OnMessageFunction = (event: MessageEvent) => void;
 ```
 
-> **This is an incomplete [`MessageEvent`](https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent).** It's a copy that contains `currentTarget` (the originating `<iframe>`), `target` (same as `currentTarget`) and `data` (the data sent by the iframe with `postMessage`). If you need to copy other properties, add them to the appropriate place in [`video-iframe.js`](../extensions/amp-video/1.0/video-iframe.js) and add `@alanorozco` as a reviewer on your pull request.
+> ⚠️ **This is an incomplete [`MessageEvent`](https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent).** It's a copy that contains `currentTarget` (the originating `<iframe>`), `target` (same as `currentTarget`) and `data` (the data sent by the iframe with `postMessage`). If you need to copy other properties, add them to the appropriate place in [`video-iframe.js`](../extensions/amp-video/1.0/video-iframe.js) and add `@alanorozco` as a reviewer on your pull request.
 
 ```js
 function onMessage(event) {
@@ -560,6 +560,8 @@ If `component` is a `<video>`, then the method is called direclty. If it's our `
 
 Methods can be defined with `useImperativeHandle` at the `component` implementation. We no longer forward our `ref` to the `<video>`, we use it to define the imperative handle instead. Downstream methods on the `<video>` element are executed explicitly through a local `videoRef`.
 
+> The methods and getters listed are the current requirements from `VideoWrapper`. Note that video players on Bento are in active development, so this list might expand in the future.
+
 ```js
 function FantasticPlayerInternalWithRef({sources, ...rest}, ref) {
   const videoRef = useRef(null);
@@ -590,8 +592,6 @@ function FantasticPlayerInternalWithRef({sources, ...rest}, ref) {
   return (<video ref={videoRef} {...rest}>{sources}</video>)
 }
 ```
-
-The methods and getters listed are the current requirements from `VideoWrapper`. Note that video players on Bento are in active development, so this list might expand in the future.
 
 ## Completing your extension
 
