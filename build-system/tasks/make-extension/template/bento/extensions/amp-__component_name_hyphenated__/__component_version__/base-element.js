@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS as COMPONENT_CSS} from './component.jss';
+__jss_import_component_css__;
 import {__component_name_pascalcase__} from './component';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 
@@ -36,5 +36,9 @@ BaseElement['layoutSizeDefined'] = true;
 /** @override */
 BaseElement['usesShadowDom'] = true;
 
+// __do_not_submit__: If BaseElement['shadowCss']  is set to `null`, remove the
+// following declaration.
+// Otherwise, keep it when defined to an actual value like `COMPONENT_CSS`.
+// Once addressed, remove this set of comments.
 /** @override */
-BaseElement['shadowCss'] = COMPONENT_CSS;
+BaseElement['shadowCss'] = __jss_component_css__;

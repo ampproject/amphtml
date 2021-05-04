@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-let cumulativeLayoutShift, largestContentfulPaint, longTasks, measureStarted;
+let cumulativeLayoutShift, largestContentfulPaint, longTasks;
+let measureStarted; // eslint-disable-line no-unused-vars
 
 function renderMeasurement(container, label, count) {
   container./*OK*/ innerHTML += `<div class='i-amphtml-performance-line'>
@@ -75,7 +76,7 @@ function measureLongTasks() {
 }
 
 function measureTimeToInteractive() {
-  measureStarted = Date.now(); // eslint-disable-line no-unused-vars
+  measureStarted = Date.now();
 }
 
 function getMaxFirstInputDelay(firstContentfulPaint) {

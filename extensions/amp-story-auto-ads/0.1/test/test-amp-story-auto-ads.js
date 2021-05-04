@@ -334,6 +334,30 @@ describes.realWin(
         storeService.dispatch(Action.TOGGLE_RTL, true);
         expect(adBadgeContainer).to.have.attribute(Attributes.DIR, 'rtl');
       });
+
+      it('should propagate the pause state if ad showing', () => {
+        const progressBackground = doc.querySelector(
+          '.i-amphtml-story-ad-progress-background'
+        );
+        storeService.dispatch(Action.TOGGLE_AD, true);
+        expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
+        storeService.dispatch(Action.TOGGLE_PAUSED, true);
+        expect(progressBackground).to.have.attribute(Attributes.PAUSED);
+        storeService.dispatch(Action.TOGGLE_PAUSED, false);
+        expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
+      });
+
+      it('should not propagate the pause state if no ad showing', () => {
+        const progressBackground = doc.querySelector(
+          '.i-amphtml-story-ad-progress-background'
+        );
+        storeService.dispatch(Action.TOGGLE_AD, false);
+        expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
+        storeService.dispatch(Action.TOGGLE_PAUSED, true);
+        expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
+        storeService.dispatch(Action.TOGGLE_PAUSED, false);
+        expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
+      });
     });
 
     describe('analytics triggers', () => {

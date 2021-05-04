@@ -83,3 +83,112 @@
   opacity: 1;
  }
 }
+
+/** For amp-story-outlink-page-attachment-v2 experiment elements. */
+
+amp-story[desktop] .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-attachment-remote  {
+  /* Shows outlink url preview on mobile only. */
+  display: none !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-attachment-remote {
+  height: 56px !important;
+  --i-amphtml-outlink-cta-background-color: white !important;
+  --i-amphtml-outlink-cta-text-color: black !important;
+}
+
+[theme="dark"].i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-attachment-remote {
+  --i-amphtml-outlink-cta-background-color: black !important;
+  --i-amphtml-outlink-cta-text-color: white !important;
+}
+
+[href].i-amphtml-amp-story-page-attachment-ui-v2.amp-story-draggable-drawer-root.i-amphtml-story-draggable-drawer-open {
+  /* Faster duration for outlink drawer. */
+  transition-duration: .3s !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-content {
+  height: 56px !important;
+  padding-inline-start: 12px !important;
+  padding-inline-end: 18px !important;
+  background: var(--i-amphtml-outlink-cta-background-color) !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-img,
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-link-icon {
+  width: 32px !important;
+  height: 32px !important;
+  flex-shrink: 0 !important;
+  padding: 0px !important;
+  border-radius: 50% !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  overflow: hidden !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2 svg.i-amphtml-story-page-open-attachment-link-icon {
+  fill: var(--i-amphtml-outlink-cta-text-color) !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-title {
+  font-size: 14px !important;
+  padding: 0 12px !important;
+  color: var(--i-amphtml-outlink-cta-text-color) !important;
+  /* For RTL support. */
+  display: flex !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-title :first-child {
+  font-weight: bold !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-title :first-child:after {
+  /* For RTL supportted space. */
+  content: "\00a0 " !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-title :nth-child(2) {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-icon {
+  margin-inline-start: auto !important;
+  width: 20px !important;
+  height: 20px !important;
+  flex-shrink: 0 !important;
+  fill: var(--i-amphtml-outlink-cta-text-color) !important;
+  background: none !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-attachment-remote.i-amphtml-story-draggable-drawer-open:after {
+  content: "" !important;
+  position: absolute !important;
+  width: 100% !important;
+  height: 4px !important;
+  color: black !important;
+  bottom: 0 !important;
+  background-color: var(--i-amphtml-outlink-cta-text-color) !important;
+  opacity: .6 !important;
+  transform-origin: left !important;
+  animation: progress-bar-animation both 1s !important;
+}
+
+[dir="rtl"] .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-attachment-remote.i-amphtml-story-draggable-drawer-open:after {
+  transform-origin: right !important;
+}
+
+@keyframes progress-bar-animation {
+  0% {
+    transform: scaleX(0)
+  }
+  100% {
+    transform: scaleX(1)
+  }
+}
+
+amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-attachment-remote .i-amphtml-story-draggable-drawer-spacer {
+    /* Hide spacer in remote attachment. */
+    display: none !important;
+}

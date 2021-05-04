@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {assign} from '../src/polyfills/object-assign';
+import {assign} from '../../../src/polyfills/object-assign';
 
 describes.sandboxed('Object.assign', {}, () => {
   it('should throw an error if target is null or undefined', () => {
