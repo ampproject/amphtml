@@ -207,10 +207,7 @@ Your `FantasticPlayer` component should return a `VideoIframe` that's configured
 
   function FantasticPlayerWithRef({...rest}, ref) {
 -   ...
-+   const src = useMemo(
-+     () => 'https://example.com/fantastic',
-+     []
-+   );
++   const src = 'https://example.com/fantastic';
 +   const makeMethodMessage = useCallback(() => '{}', []);
 +   const onMessage = useCallback((e) => {
 +     console.log(e);
