@@ -672,7 +672,7 @@ $ amp check-types
     -   [amp-stream-gallery](https://github.com/ampproject/amphtml/pull/30597)
 -   Adding video components which use `VideoWrapper`. [You may also follow the guide to Building a Bento Video Component.](./building-a-bento-video-player.md)
     -   [amp-video](https://github.com/ampproject/amphtml/pull/30280)
-    -   [amp-youtube](https://github.com/ampproject/amphtml/pull/30444)
     -   [amp-vimeo](https://github.com/ampproject/amphtml/pull/33971)
+    -   [amp-youtube](https://github.com/ampproject/amphtml/pull/30444)
 -   Adding iframe based embeds
     -   [amp-instagram](https://github.com/ampproject/amphtml/pull/30230)

@@ -649,5 +649,5 @@ Follow the [guide to Building a Bento AMP Component](./building-a-bento-amp-exte
 ## Example Pull Requests
 
 -   [amp-video](https://github.com/ampproject/amphtml/pull/30280)
--   [amp-youtube](https://github.com/ampproject/amphtml/pull/30444)
 -   [amp-vimeo](https://github.com/ampproject/amphtml/pull/33971)
+-   [amp-youtube](https://github.com/ampproject/amphtml/pull/30444)
