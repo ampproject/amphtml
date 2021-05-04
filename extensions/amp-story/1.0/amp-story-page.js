@@ -676,7 +676,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       // Render all animations in their final state.
       this.maybeFinishAnimations_();
       if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-        // Render open attachment element and make it visible.
+        // Render open attachment element and make it visible so it's visible to bots.
         this.renderOpenAttachmentUI_();
         if (this.openAttachmentEl_) {
           setImportantStyles(this.openAttachmentEl_, {'visibility': 'visible'});
