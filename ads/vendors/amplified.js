@@ -29,10 +29,6 @@ export function amplified(global, data) {
 
   global.adUnitId = adUnitId;
   global.params = JSON.parse(params);
-  global.usedCampaigns = null;
-  global.usedFormats = null;
-  global.companionsCampaigns = null;
-  global.companionFormats = null;
   global.disconnectAmplified = disconnectAmplified;
 
   setAmplifiedParams(global);
