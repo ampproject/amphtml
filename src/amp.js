@@ -47,7 +47,6 @@ import {
 } from './style-installer';
 import {internalRuntimeVersion} from './internal-version';
 import {isEsmMode, isSxgMode} from './core/mode';
-
 import {maybeTrackImpression} from './impression';
 import {maybeValidate} from './validator-integration';
 import {preconnectToOrigin} from './preconnect';

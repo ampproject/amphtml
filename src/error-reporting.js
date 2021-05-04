@@ -31,7 +31,6 @@ import {getMode} from './mode';
 import {isEsmMode, isSxgMode} from './core/mode';
 import {isLoadErrorMessage} from './event-helper';
 import {isProxyOrigin} from './url';
-
 import {makeBodyVisibleRecovery} from './style-installer';
 import {triggerAnalyticsEvent} from './analytics';
 import {urls} from './config';
