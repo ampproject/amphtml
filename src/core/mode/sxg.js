@@ -16,17 +16,15 @@
 
 /** @fileoverview Magic constant that is replaced by babel. */
 
-// IS_SXG is replaced with true when `amp dist` is called with the --sxg flag.
-// TODO(rcebulko): Refactor transformers to handle this the same way as the
-// IS_MINIFIED/IS_FORTESTING constants. Until then, it needs to be used as a
-// variable, not a declaration.
-// const IS_SXG = false;
-
 /**
  * Returns true whenever `amp dist` is called with `--sxg`. If this is true,
  * isEsmMode() is guaranteed to also be true.
  * @return {boolean}
  */
 export function isSxgMode() {
+  // IS_SXG is replaced with true when `amp dist` is called with the --sxg flag.
+  // TODO(rcebulko): Refactor transformers to handle this the same way as the
+  // IS_MINIFIED/IS_FORTESTING constants (or vice versa). Until then, it needs
+  // to be used as a variable, not a declaration.
   return IS_SXG;
 }

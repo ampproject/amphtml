@@ -16,13 +16,14 @@
 
 /** @fileoverview Magic constant that is replaced by babel. */
 
-// IS_ESM is replaced with true when `amp dist` is called with the --esm flag.
-const IS_ESM = false;
-
 /**
  * Returns true whenever `amp dist` is called with `--esm`.
  * @return {boolean}
  */
 export function isEsmMode() {
+  // IS_ESM is replaced with true when `amp dist` is called with the --esm flag.
+  // TODO(rcebulko): Refactor transformers to handle this the same way as the
+  // IS_MINIFIED/IS_FORTESTING constants (or vice versa). Until then, it needs
+  // to be used as a variable, not a declaration.
   return IS_ESM;
 }
