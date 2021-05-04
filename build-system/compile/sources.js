@@ -140,6 +140,8 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-user-notification/**/*.js',
   // Needed for video components in Bento.
   'extensions/amp-video/1.0/**/*.js',
+  // amp-video-iframe 0.1 and 1.0 share this file.
+  'extensions/amp-video-iframe/amp-video-iframe-api.js',
   // amp-vimeo 0.1 and 1.0 share this file.
   'extensions/amp-vimeo/vimeo-api.js',
   // Needed to access ConsentPolicyManager from other extensions

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {BUBBLE_MESSAGE_EVENTS} from '../amp-video-iframe-api';
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
@@ -60,20 +61,6 @@ const SANDBOX = [
   SandboxOptions.ALLOW_POPUPS,
   SandboxOptions.ALLOW_POPUPS_TO_ESCAPE_SANDBOX,
   SandboxOptions.ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION,
-];
-
-/**
- * Events allowed to be dispatched from messages.
- * @private @const
- */
-const ALLOWED_EVENTS = [
-  VideoEvents.PLAYING,
-  VideoEvents.PAUSE,
-  VideoEvents.ENDED,
-  VideoEvents.MUTED,
-  VideoEvents.UNMUTED,
-  VideoEvents.AD_START,
-  VideoEvents.AD_END,
 ];
 
 /**
@@ -360,7 +347,7 @@ class AmpVideoIframe extends AMP.BaseElement {
         break;
     }
 
-    if (ALLOWED_EVENTS.indexOf(eventReceived) > -1) {
+    if (BUBBLE_MESSAGE_EVENTS.indexOf(eventReceived) > -1) {
       dispatchCustomEvent(this.element, eventReceived);
       return;
     }
