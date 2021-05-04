@@ -132,6 +132,7 @@ describe('3p ampcontext.js', () => {
     });
     expect(context.canonicalUrl).to.equal('https://bar.com');
     expect(context.pageViewId).to.equal('1');
+    expect(context.pageViewId64).to.equal('abcdef');
     expect(context.sentinel).to.equal('1-291921');
     expect(context.startTime).to.equal(0);
     expect(context.referrer).to.equal('baz.net');
@@ -418,6 +419,7 @@ function generateAttributes(opt_sentinel) {
     },
     canonicalUrl: 'https://bar.com',
     pageViewId: '1',
+    pageViewId64: 'abcdef',
     sentinel,
     startTime: 0,
     referrer: 'baz.net',
