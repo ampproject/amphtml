@@ -33,7 +33,7 @@ export interface Api  {
 
 export type PlayerComponent = () => string | Renderable;
 
-export interface Props {
+export type Props = {
   component?: PlayerComponent,
   loading?: string,
   src?: string,
@@ -50,7 +50,7 @@ export interface Props {
   onReadyState?: (string, any?) => void,
 }
 
-export interface AutoplayProps {
+export type AutoplayProps = {
   metadata?: Object | null,
   displayIcon: boolean,
   playing: boolean,
