@@ -1371,6 +1371,7 @@ tags: {
       protocol: "web+mastodon"  # See GitHub issue #14793
       protocol: "wh"
       protocol: "whatsapp"
+      # (https://docs.microsoft.com/en-us/windows/uwp/launch-resume/launch-default-app#microsoft-edge-uri-scheme)
       protocol: "microsoft-edge"
       allow_empty: true
     }
