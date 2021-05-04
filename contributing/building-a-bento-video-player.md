@@ -398,7 +398,7 @@ function FantasticPlayerWithRef(
 }
 ```
 
-The API that your iframe's document uses to post messages is likely different, but it should always dispatch [`HTMLMediaElement` events](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement#events) upstream.
+Your iframe's interface to post messages is likely different, but your component should always dispatch [`HTMLMediaElement` events](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement#events) upstream.
 
 ### Use `VideoWrapper` directly
 
