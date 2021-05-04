@@ -217,6 +217,7 @@ Your `FantasticPlayer` component should return a `VideoIframe` that's configured
 -       ...
 -     </ContainWrapper>
 +     <VideoIframe
++       ref={ref}
 +       {...rest}
 +       src={src}
 +       makeMethodMessage={makeMethodMessage}
@@ -241,6 +242,7 @@ function FantasticPlayerWithRef({...rest}, ref) {
   }, []);
   return (
     <VideoIframe
+      ref={ref}
       {...rest}
       src={src}
       makeMethodMessage={makeMethodMessage}
