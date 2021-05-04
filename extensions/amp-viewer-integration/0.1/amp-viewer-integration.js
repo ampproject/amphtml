@@ -119,7 +119,7 @@ export class AmpViewerIntegration {
     ) {
       this.win.addEventListener('message', (e) => {
         if (
-          // e.origin !== 'https://www.google.com' ||
+          e.origin !== 'https://www.google.com' ||
           e.data?.directive?.length === 0
         ) {
           return;

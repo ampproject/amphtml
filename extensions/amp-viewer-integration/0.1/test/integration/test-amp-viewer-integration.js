@@ -237,8 +237,32 @@ describes.realWin(
       describe
         .configure()
         .ifChrome()
-        .run('unit test for text fragments', () => {
+        .run('Text Fragments', () => {
+          const mockEvent = new CustomEvent('message');
+
           it('should update url based on text fragment post message', async () => {
+            toggleExperiment(win, 'enable-text-fragments', true, true);
+
+            const updateUrlWithTextFragmentSpy = env.sandbox.spy();
+            ampViewerIntegration.updateUrlWithTextFragment_ = updateUrlWithTextFragmentSpy;
+
+            const text = 'will this higlight?';
+            const message = {
+              directive: text,
+            };
+            mockEvent.origin = 'https://www.google.com';
+            mockEvent.data = message;
+
+            ampViewerIntegration.init();
+
+            win.dispatchEvent(mockEvent);
+            expect(updateUrlWithTextFragmentSpy.calledOnce).to.be.true;
+            expect(updateUrlWithTextFragmentSpy.getCall(0).args[0]).to.equal(
+              text
+            );
+          });
+
+          it('should not update url if origin it not google.com', async () => {
             toggleExperiment(win, 'enable-text-fragments', true, true);
 
             const updateUrlWithTextFragmentSpy = env.sandbox.spy();
@@ -246,15 +270,14 @@ describes.realWin(
 
             ampViewerIntegration.init();
 
-            const text = encodeURIComponent('will this higlight?');
             const message = {
-              directive: text,
+              directive: 'will this highglight?',
             };
-            win.postMessage(message, '*');
-            expect(updateUrlWithTextFragmentSpy.calledOnce).to.be.true;
-            expect(updateUrlWithTextFragmentSpy.getCall(0).args[0]).to.equal(
-              text
-            );
+            mockEvent.origin = 'https://www.goøgle.com';
+            mockEvent.data = message;
+
+            win.dispatchEvent(mockEvent);
+            expect(updateUrlWithTextFragmentSpy.callCount).to.equal(0);
           });
 
           it('should not update url if text fragment is empty', async () => {
@@ -268,7 +291,10 @@ describes.realWin(
             const message = {
               directive: '',
             };
-            win.postMessage(message, '*');
+            mockEvent.origin = 'https://www.google.com';
+            mockEvent.data = message;
+
+            win.dispatchEvent(mockEvent);
             expect(updateUrlWithTextFragmentSpy.callCount).to.equal(0);
           });
         });
