@@ -37,7 +37,7 @@ AMP and Bento provide [default video player capabilities](https://amp.dev/docume
 
 On a host document, player components must dispatch the same events and implement the same methods so that playback and user interface can be coordinated successfully.
 
-**Preact components** can support this behavior by using a **`VideoWrapper`** that will use a specified `component`:
+**Preact components** can support this behavior by using a **`VideoWrapper`** that renders a specified `component`:
 
 ```js
 return <VideoWrapper component="video" {...props} />
