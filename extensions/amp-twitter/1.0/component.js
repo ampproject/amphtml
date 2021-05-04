@@ -34,7 +34,7 @@ const MATCHES_MESSAGING_ORIGIN = () => true;
  * @return {PreactDef.Renderable}
  */
 function TwitterWithRef(
-  {options, requestResize, style, title, tweetid, ...rest},
+  {momentid, options, requestResize, style, title, tweetid, ...rest},
   ref
 ) {
   const [height, setHeight] = useState(null);
@@ -63,7 +63,7 @@ function TwitterWithRef(
       // non-overridable props
       matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
       messageHandler={messageHandler}
-      options={{tweetid, ...options}}
+      options={{tweetid, momentid, ...options}}
       type={TYPE}
       style={height ? {...style, height} : style}
     />
