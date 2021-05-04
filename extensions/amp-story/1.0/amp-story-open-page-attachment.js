@@ -50,6 +50,8 @@ export const buildOldAttachmentElement = (element) =>
     </a>`;
 
 /**
+ * For amp-story-page-attachment-ui-v2.
+ * No image by default, if images are defined they are appended to the template.
  * @param {!Element} element
  * @return {!Element}
  */
@@ -62,6 +64,7 @@ export const buildOpenInlineAttachmentElement = (element) =>
     </a>`;
 
 /**
+ * For amp-story-page-attachment-ui-v2.
  * @param {!Element} element
  * @return {!Element}
  */
@@ -75,6 +78,7 @@ const buildOpenOutlinkAttachmentElement = (element) =>
     </a>`;
 
 /**
+ * For amp-story-page-attachment-ui-v2.
  * @param {!Element} element
  * @return {!Element}
  */
