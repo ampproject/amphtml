@@ -294,6 +294,18 @@ function FantasticPlayerWithRef(
 
 #### `origin`
 
+By default, messages from the iframe are only verified by comparing their `contentWindow`. You should define a regular expression that verifies their origin:
+
+```js
+return (
+  <VideoIframe
+    {...rest}
+    origin={new RegExp('^https://((player|www)\.)?example\.com/?$')}
+    ...
+  />
+);
+```
+
 #### Playback methods with `makeMethodMessage`
 
 We need the ability to tell the iframe to execute certain actions, for example `play`, `mute` or `hideControls`. When using an iframe to load a player, this is done by sending a `postMessage` downstream.
