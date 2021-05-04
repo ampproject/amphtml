@@ -5298,7 +5298,7 @@ void ParsedValidatorRules::MaybeEmitGlobalTagValidationErrors(
   MaybeEmitValueSetMismatchErrors(context, result);
 }
 
-// The ParseMaster requires that we register a handler for each tag
+// The htmlparser requires that we register a handler for each tag
 // for which we'd like to see CDATA - those are called the "intertags".
 // In our case, it's simply the rules which specify the
 // TagSpec::mandatory_cdata field.
