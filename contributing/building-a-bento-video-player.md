@@ -33,7 +33,7 @@
 
 ## How Video Player Components Work
 
-AMP and Bento provide [default video player capabilities](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-video-interface/) in order to create a uniform experience. For example, videos only autoplay while they're visible and muted, and they consistently unmute when clicked. They send the same event signals to [`amp-analytics`](https://go.amp.dev/c/amp-analytics), or may be pinned to a corner through the same User Experience in combination with [`amp-video-docking`](https://go.amp.dev/c/amp-video-docking).
+AMP and Bento provide [default video player capabilities](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-video-interface/) in order to create a uniform experience. For example, videos only autoplay while they're visible and muted, and they consistently unmute when clicked. They send the same event signals to [`amp-analytics`](https://go.amp.dev/c/amp-analytics), or may be pinned to a corner in the same way in combination with [`amp-video-docking`](https://go.amp.dev/c/amp-video-docking).
 
 On a host document, player components must dispatch the same events and implement the same methods so that playback and user interface can be coordinated successfully.
 
