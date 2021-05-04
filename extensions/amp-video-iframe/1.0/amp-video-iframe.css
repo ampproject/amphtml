@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-let resolved;
-
-/**
- * Returns a cached resolved promise.
- * Use this instead of directly calling Promise.resolve().
- * @return {!Promise<undefined>}
+/*
+ * Pre-upgrade:
+ * - display:block element
+ * - size-defined element
  */
-export function resolvedPromise() {
-  if (resolved) {
-    return resolved;
-  }
+amp-video-iframe {
+  display: block;
+  overflow: hidden;
+  position: relative;
+}
 
-  // It's important that we call with `undefined` here, to prevent a transform
-  // recursion. If we didn't pass an arg, then the transformer would replace
-  // this callsite with a call to `resolvedPromise()`.
-  resolved = Promise.resolve(undefined);
-  return resolved;
+/* Pre-upgrade: size-defining element - hide children. */
+amp-video-iframe:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc) {
+  display: none;
+  content-visibility: hidden;
 }

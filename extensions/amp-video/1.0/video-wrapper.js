@@ -286,7 +286,10 @@ function VideoWrapperWithRef(
           onPlaying={() => setPlayingState(true)}
           onPause={() => setPlayingState(false)}
           onEnded={() => setPlayingState(false)}
-          onError={(e) => setReadyState(ReadyState.ERROR, e)}
+          onError={(e) => {
+            setReadyState(ReadyState.ERROR, e);
+            readyDeferred.reject(e);
+          }}
           style={fillStretch}
           src={src}
           poster={poster}
