@@ -23,7 +23,7 @@ import {isMinifiedMode} from '../minified-mode';
  * functions in this file get DCE'd away during compilation.
  */
 
-/*
+/**
  * This will never execute regardless, but will be included on unminified builds
  * builds. It will be DCE'd away from minified builds, and so can be used to
  * validate that Babel is properly removing dev assertions in minified builds.
@@ -101,7 +101,7 @@ export function assert(
  */
 export function assertElement(shouldBeElement, opt_message) {
   if (isMinifiedMode()) {
-    return shouldBeElement;
+    return /** @type {!Element} */ (shouldBeElement);
   }
   devAssertDceCheck();
 
@@ -126,7 +126,7 @@ export function assertElement(shouldBeElement, opt_message) {
  */
 export function assertString(shouldBeString, opt_message) {
   if (isMinifiedMode()) {
-    return shouldBeString;
+    return /** @type {string} */ (shouldBeString);
   }
   devAssertDceCheck();
 
@@ -152,7 +152,7 @@ export function assertString(shouldBeString, opt_message) {
  */
 export function assertNumber(shouldBeNumber, opt_message) {
   if (isMinifiedMode()) {
-    return shouldBeNumber;
+    return /** @type {number} */ (shouldBeNumber);
   }
   devAssertDceCheck();
 
@@ -177,7 +177,7 @@ export function assertNumber(shouldBeNumber, opt_message) {
  */
 export function assertArray(shouldBeArray, opt_message) {
   if (isMinifiedMode()) {
-    return shouldBeArray;
+    return /** @type {!Array} */ (shouldBeArray);
   }
   devAssertDceCheck();
 
@@ -201,7 +201,7 @@ export function assertArray(shouldBeArray, opt_message) {
  */
 export function assertBoolean(shouldBeBoolean, opt_message) {
   if (isMinifiedMode()) {
-    return shouldBeBoolean;
+    return /** @type {boolean} */ (shouldBeBoolean);
   }
   devAssertDceCheck();
 
