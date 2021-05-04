@@ -50,7 +50,7 @@
     "@babel/plugin-transform-classes": "7.13.0",
     "@babel/plugin-transform-react-constant-elements": "7.13.13",
     "@babel/plugin-transform-react-jsx": "7.13.12",
-    "@babel/preset-env": "7.14.0",
+    "@babel/preset-env": "7.14.1",
     "@chiragrupani/karma-chromium-edge-launcher": "2.1.0",
     "@jest/core": "26.6.3",
     "@jridgewell/doctrine": "3.0.2",
