@@ -34,6 +34,7 @@ import {dict} from '../../../src/core/types/object';
 import {getAmpdoc} from '../../../src/service';
 import {getData, listen, listenOnce} from '../../../src/event-helper';
 import {getSourceUrl} from '../../../src/url';
+import {isExperimentOn} from '../../../src/experiments';
 import {isIframed} from '../../../src/dom';
 
 const TAG = 'amp-viewer-integration';
@@ -112,9 +113,15 @@ export class AmpViewerIntegration {
       );
     }
 
-    if (document.fragmentDirective) {
+    if (
+      'fragmentDirective' in document &&
+      isExperimentOn(this.win, 'enable-text-fragments')
+    ) {
       this.win.addEventListener('message', (e) => {
-        if (e.origin !== 'https://www.google.com') {
+        if (
+          e.origin !== 'https://www.google.com' ||
+          e.data?.directive?.length === 0
+        ) {
           return;
         }
         window.location.replace('#:~:' + e.data.directive);
