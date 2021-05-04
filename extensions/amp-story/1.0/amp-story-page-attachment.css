@@ -162,7 +162,7 @@ amp-story[desktop] .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-pa
   background: none !important;
 }
 
-.i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-attachment-remote.i-amphtml-story-draggable-drawer-open:before {
+.i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-attachment-remote.i-amphtml-story-draggable-drawer-open:after {
   content: "" !important;
   position: absolute !important;
   width: 100% !important;
@@ -175,7 +175,7 @@ amp-story[desktop] .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-pa
   animation: progress-bar-animation both 1s !important;
 }
 
-[dir="rtl"] .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-attachment-remote.i-amphtml-story-draggable-drawer-open:before {
+[dir="rtl"] .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-attachment-remote.i-amphtml-story-draggable-drawer-open:after {
   transform-origin: right !important;
 }
 
