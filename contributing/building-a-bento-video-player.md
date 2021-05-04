@@ -253,7 +253,7 @@ function FantasticPlayerWithRef({...rest}, ref) {
 
 We're rendering an iframe that always loads `https://example.com/fantastic`, but we'll specify a dynamic URL later; hence `useMemo()`. Likewise, we'll need to define implementations for the communication functions `makeMethodMessage` and `onMessage`.
 
-You should add allow one more cross-extension import for `VideoIframe`. Following the previous location on **`dep-check-config.js`**, we add:
+You should list one more allowed cross-extension import for `VideoIframe`. Following the previous location on **`dep-check-config.js`**, we add:
 
 ```diff
   allowlist: [
@@ -407,7 +407,7 @@ Your `FantasticPlayer` component should return a `VideoWrapper` that's configure
 -     <ContainWrapper layout size paint {...rest} >
 -       ...
 -     </ContainWrapper>
-+     <VideoWrapper component="video" />
++     <VideoWrapper ref={ref} {...rest} component="video" />
     );
   }
 ```
@@ -419,13 +419,13 @@ import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
 
 // ...
 function FantasticPlayerWithRef({...rest}, ref) {
-  return <VideoWrapper component="video" />;
+  return <VideoWrapper ref={ref} {...rest} component="video" />;
 }
 ```
 
 We're specifying `"video"` as the element to render, which is also the default. We'll llater change this into our own component implementation.
 
-You should add allow one more cross-extension import for `VideoWrapper`. Following the previous location on **`dep-check-config.js`**, we add:
+You should list one more allowed cross-extension import for `VideoWrapper`. Following the previous location on **`dep-check-config.js`**, we add:
 
 ```diff
   allowlist: [
@@ -440,7 +440,7 @@ You should add allow one more cross-extension import for `VideoWrapper`. Followi
 
 The `VideoWrapper` must interact with an element that implements the `HTMLMediaInterface` like `<video>`, or a Preact component that emulates the same interface.
 
-For example, we may set `component={RandomVideo}`, where the specified function renders its own video from a randomly selected `src`.
+For example, we may set a `component={FantasticPlayerInternal}`, where the specified function controls how we render and interact with the `<video>` element.
 
 By passing the `ref` through, we're able to call methods like `play()` from `FantasticPlayer` on the `<video>` element itself. By passing the `...rest` of the props we make sure that `src` is set, in addition to listening to playback events through props like `onPlay`.
 
@@ -460,7 +460,13 @@ const FantasticPlayerInternal = forwardRef(FantasticPlayerInternalWithRef);
 // ...
 
 function FantasticPlayerWithRef({...rest}, ref) {
-  return <VideoWrapper {...rest} component={RandomVideo} />;
+  return (
+    <VideoWrapper
+      ref={ref}
+      {...rest}
+      component={FantasticPlayerInternal}
+    />
+  );
 }
 ```
 
@@ -607,7 +613,11 @@ function FantasticPlayerInternalWithRef({sources, ...rest}, ref) {
     }
   }, []);
 
-  return (<video ref={videoRef} {...rest}>{sources}</video>)
+  return (
+    <video ref={videoRef} {...rest}>
+      {sources}
+    </video>
+  );
 }
 ```
 
