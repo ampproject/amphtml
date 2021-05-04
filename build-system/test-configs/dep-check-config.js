@@ -482,6 +482,18 @@ exports.rules = [
     allowlist: ['src/amp.js->src/polyfills/index.js'],
   },
 
+  // Base assertions should never be used explicitly; only the user/dev wrappers
+  // or the Log class should have access to the base implementations.
+  {
+    filesMatching: '**/*.js',
+    mustNotDependOn: 'src/core/assert/base.js',
+    allowlist: [
+      'src/core/assert/dev.js->src/core/assert/base.js',
+      'src/core/assert/user.js->src/core/assert/base.js',
+      'src/log.js->src/core/assert/base.js',
+    ],
+  },
+
   // Rules for main src.
   {
     filesMatching: 'src/**/*.js',
