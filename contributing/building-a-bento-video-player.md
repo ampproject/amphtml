@@ -91,6 +91,8 @@ Our `BaseElement` should be a superclass of `VideoBaseElement`. In **`base-eleme
 into:
 
 ```js
+// base-element.js
+// ...
 import {MyFantasticPlayer} from './component';
 import {VideoBaseElement} from '../../amp-video/1.0/base-element';
 
@@ -119,6 +121,8 @@ This enables support for AMP actions and analytics, once we map attributes to th
 Bento components must specify certain layout properties in order to prevent [Cumulative Layout Shift (CLS)](https://web.dev/cls). Video extensions must include the following in the generated **`amp-fantastic-player.css`**:
 
 ```css
+/* amp-fantastic-player.css */
+
 /*
  * Pre-upgrade:
  * - display:block element
@@ -142,6 +146,8 @@ amp-fantastic-player:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-
 [**`props`**](https://github.com/ampproject/amphtml/blob/main/contributing/building-a-bento-amp-extension.md#preactbaseelementprops) map the AMP element's attributes to the Preact component props. Take a look at [`VideoBaseElement`](extensions/amp-video/1.0/base-element.js) for how most video properties are mapped. On your own `base-element.js`, you should specify any of them you support.
 
 ```js
+// base-element.js
+// ...
 /** @override */
 BaseElement['props'] = {
   'autoplay': {attr: 'autoplay', type: 'boolean'},
@@ -178,14 +184,13 @@ To enable AMP actions (`my-element.play`) and the Preact component's imperative 
 So the outer structure looks like:
 
 ```js
+// component.js
 // ...
 import {forwardRef} from '../../../src/preact/compat';
-
 // ...
 function FantasticPlayerWithRef({...rest}, ref) {
   // ...
 }
-
 //...
 const FantasticPlayer = forwardRef(FantasticPlayerWithRef);
 FantasticPlayer.displayName = 'FantasticPlayer'; // Make findable for tests.
@@ -224,18 +229,15 @@ Your `FantasticPlayer` component should return a `VideoIframe` that's configured
   }
 ```
 
-into:
+So that our component returns a `<VideoIframe>`:
 
 ```js
-import {VideoIframe} from '../../amp-video/1.0/video-iframe';
-
+// component.js
 // ...
-
+import {VideoIframe} from '../../amp-video/1.0/video-iframe';
+// ...
 function FantasticPlayerWithRef({...rest}, ref) {
-  const src = useMemo(
-    () => 'https://example.com/fantastic',
-    []
-  );
+  const src = 'https://example.com/fantastic';
   const makeMethodMessage = useCallback(() => '{}', []);
   const onMessage = useCallback((e) => {
     console.log(e);
@@ -251,7 +253,7 @@ function FantasticPlayerWithRef({...rest}, ref) {
 }
 ```
 
-We're rendering an iframe that always loads `https://example.com/fantastic`, but we'll specify a dynamic URL later; hence `useMemo()`. Likewise, we'll need to define implementations for the communication functions `makeMethodMessage` and `onMessage`.
+We're rendering an iframe that always loads `https://example.com/fantastic`, but we'll specify a dynamic URL later. Likewise, we'll need to define implementations for the communication functions `makeMethodMessage` and `onMessage`.
 
 You should list one more allowed cross-extension import for `VideoIframe`. Following the previous location on **`dep-check-config.js`**, we add:
 
@@ -271,6 +273,8 @@ You may use props to construct the `src`, like using a `videoId` to load `https:
 We employ the `useMemo()` hook so that the `src` is generated only when the `videoId` changes:
 
 ```js
+// component.js
+// ...
 function FantasticPlayerWithRef(
   {videoId, ...rest},
   ref
@@ -294,9 +298,11 @@ function FantasticPlayerWithRef(
 
 #### `origin`
 
-By default, messages from the iframe are only verified by comparing their `contentWindow`. You should define a regular expression that verifies their origin:
+By default, messages from the iframe are only verified by comparing their `contentWindow`. You should define a regular expression that verifies their [origin](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage#the_dispatched_event):
 
 ```js
+// component.js
+// ...
 return (
   <VideoIframe
     {...rest}
@@ -319,6 +325,8 @@ type MakeMethodMessageFunction = (method: string) => string;
 We implement this function with `useCallback()` so that it's created only when required as specified by hook dependencies. It's recommended that you also create a higher-level `makeMessage` function that creates and serializes messages as your iframe's interface needs it. In this case, we `JSON.stringify` a `videoId` and a `method`:
 
 ```js
+// component.js
+// ...
 function makeMessage(videoId, method) {
   return JSON.stringify({
     'videoId': videoId,
@@ -360,6 +368,8 @@ type OnMessageFunction = (event: MessageEvent) => void;
 Here we implement the `canplay`, `play` and `pause` events for an iframe that posts them as the message `{"event": "play"}`.
 
 ```js
+// component.js
+// ...
 function onMessage(event) {
   const {data, currentTarget} = event;
   switch (data?.event) {
@@ -415,6 +425,8 @@ Your `FantasticPlayer` component should return a `VideoWrapper` that's configure
 So that our component returns a `<VideoWrapper>`:
 
 ```js
+// component.js
+// ...
 import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
 
 // ...
@@ -423,7 +435,7 @@ function FantasticPlayerWithRef({...rest}, ref) {
 }
 ```
 
-We're specifying `"video"` as the element to render, which is also the default. We'll llater change this into our own component implementation.
+We're specifying `"video"` as the element to render, which is also the default. We'll later change this into our own component implementation.
 
 You should list one more allowed cross-extension import for `VideoWrapper`. Following the previous location on **`dep-check-config.js`**, we add:
 
@@ -445,6 +457,8 @@ For example, we may set a `component={FantasticPlayerInternal}`, where the speci
 By passing the `ref` through, we're able to call methods like `play()` from `FantasticPlayer` on the `<video>` element itself. By passing the `...rest` of the props we make sure that `src` is set, in addition to listening to playback events through props like `onPlay`.
 
 ```js
+// component.js
+// ...
 function FantasticPlayerInternalWithRef({sources, ...rest}, ref) {
   return (
     <div>
@@ -458,7 +472,6 @@ function FantasticPlayerInternalWithRef({sources, ...rest}, ref) {
 const FantasticPlayerInternal = forwardRef(FantasticPlayerInternalWithRef);
 
 // ...
-
 function FantasticPlayerWithRef({...rest}, ref) {
   return (
     <VideoWrapper
@@ -475,6 +488,8 @@ function FantasticPlayerWithRef({...rest}, ref) {
 In the previous example, props received from the `VideoWrapper` are implicitly set through `...rest`. If we set each explicitly, we see the `HTMLMediaInterface` attributes and events handled.
 
 ```js
+// component.js
+// ...
 function FantasticPlayerInternalWithRef(
   {
     muted,
@@ -587,6 +602,8 @@ Methods can be defined with `useImperativeHandle` at the `component` implementat
 > The methods and getters listed are the current requirements from `VideoWrapper`. Note that video players on Bento are in active development, so this list might expand in the future.
 
 ```js
+// component.js
+// ...
 function FantasticPlayerInternalWithRef({sources, ...rest}, ref) {
   const videoRef = useRef(null);
 
