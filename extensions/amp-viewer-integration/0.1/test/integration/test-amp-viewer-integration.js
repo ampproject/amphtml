@@ -23,6 +23,7 @@ import {
 import {ViewerForTesting} from '../../viewer-for-testing';
 import {done} from 'fetch-mock';
 import {getSourceUrl} from '../../../../../src/url';
+import {toggleExperiment} from '../../../../../src/experiments';
 
 describes.sandboxed('amp-viewer-integration', {}, () => {
   const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';
@@ -230,6 +231,47 @@ describes.realWin(
             expect(initFocusHandlerStub).to.be.called;
           });
       });
+
+      // TODO(dmanek): move these tests out of the `ifChrome` section once other major
+      // browsers support text fragments (i.e. 'fragmentDirective' in document = true)
+      describe
+        .configure()
+        .ifChrome()
+        .run('unit test for text fragments', () => {
+          it('should update url based on text fragment post message', async () => {
+            toggleExperiment(win, 'enable-text-fragments', true, true);
+
+            const updateUrlWithTextFragmentSpy = env.sandbox.spy();
+            ampViewerIntegration.updateUrlWithTextFragment_ = updateUrlWithTextFragmentSpy;
+
+            ampViewerIntegration.init();
+
+            const text = encodeURIComponent('will this higlight?');
+            const message = {
+              directive: text,
+            };
+            win.postMessage(message, '*');
+            expect(updateUrlWithTextFragmentSpy.calledOnce).to.be.true;
+            expect(updateUrlWithTextFragmentSpy.getCall(0).args[0]).to.equal(
+              text
+            );
+          });
+
+          it('should not update url if text fragment is empty', async () => {
+            toggleExperiment(win, 'enable-text-fragments', true, true);
+
+            const updateUrlWithTextFragmentSpy = env.sandbox.spy();
+            ampViewerIntegration.updateUrlWithTextFragment_ = updateUrlWithTextFragmentSpy;
+
+            ampViewerIntegration.init();
+
+            const message = {
+              directive: '',
+            };
+            win.postMessage(message, '*');
+            expect(updateUrlWithTextFragmentSpy.callCount).to.equal(0);
+          });
+        });
     });
   }
 );

@@ -119,12 +119,12 @@ export class AmpViewerIntegration {
     ) {
       this.win.addEventListener('message', (e) => {
         if (
-          e.origin !== 'https://www.google.com' ||
+          // e.origin !== 'https://www.google.com' ||
           e.data?.directive?.length === 0
         ) {
           return;
         }
-        window.location.replace('#:~:' + e.data.directive);
+        this.updateUrlWithTextFragment_(e.data.directive);
       });
     } else {
       /** @type {?HighlightInfoDef} */
@@ -145,6 +145,14 @@ export class AmpViewerIntegration {
       origin,
       new Messaging(this.win, port, this.isWebView_, messagingToken)
     );
+  }
+
+  /**
+   * @param {string} fragment
+   * @private
+   */
+  updateUrlWithTextFragment_(fragment) {
+    window.location.replace('#:~:' + fragment);
   }
 
   /**
