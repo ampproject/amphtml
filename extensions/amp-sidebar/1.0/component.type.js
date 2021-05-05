@@ -23,9 +23,9 @@ var SidebarDef = {};
  * @typedef {{
  *   as: (string|PreactDef.FunctionalComponent|undefined),
  *   side: (string|undefined),
- *   onBeforeOpen: (function|undefined),
- *   onAfterOpen: (function|undefined),
- *   onAfterClose: (function|undefined),
+ *   onBeforeOpen: (function():void|undefined),
+ *   onAfterOpen: (function():void|undefined),
+ *   onAfterClose: (function():void|undefined),
  *   backdropStyle: (?Object|undefined),
  *   backdropClassName: (string|undefined),
  *   children: (?PreactDef.Renderable|undefined),

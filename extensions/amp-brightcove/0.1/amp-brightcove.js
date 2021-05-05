@@ -142,7 +142,7 @@ class AmpBrightcove extends AMP.BaseElement {
   }
 
   /**
-   * @return {Promise[]}
+   * @return {Promise}
    */
   getConsents_() {
     const consentPolicy = super.getConsentPolicy();

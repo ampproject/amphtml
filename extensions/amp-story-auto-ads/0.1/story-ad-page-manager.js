@@ -69,7 +69,7 @@ export class StoryAdPageManager {
     /** @private {!./story-ad-button-text-fitter.ButtonTextFitter} */
     this.buttonFitter_ = new ButtonTextFitter(this.ampdoc_);
 
-    /** @private {Object<string, StoryAdPage} */
+    /** @private {Object<string, StoryAdPage>} */
     this.pages_ = {};
 
     /** @private {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} **/

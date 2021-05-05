@@ -57,7 +57,7 @@ AccordionDef.AccordionHeaderProps;
 /**
  * @typedef {{
  *   as: (string|PreactDef.FunctionalComponent|undefined),
- *   role: (string|undefined)
+ *   role: (string|undefined),
  *   className: (string|undefined),
  *   id: (string|undefined),
  *   children: (?PreactDef.Renderable|undefined),

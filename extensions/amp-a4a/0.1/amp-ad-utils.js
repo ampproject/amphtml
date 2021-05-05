@@ -167,7 +167,7 @@ export function getAmpAdMetadata(creative) {
 /**
  * Merges any elements from customElementExtensions array into extensions array if
  * the element is not present.
- * @param {!Array<{custom-element: string, 'src': string}} extensions
+ * @param {!Array<{custom-element: string, 'src': string}>} extensions
  * @param {!Array<string>} customElementExtensions
  */
 export function mergeExtensionsMetadata(extensions, customElementExtensions) {

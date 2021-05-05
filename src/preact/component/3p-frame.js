@@ -32,7 +32,7 @@ import {parseUrlDeprecated} from '../../url';
 import {sequentialIdGenerator} from '../../utils/id-generator';
 import {useLayoutEffect, useMemo, useRef, useState} from '../../../src/preact';
 
-/** @type {!Object<string,function>} 3p frames for that type. */
+/** @type {!Object<string,function():void>} 3p frames for that type. */
 export const countGenerators = {};
 
 /** @enum {string} */

@@ -89,7 +89,7 @@ function isTemplateTagSupported() {
  * Creates a named custom element class.
  *
  * @param {!Window} win The window in which to register the custom element.
- * @param {function(!./service/ampdoc-impl.AmpDoc, !AmpElement element, ?(typeof BaseElement))} elementConnectedCallback
+ * @param {function(!./service/ampdoc-impl.AmpDoc, !AmpElement, ?(typeof BaseElement))} elementConnectedCallback
  * @return {typeof AmpElement} The custom element class.
  */
 export function createCustomElementClass(win, elementConnectedCallback) {
@@ -107,7 +107,7 @@ export function createCustomElementClass(win, elementConnectedCallback) {
  * Creates a base custom element class.
  *
  * @param {!Window} win The window in which to register the custom element.
- * @param {function(!./service/ampdoc-impl.AmpDoc, !AmpElement element, ?(typeof BaseElement))} elementConnectedCallback
+ * @param {function(!./service/ampdoc-impl.AmpDoc, !AmpElement, ?(typeof BaseElement))} elementConnectedCallback
  * @return {typeof HTMLElement}
  */
 function createBaseCustomElementClass(win, elementConnectedCallback) {
@@ -2177,7 +2177,7 @@ function isInternalOrServiceNode(node) {
  *
  * @param {!Window} win The window in which to register the custom element.
  * @param {(typeof ./base-element.BaseElement)=} opt_implementationClass For testing only.
- * @param {function(!./service/ampdoc-impl.AmpDoc, !AmpElement element, ?(typeof BaseElement))=} opt_elementConnectedCallback
+ * @param {function(!./service/ampdoc-impl.AmpDoc, !AmpElement, ?(typeof BaseElement))=} opt_elementConnectedCallback
  * @return {!Object} Prototype of element.
  * @visibleForTesting
  */

@@ -28,6 +28,7 @@ const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {cyan, green, yellow, red} = require('kleur/colors');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
+const {logClosureCompilerError} = require('../compile/closure-compile');
 const {log} = require('../common/logging');
 const {typecheckNewServer} = require('../server/typescript-compile');
 
@@ -159,6 +160,33 @@ const TYPE_CHECK_TARGETS = {
     externGlobs: [CORE_EXTERNS_GLOB, 'build-system/externs/*.extern.js'],
   },
 
+  /*
+   * Ensures that all files in src and extensions pass the specified set of errors.
+   */
+  'low-bar': {
+    entryPoints: ['src/amp.js'],
+    extraGlobs: ['{src,extensions}/**/*.js'],
+    onError(msg) {
+      const lowBarErrors = [
+        'JSC_BAD_JSDOC_ANNOTATION',
+        'JSC_INVALID_PARAM',
+        'JSC_TYPE_PARSE_ERROR',
+      ];
+      const lowBarRegex = new RegExp(lowBarErrors.join('|'));
+
+      const targetErrors = msg
+        .split('\n')
+        .filter((s) => lowBarRegex.test(s))
+        .join('\n')
+        .trim();
+
+      if (targetErrors.length) {
+        logClosureCompilerError(targetErrors);
+        throw new Error(`Type-checking failed for target ${cyan('low-bar')}`);
+      }
+    },
+  },
+
   // TODO(#33631): Targets below this point are not expected to pass.
   // They can possibly be removed?
   'src': {
@@ -246,12 +274,19 @@ async function typeCheck(targetName) {
     return;
   }
 
+  let errorMsg;
   await closureCompile(entryPoints, './dist', `${targetName}-check-types.js`, {
     noAddDeps,
     include3pDirectories: !noAddDeps,
     includePolyfills: !noAddDeps,
     typeCheckOnly: true,
+    logger: (m) => (errorMsg = m),
     ...opts,
+  }).catch((error) => {
+    if (!target.onError) {
+      throw error;
+    }
+    target.onError(errorMsg);
   });
   log(green('SUCCESS:'), 'Type-checking passed for target', cyan(targetName));
 }

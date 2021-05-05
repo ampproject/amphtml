@@ -111,7 +111,7 @@ export function getStoryAdMetadataFromElement(adElement) {
 /**
  * Returns a boolean indicating if there is sufficent metadata to render CTA.
  * @param {!StoryAdUIMetadata} metadata
- * @param {=boolean} opt_inabox
+ * @param {boolean=} opt_inabox
  * @return {boolean}
  */
 export function validateCtaMetadata(metadata, opt_inabox) {

@@ -111,14 +111,19 @@ export class ConfigManager {
   }
 
   /**
-   * @param {!Object} input
-   * @param {*} [input.iframe]
-   * @param {string} [input.widgetId]
-   * @param {string} [input.pubId]
-   * @param {!Object} [input.shareConfig]
-   * @param {!Object} [input.atConfig]
-   * @param {string} [input.productCode]
-   * @param {string} [input.containerClassName]
+   * @typedef {{
+   *  iframe: *,
+   *  widgetId: string,
+   *  pubId: string,
+   *  shareConfig: !Object,
+   *  atConfig: !Object,
+   *  productCode: string,
+   *  containerClassName: string,
+   * }} SendConfigurationInput
+   */
+
+  /**
+   * @param {!SendConfigurationInput} input
    * @private
    */
   sendConfiguration_(input) {
