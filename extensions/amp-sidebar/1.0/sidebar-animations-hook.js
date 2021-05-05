@@ -49,12 +49,12 @@ function safelySetStyles(element, styles) {
 /**
  * @param {boolean} mounted
  * @param {boolean} opened
- * @param {{current: function|undefined}} onAfterOpen
- * @param {{current: function|undefined}} onAfterClose
+ * @param {{current: function():void} | {current: void}} onAfterOpen
+ * @param {{current: function():void} | {current: void}} onAfterClose
  * @param {string} side
- * @param {{current: Element|null}} sidebarRef
- * @param {{current: Element|null}} backdropRef
- * @param {function} setMounted
+ * @param {{current: (Element|null)}} sidebarRef
+ * @param {{current: (Element|null)}} backdropRef
+ * @param {function():undefined} setMounted
  */
 export function useSidebarAnimation(
   mounted,

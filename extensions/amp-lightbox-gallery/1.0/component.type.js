@@ -32,7 +32,7 @@ LightboxGalleryDef.Props;
  *   as: (string|undefined),
  *   children: (!PreactDef.Renderable),
  *   enableActivation: (boolean|undefined),
- *   onClick: (function(Event)|undefined)
+ *   onClick: (function(Event)|undefined),
  *   render: (function():PreactDef.Renderable),
  * }}
  */
@@ -42,7 +42,7 @@ LightboxGalleryDef.WithLightboxProps;
  * @typedef {{
  *   deregister: (function(string):undefined),
  *   register: (function(string, Element):undefined),
- *   open: (function:undefined),
+ *   open: (function():undefined),
  * }}
  */
 LightboxGalleryDef.ContextProps;

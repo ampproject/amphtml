@@ -23,12 +23,12 @@ var LightboxDef = {};
  *   id: (string),
  *   animation: (string|undefined),
  *   children: (?PreactDef.Renderable|undefined),
- *   closeButtonAs: (function:PreactDef.Renderable|undefined),
+ *   closeButtonAs: (function():PreactDef.Renderable|undefined),
  *   scrollable: (boolean),
  *   initialOpen: (boolean),
- *   onBeforeOpen: (function|undefined),
- *   onAfterOpen: (function|undefined),
- *   onAfterClose: (function|undefined),
+ *   onBeforeOpen: (function():void|undefined),
+ *   onAfterOpen: (function():void|undefined),
+ *   onAfterClose: (function():void|undefined),
  * }}
  */
 LightboxDef.Props;
@@ -36,14 +36,14 @@ LightboxDef.Props;
 /**
  * @typedef {{
  *   aria-label: (string),
- *   as: (function:PreactDef.Renderable|undefined),
- *   onClick: function,
+ *   as: (function():PreactDef.Renderable|undefined),
+ *   onClick: function():void,
  * }}
  */
 LightboxDef.CloseButtonProps;
 
 /** @interface */
-Lightbox.LightboxApi = class {
+LightboxDef.LightboxApi = class {
   /** Open the lightbox */
   open() {}
 

@@ -142,7 +142,7 @@ export function useSlotContext(ref, opt_props) {
 
 /**
  * @param {!Element} slot
- * @param {function(!AmpElement|!Array<!AmpElement>)} action
+ * @param {function(!AmpElement):void|function(!Array<!AmpElement>):void} action
  */
 function execute(slot, action) {
   const assignedElements = slot.assignedElements
