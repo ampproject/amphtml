@@ -126,7 +126,7 @@ class AmpImaVideo extends AMP.BaseElement {
         'https'
     );
 
-    // // Handle <source> and <track> children
+    // Handle <source> and <track> children
     const sourceElements = childElementsByTag(this.element, 'SOURCE');
     const trackElements = childElementsByTag(this.element, 'TRACK');
     const childElements = toArray(sourceElements).concat(
