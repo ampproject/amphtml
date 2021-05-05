@@ -22,7 +22,7 @@ import Promise from 'promise-pjs';
  */
 export function install(win) {
   if (!win.Promise) {
-    win.Promise = /** @type {?} */ (Promise);
+    win.Promise = Promise;
     // In babel the * export is an Object with a default property.
     // In closure compiler it is the Promise function itself.
     if (Promise.default) {
