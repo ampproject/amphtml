@@ -23,10 +23,8 @@
  * amp-intersection-observer-polyfill extension.
  */
 
-/** @typedef {typeof IntersectionObserver} */
-let IntObsConstructorDef;
-/** @typedef {function(IntObsConstructorDef)} */
-let IntObsUpgraderDef;
+/** @typedef {function(!typeof IntersectionObserver)} */
+let InObUpgraderDef;
 
 const UPGRADERS = '_upgraders';
 const NATIVE = '_native';
@@ -63,9 +61,9 @@ function isWebkit(win) {
 }
 
 /**
- * @param {IntObsConstructorDef} Native
- * @param {IntObsConstructorDef} Polyfill
- * @return {IntObsConstructorDef}
+ * @param {!typeof IntersectionObserver} Native
+ * @param {!typeof IntersectionObserver} Polyfill
+ * @return {!typeof IntersectionObserver}
  */
 function getIntersectionObserverDispatcher(Native, Polyfill) {
   /**
@@ -145,7 +143,7 @@ export function upgradePolyfill(win, installer) {
       );
     }
 
-    /** @type {!Array<!IntObsUpgraderDef>} */
+    /** @type {!Array<!InObUpgraderDef>} */
     const upgraders = Stub[UPGRADERS].slice(0);
     const microtask = Promise.resolve();
     const upgrade = (upgrader) => {
@@ -166,7 +164,8 @@ export function upgradePolyfill(win, installer) {
  * This stub is necessary because the polyfill itself is significantly bigger.
  *
  * It doesn't technically extend IntersectionObserver, but this allows the stub
- * to be seen as equivalent when typechecking calls expecting an IntObs.
+ * to be seen as equivalent when typechecking calls expecting an
+ * IntersectionObserver.
  * @extends IntersectionObserver
  */
 export class IntersectionObserverStub {
@@ -263,7 +262,7 @@ export class IntersectionObserverStub {
   }
 
   /**
-   * @param {!IntObsConstructorDef} Ctor
+   * @param {!typeof IntersectionObserver} Ctor
    * @private
    */
   upgrade_(Ctor) {
@@ -274,7 +273,7 @@ export class IntersectionObserverStub {
   }
 }
 
-/** @type {!Array<!IntObsUpgraderDef>} */
+/** @type {!Array<!InObUpgraderDef>} */
 IntersectionObserverStub[UPGRADERS] = [];
 
 /** @visibleForTesting */

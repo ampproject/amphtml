@@ -24,8 +24,8 @@
  */
 
 /** @typedef {!typeof ResizeObserver} */
-let ResObsConstructorDef;
-/** @typedef {function(!ResObsConstructorDef)} */
+let!typeof ResizeObserver;
+/** @typedef {function(!typeof ResizeObserver)} */
 let ResObsUpgraderDef;
 
 const UPGRADERS = '_upgraders';
@@ -88,7 +88,7 @@ export function upgradePolyfill(win, installer) {
  * keeps the tracked elements in memory until the actual polyfill arives.
  * This stub is necessary because the polyfill itself is significantly bigger.
  * It doesn't technically extend ResizeObserver, but this allows the stub
- * to be seen as equivalent when typechecking calls expecting an ResObs.
+ * to be seen as equivalent when typechecking calls expecting a ResizeObserver.
  * @extends ResizeObserver
  */
 export class ResizeObserverStub {
@@ -140,7 +140,7 @@ export class ResizeObserverStub {
   }
 
   /**
-   * @param {!ResObsConstructorDef} Ctor
+   * @param {!typeof ResizeObserver} Ctor
    * @private
    */
   upgrade_(Ctor) {
