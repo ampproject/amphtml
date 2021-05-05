@@ -30,7 +30,7 @@ import {
 import {includes} from '../../core/types/string';
 import {parseUrlDeprecated} from '../../url';
 import {sequentialIdGenerator} from '../../utils/id-generator';
-import {useLayoutEffect, useMemo, useRef, useState} from '../../../src/preact';
+import {useLayoutEffect, useMemo, useState} from '../../../src/preact';
 
 /** @type {!Object<string,function>} 3p frames for that type. */
 export const countGenerators = {};
@@ -71,6 +71,7 @@ function ProxyIframeEmbedWithRef(
     src: srcProp,
     type,
     title = type,
+    contentRef,
     ...rest
   },
   ref
@@ -81,7 +82,6 @@ function ProxyIframeEmbedWithRef(
     );
   }
 
-  const contentRef = useRef(null);
   const count = useMemo(() => {
     if (!countGenerators[type]) {
       countGenerators[type] = sequentialIdGenerator();
@@ -132,12 +132,21 @@ function ProxyIframeEmbedWithRef(
       ),
       src,
     });
-  }, [contextOptions, count, nameProp, options, srcProp, title, type]);
+  }, [
+    contentRef,
+    contextOptions,
+    count,
+    nameProp,
+    options,
+    ref,
+    srcProp,
+    title,
+    type,
+  ]);
 
   return (
     <IframeEmbed
       allow={allow}
-      contentRef={contentRef}
       messageHandler={messageHandler}
       name={name}
       ref={ref}

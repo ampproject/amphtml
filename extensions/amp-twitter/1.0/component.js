@@ -15,13 +15,14 @@
  */
 
 import * as Preact from '../../../src/preact';
+import {ContainWrapper} from '../../../src/preact/component';
 import {
   MessageType,
   ProxyIframeEmbed,
 } from '../../../src/preact/component/3p-frame';
 import {deserializeMessage} from '../../../src/3p-frame-messaging';
 import {forwardRef} from '../../../src/preact/compat';
-import {useCallback, useState} from '../../../src/preact';
+import {useCallback, useRef, useState} from '../../../src/preact';
 
 /** @const {string} */
 const TYPE = 'twitter';
@@ -51,18 +52,27 @@ function TwitterWithRef({requestResize, title, ...rest}, ref) {
     [requestResize]
   );
 
+  const contentRef = useRef(null);
   return (
-    <ProxyIframeEmbed
-      allowFullscreen
-      ref={ref}
-      title={title}
-      {...rest}
-      // non-overridable props
-      matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
-      messageHandler={messageHandler}
-      type={TYPE}
+    <ContainWrapper
+      contentRef={contentRef}
       wrapperStyle={{height}}
-    />
+      layout
+      size
+      paint
+    >
+      <ProxyIframeEmbed
+        contentRef={contentRef}
+        allowFullscreen
+        ref={ref}
+        title={title}
+        {...rest}
+        // non-overridable props
+        matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
+        messageHandler={messageHandler}
+        type={TYPE}
+      />
+    </ContainWrapper>
   );
 }
 
