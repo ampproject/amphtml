@@ -145,7 +145,7 @@ export function upgradePolyfill(win, installer) {
       );
     }
 
-    /** @type {!Array<IntersectionObserverUpgrader>} */
+    /** @type {!Array<!IntersectionObserverUpgrader>} */
     const upgraders = Stub[UPGRADERS].slice(0);
     const microtask = Promise.resolve();
     const upgrade = (upgrader) => {
@@ -230,7 +230,7 @@ export class IntersectionObserverStub {
     }
   }
 
-  /** @return {!Array<IntersectionObserverEntry>} */
+  /** @return {!Array<!IntersectionObserverEntry>} */
   takeRecords() {
     if (this.inst_) {
       return this.inst_.takeRecords();
@@ -262,7 +262,7 @@ export class IntersectionObserverStub {
   }
 
   /**
-   * @param {IntersectionObserverCtor} Ctor
+   * @param {!IntersectionObserverCtor} Ctor
    * @private
    */
   upgrade_(Ctor) {
