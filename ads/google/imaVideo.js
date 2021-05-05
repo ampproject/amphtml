@@ -1119,7 +1119,7 @@ export function zeroPad(input) {
 function onProgressClick(event) {
   // Call this logic once to make sure we still seek if the user just clicks
   // instead of clicking and dragging.
-  clearTimeout(hideControlsTimeout);
+  clearInterval(hideControlsTimeout);
   onProgressMove(event);
   event.preventDefault();
   event.stopPropagation();
@@ -1221,7 +1221,7 @@ export function pauseVideo(event = null) {
   } else {
     videoPlayer.pause();
     // Show controls and keep them there because we're paused.
-    clearTimeout(hideControlsTimeout);
+    clearInterval(hideControlsTimeout);
     showControls();
     if (event && event.type == 'webkitendfullscreen') {
       // Video was paused because we exited fullscreen.
@@ -1453,7 +1453,7 @@ export function showControls(opt_adsForce) {
   if (playerState == PlayerStates.PLAYING) {
     // Reset hide controls timer.
     // Be sure to keep the timer greater than showControlsThrottled.
-    clearTimeout(hideControlsTimeout);
+    clearInterval(hideControlsTimeout);
     hideControlsTimeout = setTimeout(hideControls, 3000);
   }
 }
