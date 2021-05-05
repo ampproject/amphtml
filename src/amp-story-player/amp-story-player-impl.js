@@ -780,7 +780,7 @@ export class AmpStoryPlayer {
     if (story.idx !== this.currentIdx_) {
       this.currentIdx_ = story.idx;
 
-      if (options.animate != undefined) {
+      if (options?.animate != undefined) {
         this.rootEl_.classList.toggle(
           CLASS_NO_NAVIGATION_TRANSITION,
           !options.animate
@@ -927,7 +927,7 @@ export class AmpStoryPlayer {
       this.isCircularWrappingEnabled_ &&
       this.isIndexOutofBounds_(this.currentIdx_ + 1)
     ) {
-      this.go(1);
+      this.go(1, 0, {animate: true});
       return;
     }
 
@@ -1568,8 +1568,6 @@ export class AmpStoryPlayer {
 
     this.pageScroller_ &&
       this.pageScroller_.onTouchStart(event.timeStamp, coordinates.clientY);
-
-    this.rootEl_.classList.remove(CLASS_NO_NAVIGATION_TRANSITION);
 
     this.element_.dispatchEvent(
       createCustomEvent(
