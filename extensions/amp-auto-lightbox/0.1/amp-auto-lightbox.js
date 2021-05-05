@@ -274,6 +274,19 @@ function markAsVisited(candidate) {
 }
 
 /**
+ * @param {Array<string>} tagNames
+ * @return {string}
+ */
+function candidateSelector(tagNames) {
+  return tagNames
+    .map(
+      (tagName) =>
+        `${tagName}:not([${LIGHTBOXABLE_ATTR}]):not([${VISITED_ATTR}])`
+    )
+    .join(',');
+}
+
+/**
  * @param {!Element} element
  * @return {!Promise}
  */
@@ -294,7 +307,7 @@ export class Scanner {
    * @return {!Array<!Element>}
    */
   static getCandidates(root) {
-    const selector = `amp-img:not([${LIGHTBOXABLE_ATTR}]):not([${VISITED_ATTR}]),img:not([${LIGHTBOXABLE_ATTR}]):not([${VISITED_ATTR}])`;
+    const selector = candidateSelector(['amp-img', 'img']);
     const candidates = toArray(root.querySelectorAll(selector));
     // TODO(alanorozco): DOM mutations should be wrapped in mutate contexts.
     // Alternatively, use in-memory "visited" marker instead of attribute.
@@ -436,11 +449,10 @@ export function runCandidates(ampdoc, candidates) {
     whenLoaded(candidate).then(() => {
       return measureIntersectionNoRoot(candidate).then(
         ({boundingClientRect}) => {
-          if (candidate.tagName.toLowerCase() === 'img') {
-            if (!candidate.complete) {
-              return;
-            }
-          } else if (!candidate.signals().get(CommonSignals.LOAD_END)) {
+          if (
+            !candidate.tagName.toLowerCase() === 'img' &&
+            !candidate.signals().get(CommonSignals.LOAD_END)
+          ) {
             // <amp-img> will change the img's src inline data on unlayout and
             // remove it from DOM.
             return;
