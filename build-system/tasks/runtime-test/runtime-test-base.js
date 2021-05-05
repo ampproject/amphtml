@@ -53,28 +53,24 @@ let wrapCounter = 0;
  */
 let transform;
 
-/**
- * @extends {karmaConfig}
- */
 class RuntimeTestConfig {
+  /** @type {Array<string|[]>} */
+  plugins = [];
+
+  /**@type {Record<string, string|string[]>} */
+  preprocessors = {};
+
+  /** @type {string[]} */
+  reporters = [];
+
+  client = {};
+
   /**
    * @param {string} testType
    */
   constructor(testType) {
     this.testType = testType;
     Object.assign(this, karmaConfig);
-    if (!this.plugins) {
-      this.plugins = [];
-    }
-    if (!this.preprocessors) {
-      this.preprocessors = [];
-    }
-    if (!this.reporters) {
-      this.reporters = [];
-    }
-    if (!this.client) {
-      this.client = {};
-    }
     this.updateBrowsers();
     this.updateReporters();
     this.updateFiles();
@@ -84,6 +80,7 @@ class RuntimeTestConfig {
     this.updateMiddleware();
     this.updateCoverageSettings();
   }
+
   /**
    * Updates the set of preprocessors to run on HTML and JS files before testing.
    * Notes:
