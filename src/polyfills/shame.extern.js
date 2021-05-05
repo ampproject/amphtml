@@ -25,13 +25,35 @@
  * @externs
  */
 
-// These definitions are exported by the fetch and get-bounding-client-rect
-// polyfill implementation files, but currently they have dependencies on
-// non-core modules that aren't yet type-checked.
+// This definition is exported by the fetch polyfill implementation, but
+// currently has dependencies on non-core modules that aren't yet type-checked.
 //
-// Planned destination: These externs should be removed when those files are
-// re-included in the polyfills type-check target.
+// Planned destination: this should be removed when fetch is re-included in the
+// polyfills type-check target.
 /** @type {function(!Window)} */
 let install$$module$src$polyfills$fetch;
-/** @type {function(!Window)} */
-let install$$module$src$polyfills$get_bounding_client_rect;
+
+// These definitions live in non-core files but are consumed by
+// get-bounding-client-rect. They should be removed as dom.js and layout-rect.js
+// are moved to core.
+/**
+ * The structure that combines position and size for an element. The exact
+ * interpretation of position and size depends on the use case. Replicated from
+ * layout-rect.js
+ *
+ * @typedef {{
+ *   top: number,
+ *   bottom: number,
+ *   left: number,
+ *   right: number,
+ *   width: number,
+ *   height: number,
+ *   x: number,
+ *   y: number
+ * }}
+ */
+let LayoutRectDef$$module$src$layout_rect;
+/** @type {function(number, number, number, number):LayoutRectDef$$module$src$layout_rect} */
+let layoutRectLtwh$$module$src$layout_rect;
+/** @type {function(!Element):boolean} */
+let isConnectedNode$$module$src$dom;

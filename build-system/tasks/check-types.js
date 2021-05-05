@@ -131,9 +131,8 @@ const TYPE_CHECK_TARGETS = {
   'src-polyfills': {
     srcGlobs: [
       'src/polyfills/**/*.js',
-      // Exclude fetch and get-bounding-client-rect until their dependencies are
-      // cleaned up/extracted to core.
-      '!src/polyfills/{get-bounding-client-rect,fetch}.js',
+      // Exclude fetch its dependencies are cleaned up/extracted to core.
+      '!src/polyfills/fetch.js',
       ...CORE_SRCS_GLOBS,
     ],
     externGlobs: ['src/polyfills/**/*.extern.js', ...CORE_EXTERNS_GLOBS],
