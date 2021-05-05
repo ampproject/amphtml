@@ -46,9 +46,7 @@ import {srcsetFromElement} from '../../../src/srcset';
 const TAG = 'amp-image-lightbox';
 
 /** @private @const {!Set<string>} */
-const SUPPORTED_ELEMENTS_ = new Set(['amp-img', 'amp-anim']);
-/** @private @const {!Set<string>} */
-const SUPPORTED_NATIVE_ELEMENTS = new Set(['img']);
+const SUPPORTED_AMP_ELEMENTS_ = new Set(['amp-img', 'amp-anim']);
 
 /** @private @const */
 const ARIA_ATTRIBUTES = ['aria-label', 'aria-describedby', 'aria-labelledby'];
@@ -253,7 +251,7 @@ export class ImageViewer {
     this.setSourceDimensions_(sourceElement, sourceImage);
     this.srcset_ = srcsetFromElement(sourceElement);
 
-    if (SUPPORTED_NATIVE_ELEMENTS.has(sourceElement.tagName.toLowerCase())) {
+    if (sourceElement.tagName.toLowerCase() === 'img') {
       propagateAttributes(ARIA_ATTRIBUTES, sourceElement, this.image_);
     } else {
       sourceElement
@@ -879,9 +877,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     const source = invocation.caller;
     const tagName = source.tagName.toLowerCase();
     userAssert(
-      source &&
-        (SUPPORTED_ELEMENTS_.has(tagName) ||
-          SUPPORTED_NATIVE_ELEMENTS.has(tagName)),
+      source && (SUPPORTED_AMP_ELEMENTS_.has(tagName) || 'img' === tagName),
       'Unsupported element: %s',
       source.tagName
     );
