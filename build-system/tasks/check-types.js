@@ -129,8 +129,14 @@ const TYPE_CHECK_TARGETS = {
     warningLevel: 'QUIET',
   },
   'src-polyfills': {
-    srcGlobs: ['src/polyfills/**/*.js', ...CORE_SRCS_GLOBS],
-    externGlobs: CORE_EXTERNS_GLOBS,
+    srcGlobs: [
+      'src/polyfills/**/*.js',
+      // Exclude fetch and get-bounding-client-rect until their dependencies are
+      // cleaned up/extracted to core.
+      '!src/polyfills/{get-bounding-client-rect,fetch}.js',
+      ...CORE_SRCS_GLOBS,
+    ],
+    externGlobs: ['src/polyfills/**/*.extern.js', ...CORE_EXTERNS_GLOBS],
   },
   'src-preact': {
     srcGlobs: ['src/preact/**/*.js'],
