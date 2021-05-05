@@ -471,7 +471,7 @@ export function imaVideo(global, data) {
   }
   const childrenFragment = maybeCreateChildren(
     global.document,
-    tryParseJson(data.children)
+    data['_context']?.['sourceChildren']
   );
   if (childrenFragment) {
     videoPlayer.appendChild(childrenFragment);

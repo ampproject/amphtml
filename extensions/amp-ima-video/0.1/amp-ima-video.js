@@ -46,6 +46,14 @@ const TAG = 'amp-ima-video';
 const TYPE = 'ima-video';
 
 /**
+ * [tagName, attributes]
+ *   like:
+ *   ['SOURCE', {src: 'source.mp4'}]
+ * @type {!Array<string, !Object>}
+ */
+let SerializableChildDef;
+
+/**
  * @param {!Element} element
  * @return {!Object<string, *>}
  */
@@ -81,6 +89,9 @@ class AmpImaVideo extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
+    /** @private {?Array<!SerializableChildDef>} */
+    this.sourceChildren_ = null;
 
     /** @private {?string} */
     this.preconnectSource_ = null;
@@ -133,7 +144,7 @@ class AmpImaVideo extends AMP.BaseElement {
       toArray(trackElements)
     );
 
-    const serializableChildren = childElements.map((element) => {
+    this.sourceChildren_ = childElements.map((element) => {
       const {tagName} = element;
       const src = element.getAttribute('src');
       // Save the first source and first track to preconnect.
@@ -144,13 +155,6 @@ class AmpImaVideo extends AMP.BaseElement {
       }
       return [tagName, serializeAttributes(element)];
     });
-
-    if (serializableChildren.length > 0) {
-      this.element.setAttribute(
-        'data-children',
-        JSON.stringify(serializableChildren)
-      );
-    }
 
     // Handle IMASetting JSON
     const scriptElement = childElementsByTag(this.element, 'SCRIPT')[0];
@@ -203,13 +207,13 @@ class AmpImaVideo extends AMP.BaseElement {
       ? getConsentPolicyState(element, consentPolicyId)
       : Promise.resolve(null);
     return consentPromise.then((initialConsentState) => {
-      const iframe = getIframe(
-        win,
-        element,
-        TYPE,
-        {initialConsentState},
-        {allowFullscreen: true}
-      );
+      const iframeContext = {
+        initialConsentState,
+        sourceChildren: this.sourceChildren_,
+      };
+      const iframe = getIframe(win, element, TYPE, iframeContext, {
+        allowFullscreen: true,
+      });
       iframe.title = this.element.title || 'IMA video';
 
       this.applyFillContent(iframe);

@@ -17,6 +17,7 @@
 import '../amp-ima-video';
 import {htmlFor} from '../../../../src/static-template';
 import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
+import {waitForChildPromise} from '../../../../src/dom';
 
 describes.realWin(
   'amp-ima-video',
@@ -34,25 +35,33 @@ describes.realWin(
       installResizeObserverStub(env.sandbox, env.win);
     });
 
-    it('passes children into data-children attribute', async () => {
+    it('passes sourceChildren into iframe context', async () => {
       const element = html`
         <amp-ima-video data-tag="https://example.com" width="1" height="1">
           <source data-foo="bar" src="src" />
           <track any-attribute />
+          <span>Other elements should be excluded</span>
         </amp-ima-video>
       `;
+
       env.win.document.body.appendChild(element);
       await element.whenBuilt();
 
-      const {children} = element.dataset;
-      expect(children).to.not.be.null;
+      let iframe;
+      element.layoutCallback();
+      await waitForChildPromise(
+        element,
+        () => (iframe = element.querySelector('iframe'))
+      );
 
-      const parsed = JSON.parse(children);
-      expect(parsed).to.have.length(2);
-      expect(parsed[0][0]).to.eql('SOURCE');
-      expect(parsed[0][1]).to.eql({'data-foo': 'bar', src: 'src'});
-      expect(parsed[1][0]).to.eql('TRACK');
-      expect(parsed[1][1]).to.eql({'any-attribute': ''});
+      const parsedName = JSON.parse(iframe.name);
+      const sourceChildren = parsedName?.attributes?._context?.sourceChildren;
+      expect(sourceChildren).to.not.be.null;
+      expect(sourceChildren).to.have.length(2);
+      expect(sourceChildren[0][0]).to.eql('SOURCE');
+      expect(sourceChildren[0][1]).to.eql({'data-foo': 'bar', src: 'src'});
+      expect(sourceChildren[1][0]).to.eql('TRACK');
+      expect(sourceChildren[1][1]).to.eql({'any-attribute': ''});
     });
   }
 );
