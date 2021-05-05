@@ -69,8 +69,15 @@ const PRIDE_FILES_GLOBS = [
   'node_modules/promise-pjs/promise.mjs',
 ];
 
-const CORE_SRCS_GLOB = 'src/core/**/*.js';
-const CORE_EXTERNS_GLOB = 'src/core/**/*.extern.js';
+// We provide glob lists for core src/externs since any other targets are
+// allowed to depend on core.
+const CORE_SRCS_GLOBS = [
+  'src/core/**/*.js',
+
+  // Needed for CSS escape polyfill
+  'third_party/css-escape/css-escape.js',
+];
+const CORE_EXTERNS_GLOBS = ['src/core/**/*.extern.js'];
 
 /**
  * Generates a list of source file paths for extensions to type-check
@@ -106,12 +113,8 @@ const TYPE_CHECK_TARGETS = {
     warningLevel: 'QUIET',
   },
   'src-core': {
-    srcGlobs: [
-      CORE_SRCS_GLOB,
-      // Needed for CSS escape polyfill
-      'third_party/css-escape/css-escape.js',
-    ],
-    externGlobs: [CORE_EXTERNS_GLOB],
+    srcGlobs: CORE_SRCS_GLOBS,
+    externGlobs: CORE_EXTERNS_GLOBS,
   },
   'src-examiner': {
     srcGlobs: ['src/examiner/**/*.js'],
@@ -126,8 +129,8 @@ const TYPE_CHECK_TARGETS = {
     warningLevel: 'QUIET',
   },
   'src-polyfills': {
-    srcGlobs: ['src/polyfills/**/*.js'],
-    warningLevel: 'QUIET',
+    srcGlobs: ['src/polyfills/**/*.js', ...CORE_SRCS_GLOBS],
+    externGlobs: CORE_EXTERNS_GLOBS,
   },
   'src-preact': {
     srcGlobs: ['src/preact/**/*.js'],
@@ -157,7 +160,7 @@ const TYPE_CHECK_TARGETS = {
   // bug for cherry-pick.
   'pride': {
     srcGlobs: PRIDE_FILES_GLOBS,
-    externGlobs: [CORE_EXTERNS_GLOB, 'build-system/externs/*.extern.js'],
+    externGlobs: ['build-system/externs/*.extern.js', ...CORE_EXTERNS_GLOBS],
   },
 
   // TODO(#33631): Targets below this point are not expected to pass.
