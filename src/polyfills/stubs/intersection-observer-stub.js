@@ -24,9 +24,9 @@
  */
 
 /** @typedef {typeof IntersectionObserver} */
-let IntersectionObserverCtor;
-/** @typedef {function(IntersectionObserverCtor)} */
-let IntersectionObserverUpgrader;
+let IntObsConstructorDef;
+/** @typedef {function(IntObsConstructorDef)} */
+let IntObsUpgraderDef;
 
 const UPGRADERS = '_upgraders';
 const NATIVE = '_native';
@@ -63,9 +63,9 @@ function isWebkit(win) {
 }
 
 /**
- * @param {IntersectionObserverCtor} Native
- * @param {IntersectionObserverCtor} Polyfill
- * @return {IntersectionObserverCtor}
+ * @param {IntObsConstructorDef} Native
+ * @param {IntObsConstructorDef} Polyfill
+ * @return {IntObsConstructorDef}
  */
 function getIntersectionObserverDispatcher(Native, Polyfill) {
   /**
@@ -145,7 +145,7 @@ export function upgradePolyfill(win, installer) {
       );
     }
 
-    /** @type {!Array<!IntersectionObserverUpgrader>} */
+    /** @type {!Array<!IntObsUpgraderDef>} */
     const upgraders = Stub[UPGRADERS].slice(0);
     const microtask = Promise.resolve();
     const upgrade = (upgrader) => {
@@ -222,6 +222,7 @@ export class IntersectionObserverStub {
     return [].concat(this.options_.threshold || 0);
   }
 
+  /** @function */
   disconnect() {
     if (this.inst_) {
       this.inst_.disconnect();
@@ -262,7 +263,7 @@ export class IntersectionObserverStub {
   }
 
   /**
-   * @param {!IntersectionObserverCtor} Ctor
+   * @param {!IntObsConstructorDef} Ctor
    * @private
    */
   upgrade_(Ctor) {
@@ -273,7 +274,7 @@ export class IntersectionObserverStub {
   }
 }
 
-/** @type {!Array<IntersectionObserverUpgrader>} */
+/** @type {!Array<!IntObsUpgraderDef>} */
 IntersectionObserverStub[UPGRADERS] = [];
 
 /** @visibleForTesting */

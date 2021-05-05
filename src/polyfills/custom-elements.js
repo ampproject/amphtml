@@ -20,15 +20,15 @@ import {Deferred} from '../core/data-structures/promise';
  * For type anotations where Element is a local variable.
  * @typedef {!Element}
  */
-let ElementOrig;
+let ElementDef;
 
 /** @typedef {!typeof HTMLElement} */
-let CustomElementCtor;
+let CustomElementConstructorDef;
 
 /**
  * @typedef {{
  *  name: string,
- *  ctor: !CustomElementCtor,
+ *  ctor: !CustomElementConstructorDef,
  * }}
  */
 let CustomElementDef;
@@ -134,7 +134,7 @@ class CustomElementRegistry {
    * Register the custom element.
    *
    * @param {string} name
-   * @param {!CustomElementCtor} ctor
+   * @param {!CustomElementConstructorDef} ctor
    * @param {!Object=} options
    */
   define(name, ctor, options) {
@@ -154,7 +154,7 @@ class CustomElementRegistry {
    * Get the constructor of the (already defined) custom element.
    *
    * @param {string} name
-   * @return {!CustomElementCtor|undefined}
+   * @return {!CustomElementConstructorDef|undefined}
    */
   get(name) {
     const def = this.registry_.getByName(name);
@@ -276,7 +276,7 @@ class Registry {
   /**
    * Finds the custom element definition by constructor instance.
    *
-   * @param {!CustomElementCtor} ctor
+   * @param {!CustomElementConstructorDef} ctor
    * @return {!CustomElementDef|undefined}
    */
   getByConstructor(ctor) {
@@ -295,7 +295,7 @@ class Registry {
    * name in the root document.
    *
    * @param {string} name
-   * @param {!CustomElementCtor} ctor
+   * @param {!CustomElementConstructorDef} ctor
    * @param {!Object|undefined} options
    */
   define(name, ctor, options) {
@@ -734,7 +734,7 @@ function polyfill(win) {
    * You can't use the real HTMLElement constructor, because you can't subclass
    * it without using native classes. So, mock its approximation using
    * createElement.
-   * @return {!ElementOrig}
+   * @return {!ElementDef}
    */
   function HTMLElementPolyfill() {
     const {constructor} = this;

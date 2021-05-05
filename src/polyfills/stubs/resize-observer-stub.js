@@ -24,9 +24,9 @@
  */
 
 /** @typedef {!typeof ResizeObserver} */
-let ResizeObserverCtor;
-/** @typedef {function(!ResizeObserverCtor)} */
-let ResizeObserverUpgrader;
+let ResObsConstructorDef;
+/** @typedef {function(!ResObsConstructorDef)} */
+let ResObsUpgraderDef;
 
 const UPGRADERS = '_upgraders';
 const STUB = '_stub';
@@ -68,7 +68,7 @@ export function upgradePolyfill(win, installer) {
     installer();
 
     const Polyfill = win.ResizeObserver;
-    /** @type {!Array<ResizeObserverUpgrader>} */
+    /** @type {!Array<ResObsUpgraderDef>} */
     const upgraders = Stub[UPGRADERS].slice(0);
     const microtask = Promise.resolve();
     const upgrade = (upgrader) => {
@@ -107,6 +107,7 @@ export class ResizeObserverStub {
     ResizeObserverStub[UPGRADERS].push(this.upgrade_.bind(this));
   }
 
+  /** @function */
   disconnect() {
     if (this.inst_) {
       this.inst_.disconnect();
@@ -139,7 +140,7 @@ export class ResizeObserverStub {
   }
 
   /**
-   * @param {!ResizeObserverCtor} Ctor
+   * @param {!ResObsConstructorDef} Ctor
    * @private
    */
   upgrade_(Ctor) {
@@ -150,7 +151,7 @@ export class ResizeObserverStub {
   }
 }
 
-/** @type {!Array<!ResizeObserverUpgrader>} */
+/** @type {!Array<!ResObsUpgraderDef>} */
 ResizeObserverStub[UPGRADERS] = [];
 
 /** @visibleForTesting */
