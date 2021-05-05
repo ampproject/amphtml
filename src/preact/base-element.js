@@ -193,7 +193,7 @@ const IS_EMPTY_TEXT_NODE = (node) =>
  */
 export class PreactBaseElement extends AMP.BaseElement {
   /** @override @nocollapse */
-  static V1() {
+  static R1() {
     return true;
   }
 

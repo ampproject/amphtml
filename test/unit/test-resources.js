@@ -76,7 +76,7 @@ describes.realWin('Resources', {amp: true}, (env) => {
     };
 
     const element = document.createElement('amp-el');
-    element.V1 = () => false;
+    element.R1 = () => false;
     element.isBuilt = () => isBuilt;
     element.isBuilding = () => isBuilding;
     element.pause = () => {};
@@ -619,7 +619,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
   function createElement(rect) {
     const element = env.win.document.createElement('amp-test');
     element.classList.add('i-amphtml-element');
-    element.V1 = () => false;
+    element.R1 = () => false;
     element.signals = () => new Signals();
     element.whenBuilt = () => Promise.resolve();
     element.isBuilt = () => true;

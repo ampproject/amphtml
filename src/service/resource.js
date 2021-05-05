@@ -960,7 +960,7 @@ export class Resource {
    * @return {!Promise}
    */
   loadedOnce() {
-    if (this.element.V1()) {
+    if (this.element.R1()) {
       return this.element.whenLoaded();
     }
     return this.loadPromise_;

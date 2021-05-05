@@ -20,7 +20,7 @@ import {Slot} from '../../../src/preact/slot';
 import {createElementWithAttributes} from '../../../src/dom';
 import {htmlFor} from '../../../src/static-template';
 import {omit} from '../../../src/core/types/object';
-import {testElementV1} from '../../../testing/element-v1';
+import {testElementR1} from '../../../testing/element-v1';
 import {upgradeOrRegisterElement} from '../../../src/service/custom-element-registry';
 import {waitFor} from '../../../testing/test-helper';
 
@@ -75,9 +75,9 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     });
   }
 
-  describe('V1', () => {
-    it('testElementV1', () => {
-      testElementV1(PreactBaseElement);
+  describe('R1', () => {
+    it('testElementR1', () => {
+      testElementR1(PreactBaseElement);
     });
 
     it('by default prerenderAllowed is tied to the "loadable" flag', () => {
