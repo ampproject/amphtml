@@ -69,7 +69,8 @@ const PRIDE_FILES_GLOBS = [
   'node_modules/promise-pjs/promise.mjs',
 ];
 
-const CORE_EXTERNS_GLOB = 'src/core{,/**}/*.extern.js';
+const CORE_SRCS_GLOB = 'src/core/**/*.js';
+const CORE_EXTERNS_GLOB = 'src/core/**/*.extern.js';
 
 /**
  * Generates a list of source file paths for extensions to type-check
@@ -97,55 +98,55 @@ const TYPE_CHECK_TARGETS = {
   // To test a target locally:
   //   `amp check-types --target=src-foo-bar --warning_level=verbose`
   'src-amp-story-player': {
-    srcGlobs: ['src/amp-story-player{,/**}/*.js'],
+    srcGlobs: ['src/amp-story-player/**/*.js'],
     warningLevel: 'QUIET',
   },
   'src-context': {
-    srcGlobs: ['src/context{,/**}/*.js'],
+    srcGlobs: ['src/context/**/*.js'],
     warningLevel: 'QUIET',
   },
   'src-core': {
     srcGlobs: [
-      'src/core{,/**}/*.js',
+      CORE_SRCS_GLOB,
       // Needed for CSS escape polyfill
       'third_party/css-escape/css-escape.js',
     ],
     externGlobs: [CORE_EXTERNS_GLOB],
   },
   'src-examiner': {
-    srcGlobs: ['src/examiner{,/**}/*.js'],
+    srcGlobs: ['src/examiner/**/*.js'],
     warningLevel: 'QUIET',
   },
   'src-experiments': {
-    srcGlobs: ['src/experiments{,/**}/*.js'],
+    srcGlobs: ['src/experiments/**/*.js'],
     warningLevel: 'QUIET',
   },
   'src-inabox': {
-    srcGlobs: ['src/inabox{,/**}/*.js'],
+    srcGlobs: ['src/inabox/**/*.js'],
     warningLevel: 'QUIET',
   },
   'src-polyfills': {
-    srcGlobs: ['src/polyfills{,/**}/*.js'],
+    srcGlobs: ['src/polyfills/**/*.js'],
     warningLevel: 'QUIET',
   },
   'src-preact': {
-    srcGlobs: ['src/preact{,/**}/*.js'],
+    srcGlobs: ['src/preact/**/*.js'],
     warningLevel: 'QUIET',
   },
   'src-purifier': {
-    srcGlobs: ['src/purifier{,/**}/*.js'],
+    srcGlobs: ['src/purifier/**/*.js'],
     warningLevel: 'QUIET',
   },
   'src-service': {
-    srcGlobs: ['src/service{,/**}/*.js'],
+    srcGlobs: ['src/service/**/*.js'],
     warningLevel: 'QUIET',
   },
   'src-utils': {
-    srcGlobs: ['src/utils{,/**}/*.js'],
+    srcGlobs: ['src/utils/**/*.js'],
     warningLevel: 'QUIET',
   },
   'src-web-worker': {
-    srcGlobs: ['src/web-worker{,/**}/*.js'],
+    srcGlobs: ['src/web-worker/**/*.js'],
     warningLevel: 'QUIET',
   },
 
