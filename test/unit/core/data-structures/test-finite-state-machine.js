@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {FiniteStateMachine} from '../../src/finite-state-machine';
+import {FiniteStateMachine} from '../../../../src/core/data-structures/finite-state-machine';
 
 describes.sandboxed('Finite State Machine', {}, (env) => {
   describe('simple machines', () => {

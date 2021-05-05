@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import {devAssert} from './log';
+import {pureDevAssert as devAssert} from '../assert';
 
-/**
- * @template STATE
- */
+/** @template STATE */
 export class FiniteStateMachine {
   /**
    * Constructs a FSM using the bits defined in initialState as changeable
