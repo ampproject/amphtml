@@ -222,7 +222,7 @@ export class IntersectionObserverStub {
     return [].concat(this.options_.threshold || 0);
   }
 
-  /** @function */
+  /** @return {undefined} */
   disconnect() {
     if (this.inst_) {
       this.inst_.disconnect();

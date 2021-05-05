@@ -107,7 +107,7 @@ export class ResizeObserverStub {
     ResizeObserverStub[UPGRADERS].push(this.upgrade_.bind(this));
   }
 
-  /** @function */
+  /** @return {undefined} */
   disconnect() {
     if (this.inst_) {
       this.inst_.disconnect();
