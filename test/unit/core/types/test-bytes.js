@@ -21,7 +21,7 @@ import {
   stringToBytes,
   utf8Decode,
   utf8Encode,
-} from '../../../src/utils/bytes';
+} from '../../../../src/core/types/string/bytes';
 
 describes.sandboxed('stringToBytes', {}, function () {
   let fakeWin;
