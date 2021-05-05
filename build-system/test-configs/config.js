@@ -440,7 +440,6 @@ const htmlFixtureGlobs = [
   '!examples/visual-tests/amp-story/amp-story-grid-layer-template-horizontal.html',
   '!examples/visual-tests/amp-story/amp-story-grid-layer-template-thirds.html',
   '!examples/visual-tests/amp-story/amp-story-grid-layer-template-vertical.html',
-  '!examples/visual-tests/amp-story/amp-story-inline-page-attachment-dark-theme.html',
   '!examples/visual-tests/amp-story/amp-story-interactive-quiz-sizing-positioning.html',
   '!examples/visual-tests/amp-story/amp-story-landscape-templates.html',
   '!examples/visual-tests/amp-story/amp-story-page-attachment.html',
