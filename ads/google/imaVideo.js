@@ -470,7 +470,7 @@ export function imaVideo(global, data) {
     videoPlayer.appendChild(sourceElement);
   }
   const childrenFragment = maybeCreateChildren(
-    videoPlayer.ownerDocument,
+    global.document,
     tryParseJson(data?.children)
   );
   if (childrenFragment) {
