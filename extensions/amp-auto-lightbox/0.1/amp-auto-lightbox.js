@@ -110,9 +110,6 @@ const DISABLED_ANCESTORS = [
   'amp-carousel',
 ].join(',');
 
-/** @type {Set<string>} */
-const NATIVE_ELEMENTS_SUPPORTED = new Set(['img']);
-
 const SCRIPT_LD_JSON = 'script[type="application/ld+json"]';
 const META_OG_TYPE = 'meta[property="og:type"]';
 
@@ -439,7 +436,7 @@ export function runCandidates(ampdoc, candidates) {
     whenLoaded(candidate).then(() => {
       return measureIntersectionNoRoot(candidate).then(
         ({boundingClientRect}) => {
-          if (NATIVE_ELEMENTS_SUPPORTED.has(candidate.tagName.toLowerCase())) {
+          if (candidate.tagName.toLowerCase() === 'img') {
             if (!candidate.complete) {
               return;
             }
