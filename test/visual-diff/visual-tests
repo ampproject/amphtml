@@ -878,6 +878,17 @@
       "name": "amp-story-360: 360 image rendering",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [".i-amphtml-story-360-loaded"]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html",
+      "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+        "amp-story-page#cover[active]"
+      ],
+      // for page navigation
+      "loading_complete_delay_ms": 500
     }
   ]
 }
