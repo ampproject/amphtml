@@ -4,8 +4,8 @@
         "pageName": "",
         "trafficSegment": "",
         "pageType": "AMP Default",
-        "guid": "$SUBSTR(${random},0,19)",
-        "sessionID": "$SUBSTR(${random},0,19)"
+        "guid": "${clientId(bluetriangle_guid)}",
+        "sessionID": "${clientId(bluetriangle_sessionid)}"
     },
     "requests": {
         "host": "https://d.btttag.com",
