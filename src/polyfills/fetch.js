@@ -18,7 +18,7 @@ import {devAssert} from '../core/assert';
 import {hasOwn, map} from '../core/types/object';
 import {isArray, isObject} from '../core/types';
 import {parseJson} from '../json';
-import {utf8Encode} from '../utils/bytes';
+import {utf8Encode} from '../core/types/string/bytes';
 
 /** @enum {number} Allowed fetch responses. */
 const allowedFetchTypes = {

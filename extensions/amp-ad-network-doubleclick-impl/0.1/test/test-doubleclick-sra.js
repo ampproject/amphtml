@@ -52,7 +52,7 @@ import {Xhr} from '../../../../src/service/xhr-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {devAssert} from '../../../../src/log';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
-import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
+import {utf8Decode, utf8Encode} from '../../../../src/core/types/string/bytes';
 
 const config = {amp: true, allowExternalResources: true};
 
