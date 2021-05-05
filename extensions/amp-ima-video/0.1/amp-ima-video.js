@@ -34,7 +34,6 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isEnumValue, isObject} from '../../../src/core/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
-
 import {
   observeContentSize,
   unobserveContentSize,
@@ -45,6 +44,20 @@ import {toArray} from '../../../src/core/types/array';
 const TAG = 'amp-ima-video';
 
 const TYPE = 'ima-video';
+
+/**
+ * @param {!Element} element
+ * @return {!Object<string, *>}
+ */
+function serializeAttributes(element) {
+  const {attributes} = element;
+  const serialized = {};
+  for (let i = 0; i < attributes.length; i++) {
+    const {name, value} = attributes[i];
+    serialized[name] = value;
+  }
+  return serialized;
+}
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -113,28 +126,29 @@ class AmpImaVideo extends AMP.BaseElement {
         'https'
     );
 
-    // Handle <source> and <track> children
+    // // Handle <source> and <track> children
     const sourceElements = childElementsByTag(this.element, 'SOURCE');
     const trackElements = childElementsByTag(this.element, 'TRACK');
     const childElements = toArray(sourceElements).concat(
       toArray(trackElements)
     );
-    if (childElements.length > 0) {
-      const children = [];
-      childElements.forEach((child) => {
-        // Save the first source and first track to preconnect.
-        if (child.tagName == 'SOURCE' && !this.preconnectSource_) {
-          this.preconnectSource_ = child.src;
-        } else if (child.tagName == 'TRACK' && !this.preconnectTrack_) {
-          this.preconnectTrack_ = child.src;
-        }
-        children.push(child./*OK*/ outerHTML);
-      });
-      this.element.setAttribute(
-        'data-child-elements',
-        JSON.stringify(children)
-      );
-    }
+
+    const serializableChildren = childElements.map((element) => {
+      const {tagName} = element;
+      const src = element.getAttribute('src');
+      // Save the first source and first track to preconnect.
+      if (tagName == 'SOURCE' && !this.preconnectSource_) {
+        this.preconnectSource_ = src;
+      } else if (tagName == 'TRACK' && !this.preconnectTrack_) {
+        this.preconnectTrack_ = src;
+      }
+      return [tagName, serializeAttributes(element)];
+    });
+
+    this.element.setAttribute(
+      'data-children',
+      JSON.stringify(serializableChildren)
+    );
 
     // Handle IMASetting JSON
     const scriptElement = childElementsByTag(this.element, 'SCRIPT')[0];
