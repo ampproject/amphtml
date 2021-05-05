@@ -91,7 +91,11 @@ function onMessage(e) {
     // Whatever the VideoManager does, needs to be refactored.
     return;
   }
-  if (event === 'error' || BUBBLE_MESSAGE_EVENTS.indexOf(event) > -1) {
+  if (
+    event === 'error' ||
+    event === 'canplay' ||
+    BUBBLE_MESSAGE_EVENTS.indexOf(event) > -1
+  ) {
     currentTarget.dispatchEvent(
       createCustomEvent(window, event, /* detail */ null, {
         bubbles: true,
