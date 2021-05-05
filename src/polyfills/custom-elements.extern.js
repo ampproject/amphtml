@@ -18,12 +18,3 @@
 // window externs file.
 /** @type {!typeof HTMLElement} */
 window.HTMLElementOrig;
-
-// These callbacks are used for custom elements, but don't appear to belong to
-// any available type definitions. There's a TODO(jridgewell) from ~2 years ago
-// to call them differently; if that can be figured out, these may be dropped.
-// If not, these may belong to a separate node.extern.js externs file.
-/** @function @this {Node} */
-Node.prototype.connectedCallback;
-/** @function @this {Node} */
-Node.prototype.disconnectedCallback;

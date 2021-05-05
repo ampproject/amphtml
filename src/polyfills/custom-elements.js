@@ -424,7 +424,8 @@ class Registry {
     if (!def) {
       return;
     }
-    this.upgradeSelf_(/** @type {!Element} */ (node), def);
+    node = /** @type {!HTMLElement} */ (node);
+    this.upgradeSelf_(node, def);
     // TODO(jridgewell): It may be appropriate to adoptCallback, if the node
     // used to be in another doc.
     // TODO(jridgewell): I should be calling the definitions connectedCallback
@@ -446,6 +447,7 @@ class Registry {
   disconnectedCallback_(node) {
     // TODO(jridgewell): I should be calling the definitions connectedCallback
     // with node as the context.
+    node = /** @type {!HTMLElement} */ (node);
     if (node.disconnectedCallback) {
       try {
         node.disconnectedCallback();
