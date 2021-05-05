@@ -160,6 +160,33 @@ const TYPE_CHECK_TARGETS = {
     externGlobs: [CORE_EXTERNS_GLOB, 'build-system/externs/*.extern.js'],
   },
 
+  /*
+   * Ensures that all files in src and extensions pass the specified set of errors.
+   */
+  'low-bar': {
+    entryPoints: ['src/amp.js'],
+    extraGlobs: ['{src,extensions}/**/*.js'],
+    onError(msg) {
+      const lowBarErrors = [
+        'JSC_BAD_JSDOC_ANNOTATION',
+        'JSC_INVALID_PARAM',
+        'JSC_TYPE_PARSE_ERROR',
+      ];
+      const lowBarRegex = new RegExp(lowBarErrors.join('|'));
+
+      const targetErrors = msg
+        .split('\n')
+        .filter((s) => lowBarRegex.test(s))
+        .join('\n')
+        .trim();
+
+      if (targetErrors.length) {
+        logClosureCompilerError(targetErrors);
+        throw new Error(`Type-checking failed for target ${cyan('low-bar')}`);
+      }
+    },
+  },
+
   // TODO(#33631): Targets below this point are not expected to pass.
   // They can possibly be removed?
   'src': {
@@ -247,50 +274,21 @@ async function typeCheck(targetName) {
     return;
   }
 
+  let errorMsg;
   await closureCompile(entryPoints, './dist', `${targetName}-check-types.js`, {
     noAddDeps,
     include3pDirectories: !noAddDeps,
     includePolyfills: !noAddDeps,
     typeCheckOnly: true,
+    logger: (m) => (errorMsg = m),
     ...opts,
+  }).catch((error) => {
+    if (!target.onError) {
+      throw error;
+    }
+    target.onError(errorMsg);
   });
   log(green('SUCCESS:'), 'Type-checking passed for target', cyan(targetName));
-}
-
-/**
- * Typechecks all JS files within src and extensions for a specific set
- * of closure errors.
- *
- * This is a temporary measure while we restore 100% typechecking.
- */
-async function ensureMinTypeQuality() {
-  const srcGlobs = ['src/**/*.js', 'extensions/**/*.js'];
-  const errorsToCheckFor = [
-    'JSC_BAD_JSDOC_ANNOTATION',
-    'JSC_INVALID_PARAM',
-    'JSC_TYPE_PARSE_ERROR',
-  ];
-
-  let msg = '';
-  await closureCompile('src/amp.js', './dist', `check-types.js`, {
-    include3pDirectories: false,
-    includePolyfills: false,
-    typeCheckOnly: true,
-    extraGlobs: globby.sync(srcGlobs),
-    warningLevel: 'VERBOSE',
-    logger: (str) => (msg = str),
-  }).catch(() => {});
-
-  const targetErrors = msg
-    .split('\n')
-    .filter((s) => errorsToCheckFor.some((error) => s.includes(error)))
-    .join('\n')
-    .trim();
-
-  if (targetErrors.length) {
-    logClosureCompilerError(targetErrors);
-    throw new Error('Found parse errors');
-  }
 }
 
 /**
@@ -315,7 +313,6 @@ async function checkTypes() {
   log(`Checking types for targets: ${targets.map(cyan).join(', ')}`);
   displayLifecycleDebugging();
 
-  await ensureMinTypeQuality();
   await Promise.all(targets.map(typeCheck));
   exitCtrlcHandler(handlerProcess);
 }
