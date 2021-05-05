@@ -19,11 +19,10 @@ import Promise from 'promise-pjs';
 /**
  * Sets the Promise polyfill if it does not exist.
  * @param {!Window} win
- * @suppress {checkTypes}
  */
 export function install(win) {
   if (!win.Promise) {
-    win.Promise = /** @type {?} */ (Promise);
+    win.Promise = Promise;
     // In babel the * export is an Object with a default property.
     // In closure compiler it is the Promise function itself.
     if (Promise.default) {
