@@ -25,6 +25,8 @@
 
 /** @typedef {typeof IntersectionObserver} */
 let IntersectionObserverCtor;
+/** @typedef {function(IntersectionObserverCtor)} */
+let IntersectionObserverUpgrader;
 
 const UPGRADERS = '_upgraders';
 const NATIVE = '_native';
@@ -129,8 +131,7 @@ export function supportsDocumentRoot(win) {
 export function upgradePolyfill(win, installer) {
   // Can't use the IntersectionObserverStub here directly since it's a separate
   // instance deployed in v0.js vs the polyfill extension.
-  const Stub = /** @type {typeof IntersectionObserverStub} */ (win
-    .IntersectionObserver[STUB]);
+  const Stub = win.IntersectionObserver[STUB];
   if (Stub) {
     const Native = win.IntersectionObserver[NATIVE];
     delete win.IntersectionObserver;
@@ -144,19 +145,14 @@ export function upgradePolyfill(win, installer) {
       );
     }
 
+    /** @type {!Array<IntersectionObserverUpgrader>} */
     const upgraders = Stub[UPGRADERS].slice(0);
     const microtask = Promise.resolve();
     const upgrade = (upgrader) => {
       microtask.then(() => upgrader(Polyfill));
     };
-    if (upgraders.length > 0) {
-      /** @type {!Array} */ (upgraders).forEach(upgrade);
-    }
-    Stub[
-      UPGRADERS
-    ] = /** @type {!Array<function(IntersectionObserverCtor)>} */ ({
-      'push': upgrade,
-    });
+    upgraders.forEach(upgrade);
+    Stub[UPGRADERS] = {'push': upgrade};
   } else {
     // Even if this is not the stub, we still may need to polyfill
     // `isIntersecting`. See `shouldLoadPolyfill` for more info.
@@ -277,9 +273,7 @@ export class IntersectionObserverStub {
   }
 }
 
-/**
- * @type {!Array<function(IntersectionObserverCtor)>}
- */
+/** @type {!Array<IntersectionObserverUpgrader>} */
 IntersectionObserverStub[UPGRADERS] = [];
 
 /** @visibleForTesting */
