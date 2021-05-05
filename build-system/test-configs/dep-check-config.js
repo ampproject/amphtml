@@ -87,7 +87,7 @@ exports.rules = [
       '3p/**->src/core/data-structures/observable.js',
       '3p/**->src/core/data-structures/promise.js',
       '3p/**->src/core/error.js',
-      '3p/**->src/core/types/function.js',
+      '3p/**->src/core/types/function/index.js',
       '3p/**->src/core/types/index.js',
       '3p/**->src/core/types/object.js',
       '3p/**->src/core/types/string.js',
@@ -121,7 +121,7 @@ exports.rules = [
     allowlist: [
       'ads/**->src/utils/dom-fingerprint.js',
       'ads/**->src/core/error.js',
-      'ads/**->src/core/types/function.js',
+      'ads/**->src/core/types/function/index.js',
       'ads/**->src/core/types/index.js',
       'ads/**->src/core/types/object.js',
       'ads/**->src/core/types/string.js',
