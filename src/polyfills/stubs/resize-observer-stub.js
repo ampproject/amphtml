@@ -23,9 +23,9 @@
  * amp-resize-observer-polyfill extension.
  */
 
-/** @typedef {typeof ResizeObserver} */
+/** @typedef {!typeof ResizeObserver} */
 let ResizeObserverCtor;
-/** @typedef {function(ResizeObserverCtor)} */
+/** @typedef {function(!ResizeObserverCtor)} */
 let ResizeObserverUpgrader;
 
 const UPGRADERS = '_upgraders';
@@ -139,7 +139,7 @@ export class ResizeObserverStub {
   }
 
   /**
-   * @param {ResizeObserverCtor} Ctor
+   * @param {!ResizeObserverCtor} Ctor
    * @private
    */
   upgrade_(Ctor) {
@@ -150,7 +150,7 @@ export class ResizeObserverStub {
   }
 }
 
-/** @type {!Array<ResizeObserverUpgrader>} */
+/** @type {!Array<!ResizeObserverUpgrader>} */
 ResizeObserverStub[UPGRADERS] = [];
 
 /** @visibleForTesting */
