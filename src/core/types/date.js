@@ -17,10 +17,17 @@
 /** @fileoverview helpers for dealing with dates and times. */
 
 /**
- * A timestamp, such as that produced by `Date.now()`.
+ * Absolute time in milliseconds.
  * @typedef {number}
  */
 export let TimestampDef;
+
+/**
+ * Number between 0 and 1 that designates normalized time, as in "from start to
+ * end".
+ * @typedef {number}
+ */
+export let NormTimestampDef;
 
 /**
  * Parses the date using the `Date.parse()` rules. Additionally supports the
@@ -42,7 +49,7 @@ export function parseDate(s) {
 }
 
 /**
- * Converts various date formats into a TimestampDef.
+ * Converts various date formats into a timestamp in ms.
  * @param {!Date|number|string} value
  * @return {?TimestampDef}
  */
