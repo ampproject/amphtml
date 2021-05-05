@@ -633,7 +633,7 @@ export class GlobalVariableSource extends VariableSource {
    * the resulting value is `null`.
    * @param {function(!../../extensions/amp-access/0.1/access-vars.AccessVars):(T|!Promise<T>)} getter
    * @param {string} expr
-   * @return {T|null}
+   * @return {?T}
    * @template T
    * @private
    */

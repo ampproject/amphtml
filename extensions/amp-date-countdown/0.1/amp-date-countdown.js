@@ -103,7 +103,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
     /** @private {string} */
     this.biggestUnit_ = '';
 
-    /** @private {!Object|null} */
+    /** @private {?Object} */
     this.localeWordList_ = null;
 
     /** @private {?number} */
@@ -156,7 +156,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
       this.element.getAttribute('biggest-unit') || DEFAULT_BIGGEST_UNIT
     ).toUpperCase();
 
-    /** @private {!Object|null} */
+    /** @private {?Object} */
     this.localeWordList_ = this.getLocaleWord_(this.locale_);
 
     /** @private {boolean} */

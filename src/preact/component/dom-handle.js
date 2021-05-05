@@ -17,7 +17,7 @@
 import {useImperativeHandle} from '../';
 
 /**
- * @param {{current: (T|null)}} ref
+ * @param {{current: ?T}} ref
  * @param {T} node
  * @template T
  */

@@ -68,7 +68,7 @@ export function Fragment(props) {
 }
 
 /**
- * @return {{current: (T|null)}}
+ * @return {{current: ?T}}
  * @template T
  */
 export function createRef() {
@@ -97,8 +97,8 @@ export function useState(initial) {
 }
 
 /**
- * @param {T|null} initial
- * @return {{current: (T|null)}}
+ * @param {?T} initial
+ * @return {{current: ?T}}
  * @template T
  */
 export function useRef(initial) {
@@ -151,7 +151,7 @@ export function useCallback(cb, opt_deps) {
 }
 
 /**
- * @param {{current: (T|null)}} ref
+ * @param {{current: ?T}} ref
  * @param {function():T} create
  * @param {!Array<*>=} opt_deps
  * @return {undefined}

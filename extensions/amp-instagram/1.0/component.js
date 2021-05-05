@@ -28,7 +28,7 @@ const MATCHES_MESSAGING_ORIGIN = (origin) =>
 
 /**
  * @param {!InstagramDef.Props} props
- * @param {{current: (!InstagramDef.Api|null)}} ref
+ * @param {{current: ?InstagramDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
 function InstagramWithRef(

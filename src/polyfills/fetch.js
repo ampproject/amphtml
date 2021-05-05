@@ -151,7 +151,7 @@ class FetchResponse {
     /** @type {?ReadableStream} */
     this.body = null;
 
-    /** @type {string|null} */
+    /** @type {?string} */
     this.url = xhr.responseURL;
   }
 

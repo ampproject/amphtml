@@ -58,7 +58,7 @@ function makeMethodMessage(method) {
 
 /**
  * @param {!VimeoDef.Props} props
- * @param {{current: (T|null)}} ref
+ * @param {{current: ?T}} ref
  * @return {PreactDef.Renderable}
  * @template T
  */

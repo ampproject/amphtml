@@ -46,7 +46,7 @@ export function getUniqueId(win) {
  * Localizes CTA text if it is chosen from our predefined types.a
  * @param {string} ctaType
  * @param {!./story-ad-localization.StoryAdLocalization} localizationService
- * @return {string|null}
+ * @return {?string}
  */
 export function localizeCtaText(ctaType, localizationService) {
   // CTA picked from predefined choices.

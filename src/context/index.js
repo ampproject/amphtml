@@ -49,7 +49,7 @@ export function unassignSlot(node, slot) {
  * longer try to discover itself.
  *
  * @param {!Node} node
- * @param {!Node|null} parent
+ * @param {?Node} parent
  */
 export function setParent(node, parent) {
   ContextNode.get(node).setParent(parent);
