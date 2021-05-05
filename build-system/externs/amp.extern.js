@@ -483,7 +483,7 @@ let time;
 let AmpElement = function () {};
 
 /** @return {boolean} */
-AmpElement.prototype.V1 = function () {};
+AmpElement.prototype.R1 = function () {};
 
 /** @return {boolean} */
 AmpElement.prototype.deferredMount = function () {};
