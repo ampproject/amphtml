@@ -884,9 +884,8 @@ tags: {  # <amp-story-page-attachment> with href
   attrs: {
     name: "cta-image"
     value_url: {
-      # protocol: "http"  # TODO(honeybaderdontcare): readd once transformers in prod
+      protocol: "http"
       protocol: "https"
-      allow_relative: false  # TODO(honeybaderdontcare): remove once transformers in prod
     }
   }
   child_tags: {
@@ -909,17 +908,15 @@ tags: {  # <amp-story-page-attachment> with no href
   attrs: {
     name: "cta-image"
     value_url: {
-      # protocol: "http"  # TODO(honeybaderdontcare): readd once transformers in prod
+      protocol: "http"
       protocol: "https"
-      allow_relative: false  # TODO(honeybaderdontcare): remove once transformers in prod
     }
   }
   attrs: {
     name: "cta-image-2"
     value_url: {
-      # protocol: "http"  # TODO(honeybaderdontcare): readd once transformers in prod
+      protocol: "http"
       protocol: "https"
-      allow_relative: false  # TODO(honeybaderdontcare): remove once transformers in prod
     }
   }
   attrs: {
