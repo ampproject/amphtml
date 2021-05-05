@@ -2,5 +2,6 @@
   "INI_LOAD_INOB": true,
   "NO_SIGNING_RTV": true,
   "V1_IMG_DEFERRED_BUILD": false,
+  "VIDEO_POOL2": true,
   "WITHIN_VIEWPORT_INOB": false
 }
