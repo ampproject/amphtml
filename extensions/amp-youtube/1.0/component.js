@@ -46,6 +46,7 @@ const PlayerStates = {
 const methods = {
   'play': 'playVideo',
   'pause': 'pauseVideo',
+  'mute': 'mute',
   'unmute': 'unMute',
 };
 
