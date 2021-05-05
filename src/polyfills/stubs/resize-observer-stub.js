@@ -23,8 +23,6 @@
  * amp-resize-observer-polyfill extension.
  */
 
-/** @typedef {!typeof ResizeObserver} */
-let!typeof ResizeObserver;
 /** @typedef {function(!typeof ResizeObserver)} */
 let ResObsUpgraderDef;
 
