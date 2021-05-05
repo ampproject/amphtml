@@ -16,7 +16,7 @@
 
 import {FiniteStateMachine} from '../../../../src/core/data-structures/finite-state-machine';
 
-describes.sandboxed('Finite State Machine', {}, (env) => {
+describes.sandboxed('data structures - Finite State Machine', {}, (env) => {
   describe('simple machines', () => {
     let fsm;
     let spy;

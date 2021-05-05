@@ -16,7 +16,7 @@
 
 // Imported just for the side effect of getting the `types` it exports into
 // the type system during compile time.
-import {NormTimeDef} from './core/types/date';
+import {NormTimeDef} from '../types/date';
 
 /**
  * A CurveDef is a function that returns a normtime value (0 to 1) for another

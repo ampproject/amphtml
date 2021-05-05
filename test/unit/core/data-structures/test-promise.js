@@ -16,7 +16,7 @@
 
 import * as PromiseUtils from '../../../../src/core/data-structures/promise';
 
-describes.sandboxed('PromiseUtils', {}, () => {
+describes.sandboxed('data structures - PromiseUtils', {}, () => {
   function getPromiseObject() {
     let resolve, reject;
     const promise = new Promise((resolve_, reject_) => {
