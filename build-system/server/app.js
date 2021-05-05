@@ -1560,7 +1560,7 @@ function generateInfo(filePath) {
 
 /**
  * @param {string} encryptedDocumentKey
- * @return {string|null}
+ * @return {?string}
  */
 function decryptDocumentKey(encryptedDocumentKey) {
   if (!encryptedDocumentKey) {

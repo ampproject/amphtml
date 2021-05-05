@@ -624,7 +624,7 @@ AmpElement.prototype.collapse = function () {};
 let Signals = class {};
 /**
  * @param {string} unusedName
- * @return {number|!Error|null}
+ * @return {?number|?Error}
  */
 Signals.prototype.get = function (unusedName) {};
 
