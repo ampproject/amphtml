@@ -18,7 +18,7 @@ import {Deferred} from './core/data-structures/promise';
 import {Services} from './services';
 import {TimestampDef} from './core/types/date';
 import {dev} from './log';
-import {getCurve} from './curve';
+import {getCurve} from './core/data-structures/curve';
 
 /**
  * Number between 0 and 1 that designates normalized time, as in "from start to
@@ -45,8 +45,8 @@ export class Animation {
    *
    * @param {!Node} contextNode The context node.
    * @param {!TransitionDef<?>} transition Transition to animate.
-   * @param {!TimestampDef} duration Duration in milliseconds.
-   * @param {(!./curve.CurveDef|string)=} opt_curve Optional curve to use for
+   * @param {TimestampDef} duration Duration in milliseconds.
+   * @param {(!./core/data-structures/curve.CurveDef|string)=} opt_curve Optional curve to use for
    *   animation. Default is the linear animation.
    * @return {!AnimationPlayer}
    */
@@ -68,7 +68,7 @@ export class Animation {
     /** @private @const {!./service/vsync-impl.Vsync} */
     this.vsync_ = opt_vsync || Services.vsyncFor(self);
 
-    /** @private {?./curve.CurveDef} */
+    /** @private {?./core/data-structures/curve.CurveDef} */
     this.curve_ = null;
 
     /**
@@ -81,7 +81,7 @@ export class Animation {
    * Sets the default curve for the animation. Each segment is allowed to have
    * its own curve, but this curve will be used if a segment doesn't specify
    * its own.
-   * @param {!./curve.CurveDef|string|undefined} curve
+   * @param {!./core/data-structures/curve.CurveDef|string|undefined} curve
    * @return {!Animation}
    */
   setCurve(curve) {
@@ -102,7 +102,7 @@ export class Animation {
    * @param {!NormTimeDef} delay
    * @param {!TransitionDef<?>} transition
    * @param {!NormTimeDef} duration
-   * @param {(!./curve.CurveDef|string)=} opt_curve
+   * @param {(!./core/data-structures/curve.CurveDef|string)=} opt_curve
    * @return {!Animation}
    */
   add(delay, transition, duration, opt_curve) {
@@ -148,7 +148,7 @@ class AnimationPlayer {
    * @param {!./service/vsync-impl.Vsync} vsync
    * @param {!Node} contextNode
    * @param {!Array<!SegmentDef>} segments
-   * @param {?./curve.CurveDef} defaultCurve
+   * @param {?./core/data-structures/curve.CurveDef} defaultCurve
    * @param {!TimestampDef} duration
    */
   constructor(vsync, contextNode, segments, defaultCurve, duration) {
@@ -381,7 +381,7 @@ class AnimationPlayer {
  *   delay: NormTimeDef,
  *   func: !TransitionDef,
  *   duration: NormTimeDef,
- *   curve: ?./curve.CurveDef
+ *   curve: ?./core/data-structures/curve.CurveDef
  * }}
  */
 let SegmentDef;
@@ -391,7 +391,7 @@ let SegmentDef;
  *   delay: NormTimeDef,
  *   func: !TransitionDef,
  *   duration: NormTimeDef,
- *   curve: ?./curve.CurveDef,
+ *   curve: ?./core/data-structures/curve.CurveDef,
  *   started: boolean,
  *   completed: boolean
  * }}
