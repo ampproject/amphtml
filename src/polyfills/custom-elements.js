@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-/**
- * @typedef {{
- *   promise: !Promise<undefined>,
- *   resolve: function(),
- * }}
- */
-let DeferredDef;
+import {Deferred} from '../core/data-structures/promise';
 
 /**
- * @typedef {!typeof HTMLElement}
+ * For type anotations where Element is a local variable.
+ * @typedef {!Element}
  */
+let ElementOrigDef;
+
+/** @typedef {!typeof HTMLElement} */
 let CustomElementConstructorDef;
 
 /**
@@ -102,6 +100,7 @@ function isPatched(win) {
 
 /**
  * Throws the error outside the current event loop.
+ * TODO(rcebulko): Condense with core/error#rethrowAsync
  *
  * @param {!Error} error
  */
@@ -121,21 +120,13 @@ class CustomElementRegistry {
    * @param {!Registry} registry
    */
   constructor(win, registry) {
-    /**
-     * @const @private
-     */
+    /** @const @private */
     this.win_ = win;
 
-    /**
-     * @const @private
-     */
+    /** @const @private */
     this.registry_ = registry;
 
-    /**
-     * @type {!Object<string, DeferredDef>}
-     * @private
-     * @const
-     */
+    /** @private @const @type {!Object<string, !Deferred>} */
     this.pendingDefines_ = Object.create(null);
   }
 
@@ -188,19 +179,13 @@ class CustomElementRegistry {
     }
 
     const pending = this.pendingDefines_;
-    const deferred = pending[name];
-    if (deferred) {
-      return deferred.promise;
+    let deferred = pending[name];
+    if (!deferred) {
+      deferred = new Deferred();
+      pending[name] = deferred;
     }
 
-    let resolve;
-    const promise = new /*OK*/ Promise((res) => (resolve = res));
-    pending[name] = {
-      promise,
-      resolve,
-    };
-
-    return promise;
+    return deferred.promise;
   }
 
   /**
@@ -223,16 +208,10 @@ class Registry {
    * @param {!Window} win
    */
   constructor(win) {
-    /**
-     * @private @const
-     */
+    /** @private @const */
     this.win_ = win;
 
-    /**
-     * @type {!Object<string, !CustomElementDef>}
-     * @private
-     * @const
-     */
+    /** @private @const @type {!Object<string, !CustomElementDef>} */
     this.definitions_ = Object.create(null);
 
     /**
@@ -243,7 +222,7 @@ class Registry {
 
     /**
      * The currently upgrading element.
-     * @private {Element}
+     * @private {?Element}
      */
     this.current_ = null;
 
@@ -251,7 +230,7 @@ class Registry {
      * Once started (after the first Custom Element definition), this tracks
      * DOM append and removals.
      *
-     * @private {MutationObserver}
+     * @private {?MutationObserver}
      */
     this.mutationObserver_ = null;
 
@@ -273,7 +252,7 @@ class Registry {
    * constructor while returning this current node in the HTMLElement
    * class constructor (the base class of all custom elements).
    *
-   * @return {Element}
+   * @return {?Element}
    */
   current() {
     const current = this.current_;
@@ -285,7 +264,7 @@ class Registry {
    * Finds the custom element definition by name.
    *
    * @param {string} name
-   * @return {CustomElementDef|undefined}
+   * @return {!CustomElementDef|undefined}
    */
   getByName(name) {
     const definition = this.definitions_[name];
@@ -297,8 +276,8 @@ class Registry {
   /**
    * Finds the custom element definition by constructor instance.
    *
-   * @param {CustomElementConstructorDef} ctor
-   * @return {CustomElementDef|undefined}
+   * @param {!CustomElementConstructorDef} ctor
+   * @return {!CustomElementDef|undefined}
    */
   getByConstructor(ctor) {
     const definitions = this.definitions_;
@@ -445,7 +424,8 @@ class Registry {
     if (!def) {
       return;
     }
-    this.upgradeSelf_(/** @type {!Element} */ (node), def);
+    node = /** @type {!HTMLElement} */ (node);
+    this.upgradeSelf_(node, def);
     // TODO(jridgewell): It may be appropriate to adoptCallback, if the node
     // used to be in another doc.
     // TODO(jridgewell): I should be calling the definitions connectedCallback
@@ -467,6 +447,7 @@ class Registry {
   disconnectedCallback_(node) {
     // TODO(jridgewell): I should be calling the definitions connectedCallback
     // with node as the context.
+    node = /** @type {!HTMLElement} */ (node);
     if (node.disconnectedCallback) {
       try {
         node.disconnectedCallback();
@@ -725,7 +706,7 @@ function polyfill(win) {
   const {attachShadow, createShadowRoot} = elProto;
   if (attachShadow) {
     /**
-     * @param {!{mode: string}} unused
+     * @param {{mode: string}} unused
      * @return {!ShadowRoot}
      */
     elProto.attachShadow = function (unused) {
@@ -739,9 +720,7 @@ function polyfill(win) {
     };
   }
   if (createShadowRoot) {
-    /**
-     * @return {!ShadowRoot}
-     */
+    /** @return {!ShadowRoot} */
     elProto.createShadowRoot = function () {
       const shadow = createShadowRoot.apply(this, arguments);
       registry.observe(shadow);
@@ -757,7 +736,7 @@ function polyfill(win) {
    * You can't use the real HTMLElement constructor, because you can't subclass
    * it without using native classes. So, mock its approximation using
    * createElement.
-   * @return {*} TODO(#23582): Specify return type
+   * @return {!ElementOrigDef}
    */
   function HTMLElementPolyfill() {
     const {constructor} = this;
@@ -825,9 +804,7 @@ function polyfill(win) {
  */
 function wrapHTMLElement(win) {
   const {HTMLElement, Reflect} = win;
-  /**
-   * @return {!Element}
-   */
+  /** @return {!Element} */
   function HTMLElementWrapper() {
     const ctor = /** @type {function(...?):?|undefined} */ (this.constructor);
 
@@ -846,8 +823,8 @@ function wrapHTMLElement(win) {
 /**
  * Setups up prototype inheritance
  *
- * @param {!typeof SUPER} superClass
- * @param {!typeof SUB} subClass
+ * @param {!SUPER} superClass
+ * @param {!SUB} subClass
  * @template SUPER
  * @template SUB
  */
@@ -882,6 +859,7 @@ function supportsUnderProto() {
  * old IE.
  * @param {!Object} obj
  * @param {!Object} prototype
+ * @suppress {suspiciousCode} due to IS_ESM inlining
  */
 function setPrototypeOf(obj, prototype) {
   if (IS_ESM || Object.setPrototypeOf) {
