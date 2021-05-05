@@ -20,6 +20,7 @@ import {dict} from './core/types/object';
 import {includes} from './core/types/string';
 import {isScopeSelectorSupported, prependSelectorsWith} from './core/dom/css';
 import {toWin} from './types';
+import {isInternalElement} from './layout';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',
@@ -432,6 +433,18 @@ export function childNodes(parent, callback) {
     }
   }
   return nodes;
+}
+
+/**
+ * Returns the original nodes of the custom element without any service
+ * nodes that could have been added for markup. These nodes can include
+ * Text, Comment and other child nodes.
+ *
+ * @param {!AmpElement} element
+ * @return {!Array<!Node>}
+ */
+export function getRealChildNodes(element) {
+  return childNodes(element, (node) => !isInternalOrServiceNode(node));
 }
 
 /**
@@ -1008,4 +1021,42 @@ export function dispatchCustomEvent(node, name, opt_data, opt_options) {
  */
 export function containsNotSelf(parent, child) {
   return child !== parent && parent.contains(child);
+}
+
+/**
+ * Configures the supplied element to have a "fill content" layout. The
+ * exact interpretation of "fill content" depends on the element's layout.
+ *
+ * If `opt_replacedContent` is specified, it indicates whether the "replaced
+ * content" styling should be applied. Replaced content is not allowed to
+ * have its own paddings or border.
+ *
+ * @param {!Element} element
+ * @param {boolean=} opt_replacedContent
+ */
+export function applyFillContent(element, opt_replacedContent) {
+  element.classList.add('i-amphtml-fill-content');
+  if (opt_replacedContent) {
+    element.classList.add('i-amphtml-replaced-content');
+  }
+}
+
+/**
+ * Returns "true" for internal AMP nodes or for placeholder elements.
+ * @param {!Node} node
+ * @return {boolean}
+ */
+export function isInternalOrServiceNode(node) {
+  if (isInternalElement(node)) {
+    return true;
+  }
+  if (
+    node.tagName &&
+    (node.hasAttribute('placeholder') ||
+      node.hasAttribute('fallback') ||
+      node.hasAttribute('overflow'))
+  ) {
+    return true;
+  }
+  return false;
 }

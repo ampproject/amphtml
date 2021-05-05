@@ -18,7 +18,7 @@ import {ActionTrust, DEFAULT_ACTION} from './core/constants/action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
 import {devAssert, user, userAssert} from './log';
-import {dispatchCustomEvent} from './dom';
+import * as dom from './dom';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray} from './core/types';
@@ -783,7 +783,7 @@ export class BaseElement {
   forwardEvents(events, element) {
     const unlisteners = (isArray(events) ? events : [events]).map((eventType) =>
       listen(element, eventType, (event) => {
-        dispatchCustomEvent(this.element, eventType, getData(event) || {});
+        dom.dispatchCustomEvent(this.element, eventType, getData(event) || {});
       })
     );
 
@@ -888,10 +888,7 @@ export class BaseElement {
    * @public @final
    */
   applyFillContent(element, opt_replacedContent) {
-    element.classList.add('i-amphtml-fill-content');
-    if (opt_replacedContent) {
-      element.classList.add('i-amphtml-replaced-content');
-    }
+    dom.applyFillContent(element, opt_replacedContent);
   }
 
   /**
