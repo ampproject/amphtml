@@ -179,7 +179,7 @@ export class Performance {
      * The latest reported largest contentful paint time, where the loadTime
      * is specified.
      *
-     * @private {number|null}
+     * @private {?number}
      */
     this.largestContentfulPaintLoadTime_ = null;
 
@@ -187,7 +187,7 @@ export class Performance {
      * The latest reported largest contentful paint time, where the renderTime
      * is specified.
      *
-     * @private {number|null}
+     * @private {?number}
      */
     this.largestContentfulPaintRenderTime_ = null;
 
@@ -559,7 +559,7 @@ export class Performance {
    * Tick the largest contentful paint metrics.
    */
   tickLargestContentfulPaint_() {
-    /** @type {number|null} */ let end;
+    /** @type {?number} */ let end;
     if (this.largestContentfulPaintLoadTime_ !== null) {
       this.tickDelta(
         TickLabel.LARGEST_CONTENTFUL_PAINT_LOAD,

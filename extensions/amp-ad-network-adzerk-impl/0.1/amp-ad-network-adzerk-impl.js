@@ -97,7 +97,7 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
     // TODO(wg-monetization): this header name has been deprecated elsewhere,
     // and is never returned by dev server.
     if (headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'amp-mustache') {
-      return /**@type {!Promise<(ArrayBuffer|null)>}*/ (Promise.resolve(null));
+      return /**@type {!Promise<?ArrayBuffer>}*/ (Promise.resolve(null));
     }
     // Shorthand for: reject promise if current promise chain is out of date.
     const checkStillCurrent = this.verifyStillCurrent();

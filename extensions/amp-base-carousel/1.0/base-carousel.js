@@ -77,7 +77,7 @@ const MIN_AUTO_ADVANCE_INTERVAL = 1000;
 
 /**
  * @param {!BaseCarouselDef.Props} props
- * @param {{current: (!BaseCarouselDef.CarouselApi|null)}} ref
+ * @param {{current: ?BaseCarouselDef.CarouselApi}} ref
  * @return {PreactDef.Renderable}
  */
 function BaseCarouselWithRef(

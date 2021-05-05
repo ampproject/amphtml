@@ -53,7 +53,7 @@ module.exports = {
     /**
      * @param {Array<T>} array
      * @param {T} item
-     * @return {T|null}
+     * @return {?T}
      */
     function findAfter(array, item) {
       const index = array.indexOf(item);

@@ -747,7 +747,7 @@ export class SanitizerImpl {
   /**
    * @param {!Node} node
    * @param {string} attribute
-   * @param {string|null} value
+   * @param {?string} value
    * @return {boolean}
    */
   setAttribute(node, attribute, value) {

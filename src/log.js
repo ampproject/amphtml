@@ -75,7 +75,7 @@ export const LogLevel = {
 /**
  * Sets reportError function. Called from error.js to break cyclic
  * dependency.
- * @param {function(this:Window, Error, (Element|null)=): ?|undefined} fn
+ * @param {function(this:Window, Error, (?Element)=): ?|undefined} fn
  */
 export function setReportError(fn) {
   self.__AMP_REPORT_ERROR = fn;

@@ -86,7 +86,7 @@ const q3 = (array) => {
  *
  * @param {number} a
  * @param {number} b
- * @return {number|null} percentage change or null
+ * @return {?number} percentage change or null
  */
 function percent(a, b) {
   if (a === 0) {

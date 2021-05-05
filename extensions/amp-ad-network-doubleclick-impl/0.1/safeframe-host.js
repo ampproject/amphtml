@@ -204,7 +204,7 @@ export class SafeframeHostApi {
    * Returns true if the given window matches the Safeframe's content window.
    * Comparing to a null window will always return false.
    *
-   * @param {Window|null} otherWindow
+   * @param {?Window} otherWindow
    * @return {boolean}
    */
   equalsSafeframeContentWindow(otherWindow) {

@@ -49,7 +49,7 @@ export const KEYBOARD_SELECT_MODE = {
 
 /**
  * @param {!SelectorDef.Props} props
- * @param {{current: (!SelectorDef.SelectorApi|null)}} ref
+ * @param {{current: ?SelectorDef.SelectorApi}} ref
  * @return {PreactDef.Renderable}
  */
 function SelectorWithRef(

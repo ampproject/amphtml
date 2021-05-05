@@ -120,7 +120,7 @@ class AmpAddThis extends AMP.BaseElement {
     /** @private {string} */
     this.referrer_ = '';
 
-    /** @private {(?JsonObject<string, string>|null)} */
+    /** @private {?JsonObject<string, string>} */
     this.shareConfig_ = null;
 
     /** @private {(?JsonObject)} */

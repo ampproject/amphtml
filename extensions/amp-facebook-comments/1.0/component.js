@@ -33,7 +33,7 @@ const DEFAULT_TITLE = 'Facebook comments';
 
 /**
  * @param {!FacebookCommentsDef.Props} props
- * @param {{current: (!FacebookCommentsDef.Api|null)}} ref
+ * @param {{current: ?FacebookCommentsDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
 function FacebookCommentsWithRef(

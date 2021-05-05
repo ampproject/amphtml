@@ -15,7 +15,7 @@
  */
 
 /**
- * @protected {!Object<string, !ChildDef>|null}
+ * @protected {?Object<string, !ChildDef>}
  */
 foo().bar;
 

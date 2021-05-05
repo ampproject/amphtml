@@ -375,7 +375,7 @@ export class AmpWebPushHelperFrame {
    * Sets up message listeners for messages from the AMP page and service
    * worker.
    *
-   * @param {string|null} allowedOrigin For testing purposes only. Pass in the
+   * @param {?string} allowedOrigin For testing purposes only. Pass in the
    * allowedOrigin since test environments cannot access the parent origin.
    */
   run(allowedOrigin) {

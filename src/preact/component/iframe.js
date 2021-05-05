@@ -42,7 +42,7 @@ const canResetSrc = (src) => src && src != ABOUT_BLANK && !src.includes('#');
 
 /**
  * @param {!IframeEmbedDef.Props} props
- * @param {{current: (!IframeEmbedDef.Api|null)}} ref
+ * @param {{current: ?IframeEmbedDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
 export function IframeEmbedWithRef(

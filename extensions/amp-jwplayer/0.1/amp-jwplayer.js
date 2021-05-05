@@ -102,7 +102,7 @@ class AmpJWPlayer extends AMP.BaseElement {
     /** @private {number} */
     this.currentTime_ = 0;
 
-    /** @private {Array<(Array<number>|null)>} */
+    /** @private {Array<?Array<number>>} */
     this.playedRanges_ = [];
 
     /** @private {?function()} */

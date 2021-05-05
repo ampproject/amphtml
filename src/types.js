@@ -32,7 +32,7 @@ export function isFiniteNumber(value) {
  * null on disconnected documents or old IE.
  * This helper function casts it into just a simple Window return type.
  *
- * @param {!Window|null} winOrNull
+ * @param {?Window} winOrNull
  * @return {!Window}
  */
 export function toWin(winOrNull) {
