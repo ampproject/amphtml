@@ -32,6 +32,7 @@ import {
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
+import {loadPromise} from '../../../src/event-helper';
 import {measureIntersectionNoRoot} from '../../../src/utils/intersection-no-root';
 import {toArray} from '../../../src/core/types/array';
 import {tryParseJson} from '../../../src/json';
@@ -280,8 +281,8 @@ function markAsVisited(candidate) {
  * @return {!Promise}
  */
 function whenLoaded(element) {
-  if (NATIVE_ELEMENTS_SUPPORTED.has(element.tagName.toLowerCase())) {
-    return Promise.resolve();
+  if (element.tagName.toLowerCase() === 'img') {
+    return loadPromise(element);
   }
   return whenUpgradedToCustomElement(element).then((element) =>
     element.signals().whenSignal(CommonSignals.LOAD_END)
