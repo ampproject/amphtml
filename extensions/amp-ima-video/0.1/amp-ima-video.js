@@ -145,10 +145,12 @@ class AmpImaVideo extends AMP.BaseElement {
       return [tagName, serializeAttributes(element)];
     });
 
-    this.element.setAttribute(
-      'data-children',
-      JSON.stringify(serializableChildren)
-    );
+    if (serializableChildren.length > 0) {
+      this.element.setAttribute(
+        'data-children',
+        JSON.stringify(serializableChildren)
+      );
+    }
 
     // Handle IMASetting JSON
     const scriptElement = childElementsByTag(this.element, 'SCRIPT')[0];
