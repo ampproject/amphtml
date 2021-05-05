@@ -28,11 +28,10 @@ import {
   utf8Encode,
 } from '../../../../src/core/types/string/bytes';
 
-// TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
-describes.sandboxed
-  .configure()
-  .skipSafari()
-  .run('base64', {}, () => {
+describes.sandboxed('type helpers - base64', {}, () => {
+  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
+  const config = describe.configure().skipSafari();
+  config.run('base64', () => {
     describe('base64 <> utf-8 encode/decode', () => {
       const testCases = [
         'SimplyFoo',
@@ -225,3 +224,4 @@ describes.sandboxed
       });
     });
   });
+});
