@@ -242,7 +242,7 @@ function maybeCreateChildren(document, childrenDef) {
     const tagName = child[0];
     pureDevAssert(typeof tagName === 'string');
 
-    const attributes = child[0];
+    const attributes = child[1];
     pureDevAssert(typeof attributes === 'object' && attributes != null);
 
     fragment.appendChild(
