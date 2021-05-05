@@ -20,7 +20,7 @@ import {Deferred} from '../core/data-structures/promise';
  * For type anotations where Element is a local variable.
  * @typedef {!Element}
  */
-let ElementDef;
+let ElementOrigDef;
 
 /** @typedef {!typeof HTMLElement} */
 let CustomElementConstructorDef;
@@ -736,7 +736,7 @@ function polyfill(win) {
    * You can't use the real HTMLElement constructor, because you can't subclass
    * it without using native classes. So, mock its approximation using
    * createElement.
-   * @return {!ElementDef}
+   * @return {!ElementOrigDef}
    */
   function HTMLElementPolyfill() {
     const {constructor} = this;
