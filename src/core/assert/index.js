@@ -14,21 +14,5 @@
  * limitations under the License.
  */
 
-/** @externs */
-
-/** @const */
-var RenderDef = {};
-
-/**
- * @typedef {{
- *   src: (!string),
- *   getJson: (!Function),
- *   render: (?RendererFunctionType|undefined),
- * }}
- */
-RenderDef.Props;
-
-/** @interface */
-RenderDef.RenderApi = class {
-  refresh() {}
-};
+export {assert as pureDevAssert} from './dev';
+export {assert as pureUserAssert} from './user';

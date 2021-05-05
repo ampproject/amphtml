@@ -404,12 +404,17 @@ class AmpAddThis extends AMP.BaseElement {
   }
 
   /**
+   * @typedef {{
+   *   ampdoc: !../../../src/service/ampdoc-impl.AmpDoc,
+   *   loc: *,
+   *   pubId: *,
+   * }} SetupListenersInput
+   */
+
+  /**
    * Sets up listeners.
    *
-   * @param {!Object} input
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} [input.ampdoc]
-   * @param {*} [input.loc]
-   * @param {*} [input.pubId]
+   * @param {!SetupListenersInput} input
    * @memberof AmpAddThis
    */
   setupListeners_(input) {

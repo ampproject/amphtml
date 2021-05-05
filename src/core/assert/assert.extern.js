@@ -14,21 +14,12 @@
  * limitations under the License.
  */
 
-/** @externs */
-
-/** @const */
-var RenderDef = {};
+/**
+ * @fileoverview Type externs for assertions.
+ * @externs
+ */
 
 /**
- * @typedef {{
- *   src: (!string),
- *   getJson: (!Function),
- *   render: (?RendererFunctionType|undefined),
- * }}
+ * @typedef {function(?, string=, ...*):?|function(?, !Array<*>)}
  */
-RenderDef.Props;
-
-/** @interface */
-RenderDef.RenderApi = class {
-  refresh() {}
-};
+let AssertionFunction;

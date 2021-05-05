@@ -229,18 +229,18 @@ const MAX_DEVICE_SPACES = 4;
 /**
  * @typedef {{
  *  element: !Element,
- *  player: !Element
+ *  player: !Element,
  *  chip: !Element,
  *  width: number,
  *  height: number,
  *  deviceHeight: ?number,
  *  deviceSpaces: number,
- * }}
+ * }} DeviceInfo
+ *
  * Contains the data related to the device.
  * Width and height refer to the story viewport, while deviceHeight is the device screen height.
  * The deviceSpaces refers to the MAX_DEVICE_SPACES, ensuring the devices on screen don't go over the max space set.
  */
-export let DeviceInfo;
 
 const DEFAULT_DEVICES = 'iphone11native;oneplus5t;pixel2';
 
@@ -363,7 +363,7 @@ function simplifyDeviceName(name) {
  * Eg: `devices="ipad;iphone"` will find the ipad and also the first device in ALL_DEVICES
  * that starts with "iphone" (ignoring case and symbols).
  * @param {string} queryHash
- * @return {any[]}
+ * @return {Array<*>}
  */
 function parseDevices(queryHash) {
   const screenSizes = [];
