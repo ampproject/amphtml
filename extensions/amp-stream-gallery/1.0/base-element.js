@@ -15,7 +15,7 @@
  */
 
 import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/base-carousel.jss';
-import {CSS as GALLERY_CSS} from './stream-gallery.jss';
+import {CSS as GALLERY_CSS} from './component.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {StreamGallery} from './component';
 import {dict} from '../../../src/core/types/object';

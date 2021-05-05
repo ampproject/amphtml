@@ -648,7 +648,15 @@
     "name": "amp-stream-gallery",
     "version": ["0.1", "1.0"],
     "latestVersion": "1.0",
-    "options": {"hasCss": true}
+    "options": {
+      "hasCss": true,
+      "npm": {
+        "component.js": {
+          "preact": "component-preact.js",
+          "react": "component-react.js"
+        }
+      }
+    }
   },
   {
     "name": "amp-subscriptions",
