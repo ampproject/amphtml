@@ -443,6 +443,7 @@ const htmlFixtureGlobs = [
   '!examples/visual-tests/amp-story/amp-story-interactive-quiz-sizing-positioning.html',
   '!examples/visual-tests/amp-story/amp-story-landscape-templates.html',
   '!examples/visual-tests/amp-story/amp-story-page-attachment.html',
+  '!examples/visual-tests/amp-story/amp-story-page-attachment-v2.html',
   '!examples/visual-tests/amp-story/amp-story-sidebar.html',
   '!examples/visual-tests/amp-story/amp-story-tooltip.html',
   '!examples/visual-tests/amp-story/amp-story-unsupported-browser-layer.html',
