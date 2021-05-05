@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Observable} from './observable';
+import {Observable} from './core/data-structures/observable';
 import {Services} from './services';
 import {dev} from './log';
 import {listenOnce, listenOncePromise} from './event-helper';
@@ -92,7 +92,7 @@ export class Input {
   }
 
   /**
-   * See https://github.com/ampproject/amphtml/blob/master/spec/amp-css-classes.md#input-mode-classes
+   * See https://github.com/ampproject/amphtml/blob/main/spec/amp-css-classes.md#input-mode-classes
    * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    */
   setupInputModeClasses(ampdoc) {

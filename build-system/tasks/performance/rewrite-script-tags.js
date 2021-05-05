@@ -90,8 +90,8 @@ async function useRemoteScripts(url) {
 }
 
 /**
- * Download local and master version of default extension that
- * are not explicility stated by script tags in the HTML.
+ * Download default extensions that are not explicility stated by script tags in
+ * the HTML.
  * @return {Promise}
  */
 async function downloadDefaultExtensions() {

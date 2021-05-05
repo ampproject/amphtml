@@ -27,7 +27,7 @@ import {
 import {StoryAdLocalization} from './story-ad-localization';
 import {StoryAdPage} from './story-ad-page';
 import {devAssert} from '../../../src/log';
-import {findIndex} from '../../../src/utils/array';
+import {findIndex} from '../../../src/core/types/array';
 import {getServicePromiseForDoc} from '../../../src/service';
 
 /** @const {string} */
@@ -69,7 +69,7 @@ export class StoryAdPageManager {
     /** @private {!./story-ad-button-text-fitter.ButtonTextFitter} */
     this.buttonFitter_ = new ButtonTextFitter(this.ampdoc_);
 
-    /** @private {Object<string, StoryAdPage} */
+    /** @private {Object<string, StoryAdPage>} */
     this.pages_ = {};
 
     /** @private {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} **/

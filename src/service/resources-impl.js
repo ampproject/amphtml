@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
+import {Deferred} from '../core/data-structures/promise';
 import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
@@ -23,20 +23,20 @@ import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
 import {Resource, ResourceState} from './resource';
 import {Services} from '../services';
 import {TaskQueue} from './task-queue';
-import {VisibilityState} from '../visibility-state';
+import {VisibilityState} from '../core/constants/visibility-state';
 import {dev, devAssert} from '../log';
-import {dict} from '../utils/object';
+import {dict} from '../core/types/object';
 import {expandLayoutRect} from '../layout-rect';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder} from '../dom';
 import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
 import {ieMediaCheckAndFix} from './ie-media-bug';
-import {isBlockedByConsent, reportError} from '../error';
+import {isBlockedByConsent, reportError} from '../error-reporting';
 import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
-import {remove} from '../utils/array';
+import {remove} from '../core/types/array';
 import {startupChunk} from '../chunk';
-import {throttle} from '../utils/rate-limit';
+import {throttle} from '../core/types/function';
 
 const TAG_ = 'Resources';
 const LAYOUT_TASK_ID_ = 'L';
@@ -1071,7 +1071,7 @@ export class ResourcesImpl {
       if (
         r.getState() == ResourceState.NOT_BUILT &&
         !r.isBuilding() &&
-        !r.element.V1()
+        !r.element.R1()
       ) {
         this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
       }
@@ -1101,7 +1101,7 @@ export class ResourcesImpl {
     ) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        if ((r.hasOwner() && !r.isMeasureRequested()) || r.element.V1()) {
+        if ((r.hasOwner() && !r.isMeasureRequested()) || r.element.R1()) {
           // If element has owner, and measure is not requested, do nothing.
           continue;
         }
@@ -1165,7 +1165,7 @@ export class ResourcesImpl {
       if (
         r.getState() == ResourceState.NOT_BUILT ||
         r.hasOwner() ||
-        r.element.V1()
+        r.element.R1()
       ) {
         continue;
       }
@@ -1191,7 +1191,7 @@ export class ResourcesImpl {
           !r.isBuilt() &&
           !r.isBuilding() &&
           !r.hasOwner() &&
-          !r.element.V1() &&
+          !r.element.R1() &&
           r.hasBeenMeasured() &&
           r.isDisplayed() &&
           r.overlaps(loadRect)
@@ -1227,7 +1227,7 @@ export class ResourcesImpl {
         if (
           r.getState() == ResourceState.READY_FOR_LAYOUT &&
           !r.hasOwner() &&
-          !r.element.V1() &&
+          !r.element.R1() &&
           r.isDisplayed() &&
           r.idleRenderOutsideViewport()
         ) {
@@ -1247,7 +1247,7 @@ export class ResourcesImpl {
         if (
           r.getState() == ResourceState.READY_FOR_LAYOUT &&
           !r.hasOwner() &&
-          !r.element.V1() &&
+          !r.element.R1() &&
           r.isDisplayed()
         ) {
           dev().fine(TAG_, 'idle layout:', r.debugid);
@@ -1537,7 +1537,7 @@ export class ResourcesImpl {
     opt_parentPriority,
     opt_forceOutsideViewport
   ) {
-    if (resource.element.V1()) {
+    if (resource.element.R1()) {
       return;
     }
     const isBuilt = resource.getState() != ResourceState.NOT_BUILT;

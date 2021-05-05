@@ -39,10 +39,10 @@ import {
 } from './service/extensions-impl';
 import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn, toggleExperiment} from './experiments';
-import {reportErrorForWin} from './error';
-import {scheduleUpgradeIfNeeded as scheduleInObUpgradeIfNeeded} from './polyfillstub/intersection-observer-stub';
-import {scheduleUpgradeIfNeeded as scheduleResObUpgradeIfNeeded} from './polyfillstub/resize-observer-stub';
+import {reportErrorForWin} from './error-reporting';
 import {setStyle} from './style';
+import {shouldLoadPolyfill as shouldLoadInObPolyfill} from './polyfills/stubs/intersection-observer-stub';
+import {shouldLoadPolyfill as shouldLoadResObPolyfill} from './polyfills/stubs/resize-observer-stub';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
 import {waitForBodyOpenPromise} from './dom';
@@ -262,8 +262,13 @@ function adoptShared(global, callback) {
   }
 
   // Some deferred polyfills.
-  scheduleInObUpgradeIfNeeded(global);
-  scheduleResObUpgradeIfNeeded(global);
+  const extensionsFor = Services.extensionsFor(global);
+  if (shouldLoadResObPolyfill(global)) {
+    extensionsFor.preloadExtension('amp-resize-observer-polyfill');
+  }
+  if (shouldLoadInObPolyfill(global)) {
+    extensionsFor.preloadExtension('amp-intersection-observer-polyfill');
+  }
 
   return iniPromise;
 }

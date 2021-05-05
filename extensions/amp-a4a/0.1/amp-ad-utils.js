@@ -15,7 +15,8 @@
  */
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
-import {isArray, isObject} from '../../../src/types';
+import {isArray, isObject} from '../../../src/core/types';
+
 import {isSecureUrlDeprecated} from '../../../src/url';
 import {parseExtensionUrl} from '../../../src/service/extension-script';
 import {parseJson} from '../../../src/json';
@@ -166,7 +167,7 @@ export function getAmpAdMetadata(creative) {
 /**
  * Merges any elements from customElementExtensions array into extensions array if
  * the element is not present.
- * @param {!Array<{custom-element: string, 'src': string}} extensions
+ * @param {!Array<{custom-element: string, 'src': string}>} extensions
  * @param {!Array<string>} customElementExtensions
  */
 export function mergeExtensionsMetadata(extensions, customElementExtensions) {

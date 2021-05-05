@@ -2124,7 +2124,7 @@ class Context {
   // always return incomplete in that case.
   void SetExitEarly() { exit_early_ = true; }
 
-  // For each tag that the parse master processes, we compute the line/column
+  // For each tag that the htmlparser processes, we compute the line/column
   // information by counting the newline characters. Prior to calling the
   // function, |current_token_start_| actually points at the start of the
   // previous token, so effectively the body of AdvanceTo restores the invariant
@@ -4797,8 +4797,12 @@ void ParsedValidatorRules::ExpandExtensionSpec(ValidatorRules* rules) const {
     TagSpec* tagspec = rules->mutable_tags(ii);
     if (!tagspec->has_extension_spec()) continue;
     const ExtensionSpec& extension_spec = tagspec->extension_spec();
+    std::string base_spec_name = extension_spec.name();
+    if (extension_spec.has_version_name())
+      base_spec_name =
+          StrCat(extension_spec.name(), " ", extension_spec.version_name());
     if (!tagspec->has_spec_name())
-      tagspec->set_spec_name(extension_spec.name() + " extension script");
+      tagspec->set_spec_name(StrCat(base_spec_name, " extension script"));
     if (!tagspec->has_descriptive_name())
       tagspec->set_descriptive_name(tagspec->spec_name());
     tagspec->set_mandatory_parent("HEAD");
@@ -4826,13 +4830,11 @@ void ParsedValidatorRules::ExpandExtensionSpec(ValidatorRules* rules) const {
 
         // Expand module script tagspec.
         TagSpec module_tagspec = basic_tagspec;
-        ExpandModuleExtensionSpec(&module_tagspec,
-                                  tagspec->extension_spec().name());
+        ExpandModuleExtensionSpec(&module_tagspec, base_spec_name);
         new_tagspecs.push_back(module_tagspec);
         // Expand nomodule script tagspec.
         TagSpec nomodule_tagspec = basic_tagspec;
-        ExpandNomoduleExtensionSpec(&nomodule_tagspec,
-                                    tagspec->extension_spec().name());
+        ExpandNomoduleExtensionSpec(&nomodule_tagspec, base_spec_name);
         new_tagspecs.push_back(nomodule_tagspec);
       }
     }
@@ -5296,7 +5298,7 @@ void ParsedValidatorRules::MaybeEmitGlobalTagValidationErrors(
   MaybeEmitValueSetMismatchErrors(context, result);
 }
 
-// The ParseMaster requires that we register a handler for each tag
+// The htmlparser requires that we register a handler for each tag
 // for which we'd like to see CDATA - those are called the "intertags".
 // In our case, it's simply the rules which specify the
 // TagSpec::mandatory_cdata field.
@@ -5846,8 +5848,8 @@ class Validator {
 
   const ValidationResult& Result() const { return result_; }
 
-  // While the validator instance is tied forever to a given parse
-  // master and seemingly not reusable, the parse master can be used
+  // While the validator instance is tied forever to a given htmlparser
+  // and seemingly not reusable, the htmlparser can be used
   // to parse multiple documents, so in case a new document arrives
   // we clear out the state.
   void Clear() {
@@ -5935,7 +5937,7 @@ class Validator {
 
   void EndDocument() {
     if (context_.Progress(result_).complete) return;
-    // It's not clear whether the following is necessary as the parse master may
+    // It's not clear whether the following is necessary as the htmlparser may
     // close the tags automatically. But we do it anyway, for paranoia.
     context_.mutable_tag_stack()->ExitRemainingTags(context_, &result_);
     rules_->MaybeEmitGlobalTagValidationErrors(&context_, &result_);

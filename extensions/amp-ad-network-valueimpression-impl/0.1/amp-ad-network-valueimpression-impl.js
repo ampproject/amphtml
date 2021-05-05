@@ -16,7 +16,7 @@
 
 import '../../../src/service/real-time-config/real-time-config-impl';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {RefreshManager} from '../../amp-a4a/0.1/refresh-manager';
 import {Services} from '../../../src/services';
 import {WindowInterface} from '../../../src/window-interface';
@@ -27,7 +27,7 @@ import {getFlexibleAdSlotData} from './flexible-ad-slot-utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {internalRuntimeVersion} from '../../../src/internal-version';
-import {stringHash32} from '../../../src/string';
+import {stringHash32} from '../../../src/core/types/string';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-valueimpression-impl';

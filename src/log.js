@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
+import * as assertions from './core/assert/base';
 import {
   USER_ERROR_SENTINEL,
   elementStringOrPassThru,
 } from './core/error-message-helpers';
+import {createErrorVargs, duplicateErrorIfNecessary} from './core/error';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
-import {isArray, isEnumValue} from './types';
-import {once} from './utils/function';
+import {isArray} from './core/types';
+import {once} from './core/types/function';
 import {urls} from './config';
 
 const noop = () => {};
@@ -73,7 +75,7 @@ export const LogLevel = {
 /**
  * Sets reportError function. Called from error.js to break cyclic
  * dependency.
- * @param {function(*, !Element=)|undefined} fn
+ * @param {function(this:Window, Error, (?Element)=): ?|undefined} fn
  */
 export function setReportError(fn) {
   self.__AMP_REPORT_ERROR = fn;
@@ -179,6 +181,15 @@ export class Log {
           }
         });
     });
+
+    // This bound assertion function is capable of handling the format used when
+    // error/assertion messages are extracted. This logic hasn't yet been
+    // migrated to an AMP-independent form for use in core. This binding allows
+    // Log assertion helpers to maintain message-extraction capabilities until
+    // that logic can be moved to core.
+    this.boundAssertFn_ = /** @type {!AssertionFunction} */ (this.assert.bind(
+      this
+    ));
   }
 
   /**
@@ -390,7 +401,6 @@ export class Log {
    * @closurePrimitive {asserts.truthy}
    */
   assert(shouldBeTrueish, opt_message, var_args) {
-    let firstElement;
     if (isArray(opt_message)) {
       return this.assert.apply(
         this,
@@ -399,34 +409,11 @@ export class Log {
         )
       );
     }
-    if (!shouldBeTrueish) {
-      const message = opt_message || 'Assertion failed';
-      const splitMessage = message.split('%s');
-      const first = splitMessage.shift();
-      let formatted = first;
-      const messageArray = [];
-      let i = 2;
-      pushIfNonEmpty(messageArray, first);
-      while (splitMessage.length > 0) {
-        const nextConstant = splitMessage.shift();
-        const val = arguments[i++];
-        if (val && val.tagName) {
-          firstElement = val;
-        }
-        messageArray.push(val);
-        pushIfNonEmpty(messageArray, nextConstant.trim());
-        formatted += stringOrElementString(val) + nextConstant;
-      }
-      const e = new Error(formatted);
-      e.fromAssert = true;
-      e.associatedElement = firstElement;
-      e.messageArray = messageArray;
-      this.prepareError_(e);
-      // __AMP_REPORT_ERROR is installed globally per window in the entry point.
-      self.__AMP_REPORT_ERROR(e);
-      throw e;
-    }
-    return shouldBeTrueish;
+
+    return assertions.assert.apply(
+      null,
+      [this.suffix_].concat(Array.prototype.slice.call(arguments))
+    );
   }
 
   /**
@@ -437,18 +424,14 @@ export class Log {
    * @param {*} shouldBeElement
    * @param {!Array|string=} opt_message The assertion message
    * @return {!Element} The value of shouldBeTrueish.
-   * @template T
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertElement(shouldBeElement, opt_message) {
-    const shouldBeTrueish = shouldBeElement && shouldBeElement.nodeType == 1;
-    this.assertType_(
+    return assertions.assertElement(
+      this.boundAssertFn_,
       shouldBeElement,
-      shouldBeTrueish,
-      'Element expected',
       opt_message
     );
-    return /** @type {!Element} */ (shouldBeElement);
   }
 
   /**
@@ -463,13 +446,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertString(shouldBeString, opt_message) {
-    this.assertType_(
+    return assertions.assertString(
+      this.boundAssertFn_,
       shouldBeString,
-      typeof shouldBeString == 'string',
-      'String expected',
       opt_message
     );
-    return /** @type {string} */ (shouldBeString);
   }
 
   /**
@@ -485,13 +466,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertNumber(shouldBeNumber, opt_message) {
-    this.assertType_(
+    return assertions.assertNumber(
+      this.boundAssertFn_,
       shouldBeNumber,
-      typeof shouldBeNumber == 'number',
-      'Number expected',
       opt_message
     );
-    return /** @type {number} */ (shouldBeNumber);
   }
 
   /**
@@ -504,13 +483,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertArray(shouldBeArray, opt_message) {
-    this.assertType_(
+    return assertions.assertArray(
+      this.boundAssertFn_,
       shouldBeArray,
-      isArray(shouldBeArray),
-      'Array expected',
       opt_message
     );
-    return /** @type {!Array} */ (shouldBeArray);
   }
 
   /**
@@ -524,13 +501,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertBoolean(shouldBeBoolean, opt_message) {
-    this.assertType_(
+    return assertions.assertBoolean(
+      this.boundAssertFn_,
       shouldBeBoolean,
-      !!shouldBeBoolean === shouldBeBoolean,
-      'Boolean expected',
       opt_message
     );
-    return /** @type {boolean} */ (shouldBeBoolean);
   }
 
   /**
@@ -545,10 +520,12 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertEnumValue(enumObj, s, opt_enumName) {
-    if (isEnumValue(enumObj, s)) {
-      return s;
-    }
-    this.assert(false, 'Unknown %s value: "%s"', opt_enumName || 'enum', s);
+    return assertions.assertEnumValue(
+      this.boundAssertFn_,
+      enumObj,
+      s,
+      opt_enumName
+    );
   }
 
   /**
@@ -557,6 +534,7 @@ export class Log {
    */
   prepareError_(error) {
     error = duplicateErrorIfNecessary(error);
+
     if (this.suffix_) {
       if (!error.message) {
         error.message = this.suffix_;
@@ -607,108 +585,6 @@ export class Log {
     }
     return [`More info at ${externalMessageUrl(id, parts)}`];
   }
-
-  /**
-   * Asserts types, backbone of `assertNumber`, `assertString`, etc.
-   *
-   * It understands array-based "id"-contracted messages.
-   *
-   * Otherwise creates a sprintf syntax string containing the optional message or the
-   * default. An interpolation token is added at the end to include the `subject`.
-   * @param {*} subject
-   * @param {*} assertion
-   * @param {string} defaultMessage
-   * @param {!Array|string=} opt_message
-   * @private
-   */
-  assertType_(subject, assertion, defaultMessage, opt_message) {
-    if (isArray(opt_message)) {
-      this.assert(assertion, opt_message.concat(subject));
-    } else {
-      this.assert(assertion, `${opt_message || defaultMessage}: %s`, subject);
-    }
-  }
-}
-
-/**
- * @param {string|!Element} val
- * @return {string}
- */
-const stringOrElementString = (val) =>
-  /** @type {string} */ (elementStringOrPassThru(val));
-
-/**
- * @param {!Array} array
- * @param {*} val
- */
-function pushIfNonEmpty(array, val) {
-  if (val != '') {
-    array.push(val);
-  }
-}
-
-/**
- * Some exceptions (DOMException, namely) have read-only message.
- * @param {!Error} error
- * @return {!Error};
- */
-export function duplicateErrorIfNecessary(error) {
-  const messageProperty = Object.getOwnPropertyDescriptor(error, 'message');
-  if (messageProperty && messageProperty.writable) {
-    return error;
-  }
-
-  const {message, stack} = error;
-  const e = new Error(message);
-  // Copy all the extraneous things we attach.
-  for (const prop in error) {
-    e[prop] = error[prop];
-  }
-  // Ensure these are copied.
-  e.stack = stack;
-  return e;
-}
-
-/**
- * @param {...*} var_args
- * @return {!Error}
- * @visibleForTesting
- */
-export function createErrorVargs(var_args) {
-  let error = null;
-  let message = '';
-  for (let i = 0; i < arguments.length; i++) {
-    const arg = arguments[i];
-    if (arg instanceof Error && !error) {
-      error = duplicateErrorIfNecessary(arg);
-    } else {
-      if (message) {
-        message += ' ';
-      }
-      message += arg;
-    }
-  }
-
-  if (!error) {
-    error = new Error(message);
-  } else if (message) {
-    error.message = message + ': ' + error.message;
-  }
-  return error;
-}
-
-/**
- * Rethrows the error without terminating the current context. This preserves
- * whether the original error designation is a user error or a dev error.
- * @param {...*} var_args
- */
-export function rethrowAsync(var_args) {
-  const error = createErrorVargs.apply(null, arguments);
-  setTimeout(() => {
-    // reportError is installed globally per window in the entry point.
-    self.__AMP_REPORT_ERROR(error);
-    throw error;
-  });
 }
 
 /**
@@ -890,6 +766,15 @@ export function devAssert(
   if (getMode().minified) {
     return shouldBeTrueish;
   }
+  if (self.__AMP_ASSERTION_CHECK) {
+    // This will never execute regardless, but will be included on unminified
+    // builds. It will be DCE'd away from minified builds, and so can be used to
+    // validate that Babel is properly removing dev assertions in minified
+    // builds.
+    console /*OK*/
+      .log('__devAssert_sentinel__');
+  }
+
   return dev()./*Orig call*/ assert(
     shouldBeTrueish,
     opt_message,

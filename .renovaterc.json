@@ -4,95 +4,109 @@
     "supportPolicy": ["lts_latest"]
   },
   "ignoreDeps": ["ubuntu-2004"],
-
   "commitMessagePrefix": "📦",
   "timezone": "America/Los_Angeles",
   "schedule": "after 12am every weekday",
-
   "dependencyDashboard": true,
   "prBodyColumns": ["Package", "Update", "Type", "Change", "Package file"],
-  "separateMinorPatch": true,
   "prBodyNotes": [
     "<details>",
     "<summary>How to resolve breaking changes</summary>",
     "This PR may introduce breaking changes that require manual intervention. In such cases, you will need to check out this branch, fix the cause of the breakage, and commit the fix to ensure a green CI build. To check out and update this PR, follow the steps below:",
-    "```sh\n# Check out the PR branch (these steps are from GitHub)\ngit checkout -b renovate-bot-{{{branchName}}} master\ngit pull https://github.com/renovate-bot/amphtml.git {{{branchName}}}\n\n# Directly make fixes and commit them\namp lint --fix # For lint errors in JS files\namp prettify --fix # For prettier errors in non-JS files\n# Edit source code in case of new compiler warnings / errors\n\n# Push the changes to the branch\ngit push git@github.com:renovate-bot/amphtml.git renovate-bot-{{{branchName}}}:{{{branchName}}}\n```",
+    "```sh\n# Check out the PR branch (these steps are from GitHub)\ngit checkout -b renovate-bot-{{{branchName}}} main\ngit pull https://github.com/renovate-bot/amphtml.git {{{branchName}}}\n\n# Directly make fixes and commit them\namp lint --fix # For lint errors in JS files\namp prettify --fix # For prettier errors in non-JS files\n# Edit source code in case of new compiler warnings / errors\n\n# Push the changes to the branch\ngit push git@github.com:renovate-bot/amphtml.git renovate-bot-{{{branchName}}}:{{{branchName}}}\n```",
     "</details>"
   ],
-
   "packageRules": [
     {
       "groupName": "subpackage devDependencies",
       "matchPaths": ["**/*"],
-      "major": {
-        "groupName": null,
-        "additionalBranchPrefix": "subpackage-"
-      }
+      "major": {"automerge": false, "assignAutomerge": false},
+      "automerge": true,
+      "assignAutomerge": true
     },
     {
-      "groupName": "build system devDependencies",
+      "groupName": "build-system devDependencies",
       "matchPaths": ["build-system/**"],
+      "major": {"automerge": false, "assignAutomerge": false},
       "labels": ["WG: infra"],
-      "major": {
-        "groupName": null,
-        "additionalBranchPrefix": "build-system-"
-      }
+      "automerge": true,
+      "assignAutomerge": true
     },
     {
       "groupName": "validator devDependencies",
       "matchPaths": ["validator/**"],
+      "major": {"automerge": false, "assignAutomerge": false},
       "labels": ["WG: caching"],
-      "major": {
-        "groupName": null,
-        "additionalBranchPrefix": "validator-"
-      }
+      "automerge": true,
+      "assignAutomerge": true
     },
     {
-      "groupName": "core devDependencies",
-      "matchPaths": ["+(package.json)"],
-      "major": {
-        "groupName": null,
-        "additionalBranchPrefix": "core-"
-      }
-    },
-    {
-      "groupName": "linting devDependencies",
-      "matchPackagePatterns": ["\\b(prettier|eslint)\\b"],
-      "major": {
-        "groupName": null,
-        "additionalBranchPrefix": "linting-"
-      }
-    },
-    {
-      "groupName": "babel devDependencies",
-      "matchPackagePatterns": ["\\bbabel"],
-      "major": {
-        "groupName": null,
-        "additionalBranchPrefix": "babel-"
-      }
-    },
-    {
-      "excludePackagePatterns": ["^@ampproject/"],
-      "matchDepTypes": ["dependencies"],
+      "groupName": "validator webui",
+      "matchPaths": ["validator/js/webui/**"],
       "enabled": false
     },
     {
+      "groupName": "core devDependencies",
+      "matchFiles": ["package.json"],
+      "major": {"automerge": false, "assignAutomerge": false},
+      "labels": ["WG: infra"],
+      "automerge": true,
+      "assignAutomerge": true
+    },
+    {
+      "groupName": "linting devDependencies",
+      "matchFiles": ["package.json"],
+      "matchPackagePatterns": ["\\b(prettier|eslint)\\b"],
+      "major": {"automerge": false, "assignAutomerge": false},
+      "labels": ["WG: infra"],
+      "automerge": true,
+      "assignAutomerge": true
+    },
+    {
+      "groupName": "babel devDependencies",
+      "matchFiles": ["package.json"],
+      "matchPackagePatterns": ["\\bbabel"],
+      "major": {"automerge": false, "assignAutomerge": false},
+      "labels": ["WG: infra", "WG: performance"],
+      "automerge": true,
+      "assignAutomerge": true
+    },
+    {
+      "groupName": "esbuild devDependencies",
+      "matchFiles": ["package.json"],
+      "matchPackagePatterns": ["\\besbuild\\b"],
+      "major": {"automerge": false, "assignAutomerge": false},
+      "labels": ["WG: infra", "WG: performance"],
+      "automerge": true,
+      "assignAutomerge": true
+    },
+    {
       "groupName": "ampproject devDependencies",
+      "matchFiles": ["package.json"],
       "matchPackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["devDependencies"],
-      "major": {
-        "groupName": null,
-        "additionalBranchPrefix": "ampproject-"
-      }
+      "major": {"automerge": false, "assignAutomerge": false},
+      "labels": ["WG: bento", "WG: components", "WG: performance"],
+      "automerge": true,
+      "assignAutomerge": true
     },
     {
       "groupName": "ampproject dependencies",
+      "matchFiles": ["package.json"],
       "matchPackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["dependencies"],
-      "major": {
-        "groupName": null,
-        "additionalBranchPrefix": "ampproject-"
-      }
+      "labels": ["WG: bento", "WG: components", "WG: performance"],
+      "automerge": false,
+      "assignAutomerge": false
+    },
+    {
+      "groupName": "core dependencies",
+      "matchFiles": ["package.json"],
+      "excludePackagePatterns": ["^@ampproject/"],
+      "matchDepTypes": ["dependencies"],
+      "labels": ["WG: bento", "WG: components", "WG: performance"],
+      "automerge": false,
+      "assignAutomerge": false
     }
   ]
 }

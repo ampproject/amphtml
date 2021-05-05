@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Observable} from '../../../src/observable';
+import {Observable} from '../../../src/core/data-structures/observable';
 import {Services} from '../../../src/services';
 import {devAssert} from '../../../src/log';
 
@@ -51,7 +51,7 @@ export class ScrollManager {
     /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
     this.mutator_ = Services.mutatorForDoc(root.ampdoc);
 
-    /** @private {!UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.viewportOnChangedUnlistener_ = null;
 
     /** @private {!Observable<!./scroll-manager.ScrollEventDef>} */

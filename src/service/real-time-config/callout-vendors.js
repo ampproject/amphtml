@@ -45,8 +45,8 @@ const RTC_VENDORS = jsonConfiguration({
   //  If you are adding a new vendor config object to this object,  //
   //  make sure to also update the RTC documentation in these two   //
   //  files under "supported vendors".                              //
-  // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-documentation.md
-  // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-publisher-implementation-guide.md
+  // https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/rtc-documentation.md
+  // https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/rtc-publisher-implementation-guide.md
   ////////////////////////////////////////////////////////////////////
 
   // Add vendors here
@@ -220,8 +220,8 @@ const RTC_VENDORS = jsonConfiguration({
   },
   freestar: {
     url:
-      'https://prebid-amp.pub.network/openrtb2/amp?tag_id=TAG_ID&gdpr_consent=CONSENT_STRING',
-    macros: ['TAG_ID', 'CONSENT_STRING'],
+      'https://prebid-amp.pub.network/openrtb2/amp?tag_id=TAG_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adc=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING&account=ACCOUNT_ID',
+    macros: ['TAG_ID', 'CONSENT_STRING', 'ACCOUNT_ID'],
     disableKeyAppend: true,
   },
   hubvisor: {

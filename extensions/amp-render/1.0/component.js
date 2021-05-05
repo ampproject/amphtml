@@ -16,7 +16,13 @@
 
 import * as Preact from '../../../src/preact';
 import {Wrapper, useRenderer} from '../../../src/preact/component';
-import {useEffect, useState} from '../../../src/preact';
+import {forwardRef} from '../../../src/preact/compat';
+import {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
 /**
@@ -35,14 +41,13 @@ const DEFAULT_GET_JSON = (url) => {
 
 /**
  * @param {!RenderDef.Props} props
+ * @param {{current: ?RenderDef.RenderApi}} ref
  * @return {PreactDef.Renderable}
  */
-export function Render({
-  src = '',
-  getJson = DEFAULT_GET_JSON,
-  render = DEFAULT_RENDER,
-  ...rest
-}) {
+export function RenderWithRef(
+  {src = '', getJson = DEFAULT_GET_JSON, render = DEFAULT_RENDER, ...rest},
+  ref
+) {
   useResourcesNotify();
 
   const [data, setData] = useState({});
@@ -64,6 +69,21 @@ export function Render({
     };
   }, [src, getJson]);
 
+  const refresh = useCallback(() => {
+    getJson(src, /* shouldRefresh */ true).then((data) => {
+      setData(data);
+    });
+  }, [getJson, src]);
+
+  useImperativeHandle(
+    ref,
+    () =>
+      /** @type {!RenderDef.RenderApi} */ ({
+        refresh,
+      }),
+    [refresh]
+  );
+
   const rendered = useRenderer(render, data);
   const isHtml =
     rendered && typeof rendered == 'object' && '__html' in rendered;
@@ -74,3 +94,7 @@ export function Render({
     </Wrapper>
   );
 }
+
+const Render = forwardRef(RenderWithRef);
+Render.displayName = 'Render';
+export {Render};

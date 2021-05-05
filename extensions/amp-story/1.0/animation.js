@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {
   PRESET_OPTION_ATTRIBUTES,
   presets,
@@ -34,9 +34,9 @@ import {
 } from './animation-types';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {getChildJsonConfig} from '../../../src/json';
-import {map, omit} from '../../../src/utils/object';
+import {map, omit} from '../../../src/core/types/object';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 

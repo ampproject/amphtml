@@ -16,12 +16,12 @@
 
 import {Services} from '../../../src/services';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/core/types/object';
 import {getData} from '../../../src/event-helper';
 import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {getStyle, setStyles} from '../../../src/style';
 import {parseUrlDeprecated} from '../../../src/url';
-import {throttle} from '../../../src/utils/rate-limit';
+import {throttle} from '../../../src/core/types/function';
 import {tryParseJson} from '../../../src/json';
 
 /**
@@ -204,7 +204,7 @@ export class SafeframeHostApi {
    * Returns true if the given window matches the Safeframe's content window.
    * Comparing to a null window will always return false.
    *
-   * @param {Window|null} otherWindow
+   * @param {?Window} otherWindow
    * @return {boolean}
    */
   equalsSafeframeContentWindow(otherWindow) {

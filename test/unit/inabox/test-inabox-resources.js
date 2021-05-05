@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {InaboxResources} from '../../../src/inabox/inabox-resources';
 import {ResourceState} from '../../../src/service/resource';
 import {macroTask} from '../../../testing/yield';
@@ -149,10 +149,10 @@ describes.realWin('inabox-resources', {amp: true}, (env) => {
     expect(resource2.unload).to.be.calledOnce;
   });
 
-  it('should ignore V1 resources for layout pass', async () => {
+  it('should ignore R1 resources for layout pass', async () => {
     const element1 = env.createAmpElement('amp-foo');
     const element2 = env.createAmpElement('amp-bar');
-    env.sandbox.stub(element2, 'V1').returns(true);
+    env.sandbox.stub(element2, 'R1').returns(true);
 
     win.document.body.appendChild(element1);
     win.document.body.appendChild(element2);

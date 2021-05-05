@@ -15,7 +15,7 @@
  */
 
 import {BaseElement} from '../../src/base-element';
-import {CommonSignals} from '../../src/common-signals';
+import {CommonSignals} from '../../src/core/constants/common-signals';
 import {ElementStub} from '../../src/element-stub';
 import {LayoutPriority} from '../../src/layout';
 import {Services} from '../../src/services';
@@ -69,7 +69,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
   });
 
   class TestElement extends BaseElement {
-    static V1() {
+    static R1() {
       return true;
     }
 

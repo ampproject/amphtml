@@ -95,7 +95,7 @@ amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:42:2 The attri
 |        data-aax_src="302">
 |      </amp-ad>
 |    </amp-carousel>
-|   
+|
 |    <!-- Invalid: missing value for lightbox-thumbnail-id -->
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id></amp-img>
 >>   ^~~~~~~~~

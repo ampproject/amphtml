@@ -15,9 +15,9 @@
  */
 
 import {Values} from './values';
-import {devAssert} from '../log';
+import {pureDevAssert as devAssert} from '../core/assert';
 import {getMode} from '../mode';
-import {pushIfNotExist, removeItem} from '../utils/array';
+import {pushIfNotExist, removeItem} from '../core/types/array';
 import {throttleTail} from './scheduler';
 
 // Properties set on the DOM nodes to track the context state.
@@ -396,7 +396,7 @@ export class ContextNode {
    * of factory is important to reduce bundling costs for context node.
    *
    * @param {*} id
-   * @param {fucntion(new:./subscriber.Subscriber, function(...?), !Array<!ContextProp>)} constr
+   * @param {function(new:./subscriber.Subscriber, function(...?), !Array<!ContextProp>):void} constr
    * @param {!Function} func
    * @param {!Array<!ContextProp>} deps
    */

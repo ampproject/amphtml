@@ -25,8 +25,7 @@ const {
   ciPullRequestBranch,
   ciPullRequestSha,
 } = require('./ci');
-const {getStdout} = require('./exec');
-const {mainBranch} = require('./main-branch');
+const {getStdout} = require('./process');
 
 /**
  * Returns the commit at which the current PR branch was forked off of the main
@@ -40,7 +39,7 @@ function gitBranchCreationPoint() {
   if (isPullRequestBuild()) {
     const prSha = ciPullRequestSha();
     return getStdout(
-      `git rev-list --boundary ${prSha}...origin/${mainBranch} | grep "^-" | head -n 1 | cut -c2-`
+      `git rev-list --boundary ${prSha}...origin/main | grep "^-" | head -n 1 | cut -c2-`
     ).trim();
   }
   return gitMergeBaseLocalMain();
@@ -53,7 +52,7 @@ function gitBranchCreationPoint() {
  * @return {string}
  */
 function gitCiMainBaseline() {
-  return getStdout(`git merge-base origin/${mainBranch} HEAD`).trim();
+  return getStdout('git merge-base origin/main HEAD').trim();
 }
 
 /**
@@ -183,7 +182,7 @@ function gitCommitterEmail() {
  * @return {!Array<string>}
  */
 function gitCherryMain() {
-  const stdout = getStdout(`git cherry ${mainBranch}`).trim();
+  const stdout = getStdout('git cherry main').trim();
   return stdout ? stdout.split('\n') : [];
 }
 
@@ -207,7 +206,7 @@ function gitCommitFormattedTime(ref = 'HEAD') {
  * @return {string}
  */
 function gitMergeBaseLocalMain() {
-  return getStdout(`git merge-base ${mainBranch} HEAD`).trim();
+  return getStdout('git merge-base main HEAD').trim();
 }
 
 /**

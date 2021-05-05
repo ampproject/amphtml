@@ -24,7 +24,7 @@ import {
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {CSS as ctaButtonCSS} from '../../../build/amp-story-auto-ads-cta-button-0.1.css';
 import {dev, user} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
+import {dict, map} from '../../../src/core/types/object';
 
 /**
  * @typedef {{
@@ -111,7 +111,7 @@ export function getStoryAdMetadataFromElement(adElement) {
 /**
  * Returns a boolean indicating if there is sufficent metadata to render CTA.
  * @param {!StoryAdUIMetadata} metadata
- * @param {=boolean} opt_inabox
+ * @param {boolean=} opt_inabox
  * @return {boolean}
  */
 export function validateCtaMetadata(metadata, opt_inabox) {
@@ -249,6 +249,7 @@ export function createCta(doc, buttonFitter, container, uiMetadata) {
       'div',
       dict({
         'class': 'i-amphtml-story-ad-link-root',
+        'role': 'button',
       })
     );
 

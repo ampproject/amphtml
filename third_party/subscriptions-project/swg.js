@@ -5246,6 +5246,21 @@ class OffersFlow {
   }
 
   /**
+   * @param {!EntitlementsResponse} response
+   * @private
+   */
+  handleEntitlementsResponse_(response) {
+    const jwt = response.getJwt();
+    if (jwt) {
+      this.deps_.entitlementsManager().pushNextEntitlements(jwt);
+      const swgUserToken = response.getSwgUserToken();
+      if (swgUserToken) {
+        this.deps_.storage().set(Constants$1.USER_TOKEN, swgUserToken, true);
+      }
+    }
+  }
+
+  /**
    * Starts the offers flow or alreadySubscribed flow.
    * @return {!Promise}
    */

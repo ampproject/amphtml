@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {Entitlement} from './entitlement';
 import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base';
 import {Messenger} from '../../amp-access/0.1/iframe-api/messenger';
 import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
 import {devAssert, userAssert} from '../../../src/log';
-import {isArray} from '../../../src/types';
+import {isArray} from '../../../src/core/types';
 import {parseJson} from '../../../src/json';
 import {toggle} from '../../../src/style';
 

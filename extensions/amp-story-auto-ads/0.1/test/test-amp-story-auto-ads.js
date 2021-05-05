@@ -23,7 +23,7 @@ import {
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {AmpStory} from '../../../amp-story/1.0/amp-story';
 import {AmpStoryAutoAds, Attributes} from '../amp-story-auto-ads';
-import {CommonSignals} from '../../../../src/common-signals';
+import {CommonSignals} from '../../../../src/core/constants/common-signals';
 import {
   MockStoryImpl,
   addStoryAutoAdsConfig,
@@ -34,6 +34,7 @@ import {Services} from '../../../../src/services';
 import {StoryAdPage} from '../story-ad-page';
 import {macroTask} from '../../../../testing/yield';
 import {registerServiceBuilder} from '../../../../src/service';
+import {toggleExperiment} from '../../../../src/experiments';
 
 const NOOP = () => {};
 
@@ -266,8 +267,10 @@ describes.realWin(
       });
     });
 
-    describe('ad badge', () => {
+    describe('system layer', () => {
       beforeEach(async () => {
+        // TODO(#33969) remove when launched.
+        toggleExperiment(win, 'story-ad-auto-advance', true);
         // Force sync mutateElement.
         env.sandbox.stub(autoAds, 'mutateElement').callsArg(0);
         addStoryAutoAdsConfig(adElement);
@@ -279,33 +282,81 @@ describes.realWin(
         await autoAds.layoutCallback();
       });
 
-      it('should propigate the ad-showing attribute', () => {
-        expect(autoAds.getAdBadgeRoot()).not.to.have.attribute(
-          Attributes.AD_SHOWING
-        );
-        storeService.dispatch(Action.TOGGLE_AD, true);
-        expect(autoAds.getAdBadgeRoot()).to.have.attribute(
-          Attributes.AD_SHOWING
-        );
+      it('should create ad badge', () => {
+        const adBadge = doc.querySelector('.i-amphtml-story-ad-badge');
+        expect(adBadge).to.exist;
       });
 
-      it('should propigate the desktop-panels attribute', () => {
-        expect(autoAds.getAdBadgeRoot()).not.to.have.attribute(
+      it('should create progress bar', () => {
+        const progressBar = doc.querySelector(
+          '.i-amphtml-story-ad-progress-bar'
+        );
+        expect(progressBar).to.exist;
+      });
+
+      it('should propagate the ad-showing attribute to badge & progress bar', () => {
+        const adBadgeContainer = doc.querySelector(
+          '.i-amphtml-ad-overlay-container'
+        );
+        const progressBackground = doc.querySelector(
+          '.i-amphtml-story-ad-progress-background'
+        );
+        expect(adBadgeContainer).not.to.have.attribute(Attributes.AD_SHOWING);
+        expect(progressBackground).not.to.have.attribute(Attributes.AD_SHOWING);
+        storeService.dispatch(Action.TOGGLE_AD, true);
+        expect(adBadgeContainer).to.have.attribute(Attributes.AD_SHOWING);
+        expect(progressBackground).to.have.attribute(Attributes.AD_SHOWING);
+      });
+
+      it('should propagate the desktop-panels attribute to badge & progress bar', () => {
+        const adBadgeContainer = doc.querySelector(
+          '.i-amphtml-ad-overlay-container'
+        );
+        const progressBackground = doc.querySelector(
+          '.i-amphtml-story-ad-progress-background'
+        );
+        expect(adBadgeContainer).not.to.have.attribute(
+          Attributes.DESKTOP_PANELS
+        );
+        expect(progressBackground).not.to.have.attribute(
           Attributes.DESKTOP_PANELS
         );
         storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_PANELS);
-        expect(autoAds.getAdBadgeRoot()).to.have.attribute(
-          Attributes.DESKTOP_PANELS
-        );
+        expect(adBadgeContainer).to.have.attribute(Attributes.DESKTOP_PANELS);
+        expect(progressBackground).to.have.attribute(Attributes.DESKTOP_PANELS);
       });
 
-      it('should propigate the dir=rtl attribute', () => {
-        expect(autoAds.getAdBadgeRoot()).not.to.have.attribute(Attributes.DIR);
-        storeService.dispatch(Action.TOGGLE_RTL, true);
-        expect(autoAds.getAdBadgeRoot()).to.have.attribute(
-          Attributes.DIR,
-          'rtl'
+      it('should propagate the dir=rtl attribute', () => {
+        const adBadgeContainer = doc.querySelector(
+          '.i-amphtml-ad-overlay-container'
         );
+        expect(adBadgeContainer).not.to.have.attribute(Attributes.DIR);
+        storeService.dispatch(Action.TOGGLE_RTL, true);
+        expect(adBadgeContainer).to.have.attribute(Attributes.DIR, 'rtl');
+      });
+
+      it('should propagate the pause state if ad showing', () => {
+        const progressBackground = doc.querySelector(
+          '.i-amphtml-story-ad-progress-background'
+        );
+        storeService.dispatch(Action.TOGGLE_AD, true);
+        expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
+        storeService.dispatch(Action.TOGGLE_PAUSED, true);
+        expect(progressBackground).to.have.attribute(Attributes.PAUSED);
+        storeService.dispatch(Action.TOGGLE_PAUSED, false);
+        expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
+      });
+
+      it('should not propagate the pause state if no ad showing', () => {
+        const progressBackground = doc.querySelector(
+          '.i-amphtml-story-ad-progress-background'
+        );
+        storeService.dispatch(Action.TOGGLE_AD, false);
+        expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
+        storeService.dispatch(Action.TOGGLE_PAUSED, true);
+        expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
+        storeService.dispatch(Action.TOGGLE_PAUSED, false);
+        expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
       });
     });
 

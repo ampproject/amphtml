@@ -16,16 +16,12 @@
 
 import {A4AVariableSource} from './a4a-variable-source';
 import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {Deferred, tryResolve} from '../../../src/utils/promise';
+import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
+import {Deferred, tryResolve} from '../../../src/core/data-structures/promise';
 import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
-import {
-  STICKY_AD_TRANSITION_EXP,
-  divertStickyAdTransition,
-} from '../../../ads/google/a4a/sticky-ad-transition-exp';
 import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {
@@ -34,17 +30,12 @@ import {
   getDefaultBootstrapBaseUrl,
 } from '../../../src/3p-frame';
 import {assertHttpsUrl, tryDecodeUriComponent} from '../../../src/url';
-import {cancellation, isCancellation} from '../../../src/error';
+import {cancellation, isCancellation} from '../../../src/error-reporting';
 import {createElementWithAttributes} from '../../../src/dom';
 import {createSecureDocSkeleton, createSecureFrame} from './secure-frame';
-import {
-  dev,
-  devAssert,
-  duplicateErrorIfNecessary,
-  user,
-  userAssert,
-} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dict} from '../../../src/core/types/object';
+import {duplicateErrorIfNecessary} from '../../../src/core/error';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
@@ -72,13 +63,14 @@ import {
   measureIntersection,
 } from '../../../src/utils/intersection';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {isArray, isEnumValue, isObject} from '../../../src/types';
+import {isArray, isEnumValue, isObject} from '../../../src/core/types';
+
 import {listenOnce} from '../../../src/event-helper';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {padStart} from '../../../src/string';
+import {padStart} from '../../../src/core/types/string';
 import {parseJson} from '../../../src/json';
 import {processHead} from './head-validation';
 import {setStyle} from '../../../src/style';
@@ -162,6 +154,7 @@ export let CreativeMetaDataDef;
 /** @typedef {{
       consentState: (?CONSENT_POLICY_STATE|undefined),
       consentString: (?string|undefined),
+      consentStringType: (?CONSENT_STRING_TYPE|boolean),
       gdprApplies: (?boolean|undefined),
       additionalConsent: (?string|undefined),
     }} */
@@ -302,6 +295,9 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @private {?../../../src/layout-rect.LayoutSizeDef} */
     this.originalSlotSize_ = null;
+
+    /** @private {Promise<!IntersectionObserverEntry>} */
+    this.initialIntersectionPromise_ = null;
 
     /**
      * Note(keithwrightbos) - ensure the default here is null so that ios
@@ -451,6 +447,13 @@ export class AmpA4A extends AMP.BaseElement {
     }
 
     this.isSinglePageStoryAd = this.element.hasAttribute('amp-story');
+
+    const asyncIntersection =
+      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
+      ADS_INITIAL_INTERSECTION_EXP.experiment;
+    this.initialIntersectionPromise_ = asyncIntersection
+      ? measureIntersection(this.element)
+      : Promise.resolve(this.element.getIntersectionChangeEntry());
   }
 
   /** @override */
@@ -783,11 +786,20 @@ export class AmpA4A extends AMP.BaseElement {
         const additionalConsent = consentMetadata
           ? consentMetadata['additionalConsent']
           : consentMetadata;
+        const consentStringType = consentMetadata
+          ? consentMetadata['consentStringType']
+          : consentMetadata;
 
         return /** @type {!Promise<?string>} */ (this.getServeNpaSignal().then(
           (npaSignal) =>
             this.getAdUrl(
-              {consentState, consentString, gdprApplies, additionalConsent},
+              {
+                consentState,
+                consentString,
+                consentStringType,
+                gdprApplies,
+                additionalConsent,
+              },
               this.tryExecuteRealTimeConfig_(
                 consentState,
                 consentString,
@@ -1796,12 +1808,7 @@ export class AmpA4A extends AMP.BaseElement {
       height,
       width
     );
-    divertStickyAdTransition(this.win);
-    if (
-      !this.uiHandler.isStickyAd() ||
-      getExperimentBranch(this.win, STICKY_AD_TRANSITION_EXP.id) !==
-        STICKY_AD_TRANSITION_EXP.experiment
-    ) {
+    if (!this.uiHandler.isStickyAd()) {
       this.applyFillContent(this.iframe);
     }
 
@@ -1890,12 +1897,7 @@ export class AmpA4A extends AMP.BaseElement {
         'title': this.getIframeTitle(),
       })
     ));
-    divertStickyAdTransition(this.win);
-    if (
-      !this.uiHandler.isStickyAd() ||
-      getExperimentBranch(this.win, STICKY_AD_TRANSITION_EXP.id) !==
-        STICKY_AD_TRANSITION_EXP.experiment
-    ) {
+    if (!this.uiHandler.isStickyAd()) {
       this.applyFillContent(this.iframe);
     }
     const fontsArray = [];
@@ -2087,14 +2089,7 @@ export class AmpA4A extends AMP.BaseElement {
       this.sentinel
     );
 
-    const asyncIntersection =
-      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
-      ADS_INITIAL_INTERSECTION_EXP.experiment;
-    const intersectionPromise = asyncIntersection
-      ? measureIntersection(this.element)
-      : Promise.resolve(this.element.getIntersectionChangeEntry());
-
-    return intersectionPromise.then((intersection) => {
+    return this.initialIntersectionPromise_.then((intersection) => {
       contextMetadata['_context'][
         'initialIntersection'
       ] = intersectionEntryToJson(intersection);
@@ -2171,13 +2166,7 @@ export class AmpA4A extends AMP.BaseElement {
         this.getAdditionalContextMetadata(method == XORIGIN_MODE.SAFEFRAME)
       );
 
-      const asyncIntersection =
-        getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
-        ADS_INITIAL_INTERSECTION_EXP.experiment;
-      const intersectionPromise = asyncIntersection
-        ? measureIntersection(this.element)
-        : Promise.resolve(this.element.getIntersectionChangeEntry());
-      return intersectionPromise.then((intersection) => {
+      return this.initialIntersectionPromise_.then((intersection) => {
         contextMetadata['initialIntersection'] = intersectionEntryToJson(
           intersection
         );

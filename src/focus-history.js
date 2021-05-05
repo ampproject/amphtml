@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {Observable} from './observable';
+import {Observable} from './core/data-structures/observable';
 import {Services} from './services';
 import {dev} from './log';
+import {isElement} from './core/types';
 
 /**
  * FocusHistory keeps track of recent focused elements. This history can be
@@ -46,7 +47,7 @@ export class FocusHistory {
      */
     this.captureFocus_ = (e) => {
       // Hack (#15079) due to Firefox firing focus events on the entire page
-      if (e.target && e.target.nodeType == 1) {
+      if (isElement(e.target)) {
         this.pushFocus_(dev().assertElement(e.target));
       }
     };

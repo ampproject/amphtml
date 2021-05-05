@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamToUrl, addParamsToUrl} from '../../../src/url';
@@ -26,7 +27,7 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   dispatchCustomEvent,
   fullscreenEnter,
@@ -100,6 +101,9 @@ class AmpBrightcove extends AMP.BaseElement {
 
     /**@private {?string} */
     this.consentString_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /** @override */
@@ -135,20 +139,10 @@ class AmpBrightcove extends AMP.BaseElement {
       },
       3000
     ));
-
-    if (this.element.hasAttribute('dock')) {
-      this.mutateElement(() => {
-        user().warn(
-          TAG,
-          '`dock` has been disabled on this element. See https://go.amp.dev/issue/32706 for more information.'
-        );
-        this.element.removeAttribute('dock');
-      });
-    }
   }
 
   /**
-   * @return {Promise[]}
+   * @return {Promise}
    */
   getConsents_() {
     const consentPolicy = super.getConsentPolicy();
@@ -238,15 +232,19 @@ class AmpBrightcove extends AMP.BaseElement {
       return;
     }
 
-    if (eventType === 'ready') {
-      this.onReady_(data);
-    }
-
-    if (eventType === 'playing') {
-      this.playing_ = true;
-    }
-    if (eventType === 'pause') {
-      this.playing_ = false;
+    switch (eventType) {
+      case 'ready':
+        this.onReady_(data);
+        break;
+      case 'playing':
+        this.playing_ = true;
+        this.pauseHelper_.updatePlaying(true);
+        break;
+      case 'pause':
+      case 'ended':
+        this.playing_ = false;
+        this.pauseHelper_.updatePlaying(false);
+        break;
     }
 
     if (data['ct']) {
@@ -334,11 +332,12 @@ class AmpBrightcove extends AMP.BaseElement {
       `https://players.brightcove.net/${encodeURIComponent(account)}` +
       `/${encodeURIComponent(this.playerId_)}` +
       `_${encodeURIComponent(embed)}/index.html` +
+      '?amp=1&autoplay=false' +
       // These are encodeURIComponent'd in encodeId_().
       (el.getAttribute('data-playlist-id')
-        ? '?playlistId=' + this.encodeId_(el.getAttribute('data-playlist-id'))
+        ? '&playlistId=' + this.encodeId_(el.getAttribute('data-playlist-id'))
         : el.getAttribute('data-video-id')
-        ? '?videoId=' + this.encodeId_(el.getAttribute('data-video-id'))
+        ? '&videoId=' + this.encodeId_(el.getAttribute('data-video-id'))
         : '');
 
     const customReferrer = el.getAttribute('data-referrer');
@@ -440,6 +439,8 @@ class AmpBrightcove extends AMP.BaseElement {
 
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
+
+    this.pauseHelper_.updatePlaying(false);
 
     return true; // Call layoutCallback again.
   }

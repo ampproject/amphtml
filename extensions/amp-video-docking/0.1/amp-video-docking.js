@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {CSS} from '../../../build/amp-video-docking-0.1.css';
 import {Controls} from './controls';
 import {DirectionX, DirectionY, FLOAT_TOLERANCE, RectDef} from './def';
@@ -41,14 +41,14 @@ import {
 import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
 import {createViewportRect} from './viewport-rect';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {dict} from '../../../src/core/types/object';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {getInternalVideoElementFor} from '../../../src/utils/video';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isRTL, removeElement, scopedQuerySelector} from '../../../src/dom';
 import {layoutRectEquals, rectIntersection} from '../../../src/layout-rect';
-import {once} from '../../../src/utils/function';
+import {once} from '../../../src/core/types/function';
 import {
   px,
   resetStyles,

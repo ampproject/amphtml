@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {forwardRef} from '../../../src/preact/compat';
 import {mod} from '../../../src/utils/math';
 import {tryFocus} from '../../../src/dom';
@@ -49,7 +49,7 @@ export const KEYBOARD_SELECT_MODE = {
 
 /**
  * @param {!SelectorDef.Props} props
- * @param {{current: (!SelectorDef.SelectorApi|null)}} ref
+ * @param {{current: ?SelectorDef.SelectorApi}} ref
  * @return {PreactDef.Renderable}
  */
 function SelectorWithRef(

@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {ContainWrapper, useValueRef} from '../../../src/preact/component';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {forwardRef} from '../../../src/preact/compat';
 import {setStyle} from '../../../src/style';
 import {tryFocus} from '../../../src/dom';
@@ -50,7 +50,7 @@ const CONTENT_PROPS = {'part': 'scroller'};
 
 /**
  * @param {!LightboxDef.Props} props
- * @param {{current: (!LightboxDef.LightboxApi|null)}} ref
+ * @param {{current: ?LightboxDef.LightboxApi}} ref
  * @return {PreactDef.Renderable}
  */
 function LightboxWithRef(

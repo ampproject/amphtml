@@ -16,12 +16,11 @@
 
 import * as Preact from '../../../../src/preact';
 import {boolean, select, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
   title: 'amp-lightbox-1_0',
-  decorators: [withKnobs, withA11y, withAmp],
+  decorators: [withKnobs, withAmp],
 
   parameters: {
     extensions: [{name: 'amp-lightbox', version: '1.0'}],
@@ -47,9 +46,7 @@ export const Default = () => {
       <div style="height: 300px;">
         <amp-lightbox id="lightbox" layout="nodisplay" animation={animation}>
           <p>Test</p>
-          <button slot="close-button" on="tap:lightbox.close">
-            Close
-          </button>
+          <button slot="close-button">Close</button>
         </amp-lightbox>
         <div class="buttons">
           <button on="tap:lightbox">Open</button>
@@ -340,6 +337,4 @@ export const overflowAuto = () => {
   );
 };
 
-Default.story = {
-  name: 'Default',
-};
+Default.storyName = 'Default';

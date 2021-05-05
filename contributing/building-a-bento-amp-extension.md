@@ -52,6 +52,8 @@ To bootstrap the creation of a new component (or the Bento version of an existin
 $ amp make-extension --bento --name=amp-my-element
 ```
 
+This generates CSS used by the AMP element `<amp-my-element>`, and JSS used by the Preact component `<MyElement>`. To exclude either, you may additionally specify `--nocss` and/or `--nojss`.
+
 ## Naming
 
 All Bento AMP component extensions have their tag names prefixed with `amp-`.
@@ -66,7 +68,7 @@ The directory structure is below:
 
 ```sh
 /extensions/amp-my-element/
-├── 0.1/
+├── 1.0/
 |   ├── storybook/                       # Element's manual sample playground (req'd)
 |   |   ├── Basic.js                     # Preact usage examples
 |   |   ├── Basic.amp.js                 # AMP usage examples
@@ -90,7 +92,7 @@ In most cases you'll only create the required (req'd) files. If your element doe
 
 ## Extend AMP.PreactBaseElement
 
-Most AMP component extend `AMP.BaseElement`. `AMP.BaseElement` provides hookups and callbacks needed to implement and customize behavior. Callback explanations are in the BaseElement Callbacks section of [Building an AMP Extension](https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md), and inlined in the [BaseElement](https://github.com/ampproject/amphtml/blob/master/src/base-element.js)
+Most AMP component extend `AMP.BaseElement`. `AMP.BaseElement` provides hookups and callbacks needed to implement and customize behavior. Callback explanations are in the BaseElement Callbacks section of [Building an AMP Extension](https://github.com/ampproject/amphtml/blob/main/contributing/building-an-amp-extension.md), and inlined in the [BaseElement](https://github.com/ampproject/amphtml/blob/main/src/base-element.js)
 class.
 
 Important: Bento-enabled AMP components built upon a Preact component must also be usable in insolation in React development contexts.
@@ -100,7 +102,7 @@ All Preact-based Bento AMP extensions extend `AMP.PreactBaseElement`, which buil
 callbacks. Bento AMP extensions differ from AMP extensions because they are self-managing and independent, and therefore usable in a wider range of contexts beyond AMP pages, while still being fully integrated with the AMP environment
 in a fully AMP document.
 
-The configurations which bridge the Preact implementation of the component and its custom element counterpart in an HTML or AMP document are explained in the [AMP/Preact Bridge](#amppreact-bridge) section, and the callbacks which handle AMP- and DOM- specific mutability traits are explained in the [PreactBaseElement Callbacks](#preactbaseelement-callbacks) section. All of these are also explained inline in the [PreactBaseElement](https://github.com/ampproject/amphtml/blob/master/src/preact/base-element.js) class.
+The configurations which bridge the Preact implementation of the component and its custom element counterpart in an HTML or AMP document are explained in the [AMP/Preact Bridge](#amppreact-bridge) section, and the callbacks which handle AMP- and DOM- specific mutability traits are explained in the [PreactBaseElement Callbacks](#preactbaseelement-callbacks) section. All of these are also explained inline in the [PreactBaseElement](https://github.com/ampproject/amphtml/blob/main/src/preact/base-element.js) class.
 
 ### Element and Component classes
 
@@ -337,7 +339,7 @@ AmpMyElement['shadowCss'] = CSS;
 ## Actions and events
 
 AMP provides a framework for [elements to fire their own
-events](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md)
+events](https://github.com/ampproject/amphtml/blob/main/spec/amp-actions-and-events.md)
 to allow users of that element to listen and react to the events. For
 example, the `amp-base-carousel` extension fires a `slideChange` event.
 This allow publishers to listen to that event and react to it, for example, by updating an `amp-selector` state to match the current slide shown.
@@ -380,13 +382,13 @@ this.registerApiAction('close', (api) => api.close());
 
 Your element can choose to override the default `activate` method inherited from BaseElement. For example `amp-lightbox` overrides `activate` to define the `open` default case.
 
-You must document your element's actions and events in its own reference documentation and in [`AMP Actions and Events`](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md).
+You must document your element's actions and events in its own reference documentation and in [`AMP Actions and Events`](https://github.com/ampproject/amphtml/blob/main/spec/amp-actions-and-events.md).
 
 ## Allowing proper validation
 
-One of AMP's features is documentation validation checks to confirm it's valid AMP. When you implement your element, you must update the [AMP Validator](https://github.com/ampproject/amphtml/blob/master/validator/README.md)
+One of AMP's features is documentation validation checks to confirm it's valid AMP. When you implement your element, you must update the [AMP Validator](https://github.com/ampproject/amphtml/blob/main/validator/README.md)
 to include rules for your element. Otherwise documents using your extended component become invalid. Create your own rules by following the directions at
-[Contributing Component Validator Rules](https://github.com/ampproject/amphtml/blob/master/contributing/component-validator-rules.md).
+[Contributing Component Validator Rules](https://github.com/ampproject/amphtml/blob/main/contributing/component-validator-rules.md).
 
 ## Performance considerations
 
@@ -397,7 +399,7 @@ You may need to add third party integration for extended components that need to
 extension PR for examples of third party integration.
 
 Read about [Inclusion of third party software, embeds and services into
-AMP](https://github.com/ampproject/amphtml/blob/master/3p/README.md).
+AMP](https://github.com/ampproject/amphtml/blob/main/3p/README.md).
 
 For contrast, take a look at `amp-instagram` which does NOT require an SDK to embed a post. Instead, it provides an iframe-based embedding that allows `amp-instagram` to use a normal iframe with no third party integrations. `amp-youtube` and others work similarly.
 
@@ -407,9 +409,9 @@ AMP defines different layouts that elements can choose whether or not to
 support. Your element needs to announce which layouts it supports through
 overriding the `isLayoutSupported(layout)` callback and returning true
 if the element supports that layout. [Read more about AMP Layout
-System](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md)
+System](https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md)
 and [Layout
-Types](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#layout).
+Types](https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md#layout).
 
 ### What layout should your element support?
 
@@ -451,7 +453,7 @@ AmpBaseCarousel['layoutSizeDefined'] = true;
 ## Experiments
 
 Most newly created elements are initially launched as
-[experiments](https://github.com/ampproject/amphtml/blob/master/tools/experiments/README.md).
+[experiments](https://github.com/ampproject/amphtml/blob/main/tools/experiments/README.md).
 This allows people to experiment with using the new element and provide
 the author(s) with feedback. It also provides the AMP Team with the
 opportunity to monitor for any potential errors. This is especially required if the validator isn't updated with your extended component rules. Without your rules in the validator, documents using the component in production are invalid.
@@ -468,7 +470,7 @@ const EXPERIMENTS = [
     id: 'bento-my-element',
     name: 'AMP My Element',
     spec:
-      'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+      'https://github.com/ampproject/amphtml/blob/main/extensions/' +
       'amp-my-element/amp-my-element.md',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/XXXYYY',
   },
@@ -524,7 +526,7 @@ Create a `.md` file that serves as the main documentation for your element. This
 -   Attributes to specify (optional and required)
 -   Validation
 
-For samples of element documentation, see: [`amp-accordion`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-accordion/amp-accordion.md), [`amp-instagram`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md), [`amp-stream-gallery`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
+For samples of element documentation, see: [`amp-accordion`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-accordion/amp-accordion.md), [`amp-instagram`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-instagram/amp-instagram.md), [`amp-stream-gallery`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-stream-gallery/amp-stream-gallery.md)
 
 You must add a migration notes section for upgrades of existing AMP extended component. It should detail any differences between the new Bento and prior versions. For an example, reference the issue filed for [`amp-fit-text`](https://github.com/ampproject/amphtml/issues/28281).
 
@@ -614,7 +616,7 @@ to only run your extensions' tests.
 $ amp unit --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
 ```
 
-Please also reference [Testing in AMP HTML](https://github.com/ampproject/amphtml/blob/master/contributing/TESTING.md) for the full range of testing commands available.
+Please also reference [Testing in AMP HTML](https://github.com/ampproject/amphtml/blob/main/contributing/TESTING.md) for the full range of testing commands available.
 
 ## Linting and formatting
 
@@ -668,8 +670,9 @@ $ amp check-types
     -   [amp-timeago](https://github.com/ampproject/amphtml/pull/26507)
     -   [amp-base-carousel](https://github.com/ampproject/amphtml/pull/29303)
     -   [amp-stream-gallery](https://github.com/ampproject/amphtml/pull/30597)
--   Adding video components which use `VideoWrapper`
+-   Adding video components which use `VideoWrapper`. [You may also follow the guide to Building a Bento Video Component.](./building-a-bento-video-player.md)
     -   [amp-video](https://github.com/ampproject/amphtml/pull/30280)
+    -   [amp-vimeo](https://github.com/ampproject/amphtml/pull/33971)
     -   [amp-youtube](https://github.com/ampproject/amphtml/pull/30444)
 -   Adding iframe based embeds
     -   [amp-instagram](https://github.com/ampproject/amphtml/pull/30230)

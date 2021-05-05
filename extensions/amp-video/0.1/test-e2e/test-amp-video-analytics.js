@@ -46,9 +46,9 @@ describes.endtoend(
       await expect(isPaused(videoElem1)).to.be.false;
       await expect(isPaused(videoElem2)).to.be.true;
 
-      // Sleep 5 seconds for the `video-percentage-played` event trigger
+      // Sleep 1 second for the `video-percentage-played` event trigger
       // and the request to be sent
-      await sleep(5000);
+      await sleep(1000);
       await expect(
         'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking&id=myVideo'
       ).to.have.been.sent;
@@ -57,9 +57,9 @@ describes.endtoend(
       await controller.click(playBtn2);
       await expect(isPaused(videoElem1)).to.be.true;
       await expect(isPaused(videoElem2)).to.be.false;
-      // Sleep 5 seconds for the `video-percentage-played` event trigger
+      // Sleep 1 second for the `video-percentage-played` event trigger
       // and the request to be sent
-      await sleep(5000);
+      await sleep(1000);
       await expect(
         'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking&id=myVideo2'
       ).to.have.been.sent;

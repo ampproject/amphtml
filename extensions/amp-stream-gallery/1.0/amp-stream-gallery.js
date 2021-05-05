@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/base-carousel.jss';
 import {CSS} from '../../../build/amp-stream-gallery-1.0.css';
 import {CSS as GALLERY_CSS} from './stream-gallery.jss';
@@ -22,7 +22,7 @@ import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {StreamGallery} from './stream-gallery';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {dispatchCustomEvent} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
@@ -97,13 +97,15 @@ AmpStreamGallery['layoutSizeDefined'] = true;
 
 /** @override */
 AmpStreamGallery['props'] = {
-  'arrowPrev': {
+  'arrowPrevAs': {
     selector: '[slot="prev-arrow"]',
     single: true,
+    as: true,
   },
-  'arrowNext': {
+  'arrowNextAs': {
     selector: '[slot="next-arrow"]',
     single: true,
+    as: true,
   },
   'controls': {attr: 'controls', type: 'string', media: true},
   'extraSpace': {attr: 'extra-space', type: 'string', media: true},

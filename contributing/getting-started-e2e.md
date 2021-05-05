@@ -112,7 +112,7 @@ If you are new to Git it may seem surprising that there are three different repo
 
 Note that each of these repositories has a complete copy of the entire amphtml codebase. If your local repository is on your computer and you lose your internet connection you'll still be able to make changes to any file in your local repository. Part of the workflow for Git that we'll go through is how you keep these three repositories in sync.
 
-One thing that might put your mind at ease: if you aren't in a [role](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#roles) that lets you make changes to the amphtml repository directly any changes you make will only affect you. So go ahead and try out different Git commands without worrying you're going to break things for other people!
+One thing that might put your mind at ease: if you aren't in a [role](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md#roles) that lets you make changes to the amphtml repository directly any changes you make will only affect you. So go ahead and try out different Git commands without worrying you're going to break things for other people!
 
 ## Creating your GitHub fork and your local repository
 
@@ -162,11 +162,11 @@ git remote add upstream git@github.com:ampproject/amphtml.git
 
 Now run `git remote -v` again and notice that you have set up your upstream alias.
 
-Each branch of your local Git repository can track a branch of a remote repository. Right now, your local `master` branch is tracking `origin/master`, which corresponds to the `master` branch of your GitHub fork. You don't actually want this, though; the upstream `master` branch is constantly being updated, and your fork's `master` branch will rapidly become outdated. Instead, it's best to make your local `master` branch track the upstream `master` branch. You can do this like so:
+Each branch of your local Git repository can track a branch of a remote repository. Right now, your local `main` branch is tracking `origin/main`, which corresponds to the `main` branch of your GitHub fork. You don't actually want this, though; the upstream `main` branch is constantly being updated, and your fork's `main` branch will rapidly become outdated. Instead, it's best to make your local `main` branch track the upstream `main` branch. You can do this like so:
 
 ```sh
-git fetch upstream master
-git branch -u upstream/master master
+git fetch upstream main
+git branch -u upstream/main main
 ```
 
 # Building AMP and starting a local server
@@ -233,17 +233,17 @@ You may have noticed that the files in your local repository are editable which 
 
 Branches let you work on multiple different things in your repository in parallel. For example you can have one branch where you're fixing a bug, another branch where you're implementing a new feature and yet another branch where you're just doing some exploratory work. These branches co-exist in the same repository so there's no need to go through the forking and cloning steps described earlier every time you want to make a change.
 
-By default you'll have a branch named _master_. You can see this if you run the command `git branch` which lists the branches in your local repository.
+By default you'll have a branch named _main_. You can see this if you run the command `git branch` which lists the branches in your local repository.
 
-Although you could do work on the master branch, most people choose to leave the master branch unchanged and create other branches to actually do work in. Creating a branch is easy; simply run:
+Although you could do work on the main branch, most people choose to leave the main branch unchanged and create other branches to actually do work in. Creating a branch is easy; simply run:
 
 ```sh
-git checkout -b <branch_name> master
+git checkout -b <branch_name> main
 ```
 
-This will move you to the new branch, which uses `master` as its start point, meaning that it will start out containing the same files as `master`. You can then start working in the new branch.
+This will move you to the new branch, which uses `main` as its start point, meaning that it will start out containing the same files as `main`. You can then start working in the new branch.
 
-(You can use a different branch as a start point, like if you want to make one branch based on another. Generally, though, you want `master` as your start point. If you omit the start point, Git will use whichever branch you're currently on.)
+(You can use a different branch as a start point, like if you want to make one branch based on another. Generally, though, you want `main` as your start point. If you omit the start point, Git will use whichever branch you're currently on.)
 
 Whenever you want to move to a different branch, run the checkout command:
 
@@ -263,11 +263,11 @@ Note that currently the branch you just created only exists in your local reposi
 
 Since your local repository is just a copy of the amphtml repository it can quickly become out of date if other people make changes to the amphtml repository. Before you start making changes you'll want to make sure you have the latest version of the code; you'll also want to do this periodically during development, before sending your code for review, etc.
 
-In the workflow we will be using you'll go to the master branch on your local repository and pull the latest changes in from the remote amphtml repository's master branch. (Remember that you set up the alias _upstream_ to refer to the remote amphtml repository, and you set your local `master` branch to track `upstream/master`.)
+In the workflow we will be using you'll go to the main branch on your local repository and pull the latest changes in from the remote amphtml repository's main branch. (Remember that you set up the alias _upstream_ to refer to the remote amphtml repository, and you set your local `main` branch to track `upstream/main`.)
 
 ```sh
-# make sure you are in your local repo's master branch
-git checkout master
+# make sure you are in your local repo's main branch
+git checkout main
 
 # pull in the latest changes from the remote amphtml repository
 git pull
@@ -275,17 +275,17 @@ git pull
 
 If there have been any changes you'll see the details of what changed, otherwise you'll see a message like `Already up-to-date`.
 
-After running that `git pull` command your local master branch has the latest files, but your other local branches won't get automatically updated. To get a local branch in sync:
+After running that `git pull` command your local main branch has the latest files, but your other local branches won't get automatically updated. To get a local branch in sync:
 
 ```sh
 # go to the branch you want to sync
 git checkout <branch name>
 
-# bring the latest changes from your master branch into this branch
-git merge master
+# bring the latest changes from your main branch into this branch
+git merge main
 ```
 
-Since you just ran the `git pull` in your master branch it has the latest changes from the remote amphtml repository so running `git merge master` in your other branch effectively brings the latest changes from the remote amphtml repository to this other branch.
+Since you just ran the `git pull` in your main branch it has the latest changes from the remote amphtml repository so running `git merge main` in your other branch effectively brings the latest changes from the remote amphtml repository to this other branch.
 
 If there are changes that conflict with changes on your branch (e.g. someone modified a file that you're working on) you'll be prompted to resolve them at this point.
 
@@ -338,7 +338,7 @@ Since you're done with changes to that file, go ahead and create a commit:
 git commit -m "<a brief description of your commit>"
 ```
 
-Now run `git status` again, and you'll see the message `nothing to commit` and `your branch is ahead of 'origin/master' by 1 commit`.
+Now run `git status` again, and you'll see the message `nothing to commit` and `your branch is ahead of 'origin/main' by 1 commit`.
 
 Note that you can optionally skip using `git add` commands and just use the `git commit -a` flag to say "add all of the modified/deleted files to this commit," e.g.
 
@@ -456,7 +456,7 @@ For more help, see [How to get help](#how-to-get-help).
 
 # Perform manual tests
 
-Beyond technical/automated tests, manually test your changes and make sure that they work as expected, and that they follow AMP's [design principles](https://github.com/ampproject/amphtml/blob/master/contributing/DESIGN_PRINCIPLES.md). In particular, make sure that your changes are accessible - see [W3C WAI Easy Checks](https://www.w3.org/WAI/test-evaluate/preliminary/) for an initial set of suggested manual tests. Some aspects of manual testing can be semi-automated, using tools such as [Lighthouse](https://developers.google.com/web/tools/lighthouse) (which includes an accessibility audit report) and [Microsoft's Accessibility Insights](https://accessibilityinsights.io/).
+Beyond technical/automated tests, manually test your changes and make sure that they work as expected, and that they follow AMP's [design principles](https://github.com/ampproject/amphtml/blob/main/contributing/DESIGN_PRINCIPLES.md). In particular, make sure that your changes are accessible - see [W3C WAI Easy Checks](https://www.w3.org/WAI/test-evaluate/preliminary/) for an initial set of suggested manual tests. Some aspects of manual testing can be semi-automated, using tools such as [Lighthouse](https://developers.google.com/web/tools/lighthouse) (which includes an accessibility audit report) and [Microsoft's Accessibility Insights](https://accessibilityinsights.io/).
 
 Note that for more extensive automated accessibility testing, there are further options available that integrate directly within existing test/integration workflows, such as [Deque's axe-core](https://github.com/dequelabs/axe-core).
 
@@ -467,10 +467,10 @@ Up to this point you've been making changes in a branch on your local repository
 Before pushing your changes, make sure you have the latest changes in the amphtml repository on your branch by running the commands we described above:
 
 ```sh
-git checkout master
+git checkout main
 git pull
 git checkout <branch name>
-git merge master
+git merge main
 ```
 
 Now push your changes to `origin` (the alias for your GitHub fork):
@@ -507,7 +507,7 @@ Note that you _can_ edit files in your branch directly on GitHub using the web U
 
 # Send a Pull Request (i.e. request a code review)
 
-In order for your changes to become part of the amphtml repository, you will need to get your [code reviewed](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#code-review-and-approval) via a Pull Request (PR). In fact you won't actually merge your code into the amphtml repository directly; after your code has been reviewed [someone with the permission to modify the amphtml repository](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#roles) will handle the merge for you.
+In order for your changes to become part of the amphtml repository, you will need to get your [code reviewed](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md#code-review-and-approval) via a Pull Request (PR). In fact you won't actually merge your code into the amphtml repository directly; after your code has been reviewed [someone with the permission to modify the amphtml repository](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md#roles) will handle the merge for you.
 
 Once your code is ready for a review, go to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and click on the "Compare & pull request" button on the "recently pushed branches" banner. If that banner isn't visible, go to your GitHub fork at
 `https://github.com/<username>/amphtml`, use the Branch dropdown to select the branch that contains the changes you want reviewed and press the "New pull request" button.
@@ -515,18 +515,18 @@ Once your code is ready for a review, go to [https://github.com/ampproject/ampht
 On the "Open a pull request" page, you will see dropdowns at the top indicating the proposed merge. It will look something like:
 
 ```sh
-amproject/amphtml / master … <username>/amphtml / <branch name>
+amproject/amphtml / main … <username>/amphtml / <branch name>
 ```
 
 Below this are text boxes where you can provide a title and description for your pull request. Please follow the guidelines in the template for providing a good title and description.
 
 In your PR description or comments refer to any GitHub issues that your PR is addressing. This will let people reviewing your PR know what issue your change is addressing and let anyone watching the issue know that there's a PR for it. You can do this by including the text `issue #<your issue number>` in the description/comment. If your PR completely fixes the issue, make this `fixes #<your issue number>` instead, which will also cause the issue to be closed once your PR is merged.
 
-You will need to find a [Reviewer and Owner](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#code-review-and-approval) to review your code and approve it. When you find someone to review your code, cc them on the Pull Request (by adding a line "/cc @username", e.g. "/cc @mrjoro").
+You will need to find a [Reviewer and Owner](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md#code-review-and-approval) to review your code and approve it. When you find someone to review your code, cc them on the Pull Request (by adding a line "/cc @username", e.g. "/cc @mrjoro").
 
-When you're new to contributing to AMP it can be tricky to figure out who should review your code. In general if you've been working with someone in the community on your change, they can likely review your code or know who can review it. The [people who previously changed the files you're changing](https://help.github.com/en/articles/tracking-changes-in-a-file) are also good candidates for reviewing your change. If you aren't sure who to ask to review your code, the steps for [finding a guide](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#find-a-guide) can also work for finding a reviewer for your change.
+When you're new to contributing to AMP it can be tricky to figure out who should review your code. In general if you've been working with someone in the community on your change, they can likely review your code or know who can review it. The [people who previously changed the files you're changing](https://help.github.com/en/articles/tracking-changes-in-a-file) are also good candidates for reviewing your change. If you aren't sure who to ask to review your code, the steps for [finding a guide](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md#find-a-guide) can also work for finding a reviewer for your change.
 
-When you're done click "Create pull request." This will bring you to your Pull Request page where you can track progress, add comments, etc.
+This is a good time to make sure that you've signed in to the services used to validate `amphtml` pull requests. See the one-time setup instructions [here](https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-quick.md#one-time-setup). When you're done, click "Create pull request." This will bring you to your Pull Request page where you can track progress, add comments, etc.
 
 On the Pull Request page you can see that a few checks are running:
 
@@ -561,8 +561,8 @@ Creating, deleting and moving between branches in Git is cheap. Reusing branches
 GitHub offers a convenient "Delete branch" button on the PR page after the changes in your branch have been merged into the amphtml repository. You can click this button to delete your branch in the GitHub fork if you prefer, but you will also want to delete the branch in your local repository:
 
 ```sh
-# go back to the master branch
-git checkout master
+# go back to the main branch
+git checkout main
 
 # delete the branch in your local repository
 git branch -D <branch name>
@@ -599,7 +599,7 @@ If you're looking for ideas on your next contribution feel free to reach out to 
 
 This end-to-end guide provided enough details to get a basic understanding of a typical workflow for contributing code to the AMP open source project. If you find yourself wanting to know more there are a lot of resources available. Here are a few:
 
--   The ["Building an AMP Extension" guide](https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md) provides step-by-step instructions for a common type of code contribution to AMP. Even if your project involves modifying an existing AMP component, this guide will give you an overview of how AMP components work.
+-   The ["Building an AMP Extension" guide](https://github.com/ampproject/amphtml/blob/main/contributing/building-an-amp-extension.md) provides step-by-step instructions for a common type of code contribution to AMP. Even if your project involves modifying an existing AMP component, this guide will give you an overview of how AMP components work.
 -   GitHub has a lot of helpful introductory material, including:
     -   a [Hello World tutorial](https://guides.github.com/activities/hello-world/) that's a bit less in depth than this guide, but it covers things like creating a new repository and merging in code after a pull request
     -   the [Git cheat sheet](https://services.github.com/on-demand/downloads/github-git-cheat-sheet.pdf) from GitHub provides a quick reference to some common commands, including many we didn't cover in this guide (such as [diff](https://www.git-tower.com/learn/git/ebook/en/command-line/advanced-topics/diffs) and [log](https://git-scm.com/book/en/v2/Git-Basics-Viewing-the-Commit-History))

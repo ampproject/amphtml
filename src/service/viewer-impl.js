@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-import {Deferred, tryResolve} from '../utils/promise';
-import {Observable} from '../observable';
+import {Deferred, tryResolve} from '../core/data-structures/promise';
+import {Observable} from '../core/data-structures/observable';
 import {Services} from '../services';
-import {VisibilityState} from '../visibility-state';
-import {
-  dev,
-  devAssert,
-  duplicateErrorIfNecessary,
-  stripUserError,
-} from '../log';
-import {endsWith} from '../string';
-import {findIndex} from '../utils/array';
+import {VisibilityState} from '../core/constants/visibility-state';
+import {dev, devAssert, stripUserError} from '../log';
+import {duplicateErrorIfNecessary} from '../core/error';
+import {endsWith} from '../core/types/string';
+import {findIndex} from '../core/types/array';
 import {
   getSourceOrigin,
   isProxyOrigin,
@@ -36,9 +32,9 @@ import {
 } from '../url';
 import {isIframed} from '../dom';
 import {listen} from '../event-helper';
-import {map} from '../utils/object';
+import {map} from '../core/types/object';
 import {registerServiceBuilderForDoc} from '../service';
-import {reportError} from '../error';
+import {reportError} from '../error-reporting';
 import {urls} from '../config';
 
 import {ViewerInterface} from './viewer-interface';
@@ -260,8 +256,8 @@ export class ViewerImpl {
       if (newUrl != this.win.location.href && this.win.history.replaceState) {
         // Persist the hash that we removed has location.originalHash.
         // This is currently used by mode.js to infer development mode.
-        if (!this.win.location.originalHash) {
-          this.win.location.originalHash = this.win.location.hash;
+        if (!this.win.location['originalHash']) {
+          this.win.location['originalHash'] = this.win.location.hash;
         }
         this.win.history.replaceState({}, '', newUrl);
         delete this.hashParams_['click'];
@@ -890,7 +886,7 @@ export class ViewerImpl {
         getSourceOrigin(url) == getSourceOrigin(replaceUrl)
       ) {
         this.win.history.replaceState({}, '', replaceUrl.href);
-        this.win.location.originalHref = url.href;
+        this.win.location['originalHref'] = url.href;
         dev().fine(TAG_, 'replace url:' + replaceUrl.href);
       }
     } catch (e) {

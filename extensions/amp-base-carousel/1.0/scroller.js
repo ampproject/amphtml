@@ -22,7 +22,7 @@ import {
   scrollContainerToElement,
 } from './dimensions';
 import {LightboxGalleryContext} from '../../amp-lightbox-gallery/1.0/context';
-import {debounce} from '../../../src/utils/rate-limit';
+import {debounce} from '../../../src/core/types/function';
 import {forwardRef} from '../../../src/preact/compat';
 import {mod} from '../../../src/utils/math';
 import {setStyle} from '../../../src/style';
@@ -49,7 +49,7 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
 
 /**
  * @param {!BaseCarouselDef.ScrollerProps} props
- * @param {{current: (T|null)}} ref
+ * @param {{current: ?T}} ref
  * @return {PreactDef.Renderable}
  * @template T
  */
@@ -57,7 +57,6 @@ function ScrollerWithRef(
   {
     advanceCount,
     alignment,
-    autoAdvanceCount,
     axis,
     children,
     lightbox,
@@ -268,11 +267,6 @@ function ScrollerWithRef(
     debouncedResetScrollReferencePoint();
   };
 
-  const incrementCount = Math.max(advanceCount, autoAdvanceCount);
-  const needMoreSlidesToScroll =
-    loop &&
-    incrementCount > 1 &&
-    children.length - pivotIndex - visibleCount < incrementCount;
   return (
     <div
       ref={containerRef}
@@ -284,7 +278,6 @@ function ScrollerWithRef(
       {...rest}
     >
       {slides}
-      {needMoreSlidesToScroll && slides}
     </div>
   );
 }

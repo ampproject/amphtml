@@ -20,8 +20,8 @@ import {LayoutPriority} from '../../src/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {ResourcesImpl} from '../../src/service/resources-impl';
 import {Services} from '../../src/services';
-import {Signals} from '../../src/utils/signals';
-import {VisibilityState} from '../../src/visibility-state';
+import {Signals} from '../../src/core/data-structures/signals';
+import {VisibilityState} from '../../src/core/constants/visibility-state';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 
@@ -76,7 +76,7 @@ describes.realWin('Resources', {amp: true}, (env) => {
     };
 
     const element = document.createElement('amp-el');
-    element.V1 = () => false;
+    element.R1 = () => false;
     element.isBuilt = () => isBuilt;
     element.isBuilding = () => isBuilding;
     element.pause = () => {};
@@ -619,7 +619,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
   function createElement(rect) {
     const element = env.win.document.createElement('amp-test');
     element.classList.add('i-amphtml-element');
-    element.V1 = () => false;
+    element.R1 = () => false;
     element.signals = () => new Signals();
     element.whenBuilt = () => Promise.resolve();
     element.isBuilt = () => true;

@@ -807,6 +807,7 @@ const adConfig = jsonConfiguration({
       'https://www.myfinance.com',
     ],
     renderStartImplemented: true,
+    clientIdScope: 'AMP_ECID_GOOGLE',
   },
 
   'myoffrz': {
@@ -982,6 +983,11 @@ const adConfig = jsonConfiguration({
   },
 
   'rbinfox': {
+    renderStartImplemented: true,
+  },
+
+  'rcmwidget': {
+    prefetch: 'https://rcmjs.rambler.ru/static/rcmw/rcmw-amp.js',
     renderStartImplemented: true,
   },
 

@@ -590,6 +590,7 @@ descendant_tag_list: {
   tag: "ADDRESS"
   tag: "AMP-CALL-TRACKING"
   tag: "AMP-DATE-COUNTDOWN"
+  tag: "AMP-DATE-DISPLAY"
   tag: "AMP-FIT-TEXT"
   tag: "AMP-FONT"
   tag: "AMP-IMG"
@@ -703,6 +704,7 @@ descendant_tag_list: {
   tag: "AMP-ANALYTICS"
   tag: "AMP-AUDIO"
   tag: "AMP-DATE-COUNTDOWN"
+  tag: "AMP-DATE-DISPLAY"
   tag: "AMP-EXPERIMENT"
   tag: "AMP-FIT-TEXT"
   tag: "AMP-FONT"
@@ -853,12 +855,34 @@ tags: {  # <amp-story-page-attachment> with href
   }
   attrs: {
     name: "theme"
+    value: "custom"
     value: "dark"
     value: "light"
   }
   attrs: {
+    name: "cta-text"
+  }
+  attrs: {
+    name: "title"
+  }
+  attrs: {
+    name: "cta-accent-color"
+  }
+  attrs: {
+    name: "cta-accent-element"
+    value: "background"
+    value: "text"
+  }
+  attrs: {
     name: "href"
     mandatory: true
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "cta-image"
     value_url: {
       protocol: "http"
       protocol: "https"
@@ -876,19 +900,23 @@ tags: {  # <amp-story-page-attachment> with no href
   descendant_tag_list: "amp-story-page-attachment-allowed-descendants"
   mandatory_last_child: true
   attrs: {
+    name: "cta-text"
+  }
+  attrs: {
+    name: "title"
+  }
+  attrs: {
     name: "cta-image"
     value_url: {
-      # protocol: "http"  # TODO(honeybaderdontcare): readd once transformers in prod
+      protocol: "http"
       protocol: "https"
-      allow_relative: false  # TODO(honeybaderdontcare): remove once transformers in prod
     }
   }
   attrs: {
     name: "cta-image-2"
     value_url: {
-      # protocol: "http"  # TODO(honeybaderdontcare): readd once transformers in prod
+      protocol: "http"
       protocol: "https"
-      allow_relative: false  # TODO(honeybaderdontcare): remove once transformers in prod
     }
   }
   attrs: {
@@ -999,6 +1027,7 @@ descendant_tag_list {
   tag: "AMP-CAROUSEL"
   tag: "AMP-DAILYMOTION"
   tag: "AMP-DATE-COUNTDOWN"
+  tag: "AMP-DATE-DISPLAY"
   tag: "AMP-EMBEDLY-CARD"
   tag: "AMP-FACEBOOK"
   tag: "AMP-FACEBOOK-COMMENTS"

@@ -18,9 +18,9 @@ limitations under the License.
 
 ## Introduction
 
-This document explains the communication between a Viewer and AMP documents by using the open-source [AMP Viewer Integration API](https://github.com/ampproject/amphtml/tree/master/extensions/amp-viewer-integration). The AMP Viewer Integration API provides a protocol to establish a connection and send [messages](https://github.com/ampproject/amphtml/blob/master/extensions/amp-viewer-integration/amp-doc-viewer-api.md) between the Viewer and AMP documents.
+This document explains the communication between a Viewer and AMP documents by using the open-source [AMP Viewer Integration API](https://github.com/ampproject/amphtml/tree/main/extensions/amp-viewer-integration). The AMP Viewer Integration API provides a protocol to establish a connection and send [messages](https://github.com/ampproject/amphtml/blob/main/extensions/amp-viewer-integration/amp-doc-viewer-api.md) between the Viewer and AMP documents.
 
-<img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/intro.png" height="300px"></img>
+<img src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-viewer-integration/img/intro.png" height="300px"></img>
 
 A Viewer is a container in which you can view AMP Documents. An AMP Document is a document created with the AMPHTML library and validated by the [AMP Validator](https://validator.amp.dev/).
 
@@ -38,11 +38,11 @@ To establish communication between the Viewer and AMP Document, we need to estab
 
 1. The Viewer waits for the AMP document to load. The Viewer listens on its window for a `message` event.
 
-    <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/mobile-web-handshake1.png" height="300px"></img>
+    <img src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-viewer-integration/img/mobile-web-handshake1.png" height="300px"></img>
 
 2. As soon as the AMP document loads, the AMP document sends a message to the Viewer (its parent) using `postMessage()`.
 
-    <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/mobile-web-handshake2.png" height="300px"></img>
+    <img src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-viewer-integration/img/mobile-web-handshake2.png" height="300px"></img>
 
     The message from the AMP Document to the Viewer looks like this:
 
@@ -62,7 +62,7 @@ To establish communication between the Viewer and AMP Document, we need to estab
 
 3. The Viewer responds to the AMP Document by also using `postMessage()`.
 
-    <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/mobile-web-handshake3.png" height="300px"></img>
+    <img src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-viewer-integration/img/mobile-web-handshake3.png" height="300px"></img>
 
     The message from the Viewer to the AMP Document looks like this:
 
@@ -76,25 +76,25 @@ To establish communication between the Viewer and AMP Document, we need to estab
 
 4. The Viewer and AMP Document are now introduced, and they can start posting messages to each other.
 
-    <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/mobile-web-handshake4.png" height="300px"></img>
+    <img src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-viewer-integration/img/mobile-web-handshake4.png" height="300px"></img>
 
 ### Communicating between Doc and Viewer in Webview
 
 Webview is for Native apps. In Webview, the Viewer can see the AMP document, but the AMP document cannot identify the Viewer. The Viewer can talk to the AMP document, but the AMP document doesn’t know who to respond to. To allow communication between the two, we need to create a 2-way connection.
 
-<img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/webview-connection1.png" height="300px"></img>
+<img src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-viewer-integration/img/webview-connection1.png" height="300px"></img>
 
 #### Creating a 2-way connection
 
 1. The Viewer starts by polling the AMP Document every x milliseconds until the AMP Document is loaded and ready.
 
-    <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/webview-connection2.png" height="300px"></img>
+    <img src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-viewer-integration/img/webview-connection2.png" height="300px"></img>
 
 2. When the AMP document loads, it receives a “Are you there?” polling message but the AMP document doesn't know who to respond to. For this reason, the Viewer uses the [Channel Messaging API](https://developer.mozilla.org/en-US/docs/Web/API/Channel_Messaging_API) to create a 2-way connection.
 
 3. The Viewer creates two ports: one for the Viewer and one for the AMP Document. The Viewer sends a port with its polling message to the AMP Document.
 
-    <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/webview-connection3.png" height="300px"></img>
+    <img src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-viewer-integration/img/webview-connection3.png" height="300px"></img>
 
     The message sent from the Viewer to the AMP Doc is done using the `postMessage()` method. The post contains the following message:
 
@@ -114,11 +114,11 @@ Webview is for Native apps. In Webview, the Viewer can see the AMP document, but
 
 4. Eventually, the AMP Document loads and receives the message and the port.
 
-    <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/webview-connection4.png" height="300px"></img>
+    <img src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-viewer-integration/img/webview-connection4.png" height="300px"></img>
 
 5. A 2-way connection is established where the Viewer can send messages to the AMP Doc and the AMP Doc can send messages to the Viewer!
 
-    <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/webview-connection5.png" height="300px"></img>
+    <img src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-viewer-integration/img/webview-connection5.png" height="300px"></img>
 
 6. Now that the connection is set up, we need to establish the handshake between the Viewer and the AMP document.
 
@@ -128,7 +128,7 @@ In the previous section, we set up the connection between the Viewer and AMP Doc
 
 1. The AMP Doc sends a message to the Viewer over the port.
 
-    <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/webview-handshake1.png" height="300px"></img>
+    <img src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-viewer-integration/img/webview-handshake1.png" height="300px"></img>
 
     The message from the AMP document looks like this:
 
@@ -148,7 +148,7 @@ In the previous section, we set up the connection between the Viewer and AMP Doc
 
 2. The Viewer responds to the AMP document over the port.
 
-    <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/webview-handshake2.png" height="300px"></img>
+    <img src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-viewer-integration/img/webview-handshake2.png" height="300px"></img>
 
     The message looks like this:
 
@@ -162,7 +162,7 @@ In the previous section, we set up the connection between the Viewer and AMP Doc
 
 3. The handshake is established and now the Viewer and AMP Document can start communicating.
 
-    <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/webview-handshake3.png" height="300px"></img>
+    <img src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-viewer-integration/img/webview-handshake3.png" height="300px"></img>
 
 ## Using the Integration API with the Viewer
 
@@ -186,7 +186,7 @@ If the Viewer uses an AMP cache other than the Google AMP Cache, refer to the Ca
 
 #### AMP Cache Providers
 
-AMP Cache providers must include the [amp-viewer-integration](https://github.com/ampproject/amphtml/tree/master/extensions/amp-viewer-integration) component in the cached AMP documents like this:
+AMP Cache providers must include the [amp-viewer-integration](https://github.com/ampproject/amphtml/tree/main/extensions/amp-viewer-integration) component in the cached AMP documents like this:
 
 ```html
 <script async src=”../amp-viewer-integration”>
@@ -418,7 +418,7 @@ A message needs to be sent from the Viewer to the AMP Doc:
 
 ### Enabling swiping between AMP pages
 
-<img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/swipe.png" height="300px"></img>
+<img src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-viewer-integration/img/swipe.png" height="300px"></img>
 
 Touch events go straight to the AMP Document. So how does the Viewer know when to animate an AMP doc out of view while bringing another one into view? The AMP Doc forwards all touch events to the Viewer. To enable this functionality, add `cap=swipe` to your Viewer Init Params:
 
@@ -458,4 +458,4 @@ The message forwarded from the AMP Doc to the Viewer looks like this:
 
 ### Related Resources
 
--   [AMP Viewer Integration API repo](https://github.com/ampproject/amphtml/tree/master/extensions/amp-viewer-integration)
+-   [AMP Viewer Integration API repo](https://github.com/ampproject/amphtml/tree/main/extensions/amp-viewer-integration)

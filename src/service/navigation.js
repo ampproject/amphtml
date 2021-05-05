@@ -22,14 +22,14 @@ import {
   tryFocus,
 } from '../dom';
 import {dev, user, userAssert} from '../log';
-import {dict} from '../utils/object';
-import {escapeCssSelectorIdent} from '../css';
+import {dict} from '../core/types/object';
+import {escapeCssSelectorIdent} from '../core/dom/css';
 import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
 import {getMode} from '../mode';
 import {isLocalhostOrigin} from '../url';
 import {registerServiceBuilderForDoc} from '../service';
 import {toWin} from '../types';
-import PriorityQueue from '../utils/priority-queue';
+import PriorityQueue from '../core/data-structures/priority-queue';
 
 const TAG = 'navigation';
 

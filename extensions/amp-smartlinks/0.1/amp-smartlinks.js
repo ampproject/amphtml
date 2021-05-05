@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
 import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getData} from './../../../src/event-helper';
 
 import {ENDPOINTS} from './constants';

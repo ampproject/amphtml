@@ -1,5 +1,5 @@
 // For an explanation of the OWNERS rules and syntax, see:
-// https://github.com/ampproject/amp-github-apps/blob/master/owners/OWNERS.example
+// https://github.com/ampproject/amp-github-apps/blob/main/owners/OWNERS.example
 
 {
   rules: [
@@ -7,8 +7,17 @@
       owners: [{name: 'ampproject/wg-infra'}],
     },
     {
-      pattern: '{bundles.config,sources}.js',
+      pattern: 'sources.js',
       owners: [
+        {name: 'ampproject/wg-infra'},
+        {name: 'ampproject/wg-performance'},
+      ],
+    },
+    {
+      pattern: 'bundles.config.*',
+      owners: [
+        {name: 'ampproject/wg-bento'},
+        {name: 'ampproject/wg-components'},
         {name: 'ampproject/wg-infra'},
         {name: 'ampproject/wg-performance'},
       ],

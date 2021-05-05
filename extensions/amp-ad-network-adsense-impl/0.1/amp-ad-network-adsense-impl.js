@@ -24,7 +24,10 @@ import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial
 import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '../../../src/core/constants/consent-state';
 import {Navigation} from '../../../src/service/navigation';
 import {
   QQID_HEADER,
@@ -44,8 +47,8 @@ import {
   maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
 import {ResponsiveState} from './responsive-state';
-import {STICKY_AD_TRANSITION_EXP} from '../../../ads/google/a4a/sticky-ad-transition-exp';
 import {Services} from '../../../src/services';
+import {StoryAdAutoAdvance} from '../../../src/experiments/story-ad-auto-advance';
 import {StoryAdPlacements} from '../../../src/experiments/story-ad-placements';
 import {
   addAmpExperimentIdToElement,
@@ -65,7 +68,7 @@ import {
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {removeElement} from '../../../src/dom';
-import {stringHash32} from '../../../src/string';
+import {stringHash32} from '../../../src/core/types/string';
 import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @const {string} */
@@ -230,14 +233,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   divertExperiments() {
     const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
       {
-        experimentId: STICKY_AD_TRANSITION_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          STICKY_AD_TRANSITION_EXP.control,
-          STICKY_AD_TRANSITION_EXP.experiment,
-        ],
-      },
-      {
         experimentId: ADS_INITIAL_INTERSECTION_EXP.id,
         isTrafficEligible: () => true,
         branches: [
@@ -270,6 +265,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (storyAdPlacementsExpId) {
       addExperimentIdToElement(storyAdPlacementsExpId, this.element);
     }
+
+    const autoAdvanceExpBranch = getExperimentBranch(
+      this.win,
+      StoryAdAutoAdvance.ID
+    );
+    if (autoAdvanceExpBranch) {
+      addExperimentIdToElement(autoAdvanceExpBranch, this.element);
+    }
   }
 
   /**
@@ -292,11 +295,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     let consentString = undefined;
     let gdprApplies = undefined;
     let additionalConsent = undefined;
+    let consentStringType = undefined;
     if (consentTuple) {
       consentState = consentTuple.consentState;
       consentString = consentTuple.consentString;
       gdprApplies = consentTuple.gdprApplies;
       additionalConsent = consentTuple.additionalConsent;
+      consentStringType = consentTuple.consentStringType;
     }
     if (
       consentState == CONSENT_POLICY_STATE.UNKNOWN &&
@@ -390,8 +395,15 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           ? this.responsiveState_.getRafmtParam()
           : null,
       'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
-      'gdpr_consent': consentString,
+      'gdpr_consent':
+        consentStringType != CONSENT_STRING_TYPE.US_PRIVACY_STRING
+          ? consentString
+          : null,
       'addtl_consent': additionalConsent,
+      'us_privacy':
+        consentStringType == CONSENT_STRING_TYPE.US_PRIVACY_STRING
+          ? consentString
+          : null,
       'pfx': pfx ? '1' : '0',
       'aanf': /^(true|false)$/i.test(this.element.getAttribute('data-no-fill'))
         ? this.element.getAttribute('data-no-fill')

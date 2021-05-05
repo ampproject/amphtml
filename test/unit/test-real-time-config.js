@@ -18,14 +18,14 @@
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
-import {CONSENT_POLICY_STATE} from '../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../src/core/constants/consent-state';
 import {
   RTC_ERROR_ENUM,
   RealTimeConfigManager,
 } from '../../src/service/real-time-config/real-time-config-impl';
 import {Services} from '../../src/services';
 import {Xhr} from '../../src/service/xhr-impl';
-import {cancellation} from '../../src/error';
+import {cancellation} from '../../src/error-reporting';
 import {createElementWithAttributes} from '../../src/dom';
 import {dev, user} from '../../src/log';
 import {isFiniteNumber} from '../../src/types';
@@ -302,6 +302,30 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
         expectedRtcArray,
       });
     });
+
+    it('should fetch RTC from amp-script URIs', async () => {
+      const ampScriptFetch = env.sandbox.stub();
+      ampScriptFetch.returns(Promise.resolve({targeting: ['sports']}));
+      env.sandbox
+        .stub(Services, 'scriptForDocOrNull')
+        .returns(Promise.resolve({fetch: ampScriptFetch}));
+
+      const urls = ['amp-script:scriptId.functionName'];
+      setRtcConfig({urls, vendors: {}, timeoutMillis: 500});
+      const rtcResponse = await execute_(
+        element,
+        /* customMacros */ {},
+        /* consentState */ undefined,
+        /* consentString */ undefined,
+        /* consentMetadata */ undefined,
+        () => {}
+      );
+      expect(ampScriptFetch).calledWithExactly(
+        'amp-script:scriptId.functionName'
+      );
+      expect(rtcResponse[0].response).deep.equal({targeting: ['sports']});
+    });
+
     it('should send RTC callouts to inflated vendor URLs', () => {
       const vendors = {
         'fAkeVeNdOR': {SLOT_ID: 1, PAGE_ID: 2},

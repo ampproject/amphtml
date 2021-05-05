@@ -16,7 +16,7 @@
 import {Services} from '../../../src/services';
 import {addParamToUrl, addParamsToUrl} from '../../../src/url';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
 import {listenFor} from '../../../src/iframe-helper';
 import {resetStyles, setStyle, setStyles} from '../../../src/style';
@@ -38,15 +38,15 @@ const AUTHORIZATION_TIMEOUT = 3000;
 /**
  * @typedef {{
  *   appId: string,
- *   pageType: (string),
- *   debug: (boolean|null),
- *   forceWidget: (string|null),
- *   loginButtonEnabled: (boolean),
- *   videoClient: (string|null),
- *   customSegment: (string|null),
- *   cookiesEnabled: (boolean),
- *   locale: (string|null),
- *   context: (string|null),
+ *   pageType: string,
+ *   debug: ?boolean,
+ *   forceWidget: ?string,
+ *   loginButtonEnabled: boolean,
+ *   videoClient: ?string,
+ *   customSegment: ?string,
+ *   cookiesEnabled: boolean,
+ *   locale: ?string,
+ *   context: ?string,
  * }}
  */
 let PooolConfigDef;

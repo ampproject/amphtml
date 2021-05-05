@@ -17,7 +17,7 @@ const globby = require('globby');
 const path = require('path');
 const prettier = require('prettier');
 const toc = require('markdown-toc');
-const {getStdout} = require('../../common/exec');
+const {getStdout} = require('../../common/process');
 const {green} = require('kleur/colors');
 const {logOnSameLineLocalDev} = require('../../common/logging');
 const {readFile} = require('fs-extra');
@@ -84,7 +84,7 @@ function isolateCommentJson(maybeComment) {
 
 /**
  * @param {string} content
- * @return {Promise<string|null>}
+ * @return {Promise<?string>}
  */
 async function overrideToc(content) {
   const headerMatch = content.match(headerRegexp);

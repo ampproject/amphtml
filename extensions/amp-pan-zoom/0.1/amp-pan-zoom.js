@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-pan-zoom-0.1.css';
 import {
@@ -31,7 +31,7 @@ import {boundValue, distance, magnitude} from '../../../src/utils/math';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {dispatchCustomEvent} from '../../../src/dom';
 import {layoutRectFromDomRect, layoutRectLtwh} from '../../../src/layout-rect';
 import {numeric} from '../../../src/transition';
@@ -145,13 +145,13 @@ export class AmpPanZoom extends AMP.BaseElement {
     /** @private */
     this.disableDoubleTap_ = false;
 
-    /** @private {UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.unlistenMouseDown_ = null;
 
-    /** @private {UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.unlistenMouseUp_ = null;
 
-    /** @private {UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.unlistenMouseMove_ = null;
 
     /** @private */
@@ -478,7 +478,7 @@ export class AmpPanZoom extends AMP.BaseElement {
 
   /**
    * Unlisten a listener and clear. If null, does nothing
-   * @param {UnlistenDef|null} handle
+   * @param {?UnlistenDef} handle
    * @private
    */
   unlisten_(handle) {

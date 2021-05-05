@@ -22,8 +22,13 @@ var RenderDef = {};
 /**
  * @typedef {{
  *   src: (!string),
- *   getJson: (!Function)
+ *   getJson: (!Function),
  *   render: (?RendererFunctionType|undefined),
  * }}
  */
 RenderDef.Props;
+
+/** @interface */
+RenderDef.RenderApi = class {
+  refresh() {}
+};

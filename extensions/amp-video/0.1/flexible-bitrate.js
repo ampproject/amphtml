@@ -19,7 +19,7 @@ import {childElement, childElementsByTag} from '../../../src/dom';
 import {dev, devAssert} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {listen, listenOnce} from '../../../src/event-helper';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 const TAG = 'amp-video';
 
@@ -38,6 +38,10 @@ const BITRATE_BY_EFFECTIVE_TYPE = {
 
 /** @const {number} Do not downgrade the quality of a video that has loaded enough content */
 const BUFFERED_THRESHOLD_PERCENTAGE = 0.8;
+
+/** @const {string} Simulates video being buffered (fully loaded) for the bitrate algorithm. */
+const IS_VIDEO_FULLY_LOADED_OVERRIDE_FOR_TESTING =
+  'i-amphtml-is-video-fully-loaded-override-for-testing';
 
 /** @type {!BitrateManager|undefined} */
 let instance;
@@ -102,20 +106,28 @@ export class BitrateManager {
     if (video.changedSources) {
       return;
     }
-    onNontrivialWait(video, () => {
-      const current = currentSource(video);
-      const newBitrate = current.bitrate_ - 1;
-      if (newBitrate >= this.acceptableBitrate_) {
-        return;
-      }
-      this.acceptableBitrate_ = newBitrate;
-      this.switchToLowerBitrate_(video, current.bitrate_);
-      this.updateOtherManagedAndPausedVideos_();
-    });
+    onNontrivialWait(video, () => this.downgradeVideo_(video));
+    listen(video, 'downgrade', () => this.downgradeVideo_(video));
     video.changedSources = () => {
       this.sortSources_(video);
     };
     this.videos_.push(DomBasedWeakRef.make(this.win, video));
+  }
+
+  /**
+   * Downgrade a video quality by selecting a lower bitrate source if available,
+   * then downgrade the other registered videos.
+   * @param {!Element} video
+   */
+  downgradeVideo_(video) {
+    const current = currentSource(video);
+    const newBitrate = current.bitrate_ - 1;
+    if (newBitrate >= this.acceptableBitrate_) {
+      return;
+    }
+    this.acceptableBitrate_ = newBitrate;
+    this.switchToLowerBitrate_(video, current.bitrate_);
+    this.updateOtherManagedAndPausedVideos_();
   }
 
   /**
@@ -261,13 +273,10 @@ export class BitrateManager {
       const video = weakref.deref();
       if (!video) {
         this.videos_.splice(i, 1);
-        return;
+        continue;
       }
-      if (
-        !video.paused ||
-        getBufferedPercentage(video) > BUFFERED_THRESHOLD_PERCENTAGE
-      ) {
-        return;
+      if (!video.paused || isVideoLoaded(video)) {
+        continue;
       }
       const hasChanges = this.sortSources_(video);
       if (hasChanges) {
@@ -285,8 +294,8 @@ export class BitrateManager {
  */
 function onNontrivialWait(video, callback) {
   listen(video, 'waiting', () => {
-    // Do not trigger downgrade if not loaded metadata yet.
-    if (video.readyState < 1) {
+    // Do not trigger downgrade if not loaded metadata yet, or if video is fully loaded (eg: replay).
+    if (video.readyState < 1 || getBufferedPercentage(video) > 0.99) {
       return;
     }
     let timer = null;
@@ -343,4 +352,20 @@ function getBufferedPercentage(videoEl) {
     bufferedSum += videoEl.buffered.end(i) - videoEl.buffered.start(i);
   }
   return bufferedSum / videoEl.duration;
+}
+
+/**
+ * Checks for the video buffer percentage to know if a video is loaded
+ * (can be overriden with the attribute `i-amphtml-is-video-fully-loaded-override-for-testing`).
+ * @param {!Element} videoEl
+ * @return {boolean}
+ */
+function isVideoLoaded(videoEl) {
+  if (videoEl.hasAttribute(IS_VIDEO_FULLY_LOADED_OVERRIDE_FOR_TESTING)) {
+    return (
+      videoEl.getAttribute(IS_VIDEO_FULLY_LOADED_OVERRIDE_FOR_TESTING) ===
+      'true'
+    );
+  }
+  return getBufferedPercentage(videoEl) > BUFFERED_THRESHOLD_PERCENTAGE;
 }

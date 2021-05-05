@@ -18,7 +18,7 @@ import * as Preact from '../../../src/preact';
 import {WithAmpContext} from '../../../src/preact/context';
 import {animateCollapse, animateExpand} from './animations';
 import {forwardRef} from '../../../src/preact/compat';
-import {omit} from '../../../src/utils/object';
+import {omit} from '../../../src/core/types/object';
 import {
   randomIdGenerator,
   sequentialIdGenerator,
@@ -34,6 +34,7 @@ import {
   useState,
 } from '../../../src/preact';
 import {useStyles} from './component.jss';
+import objstr from 'obj-str';
 
 const AccordionContext = Preact.createContext(
   /** @type {AccordionDef.AccordionContext} */ ({})
@@ -54,7 +55,7 @@ const generateRandomId = randomIdGenerator(100000);
 
 /**
  * @param {!AccordionDef.AccordionProps} props
- * @param {{current: (!AccordionDef.AccordionApi|null)}} ref
+ * @param {{current: ?AccordionDef.AccordionApi}} ref
  * @return {PreactDef.Renderable}
  */
 function AccordionWithRef(
@@ -62,7 +63,6 @@ function AccordionWithRef(
     as: Comp = 'section',
     expandSingleSection = false,
     animate = false,
-    experimentDisplayLocking = false,
     children,
     id,
     ...rest
@@ -216,16 +216,8 @@ function AccordionWithRef(
         isExpanded,
         animate,
         prefix,
-        experimentDisplayLocking,
       }),
-    [
-      registerSection,
-      toggleExpanded,
-      isExpanded,
-      animate,
-      prefix,
-      experimentDisplayLocking,
-    ]
+    [registerSection, toggleExpanded, isExpanded, animate, prefix]
   );
 
   return (
@@ -289,7 +281,6 @@ export function AccordionSection({
     isExpanded,
     toggleExpanded,
     prefix,
-    experimentDisplayLocking,
   } = useContext(AccordionContext);
 
   const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
@@ -341,16 +332,8 @@ export function AccordionSection({
         toggleHandler,
         setContentId: setContentIdState,
         setHeaderId: setHeaderIdState,
-        experimentDisplayLocking,
       }),
-    [
-      animate,
-      contentId,
-      headerId,
-      expanded,
-      toggleHandler,
-      experimentDisplayLocking,
-    ]
+    [animate, contentId, headerId, expanded, toggleHandler]
   );
 
   return (
@@ -420,60 +403,15 @@ export function AccordionContent({
 }) {
   const ref = useRef(null);
   const hasMountedRef = useRef(false);
-  const {
-    contentId,
-    headerId,
-    expanded,
-    animate,
-    setContentId,
-    toggleHandler,
-    experimentDisplayLocking,
-  } = useContext(SectionContext);
-  const classes = useStyles();
-  const [supportsContentVisibility, setSupportsContentVisibility] = useState(
-    false
+  const {contentId, headerId, expanded, animate, setContentId} = useContext(
+    SectionContext
   );
-  const enableDisplayLocking =
-    supportsContentVisibility && experimentDisplayLocking;
-  const hiddenClass = enableDisplayLocking
-    ? classes.contentHiddenMatchable
-    : classes.contentHidden;
+  const classes = useStyles();
 
   useEffect(() => {
     hasMountedRef.current = true;
     return () => (hasMountedRef.current = false);
   }, []);
-
-  useEffect(() => {
-    if (!experimentDisplayLocking) {
-      return;
-    }
-
-    const element = ref.current;
-    if (!element) {
-      return;
-    }
-
-    const win = element.ownerDocument.defaultView;
-    if (!win) {
-      return;
-    }
-
-    const newSupportsContentVisibility = win.CSS.supports(
-      'content-visibility',
-      'hidden-matchable'
-    );
-    setSupportsContentVisibility(newSupportsContentVisibility);
-    if (!newSupportsContentVisibility) {
-      return;
-    }
-
-    const beforeMatchHandler = () => {
-      toggleHandler(/* force expand */ true);
-    };
-    element.addEventListener('beforematch', beforeMatchHandler);
-    return () => element.removeEventListener('beforematch', beforeMatchHandler);
-  }, [toggleHandler, experimentDisplayLocking]);
 
   useLayoutEffect(() => {
     if (setContentId) {
@@ -495,9 +433,11 @@ export function AccordionContent({
       <Comp
         {...rest}
         ref={ref}
-        className={`${className} ${classes.sectionChild} ${
-          expanded ? '' : hiddenClass
-        }`}
+        className={objstr({
+          [className]: true,
+          [classes.sectionChild]: true,
+          [classes.contentHidden]: !expanded,
+        })}
         id={contentId}
         aria-labelledby={headerId}
         role={role}

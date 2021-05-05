@@ -1,40 +1,44 @@
-.DS_Store
-.g4ignore
-.CIRCLECI_MERGE_COMMIT
-.babel-cache/
-build/
+# Local cache directories
+# Keep this list in sync with .eslintignore, .prettierignore, and build-system/tasks/clean.js
+.babel-cache
+.css-cache
+.pre-closure-cache
+
+# Output directories
+# Keep this list in sync with .eslintignore, .prettierignore, and build-system/tasks/clean.js
 .amp-dep-check
-extensions/**/dist/**
-c
-.css-cache/
-/dist
-dist.3p
-dist.tools
-/release
-examples.min
-node_modules
-npm-debug.log
-.idea
-.tm_properties
-.settings
-typings
-typings.json
-/test/manual/amp-ad.adtech.html
-test/coverage
-test/coverage-e2e
-*.swp
-*.swo
-deps.txt
-firebase
-.firebaserc
-firebase.json
-.firebase/
-src/purifier/dist
+build
+build-system/dist
 build-system/server/new-server/transforms/dist
 build-system/tasks/performance/cache
 build-system/tasks/performance/results.json
 build-system/global-configs/custom-config.json
+dist
+dist.3p
+dist.tools
 export
-validator/export
-result-reports/**
 examples/storybook
+extensions/**/dist
+release
+result-reports
+src/purifier/dist
+test/coverage
+test/coverage-e2e
+validator/**/dist
+validator/export
+
+# OS level files
+.DS_Store
+.g4ignore
+*.swp
+*.swo
+
+# Development environment files
+**/node_modules
+npm-debug.log
+
+# Firebase directories
+.firebaserc
+.firebase
+firebase
+firebase.json

@@ -20,12 +20,13 @@ import {
   UIType,
 } from '../../../extensions/amp-story/1.0/amp-story-store-service';
 import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
 import {deepEquals} from '../../../src/json';
 import {dev, user} from '../../../src/log';
+import {prefersReducedMotion} from '../../../src/utils/media-query-props';
 import {setImportantStyles} from '../../../src/style';
 
 /** @const {string} */
@@ -250,7 +251,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     ];
 
     // Don't animate if first instance of group or prefers-reduced-motion.
-    if (!startPos || this.prefersReducedMotion_()) {
+    if (!startPos || prefersReducedMotion(this.win)) {
       this.storeService_.dispatch(Action.ADD_PANNING_MEDIA_STATE, {
         [this.groupId_]: this.animateTo_,
       });
@@ -350,15 +351,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       dev().assertElement(this.element),
       (el) => el.tagName.toLowerCase() === 'amp-story-page'
     );
-  }
-
-  /**
-   * Whether the device opted in prefers-reduced-motion.
-   * @return {boolean}
-   * @private
-   */
-  prefersReducedMotion_() {
-    return this.win.matchMedia('(prefers-reduced-motion: reduce)')?.matches;
   }
 
   /** @override */

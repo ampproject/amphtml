@@ -25,7 +25,7 @@ import {getAmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
 import {getMode} from '../../../src/mode';
 import {mergeExtensionsMetadata} from '../../amp-a4a/0.1/amp-ad-utils';
 import {tryParseJson} from '../../../src/json';
-import {tryResolve} from '../../../src/utils/promise';
+import {tryResolve} from '../../../src/core/data-structures/promise';
 import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
 
 /** @type {string} */
@@ -97,7 +97,7 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
     // TODO(wg-monetization): this header name has been deprecated elsewhere,
     // and is never returned by dev server.
     if (headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'amp-mustache') {
-      return /**@type {!Promise<(ArrayBuffer|null)>}*/ (Promise.resolve(null));
+      return /**@type {!Promise<?ArrayBuffer>}*/ (Promise.resolve(null));
     }
     // Shorthand for: reject promise if current promise chain is out of date.
     const checkStillCurrent = this.verifyStillCurrent();

@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Deferred} from '../../../src/utils/promise';
+import {BUBBLE_MESSAGE_EVENTS} from '../amp-video-iframe-api';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
   VideoEvents,
 } from '../../../src/video-interface';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {
   SandboxOptions,
   createFrameFor,
@@ -28,7 +30,7 @@ import {
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   disableScrollingOnIframe,
   looksLikeTrackingIframe,
@@ -44,7 +46,7 @@ import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {measureIntersection} from '../../../src/utils/intersection';
-import {once} from '../../../src/utils/function';
+import {once} from '../../../src/core/types/function';
 
 /** @private @const */
 const TAG = 'amp-video-iframe';
@@ -59,20 +61,6 @@ const SANDBOX = [
   SandboxOptions.ALLOW_POPUPS,
   SandboxOptions.ALLOW_POPUPS_TO_ESCAPE_SANDBOX,
   SandboxOptions.ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION,
-];
-
-/**
- * Events allowed to be dispatched from messages.
- * @private @const
- */
-const ALLOWED_EVENTS = [
-  VideoEvents.PLAYING,
-  VideoEvents.PAUSE,
-  VideoEvents.ENDED,
-  VideoEvents.MUTED,
-  VideoEvents.UNMUTED,
-  VideoEvents.AD_START,
-  VideoEvents.AD_END,
 ];
 
 /**
@@ -112,7 +100,7 @@ class AmpVideoIframe extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {!UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.unlistenFrame_ = null;
 
     /** @private {?Deferred} */
@@ -127,6 +115,9 @@ class AmpVideoIframe extends AMP.BaseElement {
      * @private
      */
     this.boundOnMessage_ = (e) => this.onMessage_(e);
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /** @override */
@@ -216,6 +207,7 @@ class AmpVideoIframe extends AMP.BaseElement {
   unlayoutCallback() {
     this.canPlay_ = false;
     this.removeIframe_();
+    this.pauseHelper_.updatePlaying(false);
     return true; // layout again.
   }
 
@@ -345,7 +337,17 @@ class AmpVideoIframe extends AMP.BaseElement {
       return;
     }
 
-    if (ALLOWED_EVENTS.indexOf(eventReceived) > -1) {
+    switch (eventReceived) {
+      case 'playing':
+        this.pauseHelper_.updatePlaying(true);
+        break;
+      case 'pause':
+      case 'ended':
+        this.pauseHelper_.updatePlaying(false);
+        break;
+    }
+
+    if (BUBBLE_MESSAGE_EVENTS.indexOf(eventReceived) > -1) {
       dispatchCustomEvent(this.element, eventReceived);
       return;
     }
