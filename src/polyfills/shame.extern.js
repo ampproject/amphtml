@@ -25,15 +25,12 @@
  * @externs
  */
 
-/**
- * These definitions are exported by the fetch and get-bounding-client-rect
- * polyfill implementation files, but currently they have dependencies on
- * non-core modules that aren't yet type-checked.
- *
- * Planned destination: These externs should be * removed when those files are
- * re-included in the polyfills type-check target.
- */
-
+// These definitions are exported by the fetch and get-bounding-client-rect
+// polyfill implementation files, but currently they have dependencies on
+// non-core modules that aren't yet type-checked.
+//
+// Planned destination: These externs should be removed when those files are
+// re-included in the polyfills type-check target.
 /** @type {function(!Window)} */
 let install$$module$src$polyfills$fetch;
 /** @type {function(!Window)} */
