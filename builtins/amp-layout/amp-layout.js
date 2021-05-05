@@ -17,6 +17,7 @@
 import {BaseElement} from '../../src/base-element';
 import {Layout, isLayoutSizeDefined} from '../../src/layout';
 import {registerElement} from '../../src/service/custom-element-registry';
+import {buildDOM} from './build';
 
 class AmpLayout extends BaseElement {
   /** @override @nocollapse */
@@ -31,15 +32,9 @@ class AmpLayout extends BaseElement {
 
   /** @override */
   buildCallback() {
-    if (this.getLayout() == Layout.CONTAINER) {
-      return;
+    if (!this.element.hasAttribute('i-amphtml-ssr')) {
+      buildDOM(this.win.document, this.element);
     }
-    const container = this.win.document.createElement('div');
-    this.applyFillContent(container);
-    this.getRealChildNodes().forEach((child) => {
-      container.appendChild(child);
-    });
-    this.element.appendChild(container);
   }
 }
 

@@ -1,0 +1,29 @@
+{
+  "name": "server-render",
+  "version": "0.0.1",
+  "description": "server-render amp components",
+  "author": "The AMP HTML Authors",
+  "license": "Apache-2.0",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "jest": {
+    "verbose": true,
+    "transformIgnorePatterns": []
+  },
+  "devDependencies": {
+    "@babel/core": "^7.14.0",
+    "@babel/preset-env": "^7.14.1",
+    "babel-jest": "^26.6.3",
+    "jest": "^26.6.3",
+    "posthtml": "^0.15.2",
+    "posthtml-parser": "^0.8.1"
+  },
+  "dependencies": {
+    "@ampproject/worker-dom": "^0.29.3"
+  }
+}
