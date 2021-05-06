@@ -51,7 +51,7 @@ body,
 button {
   cursor: pointer;
   appearance: none;
-  padding: none;
+  padding: 0;
   border: none;
   background: transparent;
   display: block;
