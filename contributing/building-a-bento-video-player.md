@@ -101,21 +101,6 @@ export class BaseElement extends VideoBaseElement {}
 
 This enables support for AMP actions and analytics, once we map attributes to their prop counterparts in `BaseElement['props']`, and we implement the Preact component.
 
-**Adding this import statement will cause CI to fail**. You should solve this by explicitly allowing the cross-extension import, which is ok for this target file. We add to **`build-system/test-configs/dep-check-config.js`**:
-
-```diff
-{
-  // Extensions can't depend on other extensions.
-  filesMatching: 'extensions/**/*.js',
-  mustNotDependOn: 'extensions/**/*.js',
-  allowlist: [
-    ...
-+   // Bento MyFantasticPlayer, amp-my-fantastic-player
-+   'extensions/amp-my-fantastic-player/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
-  ],
-},
-```
-
 ### Pre-upgrade CSS
 
 Bento components must specify certain layout properties in order to prevent [Cumulative Layout Shift (CLS)](https://web.dev/cls). Video extensions must include the following in the generated **`amp-fantastic-player.css`**:
@@ -253,17 +238,6 @@ function FantasticPlayerWithRef({...rest}, ref) {
 ```
 
 We're rendering an iframe that always loads `https://example.com/fantastic`, but we'll specify a dynamic URL later. Likewise, we'll need to define implementations for the communication functions `makeMethodMessage` and `onMessage`.
-
-You should list one more allowed cross-extension import for `VideoIframe`. Following the previous location on **`dep-check-config.js`**, we add:
-
-```diff
-  allowlist: [
-    ...
-    // Bento MyFantasticPlayer, amp-my-fantastic-player
-    'extensions/amp-my-fantastic-player/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
-+   'extensions/amp-my-fantastic-player/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
-  ],
-```
 
 #### `src`
 
@@ -435,17 +409,6 @@ function FantasticPlayerWithRef({...rest}, ref) {
 ```
 
 We're specifying `"video"` as the element to render, which is also the default. We'll later change this into our own component implementation.
-
-You should list one more allowed cross-extension import for `VideoWrapper`. Following the previous location on **`dep-check-config.js`**, we add:
-
-```diff
-  allowlist: [
-    ...
-    // Bento MyFantasticPlayer, amp-my-fantastic-player
-    'extensions/amp-my-fantastic-player/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
-+   'extensions/amp-my-fantastic-player/1.0/component.js->extensions/amp-video/1.0/video-wrapper.js',
-  ],
-```
 
 #### Specifying `component`
 
