@@ -18,6 +18,7 @@ import * as Preact from '../../../src/preact';
 import {ContainWrapper, useValueRef} from '../../../src/preact/component';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {Side} from './sidebar-config';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
 import {
@@ -186,12 +187,14 @@ export {Sidebar};
  */
 export function SidebarToolbar({
   toolbar: mediaQueryProp,
-  toolbarTarget,
+  toolbarTarget: toolbarTargetProp,
   children,
   ...rest
 }) {
   const ref = useRef(null);
-  const [target, setTarget] = useState(null);
+  const [mediaQuery, setMediaQuery] = useState(null);
+  const [toolbarTarget, setToolbarTarget] = useState(null);
+  const [targetEl, setTargetEl] = useState(null);
 
   useEffect(() => {
     const doc = ref.current?.ownerDocument;
@@ -199,13 +202,25 @@ export function SidebarToolbar({
       return;
     }
 
-    setTarget(doc.getElementById(toolbarTarget));
-  }, [toolbarTarget]);
+    const sanitizedToolbarTarget = escapeCssSelectorIdent(toolbarTargetProp);
+    setToolbarTarget(sanitizedToolbarTarget);
+    setTargetEl(doc.getElementById(sanitizedToolbarTarget));
+  }, [toolbarTargetProp]);
+
+  useEffect(() => {
+    const win = ref.current?.ownerDocument?.defaultView;
+    if (!win) {
+      return;
+    }
+    setMediaQuery(
+      isValidMediaQuery(win, mediaQueryProp) ? mediaQueryProp : null
+    );
+  }, [mediaQueryProp]);
 
   useEffect(() => {
     const element = ref.current;
     const doc = ref.current?.ownerDocument;
-    if (!doc || !target) {
+    if (!doc || !targetEl || mediaQuery == null) {
       return;
     }
 
@@ -213,26 +228,40 @@ export function SidebarToolbar({
     const style = doc.createElement('style');
     style./*OK*/ textContent =
       `#${toolbarTarget}{display: none;}` +
-      `@media ${mediaQueryProp}{#${toolbarTarget}{display: initial;}}`;
+      `@media ${mediaQuery}{#${toolbarTarget}{display: initial;}}`;
 
-    target.appendChild(clone);
-    target.appendChild(style);
+    targetEl.appendChild(clone);
+    targetEl.appendChild(style);
     return () => {
-      if (target) {
-        target.removeChild(clone);
-        target.removeChild(style);
+      if (targetEl) {
+        targetEl.removeChild(clone);
+        targetEl.removeChild(style);
       }
     };
-  }, [mediaQueryProp, toolbarTarget, target]);
+  }, [mediaQuery, toolbarTarget, targetEl]);
 
   return (
     <nav
       ref={ref}
       toolbar={mediaQueryProp}
-      toolbar-target={toolbarTarget}
+      toolbar-target={toolbarTargetProp}
       {...rest}
     >
       {children}
     </nav>
   );
+}
+
+/**
+ * @param {!Window} win
+ * @param {string|undefined} query
+ * @return {boolean}
+ */
+function isValidMediaQuery(win, query) {
+  try {
+    win.matchMedia(query);
+    return true;
+  } catch {
+    return false;
+  }
 }
