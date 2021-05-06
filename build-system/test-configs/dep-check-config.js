@@ -248,7 +248,6 @@ exports.rules = [
       // VideoBaseElement, VideoIframe and VideoWrapper are meant to be shared.
       'extensions/**->extensions/amp-video/1.0/base-element.js',
       'extensions/**->extensions/amp-video/1.0/video-iframe.js',
-      'extensions/**->extensions/amp-video/1.0/video-wrapper.js',
 
       // <amp-video-iframe> versions share this message API definition.
       'extensions/amp-video-iframe/**->extensions/amp-video-iframe/amp-video-iframe-api.js',
