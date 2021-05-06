@@ -317,8 +317,13 @@ module.exports = {
         '**/storybook/*.js',
       ],
       'rules': {
-        'require-jsdoc': 0,
         'local/no-forbidden-terms': [2, forbiddenTermsGlobal],
+      },
+    },
+    {
+      'files': ['**/storybook/*.js'],
+      'rules': {
+        'require-jsdoc': 0,
       },
     },
     {
