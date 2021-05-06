@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-import * as PromiseUtils from '../../../../src/core/data-structures/promise';
+import {
+  Deferred,
+  LastAddedResolver,
+} from '../../../../src/core/data-structures/promise';
 
 describes.sandboxed('data structures - PromiseUtils', {}, () => {
-  function getPromiseObject() {
-    let resolve, reject;
-    const promise = new Promise((resolve_, reject_) => {
-      resolve = resolve_;
-      reject = reject_;
-    });
-
-    return {promise, resolve, reject};
-  }
+  const getPromiseObject = () => new Deferred();
 
   describe('LastAddedResolver', () => {
     it('should resolve when its only promise resolves', () => {
       const one = getPromiseObject();
-      const resolver = new PromiseUtils.LastAddedResolver();
+      const resolver = new LastAddedResolver();
       resolver.add(one.promise);
 
       setTimeout(() => one.resolve('one'), 0);
@@ -43,7 +38,7 @@ describes.sandboxed('data structures - PromiseUtils', {}, () => {
     it('should resolve when its last promise added resolves', () => {
       const one = getPromiseObject();
       const two = getPromiseObject();
-      const firstResolver = new PromiseUtils.LastAddedResolver();
+      const firstResolver = new LastAddedResolver();
       firstResolver.add(one.promise);
       firstResolver.add(two.promise);
 
@@ -53,7 +48,7 @@ describes.sandboxed('data structures - PromiseUtils', {}, () => {
       const three = getPromiseObject();
       const four = getPromiseObject();
       const five = getPromiseObject();
-      const secondResolver = new PromiseUtils.LastAddedResolver();
+      const secondResolver = new LastAddedResolver();
       secondResolver.add(three.promise);
       secondResolver.add(four.promise);
       secondResolver.add(five.promise);
@@ -75,10 +70,7 @@ describes.sandboxed('data structures - PromiseUtils', {}, () => {
     it('should support adding initial promises in the constructor', () => {
       const one = getPromiseObject();
       const two = getPromiseObject();
-      const resolver = new PromiseUtils.LastAddedResolver([
-        one.promise,
-        two.promise,
-      ]);
+      const resolver = new LastAddedResolver([one.promise, two.promise]);
 
       setTimeout(() => one.resolve('one'), 0);
       setTimeout(() => two.resolve('two'), 10);
@@ -91,7 +83,7 @@ describes.sandboxed('data structures - PromiseUtils', {}, () => {
     it('should reject only when the last promise rejects', () => {
       const one = getPromiseObject();
       const two = getPromiseObject();
-      const firstResolver = new PromiseUtils.LastAddedResolver();
+      const firstResolver = new LastAddedResolver();
       firstResolver.add(one.promise);
       firstResolver.add(two.promise);
 
@@ -102,7 +94,7 @@ describes.sandboxed('data structures - PromiseUtils', {}, () => {
       const four = getPromiseObject();
       const five = getPromiseObject();
       const six = getPromiseObject();
-      const secondResolver = new PromiseUtils.LastAddedResolver();
+      const secondResolver = new LastAddedResolver();
       secondResolver.add(four.promise);
       secondResolver.add(five.promise);
       secondResolver.add(six.promise);
