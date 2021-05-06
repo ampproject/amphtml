@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.161 */
+/** Version: 0.1.22.163 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -35,13 +35,17 @@
 
 const I18N_STRINGS = {
   'SHOWCASE_REGWALL_TITLE': {
+    'cs': 'Získejte s&nbsp;Googlem víc',
     'de': 'Immer gut informiert mit Google',
     'en': 'Get more with Google',
     'es-ar': 'Disfruta más artículos con Google',
     'fr': 'Plus de contenus avec Google',
+    'it': 'Con Google puoi avere di più',
     'pt-br': 'Veja mais com o Google',
   },
   'SHOWCASE_REGWALL_DESCRIPTION': {
+    'cs':
+      '<strong></strong>Tento obsah je obvykle zpoplatněn, ale pokud se do publikace <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> zaregistrujete pomocí účtu Google, získáte od Googlu přístup zdarma.',
     'de':
       '<strong></strong>Dieser Inhalt ist normalerweise kostenpflichtig. Google gewährt dir jedoch kostenlos Zugriff auf diesen Artikel und andere Inhalte, wenn du dich mit deinem Google-Konto bei <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> registrierst.',
     'en':
@@ -50,21 +54,27 @@ const I18N_STRINGS = {
       '<strong></strong>Normalmente, es necesario pagar para ver este contenido, pero Google te ofrece acceso gratuito a este y otros artículos si te registras en <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> con tu Cuenta&nbsp;de&nbsp;Google.',
     'fr':
       '<strong></strong>Ce contenu est généralement payant, mais vous pouvez lire cet article et d\'autres contenus gratuitement grâce à Google en vous inscrivant sur <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> avec votre compte Google.',
+    'it':
+      '<strong></strong>Generalmente questi contenuti sono a pagamento, ma Google ti offre accesso gratuito a questo articolo e ad altri articoli se ti registri a <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> usando il tuo Account Google.',
     'pt-br':
       '<strong></strong>Normalmente, é preciso pagar por este conteúdo. Porém, basta você se registrar na publicação <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> usando sua Conta do Google para ter acesso gratuito a esta matéria e muito mais.',
   },
   'SHOWCASE_REGWALL_PUBLISHER_SIGN_IN_BUTTON': {
+    'cs': 'Už máte účet?',
     'de': 'Du hast bereits ein Konto?',
     'en': 'Already have an account?',
     'es-ar': '¿Ya tienes una cuenta?',
     'fr': 'Vous avez déjà un compte&nbsp;?',
+    'it': 'Hai già un account?',
     'pt-br': 'Já tem uma conta?',
   },
   'SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON': {
+    'cs': 'Přihlásit se přes Google',
     'de': 'Über Google anmelden',
     'en': 'Sign in with Google',
     'es-ar': 'Acceder con Google',
     'fr': 'Se connecter avec Google',
+    'it': 'Accedi con Google',
     'pt-br': 'Fazer login com o Google',
   },
 };

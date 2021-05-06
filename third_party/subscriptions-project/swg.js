@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.161 */
+/** Version: 0.1.22.163 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -57,6 +57,7 @@ const AnalyticsEvent = {
   IMPRESSION_SHOWCASE_REGWALL: 23,
   IMPRESSION_SWG_SUBSCRIPTION_MINI_PROMPT: 24,
   IMPRESSION_SWG_CONTRIBUTION_MINI_PROMPT: 25,
+  IMPRESSION_CONTRIBUTION_OFFERS: 26,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -91,6 +92,7 @@ const AnalyticsEvent = {
   ACTION_SWG_CONTRIBUTION_MINI_PROMPT_CLICK: 1031,
   ACTION_SWG_SUBSCRIPTION_MINI_PROMPT_CLOSE: 1032,
   ACTION_SWG_CONTRIBUTION_MINI_PROMPT_CLOSE: 1033,
+  ACTION_CONTRIBUTION_OFFER_SELECTED: 1034,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
@@ -4471,9 +4473,10 @@ function adsUrl(url) {
 /**
  * @param {string} url Relative URL, e.g. "/offersiframe".
  * @param {string=} prefix
+ * @param {Object<string, string>=} params List of extra params to append to the URL.
  * @return {string} The complete URL.
  */
-function feUrl(url, prefix = '') {
+function feUrl(url, prefix = '', params) {
   // Add cache param.
   url = feCached('https://news.google.com' + prefix + '/swg/_/ui/v1' + url);
 
@@ -4482,6 +4485,10 @@ function feUrl(url, prefix = '') {
   const boqJsMode = query['swg.boqjsmode'];
   if (boqJsMode !== undefined) {
     url = addQueryParam(url, 'jsmode', boqJsMode);
+  }
+
+  for (const param in params) {
+    url = addQueryParam(url, param, params[param]);
   }
 
   return url;
@@ -4501,7 +4508,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.161',
+    '_client': 'SwG 0.1.22.163',
   });
 }
 
@@ -4687,6 +4694,8 @@ class PayStartFlow {
       {
         forceRedirect:
           this.deps_.config().windowOpenMode == WindowOpenMode.REDIRECT,
+        // basic flow does not support native.
+        forceDisableNative: paySwgVersion == '2',
       }
     );
     return Promise.resolve();
@@ -5284,10 +5293,6 @@ class OffersFlow {
           ViewSubscriptionsResponse,
           this.startNativeFlow_.bind(this)
         );
-        activityIframeView.on(
-          EntitlementsResponse,
-          this.handleEntitlementsResponse_.bind(this)
-        );
 
         return this.dialogManager_.openView(activityIframeView);
       });
@@ -5718,7 +5723,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.161',
+        '_client': 'SwG 0.1.22.163',
         'supportsEventManager': true,
       },
       args || {}
@@ -6566,7 +6571,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.161');
+    context.setClientVersion('SwG 0.1.22.163');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -9867,14 +9872,9 @@ class Toast {
   animate_(callback) {
     const wait = this.animating_ || Promise.resolve();
     return (this.animating_ = wait
-      .then(
-        () => {
-          return callback();
-        },
-        () => {
-          // Ignore errors to make sure animations don't get stuck.
-        }
-      )
+      .then(() => callback())
+      // Ignore errors to make sure animations don't get stuck.
+      .catch(() => {})
       .then(() => {
         this.animating_ = null;
       }));
@@ -10006,6 +10006,92 @@ const AnalyticsEventToEntitlementResult = {
 };
 
 /**
+ * @param {!string} eventCategory
+ * @param {!string} eventAction
+ * @param {!string} eventLabel
+ * @param {!boolean} nonInteraction
+ * @returns {!Object}
+ */
+const createGoogleAnalyticsEvent = (
+  eventCategory,
+  eventAction,
+  eventLabel,
+  nonInteraction
+) => ({
+  eventCategory,
+  eventAction,
+  eventLabel,
+  nonInteraction,
+});
+
+/** @const {!Object<?AnalyticsEvent,?Object>} */
+const AnalyticsEventToGoogleAnalyticsEvent = {
+  [AnalyticsEvent.IMPRESSION_OFFERS]: createGoogleAnalyticsEvent(
+    'NTG paywall',
+    'paywall modal impression',
+    '',
+    true
+  ),
+  [AnalyticsEvent.IMPRESSION_CONTRIBUTION_OFFERS]: createGoogleAnalyticsEvent(
+    'NTG membership',
+    'offer impressions',
+    '',
+    true
+  ),
+
+  [AnalyticsEvent.ACTION_OFFER_SELECTED]: createGoogleAnalyticsEvent(
+    'NTG paywall',
+    'click',
+    '',
+    false
+  ),
+  [AnalyticsEvent.ACTION_SWG_SUBSCRIPTION_MINI_PROMPT_CLICK]: createGoogleAnalyticsEvent(
+    'NTG subscription',
+    'marketing modal click',
+    '',
+    false
+  ),
+  [AnalyticsEvent.IMPRESSION_SWG_SUBSCRIPTION_MINI_PROMPT]: createGoogleAnalyticsEvent(
+    'NTG subscription',
+    'marketing modal impression',
+    '',
+    true
+  ),
+  [AnalyticsEvent.ACTION_SWG_CONTRIBUTION_MINI_PROMPT_CLICK]: createGoogleAnalyticsEvent(
+    'NTG membership',
+    'marketing modal click',
+    '',
+    false
+  ),
+  [AnalyticsEvent.IMPRESSION_SWG_CONTRIBUTION_MINI_PROMPT]: createGoogleAnalyticsEvent(
+    'NTG membership',
+    'membership modal impression',
+    '',
+    true
+  ),
+};
+
+/** @const {!Object<?AnalyticsEvent,?Object>} */
+const SubscriptionSpecificAnalyticsEventToGoogleAnalyticsEvent = {
+  [AnalyticsEvent.ACTION_PAYMENT_COMPLETE]: createGoogleAnalyticsEvent(
+    'NTG subscription',
+    'submit',
+    'success',
+    false
+  ),
+};
+
+/** @const {!Object<?AnalyticsEvent,?Object>} */
+const ContributionSpecificAnalyticsEventToGoogleAnalyticsEvent = {
+  [AnalyticsEvent.ACTION_PAYMENT_COMPLETE]: createGoogleAnalyticsEvent(
+    'NTG membership',
+    'submit',
+    'success',
+    false
+  ),
+};
+
+/**
  * Converts a propensity event enum into an analytics event enum.
  * @param {!Event|string} propensityEvent
  * @returns {!AnalyticsEvent}
@@ -10034,6 +10120,24 @@ function publisherEntitlementEventToAnalyticsEvents(event) {
 
 function analyticsEventToEntitlementResult(event) {
   return AnalyticsEventToEntitlementResult[event];
+}
+
+/**
+ * Converts an analytics event enum into a Google Analytics event object.
+ * @param {?AnalyticsEvent} event
+ * @param {string} subscriptionFlow
+ * @returns {?Object}
+ */
+function analyticsEventToGoogleAnalyticsEvent(event, subscriptionFlow) {
+  let gaEvent = null;
+  if (subscriptionFlow) {
+    if (subscriptionFlow == SubscriptionFlows.SUBSCRIBE) {
+      gaEvent = SubscriptionSpecificAnalyticsEventToGoogleAnalyticsEvent[event];
+    } else if (subscriptionFlow == SubscriptionFlows.CONTRIBUTE) {
+      gaEvent = ContributionSpecificAnalyticsEventToGoogleAnalyticsEvent[event];
+    }
+  }
+  return gaEvent || AnalyticsEventToGoogleAnalyticsEvent[event];
 }
 
 /**
@@ -11147,24 +11251,6 @@ class FetchResponse {
   }
 
   /**
-   * Reads the xhr responseXML.
-   * @return {!Promise<!Document>}
-   * @private
-   */
-  document_() {
-    assert(!this.bodyUsed, 'Body already used');
-    this.bodyUsed = true;
-    assert(
-      this.xhr_.responseXML,
-      'responseXML should exist. Make sure to return ' +
-        'Content-Type: text/html header.'
-    );
-    return /** @type {!Promise<!Document>} */ (Promise.resolve(
-      assert(this.xhr_.responseXML)
-    ));
-  }
-
-  /**
    * Drains the response and returns a promise that resolves with the response
    * ArrayBuffer.
    * @return {!Promise<!ArrayBuffer>}
@@ -11316,6 +11402,62 @@ class XhrFetcher {
     }
     // Only newer browsers support beacon.  Fallback to standard XHR POST.
     this.sendPost(url, data);
+  }
+}
+
+/**
+ * Copyright 2021 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+class GoogleAnalyticsEventListener {
+  /**
+   * @param {!./deps.DepsDef} deps
+   */
+  constructor(deps) {
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {!./client-event-manager.ClientEventManager} */
+    this.eventManager_ = deps.eventManager();
+  }
+
+  /**
+   * Start listening to client events
+   */
+  start() {
+    this.eventManager_.registerEventListener(
+      this.handleClientEvent_.bind(this)
+    );
+  }
+
+  /**
+   *  Listens for new events from the events manager and logs appropriate events to Google Analytics.
+   * @param {!../api/client-event-manager-api.ClientEvent} event
+   */
+  handleClientEvent_(event) {
+    // Bail immediately if ga function doesn't exist in Window.
+    if (typeof this.win_.ga != 'function') {
+      return;
+    }
+    const gaEvent = analyticsEventToGoogleAnalyticsEvent(
+      event.eventType,
+      event.additionalParameters?.subscriptionFlow
+    );
+    if (gaEvent) {
+      this.win_.ga('send', 'event', gaEvent);
+    }
   }
 }
 
@@ -15382,7 +15524,7 @@ class PayClient {
       'disableNative',
       // The page cannot be iframed at this time. May be relaxed later
       // for AMP and similar contexts.
-      this.win_ != this.top_()
+      options.forceDisableNative || this.win_ != this.top_()
     );
     let resolver = null;
     const promise = new Promise((resolve) => (resolver = resolve));
@@ -16255,6 +16397,7 @@ class ConfiguredRuntime {
    * @param {{
    *     fetcher: (!Fetcher|undefined),
    *     configPromise: (!Promise|undefined),
+   *     enableGoogleAnalytics: (boolean|undefined),
    *   }=} integr
    * @param {!../api/subscriptions.Config=} config
    * @param {!{
@@ -16307,6 +16450,15 @@ class ConfiguredRuntime {
 
     /** @private @const {!Callbacks} */
     this.callbacks_ = new Callbacks();
+
+    // Start listening to Google Analytics events, if applicable.
+    if (integr.enableGoogleAnalytics) {
+      /** @private @const {!GoogleAnalyticsEventListener} */
+      this.googleAnalyticsEventListener_ = new GoogleAnalyticsEventListener(
+        this
+      );
+      this.googleAnalyticsEventListener_.start();
+    }
 
     // WARNING: DepsDef ('this') is being progressively defined below.
     // Constructors will crash if they rely on something that doesn't exist yet.
@@ -16822,6 +16974,11 @@ class ConfiguredRuntime {
       signedEntitlements: showcaseEntitlementJwt,
     });
     entitlements.consume(onCloseDialog);
+  }
+
+  /** @override */
+  showBestAudienceAction() {
+    warn('Not implemented yet');
   }
 }
 
