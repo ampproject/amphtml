@@ -53,8 +53,12 @@ let wrapCounter = 0;
  */
 let transform;
 
+/**
+ * Consumes {@link karmaConfig} and dynamically populates fields based on test
+ * type and command line arguments.
+ */
 class RuntimeTestConfig {
-  /** @type {Array<string|[]>} */
+  /** @type {Array<string|Record<string, [string, *]>>} */
   plugins = [];
 
   /**@type {Record<string, string|string[]>} */
@@ -70,6 +74,11 @@ class RuntimeTestConfig {
    */
   constructor(testType) {
     this.testType = testType;
+    /**
+     * TypeScript is used for typechecking here and is unable to infer the type
+     * after using Object.assign. This results in errors relating properties of
+     * which can never be `null` being treated as though they could be.
+     */
     Object.assign(this, karmaConfig);
     this.updateBrowsers();
     this.updateReporters();
