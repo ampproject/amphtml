@@ -33,8 +33,11 @@ const MATCHES_MESSAGING_ORIGIN = () => true;
  * @param {{current: (!TwitterDef.Api|null)}} ref
  * @return {PreactDef.Renderable}
  */
-function TwitterWithRef({requestResize, title, ...rest}, ref) {
-  const [height, setHeight] = useState(FULL_HEIGHT);
+function TwitterWithRef(
+  {momentid, options, requestResize, style, title, tweetid, ...rest},
+  ref
+) {
+  const [height, setHeight] = useState(null);
   const messageHandler = useCallback(
     (event) => {
       const data = deserializeMessage(event.data);
@@ -60,8 +63,9 @@ function TwitterWithRef({requestResize, title, ...rest}, ref) {
       // non-overridable props
       matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
       messageHandler={messageHandler}
+      options={{tweetid, momentid, ...options}}
       type={TYPE}
-      wrapperStyle={{height}}
+      style={height ? {...style, height} : style}
     />
   );
 }
