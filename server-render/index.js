@@ -54,12 +54,7 @@ export function writeDocumentToAst(document, parent = []) {
       continue;
     }
 
-    let astNode;
-    try {
-      astNode = {tag: domNode.tagName.toLowerCase()};
-    } catch (err) {
-      throw new Error('hello' + domNode.nodeType);
-    }
+    const astNode = {tag: domNode.tagName.toLowerCase()};
     if (domNode.hasAttributes()) {
       astNode.attrs = Object.fromEntries(
         Array.from(domNode.attributes).map((attr) => [attr.name, attr.value])
