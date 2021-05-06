@@ -129,7 +129,6 @@ exports.rules = [
       'ads/**->src/mode.js',
       'ads/**->src/url.js',
       'ads/**->src/core/types/array.js',
-      'ads/**->src/static-template.js',
       'ads/**->src/style.js',
       'ads/**->src/core/constants/consent-state.js',
       'ads/**->src/internal-version.js',
