@@ -150,19 +150,8 @@ describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
     expect(wrapper.find('iframe')).to.have.lengthOf(1);
 
     const iframe = wrapper.find('iframe').getDOMNode();
-    let iframeSrc = iframe.src;
-    const iframeSrcSetterSpy = env.sandbox.spy();
-    Object.defineProperty(iframe, 'src', {
-      get() {
-        return iframeSrc;
-      },
-      set(value) {
-        iframeSrc = value;
-        iframeSrcSetterSpy(value);
-      },
-    });
-
+    const spy = env.sandbox.spy(iframe, 'src', ['set']);
     wrapper.setProps({playable: false});
-    expect(iframeSrcSetterSpy).to.be.calledOnce;
+    expect(spy.set).to.be.calledOnce;
   });
 });
