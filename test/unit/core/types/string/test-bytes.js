@@ -21,7 +21,7 @@ import {
   stringToBytes,
   utf8Decode,
   utf8Encode,
-} from '../../../../src/core/types/string/bytes';
+} from '../../../../../src/core/types/string/bytes';
 
 describes.sandboxed('type helpers - bytes', {}, () => {
   describe('stringToBytes', function () {
