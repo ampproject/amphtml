@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
+import * as dom from '../../src/dom';
 import {BaseElement} from '../../src/base-element';
 import {Layout, isLayoutSizeDefined, parseLayout} from '../../src/layout';
 import {registerElement} from '../../src/service/custom-element-registry';
-import {buildDOM} from './build';
-import * as dom from '../../src/dom';
 
 class AmpLayout extends BaseElement {
   /** @override @nocollapse */

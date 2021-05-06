@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import * as dom from './dom';
 import {ActionTrust, DEFAULT_ACTION} from './core/constants/action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
 import {devAssert, user, userAssert} from './log';
-import * as dom from './dom';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray} from './core/types';

@@ -18,9 +18,9 @@ import {Deferred} from './core/data-structures/promise';
 import {dev, devAssert} from './log';
 import {dict} from './core/types/object';
 import {includes} from './core/types/string';
+import {isInternalElement} from './layout';
 import {isScopeSelectorSupported, prependSelectorsWith} from './core/dom/css';
 import {toWin} from './types';
-import {isInternalElement} from './layout';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',

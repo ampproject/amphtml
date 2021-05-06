@@ -1,5 +1,20 @@
+/**
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import {buildDOM as buildAmpLayout} from '../builtins/amp-layout/amp-layout';
 import {createDocument} from './node_modules/@ampproject/worker-dom/dist/server-lib.mjs';
-import {buildDOM as buildAmpLayout} from '../builtins/amp-layout';
 
 /**
  *
@@ -22,14 +37,14 @@ export function renderElement(ast) {
  * @param {*} ast
  * @param {*} document
  * @param {*} parent
- * @returns
+ * @return
  */
 export function writeAstToDocument(
   ast,
   document = createDocument(),
   parent = document
 ) {
-  for (let astNode of ast) {
+  for (const astNode of ast) {
     // Text node
     if (typeof astNode === 'string') {
       parent.appendChild(document.createTextNode(astNode));
@@ -37,7 +52,7 @@ export function writeAstToDocument(
     }
 
     const domNode = document.createElement(astNode.tag);
-    for (let [k, v] of Object.entries(astNode.attrs ?? [])) {
+    for (const [k, v] of Object.entries(astNode.attrs ?? [])) {
       domNode.setAttribute(k, v);
     }
     writeAstToDocument(astNode.content ?? [], document, domNode);
@@ -47,7 +62,7 @@ export function writeAstToDocument(
 }
 
 export function writeDocumentToAst(document, parent = []) {
-  for (let domNode of document.childNodes ?? []) {
+  for (const domNode of document.childNodes ?? []) {
     // Text node
     if (domNode.nodeType === 3) {
       parent.content.push(domNode.data);
