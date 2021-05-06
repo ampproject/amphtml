@@ -231,10 +231,8 @@ export function SidebarToolbar({
     targetEl.appendChild(clone);
     targetEl.appendChild(style);
     return () => {
-      if (targetEl) {
-        targetEl.removeChild(clone);
-        targetEl.removeChild(style);
-      }
+      targetEl.removeChild(clone);
+      targetEl.removeChild(style);
     };
   }, [mediaQuery, toolbarTarget, targetEl]);
 
