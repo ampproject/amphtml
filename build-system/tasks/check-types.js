@@ -285,10 +285,7 @@ async function typeCheck(targetName) {
 
   if (target.onError) {
     // If an onError handler is defined, steal the output and log it manually.
-    opts.logger = (m) => {
-      errorMsg = m;
-      log(m);
-    };
+    opts.logger = (m) => (errorMsg = m);
   }
 
   let errorMsg;
