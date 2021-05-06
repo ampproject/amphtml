@@ -1470,7 +1470,7 @@ function onMessage(global, event) {
     return;
   }
   switch (msg['func']) {
-    case 'playVideo':
+    case 'play':
       if (adsActive || playbackStarted) {
         playVideo();
       } else {
@@ -1478,13 +1478,13 @@ function onMessage(global, event) {
         onBigPlayClick(global);
       }
       break;
-    case 'pauseVideo':
+    case 'pause':
       pauseVideo();
       break;
     case 'mute':
       muteVideo();
       break;
-    case 'unMute':
+    case 'unmute':
       unmuteVideo();
       break;
     case 'hideControls':
@@ -1526,7 +1526,7 @@ function onMessage(global, event) {
         requestAds();
       }
       break;
-    case 'enterFullscreen':
+    case 'requestFullscreen':
       if (fullscreen) {
         return;
       }
