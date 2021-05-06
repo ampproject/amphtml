@@ -15,7 +15,6 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {ContainWrapper, useValueRef} from '../../../src/preact/component';
 import {Loading} from '../../../src/core/loading-instructions';
 import {ReadyState} from '../../../src/core/constants/ready-state';
 import {forwardRef} from '../../../src/preact/compat';
@@ -27,6 +26,7 @@ import {
   useLayoutEffect,
   useRef,
 } from '../../../src/preact';
+import {useValueRef} from '../../../src/preact/component';
 
 const DEFAULT_MATCHES_MESSAGING_ORIGIN = () => false;
 const ABOUT_BLANK = 'about:blank';
@@ -60,7 +60,6 @@ export function IframeEmbedWithRef(
     onReadyState,
     sandbox,
     src,
-    ...rest
   },
   ref
 ) {
@@ -148,31 +147,30 @@ export function IframeEmbedWithRef(
   }, [matchesMessagingOrigin, messageHandler, mount, ready]);
 
   return (
-    <ContainWrapper {...rest} layout size paint>
-      {mount && ready && (
-        <iframe
-          allow={allow}
-          allowFullScreen={allowFullScreen}
-          allowTransparency={allowTransparency}
-          frameborder="0"
-          loading={loading}
-          name={name}
-          onLoad={() => setLoaded(true)}
-          part="iframe"
-          ref={iframeRef}
-          sandbox={sandbox}
-          scrolling="no"
-          src={src}
-          style={{
-            ...iframeStyle,
-            width: '100%',
-            height: '100%',
-            contentVisibility: 'auto',
-          }}
-          title={title}
-        />
-      )}
-    </ContainWrapper>
+    mount &&
+    ready && (
+      <iframe
+        allow={allow}
+        allowFullScreen={allowFullScreen}
+        allowTransparency={allowTransparency}
+        frameborder="0"
+        loading={loading}
+        name={name}
+        onLoad={() => setLoaded(true)}
+        part="iframe"
+        ref={iframeRef}
+        sandbox={sandbox}
+        scrolling="no"
+        src={src}
+        style={{
+          ...iframeStyle,
+          width: '100%',
+          height: '100%',
+          contentVisibility: 'auto',
+        }}
+        title={title}
+      />
+    )
   );
 }
 

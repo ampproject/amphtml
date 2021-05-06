@@ -15,6 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact';
+import {ContainWrapper} from '../../../src/preact/component';
 import {
   MessageType,
   ProxyIframeEmbed,
@@ -23,7 +24,12 @@ import {dashToUnderline} from '../../../src/core/types/string';
 import {deserializeMessage} from '../../../src/3p-frame-messaging';
 import {forwardRef} from '../../../src/preact/compat';
 import {tryParseJson} from '../../../src/json';
-import {useCallback, useLayoutEffect, useState} from '../../../src/preact';
+import {
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from '../../../src/preact';
 
 /** @const {string} */
 const TYPE = 'facebook';
@@ -83,23 +89,32 @@ function FacebookCommentsWithRef(
     setLocale(dashToUnderline(win.navigator.language));
   }, [localeProp, ref]);
 
+  const contentRef = useRef(null);
   return (
-    <ProxyIframeEmbed
-      contextOptions={{tagName: 'AMP-FACEBOOK-COMMENTS'}}
-      options={{colorScheme, href, locale, numPosts, orderBy}}
-      ref={ref}
-      title={title}
-      {...rest}
-      /* non-overridable props */
-      // We sandbox all 3P iframes however facebook embeds completely break in
-      // sandbox mode since they need access to document.domain, so we
-      // exclude facebook.
-      excludeSandbox
-      matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
-      messageHandler={messageHandler}
-      type={TYPE}
+    <ContainWrapper
+      contentRef={contentRef}
       wrapperStyle={{height}}
-    />
+      layout
+      size
+      paint
+    >
+      <ProxyIframeEmbed
+        contentRef={contentRef}
+        contextOptions={{tagName: 'AMP-FACEBOOK-COMMENTS'}}
+        options={{colorScheme, href, locale, numPosts, orderBy}}
+        ref={ref}
+        title={title}
+        {...rest}
+        /* non-overridable props */
+        // We sandbox all 3P iframes however facebook embeds completely break in
+        // sandbox mode since they need access to document.domain, so we
+        // exclude facebook.
+        excludeSandbox
+        matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
+        messageHandler={messageHandler}
+        type={TYPE}
+      />
+    </ContainWrapper>
   );
 }
 
