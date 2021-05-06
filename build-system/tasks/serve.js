@@ -42,10 +42,30 @@ const {log} = require('../common/logging');
 const {watchDebounceDelay} = require('./helpers');
 const {watch} = require('chokidar');
 
+/**
+ * @typedef {{
+ *   name: string,
+ *   port: string,
+ *   root: string,
+ *   host: string,
+ *   debug?: boolean,
+ *   silent?: boolean,
+ *   https?: boolean,
+ *   preferHttp1?: boolean,
+ *   liveReload?: boolean,
+ *   middleware?: function[],
+ *   startedcallback?: function,
+ *   serverInit?: function,
+ *   fallback?: string,
+ *   index: boolean | string | string[],
+ * }}
+ */
+let GulpConnectOptions; // eslint-disable-line no-unused-vars
+
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
 
 const HOST = argv.host || '0.0.0.0';
-const PORT = argv.port || 8000;
+const PORT = argv.port || '8000';
 
 // Used for logging.
 let url = null;
@@ -105,18 +125,8 @@ async function startServer(
     started = resolve;
   });
   setServeMode(modeOptions);
-  /**
-   * @type {{
-   *   name: string,
-   *   root: string,
-   *   host: string,
-   *   port: number,
-   *   https: string,
-   *   preferHttp1: boolean,
-   *   silent: boolean,
-   *   middleware: function[],
-   * }}
-   */
+
+  /** @type {GulpConnectOptions} */
   const options = {
     name: 'AMP Dev Server',
     root: process.cwd(),
@@ -173,7 +183,7 @@ function resetServerFiles() {
 async function stopServer() {
   if (url) {
     connect.serverClose();
-    log(green('Stopped server at'), cyan(/** @type {string} */ (url)));
+    log(green('Stopped server at'), cyan(url));
     url = null;
   }
 }

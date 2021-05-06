@@ -192,7 +192,7 @@ async function runTests_() {
 async function runWatch_() {
   const filesToWatch = argv.files ? getFilesFromArgv() : config.e2eTestPaths;
 
-  log('Watching', cyan(filesToWatch.join(', ')), 'for changes...');
+  log('Watching', cyan(filesToWatch), 'for changes...');
   watch(filesToWatch).on('change', (file) => {
     log('Detected a change in', cyan(file));
     const mocha = createMocha_();

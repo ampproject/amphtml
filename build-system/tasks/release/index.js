@@ -153,9 +153,7 @@ function discoverDistFlavors_() {
     `${green('flavor')}:`
   );
   distFlavors.forEach(({flavorType, name, command}) => {
-    log('-',
-    `(${green(flavorType)}, ${green(/** @type {string} */ (name))})`,
-    cyan(command));
+    log('-', `(${green(flavorType)}, ${green(name)})`, cyan(command));
   });
 
   logSeparator_();
@@ -178,9 +176,7 @@ async function compileDistFlavors_(distFlavors, tempDir) {
         : argv.esm
         ? `${baseCommand} --esm`
         : baseCommand;
-    log('Compiling flavor',
-      green(/** @type {string} */ (flavorType)), 'using',
-      cyan(/** @type {string} */ (command)));
+    log('Compiling flavor', green(flavorType), 'using', cyan(command));
 
     execOrDie('amp clean');
     execOrDie(command);
@@ -207,7 +203,6 @@ async function compileDistFlavors_(distFlavors, tempDir) {
         )
       ),
     ]);
-    /** @type {Promise<any>} */
     const postBuildMovesPromise = !argv.esm
       ? Promise.all([
           // Individual files to copy from the resulting build artifacts.
@@ -441,9 +436,7 @@ async function release() {
   const distFlavors = await discoverDistFlavors_();
 
   if (argv.flavor && distFlavors.length == 0) {
-    log('Flavor',
-      cyan(/** @type {string} */ (argv.flavor)),
-      'is inactive. Quitting...');
+    log('Flavor', cyan(argv.flavor), 'is inactive. Quitting...');
     return;
   }
 

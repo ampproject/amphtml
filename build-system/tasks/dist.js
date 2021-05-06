@@ -87,7 +87,7 @@ function printDistHelp(options) {
   if (argv.define_experiment_constant) {
     log(
       green('Enabling the'),
-      cyan(/** @type {string} */ (argv.define_experiment_constant)),
+      cyan(argv.define_experiment_constant),
       green('experiment.')
     );
   }

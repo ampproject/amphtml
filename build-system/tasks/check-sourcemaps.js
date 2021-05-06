@@ -75,11 +75,7 @@ function checkSourcemapUrl(sourcemapJson, map) {
     throw new Error('Could not find sourcemap URL');
   }
   if (!sourcemapJson.sourceRoot.match(sourcemapUrlMatcher)) {
-    log(
-      red('ERROR:'),
-      cyan(/** @type {string} */ (sourcemapJson.sourceRoot)),
-      'is badly formatted'
-    );
+    log(red('ERROR:'), cyan(sourcemapJson.sourceRoot), 'is badly formatted');
     throw new Error('Badly formatted sourcemap URL');
   }
 }
@@ -154,14 +150,14 @@ function checkSourcemapMappings(sourcemapJson, map) {
     '.';
   if (firstLineFile != expectedFirstLineFile) {
     log(red('ERROR:'), 'Found mapping for incorrect file.');
-    log('Actual:', cyan(/** @type {string} */ (firstLineFile)));
+    log('Actual:', cyan(firstLineFile));
     log('Expected:', cyan(expectedFirstLineFile));
     log(helpMessage);
     throw new Error('Found mapping for incorrect file');
   }
   if (firstLineCode != expectedFirstLineCode) {
     log(red('ERROR:'), 'Found mapping for incorrect code.');
-    log('Actual:', cyan(/** @type {string} */ (firstLineCode)));
+    log('Actual:', cyan(firstLineCode));
     log('Expected:', cyan(expectedFirstLineCode));
     log(helpMessage);
     throw new Error('Found mapping for incorrect code');
