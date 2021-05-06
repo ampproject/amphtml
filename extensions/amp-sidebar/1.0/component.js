@@ -200,9 +200,7 @@ export function SidebarToolbar({
       return;
     }
 
-    const selector = `#${escapeCssSelectorIdent(toolbarTarget)}`;
-    const newTarget = doc.querySelector(selector);
-    setTarget(newTarget);
+    setTarget(doc.getElementById(toolbarTarget));
   }, [toolbarTarget]);
 
   useEffect(() => {
@@ -222,8 +220,8 @@ export function SidebarToolbar({
     target.appendChild(style);
     return () => {
       if (target) {
-        clone && target.removeChild(clone);
-        style && target.removeChild(style);
+        target.removeChild(clone);
+        target.removeChild(style);
       }
     };
   }, [mediaQueryProp, toolbarTarget, target]);
