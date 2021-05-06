@@ -15,6 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
+import {VideoElementWithActions} from '../../../amp-video/1.0/storybook/_helpers';
 import {boolean, text, withKnobs} from '@storybook/addon-knobs';
 import {withAmp} from '@ampproject/storybook-addon';
 
@@ -28,12 +29,13 @@ export default {
   },
 };
 
-export const _default = () => {
+export const Default = ({id}) => {
   const videoid = text('videoid', '27246366');
   const autoplay = boolean('autoplay', true);
   const doNotTrack = boolean('do-not-track', false);
   return (
     <amp-vimeo
+      id={id}
       width="16"
       height="9"
       layout="responsive"
@@ -44,6 +46,11 @@ export const _default = () => {
   );
 };
 
-_default.story = {
-  name: 'default',
+export const Actions = () => {
+  const id = 'my-vimeo';
+  return (
+    <VideoElementWithActions id={id}>
+      <Default id={id} />
+    </VideoElementWithActions>
+  );
 };
