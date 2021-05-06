@@ -388,7 +388,6 @@ requirement: {
   allowlist: 'ads/vendors/imedia.js'
   allowlist: 'ads/vendors/kargo.js'
   allowlist: 'ads/vendors/mads.js'
-  allowlist: 'ads/google/imaVideo.js'
   allowlist: 'ads/vendors/zen.js'
   allowlist: 'extensions/amp-viewer-integration/0.1/messaging/messaging.js' # published as standalone library
   allowlist: 'src/json.js' # Where parseJson itself is implemented.
