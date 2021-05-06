@@ -31,7 +31,7 @@ import {
   serializeQueryString,
 } from '../url';
 import {applySandbox} from '../3p-frame';
-import {createCustomEvent} from '../event-helper';
+import {createCustomEvent, listenOnce} from '../event-helper';
 import {dict} from '../core/types/object';
 import {isJsonScriptTag, tryFocus} from '../dom';
 // Source for this constant is css/amp-story-player-iframe.css
@@ -780,14 +780,17 @@ export class AmpStoryPlayer {
     if (story.idx !== this.currentIdx_) {
       this.currentIdx_ = story.idx;
 
+      renderPromise = this.render_();
+
       if (options?.animate != undefined) {
         this.rootEl_.classList.toggle(
           CLASS_NO_NAVIGATION_TRANSITION,
           !options.animate
         );
+        listenOnce(story.iframe, 'transitionend', () => {
+          this.rootEl_.classList.remove(CLASS_NO_NAVIGATION_TRANSITION);
+        });
       }
-
-      renderPromise = this.render_();
       this.onNavigation_();
     }
 
@@ -927,7 +930,7 @@ export class AmpStoryPlayer {
       this.isCircularWrappingEnabled_ &&
       this.isIndexOutofBounds_(this.currentIdx_ + 1)
     ) {
-      this.go(1, 0, {animate: true});
+      this.go(1);
       return;
     }
 
@@ -1003,6 +1006,7 @@ export class AmpStoryPlayer {
   /**
    * Updates story position.
    * @param {!StoryDef} story
+   * @return {!Promise}
    * @private
    */
   updatePosition_(story) {
@@ -1013,10 +1017,13 @@ export class AmpStoryPlayer {
         ? StoryPosition.NEXT
         : StoryPosition.PREVIOUS;
 
-    requestAnimationFrame(() => {
-      const {iframe} = story;
-      resetStyles(iframe, ['transform', 'transition']);
-      iframe.setAttribute('i-amphtml-iframe-position', position);
+    return new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        const {iframe} = story;
+        resetStyles(iframe, ['transform', 'transition']);
+        iframe.setAttribute('i-amphtml-iframe-position', position);
+        resolve();
+      });
     });
   }
 
@@ -1105,11 +1112,10 @@ export class AmpStoryPlayer {
           })
           // 5. Finally update the story position.
           .then(() => {
-            this.updatePosition_(story);
-
             if (story.distance === 0) {
               tryFocus(story.iframe);
             }
+            return this.updatePosition_(story);
           })
           .catch((err) => {
             if (err.includes(LOG_TYPE.DEV)) {

@@ -43,7 +43,7 @@
 }
 
 .i-amphtml-story-player-loaded.i-amphtml-story-player-no-navigation-transition iframe {
-  transition: none;
+  transition-duration: 0.01s; /* Set to low value so transitionend is emitted */
 }
 
 .i-amphtml-story-player-main-container iframe:nth-of-type(1),
