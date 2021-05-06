@@ -565,7 +565,7 @@ function buildExtensionCss(extDir, name, version, options) {
  * @return {!Promise}
  */
 function buildNpmBinaries(extDir, options) {
-  const {npm} = options;
+  let {npm} = options;
   if (npm === true) {
     // Default to the standard/expected entrypoint
     npm = {
