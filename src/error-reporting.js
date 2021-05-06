@@ -448,7 +448,6 @@ export function errorReportingDataForViewer(errorReportData) {
     'ex': errorReportData['ex'], // expected error?
     'v': errorReportData['v'], // runtime
     'pt': errorReportData['pt'], // is pre-throttled
-    'jse': errorReportData['jse'], // detectedJsEngine
   });
 }
 
