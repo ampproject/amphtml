@@ -59,6 +59,7 @@ function createAmplifiedContainer(global) {
  * @param {!Window} global
  */
 function setAmplifiedParams(global) {
+  const queryParams = new URLSearchParams(global.context.sourceUrl);
   const adParams = {
     id: adUnitId,
     subtag: global.params.subtag ? global.params.subtag : '',
@@ -75,12 +76,14 @@ function setAmplifiedParams(global) {
     abf: 1,
     bp_abf: 0,
     position: '',
-    d: null,
     ps: 1,
     'if': 1,
     ii: 1,
     mo: global.params.mobile_optimized ? global.params.subtag : false,
   };
+  if (queryParams.d) {
+    adParams.d = queryParams.d;
+  }
   global.adParams = adParams;
 }
 
