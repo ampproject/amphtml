@@ -46,6 +46,7 @@ const PlayerStates = {
 const methods = {
   'play': 'playVideo',
   'pause': 'pauseVideo',
+  'mute': 'mute',
   'unmute': 'unMute',
 };
 
@@ -75,7 +76,7 @@ function createDefaultInfo() {
 
 /**
  * @param {!YoutubeProps} props
- * @param {{current: (T|null)}} ref
+ * @param {{current: ?T}} ref
  * @return {PreactDef.Renderable}
  * @template T
  */
