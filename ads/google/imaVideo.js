@@ -394,8 +394,9 @@ export function imaVideo(global, data) {
   playButton.addEventListener(interactEvent, onPlayPauseClick);
   progress.addEventListener(mouseDownEvent, onProgressClick);
   muteButton.addEventListener(interactEvent, onMuteUnmuteClick);
-  fullscreenButton.addEventListener(interactEvent, (e) =>
-    toggleFullscreen(global, e)
+  fullscreenButton.addEventListener(
+    interactEvent,
+    toggleFullscreen.bind(null, global)
   );
 
   // Timeout is 1s, because showControls will hide after 3s
