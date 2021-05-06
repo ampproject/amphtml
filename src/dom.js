@@ -938,6 +938,9 @@ export function domOrderComparator(element1, element2) {
  * @return {boolean} Whether or not the element now has the attribute.
  */
 export function toggleAttribute(element, name, forced) {
+  if (IS_ESM) {
+    return element.toggleAttribute(name, forced);
+  }
   const hasAttribute = element.hasAttribute(name);
   const enabled = forced !== undefined ? forced : !hasAttribute;
 
