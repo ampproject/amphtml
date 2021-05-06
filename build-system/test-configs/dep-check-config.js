@@ -145,7 +145,7 @@ exports.rules = [
       // Some ads need to depend on json.js
       'ads/**->src/json.js',
       // IMA, similar to other non-Ad 3Ps above, needs access to event-helper
-      'ads/google/imaVideo.js->src/event-helper.js',
+      'ads/google/ima/ima-video.js->src/event-helper.js',
     ],
   },
   {
