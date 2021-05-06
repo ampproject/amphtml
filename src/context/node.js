@@ -396,7 +396,7 @@ export class ContextNode {
    * of factory is important to reduce bundling costs for context node.
    *
    * @param {*} id
-   * @param {fucntion(new:./subscriber.Subscriber, function(...?), !Array<!ContextProp>)} constr
+   * @param {function(new:./subscriber.Subscriber, function(...?), !Array<!ContextProp>):void} constr
    * @param {!Function} func
    * @param {!Array<!ContextProp>} deps
    */

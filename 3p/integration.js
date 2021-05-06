@@ -148,7 +148,7 @@ import {gumgum} from '../ads/vendors/gumgum';
 import {holder} from '../ads/vendors/holder';
 import {ibillboard} from '../ads/vendors/ibillboard';
 import {idealmedia} from '../ads/vendors/idealmedia';
-import {imaVideo} from '../ads/google/imaVideo';
+import {imaVideo} from '../ads/google/ima/ima-video';
 import {imedia} from '../ads/vendors/imedia';
 import {imobile} from '../ads/vendors/imobile';
 import {imonomy} from '../ads/vendors/imonomy';
