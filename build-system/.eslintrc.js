@@ -39,7 +39,6 @@ module.exports = {
     'local/no-bigint': 0,
     'local/no-dynamic-import': 0,
     'local/no-export-side-effect': 0,
-    'local/no-for-of-statement': 0,
     'local/no-function-async': 0,
     'local/no-function-generator': 0,
     'local/no-has-own-property-method': 0,
