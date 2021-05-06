@@ -342,7 +342,7 @@ export function imaVideo(global, data) {
 
   // Attach events and configure IMA SDK.
 
-  window.addEventListener('message', (e) => onMessage(global, e));
+  window.addEventListener('message', onMessage.bind(null, global));
 
   hideControlsQueued = false;
   showControlsFirstCalled = false;
@@ -381,12 +381,14 @@ export function imaVideo(global, data) {
     // Create our own tap listener that ignores tap and drag.
     overlayButton.addEventListener(mouseMoveEvent, onOverlayButtonTouchMove);
     overlayButton.addEventListener(mouseUpEvent, onOverlayButtonTouchEnd);
-    overlayButton.addEventListener('tapwithoutdrag', (e) =>
-      onOverlayButtonInteract(global, e)
+    overlayButton.addEventListener(
+      'tapwithoutdrag',
+      onOverlayButtonInteract.bind(null, global)
     );
   } else {
-    overlayButton.addEventListener(interactEvent, (e) =>
-      onOverlayButtonInteract(global, e)
+    overlayButton.addEventListener(
+      interactEvent,
+      onOverlayButtonInteract.bind(null, global)
     );
   }
   playButton.addEventListener(interactEvent, onPlayPauseClick);
