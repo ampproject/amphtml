@@ -19,7 +19,6 @@ import {Services} from '../../src/services';
 import {
   blockedByConsentError,
   cancellation,
-  detectJsEngineFromStack,
   detectNonAmpJs,
   errorReportingDataForViewer,
   getErrorReportData,
@@ -751,63 +750,6 @@ describes.sandboxed('reportError', {}, (env) => {
       clock.tick();
     }).to.throw(/_reported_ Error reported incorrectly/);
   });
-});
-
-describes.sandboxed('detectJsEngineFromStack', {}, () => {
-  // Note that these are not true of every case. You can emulate iOS Safari
-  // on Desktop Chrome and break this.
-  describe
-    .configure()
-    .ifIos()
-    .run('on iOS', () => {
-      it.configure()
-        .ifSafari()
-        .run('detects safari as safari', () => {
-          expect(detectJsEngineFromStack()).to.equal('Safari');
-        });
-
-      it.configure()
-        .ifChrome()
-        .run('detects chrome as safari', () => {
-          expect(detectJsEngineFromStack()).to.equal('Safari');
-        });
-
-      it.configure()
-        .ifFirefox()
-        .run('detects firefox as safari', () => {
-          expect(detectJsEngineFromStack()).to.equal('Safari');
-        });
-    });
-
-  describe
-    .configure()
-    .skipIos()
-    .run('on other OSs', () => {
-      it.configure()
-        .ifSafari()
-        .run('detects safari as safari', () => {
-          // TODO(wg-performance): Fix detection of Safari 13+.
-          expect(detectJsEngineFromStack()).to.equal('unknown');
-        });
-
-      it.configure()
-        .ifChrome()
-        .run('detects chrome as chrome', () => {
-          expect(detectJsEngineFromStack()).to.equal('Chrome');
-        });
-
-      it.configure()
-        .ifFirefox()
-        .run('detects firefox as firefox', () => {
-          expect(detectJsEngineFromStack()).to.equal('Firefox');
-        });
-
-      it.configure()
-        .ifEdge()
-        .run('detects edge as IE', () => {
-          expect(detectJsEngineFromStack()).to.equal('IE');
-        });
-    });
 });
 
 describes.fakeWin('user error reporting', {amp: true}, (env) => {
