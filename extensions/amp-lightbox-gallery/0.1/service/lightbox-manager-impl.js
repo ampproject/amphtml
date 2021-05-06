@@ -38,8 +38,7 @@ import {map} from '../../../../src/core/types/object';
 import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
 import {toArray} from '../../../../src/core/types/array';
 
-const LIGHTBOX_ELIGIBLE_TAGS = new Set(['AMP-IMG']);
-const LIGHTBOX_ELGIBLE_NATIVE_ELEMENTS = new Set(['IMG']);
+const LIGHTBOX_ELIGIBLE_TAGS = new Set(['AMP-IMG', 'IMG']);
 
 // eslint-disable-next-line local/no-export-side-effect
 export const ELIGIBLE_TAP_TAGS = new Set(['AMP-IMG']);
@@ -175,10 +174,7 @@ export class LightboxManager {
    * @private
    */
   baseElementIsSupported_(element) {
-    return (
-      LIGHTBOX_ELIGIBLE_TAGS.has(element.tagName) ||
-      LIGHTBOX_ELGIBLE_NATIVE_ELEMENTS.has(element.tagName)
-    );
+    return LIGHTBOX_ELIGIBLE_TAGS.has(element.tagName);
   }
 
   /**
