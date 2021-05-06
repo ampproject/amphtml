@@ -20,7 +20,7 @@ import '../polyfills';
 import {draw3p, init} from '../integration-lib';
 import {register} from '../3p';
 
-import {imaVideo} from '../../ads/google/imaVideo';
+import {imaVideo} from '../../ads/google/ima/ima-video';
 
 init(window);
 register('ima-video', imaVideo);

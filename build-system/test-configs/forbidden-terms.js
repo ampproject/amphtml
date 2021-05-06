@@ -576,7 +576,7 @@ const forbiddenTermsGlobal = {
       'src/core/assert/base.js', // Has actual implementation of assertElement.
       'src/core/assert/dev.js', // Has actual implementation of assertElement.
       'src/polyfills/custom-elements.js',
-      'ads/google/imaVideo.js', // Required until #22277 is fixed.
+      'ads/google/ima/ima-video.js', // Required until #22277 is fixed.
       '3p/twitter.js', // Runs in a 3p window context, so cannot import log.js.
     ],
   },
