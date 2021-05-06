@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-import {CONSENT_POLICY_STATE} from '../../src/core/constants/consent-state';
+import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
 import {ImaPlayerData} from './ima-player-data';
-import {camelCaseToTitleCase, px, setStyle, setStyles} from '../../src/style';
-import {getData} from '../../src/event-helper';
-import {isObject} from '../../src/core/types';
-import {loadScript} from '../../3p/3p';
-import {throttle} from '../../src/core/types/function';
-import {tryParseJson} from '../../src/json';
+import {
+  camelCaseToTitleCase,
+  px,
+  setStyle,
+  setStyles,
+} from '../../../src/style';
+import {getData} from '../../../src/event-helper';
+import {isObject} from '../../../src/core/types';
+import {loadScript} from '../../../3p/3p';
+import {throttle} from '../../../src/core/types/function';
+import {tryParseJson} from '../../../src/json';
 
 /**
  * Possible player states.
