@@ -25,7 +25,7 @@ function getImportResolver() {
   return [
     'module-resolver',
     {
-      'root': [path.resolve('.')],
+      'root': ['.'],
       'alias': {
         // DO NOT ADD TO THIS
         '#core': './src/core',
