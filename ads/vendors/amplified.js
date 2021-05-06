@@ -61,8 +61,7 @@ function createAmplifiedContainer(global) {
 function setAmplifiedParams(global) {
   const adParams = {
     id: adUnitId,
-    subtag: global.params.subtag,
-    search: global.params.search,
+    subtag: global.params.subtag ? global.params.subtag : '',
     song: global.params.song ? global.params.song : '',
     artist: global.params.artist ? global.params.artist : '',
     alb: global.params.album ? global.params.album : '',
@@ -73,24 +72,14 @@ function setAmplifiedParams(global) {
     url: global.context.sourceUrl,
     t: Date.now(),
     vpw: null,
-    dvid: global.params.device_id,
     abf: 1,
     bp_abf: 0,
     position: '',
     d: null,
-    uc: global.usedCampaigns,
-    uf: global.usedFormats,
-    ctr: null,
-    cf: global.companionFormats,
-    cc: global.companionCampaigns,
     ps: 1,
     'if': 1,
     ii: 1,
-    pe: global.params.page_element,
-    ph: global.params.page_header,
-    pf: global.params.page_footer,
-    fh: global.params.fixed_header,
-    mo: global.params.mobile_optimized,
+    mo: global.params.mobile_optimized ? global.params.subtag : false,
   };
   global.adParams = adParams;
 }
