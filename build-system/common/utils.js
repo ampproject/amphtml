@@ -46,7 +46,7 @@ async function buildRuntime(opt_compiled = false) {
 /**
  * Extracts and validates the config for the given experiment.
  * @param {string} experiment
- * @return {Object|null}
+ * @return {?Object}
  */
 function getExperimentConfig(experiment) {
   const config = experimentsConfig[experiment];
