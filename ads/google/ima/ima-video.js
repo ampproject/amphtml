@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {CONSENT_POLICY_STATE} from '../../src/core/constants/consent-state';
+import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
 import {ImaPlayerData} from './ima-player-data';
-import {camelCaseToTitleCase, setStyle, toggle} from '../../src/style';
-import {getData} from '../../src/event-helper';
-import {htmlFor, htmlRefs, svgFor} from '../../src/static-template';
-import {isObject} from '../../src/core/types';
-import {loadScript} from '../../3p/3p';
-import {throttle} from '../../src/core/types/function';
-import {tryParseJson} from '../../src/json';
+import {camelCaseToTitleCase, setStyle, toggle} from '../../../src/style';
+import {getData} from '../../../src/event-helper';
+import {htmlFor, htmlRefs, svgFor} from '../../../src/static-template';
+import {isObject} from '../../../src/core/types';
+import {loadScript} from '../../../3p/3p';
+import {throttle} from '../../../src/core/types/function';
+import {tryParseJson} from '../../../src/json';
 // Source for this constant is css/amp-ima-video-iframe.css
-import {cssText} from '../../build/amp-ima-video-iframe.css';
+import {cssText} from '../../../build/amp-ima-video-iframe.css';
 
 /**
  * Possible player states.
@@ -977,7 +977,7 @@ export function zeroPad(input) {
 function onProgressClick(event) {
   // Call this logic once to make sure we still seek if the user just clicks
   // instead of clicking and dragging.
-  clearInterval(hideControlsTimeout);
+  clearTimeout(hideControlsTimeout);
   onProgressMove(event);
   event.preventDefault();
   event.stopPropagation();
@@ -1083,7 +1083,7 @@ export function pauseVideo(event = null) {
     const {'video': video} = elements;
     video.pause();
     // Show controls and keep them there because we're paused.
-    clearInterval(hideControlsTimeout);
+    clearTimeout(hideControlsTimeout);
     showControls();
     if (event && event.type == 'webkitendfullscreen') {
       // Video was paused because we exited fullscreen.
@@ -1282,7 +1282,7 @@ export function showControls(opt_adsForce) {
   if (playerState == PlayerStates.PLAYING) {
     // Reset hide controls timer.
     // Be sure to keep the timer greater than showControlsThrottled.
-    clearInterval(hideControlsTimeout);
+    clearTimeout(hideControlsTimeout);
     hideControlsTimeout = setTimeout(hideControls, 3000);
   }
 }
@@ -1322,7 +1322,7 @@ function onMessage(global, event) {
     return;
   }
   switch (msg['func']) {
-    case 'playVideo':
+    case 'play':
       if (adsActive || playbackStarted) {
         playVideo();
       } else {
@@ -1330,13 +1330,13 @@ function onMessage(global, event) {
         onOverlayButtonInteract(global);
       }
       break;
-    case 'pauseVideo':
+    case 'pause':
       pauseVideo();
       break;
     case 'mute':
       muteVideo();
       break;
-    case 'unMute':
+    case 'unmute':
       unmuteVideo();
       break;
     case 'hideControls':
@@ -1370,7 +1370,7 @@ function onMessage(global, event) {
         requestAds();
       }
       break;
-    case 'enterFullscreen':
+    case 'requestFullscreen':
       if (fullscreen) {
         return;
       }

@@ -146,7 +146,7 @@ exports.rules = [
       // Some ads need to depend on json.js
       'ads/**->src/json.js',
       // IMA, similar to other non-Ad 3Ps above, needs access to event-helper
-      'ads/google/imaVideo.js->src/event-helper.js',
+      'ads/google/ima/ima-video.js->src/event-helper.js',
     ],
   },
   {
@@ -246,23 +246,15 @@ exports.rules = [
       'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-comments/1.0/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
 
-      // Bento VideoIframe, amp-video-iframe
-      'extensions/amp-video-iframe/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
-      'extensions/amp-video-iframe/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
-      // Shared definition of the iframe integration API
-      'extensions/amp-video-iframe/0.1/amp-video-iframe.js->extensions/amp-video-iframe/amp-video-iframe-api.js',
-      'extensions/amp-video-iframe/1.0/amp-video-iframe.js->extensions/amp-video-iframe/amp-video-iframe-api.js',
+      // VideoBaseElement, VideoIframe and VideoWrapper are meant to be shared.
+      'extensions/**->extensions/amp-video/1.0/base-element.js',
+      'extensions/**->extensions/amp-video/1.0/video-iframe.js',
 
-      // Bento Vimeo, amp-vimeo
-      'extensions/amp-vimeo/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
-      'extensions/amp-vimeo/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
-      // Shared definition of Vimeo API
-      'extensions/amp-vimeo/0.1/amp-vimeo.js->extensions/amp-vimeo/vimeo-api.js',
-      'extensions/amp-vimeo/1.0/component.js->extensions/amp-vimeo/vimeo-api.js',
+      // <amp-video-iframe> versions share this message API definition.
+      'extensions/amp-video-iframe/**->extensions/amp-video-iframe/amp-video-iframe-api.js',
 
-      // Bento Youtube, amp-youtube
-      'extensions/amp-youtube/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
-      'extensions/amp-youtube/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
+      // <amp-vimeo> versions share this message API definition.
+      'extensions/amp-vimeo/**->extensions/amp-vimeo/vimeo-api.js',
 
       // Amp geo in group enum
       'extensions/amp-a4a/0.1/amp-a4a.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
