@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Deferred} from './promise';
-import {map} from '../types/object';
+import {Deferred} from '#core/data-structures/promise';
+import {map} from '#core/types/object';
 
 /**
  * This object tracts signals and allows blocking until a signal has been
