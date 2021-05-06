@@ -16,6 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const {getImportResolver} = require('./import-resolver');
 const {getReplacePlugin, getReplaceGlobalsPlugin} = require('./helpers');
 
 /**
@@ -57,6 +58,7 @@ function getTestConfig() {
   const replacePlugin = getReplacePlugin();
   const replaceGlobalsPlugin = getReplaceGlobalsPlugin();
   const testPlugins = [
+    getImportResolver(),
     argv.coverage ? instanbulPlugin : null,
     replacePlugin,
     replaceGlobalsPlugin,
