@@ -31,7 +31,6 @@ function getImportResolver() {
         '#core': './src/core',
         '#extensions': './extensions',
         '#polyfills': './src/polyfills',
-        '#preact': './src/preact',
       },
     },
   ];
