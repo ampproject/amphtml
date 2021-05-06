@@ -15,9 +15,10 @@
  */
 
 import {BaseElement} from '../../src/base-element';
-import {Layout, isLayoutSizeDefined} from '../../src/layout';
+import {Layout, isLayoutSizeDefined, parseLayout} from '../../src/layout';
 import {registerElement} from '../../src/service/custom-element-registry';
 import {buildDOM} from './build';
+import * as dom from '../../src/dom';
 
 class AmpLayout extends BaseElement {
   /** @override @nocollapse */
@@ -36,6 +37,26 @@ class AmpLayout extends BaseElement {
       buildDOM(this.win.document, this.element);
     }
   }
+}
+
+/**
+ *
+ * @param {!Document} document
+ * @param {!Element} element
+ */
+export function buildDOM(document, element) {
+  const layout = parseLayout(element.getAttribute('layout'));
+  if (layout == Layout.CONTAINER) {
+    return;
+  }
+
+  const container = document.createElement('div');
+  dom.applyFillContent(container);
+
+  dom.getRealChildNodes(element).forEach((child) => {
+    container.appendChild(child);
+  });
+  element.appendChild(container);
 }
 
 /**

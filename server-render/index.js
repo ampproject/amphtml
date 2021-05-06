@@ -1,5 +1,5 @@
 import {createDocument} from './node_modules/@ampproject/worker-dom/dist/server-lib.mjs';
-import {buildDOM as buildAmpLayout} from '../builtins/amp-layout/build';
+import {buildDOM as buildAmpLayout} from '../builtins/amp-layout';
 
 /**
  *
