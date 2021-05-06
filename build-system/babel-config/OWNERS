@@ -9,5 +9,11 @@
         {name: 'ampproject/wg-performance'},
       ],
     },
+    {
+      pattern: 'import-resolver.js',
+      owners: [
+        {name: 'ampproject/wg-performance', required: true}
+      ]
+    }
   ],
 }

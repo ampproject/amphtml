@@ -27,6 +27,7 @@ function getImportResolver() {
     {
       'root': [path.resolve('.')],
       'alias': {
+        // DO NOT ADD TO THIS
         '#core': './src/core',
         '#extensions': './extensions',
         '#polyfills': './src/polyfills',
