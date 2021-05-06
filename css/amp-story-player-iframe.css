@@ -37,12 +37,12 @@
   transform-style: preserve-3d;
 }
 
-.i-amphtml-story-player-loaded iframe {
+.i-amphtml-story-player-loaded .story-player-iframe {
   opacity: 1;
   transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.i-amphtml-story-player-loaded.i-amphtml-story-player-no-navigation-transition iframe {
+.i-amphtml-story-player-no-navigation-transition .story-player-iframe {
   transition-duration: 0.01s; /* Set to low value so transitionend is emitted */
 }
 
