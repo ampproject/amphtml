@@ -283,12 +283,12 @@ async function typeCheck(targetName) {
     return;
   }
 
+  let errorMsg;
   if (target.onError) {
     // If an onError handler is defined, steal the output and log it manually.
     opts.logger = (m) => (errorMsg = m);
   }
 
-  let errorMsg;
   await closureCompile(entryPoints, './dist', `${targetName}-check-types.js`, {
     noAddDeps,
     include3pDirectories: !noAddDeps,
