@@ -1853,7 +1853,9 @@ export class AmpStoryPage extends AMP.BaseElement {
         childImgNode &&
           ampImgNode
             .getImpl()
-            .then((ampImg) => propagateAttributes('alt', ampImg, childImgNode));
+            .then((impl) =>
+              propagateAttributes('alt', impl.element, childImgNode)
+            );
       }
     });
   }

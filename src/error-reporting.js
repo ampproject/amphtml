@@ -715,15 +715,17 @@ export function detectJsEngineFromStack() {
       return 'Firefox';
     }
 
-    // IE looks like Chrome, but includes a context for the base stack line.
-    // Explicitly, we're looking for something like:
-    // "    at Global code (https://example.com/app.js:1:200)" or
-    // "    at Anonymous function (https://example.com/app.js:1:200)"
-    // vs Chrome which has:
-    // "    at https://example.com/app.js:1:200"
-    const last = stack.split('\n').pop();
-    if (/\bat .* \(/i.test(last)) {
-      return 'IE';
+    if (!IS_ESM) {
+      // IE looks like Chrome, but includes a context for the base stack line.
+      // Explicitly, we're looking for something like:
+      // "    at Global code (https://example.com/app.js:1:200)" or
+      // "    at Anonymous function (https://example.com/app.js:1:200)"
+      // vs Chrome which has:
+      // "    at https://example.com/app.js:1:200"
+      const last = stack.split('\n').pop();
+      if (/\bat .* \(/i.test(last)) {
+        return 'IE';
+      }
     }
 
     // Finally, chrome includes the error message in the stack.
