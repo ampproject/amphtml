@@ -155,7 +155,7 @@ export class Purifier {
    *
    * @param {!Node} node
    * @param {string} attr Lower-case attribute name.
-   * @param {string|null} value
+   * @param {?string} value
    * @return {boolean}
    */
   validateAttributeChange(node, attr, value) {
