@@ -601,6 +601,7 @@ export class AmpScriptService {
         throw user().createError(
           TAG,
           `Script hash not found or incorrect for ${debugId}. You must include <meta name="amp-script-src" content="sha384-${hash}">. ` +
+            `During development, you can disable this check by adding the "data-ampdevmode" attribute to ${debugId}, or the root html node` +
             'See https://amp.dev/documentation/components/amp-script/#script-hash.'
         );
       }
