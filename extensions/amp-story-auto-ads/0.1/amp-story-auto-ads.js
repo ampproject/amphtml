@@ -46,6 +46,7 @@ import {getServicePromiseForDoc} from '../../../src/service';
 import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
 import {setStyle} from '../../../src/style';
 import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
+import {toggleAttribute} from '../../../src/dom';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads';
@@ -313,13 +314,11 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       const {DESKTOP_PANELS} = Attributes;
       this.adBadgeContainer_.removeAttribute(DESKTOP_PANELS);
       // TODO(#33969) can no longer be null when launched.
-      this.progressBarBackground_ &&
-        this.progressBarBackground_.removeAttribute(DESKTOP_PANELS);
+      this.progressBarBackground_?.removeAttribute(DESKTOP_PANELS);
 
       if (uiState === UIType.DESKTOP_PANELS) {
         this.adBadgeContainer_.setAttribute(DESKTOP_PANELS, '');
-        this.progressBarBackground_ &&
-          this.progressBarBackground_.setAttribute(DESKTOP_PANELS, '');
+        this.progressBarBackground_?.setAttribute(DESKTOP_PANELS, '');
       }
     });
   }
@@ -395,9 +394,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return;
     }
 
-    isPaused
-      ? this.progressBarBackground_.setAttribute(Attributes.PAUSED, '')
-      : this.progressBarBackground_.removeAttribute(Attributes.PAUSED);
+    toggleAttribute(this.progressBarBackground_, Attributes.PAUSED, isPaused);
   }
 
   /**
