@@ -94,7 +94,7 @@ export class FollowButton {
   /**
    * Determine the height of the contents to allow resizing after first layout.
    *
-   * @return {!Promise<number|null>}
+   * @return {!Promise<?number>}
    */
   height() {
     return Promise.resolve(null);

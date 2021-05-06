@@ -405,7 +405,7 @@ requirement: {
 
   # 3p ads are OK
   allowlist: 'ads/vendors/adfox.js'
-  allowlist: 'ads/vendors/google/imaVideo.js'
+  allowlist: 'ads/vendors/google/ima/ima-video.js'
   allowlist: 'ads/vendors/netletix.js'
   allowlist: 'ads/vendors/yandex.js'
   allowlist: 'extensions/amp-access/0.1/amp-access-iframe.js' # False-positive
@@ -438,7 +438,7 @@ requirement: {
   # We would have to fix this to property obfuscated the 3p frame code.
   allowlist: '3p/iframe-messaging-client.js'
   allowlist: 'ads/google/deprecated_doubleclick.js'
-  allowlist: 'ads/google/imaVideo.js'
+  allowlist: 'ads/google/ima/ima-video.js'
 }
 
 requirement: {

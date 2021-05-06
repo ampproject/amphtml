@@ -55,7 +55,7 @@ const generateRandomId = randomIdGenerator(100000);
 
 /**
  * @param {!AccordionDef.AccordionProps} props
- * @param {{current: (!AccordionDef.AccordionApi|null)}} ref
+ * @param {{current: ?AccordionDef.AccordionApi}} ref
  * @return {PreactDef.Renderable}
  */
 function AccordionWithRef(

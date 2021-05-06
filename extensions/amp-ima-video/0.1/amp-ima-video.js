@@ -15,7 +15,7 @@
  */
 
 import {Deferred} from '../../../src/core/data-structures/promise';
-import {ImaPlayerData} from '../../../ads/google/ima-player-data';
+import {ImaPlayerData} from '../../../ads/google/ima/ima-player-data';
 import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
@@ -367,12 +367,12 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /** @override */
   play(unusedIsAutoplay) {
-    this.sendCommand_('playVideo');
+    this.sendCommand_('play');
   }
 
   /** @override */
   pause() {
-    this.sendCommand_('pauseVideo');
+    this.sendCommand_('pause');
   }
 
   /** @override */
@@ -382,7 +382,7 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /** @override */
   unmute() {
-    this.sendCommand_('unMute');
+    this.sendCommand_('unmute');
   }
 
   /** @override */
@@ -397,7 +397,7 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /** @override */
   fullscreenEnter() {
-    this.sendCommand_('enterFullscreen');
+    this.sendCommand_('requestFullscreen');
   }
 
   /** @override */
