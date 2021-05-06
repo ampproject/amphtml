@@ -1,5 +1,5 @@
 import htmlParser from 'posthtml-parser';
-import {writeAstToDocument, renderElement} from '../index';
+import {writeAstToDocument, renderElement, writeDocumentToAst} from '../index';
 
 describe('amp-layout', () => {
   it('layout=fixed.', () => {
@@ -66,4 +66,30 @@ describe('writeAstToDocument', () => {
   });
 
   it.todo('should handle binding notation for amp-bind');
+});
+
+describe('writeDocumentToAst', () => {
+  it('should handle empty AST', () => {
+    const html = '';
+    const inputAst = htmlParser(html);
+    const outputAst = writeDocumentToAst(writeAstToDocument(inputAst));
+
+    expect(outputAst).toEqual(inputAst);
+  });
+
+  it('should handle single node', () => {
+    const html = '<div></div>';
+    const inputAst = htmlParser(html);
+    const outputAst = writeDocumentToAst(writeAstToDocument(inputAst));
+
+    expect(outputAst).toEqual(inputAst);
+  });
+
+  it('should handle nested nodes', () => {
+    const html = '<body><div><img></div><h1>title</h1></body>';
+    const inputAst = htmlParser(html);
+    const outputAst = writeDocumentToAst(writeAstToDocument(inputAst));
+
+    expect(outputAst).toEqual(inputAst);
+  });
 });
