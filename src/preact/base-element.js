@@ -193,7 +193,7 @@ const IS_EMPTY_TEXT_NODE = (node) =>
  */
 export class PreactBaseElement extends AMP.BaseElement {
   /** @override @nocollapse */
-  static V1() {
+  static R1() {
     return true;
   }
 
@@ -1082,7 +1082,13 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
         continue;
       }
       const def = propDefs[match];
-      const {single, name = match, clone, props: slotProps = {}} = def;
+      const {
+        as = false,
+        single,
+        name = match,
+        clone,
+        props: slotProps = {},
+      } = def;
       devAssert(clone || Ctor['usesShadowDom']);
       const parsedSlotProps = {};
       parsePropDefs(
@@ -1098,10 +1104,12 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
         props[name] = createSlot(
           childElement,
           childElement.getAttribute('slot') || `i-amphtml-${name}`,
-          parsedSlotProps
+          parsedSlotProps,
+          as
         );
       } else {
         const list = props[name] || (props[name] = []);
+        devAssert(!as);
         list.push(
           clone
             ? createShallowVNodeCopy(childElement)

@@ -51,7 +51,7 @@ export class ScrollManager {
     /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
     this.mutator_ = Services.mutatorForDoc(root.ampdoc);
 
-    /** @private {!UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.viewportOnChangedUnlistener_ = null;
 
     /** @private {!Observable<!./scroll-manager.ScrollEventDef>} */

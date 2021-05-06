@@ -42,6 +42,12 @@ module.exports = {
             'from': 'src',
             'except': ['./core', './context'],
           },
+          {
+            // Disallow importing non-core dependencies into polyfills
+            'target': 'src/polyfills',
+            'from': 'src',
+            'except': ['./core', './polyfills'],
+          },
         ],
       },
     ],
@@ -54,13 +60,18 @@ module.exports = {
         './preact/base-element.js',
         './preact/slot.js',
         './context/node.js',
+        './polyfills/fetch.js',
+        './polyfills/get-bounding-client-rect.js',
         // TEMPORARY, follow tracking issue #33631
         './preact/component/3p-frame.js',
       ],
       'rules': {'import/no-restricted-paths': isCiBuild() ? 0 : 1},
     },
     {
-      'files': ['./core/window.extern.js'],
+      'files': [
+        './core/window.extern.js',
+        './polyfills/custom-elements.extern.js',
+      ],
       'rules': {'local/no-global': 0},
     },
   ],

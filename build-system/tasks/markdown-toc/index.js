@@ -84,7 +84,7 @@ function isolateCommentJson(maybeComment) {
 
 /**
  * @param {string} content
- * @return {Promise<string|null>}
+ * @return {Promise<?string>}
  */
 async function overrideToc(content) {
   const headerMatch = content.match(headerRegexp);

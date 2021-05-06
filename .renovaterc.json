@@ -20,16 +20,14 @@
     {
       "groupName": "subpackage devDependencies",
       "matchPaths": ["**/*"],
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "major": {"groupName": null},
+      "major": {"automerge": false, "assignAutomerge": false},
       "automerge": true,
       "assignAutomerge": true
     },
     {
       "groupName": "build-system devDependencies",
       "matchPaths": ["build-system/**"],
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "major": {"groupName": null},
+      "major": {"automerge": false, "assignAutomerge": false},
       "labels": ["WG: infra"],
       "automerge": true,
       "assignAutomerge": true
@@ -37,74 +35,75 @@
     {
       "groupName": "validator devDependencies",
       "matchPaths": ["validator/**"],
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "major": {"groupName": null},
+      "major": {"automerge": false, "assignAutomerge": false},
       "labels": ["WG: caching"],
       "automerge": true,
       "assignAutomerge": true
     },
     {
+      "groupName": "validator webui",
+      "matchPaths": ["validator/js/webui/**"],
+      "enabled": false
+    },
+    {
       "groupName": "core devDependencies",
-      "matchPaths": ["+(package.json)"],
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "major": {"groupName": null},
+      "matchFiles": ["package.json"],
+      "major": {"automerge": false, "assignAutomerge": false},
       "labels": ["WG: infra"],
       "automerge": true,
       "assignAutomerge": true
     },
     {
       "groupName": "linting devDependencies",
+      "matchFiles": ["package.json"],
       "matchPackagePatterns": ["\\b(prettier|eslint)\\b"],
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "major": {"groupName": null},
+      "major": {"automerge": false, "assignAutomerge": false},
       "labels": ["WG: infra"],
       "automerge": true,
       "assignAutomerge": true
     },
     {
       "groupName": "babel devDependencies",
+      "matchFiles": ["package.json"],
       "matchPackagePatterns": ["\\bbabel"],
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "major": {"groupName": null},
+      "major": {"automerge": false, "assignAutomerge": false},
       "labels": ["WG: infra", "WG: performance"],
       "automerge": true,
       "assignAutomerge": true
     },
     {
       "groupName": "esbuild devDependencies",
+      "matchFiles": ["package.json"],
       "matchPackagePatterns": ["\\besbuild\\b"],
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "major": {"groupName": null},
+      "major": {"automerge": false, "assignAutomerge": false},
       "labels": ["WG: infra", "WG: performance"],
       "automerge": true,
       "assignAutomerge": true
     },
     {
       "groupName": "ampproject devDependencies",
+      "matchFiles": ["package.json"],
       "matchPackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["devDependencies"],
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "major": {"groupName": null},
-      "labels": ["WG: bento", "WG: performance"],
+      "major": {"automerge": false, "assignAutomerge": false},
+      "labels": ["WG: bento", "WG: components", "WG: performance"],
       "automerge": true,
       "assignAutomerge": true
     },
     {
       "groupName": "ampproject dependencies",
+      "matchFiles": ["package.json"],
       "matchPackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["dependencies"],
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "major": {"groupName": null},
       "labels": ["WG: bento", "WG: components", "WG: performance"],
       "automerge": false,
       "assignAutomerge": false
     },
     {
       "groupName": "core dependencies",
+      "matchFiles": ["package.json"],
       "excludePackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["dependencies"],
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "major": {"groupName": null},
       "labels": ["WG: bento", "WG: components", "WG: performance"],
       "automerge": false,
       "assignAutomerge": false

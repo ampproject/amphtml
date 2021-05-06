@@ -421,20 +421,21 @@ function main() {
               '          message in validator.proto.',
           'color')
       .parse(process.argv);
-  if (program.args.length === 0) {
+  const opts = program.opts();
+  if (opts.length === 0) {
     program.outputHelp();
     process.exit(1);
   }
-  if (program.html_format !== 'AMP' && program.html_format !== 'AMP4ADS' &&
-      program.html_format !== 'AMP4EMAIL') {
+  if (opts.html_format !== 'AMP' && opts.html_format !== 'AMP4ADS' &&
+      opts.html_format !== 'AMP4EMAIL') {
     process.stderr.write(
         '--html_format must be set to "AMP", "AMP4ADS", or "AMP4EMAIL".\n',
         function() {
           process.exit(1);
         });
   }
-  if (program.format !== 'color' && program.format !== 'text' &&
-      program.format !== 'json') {
+  if (opts.format !== 'color' && opts.format !== 'text' &&
+      opts.format !== 'json') {
     process.stderr.write(
         '--format must be set to "color", "text", or "json".\n', function() {
           process.exit(1);
@@ -446,12 +447,12 @@ function main() {
     if (item === '-') {
       inputs.push(readFromStdin());
     } else if (isHttpOrHttpsUrl(item)) {
-      inputs.push(readFromUrl(item, program.userAgent));
+      inputs.push(readFromUrl(item, opts.userAgent));
     } else {
       inputs.push(readFromFile(item));
     }
   }
-  getInstance(program.validator_js, program.userAgent)
+  getInstance(opts.validator_js, opts.userAgent)
       .then(function(validator) {
         return validator.init().then(() => validator);
       })
@@ -462,19 +463,19 @@ function main() {
               let hasError = false;
               for (let ii = 0; ii < resolvedInputs.length; ii++) {
                 const validationResult = validator.validateString(
-                    resolvedInputs[ii], program.html_format);
-                if (program.format === 'json') {
+                    resolvedInputs[ii], opts.html_format);
+                if (opts.format === 'json') {
                   jsonOut[program.args[ii]] = validationResult;
                 } else {
                   logValidationResult(
                       program.args[ii], validationResult,
-                      program.format === 'color' ? true : false);
+                      opts.format === 'color' ? true : false);
                 }
                 if (validationResult.status !== 'PASS') {
                   hasError = true;
                 }
               }
-              if (program.format === 'json') {
+              if (opts.format === 'json') {
                 process.stdout.write(
                     JSON.stringify(jsonOut) + '\n', function() {
                       process.exit(hasError ? 1 : 0);
@@ -491,7 +492,7 @@ function main() {
             })
             .catch(function(error) {
               process.stderr.write(
-                  (program.format == 'color' ? colors.red(error.message) :
+                  (opts.format == 'color' ? colors.red(error.message) :
                     error.message) +
                       '\n',
                   function() {
@@ -501,7 +502,7 @@ function main() {
       })
       .catch(function(error) {
         process.stderr.write(
-            (program.format == 'color' ? colors.red(error.message) :
+            (opts.format == 'color' ? colors.red(error.message) :
               error.message) +
                 '\n',
             function() {

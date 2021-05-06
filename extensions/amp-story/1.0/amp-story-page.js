@@ -566,7 +566,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.maybeStartAnimations_();
       this.checkPageHasAudio_();
       this.checkPageHasElementWithPlayback_();
-      this.renderOpenAttachmentUI_();
       this.findAndPrepareEmbeddedComponents_();
     }
 
@@ -586,6 +585,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.getViewport().onResize(
       debounce(this.win, () => this.onResize_(), RESIZE_TIMEOUT_MS)
     );
+
+    this.renderOpenAttachmentUI_();
+
     return Promise.all([
       this.beforeVisible(),
       this.waitForMediaLayout_(),
@@ -1745,9 +1747,17 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
+    // To prevent 'title' attribute from being used by browser, copy value to 'data-title' and remove.
+    if (attachmentEl.hasAttribute('title')) {
+      attachmentEl.setAttribute(
+        'data-title',
+        attachmentEl.getAttribute('title')
+      );
+      attachmentEl.removeAttribute('title');
+    }
+
     if (!this.openAttachmentEl_) {
       this.openAttachmentEl_ = renderPageAttachmentUI(
-        this.win,
         this.element,
         attachmentEl
       );

@@ -213,7 +213,7 @@ export function padStart(s, targetLength, padString) {
 
 /**
  * Tests if a value is a string.
- * @param {string} s
+ * @param {?} s
  * @return {boolean}
  */
 export function isString(s) {

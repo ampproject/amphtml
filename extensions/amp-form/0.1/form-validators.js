@@ -93,7 +93,7 @@ export class FormValidator {
 
     /**
      * Tribool indicating last known validity of form.
-     * @private {boolean|null}
+     * @private {?boolean}
      */
     this.formValidity_ = null;
   }
