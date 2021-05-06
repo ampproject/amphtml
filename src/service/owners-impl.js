@@ -114,7 +114,7 @@ export class OwnersImpl {
    * @private
    */
   findResourcesInElements_(parentResource, elements, callback) {
-    for (let element of elements) {
+    for (const element of elements) {
       devAssert(parentResource.element.contains(element));
       this.discoverResourcesForElement_(element, callback);
     }
