@@ -15,7 +15,7 @@
  */
 
 import '../amp-ima-video';
-import * as imaVideoObj from '../../../../ads/google/imaVideo';
+import * as imaVideoObj from '../../../../ads/google/ima/ima-video';
 
 import {CONSENT_POLICY_STATE} from '../../../../src/core/constants/consent-state';
 import {Services} from '../../../../src/services';
