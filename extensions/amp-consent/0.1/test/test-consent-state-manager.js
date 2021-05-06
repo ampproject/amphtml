@@ -20,12 +20,8 @@ import {
   constructConsentInfo,
   constructMetadata,
 } from '../consent-info';
-import {
-  CONSENT_STORAGE_MAX,
-  ConsentInstance,
-  ConsentStateManager,
-} from '../consent-state-manager';
 import {CONSENT_STRING_TYPE} from '../../../../src/core/constants/consent-state';
+import {ConsentInstance, ConsentStateManager} from '../consent-state-manager';
 import {Services} from '../../../../src/services';
 import {dev} from '../../../../src/log';
 import {macroTask} from '../../../../testing/yield';
@@ -191,35 +187,6 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
             constructMetadata(),
             {'purpose-abc': PURPOSE_CONSENT_STATE.ACCEPTED},
             true
-          )
-        );
-      });
-
-      it('update consent string that exceeds max size', async () => {
-        expectAsyncConsoleError(/Cannot store consent information/);
-        manager.registerConsentInstance('test', {});
-        let testStr = 'a';
-        // Reserve 26 chars to metadata size `"m":{"cst":1,"ac":"12345"}`
-        // Reserve 36 chars to the storage key, `''` and `{}`
-        // Leaves CONSENT_STORAGE_MAX - 62 chars to consent string
-        for (let i = 0; i < CONSENT_STORAGE_MAX - 62; i++) {
-          testStr += 'a';
-        }
-        manager.updateConsentInstancePurposes({
-          'purpose-abc': PURPOSE_CONSENT_STATE.ACCEPTED,
-        });
-        manager.updateConsentInstanceState(
-          CONSENT_ITEM_STATE.ACCEPTED,
-          testStr,
-          constructMetadata(CONSENT_STRING_TYPE.TCF_V1, '12345')
-        );
-        const value = await manager.getConsentInstanceInfo();
-        expect(value).to.deep.equal(
-          constructConsentInfo(
-            CONSENT_ITEM_STATE.ACCEPTED,
-            testStr,
-            constructMetadata(CONSENT_STRING_TYPE.TCF_V1, '12345'),
-            {'purpose-abc': PURPOSE_CONSENT_STATE.ACCEPTED}
           )
         );
       });
@@ -496,38 +463,6 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
           await macroTask();
           expect(storageSetSpy).to.not.be.called;
           expect(storageRemoveSpy).to.be.calledOnce;
-        });
-
-        it('remove consentInfo when consentStr length exceeds', function* () {
-          expectAsyncConsoleError(/Cannot store consent information/);
-          let testStr = 'a';
-          // Reserve 26 chars to metadata size `"m":{"cst":1,"ac":"12345"}`
-          // Reserve 36 chars to the storage key, `''` and `{}`
-          // Leaves CONSENT_STORAGE_MAX - 62 chars to consent string
-          for (let i = 0; i < CONSENT_STORAGE_MAX - 62; i++) {
-            testStr += 'a';
-          }
-          instance.update(
-            CONSENT_ITEM_STATE.ACCEPTED,
-            testStr,
-            undefined,
-            constructMetadata(CONSENT_STRING_TYPE.TCF_V1, '12345')
-          );
-          yield macroTask();
-          expect(storageSetSpy).to.not.be.called;
-          expect(storageRemoveSpy).to.be.calledOnce;
-        });
-
-        it('allows large consentInfo when not using viewer storage API', async () => {
-          usesViewer = false;
-          let testStr = 'a';
-          for (let i = 0; i < CONSENT_STORAGE_MAX - 62; i++) {
-            testStr += 'a';
-          }
-          instance.update(CONSENT_ITEM_STATE.ACCEPTED, testStr);
-          await macroTask();
-          expect(storageSetSpy).to.be.calledOnce;
-          expect(storageRemoveSpy).to.not.be.called;
         });
       });
 
