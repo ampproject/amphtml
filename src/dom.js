@@ -936,6 +936,7 @@ export function domOrderComparator(element1, element2) {
  * @param {boolean=} forced Whether the attribute should be forced on/off. If
  *    not specified, it will be toggled from the current state.
  * @return {boolean} Whether or not the element now has the attribute.
+ * @suppress {uselessCode}
  */
 export function toggleAttribute(element, name, forced) {
   if (IS_ESM) {

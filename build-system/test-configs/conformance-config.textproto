@@ -19,12 +19,6 @@ requirement: {
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'toggleAttribute is not supported in IE and iOS prior to 13.3. Switch to setAttribute and removeAttribute.'
-  value: 'Element.prototype.toggleAttribute'
-}
-
-requirement: {
-  type: BANNED_PROPERTY_CALL
   error_message: 'Use closestAncestorElementBySelector in src/dom.js'
   value: 'Element.prototype.closest'
   allowlist: 'src/dom.js'
