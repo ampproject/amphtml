@@ -2985,5 +2985,6 @@ AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
   AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
+  AMP.registerElement('amp-story-page-outlink', AmpStoryPageAttachment);
   AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });
