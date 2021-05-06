@@ -673,13 +673,14 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(openAttachmentEl.getAttribute('target')).to.eql('_top');
   });
 
-  it('should build the new default outlink page attachment UI with target="_top" to navigate in top window', async () => {
+  it('should build the new outlink page attachment UI with target="_top" to navigate in top level browsing context', async () => {
     toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
 
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
     );
     attachmentEl.setAttribute('layout', 'nodisplay');
+    attachmentEl.setAttribute('href', 'google.com');
     element.appendChild(attachmentEl);
 
     page.buildCallback();
@@ -807,7 +808,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
       'amp-story-page-attachment'
     );
     attachmentEl.setAttribute('layout', 'nodisplay');
-    attachmentEl.setAttribute('data-cta-text', 'Custom label');
+    attachmentEl.setAttribute('cta-text', 'Custom label');
     element.appendChild(attachmentEl);
 
     page.buildCallback();
@@ -818,6 +819,26 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
       '.i-amphtml-story-page-open-attachment-label'
     );
     expect(openAttachmentLabelEl.textContent).to.equal('Custom label');
+  });
+
+  it('should use cta-text attribute when data-cta-text also exist', async () => {
+    const attachmentEl = win.document.createElement(
+      'amp-story-page-attachment'
+    );
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    attachmentEl.setAttribute('cta-text', 'CTA text');
+    attachmentEl.setAttribute('data-cta-text', 'data CTA text');
+    element.appendChild(attachmentEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentLabelEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment-label'
+    );
+
+    expect(openAttachmentLabelEl.textContent).to.equal('CTA text');
   });
 
   it('should start tracking media performance when entering the page', async () => {

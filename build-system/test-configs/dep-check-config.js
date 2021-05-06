@@ -145,7 +145,7 @@ exports.rules = [
       // Some ads need to depend on json.js
       'ads/**->src/json.js',
       // IMA, similar to other non-Ad 3Ps above, needs access to event-helper
-      'ads/google/imaVideo.js->src/event-helper.js',
+      'ads/google/ima/ima-video.js->src/event-helper.js',
     ],
   },
   {
@@ -245,17 +245,15 @@ exports.rules = [
       'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-comments/1.0/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
 
-      // Bento AMP Youtube
-      'extensions/amp-youtube/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
-      'extensions/amp-youtube/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
+      // VideoBaseElement, VideoIframe and VideoWrapper are meant to be shared.
+      'extensions/**->extensions/amp-video/1.0/base-element.js',
+      'extensions/**->extensions/amp-video/1.0/video-iframe.js',
 
-      // Bento Vimeo
-      'extensions/amp-vimeo/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
-      'extensions/amp-vimeo/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
+      // <amp-video-iframe> versions share this message API definition.
+      'extensions/amp-video-iframe/**->extensions/amp-video-iframe/amp-video-iframe-api.js',
 
-      // Shared definition of Vimeo API
-      'extensions/amp-vimeo/0.1/amp-vimeo.js->extensions/amp-vimeo/vimeo-api.js',
-      'extensions/amp-vimeo/1.0/component.js->extensions/amp-vimeo/vimeo-api.js',
+      // <amp-vimeo> versions share this message API definition.
+      'extensions/amp-vimeo/**->extensions/amp-vimeo/vimeo-api.js',
 
       // Amp geo in group enum
       'extensions/amp-a4a/0.1/amp-a4a.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
@@ -435,30 +433,6 @@ exports.rules = [
     mustNotDependOn: 'src/base-element.js',
   },
   {
-    filesMatching: 'src/polyfills/*.js',
-    mustNotDependOn: '**/*.js',
-    allowlist: [
-      'src/polyfills/fetch.js->src/log.js',
-      'src/polyfills/fetch.js->src/json.js',
-      'src/polyfills/fetch.js->src/core/types/index.js',
-      'src/polyfills/fetch.js->src/core/types/object.js',
-      'src/polyfills/fetch.js->src/utils/bytes.js',
-      'src/polyfills/intersection-observer.js->src/polyfills/stubs/intersection-observer-stub.js',
-      'src/polyfills/resize-observer.js->src/polyfills/stubs/resize-observer-stub.js',
-      'src/polyfills/custom-elements.js->src/core/data-structures/promise.js',
-    ],
-  },
-  {
-    filesMatching: 'src/polyfills/stubs/**/*.js',
-    mustNotDependOn: '**/*.js',
-    allowlist: [
-      'src/polyfills/stubs/intersection-observer-stub.js->src/services.js',
-      'src/polyfills/stubs/intersection-observer-stub.js->src/core/data-structures/promise.js',
-      'src/polyfills/stubs/resize-observer-stub.js->src/services.js',
-      'src/polyfills/stubs/resize-observer-stub.js->src/core/data-structures/promise.js',
-    ],
-  },
-  {
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/polyfills/*.js',
     allowlist: [
@@ -468,22 +442,24 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/object-values.js',
       '3p/polyfills.js->src/polyfills/promise.js',
       '3p/polyfills.js->src/polyfills/string-starts-with.js',
-      'src/polyfills.js->src/polyfills/abort-controller.js',
-      'src/polyfills.js->src/polyfills/domtokenlist.js',
-      'src/polyfills.js->src/polyfills/document-contains.js',
-      'src/polyfills.js->src/polyfills/fetch.js',
-      'src/polyfills.js->src/polyfills/math-sign.js',
-      'src/polyfills.js->src/polyfills/object-assign.js',
-      'src/polyfills.js->src/polyfills/object-values.js',
-      'src/polyfills.js->src/polyfills/promise.js',
-      'src/polyfills.js->src/polyfills/array-includes.js',
-      'src/polyfills.js->src/polyfills/string-starts-with.js',
-      'src/polyfills.js->src/polyfills/custom-elements.js',
-      'src/polyfills.js->src/polyfills/intersection-observer.js',
-      'src/polyfills.js->src/polyfills/resize-observer.js',
-      'src/polyfills.js->src/polyfills/map-set.js',
-      'src/polyfills.js->src/polyfills/set-add.js',
-      'src/polyfills.js->src/polyfills/weakmap-set.js',
+      'src/amp.js->src/polyfills/index.js',
+      'src/polyfills/index.js->src/polyfills/abort-controller.js',
+      'src/polyfills/index.js->src/polyfills/domtokenlist.js',
+      'src/polyfills/index.js->src/polyfills/document-contains.js',
+      'src/polyfills/index.js->src/polyfills/fetch.js',
+      'src/polyfills/index.js->src/polyfills/get-bounding-client-rect.js',
+      'src/polyfills/index.js->src/polyfills/math-sign.js',
+      'src/polyfills/index.js->src/polyfills/object-assign.js',
+      'src/polyfills/index.js->src/polyfills/object-values.js',
+      'src/polyfills/index.js->src/polyfills/promise.js',
+      'src/polyfills/index.js->src/polyfills/array-includes.js',
+      'src/polyfills/index.js->src/polyfills/string-starts-with.js',
+      'src/polyfills/index.js->src/polyfills/custom-elements.js',
+      'src/polyfills/index.js->src/polyfills/intersection-observer.js',
+      'src/polyfills/index.js->src/polyfills/resize-observer.js',
+      'src/polyfills/index.js->src/polyfills/map-set.js',
+      'src/polyfills/index.js->src/polyfills/set-add.js',
+      'src/polyfills/index.js->src/polyfills/weakmap-set.js',
       'src/friendly-iframe-embed.js->src/polyfills/abort-controller.js',
       'src/friendly-iframe-embed.js->src/polyfills/custom-elements.js',
       'src/friendly-iframe-embed.js->src/polyfills/document-contains.js',
@@ -494,8 +470,20 @@ exports.rules = [
   },
   {
     filesMatching: '**/*.js',
-    mustNotDependOn: 'src/polyfills.js',
-    allowlist: ['src/amp.js->src/polyfills.js'],
+    mustNotDependOn: 'src/polyfills/index.js',
+    allowlist: ['src/amp.js->src/polyfills/index.js'],
+  },
+
+  // Base assertions should never be used explicitly; only the user/dev wrappers
+  // or the Log class should have access to the base implementations.
+  {
+    filesMatching: '**/*.js',
+    mustNotDependOn: 'src/core/assert/base.js',
+    allowlist: [
+      'src/core/assert/dev.js->src/core/assert/base.js',
+      'src/core/assert/user.js->src/core/assert/base.js',
+      'src/log.js->src/core/assert/base.js',
+    ],
   },
 
   // Rules for main src.

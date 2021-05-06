@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-/** @fileoverview */
+/** @fileoverview Installs polyfills depending on build environment. */
 
-import {install as installAbortController} from './polyfills/abort-controller';
-import {install as installArrayIncludes} from './polyfills/array-includes';
-import {install as installCustomElements} from './polyfills/custom-elements';
-import {install as installDOMTokenList} from './polyfills/domtokenlist';
-import {install as installDocContains} from './polyfills/document-contains';
-import {install as installFetch} from './polyfills/fetch';
+import {install as installAbortController} from './abort-controller';
+import {install as installArrayIncludes} from './array-includes';
+import {install as installCustomElements} from './custom-elements';
+import {install as installDOMTokenList} from './domtokenlist';
+import {install as installDocContains} from './document-contains';
+import {install as installFetch} from './fetch';
 import {install as installGetBoundingClientRect} from './get-bounding-client-rect';
-import {install as installIntersectionObserver} from './polyfills/intersection-observer';
-import {install as installMapSet} from './polyfills/map-set';
-import {install as installMathSign} from './polyfills/math-sign';
-import {install as installObjectAssign} from './polyfills/object-assign';
-import {install as installObjectValues} from './polyfills/object-values';
-import {install as installPromise} from './polyfills/promise';
-import {install as installResizeObserver} from './polyfills/resize-observer';
-import {install as installSetAdd} from './polyfills/set-add';
-import {install as installStringStartsWith} from './polyfills/string-starts-with';
-import {install as installWeakMapSet} from './polyfills/weakmap-set';
+import {install as installIntersectionObserver} from './intersection-observer';
+import {install as installMapSet} from './map-set';
+import {install as installMathSign} from './math-sign';
+import {install as installObjectAssign} from './object-assign';
+import {install as installObjectValues} from './object-values';
+import {install as installPromise} from './promise';
+import {install as installResizeObserver} from './resize-observer';
+import {install as installSetAdd} from './set-add';
+import {install as installStringStartsWith} from './string-starts-with';
+import {install as installWeakMapSet} from './weakmap-set';
 
 if (!IS_ESM) {
   installFetch(self);

@@ -47,7 +47,7 @@ function usePropRef(prop) {
 
 /**
  * @param {!VideoIframeDef.Props} props
- * @param {{current: (T|null)}} ref
+ * @param {{current: ?T}} ref
  * @return {PreactDef.Renderable}
  * @template T
  */
@@ -193,7 +193,7 @@ export {VideoIframeInternal};
  * VideoWrapper using an <iframe> for implementation.
  * Usable on the AMP layer through VideoBaseElement.
  * @param {VideoIframeDef.Props} props
- * @param {{current: T|null}} ref
+ * @param {{current: (?T)}} ref
  * @return {PreactDef.Renderable}
  * @template T
  */

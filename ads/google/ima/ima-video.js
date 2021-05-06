@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-import {CONSENT_POLICY_STATE} from '../../src/core/constants/consent-state';
+import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
 import {ImaPlayerData} from './ima-player-data';
-import {camelCaseToTitleCase, px, setStyle, setStyles} from '../../src/style';
-import {getData} from '../../src/event-helper';
-import {isObject} from '../../src/core/types';
-import {loadScript} from '../../3p/3p';
-import {throttle} from '../../src/core/types/function';
-import {tryParseJson} from '../../src/json';
+import {
+  camelCaseToTitleCase,
+  px,
+  setStyle,
+  setStyles,
+} from '../../../src/style';
+import {getData} from '../../../src/event-helper';
+import {isObject} from '../../../src/core/types';
+import {loadScript} from '../../../3p/3p';
+import {throttle} from '../../../src/core/types/function';
+import {tryParseJson} from '../../../src/json';
 
 /**
  * Possible player states.
@@ -1470,7 +1475,7 @@ function onMessage(global, event) {
     return;
   }
   switch (msg['func']) {
-    case 'playVideo':
+    case 'play':
       if (adsActive || playbackStarted) {
         playVideo();
       } else {
@@ -1478,13 +1483,13 @@ function onMessage(global, event) {
         onBigPlayClick(global);
       }
       break;
-    case 'pauseVideo':
+    case 'pause':
       pauseVideo();
       break;
     case 'mute':
       muteVideo();
       break;
-    case 'unMute':
+    case 'unmute':
       unmuteVideo();
       break;
     case 'hideControls':
@@ -1526,7 +1531,7 @@ function onMessage(global, event) {
         requestAds();
       }
       break;
-    case 'enterFullscreen':
+    case 'requestFullscreen':
       if (fullscreen) {
         return;
       }

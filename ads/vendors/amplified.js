@@ -79,10 +79,10 @@ function setAmplifiedParams(global) {
     ps: 1,
     'if': 1,
     ii: 1,
-    mo: global.params.mobile_optimized ? global.params.subtag : false,
+    mo: false,
   };
-  if (queryParams.d) {
-    adParams.d = queryParams.d;
+  if (queryParams.cf_ad) {
+    adParams.d = queryParams.cf_ad;
   }
   global.adParams = adParams;
 }
