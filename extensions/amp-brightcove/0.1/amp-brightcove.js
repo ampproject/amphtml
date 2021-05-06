@@ -367,9 +367,8 @@ class AmpBrightcove extends AMP.BaseElement {
     el.setAttribute('data-param-playsinline', 'true');
 
     if (el.hasAttribute('data-param-autoplay')) {
-      el.removeAttribute('style');
+      el.removeAttribute('data-param-autoplay');
     }
-
     // Pass through data-param-* attributes as params for plugin use
     return addParamsToUrl(src, getDataParamsFromAttributes(el));
   }
