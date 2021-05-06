@@ -782,7 +782,7 @@ export class AmpStoryPlayer {
 
       renderPromise = this.render_();
 
-      if (options?.animate != undefined) {
+      if (options.animate === false) {
         this.rootEl_.classList.toggle(
           CLASS_NO_NAVIGATION_TRANSITION,
           !options.animate
@@ -995,7 +995,7 @@ export class AmpStoryPlayer {
 
     let showPromise = Promise.resolve();
     if (this.currentIdx_ !== newStory.idx) {
-      showPromise = this.show(newStory.href, null, options);
+      showPromise = this.show(newStory.href, /* pageId */ null, options);
     }
 
     showPromise.then(() => {
