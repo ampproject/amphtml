@@ -97,6 +97,7 @@ export function getWinOrigin(win) {
  */
 export function parseUrlDeprecated(url, opt_nocache) {
   if (IS_ESM) {
+    cache = null;
     return parseUrlWithA(a, url, null);
   }
 
@@ -122,7 +123,8 @@ export function parseUrlDeprecated(url, opt_nocache) {
  */
 export function parseUrlWithA(a, url, opt_cache) {
   if (IS_ESM) {
-    return /** @type {?} */ (new URL(url, ''));
+    a.href = '';
+    return /** @type {?} */ (new URL(url, a.href));
   }
 
   if (opt_cache && opt_cache.has(url)) {
