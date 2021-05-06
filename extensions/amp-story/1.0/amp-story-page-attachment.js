@@ -14,23 +14,44 @@
  * limitations under the License.
  */
 
-import {Action, StateProperty} from './amp-story-store-service';
+import {Action, StateProperty, UIType} from './amp-story-store-service';
 import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {HistoryState, setHistoryState} from './history';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
+import {buildOpenAttachmentElementLinkIcon} from './amp-story-open-page-attachment';
 import {closest, removeElement} from '../../../src/dom';
 import {dev, devAssert} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getState} from '../../../src/history';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
-import {toggle} from '../../../src/style';
+import {setImportantStyles, toggle} from '../../../src/style';
+
 import {triggerClickFromLightDom} from './utils';
 
 /** @const {string} */
 const DARK_THEME_CLASS = 'i-amphtml-story-draggable-drawer-theme-dark';
+
+/**
+ * Distance to swipe before opening attachment.
+ * @const {number}
+ */
+const OPEN_THRESHOLD_PX = 150;
+
+/**
+ * Max pixels to transform the remote attachment URL preview. Equivilent to the height of preview element.
+ * @const {number}
+ */
+const DRAG_CAP_PX = 48;
+
+/**
+ * Max pixels to transform the remote attachment URL preview. Equivilent to the height of preview element.
+ * Used for the amp-story-outlink-page-attachment-v2 experiment.
+ * @const {number}
+ */
+const DRAG_CAP_PX_V2 = 56;
 
 /**
  * @enum {string}
@@ -73,10 +94,15 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   buildCallback() {
     super.buildCallback();
 
-    const theme = this.element.getAttribute('theme');
-    if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
-      this.headerEl_.classList.add(DARK_THEME_CLASS);
-      this.element.classList.add(DARK_THEME_CLASS);
+    const theme = this.element.getAttribute('theme')?.toLowerCase();
+    if (theme && AttachmentTheme.DARK === theme) {
+      if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+        this.headerEl_.setAttribute('theme', theme);
+        this.element.setAttribute('theme', theme);
+      } else {
+        this.headerEl_.classList.add(DARK_THEME_CLASS);
+        this.element.classList.add(DARK_THEME_CLASS);
+      }
     }
 
     // URL will be validated and resolved based on the canonical URL if relative
@@ -89,7 +115,11 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     }
 
     if (this.type_ === AttachmentType.REMOTE) {
-      this.buildRemote_();
+      if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+        this.buildRemoteV2_();
+      } else {
+        this.buildRemote_();
+      }
     }
 
     this.win.addEventListener('pageshow', (event) => {
@@ -160,8 +190,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildRemote_() {
-    this.setDragCap_(48 /* pixels */);
-    this.setOpenThreshold_(150 /* pixels */);
+    this.setDragCap_(DRAG_CAP_PX);
+    this.setOpenThreshold_(OPEN_THRESHOLD_PX);
 
     this.headerEl_.classList.add(
       'i-amphtml-story-draggable-drawer-header-attachment-remote'
@@ -183,6 +213,56 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       Services.urlForDoc(this.element).getSourceOrigin(
         this.element.getAttribute('href')
       );
+  }
+
+  /**
+   * Builds remote V2 page attachment's UI.
+   * @private
+   */
+  buildRemoteV2_() {
+    this.setDragCap_(DRAG_CAP_PX_V2);
+    this.setOpenThreshold_(OPEN_THRESHOLD_PX);
+
+    this.headerEl_.classList.add(
+      'i-amphtml-story-draggable-drawer-header-attachment-remote'
+    );
+    this.element.classList.add('i-amphtml-story-page-attachment-remote');
+    // Use an anchor element to make this a real link in vertical rendering.
+    const link = htmlFor(this.element)`
+      <a class="i-amphtml-story-page-attachment-remote-content" target="_blank">
+        <span class="i-amphtml-story-page-attachment-remote-title"><span ref="openStringEl"></span><span ref="urlStringEl"></span></span>
+        <svg class="i-amphtml-story-page-attachment-remote-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path d="M38 38H10V10h14V6H10c-2.21 0-4 1.79-4 4v28c0 2.21 1.79 4 4 4h28c2.21 0 4-1.79 4-4V24h-4v14zM28 6v4h7.17L15.51 29.66l2.83 2.83L38 12.83V20h4V6H28z"></path></svg>
+      </a>`;
+    const hrefAttr = this.element.getAttribute('href');
+    link.setAttribute('href', hrefAttr);
+    const {openStringEl, urlStringEl} = htmlRefs(link);
+
+    // Set image.
+    const openImgAttr = this.element.getAttribute('cta-image');
+    if (openImgAttr && openImgAttr !== 'none') {
+      const ctaImgEl = this.win.document.createElement('div');
+      ctaImgEl.classList.add('i-amphtml-story-page-attachment-remote-img');
+      setImportantStyles(ctaImgEl, {
+        'background-image': 'url(' + openImgAttr + ')',
+      });
+      link.prepend(ctaImgEl);
+    } else if (!openImgAttr) {
+      // Attach link icon SVG by default.
+      const linkImage = buildOpenAttachmentElementLinkIcon(link);
+      link.prepend(linkImage);
+    }
+
+    // Set url prevew text.
+    const localizationService = getLocalizationService(devAssert(this.element));
+    if (localizationService) {
+      const localizedOpenString = localizationService.getLocalizedString(
+        LocalizedStringId.AMP_STORY_OPEN_OUTLINK_TEXT
+      );
+      openStringEl.textContent = localizedOpenString;
+    }
+    urlStringEl.textContent = hrefAttr;
+
+    this.contentEl_.appendChild(link);
   }
 
   /**
@@ -282,23 +362,33 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   openRemote_() {
-    const animationEl = this.win.document.createElement('div');
-    animationEl.classList.add('i-amphtml-story-page-attachment-expand');
-    const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
+    const clickTarget = this.element.parentElement
+      .querySelector('.i-amphtml-story-page-open-attachment-host')
+      .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
 
-    this.mutateElement(() => {
-      storyEl.appendChild(animationEl);
-    }).then(() => {
-      // Give some time for the 120ms CSS animation to run (cf
-      // amp-story-page-attachment.css). The navigation itself will take some
-      // time, depending on the target and network conditions.
+    const isMobileUI =
+      this.storeService_.get(StateProperty.UI_STATE) === UIType.MOBILE;
+    // Shows outlink url preview on mobile only.
+    if (!isMobileUI) {
+      triggerClickFromLightDom(clickTarget, this.element);
+    } else {
+      const animationEl = this.win.document.createElement('div');
+      const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
+
+      this.mutateElement(() => {
+        clickTarget.classList.add(
+          'i-amphtml-story-page-open-attachment-opening'
+        );
+      });
+      // Play post-tap animation before opening link.
       this.win.setTimeout(() => {
-        const clickTarget = this.element.parentElement
-          .querySelector('.i-amphtml-story-page-open-attachment-host')
-          .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
+        this.mutateElement(() => {
+          animationEl.classList.add('i-amphtml-story-page-attachment-expand');
+          storyEl.appendChild(animationEl);
+        });
         triggerClickFromLightDom(clickTarget, this.element);
-      }, 50);
-    });
+      }, 1000);
+    }
   }
 
   /**

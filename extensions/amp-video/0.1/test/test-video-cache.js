@@ -36,9 +36,10 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
     env.win.document.head.appendChild(
       createExtensionScript(env.win, 'amp-cache-url', '0.1')
     );
-    env.sandbox
-      .stub(Services, 'documentInfoForDoc')
-      .returns({sourceUrl: 'https://example.com'});
+    env.sandbox.stub(Services, 'documentInfoForDoc').returns({
+      sourceUrl: 'https://example.com',
+      canonicalUrl: 'https://canonical.com',
+    });
   });
 
   describe('select sources', () => {
@@ -49,7 +50,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.win);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4'
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
       );
     });
 
@@ -60,7 +61,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.win);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4'
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
       );
     });
 
@@ -74,7 +75,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.win);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video2.mp4'
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video2.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
       );
     });
   });
@@ -87,7 +88,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.win);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://website-com.cdn.ampproject.org/mbv/s/website.com/video.html'
+        'https://website-com.cdn.ampproject.org/mbv/s/website.com/video.html?amp_video_host_url=https%3A%2F%2Fcanonical.com'
       );
     });
 
@@ -98,7 +99,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.win);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video.html'
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video.html?amp_video_host_url=https%3A%2F%2Fcanonical.com'
       );
     });
   });
