@@ -256,8 +256,8 @@ export class ImageViewer {
     } else {
       sourceElement
         .getImpl()
-        .then((elem) =>
-          propagateAttributes(ARIA_ATTRIBUTES, elem, this.image_)
+        .then((impl) =>
+          propagateAttributes(ARIA_ATTRIBUTES, impl.element, this.image_)
         );
     }
 
