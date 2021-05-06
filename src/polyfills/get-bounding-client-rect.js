@@ -21,8 +21,8 @@
  * @see https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/106812/
  */
 
-import {LayoutRectDef, layoutRectLtwh} from './layout-rect';
-import {isConnectedNode} from './dom';
+import {LayoutRectDef, layoutRectLtwh} from '../layout-rect';
+import {isConnectedNode} from '../dom';
 
 /**
  * Stores the native getBoundingClientRect before we patch it, so that the
@@ -34,6 +34,7 @@ let nativeClientRect;
  * Polyfill for Node.getBoundingClientRect API.
  * @this {!Element}
  * @return {!ClientRect|!LayoutRectDef}
+ * @suppress {suspiciousCode} due to IS_ESM inlining
  */
 function getBoundingClientRect() {
   // eslint-disable-next-line local/no-invalid-this
@@ -48,6 +49,7 @@ function getBoundingClientRect() {
  * Determines if this polyfill should be installed.
  * @param {!Window} win
  * @return {boolean}
+ * @suppress {uselessCode} due to IS_ESM inlining
  */
 function shouldInstall(win) {
   if (IS_ESM) {

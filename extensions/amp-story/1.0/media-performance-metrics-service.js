@@ -21,8 +21,8 @@ import {
 import {Services} from '../../../src/services';
 import {TickLabel} from '../../../src/core/constants/enums';
 import {dev} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {lastChildElement} from '../../../src/dom';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {lastChildElement, matches} from '../../../src/dom';
 import {registerServiceBuilder} from '../../../src/service';
 import {urls} from '../../../src/config';
 
@@ -45,6 +45,15 @@ const CacheState = {
   ORIGIN: 0, // Served from origin.
   ORIGIN_CACHE_MISS: 1, // Served from origin even though cache URL was present.
   CACHE: 2, // Served from cache.
+};
+
+/**
+ * Video is first page status.
+ * @enum
+ */
+const FirstPageState = {
+  NOT_ON_FIRST_PAGE: 0, // Video is not on the first page.
+  ON_FIRST_PAGE: 1, // Video is on the first page.
 };
 
 /**
@@ -217,6 +226,12 @@ export class MediaPerformanceMetricsService {
     this.performanceService_.tickDelta(
       TickLabel.VIDEO_CACHE_STATE,
       videoCacheState
+    );
+    this.performanceService_.tickDelta(
+      TickLabel.VIDEO_ON_FIRST_PAGE,
+      matches(media, `amp-story-page:first-of-type ${media.tagName}`)
+        ? FirstPageState.ON_FIRST_PAGE
+        : FirstPageState.NOT_ON_FIRST_PAGE
     );
 
     // If the media errored.

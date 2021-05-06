@@ -369,7 +369,14 @@ describe('Logging', () => {
       }
       expect(error).to.be.instanceof(Error);
       expect(error.message).to.equal('1 a 2 b 3' + USER_ERROR_SENTINEL);
-      expect(error.messageArray).to.deep.equal([1, 'a', 2, 'b', 3]);
+      expect(error.messageArray).to.deep.equal([
+        1,
+        'a',
+        2,
+        'b',
+        3,
+        USER_ERROR_SENTINEL,
+      ]);
     });
 
     it('should add element and assert info', () => {
