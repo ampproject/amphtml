@@ -277,7 +277,7 @@ describes.realWin(
             directive: 'will this highglight?',
           };
           const mockEvent = new CustomEvent('message');
-          mockEvent.origin = 'https://www.goøgle.com';
+          mockEvent.origin = 'https://not.valid.domain';
           mockEvent.data = message;
 
           win.dispatchEvent(mockEvent);
