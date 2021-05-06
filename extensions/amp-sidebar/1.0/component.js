@@ -212,9 +212,7 @@ export function SidebarToolbar({
     if (!win) {
       return;
     }
-    setMediaQuery(
-      isValidMediaQuery(win, mediaQueryProp) ? mediaQueryProp : null
-    );
+    setMediaQuery(sanitizeMediaQuery(win, mediaQueryProp));
   }, [mediaQueryProp]);
 
   useEffect(() => {
@@ -257,11 +255,6 @@ export function SidebarToolbar({
  * @param {string|undefined} query
  * @return {boolean}
  */
-function isValidMediaQuery(win, query) {
-  try {
-    win.matchMedia(query);
-    return true;
-  } catch {
-    return false;
-  }
+function sanitizeMediaQuery(win, query) {
+  return win.matchMedia(query).media;
 }
