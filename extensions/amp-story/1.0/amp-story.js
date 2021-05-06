@@ -444,7 +444,7 @@ export class AmpStory extends AMP.BaseElement {
       this.element.removeAttribute('title');
     }
 
-    // Remove text nodes which would be shown outside of the amp-story
+    // Remove text nodes which would be shown outside of the amp-story.
     const textNodes = childNodes(
       this.element,
       (node) => node.nodeType === Node.TEXT_NODE
