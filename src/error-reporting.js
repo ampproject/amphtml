@@ -119,13 +119,6 @@ function tryJsonStringify(value) {
 }
 
 /**
- * The true JS engine, as detected by inspecting an Error stack. This should be
- * used with the userAgent to tell definitely. I.e., Chrome on iOS is really a
- * Safari JS engine.
- */
-let detectedJsEngine;
-
-/**
  * @param {!Window} win
  * @param {*} error
  * @param {!Element=} opt_associatedElement
