@@ -253,7 +253,7 @@ export function SidebarToolbar({
 /**
  * @param {!Window} win
  * @param {string|undefined} query
- * @return {boolean}
+ * @return {string}
  */
 function sanitizeMediaQuery(win, query) {
   return win.matchMedia(query).media;
