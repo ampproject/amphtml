@@ -1017,13 +1017,10 @@ export class AmpStoryPlayer {
         ? StoryPosition.NEXT
         : StoryPosition.PREVIOUS;
 
-    return new Promise((resolve) => {
-      requestAnimationFrame(() => {
-        const {iframe} = story;
-        resetStyles(iframe, ['transform', 'transition']);
-        iframe.setAttribute('i-amphtml-iframe-position', position);
-        resolve();
-      });
+    requestAnimationFrame(() => {
+      const {iframe} = story;
+      resetStyles(iframe, ['transform', 'transition']);
+      iframe.setAttribute('i-amphtml-iframe-position', position);
     });
   }
 
@@ -1112,10 +1109,11 @@ export class AmpStoryPlayer {
           })
           // 5. Finally update the story position.
           .then(() => {
+            this.updatePosition_(story);
+
             if (story.distance === 0) {
               tryFocus(story.iframe);
             }
-            return this.updatePosition_(story);
           })
           .catch((err) => {
             if (err.includes(LOG_TYPE.DEV)) {
