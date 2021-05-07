@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Observable} from '@/data-structures/observable';
+import {Observable} from '@/src/core/data-structures/observable';
 
 describes.sandboxed('Observable', {}, () => {
   let observable;
