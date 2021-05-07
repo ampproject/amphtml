@@ -30,7 +30,7 @@ const {
   exitCtrlcHandler,
 } = require('../../common/ctrlcHandler');
 const {buildRuntime, getFilesFromArgv} = require('../../common/utils');
-const {cyan} = require('kleur/colors');
+const {cyan} = require('../../common/colors');
 const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
 const {isCiBuild, isCircleciBuild} = require('../../common/ci');
