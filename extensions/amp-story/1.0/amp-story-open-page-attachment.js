@@ -71,7 +71,7 @@ export const buildOpenInlineAttachmentElement = (element) =>
 const buildOpenOutlinkAttachmentElement = (element) =>
   htmlFor(element)`
     <a class="i-amphtml-story-page-open-attachment i-amphtml-amp-story-page-attachment-ui-v2" role="button" target="_top">
-      <svg class="i-amphtml-story-outlink-page-attachment-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 8" width="20px" height="8px"><polyline points="2,6.2 10,1.8 18,6.2" style="stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;fill:none"></polyline></svg>
+      <svg class="i-amphtml-story-outlink-page-attachment-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 8" width="20px" height="8px"><path d="M18,7.7c-0.2,0-0.5-0.1-0.7-0.2l-7.3-4l-7.3,4C2,7.9,1.1,7.7,0.7,6.9c-0.4-0.7-0.1-1.6,0.6-2l8-4.4c0.5-0.2,1-0.2,1.5,0l8,4.4c0.7,0.4,1,1.3,0.6,2C19,7.4,18.5,7.7,18,7.7z"></path></svg>
       <div class="i-amphtml-story-outlink-page-attachment-outlink-chip" ref="chipEl">
         <span class="i-amphtml-story-page-attachment-label" ref="ctaLabelEl"></span>
       </div>
