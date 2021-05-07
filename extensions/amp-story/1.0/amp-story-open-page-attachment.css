@@ -331,7 +331,7 @@
   display: block !important;
   cursor: pointer !important;
   margin-bottom: 10px !important;
-  fill: var(--i-amphtml-outlink-cta-background-color) !important;
+  stroke: var(--i-amphtml-outlink-cta-background-color) !important;
 }
 
 .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment[active] .i-amphtml-story-outlink-page-attachment-arrow {
