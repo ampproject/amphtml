@@ -30,6 +30,7 @@ const {runClosure} = require('./closure-compile');
 const {sanitize} = require('./sanitize');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
 const {writeSourcemaps} = require('./helpers');
+const {getBuildTimeConstants} = require('../tasks/helpers');
 
 const queue = [];
 let inProgress = 0;
@@ -49,9 +50,7 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS =
  *  verboseLogging?: boolean,
  *  typeCheckOnly?: boolean,
  *  skipUnknownDepsCheck?: boolean,
- *  warningLevel?: boolean,
- *  minify?: boolean,
- *  fortesting?: boolean,
+ *  warningLevel?: boolean
  * }}
  */
 let OptionsDef;
@@ -229,8 +228,9 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
   const define = [
     `VERSION=${internalRuntimeVersion}`,
     'AMP_MODE=true',
-    `IS_MINIFIED=true`,
-    `IS_FORTESTING=${options.fortesting}`,
+    ...Object.entries(getBuildTimeConstants(options)).map(
+      ([k, v]) => `${k}=${v}`
+    ),
   ];
   if (argv.pseudo_names) {
     define.push('PSEUDO_NAMES=true');

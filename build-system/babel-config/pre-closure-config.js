@@ -79,9 +79,6 @@ function getPreClosureConfig() {
           {isEsmBuild: !!argv.esm},
         ]
       : null,
-    !(isFortesting || isCheckTypes)
-      ? './build-system/babel-plugins/babel-plugin-is_fortesting-constant-transformer'
-      : null,
   ].filter(Boolean);
   const presetEnv = [
     '@babel/preset-env',

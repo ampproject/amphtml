@@ -461,11 +461,7 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       footer,
       incremental: !!options.watch,
       logLevel: 'silent',
-      define: {
-        ...experimentDefines,
-        IS_MINIFIED: 'false',
-        IS_FORTESTING: `${options.fortesting}`,
-      },
+      define: getBuildTimeConstants(options),
     })
     .then((result) => {
       finishBundle(srcFilename, destDir, destFilename, options, startTime);
@@ -543,10 +539,7 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
         incremental: !!options.watch,
         logLevel: 'silent',
         external: options.externalDependencies,
-        define: {
-          IS_MINIFIED: `${options.minify}`,
-          IS_FORTESTING: `${options.fortesting}`,
-        },
+        define: getBuildTimeConstants(options),
       });
     } else {
       result = await result.rebuild();
@@ -859,6 +852,21 @@ async function getDependencies(entryPoint, options) {
   return Object.keys(result.metafile?.inputs);
 }
 
+function getBuildTimeConstants(options) {
+  return {
+    ...experimentDefines,
+    IS_FORTESTING: options.fortesting,
+    IS_MINIFIED: options.minify,
+
+    // We build on the idea that SxG is an upgrade to the ESM build.
+    // Therefore, all conditions set by ESM will also hold for SxG.
+    // However, we will also need to introduce a separate IS_SxG flag
+    // for conditions only true for SxG.
+    IS_ESM: argv.esm || argv.sxg,
+    IS_SXG: argv.sxg,
+  };
+}
+
 module.exports = {
   MINIFIED_TARGETS,
   applyAmpConfig,
@@ -876,4 +884,5 @@ module.exports = {
   printConfigHelp,
   printNobuildHelp,
   watchDebounceDelay,
+  getBuildTimeConstants,
 };

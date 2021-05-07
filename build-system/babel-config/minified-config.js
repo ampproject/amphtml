@@ -72,9 +72,6 @@ function getMinifiedConfig() {
           './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
           {isEsmBuild: !!argv.esm},
         ],
-    argv.fortesting
-      ? null
-      : './build-system/babel-plugins/babel-plugin-is_fortesting-constant-transformer',
   ].filter(Boolean);
   const presetEnv = [
     '@babel/preset-env',
