@@ -137,42 +137,44 @@ function SidebarWithRef(
   }, [opened, close]);
 
   return (
-    <div className={objstr({[classes.unmounted]: !mounted})} part="wrapper">
-      <ContainWrapper
-        as={Comp}
-        ref={sidebarRef}
-        size={false}
-        layout={true}
-        paint={true}
-        part="sidebar"
-        wrapperClassName={objstr({
-          [classes.sidebar]: true,
-          [classes.defaultSidebarStyles]: true,
-          [classes.left]: side === Side.LEFT,
-          [classes.right]: side !== Side.LEFT,
-        })}
-        role="menu"
-        tabindex="-1"
-        hidden={!side}
-        {...rest}
-      >
-        {children}
-      </ContainWrapper>
-      <div
-        ref={backdropRef}
-        onClick={() => close()}
-        part="backdrop"
-        style={backdropStyle}
-        className={objstr({
-          [classes.backdrop]: true,
-          [classes.defaultBackdropStyles]: true,
-          [backdropClassName]: backdropClassName,
-        })}
-        hidden={!side}
-      >
-        <div className={classes.backdropOverscrollBlocker}></div>
-      </div>
-    </div>
+    mounted && (
+      <>
+        <ContainWrapper
+          as={Comp}
+          ref={sidebarRef}
+          size={false}
+          layout={true}
+          paint={true}
+          part="sidebar"
+          wrapperClassName={objstr({
+            [classes.sidebar]: true,
+            [classes.defaultSidebarStyles]: true,
+            [classes.left]: side === Side.LEFT,
+            [classes.right]: side !== Side.LEFT,
+          })}
+          role="menu"
+          tabindex="-1"
+          hidden={!side}
+          {...rest}
+        >
+          {children}
+        </ContainWrapper>
+        <div
+          ref={backdropRef}
+          onClick={() => close()}
+          part="backdrop"
+          style={backdropStyle}
+          className={objstr({
+            [classes.backdrop]: true,
+            [classes.defaultBackdropStyles]: true,
+            [backdropClassName]: backdropClassName,
+          })}
+          hidden={!side}
+        >
+          <div className={classes.backdropOverscrollBlocker}></div>
+        </div>
+      </>
+    )
   );
 }
 

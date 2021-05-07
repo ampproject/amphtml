@@ -21,7 +21,7 @@ import {mount} from 'enzyme';
 
 describes.sandboxed('Sidebar preact component', {}, (env) => {
   const isOpened = (sidebarElement) => {
-    return !sidebarElement.className.includes('unmounted');
+    return !!sidebarElement;
   };
 
   describe('basic actions', () => {
@@ -106,7 +106,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       wrapper.update();
 
       const contentElement = wrapper.find(Sidebar).getDOMNode()
-        .firstElementChild.firstElementChild;
+        .firstElementChild;
       expect(contentElement.textContent).to.equal('Content');
     });
 
@@ -114,8 +114,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       openButton.getDOMNode().click();
       wrapper.update();
 
-      const sidebarElement = wrapper.find(Sidebar).getDOMNode()
-        .firstElementChild;
+      const sidebarElement = wrapper.find(Sidebar).getDOMNode();
       const backdropElement = sidebarElement.nextSibling;
 
       expect(sidebarElement.className.includes('default')).to.be.true;
@@ -155,8 +154,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       openButton.getDOMNode().click();
       wrapper.update();
 
-      const sidebarElement = wrapper.find(Sidebar).getDOMNode()
-        .firstElementChild;
+      const sidebarElement = wrapper.find(Sidebar).getDOMNode();
       const backdropElement = sidebarElement.nextSibling;
 
       expect(sidebarElement.style.color).to.equal('rgb(1, 1, 1)');
@@ -193,7 +191,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       wrapper.update();
       sidebar = wrapper.find(Sidebar);
 
-      const sidebarNode = sidebar.getDOMNode().firstElementChild;
+      const sidebarNode = sidebar.getDOMNode();
       expect(sidebarNode.className.includes('right')).to.be.true;
     });
 
@@ -220,7 +218,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       wrapper.update();
       sidebar = wrapper.find(Sidebar);
 
-      let sidebarNode = sidebar.getDOMNode().firstElementChild;
+      let sidebarNode = sidebar.getDOMNode();
       expect(sidebarNode.className.includes('right')).to.be.true;
 
       // default to left
@@ -243,7 +241,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       wrapper.update();
       sidebar = wrapper.find(Sidebar);
 
-      sidebarNode = sidebar.getDOMNode().firstElementChild;
+      sidebarNode = sidebar.getDOMNode();
       expect(sidebarNode.className.includes('left')).to.be.true;
 
       document.dir = documentDir;
@@ -681,7 +679,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       document.body.removeChild(target);
     });
 
-    it('toolbar target receives content when media query is true', () => {
+    it.only('toolbar target receives content when media query is true', () => {
       // this media query is always true
       mediaQuery = '';
       wrapper = mount(
