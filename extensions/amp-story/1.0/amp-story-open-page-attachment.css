@@ -332,6 +332,7 @@
   cursor: pointer !important;
   margin-bottom: 10px !important;
   fill: var(--i-amphtml-outlink-cta-background-color) !important;
+  filter: drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3)) !important;
 }
 
 .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment[active] .i-amphtml-story-outlink-page-attachment-arrow {
@@ -385,6 +386,7 @@
   border-radius: 30px !important;
   background: var(--i-amphtml-outlink-cta-background-color) !important;
   place-items: center !important;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, .15) !important;
 }
 
 .i-amphtml-story-outlink-page-attachment-img {
