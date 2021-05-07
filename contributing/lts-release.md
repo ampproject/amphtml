@@ -4,7 +4,7 @@ The **lts** release channel provides a previous **stable** build for one-month i
 
 In the event that the second Monday of the month falls during a [release freeze](https://github.com/ampproject/amphtml/blob/main/contributing/release-schedule.md#release-freezes) (such as on one of the major US holidays), the promotion will be performed after the end of the release freeze.
 
-> Note: The **lts** release channel is available only to AMP Websites and AMP Stories; it is not available to AMP for Email or AMP for Ads.
+> Note: The **lts** release channel is available only to AMP Websites and AMP Stories; it is not available to AMP Email or AMP Ads.
 
 ## How to Opt-In
 
