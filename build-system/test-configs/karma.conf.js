@@ -17,7 +17,6 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {dotWrappingWidth} = require('../common/logging');
-const {getBuildTimeConstants} = require('../compile/build-constants');
 const {isCiBuild} = require('../common/ci');
 
 const TEST_SERVER_PORT = 8081;
@@ -36,9 +35,6 @@ module.exports = {
   frameworks: ['fixture', 'mocha', 'source-map-support'],
 
   preprocessors: {}, // Dynamically populated based on tests being run.
-  esbuild: {
-    define: getBuildTimeConstants(),
-  },
 
   hostname: 'localhost',
 

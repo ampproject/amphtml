@@ -35,6 +35,7 @@ const {createKarmaServer, getAdTypes} = require('./helpers');
 const {cyan, green, red, yellow} = require('kleur/colors');
 const {dotWrappingWidth} = require('../../common/logging');
 const {getEsbuildBabelPlugin} = require('../../common/esbuild-babel');
+const {getEsbuildConstants} = require('../../compile/build-constants');
 const {getFilesFromArgv} = require('../../common/utils');
 const {isCiBuild, isCircleciBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
@@ -134,7 +135,7 @@ class RuntimeTestConfig {
         browsers: ['Firefox_flags'],
         customLaunchers: {
           // eslint-disable-next-line
-        Firefox_flags: {
+          Firefox_flags: {
             base: 'Firefox',
             flags: argv.headless ? ['-headless'] : [],
           },
@@ -175,7 +176,7 @@ class RuntimeTestConfig {
         browsers: ['Chrome_flags'],
         customLaunchers: {
           // eslint-disable-next-line
-        Chrome_flags: {
+          Chrome_flags: {
             base: 'Chrome',
             flags: chromeFlags,
           },
@@ -311,6 +312,7 @@ class RuntimeTestConfig {
       define: {
         'process.env.NODE_DEBUG': 'false',
         'process.env.NODE_ENV': '"test"',
+        ...getEsbuildConstants(),
       },
       plugins: [importPathPlugin, babelPlugin],
       sourcemap: 'inline',

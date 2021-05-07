@@ -15,22 +15,41 @@
  */
 const argv = require('minimist')(process.argv.slice(2));
 const experimentDefines = require('../global-configs/experiments-const.json');
+const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
 function getBuildTimeConstants() {
   return {
     ...experimentDefines,
-    IS_FORTESTING: !!argv.fortesting,
-    IS_MINIFIED: !!argv.compiled,
+    IS_FORTESTING: String(!!argv.fortesting),
+    IS_MINIFIED: String(!!argv.compiled),
+    VERSION: String(internalRuntimeVersion),
+    AMP_MODE: true,
 
     // We build on the idea that SxG is an upgrade to the ESM build.
     // Therefore, all conditions set by ESM will also hold for SxG.
     // However, we will also need to introduce a separate IS_SxG flag
     // for conditions only true for SxG.
-    IS_ESM: !!(argv.esm || argv.sxg),
-    IS_SXG: !!argv.sxg,
+    IS_ESM: String(!!(argv.esm || argv.sxg)),
+    IS_SXG: String(!!argv.sxg),
   };
 }
 
+// Esbuild requires map of string --> string.
+function getEsbuildConstants() {
+  return Object.fromEntries(
+    Object.entries(getBuildTimeConstants()).map(([key, val]) => [
+      key,
+      String(val),
+    ])
+  );
+}
+
+// Closure requires a series of arrays.
+function getClosureConstants() {
+  return Object.entries(getBuildTimeConstants()).map(([k, v]) => `${k}=${v}`);
+}
+
 module.exports = {
-  getBuildTimeConstants,
+  getEsbuildConstants,
+  getClosureConstants,
 };
