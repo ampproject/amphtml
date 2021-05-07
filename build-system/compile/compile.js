@@ -22,6 +22,7 @@ const path = require('path');
 const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {CLOSURE_SRC_GLOBS} = require('./sources');
 const {cpus} = require('os');
+const {getBuildTimeConstants} = require('./build-constants');
 const {green, cyan} = require('kleur/colors');
 const {log, logLocalDev} = require('../common/logging');
 const {postClosureBabel} = require('./post-closure-babel');
@@ -30,7 +31,6 @@ const {runClosure} = require('./closure-compile');
 const {sanitize} = require('./sanitize');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
 const {writeSourcemaps} = require('./helpers');
-const {getBuildTimeConstants} = require('./build-constants');
 
 const queue = [];
 let inProgress = 0;
@@ -228,7 +228,7 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
   const define = [
     `VERSION=${internalRuntimeVersion}`,
     'AMP_MODE=true',
-    ...Object.entries(getBuildTimeConstants(options)).map(
+    ...Object.entries(getBuildTimeConstants()).map(
       ([k, v]) => `${k}=${v}`
     ),
   ];

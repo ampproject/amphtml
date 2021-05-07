@@ -30,6 +30,7 @@ const {
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
+const {getBuildTimeConstants} = require('../compile/build-constants');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {green, red, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
@@ -37,7 +38,6 @@ const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {watch} = require('chokidar');
-const {getBuildTimeConstants} = require('../compile/build-constants');
 
 /** @type {Remapping.default} */
 const remapping = /** @type {*} */ (Remapping);
@@ -461,7 +461,7 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       footer,
       incremental: !!options.watch,
       logLevel: 'silent',
-      define: getBuildTimeConstants(options),
+      define: getBuildTimeConstants(),
     })
     .then((result) => {
       finishBundle(srcFilename, destDir, destFilename, options, startTime);
@@ -539,7 +539,7 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
         incremental: !!options.watch,
         logLevel: 'silent',
         external: options.externalDependencies,
-        define: getBuildTimeConstants(options),
+        define: getBuildTimeConstants(),
       });
     } else {
       result = await result.rebuild();
