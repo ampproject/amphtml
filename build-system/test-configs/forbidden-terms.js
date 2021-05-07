@@ -96,8 +96,13 @@ const forbiddenTermsGlobal = {
       'css/ampshared.css',
     ],
   },
-  'describe\\.only': '',
-  'describes.*\\.only': '',
+  'describe\\.only': {
+    message: 'Please remove all instances of describe.only',
+    allowlist: ['testing/describes.js'],
+  },
+  'describes.*\\.only': {
+    message: 'Please remove all instances of describes.only',
+  },
   'dev\\(\\)\\.assert\\(': 'Use the devAssert function instead.',
   '[^.]user\\(\\)\\.assert\\(': 'Use the userAssert function instead.',
   'it\\.only': '',
@@ -647,7 +652,7 @@ const forbiddenTermsGlobal = {
       'Use of `this.skip()` is forbidden in test files. Use ' +
       '`this.skipTest()` from within a `before()` block instead. See #17245.',
     checkInTestFolder: true,
-    allowlist: ['test/_init_tests.js'],
+    allowlist: ['testing/_init_tests.js'],
   },
   '[^\\.]makeBodyVisible\\(': {
     message:
@@ -685,7 +690,7 @@ const forbiddenTermsGlobal = {
       'build-system/server/app-index/test/test-self.js',
       'build-system/server/app-index/test/test-template.js',
       'build-system/server/app-index/test/test.js',
-      'test/_init_tests.js',
+      'testing/_init_tests.js',
       'test/e2e/test-controller-promise.js',
       'test/e2e/test-expect.js',
       'validator/js/engine/amp4ads-parse-css_test.js',

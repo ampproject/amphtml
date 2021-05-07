@@ -309,7 +309,6 @@ module.exports = {
     {
       'files': [
         '**/test-*',
-        '**/_init_tests.js',
         '**/*_test.js',
         '**/testing/**',
       ],
