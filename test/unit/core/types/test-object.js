@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as object from '@amp/core/types/object';
+import * as object from '@/types/object';
 
 describes.sandboxed('type helpers - objects', {}, () => {
   it('hasOwn', () => {

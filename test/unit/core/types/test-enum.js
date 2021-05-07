@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {isEnumValue} from '@amp/core/types/enum';
+import {isEnumValue} from '@/types/enum';
 
 describes.sandboxed('type helpers - enums', {}, () => {
   describe('isEnumValue', () => {

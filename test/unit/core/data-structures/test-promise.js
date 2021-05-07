@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as PromiseUtils from '@amp/core/data-structures/promise';
+import * as PromiseUtils from '@/data-structures/promise';
 
 describes.sandboxed('PromiseUtils', {}, () => {
   function getPromiseObject() {

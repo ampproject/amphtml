@@ -22,7 +22,7 @@ import {
   pushIfNotExist,
   remove,
   toArray,
-} from '@amp/core/types/array';
+} from '@/types/array';
 
 describes.sandboxed('type helpers - arrays', {}, () => {
   describe('toArray', () => {

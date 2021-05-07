@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {elementStringOrPassThru} from '@amp/core/error-message-helpers';
-import {includes} from '@amp/core/types/string';
-import {isArray, isElement, isEnumValue, isString} from '@amp/core/types';
-import {remove} from '@amp/core/types/array';
+import {elementStringOrPassThru} from '@/error-message-helpers';
+import {includes} from '@/types/string';
+import {isArray, isElement, isEnumValue, isString} from '@/types';
+import {remove} from '@/types/array';
 
 /**
  * @fileoverview This file provides the base implementation for assertion
