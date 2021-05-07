@@ -113,25 +113,10 @@ export class AmpViewerIntegration {
       );
     }
 
-    if (
-      'fragmentDirective' in document &&
-      isExperimentOn(this.win, 'enable-text-fragments')
-    ) {
-      this.win.addEventListener('message', (e) => {
-        if (
-          e.origin !== 'https://www.google.com' ||
-          !e.data?.directive?.length
-        ) {
-          return;
-        }
-        this.updateUrlWithTextFragment_(e.data.directive);
-      });
-    } else {
-      /** @type {?HighlightInfoDef} */
-      const highlightInfo = getHighlightParam(ampdoc);
-      if (highlightInfo) {
-        this.highlightHandler_ = new HighlightHandler(ampdoc, highlightInfo);
-      }
+    /** @type {?HighlightInfoDef} */
+    const highlightInfo = getHighlightParam(ampdoc);
+    if (highlightInfo) {
+      this.highlightHandler_ = new HighlightHandler(ampdoc, highlightInfo);
     }
 
     const port = new WindowPortEmulator(
@@ -145,14 +130,6 @@ export class AmpViewerIntegration {
       origin,
       new Messaging(this.win, port, this.isWebView_, messagingToken)
     );
-  }
-
-  /**
-   * @param {string} fragment
-   * @private
-   */
-  updateUrlWithTextFragment_(fragment) {
-    window.location.replace('#:~:' + fragment);
   }
 
   /**

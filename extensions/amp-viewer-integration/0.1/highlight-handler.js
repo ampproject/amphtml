@@ -17,6 +17,7 @@
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/core/types/object';
 import {findSentences, markTextRangeList} from './findtext';
+import {isExperimentOn} from '../../../src/experiments';
 import {listenOnce} from '../../../src/event-helper';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {once} from '../../../src/core/types/function';
@@ -150,9 +151,22 @@ export class HighlightHandler {
     /** @private {?Array<!Element>} */
     this.highlightedNodes_ = null;
 
-    whenDocumentReady(ampdoc.win.document).then(() => {
-      this.initHighlight_(highlightInfo);
-    });
+    if (
+      'fragmentDirective' in document &&
+      isExperimentOn(this.win, 'enable-text-fragments')
+    ) {
+      ampdoc.whenFirstVisible().then(() => {
+        const sentences = highlightInfo['sentences'];
+        const fragment = sentences
+          .map((text) => 'text=' + encodeURIComponent(text))
+          .join('&');
+        ampdoc.win.location.replace('#:~:' + fragment);
+      });
+    } else {
+      whenDocumentReady(ampdoc.win.document).then(() => {
+        this.initHighlight_(highlightInfo);
+      });
+    }
   }
 
   /**
