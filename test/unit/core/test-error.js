@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {duplicateErrorIfNecessary, rethrowAsync} from '#core/error';
+import {duplicateErrorIfNecessary, rethrowAsync} from '@amp/core/error';
 import {isUserErrorMessage, user} from '../../../src/log';
 
 describes.sandboxed('errors', {}, () => {

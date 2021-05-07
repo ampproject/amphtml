@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isElement} from '#core/types';
+import {isElement} from '@amp/core/types';
 
 /**
  * Triple zero width space.

@@ -24,7 +24,7 @@ import {
   isString,
   padStart,
   trimEnd,
-} from '#core/types/string';
+} from '@amp/core/types/string';
 
 describes.sandboxed('type helpers - strings', {}, () => {
   describe('dashToCamelCase', () => {

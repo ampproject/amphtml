@@ -28,7 +28,7 @@ function getImportResolver() {
       'root': ['.'],
       'alias': {
         // DO NOT ADD TO THIS
-        '#core': './src/core',
+        '@amp/core': './src/core',
         '#extensions': './extensions',
         '#polyfills': './src/polyfills',
       },

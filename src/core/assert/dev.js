@@ -15,7 +15,7 @@
  */
 
 import * as assertions from './base';
-import {isMinifiedMode} from '#core/minified-mode';
+import {isMinifiedMode} from '@amp/core/minified-mode';
 
 /**
  * @fileoverview This file provides the entrypoint for dev assertions. It's

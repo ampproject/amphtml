@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {escapeCssSelectorIdent, prependSelectorsWith} from '#core/dom/css';
+import {escapeCssSelectorIdent, prependSelectorsWith} from '@amp/core/dom/css';
 
 describes.sandboxed('CSS', {}, () => {
   describe('escapeCssSelectorIdent', () => {

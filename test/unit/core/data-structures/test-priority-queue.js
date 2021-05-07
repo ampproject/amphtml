@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import PriorityQueue from '#core/data-structures/priority-queue';
+import PriorityQueue from '@amp/core/data-structures/priority-queue';
 
 describes.sandboxed('PriorityQueue', {}, () => {
   let pq;
