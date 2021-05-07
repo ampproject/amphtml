@@ -137,8 +137,23 @@ function getReplaceGlobalsPlugin() {
   ];
 }
 
+/**
+ * Plugin config for import mapping (in compilation only, not browser).
+ * @return {!Array<string|Object>}
+ */
+function getImportResolverPlugin() {
+  return [
+    'module-resolver',
+    {
+      'root': ['.'],
+      'alias': {'@': '.'},
+    },
+  ];
+}
+
 module.exports = {
   getExperimentConstant,
   getReplacePlugin,
   getReplaceGlobalsPlugin,
+  getImportResolverPlugin,
 };

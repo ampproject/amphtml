@@ -27,6 +27,9 @@ module.exports = ({config}) => {
       path.join(__dirname, '../node_modules'),
       path.join(__dirname, '../../../../node_modules'),
     ],
+    alias: {
+      '@': path.join(__dirname, '../../../..'),
+    },
   };
   config.module = {
     rules: [

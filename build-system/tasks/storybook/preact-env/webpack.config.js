@@ -31,6 +31,7 @@ module.exports = ({config}) => {
     alias: {
       'react': 'preact/compat',
       'react-dom': 'preact/compat',
+      '@': path.join(__dirname, '../../../..'),
     },
   };
   config.module = {

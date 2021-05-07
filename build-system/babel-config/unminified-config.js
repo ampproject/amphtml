@@ -19,7 +19,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
-const {getImportResolver} = require('./import-resolver');
+const {getImportResolverPlugin} = require('./helpers');
 const {getReplacePlugin} = require('./helpers');
 
 /**
@@ -50,7 +50,7 @@ function getUnminifiedConfig() {
   ];
   const replacePlugin = getReplacePlugin();
   const unminifiedPlugins = [
-    getImportResolver(),
+    getImportResolverPlugin(),
     argv.coverage ? 'babel-plugin-istanbul' : null,
     replacePlugin,
     './build-system/babel-plugins/babel-plugin-transform-json-import',
