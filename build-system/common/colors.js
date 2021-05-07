@@ -15,22 +15,16 @@
  */
 const colors = require('kleur/colors');
 
-/**@type {Record<keyof typeof colors, (input?: string | boolean | number | string[] | number[] | boolean []) => string>}   */
+/**
+ * @fileoverview kleur/color provides a collection of untyped color formatting
+ * functions. This file provides a generically typed wrapper for each of them in
+ * order to satisfy our type checks without changing any functionality. For more
+ * info, see https://github.com/lukeed/kleur/blob/master/colors.{mjs,d.ts}.
+ */
 module.exports = Object.entries(colors).reduce((map, [key, formatter]) => {
-  if (key === 'enabled') {
-    map[key] = formatter;
-    return map;
-  }
-  map[key] = function (input) {
-    if (!input) {
-      return `${input}`;
-    }
-
-    if (input instanceof Array) {
-      return /** @type {function} */ (formatter)(input.join(' '));
-    }
-
-    return /** @type {function} */ (formatter)(input);
-  };
+  map[key] =
+    typeof formatter == 'function'
+      ? (txt) => /** @type {function} */ (formatter)(txt)
+      : formatter;
   return map;
-}, /**@type {Record<keyof typeof colors, (input?: string | boolean | number | string[] | number[] | boolean []) => string>}   */ ({}));
+}, /**@type {Record<keyof typeof colors, (input?: *) => string>} */ ({}));
