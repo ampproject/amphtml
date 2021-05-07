@@ -18,7 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
 const path = require('path');
-const {green, yellow, cyan, red} = require('kleur/colors');
+const {green, yellow, cyan, red} = require('../../common/colors');
 const {isCiBuild} = require('../../common/ci');
 const {log, logWithoutTimestamp} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');

@@ -16,7 +16,7 @@
 'use strict';
 
 const fs = require('fs').promises;
-const {cyan, red, green} = require('kleur/colors');
+const {cyan, red, green} = require('../common/colors');
 const {log} = require('../common/logging');
 
 const DEV_ASSERT_SENTINEL = '__devAssert_sentinel__';

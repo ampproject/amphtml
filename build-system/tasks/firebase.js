@@ -19,7 +19,7 @@ const path = require('path');
 const {clean} = require('./clean');
 const {doBuild} = require('./build');
 const {doDist} = require('./dist');
-const {green} = require('kleur/colors');
+const {green} = require('../common/colors');
 const {log} = require('../common/logging');
 
 /**

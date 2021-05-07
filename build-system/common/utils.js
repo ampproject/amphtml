@@ -23,7 +23,7 @@ const {default: ignore} = require('ignore');
 const {doBuild} = require('../tasks/build');
 const {doDist} = require('../tasks/dist');
 const {gitDiffNameOnlyMain} = require('./git');
-const {green, cyan, red, yellow} = require('kleur/colors');
+const {green, cyan, red, yellow} = require('./colors');
 const {log, logLocalDev} = require('./logging');
 
 /**

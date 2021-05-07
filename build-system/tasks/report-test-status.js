@@ -23,7 +23,7 @@ const {
   isGithubActionsBuild,
 } = require('../common/ci');
 const {ciJobUrl} = require('../common/ci');
-const {cyan, yellow} = require('kleur/colors');
+const {cyan, yellow} = require('../common/colors');
 const {determineBuildTargets, Targets} = require('../pr-check/build-targets');
 const {getValidExperiments} = require('../common/utils');
 const {gitCommitHash} = require('../common/git');
