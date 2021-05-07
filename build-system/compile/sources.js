@@ -155,7 +155,7 @@ const CLOSURE_SRC_GLOBS = [
   '!third_party/babel/custom-babel-helpers.js',
   // Exclude since it's not part of the runtime/extension binaries.
   '!extensions/amp-access/0.1/amp-login-done.js',
-  'builtins/**.js',
+  'builtins/**/*.js',
   // 'node_modules/core-js/modules/**.js',
   // Not sure what these files are, but they seem to duplicate code
   // one level below and confuse the compiler.

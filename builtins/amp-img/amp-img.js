@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {BaseElement} from '../src/base-element';
-import {Layout, isLayoutSizeDefined} from '../src/layout';
-import {ReadyState} from '../src/core/constants/ready-state';
-import {Services} from '../src/services';
-import {dev} from '../src/log';
-import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
-import {listen} from '../src/event-helper';
-import {propagateObjectFitStyles, setImportantStyles} from '../src/style';
-import {registerElement} from '../src/service/custom-element-registry';
-import {removeElement, scopedQuerySelector} from '../src/dom';
+import {BaseElement} from '../../src/base-element';
+import {Layout, isLayoutSizeDefined} from '../../src/layout';
+import {ReadyState} from '../../src/core/constants/ready-state';
+import {Services} from '../../src/services';
+import {dev} from '../../src/log';
+import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../../src/utils/img';
+import {listen} from '../../src/event-helper';
+import {propagateObjectFitStyles, setImportantStyles} from '../../src/style';
+import {registerElement} from '../../src/service/custom-element-registry';
+import {removeElement, scopedQuerySelector} from '../../src/dom';
 
 /** @const {string} */
 const TAG = 'amp-img';

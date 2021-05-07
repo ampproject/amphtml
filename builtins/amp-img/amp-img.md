@@ -45,7 +45,7 @@ the `layout` attribute.
 [tip type="read-on"]
 
 Learn more about layouts in the
-[AMP HTML Layout System](../spec/amp-html-layout.md)
+[AMP HTML Layout System](../../spec/amp-html-layout.md)
 spec and
 [Supported Layouts](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout.html#the-layout-attribute).
 
@@ -362,7 +362,7 @@ amp-img {
 [filter formats="email"]
 
 Enable a lightbox effect on `amp-img` in email by using the
-[`amp-image-lightbox`](../extensions/amp-image-lightbox/amp-image-lightbox.md)
+[`amp-image-lightbox`](../../extensions/amp-image-lightbox/amp-image-lightbox.md)
 component with the `on` action.
 
 [/filter] <!-- formats="email" -->

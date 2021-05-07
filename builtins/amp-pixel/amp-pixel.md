@@ -60,7 +60,7 @@ When processing AMP URLs in the referrer header of analytics requests, strip out
 ### Substitutions
 
 The `amp-pixel` allows all standard URL variable substitutions.
-See the [Substitutions Guide](../spec/amp-var-substitutions.md) for more information.
+See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more information.
 
 In the following example, a request might be made to something like `https://foo.com/pixel?0.8390278471201` where the RANDOM value is randomly generated upon each impression.
 
