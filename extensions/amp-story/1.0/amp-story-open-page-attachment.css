@@ -212,11 +212,12 @@
   font-size: 16px !important;
   font-weight: 700 !important;
   letter-spacing: 0.3px;
-  line-height: 16px !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
   max-width: 210px !important;
+  /* Prevents clipping of decenders. */
+  line-height: 18px !important;
 }
 
 /** For amp-story-inline-page-attachment-v2 inline default. */
@@ -299,13 +300,13 @@
 .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
   --i-amphtml-outlink-cta-background-color: white !important;
   --i-amphtml-outlink-cta-text-color: black !important;
-  background: linear-gradient(0, rgba(0, 0, 0, 0.3), transparent) !important;
+  background: linear-gradient(0, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0)) !important;
 }
 
 [theme="dark"].i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
   --i-amphtml-outlink-cta-background-color: black !important;
   --i-amphtml-outlink-cta-text-color: white !important;
-  background: linear-gradient(0, rgba(255, 255, 255, 0.3), transparent) !important;
+  background: linear-gradient(0, rgba(255, 255, 255, .25), rgba(255, 255, 255, 0)) !important;
 }
 
 [href].i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
