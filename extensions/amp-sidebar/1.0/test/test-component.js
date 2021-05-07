@@ -681,7 +681,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       document.body.removeChild(target);
     });
 
-    it('toolbar target receives expected content from toolbar', () => {
+    it('toolbar target should receive expected content from toolbar', () => {
       // this media query is always true
       mediaQuery = '';
       wrapper = mount(
@@ -705,7 +705,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       expect(target.lastElementChild.nodeName).to.equal('STYLE');
     });
 
-    it('existing children in toolbar target are not overwritten', () => {
+    it('existing children in toolbar target should not be overwritten', () => {
       // this media query is always true
       mediaQuery = '';
       target.innerHTML = '<span>hello world<span>';
@@ -731,7 +731,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       expect(target.lastElementChild.nodeName).to.equal('STYLE');
     });
 
-    it('verify toolbar target content is removed on unmount', () => {
+    it('toolbar target content should be removed on unmount', () => {
       // this media query is always false
       mediaQuery = '(max-height: 0px)';
       wrapper = mount(
@@ -752,6 +752,54 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       expect(target.childElementCount).to.equal(2);
 
       wrapper.unmount();
+      expect(target.hasChildNodes()).to.be.false;
+    });
+
+    it('toolbar should sanitize an invalid media query', () => {
+      // this is an invalid media query
+      mediaQuery = 'foo {}';
+      wrapper = mount(
+        <>
+          <Sidebar ref={ref} side="left">
+            <div>Content</div>
+            <SidebarToolbar toolbar={mediaQuery} toolbarTarget="toolbar-target">
+              <ul>
+                <li>Toolbar Item 1</li>
+                <li>Toolbar Item 2</li>
+              </ul>
+            </SidebarToolbar>
+          </Sidebar>
+        </>
+      );
+
+      expect(target.hasChildNodes()).to.be.true;
+      expect(target.childElementCount).to.equal(2);
+      const styleElementText = target.lastElementChild.textContent;
+      expect(styleElementText).to.include('not all'); //sanitized media query
+      expect(styleElementText).not.to.include('foo'); //unsanitized media query
+    });
+
+    it('toolbar should sanitize the toolbar target attribute', () => {
+      // this media query is always true
+      mediaQuery = '';
+      const toolbarTarget = 'toolbar-target:.';
+      const getElementByIdSpy = env.sandbox.spy(document, 'getElementById');
+      wrapper = mount(
+        <>
+          <Sidebar ref={ref} side="left">
+            <div>Content</div>
+            <SidebarToolbar toolbar={mediaQuery} toolbarTarget={toolbarTarget}>
+              <ul>
+                <li>Toolbar Item 1</li>
+                <li>Toolbar Item 2</li>
+              </ul>
+            </SidebarToolbar>
+          </Sidebar>
+        </>
+      );
+
+      expect(getElementByIdSpy).to.be.calledOnce;
+      expect(getElementByIdSpy).to.be.calledWith('toolbar-target\\:\\.');
       expect(target.hasChildNodes()).to.be.false;
     });
   });

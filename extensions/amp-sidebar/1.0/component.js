@@ -212,6 +212,7 @@ export function SidebarToolbar({
     if (!win) {
       return;
     }
+
     setMediaQuery(sanitizeMediaQuery(win, mediaQueryProp));
   }, [mediaQueryProp]);
 
