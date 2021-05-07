@@ -150,7 +150,8 @@ export class HighlightHandler {
     /** @private {?Array<!Element>} */
     this.highlightedNodes_ = null;
 
-    whenDocumentReady(ampdoc.win.document).then(() => {
+    // whenDocumentReady(ampdoc.win.document).then(() => {
+    ampdoc.whenFirstVisible().then(() => {
       // this.initHighlight_(highlightInfo);
       const sentences = highlightInfo['sentences'];
       const fragment = sentences
