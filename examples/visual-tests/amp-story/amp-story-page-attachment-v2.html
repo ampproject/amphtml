@@ -7,6 +7,11 @@
         src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <script async custom-element="amp-video"
         src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+    <script>
+      (self.AMP = self.AMP || []).push(function(AMP) {
+        AMP.toggleExperiment('amp-story-page-attachment-ui-v2', true);
+      });
+    </script>
     <title>AMP Story page attachment</title>
     <meta name="viewport"
           content="width=device-width,minimum-scale=1,initial-scale=1">
@@ -58,7 +63,7 @@
         </amp-story-page-attachment>
       </amp-story-page>
 
-      <amp-story-page id="inline-custom-text">
+      <amp-story-page id="page1" id="inline-custom-text">
         <amp-story-page-attachment
           layout="nodisplay"
           cta-text="Custom text">
@@ -69,7 +74,7 @@
         </amp-story-page-attachment>
       </amp-story-page>
 
-      <amp-story-page id="inline-dark-theme">
+      <amp-story-page id="page2" id="inline-dark-theme">
         <amp-story-page-attachment
           layout="nodisplay"
           theme="dark">
@@ -80,7 +85,7 @@
         </amp-story-page-attachment>
       </amp-story-page>
 
-      <amp-story-page id="inline-dark-theme-1-image">
+      <amp-story-page id="page3" id="inline-dark-theme-1-image">
         <amp-story-page-attachment
           title="Lorem ipsum"
           layout="nodisplay"
@@ -94,7 +99,7 @@
         </amp-story-page-attachment>
       </amp-story-page>
 
-      <amp-story-page id="inline-dark-theme-2-images">
+      <amp-story-page id="page4" id="inline-dark-theme-2-images">
         <amp-story-page-attachment
           title="Lorem ipsum"
           layout="nodisplay"
@@ -109,7 +114,7 @@
         </amp-story-page-attachment>
       </amp-story-page>
 
-      <amp-story-page id="inline-light-theme-2-images">
+      <amp-story-page id="page5" id="inline-light-theme-2-images">
         <amp-story-page-attachment
           title="Lorem ipsum"
           layout="nodisplay"
@@ -123,12 +128,12 @@
         </amp-story-page-attachment>
       </amp-story-page>
 
-      <amp-story-page id="outlink-default">
+      <amp-story-page id="page6" id="outlink-default">
         <amp-story-page-attachment layout="nodisplay" href="https://google.com">
         </amp-story-page-attachment>
       </amp-story-page>
 
-      <amp-story-page id="outlink-custom-text">
+      <amp-story-page id="page7" id="outlink-custom-text">
         <amp-story-page-attachment
           layout="nodisplay"
           href="https://google.com"
@@ -136,7 +141,7 @@
         </amp-story-page-attachment>
       </amp-story-page>
 
-      <amp-story-page id="outlink-no-image">
+      <amp-story-page id="page8" id="outlink-no-image">
         <amp-story-page-attachment
           layout="nodisplay"
           href="https://google.com"
@@ -144,7 +149,7 @@
         </amp-story-page-attachment>
       </amp-story-page>
 
-      <amp-story-page id="outlink-custom-image">
+      <amp-story-page id="page9" id="outlink-custom-image">
         <amp-story-page-attachment
           layout="nodisplay"
           href="https://google.com"
@@ -152,7 +157,7 @@
         </amp-story-page-attachment>
       </amp-story-page>
 
-      <amp-story-page id="outlink-dark-theme">
+      <amp-story-page id="page10" id="outlink-dark-theme">
         <amp-story-page-attachment
           layout="nodisplay"
           href="https://google.com"
@@ -160,7 +165,7 @@
         </amp-story-page-attachment>
       </amp-story-page>
 
-      <amp-story-page id="outlink-custom-background-color">
+      <amp-story-page id="page11" id="outlink-custom-background-color">
         <amp-story-page-attachment
           layout="nodisplay"
           href="https://google.com"
@@ -170,7 +175,7 @@
         </amp-story-page-attachment>
       </amp-story-page>
 
-      <amp-story-page id="outlink-custom-text-color">
+      <amp-story-page id="page12" id="outlink-custom-text-color">
         <amp-story-page-attachment
           layout="nodisplay"
           href="https://google.com"

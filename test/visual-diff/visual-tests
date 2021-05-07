@@ -889,6 +889,138 @@
       ],
       // for page navigation
       "loading_complete_delay_ms": 500
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page1",
+      "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+        "amp-story-page#page1[active]"
+      ],
+      // for page navigation
+      "loading_complete_delay_ms": 500
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page2",
+      "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+        "amp-story-page#page2[active]"
+      ],
+      // for page navigation
+      "loading_complete_delay_ms": 500
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page3",
+      "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+        "amp-story-page#page3[active]"
+      ],
+      // for page navigation
+      "loading_complete_delay_ms": 500
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page4",
+      "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+        "amp-story-page#page4[active]"
+      ],
+      // for page navigation
+      "loading_complete_delay_ms": 500
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page5",
+      "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+        "amp-story-page#page5[active]"
+      ],
+      // for page navigation
+      "loading_complete_delay_ms": 500
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page6",
+      "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+        "amp-story-page#page6[active]"
+      ],
+      // for page navigation
+      "loading_complete_delay_ms": 500
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page7",
+      "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+        "amp-story-page#page7[active]"
+      ],
+      // for page navigation
+      "loading_complete_delay_ms": 500
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page8",
+      "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+        "amp-story-page#page8[active]"
+      ],
+      // for page navigation
+      "loading_complete_delay_ms": 500
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page9",
+      "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+        "amp-story-page#page9[active]"
+      ],
+      // for page navigation
+      "loading_complete_delay_ms": 500
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page10",
+      "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+        "amp-story-page#page10[active]"
+      ],
+      // for page navigation
+      "loading_complete_delay_ms": 500
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page11",
+      "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+        "amp-story-page#page11[active]"
+      ],
+      // for page navigation
+      "loading_complete_delay_ms": 500
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page12",
+      "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+        "amp-story-page#page12[active]"
+      ],
+      // for page navigation
+      "loading_complete_delay_ms": 500
     }
   ]
 }
