@@ -694,6 +694,21 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(openAttachmentEl.getAttribute('target')).to.eql('_top');
   });
 
+  it('should build the open outlink UI with same codepath as page attachment', async () => {
+    const outlinkEl = win.document.createElement('amp-story-page-outlink');
+    outlinkEl.setAttribute('layout', 'nodisplay');
+    element.appendChild(outlinkEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openoutlinkEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+    expect(openoutlinkEl).to.exist;
+  });
+
   it('should build the inline page attachment UI with one image', async () => {
     toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
 
