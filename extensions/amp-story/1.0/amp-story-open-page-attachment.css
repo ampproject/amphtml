@@ -212,11 +212,12 @@
   font-size: 16px !important;
   font-weight: 700 !important;
   letter-spacing: 0.3px;
-  line-height: 16px !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
   max-width: 210px !important;
+  /* Prevents clipping of decenders. */
+  line-height: 18px !important;
 }
 
 /** For amp-story-inline-page-attachment-v2 inline default. */
@@ -276,7 +277,7 @@
   left: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18.7px" height="7.5px" viewBox="0 0 18.7 7.5"><path d="M18,4.7l-7.8-4.5C10,0,9.7,0,9.4,0C9.1,0,8.8,0,8.5,0.2L0.7,4.7C0,5.1-0.2,6,0.2,6.7c0.4,0.7,1.3,1,2.1,0.5l7.1-4.1l7.1,4.1c0.7,0.4,1.6,0.2,2.1-0.5C19,6,18.7,5.1,18,4.7z"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 8" width="20px" height="8px"><path d="M18,7.7c-0.2,0-0.5-0.1-0.7-0.2l-7.3-4l-7.3,4C2,7.9,1.1,7.7,0.7,6.9c-0.4-0.7-0.1-1.6,0.6-2l8-4.4c0.5-0.2,1-0.2,1.5,0l8,4.4c0.7,0.4,1,1.3,0.6,2C19,7.4,18.5,7.7,18,7.7z"></path></svg>') !important;
   background-position: center !important;
   background-size: auto !important;
   background-repeat: no-repeat !important;
@@ -287,7 +288,7 @@
 }
 
 [theme="dark"] .i-amphtml-story-inline-page-attachment-arrow:before {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="white" width="18.7px" height="7.5px" viewBox="0 0 18.7 7.5"><path d="M18,4.7l-7.8-4.5C10,0,9.7,0,9.4,0C9.1,0,8.8,0,8.5,0.2L0.7,4.7C0,5.1-0.2,6,0.2,6.7c0.4,0.7,1.3,1,2.1,0.5l7.1-4.1l7.1,4.1c0.7,0.4,1.6,0.2,2.1-0.5C19,6,18.7,5.1,18,4.7z"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 8" width="20px" height="8px"><path d="M18,7.7c-0.2,0-0.5-0.1-0.7-0.2l-7.3-4l-7.3,4C2,7.9,1.1,7.7,0.7,6.9c-0.4-0.7-0.1-1.6,0.6-2l8-4.4c0.5-0.2,1-0.2,1.5,0l8,4.4c0.7,0.4,1,1.3,0.6,2C19,7.4,18.5,7.7,18,7.7z"></path></svg>') !important;
 }
 
 .i-amphtml-amp-story-page-attachment-ui-v2:not([href]) .i-amphtml-story-page-attachment-label {
@@ -299,13 +300,13 @@
 .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
   --i-amphtml-outlink-cta-background-color: white !important;
   --i-amphtml-outlink-cta-text-color: black !important;
-  background: linear-gradient(0, rgba(0, 0, 0, 0.3), transparent) !important;
+  background: linear-gradient(0, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0)) !important;
 }
 
 [theme="dark"].i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
   --i-amphtml-outlink-cta-background-color: black !important;
   --i-amphtml-outlink-cta-text-color: white !important;
-  background: linear-gradient(0, rgba(255, 255, 255, 0.3), transparent) !important;
+  background: linear-gradient(0, rgba(255, 255, 255, .25), rgba(255, 255, 255, 0)) !important;
 }
 
 [href].i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment {
@@ -332,6 +333,7 @@
   cursor: pointer !important;
   margin-bottom: 10px !important;
   fill: var(--i-amphtml-outlink-cta-background-color) !important;
+  filter: drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3)) !important;
 }
 
 .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-open-attachment[active] .i-amphtml-story-outlink-page-attachment-arrow {
@@ -385,6 +387,7 @@
   border-radius: 30px !important;
   background: var(--i-amphtml-outlink-cta-background-color) !important;
   place-items: center !important;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, .15) !important;
 }
 
 .i-amphtml-story-outlink-page-attachment-img {
