@@ -57,29 +57,15 @@ export function resolvedPromise() {
  * @template T
  */
 export class Deferred {
-  /**
-   * Creates an instance of Deferred.
-   */
+  /** Constructor. */
   constructor() {
-    let resolve, reject;
-
-    /**
-     * @const {!Promise<T>}
-     */
+    /** @const {!Promise<T>} */
     this.promise = new /*OK*/ Promise((res, rej) => {
-      resolve = res;
-      reject = rej;
+      /** @const {function(T=)} */
+      this.resolve = res;
+      /** @const {function(*=)} */
+      this.reject = rej;
     });
-
-    /**
-     * @const {function(T=)}
-     */
-    this.resolve = resolve;
-
-    /**
-     * @const {function(*=)}
-     */
-    this.reject = reject;
   }
 }
 
