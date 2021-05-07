@@ -52,7 +52,7 @@ export const Default = () => {
   );
 };
 
-export const moments = () => {
+export const Moments = () => {
   const limit = number('limit to', 2);
   return (
     <amp-twitter
@@ -64,7 +64,7 @@ export const moments = () => {
   );
 };
 
-export const timelines = () => {
+export const Timelines = () => {
   const tweetLimit = number('limit to', 5);
   const timelineSourceType = select(
     'source type',
@@ -85,7 +85,7 @@ export const timelines = () => {
   );
 };
 
-export const deletedTweet = () => {
+export const DeletedTweet = () => {
   const withFallback = boolean('include fallback?', true);
   return (
     <amp-twitter
@@ -116,7 +116,7 @@ export const deletedTweet = () => {
   );
 };
 
-export const invalidTweet = () => {
+export const InvalidTweet = () => {
   return (
     <amp-twitter
       width="390"
