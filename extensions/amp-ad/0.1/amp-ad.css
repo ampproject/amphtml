@@ -154,7 +154,6 @@ amp-ad[sticky] {
 amp-ad[sticky='top'] {
   width: 100% !important;
   background: #fff;
-  top: 0;
   padding-bottom: 5px;
 }
 
