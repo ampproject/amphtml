@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {debounce, throttle} from '@/src/core/types/function';
+import {debounce, throttle} from '@@/types/function';
 
 describes.sandboxed('type helpers - functions', {}, () => {
   describe('throttle', () => {

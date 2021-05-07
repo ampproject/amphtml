@@ -30,7 +30,7 @@
  */
 
 import * as assertions from './base';
-import {USER_ERROR_SENTINEL} from '@/src/core/error-message-helpers';
+import {USER_ERROR_SENTINEL} from '@@/error-message-helpers';
 
 /**
  * @fileoverview This file provides the entrypoint for user assertions. It's
