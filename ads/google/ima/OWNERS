@@ -5,12 +5,9 @@
   rules: [
     {
       owners: [
-        {name: 'chenshay'},
-        {name: 'chrisantaki'},
-        {name: 'dvoytenko'},
-        {name: 'elijahsoria'},
-        {name: 'jpettitt'},
-        {name: 'qidonna'},
+        {name: 'ampproject/wg-bento'},
+        {name: 'ampproject/wg-components'},
+        {name: 'ampproject/wg-monetization'},
       ],
     },
   ],
