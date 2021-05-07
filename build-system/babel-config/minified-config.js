@@ -56,7 +56,6 @@ function getMinifiedConfig() {
     './build-system/babel-plugins/babel-plugin-transform-html-template',
     './build-system/babel-plugins/babel-plugin-transform-jss',
     './build-system/babel-plugins/babel-plugin-transform-version-call',
-    './build-system/babel-plugins/babel-plugin-transform-simple-array-destructure',
     './build-system/babel-plugins/babel-plugin-transform-default-assignment',
     replacePlugin,
     './build-system/babel-plugins/babel-plugin-transform-amp-asserts',
