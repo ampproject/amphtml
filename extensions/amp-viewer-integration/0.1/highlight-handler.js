@@ -151,7 +151,19 @@ export class HighlightHandler {
     this.highlightedNodes_ = null;
 
     whenDocumentReady(ampdoc.win.document).then(() => {
-      this.initHighlight_(highlightInfo);
+      // this.initHighlight_(highlightInfo);
+      const sentences = highlightInfo['sentences'];
+      const fragment = sentences
+        .map((text) => 'text=' + encodeURIComponent(text))
+        .join('&');
+      console.log(
+        '%cmessage fragment',
+        'color:red;font-size:20px',
+        sentences,
+        fragment
+      );
+      window.location.replace('#:~:' + fragment);
+      ampdoc.win.location.replace('#:~:' + fragment);
     });
   }
 

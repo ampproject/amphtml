@@ -113,19 +113,23 @@ export class AmpViewerIntegration {
       );
     }
 
-    if (
-      'fragmentDirective' in document &&
-      isExperimentOn(this.win, 'enable-text-fragments')
-    ) {
-      this.win.addEventListener('message', (e) => {
-        if (
-          e.origin !== 'https://www.google.com' ||
-          !e.data?.directive?.length
-        ) {
-          return;
-        }
-        this.updateUrlWithTextFragment_(e.data.directive);
-      });
+    if ('fragmentDirective' in document) {
+      const highlightInfo = getHighlightParam(ampdoc);
+      this.highlightHandler_ = new HighlightHandler(ampdoc, highlightInfo);
+
+
+      // const sentences = highlightInfo['sentences'];
+      // const fragment = sentences
+      //   .map((text) => 'text=' + encodeURIComponent(text))
+      //   .join('&');
+      // console.log(
+      //   '%cmessage fragment',
+      //   'color:red;font-size:20px',
+      //   sentences,
+      //   fragment
+      // );
+      // // XXX updating the URL does not work in case of
+      // this.updateUrlWithTextFragment_(fragment);
     } else {
       /** @type {?HighlightInfoDef} */
       const highlightInfo = getHighlightParam(ampdoc);
