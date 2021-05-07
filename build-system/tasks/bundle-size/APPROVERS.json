@@ -16,7 +16,7 @@
     "threshold": 0.5
   },
   "dist.3p/current-min/vendor/*.?(m)js": {
-    "approvers": ["ampproject/wg-monetization"],
+    "approvers": ["ampproject/wg-components", "ampproject/wg-monetization"],
     "threshold": 0.1
   }
 }
