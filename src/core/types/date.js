@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {isString} from '.';
+
 /** @fileoverview helpers for dealing with dates and times. */
 
 /**
@@ -21,13 +23,6 @@
  * @typedef {number}
  */
 export let TimestampDef;
-
-/**
- * Number between 0 and 1 that designates normalized time, as in "from start to
- * end".
- * @typedef {number}
- */
-export let NormTimestampDef;
 
 /**
  * Parses the date using the `Date.parse()` rules. Additionally supports the
@@ -60,7 +55,7 @@ export function getDate(value) {
   if (typeof value == 'number') {
     return value;
   }
-  if (typeof value == 'string') {
+  if (isString(value)) {
     return parseDate(value);
   }
   value = /** @type {!Date} */ (value);

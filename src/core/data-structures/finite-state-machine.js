@@ -15,6 +15,7 @@
  */
 
 import {pureDevAssert as devAssert} from '../assert';
+import {map} from '../types/object';
 
 /** @template STATE */
 export class FiniteStateMachine {
@@ -35,7 +36,7 @@ export class FiniteStateMachine {
      * to the new.
      * @private {Object<string, function()>}
      */
-    this.transitions_ = Object.create(null);
+    this.transitions_ = map();
   }
 
   /**
