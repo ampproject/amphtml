@@ -17,6 +17,7 @@
 // Imported just for the side effect of getting the `types` it exports into
 // the type system during compile time.
 import {NormTimeDef} from '../types/date';
+import {once} from '../types/function';
 
 /**
  * A CurveDef is a function that returns a normtime value (0 to 1) for another
@@ -250,25 +251,17 @@ export const Curves = {
     return n;
   },
 
-  /**
-   * ease
-   */
-  EASE: bezierCurve(0.25, 0.1, 0.25, 1.0),
+  /** ease */
+  EASE: once(bezierCurve)(0.25, 0.1, 0.25, 1.0),
 
-  /**
-   * ease-in: slow out, fast in
-   */
-  EASE_IN: bezierCurve(0.42, 0.0, 1.0, 1.0),
+  /** ease-in: slow out, fast in */
+  EASE_IN: once(bezierCurve)(0.42, 0.0, 1.0, 1.0),
 
-  /**
-   * ease-out: fast out, slow in
-   */
-  EASE_OUT: bezierCurve(0.0, 0.0, 0.58, 1.0),
+  /** ease-out: fast out, slow in */
+  EASE_OUT: once(bezierCurve)(0.0, 0.0, 0.58, 1.0),
 
-  /**
-   * ease-in-out
-   */
-  EASE_IN_OUT: bezierCurve(0.42, 0.0, 0.58, 1.0),
+  /** ease-in-out */
+  EASE_IN_OUT: once(bezierCurve)(0.42, 0.0, 0.58, 1.0),
 };
 
 /**
