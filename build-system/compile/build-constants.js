@@ -17,6 +17,11 @@ const argv = require('minimist')(process.argv.slice(2));
 const experimentDefines = require('../global-configs/experiments-const.json');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
+/**
+ * Returns the build time constants needed by bundlers.
+ *
+ * @return {Object<string, *>}
+ */
 function getBuildTimeConstants() {
   return {
     ...experimentDefines,
@@ -34,7 +39,7 @@ function getBuildTimeConstants() {
   };
 }
 
-// Esbuild requires map of string --> string.
+/** @return {Object<string,string>} */
 function getEsbuildConstants() {
   return Object.fromEntries(
     Object.entries(getBuildTimeConstants()).map(([key, val]) => [
@@ -44,7 +49,7 @@ function getEsbuildConstants() {
   );
 }
 
-// Closure requires a series of arrays.
+/** @return {Array<string>}  */
 function getClosureConstants() {
   return Object.entries(getBuildTimeConstants()).map(([k, v]) => `${k}=${v}`);
 }
