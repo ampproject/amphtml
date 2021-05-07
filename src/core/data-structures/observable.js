@@ -87,9 +87,6 @@ export class Observable {
    * @return {number}
    */
   getHandlerCount() {
-    if (!this.handlers_) {
-      return 0;
-    }
-    return this.handlers_.length;
+    return this.handlers_?.length || 0;
   }
 }
