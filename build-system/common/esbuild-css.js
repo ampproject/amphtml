@@ -28,8 +28,8 @@ const esbuildCssPlugin = {
       const input = await readFile(args.path, 'utf8');
       const {css} = await transformCssString(input, args.path);
       return {
-        contents: JSON.stringify({CSS: css}),
-        loader: 'json',
+        contents: css,
+        loader: 'text',
       };
     });
   },
