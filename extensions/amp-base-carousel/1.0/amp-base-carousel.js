@@ -15,34 +15,21 @@
  */
 
 import {ActionTrust} from '../../../src/core/constants/action-constants';
-import {BaseCarousel} from './base-carousel';
-import {CSS as COMPONENT_CSS} from './base-carousel.jss';
+import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-base-carousel-1.0.css';
-import {CarouselContextProp} from './carousel-props';
-import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '../../../src/core/types/object';
-import {dispatchCustomEvent} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
+import {toWin} from '../../../src/types';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-base-carousel';
 
 /** @extends {PreactBaseElement<BaseCarouselDef.CarouselApi>} */
-class AmpBaseCarousel extends PreactBaseElement {
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-
-    /** @private {?number} */
-    this.slide_ = null;
-  }
-
+class AmpBaseCarousel extends BaseElement {
   /** @override */
   init() {
-    const {element} = this;
     this.registerApiAction('prev', (api) => api.prev(), ActionTrust.LOW);
     this.registerApiAction('next', (api) => api.next(), ActionTrust.LOW);
     this.registerApiAction(
@@ -54,13 +41,7 @@ class AmpBaseCarousel extends PreactBaseElement {
       ActionTrust.LOW
     );
 
-    this.slide_ = parseInt(element.getAttribute('slide'), 10);
-    return dict({
-      'defaultSlide': this.slide_ || 0,
-      'onSlideChange': (index) => {
-        fireSlideChangeEvent(this.win, element, index, ActionTrust.HIGH);
-      },
-    });
+    return super.init();
   }
 
   /** @override */
@@ -74,101 +55,20 @@ class AmpBaseCarousel extends PreactBaseElement {
   }
 
   /** @override */
-  mutationObserverCallback() {
-    const slide = parseInt(this.element.getAttribute('slide'), 10);
-    if (slide === this.slide_) {
-      return;
-    }
-    this.slide_ = slide;
-    if (!isNaN(slide)) {
-      this.api().goToSlide(slide);
-    }
+  triggerEvent(element, eventName, detail) {
+    const event = createCustomEvent(
+      toWin(element.ownerDocument.defaultView),
+      `amp-base-carousel.${eventName}`,
+      detail
+    );
+    Services.actionServiceForDoc(element).trigger(
+      element,
+      eventName,
+      event,
+      ActionTrust.HIGH
+    );
+    super.triggerEvent(element, eventName, detail);
   }
-}
-
-/** @override */
-AmpBaseCarousel['Component'] = BaseCarousel;
-
-/** @override */
-AmpBaseCarousel['layoutSizeDefined'] = true;
-
-/** @override */
-AmpBaseCarousel['props'] = {
-  'advanceCount': {attr: 'advance-count', type: 'number', media: true},
-  'arrowPrevAs': {
-    selector: '[slot="prev-arrow"]',
-    single: true,
-    as: true,
-  },
-  'arrowNextAs': {
-    selector: '[slot="next-arrow"]',
-    single: true,
-    as: true,
-  },
-  'autoAdvance': {attr: 'auto-advance', type: 'boolean', media: true},
-  'autoAdvanceCount': {attr: 'auto-advance-count', type: 'number', media: true},
-  'autoAdvanceInterval': {
-    attr: 'auto-advance-interval',
-    type: 'number',
-    media: true,
-  },
-  'autoAdvanceLoops': {attr: 'auto-advance-loops', type: 'number', media: true},
-  'controls': {attr: 'controls', type: 'string', media: true},
-  'orientation': {
-    attr: 'orientation',
-    type: 'string',
-    media: true,
-    default: 'horizontal',
-  },
-  'loop': {attr: 'loop', type: 'boolean', media: true},
-  'mixedLength': {attr: 'mixed-length', type: 'boolean', media: true},
-  'outsetArrows': {attr: 'outset-arrows', type: 'boolean', media: true},
-  'snap': {attr: 'snap', type: 'boolean', media: true, default: true},
-  'snapBy': {attr: 'snap-by', type: 'number', media: true},
-  'snapAlign': {attr: 'snap-align', type: 'string', media: true},
-  'visibleCount': {attr: 'visible-count', type: 'number', media: true},
-  'children': {
-    props: {
-      'thumbnailSrc': {attr: 'data-thumbnail-src'},
-    },
-    selector: '*', // This should be last as catch-all.
-    single: false,
-  },
-};
-
-/** @override */
-AmpBaseCarousel['usesShadowDom'] = true;
-
-/** @override */
-AmpBaseCarousel['shadowCss'] = COMPONENT_CSS;
-
-/** @override */
-AmpBaseCarousel['useContexts'] = [CarouselContextProp];
-
-/**
- * Triggers a 'slideChange' event with one data param:
- * 'index' - index of the current slide.
- * @param {!Window} win
- * @param {!Element} el The element that was selected or deslected.
- * @param {number} index
- * @param {!ActionTrust} trust
- * @private
- */
-function fireSlideChangeEvent(win, el, index, trust) {
-  const eventName = 'slideChange';
-  const data = dict({'index': index});
-  const slideChangeEvent = createCustomEvent(
-    win,
-    `amp-base-carousel.${eventName}`,
-    data
-  );
-  Services.actionServiceForDoc(el).trigger(
-    el,
-    eventName,
-    slideChangeEvent,
-    trust
-  );
-  dispatchCustomEvent(el, eventName, data);
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
