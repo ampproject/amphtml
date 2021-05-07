@@ -83,3 +83,53 @@ export const timelines = () => {
     />
   );
 };
+
+export const deletedTweet = () => {
+  const withFallback = boolean('include fallback?', true);
+  return (
+    <amp-twitter
+      width="390"
+      height="330"
+      layout="fixed"
+      data-tweetid="882818033403789316"
+      data-cards="hidden"
+    >
+      <blockquote placeholder>
+        <p lang="en" dir="ltr">
+          In case you missed it last week, check out our recap of AMP in 2020
+          ⚡🙌
+        </p>
+        <p>
+          Watch here ➡️
+          <br />
+          <a href="https://t.co/eaxT3MuSAK">https://t.co/eaxT3MuSAK</a>
+        </p>
+      </blockquote>
+      {withFallback && (
+        <div fallback>
+          An error occurred while retrieving the tweet. It might have been
+          deleted.
+        </div>
+      )}
+    </amp-twitter>
+  );
+};
+
+export const invalidTweet = () => {
+  return (
+    <amp-twitter
+      width="390"
+      height="330"
+      layout="fixed"
+      data-tweetid="1111111111111641653602164060160"
+      data-cards="hidden"
+    >
+      <blockquote placeholder class="twitter-tweet" data-lang="en">
+        <p>
+          This placeholder should never change because given tweet-id is
+          invalid.
+        </p>
+      </blockquote>
+    </amp-twitter>
+  );
+};
