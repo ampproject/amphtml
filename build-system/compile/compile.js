@@ -30,7 +30,7 @@ const {runClosure} = require('./closure-compile');
 const {sanitize} = require('./sanitize');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
 const {writeSourcemaps} = require('./helpers');
-const {getBuildTimeConstants} = require('../tasks/helpers');
+const {getBuildTimeConstants} = require('./build-constants');
 
 const queue = [];
 let inProgress = 0;
@@ -225,7 +225,6 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     'node_modules/',
     'build/patched-module/',
   ];
-  throw new Error(typeof getBuildTimeConstants);
   const define = [
     `VERSION=${internalRuntimeVersion}`,
     'AMP_MODE=true',
