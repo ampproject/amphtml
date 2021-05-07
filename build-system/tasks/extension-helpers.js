@@ -565,7 +565,16 @@ function buildExtensionCss(extDir, name, version, options) {
  * @return {!Promise}
  */
 function buildNpmBinaries(extDir, options) {
-  const {npm} = options;
+  let {npm} = options;
+  if (npm === true) {
+    // Default to the standard/expected entrypoint
+    npm = {
+      'component.js': {
+        'preact': 'component-preact.js',
+        'react': 'component-react.js',
+      },
+    };
+  }
   const keys = Object.keys(npm);
   const promises = keys.flatMap((entryPoint) => {
     const {preact, react} = npm[entryPoint];
