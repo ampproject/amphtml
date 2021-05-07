@@ -58,6 +58,12 @@ function getUnminifiedConfig() {
     ],
     './build-system/babel-plugins/babel-plugin-transform-json-configuration',
     './build-system/babel-plugins/babel-plugin-transform-jss',
+
+    // TODO(alanorozco): import-css conflicts with transform-jss when defining
+    // `const CSS`. This is not intended and should be fixed. However, running
+    // import-css after transform-jss works around this issue.
+    './build-system/babel-plugins/babel-plugin-transform-import-css',
+
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
     '@babel/plugin-transform-react-constant-elements',

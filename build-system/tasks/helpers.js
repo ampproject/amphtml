@@ -31,6 +31,7 @@ const {
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
+const {esbuildCssPlugin} = require('../common/esbuild-css');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {green, red, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
@@ -457,7 +458,7 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       sourcemap: true,
       define: experimentDefines,
       outfile: destFile,
-      plugins: [babelPlugin],
+      plugins: [esbuildCssPlugin, babelPlugin],
       banner,
       footer,
       incremental: !!options.watch,
@@ -514,7 +515,7 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
     options.minify ? 'minified' : 'unminified',
     /* enableCache */ true
   );
-  const plugins = [babelPlugin];
+  const plugins = [esbuildCssPlugin, babelPlugin];
 
   if (options.remapDependencies) {
     plugins.unshift(remapDependenciesPlugin());
@@ -846,7 +847,7 @@ async function getDependencies(entryPoint, options) {
     bundle: true,
     write: false,
     metafile: true,
-    plugins: [babelPlugin],
+    plugins: [esbuildCssPlugin, babelPlugin],
   });
   return Object.keys(result.metafile?.inputs);
 }

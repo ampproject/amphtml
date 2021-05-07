@@ -62,6 +62,12 @@ function getPreClosureConfig() {
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
     './build-system/babel-plugins/babel-plugin-transform-html-template',
     './build-system/babel-plugins/babel-plugin-transform-jss',
+
+    // TODO(alanorozco): import-css conflicts with transform-jss when defining
+    // `const CSS`. This is not intended and should be fixed. However, running
+    // import-css after transform-jss works around this issue.
+    './build-system/babel-plugins/babel-plugin-transform-import-css',
+
     './build-system/babel-plugins/babel-plugin-transform-version-call',
     './build-system/babel-plugins/babel-plugin-transform-simple-array-destructure',
     './build-system/babel-plugins/babel-plugin-transform-default-assignment',

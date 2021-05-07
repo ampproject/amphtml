@@ -202,15 +202,13 @@
   {
     "name": "amp-fit-text",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {"hasCss": true}
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-fit-text",
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
       "npm": {
         "component.js": {
           "preact": "component-preact.js",
