@@ -312,9 +312,15 @@ module.exports = {
         '**/_init_tests.js',
         '**/*_test.js',
         '**/testing/**',
-        '**/storybook/*.js',
       ],
       'rules': {
+        'local/no-forbidden-terms': [2, forbiddenTermsGlobal],
+      },
+    },
+    {
+      'files': ['**/storybook/*.js'],
+      'rules': {
+        'require-jsdoc': 0,
         'local/no-forbidden-terms': [2, forbiddenTermsGlobal],
       },
     },
