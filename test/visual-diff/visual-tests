@@ -885,139 +885,139 @@
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        "amp-story-page#cover[active]"
+        "amp-story-page#inline-default[active]"
       ],
       // for page navigation
       "loading_complete_delay_ms": 500
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page1",
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=inline-custom-text",
       "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        "amp-story-page#page1[active]"
+        "amp-story-page#inline-custom-text[active]"
       ],
       // for page navigation
       "loading_complete_delay_ms": 500
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page2",
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=inline-dark-theme",
       "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        "amp-story-page#page2[active]"
+        "amp-story-page#inline-dark-theme[active]"
       ],
       // for page navigation
       "loading_complete_delay_ms": 500
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page3",
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=inline-dark-theme-1-image",
       "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        "amp-story-page#page3[active]"
+        "amp-story-page#inline-dark-theme-1-image[active]"
       ],
       // for page navigation
       "loading_complete_delay_ms": 500
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page4",
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=inline-dark-theme-2-images",
       "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        "amp-story-page#page4[active]"
+        "amp-story-page#inline-dark-theme-2-images[active]"
       ],
       // for page navigation
       "loading_complete_delay_ms": 500
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page5",
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=inline-light-theme-2-images",
       "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        "amp-story-page#page5[active]"
+        "amp-story-page#inline-light-theme-2-images[active]"
       ],
       // for page navigation
       "loading_complete_delay_ms": 500
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page6",
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=outlink-default",
       "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        "amp-story-page#page6[active]"
+        "amp-story-page#outlink-default[active]"
       ],
       // for page navigation
       "loading_complete_delay_ms": 500
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page7",
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=outlink-custom-text",
       "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        "amp-story-page#page7[active]"
+        "amp-story-page#outlink-custom-text[active]"
       ],
       // for page navigation
       "loading_complete_delay_ms": 500
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page8",
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=outlink-no-image",
       "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        "amp-story-page#page8[active]"
+        "amp-story-page#outlink-no-image[active]"
       ],
       // for page navigation
       "loading_complete_delay_ms": 500
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page9",
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=outlink-custom-image",
       "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        "amp-story-page#page9[active]"
+        "amp-story-page#outlink-custom-image[active]"
       ],
       // for page navigation
       "loading_complete_delay_ms": 500
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page10",
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=outlink-dark-theme",
       "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        "amp-story-page#page10[active]"
+        "amp-story-page#outlink-dark-theme[active]"
       ],
       // for page navigation
       "loading_complete_delay_ms": 500
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page11",
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=outlink-custom-background-color",
       "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        "amp-story-page#page11[active]"
+        "amp-story-page#outlink-custom-background-color[active]"
       ],
       // for page navigation
       "loading_complete_delay_ms": 500
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=page12",
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html#page=outlink-custom-text-color",
       "name": "amp-story-page-attachment-v2: displays new inline & outlink CTA buttons with various customizations",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        "amp-story-page#page12[active]"
+        "amp-story-page#outlink-custom-text-color[active]"
       ],
       // for page navigation
       "loading_complete_delay_ms": 500
