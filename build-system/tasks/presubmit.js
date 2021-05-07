@@ -22,7 +22,7 @@ const {
   matchForbiddenTerms,
   forbiddenTermsGlobal,
 } = require('../test-configs/forbidden-terms');
-const {cyan, red, yellow} = require('kleur/colors');
+const {cyan, red, yellow} = require('../common/colors');
 const {log} = require('../common/logging');
 
 /**

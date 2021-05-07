@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const colors = require('kleur/colors');
+const colors = require('../common/colors');
 const fs = require('fs-extra');
 const globby = require('globby');
 const path = require('path');

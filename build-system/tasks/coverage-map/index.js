@@ -16,7 +16,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs').promises;
 const {buildNewServer} = require('../../server/typescript-compile');
-const {cyan} = require('kleur/colors');
+const {cyan} = require('../../common/colors');
 const {dist} = require('../dist');
 const {log} = require('../../common/logging');
 const {startServer, stopServer} = require('../serve');

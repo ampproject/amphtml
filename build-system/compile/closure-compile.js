@@ -17,7 +17,7 @@
 
 const compiler = require('@ampproject/google-closure-compiler');
 const vinylFs = require('vinyl-fs');
-const {cyan, red, yellow} = require('kleur/colors');
+const {cyan, red, yellow} = require('../common/colors');
 const {getBabelOutputDir} = require('./pre-closure-babel');
 const {log, logWithoutTimestamp} = require('../common/logging');
 

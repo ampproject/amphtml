@@ -32,7 +32,7 @@ const {
 } = require('../../common/ctrlcHandler');
 const {app} = require('../../server/test-server');
 const {createKarmaServer, getAdTypes} = require('./helpers');
-const {cyan, green, red, yellow} = require('kleur/colors');
+const {cyan, green, red, yellow} = require('../../common/colors');
 const {dotWrappingWidth} = require('../../common/logging');
 const {getEsbuildBabelPlugin} = require('../../common/esbuild-babel');
 const {getFilesFromArgv} = require('../../common/utils');

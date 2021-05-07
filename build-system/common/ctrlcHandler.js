@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const colors = require('kleur/colors');
+const colors = require('./colors');
 const {execScriptAsync, exec} = require('./exec');
 const {logLocalDev} = require('./logging');
 

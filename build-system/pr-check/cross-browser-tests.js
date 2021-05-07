@@ -21,7 +21,7 @@
 
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {log} = require('../common/logging');
-const {red, cyan} = require('kleur/colors');
+const {red, cyan} = require('../common/colors');
 const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runCiJob} = require('./ci-job');
 const {skipDependentJobs, timedExecOrDie} = require('./utils');

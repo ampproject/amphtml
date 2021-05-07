@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const {cyan, green} = require('kleur/colors');
+const {cyan, green} = require('../common/colors');
 const {execOrThrow} = require('../common/exec');
 const {log} = require('../common/logging');
 

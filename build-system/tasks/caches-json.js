@@ -17,7 +17,7 @@
 
 const path = require('path');
 const {log, logLocalDev} = require('../common/logging');
-const {red, green, cyan} = require('kleur/colors');
+const {red, green, cyan} = require('../common/colors');
 
 const expectedCaches = ['google', 'bing'];
 const cachesJsonPath = '../global-configs/caches.json';

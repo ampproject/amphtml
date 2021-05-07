@@ -48,7 +48,7 @@ const {
 const {getServeMode} = require('./app-utils');
 const {logWithoutTimestamp} = require('../common/logging');
 const {log} = require('../common/logging');
-const {red} = require('kleur/colors');
+const {red} = require('../common/colors');
 const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls, isRtvMode} = require('./app-utils');
 

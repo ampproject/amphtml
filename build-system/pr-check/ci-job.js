@@ -28,7 +28,7 @@ const {
 } = require('../common/logging');
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
-const {red} = require('kleur/colors');
+const {red} = require('../common/colors');
 const {updatePackages} = require('../common/update-packages');
 
 /**
