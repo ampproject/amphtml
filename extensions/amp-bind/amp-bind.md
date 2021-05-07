@@ -1051,7 +1051,7 @@ Some AMP components and HTML elements have specific bindable attributes. They ar
 -   `[src]`
 -   `[srcset]`
 
-Bind to `[srcset]` instead of `[src]` to support responsive images. See corresponding [`amp-img` attributes](../../builtins/amp-img.md#attributes).
+Bind to `[srcset]` instead of `[src]` to support responsive images. See corresponding [`amp-img` attributes](../../builtins/amp-img/amp-img.md#attributes).
 [/filter] <!-- formats="websites, ads" -->
 [filter formats="email"]
 

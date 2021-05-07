@@ -1099,7 +1099,7 @@ const forbiddenTermsSrcInclusive = {
     message: measurementApiDeprecated,
     allowlist: [
       'build-system/externs/amp.extern.js',
-      'builtins/amp-img.js',
+      'builtins/amp-img/amp-img.js',
       'src/base-element.js',
       'src/custom-element.js',
       'src/iframe-helper.js',

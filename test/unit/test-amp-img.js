@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpImg, installImg} from '../../builtins/amp-img';
+import {AmpImg, installImg} from '../../builtins/amp-img/amp-img';
 import {BaseElement} from '../../src/base-element';
 import {Layout, LayoutPriority} from '../../src/layout';
 import {Services} from '../../src/services';
