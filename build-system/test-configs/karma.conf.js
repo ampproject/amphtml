@@ -31,9 +31,6 @@ if (argv.debug) {
   COMMON_CHROME_FLAGS.push('--auto-open-devtools-for-tabs');
 }
 
-/**
- * @param {!Object} config
- */
 module.exports = {
   frameworks: ['fixture', 'mocha', 'source-map-support'],
 
