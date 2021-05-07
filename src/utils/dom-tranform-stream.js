@@ -15,10 +15,7 @@
  */
 
 import {Deferred} from '../core/data-structures/promise';
-import {
-  assert as devAssert,
-  assertElement as devAssertElement,
-} from '../core/assert/dev';
+import {devAssert, devAssertElement} from '../core/assert/dev';
 import {removeNoScriptElements} from './dom-writer';
 
 /**
