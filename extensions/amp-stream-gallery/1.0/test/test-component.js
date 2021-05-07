@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {StreamGallery} from '../stream-gallery';
+import {StreamGallery} from '../component';
 import {mount} from 'enzyme';
 
 describes.sandboxed('StreamGallery preact component', {}, () => {
