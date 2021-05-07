@@ -225,6 +225,7 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     'node_modules/',
     'build/patched-module/',
   ];
+  throw new Error(typeof getBuildTimeConstants);
   const define = [
     `VERSION=${internalRuntimeVersion}`,
     'AMP_MODE=true',
