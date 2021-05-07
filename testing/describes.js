@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 /**
  * @fileoverview
@@ -88,6 +89,7 @@ import {
   interceptEventListeners,
 } from './fake-dom';
 import {Services} from '../src/services';
+import {TestConfig} from './test-config';
 import {addParamsToUrl} from '../src/url';
 import {adopt, adoptShadowMode} from '../src/runtime';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
@@ -100,8 +102,6 @@ import {
   installBuiltinElements,
   installRuntimeServices,
 } from '../src/service/core-services';
-import {stubService} from './test-helper';
-
 import {install as installCustomElements} from '../src/polyfills/custom-elements';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
@@ -114,7 +114,7 @@ import {
 } from '../src/impression';
 import {resetScheduledElementForTesting} from '../src/service/custom-element-registry';
 import {setStyles} from '../src/style';
-
+import {stubService} from './test-helper';
 import fetchMock from 'fetch-mock/es5/client-bundle';
 import sinon from /*OK*/ 'sinon';
 
@@ -179,6 +179,7 @@ export let AmpTestEnv;
  * @param {function()} fn
  */
 export const sandboxed = describeEnv((unusedSpec) => []);
+sandboxed.configure = () => new TestConfig(sandboxed);
 
 /**
  * A test with a fake window.
@@ -196,6 +197,7 @@ export const fakeWin = describeEnv((spec) => [
   new FakeWinFixture(spec),
   new AmpFixture(spec),
 ]);
+fakeWin.configure = () => new TestConfig(fakeWin);
 
 /**
  * A test with a real (iframed) window.
@@ -215,6 +217,7 @@ export const realWin = describeEnv((spec) => [
   new RealWinFixture(spec),
   new AmpFixture(spec),
 ]);
+realWin.configure = () => new TestConfig(realWin);
 
 /**
  * A test that loads HTML markup in `spec.body` into an embedded iframe.
@@ -225,8 +228,6 @@ export const realWin = describeEnv((spec) => [
  *   hash: (string|undefined),
  *   amp: (boolean),
  *   timeout: (number),
- *   ifIe: (boolean),
- *   enableIe: (boolean),
  * }} spec
  * @param {function({
  *   win: !Window,
@@ -236,6 +237,7 @@ export const realWin = describeEnv((spec) => [
 export const integration = describeEnv((spec) => [
   new IntegrationFixture(spec),
 ]);
+integration.configure = () => new TestConfig(integration);
 
 /**
  * A repeating test.
@@ -280,6 +282,7 @@ export const repeated = (function () {
 
   return mainFunc;
 })();
+repeated.configure = () => new TestConfig(repeated);
 
 /**
  * Mocks Window.fetch in the given environment and exposes `env.fetchMock`. For
@@ -350,15 +353,7 @@ function describeEnv(factory) {
         }
       });
 
-      let d = describe.configure();
-      // Allow for specifying IE-only and IE-enabled test suites.
-      if (spec.ifIe) {
-        d = d.ifIe();
-      } else if (spec.enableIe) {
-        d = d.enableIe();
-      }
-
-      d.run(SUB, function () {
+      describe(SUB, function () {
         if (spec.timeout) {
           this.timeout(spec.timeout);
         }
@@ -367,28 +362,12 @@ function describeEnv(factory) {
     });
   };
 
-  /**
-   * @param {string} name
-   * @param {!Object} spec
-   * @param {function(!Object)} fn
-   */
-  const mainFunc = function (name, spec, fn) {
-    return templateFunc(name, spec, fn, describe);
-  };
+  const createTemplate = (describeFunc) => (name, spec, fn) =>
+    templateFunc(name, spec, fn, describeFunc);
 
-  /**
-   * @param {string} name
-   * @param {!Object} spec
-   * @param {function(!Object)} fn
-   */
-  mainFunc.only = function (name, spec, fn) {
-    return templateFunc(name, spec, fn, describe./*OK*/ only);
-  };
-
-  mainFunc.skip = function (name, variants, fn) {
-    return templateFunc(name, variants, fn, describe.skip);
-  };
-
+  const mainFunc = createTemplate(describe);
+  mainFunc.only = createTemplate(describe.only);
+  mainFunc.skip = createTemplate(describe.skip);
   return mainFunc;
 }
 
