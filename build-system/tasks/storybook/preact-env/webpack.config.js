@@ -32,6 +32,7 @@ module.exports = ({config}) => {
       'react': 'preact/compat',
       'react-dom': 'preact/compat',
       '@': path.join(__dirname, '../../../..'),
+      '@@': path.join(__dirname, '../../../../src/core'),
     },
   };
   config.module = {

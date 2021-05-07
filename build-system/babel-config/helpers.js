@@ -146,7 +146,10 @@ function getImportResolverPlugin() {
     'module-resolver',
     {
       'root': ['.'],
-      'alias': {'@': '.'},
+      'alias': {
+        '@': '.',
+        '@@': './src/core',
+      },
     },
   ];
 }

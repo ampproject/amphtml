@@ -29,6 +29,7 @@ module.exports = ({config}) => {
     ],
     alias: {
       '@': path.join(__dirname, '../../../..'),
+      '@@': path.join(__dirname, '../../../../src/core'),
     },
   };
   config.module = {
