@@ -658,12 +658,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "npm": {
-        "component.js": {
-          "preact": "component-preact.js",
-          "react": "component-react.js"
-        }
-      }
+      "npm": true
     }
   },
   {
