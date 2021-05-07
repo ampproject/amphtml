@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 import {computedStyle} from '../style';
-import {dev, devAssert} from '../log';
+import {dev} from '../log';
+import {
+  assert as devAssert,
+  assertElement as devAssertElement,
+} from '../core/assert/dev';
 
 /** @typedef {
  *    function(!Element, !Object<string, string>): *
@@ -79,7 +83,7 @@ export class DomAncestorVisitor {
     while (el && (visitors = this.getActiveVisitors_()).length) {
       const style = computedStyle(this.win_, el);
       visitors.forEach((visitor) =>
-        visitor.callback(dev().assertElement(el), style)
+        visitor.callback(devAssertElement(el), style)
       );
       el = el.parentElement;
     }
