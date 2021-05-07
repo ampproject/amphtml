@@ -50,6 +50,8 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS =
  *  typeCheckOnly?: boolean,
  *  skipUnknownDepsCheck?: boolean,
  *  warningLevel?: boolean,
+ *  minify?: boolean,
+ *  fortesting?: boolean,
  * }}
  */
 let OptionsDef;
@@ -224,7 +226,12 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     'node_modules/',
     'build/patched-module/',
   ];
-  const define = [`VERSION=${internalRuntimeVersion}`, 'AMP_MODE=true'];
+  const define = [
+    `VERSION=${internalRuntimeVersion}`,
+    'AMP_MODE=true',
+    `IS_MINIFIED=true`,
+    `IS_FORTESTING=${options.fortesting}`,
+  ];
   if (argv.pseudo_names) {
     define.push('PSEUDO_NAMES=true');
   }
