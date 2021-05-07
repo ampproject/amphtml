@@ -27,4 +27,4 @@ module.exports = Object.entries(colors).reduce((map, [key, formatter]) => {
       ? (txt) => /** @type {function} */ (formatter)(txt)
       : formatter;
   return map;
-}, /**@type {Record<keyof typeof colors, (input?: *) => string>} */ ({}));
+}, /** @type {Record<keyof typeof colors, (input?: *) => string>} */ ({}));
