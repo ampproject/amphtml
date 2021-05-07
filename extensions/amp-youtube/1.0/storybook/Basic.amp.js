@@ -15,6 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
+import {VideoElementWithActions} from '../../../amp-video/1.0/storybook/_helpers';
 import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
 import {withAmp} from '@ampproject/storybook-addon';
 
@@ -30,7 +31,7 @@ export default {
   },
 };
 
-export const Default = () => {
+export const Default = ({id}) => {
   const videoid = text('videoid', 'IAvf-rkzNck');
   const layout = text('layout', 'responsive');
   const autoplay = boolean('autoplay', false);
@@ -40,6 +41,7 @@ export const Default = () => {
   const credentials = text('credentials', 'include');
   return (
     <amp-youtube
+      id={id}
       width={width}
       height={height}
       data-videoid={videoid}
@@ -48,6 +50,15 @@ export const Default = () => {
       loop={loop}
       credentials={credentials}
     ></amp-youtube>
+  );
+};
+
+export const Actions = () => {
+  const id = 'my-amp-youtube';
+  return (
+    <VideoElementWithActions id={id}>
+      <Default id={id} />
+    </VideoElementWithActions>
   );
 };
 
