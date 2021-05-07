@@ -474,7 +474,10 @@ export class ManualAdvancement extends AdvancementConfig {
       (el) => {
         tagName = el.tagName.toLowerCase();
 
-        if (tagName === 'amp-story-page-attachment') {
+        if (
+          tagName === 'amp-story-page-attachment' ||
+          tagName === 'amp-story-page-outlink'
+        ) {
           shouldHandleEvent = false;
           return true;
         }
@@ -502,7 +505,7 @@ export class ManualAdvancement extends AdvancementConfig {
 
   /**
    * For an element to trigger a tooltip it has to be descendant of
-   * amp-story-page but not of amp-story-cta-layer or amp-story-page-attachment.
+   * amp-story-page but not of amp-story-cta-layer, amp-story-page-attachment or amp-story-page-outlink.
    * @param {!Event} event
    * @param {!ClientRect} pageRect
    * @return {boolean}
@@ -542,7 +545,8 @@ export class ManualAdvancement extends AdvancementConfig {
 
         if (
           tagName === 'amp-story-cta-layer' ||
-          tagName === 'amp-story-page-attachment'
+          tagName === 'amp-story-page-attachment' ||
+          tagName === 'amp-story-page-outlink'
         ) {
           valid = false;
           return false;

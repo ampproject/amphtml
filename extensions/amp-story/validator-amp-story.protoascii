@@ -849,6 +849,32 @@ tags: {  # <amp-story-page-attachment> with href
   mandatory_ancestor: "AMP-STORY-PAGE"
   mandatory_last_child: true
   attrs: {
+    name: "cta-accent-color"
+  }
+  attrs: {
+    name: "cta-accent-element"
+    value: "background"
+    value: "text"
+  }
+  attrs: {
+    name: "cta-image"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "cta-text"
+  }
+  attrs: {
+    name: "href"
+    mandatory: true
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
     name: "layout"
     mandatory: true
     value: "nodisplay"
@@ -860,33 +886,7 @@ tags: {  # <amp-story-page-attachment> with href
     value: "light"
   }
   attrs: {
-    name: "cta-text"
-  }
-  attrs: {
     name: "title"
-  }
-  attrs: {
-    name: "cta-accent-color"
-  }
-  attrs: {
-    name: "cta-accent-element"
-    value: "background"
-    value: "text"
-  }
-  attrs: {
-    name: "href"
-    mandatory: true
-    value_url: {
-      protocol: "http"
-      protocol: "https"
-    }
-  }
-  attrs: {
-    name: "cta-image"
-    value_url: {
-      protocol: "http"
-      protocol: "https"
-    }
   }
   child_tags: {
     mandatory_num_child_tags: 0
@@ -928,6 +928,56 @@ tags: {  # <amp-story-page-attachment> with no href
     name: "theme"
     value: "dark"
     value: "light"
+  }
+}
+tags: {  # Same validation rules as `<amp-story-page-attachment> with href`
+  html_format: AMP
+  tag_name: "AMP-STORY-PAGE-OUTLINK"
+  spec_name: "amp-story-page-outlink"
+  mandatory_ancestor: "AMP-STORY-PAGE"
+  mandatory_last_child: true
+  attrs: {
+    name: "cta-accent-color"
+  }
+  attrs: {
+    name: "cta-accent-element"
+    value: "background"
+    value: "text"
+  }
+  attrs: {
+    name: "cta-image"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "cta-text"
+  }
+  attrs: {
+    name: "href"
+    mandatory: true
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "layout"
+    mandatory: true
+    value: "nodisplay"
+  }
+  attrs: {
+    name: "theme"
+    value: "custom"
+    value: "dark"
+    value: "light"
+  }
+  attrs: {
+    name: "title"
+  }
+  child_tags: {
+    mandatory_num_child_tags: 0
   }
 }
 tags: {  # <amp-story-animation> <script>
