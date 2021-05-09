@@ -186,6 +186,10 @@ export class HighlightHandler {
     this.updateUrlWithTextFragment_(fragment);
   }
 
+  /**
+   * @param {string} fragment
+   * @private
+   */
   updateUrlWithTextFragment_(fragment) {
     this.ampdoc_.win.location.replace(TEXT_FRAGMENT_PREFIX + fragment);
   }

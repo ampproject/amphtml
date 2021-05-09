@@ -424,7 +424,7 @@ describes.realWin(
       expect(setScrollTopStub.firstCall.args[0]).to.equal(350);
     });
 
-    it.only('highlights using text fragments', async () => {
+    it('should highlight using text fragments', async () => {
       toggleExperiment(env.win, 'use-text-fragments-for-highlights', true);
       const {ampdoc} = env;
       let whenFirstVisiblePromiseResolve;
@@ -450,6 +450,31 @@ describes.realWin(
       expect(updateUrlWithTextFragmentSpy.getCall(0).args[0]).to.equal(
         'text=amp&text=highlight'
       );
+    });
+
+    it('should not highlight if highlightInfo.skipRendering = true', async () => {
+      toggleExperiment(env.win, 'use-text-fragments-for-highlights', true);
+      const {ampdoc} = env;
+      let whenFirstVisiblePromiseResolve;
+      const whenFirstVisiblePromise = new Promise((resolve) => {
+        whenFirstVisiblePromiseResolve = resolve;
+      });
+      env.sandbox
+        .stub(ampdoc, 'whenFirstVisible')
+        .returns(whenFirstVisiblePromise);
+
+      const highlightHandler = new HighlightHandler(ampdoc, {
+        sentences: ['amp', 'highlight'],
+        skipRendering: true,
+      });
+
+      const updateUrlWithTextFragmentSpy = env.sandbox.spy();
+      highlightHandler.updateUrlWithTextFragment_ = updateUrlWithTextFragmentSpy;
+
+      whenFirstVisiblePromiseResolve();
+      await whenFirstVisiblePromise;
+
+      expect(updateUrlWithTextFragmentSpy).not.to.be.called;
     });
   }
 );
