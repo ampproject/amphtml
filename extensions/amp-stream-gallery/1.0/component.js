@@ -26,7 +26,7 @@ import {
   useRef,
   useState,
 } from '../../../src/preact';
-import {useStyles} from './stream-gallery.jss';
+import {useStyles} from './component.jss';
 import objstr from 'obj-str';
 
 const DEFAULT_VISIBLE_COUNT = 1;
