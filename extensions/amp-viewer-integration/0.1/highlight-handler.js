@@ -158,9 +158,8 @@ export class HighlightHandler {
     this.highlightedNodes_ = null;
 
     if (
-      'fragmentDirective' in
-      document /*&&
-      isExperimentOn(ampdoc.win, 'use-text-fragments-for-highlights')*/
+      'fragmentDirective' in document &&
+      isExperimentOn(ampdoc.win, 'use-text-fragments-for-highlights')
     ) {
       ampdoc.whenFirstVisible().then(() => {
         this.highlightUsingTextFragments_(highlightInfo);
