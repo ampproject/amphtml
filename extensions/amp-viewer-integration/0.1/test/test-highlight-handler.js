@@ -125,7 +125,6 @@ describes.realWin(
   (env) => {
     let root = null;
     let docreadyCb = null;
-    let whenFirstVisibleResolve;
     beforeEach(() => {
       const {document} = env.win;
       root = document.createElement('div');
@@ -137,20 +136,11 @@ describes.realWin(
       div1.textContent = 'highlighted text';
       root.appendChild(div1);
 
-      const whenFirstVisiblePromise = new Promise((resolve) => {
-        whenFirstVisibleResolve = resolve;
-      });
-      env.sandbox
-        .stub(env.ampdoc, 'whenFirstVisible')
-        .returns(whenFirstVisiblePromise);
-
       env.sandbox.stub(docready, 'whenDocumentReady').returns({
         then: (cb) => {
           docreadyCb = cb;
         },
       });
-
-      env.sandbox.stub();
     });
 
     it('initialize with visibility=visible', () => {
@@ -434,57 +424,68 @@ describes.realWin(
       expect(setScrollTopStub.firstCall.args[0]).to.equal(350);
     });
 
-    it('should highlight using text fragments', async () => {
-      toggleExperiment(env.win, 'use-text-fragments-for-highlights', true);
-      const {ampdoc} = env;
-      let whenFirstVisiblePromiseResolve;
-      const whenFirstVisiblePromise = new Promise((resolve) => {
-        whenFirstVisiblePromiseResolve = resolve;
+    // TODO(dmanek): remove `ifChrome` once other major browsers support
+    // text fragments (i.e. 'fragmentDirective' in document = true)
+    it.configure()
+      .ifChrome()
+      .run('should highlight using text fragments', async () => {
+        toggleExperiment(env.win, 'use-text-fragments-for-highlights', true);
+        const {ampdoc} = env;
+        let whenFirstVisiblePromiseResolve;
+        const whenFirstVisiblePromise = new Promise((resolve) => {
+          whenFirstVisiblePromiseResolve = resolve;
+        });
+        env.sandbox
+          .stub(ampdoc, 'whenFirstVisible')
+          .returns(whenFirstVisiblePromise);
+
+        const highlightHandler = new HighlightHandler(ampdoc, {
+          sentences: ['amp', 'highlight'],
+          skipRendering: false,
+        });
+
+        const updateUrlWithTextFragmentSpy = env.sandbox.spy();
+        highlightHandler.updateUrlWithTextFragment_ = updateUrlWithTextFragmentSpy;
+
+        whenFirstVisiblePromiseResolve();
+        await whenFirstVisiblePromise;
+
+        expect(updateUrlWithTextFragmentSpy).to.be.calledOnce;
+        expect(updateUrlWithTextFragmentSpy.getCall(0).args[0]).to.equal(
+          'text=amp&text=highlight'
+        );
       });
-      env.sandbox
-        .stub(ampdoc, 'whenFirstVisible')
-        .returns(whenFirstVisiblePromise);
 
-      const highlightHandler = new HighlightHandler(ampdoc, {
-        sentences: ['amp', 'highlight'],
-        skipRendering: false,
-      });
+    // TODO(dmanek): remove `ifChrome` once other major browsers support
+    // text fragments (i.e. 'fragmentDirective' in document = true)
+    it.configure()
+      .ifChrome()
+      .run(
+        'should not highlight if highlightInfo.skipRendering = true',
+        async () => {
+          toggleExperiment(env.win, 'use-text-fragments-for-highlights', true);
+          const {ampdoc} = env;
+          let whenFirstVisiblePromiseResolve;
+          const whenFirstVisiblePromise = new Promise((resolve) => {
+            whenFirstVisiblePromiseResolve = resolve;
+          });
+          env.sandbox
+            .stub(ampdoc, 'whenFirstVisible')
+            .returns(whenFirstVisiblePromise);
 
-      const updateUrlWithTextFragmentSpy = env.sandbox.spy();
-      highlightHandler.updateUrlWithTextFragment_ = updateUrlWithTextFragmentSpy;
+          const highlightHandler = new HighlightHandler(ampdoc, {
+            sentences: ['amp', 'highlight'],
+            skipRendering: true,
+          });
 
-      whenFirstVisiblePromiseResolve();
-      await whenFirstVisiblePromise;
+          const updateUrlWithTextFragmentSpy = env.sandbox.spy();
+          highlightHandler.updateUrlWithTextFragment_ = updateUrlWithTextFragmentSpy;
 
-      expect(updateUrlWithTextFragmentSpy).to.be.calledOnce;
-      expect(updateUrlWithTextFragmentSpy.getCall(0).args[0]).to.equal(
-        'text=amp&text=highlight'
+          whenFirstVisiblePromiseResolve();
+          await whenFirstVisiblePromise;
+
+          expect(updateUrlWithTextFragmentSpy).not.to.be.called;
+        }
       );
-    });
-
-    it('should not highlight if highlightInfo.skipRendering = true', async () => {
-      toggleExperiment(env.win, 'use-text-fragments-for-highlights', true);
-      const {ampdoc} = env;
-      let whenFirstVisiblePromiseResolve;
-      const whenFirstVisiblePromise = new Promise((resolve) => {
-        whenFirstVisiblePromiseResolve = resolve;
-      });
-      env.sandbox
-        .stub(ampdoc, 'whenFirstVisible')
-        .returns(whenFirstVisiblePromise);
-
-      const highlightHandler = new HighlightHandler(ampdoc, {
-        sentences: ['amp', 'highlight'],
-        skipRendering: true,
-      });
-
-      const updateUrlWithTextFragmentSpy = env.sandbox.spy();
-      highlightHandler.updateUrlWithTextFragment_ = updateUrlWithTextFragmentSpy;
-
-      whenFirstVisiblePromiseResolve();
-      await whenFirstVisiblePromise;
-
-      expect(updateUrlWithTextFragmentSpy).not.to.be.called;
-    });
   }
 );
