@@ -34,7 +34,6 @@ import {dict} from '../../../src/core/types/object';
 import {getAmpdoc} from '../../../src/service';
 import {getData, listen, listenOnce} from '../../../src/event-helper';
 import {getSourceUrl} from '../../../src/url';
-import {isExperimentOn} from '../../../src/experiments';
 import {isIframed} from '../../../src/dom';
 
 const TAG = 'amp-viewer-integration';
@@ -112,7 +111,6 @@ export class AmpViewerIntegration {
         }
       );
     }
-
     /** @type {?HighlightInfoDef} */
     const highlightInfo = getHighlightParam(ampdoc);
     if (highlightInfo) {

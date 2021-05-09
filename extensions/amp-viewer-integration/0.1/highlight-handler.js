@@ -79,6 +79,12 @@ export let HighlightInfoDef;
 const SCROLL_ANIMATION_HEIGHT = 500;
 
 /**
+ * Text fragment prefix to add to the URL
+ * @type {string}
+ */
+const TEXT_FRAGMENT_PREFIX = '#:~:';
+
+/**
  * The height of the margin placed before highlighted texts.
  * This margin is necessary to avoid the overlap with the common floating
  * header UI.
@@ -152,15 +158,12 @@ export class HighlightHandler {
     this.highlightedNodes_ = null;
 
     if (
-      'fragmentDirective' in document &&
-      isExperimentOn(this.win, 'enable-text-fragments')
+      'fragmentDirective' in
+      document /*&&
+      isExperimentOn(ampdoc.win, 'use-text-fragments-for-highlights')*/
     ) {
       ampdoc.whenFirstVisible().then(() => {
-        const sentences = highlightInfo['sentences'];
-        const fragment = sentences
-          .map((text) => 'text=' + encodeURIComponent(text))
-          .join('&');
-        ampdoc.win.location.replace('#:~:' + fragment);
+        this.highlightUsingTextFragments_(highlightInfo);
       });
     } else {
       whenDocumentReady(ampdoc.win.document).then(() => {
@@ -419,5 +422,27 @@ export class HighlightHandler {
     for (let i = 0; i < this.highlightedNodes_.length; i++) {
       resetStyles(this.highlightedNodes_[i], ['backgroundColor', 'color']);
     }
+  }
+
+  /**
+   * @param {!HighlightInfoDef} highlightInfo
+   * @private
+   */
+  highlightUsingTextFragments_(highlightInfo) {
+    const {sentences, skipRendering} = highlightInfo;
+    if (skipRendering || !sentences?.length) {
+      return;
+    }
+    const fragment = sentences
+      .map((text) => 'text=' + encodeURIComponent(text))
+      .join('&');
+    this.updateUrlWithTextFragment_(fragment);
+  }
+
+  /**
+   * @param {string} fragment
+   */
+  updateUrlWithTextFragment_(fragment) {
+    this.ampdoc_.win.location.replace(TEXT_FRAGMENT_PREFIX + fragment);
   }
 }

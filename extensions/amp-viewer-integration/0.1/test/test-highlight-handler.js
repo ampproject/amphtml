@@ -20,6 +20,7 @@ import {Messaging, WindowPortEmulator} from '../messaging/messaging';
 import {Services} from '../../../../src/services';
 import {VisibilityState} from '../../../../src/core/constants/visibility-state';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.fakeWin(
   'getHighlightParam',
@@ -124,6 +125,7 @@ describes.realWin(
   (env) => {
     let root = null;
     let docreadyCb = null;
+    let whenFirstVisibleResolve;
     beforeEach(() => {
       const {document} = env.win;
       root = document.createElement('div');
@@ -135,11 +137,20 @@ describes.realWin(
       div1.textContent = 'highlighted text';
       root.appendChild(div1);
 
+      const whenFirstVisiblePromise = new Promise((resolve) => {
+        whenFirstVisibleResolve = resolve;
+      });
+      env.sandbox
+        .stub(env.ampdoc, 'whenFirstVisible')
+        .returns(whenFirstVisiblePromise);
+
       env.sandbox.stub(docready, 'whenDocumentReady').returns({
         then: (cb) => {
           docreadyCb = cb;
         },
       });
+
+      env.sandbox.stub();
     });
 
     it('initialize with visibility=visible', () => {
@@ -422,5 +433,31 @@ describes.realWin(
       expect(setScrollTopStub).to.be.calledOnce;
       expect(setScrollTopStub.firstCall.args[0]).to.equal(350);
     });
+
+    // it.only('highglights using text fragments', () => {
+    //   toggleExperiment(env.win, 'use-text-fragments-for-highlights', true);
+    //   const {ampdoc} = env;
+
+    //   const highlightHandler = new HighlightHandler(ampdoc, {
+    //     sentences: ['amp', 'highlight'],
+    //     skipRendering: false,
+    //   });
+    //   const updateUrlWithTextFragmentSpy = env.sandbox.spy();
+    //   highlightHandler.updateUrlWithTextFragment_ = updateUrlWithTextFragmentSpy;
+    //   whenFirstVisibleResolve();
+    //   ampdoc.whenFirstVisible().then(() => {
+    //     console.log(updateUrlWithTextFragmentSpy.getCall(0).args[0]);
+    //     // env.sandbox.spy(highlightHandler, 'updateUrlWithTextFragment_');
+    //     // highlightHandler.updateUrlWithTextFragment_ = updateUrlWithTextFragmentSpy;
+    //     // env.sandbox.stub(ampdoc, 'whenFirstVisible').returns(Promise.resolve());
+
+    //     expect(updateUrlWithTextFragmentSpy).to.be.calledOnce;
+    //     expect(updateUrlWithTextFragmentSpy.getCall(0).args[0]).to.equal(
+    //       'text=amp&text=highlightsssssssss'
+    //     );
+
+    //     // expect(updateUrlWithTextFragmentSpy.calledOnce).to.be.true;
+    //   });
+    // });
   }
 );
