@@ -15,26 +15,20 @@
  */
 
 import {ActionTrust} from '../../../src/core/constants/action-constants';
-import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/base-carousel.jss';
+import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-stream-gallery-1.0.css';
-import {CSS as GALLERY_CSS} from './stream-gallery.jss';
-import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
-import {StreamGallery} from './stream-gallery';
-import {cloneElement} from '../../../src/preact';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '../../../src/core/types/object';
-import {dispatchCustomEvent} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
+import {toWin} from '../../../src/types';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-stream-gallery';
 
-class AmpStreamGallery extends PreactBaseElement {
+class AmpStreamGallery extends BaseElement {
   /** @override */
   init() {
-    const {element} = this;
     this.registerApiAction('prev', (api) => api.prev(), ActionTrust.LOW);
     this.registerApiAction('next', (api) => api.next(), ActionTrust.LOW);
     this.registerApiAction(
@@ -46,11 +40,7 @@ class AmpStreamGallery extends PreactBaseElement {
       ActionTrust.LOW
     );
 
-    return dict({
-      'onSlideChange': (index) => {
-        fireSlideChangeEvent(this.win, element, index, ActionTrust.HIGH);
-      },
-    });
+    return super.init();
   }
 
   /** @override */
@@ -64,81 +54,22 @@ class AmpStreamGallery extends PreactBaseElement {
   }
 
   /** @override */
-  updatePropsForRendering(props) {
-    const {arrowPrev, arrowNext} = props;
-    if (arrowPrev) {
-      props['arrowPrevAs'] = (props) => cloneElement(arrowPrev, props);
-    }
-    if (arrowNext) {
-      props['arrowNextAs'] = (props) => cloneElement(arrowNext, props);
-    }
+  triggerEvent(element, eventName, detail) {
+    const event = createCustomEvent(
+      toWin(element.ownerDocument.defaultView),
+      `amp-stream-gallery.${eventName}`,
+      detail
+    );
+    Services.actionServiceForDoc(element).trigger(
+      element,
+      eventName,
+      event,
+      ActionTrust.HIGH
+    );
+
+    super.triggerEvent(element, eventName, detail);
   }
 }
-
-/**
- * Triggers a 'slideChange' event with one data param:
- * 'index' - index of the current slide.
- * @param {!Window} win
- * @param {!Element} el The element that was selected or deslected.
- * @param {number} index
- * @param {!ActionTrust} trust
- * @private
- */
-function fireSlideChangeEvent(win, el, index, trust) {
-  const eventName = 'slideChange';
-  const data = dict({'index': index});
-  const slideChangeEvent = createCustomEvent(
-    win,
-    `amp-stream-gallery.${eventName}`,
-    data
-  );
-  Services.actionServiceForDoc(el).trigger(
-    el,
-    eventName,
-    slideChangeEvent,
-    trust
-  );
-  dispatchCustomEvent(el, eventName, data);
-}
-
-/** @override */
-AmpStreamGallery['Component'] = StreamGallery;
-
-/** @override */
-AmpStreamGallery['layoutSizeDefined'] = true;
-
-/** @override */
-AmpStreamGallery['props'] = {
-  'arrowPrev': {
-    selector: '[slot="prev-arrow"]',
-    single: true,
-  },
-  'arrowNext': {
-    selector: '[slot="next-arrow"]',
-    single: true,
-  },
-  'controls': {attr: 'controls', type: 'string', media: true},
-  'extraSpace': {attr: 'extra-space', type: 'string', media: true},
-  'loop': {attr: 'loop', type: 'boolean', media: true},
-  'minItemWidth': {attr: 'min-item-width', type: 'number', media: true},
-  'maxItemWidth': {attr: 'max-item-width', type: 'number', media: true},
-  'maxVisibleCount': {attr: 'max-visible-count', type: 'number', media: true},
-  'minVisibleCount': {attr: 'min-visible-count', type: 'number', media: true},
-  'outsetArrows': {attr: 'outset-arrows', type: 'boolean', media: true},
-  'peek': {attr: 'peek', type: 'number', media: true},
-  'slideAlign': {attr: 'slide-align', type: 'string', media: true},
-  'snap': {attr: 'snap', type: 'boolean', media: true},
-  'children': {
-    selector: '*', // This should be last as catch-all.
-    single: false,
-  },
-};
-
-/** @override */
-AmpStreamGallery['usesShadowDom'] = true;
-
-/** @override */
-AmpStreamGallery['shadowCss'] = GALLERY_CSS + CAROUSEL_CSS;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpStreamGallery, CSS);

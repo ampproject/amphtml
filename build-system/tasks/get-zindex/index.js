@@ -26,7 +26,7 @@ const {
   getJscodeshiftReport,
 } = require('../../test-configs/jscodeshift');
 const {getStdout} = require('../../common/process');
-const {gray, magenta} = require('kleur/colors');
+const {gray, magenta} = require('../../common/colors');
 const {logOnSameLineLocalDev, logLocalDev} = require('../../common/logging');
 const {writeDiffOrFail} = require('../../common/diff');
 

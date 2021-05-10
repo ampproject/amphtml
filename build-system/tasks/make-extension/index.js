@@ -20,7 +20,7 @@ const del = require('del');
 const fs = require('fs-extra');
 const objstr = require('obj-str');
 const path = require('path');
-const {cyan, green, red, yellow} = require('kleur/colors');
+const {cyan, green, red, yellow} = require('../../common/colors');
 const {format} = require('./format');
 const {getStdout, getOutput} = require('../../common/process');
 const {log, logLocalDev, logWithoutTimestamp} = require('../../common/logging');
@@ -220,7 +220,25 @@ async function makeExtensionFromTemplates(
     '__component_name_hyphenated__': name,
     '__component_name_hyphenated_capitalized__': name.toUpperCase(),
     '__component_name_pascalcase__': namePascalCase,
+    // TODO(alanorozco): Remove __storybook_experiments...__ once we stop
+    // requiring the bento experiment.
+    '__storybook_experiments_do_not_add_trailing_comma__':
+      // Don't add a trailing comma in the template, instead we add it here.
+      // This is because the property added is optional, and a double comma would
+      // cause a syntax error.
+      options.bento ? "experiments: ['bento']," : '',
     ...(!options.nocss
+      ? {
+          '__css_import__': `import {CSS} from '../../../build/amp-${name}-${version}.css'`,
+          '__css_id__': `CSS`,
+          '__register_element_args__': `TAG, Amp${namePascalCase}, CSS`,
+        }
+      : {
+          '__css_import__': '',
+          '__css_id__': '',
+          '__register_element_args__': `TAG, Amp${namePascalCase}`,
+        }),
+    ...(!options.nojss
       ? {
           '__jss_import_component_css__': `import {CSS as COMPONENT_CSS} from './component.jss'`,
           '__jss_component_css__': 'COMPONENT_CSS',
@@ -228,9 +246,6 @@ async function makeExtensionFromTemplates(
           '__jss_styles_use_styles__': 'const styles = useStyles()',
           '__jss_styles_example_or_placeholder__':
             '`${styles.exampleContentHidden}`',
-          '__css_import__': `import {CSS} from '../../../build/amp-${name}-${version}.css'`,
-          '__css_id__': `CSS`,
-          '__register_element_args__': `TAG, Amp${namePascalCase}, CSS`,
         }
       : {
           '__jss_import_component_css_': '',
@@ -238,9 +253,6 @@ async function makeExtensionFromTemplates(
           '__jss_import_use_styles__': '',
           '__jss_styles_use_styles__': '',
           '__jss_styles_example_or_placeholder__': `'my-classname'`,
-          '__css_import__': '',
-          '__css_id__': '',
-          '__register_element_args__': `TAG, Amp${namePascalCase}`,
         }),
     // eslint-disable-next-line local/no-forbidden-terms
     // This allows generated code to contain "DO NOT SUBMIT", which will cause
@@ -341,29 +353,21 @@ async function affectsWorkingTree(fn) {
 }
 
 /**
- * Builds and tests a generated extension.
- * (Unit tests for the generator are located in test/test.js)
+ * Generates an extension with the given name and runs all unit tests located in
+ * the generated extension directory.
  * @param {string} name
- * @return {!Promise{?string}} stderr or null if passing
+ * @return {!Promise{?string}} stderr if failing, null if passing
  */
 async function runExtensionTests(name) {
   for (const command of [
     `amp build --extensions=${name} --core_runtime_only`,
-    `amp unit --nohelp --headless --files="extensions/${name}/**/test/test-*.js" --report`,
+    `amp unit --headless --files="extensions/${name}/**/test/test-*.js"`,
   ]) {
     log('Running', cyan(command) + '...');
     const result = getOutput(command);
     if (result.status !== 0) {
       return result.stderr || result.stdout;
     }
-  }
-  const report = await fs.readJson('result-reports/unit.json');
-  if (!report.summary.success) {
-    return `Zero tests succeeded\n${JSON.stringify(
-      report,
-      /* replacer */ undefined,
-      /* space */ 2
-    )}`;
   }
   return null;
 }
@@ -374,14 +378,14 @@ async function runExtensionTests(name) {
 async function makeExtension() {
   let testError;
 
-  const {bento, nocss} = argv;
+  const {bento, nocss, nojss} = argv;
 
   const templateDirs = objstr({
     shared: true,
     bento,
     classic: !bento,
     css: !nocss,
-    jss: bento && !nocss,
+    jss: bento && !nojss,
   })
     .split(/\s+/)
     .map((name) => getTemplateDir(name));
@@ -430,7 +434,9 @@ makeExtension.flags = {
   name: 'The name of the extension. The prefix `amp-*` is added if necessary',
   cleanup: 'Undo file changes before exiting. This is useful alongside --test',
   bento: 'Generate a Bento component',
-  nocss: 'Exclude extension-specific CSS',
+  nocss:
+    'Exclude extension-specific CSS. (If specifying --bento, JSS is still generated unless combined with --nojss)',
+  nojss: 'Exclude extension-specific JSS when specifying --bento.',
   test: 'Build and test the generated extension',
   version: 'Sets the version number (default: 0.1; or 1.0 with --bento)',
   overwrite:

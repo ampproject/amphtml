@@ -75,6 +75,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen} from '../../../src/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
+import {prefersReducedMotion} from '../../../src/utils/media-query-props';
 import {px, toggle} from '../../../src/style';
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
@@ -308,17 +309,20 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   maybeCreateAnimationManager_() {
-    if (!this.animationManager_) {
-      if (!hasAnimations(this.element)) {
-        return;
-      }
-
-      this.animationManager_ = AnimationManager.create(
-        this.element,
-        this.getAmpDoc(),
-        this.getAmpDoc().getUrl()
-      );
+    if (this.animationManager_) {
+      return;
     }
+    if (prefersReducedMotion(this.win)) {
+      return;
+    }
+    if (!hasAnimations(this.element)) {
+      return;
+    }
+    this.animationManager_ = AnimationManager.create(
+      this.element,
+      this.getAmpDoc(),
+      this.getAmpDoc().getUrl()
+    );
   }
 
   /** @override */
@@ -479,9 +483,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         if (this.state_ === PageState.PAUSED) {
           this.advancement_.start();
           this.playAllMedia_();
-          if (this.animationManager_) {
-            this.animationManager_.resumeAll();
-          }
+          this.animationManager_?.resumeAll();
         }
 
         this.state_ = state;
@@ -493,9 +495,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         const canResume = !this.storeService_.get(StateProperty.BOOKEND_STATE);
         this.advancement_.stop(canResume);
         this.pauseAllMedia_(false /** rewindToBeginning */);
-        if (this.animationManager_) {
-          this.animationManager_.pauseAll();
-        }
+        this.animationManager_?.pauseAll();
         this.state_ = state;
         break;
       default:
@@ -533,9 +533,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.muteAllMedia();
     }
 
-    if (this.animationManager_) {
-      this.animationManager_.cancelAll();
-    }
+    this.animationManager_?.cancelAll();
   }
 
   /**
@@ -564,12 +562,9 @@ export class AmpStoryPage extends AMP.BaseElement {
           });
         });
       });
-      this.prefersReducedMotion_()
-        ? this.maybeFinishAnimations_()
-        : this.maybeStartAnimations_();
+      this.maybeStartAnimations_();
       this.checkPageHasAudio_();
       this.checkPageHasElementWithPlayback_();
-      this.renderOpenAttachmentUI_();
       this.findAndPrepareEmbeddedComponents_();
     }
 
@@ -589,6 +584,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.getViewport().onResize(
       debounce(this.win, () => this.onResize_(), RESIZE_TIMEOUT_MS)
     );
+
+    this.renderOpenAttachmentUI_();
+
     return Promise.all([
       this.beforeVisible(),
       this.waitForMediaLayout_(),
@@ -1208,10 +1206,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   maybeStartAnimations_() {
-    if (!this.animationManager_) {
-      return;
-    }
-    this.animationManager_.animateIn();
+    this.animationManager_?.animateIn();
   }
 
   /**
@@ -1232,22 +1227,10 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Whether the device opted in prefers-reduced-motion.
-   * @return {boolean}
-   * @private
-   */
-  prefersReducedMotion_() {
-    return this.win.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  }
-
-  /**
    * @return {!Promise}
    */
   maybeApplyFirstAnimationFrame() {
-    if (!this.animationManager_) {
-      return Promise.resolve();
-    }
-    return this.animationManager_.applyFirstFrame();
+    return Promise.resolve(this.animationManager_?.applyFirstFrame());
   }
 
   /**
@@ -1756,16 +1739,25 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   renderOpenAttachmentUI_() {
+    // AttachmentEl can be either amp-story-page-attachment or amp-story-page-outlink
     const attachmentEl = this.element.querySelector(
-      'amp-story-page-attachment'
+      'amp-story-page-attachment, amp-story-page-outlink'
     );
     if (!attachmentEl) {
       return;
     }
 
+    // To prevent 'title' attribute from being used by browser, copy value to 'data-title' and remove.
+    if (attachmentEl.hasAttribute('title')) {
+      attachmentEl.setAttribute(
+        'data-title',
+        attachmentEl.getAttribute('title')
+      );
+      attachmentEl.removeAttribute('title');
+    }
+
     if (!this.openAttachmentEl_) {
       this.openAttachmentEl_ = renderPageAttachmentUI(
-        this.win,
         this.element,
         attachmentEl
       );
@@ -1774,7 +1766,11 @@ export class AmpStoryPage extends AMP.BaseElement {
       container.classList.add('i-amphtml-story-page-open-attachment-host');
       container.setAttribute('role', 'button');
 
-      container.addEventListener('click', () => this.openAttachment());
+      container.addEventListener('click', (e) => {
+        // Prevent default so link can be opened programmatically after URL preview is shown.
+        e.preventDefault();
+        this.openAttachment();
+      });
 
       this.mutateElement(() => {
         this.element.appendChild(container);

@@ -573,9 +573,10 @@ const forbiddenTermsGlobal = {
   '/\\*\\* @type \\{\\!Element\\} \\*/': {
     message: 'Use assertElement instead of casting to !Element.',
     allowlist: [
-      'src/log.js', // Has actual implementation of assertElement.
+      'src/core/assert/base.js', // Has actual implementation of assertElement.
+      'src/core/assert/dev.js', // Has actual implementation of assertElement.
       'src/polyfills/custom-elements.js',
-      'ads/google/imaVideo.js', // Required until #22277 is fixed.
+      'ads/google/ima/ima-video.js', // Required until #22277 is fixed.
       '3p/twitter.js', // Runs in a 3p window context, so cannot import log.js.
     ],
   },
@@ -776,7 +777,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-callout-vendors.js',
       'test/unit/test-chunk.js',
       'test/unit/test-cid.js',
-      'test/unit/test-css.js',
       'test/unit/test-curve.js',
       'test/unit/test-describes.js',
       'test/unit/test-document-info.js',
@@ -950,8 +950,7 @@ const forbiddenTermsSrcInclusive = {
     message: bannedTermsHelpString,
     allowlist: [
       'src/friendly-iframe-embed.js',
-      'src/polyfills/stubs/intersection-observer-stub.js',
-      'src/polyfills/stubs/resize-observer-stub.js',
+      'src/runtime.js',
       'src/service/extensions-impl.js',
       'src/service/crypto-impl.js',
     ],
@@ -1062,7 +1061,11 @@ const forbiddenTermsSrcInclusive = {
   '\\.indexOf\\(.*===?.*\\.length': 'use endsWith helper in src/string.js',
   '/url-parse-query-string': {
     message: 'Import parseQueryString from `src/url.js`',
-    allowlist: ['src/url.js', 'src/mode.js'],
+    allowlist: [
+      'build-system/tasks/check-types.js',
+      'src/mode.js',
+      'src/url.js',
+    ],
   },
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
@@ -1096,7 +1099,7 @@ const forbiddenTermsSrcInclusive = {
     message: measurementApiDeprecated,
     allowlist: [
       'build-system/externs/amp.extern.js',
-      'builtins/amp-img.js',
+      'builtins/amp-img/amp-img.js',
       'src/base-element.js',
       'src/custom-element.js',
       'src/iframe-helper.js',
@@ -1140,6 +1143,14 @@ const forbiddenTermsSrcInclusive = {
   "require\\('fancy-log'\\)": {
     message:
       'Instead of fancy-log, use the logging functions in build-system/common/logging.js.',
+  },
+  "require\\('kleur\\/colors'\\)": {
+    message:
+      'Instead of kleur/colors, use the log-coloring functions in build-system/common/colors.js',
+    allowlist: [
+      'build-system/common/colors.js',
+      'third_party/react-dates/scope-require.js',
+    ],
   },
   'withA11y':
     'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',

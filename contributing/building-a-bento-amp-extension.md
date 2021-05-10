@@ -52,6 +52,8 @@ To bootstrap the creation of a new component (or the Bento version of an existin
 $ amp make-extension --bento --name=amp-my-element
 ```
 
+This generates CSS used by the AMP element `<amp-my-element>`, and JSS used by the Preact component `<MyElement>`. To exclude either, you may additionally specify `--nocss` and/or `--nojss`.
+
 ## Naming
 
 All Bento AMP component extensions have their tag names prefixed with `amp-`.
@@ -66,7 +68,7 @@ The directory structure is below:
 
 ```sh
 /extensions/amp-my-element/
-├── 0.1/
+├── 1.0/
 |   ├── storybook/                       # Element's manual sample playground (req'd)
 |   |   ├── Basic.js                     # Preact usage examples
 |   |   ├── Basic.amp.js                 # AMP usage examples
@@ -668,8 +670,9 @@ $ amp check-types
     -   [amp-timeago](https://github.com/ampproject/amphtml/pull/26507)
     -   [amp-base-carousel](https://github.com/ampproject/amphtml/pull/29303)
     -   [amp-stream-gallery](https://github.com/ampproject/amphtml/pull/30597)
--   Adding video components which use `VideoWrapper`
+-   Adding video components which use `VideoWrapper`. [You may also follow the guide to Building a Bento Video Component.](./building-a-bento-video-player.md)
     -   [amp-video](https://github.com/ampproject/amphtml/pull/30280)
+    -   [amp-vimeo](https://github.com/ampproject/amphtml/pull/33971)
     -   [amp-youtube](https://github.com/ampproject/amphtml/pull/30444)
 -   Adding iframe based embeds
     -   [amp-instagram](https://github.com/ampproject/amphtml/pull/30230)
