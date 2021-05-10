@@ -315,7 +315,7 @@
         <button on="tap:AMP.setState({ srcUrl: 'amp-state:my-state2' })">Change to alternate amp-state source</button>
       </div> -->
 
-      <amp-list id="amp-list-placeholder" noloading layout="fixed-height" height="954" src="https://amp.dev/documentation/examples/api/slow-json-with-items/?delay=5000">
+      <!-- <amp-list id="amp-list-placeholder" noloading layout="fixed-height" height="954" src="https://amp.dev/documentation/examples/api/slow-json-with-items/?delay=5000">
         <div placeholder>
           <div class="product">
             <div class="image-placeholder"></div>
@@ -339,11 +339,23 @@
                 </div>
             </div>
         </template>
-      </amp-list>
+      </amp-list> -->
 
-      <hr>
       <amp-render id="amp-list-placeholder" layout="fixed-height" height="654" src="https://amp.dev/documentation/examples/api/slow-json-with-items/?delay=5000">
-        <div placeholder>Loading ...</div>
+        <div placeholder>
+          <div class="product">
+            <div class="image-placeholder"></div>
+            <div>Loading...</div>
+          </div>
+          <div class="product">
+            <div class="image-placeholder"></div>
+            <div>Loading...</div>
+          </div>
+          <div class="product">
+            <div class="image-placeholder"></div>
+            <div>Loading...</div>
+          </div>
+        </div>
         <div fallback>Failed to load data.</div>
         <template type="amp-mustache">
           {{#items}}
