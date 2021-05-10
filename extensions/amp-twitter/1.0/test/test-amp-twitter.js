@@ -91,9 +91,10 @@ describes.realWin(
     });
 
     it('should replace iframe after tweetid mutation', async () => {
+      const originalTweetId = '585110598171631616';
       const newTweetId = '638793490521001985';
       element = createElementWithAttributes(win.document, 'amp-twitter', {
-        'data-tweetid': '585110598171631616',
+        'data-tweetid': originalTweetId,
         'height': 500,
         'width': 500,
         'layout': 'responsive',
@@ -102,23 +103,23 @@ describes.realWin(
       await waitForRender();
 
       const iframe = element.shadowRoot.querySelector('iframe');
-      const oldName = iframe.getAttribute('name');
-      expect(oldName).to.contain('585110598171631616');
-      expect(oldName).not.to.contain('638793490521001985');
+      const originalName = iframe.getAttribute('name');
+      expect(originalName).to.contain(originalTweetId);
+      expect(originalName).not.to.contain(newTweetId);
 
       element.setAttribute('data-tweetid', newTweetId);
       await waitFor(
         () =>
           element.shadowRoot.querySelector('iframe').getAttribute('name') !=
-          oldName,
+          originalName,
         'iframe changed'
       );
 
-      const name = element.shadowRoot
+      const newName = element.shadowRoot
         .querySelector('iframe')
         .getAttribute('name');
-      expect(name).not.to.contain('585110598171631616');
-      expect(name).to.contain('638793490521001985');
+      expect(newName).not.to.contain(originalTweetId);
+      expect(newName).to.contain(newTweetId);
     });
   }
 );
