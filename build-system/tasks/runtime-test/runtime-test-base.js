@@ -34,8 +34,8 @@ const {app} = require('../../server/test-server');
 const {createKarmaServer, getAdTypes} = require('./helpers');
 const {cyan, green, red, yellow} = require('kleur/colors');
 const {dotWrappingWidth} = require('../../common/logging');
-const {esbuildCssPlugin} = require('../../common/esbuild-css');
 const {getEsbuildBabelPlugin} = require('../../common/esbuild-babel');
+const {getEsbuildCssPlugin} = require('../../common/esbuild-css');
 const {getFilesFromArgv} = require('../../common/utils');
 const {isCiBuild, isCircleciBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
@@ -269,6 +269,7 @@ function updateEsbuildConfig(config) {
       });
     },
   };
+  const cssPlugin = getEsbuildCssPlugin();
   const babelPlugin = getEsbuildBabelPlugin(
     /* callerName */ 'test',
     /* enableCache */ true,
@@ -281,7 +282,7 @@ function updateEsbuildConfig(config) {
       'process.env.NODE_DEBUG': 'false',
       'process.env.NODE_ENV': '"test"',
     },
-    plugins: [esbuildCssPlugin, importPathPlugin, babelPlugin],
+    plugins: [cssPlugin, importPathPlugin, babelPlugin],
     sourcemap: 'inline',
   };
 }

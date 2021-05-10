@@ -15,8 +15,8 @@
  */
 
 const fsPath = require('path');
-const {readFileSync, accessSync} = require('fs-extra');
-const {transformCssSync} = require('../../tasks/css/jsify-css-sync');
+const {accessSync} = require('fs-extra');
+const {jsifyCssSync} = require('../../tasks/css/jsify-css-sync');
 
 module.exports = function (babel) {
   const {types: t, template} = babel;
@@ -35,30 +35,32 @@ module.exports = function (babel) {
           return;
         }
 
-        const filename = fsPath.relative(
-          process.cwd(),
-          state.file.opts.filename
-        );
         const importFilepath = fsPath.join(
-          fsPath.dirname(filename),
+          fsPath.dirname(state.file.opts.filename),
           source.node.value
         );
 
+        // Omit references to built files.
+        if (importFilepath.includes('/build/')) {
+          return;
+        }
+
+        // Nonexistent files will error out down the chain once we check for
+        // unknown Closure modules.
         try {
           accessSync(importFilepath);
         } catch (_) {
           return;
         }
 
-        const {css} = transformCssSync(
-          readFileSync(importFilepath),
-          undefined,
-          importFilepath
-        );
-
-        const id = t.identifier(specifier.node.local.name);
-        const init = t.stringLiteral(css);
-        path.replaceWith(template.ast`const ${id} = ${init};`);
+        try {
+          const css = jsifyCssSync(importFilepath);
+          const id = t.identifier(specifier.node.local.name);
+          const init = t.stringLiteral(css);
+          path.replaceWith(template.ast`const ${id} = ${init};`);
+        } catch (e) {
+          throw path.buildCodeFrameError(`[${importFilepath}] ${e.message}`);
+        }
       },
     },
   };

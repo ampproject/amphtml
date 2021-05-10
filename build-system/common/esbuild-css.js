@@ -14,25 +14,41 @@
  * limitations under the License.
  */
 
-const {readFile} = require('fs-extra');
-const {transformCssString} = require('../tasks/css/jsify-css');
+const globby = require('globby');
+const path = require('path');
+const {jsifyCssAsync} = require('../tasks/css/jsify-css');
 
-const esbuildCssPlugin = {
-  name: 'css-plugin',
-  setup(build) {
-    build.onLoad({filter: /\.css$/}, async (args) => {
-      // Omit legacy references since they're resolved to Javascript.
-      if (args.path.includes('../build/')) {
-        return null;
-      }
-      const input = await readFile(args.path, 'utf8');
-      const {css} = await transformCssString(input, args.path);
-      return {
-        contents: css,
-        loader: 'text',
-      };
-    });
-  },
-};
+/**
+ * @param {?Array<string>=} cssInputFiles When this array is provided, the list
+ *   of imported CSS files is added.
+ * @return {import('esbuild').Plugin}
+ */
+function getEsbuildCssPlugin(cssInputFiles) {
+  return {
+    name: 'css-plugin',
+    setup(build) {
+      build.onLoad({filter: /\.css$/}, async (args) => {
+        // Omit references to built files.
+        if (args.path.includes('/build/')) {
+          return null;
+        }
 
-module.exports = {esbuildCssPlugin};
+        // We currently lack a way to determine all transitive CSS imports, so
+        // in the meantime we naïvely watch all .css paths in the same directory
+        // as the processed file.
+        // TODO(alanorozco): Add the correct chain of imported files
+        (cssInputFiles || null)?.push(
+          ...(await globby(path.join(path.dirname(args.path), '**/*.css')))
+        );
+
+        const css = await jsifyCssAsync(args.path);
+        return {
+          contents: css,
+          loader: 'text',
+        };
+      });
+    },
+  };
+}
+
+module.exports = {getEsbuildCssPlugin};

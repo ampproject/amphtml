@@ -31,8 +31,8 @@ const {
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
-const {esbuildCssPlugin} = require('../common/esbuild-css');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
+const {getEsbuildCssPlugin} = require('../common/esbuild-css');
 const {green, red, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
@@ -458,7 +458,7 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       sourcemap: true,
       define: experimentDefines,
       outfile: destFile,
-      plugins: [esbuildCssPlugin, babelPlugin],
+      plugins: [getEsbuildCssPlugin(), babelPlugin],
       banner,
       footer,
       incremental: !!options.watch,
@@ -482,7 +482,9 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
           .catch((err) =>
             handleBundleError(err, /* continueOnError */ true, destFilename)
           );
-        options?.onWatchBuild(buildPromise);
+        if (options.onWatchBuild) {
+          options.onWatchBuild(buildPromise);
+        }
         await buildPromise;
       },
     });
@@ -515,7 +517,7 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
     options.minify ? 'minified' : 'unminified',
     /* enableCache */ true
   );
-  const plugins = [esbuildCssPlugin, babelPlugin];
+  const plugins = [getEsbuildCssPlugin(), babelPlugin];
 
   if (options.remapDependencies) {
     plugins.unshift(remapDependenciesPlugin());
@@ -842,14 +844,15 @@ function mkdirSync(path) {
 async function getDependencies(entryPoint, options) {
   const caller = options.minify ? 'minified' : 'unminified';
   const babelPlugin = getEsbuildBabelPlugin(caller, /* enableCache */ true);
+  const cssInputFiles = [];
   const result = await esbuild.build({
     entryPoints: [entryPoint],
     bundle: true,
     write: false,
     metafile: true,
-    plugins: [esbuildCssPlugin, babelPlugin],
+    plugins: [getEsbuildCssPlugin(cssInputFiles), babelPlugin],
   });
-  return Object.keys(result.metafile?.inputs);
+  return [Object.keys(result.metafile?.inputs ?? {}), ...cssInputFiles];
 }
 
 module.exports = {
