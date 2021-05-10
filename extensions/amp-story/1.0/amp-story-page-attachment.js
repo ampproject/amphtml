@@ -238,7 +238,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     const {openStringEl, urlStringEl} = htmlRefs(link);
 
     // Set image.
-    const openImgAttr = this.element.getAttribute('cta-image');
+    const openImgAttr = this.element.getAttribute('cta-img-src');
     if (openImgAttr && openImgAttr !== 'none') {
       const ctaImgEl = this.win.document.createElement('div');
       ctaImgEl.classList.add('i-amphtml-story-page-attachment-remote-img');

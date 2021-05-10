@@ -857,7 +857,7 @@ tags: {  # <amp-story-page-attachment> with href
     value: "text"
   }
   attrs: {
-    name: "cta-image"
+    name: "cta-img-src"
     value_url: {
       protocol: "http"
       protocol: "https"
@@ -906,14 +906,14 @@ tags: {  # <amp-story-page-attachment> with no href
     name: "title"
   }
   attrs: {
-    name: "cta-image"
+    name: "cta-img-src"
     value_url: {
       protocol: "http"
       protocol: "https"
     }
   }
   attrs: {
-    name: "cta-image-2"
+    name: "cta-img-src-2"
     value_url: {
       protocol: "http"
       protocol: "https"
@@ -945,7 +945,7 @@ tags: {  # Same validation rules as `<amp-story-page-attachment> with href`
     value: "text"
   }
   attrs: {
-    name: "cta-image"
+    name: "cta-img-src"
     value_url: {
       protocol: "http"
       protocol: "https"

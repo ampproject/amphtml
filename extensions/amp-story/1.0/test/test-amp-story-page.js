@@ -717,7 +717,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     );
 
     attachmentEl.setAttribute('layout', 'nodisplay');
-    attachmentEl.setAttribute('cta-image', 'nodisplay');
+    attachmentEl.setAttribute('cta-img-src', 'nodisplay');
     element.appendChild(attachmentEl);
 
     page.buildCallback();
@@ -743,8 +743,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     );
 
     attachmentEl.setAttribute('layout', 'nodisplay');
-    attachmentEl.setAttribute('cta-image', 'nodisplay');
-    attachmentEl.setAttribute('cta-image-2', 'nodisplay');
+    attachmentEl.setAttribute('cta-img-src', 'nodisplay');
+    attachmentEl.setAttribute('cta-img-src-2', 'nodisplay');
     element.appendChild(attachmentEl);
 
     page.buildCallback();

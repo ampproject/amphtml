@@ -181,7 +181,7 @@ const renderOutlinkPageAttachmentUI = (pageEl, attachmentEl) => {
   openAttachmentEl.setAttribute('aria-label', openLabel);
 
   // Set image.
-  const openImgAttr = attachmentEl.getAttribute('cta-image');
+  const openImgAttr = attachmentEl.getAttribute('cta-img-src');
   if (openImgAttr && openImgAttr !== 'none') {
     const ctaImgEl = htmlFor(chipEl)`
       <div class="i-amphtml-story-outlink-page-attachment-img"></div>`;
@@ -242,12 +242,12 @@ const renderInlinePageAttachmentUi = (pageEl, attachmentEl) => {
     return ctaImgEl;
   };
 
-  const openImgAttr2 = attachmentEl.getAttribute('cta-image-2');
+  const openImgAttr2 = attachmentEl.getAttribute('cta-img-src-2');
   if (openImgAttr2) {
     chipEl.prepend(makeImgElWithBG(openImgAttr2));
   }
 
-  const openImgAttr = attachmentEl.getAttribute('cta-image');
+  const openImgAttr = attachmentEl.getAttribute('cta-img-src');
   if (openImgAttr) {
     chipEl.prepend(makeImgElWithBG(openImgAttr));
   }
