@@ -200,10 +200,7 @@ class RuntimeTestConfig {
    * Overrides default reporters for verbose settings.
    */
   updateReporters() {
-    if (
-      (argv.testnames || argv.local_changes || argv.files || argv.verbose) &&
-      !isCiBuild()
-    ) {
+    if (argv.testnames || argv.local_changes || argv.files || argv.verbose) {
       this.reporters = ['mocha'];
     }
 

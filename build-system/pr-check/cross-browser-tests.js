@@ -42,8 +42,8 @@ function runIntegrationTestsForPlatform() {
       timedExecOrDie('amp integration --nobuild --compiled --safari');
       break;
     case 'win32':
-      timedExecOrDie('amp integration --nobuild --compiled --headless --edge');
-      timedExecOrDie('amp integration --nobuild --compiled --ie');
+      // timedExecOrDie('amp integration --nobuild --compiled --headless --edge');
+      timedExecOrDie('amp integration --nobuild --compiled --ie --testnames');
       break;
     default:
       log(
@@ -88,7 +88,7 @@ function runUnitTestsForPlatform() {
       timedExecOrDie('amp unit --safari');
       break;
     case 'win32':
-      timedExecOrDie('amp unit --headless --edge');
+      // timedExecOrDie('amp unit --headless --edge');
       break;
     default:
       log(
