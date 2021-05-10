@@ -21,12 +21,4 @@ module.exports = {
     'local/no-style-property-setting': 0,
     'local/no-spread': 0,
   },
-  'overrides': [
-    {
-      'files': ['_init_tests.js'],
-      'rules': {
-        'local/no-forbidden-terms': 0,
-      },
-    },
-  ],
 };
