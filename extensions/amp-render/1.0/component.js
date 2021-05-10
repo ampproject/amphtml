@@ -39,13 +39,22 @@ const DEFAULT_GET_JSON = (url) => {
   return fetch(url).then((res) => res.json());
 };
 
+const NOOP = () => {};
+
 /**
  * @param {!RenderDef.Props} props
  * @param {{current: ?RenderDef.RenderApi}} ref
  * @return {PreactDef.Renderable}
  */
 export function RenderWithRef(
-  {src = '', getJson = DEFAULT_GET_JSON, render = DEFAULT_RENDER, ...rest},
+  {
+    src = '',
+    getJson = DEFAULT_GET_JSON,
+    render = DEFAULT_RENDER,
+    onLoad = NOOP,
+    onError = NOOP,
+    ...rest
+  },
   ref
 ) {
   useResourcesNotify();
@@ -59,21 +68,31 @@ export function RenderWithRef(
       return;
     }
     let cancelled = false;
-    getJson(src).then((data) => {
-      if (!cancelled) {
-        setData(data);
-      }
-    });
+    getJson(src)
+      .then((data) => {
+        if (!cancelled) {
+          setData(data);
+          onLoad();
+        }
+      })
+      .catch((e) => {
+        onError(e);
+      });
     return () => {
       cancelled = true;
     };
-  }, [src, getJson]);
+  }, [getJson, src, onLoad, onError]);
 
   const refresh = useCallback(() => {
-    getJson(src, /* shouldRefresh */ true).then((data) => {
-      setData(data);
-    });
-  }, [getJson, src]);
+    getJson(src, /* shouldRefresh */ true)
+      .then((data) => {
+        setData(data);
+        onLoad();
+      })
+      .catch((e) => {
+        onError(e);
+      });
+  }, [getJson, src, onLoad, onError]);
 
   useImperativeHandle(
     ref,
