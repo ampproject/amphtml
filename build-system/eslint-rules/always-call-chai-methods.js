@@ -20,7 +20,6 @@
 const chai = require('chai');
 chai.use(require('chai-as-promised'));
 chai.use(require('sinon-chai'));
-// testing/_init_tests.js
 chai.Assertion.addMethod('attribute');
 chai.Assertion.addMethod('class');
 chai.Assertion.addMethod('display');
