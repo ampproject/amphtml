@@ -22,6 +22,12 @@ const {jsifyCssAsync} = require('../tasks/css/jsify-css');
  * @param {?Array<string>=} cssInputFiles When this array is provided, the list
  *   of imported CSS files is added.
  * @return {import('esbuild').Plugin}
+ *
+ * TODO(alanorozco): Remove cssInputFiles, or this comment, once we resolve the
+ * concert of esbuild's ability to propagate watchFiles into the Metafile.
+ *
+ * (See getDependencies() on build-system/tasks/helpers.js
+ * and https://github.com/evanw/esbuild/issues/1268)
  */
 function getEsbuildCssPlugin(cssInputFiles) {
   return {
