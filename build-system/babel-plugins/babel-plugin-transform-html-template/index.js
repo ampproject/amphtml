@@ -22,13 +22,27 @@ const {minify} = require('html-minifier');
 
 const INSERTED_TEMPLATES = new Map();
 
+const quasiSplitSep = '__html_quasi_sep__';
+
+/**
+ * @param {string} string original HTML literal
+ * @return {string} optimized HTML
+ */
+function optimizeLiteralOutput(string) {
+  return minify(string, {
+    removeComments: true,
+    collapseWhitespace: true,
+    removeAttributeQuotes: true,
+  });
+}
+
 /**
  * Optimizes the tagged template literal by removing whitespace, comments
  * and removes attribute quoting where possible.
  * @param {*} templateLiteral original tagged template literal.
  * @return {string} optimized template
  */
-function optimizeLiteralOutput(templateLiteral) {
+function optimizeTaggedTemplateExpression(templateLiteral) {
   if (templateLiteral.quasis.length !== 1) {
     console /* OK */
       .log(
@@ -37,11 +51,7 @@ function optimizeLiteralOutput(templateLiteral) {
       );
     return null;
   }
-  return minify(templateLiteral.quasis[0].value.cooked, {
-    removeComments: true,
-    collapseWhitespace: true,
-    removeAttributeQuotes: true,
-  });
+  return optimizeLiteralOutput(templateLiteral.quasis[0].value.cooked);
 }
 
 module.exports = function ({types: t}) {
@@ -62,11 +72,76 @@ module.exports = function ({types: t}) {
       t.isIdentifier(tag.callee) &&
       staticTemplateFactoryFns.has(tag.callee.name));
 
+  function joinTemplateLiteral(node) {
+    return node.quasis.map(({value}) => value.cooked).join(quasiSplitSep);
+  }
+
+  function splitTemplateLiteral(string) {
+    return string
+      .split(quasiSplitSep)
+      .map((cooked) => t.templateElement({raw: cooked, cooked}));
+  }
+
+  function getHtmlLeadingComment(node) {
+    const {leadingComments} = node;
+    if (!leadingComments) {
+      return;
+    }
+    const lastLeadingComment = leadingComments[leadingComments.length - 1];
+    if (lastLeadingComment && lastLeadingComment.value === ' HTML ') {
+      leadingComments.pop();
+      return lastLeadingComment;
+    }
+  }
+
   return {
     name: 'transform-html-templates',
     visitor: {
       Program() {
         INSERTED_TEMPLATES.clear();
+      },
+      // ExpressionStatement(path) {
+      //   const lastLeadingComment = getHtmlLeadingComment(path.node);
+      //   if (!lastLeadingComment) {
+      //     return;
+      //   }
+      //   const expression = path.get('expression');
+      //   if (!expression.isStringLiteral()) {
+      //     return;
+      //   }
+      //   const minified = optimizeLiteralOutput(path.node.expression.value);
+      //   path.replaceWith(t.stringLiteral(minified));
+      // },
+      StringLiteral(path) {
+        const lastLeadingComment = getHtmlLeadingComment(path.node);
+        if (!lastLeadingComment) {
+          return;
+        }
+        const minified = optimizeLiteralOutput(path.node.value);
+        try {
+          path.replaceWith(t.stringLiteral(minified));
+        } catch (e) {
+          throw path.buildCodeFrameError(e.message);
+        }
+      },
+      TemplateLiteral(path) {
+        // We handle html`...` and svg`...` in TaggedTemplateExpression below.
+        if (path.parentPath.isTaggedTemplateExpression()) {
+          return;
+        }
+        const lastLeadingComment = getHtmlLeadingComment(path.node);
+        if (!lastLeadingComment) {
+          return;
+        }
+        const newQuasis = splitTemplateLiteral(
+          optimizeLiteralOutput(joinTemplateLiteral(path.node))
+        );
+        if (path.node.quasis.length !== newQuasis.length) {
+          throw new path.buildCodeFrameError(
+            `Don't use "${quasiSplitSep}" in HTML template literal`
+          );
+        }
+        path.node.quasis = newQuasis;
       },
       TaggedTemplateExpression(path) {
         const {tag} = path.node;
@@ -76,7 +151,7 @@ module.exports = function ({types: t}) {
           // transpiled template or hoisting the template and referring
           // to its value.
           // Note: Ensures duplicate templates are not hoisted.
-          const template = optimizeLiteralOutput(path.node.quasi);
+          const template = optimizeTaggedTemplateExpression(path.node.quasi);
 
           if (template !== null) {
             const templateArrayExpression = t.arrayExpression([

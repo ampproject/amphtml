@@ -50,26 +50,34 @@ const sandboxVals =
  * @return {string}
  */
 export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
-  `<!DOCTYPE html>
-  <html ⚡4ads lang="en">
-  <head>
-    <base href="${escapeHtml(url)}">
-    <meta charset="UTF-8">
-    <meta http-equiv=Content-Security-Policy content="
-      img-src * data:;
-      media-src *;
-      font-src *;
-      connect-src *;
-      script-src ${getFieSafeScriptSrcs()};
-      object-src 'none';
-      child-src 'none';
-      default-src 'none';
-      style-src ${fontProviderAllowList} 'unsafe-inline';
-    ">
-    ${sanitizedHeadElements}
-  </head>
-  <body>${body}</body>
-  </html>`;
+  /* HTML */
+  `
+    <!DOCTYPE html>
+    <html ⚡4ads lang="en">
+      <head>
+        <base href="${escapeHtml(url)}" />
+        <meta charset="UTF-8" />
+        <meta
+          http-equiv="Content-Security-Policy"
+          content="
+            img-src * data:;
+            media-src *;
+            font-src *;
+            connect-src *;
+            script-src ${getFieSafeScriptSrcs()};
+            object-src 'none';
+            child-src 'none';
+            default-src 'none';
+            style-src ${fontProviderAllowList} 'unsafe-inline';
+          "
+        />
+        ${sanitizedHeadElements}
+      </head>
+      <body>
+        ${body}
+      </body>
+    </html>
+  `;
 
 /**
  * Create iframe with predefined CSP and sandbox attributes for security.

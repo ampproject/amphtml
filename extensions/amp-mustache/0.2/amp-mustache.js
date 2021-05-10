@@ -115,7 +115,7 @@ export class AmpMustache extends BaseTemplate {
 
   /** @override */
   setHtml(html) {
-    const wrapped = `<div>${html}</div>`;
+    const wrapped = /* HTML */ `<div>${html}</div>`;
     const purified = this.tryUnwrap(this.purifyAndSetHtml_(wrapped));
     return this.unwrapChildren(purified);
   }
@@ -155,7 +155,7 @@ export class AmpMustache extends BaseTemplate {
    * @private
    */
   purifyAndSetHtml_(html) {
-    const body = this.purifier_.purifyHtml(`<div>${html}</div>`);
+    const body = this.purifier_.purifyHtml(/* HTML */ `<div>${html}</div>`);
     return body.firstElementChild;
   }
 }
