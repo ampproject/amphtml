@@ -216,6 +216,7 @@ const forbiddenTermsGlobal = {
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
       'src/service/ampdoc-impl.js',
+      'testing/_init_tests.js',
       'testing/describes.js',
       'testing/iframe.js',
     ],
@@ -328,6 +329,7 @@ const forbiddenTermsGlobal = {
       'src/log.js',
       'src/web-worker/web-worker.js',
       'tools/experiments/experiments.js',
+      'testing/_init_tests.js',
     ],
   },
   'parseUrlWithA': {
@@ -456,6 +458,7 @@ const forbiddenTermsGlobal = {
       'src/experiments.js',
       'src/service/cid-impl.js',
       'src/service/storage-impl.js',
+      'testing/_init_tests.js',
       'testing/fake-dom.js',
     ],
   },
@@ -602,6 +605,7 @@ const forbiddenTermsGlobal = {
       'and getMode() to access config',
     allowlist: [
       'build-system/externs/amp.extern.js',
+      'build-system/server/amp4test.js',
       'build-system/server/app.js',
       'build-system/tasks/e2e/index.js',
       'build-system/tasks/firebase.js',
@@ -618,8 +622,8 @@ const forbiddenTermsGlobal = {
       'src/experiments.js',
       'src/mode.js',
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
+      'testing/_init_tests.js',
       'tools/experiments/experiments.js',
-      'build-system/server/amp4test.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
