@@ -139,7 +139,7 @@ export const InvalidTweet = () => {
   );
 };
 
-export const mutatedTweetId = () => {
+export const MutatedTweetId = () => {
   return (
     <>
       <button on="tap:AMP.setState({tweetid: '495719809695621121'})">
