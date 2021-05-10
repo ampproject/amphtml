@@ -26,8 +26,9 @@ const {
 const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
-const {cyan, green, yellow, red} = require('kleur/colors');
+const {cyan, green, yellow, red} = require('../common/colors');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
+const {logClosureCompilerError} = require('../compile/closure-compile');
 const {log} = require('../common/logging');
 const {typecheckNewServer} = require('../server/typescript-compile');
 
@@ -69,7 +70,15 @@ const PRIDE_FILES_GLOBS = [
   'node_modules/promise-pjs/promise.mjs',
 ];
 
-const CORE_EXTERNS_GLOB = 'src/core{,/**}/*.extern.js';
+// We provide glob lists for core src/externs since any other targets are
+// allowed to depend on core.
+const CORE_SRCS_GLOBS = [
+  'src/core/**/*.js',
+
+  // Needed for CSS escape polyfill
+  'third_party/css-escape/css-escape.js',
+];
+const CORE_EXTERNS_GLOBS = ['src/core/**/*.extern.js'];
 
 /**
  * Generates a list of source file paths for extensions to type-check
@@ -97,55 +106,56 @@ const TYPE_CHECK_TARGETS = {
   // To test a target locally:
   //   `amp check-types --target=src-foo-bar --warning_level=verbose`
   'src-amp-story-player': {
-    srcGlobs: ['src/amp-story-player{,/**}/*.js'],
+    srcGlobs: ['src/amp-story-player/**/*.js'],
     warningLevel: 'QUIET',
   },
   'src-context': {
-    srcGlobs: ['src/context{,/**}/*.js'],
+    srcGlobs: ['src/context/**/*.js'],
     warningLevel: 'QUIET',
   },
   'src-core': {
-    srcGlobs: [
-      'src/core{,/**}/*.js',
-      // Needed for CSS escape polyfill
-      'third_party/css-escape/css-escape.js',
-    ],
-    externGlobs: [CORE_EXTERNS_GLOB],
+    srcGlobs: CORE_SRCS_GLOBS,
+    externGlobs: CORE_EXTERNS_GLOBS,
   },
   'src-examiner': {
-    srcGlobs: ['src/examiner{,/**}/*.js'],
+    srcGlobs: ['src/examiner/**/*.js'],
     warningLevel: 'QUIET',
   },
   'src-experiments': {
-    srcGlobs: ['src/experiments{,/**}/*.js'],
+    srcGlobs: ['src/experiments/**/*.js'],
     warningLevel: 'QUIET',
   },
   'src-inabox': {
-    srcGlobs: ['src/inabox{,/**}/*.js'],
+    srcGlobs: ['src/inabox/**/*.js'],
     warningLevel: 'QUIET',
   },
   'src-polyfills': {
-    srcGlobs: ['src/polyfills{,/**}/*.js'],
-    warningLevel: 'QUIET',
+    srcGlobs: [
+      'src/polyfills/**/*.js',
+      // Exclude fetch its dependencies are cleaned up/extracted to core.
+      '!src/polyfills/fetch.js',
+      ...CORE_SRCS_GLOBS,
+    ],
+    externGlobs: ['src/polyfills/**/*.extern.js', ...CORE_EXTERNS_GLOBS],
   },
   'src-preact': {
-    srcGlobs: ['src/preact{,/**}/*.js'],
+    srcGlobs: ['src/preact/**/*.js'],
     warningLevel: 'QUIET',
   },
   'src-purifier': {
-    srcGlobs: ['src/purifier{,/**}/*.js'],
+    srcGlobs: ['src/purifier/**/*.js'],
     warningLevel: 'QUIET',
   },
   'src-service': {
-    srcGlobs: ['src/service{,/**}/*.js'],
+    srcGlobs: ['src/service/**/*.js'],
     warningLevel: 'QUIET',
   },
   'src-utils': {
-    srcGlobs: ['src/utils{,/**}/*.js'],
+    srcGlobs: ['src/utils/**/*.js'],
     warningLevel: 'QUIET',
   },
   'src-web-worker': {
-    srcGlobs: ['src/web-worker{,/**}/*.js'],
+    srcGlobs: ['src/web-worker/**/*.js'],
     warningLevel: 'QUIET',
   },
 
@@ -156,7 +166,34 @@ const TYPE_CHECK_TARGETS = {
   // bug for cherry-pick.
   'pride': {
     srcGlobs: PRIDE_FILES_GLOBS,
-    externGlobs: [CORE_EXTERNS_GLOB, 'build-system/externs/*.extern.js'],
+    externGlobs: ['build-system/externs/*.extern.js', ...CORE_EXTERNS_GLOBS],
+  },
+
+  /*
+   * Ensures that all files in src and extensions pass the specified set of errors.
+   */
+  'low-bar': {
+    entryPoints: ['src/amp.js'],
+    extraGlobs: ['{src,extensions}/**/*.js'],
+    onError(msg) {
+      const lowBarErrors = [
+        'JSC_BAD_JSDOC_ANNOTATION',
+        'JSC_INVALID_PARAM',
+        'JSC_TYPE_PARSE_ERROR',
+      ];
+      const lowBarRegex = new RegExp(lowBarErrors.join('|'));
+
+      const targetErrors = msg
+        .split('\n')
+        .filter((s) => lowBarRegex.test(s))
+        .join('\n')
+        .trim();
+
+      if (targetErrors.length) {
+        logClosureCompilerError(targetErrors);
+        throw new Error(`Type-checking failed for target ${cyan('low-bar')}`);
+      }
+    },
   },
 
   // TODO(#33631): Targets below this point are not expected to pass.
@@ -246,12 +283,24 @@ async function typeCheck(targetName) {
     return;
   }
 
+  let errorMsg;
+  if (target.onError) {
+    // If an onError handler is defined, steal the output and let onError handle
+    // logging
+    opts.logger = (m) => (errorMsg = m);
+  }
+
   await closureCompile(entryPoints, './dist', `${targetName}-check-types.js`, {
     noAddDeps,
     include3pDirectories: !noAddDeps,
     includePolyfills: !noAddDeps,
     typeCheckOnly: true,
     ...opts,
+  }).catch((error) => {
+    if (!target.onError) {
+      throw error;
+    }
+    target.onError(errorMsg);
   });
   log(green('SUCCESS:'), 'Type-checking passed for target', cyan(targetName));
 }

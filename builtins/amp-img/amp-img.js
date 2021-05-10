@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {BaseElement} from '../src/base-element';
-import {Layout, isLayoutSizeDefined} from '../src/layout';
-import {ReadyState} from '../src/core/constants/ready-state';
-import {Services} from '../src/services';
-import {dev} from '../src/log';
-import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
-import {listen} from '../src/event-helper';
-import {propagateObjectFitStyles, setImportantStyles} from '../src/style';
-import {registerElement} from '../src/service/custom-element-registry';
-import {removeElement, scopedQuerySelector} from '../src/dom';
+import {BaseElement} from '../../src/base-element';
+import {Layout, isLayoutSizeDefined} from '../../src/layout';
+import {ReadyState} from '../../src/core/constants/ready-state';
+import {Services} from '../../src/services';
+import {dev} from '../../src/log';
+import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../../src/utils/img';
+import {listen} from '../../src/event-helper';
+import {propagateObjectFitStyles, setImportantStyles} from '../../src/style';
+import {registerElement} from '../../src/service/custom-element-registry';
+import {removeElement, scopedQuerySelector} from '../../src/dom';
 
 /** @const {string} */
 const TAG = 'amp-img';
@@ -47,8 +47,8 @@ const ATTRIBUTES_TO_PROPAGATE = [
 
 export class AmpImg extends BaseElement {
   /** @override @nocollapse */
-  static V1() {
-    return V1_IMG_DEFERRED_BUILD;
+  static R1() {
+    return R1_IMG_DEFERRED_BUILD;
   }
 
   /** @override @nocollapse */
@@ -141,7 +141,7 @@ export class AmpImg extends BaseElement {
         guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
       }
 
-      if (AmpImg.V1() && !this.img_.complete) {
+      if (AmpImg.R1() && !this.img_.complete) {
         this.setReadyState(ReadyState.LOADING);
       }
     }
@@ -238,8 +238,8 @@ export class AmpImg extends BaseElement {
    * @private
    */
   maybeGenerateSizes_(sync) {
-    if (V1_IMG_DEFERRED_BUILD) {
-      // The `getLayoutSize()` is not available for a V1 element. Skip this
+    if (R1_IMG_DEFERRED_BUILD) {
+      // The `getLayoutSize()` is not available for a R1 element. Skip this
       // codepath. Also: is this feature at all useful? E.g. it doesn't even
       // execute in the `i-amphtml-ssr` mode.
       return;
@@ -367,8 +367,8 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    if (AmpImg.V1()) {
-      // TODO(#31915): Reconsider if this is still desired for V1. This helps
+    if (AmpImg.R1()) {
+      // TODO(#31915): Reconsider if this is still desired for R1. This helps
       // with network interruption when a document is inactivated.
       return;
     }

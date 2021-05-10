@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
+import * as Preact from '../../../../src/preact';
 
-module.exports = function (context) {
-  return {
-    ForOfStatement: function (node) {
-      context.report({node, message: 'No for-of statement allowed.'});
-    },
-  };
-};
+export const VideoElementWithActions = ({
+  id,
+  children,
+  actions = ['play', 'pause', 'mute', 'unmute', 'fullscreen'],
+}) => (
+  <div style="max-width: 800px">
+    <p style={{display: 'flex'}}>
+      {actions.map((action) => (
+        <button style={{flex: 1, margin: '0 4px'}} on={`tap:${id}.${action}`}>
+          {action}
+        </button>
+      ))}
+    </p>
+    {children}
+  </div>
+);

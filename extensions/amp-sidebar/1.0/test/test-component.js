@@ -681,7 +681,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       document.body.removeChild(target);
     });
 
-    it('toolbar target receives content when media query is true', () => {
+    it('toolbar target should receive expected content from toolbar', () => {
       // this media query is always true
       mediaQuery = '';
       wrapper = mount(
@@ -698,13 +698,17 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
         </>
       );
 
-      // Toolbar target should have children
+      // Toolbar nodes were appended to the target
       expect(target.hasChildNodes()).to.be.true;
+      expect(target.childElementCount).to.equal(2);
+      expect(target.firstElementChild.nodeName).to.equal('NAV');
+      expect(target.lastElementChild.nodeName).to.equal('STYLE');
     });
 
-    it('toolbar target does not receive content when media query is false', () => {
+    it('existing children in toolbar target should not be overwritten', () => {
       // this media query is always true
-      mediaQuery = 'false';
+      mediaQuery = '';
+      target.innerHTML = '<span>hello world<span>';
       wrapper = mount(
         <>
           <Sidebar ref={ref} side="left">
@@ -719,17 +723,41 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
         </>
       );
 
-      // Toolbar target should have children
+      // Toolbar target now has 3 nodes, 1 existing, 2 appended from toolbar
+      expect(target.hasChildNodes()).to.be.true;
+      expect(target.childElementCount).to.equal(3);
+      expect(target.firstElementChild.nodeName).to.equal('SPAN');
+      expect(target.children[1].nodeName).to.equal('NAV');
+      expect(target.lastElementChild.nodeName).to.equal('STYLE');
+    });
+
+    it('toolbar target content should be removed on unmount', () => {
+      // this media query is always false
+      mediaQuery = '(max-height: 0px)';
+      wrapper = mount(
+        <>
+          <Sidebar ref={ref} side="left">
+            <div>Content</div>
+            <SidebarToolbar toolbar={mediaQuery} toolbarTarget="toolbar-target">
+              <ul>
+                <li>Toolbar Item 1</li>
+                <li>Toolbar Item 2</li>
+              </ul>
+            </SidebarToolbar>
+          </Sidebar>
+        </>
+      );
+
+      expect(target.hasChildNodes()).to.be.true;
+      expect(target.childElementCount).to.equal(2);
+
+      wrapper.unmount();
       expect(target.hasChildNodes()).to.be.false;
     });
 
-    it('toolbar target content changes when sidebar is opened and closed', () => {
-      // disable animations for synchronous testing
-      const animateFunction = Element.prototype.animate;
-      Element.prototype.animate = null;
-
-      // this media query is always true
-      mediaQuery = '';
+    it('toolbar should sanitize an invalid media query', () => {
+      // this is an invalid media query
+      mediaQuery = 'foo {}';
       wrapper = mount(
         <>
           <Sidebar ref={ref} side="left">
@@ -741,68 +769,26 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
               </ul>
             </SidebarToolbar>
           </Sidebar>
-          <button id="open" onClick={() => ref.current.open()}></button>
-          <button id="close" onClick={() => ref.current.close()}></button>
         </>
       );
 
-      const openButton = wrapper.find('#open');
-      const closeButton = wrapper.find('#close');
-
-      // verify sidebar is closed
-      let sidebarElement = wrapper.find(Sidebar).getDOMNode();
-      expect(isOpened(sidebarElement)).to.be.false;
-
-      // Toolbar target should have children
       expect(target.hasChildNodes()).to.be.true;
-
-      // click to open the sidebar
-      openButton.simulate('click');
-
-      // verify sidebar is opened and toolbar has children
-      sidebarElement = wrapper.find(Sidebar).getDOMNode();
-      expect(isOpened(sidebarElement)).to.be.true;
-      expect(target.hasChildNodes()).to.be.true;
-
-      // click to close the sidebar
-      closeButton.simulate('click');
-
-      // verify sidebar is closed and toolbar has children
-      sidebarElement = wrapper.find(Sidebar).getDOMNode();
-      expect(isOpened(sidebarElement)).to.be.false;
-      expect(target.hasChildNodes()).to.be.true;
-
-      Element.prototype.animate = animateFunction;
+      expect(target.childElementCount).to.equal(2);
+      const styleElementText = target.lastElementChild.textContent;
+      expect(styleElementText).to.include('not all'); //sanitized media query
+      expect(styleElementText).not.to.include('foo'); //unsanitized media query
     });
 
-    it('toolbar target content updates when media query truthiness change', () => {
-      // disable animations for synchronous testing
-      const animateFunction = Element.prototype.animate;
-      Element.prototype.animate = null;
-
-      // mock the media query to manually update matching
-      let mockMediaQueryList;
-      window.matchMedia = (media) => {
-        const mql = matchMediaFunction(media);
-        mockMediaQueryList = {
-          matches: mql.matches,
-          addEventListener: function (type, callback) {
-            this.callback = callback;
-          },
-          removeEventListener: function () {
-            this.callback = null;
-          },
-        };
-        return mockMediaQueryList;
-      };
-
+    it('toolbar should sanitize the toolbar target attribute', () => {
       // this media query is always true
       mediaQuery = '';
+      const toolbarTarget = 'toolbar-target:.';
+      const getElementByIdSpy = env.sandbox.spy(document, 'getElementById');
       wrapper = mount(
         <>
           <Sidebar ref={ref} side="left">
             <div>Content</div>
-            <SidebarToolbar toolbar={mediaQuery} toolbarTarget="toolbar-target">
+            <SidebarToolbar toolbar={mediaQuery} toolbarTarget={toolbarTarget}>
               <ul>
                 <li>Toolbar Item 1</li>
                 <li>Toolbar Item 2</li>
@@ -812,24 +798,9 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
         </>
       );
 
-      // media query is true so toolbar-target should have content
-      expect(target.hasChildNodes()).to.be.true;
-
-      // update the media query to be false (mocked)
-      // verify toolbar-target no longer has children
-      mockMediaQueryList.matches = false;
-      mockMediaQueryList.callback();
-      wrapper.update();
+      expect(getElementByIdSpy).to.be.calledOnce;
+      expect(getElementByIdSpy).to.be.calledWith('toolbar-target\\:\\.');
       expect(target.hasChildNodes()).to.be.false;
-
-      // update the media query to be true (mocked)
-      // verify toolbar-target has children
-      mockMediaQueryList.matches = true;
-      mockMediaQueryList.callback();
-      wrapper.update();
-      expect(target.hasChildNodes()).to.be.true;
-
-      Element.prototype.animate = animateFunction;
     });
   });
 });

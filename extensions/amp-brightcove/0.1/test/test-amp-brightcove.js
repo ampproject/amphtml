@@ -114,7 +114,7 @@ describes.realWin(
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.src).to.equal(
           'https://players.brightcove.net/1290862519001/default_default' +
-            '/index.html?amp=1&autoplay=false' +
+            '/index.html?amp=1' +
             '&videoId=ref:amp-test-video&playsinline=true'
         );
       });
@@ -145,6 +145,18 @@ describes.realWin(
       });
     });
 
+    it('should exclude data-param-autoplay attribute', () => {
+      return getBrightcove({
+        'data-account': '1290862519001',
+        'data-video-id': 'ref:amp-test-video',
+        'data-param-autoplay': 'muted',
+      }).then((bc) => {
+        const iframe = bc.querySelector('iframe');
+        const params = parseUrlDeprecated(iframe.src).search.split('&');
+        expect(params).to.not.contain('autoplay');
+      });
+    });
+
     it('should propagate mutated attributes', () => {
       return getBrightcove({
         'data-account': '1290862519001',
@@ -154,7 +166,7 @@ describes.realWin(
 
         expect(iframe.src).to.equal(
           'https://players.brightcove.net/1290862519001/default_default' +
-            '/index.html?amp=1&autoplay=false' +
+            '/index.html?amp=1' +
             '&videoId=ref:amp-test-video&playsinline=true'
         );
 
@@ -167,7 +179,7 @@ describes.realWin(
 
         expect(iframe.src).to.equal(
           'https://players.brightcove.net/' +
-            '12345/default_default/index.html?amp=1&autoplay=false' +
+            '12345/default_default/index.html?amp=1' +
             '&videoId=abcdef&playsinline=true'
         );
       });
@@ -324,6 +336,21 @@ describes.realWin(
         );
         expect(iframe.src).to.contain('ampInitialConsentValue=abc');
       });
+    });
+
+    it('should distinguish autoplay', async () => {
+      const bc = await getBrightcove({
+        'data-account': '1290862519001',
+        'data-video-id': 'ref:amp-test-video',
+      });
+      const impl = await bc.getImpl();
+      const spy = env.sandbox.spy(impl, 'sendCommand_');
+
+      impl.play(true);
+      expect(spy).to.be.calledWith('play', true);
+
+      impl.play(false);
+      expect(spy).to.be.calledWith('play', false);
     });
   }
 );
