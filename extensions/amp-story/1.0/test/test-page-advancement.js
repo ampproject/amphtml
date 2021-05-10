@@ -129,6 +129,35 @@ describes.realWin('page-advancement', {amp: true}, (env) => {
 
         expect(advancement).to.not.be.instanceOf(TimeBasedAdvancement);
       });
+
+      it('should update delayMs_ when updateTimeDelay() is called', () => {
+        const pageEl = html`
+          <amp-story-page auto-advance-after="3s"> </amp-story-page>
+        `;
+        const advancement = AdvancementConfig.forElement(win, pageEl);
+        expect(advancement.delayMs_).to.be.equal(3000);
+
+        advancement.updateTimeDelay('5s');
+
+        expect(advancement.delayMs_).to.be.equal(5000);
+        expect(advancement.remainingDelayMs_).to.be.equal(null);
+      });
+
+      it('should update remainingDelayMs_ when updateTimeDelay() is called', () => {
+        const pageEl = html`
+          <amp-story-page auto-advance-after="3s"> </amp-story-page>
+        `;
+        const advancement = AdvancementConfig.forElement(win, pageEl);
+        // Simulate a pause after 1 second.
+        advancement.start();
+        advancement.startTimeMs_ -= 1000;
+        advancement.stop(true);
+        expect(advancement.remainingDelayMs_).to.be.equal(2000);
+
+        advancement.updateTimeDelay('5s');
+
+        expect(advancement.remainingDelayMs_).to.be.equal(4000);
+      });
     });
 
     describe('MediaBasedAdvancement', () => {
