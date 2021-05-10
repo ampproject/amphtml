@@ -68,15 +68,18 @@ export function RenderWithRef(
       return;
     }
     let cancelled = false;
+    onLoad(true);
+    onError(false);
     getJson(src)
       .then((data) => {
         if (!cancelled) {
           setData(data);
-          onLoad();
+          onLoad(false);
         }
       })
       .catch((e) => {
-        onError(e);
+        onLoad(false);
+        onError(true);
       });
     return () => {
       cancelled = true;
@@ -84,13 +87,16 @@ export function RenderWithRef(
   }, [getJson, src, onLoad, onError]);
 
   const refresh = useCallback(() => {
+    onLoad(true);
+    onError(false);
     getJson(src, /* shouldRefresh */ true)
       .then((data) => {
         setData(data);
-        onLoad();
+        onLoad(false);
       })
       .catch((e) => {
-        onError(e);
+        onLoad(false);
+        onError(true);
       });
   }, [getJson, src, onLoad, onError]);
 
