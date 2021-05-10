@@ -22,7 +22,7 @@
 
 const fs = require('fs-extra');
 const path = require('path');
-const {cyan, green, yellow} = require('kleur/colors');
+const {cyan, green, yellow} = require('../common/colors');
 const {getStdout} = require('../common/process');
 const {logWithoutTimestamp: log} = require('../common/logging');
 

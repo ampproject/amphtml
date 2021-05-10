@@ -1144,6 +1144,14 @@ const forbiddenTermsSrcInclusive = {
     message:
       'Instead of fancy-log, use the logging functions in build-system/common/logging.js.',
   },
+  "require\\('kleur\\/colors'\\)": {
+    message:
+      'Instead of kleur/colors, use the log-coloring functions in build-system/common/colors.js',
+    allowlist: [
+      'build-system/common/colors.js',
+      'third_party/react-dates/scope-require.js',
+    ],
+  },
   'withA11y':
     'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',
   'detectIsAutoplaySupported': {
