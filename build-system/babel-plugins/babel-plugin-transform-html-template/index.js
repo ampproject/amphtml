@@ -100,18 +100,6 @@ module.exports = function ({types: t}) {
       Program() {
         INSERTED_TEMPLATES.clear();
       },
-      // ExpressionStatement(path) {
-      //   const lastLeadingComment = getHtmlLeadingComment(path.node);
-      //   if (!lastLeadingComment) {
-      //     return;
-      //   }
-      //   const expression = path.get('expression');
-      //   if (!expression.isStringLiteral()) {
-      //     return;
-      //   }
-      //   const minified = optimizeLiteralOutput(path.node.expression.value);
-      //   path.replaceWith(t.stringLiteral(minified));
-      // },
       StringLiteral(path) {
         const lastLeadingComment = getHtmlLeadingComment(path.node);
         if (!lastLeadingComment) {
