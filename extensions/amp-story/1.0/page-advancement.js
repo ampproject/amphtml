@@ -906,7 +906,6 @@ export class TimeBasedAdvancement extends AdvancementConfig {
 
   /**
    * Updates the delay (and derived values) from the given auto-advance string.
-   *
    * @param {string} autoAdvanceStr The value of the updated auto-advance-after attribute.
    */
   updateTimeDelay(autoAdvanceStr) {
