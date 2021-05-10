@@ -73,7 +73,7 @@ const getMetadata = (player, props) =>
 
 /**
  * @param {!VideoWrapperDef.Props} props
- * @param {{current: (T|null)}} ref
+ * @param {{current: ?T}} ref
  * @return {PreactDef.Renderable}
  * @template T
  */
@@ -286,7 +286,10 @@ function VideoWrapperWithRef(
           onPlaying={() => setPlayingState(true)}
           onPause={() => setPlayingState(false)}
           onEnded={() => setPlayingState(false)}
-          onError={(e) => setReadyState(ReadyState.ERROR, e)}
+          onError={(e) => {
+            setReadyState(ReadyState.ERROR, e);
+            readyDeferred.reject(e);
+          }}
           style={fillStretch}
           src={src}
           poster={poster}

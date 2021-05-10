@@ -20,7 +20,7 @@ import {Slot} from '../../../src/preact/slot';
 import {createElementWithAttributes} from '../../../src/dom';
 import {htmlFor} from '../../../src/static-template';
 import {omit} from '../../../src/core/types/object';
-import {testElementV1} from '../../../testing/element-v1';
+import {testElementR1} from '../../../testing/element-v1';
 import {upgradeOrRegisterElement} from '../../../src/service/custom-element-registry';
 import {waitFor} from '../../../testing/test-helper';
 
@@ -75,9 +75,9 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     });
   }
 
-  describe('V1', () => {
-    it('testElementV1', () => {
-      testElementV1(PreactBaseElement);
+  describe('R1', () => {
+    it('testElementR1', () => {
+      testElementR1(PreactBaseElement);
     });
 
     it('by default prerenderAllowed is tied to the "loadable" flag', () => {
@@ -561,6 +561,19 @@ describes.realWin('PreactBaseElement', spec, (env) => {
           selector: '[special2]',
           single: true,
         },
+        'specialAs': {
+          selector: '[special3]',
+          props: {
+            'noValue': {attr: 'no-value'},
+            'valueWithDef': {attr: 'value-with-def', default: 'DEFAULT'},
+            'propA': {attr: 'prop-a'},
+            'minFontSize': {attr: 'min-font-size', type: 'number'},
+            'disabled': {attr: 'disabled', type: 'boolean'},
+            'enabled': {attr: 'enabled', type: 'boolean'},
+          },
+          single: true,
+          as: true,
+        },
         'children': {
           props: {
             'boolDefTrue': {
@@ -584,6 +597,13 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         <amp-preact layout="fixed" width="100" height="100">
           <div
             special1
+            prop-a="A"
+            min-font-size="72"
+            disabled
+            unknown="1"
+          ></div>
+          <div
+            special3
             prop-a="A"
             min-font-size="72"
             disabled
@@ -646,6 +666,71 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(element.querySelector('[special1]').slot).to.equal(
         'i-amphtml-special1'
       );
+    });
+
+    it('should pass children as functional prop slot for single-element mapping with "as" and parse attributes', () => {
+      const {specialAs: Comp} = lastProps;
+      expect(typeof Comp).to.equal('function');
+      expect(Comp.name).to.equal('SlotWithProps');
+
+      const special3 = Comp();
+      expect(special3.props).to.deep.equal({
+        valueWithDef: 'DEFAULT',
+        propA: 'A',
+        minFontSize: 72,
+        disabled: true,
+        name: 'i-amphtml-specialAs',
+      });
+
+      const special3WithProps = Comp({
+        'aria-disabled': 'false',
+        disabled: false,
+      });
+      expect(special3WithProps.props).to.deep.equal({
+        valueWithDef: 'DEFAULT',
+        propA: 'A',
+        minFontSize: 72,
+        name: 'i-amphtml-specialAs',
+        'aria-disabled': 'false',
+        disabled: false,
+      });
+
+      expect(element.querySelector('[special3]').slot).to.equal(
+        'i-amphtml-specialAs'
+      );
+    });
+
+    it('should pass new functional prop slot for "as" on mutation', async () => {
+      const {specialAs: prevComp} = lastProps;
+      const prevSpecial3 = prevComp();
+      expect(prevSpecial3.props).to.deep.equal({
+        valueWithDef: 'DEFAULT',
+        propA: 'A',
+        minFontSize: 72,
+        disabled: true,
+        name: 'i-amphtml-specialAs',
+      });
+
+      // Mutate slot prop, but this won't trigger a rerender
+      element
+        .querySelector('[special3]')
+        .setAttribute('value-with-def', 'CUSTOM');
+      // Mutate an observed attr to trigger rerender
+      element.setAttribute('prop-a', 'B');
+
+      await waitFor(() => component.callCount > 1, 'component re-rendered');
+      expect(component).to.be.calledTwice;
+
+      const {specialAs: Comp} = lastProps;
+      expect(Comp).not.to.deep.equal(prevComp);
+      const special3 = Comp();
+      expect(special3.props).to.deep.equal({
+        valueWithDef: 'CUSTOM',
+        propA: 'A',
+        minFontSize: 72,
+        disabled: true,
+        name: 'i-amphtml-specialAs',
+      });
     });
 
     it('should pass children as prop slot array and parse attributes', () => {
@@ -1144,7 +1229,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     it('should rerender on new children', async () => {
       await waitFor(() => component.callCount > 0, 'component rendered');
-      const {children: prevChildren} = lastProps;
+      const {children: prevChildren, specialAs: prevSpecialAs} = lastProps;
       expect(prevChildren).to.have.lengthOf(1);
 
       const newChild = createElementWithAttributes(doc, 'div', {
@@ -1157,7 +1242,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       await waitFor(() => component.callCount > 1, 'component re-rendered');
       expect(component).to.be.calledTwice;
 
-      const {children} = lastProps;
+      const {children, specialAs} = lastProps;
       expect(children).to.have.lengthOf(1);
       const child = children[0];
 
@@ -1170,6 +1255,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(element.querySelector('#child1').slot).to.equal('');
       expect(element.querySelector('#child2').slot).to.equal('');
       expect(element.textContent).to.contain('text (should be passed through)');
+      expect(specialAs).to.deep.equal(prevSpecialAs);
     });
 
     it('should rerender on text change', async () => {

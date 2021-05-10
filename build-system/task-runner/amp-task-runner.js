@@ -28,7 +28,7 @@ const {
   updatePackages,
   updateSubpackages,
 } = require('../common/update-packages');
-const {cyan, red, green, magenta} = require('kleur/colors');
+const {cyan, red, green, magenta} = require('../common/colors');
 const {isCiBuild} = require('../common/ci');
 const {log} = require('../common/logging');
 

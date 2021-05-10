@@ -82,7 +82,6 @@ const forbiddenTermsGlobal = {
       'build-system/server/amp4test.js',
       'build-system/server/app-index/boilerplate.js',
       'build-system/server/variable-substitution.js',
-      'build-system/tasks/make-extension/index.js',
       'extensions/amp-pinterest/0.1/amp-pinterest.css',
       'extensions/amp-pinterest/0.1/follow-button.js',
       'extensions/amp-pinterest/0.1/pin-widget.js',
@@ -574,9 +573,10 @@ const forbiddenTermsGlobal = {
   '/\\*\\* @type \\{\\!Element\\} \\*/': {
     message: 'Use assertElement instead of casting to !Element.',
     allowlist: [
-      'src/log.js', // Has actual implementation of assertElement.
+      'src/core/assert/base.js', // Has actual implementation of assertElement.
+      'src/core/assert/dev.js', // Has actual implementation of assertElement.
       'src/polyfills/custom-elements.js',
-      'ads/google/imaVideo.js', // Required until #22277 is fixed.
+      'ads/google/ima/ima-video.js', // Required until #22277 is fixed.
       '3p/twitter.js', // Runs in a 3p window context, so cannot import log.js.
     ],
   },
@@ -777,7 +777,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-callout-vendors.js',
       'test/unit/test-chunk.js',
       'test/unit/test-cid.js',
-      'test/unit/test-css.js',
       'test/unit/test-curve.js',
       'test/unit/test-describes.js',
       'test/unit/test-document-info.js',
@@ -805,10 +804,6 @@ const forbiddenTermsGlobal = {
       'test/unit/test-mustache.js',
       'test/unit/test-pass.js',
       'test/unit/test-platform.js',
-      'test/unit/test-polyfill-document-contains.js',
-      'test/unit/test-polyfill-math-sign.js',
-      'test/unit/test-polyfill-object-assign.js',
-      'test/unit/test-polyfill-object-values.js',
       'test/unit/test-pull-to-refresh.js',
       'test/unit/test-purifier.js',
       'test/unit/test-render-delaying-services.js',
@@ -955,8 +950,7 @@ const forbiddenTermsSrcInclusive = {
     message: bannedTermsHelpString,
     allowlist: [
       'src/friendly-iframe-embed.js',
-      'src/polyfillstub/intersection-observer-stub.js',
-      'src/polyfillstub/resize-observer-stub.js',
+      'src/runtime.js',
       'src/service/extensions-impl.js',
       'src/service/crypto-impl.js',
     ],
@@ -1040,7 +1034,6 @@ const forbiddenTermsSrcInclusive = {
       'build-system/server/shadow-viewer.js',
       'build-system/server/variable-substitution.js',
       'build-system/tasks/dist.js',
-      'build-system/tasks/make-extension/index.js',
       'build-system/tasks/helpers.js',
       'build-system/tasks/performance/helpers.js',
       'src/3p-frame.js',
@@ -1068,7 +1061,11 @@ const forbiddenTermsSrcInclusive = {
   '\\.indexOf\\(.*===?.*\\.length': 'use endsWith helper in src/string.js',
   '/url-parse-query-string': {
     message: 'Import parseQueryString from `src/url.js`',
-    allowlist: ['src/url.js', 'src/mode.js'],
+    allowlist: [
+      'build-system/tasks/check-types.js',
+      'src/mode.js',
+      'src/url.js',
+    ],
   },
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
@@ -1102,7 +1099,7 @@ const forbiddenTermsSrcInclusive = {
     message: measurementApiDeprecated,
     allowlist: [
       'build-system/externs/amp.extern.js',
-      'builtins/amp-img.js',
+      'builtins/amp-img/amp-img.js',
       'src/base-element.js',
       'src/custom-element.js',
       'src/iframe-helper.js',
@@ -1147,8 +1144,24 @@ const forbiddenTermsSrcInclusive = {
     message:
       'Instead of fancy-log, use the logging functions in build-system/common/logging.js.',
   },
+  "require\\('kleur\\/colors'\\)": {
+    message:
+      'Instead of kleur/colors, use the log-coloring functions in build-system/common/colors.js',
+    allowlist: [
+      'build-system/common/colors.js',
+      'third_party/react-dates/scope-require.js',
+    ],
+  },
   'withA11y':
     'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',
+  'detectIsAutoplaySupported': {
+    message:
+      'Detecting autoplay support is expensive. Use the cached function "isAutoplaySupported" instead.',
+    allowlist: [
+      // The function itself is defined here.
+      'src/utils/video.js',
+    ],
+  },
 };
 
 /**

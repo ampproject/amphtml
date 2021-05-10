@@ -28,7 +28,7 @@ import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {getAmpdoc} from '../../../src/service';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {interactiveElementsSelectors} from './amp-story-embedded-component';
@@ -474,7 +474,10 @@ export class ManualAdvancement extends AdvancementConfig {
       (el) => {
         tagName = el.tagName.toLowerCase();
 
-        if (tagName === 'amp-story-page-attachment') {
+        if (
+          tagName === 'amp-story-page-attachment' ||
+          tagName === 'amp-story-page-outlink'
+        ) {
           shouldHandleEvent = false;
           return true;
         }
@@ -502,7 +505,7 @@ export class ManualAdvancement extends AdvancementConfig {
 
   /**
    * For an element to trigger a tooltip it has to be descendant of
-   * amp-story-page but not of amp-story-cta-layer or amp-story-page-attachment.
+   * amp-story-page but not of amp-story-cta-layer, amp-story-page-attachment or amp-story-page-outlink.
    * @param {!Event} event
    * @param {!ClientRect} pageRect
    * @return {boolean}
@@ -542,7 +545,8 @@ export class ManualAdvancement extends AdvancementConfig {
 
         if (
           tagName === 'amp-story-cta-layer' ||
-          tagName === 'amp-story-page-attachment'
+          tagName === 'amp-story-page-attachment' ||
+          tagName === 'amp-story-page-outlink'
         ) {
           valid = false;
           return false;
@@ -898,6 +902,21 @@ export class TimeBasedAdvancement extends AdvancementConfig {
       AdvancementMode.AUTO_ADVANCE_TIME
     );
     super.onAdvance();
+  }
+
+  /**
+   * Updates the delay (and derived values) from the given auto-advance string.
+   * @param {string} autoAdvanceStr The value of the updated auto-advance-after attribute.
+   */
+  updateTimeDelay(autoAdvanceStr) {
+    const newDelayMs = timeStrToMillis(autoAdvanceStr);
+    if (newDelayMs === undefined || isNaN(newDelayMs)) {
+      return;
+    }
+    if (this.remainingDelayMs_) {
+      this.remainingDelayMs_ += newDelayMs - this.delayMs_;
+    }
+    this.delayMs_ = newDelayMs;
   }
 
   /**

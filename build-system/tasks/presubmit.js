@@ -22,7 +22,7 @@ const {
   matchForbiddenTerms,
   forbiddenTermsGlobal,
 } = require('../test-configs/forbidden-terms');
-const {cyan, red, yellow} = require('kleur/colors');
+const {cyan, red, yellow} = require('../common/colors');
 const {log} = require('../common/logging');
 
 /**
@@ -39,7 +39,7 @@ const requiredTerms = {
   'http\\://www\\.apache\\.org/licenses/LICENSE-2\\.0': dedicatedCopyrightNoteSources,
 };
 // Exclude extension generator templates
-const requiredTermsExcluded = /amp-__component_name_hyphenated__/;
+const requiredTermsExcluded = new RegExp('/make-extension(/.+)?/template/');
 
 /**
  * Test if a file's contents match any of the forbidden terms

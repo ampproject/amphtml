@@ -18,7 +18,8 @@ import * as Preact from '../../../src/preact';
 import {ContainWrapper, useValueRef} from '../../../src/preact/component';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {Side} from './sidebar-config';
-import {createPortal, forwardRef} from '../../../src/preact/compat';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
 import {
   useCallback,
@@ -186,49 +187,73 @@ export {Sidebar};
  */
 export function SidebarToolbar({
   toolbar: mediaQueryProp,
-  toolbarTarget,
+  toolbarTarget: toolbarTargetProp,
   children,
   ...rest
 }) {
-  const ref = useRef();
-  const [matches, setMatches] = useState(false);
+  const ref = useRef(null);
+  const [mediaQuery, setMediaQuery] = useState(null);
+  const [toolbarTarget, setToolbarTarget] = useState(null);
   const [targetEl, setTargetEl] = useState(null);
 
   useEffect(() => {
-    const window = ref.current?.ownerDocument?.defaultView;
-    if (!window) {
+    const doc = ref.current?.ownerDocument;
+    if (!doc) {
       return;
     }
 
-    const mediaQueryList = window.matchMedia(mediaQueryProp);
-    const updateMatches = () => setMatches(mediaQueryList.matches);
-    mediaQueryList.addEventListener('change', updateMatches);
-    setMatches(mediaQueryList.matches);
-    return () => mediaQueryList.removeEventListener('change', updateMatches);
+    const sanitizedToolbarTarget = escapeCssSelectorIdent(toolbarTargetProp);
+    setToolbarTarget(sanitizedToolbarTarget);
+    setTargetEl(doc.getElementById(sanitizedToolbarTarget));
+  }, [toolbarTargetProp]);
+
+  useEffect(() => {
+    const win = ref.current?.ownerDocument?.defaultView;
+    if (!win) {
+      return;
+    }
+
+    setMediaQuery(sanitizeMediaQuery(win, mediaQueryProp));
   }, [mediaQueryProp]);
 
   useEffect(() => {
-    const document = ref.current?.ownerDocument;
-    if (!document) {
+    const element = ref.current;
+    const doc = ref.current?.ownerDocument;
+    if (!doc || !targetEl || mediaQuery == null) {
       return;
     }
 
-    const selector = `#${CSS.escape(toolbarTarget)}`;
-    const newTargetEl = document.querySelector(selector);
-    setTargetEl(newTargetEl);
-  }, [toolbarTarget]);
+    const clone = element.cloneNode(true);
+    const style = doc.createElement('style');
+    style./*OK*/ textContent =
+      `#${toolbarTarget}{display: none;}` +
+      `@media ${mediaQuery}{#${toolbarTarget}{display: initial;}}`;
+
+    targetEl.appendChild(clone);
+    targetEl.appendChild(style);
+    return () => {
+      targetEl.removeChild(clone);
+      targetEl.removeChild(style);
+    };
+  }, [mediaQuery, toolbarTarget, targetEl]);
 
   return (
-    <>
-      <nav
-        ref={ref}
-        toolbar={mediaQueryProp}
-        toolbar-target={toolbarTarget}
-        {...rest}
-      >
-        {children}
-      </nav>
-      {matches && targetEl && createPortal(children, targetEl)}
-    </>
+    <nav
+      ref={ref}
+      toolbar={mediaQueryProp}
+      toolbar-target={toolbarTargetProp}
+      {...rest}
+    >
+      {children}
+    </nav>
   );
+}
+
+/**
+ * @param {!Window} win
+ * @param {string|undefined} query
+ * @return {string}
+ */
+function sanitizeMediaQuery(win, query) {
+  return win.matchMedia(query).media;
 }
