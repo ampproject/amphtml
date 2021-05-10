@@ -65,7 +65,7 @@ describes.realWin(
     it("container's height is changed", async () => {
       const initialHeight = 300;
       element = createElementWithAttributes(win.document, 'amp-twitter', {
-        'data-shortcode': '585110598171631616',
+        'data-tweetid': '585110598171631616',
         'height': initialHeight,
         'width': 500,
         'layout': 'responsive',
@@ -88,6 +88,37 @@ describes.realWin(
       ).contentWindow;
       win.dispatchEvent(mockEvent);
       expect(forceChangeHeightStub).to.be.calledOnce.calledWith(1000);
+    });
+
+    it('should replace iframe after tweetid mutation', async () => {
+      const newTweetId = '638793490521001985';
+      element = createElementWithAttributes(win.document, 'amp-twitter', {
+        'data-tweetid': '585110598171631616',
+        'height': 500,
+        'width': 500,
+        'layout': 'responsive',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
+
+      const iframe = element.shadowRoot.querySelector('iframe');
+      const oldName = iframe.getAttribute('name');
+      expect(oldName).to.contain('585110598171631616');
+      expect(oldName).not.to.contain('638793490521001985');
+
+      element.setAttribute('data-tweetid', newTweetId);
+      await waitFor(
+        () =>
+          element.shadowRoot.querySelector('iframe').getAttribute('name') !=
+          oldName,
+        'iframe changed'
+      );
+
+      const name = element.shadowRoot
+        .querySelector('iframe')
+        .getAttribute('name');
+      expect(name).not.to.contain('585110598171631616');
+      expect(name).to.contain('638793490521001985');
     });
   }
 );
