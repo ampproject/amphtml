@@ -176,8 +176,8 @@ export class HighlightHandler {
    * @private
    */
   highlightUsingTextFragments_(highlightInfo) {
-    const {sentences, skipRendering} = highlightInfo;
-    if (skipRendering || !sentences?.length) {
+    const {sentences} = highlightInfo;
+    if (!sentences?.length) {
       return;
     }
     const fragment = sentences

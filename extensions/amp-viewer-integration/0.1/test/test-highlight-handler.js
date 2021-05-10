@@ -441,7 +441,6 @@ describes.realWin(
 
         const highlightHandler = new HighlightHandler(ampdoc, {
           sentences: ['amp', 'highlight'],
-          skipRendering: false,
         });
 
         const updateUrlWithTextFragmentSpy = env.sandbox.spy();
@@ -461,7 +460,7 @@ describes.realWin(
     it.configure()
       .ifChrome()
       .run(
-        'should not highlight if highlightInfo.skipRendering = true',
+        'should not highlight if highlightInfo.sentences is empty',
         async () => {
           toggleExperiment(env.win, 'use-text-fragments-for-highlights', true);
           const {ampdoc} = env;
@@ -474,8 +473,7 @@ describes.realWin(
             .returns(whenFirstVisiblePromise);
 
           const highlightHandler = new HighlightHandler(ampdoc, {
-            sentences: ['amp', 'highlight'],
-            skipRendering: true,
+            sentences: [],
           });
 
           const updateUrlWithTextFragmentSpy = env.sandbox.spy();
