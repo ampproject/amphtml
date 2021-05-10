@@ -178,8 +178,7 @@ export let AmpTestEnv;
  * @param {!TestSpec} spec
  * @param {function()} fn
  */
-export const sandboxed = describeEnv((unusedSpec) => []);
-sandboxed.configure = () => new TestConfig(sandboxed);
+export const sandboxed = createConfigurableRunner((unusedSpec) => []);
 
 /**
  * A test with a fake window.
@@ -193,11 +192,10 @@ sandboxed.configure = () => new TestConfig(sandboxed);
  *   amp: (!AmpTestEnv|undefined),
  * })} fn
  */
-export const fakeWin = describeEnv((spec) => [
+export const fakeWin = createConfigurableRunner((spec) => [
   new FakeWinFixture(spec),
   new AmpFixture(spec),
 ]);
-fakeWin.configure = () => new TestConfig(fakeWin);
 
 /**
  * A test with a real (iframed) window.
@@ -213,11 +211,10 @@ fakeWin.configure = () => new TestConfig(fakeWin);
  *   amp: (!AmpTestEnv|undefined),
  * })} fn
  */
-export const realWin = describeEnv((spec) => [
+export const realWin = createConfigurableRunner((spec) => [
   new RealWinFixture(spec),
   new AmpFixture(spec),
 ]);
-realWin.configure = () => new TestConfig(realWin);
 
 /**
  * A test that loads HTML markup in `spec.body` into an embedded iframe.
@@ -234,10 +231,9 @@ realWin.configure = () => new TestConfig(realWin);
  *   iframe: !HTMLIFrameElement,
  * })} fn
  */
-export const integration = describeEnv((spec) => [
+export const integration = createConfigurableRunner((spec) => [
   new IntegrationFixture(spec),
 ]);
-integration.configure = () => new TestConfig(integration);
 
 /**
  * A repeating test.
@@ -369,6 +365,16 @@ function describeEnv(factory) {
   mainFunc.only = createTemplate(describe.only);
   mainFunc.skip = createTemplate(describe.skip);
   return mainFunc;
+}
+
+/**
+ * Creates a configurable version of a top-level describes runner.
+ * @param {function(!Object):!Array<?Fixture>} factory
+ */
+function createConfigurableRunner(factory) {
+  const runner = describeEnv(factory);
+  runner.configure = () => new TestConfig(runner);
+  return runner;
 }
 
 /** @interface */
