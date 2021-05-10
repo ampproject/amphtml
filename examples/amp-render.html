@@ -41,16 +41,30 @@
       custom-element="amp-list"
       src="https://cdn.ampproject.org/v0/amp-list-0.1.js"
     ></script>
-    <script async custom-element="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js"></script>
+    <script
+      async
+      custom-element="amp-script"
+      src="https://cdn.ampproject.org/v0/amp-script-0.1.js"
+    ></script>
     <script>
       (self.AMP = self.AMP || []).push(function (AMP) {
         AMP.toggleExperiment('amp-render', true);
       });
     </script>
-<!-- <meta name="amp-script-src" content="sha384-_Ti60nYvoQ_lQXcVj2dXTtwzzv7pw1U7x3AUZqewe-q1L8oq-RVwi84ko_XXdMSt"> -->
-<meta name="amp-script-src" content="sha384-1Mf5TUSPnSk7m0HT7EJ_Ma9gr5igPbvnWzpEZpEw2ZjOes90dw9WR2yTCciQnzip">
+    <!-- <meta name="amp-script-src" content="sha384-_Ti60nYvoQ_lQXcVj2dXTtwzzv7pw1U7x3AUZqewe-q1L8oq-RVwi84ko_XXdMSt"> -->
+    <meta
+      name="amp-script-src"
+      content="sha384-1Mf5TUSPnSk7m0HT7EJ_Ma9gr5igPbvnWzpEZpEw2ZjOes90dw9WR2yTCciQnzip"
+    />
     <!-- prettier-ignore -->
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style>
+    <style amp-custom>
+      .product .image-placeholder {
+        width: 150px;
+        height: 100px;
+        background-color: #999;
+      }
+    </style>
   </head>
   <body>
     <!-- <h1>Hello AMPHTML World!</h1>
@@ -73,7 +87,6 @@
     </amp-render>
 
     <button on="tap:AMP.setState({ url: '/examples/data2.json' })">Change source</button> -->
-
 
     <!-- <amp-render
       id="my-amp-render"
@@ -113,7 +126,6 @@
       Change source
     </button> -->
 
-
     <!-- <amp-render
       layout="fixed-height"
       height="200"
@@ -133,7 +145,7 @@
         Loading data...
       </div>
     </amp-render> -->
-<!--
+    <!--
     <amp-state id="theFood">
       <script type="application/json">
         {
@@ -176,7 +188,7 @@
       Change source
     </button> -->
 
-<!--
+    <!--
     <amp-state id="joe">
       <script type="application/json">
         {
@@ -217,8 +229,7 @@
         </template>
     </amp-render> -->
 
-
-      <!-- <amp-render
+    <!-- <amp-render
       data-amp-bind-src="bindSrc"
       src="https://amp.dev/static/samples/json/examples.json"
         width="300"
@@ -236,8 +247,7 @@
         Change source
       </button> -->
 
-
-      <!-- <amp-render
+    <!-- <amp-render
         id="my-amp-render"
         layout="fixed-height"
         height="100"
@@ -250,7 +260,7 @@
 
       <button on="tap:my-amp-render.refresh">Refresh list</button> -->
 
-      <!-- <div>
+    <!-- <div>
         <amp-state id="my-state">
           <script type="application/json">
             {
@@ -315,7 +325,8 @@
         <button on="tap:AMP.setState({ srcUrl: 'amp-state:my-state2' })">Change to alternate amp-state source</button>
       </div> -->
 
-      <!-- <amp-list id="amp-list-placeholder" noloading layout="fixed-height" height="954" src="https://amp.dev/documentation/examples/api/slow-json-with-items/?delay=5000">
+    <!-- <amp-list id="amp-list-placeholder" noloading layout="fixed-height" height="954" src="https://amp.dev/documentation/examples/api/slow-json-with-items/?delay=5000">
+        <div fallback>Failed to load data.</div>
         <div placeholder>
           <div class="product">
             <div class="image-placeholder"></div>
@@ -341,35 +352,39 @@
         </template>
       </amp-list> -->
 
-      <amp-render id="amp-list-placeholder" layout="fixed-height" height="654" src="https://amp.dev/documentation/examples/api/slow-json-with-items/?delay=5000">
-        <div placeholder>
-          <div class="product">
-            <div class="image-placeholder"></div>
-            <div>Loading...</div>
-          </div>
-          <div class="product">
-            <div class="image-placeholder"></div>
-            <div>Loading...</div>
-          </div>
-          <div class="product">
-            <div class="image-placeholder"></div>
-            <div>Loading...</div>
+    <amp-render
+      layout="fixed-height"
+      height="654"
+      src="https://amp.dev/documentation/examples/api/slow-json-with-items/?delay=5000"
+    >
+      <template type="amp-mustache">
+        {{#items}}
+        <div class="product">
+          <div>
+            <div>{{name}}</div>
+            <div>{{{stars}}}</div>
+            <div>${{price}}</div>
           </div>
         </div>
-        <div fallback>Failed to load data.</div>
-        <template type="amp-mustache">
-          {{#items}}
-            <div class="product">
+        {{/items}}
+      </template>
 
-                <div>
-                  <div>{{name}}</div>
-                  <div>{{{stars}}}</div>
-                  <div>${{price}}</div>
-                </div>
-            </div>
-          {{/items}}
-        </template>
-      </amp-render>
+      <div placeholder>
+        <div class="product">
+          <div class="image-placeholder"></div>
+          <div>Loading...</div>
+        </div>
+        <div class="product">
+          <div class="image-placeholder"></div>
+          <div>Loading...</div>
+        </div>
+        <div class="product">
+          <div class="image-placeholder"></div>
+          <div>Loading...</div>
+        </div>
+      </div>
 
+      <div fallback>Failed to load data.</div>
+    </amp-render>
   </body>
 </html>

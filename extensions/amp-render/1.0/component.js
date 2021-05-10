@@ -51,8 +51,8 @@ export function RenderWithRef(
     src = '',
     getJson = DEFAULT_GET_JSON,
     render = DEFAULT_RENDER,
-    onLoad = NOOP,
-    onError = NOOP,
+    togglePlaceholder = NOOP,
+    toggleFallback = NOOP,
     ...rest
   },
   ref
@@ -68,37 +68,37 @@ export function RenderWithRef(
       return;
     }
     let cancelled = false;
-    onLoad(true);
-    onError(false);
+    togglePlaceholder(true);
+    toggleFallback(false);
     getJson(src)
       .then((data) => {
         if (!cancelled) {
           setData(data);
-          onLoad(false);
+          togglePlaceholder(false);
         }
       })
       .catch((e) => {
-        onLoad(false);
-        onError(true);
+        togglePlaceholder(false);
+        toggleFallback(true);
       });
     return () => {
       cancelled = true;
     };
-  }, [getJson, src, onLoad, onError]);
+  }, [getJson, src, togglePlaceholder, toggleFallback]);
 
   const refresh = useCallback(() => {
-    onLoad(true);
-    onError(false);
+    togglePlaceholder(true);
+    toggleFallback(false);
     getJson(src, /* shouldRefresh */ true)
       .then((data) => {
         setData(data);
-        onLoad(false);
+        togglePlaceholder(false);
       })
       .catch((e) => {
-        onLoad(false);
-        onError(true);
+        togglePlaceholder(false);
+        toggleFallback(true);
       });
-  }, [getJson, src, onLoad, onError]);
+  }, [getJson, src, togglePlaceholder, toggleFallback]);
 
   useImperativeHandle(
     ref,

@@ -182,10 +182,8 @@ export class AmpRender extends BaseElement {
 
     return dict({
       'getJson': this.getFetchJsonFn(),
-      // 'onLoad': () => this.togglePlaceholder(true),
-      // 'onError': () => this.toggleFallback(true),
-      'onLoad': (val) => this.togglePlaceholder(val),
-      'onError': (val) => this.toggleFallback(val),
+      'togglePlaceholder': (val) => this.togglePlaceholder(val),
+      'toggleFallback': (val) => this.toggleFallback(val),
     });
   }
 

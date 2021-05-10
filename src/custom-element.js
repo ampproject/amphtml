@@ -1964,6 +1964,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       const resourceState = this.getResource_().getState();
       // Do not show fallback before layout
       if (
+        !this.R1() &&
         show &&
         (resourceState == ResourceState.NOT_BUILT ||
           resourceState == ResourceState.NOT_LAID_OUT ||
