@@ -433,6 +433,28 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(mediaPoolRegister).to.not.have.been.called;
   });
 
+  it('should use storyNextUp value as default for auto-advance-after', async () => {
+    env.sandbox
+      .stub(Services.viewerForDoc(element), 'getParam')
+      .withArgs('storyNextUp')
+      .returns('5s');
+    expect(element.getAttribute('auto-advance-after')).to.be.equal(null);
+    page.buildCallback();
+
+    expect(element.getAttribute('auto-advance-after')).to.be.equal('5s');
+  });
+
+  it('should not use storyNextUp to override auto-advance-after value', async () => {
+    env.sandbox
+      .stub(Services.viewerForDoc(element), 'getParam')
+      .withArgs('storyNextUp')
+      .returns('5s');
+    element.setAttribute('auto-advance-after', '20000ms');
+    page.buildCallback();
+
+    expect(element.getAttribute('auto-advance-after')).to.be.equal('20000ms');
+  });
+
   it('should stop the advancement when state becomes not active', async () => {
     page.buildCallback();
     const advancementStopStub = env.sandbox.stub(page.advancement_, 'stop');
