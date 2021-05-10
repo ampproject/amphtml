@@ -785,7 +785,7 @@ export class AmpStoryPlayer {
       if (options.animate === false) {
         this.rootEl_.classList.toggle(
           CLASS_NO_NAVIGATION_TRANSITION,
-          !options.animate
+          true
         );
         listenOnce(story.iframe, 'transitionend', () => {
           this.rootEl_.classList.remove(CLASS_NO_NAVIGATION_TRANSITION);
