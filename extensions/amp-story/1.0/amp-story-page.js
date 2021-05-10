@@ -412,9 +412,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
     whenUpgradedToCustomElement(video)
-      .then(() => {
-        return video.getImpl();
-      })
+      .then(() => video.getImpl())
       .then((videoImpl) => {
         const videoDuration = videoImpl.getDuration();
         if (!isNaN(videoDuration)) {
