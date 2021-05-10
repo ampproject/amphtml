@@ -28,6 +28,10 @@ export default {
         name: 'amp-twitter',
         version: '1.0',
       },
+      {
+        name: 'amp-bind',
+        version: '0.1',
+      },
     ],
     experiments: ['bento'],
   },
@@ -49,5 +53,25 @@ export const Default = () => {
         </p>
       </blockquote>
     </amp-twitter>
+  );
+};
+
+export const mutatedTweetId = () => {
+  return (
+    <>
+      <button on="tap:AMP.setState({tweetid: '495719809695621121'})">
+        Change tweet
+      </button>
+      <amp-state id="tweetid">
+        <script type="application/json">1356304203044499462</script>
+      </amp-state>
+      <amp-twitter
+        width="375"
+        height="472"
+        layout="responsive"
+        data-tweetid="1356304203044499462"
+        data-amp-bind-data-tweetid="tweetid"
+      ></amp-twitter>
+    </>
   );
 };
