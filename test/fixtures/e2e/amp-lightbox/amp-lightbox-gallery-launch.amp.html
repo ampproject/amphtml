@@ -17,9 +17,6 @@ The amp-lightbox-gallery component provides a "lightbox” experience for AMP co
   <script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js"></script>
   <!-- Optionally import the amp-carousel component in the header if you are using lightbox with carousel. -->
   <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
-  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
-  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
-  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
 
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <style amp-custom>
@@ -64,11 +61,11 @@ The amp-lightbox-gallery component provides a "lightbox” experience for AMP co
   This is a basic example that demonstrates lightboxed `<amp-img>`s. You have one or more `<amp-img>` elements on the page. Just add the "lightbox" attribute to each image that you wish to view in a lightbox.
   -->
   <div class="container">
-    <amp-img lightbox src="./img/bluegradient.png" width="300" height="200" layout="responsive"></amp-img>
+    <amp-img lightbox src="../../../manual/img/bluegradient.png" width="300" height="200" layout="responsive"></amp-img>
     <p class="paragraph">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-    <amp-img lightbox src="./img/redgradient.png" width="300" height="200" layout="responsive"></amp-img>
+    <amp-img lightbox src="../../../manual/img/redgradient.png" width="300" height="200" layout="responsive"></amp-img>
     <p class="paragraph">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-    <amp-img lightbox src="./img/lemonyellowgradient.png" width="300" height="200" layout="responsive"></amp-img>
+    <amp-img lightbox src="../../../manual/img/lemonyellowgradient.png" width="300" height="200" layout="responsive"></amp-img>
     <p class="paragraph">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
   </div>
 
@@ -78,9 +75,9 @@ The amp-lightbox-gallery component provides a "lightbox” experience for AMP co
   -->
   <div>
     <amp-carousel lightbox width="400" height="300" layout="responsive" type="slides">
-      <amp-img src="./img/lilacgradient.png" width="400" height="300" layout="responsive"></amp-img>
-      <amp-img src="./img/tealgradient.png" width="400" height="300" layout="responsive"></amp-img>
-      <amp-img src="./img/orangegradient.png" width="400" height="300" layout="responsive"></amp-img>
+      <amp-img src="../../../manual/img/lilacgradient.png" width="400" height="300" layout="responsive"></amp-img>
+      <amp-img src="../../../manual/img/tealgradient.png" width="400" height="300" layout="responsive"></amp-img>
+      <amp-img src="../../../manual/img/orangegradient.png" width="400" height="300" layout="responsive"></amp-img>
     </amp-carousel>
   </div>
 
@@ -89,7 +86,7 @@ The amp-lightbox-gallery component provides a "lightbox” experience for AMP co
 
     <div>
       <amp-img lightbox="hero"
-        src="./img/lilacgradient.png"
+        src="../../../manual/img/lilacgradient.png"
         width="400"
         height="300"
         layout="responsive">
@@ -97,12 +94,12 @@ The amp-lightbox-gallery component provides a "lightbox” experience for AMP co
       </amp-img>
     <div hidden>
       <amp-img lightbox="hero"
-        src="./img/orangegradient.png"
+        src="../../../manual/img/orangegradient.png"
         layout="responsive"
         width="400"
         height="300"></amp-img>
       <amp-img lightbox="hero"
-        src="./img/tealgradient.png"
+        src="../../../manual/img/tealgradient.png"
         width="400"
         height="300"
         layout="responsive" ></amp-img>
@@ -120,7 +117,7 @@ The amp-lightbox-gallery component provides a "lightbox” experience for AMP co
 
     <amp-img
       lightbox="caption"
-      src="./img/lemonyellowgradient.png"
+      src="../../../manual/img/lemonyellowgradient.png"
       width="300"
       height="200"
       layout="responsive"></amp-img>
@@ -129,7 +126,7 @@ The amp-lightbox-gallery component provides a "lightbox” experience for AMP co
     <figure>
       <amp-img
         lightbox="caption"
-        src="./img/redgradient.png"
+        src="../../../manual/img/redgradient.png"
         width="300"
         height="200"
         layout="responsive"></amp-img>
@@ -141,7 +138,7 @@ The amp-lightbox-gallery component provides a "lightbox” experience for AMP co
 
     <amp-img
       lightbox="caption"
-      src="./img/greengradient.png"
+      src="../../../manual/img/greengradient.png"
       layout="responsive"
       width="300"
       height="200"
