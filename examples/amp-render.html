@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html ⚡>
+  <head>
+    <meta charset="utf-8" />
+    <title>My AMP Page</title>
+    <link rel="canonical" href="self.html" />
+    <meta name="viewport" content="width=device-width" />
+    <noscript
+      ><style amp-boilerplate>
+        body {
+          -webkit-animation: none;
+          -moz-animation: none;
+          -ms-animation: none;
+          animation: none;
+        }
+      </style></noscript
+    >
+    <style amp-custom>
+      h1 {
+        margin: 1rem;
+      }
+    </style>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script
+      async
+      custom-element="amp-bind"
+      src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"
+    ></script>
+    <script
+      async
+      custom-template="amp-mustache"
+      src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-render"
+      src="https://cdn.ampproject.org/v0/amp-render-1.0.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-list"
+      src="https://cdn.ampproject.org/v0/amp-list-0.1.js"
+    ></script>
+    <script async custom-element="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js"></script>
+    <script>
+      (self.AMP = self.AMP || []).push(function (AMP) {
+        AMP.toggleExperiment('amp-render', true);
+      });
+    </script>
+<!-- <meta name="amp-script-src" content="sha384-_Ti60nYvoQ_lQXcVj2dXTtwzzv7pw1U7x3AUZqewe-q1L8oq-RVwi84ko_XXdMSt"> -->
+<meta name="amp-script-src" content="sha384-1Mf5TUSPnSk7m0HT7EJ_Ma9gr5igPbvnWzpEZpEw2ZjOes90dw9WR2yTCciQnzip">
+    <!-- prettier-ignore -->
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style>
+  </head>
+  <body>
+    <!-- <h1>Hello AMPHTML World!</h1>
+    <amp-state id="my-state">
+      <script type="application/json">
+      {
+        "url": "/examples/data.json"
+      }
+    </script>
+    </amp-state>
+
+    <amp-render
+      layout="fixed-height"
+      height="100"
+      src="/examples/data.json"
+      [src]="url">
+      <template type="amp-mustache">
+            <li>{{name}}</li>
+      </template>
+    </amp-render>
+
+    <button on="tap:AMP.setState({ url: '/examples/data2.json' })">Change source</button> -->
+
+
+    <!-- <amp-render
+      id="my-amp-render"
+      layout="fixed-height"
+      height="100"
+      src="http://localhost:8000/examples/data.json?RANDOM"
+      [src]="srcUrl"
+      xssi-prefix=")]}"
+      key="name">
+      <template type="amp-mustache">
+            <li>{{firstName}} {{lastName}}</li>
+      </template>
+    </amp-render>
+
+    <button
+      on="tap:AMP.setState({ srcUrl: 'https://cdn.glitch.com/b443f914-de11-4b13-a5e1-ec07ba86ebc1%2Fdata2.json?RANDOM' })"
+    >
+      Change source
+    </button>
+
+    <button on="tap:my-amp-render.refresh">Refresh list</button> -->
+
+    <!-- <amp-render
+      layout="fixed-height"
+      height="100"
+      src="/examples/data.json"
+      [src]="srcUrl"
+      binding="no"
+    >
+      <template type="amp-mustache">
+        <h1>{{name}}</h1>
+      </template>
+    </amp-render>
+    <button
+      on="tap:AMP.setState({ srcUrl: '/examples/data2.json' })"
+    >
+      Change source
+    </button> -->
+
+
+    <!-- <amp-render
+      layout="fixed-height"
+      height="200"
+      src="https://preview.amp.dev/documentation/examples/api/slow-json-with-items/?delay=2000"
+      xssi-prefix="dhruv"
+      key="."
+    >
+      <template type="amp-mustache">
+        <ul>
+        {{#items}}
+          <li>{{name}}</li>
+        {{/items}}
+      </ul>
+      </template>
+
+      <div placeholder>
+        Loading data...
+      </div>
+    </amp-render> -->
+<!--
+    <amp-state id="theFood">
+      <script type="application/json">
+        {
+          "foods": [
+            {
+              "name": "pizza"
+            },
+            {
+              "name": "burger"
+            },
+            {
+              "name": "taco"
+            }
+          ]
+        }
+      </script>
+    </amp-state>
+
+    <amp-render src="amp-state:theFood" [src]="srcUrl" width="auto" height="140" layout="fixed-height">
+      <template type="amp-mustache">
+        <p>List of my fav foods from amp-state:
+          <ul>
+          {{#foods}}
+            <li>{{name}}</li>
+          {{/foods}}
+        </ul>
+      </p>
+      </template>
+      <div placeholder>
+        [placeholder] Loading data...
+      </div>
+
+      <div fallback>
+        [fallback] Failed to load data
+      </div>
+    </amp-render>
+
+    <button
+    on="tap:AMP.setState({ srcUrl: 'http://localhost:8000/examples/foods.json' })">
+      Change source
+    </button> -->
+
+<!--
+    <amp-state id="joe">
+      <script type="application/json">
+        {
+          "name": "Joe"
+        }
+      </script>
+    </amp-state>
+
+    <amp-render
+      layout="fixed-height"
+      height="100"
+      src="amp-state:joe"
+      [src]="srcUrl"
+      binding="no"
+    >
+      <template type="amp-mustache">
+        <h1>{{name}}</h1>
+      </template>
+    </amp-render> -->
+
+    <!-- <amp-script id="dataFunctions" script="local-script" nodom></amp-script>
+
+    <script id="local-script" type="text/plain" target="amp-script">
+      function getRemoteData() {
+        return fetch('http://localhost:8000/examples/data.json')
+          .then(resp => resp.json());
+
+      }
+      exportFunction('getRemoteData', getRemoteData);
+    </script>
+
+    <amp-render src="amp-script:dataFunctions.getRemoteData"
+      width="auto"
+      height="100"
+      layout="fixed-height">
+        <template type="amp-mustache">
+          <h1>{{name}}</h1>
+        </template>
+    </amp-render> -->
+
+
+      <!-- <amp-render
+      data-amp-bind-src="bindSrc"
+      src="https://amp.dev/static/samples/json/examples.json"
+        width="300"
+        height="100"
+        layout="fixed"
+      >
+        <template type="amp-mustache">
+          {{#items}}
+            <a href="{{url}}">{{title}}</a>
+          {{/items}}
+        </template>
+      </amp-render>
+
+      <button on="tap:AMP.setState({ bindSrc: '/examples/amp-render-data2.json' })">
+        Change source
+      </button> -->
+
+
+      <!-- <amp-render
+        id="my-amp-render"
+        layout="fixed-height"
+        height="100"
+        src="/examples/data.json"
+        [src]="url">
+        <template type="amp-mustache">
+            <li>{{name}}</li>
+        </template>
+      </amp-render>
+
+      <button on="tap:my-amp-render.refresh">Refresh list</button> -->
+
+      <!-- <div>
+        <amp-state id="my-state">
+          <script type="application/json">
+            {
+               "items": [
+                 {
+                   "title": "amp-twitter",
+                   "url": "/documentation/components/reference/amp-bind.html"
+                 },
+                 {
+                  "title": "amp-lightbox",
+                  "url": "/documentation/components/reference/amp-lightbox.html"
+                },
+                {
+                  "title": "amp-access",
+                  "url": "/documentation/components/reference/amp-access.html"
+                },
+                 {
+                   "title": "amp-list",
+                   "url": "/documentation/components/reference/amp-list.html"
+                 }
+               ]
+              }
+          </script>
+        </amp-state>
+
+        <amp-state id="my-state2">
+          <script type="application/json">
+            {
+               "items": [
+                 {
+                   "title": "amp-list",
+                   "url": "/documentation/components/reference/amp-bind.html"
+                 },
+                 {
+                  "title": "amp-next-page",
+                  "url": "/documentation/components/reference/amp-lightbox.html"
+                },
+                {
+                  "title": "amp-consent",
+                  "url": "/documentation/components/reference/amp-access.html"
+                },
+                 {
+                   "title": "amp-vimeo",
+                   "url": "/documentation/components/reference/amp-list.html"
+                 }
+               ]
+              }
+          </script>
+        </amp-state>
+
+
+        <amp-render layout="fixed-height" height="100" src="amp-state:my-state" [src]="srcUrl" binding="no">
+          <template type="amp-mustache">
+            {{#items}}
+            <li>
+              <a href="{{url}}">{{title}}</a>
+            </li>
+            {{/items}}
+          </template>
+        </amp-render>
+        <button on="tap:AMP.setState({ srcUrl: 'https://amp.dev/static/samples/json/examples2.json' })">Change to remote source</button>
+        <button on="tap:AMP.setState({ srcUrl: 'amp-state:my-state2' })">Change to alternate amp-state source</button>
+      </div> -->
+
+      <amp-list id="amp-list-placeholder" noloading layout="fixed-height" height="954" src="https://amp.dev/documentation/examples/api/slow-json-with-items/?delay=5000">
+        <div placeholder>
+          <div class="product">
+            <div class="image-placeholder"></div>
+            <div>Loading...</div>
+          </div>
+          <div class="product">
+            <div class="image-placeholder"></div>
+            <div>Loading...</div>
+          </div>
+          <div class="product">
+            <div class="image-placeholder"></div>
+            <div>Loading...</div>
+          </div>
+        </div>
+        <template type="amp-mustache">
+            <div class="product">
+                <div>
+                  <div>{{name}}</div>
+                  <div>{{{stars}}}</div>
+                  <div>${{price}}</div>
+                </div>
+            </div>
+        </template>
+      </amp-list>
+
+      <hr>
+      <amp-render id="amp-list-placeholder" layout="fixed-height" height="654" src="https://amp.dev/documentation/examples/api/slow-json-with-items/?delay=5000">
+        <div placeholder>Loading ...</div>
+        <div fallback>Failed to load data.</div>
+        <template type="amp-mustache">
+          {{#items}}
+            <div class="product">
+
+                <div>
+                  <div>{{name}}</div>
+                  <div>{{{stars}}}</div>
+                  <div>${{price}}</div>
+                </div>
+            </div>
+          {{/items}}
+        </template>
+      </amp-render>
+
+  </body>
+</html>
