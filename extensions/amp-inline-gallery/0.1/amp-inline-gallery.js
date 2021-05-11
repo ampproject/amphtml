@@ -82,9 +82,9 @@ class AmpInlineGallery extends AMP.BaseElement {
     Promise.all([
       scopedQuerySelector(this.element, CAROUSEL_SELECTOR).getImpl(),
       Promise.all(
-        toArray(
-          scopedQuerySelectorAll(this.element, THUMBNAILS_SELECTORS)
-        ).map((el) => el.getImpl())
+        toArray(scopedQuerySelectorAll(this.element, THUMBNAILS_SELECTORS)).map(
+          (el) => el.getImpl()
+        )
       ),
     ]).then((data) => {
       const carouselImpl = data[0];

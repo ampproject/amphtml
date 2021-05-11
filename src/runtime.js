@@ -250,9 +250,10 @@ function adoptShared(global, callback) {
   // If the closure passed to maybePumpEarlyFrame didn't execute
   // immediately we need to keep pushing onto preregisteredExtensions
   if (!global.AMP.push) {
-    global.AMP.push = /** @type {function((ExtensionPayload|function(!Object, !Object): ?))} */ (preregisteredExtensions.push.bind(
-      preregisteredExtensions
-    ));
+    global.AMP.push =
+      /** @type {function((ExtensionPayload|function(!Object, !Object): ?))} */ (
+        preregisteredExtensions.push.bind(preregisteredExtensions)
+      );
   }
 
   // For iOS we need to set `cursor:pointer` to ensure that click events are
@@ -414,9 +415,8 @@ export function adoptShadowMode(global) {
      * @param {!Object<string, string>=} opt_initParams
      * @return {!Object}
      */
-    global.AMP.attachShadowDocAsStream = manager.attachShadowDocAsStream.bind(
-      manager
-    );
+    global.AMP.attachShadowDocAsStream =
+      manager.attachShadowDocAsStream.bind(manager);
 
     return waitForBodyOpenPromise(global.document);
   });

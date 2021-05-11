@@ -86,9 +86,8 @@ describes.realWin(
               )
             ).to.be.ok;
             return timer.promise(50).then(() => {
-              const analyticsEle = baseEle.element.querySelector(
-                'amp-analytics'
-              );
+              const analyticsEle =
+                baseEle.element.querySelector('amp-analytics');
               expect(analyticsEle).to.not.be.null;
               expect(analyticsEle.getAttribute('sandbox')).to.equal('true');
               expect(analyticsEle.getAttribute('trigger')).to.equal(

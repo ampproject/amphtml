@@ -25,9 +25,9 @@ export function detectIsAutoplaySupported(win) {
   // `paused` is true after `play()` call, autoplay is supported. Although
   // this is unintuitive, it works across browsers and is currently the lightest
   // way to detect autoplay without using a data source.
-  const detectionElement = /** @type {!HTMLVideoElement} */ (win.document.createElement(
-    'video'
-  ));
+  const detectionElement = /** @type {!HTMLVideoElement} */ (
+    win.document.createElement('video')
+  );
 
   // NOTE(aghassemi): We need both attributes and properties due to Chrome and
   // Safari differences when dealing with non-attached elements.

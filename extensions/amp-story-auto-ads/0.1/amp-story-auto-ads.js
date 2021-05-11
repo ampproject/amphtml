@@ -175,9 +175,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @param {!StoryAdPage} adPage
    */
   forcePlaceAdAfterPage_(adPage) {
-    const pageBeforeAdId = /** @type {string} */ (this.storeService_.get(
-      StateProperty.CURRENT_PAGE_ID
-    ));
+    const pageBeforeAdId = /** @type {string} */ (
+      this.storeService_.get(StateProperty.CURRENT_PAGE_ID)
+    );
     adPage.registerLoadCallback(() =>
       this.adPageManager_
         .maybeInsertPageAfter(pageBeforeAdId, adPage)

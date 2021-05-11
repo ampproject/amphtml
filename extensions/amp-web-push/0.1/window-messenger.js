@@ -119,12 +119,13 @@ export class WindowMessenger {
         );
         return;
       }
-      this.onListenConnectionMessageReceivedProc_ = this.onListenConnectionMessageReceived_.bind(
-        this,
-        allowedOrigins,
-        resolve,
-        reject
-      );
+      this.onListenConnectionMessageReceivedProc_ =
+        this.onListenConnectionMessageReceived_.bind(
+          this,
+          allowedOrigins,
+          resolve,
+          reject
+        );
       this.window_.addEventListener(
         'message',
         /** @type {(function (Event): (boolean|undefined)|null)} */
@@ -226,9 +227,8 @@ export class WindowMessenger {
     );
     // Get the message port
     this.messagePort_ = messagePorts[0];
-    this.onChannelMessageReceivedProc_ = this.onChannelMessageReceived_.bind(
-      this
-    );
+    this.onChannelMessageReceivedProc_ =
+      this.onChannelMessageReceived_.bind(this);
     this.messagePort_.addEventListener(
       'message',
       this.onChannelMessageReceivedProc_,
@@ -272,12 +272,13 @@ export class WindowMessenger {
       }
       this.channel_ = new MessageChannel();
       this.messagePort_ = this.channel_.port1;
-      this.onConnectConnectionMessageReceivedProc_ = this.onConnectConnectionMessageReceived_.bind(
-        this,
-        this.messagePort_,
-        expectedRemoteOrigin,
-        resolve
-      );
+      this.onConnectConnectionMessageReceivedProc_ =
+        this.onConnectConnectionMessageReceived_.bind(
+          this,
+          this.messagePort_,
+          expectedRemoteOrigin,
+          resolve
+        );
       this.messagePort_.addEventListener(
         'message',
         this.onConnectConnectionMessageReceivedProc_
@@ -323,9 +324,8 @@ export class WindowMessenger {
       this.onConnectConnectionMessageReceivedProc_
     );
     // Install a new message handler for receiving normal messages
-    this.onChannelMessageReceivedProc_ = this.onChannelMessageReceived_.bind(
-      this
-    );
+    this.onChannelMessageReceivedProc_ =
+      this.onChannelMessageReceived_.bind(this);
     messagePort.addEventListener(
       'message',
       this.onChannelMessageReceivedProc_,

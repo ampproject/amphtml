@@ -121,7 +121,8 @@ function checkLinksInFile(file) {
       {pattern: /https:\/\/codepen.*/},
       // GitHub PRs and Issues can be assumed to exist
       {
-        pattern: /https:\/\/github.com\/ampproject\/amphtml\/(pull|issue)\/d+.*/,
+        pattern:
+          /https:\/\/github.com\/ampproject\/amphtml\/(pull|issue)\/d+.*/,
       },
       // Templated links are merely used to generate other markdown files.
       {pattern: /\$\{[a-z]*\}/},

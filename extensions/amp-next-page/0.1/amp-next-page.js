@@ -292,10 +292,9 @@ export class AmpNextPage extends AMP.BaseElement {
  * @return {!Promise<!NextPageService>}
  */
 function nextPageServiceForDoc(elementOrAmpDoc) {
-  return /** @type {!Promise<!NextPageService>} */ (getServicePromiseForDoc(
-    elementOrAmpDoc,
-    SERVICE_ID
-  ));
+  return /** @type {!Promise<!NextPageService>} */ (
+    getServicePromiseForDoc(elementOrAmpDoc, SERVICE_ID)
+  );
 }
 
 /**

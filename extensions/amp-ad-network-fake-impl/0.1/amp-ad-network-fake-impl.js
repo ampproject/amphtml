@@ -90,10 +90,8 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
       if (!response) {
         return null;
       }
-      const {
-        status,
-        headers,
-      } = /** @type {{status: number, headers: !Headers}} */ (response);
+      const {status, headers} =
+        /** @type {{status: number, headers: !Headers}} */ (response);
 
       // In the convert creative mode the content is the plain AMP HTML.
       // This mode is primarily used for A4A Envelope for testing.

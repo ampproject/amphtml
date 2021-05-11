@@ -140,9 +140,8 @@ describes.realWin('amp-story-education', {amp: true}, (env) => {
       // TODO(gmajoulet): remove private method call when viewer messaging is
       // introduced.
       storyEducation.setState_(State.NAVIGATION_TAP);
-      const navigationTapEl = storyEducation.containerEl_.querySelector(
-        '[step="tap"]'
-      );
+      const navigationTapEl =
+        storyEducation.containerEl_.querySelector('[step="tap"]');
 
       expect(navigationTapEl).to.exist;
     });
@@ -154,9 +153,8 @@ describes.realWin('amp-story-education', {amp: true}, (env) => {
       // TODO(gmajoulet): remove private method call when viewer messaging is
       // introduced.
       storyEducation.setState_(State.NAVIGATION_SWIPE);
-      const navigationSwipeEl = storyEducation.containerEl_.querySelector(
-        '[step="swipe"]'
-      );
+      const navigationSwipeEl =
+        storyEducation.containerEl_.querySelector('[step="swipe"]');
 
       expect(navigationSwipeEl).to.exist;
     });
@@ -182,9 +180,8 @@ describes.realWin('amp-story-education', {amp: true}, (env) => {
       const clickEvent = new MouseEvent('click', {clientX: 100, clientY: 100});
       storyEducation.containerEl_.dispatchEvent(clickEvent);
 
-      const navigationSwipeEl = storyEducation.containerEl_.querySelector(
-        '[step="swipe"]'
-      );
+      const navigationSwipeEl =
+        storyEducation.containerEl_.querySelector('[step="swipe"]');
       expect(navigationSwipeEl).to.exist;
     });
 
@@ -257,9 +254,8 @@ describes.realWin('amp-story-education', {amp: true}, (env) => {
       await Promise.resolve(); // whenFirstVisible icrotask tick.
       await Promise.resolve(); // sendMessageAwaitResponse microtask tick.
 
-      const navigationTapEl = storyEducation.containerEl_.querySelector(
-        '[step="tap"]'
-      );
+      const navigationTapEl =
+        storyEducation.containerEl_.querySelector('[step="tap"]');
       expect(navigationTapEl).to.exist;
     });
 
@@ -275,9 +271,8 @@ describes.realWin('amp-story-education', {amp: true}, (env) => {
       await Promise.resolve(); // whenFirstVisible microtask tick.
       await Promise.resolve(); // sendMessageAwaitResponse microtask tick.
 
-      const navigationTapEl = storyEducation.containerEl_.querySelector(
-        '[step="tap"]'
-      );
+      const navigationTapEl =
+        storyEducation.containerEl_.querySelector('[step="tap"]');
       expect(navigationTapEl).to.not.exist;
     });
   });

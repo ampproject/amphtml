@@ -106,19 +106,19 @@ export class AmpStoryVariableService {
           return;
         }
 
-        this.variables_[
-          AnalyticsVariable.STORY_PREVIOUS_PAGE_ID
-        ] = this.variables_[AnalyticsVariable.STORY_PAGE_ID];
+        this.variables_[AnalyticsVariable.STORY_PREVIOUS_PAGE_ID] =
+          this.variables_[AnalyticsVariable.STORY_PAGE_ID];
 
         this.variables_[AnalyticsVariable.STORY_PAGE_ID] = pageId;
 
-        const pageIndex = /** @type {number} */ (this.storeService_.get(
-          StateProperty.CURRENT_PAGE_INDEX
-        ));
+        const pageIndex = /** @type {number} */ (
+          this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX)
+        );
         this.variables_[AnalyticsVariable.STORY_PAGE_INDEX] = pageIndex;
 
-        const numberOfPages = this.storeService_.get(StateProperty.PAGE_IDS)
-          .length;
+        const numberOfPages = this.storeService_.get(
+          StateProperty.PAGE_IDS
+        ).length;
         if (numberOfPages > 0) {
           if (numberOfPages === 1) {
             this.variables_[AnalyticsVariable.STORY_PROGRESS] = 0;

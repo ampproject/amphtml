@@ -120,8 +120,9 @@ export class InfoDialog {
       this.parentEl_.appendChild(root);
     });
 
-    const pageUrl = Services.documentInfoForDoc(getAmpdoc(this.parentEl_))
-      .canonicalUrl;
+    const pageUrl = Services.documentInfoForDoc(
+      getAmpdoc(this.parentEl_)
+    ).canonicalUrl;
 
     return Promise.all([
       appendPromise,

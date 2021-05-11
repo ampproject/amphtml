@@ -53,9 +53,8 @@ describes.realWin('form-validators', {amp: true}, (env) => {
     [name, email, text, submit].forEach((c) => form.appendChild(c));
 
     if (isCustomValidations) {
-      const {noName, noEmail, invalidEmail, invalidText} = getCustomValidations(
-        doc
-      );
+      const {noName, noEmail, invalidEmail, invalidText} =
+        getCustomValidations(doc);
       [noName, noEmail, invalidEmail, invalidText].forEach((c) =>
         doc.body.appendChild(c)
       );
@@ -731,9 +730,8 @@ describes.realWin('form-validators', {amp: true}, (env) => {
       [name, email, submit].forEach((c) => form.appendChild(c));
 
       validations.forEach((v) => v.parentNode.removeChild(v));
-      const {noName, noEmail, invalidEmail, invalidText} = getCustomValidations(
-        doc
-      );
+      const {noName, noEmail, invalidEmail, invalidText} =
+        getCustomValidations(doc);
       [noName, noEmail, invalidEmail, invalidText].forEach((c) =>
         doc.body.appendChild(c)
       );

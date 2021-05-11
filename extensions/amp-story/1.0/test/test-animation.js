@@ -713,12 +713,8 @@ describes.realWin('amp-story animations', {}, (env) => {
           </amp-story-animation>
         </div>
       `;
-      const {
-        animatedFirst,
-        animatedSecond,
-        animatedThird,
-        animatedFourth,
-      } = htmlRefs(page);
+      const {animatedFirst, animatedSecond, animatedThird, animatedFourth} =
+        htmlRefs(page);
 
       env.win.document.body.appendChild(page);
 

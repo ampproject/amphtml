@@ -287,9 +287,11 @@ class AmpApesterMedia extends AMP.BaseElement {
         const payload = response['payload'];
         // If it's a playlist we choose a media randomly.
         // The response will be an array.
-        const media = /** @type {!JsonObject} */ (this.embedOptions_.playlist
-          ? payload[Math.floor(Math.random() * payload.length)]
-          : payload);
+        const media = /** @type {!JsonObject} */ (
+          this.embedOptions_.playlist
+            ? payload[Math.floor(Math.random() * payload.length)]
+            : payload
+        );
         const interactionId = media['interactionId'];
         const usePlayer = media['usePlayer'];
         const src = this.constructUrlFromMedia_(interactionId, usePlayer);

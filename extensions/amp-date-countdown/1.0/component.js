@@ -60,10 +60,12 @@ const DEFAULT_COUNT_UP = false;
  * @return {string}
  */
 const DEFAULT_RENDER = (data) =>
-  /** @type {string} */ (`${data['days']} ${data['dd']}, ` +
-    `${data['hours']} ${data['hh']}, ` +
-    `${data['minutes']} ${data['mm']}, ` +
-    `${data['seconds']} ${data['ss']}`);
+  /** @type {string} */ (
+    `${data['days']} ${data['dd']}, ` +
+      `${data['hours']} ${data['hh']}, ` +
+      `${data['minutes']} ${data['mm']}, ` +
+      `${data['seconds']} ${data['ss']}`
+  );
 
 /**
  * @param {!DateCountdownPropsDef} props

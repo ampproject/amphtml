@@ -212,9 +212,11 @@ export class Vsync {
    * @return {function(!VsyncStateDef=)}
    */
   createTask(task) {
-    return /** @type {function(!VsyncStateDef=)} */ ((opt_state) => {
-      this.run(task, opt_state);
-    });
+    return /** @type {function(!VsyncStateDef=)} */ (
+      (opt_state) => {
+        this.run(task, opt_state);
+      }
+    );
   }
 
   /**
@@ -328,9 +330,11 @@ export class Vsync {
    * @return {function(!VsyncStateDef=):boolean}
    */
   createAnimTask(contextNode, task) {
-    return /** @type {function(!VsyncStateDef=):boolean} */ ((opt_state) => {
-      return this.runAnim(contextNode, task, opt_state);
-    });
+    return /** @type {function(!VsyncStateDef=):boolean} */ (
+      (opt_state) => {
+        return this.runAnim(contextNode, task, opt_state);
+      }
+    );
   }
 
   /**

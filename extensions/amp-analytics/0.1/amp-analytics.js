@@ -785,10 +785,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       return Promise.resolve(spec);
     }
 
-    return this.expandTemplateWithUrlParams_(
-      spec,
-      expansionOptions
-    ).then((val) => stringToBool(val));
+    return this.expandTemplateWithUrlParams_(spec, expansionOptions).then(
+      (val) => stringToBool(val)
+    );
   }
 
   /**

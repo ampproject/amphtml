@@ -166,9 +166,8 @@ class AmpO2Player extends AMP.BaseElement {
   sendConsentData_(source, origin) {
     const consentPolicyId = super.getConsentPolicy() || 'default';
     const consentStringPromise = this.getConsentString_(consentPolicyId);
-    const consentPolicyStatePromise = this.getConsentPolicyState_(
-      consentPolicyId
-    );
+    const consentPolicyStatePromise =
+      this.getConsentPolicyState_(consentPolicyId);
 
     Promise.all([consentPolicyStatePromise, consentStringPromise]).then(
       (consents) => {

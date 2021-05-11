@@ -608,9 +608,8 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   getEntitlements() {
-    const encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
-      'google.com'
-    );
+    const encryptedDocumentKey =
+      this.serviceAdapter_.getEncryptedDocumentKey('google.com');
     userAssert(
       !(this.enableLAA_ && encryptedDocumentKey),
       `enableLAA cannot be used when the document is encrypted`

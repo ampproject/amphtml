@@ -235,7 +235,9 @@ export class AmpConsent extends AMP.BaseElement {
       this.getAmpDoc(),
       CONSENT_POLICY_MANAGER
     ).then((manager) => {
-      this.consentPolicyManager_ = /** @type {!ConsentPolicyManager} */ (manager);
+      this.consentPolicyManager_ = /** @type {!ConsentPolicyManager} */ (
+        manager
+      );
       this.consentPolicyManager_.setLegacyConsentInstanceId(
         /** @type {string} */ (this.consentId_)
       );
@@ -262,7 +264,9 @@ export class AmpConsent extends AMP.BaseElement {
       this.getAmpDoc(),
       NOTIFICATION_UI_MANAGER
     ).then((manager) => {
-      this.notificationUiManager_ = /** @type {!NotificationUiManager} */ (manager);
+      this.notificationUiManager_ = /** @type {!NotificationUiManager} */ (
+        manager
+      );
     });
 
     const cookieWriterPromise = this.consentConfig_['cookies']
@@ -732,7 +736,8 @@ export class AmpConsent extends AMP.BaseElement {
     if (!this.consentConfig_['checkConsentHref']) {
       this.remoteConfigPromise_ = Promise.resolve(null);
     } else {
-      const storeConsentPromise = this.consentStateManager_.getLastConsentInstanceInfo();
+      const storeConsentPromise =
+        this.consentStateManager_.getLastConsentInstanceInfo();
       this.remoteConfigPromise_ = storeConsentPromise.then((storedInfo) => {
         // Note: Expect the request to look different in following versions.
         const request = /** @type {!JsonObject} */ ({
@@ -866,10 +871,9 @@ export class AmpConsent extends AMP.BaseElement {
   initPromptUI_(isConsentRequired) {
     this.consentUI_ = new ConsentUI(
       this,
-      /** @type {!JsonObject} */ (devAssert(
-        this.consentConfig_,
-        'consent config not found'
-      ))
+      /** @type {!JsonObject} */ (
+        devAssert(this.consentConfig_, 'consent config not found')
+      )
     );
 
     // Get current consent state

@@ -135,12 +135,8 @@ export class LandscapeComponent {
     }
 
     const landscapeEls = htmlRefs(el);
-    const {
-      category,
-      title,
-      image,
-      meta,
-    } = /** @type {!landscapeElementsDef} */ (landscapeEls);
+    const {category, title, image, meta} =
+      /** @type {!landscapeElementsDef} */ (landscapeEls);
 
     category.textContent = landscapeData.category;
     title.textContent = landscapeData.title;

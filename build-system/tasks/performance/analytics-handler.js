@@ -114,12 +114,8 @@ async function maybeHandleAnalyticsRequest(
  * @return {!Object}
  */
 function getAnalyticsMetrics(analyticsHandlerOptions) {
-  const {
-    expectedRequests,
-    firstRequestTime,
-    requests,
-    startTime,
-  } = analyticsHandlerOptions;
+  const {expectedRequests, firstRequestTime, requests, startTime} =
+    analyticsHandlerOptions;
   const analyticsMetrics = {};
   // If there is no firstRequestTime, that means that request didn't fire.
   // `percentRequestsFailed` because we take the mean rather than sum

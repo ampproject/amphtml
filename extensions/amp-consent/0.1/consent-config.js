@@ -128,19 +128,16 @@ export class ConsentConfig {
    */
   validateAndParseConfig_() {
     const inlineConfig = this.convertInlineConfigFormat_(
-      /** @type {!JsonObject} */ (userAssert(
-        this.getInlineConfig_(),
-        '%s: Inline config not found'
-      ))
+      /** @type {!JsonObject} */ (
+        userAssert(this.getInlineConfig_(), '%s: Inline config not found')
+      )
     );
 
     const cmpConfig = this.getCMPConfig_();
 
-    const config = /** @type {!JsonObject} */ (deepMerge(
-      cmpConfig || {},
-      inlineConfig || {},
-      1
-    ));
+    const config = /** @type {!JsonObject} */ (
+      deepMerge(cmpConfig || {}, inlineConfig || {}, 1)
+    );
 
     userAssert(
       config['consentInstanceId'],

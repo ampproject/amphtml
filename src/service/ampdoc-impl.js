@@ -675,9 +675,9 @@ export class AmpDoc {
    * @return {?time}
    */
   getFirstVisibleTime() {
-    return /** @type {?number} */ (this.signals_.get(
-      AmpDocSignals.FIRST_VISIBLE
-    ));
+    return /** @type {?number} */ (
+      this.signals_.get(AmpDocSignals.FIRST_VISIBLE)
+    );
   }
 
   /**

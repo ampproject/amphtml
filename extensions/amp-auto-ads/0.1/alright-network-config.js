@@ -47,9 +47,8 @@ export class AlrightNetworkConfig {
   /** @override */
   getConfigUrl() {
     const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
-    const publisherId = this.autoAmpAdsElement_.getAttribute(
-      'data-publisher-id'
-    );
+    const publisherId =
+      this.autoAmpAdsElement_.getAttribute('data-publisher-id');
     const pageType = this.autoAmpAdsElement_.getAttribute('data-page-type');
     const contentCategory =
       this.autoAmpAdsElement_.getAttribute('data-content-category') || '';

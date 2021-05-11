@@ -103,9 +103,8 @@ describes.realWin(
           'height': 1000,
         },
       });
-      mockEvent.source = element.shadowRoot.querySelector(
-        'iframe'
-      ).contentWindow;
+      mockEvent.source =
+        element.shadowRoot.querySelector('iframe').contentWindow;
       win.dispatchEvent(mockEvent);
 
       expect(forceChangeHeightStub).to.be.calledOnce.calledWith(1000);

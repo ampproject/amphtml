@@ -128,17 +128,16 @@ class AmpBrightcove extends AMP.BaseElement {
     this.playerReadyResolver_ = deferred.resolve;
 
     // Warn if the player does not have video interface support
-    this.readyTimeout_ = /** @type {number} */ (Services.timerFor(window).delay(
-      () => {
+    this.readyTimeout_ = /** @type {number} */ (
+      Services.timerFor(window).delay(() => {
         user().warn(
           TAG,
           'Did not receive ready callback from player %s.' +
             ' Ensure it has the videojs-amp-support plugin.',
           this.playerId_
         );
-      },
-      3000
-    ));
+      }, 3000)
+    );
   }
 
   /**

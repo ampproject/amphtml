@@ -477,9 +477,9 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
             setCidBackup(ampdoc, cookieName, existingCookie);
           }
         }
-        return /** @type {!Promise<?string>} */ (Promise.resolve(
-          existingCookie
-        ));
+        return /** @type {!Promise<?string>} */ (
+          Promise.resolve(existingCookie)
+        );
       }
 
       if (cid.externalCidCache_[scope]) {

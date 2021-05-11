@@ -125,9 +125,9 @@ export function setStyle(element, property, value, opt_units, opt_bypassCache) {
   if (!propertyName) {
     return;
   }
-  const styleValue = /** @type {string} */ (opt_units
-    ? value + opt_units
-    : value);
+  const styleValue = /** @type {string} */ (
+    opt_units ? value + opt_units : value
+  );
   if (isVar(propertyName)) {
     element.style.setProperty(propertyName, styleValue);
   } else {

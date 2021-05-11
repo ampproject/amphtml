@@ -569,13 +569,8 @@ function installPatches(win, registry) {
   const elProto = Element.prototype;
   const nodeProto = Node.prototype;
   const {createElement, importNode} = docProto;
-  const {
-    appendChild,
-    cloneNode,
-    insertBefore,
-    removeChild,
-    replaceChild,
-  } = nodeProto;
+  const {appendChild, cloneNode, insertBefore, removeChild, replaceChild} =
+    nodeProto;
 
   // Patch createElement to immediately upgrade the custom element.
   // This has the added benefit that it avoids the "already created but needs
@@ -896,10 +891,9 @@ export function copyProperties(obj, prototype) {
         continue;
       }
 
-      const desc = /** @type {!ObjectPropertyDescriptor<Object>} */ (Object.getOwnPropertyDescriptor(
-        current,
-        prop
-      ));
+      const desc = /** @type {!ObjectPropertyDescriptor<Object>} */ (
+        Object.getOwnPropertyDescriptor(current, prop)
+      );
       Object.defineProperty(obj, prop, desc);
     }
 

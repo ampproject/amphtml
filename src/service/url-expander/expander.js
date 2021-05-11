@@ -333,11 +333,9 @@ export class Expander {
       const result = this.evaluateBindingSync_(binding, name, opt_args);
       return encode ? encodeURIComponent(result) : result;
     } else {
-      return this.evaluateBindingAsync_(
-        binding,
-        name,
-        opt_args
-      ).then((result) => (encode ? encodeURIComponent(result) : result));
+      return this.evaluateBindingAsync_(binding, name, opt_args).then(
+        (result) => (encode ? encodeURIComponent(result) : result)
+      );
     }
   }
 

@@ -292,36 +292,32 @@ describes.realWin(
     it('should preprocess percentages properly', () => {
       const responseData1 = getMockInteractiveData()['options'];
 
-      const percentages1 = ampStoryInteractive.preprocessPercentages_(
-        responseData1
-      );
+      const percentages1 =
+        ampStoryInteractive.preprocessPercentages_(responseData1);
 
       expect(percentages1).to.deep.equal([30, 30, 30, 10]);
     });
 
     it('should preprocess percentages preserving ties', () => {
       const responseData2 = generateResponseDataFor([3, 3, 3]);
-      const percentages2 = ampStoryInteractive.preprocessPercentages_(
-        responseData2
-      );
+      const percentages2 =
+        ampStoryInteractive.preprocessPercentages_(responseData2);
 
       expect(percentages2).to.deep.equal([33, 33, 33]);
     });
 
     it('should preprocess percentages preserving order', () => {
       const responseData3 = generateResponseDataFor([255, 255, 245, 245]);
-      const percentages3 = ampStoryInteractive.preprocessPercentages_(
-        responseData3
-      );
+      const percentages3 =
+        ampStoryInteractive.preprocessPercentages_(responseData3);
 
       expect(percentages3).to.deep.equal([26, 26, 24, 24]);
     });
 
     it('should preprocess percentages handling rounding edge cases', () => {
       const responseData4 = generateResponseDataFor([335, 335, 330]);
-      const percentages4 = ampStoryInteractive.preprocessPercentages_(
-        responseData4
-      );
+      const percentages4 =
+        ampStoryInteractive.preprocessPercentages_(responseData4);
 
       expect(percentages4).to.deep.equal([33, 33, 33]);
     });

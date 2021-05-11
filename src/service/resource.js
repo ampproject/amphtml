@@ -92,11 +92,13 @@ export class Resource {
    * @return {!Resource}
    */
   static forElement(element) {
-    return /** @type {!Resource} */ (devAssert(
-      Resource.forElementOptional(element),
-      'Missing resource prop on %s',
-      element
-    ));
+    return /** @type {!Resource} */ (
+      devAssert(
+        Resource.forElementOptional(element),
+        'Missing resource prop on %s',
+        element
+      )
+    );
   }
 
   /**

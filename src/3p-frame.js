@@ -101,9 +101,9 @@ export function getIframe(
     attributes['_context']['initialIntersection'] = initialIntersection;
   }
 
-  const iframe = /** @type {!HTMLIFrameElement} */ (parentWindow.document.createElement(
-    'iframe'
-  ));
+  const iframe = /** @type {!HTMLIFrameElement} */ (
+    parentWindow.document.createElement('iframe')
+  );
 
   if (!count[attributes['type']]) {
     count[attributes['type']] = 0;

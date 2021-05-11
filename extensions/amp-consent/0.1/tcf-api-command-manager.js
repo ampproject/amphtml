@@ -180,15 +180,12 @@ export class TcfApiCommandManager {
    * @return {!Promise<Array>}
    */
   getTcDataPromises_() {
-    const consentStringInfoPromise = this.policyManager_.getConsentStringInfo(
-      'default'
-    );
-    const metadataPromise = this.policyManager_.getConsentMetadataInfo(
-      'default'
-    );
-    const sharedDataPromise = this.policyManager_.getMergedSharedData(
-      'default'
-    );
+    const consentStringInfoPromise =
+      this.policyManager_.getConsentStringInfo('default');
+    const metadataPromise =
+      this.policyManager_.getConsentMetadataInfo('default');
+    const sharedDataPromise =
+      this.policyManager_.getMergedSharedData('default');
 
     return Promise.all([
       metadataPromise,

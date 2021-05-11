@@ -100,9 +100,8 @@ export class AmpMustache extends BaseTemplate {
       const nestedTemplateKey = `__AMP_NESTED_TEMPLATE_${index}`;
       this.nestedTemplates_[nestedTemplateKey] =
         nestedTemplate./*OK*/ outerHTML;
-      const nestedTemplateAsVariable = this.element.ownerDocument.createTextNode(
-        `{{{${nestedTemplateKey}}}}`
-      );
+      const nestedTemplateAsVariable =
+        this.element.ownerDocument.createTextNode(`{{{${nestedTemplateKey}}}}`);
       nestedTemplate.parentNode.replaceChild(
         nestedTemplateAsVariable,
         nestedTemplate

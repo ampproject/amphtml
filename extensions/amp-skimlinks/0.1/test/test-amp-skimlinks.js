@@ -341,9 +341,8 @@ describes.fakeWin(
 
       describe('When beacon call has already been made', () => {
         beforeEach(() => {
-          ampSkimlinks.affiliateLinkResolver_.firstRequest = Promise.resolve(
-            beaconResponse
-          );
+          ampSkimlinks.affiliateLinkResolver_.firstRequest =
+            Promise.resolve(beaconResponse);
         });
 
         it('Should not make the fallback call', () => {

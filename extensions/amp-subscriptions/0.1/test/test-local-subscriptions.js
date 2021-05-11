@@ -272,9 +272,8 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
       'should return actionMap as is if login and subscribe actions' +
         ' are present',
       () => {
-        const returnedMap = localSubscriptionPlatform.validateActionMap(
-          actionMap
-        );
+        const returnedMap =
+          localSubscriptionPlatform.validateActionMap(actionMap);
         expect(JSON.stringify(returnedMap)).to.be.equal(
           JSON.stringify(actionMap)
         );

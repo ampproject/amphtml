@@ -1063,7 +1063,8 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     const pauseSpy = env.sandbox.spy(videoMock, 'pause');
     imaVideoObj.setVideoPlayerForTesting(videoMock);
     //const showControlsSpy = env.sandbox.spy(imaVideoObj, 'showControls');
-    imaVideoObj.getPropertiesForTesting().playerState = imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING;
+    imaVideoObj.getPropertiesForTesting().playerState =
+      imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING;
 
     imaVideoObj.pauseVideo({});
 
@@ -1146,7 +1147,8 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     );
     imaVideoObj.setVideoPlayerForTesting(videoMock);
     //const showControlsSpy = env.sandbox.spy(imaVideoObj, 'showControls');
-    imaVideoObj.getPropertiesForTesting().playerState = imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING;
+    imaVideoObj.getPropertiesForTesting().playerState =
+      imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING;
 
     imaVideoObj.pauseVideo({type: 'webkitendfullscreen'});
 
@@ -1170,7 +1172,8 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
       src: srcUrl,
       tag: adTagUrl,
     });
-    imaVideoObj.getPropertiesForTesting().playerState = imaVideoObj.getPropertiesForTesting().PlayerStates.PAUSED;
+    imaVideoObj.getPropertiesForTesting().playerState =
+      imaVideoObj.getPropertiesForTesting().PlayerStates.PAUSED;
     imaVideoObj.setHideControlsTimeoutForTesting(null);
 
     imaVideoObj.showControls();
@@ -1302,8 +1305,8 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
       ).to.eql('none');
 
       const interactEvent = new Event(hoverEvent);
-      const videoPlayerElement = imaVideoObj.getPropertiesForTesting()
-        .videoPlayer;
+      const videoPlayerElement =
+        imaVideoObj.getPropertiesForTesting().videoPlayer;
 
       imaVideoObj.setPlayerStateForTesting(
         imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING
@@ -1341,8 +1344,8 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
       ).to.eql('none');
 
       const interactEvent = new Event(hoverEvent);
-      const videoPlayerElement = imaVideoObj.getPropertiesForTesting()
-        .videoPlayer;
+      const videoPlayerElement =
+        imaVideoObj.getPropertiesForTesting().videoPlayer;
 
       imaVideoObj.setPlayerStateForTesting(
         imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING

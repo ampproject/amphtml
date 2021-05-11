@@ -387,13 +387,14 @@ export class ResponsiveState {
    * @private
    */
   isInResponsiveHeightFixExperimentBranch_() {
-    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
-      {
-        experimentId: MAX_HEIGHT_EXP.branch,
-        isTrafficEligible: () => true,
-        branches: [MAX_HEIGHT_EXP.control, MAX_HEIGHT_EXP.experiment],
-      },
-    ]);
+    const experimentInfoList =
+      /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
+        {
+          experimentId: MAX_HEIGHT_EXP.branch,
+          isTrafficEligible: () => true,
+          branches: [MAX_HEIGHT_EXP.control, MAX_HEIGHT_EXP.experiment],
+        },
+      ]);
     const setExps = randomlySelectUnsetExperiments(
       this.win_,
       experimentInfoList

@@ -222,9 +222,8 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
         </body>`);
       await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
 
-      const altBody = iframe.contentDocument.querySelector(
-        '#x-a4a-former-body'
-      );
+      const altBody =
+        iframe.contentDocument.querySelector('#x-a4a-former-body');
       expect(altBody).not.to.have.attribute('amp-story-visible');
       storyAdPage.toggleVisibility();
       expect(altBody).to.have.attribute('amp-story-visible');

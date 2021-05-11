@@ -134,10 +134,9 @@ export function sanitizeHtml(html, doc) {
         // Ask Caja to validate the element as well.
         // Use the resulting properties.
         const savedAttribs = attribs.slice(0);
-        const scrubbed = /** @type {!JsonObject} */ (tagPolicy(
-          tagName,
-          attribs
-        ));
+        const scrubbed = /** @type {!JsonObject} */ (
+          tagPolicy(tagName, attribs)
+        );
         if (!scrubbed) {
           ignore++;
         } else {

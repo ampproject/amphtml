@@ -192,15 +192,12 @@ describes.realWin(
 
     function setDefaultConfigParams_() {
       webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.PERMISSION_DIALOG_URL
-      ] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.SERVICE_WORKER_URL
-      ] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.SERVICE_WORKER_SCOPE
-      ] = FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.PERMISSION_DIALOG_URL] =
+        FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL] =
+        FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE] =
+        FAKE_IFRAME_URL;
     }
 
     function setupHelperIframe() {
@@ -210,12 +207,11 @@ describes.realWin(
         iframeWindow = helperIframe.contentWindow;
         iframeWindow.WindowMessenger = WindowMessenger;
         iframeWindow.AmpWebPushHelperFrame = AmpWebPushHelperFrame;
-        iframeWindow._ampWebPushHelperFrame = new iframeWindow.AmpWebPushHelperFrame(
-          {
+        iframeWindow._ampWebPushHelperFrame =
+          new iframeWindow.AmpWebPushHelperFrame({
             debug: true,
             windowContext: iframeWindow,
-          }
-        );
+          });
         iframeWindow._ampWebPushHelperFrame.run(
           env.win.location.ancestorOrigins[0]
         );
@@ -269,15 +265,12 @@ describes.realWin(
 
     function setDefaultConfigParams_() {
       webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.PERMISSION_DIALOG_URL
-      ] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.SERVICE_WORKER_URL
-      ] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.SERVICE_WORKER_SCOPE
-      ] = FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.PERMISSION_DIALOG_URL] =
+        FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL] =
+        FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE] =
+        FAKE_IFRAME_URL;
     }
 
     function setupHelperIframe() {
@@ -287,12 +280,11 @@ describes.realWin(
         iframeWindow = helperIframe.contentWindow;
         iframeWindow.WindowMessenger = WindowMessenger;
         iframeWindow.AmpWebPushHelperFrame = AmpWebPushHelperFrame;
-        iframeWindow._ampWebPushHelperFrame = new iframeWindow.AmpWebPushHelperFrame(
-          {
+        iframeWindow._ampWebPushHelperFrame =
+          new iframeWindow.AmpWebPushHelperFrame({
             debug: true,
             windowContext: iframeWindow,
-          }
-        );
+          });
         iframeWindow._ampWebPushHelperFrame.run(
           env.win.location.ancestorOrigins[0]
         );
@@ -560,15 +552,12 @@ describes.realWin(
 
     function setDefaultConfigParams_() {
       webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.PERMISSION_DIALOG_URL
-      ] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.SERVICE_WORKER_URL
-      ] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.SERVICE_WORKER_SCOPE
-      ] = FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.PERMISSION_DIALOG_URL] =
+        FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL] =
+        FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE] =
+        FAKE_IFRAME_URL;
     }
 
     function setupHelperIframe() {
@@ -578,12 +567,11 @@ describes.realWin(
         iframeWindow = helperIframe.contentWindow;
         iframeWindow.WindowMessenger = WindowMessenger;
         iframeWindow.AmpWebPushHelperFrame = AmpWebPushHelperFrame;
-        iframeWindow._ampWebPushHelperFrame = new iframeWindow.AmpWebPushHelperFrame(
-          {
+        iframeWindow._ampWebPushHelperFrame =
+          new iframeWindow.AmpWebPushHelperFrame({
             debug: true,
             windowContext: iframeWindow,
-          }
-        );
+          });
         iframeWindow._ampWebPushHelperFrame.run(
           env.win.location.ancestorOrigins[0]
         );
@@ -696,18 +684,16 @@ describes.realWin(
 
       const urlWithSingleParam =
         'https://a.com/?' + WebPushService.PERMISSION_POPUP_URL_FRAGMENT;
-      const newUrlWithSingleParam = webPush.removePermissionPopupUrlFragmentFromUrl(
-        urlWithSingleParam
-      );
+      const newUrlWithSingleParam =
+        webPush.removePermissionPopupUrlFragmentFromUrl(urlWithSingleParam);
       expect(newUrlWithSingleParam).to.eq('https://a.com/');
 
       const urlWithMultipleParams =
         'https://a.com/?a=1&' +
         WebPushService.PERMISSION_POPUP_URL_FRAGMENT +
         '&b=2';
-      const newUrlWithMultipleParams = webPush.removePermissionPopupUrlFragmentFromUrl(
-        urlWithMultipleParams
-      );
+      const newUrlWithMultipleParams =
+        webPush.removePermissionPopupUrlFragmentFromUrl(urlWithMultipleParams);
       expect(newUrlWithMultipleParams).to.eq('https://a.com/?a=1&b=2');
     });
   }
@@ -725,15 +711,12 @@ describes.realWin(
 
     function setDefaultConfigParams_() {
       webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.PERMISSION_DIALOG_URL
-      ] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.SERVICE_WORKER_URL
-      ] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.SERVICE_WORKER_SCOPE
-      ] = FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.PERMISSION_DIALOG_URL] =
+        FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL] =
+        FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE] =
+        FAKE_IFRAME_URL;
     }
 
     function setupHelperIframe() {
@@ -743,12 +726,11 @@ describes.realWin(
         iframeWindow = helperIframe.contentWindow;
         iframeWindow.WindowMessenger = WindowMessenger;
         iframeWindow.AmpWebPushHelperFrame = AmpWebPushHelperFrame;
-        iframeWindow._ampWebPushHelperFrame = new iframeWindow.AmpWebPushHelperFrame(
-          {
+        iframeWindow._ampWebPushHelperFrame =
+          new iframeWindow.AmpWebPushHelperFrame({
             debug: true,
             windowContext: iframeWindow,
-          }
-        );
+          });
         iframeWindow._ampWebPushHelperFrame.run(
           env.win.location.ancestorOrigins[0]
         );

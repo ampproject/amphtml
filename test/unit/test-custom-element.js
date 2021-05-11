@@ -146,9 +146,8 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
         win.__AMP_EXTENDED_ELEMENTS['amp-test'] = TestElement;
         win.__AMP_EXTENDED_ELEMENTS['amp-stub'] = ElementStub;
-        win.__AMP_EXTENDED_ELEMENTS[
-          'amp-test-with-re-upgrade'
-        ] = TestElementWithReUpgrade;
+        win.__AMP_EXTENDED_ELEMENTS['amp-test-with-re-upgrade'] =
+          TestElementWithReUpgrade;
         ampdoc.declareExtension('amp-stub', '0.1');
 
         testElementPreconnectCallback = env.sandbox.spy();

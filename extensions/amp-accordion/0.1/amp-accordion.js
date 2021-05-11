@@ -242,9 +242,9 @@ class AmpAccordion extends AMP.BaseElement {
         dev().assertString(this.sessionId_)
       );
       return sessionStr
-        ? /** @type {!JsonObject} */ (devAssert(
-            parseJson(dev().assertString(sessionStr))
-          ))
+        ? /** @type {!JsonObject} */ (
+            devAssert(parseJson(dev().assertString(sessionStr)))
+          )
         : dict();
     } catch (e) {
       dev().fine(

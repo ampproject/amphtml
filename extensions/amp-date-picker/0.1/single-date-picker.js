@@ -24,15 +24,15 @@ import {withDatePickerCommon} from './date-picker-common';
  * @return {typeof React.Component} A single date picker component class
  */
 function createSingleDatePickerBase() {
-  const constants = /** @type {!JsonObject} */ (requireExternal(
-    'react-dates/constants'
-  ));
+  const constants = /** @type {!JsonObject} */ (
+    requireExternal('react-dates/constants')
+  );
 
   const DAY_SIZE = constants['DAY_SIZE'];
   const HORIZONTAL_ORIENTATION = constants['HORIZONTAL_ORIENTATION'];
-  const DayPickerSingleDateController = /** @type {typeof  React.Component} */ (requireExternal(
-    'react-dates'
-  )['DayPickerSingleDateController']);
+  const DayPickerSingleDateController = /** @type {typeof  React.Component} */ (
+    requireExternal('react-dates')['DayPickerSingleDateController']
+  );
 
   const defaultProps = dict({
     'date': null,

@@ -39,10 +39,8 @@ describes.sandboxed
 
       scenarios.forEach((scenario) => {
         describe(scenario, () => {
-          const {
-            TextEncoder: oldTextEncoder,
-            TextDecoder: oldTextDecoder,
-          } = window;
+          const {TextEncoder: oldTextEncoder, TextDecoder: oldTextDecoder} =
+            window;
           beforeEach(() => {
             // Forces use of the TextEncoding polyfill
             if (scenario == 'PolyfillTextEncoding') {

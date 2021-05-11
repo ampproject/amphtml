@@ -120,10 +120,9 @@ export class LiveListManager {
    * @return {!Promise<!LiveListManager>}
    */
   static forDoc(element) {
-    return /** @type {!Promise<!LiveListManager>} */ (getServicePromiseForDoc(
-      element,
-      SERVICE_ID
-    ));
+    return /** @type {!Promise<!LiveListManager>} */ (
+      getServicePromiseForDoc(element, SERVICE_ID)
+    );
   }
 
   /**
@@ -217,9 +216,8 @@ export class LiveListManager {
     );
 
     return liveListsWithCustomSlots.map((id) => {
-      const customSlotId = this.liveLists_[id].element[
-        AMP_LIVE_LIST_CUSTOM_SLOT_ID
-      ];
+      const customSlotId =
+        this.liveLists_[id].element[AMP_LIVE_LIST_CUSTOM_SLOT_ID];
       return doc.getElementById(customSlotId);
     });
   }

@@ -97,9 +97,8 @@ module.exports = function ({types: t}) {
                 hoistedIdentifier = t.clone(INSERTED_TEMPLATES.get(template));
               } else {
                 // Template not hoisted. Hoist it.
-                hoistedIdentifier = path.scope.generateUidIdentifier(
-                  'template'
-                );
+                hoistedIdentifier =
+                  path.scope.generateUidIdentifier('template');
                 const program = path.findParent((path) => path.isProgram());
 
                 program.scope.push({

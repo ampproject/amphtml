@@ -40,7 +40,9 @@ module.exports = function (context) {
       fixable: 'code',
     },
     Program: function () {
-      const comments = /** @type {!Array<!EslintNodeDef>} */ (sourceCode.getAllComments());
+      const comments = /** @type {!Array<!EslintNodeDef>} */ (
+        sourceCode.getAllComments()
+      );
       comments
         .map((node) => parseClosureComments(context, node))
         .forEach((comment) => checkClosureComments(context, comment));

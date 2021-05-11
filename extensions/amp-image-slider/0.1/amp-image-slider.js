@@ -562,10 +562,8 @@ export class AmpImageSlider extends AMP.BaseElement {
    */
   getCurrentSliderPercentage_() {
     const {left: barLeft} = this.bar_./*OK*/ getBoundingClientRect();
-    const {
-      left: boxLeft,
-      width: boxWidth,
-    } = this.element./*OK*/ getBoundingClientRect();
+    const {left: boxLeft, width: boxWidth} =
+      this.element./*OK*/ getBoundingClientRect();
     return (barLeft - boxLeft) / boxWidth;
   }
 

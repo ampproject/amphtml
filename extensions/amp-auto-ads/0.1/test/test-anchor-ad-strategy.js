@@ -114,9 +114,8 @@ describes.realWin(
       it('should not insert sticky ad if exists one', () => {
         configObj['optInStatus'].push(2);
 
-        const existingStickyAd = env.win.document.createElement(
-          'amp-sticky-ad'
-        );
+        const existingStickyAd =
+          env.win.document.createElement('amp-sticky-ad');
         env.win.document.body.appendChild(existingStickyAd);
 
         const anchorAdStrategy = new AnchorAdStrategy(

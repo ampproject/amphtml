@@ -548,10 +548,9 @@ export function variableServiceForDoc(elementOrAmpDoc) {
  * @return {!Promise<!VariableService>}
  */
 export function variableServicePromiseForDoc(elementOrAmpDoc) {
-  return /** @type {!Promise<!VariableService>} */ (getServicePromiseForDoc(
-    elementOrAmpDoc,
-    'amp-analytics-variables'
-  ));
+  return /** @type {!Promise<!VariableService>} */ (
+    getServicePromiseForDoc(elementOrAmpDoc, 'amp-analytics-variables')
+  );
 }
 
 /**

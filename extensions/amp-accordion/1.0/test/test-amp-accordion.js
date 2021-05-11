@@ -110,18 +110,12 @@ describes.realWin(
 
     it('should have amp specific classes for CSS', () => {
       const sections = element.children;
-      const {
-        firstElementChild: header0,
-        lastElementChild: content0,
-      } = sections[0];
-      const {
-        firstElementChild: header1,
-        lastElementChild: content1,
-      } = sections[1];
-      const {
-        firstElementChild: header2,
-        lastElementChild: content2,
-      } = sections[2];
+      const {firstElementChild: header0, lastElementChild: content0} =
+        sections[0];
+      const {firstElementChild: header1, lastElementChild: content1} =
+        sections[1];
+      const {firstElementChild: header2, lastElementChild: content2} =
+        sections[2];
 
       // Check classes
       expect(header0.className).to.include('i-amphtml-accordion-header');
@@ -242,18 +236,12 @@ describes.realWin(
     it('should include a11y related attributes', async () => {
       const sections = element.children;
 
-      const {
-        firstElementChild: header0,
-        lastElementChild: content0,
-      } = sections[0];
-      const {
-        firstElementChild: header1,
-        lastElementChild: content1,
-      } = sections[1];
-      const {
-        firstElementChild: header2,
-        lastElementChild: content2,
-      } = sections[2];
+      const {firstElementChild: header0, lastElementChild: content0} =
+        sections[0];
+      const {firstElementChild: header1, lastElementChild: content1} =
+        sections[1];
+      const {firstElementChild: header2, lastElementChild: content2} =
+        sections[2];
 
       expect(header0).to.have.attribute('tabindex');
       expect(header0).to.have.attribute('aria-controls');
@@ -325,18 +313,12 @@ describes.realWin(
       await element.buildInternal();
 
       const sections = element.children;
-      const {
-        firstElementChild: header0,
-        lastElementChild: content0,
-      } = sections[0];
-      const {
-        firstElementChild: header1,
-        lastElementChild: content1,
-      } = sections[1];
-      const {
-        firstElementChild: header2,
-        lastElementChild: content2,
-      } = sections[2];
+      const {firstElementChild: header0, lastElementChild: content0} =
+        sections[0];
+      const {firstElementChild: header1, lastElementChild: content1} =
+        sections[1];
+      const {firstElementChild: header2, lastElementChild: content2} =
+        sections[2];
 
       expect(header0.getAttribute('id')).to.equal('h1');
       expect(content0.getAttribute('id')).to.equal('c1');
@@ -381,14 +363,10 @@ describes.realWin(
       await element.buildInternal();
 
       const sections = element.children;
-      const {
-        firstElementChild: header0,
-        lastElementChild: content0,
-      } = sections[0];
-      const {
-        firstElementChild: header1,
-        lastElementChild: content1,
-      } = sections[1];
+      const {firstElementChild: header0, lastElementChild: content0} =
+        sections[0];
+      const {firstElementChild: header1, lastElementChild: content1} =
+        sections[1];
 
       expect(header0).to.have.attribute('role');
       expect(header0.getAttribute('role')).to.equal('cat');

@@ -557,9 +557,9 @@ export class FriendlyIframeEmbed {
    * @visibleForTesting
    */
   getBodyElement() {
-    return /** @type {!HTMLBodyElement} */ ((
-      this.iframe.contentDocument || this.iframe.contentWindow.document
-    ).body);
+    return /** @type {!HTMLBodyElement} */ (
+      (this.iframe.contentDocument || this.iframe.contentWindow.document).body
+    );
   }
 
   /**

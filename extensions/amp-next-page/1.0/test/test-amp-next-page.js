@@ -751,12 +751,10 @@ describes.realWin(
           }
         );
 
-        const template1 = service.pages_[1].container.querySelector(
-          '[separator]'
-        );
-        const template2 = service.pages_[2].container.querySelector(
-          '[separator]'
-        );
+        const template1 =
+          service.pages_[1].container.querySelector('[separator]');
+        const template2 =
+          service.pages_[2].container.querySelector('[separator]');
 
         expect(template1.innerText).to.equal('Rendered 1');
         expect(template2.innerText).to.equal('Rendered 2');

@@ -58,9 +58,8 @@ export class AccessClientAdapter {
     }
 
     /** @const @private {number} */
-    this.authorizationTimeout_ = this.buildConfigAuthorizationTimeout_(
-      configJson
-    );
+    this.authorizationTimeout_ =
+      this.buildConfigAuthorizationTimeout_(configJson);
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(ampdoc.win);

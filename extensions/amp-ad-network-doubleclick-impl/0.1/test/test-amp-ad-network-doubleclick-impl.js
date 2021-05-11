@@ -521,9 +521,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
               '1';
           }
           impl.onCreativeRender(false);
-          const ampAnalyticsElement = impl.element.querySelector(
-            'amp-analytics'
-          );
+          const ampAnalyticsElement =
+            impl.element.querySelector('amp-analytics');
           expect(ampAnalyticsElement).to.be.ok;
           expect(ampAnalyticsElement.CONFIG).jsonEqual(
             impl.ampAnalyticsConfig_

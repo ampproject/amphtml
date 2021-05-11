@@ -65,8 +65,7 @@ describes.realWin(
       doc.body.appendChild(div);
 
       reddit(win, {
-        src:
-          'https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed',
+        src: 'https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed',
         embedtype: 'post',
         width: 400,
         height: 400,
@@ -94,8 +93,7 @@ describes.realWin(
       doc.body.appendChild(div);
 
       reddit(win, {
-        src:
-          'https://www.reddit.com/r/sports/comments/54loj1/50_cents_awful_1st_pitch_given_a_historical/d8306kw',
+        src: 'https://www.reddit.com/r/sports/comments/54loj1/50_cents_awful_1st_pitch_given_a_historical/d8306kw',
         embedtype: 'comment',
         width: 400,
         height: 400,

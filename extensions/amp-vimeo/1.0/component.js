@@ -67,11 +67,10 @@ export function VimeoWithRef(
   ref
 ) {
   const origin = useMemo(getVimeoOriginRegExp, []);
-  const src = useMemo(() => getVimeoIframeSrc(videoid, autoplay, doNotTrack), [
-    videoid,
-    doNotTrack,
-    autoplay,
-  ]);
+  const src = useMemo(
+    () => getVimeoIframeSrc(videoid, autoplay, doNotTrack),
+    [videoid, doNotTrack, autoplay]
+  );
 
   const readyIframeRef = useRef(null);
   const onReadyMessage = useCallback((iframe) => {

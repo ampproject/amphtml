@@ -137,8 +137,9 @@ function isEnabled(win, rule) {
 function buildKeyframes(keyframesRule) {
   const array = [];
   for (let i = 0; i < keyframesRule.cssRules.length; i++) {
-    const keyframeRule = /** @type {!CSSKeyframeRule} */ (keyframesRule
-      .cssRules[i]);
+    const keyframeRule = /** @type {!CSSKeyframeRule} */ (
+      keyframesRule.cssRules[i]
+    );
     const keyframe = {};
     keyframe['offset'] =
       keyframeRule.keyText == 'from'

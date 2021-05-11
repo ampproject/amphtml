@@ -867,9 +867,9 @@ export class ViewportImpl {
       return null;
     }
     if (this.viewportMeta_ === undefined) {
-      this.viewportMeta_ = /** @type {?HTMLMetaElement} */ (this.globalDoc_.querySelector(
-        'meta[name=viewport]'
-      ));
+      this.viewportMeta_ = /** @type {?HTMLMetaElement} */ (
+        this.globalDoc_.querySelector('meta[name=viewport]')
+      );
       if (this.viewportMeta_) {
         this.originalViewportMetaString_ = this.viewportMeta_.content;
       }

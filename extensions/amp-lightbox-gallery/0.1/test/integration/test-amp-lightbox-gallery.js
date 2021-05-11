@@ -66,9 +66,8 @@ describes.sandboxed.configure().skip('amp-lightbox-gallery', function () {
             const carouselQuery = lightbox.getElementsByTagName('AMP-CAROUSEL');
             expect(carouselQuery.length).to.equal(1);
             const carousel = carouselQuery[0];
-            const imageViewerQuery = carousel.getElementsByTagName(
-              'AMP-IMAGE-VIEWER'
-            );
+            const imageViewerQuery =
+              carousel.getElementsByTagName('AMP-IMAGE-VIEWER');
             expect(imageViewerQuery.length).to.equal(1);
             const imageViewer = imageViewerQuery[0];
             const img = imageViewer.querySelector(

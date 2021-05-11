@@ -137,10 +137,8 @@ export class ConfigManager {
       containerClassName,
     } = input;
     const pubData = this.dataForPubId_[pubId];
-    const {
-      config: dashboardConfig,
-      requestStatus: configRequestStatus,
-    } = pubData;
+    const {config: dashboardConfig, requestStatus: configRequestStatus} =
+      pubData;
     const jsonToSend = dict({
       'event': CONFIGURATION_EVENT,
       'shareConfig': shareConfig,

@@ -187,9 +187,8 @@ export class FontLoader {
    * @private
    */
   createFontComparators_() {
-    const containerElement = (this.container_ = this.document_.createElement(
-      'div'
-    ));
+    const containerElement = (this.container_ =
+      this.document_.createElement('div'));
     setStyles(containerElement, {
       // Use larger font-size to better detect font load.
       fontSize: '40px',
