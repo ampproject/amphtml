@@ -67,7 +67,10 @@ export class TemplateRenderer extends Renderer {
       element,
       creativeMetadata
     ).then((iframe) => {
-      const templateData = /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (creativeData.templateData);
+      const templateData =
+        /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
+          creativeData.templateData
+        );
       const {data} = templateData;
       if (!data) {
         return Promise.resolve();
@@ -81,9 +84,8 @@ export class TemplateRenderer extends Renderer {
             templateHelper.insertAnalytics(renderedElement, analytics);
           }
           // This element must exist, or #render() would have thrown.
-          const templateElement = this.getDocument(iframe).querySelector(
-            'template'
-          );
+          const templateElement =
+            this.getDocument(iframe).querySelector('template');
           templateElement.parentNode.replaceChild(
             renderedElement,
             templateElement

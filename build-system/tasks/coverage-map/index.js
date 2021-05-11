@@ -72,21 +72,23 @@ async function collectCoverage() {
  */
 async function autoScroll(page) {
   await page.evaluate(async () => {
-    await /** @type {Promise<void>} */ (new Promise((resolve) => {
-      let totalHeight = 0;
-      const scrollDistance = 100;
-      const distance = scrollDistance;
-      const timer = setInterval(() => {
-        const {scrollHeight} = document.body;
-        window./*OK*/ scrollBy(0, distance);
-        totalHeight += distance;
+    await /** @type {Promise<void>} */ (
+      new Promise((resolve) => {
+        let totalHeight = 0;
+        const scrollDistance = 100;
+        const distance = scrollDistance;
+        const timer = setInterval(() => {
+          const {scrollHeight} = document.body;
+          window./*OK*/ scrollBy(0, distance);
+          totalHeight += distance;
 
-        if (totalHeight >= scrollHeight) {
-          clearInterval(timer);
-          resolve();
-        }
-      }, 100);
-    }));
+          if (totalHeight >= scrollHeight) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 100);
+      })
+    );
   });
 }
 
@@ -175,8 +177,7 @@ coverageMap.flags = {
   outputhtml: 'Output HTML file [default: out.html]',
   nobuild: 'Skips dist build.',
   port: 'Port number for AMP server [default: 8000]',
-  file:
-    'Output file(s) relative to dist/. Accepts .js, .mjs, and wildcards. [default: v0.js]',
+  file: 'Output file(s) relative to dist/. Accepts .js, .mjs, and wildcards. [default: v0.js]',
   esm: 'Generate coverage in ESM mode. Triggers an extra HTML transformation.',
   sxg: 'Generate in SxG mode. Triggers an extra HTML transformation.',
 };

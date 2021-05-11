@@ -18,10 +18,10 @@ import {AmpEvents} from '../../../../../src/core/constants/amp-events';
 import {createFixtureIframe} from '../../../../../testing/iframe';
 import {toggleExperiment} from '../../../../../src/experiments';
 
-describe
+describes.sandboxed
   .configure()
   .ifChrome()
-  .run('amp-pan-zoom', function () {
+  .run('amp-pan-zoom', {}, function () {
     this.timeout(100000);
     let fixture;
     beforeEach(() => {

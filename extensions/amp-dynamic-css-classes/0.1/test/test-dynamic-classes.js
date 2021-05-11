@@ -16,7 +16,7 @@
 
 import {referrers_} from '../amp-dynamic-css-classes';
 
-describe('amp-dynamic-css-classes', () => {
+describes.sandboxed('amp-dynamic-css-classes', {}, () => {
   describe('referrers_', () => {
     describe('when referrer is TLD-less', () => {
       const referrer = 'localhost';

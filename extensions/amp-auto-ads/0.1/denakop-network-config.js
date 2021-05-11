@@ -60,9 +60,8 @@ export class DenakopNetworkConfig {
       );
     }
 
-    const publisherId = this.autoAmpAdsElement_.getAttribute(
-      'data-publisher-id'
-    );
+    const publisherId =
+      this.autoAmpAdsElement_.getAttribute('data-publisher-id');
     const tagId = this.autoAmpAdsElement_.getAttribute('data-tag-id');
     return buildUrl(
       '//v2.denakop.com/ad-request/amp',

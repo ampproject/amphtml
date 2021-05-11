@@ -132,7 +132,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
 
   describe('#hasTimedOut', () => {
     it('should timeout after > 10 seconds', () => {
-      const clock = window.sandbox.useFakeTimers(1555555555555);
+      const clock = env.sandbox.useFakeTimers(1555555555555);
       storyAdPage.build();
       expect(storyAdPage.hasTimedOut()).to.be.false;
       clock.tick(10009); // 10 second timeout.
@@ -164,7 +164,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
 
   describe('#registerLoadCallback', () => {
     it('registers given functions and executes when loaded', async () => {
-      const someFunc = window.sandbox.spy();
+      const someFunc = env.sandbox.spy();
       const pageElement = storyAdPage.build();
       // Stub delegateVideoAutoplay.
       pageElement.getImpl = () => Promise.resolve(pageImplMock);
@@ -222,9 +222,8 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
         </body>`);
       await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
 
-      const altBody = iframe.contentDocument.querySelector(
-        '#x-a4a-former-body'
-      );
+      const altBody =
+        iframe.contentDocument.querySelector('#x-a4a-former-body');
       expect(altBody).not.to.have.attribute('amp-story-visible');
       storyAdPage.toggleVisibility();
       expect(altBody).to.have.attribute('amp-story-visible');
@@ -403,7 +402,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
         'https://googleads.g.doubleclick.net/pagead/images/mtad/ad_choices_blue.png'
       );
 
-      const openWindowDialogStub = window.sandbox.stub(dom, 'openWindowDialog');
+      const openWindowDialogStub = env.sandbox.stub(dom, 'openWindowDialog');
       attribution.click();
       expect(openWindowDialogStub).to.be.calledOnce;
       expect(openWindowDialogStub).to.be.calledWithExactly(
@@ -487,8 +486,8 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
 
     beforeEach(() => {
       const storyAnalytics = new StoryAdAnalytics(env.ampdoc);
-      fireEventStub = window.sandbox.stub(storyAnalytics, 'fireEvent');
-      window.sandbox
+      fireEventStub = env.sandbox.stub(storyAnalytics, 'fireEvent');
+      env.sandbox
         .stub(service, 'getServicePromiseForDoc')
         .resolves(storyAnalytics);
       storyAdPage = new StoryAdPage(
@@ -507,7 +506,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
         pageElement,
         1, // adIndex
         'story-ad-request',
-        {requestTime: window.sandbox.match.number}
+        {requestTime: env.sandbox.match.number}
       );
     });
 
@@ -524,7 +523,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
         pageElement,
         1, // adIndex
         'story-ad-load',
-        {loadTime: window.sandbox.match.number}
+        {loadTime: env.sandbox.match.number}
       );
     });
 
@@ -544,7 +543,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
         pageElement,
         1, // adIndex
         'story-ad-swipe',
-        {swipeTime: window.sandbox.match.number}
+        {swipeTime: env.sandbox.match.number}
       );
     });
 
@@ -572,7 +571,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
         pageElement,
         1, // adIndex
         'story-ad-click',
-        {clickTime: window.sandbox.match.number}
+        {clickTime: env.sandbox.match.number}
       );
     });
   });

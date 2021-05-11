@@ -70,9 +70,9 @@ function createObserver(win, viewportNum) {
   };
 
   const iframed = isIframed(win);
-  const root = /** @type {?Element} */ (iframed
-    ? /** @type {*} */ (win.document)
-    : null);
+  const root = /** @type {?Element} */ (
+    iframed ? /** @type {*} */ (win.document) : null
+  );
   const observer = new win.IntersectionObserver(callback, {
     root,
     rootMargin: `${(viewportNum - 1) * 100}%`,

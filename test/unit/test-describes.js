@@ -15,7 +15,7 @@
  */
 
 // Test `fetch-mock` integration in describes.
-describe('fetch-mock', () => {
+describes.sandboxed('fetch-mock', {}, () => {
   /** @param {!Object} env */
   function runTests(env) {
     it('should mock fetches', () => {

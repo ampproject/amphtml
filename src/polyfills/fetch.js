@@ -189,9 +189,9 @@ class FetchResponse {
    * @return {!Promise<!JsonObject>}
    */
   json() {
-    return /** @type {!Promise<!JsonObject>} */ (this.drainText_().then(
-      parseJson
-    ));
+    return /** @type {!Promise<!JsonObject>} */ (
+      this.drainText_().then(parseJson)
+    );
   }
 
   /**
@@ -200,9 +200,9 @@ class FetchResponse {
    * @return {!Promise<!ArrayBuffer>}
    */
   arrayBuffer() {
-    return /** @type {!Promise<!ArrayBuffer>} */ (this.drainText_().then(
-      utf8Encode
-    ));
+    return /** @type {!Promise<!ArrayBuffer>} */ (
+      this.drainText_().then(utf8Encode)
+    );
   }
 }
 
@@ -283,9 +283,8 @@ export class Response extends FetchResponse {
       /** @type {!Array} */ (init.headers).forEach((entry) => {
         const headerName = entry[0];
         const headerValue = entry[1];
-        lowercasedHeaders[String(headerName).toLowerCase()] = String(
-          headerValue
-        );
+        lowercasedHeaders[String(headerName).toLowerCase()] =
+          String(headerValue);
       });
     } else if (isObject(init.headers)) {
       for (const key in init.headers) {
