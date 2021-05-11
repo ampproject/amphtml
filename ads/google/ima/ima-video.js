@@ -304,19 +304,18 @@ function renderElements(elementOrDoc) {
 
 /**
  * @param {!Document} document
+ * @param {!Element} parent
  * @param {?Array<Array<string|Object>>} childrenDef
  *   an array of [tagName, attributes] items like:
  *     [
  *       ['SOURCE', {'src': 'foo.mp4'}],
  *       ['TRACK', {'src': 'bar.mp4'}],
  *     ]
- * @return {?Node} Optional DocumentFragment containing created children
  */
-function maybeCreateChildren(document, childrenDef) {
+function maybeAppendChildren(document, parent, childrenDef) {
   if (!isArray(childrenDef)) {
-    return null;
+    return;
   }
-  const fragment = document.createDocumentFragment();
   childrenDef.forEach((child) => {
     const tagName = child[0];
     const attributes = child[1];
@@ -333,8 +332,8 @@ function maybeCreateChildren(document, childrenDef) {
     for (const attr in attributes) {
       element.setAttribute(attr, attributes[attr]);
     }
+    parent.appendChild(element);
   });
-  return fragment;
 }
 
 /**
@@ -363,13 +362,11 @@ export function imaVideo(global, data) {
     sourceElement.setAttribute('src', data.src);
     video.appendChild(sourceElement);
   }
-  const childrenFragment = maybeCreateChildren(
+  maybeAppendChildren(
     global.document,
-    data['_context']?.['sourceChildren']
+    video,
+    tryParseJson(data['sourceChildren'])
   );
-  if (childrenFragment) {
-    video.appendChild(childrenFragment);
-  }
 
   if (data.imaSettings) {
     imaSettings = tryParseJson(data.imaSettings);
