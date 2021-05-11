@@ -36,7 +36,7 @@ export function once(fn) {
   let callback = fn;
   return (...args) => {
     if (!evaluated) {
-      retValue = callback.apply(self, args);
+      retValue = callback(...args);
       evaluated = true;
       callback = null; // GC
     }
@@ -61,14 +61,14 @@ export function throttle(win, callback, minInterval) {
   let nextCallArgs = null;
 
   /**
-   * @param {!Object} args
+   * @param {...T} args
    */
-  function fire(args) {
+  function fire(...args) {
     nextCallArgs = null;
     // Lock the fire for minInterval milliseconds
     locker = win.setTimeout(waiter, minInterval);
 
-    callback.apply(null, args);
+    callback(...args);
   }
 
   /**
@@ -78,7 +78,7 @@ export function throttle(win, callback, minInterval) {
     locker = 0;
     // If during the period there're invocations queued up, fire once.
     if (nextCallArgs) {
-      fire(nextCallArgs);
+      fire(...nextCallArgs);
     }
   }
 
@@ -86,7 +86,7 @@ export function throttle(win, callback, minInterval) {
     if (locker) {
       nextCallArgs = args;
     } else {
-      fire(args);
+      fire(...args);
     }
   };
 }
@@ -111,9 +111,9 @@ export function debounce(win, callback, minInterval) {
   /**
    * @param {?Array} args
    */
-  function fire(args) {
+  function fire(...args) {
     nextCallArgs = null;
-    callback.apply(null, args);
+    callback(...args);
   }
 
   /**
@@ -125,7 +125,7 @@ export function debounce(win, callback, minInterval) {
     if (remaining > 0) {
       locker = win.setTimeout(waiter, remaining);
     } else {
-      fire(nextCallArgs);
+      fire(...nextCallArgs);
     }
   }
 
