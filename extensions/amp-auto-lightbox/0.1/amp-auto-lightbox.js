@@ -115,25 +115,23 @@ const META_OG_TYPE = 'meta[property="og:type"]';
 
 const NOOP = () => {};
 
-/**
- * For better minification.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @return {!Document|!ShadowRoot}
- */
-const getRootNode = (ampdoc) => ampdoc.getRootNode();
-
 /** @visibleForTesting */
 export class Criteria {
   /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} element
    * @param {number} renderWidth
    * @param {number} renderHeight
    * @return {boolean}
    */
-  static meetsAll(element, renderWidth, renderHeight) {
+  static meetsAll(ampdoc, element, renderWidth, renderHeight) {
     return (
-      Criteria.meetsSizingCriteria(element, renderWidth, renderHeight) &&
-      Criteria.meetsTreeShapeCriteria(element)
+      Criteria.meetsSizingCriteria(
+        ampdoc,
+        element,
+        renderWidth,
+        renderHeight
+      ) && Criteria.meetsTreeShapeCriteria(element)
     );
   }
 
@@ -155,17 +153,18 @@ export class Criteria {
   }
 
   /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} element
    * @param {number} renderWidth
    * @param {number} renderHeight
    * @return {boolean}
    */
-  static meetsSizingCriteria(element, renderWidth, renderHeight) {
+  static meetsSizingCriteria(ampdoc, element, renderWidth, renderHeight) {
     const {naturalWidth, naturalHeight} = getMaxNaturalDimensions(
       dev().assertElement(element.querySelector('img') || element)
     );
 
-    const viewport = Services.viewportForDoc(element);
+    const viewport = Services.viewportForDoc(ampdoc);
     const {width: vw, height: vh} = viewport.getSize();
 
     return meetsSizingCriteria(
@@ -327,7 +326,7 @@ export class DocMetaAnnotations {
    * @return {string|undefined}
    */
   static getOgType(ampdoc) {
-    const tag = getRootNode(ampdoc).querySelector(META_OG_TYPE);
+    const tag = ampdoc.getRootNode().querySelector(META_OG_TYPE);
     if (tag) {
       return tag.getAttribute('content');
     }
@@ -348,7 +347,7 @@ export class DocMetaAnnotations {
    * @return {!Array<string>}
    */
   static getAllLdJsonTypes(ampdoc) {
-    return toArray(getRootNode(ampdoc).querySelectorAll(SCRIPT_LD_JSON))
+    return toArray(ampdoc.getRootNode().querySelectorAll(SCRIPT_LD_JSON))
       .map((el) => {
         const {textContent} = el;
         return (tryParseJson(textContent) || {})['@type'];
@@ -381,7 +380,7 @@ function usesLightboxExplicitly(ampdoc) {
 
   const lightboxedElementsSelector = `[${LIGHTBOXABLE_ATTR}]:not([${VISITED_ATTR}])`;
 
-  const exists = (selector) => !!getRootNode(ampdoc).querySelector(selector);
+  const exists = (selector) => !!ampdoc.getRootNode().querySelector(selector);
 
   return (
     exists(requiredExtensionSelector) && exists(lightboxedElementsSelector)
@@ -450,7 +449,7 @@ export function runCandidates(ampdoc, candidates) {
       return measureIntersectionNoRoot(candidate).then(
         ({boundingClientRect}) => {
           if (
-            !candidate.tagName.toLowerCase() === 'img' &&
+            !candidate.tagName === 'IMG' &&
             !candidate.signals().get(CommonSignals.LOAD_END)
           ) {
             // <amp-img> will change the img's src inline data on unlayout and
@@ -459,7 +458,7 @@ export function runCandidates(ampdoc, candidates) {
           }
 
           const {width, height} = boundingClientRect;
-          if (!Criteria.meetsAll(candidate, width, height)) {
+          if (!Criteria.meetsAll(ampdoc, candidate, width, height)) {
             return;
           }
           dev().info(TAG, 'apply', candidate);
@@ -488,7 +487,7 @@ export function scan(ampdoc, opt_root) {
 AMP.extension(TAG, '0.1', (AMP) => {
   const {ampdoc} = AMP;
   ampdoc.whenReady().then(() => {
-    getRootNode(ampdoc).addEventListener(AmpEvents.DOM_UPDATE, (e) => {
+    ampdoc.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, (e) => {
       const {target} = e;
       scan(ampdoc, dev().assertElement(target));
     });
