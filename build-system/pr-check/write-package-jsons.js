@@ -21,24 +21,36 @@
  */
 
 const [extension, ampVersion] = process.argv.slice(2);
+const {log} = require('../common/logging');
 const {stat, writeFile} = require('fs/promises');
+const {valid} = require('semver');
 
 async function writePackageJson(extensionVersion) {
   try {
     await stat(`extensions/${extension}/${extensionVersion}`);
-  } catch (e) {
-    console./*OK*/ log(
-      `${extension} ${extensionVersion} : skipping, does not exist`
-    );
+  } catch (_) {
+    log(`${extension} ${extensionVersion} : skipping, does not exist`);
     return;
   }
 
   const major = extensionVersion.split('.', 1);
   const minor = ampVersion.slice(0, 10);
   const patch = Number(ampVersion.slice(-3)); // npm trims trailing zeroes in patch number, so mimic this in package.json
+  const version = `${major}.${minor}.${patch}`;
+  if (!valid(version) || ampVersion.length != 13) {
+    log(
+      'Invalid semver version',
+      version,
+      'or invalid AMP version',
+      ampVersion
+    );
+    process.exitCode = 1;
+    return;
+  }
+
   const json = {
     name: `@ampproject/${extension}`,
-    version: `${major}.${minor}.${patch}`,
+    version,
     description: `AMP HTML ${extension} Component`,
     author: 'The AMP HTML Authors',
     license: 'Apache-2.0',
@@ -68,19 +80,22 @@ async function writePackageJson(extensionVersion) {
     },
   };
 
-  writeFile(
-    `extensions/${extension}/${extensionVersion}/package.json`,
-    JSON.stringify(json)
-  ).catch((e) => {
-    console./*OK*/ error(e);
+  try {
+    await writeFile(
+      `extensions/${extension}/${extensionVersion}/package.json`,
+      JSON.stringify(json)
+    );
+    log(
+      extension,
+      extensionVersion,
+      ': created package.json for',
+      json.version
+    );
+  } catch (e) {
+    log(e);
     process.exitCode = 1;
-  });
-  console./*OK*/ log(
-    extension,
-    extensionVersion,
-    ': created package.json for',
-    json.version
-  );
+    return;
+  }
 }
 
 writePackageJson('1.0');
