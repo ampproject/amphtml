@@ -52,21 +52,23 @@ export class ScrollBar extends ScrollComponent {
    * @protected
    * */
   makeIframe_() {
-    this.frame_ = /** @type {!HTMLIFrameElement} */ (this.el(
-      'iframe',
-      dict({
-        'scrolling': 'no',
-        'frameborder': '0',
-        'allowtransparency': 'true',
-        'title': 'Scroll',
-        'width': '100%',
-        'height': '100%',
-        'sandbox':
-          'allow-scripts allow-same-origin ' +
-          'allow-top-navigation allow-popups ' +
-          'allow-popups-to-escape-sandbox',
-      })
-    ));
+    this.frame_ = /** @type {!HTMLIFrameElement} */ (
+      this.el(
+        'iframe',
+        dict({
+          'scrolling': 'no',
+          'frameborder': '0',
+          'allowtransparency': 'true',
+          'title': 'Scroll',
+          'width': '100%',
+          'height': '100%',
+          'sandbox':
+            'allow-scripts allow-same-origin ' +
+            'allow-top-navigation allow-popups ' +
+            'allow-popups-to-escape-sandbox',
+        })
+      )
+    );
 
     this.root_ = this.el(
       'div',

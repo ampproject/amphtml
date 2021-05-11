@@ -104,8 +104,9 @@ export function getCryptoRandomBytesArray(win, length) {
 
   // Support IE 11
   if (!IS_ESM) {
-    crypto = /** @type {!webCrypto.Crypto|undefined} */ (crypto ||
-      win.msCrypto);
+    crypto = /** @type {!webCrypto.Crypto|undefined} */ (
+      crypto || win.msCrypto
+    );
     if (!crypto || !crypto.getRandomValues) {
       return null;
     }

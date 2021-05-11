@@ -310,9 +310,8 @@ async function measureDocument(url, version, config) {
   const page = await browser.newPage();
   const handlerOptionsForUrl = {...config.urlToHandlers[url]};
   const handlersList = [];
-  const {timeoutPromise, resolve} = setupDelayBasedOnHandlerOptions(
-    handlerOptionsForUrl
-  );
+  const {timeoutPromise, resolve} =
+    setupDelayBasedOnHandlerOptions(handlerOptionsForUrl);
   await page.setCacheEnabled(false);
   await page.setRequestInterception(true);
   setupDefaultHandlers(handlersList, version);

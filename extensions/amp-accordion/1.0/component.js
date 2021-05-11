@@ -358,13 +358,8 @@ export function AccordionHeader({
   children,
   ...rest
 }) {
-  const {
-    contentId,
-    headerId,
-    expanded,
-    toggleHandler,
-    setHeaderId,
-  } = useContext(SectionContext);
+  const {contentId, headerId, expanded, toggleHandler, setHeaderId} =
+    useContext(SectionContext);
   const classes = useStyles();
 
   useLayoutEffect(() => {
@@ -403,9 +398,8 @@ export function AccordionContent({
 }) {
   const ref = useRef(null);
   const hasMountedRef = useRef(false);
-  const {contentId, headerId, expanded, animate, setContentId} = useContext(
-    SectionContext
-  );
+  const {contentId, headerId, expanded, animate, setContentId} =
+    useContext(SectionContext);
   const classes = useStyles();
 
   useEffect(() => {
