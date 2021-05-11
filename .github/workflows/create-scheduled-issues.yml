@@ -13,6 +13,10 @@ jobs:
     name: Create Scheduled Issues
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
       - name: Create Scheduled Issues
         run: |
           node .github/workflows/create-scheduled-issues
