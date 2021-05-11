@@ -811,7 +811,7 @@ class VideoEntry {
       // Only muted videos are allowed to autoplay
       this.video.mute();
 
-      this.installAutoplayArtifacts_();
+      this.installAutoplayElements_();
     });
   }
 
@@ -821,7 +821,7 @@ class VideoEntry {
    * `controls` is set. See `video-autoplay.css`.
    * @private
    */
-  installAutoplayArtifacts_() {
+  installAutoplayElements_() {
     const {video} = this;
     const {element, win} = this.video;
 
@@ -833,27 +833,60 @@ class VideoEntry {
     }
 
     const animation = renderIcon(win, element);
+    const elements = [animation];
+
+    /** @param {boolean} display */
+    function toggleElements(display) {
+      video.mutateElementSkipRemeasure(() => {
+        for (const child of elements) {
+          toggle(child, display);
+        }
+      });
+    }
 
     /** @param {boolean} isPlaying */
-    const toggleAnimation = (isPlaying) => {
+    function toggleAnimation(isPlaying) {
       video.mutateElementSkipRemeasure(() =>
         animation.classList.toggle('amp-video-eq-play', isPlaying)
       );
-    };
-
-    video.mutateElementSkipRemeasure(() => element.appendChild(animation));
+    }
 
     const unlisteners = [
       listen(element, VideoEvents.PAUSE, () => toggleAnimation(false)),
       listen(element, VideoEvents.PLAYING, () => toggleAnimation(true)),
+      listen(element, VideoEvents.AD_START, () => {
+        toggleElements(false);
+        video.showControls();
+      }),
+      listen(element, VideoEvents.AD_END, () => {
+        toggleElements(true);
+        video.hideControls();
+      }),
+      listen(element, VideoEvents.UNMUTED, () => userInteractedWith(video)),
     ];
+
+    if (video.isInteractive()) {
+      video.hideControls();
+
+      const mask = renderInteractionOverlay(element, this.metadata_);
+      elements.push(mask);
+      unlisteners.push(listen(mask, 'click', () => userInteractedWith(video)));
+    }
+
+    video.mutateElementSkipRemeasure(() => {
+      for (const child of elements) {
+        element.appendChild(child);
+      }
+    });
+
+    if (this.isRollingAd_) {
+      toggleElements(false);
+    }
 
     video
       .signals()
       .whenSignal(VideoServiceSignals.USER_INTERACTED)
       .then(() => {
-        const {video} = this;
-        const {element} = video;
         this.firstPlayEventOrNoop_();
         if (video.isInteractive()) {
           video.showControls();
@@ -862,43 +895,12 @@ class VideoEntry {
         unlisteners.forEach((unlistener) => {
           unlistener();
         });
-        const animation = element.querySelector('.amp-video-eq');
-        const mask = element.querySelector('.i-amphtml-video-mask');
-        if (animation) {
-          removeElement(animation);
-        }
-        if (mask) {
-          removeElement(mask);
-        }
+        video.mutateElementSkipRemeasure(() => {
+          for (const child of elements) {
+            removeElement(child);
+          }
+        });
       });
-
-    if (!video.isInteractive()) {
-      return;
-    }
-
-    const mask = renderInteractionOverlay(element, this.metadata_);
-
-    /** @param {boolean} display */
-    const setMaskDisplay = (display) => {
-      video.mutateElementSkipRemeasure(() => toggle(mask, display));
-    };
-
-    video.hideControls();
-
-    video.mutateElementSkipRemeasure(() => element.appendChild(mask));
-
-    [
-      listen(mask, 'click', () => userInteractedWith(video)),
-      listen(element, VideoEvents.AD_START, () => {
-        setMaskDisplay(false);
-        video.showControls();
-      }),
-      listen(element, VideoEvents.AD_END, () => {
-        setMaskDisplay(true);
-        video.hideControls();
-      }),
-      listen(element, VideoEvents.UNMUTED, () => userInteractedWith(video)),
-    ].forEach((unlistener) => unlisteners.push(unlistener));
   }
 
   /**
