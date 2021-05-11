@@ -107,19 +107,14 @@ function getFileBabelOptions(babelOptions, filename) {
   // babel.loadOptions, therefore all of the plugins from preset-env have already been applied.
   // and must be disabled individually.
   if (filename.endsWith('.mjs')) {
-    const plugins = [...babelOptions.plugins];
-    const toRemove = [
+    const toRemove = new Set([
       'transform-modules-commonjs',
       'proposal-dynamic-import',
       'syntax-dynamic-import',
       'proposal-export-namespace-from',
       'syntax-export-namespace-from',
-    ];
-    for (const plugin of toRemove) {
-      const pluginIndex = plugins.findIndex(({key}) => key === plugin);
-      plugins.splice(pluginIndex, 1);
-    }
-
+    ]);
+    const plugins = babelOptions.plugins.filter(({key}) => !toRemove.has(key));
     babelOptions = {...babelOptions, plugins};
   }
 
