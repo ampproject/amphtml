@@ -22,18 +22,5 @@
       "on": "visible",
       "request": "pageview"
     }
-  },
-  "extraUrlParams": {
-    "CN1": "0",
-    "CN2": "0",
-    "CN3": "0",
-    "CN4": "0",
-    "CN5": "0",
-    "CN6": "0",
-    "CN7": "0",
-    "CN8": "0",
-    "CN9": "0",
-    "CN10": "0",
-    "CSID": "0"
   }
 }
