@@ -24,14 +24,14 @@ const [extension, ampVersion] = process.argv.slice(2);
 const {stat, writeFile} = require('fs/promises');
 
 async function writePackageJson(extensionVersion) {
-  stat(`extensions/${extension}/${extensionVersion}`, (_, stats) => {
-    if (!stats.isDirectory()) {
-      console./*OK*/ log(
-        `${extension} ${extensionVersion} does not exist; skipping`
-      );
-      return;
-    }
-  });
+  try {
+    await stat(`extensions/${extension}/${extensionVersion}`);
+  } catch (e) {
+    console./*OK*/ log(
+      `${extension} ${extensionVersion} : skipping, does not exist`
+    );
+    return;
+  }
 
   const major = extensionVersion.split('.', 1);
   const minor = ampVersion.slice(0, 10);
@@ -75,7 +75,12 @@ async function writePackageJson(extensionVersion) {
     console./*OK*/ error(e);
     process.exitCode = 1;
   });
-  console./*OK*/ log('Wrote package.json for', extension, extensionVersion);
+  console./*OK*/ log(
+    extension,
+    extensionVersion,
+    ': created package.json for',
+    json.version
+  );
 }
 
 writePackageJson('1.0');
