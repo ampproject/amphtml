@@ -783,10 +783,7 @@ export class AmpStoryPlayer {
       renderPromise = this.render_();
 
       if (options.animate === false) {
-        this.rootEl_.classList.toggle(
-          CLASS_NO_NAVIGATION_TRANSITION,
-          true
-        );
+        this.rootEl_.classList.toggle(CLASS_NO_NAVIGATION_TRANSITION, true);
         listenOnce(story.iframe, 'transitionend', () => {
           this.rootEl_.classList.remove(CLASS_NO_NAVIGATION_TRANSITION);
         });
