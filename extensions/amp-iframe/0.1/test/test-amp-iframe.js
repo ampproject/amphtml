@@ -906,39 +906,6 @@ describes.realWin(
       yield ampIframe.signals().whenSignal(CommonSignals.LOAD_START);
     });
 
-    it('should not cache intersection box', async () => {
-      const ampIframe = createAmpIframe(env, {
-        src: iframeSrc,
-        sandbox: 'allow-scripts allow-same-origin',
-        width: 300,
-        height: 250,
-      });
-      await waitForAmpIframeLayoutPromise(doc, ampIframe);
-      const impl = await ampIframe.getImpl(false);
-      const stub = env.sandbox.stub(impl, 'getLayoutBox');
-      const box = {
-        top: 100,
-        bottom: 200,
-        left: 0,
-        right: 100,
-        width: 100,
-        height: 100,
-      };
-      stub.returns(box);
-
-      impl.onLayoutMeasure();
-      const intersection = impl.getIntersectionElementLayoutBox();
-      // Simulate a fixed position element "moving" 100px by scrolling down
-      // the page.
-      box.top += 100;
-      box.bottom += 100;
-      const newIntersection = impl.getIntersectionElementLayoutBox();
-      expect(newIntersection).not.to.deep.equal(intersection);
-      expect(newIntersection.top).to.equal(intersection.top + 100);
-      expect(newIntersection.width).to.equal(300);
-      expect(newIntersection.height).to.equal(250);
-    });
-
     it('should propagate `src` when container attribute is mutated', async () => {
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
