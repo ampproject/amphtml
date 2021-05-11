@@ -47,10 +47,11 @@
       src="https://cdn.ampproject.org/v0/amp-script-0.1.js"
     ></script>
     <script>
-      (self.AMP = self.AMP || []).push(function (AMP) {
-        AMP.toggleExperiment('amp-render', true);
-      });
+       (self.AMP = self.AMP || []).push(function (AMP) {
+            AMP.toggleExperiment('amp-render', true);
+         });
     </script>
+
     <!-- <meta name="amp-script-src" content="sha384-_Ti60nYvoQ_lQXcVj2dXTtwzzv7pw1U7x3AUZqewe-q1L8oq-RVwi84ko_XXdMSt"> -->
     <meta
       name="amp-script-src"
@@ -320,12 +321,13 @@
             </li>
             {{/items}}
           </template>
-        </amp-render>
+        </amp-render>-
+
         <button on="tap:AMP.setState({ srcUrl: 'https://amp.dev/static/samples/json/examples2.json' })">Change to remote source</button>
         <button on="tap:AMP.setState({ srcUrl: 'amp-state:my-state2' })">Change to alternate amp-state source</button>
       </div> -->
 
-    <!-- <amp-list id="amp-list-placeholder" noloading layout="fixed-height" height="954" src="https://amp.dev/documentation/examples/api/slow-json-with-items/?delay=5000">
+    <amp-list id="amp-list-placeholder" noloading reset-on-refresh layout="fixed-height" height="654" src="https://amp.dev/documentation/examples/api/slow-json-with-items/?delay=5000">
         <div fallback>Failed to load data.</div>
         <div placeholder>
           <div class="product">
@@ -350,9 +352,12 @@
                 </div>
             </div>
         </template>
-      </amp-list> -->
+      </amp-list>
+      <button on="tap:amp-list-placeholder.refresh">Refresh list</button>
+      <hr>
 
     <amp-render
+      id="my-amp-render"
       layout="fixed-height"
       height="654"
       src="https://amp.dev/documentation/examples/api/slow-json-with-items/?delay=5000"
@@ -368,7 +373,6 @@
         </div>
         {{/items}}
       </template>
-
       <div placeholder>
         <div class="product">
           <div class="image-placeholder"></div>
@@ -384,7 +388,11 @@
         </div>
       </div>
 
-      <div fallback>Failed to load data.</div>
+      <!-- <div fallback>
+        <h1>Failed to load data!</h1>
+      </div> -->
     </amp-render>
+
+    <button on="tap:my-amp-render.refresh">Refresh list</button>
   </body>
 </html>

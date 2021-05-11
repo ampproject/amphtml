@@ -39,8 +39,6 @@ const DEFAULT_GET_JSON = (url) => {
   return fetch(url).then((res) => res.json());
 };
 
-const NOOP = () => {};
-
 /**
  * @param {!RenderDef.Props} props
  * @param {{current: ?RenderDef.RenderApi}} ref
@@ -51,8 +49,9 @@ export function RenderWithRef(
     src = '',
     getJson = DEFAULT_GET_JSON,
     render = DEFAULT_RENDER,
-    togglePlaceholder = NOOP,
-    toggleFallback = NOOP,
+    onReady,
+    onRefresh,
+    onError,
     ...rest
   },
   ref
@@ -68,37 +67,32 @@ export function RenderWithRef(
       return;
     }
     let cancelled = false;
-    togglePlaceholder(true);
-    toggleFallback(false);
     getJson(src)
       .then((data) => {
         if (!cancelled) {
           setData(data);
-          togglePlaceholder(false);
+          onReady?.();
         }
       })
       .catch((e) => {
-        togglePlaceholder(false);
-        toggleFallback(true);
+        onError?.(e);
       });
     return () => {
       cancelled = true;
     };
-  }, [getJson, src, togglePlaceholder, toggleFallback]);
+  }, [getJson, src, onReady, onError]);
 
   const refresh = useCallback(() => {
-    togglePlaceholder(true);
-    toggleFallback(false);
+    onRefresh();
     getJson(src, /* shouldRefresh */ true)
       .then((data) => {
         setData(data);
-        togglePlaceholder(false);
+        onReady?.();
       })
       .catch((e) => {
-        togglePlaceholder(false);
-        toggleFallback(true);
+        onError?.(e);
       });
-  }, [getJson, src, togglePlaceholder, toggleFallback]);
+  }, [getJson, src, onReady, onRefresh, onError]);
 
   useImperativeHandle(
     ref,
