@@ -1,0 +1,20 @@
+name: Create Scheduled Issues
+
+on:
+  schedule:
+    # At 00:00 on Tuesday and Wednesday.
+    # (Days of week should match those configured in
+    # .github/workflows/create-scheduled-issues/template/)
+    - cron: '0 0 * * 2,3'
+
+jobs:
+  create-design-review-issue:
+    if: github.repository == 'ampproject/amphtml'
+    name: Create Scheduled Issues
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Scheduled Issues
+        run: |
+          node .github/workflows/create-scheduled-issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
