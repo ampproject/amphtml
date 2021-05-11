@@ -106,7 +106,7 @@ function getFileBabelOptions(babelOptions, filename) {
   // to process a .mjs file that contains CJS exports. This function is called after
   // babel.loadOptions, therefore all of the plugins from preset-env have already been applied.
   // and must be disabled individually.
-  if (filename.endsWith('.mjs')) {
+  if (filename.includes('node_modules')) {
     const toRemove = new Set([
       'transform-modules-commonjs',
       'proposal-dynamic-import',
