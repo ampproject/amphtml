@@ -142,7 +142,7 @@
 `amp-story-page[active]` | 1 | [extensions/amp-story/1.0/amp-story.css](/extensions/amp-story/1.0/amp-story.css)
 `.i-amphtml-stream-gallery-next` | 1 | [extensions/amp-stream-gallery/0.1/arrows.css](/extensions/amp-stream-gallery/0.1/arrows.css)
 `.i-amphtml-stream-gallery-prev` | 1 | [extensions/amp-stream-gallery/0.1/arrows.css](/extensions/amp-stream-gallery/0.1/arrows.css)
-`arrow` | 1 | [extensions/amp-stream-gallery/1.0/stream-gallery.jss.js](/extensions/amp-stream-gallery/1.0/stream-gallery.jss.js)
+`arrow` | 1 | [extensions/amp-stream-gallery/1.0/component.jss.js](/extensions/amp-stream-gallery/1.0/component.jss.js)
 `eq` | 1 | [extensions/amp-video/1.0/autoplay.jss.js](/extensions/amp-video/1.0/autoplay.jss.js)
 `.i-amphtml-byside-content-loading-container .i-amphtml-byside-content-loading-animation:after` | 0 | [extensions/amp-byside-content/0.1/amp-byside-content.css](/extensions/amp-byside-content/0.1/amp-byside-content.css)
 `0%` | 0 | [extensions/amp-byside-content/0.1/amp-byside-content.css](/extensions/amp-byside-content/0.1/amp-byside-content.css)

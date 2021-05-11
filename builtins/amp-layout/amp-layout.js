@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {BaseElement} from '../src/base-element';
-import {Layout, isLayoutSizeDefined} from '../src/layout';
-import {registerElement} from '../src/service/custom-element-registry';
+import {BaseElement} from '../../src/base-element';
+import {Layout, isLayoutSizeDefined} from '../../src/layout';
+import {registerElement} from '../../src/service/custom-element-registry';
 
 class AmpLayout extends BaseElement {
   /** @override @nocollapse */

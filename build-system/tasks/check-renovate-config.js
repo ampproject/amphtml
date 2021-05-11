@@ -49,7 +49,7 @@
 
 'use strict';
 
-const {cyan, red, green} = require('kleur/colors');
+const {cyan, red, green} = require('../common/colors');
 const {getOutput} = require('../common/process');
 const {log} = require('../common/logging');
 
