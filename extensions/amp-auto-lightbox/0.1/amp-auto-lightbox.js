@@ -118,17 +118,17 @@ const NOOP = () => {};
 /** @visibleForTesting */
 export class Criteria {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} element
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {number} renderWidth
    * @param {number} renderHeight
    * @return {boolean}
    */
-  static meetsAll(ampdoc, element, renderWidth, renderHeight) {
+  static meetsAll(element, ampdoc, renderWidth, renderHeight) {
     return (
       Criteria.meetsSizingCriteria(
-        ampdoc,
         element,
+        ampdoc,
         renderWidth,
         renderHeight
       ) && Criteria.meetsTreeShapeCriteria(element)
@@ -153,13 +153,13 @@ export class Criteria {
   }
 
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} element
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {number} renderWidth
    * @param {number} renderHeight
    * @return {boolean}
    */
-  static meetsSizingCriteria(ampdoc, element, renderWidth, renderHeight) {
+  static meetsSizingCriteria(element, ampdoc, renderWidth, renderHeight) {
     const {naturalWidth, naturalHeight} = getMaxNaturalDimensions(
       dev().assertElement(element.querySelector('img') || element)
     );
@@ -458,7 +458,7 @@ export function runCandidates(ampdoc, candidates) {
           }
 
           const {width, height} = boundingClientRect;
-          if (!Criteria.meetsAll(ampdoc, candidate, width, height)) {
+          if (!Criteria.meetsAll(candidate, ampdoc, width, height)) {
             return;
           }
           dev().info(TAG, 'apply', candidate);
