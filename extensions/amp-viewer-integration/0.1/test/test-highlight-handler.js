@@ -444,7 +444,8 @@ describes.realWin(
         });
 
         const updateUrlWithTextFragmentSpy = env.sandbox.spy();
-        highlightHandler.updateUrlWithTextFragment_ = updateUrlWithTextFragmentSpy;
+        highlightHandler.updateUrlWithTextFragment_ =
+          updateUrlWithTextFragmentSpy;
 
         whenFirstVisiblePromiseResolve();
         await whenFirstVisiblePromise;
@@ -477,7 +478,8 @@ describes.realWin(
           });
 
           const updateUrlWithTextFragmentSpy = env.sandbox.spy();
-          highlightHandler.updateUrlWithTextFragment_ = updateUrlWithTextFragmentSpy;
+          highlightHandler.updateUrlWithTextFragment_ =
+            updateUrlWithTextFragmentSpy;
 
           whenFirstVisiblePromiseResolve();
           await whenFirstVisiblePromise;
