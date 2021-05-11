@@ -17,8 +17,24 @@
 tags: {  # amp-video-iframe
   html_format: AMP  # Iframes not allowed in ads.
   tag_name: "SCRIPT"
+  satisfies: "amp-video-iframe 1.0"
+  excludes: "amp-video-iframe 0.1"
   extension_spec: {
     name: "amp-video-iframe"
+    version_name: "v1.0"
+    version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+tags: {  # amp-video-iframe
+  html_format: AMP  # Iframes not allowed in ads.
+  tag_name: "SCRIPT"
+  satisfies: "amp-video-iframe 0.1"
+  excludes: "amp-video-iframe 1.0"
+  extension_spec: {
+    name: "amp-video-iframe"
+    version_name: "v0.1"
     version: "0.1"
     version: "latest"
   }
