@@ -128,7 +128,7 @@ export function deepMerge(target, source, depth = 10) {
         const oldValue = t[key];
         if (isObject(newValue) && isObject(oldValue)) {
           queue.push({t: oldValue, s: newValue, d: d + 1});
-          break;
+          continue;
         }
       }
       t[key] = newValue;
