@@ -53,7 +53,7 @@ export class Observable {
     if (!this.handlers_) {
       return;
     }
-    removeItem(this.handlers, handler);
+    removeItem(this.handlers_, handler);
   }
 
   /**
