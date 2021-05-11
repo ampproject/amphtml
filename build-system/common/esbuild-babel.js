@@ -102,8 +102,8 @@ function getEsbuildBabelPlugin(
  * @return {!Object}
  */
 function getFileBabelOptions(babelOptions, filename) {
-  // Patch for leaving .mjs files as esm, since esbuild will break when trying
-  // to process a .mjs file that contains CJS exports. This function is called after
+  // Patch for leaving files within node_modules as esm, since esbuild will break when trying
+  // to process a module file that contains CJS exports. This function is called after
   // babel.loadOptions, therefore all of the plugins from preset-env have already been applied.
   // and must be disabled individually.
   if (filename.includes('node_modules')) {
