@@ -20,7 +20,6 @@
     "exportNamespaceFrom",
     "functionBind",
     "functionSent",
-    "importAssertions",
     "importMeta",
     "logicalAssignment",
     "nullishCoalescingOperator",
