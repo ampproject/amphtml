@@ -120,7 +120,7 @@ export function deepMerge(target, source, depth = 10) {
       Object.assign(t, s);
       continue;
     }
-    Object.keys(s).forEach((key) => {
+    for (const key of Object.keys(s)) {
       const newValue = s[key];
       // Perform a deep merge IFF both target and source have the same key
       // whose corresponding values are objects.
@@ -128,11 +128,11 @@ export function deepMerge(target, source, depth = 10) {
         const oldValue = t[key];
         if (isObject(newValue) && isObject(oldValue)) {
           queue.push({t: oldValue, s: newValue, d: d + 1});
-          return;
+          continue;
         }
       }
       t[key] = newValue;
-    });
+    }
   }
   return target;
 }
