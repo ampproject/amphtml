@@ -130,8 +130,7 @@ describes.realWin('page-advancement', {amp: true}, (env) => {
         expect(advancement).to.not.be.instanceOf(TimeBasedAdvancement);
       });
 
-      // TODO(zaparent, #34153): This test is flaky during CI.
-      it.skip('should update delayMs_ when updateTimeDelay() is called', () => {
+      it('should update delayMs_ when updateTimeDelay() is called', () => {
         const pageEl = html`
           <amp-story-page auto-advance-after="3s"> </amp-story-page>
         `;
@@ -140,12 +139,11 @@ describes.realWin('page-advancement', {amp: true}, (env) => {
 
         advancement.updateTimeDelay('5s');
 
-        expect(advancement.delayMs_).to.be.equal(5000);
+        expect(advancement.delayMs_).to.be.above(4500).and.below(5500);
         expect(advancement.remainingDelayMs_).to.be.equal(null);
       });
 
-      // TODO(zaparent, #34153): This test is flaky during CI.
-      it.skip('should update remainingDelayMs_ when updateTimeDelay() is called', () => {
+      it('should update remainingDelayMs_ when updateTimeDelay() is called', () => {
         const pageEl = html`
           <amp-story-page auto-advance-after="3s"> </amp-story-page>
         `;
@@ -154,11 +152,11 @@ describes.realWin('page-advancement', {amp: true}, (env) => {
         advancement.start();
         advancement.startTimeMs_ -= 1000;
         advancement.stop(true);
-        expect(advancement.remainingDelayMs_).to.be.equal(2000);
+        expect(advancement.remainingDelayMs_).to.be.above(1500).and.below(2500);
 
         advancement.updateTimeDelay('5s');
 
-        expect(advancement.remainingDelayMs_).to.be.equal(4000);
+        expect(advancement.remainingDelayMs_).to.be.above(3500).and.below(4500);
       });
     });
 
