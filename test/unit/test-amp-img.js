@@ -15,7 +15,7 @@
  */
 
 import * as propagateAttributeObject from '../../src/core/dom/propagate-attributes';
-import {AmpImg, installImg} from '../../builtins/amp-img';
+import {AmpImg, installImg} from '../../builtins/amp-img/amp-img';
 import {BaseElement} from '../../src/base-element';
 import {Layout, LayoutPriority} from '../../src/layout';
 import {Services} from '../../src/services';

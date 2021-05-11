@@ -51,6 +51,7 @@ import {LoadingSpinner} from './loading-spinner';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {MediaPool} from './media-pool';
 import {Services} from '../../../src/services';
+import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
 import {
   addAttributesToElement,
   closestAncestorElementBySelector,
@@ -60,7 +61,6 @@ import {
 } from '../../../src/dom';
 import {createShadowRootWithStyle, setTextBackgroundColor} from './utils';
 import {debounce} from '../../../src/core/types/function';
-import {delegateAutoplay} from '../../../src/video-interface';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getAmpdoc} from '../../../src/service';
@@ -73,7 +73,7 @@ import {htmlFor} from '../../../src/static-template';
 import {isAutoplaySupported} from '../../../src/utils/video';
 import {isExperimentOn} from '../../../src/experiments';
 import {isPrerenderActivePage} from './prerender-active-page';
-import {listen} from '../../../src/event-helper';
+import {listen, listenOnce} from '../../../src/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {prefersReducedMotion} from '../../../src/utils/media-query-props';
 import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
@@ -143,6 +143,9 @@ const DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION = '2s';
 
 /** @private @const {string} */
 const VIDEO_PREVIEW_AUTO_ADVANCE_DURATION = '5s';
+
+/** @private @const {number} */
+const VIDEO_MINIMUM_AUTO_ADVANCE_DURATION_S = 2;
 
 /**
  * @param {!Element} element
@@ -375,9 +378,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Reads the storyNextUp param if provided and sets the auto-advance-after
-   * attribute if there isn't a value set by the publisher. The
-   * auto-advance-after attribute will be set to the id of the first
-   * video if there is one, or the value of the storyNextUp param otherwise.
+   * attribute to the given value if there isn't one set by the publisher. The
+   * auto-advance-after attribute may later be set to the duration of the first
+   * video if there is one, once the metadata is available.
    * @private
    */
   maybeSetStoryNextUp_() {
@@ -390,20 +393,60 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (autoAdvanceAttr !== null || storyNextUpParam === null) {
       return;
     }
-    const video = this.getFirstAmpVideo_();
-    if (video === null) {
-      addAttributesToElement(
-        this.element,
-        dict({'auto-advance-after': storyNextUpParam})
-      );
-      return;
-    }
-    if (video.id === '') {
-      video.id = this.element.id + '_firstVideo';
-    }
     addAttributesToElement(
       this.element,
-      dict({'auto-advance-after': video.id})
+      dict({
+        'auto-advance-after': storyNextUpParam,
+      })
+    );
+    this.listenAndUpdateAutoAdvanceDuration_();
+  }
+
+  /**
+   * If there's a video on the page, this sets a listener to update
+   * the TimeBasedAdvancement when the first video's duration becomes available.
+   * @private
+   */
+  listenAndUpdateAutoAdvanceDuration_() {
+    const video = this.getFirstAmpVideo_();
+    if (video === null) {
+      return;
+    }
+    whenUpgradedToCustomElement(video)
+      .then(() => video.getImpl())
+      .then((videoImpl) => {
+        const videoDuration = videoImpl.getDuration();
+        if (!isNaN(videoDuration)) {
+          this.maybeUpdateAutoAdvanceTime_(videoDuration);
+          return;
+        }
+        listenOnce(video, VideoEvents.LOADEDMETADATA, () => {
+          this.maybeUpdateAutoAdvanceTime_(videoImpl.getDuration());
+        });
+      });
+  }
+
+  /**
+   * If advancement_ is a TimeBasedConfig, this updates the 'auto-advance-after'
+   * attribute and updates the time delay used by the page's AdvancementConfig.
+   * If the duration is < 2 seconds, the default is left unchanged.
+   * @param {number} duration The updated duration for the page, in seconds.
+   * @private
+   */
+  maybeUpdateAutoAdvanceTime_(duration) {
+    if (
+      duration < VIDEO_MINIMUM_AUTO_ADVANCE_DURATION_S ||
+      !this.advancement_ ||
+      !this.advancement_.updateTimeDelay
+    ) {
+      return;
+    }
+    this.advancement_.updateTimeDelay(duration + 's');
+    // 'auto-advance-after' is only read during buildCallback(), but we update it
+    // here to keep the DOM consistent with the AdvancementConfig.
+    addAttributesToElement(
+      this.element,
+      dict({'auto-advance-after': duration + 's'})
     );
   }
 
@@ -1740,8 +1783,9 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   renderOpenAttachmentUI_() {
+    // AttachmentEl can be either amp-story-page-attachment or amp-story-page-outlink
     const attachmentEl = this.element.querySelector(
-      'amp-story-page-attachment'
+      'amp-story-page-attachment, amp-story-page-outlink'
     );
     if (!attachmentEl) {
       return;

@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-import {CONSENT_POLICY_STATE} from '../../src/core/constants/consent-state';
+import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
 import {ImaPlayerData} from './ima-player-data';
-import {camelCaseToTitleCase, px, setStyle, setStyles} from '../../src/style';
-import {getData} from '../../src/event-helper';
-import {isObject} from '../../src/core/types';
-import {loadScript} from '../../3p/3p';
-import {throttle} from '../../src/core/types/function';
-import {tryParseJson} from '../../src/json';
+import {
+  camelCaseToTitleCase,
+  px,
+  setStyle,
+  setStyles,
+} from '../../../src/style';
+import {getData} from '../../../src/event-helper';
+import {isObject} from '../../../src/core/types';
+import {loadScript} from '../../../3p/3p';
+import {throttle} from '../../../src/core/types/function';
+import {tryParseJson} from '../../../src/json';
 
 /**
  * Possible player states.
@@ -1096,7 +1101,7 @@ export function zeroPad(input) {
 function onProgressClick(event) {
   // Call this logic once to make sure we still seek if the user just clicks
   // instead of clicking and dragging.
-  clearInterval(hideControlsTimeout);
+  clearTimeout(hideControlsTimeout);
   onProgressMove(event);
   event.preventDefault();
   event.stopPropagation();
@@ -1198,7 +1203,7 @@ export function pauseVideo(event = null) {
   } else {
     videoPlayer.pause();
     // Show controls and keep them there because we're paused.
-    clearInterval(hideControlsTimeout);
+    clearTimeout(hideControlsTimeout);
     showControls();
     if (event && event.type == 'webkitendfullscreen') {
       // Video was paused because we exited fullscreen.
@@ -1430,7 +1435,7 @@ export function showControls(opt_adsForce) {
   if (playerState == PlayerStates.PLAYING) {
     // Reset hide controls timer.
     // Be sure to keep the timer greater than showControlsThrottled.
-    clearInterval(hideControlsTimeout);
+    clearTimeout(hideControlsTimeout);
     hideControlsTimeout = setTimeout(hideControls, 3000);
   }
 }
