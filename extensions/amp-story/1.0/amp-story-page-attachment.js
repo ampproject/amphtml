@@ -352,7 +352,11 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     );
 
     if (this.type_ === AttachmentType.REMOTE) {
-      this.openRemote_();
+      if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+        this.openRemoteV2_();
+      } else {
+        this.openRemote_();
+      }
     }
   }
 
@@ -361,7 +365,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * specified URL.
    * @private
    */
-  openRemote_() {
+  openRemoteV2_() {
     const clickTarget = this.element.parentElement
       .querySelector('.i-amphtml-story-page-open-attachment-host')
       .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
@@ -389,6 +393,32 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
         triggerClickFromLightDom(clickTarget, this.element);
       }, 1000);
     }
+  }
+
+  /**
+   * Triggers a remote attachment opening animation, and redirects to the
+   * specified URL.
+   * @private
+   */
+  openRemote_() {
+    const animationEl = this.win.document.createElement('div');
+    animationEl.classList.add('i-amphtml-story-page-attachment-expand');
+    const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
+
+    this.mutateElement(() => {
+      storyEl.appendChild(animationEl);
+    }).then(() => {
+      // Give some time for the 120ms CSS animation to run (cf
+      // amp-story-page-attachment.css). The navigation itself will take some
+      // time, depending on the target and network conditions.
+      this.win.setTimeout(() => {
+        const navigationService = Services.navigationForDoc(this.getAmpDoc());
+        navigationService.navigateTo(
+          this.win,
+          this.element.getAttribute('href')
+        );
+      }, 50);
+    });
   }
 
   /**
