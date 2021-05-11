@@ -251,7 +251,6 @@ beforeEach(function () {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   beforeTest();
   testName = this.currentTest.fullTitle();
-  window.sandbox = sinon.createSandbox();
   maybeStubConsoleInfoLogWarn();
   preventAsyncErrorThrows();
   warnForConsoleError();
@@ -282,7 +281,6 @@ afterEach(function () {
   if (consoleInfoLogWarnSandbox) {
     consoleInfoLogWarnSandbox.restore();
   }
-  window.sandbox.restore();
   restoreConsoleError();
   restoreAsyncErrorThrows();
   this.timeout(BEFORE_AFTER_TIMEOUT);

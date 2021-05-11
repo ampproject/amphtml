@@ -195,6 +195,14 @@ export class AmpRender extends BaseElement {
   }
 
   /** @override */
+  buildCallback() {
+    super.buildCallback();
+    if (!this.element.hasAttribute('aria-live')) {
+      this.element.setAttribute('aria-live', 'polite');
+    }
+  }
+
+  /** @override */
   mutationObserverCallback() {
     const src = this.element.getAttribute('src');
     if (src === this.src_) {
