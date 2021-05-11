@@ -308,8 +308,9 @@ function describeEnv(factory) {
    * @param {!Object} spec
    * @param {function(!Object)} fn
    * @param {function(string, function())} describeFunc
+   * @param {?boolean} configured
    */
-  const templateFunc = function (name, spec, fn, describeFunc) {
+  const templateFunc = function (name, spec, fn, describeFunc, configured) {
     const fixtures = [new SandboxFixture(spec)].concat(
       factory(spec).filter((fixture) => fixture && fixture.isOn())
     );
@@ -349,17 +350,25 @@ function describeEnv(factory) {
         }
       });
 
-      describe(SUB, function () {
+      function execute() {
         if (spec.timeout) {
           this.timeout(spec.timeout);
         }
         fn.call(this, env);
-      });
+      }
+
+      // Don't re-configure the inner describe() if the outer describes() was
+      // already configured.
+      if (configured) {
+        describe(SUB, execute);
+      } else {
+        describe.configure().run(SUB, execute);
+      }
     });
   };
 
-  const createTemplate = (describeFunc) => (name, spec, fn) =>
-    templateFunc(name, spec, fn, describeFunc);
+  const createTemplate = (describeFunc) => (name, spec, fn, configured) =>
+    templateFunc(name, spec, fn, describeFunc, configured);
 
   const mainFunc = createTemplate(describe);
   mainFunc.only = createTemplate(describe.only);

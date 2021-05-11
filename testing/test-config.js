@@ -146,6 +146,20 @@ export class TestConfig {
     return this;
   }
 
+  isSkipped() {
+    for (let i = 0; i < this.skipMatchers.length; i++) {
+      if (this.skipMatchers[i].call(this)) {
+        return true;
+      }
+    }
+    for (let i = 0; i < this.ifMatchers.length; i++) {
+      if (!this.ifMatchers[i].call(this)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * Runs tests after configuration is complete. Variable args because describe
    * and it use (name, function) while describes uses (name, spec, function).
@@ -153,18 +167,10 @@ export class TestConfig {
    * @param {...*} args
    */
   run(name, ...args) {
-    for (let i = 0; i < this.skipMatchers.length; i++) {
-      if (this.skipMatchers[i].call(this)) {
-        this.runner.skip(name, ...args);
-        return;
-      }
+    if (this.isSkipped()) {
+      this.runner.skip(name, ...args);
+      return;
     }
-    for (let i = 0; i < this.ifMatchers.length; i++) {
-      if (!this.ifMatchers[i].call(this)) {
-        this.runner.skip(name, ...args);
-        return;
-      }
-    }
-    this.runner(name, ...args);
+    this.runner(name, ...args, /* configured */ true);
   }
 }
