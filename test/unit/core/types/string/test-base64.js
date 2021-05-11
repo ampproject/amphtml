@@ -28,7 +28,7 @@ import {
   utf8Encode,
 } from '../../../../../src/core/types/string/bytes';
 
-describes.sandboxed('type helpers - base64', {}, () => {
+describes.sandboxed('type helpers - strings - base64', {}, () => {
   // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
   const config = describe.configure().skipSafari();
   config.run('base64', () => {

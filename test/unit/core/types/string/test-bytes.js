@@ -23,7 +23,7 @@ import {
   utf8Encode,
 } from '../../../../../src/core/types/string/bytes';
 
-describes.sandboxed('type helpers - bytes', {}, () => {
+describes.sandboxed('type helpers - strings - bytes', {}, () => {
   describe('stringToBytes', function () {
     let fakeWin;
 
