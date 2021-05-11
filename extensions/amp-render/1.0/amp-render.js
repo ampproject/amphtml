@@ -188,8 +188,14 @@ export class AmpRender extends BaseElement {
         this.toggleFallback(false);
       },
       'onError': () => {
-        this.togglePlaceholder(false);
-        this.toggleFallback(true);
+        // If the content fails to load and there's a fallback element, display the fallback.
+        // Otherwise, continue displaying the placeholder.
+        if (this.getFallback()) {
+          this.togglePlaceholder(false);
+          this.toggleFallback(true);
+        } else {
+          this.togglePlaceholder(true);
+        }
       },
     });
   }
