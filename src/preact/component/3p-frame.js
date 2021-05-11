@@ -30,7 +30,14 @@ import {
 import {includes} from '../../core/types/string';
 import {parseUrlDeprecated} from '../../url';
 import {sequentialIdGenerator} from '../../utils/id-generator';
-import {useLayoutEffect, useMemo, useRef, useState} from '../../../src/preact';
+import {
+  useEffect,
+  useImperativeHandle,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from '../../../src/preact';
 
 /** @type {!Object<string,function():void>} 3p frames for that type. */
 export const countGenerators = {};
@@ -83,6 +90,7 @@ function ProxyIframeEmbedWithRef(
   }
 
   const contentRef = useRef(null);
+  const iframeRef = useRef(null);
   const count = useMemo(() => {
     if (!countGenerators[type]) {
       countGenerators[type] = sequentialIdGenerator();
@@ -144,13 +152,37 @@ function ProxyIframeEmbedWithRef(
     type,
   ]);
 
+  useEffect(() => {
+    const iframe = iframeRef.current?.node;
+    if (!iframe) {
+      return;
+    }
+    const parent = iframe.parentNode;
+    parent.insertBefore(iframe, iframe.nextSibling);
+  }, [name]);
+
+  // Component API: IframeEmbedDef.Api.
+  useImperativeHandle(
+    ref,
+    () => ({
+      // Standard Bento
+      get readyState() {
+        return iframeRef.current?.readyState;
+      },
+      get node() {
+        return iframeRef.current?.node;
+      },
+    }),
+    []
+  );
+
   return (
     <IframeEmbed
       allow={allow}
       contentRef={contentRef}
       messageHandler={messageHandler}
       name={name}
-      ref={ref}
+      ref={iframeRef}
       ready={!!name}
       sandbox={excludeSandbox ? undefined : sandbox}
       src={src}

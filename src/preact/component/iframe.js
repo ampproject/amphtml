@@ -93,6 +93,9 @@ export function IframeEmbedWithRef(
       get readyState() {
         return loadedRef.current ? ReadyState.COMPLETE : ReadyState.LOADING;
       },
+      get node() {
+        return iframeRef.current;
+      },
     }),
     []
   );
