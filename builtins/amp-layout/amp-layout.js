@@ -32,9 +32,7 @@ class AmpLayout extends BaseElement {
 
   /** @override */
   buildCallback() {
-    if (!this.element.hasAttribute('i-amphtml-ssr')) {
-      buildDOM(this.win.document, this.element);
-    }
+    buildDOM(this.win.document, this.element);
   }
 }
 
