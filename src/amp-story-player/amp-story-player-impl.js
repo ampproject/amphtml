@@ -31,7 +31,7 @@ import {
   serializeQueryString,
 } from '../url';
 import {applySandbox} from '../3p-frame';
-import {createCustomEvent} from '../event-helper';
+import {createCustomEvent, listenOnce} from '../event-helper';
 import {dict} from '../core/types/object';
 import {isJsonScriptTag, tryFocus} from '../dom';
 // Source for this constant is css/amp-story-player-iframe.css
@@ -115,6 +115,10 @@ const STORY_MESSAGE_STATE_TYPE = {
 /** @const {string} */
 export const AMP_STORY_PLAYER_EVENT = 'AMP_STORY_PLAYER_EVENT';
 
+/** @const {string} */
+const CLASS_NO_NAVIGATION_TRANSITION =
+  'i-amphtml-story-player-no-navigation-transition';
+
 /** @typedef {{ state:string, value:(boolean|string) }} */
 let DocumentStateTypeDef;
 
@@ -135,17 +139,27 @@ let StoryDef;
 
 /**
  * @typedef {{
- *   on: string,
- *   action: string,
- *   endpoint: string,
+ *   on: ?string,
+ *   action: ?string,
+ *   endpoint: ?string,
+ *   pageScroll: ?boolean,
+ *   autoplay: ?boolean,
  * }}
  */
 let BehaviorDef;
 
 /**
  * @typedef {{
- *   controls: (!Array<!ViewerControlDef>),
- *   behavior: !BehaviorDef,
+ *   attribution: ?string,
+ * }}
+ */
+let DisplayDef;
+
+/**
+ * @typedef {{
+ *   controls: ?Array<!ViewerControlDef>,
+ *   behavior: ?BehaviorDef,
+ *   display: ?DisplayDef,
  * }}
  */
 let ConfigDef;
@@ -756,9 +770,10 @@ export class AmpStoryPlayer {
    * Shows the story provided by the URL in the player and go to the page if provided.
    * @param {?string} storyUrl
    * @param {string=} pageId
+   * @param {{animate: boolean?}} options
    * @return {!Promise}
    */
-  show(storyUrl, pageId = null) {
+  show(storyUrl, pageId = null, options = {}) {
     const story = this.getStoryFromUrl_(storyUrl);
 
     let renderPromise = Promise.resolve();
@@ -766,6 +781,13 @@ export class AmpStoryPlayer {
       this.currentIdx_ = story.idx;
 
       renderPromise = this.render_();
+
+      if (options.animate === false) {
+        this.rootEl_.classList.toggle(CLASS_NO_NAVIGATION_TRANSITION, true);
+        listenOnce(story.iframe, 'transitionend', () => {
+          this.rootEl_.classList.remove(CLASS_NO_NAVIGATION_TRANSITION);
+        });
+      }
       this.onNavigation_();
     }
 
@@ -945,8 +967,9 @@ export class AmpStoryPlayer {
    * Navigates stories given a number.
    * @param {number} storyDelta
    * @param {number=} pageDelta
+   * @param {{animate: boolean?}} options
    */
-  go(storyDelta, pageDelta = 0) {
+  go(storyDelta, pageDelta = 0, options = {}) {
     if (storyDelta === 0 && pageDelta === 0) {
       return;
     }
@@ -969,7 +992,7 @@ export class AmpStoryPlayer {
 
     let showPromise = Promise.resolve();
     if (this.currentIdx_ !== newStory.idx) {
-      showPromise = this.show(newStory.href);
+      showPromise = this.show(newStory.href, /* pageId */ null, options);
     }
 
     showPromise.then(() => {
@@ -980,6 +1003,7 @@ export class AmpStoryPlayer {
   /**
    * Updates story position.
    * @param {!StoryDef} story
+   * @return {!Promise}
    * @private
    */
   updatePosition_(story) {
