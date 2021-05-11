@@ -15,8 +15,10 @@
  */
 
 module.exports = {
-  frequencyWeeks: 1,
-  dayOfWeek: /* wednesday */ 3, // sunday = 0, monday = 1
+  frequencyWeeks: [
+    /* every week */ 1,
+    /* wednesday */ 3, // sunday = 0, monday = 1
+  ],
   sessionDurationHours: 1,
   timeRotationStartYyyyMmDd: '2021-03-31',
   timeRotationUtc: [
@@ -27,7 +29,7 @@ module.exports = {
   labels: ['Type: Design Review'],
 
   // All previous weeks have already been handled.
-  generateWeeksFromNow: 3,
+  sessionsFromNow: 3,
 
   createTitle({yyyy, mm, dd, timeUtc, region}) {
     return `Design Review ${yyyy}-${mm}-${dd} ${timeUtc} UTC (${region})`;

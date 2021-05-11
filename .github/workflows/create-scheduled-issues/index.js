@@ -16,20 +16,20 @@
 
 /**
  * @fileoverview
- * Creates a Github issue for an upcoming design review.
+ * Creates Github issues on a schedule, like for upcoming Design Reviews
+ * (https://go.amp.dev/design-reviews)
  *
- * https://go.amp.dev/design-reviews
- *
- * A Github Action runs this once a week. See create-design-review-issues.yml
+ * See README.md for a guide to running and configuring this script.
  */
 
 /*
  * ⚠️ Only use standard node modules.
  *
- * This file runs by itself. It cannot depend on `npm install` nor file
- * structure since the Github Action downloads this file only.
+ * This file runs by itself. It cannot depend on `npm install`.
  */
 const https = require('https');
+
+const templates = ['design-review', 'wg-components-office-hours'];
 
 function leadingZero(number) {
   return number.toString().padStart(2, '0');
@@ -78,24 +78,28 @@ function httpsRequest(url, options, data) {
     req.on('error', (error) => {
       reject(error);
     });
-    req.write(data);
+    if (data) {
+      req.write(data);
+    }
     req.end();
   });
 }
 
-async function postGithub(token, url, data) {
+async function requestGithub(token, url, data, options = {}) {
   const {res, body} = await httpsRequest(
     url,
     {
-      method: 'POST',
+      ...options,
+      method: options.method || 'GET',
       headers: {
+        ...options.headers,
         'Authorization': `token ${token}`,
         'Content-Type': 'application/json',
         'User-Agent': 'amphtml',
         'Accept': 'application/vnd.github.v3+json',
       },
     },
-    JSON.stringify(data)
+    data ? JSON.stringify(data) : undefined
   );
 
   if (res.statusCode < 200 || res.statusCode > 299) {
@@ -106,9 +110,26 @@ async function postGithub(token, url, data) {
   return JSON.parse(body);
 }
 
+function postGithub(token, url, data) {
+  return requestGithub(token, url, data, {method: 'POST'});
+}
+
 function postGithubIssue(token, repo, data) {
   const url = `https://api.github.com/repos/${repo}/issues`;
   return postGithub(token, url, data);
+}
+
+function normalizeTitleForComparison(title) {
+  return title.toLowerCase().replace(/[^a-z0-9]+/gi, ' ');
+}
+
+async function findGithubIssue(token, repo, dateFromTitleRegEx, labels) {
+  const url = `https://api.github.com/repos/${repo}/issues?state=open&labels=${encodeURIComponent(
+    labels.join(',')
+  )}`;
+  return (await requestGithub(token, url)).find((item) =>
+    dateFromTitleRegEx.test(item.title)
+  );
 }
 
 function getNextDayOfWeek(date, dayOfWeek, weeks = 1) {
@@ -125,13 +146,16 @@ function getWeeksBetween(d1, d2) {
   return Math.round((d2 - d1) / (7 * 24 * 60 * 60 * 1000));
 }
 
-function getRotation(date, timeRotationUtc, startYyyyMmDd, frequencyWeeks = 1) {
-  const [year, month, day] = startYyyyMmDd.split('-');
-  const start = new Date(year, month - 1, day);
+function getRotationWeekly(
+  scheduled,
+  start,
+  timeRotationUtc,
+  frequencyWeeks = 1
+) {
   const dateBeginningOfDay = new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate()
+    scheduled.getFullYear(),
+    scheduled.getMonth(),
+    scheduled.getDate()
   );
   const weeks = getWeeksBetween(start, dateBeginningOfDay);
   if (weeks % frequencyWeeks !== 0) {
@@ -140,38 +164,83 @@ function getRotation(date, timeRotationUtc, startYyyyMmDd, frequencyWeeks = 1) {
   return timeRotationUtc[weeks % timeRotationUtc.length];
 }
 
+function getNextNthWeekdayOfMonth(date, weekday, n) {
+  let count = 0;
+  const idate = new Date(date.getFullYear(), date.getMonth(), 1);
+  while (true) {
+    if (idate.getDay() === weekday) {
+      if (++count == n) {
+        break;
+      }
+    }
+    idate.setDate(idate.getDate() + 1);
+  }
+  return idate;
+}
+
+function getRotationMonthly(scheduled, start, timeRotationUtc) {
+  const months =
+    12 * (scheduled.getFullYear() - start.getFullYear()) +
+    (scheduled.getMonth() - start.getMonth());
+  return timeRotationUtc[months % timeRotationUtc.length];
+}
+
 const timeZ = (yyyy, mm, dd, hours, minutes) =>
   `${yyyy + mm + dd}T${leadingZero(hours) + leadingZero(minutes)}Z`;
 
-function getNextIssueData({
-  frequencyWeeks,
-  dayOfWeek,
-  generateWeeksFromNow,
-  sessionDurationHours,
-  timeRotationStartYyyyMmDd,
-  timeRotationUtc,
-  labels,
-  createTitle,
-  createBody,
-}) {
-  const today = new Date();
+function getNextIssueData(template) {
+  let {
+    frequencyWeeks,
+    frequencyWeekdayOfMonth,
+    sessionsFromNow = 1,
+    sessionDurationHours,
+    timeRotationStartYyyyMmDd,
+    timeRotationUtc,
+    labels,
+    createTitle,
+    createBody,
+  } = template;
 
-  // We generate it in the same day of week.
-  if (today.getDay() !== dayOfWeek) {
-    return null;
+  if (!frequencyWeeks === !frequencyWeekdayOfMonth) {
+    throw new Error(
+      'specify exactly one of frequencyWeeks or frequencyWeekdayOfMonth'
+    );
   }
+
+  const dayOfWeek = (frequencyWeeks || frequencyWeekdayOfMonth)[1];
 
   // if we run on the same day of week, we need to skip one day to calculate
   // properly
+  const today = new Date();
   today.setDate(today.getDate() + 1);
 
-  const nextDay = getNextDayOfWeek(today, dayOfWeek, generateWeeksFromNow);
-  const rotation = getRotation(
-    nextDay,
-    timeRotationUtc,
-    timeRotationStartYyyyMmDd,
-    frequencyWeeks
-  );
+  const [year, month, day] = timeRotationStartYyyyMmDd.split('-');
+  const timeRotationStart = new Date(year, month - 1, day);
+
+  const nextDay =
+    frequencyWeeks != null
+      ? getNextDayOfWeek(today, dayOfWeek, sessionsFromNow)
+      : getNextNthWeekdayOfMonth(
+          new Date(
+            today.getFullYear(),
+            today.getMonth() + (sessionsFromNow - 1),
+            today.getDate(),
+            today.getHours(),
+            today.getMinutes()
+          ),
+          dayOfWeek,
+          frequencyWeekdayOfMonth[0]
+        );
+
+  const rotation =
+    frequencyWeeks != null
+      ? getRotationWeekly(
+          nextDay,
+          timeRotationStart,
+          timeRotationUtc,
+          frequencyWeeks[0]
+        )
+      : getRotationMonthly(nextDay, timeRotationStart, timeRotationUtc);
 
   if (!rotation) {
     return null;
@@ -206,7 +275,7 @@ function getNextIssueData({
   const title = createTitle(templateData);
   const body = createBody(templateData);
 
-  return {title, labels, body};
+  return {yyyy, mm, dd, issue: {title, labels, body}};
 }
 
 function env(key) {
@@ -216,36 +285,47 @@ function env(key) {
   return process.env[key];
 }
 
-async function maybeCreateIssue(name) {
+async function maybeCreateIssue(token, repo, name) {
   const template = require(`./template/${name}`);
-  const nextIssueData = getNextIssueData(template);
+  const {yyyy, mm, dd, issue} = getNextIssueData(template);
 
   console./*OK*/ log();
   console./*OK*/ log(name);
 
-  if (!nextIssueData) {
-    console./*OK*/log('- [ignored]');
+  if (!issue) {
+    console./*OK*/ log('- [ignored]');
     return;
+  }
+
+  const dateFromTitleRegEx = new RegExp(
+    `${yyyy}[/\\- ]*${mm}[/\\- ]*${dd}[/\\- ]*`
+  );
+  const existingIssue = await findGithubIssue(
+    token,
+    repo,
+    dateFromTitleRegEx,
+    issue.labels
+  );
+  if (existingIssue) {
+    console./*OK*/ log('- [issue already exists]');
   }
 
   if (process.argv.includes('--dry-run')) {
-    console./*OK*/ log(nextIssueData);
+    console./*OK*/ log(issue);
     return;
   }
 
-  const {title, 'html_url': htmlUrl} = await postGithubIssue(
-    env('GITHUB_TOKEN'),
-    env('GITHUB_REPOSITORY'),
-    nextIssueData
-  );
+  const {title, 'html_url': htmlUrl} =
+    existingIssue || (await postGithubIssue(token, repo, issue));
+
   console./*OK*/ log('-', title);
   console./*OK*/ log('-', htmlUrl);
 }
 
 async function createAllIssuesForToday() {
-  console.log('Creating scheduled issues:')
-  for (const name of ['design-review', 'wg-components-office-hours']) {
-    await maybeCreateIssue(name);
+  console./*OK*/ log('Creating scheduled issues:');
+  for (const name of templates) {
+    await maybeCreateIssue(env('GITHUB_TOKEN'), env('GITHUB_REPOSITORY'), name);
   }
 }
 

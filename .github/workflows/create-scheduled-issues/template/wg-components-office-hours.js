@@ -15,19 +15,14 @@
  */
 
 module.exports = {
-  frequencyWeeks: 3,
-  dayOfWeek: /* tuesday */ 2, // sunday = 0, monday = 1
-  sessionDurationHours: 1,
-  timeRotationStartYyyyMmDd: '2021-03-31',
-  timeRotationUtc: [
-    ['Americas', '21:00'],
-    ['Asia/Oceania', '01:00'],
-    ['Africa/Europe/western Asia', '16:30'],
+  frequencyWeekdayOfMonth: [
+    /* third */ 3,
+    /* tuesday */ 2, // sunday = 0, monday = 1
   ],
-  labels: ['Type: Design Review'],
-
-  // All previous weeks have already been handled.
-  generateWeeksFromNow: 3,
+  sessionDurationHours: 1,
+  timeRotationStartYyyyMmDd: '2021-04-20',
+  timeRotationUtc: [['Americas', '18:00']],
+  labels: ['Type: Office Hours', 'WG: components'],
 
   createTitle({yyyy, mm, dd, timeUtc, region}) {
     return `wg-components Office Hours ${yyyy}-${mm}-${dd} ${timeUtc} UTC (${region})`;
