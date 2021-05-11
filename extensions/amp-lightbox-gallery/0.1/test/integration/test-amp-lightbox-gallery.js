@@ -18,7 +18,7 @@ import * as analytics from '../../../../../src/analytics';
 import {poll} from '../../../../../testing/iframe';
 
 // TODO(cathyxz, #16822): This suite is flaky.
-describe.configure().skip('amp-lightbox-gallery', function () {
+describes.sandboxed.configure().skip('amp-lightbox-gallery', function () {
   this.timeout(10000);
   const extensions = ['amp-lightbox-gallery'];
   const body = `

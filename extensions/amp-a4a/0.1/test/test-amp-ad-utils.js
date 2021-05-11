@@ -22,7 +22,7 @@ import {
   mergeExtensionsMetadata,
 } from '../amp-ad-utils';
 
-describe('getAmpAdMetadata', () => {
+describes.sandboxed('getAmpAdMetadata', {}, () => {
   it('should parse metadata successfully', () => {
     const creativeMetadata = getAmpAdMetadata(data.reserialized);
     expect(creativeMetadata).to.be.ok;
@@ -62,7 +62,7 @@ describe('getAmpAdMetadata', () => {
   });
 });
 
-describe('mergeExtensionsMetadata', () => {
+describes.sandboxed('mergeExtensionsMetadata', {}, () => {
   it('should add els that exist in customElementExtensions but not extensions', () => {
     const customElementExtensions = ['amp-analytics'];
     const extensions = [];
@@ -95,7 +95,7 @@ describe('mergeExtensionsMetadata', () => {
   });
 });
 
-describe('extensionsHasElement', () => {
+describes.sandboxed('extensionsHasElement', {}, () => {
   it('should return true if containing extension', () => {
     const extensions = [
       {
@@ -122,7 +122,7 @@ describe('extensionsHasElement', () => {
   });
 });
 
-describe('getExtensionsFromMetadata', () => {
+describes.sandboxed('getExtensionsFromMetadata', {}, () => {
   it('should return extension name and version', () => {
     const metadata = {
       extensions: [

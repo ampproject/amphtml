@@ -28,7 +28,7 @@ import {
 } from '../../src/layout';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 
-describe('Layout', () => {
+describes.sandboxed('Layout', {}, () => {
   let div;
   let aspectRatioEnabled;
 
