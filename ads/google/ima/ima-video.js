@@ -241,7 +241,7 @@ function maybeCreateChildren(document, childrenDef) {
     return null;
   }
   const fragment = document.createDocumentFragment();
-  for (const child of childrenDef) {
+  childrenDef.forEach((child) => {
     const tagName = child[0];
     const attributes = child[1];
     if (
@@ -257,7 +257,7 @@ function maybeCreateChildren(document, childrenDef) {
     for (const attr in attributes) {
       element.setAttribute(attr, attributes[attr]);
     }
-  }
+  });
   return fragment;
 }
 
