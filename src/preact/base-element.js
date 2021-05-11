@@ -114,6 +114,7 @@ const SHADOW_CONTAINER_ATTRS = dict({
   'part': 'c',
 });
 
+/** @const {string} */
 const SERVICE_SLOT_NAME = 'i-amphtml-svc';
 
 /** @const {!JsonObject<string, string>} */
