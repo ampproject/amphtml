@@ -21,7 +21,7 @@
  */
 
 const [extension, ampVersion] = process.argv.slice(2);
-const {log} = require('../common/logging');
+const {log} = require('../../../build-system/common/logging');
 const {stat, writeFile} = require('fs/promises');
 const {valid} = require('semver');
 
