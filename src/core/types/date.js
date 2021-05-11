@@ -56,7 +56,7 @@ export function getDate(value) {
     return value;
   }
   if (isString(value)) {
-    return parseDate(value);
+    return parseDate(/** @type {string} */ (value));
   }
   value = /** @type {!Date} */ (value);
   return value.getTime();

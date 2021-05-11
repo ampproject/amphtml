@@ -286,6 +286,7 @@ export function getCurve(curve) {
     return null;
   }
   if (isString(curve)) {
+    curve = /** @type {string} */ (curve);
     // If the curve is a custom cubic-bezier curve
     if (curve.indexOf('cubic-bezier') != -1) {
       const match = curve.match(/cubic-bezier\((.+)\)/);
@@ -304,5 +305,5 @@ export function getCurve(curve) {
     }
     return NAME_MAP[curve];
   }
-  return curve;
+  return /** @type {!CurveDef} */ (curve);
 }
