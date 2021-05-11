@@ -454,5 +454,68 @@ describes.realWin(
       await waitForText(element, 'Biden, Joe');
       expect(fetchJsonStub).to.have.been.called;
     });
+
+    it('should add aria-live="polite" attribute', async () => {
+      const ampState = html`
+        <amp-state id="theFood">
+          <script type="application/json">
+            {
+              "name": "Bill"
+            }
+          </script>
+        </amp-state>
+      `;
+      doc.body.appendChild(ampState);
+
+      element = html`
+        <amp-render
+          src="amp-state:theFood"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(ampState);
+      await ampState.buildInternal();
+
+      await getRenderedData();
+      expect(element.getAttribute('aria-live')).to.equal('polite');
+    });
+
+    it('should not add aria-live="polite" attribute if one already exists', async () => {
+      const ampState = html`
+        <amp-state id="theFood">
+          <script type="application/json">
+            {
+              "name": "Bill"
+            }
+          </script>
+        </amp-state>
+      `;
+      doc.body.appendChild(ampState);
+
+      element = html`
+        <amp-render
+          src="amp-state:theFood"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+          aria-live="assertive"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(ampState);
+      await ampState.buildInternal();
+
+      await getRenderedData();
+      expect(element.getAttribute('aria-live')).to.equal('assertive');
+    });
   }
 );
