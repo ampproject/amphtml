@@ -307,12 +307,7 @@ module.exports = {
       },
     },
     {
-      'files': [
-        '**/test-*',
-        '**/_init_tests.js',
-        '**/*_test.js',
-        '**/testing/**',
-      ],
+      'files': ['**/test-*', '**/*_test.js', '**/testing/**'],
       'rules': {
         'local/no-forbidden-terms': [2, forbiddenTermsGlobal],
       },
