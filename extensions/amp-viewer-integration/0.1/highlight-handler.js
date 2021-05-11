@@ -91,7 +91,7 @@ const PAGE_TOP_MARGIN = 80;
  * Text fragment prefix to add to the URL
  * @type {string}
  */
-const TEXT_FRAGMENT_PREFIX = '#:~:';
+const TEXT_FRAGMENT_PREFIX = ':~:';
 
 /**
  * Returns highlight param in the URL hash.
@@ -191,7 +191,12 @@ export class HighlightHandler {
    * @private
    */
   updateUrlWithTextFragment_(fragment) {
-    this.ampdoc_.win.location.replace(TEXT_FRAGMENT_PREFIX + fragment);
+    const {hash} = this.ampdoc_.win.location;
+    if (hash) {
+      this.ampdoc_.win.location.replace(hash + TEXT_FRAGMENT_PREFIX + fragment);
+    } else {
+      this.ampdoc_.win.location.replace('#' + TEXT_FRAGMENT_PREFIX + fragment);
+    }
   }
 
   /**
