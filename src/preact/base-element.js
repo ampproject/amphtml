@@ -114,8 +114,11 @@ const SHADOW_CONTAINER_ATTRS = dict({
   'part': 'c',
 });
 
+/** @const {string} */
+const SERVICE_SLOT_NAME = 'i-amphtml-svc';
+
 /** @const {!JsonObject<string, string>} */
-const SERVICE_SLOT_ATTRS = dict({'name': 'i-amphtml-svc'});
+const SERVICE_SLOT_ATTRS = dict({'name': SERVICE_SLOT_NAME});
 
 /**
  * The same as `applyFillContent`, but inside the shadow.
@@ -624,6 +627,8 @@ export class PreactBaseElement extends AMP.BaseElement {
             SERVICE_SLOT_ATTRS
           );
           shadowRoot.appendChild(serviceSlot);
+          this.getPlaceholder()?.setAttribute('slot', SERVICE_SLOT_NAME);
+          this.getFallback()?.setAttribute('slot', SERVICE_SLOT_NAME);
         }
         this.container_ = container;
 

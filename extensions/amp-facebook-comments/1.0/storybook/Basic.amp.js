@@ -51,7 +51,11 @@ export const _default = () => {
       data-locale={locale}
       data-numposts={numPosts}
       data-order-by={orderBy}
-    ></amp-facebook-comments>
+    >
+      <div placeholder>
+        <h1>Placeholder</h1>
+      </div>
+    </amp-facebook-comments>
   );
 };
 
