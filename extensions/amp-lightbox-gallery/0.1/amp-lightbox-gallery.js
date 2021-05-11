@@ -58,6 +58,7 @@ import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const */
 const TAG = 'amp-lightbox-gallery';
+const AMP_CAROUSEL_TAG = 'amp-carousel';
 const DEFAULT_GALLERY_ID = 'amp-lightbox-gallery';
 const SLIDE_ITEM_SELECTOR =
   '.i-amphtml-slide-item, .i-amphtml-carousel-slotted';
@@ -370,17 +371,21 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   buildCarousel_(lightboxGroupId) {
-    const carouselVersion = isExperimentOn(
+    const extensionVersion = this.getAmpDoc().getExtensionVersion(
+      AMP_CAROUSEL_TAG
+    );
+    const experimentVersion = isExperimentOn(
       this.win,
       'amp-lightbox-gallery-carousel-0-2'
     )
       ? '0.2'
       : '0.1';
+    const carouselVersion = extensionVersion ?? experimentVersion;
 
     return Promise.all([
       Services.extensionsFor(this.win).installExtensionForDoc(
         this.getAmpDoc(),
-        'amp-carousel',
+        AMP_CAROUSEL_TAG,
         carouselVersion
       ),
       Services.extensionsFor(this.win).installExtensionForDoc(

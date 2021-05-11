@@ -24,6 +24,7 @@ import {getLocalizationService} from './amp-story-localization-service';
 import {getRGBFromCssColorValue, getTextColorForRGB} from './utils';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
+import {toWin} from '../../../src/types';
 
 /**
  * @enum {string}
@@ -269,7 +270,9 @@ export const setCustomThemeStyles = (attachmentEl, openAttachmentEl) => {
     setImportantStyles(attachmentEl, {
       'background-color': attachmentEl.getAttribute('cta-accent-color'),
     });
-    const styles = computedStyle(attachmentEl.getAmpDoc().win, attachmentEl);
+
+    const win = toWin(attachmentEl.ownerDocument.defaultView);
+    const styles = computedStyle(win, attachmentEl);
     const rgb = getRGBFromCssColorValue(styles['background-color']);
     contrastColor = getTextColorForRGB(rgb);
     setImportantStyles(attachmentEl, {
