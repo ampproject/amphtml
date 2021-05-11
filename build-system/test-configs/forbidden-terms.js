@@ -122,6 +122,10 @@ const forbiddenTermsGlobal = {
       '  If this is same domain, mark /*OK*/.\n' +
       '  If this is cross domain, overwrite the method directly.',
   },
+  'window\\.sandbox': {
+    message: 'Usage of window.sandbox is forbidden. Use env.sandbox instead.',
+    checkInTestFolder: true,
+  },
   'console\\.\\w+\\(': {
     message: String(
       'console.log is generally forbidden. For the runtime, use ' +
