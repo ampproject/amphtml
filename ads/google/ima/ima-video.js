@@ -950,6 +950,7 @@ export function onContentPauseRequested(global) {
     adsManagerHeightOnLoad = null;
   }
   adsActive = true;
+  playerState = PlayerStates.PLAYING;
   postMessage({event: VideoEvents.AD_START});
   removeHoverEventFromElement(
     /** @type {!Element} */ (videoPlayer),
@@ -995,6 +996,7 @@ export function onContentResumeRequested() {
 export function onAdPaused() {
   // show play button while ad is paused
   changeIcon(playPauseDiv, 'play');
+  playerState = PlayerStates.PAUSE;
 }
 
 /**
@@ -1007,6 +1009,7 @@ export function onAdPaused() {
 export function onAdResumed() {
   // show pause button when ad resumes
   changeIcon(playPauseDiv, 'pause');
+  playerState = PlayerStates.PLAYING;
 }
 
 /**
