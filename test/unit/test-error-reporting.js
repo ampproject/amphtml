@@ -90,7 +90,8 @@ describes.fakeWin('installErrorReporting', {}, (env) => {
   });
 
   it('should ignore blockByConsent', () => {
-    rejectedPromiseEvent.reason = rejectedPromiseError = blockedByConsentError();
+    rejectedPromiseEvent.reason = rejectedPromiseError =
+      blockedByConsentError();
     win.eventListeners.fire(rejectedPromiseEvent);
     expect(rejectedPromiseError.reported).to.be.not.be.ok;
     expect(rejectedPromiseEventCancelledSpy).to.be.calledOnce;

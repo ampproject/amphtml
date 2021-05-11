@@ -341,10 +341,9 @@ function getAmpdocServiceHolder(nodeOrDoc) {
  * @return {!./service/ampdoc-impl.AmpDocService}
  */
 function getAmpdocService(win) {
-  return /** @type {!./service/ampdoc-impl.AmpDocService} */ (getService(
-    win,
-    'ampdoc'
-  ));
+  return /** @type {!./service/ampdoc-impl.AmpDocService} */ (
+    getService(win, 'ampdoc')
+  );
 }
 
 /**

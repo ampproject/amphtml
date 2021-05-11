@@ -401,10 +401,9 @@ export class StoryAdPage {
     if (this.adFrame_) {
       return this.adFrame_;
     }
-    return (this.adFrame_ = /** @type {?HTMLIFrameElement} */ (elementByTag(
-      devAssert(this.pageElement_),
-      'iframe'
-    )));
+    return (this.adFrame_ = /** @type {?HTMLIFrameElement} */ (
+      elementByTag(devAssert(this.pageElement_), 'iframe')
+    ));
   }
 
   /**

@@ -371,9 +371,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   buildCarousel_(lightboxGroupId) {
-    const extensionVersion = this.getAmpDoc().getExtensionVersion(
-      AMP_CAROUSEL_TAG
-    );
+    const extensionVersion =
+      this.getAmpDoc().getExtensionVersion(AMP_CAROUSEL_TAG);
     const experimentVersion = isExperimentOn(
       this.win,
       'amp-lightbox-gallery-carousel-0-2'
@@ -645,9 +644,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   swipeGesture_(data) {
     if (data.first) {
       const {sourceElement} = this.getCurrentElement_();
-      const parentCarousel = this.getSourceElementParentCarousel_(
-        sourceElement
-      );
+      const parentCarousel =
+        this.getSourceElementParentCarousel_(sourceElement);
 
       this.swipeToDismiss_.startSwipe({
         swipeElement: dev().assertElement(this.carousel_),
@@ -1434,11 +1432,13 @@ export function installLightboxGallery(ampdoc) {
  * @return {!Promise<?LightboxManager>}
  */
 function lightboxManagerForDoc(element) {
-  return /** @type {!Promise<?LightboxManager>} */ (getElementServiceForDoc(
-    element,
-    'amp-lightbox-manager',
-    'amp-lightbox-gallery'
-  ));
+  return /** @type {!Promise<?LightboxManager>} */ (
+    getElementServiceForDoc(
+      element,
+      'amp-lightbox-manager',
+      'amp-lightbox-gallery'
+    )
+  );
 }
 
 AMP.extension(TAG, '0.1', (AMP) => {
