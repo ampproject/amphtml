@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isString} from '.';
+import {isString} from './string';
 
 /** @fileoverview helpers for dealing with dates and times. */
 
