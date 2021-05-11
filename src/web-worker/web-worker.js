@@ -61,12 +61,9 @@ self.addEventListener('error', errorHandler_);
 
 self.addEventListener('message', function (event) {
   const messageEvent = /** @type {!MessageEvent} */ (event);
-  const {
-    method,
-    args,
-    id,
-    scope,
-  } = /** @type {ToWorkerMessageDef} */ (messageEvent.data);
+  const {method, args, id, scope} = /** @type {ToWorkerMessageDef} */ (
+    messageEvent.data
+  );
   let returnValue;
 
   // TODO(choumx): Remove this fallback when we confirm there are no errors.

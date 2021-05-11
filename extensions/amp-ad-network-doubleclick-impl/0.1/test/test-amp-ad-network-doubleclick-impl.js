@@ -521,9 +521,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
               '1';
           }
           impl.onCreativeRender(false);
-          const ampAnalyticsElement = impl.element.querySelector(
-            'amp-analytics'
-          );
+          const ampAnalyticsElement =
+            impl.element.querySelector('amp-analytics');
           expect(ampAnalyticsElement).to.be.ok;
           expect(ampAnalyticsElement.CONFIG).jsonEqual(
             impl.ampAnalyticsConfig_
@@ -632,7 +631,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       doc.body.appendChild(element);
       impl = new AmpAdNetworkDoubleclickImpl(element);
       // Temporary fix for local test failure.
-      window.sandbox
+      env.sandbox
         .stub(impl, 'getIntersectionElementLayoutBox')
         .callsFake(() => {
           return {

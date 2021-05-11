@@ -20,16 +20,16 @@ import {
 } from '../linker-reader';
 import {mockWindowInterface} from '../../../../testing/test-helper';
 
-describe('LinkerReader', () => {
+describes.sandboxed('LinkerReader', {}, (env) => {
   let linkerReader;
   let mockWin;
 
   beforeEach(() => {
     // Can not import from test-linker.js because all test in test-liner.js
     // will be run with the test-linker-reader if we do so.
-    window.sandbox.useFakeTimers(1533329483292);
-    window.sandbox.stub(Date.prototype, 'getTimezoneOffset').returns(420);
-    mockWin = mockWindowInterface(window.sandbox);
+    env.sandbox.useFakeTimers(1533329483292);
+    env.sandbox.stub(Date.prototype, 'getTimezoneOffset').returns(420);
+    mockWin = mockWindowInterface(env.sandbox);
     mockWin.getUserAgent.returns(
       'Mozilla/5.0 (X11; Linux x86_64) ' +
         'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 ' +

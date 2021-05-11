@@ -242,7 +242,8 @@ const DENYLISTED_PROTOCOLS = /^(?:\w+script|data|blob):/i;
 const EXTENDED_DENYLISTED_PROTOCOLS = /^(?:blob):/i;
 
 // From https://github.com/cure53/DOMPurify/blob/master/src/regexp.js.
-const ATTR_WHITESPACE = /[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205f\u3000]/g;
+const ATTR_WHITESPACE =
+  /[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205f\u3000]/g;
 
 /** @const {!Object<string, !Object<string, !RegExp>>} */
 const DENYLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze(
@@ -305,7 +306,8 @@ const EMAIL_DENYLISTED_TAG_SPECIFIC_ATTRS = Object.freeze(
  *
  * @const {!RegExp}
  */
-const INVALID_INLINE_STYLE_REGEX = /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
+const INVALID_INLINE_STYLE_REGEX =
+  /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
 
 /**
  * Whether the attribute/value is valid.

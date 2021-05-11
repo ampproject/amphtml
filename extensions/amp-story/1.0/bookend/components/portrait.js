@@ -133,12 +133,9 @@ export class PortraitComponent {
       addAttributesToElement(el, dict({'rel': 'amphtml'}));
     }
 
-    const {
-      category,
-      title,
-      image,
-      meta,
-    } = /** @type {!portraitElementsDef} */ (htmlRefs(el));
+    const {category, title, image, meta} = /** @type {!portraitElementsDef} */ (
+      htmlRefs(el)
+    );
 
     category.textContent = portraitData.category;
     title.textContent = portraitData.title;

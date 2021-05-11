@@ -135,13 +135,15 @@ function assertType_(
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertElement(assertFn, shouldBeElement, opt_message) {
-  return /** @type {!Element} */ (assertType_(
-    assertFn,
-    shouldBeElement,
-    isElement(shouldBeElement),
-    'Element expected',
-    opt_message
-  ));
+  return /** @type {!Element} */ (
+    assertType_(
+      assertFn,
+      shouldBeElement,
+      isElement(shouldBeElement),
+      'Element expected',
+      opt_message
+    )
+  );
 }
 
 /**
@@ -158,13 +160,15 @@ export function assertElement(assertFn, shouldBeElement, opt_message) {
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertString(assertFn, shouldBeString, opt_message) {
-  return /** @type {string} */ (assertType_(
-    assertFn,
-    shouldBeString,
-    isString(shouldBeString),
-    'String expected',
-    opt_message
-  ));
+  return /** @type {string} */ (
+    assertType_(
+      assertFn,
+      shouldBeString,
+      isString(shouldBeString),
+      'String expected',
+      opt_message
+    )
+  );
 }
 
 /**
@@ -182,13 +186,15 @@ export function assertString(assertFn, shouldBeString, opt_message) {
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertNumber(assertFn, shouldBeNumber, opt_message) {
-  return /** @type {number} */ (assertType_(
-    assertFn,
-    shouldBeNumber,
-    typeof shouldBeNumber == 'number',
-    'Number expected',
-    opt_message
-  ));
+  return /** @type {number} */ (
+    assertType_(
+      assertFn,
+      shouldBeNumber,
+      typeof shouldBeNumber == 'number',
+      'Number expected',
+      opt_message
+    )
+  );
 }
 
 /**
@@ -205,13 +211,15 @@ export function assertNumber(assertFn, shouldBeNumber, opt_message) {
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertArray(assertFn, shouldBeArray, opt_message) {
-  return /** @type {!Array} */ (assertType_(
-    assertFn,
-    shouldBeArray,
-    isArray(shouldBeArray),
-    'Array expected',
-    opt_message
-  ));
+  return /** @type {!Array} */ (
+    assertType_(
+      assertFn,
+      shouldBeArray,
+      isArray(shouldBeArray),
+      'Array expected',
+      opt_message
+    )
+  );
 }
 
 /**
@@ -227,13 +235,15 @@ export function assertArray(assertFn, shouldBeArray, opt_message) {
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertBoolean(assertFn, shouldBeBoolean, opt_message) {
-  return /** @type {boolean} */ (assertType_(
-    assertFn,
-    shouldBeBoolean,
-    !!shouldBeBoolean === shouldBeBoolean,
-    'Boolean expected',
-    opt_message
-  ));
+  return /** @type {boolean} */ (
+    assertType_(
+      assertFn,
+      shouldBeBoolean,
+      !!shouldBeBoolean === shouldBeBoolean,
+      'Boolean expected',
+      opt_message
+    )
+  );
 }
 
 /**

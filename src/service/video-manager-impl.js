@@ -223,7 +223,9 @@ export class VideoManager {
     // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
     // moment in the element's lifecycle and the promise will resolve
     // appropriately each time.
-    const signals = /** @type {!../base-element.BaseElement} */ (video).signals();
+    const signals = /** @type {!../base-element.BaseElement} */ (
+      video
+    ).signals();
 
     signals.signal(VideoEvents.REGISTERED);
 
@@ -337,10 +339,9 @@ export class VideoManager {
       `Could not find an element with id="${id}" for VIDEO_STATE`
     );
     const entry = this.getEntry_(videoElement);
-    return (entry
-      ? entry.getAnalyticsDetails()
-      : Promise.resolve()
-    ).then((details) => (details ? details[property] : ''));
+    return (entry ? entry.getAnalyticsDetails() : Promise.resolve()).then(
+      (details) => (details ? details[property] : '')
+    );
   }
 
   // TODO(go.amp.dev/issue/27010): For getters below, let's expose VideoEntry
@@ -996,7 +997,9 @@ class VideoEntry {
       measureIntersection(video.element),
     ]).then((responses) => {
       const isAutoplaySupported = /** @type {boolean} */ (responses[0]);
-      const intersection = /** @type {!IntersectionObserverEntry} */ (responses[1]);
+      const intersection = /** @type {!IntersectionObserverEntry} */ (
+        responses[1]
+      );
       const {width, height} = intersection.boundingClientRect;
       const autoplay = this.hasAutoplay && isAutoplaySupported;
       const playedRanges = video.getPlayedRanges();

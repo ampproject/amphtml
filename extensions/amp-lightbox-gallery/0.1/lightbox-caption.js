@@ -107,9 +107,9 @@ export class LightboxCaption {
    * @return {!OverflowState} state
    */
   getOverflowState() {
-    return /** @type {OverflowState} */ (this.scrollContainer_.getAttribute(
-      'i-amphtml-lbg-caption-state'
-    ));
+    return /** @type {OverflowState} */ (
+      this.scrollContainer_.getAttribute('i-amphtml-lbg-caption-state')
+    );
   }
 
   /**

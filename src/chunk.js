@@ -462,8 +462,9 @@ class Chunks {
       !allowLongTasks &&
       this.bodyIsVisible_ &&
       (this.supportsInputPending_
-        ? /** @type {!{scheduling: {isInputPending: Function}}} */ (this.win_
-            .navigator).scheduling.isInputPending()
+        ? /** @type {!{scheduling: {isInputPending: Function}}} */ (
+            this.win_.navigator
+          ).scheduling.isInputPending()
         : this.durationOfLastExecution_ > 5)
     ) {
       this.durationOfLastExecution_ = 0;

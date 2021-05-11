@@ -17,7 +17,7 @@
 import {Messaging} from '../../messaging/messaging';
 import {getWinOrigin, serializeQueryString} from '../../../../../src/url';
 
-describes.sandboxed('AmpViewerMessagingIntegration', {}, () => {
+describes.sandboxed('AmpViewerMessagingIntegration', {}, (env) => {
   const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';
 
   describe
@@ -123,7 +123,7 @@ describes.sandboxed('AmpViewerMessagingIntegration', {}, () => {
           iframeOrigin,
           'bar'
         ).then((messaging) => {
-          const handlerStub = window.sandbox.stub();
+          const handlerStub = env.sandbox.stub();
           messaging.setDefaultHandler(handlerStub);
           expect(handlerStub).to.not.have.been.called;
         });
