@@ -1359,9 +1359,9 @@ tags: {
       protocol: "intent"
       # Line messenger (https://media.line.me/howto/en/)
       protocol: "line"
-      protocol: "skype"
       # (https://docs.microsoft.com/en-us/windows/uwp/launch-resume/launch-default-app#microsoft-edge-uri-scheme)
       protocol: "microsoft-edge"
+      protocol: "skype"
       protocol: "sms"
       protocol: "snapchat"
       protocol: "tel"
