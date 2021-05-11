@@ -1213,14 +1213,13 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, (env) => {
       expect(result['bar'].length).to.equal(2);
       expect(result['hello']).to.be.ok;
       expect(result['hello'].length).to.equal(1);
-      return Promise.all(
-        result['bar'].concat(result['hello'])
-      ).then((baseElements) =>
-        baseElements.forEach((baseElement) =>
-          expect(baseElement.element.getAttribute('type')).to.equal(
-            'doubleclick'
+      return Promise.all(result['bar'].concat(result['hello'])).then(
+        (baseElements) =>
+          baseElements.forEach((baseElement) =>
+            expect(baseElement.element.getAttribute('type')).to.equal(
+              'doubleclick'
+            )
           )
-        )
       );
     });
   });

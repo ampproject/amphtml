@@ -372,14 +372,16 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
 
       it('should return different values for different file names', () => {
         mockMode({});
-        let match = /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame\.html$/.exec(
-          getDefaultBootstrapBaseUrl(window)
-        );
+        let match =
+          /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame\.html$/.exec(
+            getDefaultBootstrapBaseUrl(window)
+          );
         const domain = match && match[1];
         expect(domain).to.be.ok;
-        match = /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame2\.html$/.exec(
-          getDefaultBootstrapBaseUrl(window, 'frame2')
-        );
+        match =
+          /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame2\.html$/.exec(
+            getDefaultBootstrapBaseUrl(window, 'frame2')
+          );
         expect(match && match[1]).to.equal(domain);
       });
 

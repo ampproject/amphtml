@@ -290,8 +290,7 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
 
       windowInterface.history = {replaceState: () => {}};
       windowInterface.location = {
-        href:
-          'https://www.source.test/dest?a=1&testLinker=1*4o2q85*cid*MTIzNDU.',
+        href: 'https://www.source.test/dest?a=1&testLinker=1*4o2q85*cid*MTIzNDU.',
         search: '?a=1&testLinker=1*4o2q85*cid*MTIzNDU.',
         origin: 'https://www.source.test',
         pathname: '/dest',

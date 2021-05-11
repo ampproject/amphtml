@@ -284,16 +284,17 @@ class AmpLightbox extends AMP.BaseElement {
       return;
     }
     this.initialize_();
-    this.boundCloseOnEscape_ = /** @type {?function(this:AmpLightbox, Event)} */ (this.closeOnEscape_.bind(
-      this
-    ));
+    this.boundCloseOnEscape_ =
+      /** @type {?function(this:AmpLightbox, Event)} */ (
+        this.closeOnEscape_.bind(this)
+      );
     this.document_.documentElement.addEventListener(
       'keydown',
       this.boundCloseOnEscape_
     );
-    this.boundFocusin_ = /** @type {?function(this:AmpLightbox)} */ (this.onFocusin_.bind(
-      this
-    ));
+    this.boundFocusin_ = /** @type {?function(this:AmpLightbox)} */ (
+      this.onFocusin_.bind(this)
+    );
     this.document_.documentElement.addEventListener(
       'focusin',
       this.boundFocusin_
@@ -343,11 +344,8 @@ class AmpLightbox extends AMP.BaseElement {
   finalizeOpen_(callback, trust) {
     const {element} = this;
 
-    const {
-      durationSeconds,
-      openStyle,
-      closedStyle,
-    } = this.getAnimationPresetDef_();
+    const {durationSeconds, openStyle, closedStyle} =
+      this.getAnimationPresetDef_();
 
     const props = Object.keys(openStyle);
 
@@ -438,9 +436,10 @@ class AmpLightbox extends AMP.BaseElement {
     }
 
     // click event doesn't work with enter on i-amphtml-ad-close-header
-    this.boundCloseOnEnter_ = /** @type {?function(this:AmpLightbox, Event)} */ (this.closeOnEnter_.bind(
-      this
-    ));
+    this.boundCloseOnEnter_ =
+      /** @type {?function(this:AmpLightbox, Event)} */ (
+        this.closeOnEnter_.bind(this)
+      );
     this.closeButtonHeader_.addEventListener(
       'keydown',
       this.boundCloseOnEnter_
@@ -449,8 +448,8 @@ class AmpLightbox extends AMP.BaseElement {
     let headerHeight;
     this.measureMutateElement(
       () => {
-        headerHeight = this.closeButtonHeader_./*OK*/ getBoundingClientRect()
-          .height;
+        headerHeight =
+          this.closeButtonHeader_./*OK*/ getBoundingClientRect().height;
       },
       () => {
         // Done in vsync in order to apply transition.
@@ -480,9 +479,9 @@ class AmpLightbox extends AMP.BaseElement {
     if (!this.closeButtonSR_ && !this.closeButtonHeader_) {
       return;
     }
-    this.boundClose_ = /** @type {?function(this:AmpLightbox)} */ (this.closeOnClick_.bind(
-      this
-    ));
+    this.boundClose_ = /** @type {?function(this:AmpLightbox)} */ (
+      this.closeOnClick_.bind(this)
+    );
     this.closeButton_.addEventListener('click', this.boundClose_);
   }
 
@@ -781,28 +780,28 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   waitForScroll_(startingScrollTop) {
-    this.scrollTimerId_ = /** @type {number} */ (Services.timerFor(
-      this.win
-    ).delay(() => {
-      if (Math.abs(startingScrollTop - this.pos_) < 30) {
-        dev().fine(
-          TAG,
-          'slow scrolling: %s - %s',
-          startingScrollTop,
-          this.pos_
-        );
-        this.scrollTimerId_ = null;
-        this.update_(this.pos_);
-      } else {
-        dev().fine(
-          TAG,
-          'fast scrolling: %s - %s',
-          startingScrollTop,
-          this.pos_
-        );
-        this.waitForScroll_(this.pos_);
-      }
-    }, 100));
+    this.scrollTimerId_ = /** @type {number} */ (
+      Services.timerFor(this.win).delay(() => {
+        if (Math.abs(startingScrollTop - this.pos_) < 30) {
+          dev().fine(
+            TAG,
+            'slow scrolling: %s - %s',
+            startingScrollTop,
+            this.pos_
+          );
+          this.scrollTimerId_ = null;
+          this.update_(this.pos_);
+        } else {
+          dev().fine(
+            TAG,
+            'fast scrolling: %s - %s',
+            startingScrollTop,
+            this.pos_
+          );
+          this.waitForScroll_(this.pos_);
+        }
+      }, 100)
+    );
   }
 
   /**

@@ -143,9 +143,8 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
           type: 'render-start',
           sentinel: 'amp3ptest' + testIndex,
         });
-        const expectResponsePromise = iframe.expectMessageFromParent(
-          'embed-size-changed'
-        );
+        const expectResponsePromise =
+          iframe.expectMessageFromParent('embed-size-changed');
         const renderStartPromise = signals.whenSignal('render-start');
         return Promise.all([renderStartPromise, initPromise])
           .then(() => {

@@ -533,14 +533,15 @@ const forbiddenTermsGlobal = {
   'setTimeout.*throw': {
     message: 'Use dev.error or user.error instead.',
   },
-  '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([A-Z0-9-]+|[\'"`][A-Z0-9-]+[\'"`]))[^,)\n]*': {
-    message:
-      'Logging message require explicitly `TAG`, or an all uppercase' +
-      ' string as the first parameter',
-    allowlist: [
-      'build-system/babel-plugins/babel-plugin-transform-dev-methods/index.js',
-    ],
-  },
+  '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([A-Z0-9-]+|[\'"`][A-Z0-9-]+[\'"`]))[^,)\n]*':
+    {
+      message:
+        'Logging message require explicitly `TAG`, or an all uppercase' +
+        ' string as the first parameter',
+      allowlist: [
+        'build-system/babel-plugins/babel-plugin-transform-dev-methods/index.js',
+      ],
+    },
   '\\.schedulePass\\(': {
     message: 'schedulePass is heavy, think twice before using it',
     allowlist: ['src/service/mutator-impl.js', 'src/service/resources-impl.js'],
@@ -644,9 +645,11 @@ const forbiddenTermsGlobal = {
   '\\.defer\\(\\)': {
     message: 'Promise.defer() is deprecated and should not be used.',
   },
-  '(dev|user)\\(\\)\\.assert(Element|String|Number)?\\(\\s*([A-Z][A-Z0-9-]*,)': {
-    message: 'TAG is not an argument to assert(). Will cause false positives.',
-  },
+  '(dev|user)\\(\\)\\.assert(Element|String|Number)?\\(\\s*([A-Z][A-Z0-9-]*,)':
+    {
+      message:
+        'TAG is not an argument to assert(). Will cause false positives.',
+    },
   'eslint no-unused-vars': {
     message: 'Use a line-level "no-unused-vars" rule instead.',
     allowlist: ['extensions/amp-access/0.1/iframe-api/access-controller.js'],
@@ -1104,10 +1107,9 @@ function matchForbiddenTerms(srcFile, contents, terms) {
         allowlist = null,
         checkInTestFolder = false,
         checkProse = false,
-      } =
-        typeof messageOrDef === 'string'
-          ? {message: messageOrDef}
-          : messageOrDef;
+      } = typeof messageOrDef === 'string'
+        ? {message: messageOrDef}
+        : messageOrDef;
       // NOTE: we could do a glob test instead of exact check in the future
       // if needed but that might be too permissive.
       if (
