@@ -120,8 +120,7 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     const properties = imaVideoObj.getPropertiesForTesting();
     expect(properties.playbackStarted).to.be.true;
     expect(properties.uiTicker).to.exist;
-    expect(bigPlayDivMock.setAttribute.withArgs('hidden', '')).to.have.been
-      .calledOnce;
+    expect(bigPlayDivMock.setAttribute.withArgs('hidden', '')).to.be.calledOnce;
     expect(initSpy).to.be.called;
     expect(loadSpy).to.be.called;
     // TODO - Fix one I figure out how to spy on internals.
