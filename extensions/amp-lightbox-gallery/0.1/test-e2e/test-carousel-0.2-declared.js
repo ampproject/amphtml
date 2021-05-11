@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,10 @@ const pageWidth = 800;
 const pageHeight = 600;
 
 describes.endtoend(
-  'AMP Lightbox Gallery Open/Close',
+  'AMP Lightbox Gallery with AMP Carousel 2.0',
   {
-    fixture: 'amp-lightbox/amp-lightbox-gallery-launch.amp.html',
+    fixture: 'amp-lightbox/amp-lightbox-with-carousel-0.2.amp.html',
     initialRect: {width: pageWidth, height: pageHeight},
-    // TODO(sparhami) Get this working in other environments.
     environments: ['single'],
   },
   async (env) => {
@@ -40,10 +39,7 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    // TODO(sparhami) Cover swipe to dismiss if possible.
-    // TODO(sparhami) Test basic transition to gallery and back.
-    // TODO(#28948) fix this flaky test.
-    it.skip('should open/close lightbox', async () => {
+    it('should open/close lightbox', async () => {
       // First open the gallery.
       const firstAmpImg = await controller.findElement('amp-img');
       await controller.click(firstAmpImg);
@@ -63,10 +59,6 @@ describes.endtoend(
         'amp-lightbox-gallery img'
       );
       await expect(prop(firstSlideImg, 'naturalWidth')).to.be.gt(0);
-
-      // Now close the gallery via button click and wait for it to close.
-      await controller.click(closeButton);
-      await controller.findElement('amp-lightbox-gallery[hidden]');
     });
   }
 );
