@@ -27,11 +27,11 @@ describes.repeated(
     },
     'with template[type=amp-mustache]': {templateType: 'template'},
   },
-  (name, variant) => {
+  (name, variant, env) => {
     let viewerCanRenderTemplates = false;
 
     beforeEach(() => {
-      const getServiceForDocStub = window.sandbox.stub(
+      const getServiceForDocStub = env.sandbox.stub(
         service,
         'getServiceForDoc'
       );
@@ -595,14 +595,14 @@ describes.repeated(
       });
 
       it('should not call mustache parsing', () => {
-        window.sandbox.spy(mustache, 'parse');
+        env.sandbox.spy(mustache, 'parse');
         template.compileCallback();
         expect(mustache.parse).to.have.not.been.called;
       });
 
       it('should not mustache render but still sanitize html', () => {
-        window.sandbox.spy(sanitizer, 'sanitizeHtml');
-        window.sandbox.spy(mustache, 'render');
+        env.sandbox.spy(sanitizer, 'sanitizeHtml');
+        env.sandbox.spy(mustache, 'render');
         template.setHtml('<div>test</div>');
         expect(mustache.render).to.have.not.been.called;
         expect(sanitizer.sanitizeHtml).to.have.been.called;

@@ -43,7 +43,7 @@ describes.repeated(
     'legacy w/ inputs': {denylist: true, inputs: true},
     'no EventTarget': {eventTarget: true},
   },
-  (name, variant) => {
+  (name, variant, env) => {
     let form;
     let inputs;
 
@@ -51,7 +51,7 @@ describes.repeated(
       // Stub only to work around the fact that there's no Ampdoc, so the service
       // cannot be retrieved.
       // Otherwise this test would barf because `form` is detached.
-      window.sandbox.stub(Services, 'urlForDoc').returns({
+      env.sandbox.stub(Services, 'urlForDoc').returns({
         parse: parseUrlDeprecated,
       });
 
