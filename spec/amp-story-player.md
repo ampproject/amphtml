@@ -182,6 +182,7 @@ playerEl.load();
 
 -   number: the story in the player to which you want to move, relative to the current story.
 -   number (optional): the page of the story to which you want to move, relative to the current page.
+-   {animate: boolean} (optional): options for the navigation (animate: whether to animate the story transition).
 
 If the player is currently on the third story out of five stories:
 
@@ -189,6 +190,7 @@ If the player is currently on the third story out of five stories:
 -   `player.go(-1)` will go backward one story to the second story
 -   `player.go(-1, 1)` will go backward one story and navigate one page backwards
 -   `player.go(0, 5)` will stay in the current story and navigate 5 pages forward
+-   `player.go(1, 0, {animate: false})` will go to the next page without the swipe animation
 
 #### show
 
@@ -196,6 +198,7 @@ If the player is currently on the third story out of five stories:
 
 -   string or null: the URL of the story to show.
 -   string (optional): the ID attribute of the page element.
+-   {animate: boolean} (optional): options for the navigation (animate: whether to animate the story transition).
 
 Will change the current story being displayed by the player.
 
@@ -203,6 +206,7 @@ Will change the current story being displayed by the player.
 player.show('cool-story.html'); // Will display cool-story.html
 player.show('cool-story.html', 'page-4'); // Will display cool-story.html and switch to page-4
 player.show(null, 'page-4'); // Stay on current story and switch to page-4
+player.show('cool-story.html', null, {animate: false}); // Will display cool-story.html without the swipe animation
 ```
 
 #### rewind
