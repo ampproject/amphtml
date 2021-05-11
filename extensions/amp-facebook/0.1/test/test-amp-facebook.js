@@ -109,9 +109,6 @@ describes.realWin(
       const div = document.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK',
-      };
 
       facebook(win, {
         href: fbPostHref,
@@ -127,9 +124,6 @@ describes.realWin(
       const div = doc.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK',
-      };
 
       facebook(win, {
         href: fbVideoHref,
@@ -149,9 +143,6 @@ describes.realWin(
         const div = doc.createElement('div');
         div.setAttribute('id', 'c');
         doc.body.appendChild(div);
-        win.context = {
-          tagName: 'AMP-FACEBOOK',
-        };
 
         facebook(win, {
           href: fbVideoHref,
@@ -170,9 +161,6 @@ describes.realWin(
       const div = doc.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK',
-      };
 
       facebook(win, {
         embedAs: 'video',
@@ -189,9 +177,6 @@ describes.realWin(
       const div = doc.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK',
-      };
 
       facebook(win, {
         embedAs: 'post',
@@ -211,14 +196,12 @@ describes.realWin(
         const div = doc.createElement('div');
         div.setAttribute('id', 'c');
         doc.body.appendChild(div);
-        win.context = {
-          tagName: 'AMP-FACEBOOK-PAGE',
-        };
 
         facebook(win, {
           href: fbPageHref,
           width: 200,
           height: 200,
+          embedAs: 'page',
         });
         const fbPage = doc.body.getElementsByClassName('fb-page')[0];
         expect(fbPage).not.to.be.undefined;
