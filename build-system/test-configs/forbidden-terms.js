@@ -96,8 +96,13 @@ const forbiddenTermsGlobal = {
       'css/ampshared.css',
     ],
   },
-  'describe\\.only': '',
-  'describes.*\\.only': '',
+  'describe\\.only': {
+    message: 'Please remove all instances of describe.only',
+    allowlist: ['testing/describes.js'],
+  },
+  'describes.*\\.only': {
+    message: 'Please remove all instances of describes.only',
+  },
   'dev\\(\\)\\.assert\\(': 'Use the devAssert function instead.',
   '[^.]user\\(\\)\\.assert\\(': 'Use the userAssert function instead.',
   'it\\.only': '',
@@ -211,6 +216,7 @@ const forbiddenTermsGlobal = {
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
       'src/service/ampdoc-impl.js',
+      'testing/_init_tests.js',
       'testing/describes.js',
       'testing/iframe.js',
     ],
@@ -323,6 +329,7 @@ const forbiddenTermsGlobal = {
       'src/log.js',
       'src/web-worker/web-worker.js',
       'tools/experiments/experiments.js',
+      'testing/_init_tests.js',
     ],
   },
   'parseUrlWithA': {
@@ -451,6 +458,7 @@ const forbiddenTermsGlobal = {
       'src/experiments.js',
       'src/service/cid-impl.js',
       'src/service/storage-impl.js',
+      'testing/_init_tests.js',
       'testing/fake-dom.js',
     ],
   },
@@ -597,6 +605,7 @@ const forbiddenTermsGlobal = {
       'and getMode() to access config',
     allowlist: [
       'build-system/externs/amp.extern.js',
+      'build-system/server/amp4test.js',
       'build-system/server/app.js',
       'build-system/tasks/e2e/index.js',
       'build-system/tasks/firebase.js',
@@ -613,8 +622,8 @@ const forbiddenTermsGlobal = {
       'src/experiments.js',
       'src/mode.js',
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
+      'testing/_init_tests.js',
       'tools/experiments/experiments.js',
-      'build-system/server/amp4test.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
@@ -647,7 +656,7 @@ const forbiddenTermsGlobal = {
       'Use of `this.skip()` is forbidden in test files. Use ' +
       '`this.skipTest()` from within a `before()` block instead. See #17245.',
     checkInTestFolder: true,
-    allowlist: ['test/_init_tests.js'],
+    allowlist: ['testing/_init_tests.js'],
   },
   '[^\\.]makeBodyVisible\\(': {
     message:
@@ -685,7 +694,7 @@ const forbiddenTermsGlobal = {
       'build-system/server/app-index/test/test-self.js',
       'build-system/server/app-index/test/test-template.js',
       'build-system/server/app-index/test/test.js',
-      'test/_init_tests.js',
+      'testing/_init_tests.js',
       'test/e2e/test-controller-promise.js',
       'test/e2e/test-expect.js',
       'validator/js/engine/amp4ads-parse-css_test.js',
@@ -1099,7 +1108,7 @@ const forbiddenTermsSrcInclusive = {
     message: measurementApiDeprecated,
     allowlist: [
       'build-system/externs/amp.extern.js',
-      'builtins/amp-img.js',
+      'builtins/amp-img/amp-img.js',
       'src/base-element.js',
       'src/custom-element.js',
       'src/iframe-helper.js',
@@ -1143,6 +1152,14 @@ const forbiddenTermsSrcInclusive = {
   "require\\('fancy-log'\\)": {
     message:
       'Instead of fancy-log, use the logging functions in build-system/common/logging.js.',
+  },
+  "require\\('kleur\\/colors'\\)": {
+    message:
+      'Instead of kleur/colors, use the log-coloring functions in build-system/common/colors.js',
+    allowlist: [
+      'build-system/common/colors.js',
+      'third_party/react-dates/scope-require.js',
+    ],
   },
   'withA11y':
     'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpImg} from '../../builtins/amp-img';
+import {AmpImg} from '../../builtins/amp-img/amp-img';
 import {BaseElement} from '../../src/base-element';
 import {Layout, LayoutPriority} from '../../src/layout';
 import {createElementWithAttributes, dispatchCustomEvent} from '../../src/dom';
