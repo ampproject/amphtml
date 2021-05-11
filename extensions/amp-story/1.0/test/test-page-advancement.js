@@ -130,7 +130,8 @@ describes.realWin('page-advancement', {amp: true}, (env) => {
         expect(advancement).to.not.be.instanceOf(TimeBasedAdvancement);
       });
 
-      it('should update delayMs_ when updateTimeDelay() is called', () => {
+      // TODO(zaparent, #34153): This test is flaky during CI.
+      it.skip('should update delayMs_ when updateTimeDelay() is called', () => {
         const pageEl = html`
           <amp-story-page auto-advance-after="3s"> </amp-story-page>
         `;
@@ -143,7 +144,8 @@ describes.realWin('page-advancement', {amp: true}, (env) => {
         expect(advancement.remainingDelayMs_).to.be.equal(null);
       });
 
-      it('should update remainingDelayMs_ when updateTimeDelay() is called', () => {
+      // TODO(zaparent, #34153): This test is flaky during CI.
+      it.skip('should update remainingDelayMs_ when updateTimeDelay() is called', () => {
         const pageEl = html`
           <amp-story-page auto-advance-after="3s"> </amp-story-page>
         `;
