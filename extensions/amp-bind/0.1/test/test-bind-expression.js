@@ -17,7 +17,7 @@
 import {BindExpression} from '../bind-expression';
 import {BindMacro} from '../bind-macro';
 
-describe('BindExpression', () => {
+describes.sandboxed('BindExpression', {}, () => {
   const argumentTypeError = 'Unexpected argument type';
   const unsupportedFunctionError = 'not a supported function';
   const expressionSizeExceededError = 'exceeds max';

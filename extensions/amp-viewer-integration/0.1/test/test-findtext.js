@@ -23,7 +23,7 @@ import {
   textPosChar,
 } from '../findtext';
 
-describe('CircularBuffer', () => {
+describes.sandboxed('CircularBuffer', {}, () => {
   it('add and get', () => {
     const buf = new CircularBuffer(5);
     for (let i = 0; i < 7; i++) {
@@ -37,7 +37,7 @@ describe('CircularBuffer', () => {
   });
 });
 
-describe('canonicalizeString', () => {
+describes.sandboxed('canonicalizeString', {}, () => {
   it('test examples', () => {
     expect(canonicalizeString('a b  c')).to.equal('abc');
     expect(canonicalizeString('abc.d')).to.equal('abcd');

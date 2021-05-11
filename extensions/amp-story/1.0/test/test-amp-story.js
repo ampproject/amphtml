@@ -718,7 +718,7 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        const setStateStub = window.sandbox.stub(story.activePage_, 'setState');
+        const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
         story.getAmpDoc().overrideVisibilityState(VisibilityState.INACTIVE);
         expect(setStateStub.getCall(1)).to.have.been.calledWithExactly(
           PageState.NOT_ACTIVE
@@ -737,7 +737,7 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        const setStateStub = window.sandbox.stub(story.activePage_, 'setState');
+        const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
         story.getAmpDoc().overrideVisibilityState(VisibilityState.HIDDEN);
         expect(setStateStub).to.have.been.calledOnceWithExactly(
           PageState.PAUSED
@@ -756,7 +756,7 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        const setStateStub = window.sandbox.stub(story.activePage_, 'setState');
+        const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
         story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
         expect(setStateStub).to.have.been.calledOnceWithExactly(
           PageState.PAUSED
@@ -776,7 +776,7 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        const setStateStub = window.sandbox.stub(story.activePage_, 'setState');
+        const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
         story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
         story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
         expect(setStateStub.getCall(1)).to.have.been.calledWithExactly(
@@ -788,7 +788,7 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        const setStateStub = window.sandbox.stub(story.activePage_, 'setState');
+        const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
         story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
         story.getAmpDoc().overrideVisibilityState(VisibilityState.INACTIVE);
         story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);

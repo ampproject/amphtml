@@ -769,7 +769,7 @@ describes.realWin(
             'checkConsentHref': 'https://server-test-7/',
           };
           ampConsent = getAmpConsent(doc, inlineConfig);
-          const validationSpy = window.sandbox.spy(
+          const validationSpy = env.sandbox.spy(
             ampConsent,
             'validatePurposeConsents_'
           );
@@ -1167,7 +1167,7 @@ describes.realWin(
         doc.body.appendChild(consentElement);
         ampConsent = new AmpConsent(consentElement);
         actionSpy = env.sandbox.stub(ampConsent, 'handleAction_');
-        window.sandbox.stub(ampConsent, 'isReadyToHandleAction_').returns(true);
+        env.sandbox.stub(ampConsent, 'isReadyToHandleAction_').returns(true);
         ampConsent.enableInteractions_();
         ampIframe = document.createElement('amp-iframe');
         iframe = doc.createElement('iframe');
@@ -1209,7 +1209,7 @@ describes.realWin(
         beforeEach(async () => {
           ampConsent.buildCallback();
           await macroTask();
-          managerSpy = window.sandbox.spy(
+          managerSpy = env.sandbox.spy(
             ampConsent.consentStateManager_,
             'updateConsentInstancePurposes'
           );
@@ -1632,10 +1632,10 @@ describes.realWin(
             doc.body.appendChild(consentElement);
             ampConsent = new AmpConsent(consentElement);
             await ampConsent.buildCallback();
-            window.sandbox
+            env.sandbox
               .stub(ampConsent.consentStateManager_, 'getConsentInstanceInfo')
               .returns(Promise.resolve({}));
-            const spy = window.sandbox.spy(
+            const spy = env.sandbox.spy(
               ampConsent,
               'checkGranularConsentRequired_'
             );
@@ -1708,7 +1708,7 @@ describes.realWin(
         it('purposeConsentDefault handles empty and null purposeConsentRequired', async () => {
           const mockInvocation = {args: {purposeConsentDefault: true}};
           ampConsent.purposeConsentRequired_ = Promise.resolve();
-          window.sandbox.stub(ampConsent, 'hide_').callsFake(() => {});
+          env.sandbox.stub(ampConsent, 'hide_').callsFake(() => {});
           await ampConsent.buildCallback();
           await macroTask();
           updateConsentInstancePurposeSpy = env.sandbox.spy(
@@ -1746,7 +1746,7 @@ describes.realWin(
 
         it('handles setPurpose with no args', async () => {
           const mockInvocation = {args: null};
-          const devSpy = window.sandbox.spy(dev(), 'error');
+          const devSpy = env.sandbox.spy(dev(), 'error');
           await ampConsent.buildCallback();
           await macroTask();
           updateConsentInstancePurposeSpy = env.sandbox.spy(

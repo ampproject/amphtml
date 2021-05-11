@@ -339,7 +339,7 @@ describes.repeated(
   }
 );
 
-describe('SanitizerImpl', () => {
+describes.sandboxed('SanitizerImpl', {}, (env) => {
   let el;
   let win;
   let s;
@@ -543,11 +543,11 @@ describe('SanitizerImpl', () => {
 
     beforeEach(() => {
       bind = {
-        getStateValue: window.sandbox.stub(),
-        setState: window.sandbox.stub(),
-        constrain: window.sandbox.stub(),
+        getStateValue: env.sandbox.stub(),
+        setState: env.sandbox.stub(),
+        constrain: env.sandbox.stub(),
       };
-      window.sandbox.stub(Services, 'bindForDocOrNull').resolves(bind);
+      env.sandbox.stub(Services, 'bindForDocOrNull').resolves(bind);
     });
 
     it('AMP.setState(json), without user interaction', async () => {

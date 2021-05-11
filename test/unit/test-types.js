@@ -16,7 +16,7 @@
 
 import * as types from '../../src/types';
 
-describe('Types', () => {
+describes.sandboxed('Types', {}, () => {
   describe('isFiniteNumber', () => {
     it('should yield false for non-numbers', () => {
       expect(types.isFiniteNumber(null)).to.be.false;

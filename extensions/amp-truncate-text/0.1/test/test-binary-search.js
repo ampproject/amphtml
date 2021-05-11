@@ -20,7 +20,7 @@ import {
  * limitations under the License.
  */
 
-describe('binarySearch', () => {
+describes.sandboxed('binarySearch', {}, () => {
   const {NEXT, PREV} = BinarySearchPreference;
   const {RIGHT, LEFT} = BinarySearchStop;
 

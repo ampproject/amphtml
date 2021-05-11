@@ -16,7 +16,7 @@
 
 import PriorityQueue from '../../../../src/core/data-structures/priority-queue';
 
-describes.sandboxed('PriorityQueue', {}, () => {
+describes.sandboxed('PriorityQueue', {}, (env) => {
   let pq;
 
   beforeEach(() => {
@@ -91,7 +91,7 @@ describes.sandboxed('PriorityQueue', {}, () => {
   });
 
   it('should iterate through queue', () => {
-    const spy = window.sandbox.spy();
+    const spy = env.sandbox.spy();
     pq.enqueue('p', 1);
     pq.enqueue('m', 2);
     pq.enqueue('a', 3);

@@ -25,7 +25,7 @@ import {
   ssp,
 } from '../../../ads/vendors/ssp';
 
-describes.fakeWin('amp-ad-ssp', {}, () => {
+describes.fakeWin('amp-ad-ssp', {}, (env) => {
   let sandbox;
   let win;
   let commonData;
@@ -35,7 +35,7 @@ describes.fakeWin('amp-ad-ssp', {}, () => {
    * Set up our test environment.
    */
   beforeEach(() => {
-    sandbox = window.sandbox;
+    sandbox = env.sandbox;
 
     commonData = {
       width: '200',

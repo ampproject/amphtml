@@ -16,7 +16,7 @@
 
 import {isExperimentOn, toggleExperiment} from '../../../../../src/experiments';
 
-describe.skip('amp-fx-collection', function () {
+describes.sandboxed.skip('amp-fx-collection', {}, function () {
   const css = `
     .spacer {
       height: 100vh;

@@ -42,7 +42,7 @@ import {
   serializeQueryString,
 } from '../../src/url';
 
-describe('getWinOrigin', () => {
+describes.sandboxed('getWinOrigin', {}, () => {
   it('should return origin if available', () => {
     expect(
       getWinOrigin({
@@ -98,7 +98,7 @@ describe('getWinOrigin', () => {
   });
 });
 
-describe('parseUrlDeprecated', () => {
+describes.sandboxed('parseUrlDeprecated', {}, () => {
   const currentPort = location.port;
 
   function compareParse(url, result) {
@@ -259,7 +259,7 @@ describe('parseUrlDeprecated', () => {
   });
 });
 
-describe('parseQueryString', () => {
+describes.sandboxed('parseQueryString', {}, () => {
   it('should return empty params when query string is empty or null', () => {
     expect(parseQueryString(null)).to.deep.equal({});
     expect(parseQueryString('')).to.deep.equal({});
@@ -311,7 +311,7 @@ describe('parseQueryString', () => {
   });
 });
 
-describe('serializeQueryString', () => {
+describes.sandboxed('serializeQueryString', {}, () => {
   it('should return empty string for empty params', () => {
     expect(serializeQueryString({})).to.equal('');
     expect(
@@ -340,7 +340,7 @@ describe('serializeQueryString', () => {
   });
 });
 
-describe('assertHttpsUrl/isSecureUrl', () => {
+describes.sandboxed('assertHttpsUrl/isSecureUrl', {}, () => {
   const referenceElement = document.createElement('div');
   it('should NOT allow null or undefined, but allow empty string', () => {
     allowConsoleError(() => {
@@ -392,7 +392,7 @@ describe('assertHttpsUrl/isSecureUrl', () => {
   });
 });
 
-describe('assertAbsoluteHttpOrHttpsUrl', () => {
+describes.sandboxed('assertAbsoluteHttpOrHttpsUrl', {}, () => {
   it('should allow http', () => {
     expect(assertAbsoluteHttpOrHttpsUrl('http://twitter.com/')).to.equal(
       'http://twitter.com/'
@@ -434,7 +434,7 @@ describe('assertAbsoluteHttpOrHttpsUrl', () => {
   });
 });
 
-describe('removeFragment', () => {
+describes.sandboxed('removeFragment', {}, () => {
   it('should remove fragment', () => {
     expect(removeFragment('https://twitter.com/path#abc')).to.equal(
       'https://twitter.com/path'
@@ -452,7 +452,7 @@ describe('removeFragment', () => {
   });
 });
 
-describe('removeSearch', () => {
+describes.sandboxed('removeSearch', {}, () => {
   it('should remove search', () => {
     expect(removeSearch('https://twitter.com/path?abc')).to.equal(
       'https://twitter.com/path'
@@ -503,7 +503,7 @@ describe('removeSearch', () => {
   });
 });
 
-describe('addParamToUrl', () => {
+describes.sandboxed('addParamToUrl', {}, () => {
   let url;
 
   beforeEach(() => {
@@ -568,7 +568,7 @@ describe('addParamToUrl', () => {
   });
 });
 
-describe('addParamsToUrl', () => {
+describes.sandboxed('addParamsToUrl', {}, () => {
   let url;
   const params = {
     hello: 'world',
@@ -607,7 +607,7 @@ describe('addParamsToUrl', () => {
   });
 });
 
-describe('addMissingParamsToUrl', () => {
+describes.sandboxed('addMissingParamsToUrl', {}, () => {
   let url;
   const params = {
     hello: 'world',
@@ -626,7 +626,7 @@ describe('addMissingParamsToUrl', () => {
   });
 });
 
-describe('isProxyOrigin', () => {
+describes.sandboxed('isProxyOrigin', {}, () => {
   function testProxyOrigin(href, bool) {
     it(
       'should return that ' +
@@ -677,7 +677,7 @@ describe('isProxyOrigin', () => {
   );
 });
 
-describe('isLocalhostOrigin', () => {
+describes.sandboxed('isLocalhostOrigin', {}, () => {
   function testLocalhostOrigin(href, bool) {
     it(
       'should return that ' +
@@ -698,7 +698,7 @@ describe('isLocalhostOrigin', () => {
   testLocalhostOrigin('http://www.example.com/foo.html', false);
 });
 
-describe('isProtocolValid', () => {
+describes.sandboxed('isProtocolValid', {}, () => {
   function testProtocolValid(href, bool) {
     it.configure()
       .skipFirefox()
@@ -728,7 +728,7 @@ describe('isProtocolValid', () => {
   testProtocolValid('vbscript:foo', false);
 });
 
-describe('getSourceOrigin/Url', () => {
+describes.sandboxed('getSourceOrigin/Url', {}, () => {
   function testOrigin(href, sourceHref) {
     it('should return the source origin/url from ' + href, () => {
       expect(getSourceUrl(href)).to.equal(sourceHref);
@@ -888,7 +888,7 @@ describe('getSourceOrigin/Url', () => {
   });
 });
 
-describe('resolveRelativeUrl', () => {
+describes.sandboxed('resolveRelativeUrl', {}, () => {
   function testRelUrl(href, baseHref, resolvedHref) {
     it.configure()
       .skipFirefox()
@@ -982,7 +982,7 @@ describe('resolveRelativeUrl', () => {
   );
 });
 
-describe('getCorsUrl', () => {
+describes.sandboxed('getCorsUrl', {}, () => {
   it('should error if __amp_source_origin is set', () => {
     allowConsoleError(() => {
       expect(() =>
@@ -1002,7 +1002,7 @@ describe('getCorsUrl', () => {
   });
 });
 
-describe('removeAmpJsParamsFromUrl', () => {
+describes.sandboxed('removeAmpJsParamsFromUrl', {}, () => {
   it('should handle unaffected URLs', () => {
     expect(removeAmpJsParamsFromUrl('http://example.com')).to.equal(
       'http://example.com/'
@@ -1056,7 +1056,7 @@ describe('removeAmpJsParamsFromUrl', () => {
   });
 });
 
-describe('removeParamsFromSearch', () => {
+describes.sandboxed('removeParamsFromSearch', {}, () => {
   it('should remove the leading ? or &', () => {
     expect(removeParamsFromSearch('?a=1&', 'a')).to.equal('');
   });
@@ -1072,7 +1072,7 @@ describe('removeParamsFromSearch', () => {
   });
 });
 
-describe('getProxyServingType', () => {
+describes.sandboxed('getProxyServingType', {}, () => {
   it('should ignore non-proxy origins', () => {
     expect(getProxyServingType('http://www.example.com')).to.be.null;
     expect(getProxyServingType('http://cdn.ampproject.org/c/o.com/foo/')).to.be

@@ -17,9 +17,9 @@
 import {BrowserController, RequestBank} from '../../testing/test-helper';
 
 // TODO(zhouyx, #11459): Unskip the test on Safari and Firefox.
-const t = describe.configure().skipSafari().skipFirefox().skipEdge();
+const t = describes.sandboxed.configure().skipSafari().skipFirefox().skipEdge();
 
-t.run('user-error', function () {
+t.run('user-error', {}, function () {
   describes.integration(
     'user-error integration test',
     {

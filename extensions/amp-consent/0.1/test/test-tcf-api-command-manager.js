@@ -40,8 +40,8 @@ describes.realWin(
       let callId;
 
       beforeEach(() => {
-        mockWin = mockWindowInterface(window.sandbox);
-        mockWin.postMessage = window.sandbox.spy();
+        mockWin = mockWindowInterface(env.sandbox);
+        mockWin.postMessage = env.sandbox.spy();
         mockMetadata = {};
         mockSharedData = {};
         mockTcString = '';
@@ -55,7 +55,7 @@ describes.realWin(
           getMergedSharedData: (opt_policy) => {
             return Promise.resolve(mockSharedData);
           },
-          setOnPolicyChange: window.sandbox.spy(),
+          setOnPolicyChange: env.sandbox.spy(),
         };
       });
 

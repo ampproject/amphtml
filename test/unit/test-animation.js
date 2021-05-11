@@ -16,7 +16,7 @@
 
 import {Animation} from '../../src/animation';
 
-describe('Animation', () => {
+describes.sandboxed('Animation', {}, (env) => {
   let vsync;
   let vsyncTasks;
   let anim;
@@ -24,7 +24,7 @@ describe('Animation', () => {
   let contextNode;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     vsyncTasks = [];
     vsync = {
       canAnimate: () => true,

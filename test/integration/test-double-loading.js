@@ -27,10 +27,10 @@ function checkElementUpgrade(element) {
   expect(element).to.not.have.class('i-amphtml-unresolved');
 }
 
-describe
+describes.sandboxed
   .configure()
   .ifModuleBuild()
-  .run('runtime', () => {
+  .run('runtime', {}, () => {
     it('should only execute module code', async () => {
       const testExtension = 'amp-carousel';
       const fixture = await createFixtureIframe(

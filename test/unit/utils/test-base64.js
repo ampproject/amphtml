@@ -25,10 +25,10 @@ import {
 import {stringToBytes, utf8Decode, utf8Encode} from '../../../src/utils/bytes';
 
 // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
-describe
+describes.sandboxed
   .configure()
   .skipSafari()
-  .run('base64', () => {
+  .run('base64', {}, () => {
     describe('base64 <> utf-8 encode/decode', () => {
       const testCases = [
         'SimplyFoo',

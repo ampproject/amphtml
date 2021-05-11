@@ -82,7 +82,7 @@ describes.integration(
             // This is brittle but I don't know how else to stub
             // window navigation.
             const navigationService = win.__AMP_SERVICES.navigation.obj;
-            const navigateTo = window.sandbox.stub(
+            const navigateTo = env.sandbox.stub(
               navigationService,
               'navigateTo'
             );
@@ -95,7 +95,7 @@ describes.integration(
         });
 
       it('AMP.print()', async () => {
-        const print = window.sandbox.stub(win, 'print');
+        const print = env.sandbox.stub(win, 'print');
 
         doc.getElementById('printBtn').click();
         await poll('print() called once', () => print.calledOnce);

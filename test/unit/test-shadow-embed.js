@@ -33,7 +33,7 @@ import {
 import {installStylesForDoc} from '../../src/style-installer';
 import {toArray} from '../../src/core/types/array';
 
-describes.sandboxed('shadow-embed', {}, () => {
+describes.sandboxed('shadow-embed', {}, (env) => {
   afterEach(() => {
     setShadowDomSupportedVersionForTesting(undefined);
   });
@@ -354,7 +354,7 @@ describes.sandboxed('shadow-embed', {}, () => {
     let isFirefox;
 
     beforeEach(() => {
-      createHTMLDocumentSpy = window.sandbox.spy();
+      createHTMLDocumentSpy = env.sandbox.spy();
       isFirefox = false;
       const platform = {
         isFirefox: () => isFirefox,

@@ -23,7 +23,7 @@ import {
   getMultiSizeDimensions,
 } from '../utils';
 
-describe('#getMultiSizeDimensions', () => {
+describes.sandboxed('#getMultiSizeDimensions', {}, () => {
   const multiSizes = [
     [300, 300],
     [300, 250],
@@ -143,35 +143,43 @@ describe('#getMultiSizeDimensions', () => {
   });
 });
 
-describe('#getMatchedContentResponsiveHeightAndUpdatePubParams', () => {
-  it('should use auto logic when no pub params present', () => {
-    const element = document.createElement('div');
-    expect(
-      getMatchedContentResponsiveHeightAndUpdatePubParams(400, element)
-    ).to.equal(1472);
-    expect(element.getAttribute(ExternalCorePubVars.ROWS_NUM)).to.equal('12');
-    expect(element.getAttribute(ExternalCorePubVars.COLUMNS_NUM)).to.equal('1');
-    expect(element.getAttribute(ExternalCorePubVars.UI_TYPE)).to.equal(
-      LayoutType.MOBILE_BANNER_IMAGE_SIDEBYSIDE
-    );
-  });
+describes.sandboxed(
+  '#getMatchedContentResponsiveHeightAndUpdatePubParams',
+  {},
+  () => {
+    it('should use auto logic when no pub params present', () => {
+      const element = document.createElement('div');
+      expect(
+        getMatchedContentResponsiveHeightAndUpdatePubParams(400, element)
+      ).to.equal(1472);
+      expect(element.getAttribute(ExternalCorePubVars.ROWS_NUM)).to.equal('12');
+      expect(element.getAttribute(ExternalCorePubVars.COLUMNS_NUM)).to.equal(
+        '1'
+      );
+      expect(element.getAttribute(ExternalCorePubVars.UI_TYPE)).to.equal(
+        LayoutType.MOBILE_BANNER_IMAGE_SIDEBYSIDE
+      );
+    });
 
-  it('should use pub control logic when pub params present', () => {
-    const element = document.createElement('div');
-    element.setAttribute(ExternalCorePubVars.ROWS_NUM, '1,2');
-    element.setAttribute(ExternalCorePubVars.COLUMNS_NUM, '3,4');
-    element.setAttribute(
-      ExternalCorePubVars.UI_TYPE,
-      `${LayoutType.IMAGE_SIDEBYSIDE},${LayoutType.IMAGE_STACKED}`
-    );
+    it('should use pub control logic when pub params present', () => {
+      const element = document.createElement('div');
+      element.setAttribute(ExternalCorePubVars.ROWS_NUM, '1,2');
+      element.setAttribute(ExternalCorePubVars.COLUMNS_NUM, '3,4');
+      element.setAttribute(
+        ExternalCorePubVars.UI_TYPE,
+        `${LayoutType.IMAGE_SIDEBYSIDE},${LayoutType.IMAGE_STACKED}`
+      );
 
-    expect(
-      getMatchedContentResponsiveHeightAndUpdatePubParams(800, element)
-    ).to.equal(382);
-    expect(element.getAttribute(ExternalCorePubVars.ROWS_NUM)).to.equal('2');
-    expect(element.getAttribute(ExternalCorePubVars.COLUMNS_NUM)).to.equal('4');
-    expect(element.getAttribute(ExternalCorePubVars.UI_TYPE)).to.equal(
-      LayoutType.PUB_CONTROL_IMAGE_STACKED
-    );
-  });
-});
+      expect(
+        getMatchedContentResponsiveHeightAndUpdatePubParams(800, element)
+      ).to.equal(382);
+      expect(element.getAttribute(ExternalCorePubVars.ROWS_NUM)).to.equal('2');
+      expect(element.getAttribute(ExternalCorePubVars.COLUMNS_NUM)).to.equal(
+        '4'
+      );
+      expect(element.getAttribute(ExternalCorePubVars.UI_TYPE)).to.equal(
+        LayoutType.PUB_CONTROL_IMAGE_STACKED
+      );
+    });
+  }
+);

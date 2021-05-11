@@ -23,7 +23,7 @@ import {toArray} from '../../../../src/core/types/array';
 
 adopt(window);
 
-describe('amp-sidebar - toolbar', () => {
+describes.sandboxed('amp-sidebar - toolbar', {}, (env) => {
   let timer;
 
   function getToolbars(options) {
@@ -43,7 +43,7 @@ describe('amp-sidebar - toolbar', () => {
         },
       };
 
-      window.sandbox.stub(timer, 'delay').callsFake(function (callback) {
+      env.sandbox.stub(timer, 'delay').callsFake(function (callback) {
         callback();
       });
 
