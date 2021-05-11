@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 // These must load before all other tests.
 import '../src/polyfills';
-import './_setup_test_framework';
+import './setup_chai_sinon';
 
 import * as coreError from '../src/core/error';
 import * as describes from '../testing/describes';
 import {Services} from '../src/services';
+import {TestConfig} from './test-config';
 import {activateChunkingForTesting} from '../src/chunk';
 import {adoptWithMultidocDeps} from '../src/runtime';
 import {cancelTimersForTesting} from '../src/service/timer-impl';
@@ -42,9 +44,12 @@ import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {setReportError} from '../src/log';
 import AMP_CONFIG from '../build-system/global-configs/prod-config.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import PreactEnzyme from 'enzyme-adapter-preact-pure';
-import chaiAsPromised from 'chai-as-promised';
-import sinon from /*OK*/ 'sinon';
-import stringify from 'json-stable-stringify';
+import sinon from 'sinon'; // eslint-disable-line local/no-import
+
+/** @fileoverview
+ * This file initializes AMP's Karma + Mocha based unit & integration tests.
+ * TODO(wg-infra, #23837): Further refactor and clean up this file.
+ */
 
 // Used to print warnings for unexpected console errors.
 let that;
@@ -89,169 +94,6 @@ if (parent.karma && !parent.__karma__) {
 window.ampTestRuntimeConfig = parent.__karma__
   ? parent.__karma__.config.amp
   : {};
-
-/**
- * Helper class to skip or retry tests under specific environment.
- * Should be instantiated via describe.configure() or it.configure().
- * Get permission before use!
- *
- * Example usages:
- * describe.configure().skipFirefox().skipSafari().run('Bla bla ...', ... );
- * it.configure().skipEdge().run('Should ...', ...);
- */
-class TestConfig {
-  constructor(runner) {
-    this.runner = runner;
-    /**
-     * List of predicate functions that are called before running each test
-     * suite to check whether the suite should be skipped or not.
-     * If any of the functions return 'true', the suite will be skipped.
-     * @type {!Array<function():boolean>}
-     */
-    this.skipMatchers = [];
-
-    /**
-     * List of predicate functions that are called before running each test
-     * suite to check whether the suite should be skipped or not.
-     * If any of the functions return 'false', the suite will be skipped.
-     * @type {!Array<function():boolean>}
-     */
-    this.ifMatchers = [];
-
-    /**
-     * Called for each test suite (things created by `describe`).
-     * @type {!Array<function(!TestSuite)>}
-     */
-    this.configTasks = [];
-
-    this.platform = Services.platformFor(window);
-
-    this.isModuleBuild = () => !!window.ampTestRuntimeConfig.isModuleBuild;
-
-    /**
-     * Predicate functions that determine whether to run tests on a platform.
-     */
-    this.runOnChrome = this.platform.isChrome.bind(this.platform);
-    this.runOnEdge = this.platform.isEdge.bind(this.platform);
-    this.runOnFirefox = this.platform.isFirefox.bind(this.platform);
-    this.runOnSafari = this.platform.isSafari.bind(this.platform);
-    this.runOnIos = this.platform.isIos.bind(this.platform);
-    this.runOnIe = this.platform.isIe.bind(this.platform);
-
-    /**
-     * By default, IE is skipped. Individual tests may opt in.
-     */
-    this.skip(this.runOnIe);
-  }
-
-  skipModuleBuild() {
-    return this.skip(this.isModuleBuild);
-  }
-
-  skipChrome() {
-    return this.skip(this.runOnChrome);
-  }
-
-  skipEdge() {
-    return this.skip(this.runOnEdge);
-  }
-
-  skipFirefox() {
-    return this.skip(this.runOnFirefox);
-  }
-
-  skipSafari() {
-    return this.skip(this.runOnSafari);
-  }
-
-  skipIos() {
-    return this.skip(this.runOnIos);
-  }
-
-  skipIfPropertiesObfuscated() {
-    return this.skip(function () {
-      return window.__karma__.config.amp.propertiesObfuscated;
-    });
-  }
-
-  enableIe() {
-    this.skipMatchers.splice(this.skipMatchers.indexOf(this.runOnIe), 1);
-    return this;
-  }
-
-  /**
-   * @param {function():boolean} fn
-   */
-  skip(fn) {
-    this.skipMatchers.push(fn);
-    return this;
-  }
-
-  ifModuleBuild() {
-    return this.if(this.isModuleBuild);
-  }
-
-  ifChrome() {
-    return this.if(this.runOnChrome);
-  }
-
-  ifEdge() {
-    return this.if(this.runOnEdge);
-  }
-
-  ifFirefox() {
-    return this.if(this.runOnFirefox);
-  }
-
-  ifSafari() {
-    return this.if(this.runOnSafari);
-  }
-
-  ifIos() {
-    return this.if(this.runOnIos);
-  }
-
-  ifIe() {
-    // It's necessary to first enable IE because we skip it by default.
-    return this.enableIe().if(this.runOnIe);
-  }
-
-  /**
-   * @param {function():boolean} fn
-   */
-  if(fn) {
-    this.ifMatchers.push(fn);
-    return this;
-  }
-
-  /**
-   * @param {string} desc
-   * @param {function()} fn
-   */
-  run(desc, fn) {
-    for (let i = 0; i < this.skipMatchers.length; i++) {
-      if (this.skipMatchers[i].call(this)) {
-        this.runner.skip(desc, fn);
-        return;
-      }
-    }
-
-    for (let i = 0; i < this.ifMatchers.length; i++) {
-      if (!this.ifMatchers[i].call(this)) {
-        this.runner.skip(desc, fn);
-        return;
-      }
-    }
-
-    const tasks = this.configTasks;
-    this.runner(desc, function () {
-      tasks.forEach((task) => {
-        task(this);
-      });
-      return fn.apply(this, arguments);
-    });
-  }
-}
 
 describe.configure = function () {
   return new TestConfig(describe);
@@ -488,99 +330,4 @@ afterEach(function () {
   resetExperimentTogglesForTesting(window);
   resetEvtListenerOptsSupportForTesting();
   cancelTimersForTesting();
-});
-
-chai.use(chaiAsPromised);
-
-chai.Assertion.addMethod('attribute', function (attr) {
-  const obj = this._obj;
-  const tagName = obj.tagName.toLowerCase();
-  this.assert(
-    obj.hasAttribute(attr),
-    "expected element '" + tagName + "' to have attribute #{exp}",
-    "expected element '" + tagName + "' to not have attribute #{act}",
-    attr,
-    attr
-  );
-});
-
-chai.Assertion.addMethod('class', function (className) {
-  const obj = this._obj;
-  const tagName = obj.tagName.toLowerCase();
-  this.assert(
-    obj.classList.contains(className),
-    "expected element '" + tagName + "' to have class #{exp}",
-    "expected element '" + tagName + "' to not have class #{act}",
-    className,
-    className
-  );
-});
-
-chai.Assertion.addProperty('visible', function () {
-  const obj = this._obj;
-  const computedStyle = window.getComputedStyle(obj);
-  const visibility = computedStyle.getPropertyValue('visibility');
-  const opacity = computedStyle.getPropertyValue('opacity');
-  const isOpaque = parseInt(opacity, 10) > 0;
-  const tagName = obj.tagName.toLowerCase();
-  this.assert(
-    visibility === 'visible' && isOpaque,
-    "expected element '" +
-      tagName +
-      "' to be #{exp}, got #{act}. with classes: " +
-      obj.className,
-    "expected element '" +
-      tagName +
-      "' not to be #{exp}, got #{act}. with classes: " +
-      obj.className,
-    'visible and opaque',
-    `visibility = ${visibility} and opacity = ${opacity}`
-  );
-});
-
-chai.Assertion.addProperty('hidden', function () {
-  const obj = this._obj;
-  const computedStyle = window.getComputedStyle(obj);
-  const visibility = computedStyle.getPropertyValue('visibility');
-  const opacity = computedStyle.getPropertyValue('opacity');
-  const tagName = obj.tagName.toLowerCase();
-  this.assert(
-    visibility === 'hidden' || parseInt(opacity, 10) == 0,
-    "expected element '" +
-      tagName +
-      "' to be #{exp}, got #{act}. with classes: " +
-      obj.className,
-    "expected element '" +
-      tagName +
-      "' not to be #{act}. with classes: " +
-      obj.className,
-    'hidden',
-    visibility
-  );
-});
-
-chai.Assertion.addMethod('display', function (display) {
-  const obj = this._obj;
-  const value = window.getComputedStyle(obj).getPropertyValue('display');
-  const tagName = obj.tagName.toLowerCase();
-  this.assert(
-    value === display,
-    "expected element '" + tagName + "' to be display #{exp}, got #{act}.",
-    "expected element '" + tagName + "' not to be display #{act}.",
-    display,
-    value
-  );
-});
-
-chai.Assertion.addMethod('jsonEqual', function (compare) {
-  const obj = this._obj;
-  const a = stringify(compare);
-  const b = stringify(obj);
-  this.assert(
-    a == b,
-    'expected JSON to be equal.\nExp: #{exp}\nAct: #{act}',
-    'expected JSON to not be equal.\nExp: #{exp}\nAct: #{act}',
-    a,
-    b
-  );
 });

@@ -24,7 +24,7 @@
  *   watched: boolean
  * }>
  */
-const initTestsPath = ['test/_init_tests.js'];
+const initTestsPath = ['testing/_init_tests.js'];
 
 const karmaHtmlFixturesPath = 'test/fixtures/*.html';
 
