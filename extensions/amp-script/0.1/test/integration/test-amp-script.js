@@ -23,10 +23,10 @@ function poll(description, condition, opt_onError) {
   return classicPoll(description, condition, opt_onError, TIMEOUT);
 }
 
-describe
+describes.sandboxed
   .configure()
   .skipFirefox()
-  .run('amp-script', function () {
+  .run('amp-script', {}, function () {
     this.timeout(TIMEOUT);
 
     let browser, doc, element;

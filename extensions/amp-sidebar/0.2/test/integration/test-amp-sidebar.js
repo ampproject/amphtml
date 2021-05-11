@@ -16,11 +16,11 @@
 
 import {poll} from '../../../../../testing/iframe';
 
-describe
+describes.sandboxed
   .configure()
   .skipSafari()
   .skipEdge()
-  .run('amp-sidebar', function () {
+  .run('amp-sidebar', {}, function () {
     // Extend timeout slightly for flakes on Windows environments
     this.timeout(4000);
     const extensions = ['amp-sidebar'];

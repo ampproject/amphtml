@@ -1071,7 +1071,7 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
   });
 });
 
-describe('areFriendlyDomains', () => {
+describes.sandboxed('areFriendlyDomains', {}, () => {
   it('should work', () => {
     expect(areFriendlyDomains('amp.source.test', 'www.source.test')).to.be.true;
     expect(areFriendlyDomains('m.source.test', 'www.source.test')).to.be.true;
@@ -1086,7 +1086,7 @@ describe('areFriendlyDomains', () => {
   });
 });
 
-describe('wildcard matching', () => {
+describes.sandboxed('wildcard matching', {}, () => {
   const testCases = [
     {
       hostname: 'amp.foo.com',
