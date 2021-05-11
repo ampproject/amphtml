@@ -236,12 +236,17 @@ export const integration = createConfigurableRunner((spec) => [
 ]);
 
 /**
- * A repeating test.
+ * A repeated test within a sandboxed wrapper.
  * @param {string} name
  * @param {!Object<string, *>} variants
- * @param {function(string, *)} fn
+ * @param {function()} fn
  */
-export const repeated = (function () {
+export const repeated = createRepeatedRunner();
+
+/**
+ * Defines a repeating test within a sandboxed wrapper.
+ */
+function repeatedEnv() {
   /**
    * @param {string} name
    * @param {!Object<string, *>} variants
@@ -251,34 +256,30 @@ export const repeated = (function () {
   const templateFunc = function (name, variants, fn, describeFunc) {
     return describeFunc(name, function () {
       for (const name in variants) {
-        describe(name ? ` ${name} ` : SUB, function () {
-          fn.call(this, name, variants[name]);
+        sandboxed(name ? ` ${name} ` : SUB, {}, function (env) {
+          fn.call(this, name, variants[name], env);
         });
       }
     });
   };
 
-  /**
-   * @param {string} name
-   * @param {!Object<string, *>} variants
-   * @param {function(string, *)} fn
-   */
-  const mainFunc = function (name, variants, fn) {
-    return templateFunc(name, variants, fn, describe);
-  };
+  const createTemplate = (describeFunc) => (name, variants, fn) =>
+    templateFunc(name, variants, fn, describeFunc);
 
-  /**
-   * @param {string} name
-   * @param {!Object<string, *>} variants
-   * @param {function(string, *)} fn
-   */
-  mainFunc.only = function (name, variants, fn) {
-    return templateFunc(name, variants, fn, describe./*OK*/ only);
-  };
-
+  const mainFunc = createTemplate(describe);
+  mainFunc.only = createTemplate(describe.only);
+  mainFunc.skip = createTemplate(describe.skip);
   return mainFunc;
-})();
-repeated.configure = () => new TestConfig(repeated);
+}
+
+/**
+ * Creates a repeated version of a top-level describes runner.
+ */
+function createRepeatedRunner() {
+  const runner = repeatedEnv();
+  runner.configure = () => new TestConfig(runner);
+  return runner;
+}
 
 /**
  * Mocks Window.fetch in the given environment and exposes `env.fetchMock`. For
