@@ -340,7 +340,6 @@ const VIEWER_CONTROL_DEFAULTS = {
  * Chrome contains:
  *   - mute/unmute button
  *   - story progress bar
- *   - bookend close button
  *   - share button
  *   - domain info button
  *   - sidebar
@@ -423,8 +422,9 @@ export class SystemLayer {
     // Make the share button link to the current document to make sure
     // embedded STAMPs always have a back-link to themselves, and to make
     // gestures like right-clicks work.
-    this.systemLayerEl_.querySelector('.i-amphtml-story-share-control').href =
-      Services.documentInfoForDoc(this.parentEl_).canonicalUrl;
+    this.systemLayerEl_.querySelector(
+      '.i-amphtml-story-share-control'
+    ).href = Services.documentInfoForDoc(this.parentEl_).canonicalUrl;
 
     createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
 
@@ -557,10 +557,6 @@ export class SystemLayer {
 
     this.storeService_.subscribe(StateProperty.AD_STATE, (isAd) => {
       this.onAdStateUpdate_(isAd);
-    });
-
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
-      this.onBookendStateUpdate_(isActive);
     });
 
     this.storeService_.subscribe(
@@ -711,18 +707,6 @@ export class SystemLayer {
     isAd
       ? this.getShadowRoot().setAttribute(AD_SHOWING_ATTRIBUTE, '')
       : this.getShadowRoot().removeAttribute(AD_SHOWING_ATTRIBUTE);
-  }
-
-  /**
-   * Reacts to the bookend state updates and updates the UI accordingly.
-   * @param {boolean} isActive
-   * @private
-   */
-  onBookendStateUpdate_(isActive) {
-    this.getShadowRoot().classList.toggle(
-      'i-amphtml-story-bookend-active',
-      isActive
-    );
   }
 
   /**

@@ -88,7 +88,6 @@ export let InteractiveReactData;
 /**
  * @typedef {{
  *    canInsertAutomaticAd: boolean,
- *    canShowBookend: boolean,
  *    canShowAudioUi: boolean,
  *    canShowNavigationOverlayHint: boolean,
  *    canShowPaginationButtons: boolean,
@@ -100,7 +99,6 @@ export let InteractiveReactData;
  *    adState: boolean,
  *    pageAttachmentState: boolean,
  *    affiliateLinkState: !Element,
- *    bookendState: boolean,
  *    desktopState: boolean,
  *    educationState: boolean,
  *    gyroscopeEnabledState: string,
@@ -140,7 +138,6 @@ export let State;
 export const StateProperty = {
   // Embed options.
   CAN_INSERT_AUTOMATIC_AD: 'canInsertAutomaticAd',
-  CAN_SHOW_BOOKEND: 'canShowBookend',
   CAN_SHOW_AUDIO_UI: 'canShowAudioUi',
   CAN_SHOW_NAVIGATION_OVERLAY_HINT: 'canShowNavigationOverlayHint',
   CAN_SHOW_PAGINATION_BUTTONS: 'canShowPaginationButtons',
@@ -153,7 +150,6 @@ export const StateProperty = {
   ACCESS_STATE: 'accessState', // amp-access paywall.
   AD_STATE: 'adState',
   PAGE_ATTACHMENT_STATE: 'pageAttachmentState',
-  BOOKEND_STATE: 'bookendState',
   AFFILIATE_LINK_STATE: 'affiliateLinkState',
   DESKTOP_STATE: 'desktopState',
   EDUCATION_STATE: 'educationState',
@@ -209,8 +205,6 @@ export const Action = {
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_AFFILIATE_LINK: 'toggleAffiliateLink',
-  TOGGLE_BOOKEND: 'toggleBookend',
-  TOGGLE_CAN_SHOW_BOOKEND: 'toggleCanShowBookend',
   TOGGLE_EDUCATION: 'toggleEducation',
   TOGGLE_HAS_SIDEBAR: 'toggleHasSidebar',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
@@ -332,21 +326,6 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.AFFILIATE_LINK_STATE]: data,
-      });
-    // Shows or hides the bookend.
-    case Action.TOGGLE_BOOKEND:
-      if (!state[StateProperty.CAN_SHOW_BOOKEND]) {
-        return state;
-      }
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.BOOKEND_STATE]: !!data,
-        [StateProperty.PAUSED_STATE]: !!data,
-      });
-    case Action.TOGGLE_CAN_SHOW_BOOKEND:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.CAN_SHOW_BOOKEND]: !!data,
       });
     case Action.TOGGLE_EDUCATION:
       return /** @type {!State} */ ({
@@ -605,7 +584,6 @@ export class AmpStoryStoreService {
     // properties, so we have to force the type.
     return /** @type {!State} */ ({
       [StateProperty.CAN_INSERT_AUTOMATIC_AD]: true,
-      [StateProperty.CAN_SHOW_BOOKEND]: true,
       [StateProperty.CAN_SHOW_AUDIO_UI]: true,
       [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: true,
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
@@ -616,7 +594,6 @@ export class AmpStoryStoreService {
       [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
       [StateProperty.AFFILIATE_LINK_STATE]: null,
-      [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
       [StateProperty.EDUCATION_STATE]: false,
       [StateProperty.GYROSCOPE_PERMISSION_STATE]: '',
@@ -670,7 +647,6 @@ export class AmpStoryStoreService {
       case EmbedMode.NAME_TBD:
         return {
           [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
-          [StateProperty.CAN_SHOW_BOOKEND]: false,
           [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
           [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: false,
           [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
@@ -685,7 +661,6 @@ export class AmpStoryStoreService {
         return {
           [StateProperty.PREVIEW_STATE]: true,
           [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
-          [StateProperty.CAN_SHOW_BOOKEND]: false,
           [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
           [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: false,
           [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,

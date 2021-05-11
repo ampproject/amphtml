@@ -27,7 +27,6 @@ export const LOCAL_STORAGE_KEY = 'amp-story-state';
 /** @enum {string} */
 export const HistoryState = {
   ATTACHMENT_PAGE_ID: 'ampStoryAttachmentPageId',
-  BOOKEND_ACTIVE: 'ampStoryBookendActive',
   NAVIGATION_PATH: 'ampStoryNavigationPath',
 };
 
@@ -68,9 +67,8 @@ export function getHistoryState(win, stateName) {
     state = getLocalStorageState(win);
   }
   if (state) {
-    return /** @type {string|boolean|Array<string>|null} */ (
-      state[stateName] || null
-    );
+    return /** @type {string|boolean|Array<string>|null} */ (state[stateName] ||
+      null);
   }
   return null;
 }
