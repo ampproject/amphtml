@@ -19,7 +19,7 @@ import {ImaPlayerData} from './ima-player-data';
 import {camelCaseToTitleCase, setStyle, toggle} from '../../../src/style';
 import {getData} from '../../../src/event-helper';
 import {htmlFor, htmlRefs, svgFor} from '../../../src/static-template';
-import {isObject} from '../../../src/core/types';
+import {isArray, isObject} from '../../../src/core/types';
 import {loadScript} from '../../../3p/3p';
 import {throttle} from '../../../src/core/types/function';
 import {tryParseJson} from '../../../src/json';
@@ -303,6 +303,41 @@ function renderElements(elementOrDoc) {
 }
 
 /**
+ * @param {!Document} document
+ * @param {?Array<Array<string|Object>>} childrenDef
+ *   an array of [tagName, attributes] items like:
+ *     [
+ *       ['SOURCE', {'src': 'foo.mp4'}],
+ *       ['TRACK', {'src': 'bar.mp4'}],
+ *     ]
+ * @return {?Node} Optional DocumentFragment containing created children
+ */
+function maybeCreateChildren(document, childrenDef) {
+  if (!isArray(childrenDef)) {
+    return null;
+  }
+  const fragment = document.createDocumentFragment();
+  childrenDef.forEach((child) => {
+    const tagName = child[0];
+    const attributes = child[1];
+    if (
+      !(
+        typeof tagName === 'string' &&
+        typeof attributes === 'object' &&
+        attributes != null
+      )
+    ) {
+      throw new Error(child);
+    }
+    const element = document.createElement(tagName);
+    for (const attr in attributes) {
+      element.setAttribute(attr, attributes[attr]);
+    }
+  });
+  return fragment;
+}
+
+/**
  * @param {!Object} global
  * @param {!Object} data
  */
@@ -328,12 +363,14 @@ export function imaVideo(global, data) {
     sourceElement.setAttribute('src', data.src);
     video.appendChild(sourceElement);
   }
-  if (data.childElements) {
-    const children = JSON.parse(data.childElements);
-    /** @type {!Array} */ (children).forEach((child) => {
-      video.appendChild(htmlToElement(child));
-    });
+  const childrenFragment = maybeCreateChildren(
+    global.document,
+    data['_context']?.['sourceChildren']
+  );
+  if (childrenFragment) {
+    video.appendChild(childrenFragment);
   }
+
   if (data.imaSettings) {
     imaSettings = tryParseJson(data.imaSettings);
   }
@@ -550,16 +587,6 @@ function onImaLoadFail() {
   );
   imaLoadAllowed = false;
   postMessage({event: VideoEvents.LOAD});
-}
-
-/**
- * @param {string} html
- * @return {!Element}
- */
-function htmlToElement(html) {
-  const template = document.createElement('template');
-  template./*OK*/ innerHTML = html;
-  return template.content.firstChild;
 }
 
 /**

@@ -34,7 +34,6 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isEnumValue, isObject} from '../../../src/core/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
-
 import {
   observeContentSize,
   unobserveContentSize,
@@ -45,6 +44,28 @@ import {toArray} from '../../../src/core/types/array';
 const TAG = 'amp-ima-video';
 
 const TYPE = 'ima-video';
+
+/**
+ * [tagName, attributes]
+ *   like:
+ *   ['SOURCE', {src: 'source.mp4'}]
+ * @type {!Array<string, !Object>}
+ */
+let SerializableChildDef;
+
+/**
+ * @param {!Element} element
+ * @return {!Object<string, *>}
+ */
+function serializeAttributes(element) {
+  const {attributes} = element;
+  const serialized = {};
+  for (let i = 0; i < attributes.length; i++) {
+    const {name, value} = attributes[i];
+    serialized[name] = value;
+  }
+  return serialized;
+}
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -68,6 +89,9 @@ class AmpImaVideo extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
+    /** @private {?Array<!SerializableChildDef>} */
+    this.sourceChildren_ = null;
 
     /** @private {?string} */
     this.preconnectSource_ = null;
@@ -119,22 +143,18 @@ class AmpImaVideo extends AMP.BaseElement {
     const childElements = toArray(sourceElements).concat(
       toArray(trackElements)
     );
-    if (childElements.length > 0) {
-      const children = [];
-      childElements.forEach((child) => {
-        // Save the first source and first track to preconnect.
-        if (child.tagName == 'SOURCE' && !this.preconnectSource_) {
-          this.preconnectSource_ = child.src;
-        } else if (child.tagName == 'TRACK' && !this.preconnectTrack_) {
-          this.preconnectTrack_ = child.src;
-        }
-        children.push(child./*OK*/ outerHTML);
-      });
-      this.element.setAttribute(
-        'data-child-elements',
-        JSON.stringify(children)
-      );
-    }
+
+    this.sourceChildren_ = childElements.map((element) => {
+      const {tagName} = element;
+      const src = element.getAttribute('src');
+      // Save the first source and first track to preconnect.
+      if (tagName == 'SOURCE' && !this.preconnectSource_) {
+        this.preconnectSource_ = src;
+      } else if (tagName == 'TRACK' && !this.preconnectTrack_) {
+        this.preconnectTrack_ = src;
+      }
+      return [tagName, serializeAttributes(element)];
+    });
 
     // Handle IMASetting JSON
     const scriptElement = childElementsByTag(this.element, 'SCRIPT')[0];
@@ -187,13 +207,13 @@ class AmpImaVideo extends AMP.BaseElement {
       ? getConsentPolicyState(element, consentPolicyId)
       : Promise.resolve(null);
     return consentPromise.then((initialConsentState) => {
-      const iframe = getIframe(
-        win,
-        element,
-        TYPE,
-        {initialConsentState},
-        {allowFullscreen: true}
-      );
+      const iframeContext = {
+        initialConsentState,
+        sourceChildren: this.sourceChildren_,
+      };
+      const iframe = getIframe(win, element, TYPE, iframeContext, {
+        allowFullscreen: true,
+      });
       iframe.title = this.element.title || 'IMA video';
 
       this.applyFillContent(iframe);
