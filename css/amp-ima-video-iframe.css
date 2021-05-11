@@ -61,7 +61,6 @@ button {
   position: absolute;
   bottom: 0;
   width: 100%;
-  /* height: 100px; */
   background-color: rgba(7, 20, 30, 0.7);
   background: linear-gradient(
     0,
