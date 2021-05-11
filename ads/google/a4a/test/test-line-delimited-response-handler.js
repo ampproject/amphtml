@@ -19,7 +19,7 @@ import {
   metaJsonCreativeGrouper,
 } from '../line-delimited-response-handler';
 
-describe('#line-delimited-response-handler', () => {
+describes.sandboxed('#line-delimited-response-handler', {}, () => {
   let chunkHandlerStub;
   let slotData;
   let win;

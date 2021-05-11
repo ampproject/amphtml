@@ -26,10 +26,10 @@ import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
 import {xhrServiceForTesting} from '../../src/service/xhr-impl';
 
 // TODO(jridgewell, #11827): Make this test work on Safari.
-describe
+describes.sandboxed
   .configure()
   .skipSafari()
-  .run('XHR', function () {
+  .run('XHR', {}, function () {
     let ampdocServiceForStub;
     let ampdoc;
     let ampdocViewerStub;

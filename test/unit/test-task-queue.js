@@ -16,7 +16,7 @@
 
 import {TaskQueue} from '../../src/service/task-queue';
 
-describe('TaskQueue', () => {
+describes.sandboxed('TaskQueue', {}, () => {
   let clock;
   let queue;
 

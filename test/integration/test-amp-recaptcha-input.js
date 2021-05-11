@@ -20,11 +20,11 @@ import {poll} from '../../testing/iframe';
 
 // TODO(wg-components): These tests are broken on Firefox (as of v77). They
 // also fail on Safari.
-describe
+describes.sandboxed
   .configure()
   .skipFirefox()
   .skipSafari()
-  .run('amp-recaptcha-input', function () {
+  .run('amp-recaptcha-input', {}, function () {
     describes.integration(
       'with form and amp-mustache',
       {

@@ -981,7 +981,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
   });
 });
 
-describe('Resource idleRenderOutsideViewport', () => {
+describes.sandboxed('Resource idleRenderOutsideViewport', {}, () => {
   let element;
   let resources;
   let resource;

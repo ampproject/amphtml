@@ -16,7 +16,7 @@
 
 import {JwtHelper, pemToBytes} from '../jwt';
 
-describe('JwtHelper', () => {
+describes.sandboxed('JwtHelper', {}, () => {
   // Generated from https://jwt.io/#debugger
   // Name deliberately changed from "John Doe" to "John ௵Z加䅌ਇ☎Èʘغޝ" to test
   // correct unicode handling on our part.
@@ -250,10 +250,10 @@ describe('JwtHelper', () => {
 });
 
 // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
-describe
+describes.sandboxed
   .configure()
   .skipSafari()
-  .run('pemToBytes', () => {
+  .run('pemToBytes', {}, () => {
     const PLAIN_TEXT =
       'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDdlatRjRjogo3WojgGHFHYLugd' +
       'UWAY9iR3fy4arWNA1KoS8kVw33cJibXr8bvwUAUparCwlvdbH6dvEOfou0/gCFQs' +

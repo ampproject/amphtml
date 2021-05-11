@@ -23,7 +23,7 @@ import {
 } from '../../src/gesture-recognizers';
 import {Gestures} from '../../src/gesture';
 
-describe('TapRecognizer', () => {
+describes.sandboxed('TapRecognizer', {}, () => {
   let element;
   let recognizer;
   let gestures;
@@ -118,7 +118,7 @@ describe('TapRecognizer', () => {
   });
 });
 
-describe('DoubletapRecognizer', () => {
+describes.sandboxed('DoubletapRecognizer', {}, () => {
   let element;
   let recognizer;
   let gestures;
@@ -224,7 +224,7 @@ describe('DoubletapRecognizer', () => {
   });
 });
 
-describe('SwipeXYRecognizer', () => {
+describes.sandboxed('SwipeXYRecognizer', {}, () => {
   let element;
   let clock;
   let recognizer;
@@ -483,7 +483,7 @@ describe('SwipeXYRecognizer', () => {
   });
 });
 
-describe('TapzoomRecognizer', () => {
+describes.sandboxed('TapzoomRecognizer', {}, () => {
   let element;
   let clock;
   let recognizer;
@@ -697,7 +697,7 @@ describe('TapzoomRecognizer', () => {
   });
 });
 
-describe('PinchRecognizer', () => {
+describes.sandboxed('PinchRecognizer', {}, () => {
   let element;
   let clock;
   let recognizer;

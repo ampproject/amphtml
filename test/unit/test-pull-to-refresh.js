@@ -16,7 +16,7 @@
 
 import {PullToRefreshBlocker} from '../../src/pull-to-refresh';
 
-describe('PullToRefreshBlocker', () => {
+describes.sandboxed('PullToRefreshBlocker', {}, () => {
   let eventListeners;
   let viewportMock;
   let blocker;

@@ -21,10 +21,10 @@ import {createIframePromise} from '../../testing/iframe';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
 
-describe
+describes.sandboxed
   .configure()
   .skipFirefox()
-  .run('document-info', () => {
+  .run('document-info', {}, () => {
     beforeEach(() => {
       window.sandbox.stub(CID, 'getRandomString64').returns('abcdef');
     });

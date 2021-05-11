@@ -23,7 +23,7 @@ import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {installXhrService} from '../../../src/service/xhr-impl';
 
-describe('invokeWebWorker', () => {
+describes.sandboxed('invokeWebWorker', {}, () => {
   let fakeWin;
 
   let ampWorker;

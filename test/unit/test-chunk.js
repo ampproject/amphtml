@@ -24,7 +24,7 @@ import {
 } from '../../src/chunk';
 import {installDocService} from '../../src/service/ampdoc-impl';
 
-describe('chunk2', () => {
+describes.sandboxed('chunk2', {}, () => {
   beforeEach(() => {
     activateChunkingForTesting();
   });
@@ -360,7 +360,7 @@ describe('chunk2', () => {
   );
 });
 
-describe('long tasks', () => {
+describes.sandboxed('long tasks', {}, () => {
   describes.fakeWin(
     'long chunk tasks force a macro task between work',
     {
@@ -482,7 +482,7 @@ describe('long tasks', () => {
   );
 });
 
-describe('isInputPending usage', () => {
+describes.sandboxed('isInputPending usage', {}, () => {
   describes.fakeWin(
     'pending input breaks microtask loop to subsequent macrotask',
     {
@@ -589,7 +589,7 @@ describe('isInputPending usage', () => {
   );
 });
 
-describe('onIdle', () => {
+describes.sandboxed('onIdle', {}, () => {
   let win;
   let calls;
   let callbackCalled;

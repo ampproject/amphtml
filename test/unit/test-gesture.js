@@ -16,7 +16,7 @@
 
 import {GestureRecognizer, Gestures} from '../../src/gesture';
 
-describe('Gestures', () => {
+describes.sandboxed('Gestures', {}, () => {
   class TestRecognizer extends GestureRecognizer {
     constructor(manager) {
       super('test', manager);

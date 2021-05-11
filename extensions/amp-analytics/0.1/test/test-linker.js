@@ -245,7 +245,7 @@ const createLinkerTests = [
   },
 ];
 
-describe('Linker', () => {
+describes.sandboxed('Linker', {}, () => {
   let mockWin;
   beforeEach(() => {
     // Linker uses a timestamp value to generate checksum.

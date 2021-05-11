@@ -25,7 +25,7 @@ import {installViewportServiceForDoc} from '../../src/service/viewport/viewport-
 import {installVsyncService} from '../../src/service/vsync-impl';
 import {markElementScheduledForTesting} from '../../src/service/custom-element-registry';
 
-describe('Activity getTotalEngagedTime', () => {
+describes.sandboxed('Activity getTotalEngagedTime', {}, () => {
   let clock;
   let fakeDoc;
   let fakeWin;
@@ -259,7 +259,7 @@ describe('Activity getTotalEngagedTime', () => {
   );
 });
 
-describe('Activity getIncrementalEngagedTime', () => {
+describes.sandboxed('Activity getIncrementalEngagedTime', {}, () => {
   let clock;
   let fakeDoc;
   let fakeWin;

@@ -16,7 +16,7 @@
 
 import * as tr from '../../src/transition';
 
-describe('Transition', () => {
+describes.sandboxed('Transition', {}, () => {
   it('all', () => {
     const func1 = window.sandbox.spy();
     const func2 = window.sandbox.spy();

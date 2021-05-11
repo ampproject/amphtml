@@ -26,7 +26,7 @@ import {
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {toggleExperiment} from '../../../../src/experiments';
 
-describe('amp-ad-xorigin-iframe-handler', () => {
+describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, () => {
   let ampdoc;
   let adImpl;
   let signals;

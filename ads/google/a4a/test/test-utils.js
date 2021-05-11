@@ -90,7 +90,7 @@ function noopMethods(
   sandbox.stub(impl.element, 'offsetHeight').value(pageLayoutBox.height);
 }
 
-describe('Google A4A utils', () => {
+describes.sandboxed('Google A4A utils', {}, () => {
   //TODO: Add tests for other utils functions.
 
   describe('#additionalDimensions', () => {

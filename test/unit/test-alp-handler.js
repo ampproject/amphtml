@@ -17,7 +17,7 @@
 import {handleClick, warmupDynamic, warmupStatic} from '../../ads/alp/handler';
 import {parseUrlDeprecated} from '../../src/url';
 
-describe('alp-handler', () => {
+describes.sandboxed('alp-handler', {}, () => {
   let event;
   let anchor;
   let open;

@@ -38,7 +38,7 @@ function fakeLocalStorage(initial = {}) {
   };
 }
 
-describe('experimentToggles', () => {
+describes.sandboxed('experimentToggles', {}, () => {
   it('should return experiment status map', () => {
     const win = {
       localStorage: fakeLocalStorage({
@@ -106,7 +106,7 @@ describe('experimentToggles', () => {
   });
 });
 
-describe('isExperimentOn', () => {
+describes.sandboxed('isExperimentOn', {}, () => {
   let win;
 
   beforeEach(() => {
@@ -212,7 +212,7 @@ describe('isExperimentOn', () => {
   });
 });
 
-describe('toggleExperiment', () => {
+describes.sandboxed('toggleExperiment', {}, () => {
   let clock;
 
   beforeEach(() => {
@@ -531,7 +531,7 @@ describes.fakeWin('url override', {}, (env) => {
   });
 });
 
-describe('isCanary', () => {
+describes.sandboxed('isCanary', {}, () => {
   it('should return value based on binary version', () => {
     const win = {
       AMP_CONFIG: {
@@ -544,7 +544,7 @@ describe('isCanary', () => {
   });
 });
 
-describe('getBinaryType', () => {
+describes.sandboxed('getBinaryType', {}, () => {
   it('should return correct type', () => {
     const win = {
       AMP_CONFIG: {
@@ -566,7 +566,7 @@ describe('getBinaryType', () => {
   });
 });
 
-describe('experiment branch tests', () => {
+describes.sandboxed('experiment branch tests', {}, () => {
   describe('#randomlySelectUnsetExperiments', () => {
     let accurateRandomStub;
     let cachedAccuratePrng;

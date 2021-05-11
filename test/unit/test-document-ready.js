@@ -22,7 +22,7 @@ import {
   whenDocumentReady,
 } from '../../src/document-ready';
 
-describe('documentReady', () => {
+describes.sandboxed('documentReady', {}, () => {
   let testDoc;
   let eventListeners;
   const timer = Services.timerFor(window);

@@ -16,7 +16,7 @@
 
 import {Animation} from '../../src/animation';
 
-describe('Animation', () => {
+describes.sandboxed('Animation', {}, () => {
   let vsync;
   let vsyncTasks;
   let anim;

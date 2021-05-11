@@ -17,7 +17,7 @@
 import {BindEvaluator} from '../bind-evaluator';
 import {BindExpression} from '../bind-expression';
 
-describe('BindEvaluator', () => {
+describes.sandboxed('BindEvaluator', {}, () => {
   let evaluator;
 
   beforeEach(() => {

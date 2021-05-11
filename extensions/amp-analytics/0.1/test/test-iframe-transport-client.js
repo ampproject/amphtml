@@ -28,7 +28,7 @@ function createUniqueId() {
   return String(++nextId);
 }
 
-describe('iframe-transport-client', () => {
+describes.sandboxed('iframe-transport-client', {}, () => {
   let iframeTransportClient;
   let sentinel;
 

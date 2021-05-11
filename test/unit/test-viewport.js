@@ -1257,7 +1257,7 @@ describes.fakeWin('Viewport', {}, (env) => {
   });
 });
 
-describe('Viewport META', () => {
+describes.sandboxed('Viewport META', {}, () => {
   describe('parseViewportMeta', () => {
     it('should accept null or empty strings', () => {
       expect(parseViewportMeta(null)).to.be.empty;
@@ -1558,7 +1558,7 @@ describe('Viewport META', () => {
   });
 });
 
-describe('createViewport', () => {
+describes.sandboxed('createViewport', {}, () => {
   describes.fakeWin(
     'in Android',
     {

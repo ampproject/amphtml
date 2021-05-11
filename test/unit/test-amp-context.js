@@ -19,7 +19,7 @@ import {Platform} from '../../src/service/platform-impl';
 
 const NOOP = () => {};
 
-describe('3p ampcontext.js', () => {
+describes.sandboxed('3p ampcontext.js', {}, () => {
   let windowPostMessageSpy;
   let windowMessageHandler;
   let win;

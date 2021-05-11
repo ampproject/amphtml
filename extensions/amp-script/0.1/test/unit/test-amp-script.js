@@ -339,7 +339,7 @@ describes.repeated(
   }
 );
 
-describe('SanitizerImpl', () => {
+describes.sandboxed('SanitizerImpl', {}, () => {
   let el;
   let win;
   let s;

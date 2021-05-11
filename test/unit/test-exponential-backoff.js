@@ -19,7 +19,7 @@ import {
   exponentialBackoffClock,
 } from '../../src/exponential-backoff';
 
-describe('exponentialBackoff', () => {
+describes.sandboxed('exponentialBackoff', {}, () => {
   let clock;
 
   beforeEach(() => {

@@ -17,7 +17,7 @@
 import {Pass} from '../../src/pass';
 import {Services} from '../../src/services';
 
-describe('Pass', () => {
+describes.sandboxed('Pass', {}, () => {
   let pass;
   let timerMock;
   let handlerCalled;

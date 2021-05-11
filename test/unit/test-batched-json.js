@@ -18,7 +18,7 @@ import {Services} from '../../src/services';
 import {UrlReplacementPolicy, batchFetchJsonFor} from '../../src/batched-json';
 import {user} from '../../src/log';
 
-describe('batchFetchJsonFor', () => {
+describes.sandboxed('batchFetchJsonFor', {}, () => {
   // Fakes.
   const ampdoc = {win: null};
   // Service fakes.

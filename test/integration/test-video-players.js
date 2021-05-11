@@ -29,10 +29,10 @@
 import {runVideoPlayerIntegrationTests} from './test-video-players-helper';
 
 // TODO(aghassemi,#7822): Videos may not be playable on an iOS simulator.
-describe
+describes.sandboxed
   .configure()
   .skipIos()
-  .run('amp-video', () => {
+  .run('amp-video', {}, () => {
     runVideoPlayerIntegrationTests((fixture) => {
       const video = fixture.doc.createElement('amp-video');
       video.setAttribute('src', '/examples/av/ForBiggerJoyrides-tiny.mp4');
@@ -41,7 +41,7 @@ describe
   });
 
 // TODO(alanorozco): unskip
-describe.skip('amp-video-iframe', () => {
+describes.sandboxed.skip('amp-video-iframe', {}, () => {
   runVideoPlayerIntegrationTests(
     (fixture) => {
       const video = fixture.doc.createElement('amp-video-iframe');
@@ -55,7 +55,7 @@ describe.skip('amp-video-iframe', () => {
 });
 
 //TODO(aghassemi, #9379): unskip
-describe.skip('amp-youtube', () => {
+describes.sandboxed.skip('amp-youtube', {}, () => {
   runVideoPlayerIntegrationTests(
     (fixture) => {
       const video = fixture.doc.createElement('amp-youtube');
@@ -68,7 +68,7 @@ describe.skip('amp-youtube', () => {
 });
 
 //TODO(aghassemi, #9379): unskip
-describe.skip('amp-dailymotion', () => {
+describes.sandboxed.skip('amp-dailymotion', {}, () => {
   runVideoPlayerIntegrationTests(
     (fixture) => {
       const video = fixture.doc.createElement('amp-dailymotion');
@@ -80,7 +80,7 @@ describe.skip('amp-dailymotion', () => {
   );
 });
 
-describe.configure().skip('amp-3q-player', () => {
+describes.sandboxed.configure().skip('amp-3q-player', {}, () => {
   runVideoPlayerIntegrationTests(
     (fixture) => {
       const video = fixture.doc.createElement('amp-3q-player');
@@ -93,7 +93,7 @@ describe.configure().skip('amp-3q-player', () => {
 });
 
 //TODO(aghassemi,#8264): Unskip when integration is fixed.
-describe.skip('amp-nexxtv-player', () => {
+describes.sandboxed.skip('amp-nexxtv-player', {}, () => {
   runVideoPlayerIntegrationTests(
     (fixture) => {
       const video = fixture.doc.createElement('amp-nexxtv-player');
@@ -107,7 +107,7 @@ describe.skip('amp-nexxtv-player', () => {
 });
 
 //TODO(aghassemi, #9379): unskip
-describe.skip('amp-ima-video', () => {
+describes.sandboxed.skip('amp-ima-video', {}, () => {
   runVideoPlayerIntegrationTests(
     (fixture) => {
       const video = fixture.doc.createElement('amp-ima-video');
@@ -129,7 +129,7 @@ describe.skip('amp-ima-video', () => {
 });
 
 //TODO(cvializ, #14833): unskip after brid player is fixed
-describe.skip('amp-brid-player', () => {
+describes.sandboxed.skip('amp-brid-player', {}, () => {
   runVideoPlayerIntegrationTests(
     (fixture) => {
       const video = fixture.doc.createElement('amp-brid-player');
@@ -143,7 +143,7 @@ describe.skip('amp-brid-player', () => {
   );
 });
 
-describe.skip('amp-brightcove', () => {
+describes.sandboxed.skip('amp-brightcove', {}, () => {
   runVideoPlayerIntegrationTests(
     (fixture) => {
       const video = fixture.doc.createElement('amp-brightcove');
@@ -157,7 +157,7 @@ describe.skip('amp-brightcove', () => {
   );
 });
 
-describe.skip('amp-delight-player', () => {
+describes.sandboxed.skip('amp-delight-player', {}, () => {
   runVideoPlayerIntegrationTests(
     (fixture) => {
       const video = fixture.doc.createElement('amp-delight-player');

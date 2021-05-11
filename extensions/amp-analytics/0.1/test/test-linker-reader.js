@@ -20,7 +20,7 @@ import {
 } from '../linker-reader';
 import {mockWindowInterface} from '../../../../testing/test-helper';
 
-describe('LinkerReader', () => {
+describes.sandboxed('LinkerReader', {}, () => {
   let linkerReader;
   let mockWin;
 

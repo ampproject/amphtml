@@ -16,7 +16,7 @@
 
 import {Platform} from '../../src/service/platform-impl';
 
-describe('Platform', () => {
+describes.sandboxed('Platform', {}, () => {
   let isIos;
   let isAndroid;
   let isChrome;

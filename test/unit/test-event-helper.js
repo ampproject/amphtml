@@ -31,7 +31,7 @@ import {
   supportsPassiveEventListener,
 } from '../../src/event-helper-listen';
 
-describe('EventHelper', () => {
+describes.sandboxed('EventHelper', {}, () => {
   function getEvent(name, target) {
     const event = document.createEvent('Event');
     event.initEvent(name, true, true);

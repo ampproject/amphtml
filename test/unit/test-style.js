@@ -16,7 +16,7 @@
 
 import * as st from '../../src/style';
 
-describe('Style', () => {
+describes.sandboxed('Style', {}, () => {
   it('toggle', () => {
     const element = document.createElement('div');
 

@@ -17,10 +17,10 @@ import * as IframeHelper from '../../src/iframe-helper';
 import {createIframePromise} from '../../testing/iframe';
 import {generateSentinel} from '../../src/3p-frame';
 
-describe
+describes.sandboxed
   .configure()
   .skipFirefox()
-  .run('iframe-helper', function () {
+  .run('iframe-helper', {}, function () {
     const iframeSrc =
       'http://iframe.localhost:' +
       location.port +

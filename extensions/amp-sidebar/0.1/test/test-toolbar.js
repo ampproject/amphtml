@@ -23,7 +23,7 @@ import {toArray} from '../../../../src/core/types/array';
 
 adopt(window);
 
-describe('amp-sidebar - toolbar', () => {
+describes.sandboxed('amp-sidebar - toolbar', {}, () => {
   let timer;
 
   function getToolbars(options) {

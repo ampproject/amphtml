@@ -27,7 +27,7 @@ import {
   userAssert,
 } from '../../src/log';
 
-describe('Logging', () => {
+describes.sandboxed('Logging', {}, () => {
   const RETURNS_FINE = () => LogLevel.FINE;
   const RETURNS_INFO = () => LogLevel.INFO;
   const RETURNS_WARN = () => LogLevel.WARN;

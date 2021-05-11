@@ -78,7 +78,7 @@ function expectRenderedInXDomainIframe(element, src) {
   expect(child, 'iframe child').to.be.visible;
 }
 
-describe('integration test: a4a', () => {
+describes.sandboxed('integration test: a4a', {}, () => {
   let fixture;
   let fetchMock;
   let adResponse;

@@ -23,7 +23,7 @@ import {
 } from '../refresh-manager';
 import {Services} from '../../../../src/services';
 
-describe('refresh', () => {
+describes.sandboxed('refresh', {}, () => {
   let mockA4a;
   const config = {
     visiblePercentageMin: 50,

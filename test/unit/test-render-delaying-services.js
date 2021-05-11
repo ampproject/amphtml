@@ -23,7 +23,7 @@ import {
 } from '../../src/render-delaying-services';
 import {macroTask} from '../../testing/yield';
 
-describe('waitForServices', () => {
+describes.sandboxed('waitForServices', {}, () => {
   let win;
   let clock;
   let dynamicCssResolve;

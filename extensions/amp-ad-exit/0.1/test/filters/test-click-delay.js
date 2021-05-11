@@ -17,7 +17,7 @@
 import {ClickDelayFilter} from '../../filters/click-delay';
 import {FilterType} from '../../filters/filter';
 
-describe('click-delay', () => {
+describes.sandboxed('click-delay', {}, () => {
   const DEFAULT_CONFIG = {
     type: FilterType.CLICK_DELAY,
     delay: 123,

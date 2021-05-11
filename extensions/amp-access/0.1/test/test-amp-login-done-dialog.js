@@ -16,7 +16,7 @@
 
 import {LoginDoneDialog, buildLangSelector} from '../amp-login-done-dialog';
 
-describe('LoginDoneDialog', () => {
+describes.sandboxed('LoginDoneDialog', {}, () => {
   let clock;
   let windowApi;
   let dialog;

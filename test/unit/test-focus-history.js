@@ -17,7 +17,7 @@
 import {FocusHistory} from '../../src/focus-history';
 import {installTimerService} from '../../src/service/timer-impl';
 
-describe('FocusHistory', () => {
+describes.sandboxed('FocusHistory', {}, () => {
   let clock;
   let testDoc;
   let eventListeners;

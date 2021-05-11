@@ -23,7 +23,7 @@ import {
   validateSrcPrefix,
 } from '../../3p/3p';
 
-describe('3p', () => {
+describes.sandboxed('3p', {}, () => {
   let clock;
 
   beforeEach(() => {

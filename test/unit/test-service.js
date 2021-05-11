@@ -39,7 +39,7 @@ import {
 } from '../../src/service';
 import {loadPromise} from '../../src/event-helper';
 
-describe('service', () => {
+describes.sandboxed('service', {}, () => {
   describe('disposable interface', () => {
     let disposable;
     let nonDisposable;
