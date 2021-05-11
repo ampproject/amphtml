@@ -18,7 +18,6 @@ import * as Preact from '../../../src/preact/index';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Slot} from '../../../src/preact/slot';
 import {createElementWithAttributes} from '../../../src/dom';
-import {expect} from 'chai';
 import {htmlFor} from '../../../src/static-template';
 import {omit} from '../../../src/core/types/object';
 import {testElementR1} from '../../../testing/element-v1';
