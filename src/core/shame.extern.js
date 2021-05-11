@@ -35,3 +35,24 @@
  * @typedef {function()}
  */
 let UnlistenDef;
+
+/**
+ * Build Constants -- see build-system/build-constants.js for definition.
+ */
+/** @define {boolean} */
+var IS_FORTESTING = false;
+
+/** @define {boolean} */
+var IS_MINIFIED = false;
+
+/** @define {string} */
+var VERSION = '';
+
+/** @define {boolean} */
+var AMP_MODE = false;
+
+/** @define {boolean} */
+var IS_ESM = false;
+
+/** @define {boolean} */
+var IS_SXG = false;

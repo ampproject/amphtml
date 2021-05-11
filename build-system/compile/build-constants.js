@@ -51,7 +51,7 @@ function getEsbuildConstants() {
 
 /** @return {Array<string>}  */
 function getClosureConstants() {
-  return Object.entries(getBuildTimeConstants()).map(([k, v]) => `${k}=${v}`);
+  return Object.entries(getBuildTimeConstants()).map(([k, v]) => `'${k}=${v}'`);
 }
 
 module.exports = {
