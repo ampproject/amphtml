@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {removeItem} from '../types/array';
+
 /**
  * This class helps to manage observers. Observers can be added, removed or
  * fired through and instance of this class.
@@ -51,10 +53,7 @@ export class Observable {
     if (!this.handlers_) {
       return;
     }
-    const index = this.handlers_.indexOf(handler);
-    if (index > -1) {
-      this.handlers_.splice(index, 1);
-    }
+    removeItem(this.handlers_, handler);
   }
 
   /**
@@ -75,9 +74,7 @@ export class Observable {
     if (!this.handlers_) {
       return;
     }
-    const handlers = this.handlers_;
-    for (let i = 0; i < handlers.length; i++) {
-      const handler = handlers[i];
+    for (const handler of this.handlers_) {
       handler(opt_event);
     }
   }
@@ -87,9 +84,6 @@ export class Observable {
    * @return {number}
    */
   getHandlerCount() {
-    if (!this.handlers_) {
-      return 0;
-    }
-    return this.handlers_.length;
+    return this.handlers_?.length ?? 0;
   }
 }

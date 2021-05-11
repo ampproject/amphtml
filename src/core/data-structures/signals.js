@@ -76,10 +76,7 @@ export class Signals {
       } else {
         // Allocate the promise/resolver for when the signal arrives in the
         // future.
-        const deferred = new Deferred();
-        const {promise, resolve, reject} = deferred;
-
-        promiseStruct = {promise, resolve, reject};
+        promiseStruct = new Deferred();
       }
       if (!this.promiseMap_) {
         this.promiseMap_ = map();
@@ -104,7 +101,7 @@ export class Signals {
     const time = opt_time == undefined ? Date.now() : opt_time;
     this.map_[name] = time;
     const promiseStruct = this.promiseMap_ && this.promiseMap_[name];
-    if (promiseStruct && promiseStruct.resolve) {
+    if (promiseStruct?.resolve) {
       promiseStruct.resolve(time);
       promiseStruct.resolve = undefined;
       promiseStruct.reject = undefined;
@@ -124,7 +121,7 @@ export class Signals {
     }
     this.map_[name] = error;
     const promiseStruct = this.promiseMap_ && this.promiseMap_[name];
-    if (promiseStruct && promiseStruct.reject) {
+    if (promiseStruct?.reject) {
       promiseStruct.reject(error);
       promiseStruct.promise.catch(() => {});
       promiseStruct.resolve = undefined;
