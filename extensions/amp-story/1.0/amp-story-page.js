@@ -81,6 +81,7 @@ import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
 import {toArray} from '../../../src/core/types/array';
 import {upgradeBackgroundAudio} from './audio';
+import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
@@ -1810,8 +1811,10 @@ export class AmpStoryPage extends AMP.BaseElement {
       container.setAttribute('role', 'button');
 
       container.addEventListener('click', (e) => {
-        // Prevent default so link can be opened programmatically after URL preview is shown.
-        e.preventDefault();
+        if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+          // Prevent default so link can be opened programmatically after URL preview is shown.
+          e.preventDefault();
+        }
         this.openAttachment();
       });
 
@@ -1832,7 +1835,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   openAttachment(shouldAnimate = true) {
     const attachmentEl = this.element.querySelector(
-      'amp-story-page-attachment'
+      'amp-story-page-attachment, amp-story-page-outlink'
     );
 
     if (!attachmentEl) {
