@@ -167,7 +167,8 @@ export class SignatureVerifier {
    * @return {!Promise<!VerificationStatus>}
    */
   verify(creative, headers) {
-    const signatureFormat = /^([A-Za-z0-9._-]+):([A-Za-z0-9._-]+):([A-Za-z0-9+/]{341}[AQgw]==)$/;
+    const signatureFormat =
+      /^([A-Za-z0-9._-]+):([A-Za-z0-9._-]+):([A-Za-z0-9+/]{341}[AQgw]==)$/;
     if (!headers.has(AMP_SIGNATURE_HEADER)) {
       return Promise.resolve(VerificationStatus.UNVERIFIED);
     }

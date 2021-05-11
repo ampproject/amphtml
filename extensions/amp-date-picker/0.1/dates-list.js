@@ -35,9 +35,9 @@ export class DatesList {
    */
   constructor(dates) {
     /** @private @const */
-    this.ReactDates_ = /** @type {!JsonObject} */ (requireExternal(
-      'react-dates'
-    ));
+    this.ReactDates_ = /** @type {!JsonObject} */ (
+      requireExternal('react-dates')
+    );
 
     /** @private @const */
     this.moment_ = requireExternal('moment');

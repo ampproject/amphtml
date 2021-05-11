@@ -55,14 +55,8 @@ let BaseCarouselDimensionDef;
  * @return {!BaseCarouselDimensionDef} The dimension for the Element along the given Axis.
  */
 export function getDimension(axis, el) {
-  const {
-    top,
-    bottom,
-    height,
-    left,
-    right,
-    width,
-  } = el./*OK*/ getBoundingClientRect();
+  const {top, bottom, height, left, right, width} =
+    el./*OK*/ getBoundingClientRect();
 
   return {
     start: Math.round(axis == Axis.X ? left : top),

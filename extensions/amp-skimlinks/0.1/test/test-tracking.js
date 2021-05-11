@@ -60,9 +60,8 @@ describes.fakeWin(
         guid: 'guid',
         ...trackingInfo,
       };
-      const trackingService = helpers.createTrackingWithStubAnalytics(
-        skimOptions
-      );
+      const trackingService =
+        helpers.createTrackingWithStubAnalytics(skimOptions);
       trackingService.setTrackingInfo(trackingInfo);
 
       return trackingService;

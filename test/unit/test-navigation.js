@@ -897,9 +897,8 @@ describes.sandboxed('Navigation', {}, () => {
             // Navigation uses the UrlReplacements service scoped to the event
             // target, but for testing stub in the top-level service for simplicity.
             const {documentElement} = parentWin.document;
-            const urlReplacements = Services.urlReplacementsForDoc(
-              documentElement
-            );
+            const urlReplacements =
+              Services.urlReplacementsForDoc(documentElement);
             env.sandbox
               .stub(Services, 'urlReplacementsForDoc')
               .withArgs(anchor)

@@ -465,10 +465,12 @@ export class AmpAnimation extends AMP.BaseElement {
   createRunner_(opt_args, opt_positionObserverData) {
     // Force cast to `WebAnimationDef`. It will be validated during preparation
     // phase.
-    const configJson = /** @type {!./web-animation-types.WebAnimationDef} */ (this
-      .configJson_);
-    const args = /** @type {?./web-animation-types.WebAnimationDef} */ (opt_args ||
-      null);
+    const configJson = /** @type {!./web-animation-types.WebAnimationDef} */ (
+      this.configJson_
+    );
+    const args = /** @type {?./web-animation-types.WebAnimationDef} */ (
+      opt_args || null
+    );
 
     // Ensure polyfill is installed.
     const ampdoc = this.getAmpDoc();

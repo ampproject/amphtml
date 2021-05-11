@@ -33,7 +33,9 @@ import {utf8Decode} from '../../../src/utils/bytes';
 export class NameFrameRenderer extends Renderer {
   /** @override */
   render(context, element, crossDomainData) {
-    crossDomainData = /** @type {!./amp-ad-type-defs.CrossDomainDataDef} */ (crossDomainData);
+    crossDomainData = /** @type {!./amp-ad-type-defs.CrossDomainDataDef} */ (
+      crossDomainData
+    );
 
     if (!crossDomainData.creative && !crossDomainData.rawCreativeBytes) {
       // No creative, nothing to do.
@@ -66,9 +68,8 @@ export class NameFrameRenderer extends Renderer {
       ? measureIntersection(element)
       : Promise.resolve(element.getIntersectionChangeEntry());
     return intersectionPromise.then((intersection) => {
-      contextMetadata['_context'][
-        'initialIntersection'
-      ] = intersectionEntryToJson(intersection);
+      contextMetadata['_context']['initialIntersection'] =
+        intersectionEntryToJson(intersection);
       const attributes = dict({
         'src': srcPath,
         'name': JSON.stringify(contextMetadata),

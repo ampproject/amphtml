@@ -334,9 +334,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     // Don't create a new history entry for remote attachment as user is
     // navigating away.
     if (this.type_ !== AttachmentType.REMOTE) {
-      const currentHistoryState = /** @type {!Object} */ (getState(
-        this.win.history
-      ));
+      const currentHistoryState = /** @type {!Object} */ (
+        getState(this.win.history)
+      );
       const historyState = {
         ...currentHistoryState,
         [HistoryState.ATTACHMENT_PAGE_ID]: this.storeService_.get(

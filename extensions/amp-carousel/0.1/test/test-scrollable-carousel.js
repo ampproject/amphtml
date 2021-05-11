@@ -114,9 +114,8 @@ describes.realWin(
         );
 
         // build child slides
-        const carouselSlideEls = container.getElementsByClassName(
-          'amp-carousel-slide'
-        );
+        const carouselSlideEls =
+          container.getElementsByClassName('amp-carousel-slide');
         expect(carouselSlideEls.length).to.equal(7);
         expect(carouselSlideEls[0]).to.have.display('inline-block');
 
@@ -140,9 +139,8 @@ describes.realWin(
       const container = carousel.getElementsByClassName(
         'i-amphtml-scrollable-carousel-container'
       )[0];
-      const carouselSlideEls = container.getElementsByClassName(
-        'amp-carousel-slide'
-      );
+      const carouselSlideEls =
+        container.getElementsByClassName('amp-carousel-slide');
 
       // show control buttons correctly
       expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.true;

@@ -141,11 +141,13 @@ export class LaterpayVendor {
     this.currentLocale_ = this.laterpayConfig_['locale'] || 'en';
 
     /** @private {!JsonObject} */
-    this.i18n_ = /** @type {!JsonObject} */ (Object.assign(
-      dict(),
-      DEFAULT_MESSAGES,
-      this.laterpayConfig_['localeMessages'] || dict()
-    ));
+    this.i18n_ = /** @type {!JsonObject} */ (
+      Object.assign(
+        dict(),
+        DEFAULT_MESSAGES,
+        this.laterpayConfig_['localeMessages'] || dict()
+      )
+    );
 
     /** @private {string} */
     this.purchaseConfigBaseUrl_ = this.getConfigUrl_() + CONFIG_BASE_PATH;
@@ -335,12 +337,10 @@ export class LaterpayVendor {
     }
     this.renderTextBlock_('header');
     const listContainer = this.createElement_('ul');
-    this.purchaseConfig_['premiumcontent']['title'] = this.i18n_[
-      'premiumContentTitle'
-    ];
-    this.purchaseConfig_['premiumcontent'][
-      'description'
-    ] = this.getArticleTitle_();
+    this.purchaseConfig_['premiumcontent']['title'] =
+      this.i18n_['premiumContentTitle'];
+    this.purchaseConfig_['premiumcontent']['description'] =
+      this.getArticleTitle_();
     listContainer.appendChild(
       this.createPurchaseOption_(this.purchaseConfig_['premiumcontent'])
     );

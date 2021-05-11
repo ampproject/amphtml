@@ -73,20 +73,17 @@ const CHANNELS = [
   {
     id: EXPERIMENTAL_CHANNEL_ID,
     name: 'AMP Experimental Channel (more info)',
-    spec:
-      'https://github.com/ampproject/amphtml/blob/main/contributing/release-schedule.md#amp-experimental-and-beta-channels',
+    spec: 'https://github.com/ampproject/amphtml/blob/main/contributing/release-schedule.md#amp-experimental-and-beta-channels',
   },
   {
     id: BETA_CHANNEL_ID,
     name: 'AMP Beta Channel (more info)',
-    spec:
-      'https://github.com/ampproject/amphtml/blob/main/contributing/release-schedule.md#amp-experimental-and-beta-channels',
+    spec: 'https://github.com/ampproject/amphtml/blob/main/contributing/release-schedule.md#amp-experimental-and-beta-channels',
   },
   {
     id: NIGHTLY_CHANNEL_ID,
     name: 'AMP Nightly Channel (more info)',
-    spec:
-      'https://github.com/ampproject/amphtml/blob/main/contributing/release-schedule.md#amp-experimental-and-beta-channels',
+    spec: 'https://github.com/ampproject/amphtml/blob/main/contributing/release-schedule.md#amp-experimental-and-beta-channels',
   },
 ];
 

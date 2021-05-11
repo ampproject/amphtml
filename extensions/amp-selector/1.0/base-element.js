@@ -159,10 +159,10 @@ export function OptionShim({
 
   useLayoutEffect(() => syncEvent('click', onClick), [onClick, syncEvent]);
   useLayoutEffect(() => syncEvent('focus', onFocus), [onFocus, syncEvent]);
-  useLayoutEffect(() => syncEvent('keydown', onKeyDown), [
-    onKeyDown,
-    syncEvent,
-  ]);
+  useLayoutEffect(
+    () => syncEvent('keydown', onKeyDown),
+    [onKeyDown, syncEvent]
+  );
 
   useLayoutEffect(() => {
     toggleAttribute(shimDomElement, 'selected', !!selected);

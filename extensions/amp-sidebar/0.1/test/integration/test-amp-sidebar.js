@@ -72,9 +72,8 @@ describes.sandboxed
             openerButton.click();
             return openedPromise
               .then(() => {
-                const closerButton = win.document.getElementById(
-                  'sidebarCloser'
-                );
+                const closerButton =
+                  win.document.getElementById('sidebarCloser');
                 const closedPromise = waitForSidebarClose(win.document);
                 closerButton.click();
                 return closedPromise;
@@ -99,9 +98,8 @@ describes.sandboxed
               .then(() => {
                 viewport.setScrollTop(1000);
                 expect(viewport.getScrollTop()).to.equal(1000);
-                const closerButton = win.document.getElementById(
-                  'sidebarCloser'
-                );
+                const closerButton =
+                  win.document.getElementById('sidebarCloser');
                 const closedPromise = waitForSidebarClose(win.document);
                 closerButton.click();
                 return closedPromise;

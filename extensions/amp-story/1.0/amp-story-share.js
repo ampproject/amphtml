@@ -164,15 +164,17 @@ function buildProvider(doc, shareType, opt_params) {
     /** @type {!Array<!./simple-template.ElementDef>} */ ([
       {
         tag: 'amp-social-share',
-        attrs: /** @type {!JsonObject} */ (Object.assign(
-          dict({
-            'width': 48,
-            'height': 48,
-            'class': 'i-amphtml-story-share-icon',
-            'type': shareType,
-          }),
-          buildProviderParams(opt_params)
-        )),
+        attrs: /** @type {!JsonObject} */ (
+          Object.assign(
+            dict({
+              'width': 48,
+              'height': 48,
+              'class': 'i-amphtml-story-share-icon',
+              'type': shareType,
+            }),
+            buildProviderParams(opt_params)
+          )
+        ),
         children: [
           {
             tag: 'span',

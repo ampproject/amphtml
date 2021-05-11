@@ -1805,9 +1805,8 @@ class BindWalker {
       'ownerDocument is null.'
     );
 
-    const useQuerySelector = doc.documentElement.hasAttribute(
-      'i-amphtml-binding'
-    );
+    const useQuerySelector =
+      doc.documentElement.hasAttribute('i-amphtml-binding');
     /** @private @const {boolean} */
     this.useQuerySelector_ = useQuerySelector;
 

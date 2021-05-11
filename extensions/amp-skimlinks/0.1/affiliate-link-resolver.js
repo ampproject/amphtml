@@ -128,9 +128,8 @@ export class AffiliateLinkResolver {
    * @public
    */
   resolveUnknownAnchors(anchorList) {
-    const alreadyResolvedResponse = this.associateWithReplacementUrl_(
-      anchorList
-    );
+    const alreadyResolvedResponse =
+      this.associateWithReplacementUrl_(anchorList);
     let willBeResolvedPromise = null;
 
     const domainsToAsk = this.getNewDomains_(anchorList);

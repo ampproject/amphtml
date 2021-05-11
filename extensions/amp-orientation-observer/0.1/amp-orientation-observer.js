@@ -178,9 +178,9 @@ export class AmpOrientationObserver extends AMP.BaseElement {
               /** @type {number} */ (currentValue[axis])
             );
           } else {
-            this.computedValue_[axis] = /** @type {number} */ (currentValue[
-              axis
-            ]);
+            this.computedValue_[axis] = /** @type {number} */ (
+              currentValue[axis]
+            );
           }
           this.triggerEvent_(
             axis,

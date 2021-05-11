@@ -114,8 +114,9 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       openButton.getDOMNode().click();
       wrapper.update();
 
-      const sidebarElement = wrapper.find(Sidebar).getDOMNode()
-        .firstElementChild;
+      const sidebarElement = wrapper
+        .find(Sidebar)
+        .getDOMNode().firstElementChild;
       const backdropElement = sidebarElement.nextSibling;
 
       expect(sidebarElement.className.includes('default')).to.be.true;
@@ -155,8 +156,9 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       openButton.getDOMNode().click();
       wrapper.update();
 
-      const sidebarElement = wrapper.find(Sidebar).getDOMNode()
-        .firstElementChild;
+      const sidebarElement = wrapper
+        .find(Sidebar)
+        .getDOMNode().firstElementChild;
       const backdropElement = sidebarElement.nextSibling;
 
       expect(sidebarElement.style.color).to.equal('rgb(1, 1, 1)');

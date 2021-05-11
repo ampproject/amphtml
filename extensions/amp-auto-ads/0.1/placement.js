@@ -208,13 +208,14 @@ export class Placement {
         'auto-ads-no-insertion-above'
       );
       if (holdbackExp) {
-        const expInfoList = /** @type {!Array<!../../../experiments.ExperimentInfo>} */ ([
-          {
-            experimentId: 'auto-ads-no-insertion-above',
-            isTrafficEligible: () => true,
-            branches: [controlBranch, expBranch],
-          },
-        ]);
+        const expInfoList =
+          /** @type {!Array<!../../../experiments.ExperimentInfo>} */ ([
+            {
+              experimentId: 'auto-ads-no-insertion-above',
+              isTrafficEligible: () => true,
+              branches: [controlBranch, expBranch],
+            },
+          ]);
         randomlySelectUnsetExperiments(this.ampdoc.win, expInfoList);
       }
       if (
@@ -316,16 +317,18 @@ export class Placement {
    * @private
    */
   createAdElement_(baseAttributes, width) {
-    const attributes = /** @type {!JsonObject} */ (Object.assign(
-      dict({
-        'layout': width ? 'fixed' : 'fixed-height',
-        'height': '0',
-        'width': width ? width : 'auto',
-        'class': 'i-amphtml-layout-awaiting-size',
-      }),
-      baseAttributes,
-      this.attributes_
-    ));
+    const attributes = /** @type {!JsonObject} */ (
+      Object.assign(
+        dict({
+          'layout': width ? 'fixed' : 'fixed-height',
+          'height': '0',
+          'width': width ? width : 'auto',
+          'class': 'i-amphtml-layout-awaiting-size',
+        }),
+        baseAttributes,
+        this.attributes_
+      )
+    );
     return createElementWithAttributes(
       this.ampdoc.win.document,
       'amp-ad',
@@ -339,18 +342,20 @@ export class Placement {
    * @private
    */
   createFullWidthResponsiveAdElement_(baseAttributes) {
-    const attributes = /** @type {!JsonObject} */ (Object.assign(
-      dict({
-        'width': '100vw',
-        'height': '0',
-        'layout': 'fixed',
-        'class': 'i-amphtml-layout-awaiting-size',
-        'data-auto-format': 'rspv',
-        'data-full-width': '',
-      }),
-      baseAttributes,
-      this.attributes_
-    ));
+    const attributes = /** @type {!JsonObject} */ (
+      Object.assign(
+        dict({
+          'width': '100vw',
+          'height': '0',
+          'layout': 'fixed',
+          'class': 'i-amphtml-layout-awaiting-size',
+          'data-auto-format': 'rspv',
+          'data-full-width': '',
+        }),
+        baseAttributes,
+        this.attributes_
+      )
+    );
     return createElementWithAttributes(
       this.ampdoc.win.document,
       'amp-ad',

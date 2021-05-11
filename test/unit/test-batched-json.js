@@ -86,7 +86,8 @@ describes.sandboxed('batchFetchJsonFor', {}, (env) => {
         urlReplacements.collectDisallowedVarsSync.withArgs(el).returns(['BAR']);
 
         const optIn = UrlReplacementPolicy.OPT_IN;
-        const rejectError = /Please add data-amp-replace="BAR" to the <AMP-LIST> element./;
+        const rejectError =
+          /Please add data-amp-replace="BAR" to the <AMP-LIST> element./;
         return batchFetchJsonFor(ampdoc, el, {
           urlReplacement: optIn,
         }).should.eventually.be.rejectedWith(rejectError);

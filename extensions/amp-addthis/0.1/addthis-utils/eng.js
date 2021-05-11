@@ -28,12 +28,8 @@ import {pixelDrop} from './pixel';
  */
 const getEngData = (params) => {
   const {monitors, loc, ampDoc, pubId} = params;
-  const {
-    dwellMonitor,
-    scrollMonitor,
-    clickMonitor,
-    activeToolsMonitor,
-  } = monitors;
+  const {dwellMonitor, scrollMonitor, clickMonitor, activeToolsMonitor} =
+    monitors;
   const {host, pathname, hash} = loc;
   const viewport = Services.viewportForDoc(ampDoc);
 

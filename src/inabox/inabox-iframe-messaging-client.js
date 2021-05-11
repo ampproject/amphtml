@@ -24,10 +24,9 @@ import {tryParseJson} from '../json';
  * @return {?../../3p/iframe-messaging-client.IframeMessagingClient}
  */
 export function iframeMessagingClientFor(win) {
-  return /** @type {?../../3p/iframe-messaging-client.IframeMessagingClient} */ (getExistingServiceOrNull(
-    win,
-    'iframeMessagingClient'
-  ));
+  return /** @type {?../../3p/iframe-messaging-client.IframeMessagingClient} */ (
+    getExistingServiceOrNull(win, 'iframeMessagingClient')
+  );
 }
 
 /**

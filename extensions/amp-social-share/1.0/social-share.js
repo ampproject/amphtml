@@ -66,12 +66,8 @@ export function SocialShare({
     return null;
   }
 
-  const {
-    finalEndpoint,
-    checkedWidth,
-    checkedHeight,
-    checkedTarget,
-  } = checkPropsReturnValue;
+  const {finalEndpoint, checkedWidth, checkedHeight, checkedTarget} =
+    checkPropsReturnValue;
 
   return (
     <Wrapper
@@ -245,10 +241,12 @@ function getQueryString(endpoint) {
  * @return {boolean}
  */
 function isIos() {
-  return /** @type {boolean} */ (window &&
-    window.navigator &&
-    window.navigator.userAgent &&
-    window.navigator.userAgent.search(/iPhone|iPad|iPod/i) >= 0);
+  return /** @type {boolean} */ (
+    window &&
+      window.navigator &&
+      window.navigator.userAgent &&
+      window.navigator.userAgent.search(/iPhone|iPad|iPod/i) >= 0
+  );
 }
 
 /**

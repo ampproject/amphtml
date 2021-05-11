@@ -23,8 +23,7 @@ describes.integration
   .run(
     'toggle display helper',
     {
-      body:
-        '<amp-img src="/examples/img/hero@1x.jpg" width="289" height="216"></amp-img>',
+      body: '<amp-img src="/examples/img/hero@1x.jpg" width="289" height="216"></amp-img>',
     },
     (env) => {
       let browser, doc;

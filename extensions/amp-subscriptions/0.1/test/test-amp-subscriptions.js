@@ -410,7 +410,8 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         ? new Entitlement(grantEntitlementSpec)
         : null;
       const granted = !!grantEntitlementSpec;
-      const localPlatform = subscriptionService.platformStore_.getLocalPlatform_();
+      const localPlatform =
+        subscriptionService.platformStore_.getLocalPlatform_();
       env.sandbox
         .stub(subscriptionService.platformStore_, 'getGrantStatus')
         .callsFake(() => Promise.resolve(granted));
@@ -436,7 +437,8 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         granted: true,
         grantReason: GrantReason.SUBSCRIBER,
       });
-      const localPlatform = subscriptionService.platformStore_.getLocalPlatform_();
+      const localPlatform =
+        subscriptionService.platformStore_.getLocalPlatform_();
       const selectPlatformStub =
         subscriptionService.platformStore_.selectPlatform;
       const activateStub = env.sandbox.stub(localPlatform, 'activate');
@@ -481,7 +483,8 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
           grantReason: GrantReason.SUBSCRIBER,
         }
       );
-      const localPlatform = subscriptionService.platformStore_.getLocalPlatform_();
+      const localPlatform =
+        subscriptionService.platformStore_.getLocalPlatform_();
       const selectPlatformStub =
         subscriptionService.platformStore_.selectPlatform;
       const activateStub = env.sandbox.stub(localPlatform, 'activate');
@@ -534,7 +537,8 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
 
       await subscriptionService.initialize_();
       resolveRequiredPromises({granted: false});
-      const localPlatform = subscriptionService.platformStore_.getLocalPlatform_();
+      const localPlatform =
+        subscriptionService.platformStore_.getLocalPlatform_();
       env.sandbox.stub(localPlatform, 'activate');
 
       await subscriptionService.selectAndActivatePlatform_();
@@ -1257,9 +1261,9 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         platformConfig.fallbackEntitlement
       );
       subscriptionService.initializePlatformStore_(['local']);
-      expect(
-        subscriptionService.platformStore_.platformKeys_
-      ).to.be.deep.equal(['local']);
+      expect(subscriptionService.platformStore_.platformKeys_).to.be.deep.equal(
+        ['local']
+      );
       expect(
         subscriptionService.platformStore_.fallbackEntitlement_.json()
       ).to.be.deep.equal(entitlement.json());

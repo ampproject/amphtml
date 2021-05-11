@@ -78,9 +78,9 @@ export class Crypto {
 
     if (!this.subtle || this.polyfillPromise_) {
       // means native Crypto API is not available or failed before.
-      return (
-        this.polyfillPromise_ || this.loadPolyfill_()
-      ).then((polyfillSha384) => polyfillSha384(input));
+      return (this.polyfillPromise_ || this.loadPolyfill_()).then(
+        (polyfillSha384) => polyfillSha384(input)
+      );
     }
 
     try {
@@ -187,13 +187,9 @@ export class Crypto {
     const keyData = this.isLegacyWebkit_
       ? utf8Encode(JSON.stringify(/** @type {!JsonObject} */ (jwk)))
       : /** @type {!webCrypto.JsonWebKey} */ (jwk);
-    return /** @type {!Promise<!webCrypto.CryptoKey>} */ (this.subtle.importKey(
-      'jwk',
-      keyData,
-      this.pkcsAlgo,
-      true,
-      ['verify']
-    ));
+    return /** @type {!Promise<!webCrypto.CryptoKey>} */ (
+      this.subtle.importKey('jwk', keyData, this.pkcsAlgo, true, ['verify'])
+    );
   }
 
   /**
@@ -208,12 +204,9 @@ export class Crypto {
    */
   verifyPkcs(key, signature, data) {
     devAssert(this.isPkcsAvailable());
-    return /** @type {!Promise<boolean>} */ (this.subtle.verify(
-      this.pkcsAlgo,
-      key,
-      signature,
-      data
-    ));
+    return /** @type {!Promise<boolean>} */ (
+      this.subtle.verify(this.pkcsAlgo, key, signature, data)
+    );
   }
 }
 

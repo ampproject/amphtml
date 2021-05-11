@@ -194,9 +194,8 @@ export class AmpStoryDevToolsTabDebug extends AMP.BaseElement {
    * @param {!Array} errorList
    */
   updateDebugTabIcon(errorList) {
-    const debugTabSelector = this.win.document.querySelector(
-      '[data-tab="Debug"]'
-    );
+    const debugTabSelector =
+      this.win.document.querySelector('[data-tab="Debug"]');
     if (!debugTabSelector) {
       return;
     }

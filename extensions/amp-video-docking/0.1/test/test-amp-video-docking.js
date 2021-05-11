@@ -310,13 +310,8 @@ describes.realWin('video docking', {amp: true}, (env) => {
       const expectedTransform = transformMatrix(x, y, scale);
 
       [internalElement, overlay, shadow].forEach((el) => {
-        const {
-          transform,
-          width,
-          height,
-          minWidth,
-          minHeight,
-        } = getComputedStyle(el);
+        const {transform, width, height, minWidth, minHeight} =
+          getComputedStyle(el);
         expect(transform).to.equal(expectedTransform);
         expect(width).to.equal(expectedWidth + 'px');
         expect(minWidth).to.equal(expectedWidth + 'px');

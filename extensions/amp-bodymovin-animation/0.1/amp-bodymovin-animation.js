@@ -195,9 +195,9 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     }
 
     /** @const {?JsonObject} */
-    const eventData = /** @type {?JsonObject} */ (isObject(getData(event))
-      ? getData(event)
-      : parseJson(getData(event)));
+    const eventData = /** @type {?JsonObject} */ (
+      isObject(getData(event)) ? getData(event) : parseJson(getData(event))
+    );
     if (eventData === undefined) {
       return; // We only process valid JSON.
     }

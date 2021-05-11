@@ -217,9 +217,8 @@ describes.sandboxed('chunk2', {}, () => {
           env.sandbox.stub(ampdoc, 'isVisible').callsFake(() => {
             return false;
           });
-          env.win.requestIdleCallback = resolvingIdleCallbackWithTimeRemaining(
-            15
-          );
+          env.win.requestIdleCallback =
+            resolvingIdleCallbackWithTimeRemaining(15);
           const chunks = chunkInstanceForTesting(env.win.document);
           env.sandbox.stub(chunks, 'executeAsap_').callsFake(() => {
             throw new Error('No calls expected: executeAsap_');
@@ -252,9 +251,8 @@ describes.sandboxed('chunk2', {}, () => {
           env.sandbox.stub(ampdoc, 'isVisible').callsFake(() => {
             return false;
           });
-          env.win.requestIdleCallback = resolvingIdleCallbackWithTimeRemaining(
-            15
-          );
+          env.win.requestIdleCallback =
+            resolvingIdleCallbackWithTimeRemaining(15);
           const chunks = chunkInstanceForTesting(env.win.document);
           env.sandbox.stub(chunks, 'executeAsap_').callsFake(() => {
             throw new Error('No calls expected: executeAsap_');

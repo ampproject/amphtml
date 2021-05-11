@@ -49,9 +49,8 @@ export class LocalSubscriptionBasePlatform {
     this.serviceConfig_ = platformConfig;
 
     /** @private @const {boolean} */
-    this.pingbackAllEntitlements_ = !!this.serviceConfig_[
-      'pingbackAllEntitlements'
-    ];
+    this.pingbackAllEntitlements_ =
+      !!this.serviceConfig_['pingbackAllEntitlements'];
 
     /** @protected @const {!./service-adapter.ServiceAdapter} */
     this.serviceAdapter_ = serviceAdapter;

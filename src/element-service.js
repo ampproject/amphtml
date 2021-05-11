@@ -160,16 +160,18 @@ export function getElementServiceIfAvailableForDocInEmbedScope(
  * @closurePrimitive {asserts.matchesReturn}
  */
 function assertService(service, id, extension) {
-  return /** @type {!Object} */ (userAssert(
-    service,
-    'Service %s was requested to be provided through %s, ' +
-      'but %s is not loaded in the current page. To fix this ' +
-      'problem load the JavaScript file for %s in this page.',
-    id,
-    extension,
-    extension,
-    extension
-  ));
+  return /** @type {!Object} */ (
+    userAssert(
+      service,
+      'Service %s was requested to be provided through %s, ' +
+        'but %s is not loaded in the current page. To fix this ' +
+        'problem load the JavaScript file for %s in this page.',
+      id,
+      extension,
+      extension,
+      extension
+    )
+  );
 }
 
 /**

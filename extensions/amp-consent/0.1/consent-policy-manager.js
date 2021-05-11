@@ -367,8 +367,9 @@ export class ConsentPolicyManager {
     if (!this.policyInstancesDeferred_[policyId]) {
       this.policyInstancesDeferred_[policyId] = new Deferred();
     }
-    return /** @type {!Promise} */ (this.policyInstancesDeferred_[policyId]
-      .promise);
+    return /** @type {!Promise} */ (
+      this.policyInstancesDeferred_[policyId].promise
+    );
   }
 }
 

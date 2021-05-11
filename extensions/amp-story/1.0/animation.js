@@ -246,7 +246,9 @@ export class AnimationRunner {
   resolvePresetKeyframes_(keyframesOrCreateFn, keyframeOptions) {
     if (typeof keyframesOrCreateFn === 'function') {
       return this.getDims().then((dimensions) => {
-        const fn = /** @type {!WebKeyframesCreateFnDef} */ (keyframesOrCreateFn);
+        const fn = /** @type {!WebKeyframesCreateFnDef} */ (
+          keyframesOrCreateFn
+        );
         return fn(dimensions, keyframeOptions || {});
       });
     }
@@ -269,11 +271,9 @@ export class AnimationRunner {
     // The need for this cast is an unfortunate result of using @mixes in
     // WebAnimationDef. Otherwise Closure will not understand the timing props
     // mixed in from another type.
-    const {
-      delay,
-      duration,
-      easing,
-    } = /** @type {!WebAnimationTimingDef} */ (spec);
+    const {delay, duration, easing} = /** @type {!WebAnimationTimingDef} */ (
+      spec
+    );
     const {target} = /** @type {!WebAnimationSelectorDef} */ (spec);
     return this.resolvePresetKeyframes_(preset.keyframes, keyframeOptions).then(
       (keyframes) => ({
@@ -450,10 +450,12 @@ export class AnimationRunner {
       /**
        * @type {!../../amp-animation/0.1/runners/animation-runner.AnimationRunner}
        */
-      (devAssert(
-        this.runner_,
-        'Tried to execute playbackWhenReady_ before runner was resolved.'
-      ));
+      (
+        devAssert(
+          this.runner_,
+          'Tried to execute playbackWhenReady_ before runner was resolved.'
+        )
+      );
 
     (wait || Promise.resolve()).then(() => {
       if (!this.isActivityScheduled_(activity)) {

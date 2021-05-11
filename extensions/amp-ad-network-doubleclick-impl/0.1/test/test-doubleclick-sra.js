@@ -384,11 +384,12 @@ describes.realWin('Doubleclick SRA', config, (env) => {
           .withArgs('50x320')
           .returns('13579');
         impl1.populateAdUrlState();
-        impl1.identityToken = /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({
-          token: 'abcdef',
-          jar: 'some_jar',
-          pucrd: 'some_pucrd',
-        });
+        impl1.identityToken =
+          /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({
+            token: 'abcdef',
+            jar: 'some_jar',
+            pucrd: 'some_pucrd',
+          });
         const targeting2 = {
           cookieOptOut: 1,
           categoryExclusions: 'food',

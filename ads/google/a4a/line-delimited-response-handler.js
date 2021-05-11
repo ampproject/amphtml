@@ -49,7 +49,9 @@ export function lineDelimitedStreamer(win, response, lineCallback) {
   }
 
   const decoder = new TextDecoder('utf-8');
-  const reader = /** @type {!ReadableStreamDefaultReader} */ (response.body.getReader());
+  const reader = /** @type {!ReadableStreamDefaultReader} */ (
+    response.body.getReader()
+  );
   reader.read().then(function chunk(result) {
     if (result.value) {
       streamer(
@@ -76,8 +78,9 @@ export function metaJsonCreativeGrouper(callback) {
   let first;
   return function (line, done) {
     if (first) {
-      const metadata = /** @type {!Object<string, *>} */ (tryParseJson(first) ||
-        {});
+      const metadata = /** @type {!Object<string, *>} */ (
+        tryParseJson(first) || {}
+      );
       const lowerCasedMetadata = Object.keys(metadata).reduce((newObj, key) => {
         newObj[key.toLowerCase()] = metadata[key];
         return newObj;

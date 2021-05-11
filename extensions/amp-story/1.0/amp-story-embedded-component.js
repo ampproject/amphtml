@@ -902,11 +902,13 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   updateTooltipEl_(component) {
-    const embedConfig = /** @type {!Object} */ (userAssert(
-      this.getEmbedConfigFor_(component.element),
-      'Invalid embed config for target',
-      component.element
-    ));
+    const embedConfig = /** @type {!Object} */ (
+      userAssert(
+        this.getEmbedConfigFor_(component.element),
+        'Invalid embed config for target',
+        component.element
+      )
+    );
 
     const theme = this.triggeringTarget_.getAttribute('theme');
     if (theme && TooltipTheme.DARK === theme.toLowerCase()) {
@@ -1419,12 +1421,8 @@ export class AmpStoryEmbeddedComponent {
       </section>
     `;
     const overlayEls = htmlRefs(tooltipOverlay);
-    const {
-      tooltip,
-      buttonLeft,
-      buttonRight,
-      arrow,
-    } = /** @type {!tooltipElementsDef} */ (overlayEls);
+    const {tooltip, buttonLeft, buttonRight, arrow} =
+      /** @type {!tooltipElementsDef} */ (overlayEls);
 
     this.tooltip_ = tooltip;
     this.tooltipArrow_ = arrow;

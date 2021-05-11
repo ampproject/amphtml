@@ -417,7 +417,9 @@ export class AmpStoryConsent extends AMP.BaseElement {
     const geoGroup = this.consentConfig_.promptIfUnknownForGeoGroup;
     if (geoGroup) {
       Services.geoForDocOrNull(this.element).then((geo) => {
-        const matchedGeoGroups = /** @type {!Array<string>} */ (geo.matchedISOCountryGroups);
+        const matchedGeoGroups = /** @type {!Array<string>} */ (
+          geo.matchedISOCountryGroups
+        );
         if (geo && !matchedGeoGroups.includes(geoGroup)) {
           return;
         }

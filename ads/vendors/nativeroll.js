@@ -44,8 +44,9 @@ function initPlayer(global, data) {
       global.context.noContentAvailable();
     },
     onLoad: () => {
-      const height = global.document.getElementsByClassName('nr-player')[0]
-        ./* OK */ offsetHeight;
+      const height =
+        global.document.getElementsByClassName('nr-player')[0]
+          ./* OK */ offsetHeight;
       global.context.requestResize(undefined, height);
     },
     onDestroy: () => {

@@ -518,9 +518,9 @@ export class AmpStoryPlayer {
     }
 
     try {
-      this.playerConfig_ = /** @type {!ConfigDef} */ (parseJson(
-        scriptTag.textContent
-      ));
+      this.playerConfig_ = /** @type {!ConfigDef} */ (
+        parseJson(scriptTag.textContent)
+      );
     } catch (reason) {
       console /*OK*/
         .error(`[${TAG}] `, reason);

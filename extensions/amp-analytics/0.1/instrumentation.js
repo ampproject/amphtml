@@ -105,10 +105,9 @@ export class InstrumentationService {
     const event = new AnalyticsEvent(target, eventType, vars, enableDataVars);
     const root = this.findRoot_(target);
     const trackerName = getTrackerKeyName(eventType);
-    const tracker = /** @type {!CustomEventTracker|!AmpStoryEventTracker} */ (root.getTracker(
-      trackerName,
-      this.getTrackerClass_(trackerName)
-    ));
+    const tracker = /** @type {!CustomEventTracker|!AmpStoryEventTracker} */ (
+      root.getTracker(trackerName, this.getTrackerClass_(trackerName))
+    );
     tracker.trigger(event);
   }
 
@@ -158,10 +157,9 @@ export class InstrumentationService {
  * @return {!Promise<InstrumentationService>}
  */
 export function instrumentationServicePromiseForDoc(elementOrAmpDoc) {
-  return /** @type {!Promise<InstrumentationService>} */ (getServicePromiseForDoc(
-    elementOrAmpDoc,
-    'amp-analytics-instrumentation'
-  ));
+  return /** @type {!Promise<InstrumentationService>} */ (
+    getServicePromiseForDoc(elementOrAmpDoc, 'amp-analytics-instrumentation')
+  );
 }
 
 /**

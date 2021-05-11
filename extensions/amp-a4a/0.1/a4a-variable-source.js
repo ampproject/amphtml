@@ -198,9 +198,8 @@ export class A4AVariableSource extends VariableSource {
       for (let j = 0; j < attributeNames.length; ++j) {
         const attributeName = attributeNames[j];
         if (elements[i].hasAttribute(attributeName)) {
-          currentResult[attributeName] = elements[i].getAttribute(
-            attributeName
-          );
+          currentResult[attributeName] =
+            elements[i].getAttribute(attributeName);
           foundAtLeastOneAttr = true;
         }
       }

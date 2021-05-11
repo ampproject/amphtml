@@ -356,9 +356,9 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
         ]);
         // Check that non-experiment works
         toggleExperiment(win, 'visibility-trigger-improvements', false);
-        expect(
-          await root.getElements(body, '.notMyClass', null)
-        ).to.deep.equal([child3]);
+        expect(await root.getElements(body, '.notMyClass', null)).to.deep.equal(
+          [child3]
+        );
       });
 
       it('should only find elements with data-vars-*', async () => {

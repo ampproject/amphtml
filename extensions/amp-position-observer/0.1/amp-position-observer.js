@@ -132,9 +132,9 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
         this.positionObserver_.observe(
           scene,
           PositionObserverFidelity.HIGH,
-          /** @type {function(?PositionInViewportEntryDef)} */ (this.positionChanged_.bind(
-            this
-          ))
+          /** @type {function(?PositionInViewportEntryDef)} */ (
+            this.positionChanged_.bind(this)
+          )
         );
       });
   }

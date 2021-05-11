@@ -103,12 +103,14 @@ export class SubscriptionAnalytics {
   serviceEvent(eventType, platformKey, opt_vars, internalVars) {
     this.event(
       eventType,
-      /** @type {!JsonObject} */ (Object.assign(
-        dict({
-          'serviceId': platformKey,
-        }),
-        opt_vars
-      )),
+      /** @type {!JsonObject} */ (
+        Object.assign(
+          dict({
+            'serviceId': platformKey,
+          }),
+          opt_vars
+        )
+      ),
       internalVars
     );
   }

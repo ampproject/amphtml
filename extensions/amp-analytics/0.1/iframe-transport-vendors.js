@@ -39,4 +39,6 @@ const canaryConfig = {
 };
 
 export const IFRAME_TRANSPORTS = /** @type {!JsonObject} */ (prodConfig);
-export const IFRAME_TRANSPORTS_CANARY = /** @type {!JsonObject} */ (canaryConfig);
+export const IFRAME_TRANSPORTS_CANARY = /** @type {!JsonObject} */ (
+  canaryConfig
+);

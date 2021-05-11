@@ -407,8 +407,8 @@ export class AmpList extends AMP.BaseElement {
     let listHeight;
     return this.measureMutateElement(
       /* measurer */ () => {
-        buttonHeight = this.getLoadMoreService_().getLoadMoreButton()
-          ./*OK*/ offsetHeight;
+        buttonHeight =
+          this.getLoadMoreService_().getLoadMoreButton()./*OK*/ offsetHeight;
         listHeight = this.element./*OK*/ offsetHeight;
       },
       /* mutator */ () => {
@@ -482,9 +482,9 @@ export class AmpList extends AMP.BaseElement {
           !this.ssrTemplateHelper_.isEnabled(),
           '[amp-list]: "amp-script" URIs cannot be used in SSR mode.'
         );
-        return Services.scriptForDocOrNull(
-          this.element
-        ).then((ampScriptService) => ampScriptService.fetch(src));
+        return Services.scriptForDocOrNull(this.element).then(
+          (ampScriptService) => ampScriptService.fetch(src)
+        );
       })
       .then((json) => {
         userAssert(
@@ -627,9 +627,8 @@ export class AmpList extends AMP.BaseElement {
     ) {
       const reset = () => {
         this.togglePlaceholder(true);
-        const forceLoadingIndicator = this.element.hasAttribute(
-          'reset-on-refresh'
-        );
+        const forceLoadingIndicator =
+          this.element.hasAttribute('reset-on-refresh');
         this.toggleLoading(true, forceLoadingIndicator);
         this.toggleFallback_(false);
         // Clean up bindings in children before removing them from DOM.
@@ -915,8 +914,8 @@ export class AmpList extends AMP.BaseElement {
     });
 
     if (this.renderedItems_ && opt_append) {
-      this.renderItems_.payload = /** @type {(?JsonObject|Array<JsonObject>)} */ (opt_payload ||
-        {});
+      this.renderItems_.payload =
+        /** @type {(?JsonObject|Array<JsonObject>)} */ (opt_payload || {});
     }
 
     return promise;
@@ -1020,9 +1019,9 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   updateBindings_(elementOrElements, append) {
-    const elements = /** @type {!Array<!Element>} */ (isArray(elementOrElements)
-      ? elementOrElements
-      : [elementOrElements]);
+    const elements = /** @type {!Array<!Element>} */ (
+      isArray(elementOrElements) ? elementOrElements : [elementOrElements]
+    );
 
     // binding=no: Always skip render-blocking update.
     const binding = this.element.getAttribute('binding');

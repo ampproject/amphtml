@@ -25,11 +25,9 @@ const {
   EVENT_TEST_PENDING,
 } = Mocha.Runner.constants;
 const {Base} = Mocha.reporters;
-const {
-  icon,
-  nbDotsPerLine,
-} = require('../../test-configs/karma.conf').superDotsReporter;
 const {green, red, yellow} = require('../../common/colors');
+const {icon, nbDotsPerLine} =
+  require('../../test-configs/karma.conf').superDotsReporter;
 const {reportTestFinished} = require('../report-test-status');
 
 /**

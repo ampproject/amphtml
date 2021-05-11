@@ -58,8 +58,7 @@ const AmpVideoWithKnobs = ({i, ...rest}) => {
     'sources',
     [
       {
-        src:
-          'https://amp.dev/static/inline-examples/videos/kitten-playing.webm',
+        src: 'https://amp.dev/static/inline-examples/videos/kitten-playing.webm',
         type: 'video/webm',
       },
       {

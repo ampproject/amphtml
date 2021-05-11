@@ -713,9 +713,8 @@ describes.sandboxed
       });
 
       it('should not intercept if AMP doc does not opt in', () => {
-        const nonOptedInDoc = window.document.implementation.createHTMLDocument(
-          ''
-        );
+        const nonOptedInDoc =
+          window.document.implementation.createHTMLDocument('');
         const ampdoc = {
           getRootNode: () => nonOptedInDoc,
           whenFirstVisible: () => Promise.resolve(),

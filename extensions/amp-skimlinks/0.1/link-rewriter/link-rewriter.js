@@ -155,10 +155,11 @@ export class LinkRewriter {
           resolve();
         });
       };
-      const elementOrShadowRoot = /** @type {!Element|!ShadowRoot} */ (this
-        .rootNode_.nodeType == Node.DOCUMENT_NODE
-        ? this.rootNode_.documentElement
-        : this.rootNode_);
+      const elementOrShadowRoot = /** @type {!Element|!ShadowRoot} */ (
+        this.rootNode_.nodeType == Node.DOCUMENT_NODE
+          ? this.rootNode_.documentElement
+          : this.rootNode_
+      );
       chunk(elementOrShadowRoot, task, ChunkPriority.LOW);
     });
   }

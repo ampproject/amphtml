@@ -93,9 +93,9 @@ export class AmpAdTemplateHelper {
    * @param {!Array|!JsonObject} analyticsValue
    */
   insertAnalytics(element, analyticsValue) {
-    analyticsValue = /**@type {!Array}*/ (isArray(analyticsValue)
-      ? analyticsValue
-      : [analyticsValue]);
+    analyticsValue = /**@type {!Array}*/ (
+      isArray(analyticsValue) ? analyticsValue : [analyticsValue]
+    );
     for (let i = 0; i < analyticsValue.length; i++) {
       const config = analyticsValue[i];
       const analyticsEle = element.ownerDocument.createElement('amp-analytics');
@@ -146,8 +146,7 @@ export class AmpAdTemplateHelper {
  */
 export function getAmpAdTemplateHelper(target) {
   registerServiceBuilderForDoc(target, SERVICE_ID, AmpAdTemplateHelper);
-  return /** @type {!AmpAdTemplateHelper} */ (getServiceForDoc(
-    target,
-    SERVICE_ID
-  ));
+  return /** @type {!AmpAdTemplateHelper} */ (
+    getServiceForDoc(target, SERVICE_ID)
+  );
 }

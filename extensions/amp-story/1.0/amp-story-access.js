@@ -263,9 +263,9 @@ export class AmpStoryAccess extends AMP.BaseElement {
     );
 
     // Configuration validation is handled by the amp-access extension.
-    let accessConfig = /** @type {!Array|!Object} */ (parseJson(
-      accessEl.textContent
-    ));
+    let accessConfig = /** @type {!Array|!Object} */ (
+      parseJson(accessEl.textContent)
+    );
 
     if (!isArray(accessConfig)) {
       accessConfig = [accessConfig];
