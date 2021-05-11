@@ -50,14 +50,14 @@ describes.sandboxed('Motion calcVelocity', {}, () => {
   });
 });
 
-describes.sandboxed('Motion continueMotion', {}, () => {
+describes.sandboxed('Motion continueMotion', {}, (env) => {
   let clock;
   let vsync;
   let vsyncTasks;
   let contextNode;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     vsyncTasks = [];
     vsync = {
       runAnimMutateSeries: (unusedContextNode, mutator) => {

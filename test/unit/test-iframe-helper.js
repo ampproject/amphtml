@@ -20,7 +20,7 @@ import {generateSentinel} from '../../src/3p-frame';
 describes.sandboxed
   .configure()
   .skipFirefox()
-  .run('iframe-helper', {}, function () {
+  .run('iframe-helper', {}, function (env) {
     const iframeSrc =
       'http://iframe.localhost:' +
       location.port +
@@ -209,7 +209,7 @@ describes.sandboxed
     // TODO(wg-components, #32103): This fails regularly during CI
     it.skip('should set sentinel on postMessage data', () => {
       insert(testIframe);
-      const postMessageSpy = window.sandbox /*OK*/
+      const postMessageSpy = env.sandbox /*OK*/
         .spy(testIframe.contentWindow, 'postMessage');
       IframeHelper.postMessage(
         testIframe,

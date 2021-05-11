@@ -16,7 +16,7 @@
 
 import {Platform} from '../../src/service/platform-impl';
 
-describes.sandboxed('Platform', {}, () => {
+describes.sandboxed('Platform', {}, (env) => {
   let isIos;
   let isAndroid;
   let isChrome;
@@ -71,7 +71,7 @@ describes.sandboxed('Platform', {}, () => {
         standalone: standAloneBoolean,
         userAgent: userAgentString,
       },
-      matchMedia: window.sandbox.stub().returns({matches: true}),
+      matchMedia: env.sandbox.stub().returns({matches: true}),
     });
     expect(platform.isStandalone()).to.equal(isStandalone);
   }

@@ -17,7 +17,7 @@
 import {dev} from '../../src/log';
 import {ieMediaCheckAndFix} from '../../src/service/ie-media-bug';
 
-describes.sandboxed('ie-media-bug', {}, () => {
+describes.sandboxed('ie-media-bug', {}, (env) => {
   let clock;
   let windowApi, windowMock;
   let platform;
@@ -25,12 +25,12 @@ describes.sandboxed('ie-media-bug', {}, () => {
   let devErrorStub;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     platform = {
       isIe: () => false,
     };
-    platformMock = window.sandbox.mock(platform);
-    devErrorStub = window.sandbox.stub(dev(), 'error');
+    platformMock = env.sandbox.mock(platform);
+    devErrorStub = env.sandbox.stub(dev(), 'error');
 
     windowApi = {
       innerWidth: 320,
@@ -38,7 +38,7 @@ describes.sandboxed('ie-media-bug', {}, () => {
       clearInterval: () => {},
       matchMedia: () => {},
     };
-    windowMock = window.sandbox.mock(windowApi);
+    windowMock = env.sandbox.mock(windowApi);
   });
 
   afterEach(() => {
@@ -82,7 +82,7 @@ describes.sandboxed('ie-media-bug', {}, () => {
     windowMock
       .expects('setInterval')
       .withExactArgs(
-        window.sandbox.match((arg) => {
+        env.sandbox.match((arg) => {
           intervalCallback = arg;
           return true;
         }),
@@ -100,7 +100,7 @@ describes.sandboxed('ie-media-bug', {}, () => {
 
     // Second pass.
     clock.tick(10);
-    windowMock = window.sandbox.mock(windowApi);
+    windowMock = env.sandbox.mock(windowApi);
     windowMock
       .expects('matchMedia')
       .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
@@ -114,7 +114,7 @@ describes.sandboxed('ie-media-bug', {}, () => {
 
     // Third pass - succeed.
     clock.tick(10);
-    windowMock = window.sandbox.mock(windowApi);
+    windowMock = env.sandbox.mock(windowApi);
     windowMock
       .expects('matchMedia')
       .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
@@ -144,7 +144,7 @@ describes.sandboxed('ie-media-bug', {}, () => {
     windowMock
       .expects('setInterval')
       .withExactArgs(
-        window.sandbox.match((arg) => {
+        env.sandbox.match((arg) => {
           intervalCallback = arg;
           return true;
         }),

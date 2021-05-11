@@ -23,11 +23,11 @@ import {
   validateSrcPrefix,
 } from '../../3p/3p';
 
-describes.sandboxed('3p', {}, () => {
+describes.sandboxed('3p', {}, (env) => {
   let clock;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
   });
 
   afterEach(() => {

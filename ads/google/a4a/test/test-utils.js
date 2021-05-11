@@ -90,7 +90,7 @@ function noopMethods(
   sandbox.stub(impl.element, 'offsetHeight').value(pageLayoutBox.height);
 }
 
-describes.sandboxed('Google A4A utils', {}, () => {
+describes.sandboxed('Google A4A utils', {}, (env) => {
   //TODO: Add tests for other utils functions.
 
   describe('#additionalDimensions', () => {
@@ -249,7 +249,7 @@ describes.sandboxed('Google A4A utils', {}, () => {
     });
 
     it('should add the correct CSI signals', () => {
-      window.sandbox
+      env.sandbox
         .stub(Services, 'documentInfoForDoc')
         .returns({pageViewId: 777});
       const mockElement = {
@@ -388,7 +388,7 @@ describes.sandboxed('Google A4A utils', {}, () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, fixture.ampdoc, window.sandbox);
+        noopMethods(impl, fixture.ampdoc, env.sandbox);
         return fixture.addElement(elem).then(() =>
           googleAdUrl(impl, '', 0, [], []).then((url1) => {
             expect(url1).to.match(/ady=11/);
@@ -409,7 +409,7 @@ describes.sandboxed('Google A4A utils', {}, () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, fixture.ampdoc, window.sandbox);
+        noopMethods(impl, fixture.ampdoc, env.sandbox);
         const getRect = () => {
           return {'width': 100, 'height': 200};
         };
@@ -418,7 +418,7 @@ describes.sandboxed('Google A4A utils', {}, () => {
         };
         const getScrollLeft = () => 12.1;
         const getScrollTop = () => 34.2;
-        const viewportStub = window.sandbox.stub(Services, 'viewportForDoc');
+        const viewportStub = env.sandbox.stub(Services, 'viewportForDoc');
         viewportStub.returns({getRect, getSize, getScrollTop, getScrollLeft});
         return googleAdUrl(impl, '', 0, {}, []).then((url1) => {
           expect(url1).to.match(/scr_x=12&scr_y=34/);
@@ -441,7 +441,7 @@ describes.sandboxed('Google A4A utils', {}, () => {
           [AMP_EXPERIMENT_ATTRIBUTE]: '111,222',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, fixture.ampdoc, window.sandbox);
+        noopMethods(impl, fixture.ampdoc, env.sandbox);
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, {}, ['789', '098']).then((url1) => {
             expect(url1).to.match(/eid=123%2C456%2C789%2C098/);
@@ -462,7 +462,7 @@ describes.sandboxed('Google A4A utils', {}, () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, fixture.ampdoc, window.sandbox);
+        noopMethods(impl, fixture.ampdoc, env.sandbox);
         impl.win.AMP_CONFIG = {type: 'production'};
         impl.win.location.hash = 'foo,deid=123456,654321,bar';
         return fixture.addElement(elem).then(() => {
@@ -484,7 +484,7 @@ describes.sandboxed('Google A4A utils', {}, () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, fixture.ampdoc, window.sandbox);
+        noopMethods(impl, fixture.ampdoc, env.sandbox);
         impl.win.gaGlobal = {cid: 'foo', hid: 'bar'};
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, [], []).then((url) => {
@@ -506,8 +506,8 @@ describes.sandboxed('Google A4A utils', {}, () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, fixture.ampdoc, window.sandbox);
-        const createElementStub = window.sandbox.stub(
+        noopMethods(impl, fixture.ampdoc, env.sandbox);
+        const createElementStub = env.sandbox.stub(
           impl.win.document,
           'createElement'
         );
@@ -535,8 +535,8 @@ describes.sandboxed('Google A4A utils', {}, () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, fixture.ampdoc, window.sandbox);
-        const createElementStub = window.sandbox.stub(
+        noopMethods(impl, fixture.ampdoc, env.sandbox);
+        const createElementStub = env.sandbox.stub(
           impl.win.document,
           'createElement'
         );
@@ -562,9 +562,9 @@ describes.sandboxed('Google A4A utils', {}, () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, fixture.ampdoc, window.sandbox);
+        noopMethods(impl, fixture.ampdoc, env.sandbox);
         impl.win.SVGElement = undefined;
-        const createElementStub = window.sandbox.stub(
+        const createElementStub = env.sandbox.stub(
           impl.win.document,
           'createElement'
         );
@@ -592,11 +592,11 @@ describes.sandboxed('Google A4A utils', {}, () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, fixture.ampdoc, window.sandbox);
-        window.sandbox
+        noopMethods(impl, fixture.ampdoc, env.sandbox);
+        env.sandbox
           .stub(Services.viewerForDoc(impl.getAmpDoc()), 'getReferrerUrl')
           .returns(new Promise(() => {}));
-        const createElementStub = window.sandbox.stub(
+        const createElementStub = env.sandbox.stub(
           impl.win.document,
           'createElement'
         );
@@ -621,7 +621,7 @@ describes.sandboxed('Google A4A utils', {}, () => {
         doc.win = fixture.win;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {});
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, fixture.ampdoc, window.sandbox);
+        noopMethods(impl, fixture.ampdoc, env.sandbox);
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', Date.now(), [], []).then((url) => {
             expect(url).to.match(/[&?]bdt=[1-9][0-9]*[&$]/);
@@ -989,7 +989,7 @@ describes.sandboxed('Google A4A utils', {}, () => {
     });
 
     it('should include viewer lastVisibleTime', () => {
-      window.sandbox.stub(ampdoc, 'getLastVisibleTime').returns(300);
+      env.sandbox.stub(ampdoc, 'getLastVisibleTime').returns(300);
 
       const vars = getCsiAmpAnalyticsVariables('trigger', a4a, null);
       expect(vars['viewerLastVisibleTime']).to.be.a('number');

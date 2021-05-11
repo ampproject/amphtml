@@ -17,19 +17,19 @@
 import {Poller} from '../poller';
 import {Services} from '../../../../src/services';
 
-describes.sandboxed('Poller', {}, () => {
+describes.sandboxed('Poller', {}, (env) => {
   let clock;
   let poller;
   let workStub;
   const timer = Services.timerFor(window);
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     const obj = {
       work() {},
     };
-    workStub = window.sandbox.stub(obj, 'work');
-    window.sandbox.stub(Math, 'random').callsFake(() => 1);
+    workStub = env.sandbox.stub(obj, 'work');
+    env.sandbox.stub(Math, 'random').callsFake(() => 1);
     const wait = 5000;
     poller = new Poller(window, wait, workStub);
   });
@@ -243,13 +243,13 @@ describes.sandboxed('Poller', {}, () => {
   });
 
   it('should clear timeout ids if stopped', () => {
-    const delaySpy = window.sandbox.spy(timer, 'delay');
+    const delaySpy = env.sandbox.spy(timer, 'delay');
     const retriableErr = new Error('HTTP Error');
     retriableErr.retriable = true;
     workStub.onCall(0).returns(Promise.reject(retriableErr));
     workStub.onCall(1).returns(Promise.reject(retriableErr));
     workStub.returns(Promise.resolve());
-    const clearSpy = window.sandbox.spy(timer, 'cancel');
+    const clearSpy = env.sandbox.spy(timer, 'cancel');
 
     expect(poller.lastTimeoutId_).to.be.null;
 

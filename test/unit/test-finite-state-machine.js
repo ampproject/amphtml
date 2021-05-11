@@ -16,7 +16,7 @@
 
 import {FiniteStateMachine} from '../../src/finite-state-machine';
 
-describes.sandboxed('Finite State Machine', {}, () => {
+describes.sandboxed('Finite State Machine', {}, (env) => {
   describe('simple machines', () => {
     let fsm;
     let spy;
@@ -24,8 +24,8 @@ describes.sandboxed('Finite State Machine', {}, () => {
 
     beforeEach(() => {
       fsm = new FiniteStateMachine('init');
-      spy = window.sandbox.spy();
-      other = window.sandbox.spy();
+      spy = env.sandbox.spy();
+      other = env.sandbox.spy();
 
       fsm.addTransition('init', 'start', spy);
       fsm.addTransition('init', 'other', other);

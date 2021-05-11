@@ -23,7 +23,7 @@ import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {installXhrService} from '../../../src/service/xhr-impl';
 
-describes.sandboxed('invokeWebWorker', {}, () => {
+describes.sandboxed('invokeWebWorker', {}, (env) => {
   let fakeWin;
 
   let ampWorker;
@@ -34,12 +34,12 @@ describes.sandboxed('invokeWebWorker', {}, () => {
   let workerReadyPromise;
 
   beforeEach(() => {
-    window.sandbox.stub(Services, 'ampdocServiceFor').returns({
+    env.sandbox.stub(Services, 'ampdocServiceFor').returns({
       isSingleDoc: () => false,
     });
 
-    postMessageStub = window.sandbox.stub();
-    blobStub = window.sandbox.stub();
+    postMessageStub = env.sandbox.stub();
+    blobStub = env.sandbox.stub();
 
     fakeWorker = {};
     fakeWorker.postMessage = postMessageStub;
@@ -48,13 +48,13 @@ describes.sandboxed('invokeWebWorker', {}, () => {
     fakeWin = {
       Worker: () => fakeWorker,
       Blob: blobStub,
-      URL: {createObjectURL: window.sandbox.stub()},
+      URL: {createObjectURL: env.sandbox.stub()},
       location: window.location,
     };
 
     // Stub xhr.fetchText() to return a resolved promise.
     installXhrService(fakeWin);
-    fetchTextCallStub = window.sandbox
+    fetchTextCallStub = env.sandbox
       .stub(Services.xhrFor(fakeWin), 'fetchText')
       .callsFake(() =>
         Promise.resolve({
@@ -83,7 +83,7 @@ describes.sandboxed('invokeWebWorker', {}, () => {
     return workerReadyPromise.then(() => {
       expect(postMessageStub).to.have.been.calledWithMatch({
         method: 'foo',
-        args: window.sandbox.match(['bar', 123]),
+        args: env.sandbox.match(['bar', 123]),
         id: 0,
       });
 
@@ -195,7 +195,7 @@ describes.sandboxed('invokeWebWorker', {}, () => {
   });
 
   it('should log error when unexpected message is received', () => {
-    const errorStub = window.sandbox.stub(dev(), 'error');
+    const errorStub = env.sandbox.stub(dev(), 'error');
 
     invokeWebWorker(fakeWin, 'foo');
 

@@ -39,14 +39,14 @@ import {
 } from '../../src/service';
 import {loadPromise} from '../../src/event-helper';
 
-describes.sandboxed('service', {}, () => {
+describes.sandboxed('service', {}, (env) => {
   describe('disposable interface', () => {
     let disposable;
     let nonDisposable;
 
     beforeEach(() => {
       nonDisposable = {};
-      disposable = {dispose: window.sandbox.spy()};
+      disposable = {dispose: env.sandbox.spy()};
     });
 
     it('should test disposable interface', () => {
@@ -76,7 +76,7 @@ describes.sandboxed('service', {}, () => {
           this.count = ++count;
         }
       };
-      factory = window.sandbox.spy(() => {
+      factory = env.sandbox.spy(() => {
         return new Class();
       });
       resetServiceForTesting(window, 'a');
@@ -234,7 +234,7 @@ describes.sandboxed('service', {}, () => {
           this.count = ++count;
         }
       };
-      factory = window.sandbox.spy(function () {
+      factory = env.sandbox.spy(function () {
         return new Class();
       });
       windowApi = {
@@ -246,7 +246,7 @@ describes.sandboxed('service', {}, () => {
         isSingleDoc: () => false,
         win: windowApi,
       };
-      ampdocMock = window.sandbox.mock(ampdoc);
+      ampdocMock = env.sandbox.mock(ampdoc);
       ampdocServiceApi = {getAmpDoc: () => ampdoc};
       registerServiceBuilder(windowApi, 'ampdoc', function () {
         return ampdocServiceApi;
@@ -431,7 +431,7 @@ describes.sandboxed('service', {}, () => {
       expectAsyncConsoleError(/intentional/);
       const disposableFactory = function () {
         return {
-          dispose: window.sandbox.spy(),
+          dispose: env.sandbox.spy(),
         };
       };
       registerServiceBuilderForDoc(node, 'a', disposableFactory);
@@ -439,7 +439,7 @@ describes.sandboxed('service', {}, () => {
 
       registerServiceBuilderForDoc(node, 'b', function () {
         return {
-          dispose: window.sandbox.stub().throws('intentional'),
+          dispose: env.sandbox.stub().throws('intentional'),
         };
       });
       const disposableWithError = getServiceForDoc(node, 'b');
@@ -537,7 +537,7 @@ describes.sandboxed('service', {}, () => {
           isSingleDoc: () => false,
           win: windowApi,
         };
-        window.sandbox.stub(ampdocServiceApi, 'getAmpDoc').callsFake((node) => {
+        env.sandbox.stub(ampdocServiceApi, 'getAmpDoc').callsFake((node) => {
           if (node == childWinNode || node == grandChildWinNode) {
             return childAmpdoc;
           }
@@ -559,7 +559,7 @@ describes.sandboxed('service', {}, () => {
           win: windowApi,
         };
         registerServiceBuilderForDoc(childAmpdoc, 'c', factory);
-        window.sandbox.stub(ampdocServiceApi, 'getAmpDoc').callsFake((node) => {
+        env.sandbox.stub(ampdocServiceApi, 'getAmpDoc').callsFake((node) => {
           if (node == childWinNode || node == grandChildWinNode) {
             return childAmpdoc;
           }
@@ -601,7 +601,7 @@ describes.sandboxed('service', {}, () => {
       it('should dispose disposable services', () => {
         const disposableFactory = function () {
           return {
-            dispose: window.sandbox.spy(),
+            dispose: env.sandbox.spy(),
           };
         };
 

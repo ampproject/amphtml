@@ -19,13 +19,13 @@ import {Platform} from '../../src/service/platform-impl';
 
 const NOOP = () => {};
 
-describes.sandboxed('3p ampcontext.js', {}, () => {
+describes.sandboxed('3p ampcontext.js', {}, (env) => {
   let windowPostMessageSpy;
   let windowMessageHandler;
   let win;
 
   beforeEach(() => {
-    windowPostMessageSpy = window.sandbox.spy();
+    windowPostMessageSpy = env.sandbox.spy();
     win = {
       addEventListener: (eventType, handlerFn) => {
         expect(eventType).to.equal('message');
@@ -166,7 +166,7 @@ describes.sandboxed('3p ampcontext.js', {}, () => {
   it('should be able to send an intersection observer request', () => {
     win.name = generateSerializedAttributes();
     const context = new AmpContext(win);
-    const callbackSpy = window.sandbox.spy();
+    const callbackSpy = env.sandbox.spy();
 
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.resetHistory();
@@ -211,7 +211,7 @@ describes.sandboxed('3p ampcontext.js', {}, () => {
   it('should send a pM and set callback when onPageVisibilityChange()', () => {
     win.name = generateSerializedAttributes();
     const context = new AmpContext(win);
-    const callbackSpy = window.sandbox.spy();
+    const callbackSpy = env.sandbox.spy();
     const stopObserving = context.onPageVisibilityChange(callbackSpy);
 
     // window.context should have sent postMessage asking for visibility
@@ -258,8 +258,8 @@ describes.sandboxed('3p ampcontext.js', {}, () => {
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.resetHistory();
 
-    const successCallbackSpy = window.sandbox.spy();
-    const failureCallbackSpy = window.sandbox.spy();
+    const successCallbackSpy = env.sandbox.spy();
+    const failureCallbackSpy = env.sandbox.spy();
     const initialId = context.nextResizeRequestId_;
 
     const height = 100;
@@ -315,10 +315,10 @@ describes.sandboxed('3p ampcontext.js', {}, () => {
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.resetHistory();
 
-    context.sendDeprecationNotice_ = window.sandbox.spy();
+    context.sendDeprecationNotice_ = env.sandbox.spy();
 
-    const successCallbackSpy = window.sandbox.spy();
-    const deniedCallbackSpy = window.sandbox.spy();
+    const successCallbackSpy = env.sandbox.spy();
+    const deniedCallbackSpy = env.sandbox.spy();
 
     context.onResizeSuccess(successCallbackSpy);
     context.onResizeDenied(deniedCallbackSpy);
@@ -365,8 +365,8 @@ describes.sandboxed('3p ampcontext.js', {}, () => {
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.resetHistory();
 
-    const successCallbackSpy = window.sandbox.spy();
-    const deniedCallbackSpy = window.sandbox.spy();
+    const successCallbackSpy = env.sandbox.spy();
+    const deniedCallbackSpy = env.sandbox.spy();
 
     context.onResizeSuccess(successCallbackSpy);
     context.onResizeDenied(deniedCallbackSpy);

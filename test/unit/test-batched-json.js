@@ -18,7 +18,7 @@ import {Services} from '../../src/services';
 import {UrlReplacementPolicy, batchFetchJsonFor} from '../../src/batched-json';
 import {user} from '../../src/log';
 
-describes.sandboxed('batchFetchJsonFor', {}, () => {
+describes.sandboxed('batchFetchJsonFor', {}, (env) => {
   // Fakes.
   const ampdoc = {win: null};
   // Service fakes.
@@ -43,24 +43,24 @@ describes.sandboxed('batchFetchJsonFor', {}, () => {
 
   beforeEach(() => {
     urlReplacements = {
-      expandUrlAsync: window.sandbox.stub(),
-      collectDisallowedVarsSync: window.sandbox.stub(),
+      expandUrlAsync: env.sandbox.stub(),
+      collectDisallowedVarsSync: env.sandbox.stub(),
     };
-    window.sandbox
+    env.sandbox
       .stub(Services, 'urlReplacementsForDoc')
       .returns(urlReplacements);
 
-    fetchJson = window.sandbox.stub().returns(
+    fetchJson = env.sandbox.stub().returns(
       Promise.resolve({
         json: () => Promise.resolve(data),
       })
     );
 
     xhr = {xssiJson: () => Promise.resolve(data)};
-    window.sandbox.stub(Services, 'xhrFor').returns(xhr);
+    env.sandbox.stub(Services, 'xhrFor').returns(xhr);
 
     batchedXhr = {fetchJson};
-    window.sandbox.stub(Services, 'batchedXhrFor').returns(batchedXhr);
+    env.sandbox.stub(Services, 'batchedXhrFor').returns(batchedXhr);
   });
 
   describe('URL replacement', () => {
@@ -100,7 +100,7 @@ describes.sandboxed('batchFetchJsonFor', {}, () => {
         .withArgs('https://data.com?x=FOO&y=BAR')
         .returns(Promise.resolve('https://data.com?x=abc&y=BAR'));
 
-      const userError = window.sandbox.stub(user(), 'error');
+      const userError = env.sandbox.stub(user(), 'error');
       const all = UrlReplacementPolicy.ALL;
       return batchFetchJsonFor(ampdoc, el, {urlReplacement: all}).then(() => {
         expect(fetchJson).to.be.calledWith('https://data.com?x=abc&y=BAR');

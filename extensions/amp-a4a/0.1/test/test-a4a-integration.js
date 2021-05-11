@@ -78,7 +78,7 @@ function expectRenderedInXDomainIframe(element, src) {
   expect(child, 'iframe child').to.be.visible;
 }
 
-describes.sandboxed('integration test: a4a', {}, () => {
+describes.sandboxed('integration test: a4a', {}, (env) => {
   let fixture;
   let fetchMock;
   let adResponse;
@@ -151,7 +151,7 @@ describes.sandboxed('integration test: a4a', {}, () => {
     // TODO(tdrl) Currently layoutCallback rejects, even though something *is*
     // rendered.  This should be fixed in a refactor, and we should change this
     // .catch to a .then.
-    const forceCollapseStub = window.sandbox.spy(
+    const forceCollapseStub = env.sandbox.spy(
       MockA4AImpl.prototype,
       'forceCollapse'
     );
@@ -169,7 +169,7 @@ describes.sandboxed('integration test: a4a', {}, () => {
   it('should collapse slot when creative response has code 204', async () => {
     adResponse.status = 204;
     adResponse.body = null;
-    const forceCollapseStub = window.sandbox.spy(
+    const forceCollapseStub = env.sandbox.spy(
       MockA4AImpl.prototype,
       'forceCollapse'
     );
@@ -179,7 +179,7 @@ describes.sandboxed('integration test: a4a', {}, () => {
 
   it('should collapse slot when creative response.arrayBuffer() is empty', async () => {
     adResponse.body = '';
-    const forceCollapseStub = window.sandbox.spy(
+    const forceCollapseStub = env.sandbox.spy(
       MockA4AImpl.prototype,
       'forceCollapse'
     );
@@ -191,7 +191,7 @@ describes.sandboxed('integration test: a4a', {}, () => {
     await fixture.addElement(a4aElement);
     await expectRenderedInFriendlyIframe(a4aElement, 'Hello, world.');
     const a4a = new MockA4AImpl(a4aElement);
-    const initiateAdRequestMock = window.sandbox
+    const initiateAdRequestMock = env.sandbox
       .stub(MockA4AImpl.prototype, 'initiateAdRequest')
       .callsFake(() => {
         a4a.adPromise_ = Promise.resolve();
@@ -199,16 +199,16 @@ describes.sandboxed('integration test: a4a', {}, () => {
         // up any unrelated asserts.
         a4a.isRefreshing = false;
       });
-    const tearDownSlotMock = window.sandbox.stub(
+    const tearDownSlotMock = env.sandbox.stub(
       MockA4AImpl.prototype,
       'tearDownSlot'
     );
     tearDownSlotMock.returns(undefined);
-    const destroyFrameSpy = window.sandbox.spy(
+    const destroyFrameSpy = env.sandbox.spy(
       MockA4AImpl.prototype,
       'destroyFrame'
     );
-    const callback = window.sandbox.spy();
+    const callback = env.sandbox.spy();
     await a4a.refresh(callback);
     expect(initiateAdRequestMock).to.be.called;
     expect(tearDownSlotMock).to.be.called;

@@ -23,7 +23,7 @@ import {
 } from '../../src/gesture-recognizers';
 import {Gestures} from '../../src/gesture';
 
-describes.sandboxed('TapRecognizer', {}, () => {
+describes.sandboxed('TapRecognizer', {}, (env) => {
   let element;
   let recognizer;
   let gestures;
@@ -38,7 +38,7 @@ describes.sandboxed('TapRecognizer', {}, () => {
     };
 
     gestures = new Gestures(element);
-    gesturesMock = window.sandbox.mock(gestures);
+    gesturesMock = env.sandbox.mock(gestures);
 
     recognizer = new TapRecognizer(gestures);
   });
@@ -105,7 +105,7 @@ describes.sandboxed('TapRecognizer', {}, () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match((data) => {
+        env.sandbox.match((data) => {
           return (
             data.clientX == 101 && data.clientY == 201 && data.target === target
           );
@@ -118,7 +118,7 @@ describes.sandboxed('TapRecognizer', {}, () => {
   });
 });
 
-describes.sandboxed('DoubletapRecognizer', {}, () => {
+describes.sandboxed('DoubletapRecognizer', {}, (env) => {
   let element;
   let recognizer;
   let gestures;
@@ -133,7 +133,7 @@ describes.sandboxed('DoubletapRecognizer', {}, () => {
     };
 
     gestures = new Gestures(element);
-    gesturesMock = window.sandbox.mock(gestures);
+    gesturesMock = env.sandbox.mock(gestures);
 
     recognizer = new DoubletapRecognizer(gestures);
   });
@@ -212,7 +212,7 @@ describes.sandboxed('DoubletapRecognizer', {}, () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match((data) => {
+        env.sandbox.match((data) => {
           return data.clientX == 101 && data.clientY == 201;
         }),
         null
@@ -224,7 +224,7 @@ describes.sandboxed('DoubletapRecognizer', {}, () => {
   });
 });
 
-describes.sandboxed('SwipeXYRecognizer', {}, () => {
+describes.sandboxed('SwipeXYRecognizer', {}, (env) => {
   let element;
   let clock;
   let recognizer;
@@ -232,7 +232,7 @@ describes.sandboxed('SwipeXYRecognizer', {}, () => {
   let gesturesMock;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
 
     element = {
       addEventListener: (unusedEventType, unusedHandler) => {},
@@ -242,7 +242,7 @@ describes.sandboxed('SwipeXYRecognizer', {}, () => {
     };
 
     gestures = new Gestures(element);
-    gesturesMock = window.sandbox.mock(gestures);
+    gesturesMock = env.sandbox.mock(gestures);
 
     recognizer = new SwipeXYRecognizer(gestures);
   });
@@ -312,7 +312,7 @@ describes.sandboxed('SwipeXYRecognizer', {}, () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match((data) => {
+        env.sandbox.match((data) => {
           return (
             data.first === true &&
             data.last === false &&
@@ -350,7 +350,7 @@ describes.sandboxed('SwipeXYRecognizer', {}, () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match((data) => {
+        env.sandbox.match((data) => {
           return (
             data.first === false &&
             data.last === false &&
@@ -386,7 +386,7 @@ describes.sandboxed('SwipeXYRecognizer', {}, () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match((data) => {
+        env.sandbox.match((data) => {
           return (
             data.first === false &&
             data.last === true &&
@@ -420,7 +420,7 @@ describes.sandboxed('SwipeXYRecognizer', {}, () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match((data) => {
+        env.sandbox.match((data) => {
           return (
             data.first === false &&
             data.last === true &&
@@ -483,7 +483,7 @@ describes.sandboxed('SwipeXYRecognizer', {}, () => {
   });
 });
 
-describes.sandboxed('TapzoomRecognizer', {}, () => {
+describes.sandboxed('TapzoomRecognizer', {}, (env) => {
   let element;
   let clock;
   let recognizer;
@@ -491,7 +491,7 @@ describes.sandboxed('TapzoomRecognizer', {}, () => {
   let gesturesMock;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
 
     element = {
       addEventListener: (unusedEventType, unusedHandler) => {},
@@ -501,7 +501,7 @@ describes.sandboxed('TapzoomRecognizer', {}, () => {
     };
 
     gestures = new Gestures(element);
-    gesturesMock = window.sandbox.mock(gestures);
+    gesturesMock = env.sandbox.mock(gestures);
 
     recognizer = new TapzoomRecognizer(gestures);
   });
@@ -604,7 +604,7 @@ describes.sandboxed('TapzoomRecognizer', {}, () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match((data) => {
+        env.sandbox.match((data) => {
           return (
             data.first === true &&
             data.last === false &&
@@ -637,7 +637,7 @@ describes.sandboxed('TapzoomRecognizer', {}, () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match((data) => {
+        env.sandbox.match((data) => {
           return (
             data.first === false &&
             data.last === false &&
@@ -673,7 +673,7 @@ describes.sandboxed('TapzoomRecognizer', {}, () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match((data) => {
+        env.sandbox.match((data) => {
           return (
             data.first === false &&
             data.last === true &&
@@ -697,7 +697,7 @@ describes.sandboxed('TapzoomRecognizer', {}, () => {
   });
 });
 
-describes.sandboxed('PinchRecognizer', {}, () => {
+describes.sandboxed('PinchRecognizer', {}, (env) => {
   let element;
   let clock;
   let recognizer;
@@ -705,7 +705,7 @@ describes.sandboxed('PinchRecognizer', {}, () => {
   let gesturesMock;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
 
     element = {
       addEventListener: (unusedEventType, unusedHandler) => {},
@@ -715,7 +715,7 @@ describes.sandboxed('PinchRecognizer', {}, () => {
     };
 
     gestures = new Gestures(element);
-    gesturesMock = window.sandbox.mock(gestures);
+    gesturesMock = env.sandbox.mock(gestures);
 
     recognizer = new PinchRecognizer(gestures);
   });
@@ -848,7 +848,7 @@ describes.sandboxed('PinchRecognizer', {}, () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match((data) => {
+        env.sandbox.match((data) => {
           return (
             data.first === true &&
             data.last === false &&
@@ -903,7 +903,7 @@ describes.sandboxed('PinchRecognizer', {}, () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match((unusedData) => true),
+        env.sandbox.match((unusedData) => true),
         null
       )
       .once();
@@ -920,7 +920,7 @@ describes.sandboxed('PinchRecognizer', {}, () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match((data) => {
+        env.sandbox.match((data) => {
           return (
             data.first === false &&
             data.last === false &&
@@ -961,7 +961,7 @@ describes.sandboxed('PinchRecognizer', {}, () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match((unusedData) => true),
+        env.sandbox.match((unusedData) => true),
         null
       )
       .once();
@@ -973,7 +973,7 @@ describes.sandboxed('PinchRecognizer', {}, () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match((data) => {
+        env.sandbox.match((data) => {
           return (
             data.first === false &&
             data.last === true &&
@@ -1012,7 +1012,7 @@ describes.sandboxed('PinchRecognizer', {}, () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match((unusedData) => true),
+        env.sandbox.match((unusedData) => true),
         null
       )
       .once();
@@ -1024,7 +1024,7 @@ describes.sandboxed('PinchRecognizer', {}, () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match((data) => {
+        env.sandbox.match((data) => {
           return (
             data.first === false &&
             data.last === true &&
@@ -1068,7 +1068,7 @@ describes.sandboxed('PinchRecognizer', {}, () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match((data) => {
+        env.sandbox.match((data) => {
           return (
             data.centerClientX == 100 &&
             data.centerClientY == 100 &&
@@ -1089,7 +1089,7 @@ describes.sandboxed('PinchRecognizer', {}, () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match((data) => {
+        env.sandbox.match((data) => {
           return (
             data.centerClientX == 100 &&
             data.centerClientY == 100 &&

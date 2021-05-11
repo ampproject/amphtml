@@ -32,8 +32,8 @@ import {runVideoPlayerIntegrationTests} from './test-video-players-helper';
 describes.sandboxed
   .configure()
   .skipIos()
-  .run('amp-video', {}, () => {
-    runVideoPlayerIntegrationTests((fixture) => {
+  .run('amp-video', {}, (env) => {
+    runVideoPlayerIntegrationTests(env, (fixture) => {
       const video = fixture.doc.createElement('amp-video');
       video.setAttribute('src', '/examples/av/ForBiggerJoyrides-tiny.mp4');
       return video;
@@ -41,8 +41,9 @@ describes.sandboxed
   });
 
 // TODO(alanorozco): unskip
-describes.sandboxed.skip('amp-video-iframe', {}, () => {
+describes.sandboxed.skip('amp-video-iframe', {}, (env) => {
   runVideoPlayerIntegrationTests(
+    env,
     (fixture) => {
       const video = fixture.doc.createElement('amp-video-iframe');
       video.setAttribute('src', '/examples/amp-video-iframe/frame.html');
@@ -55,8 +56,9 @@ describes.sandboxed.skip('amp-video-iframe', {}, () => {
 });
 
 //TODO(aghassemi, #9379): unskip
-describes.sandboxed.skip('amp-youtube', {}, () => {
+describes.sandboxed.skip('amp-youtube', {}, (env) => {
   runVideoPlayerIntegrationTests(
+    env,
     (fixture) => {
       const video = fixture.doc.createElement('amp-youtube');
       video.setAttribute('data-videoid', 'O0QDEXZhow4');
@@ -68,8 +70,9 @@ describes.sandboxed.skip('amp-youtube', {}, () => {
 });
 
 //TODO(aghassemi, #9379): unskip
-describes.sandboxed.skip('amp-dailymotion', {}, () => {
+describes.sandboxed.skip('amp-dailymotion', {}, (env) => {
   runVideoPlayerIntegrationTests(
+    env,
     (fixture) => {
       const video = fixture.doc.createElement('amp-dailymotion');
       video.setAttribute('data-videoid', 'x3rdtfy');
@@ -80,8 +83,9 @@ describes.sandboxed.skip('amp-dailymotion', {}, () => {
   );
 });
 
-describes.sandboxed.configure().skip('amp-3q-player', {}, () => {
+describes.sandboxed.configure().skip('amp-3q-player', {}, (env) => {
   runVideoPlayerIntegrationTests(
+    env,
     (fixture) => {
       const video = fixture.doc.createElement('amp-3q-player');
       video.setAttribute('data-id', 'c8dbe7f4-7f7f-11e6-a407-0cc47a188158');
@@ -93,8 +97,9 @@ describes.sandboxed.configure().skip('amp-3q-player', {}, () => {
 });
 
 //TODO(aghassemi,#8264): Unskip when integration is fixed.
-describes.sandboxed.skip('amp-nexxtv-player', {}, () => {
+describes.sandboxed.skip('amp-nexxtv-player', {}, (env) => {
   runVideoPlayerIntegrationTests(
+    env,
     (fixture) => {
       const video = fixture.doc.createElement('amp-nexxtv-player');
       video.setAttribute('data-mediaid', 'PTPFEC4U184674');
@@ -107,8 +112,9 @@ describes.sandboxed.skip('amp-nexxtv-player', {}, () => {
 });
 
 //TODO(aghassemi, #9379): unskip
-describes.sandboxed.skip('amp-ima-video', {}, () => {
+describes.sandboxed.skip('amp-ima-video', {}, (env) => {
   runVideoPlayerIntegrationTests(
+    env,
     (fixture) => {
       const video = fixture.doc.createElement('amp-ima-video');
       video.setAttribute('width', 640);
@@ -129,8 +135,9 @@ describes.sandboxed.skip('amp-ima-video', {}, () => {
 });
 
 //TODO(cvializ, #14833): unskip after brid player is fixed
-describes.sandboxed.skip('amp-brid-player', {}, () => {
+describes.sandboxed.skip('amp-brid-player', {}, (env) => {
   runVideoPlayerIntegrationTests(
+    env,
     (fixture) => {
       const video = fixture.doc.createElement('amp-brid-player');
       video.setAttribute('data-partner', '264');
@@ -143,8 +150,9 @@ describes.sandboxed.skip('amp-brid-player', {}, () => {
   );
 });
 
-describes.sandboxed.skip('amp-brightcove', {}, () => {
+describes.sandboxed.skip('amp-brightcove', {}, (env) => {
   runVideoPlayerIntegrationTests(
+    env,
     (fixture) => {
       const video = fixture.doc.createElement('amp-brightcove');
       video.setAttribute('data-account-id', '1290862519001');
@@ -157,8 +165,9 @@ describes.sandboxed.skip('amp-brightcove', {}, () => {
   );
 });
 
-describes.sandboxed.skip('amp-delight-player', {}, () => {
+describes.sandboxed.skip('amp-delight-player', {}, (env) => {
   runVideoPlayerIntegrationTests(
+    env,
     (fixture) => {
       const video = fixture.doc.createElement('amp-delight-player');
       video.setAttribute('data-content-id', '-LLoCCZqWi18O73b6M0w');

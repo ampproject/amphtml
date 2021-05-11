@@ -17,7 +17,7 @@
 import {handleClick, warmupDynamic, warmupStatic} from '../../ads/alp/handler';
 import {parseUrlDeprecated} from '../../src/url';
 
-describes.sandboxed('alp-handler', {}, () => {
+describes.sandboxed('alp-handler', {}, (env) => {
   let event;
   let anchor;
   let open;
@@ -32,32 +32,32 @@ describes.sandboxed('alp-handler', {}, () => {
       Image() {
         image = this;
       },
-      postMessage: window.sandbox.stub(),
+      postMessage: env.sandbox.stub(),
       _id: 'base-win',
     };
     win.parent = {
-      postMessage: window.sandbox.stub(),
+      postMessage: env.sandbox.stub(),
       _id: 'p0',
     };
     win.parent.parent = {
-      postMessage: window.sandbox.stub(),
+      postMessage: env.sandbox.stub(),
       _id: 'p1',
     };
     win.parent.parent.parent = {
-      postMessage: window.sandbox.stub(),
+      postMessage: env.sandbox.stub(),
       _id: 'p2',
     };
     win.parent.parent.parent.parent = {
-      postMessage: window.sandbox.stub(),
+      postMessage: env.sandbox.stub(),
       _id: 'p3',
     };
-    open = window.sandbox.stub(win, 'open').callsFake(() => {
+    open = env.sandbox.stub(win, 'open').callsFake(() => {
       return {};
     });
     const doc = {
       defaultView: win,
       head: {
-        appendChild: window.sandbox.spy(),
+        appendChild: env.sandbox.spy(),
       },
     };
     win.document = doc;
@@ -70,7 +70,7 @@ describes.sandboxed('alp-handler', {}, () => {
           'https://cdn.ampproject.org/c/www.example.com/amp.html'
         ),
       ownerDocument: doc,
-      getAttribute: window.sandbox.stub(),
+      getAttribute: env.sandbox.stub(),
       get search() {
         return parseUrlDeprecated(this.href).search;
       },
@@ -79,7 +79,7 @@ describes.sandboxed('alp-handler', {}, () => {
       trusted: true,
       buttons: 0,
       target: anchor,
-      preventDefault: window.sandbox.spy(),
+      preventDefault: env.sandbox.spy(),
       defaultPrevented: false,
     };
   });
@@ -190,7 +190,7 @@ describes.sandboxed('alp-handler', {}, () => {
   });
 
   it('should perform special navigation if specially asked for', () => {
-    const navigateSpy = window.sandbox.spy();
+    const navigateSpy = env.sandbox.spy();
     const opt_navigate = (val) => {
       navigateSpy();
       expect(val).to.equal(

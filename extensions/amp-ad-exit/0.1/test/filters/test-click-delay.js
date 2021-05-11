@@ -17,7 +17,7 @@
 import {ClickDelayFilter} from '../../filters/click-delay';
 import {FilterType} from '../../filters/filter';
 
-describes.sandboxed('click-delay', {}, () => {
+describes.sandboxed('click-delay', {}, (env) => {
   const DEFAULT_CONFIG = {
     type: FilterType.CLICK_DELAY,
     delay: 123,
@@ -26,7 +26,7 @@ describes.sandboxed('click-delay', {}, () => {
 
   it('should use performance timing', () => {
     const win = {performance: {timing: {'navigationStart': 456}}};
-    window.sandbox.stub(Date, 'now').returns(123);
+    env.sandbox.stub(Date, 'now').returns(123);
     expect(
       new ClickDelayFilter('foo', DEFAULT_CONFIG, win).intervalStart
     ).to.equal(456);
@@ -57,7 +57,7 @@ describes.sandboxed('click-delay', {}, () => {
               ).to.throw(win.err)
             );
           } else {
-            window.sandbox.stub(Date, 'now').returns(123);
+            env.sandbox.stub(Date, 'now').returns(123);
             expect(
               new ClickDelayFilter('foo', test.config, test.win).intervalStart
             ).to.equal(123);
@@ -72,7 +72,7 @@ describes.sandboxed('click-delay', {}, () => {
       const filter = new ClickDelayFilter('foo', DEFAULT_CONFIG, {
         performance: {timing: {navigationStart: 1}},
       });
-      const nowStub = window.sandbox.stub(Date, 'now');
+      const nowStub = env.sandbox.stub(Date, 'now');
       nowStub.onFirstCall().returns(1001);
       expect(filter.filter()).to.be.true;
     });
@@ -81,7 +81,7 @@ describes.sandboxed('click-delay', {}, () => {
       const filter = new ClickDelayFilter('foo', DEFAULT_CONFIG, {
         performance: {timing: {navigationStart: 1}},
       });
-      const nowStub = window.sandbox.stub(Date, 'now');
+      const nowStub = env.sandbox.stub(Date, 'now');
       nowStub.onFirstCall().returns(1);
       nowStub.onSecondCall().returns(125);
       expect(filter.filter()).to.be.false;

@@ -29,7 +29,7 @@ import {xhrServiceForTesting} from '../../src/service/xhr-impl';
 describes.sandboxed
   .configure()
   .skipSafari()
-  .run('XHR', {}, function () {
+  .run('XHR', {}, function (env) {
     let ampdocServiceForStub;
     let ampdoc;
     let ampdocViewerStub;
@@ -62,7 +62,7 @@ describes.sandboxed
     ];
 
     function setupMockXhr() {
-      const mockXhr = window.sandbox.useFakeXMLHttpRequest();
+      const mockXhr = env.sandbox.useFakeXMLHttpRequest();
       xhrCreated = new Promise((resolve) => (mockXhr.onCreate = resolve));
     }
 
@@ -76,7 +76,7 @@ describes.sandboxed
     }
 
     beforeEach(() => {
-      ampdocServiceForStub = window.sandbox.stub(Services, 'ampdocServiceFor');
+      ampdocServiceForStub = env.sandbox.stub(Services, 'ampdocServiceFor');
       ampdoc = {
         getRootNode: () => null,
         whenFirstVisible: () => Promise.resolve(),
@@ -86,7 +86,7 @@ describes.sandboxed
         getAmpDoc: () => ampdoc,
         getSingleDoc: () => ampdoc,
       });
-      ampdocViewerStub = window.sandbox.stub(Services, 'viewerForDoc');
+      ampdocViewerStub = env.sandbox.stub(Services, 'viewerForDoc');
       ampdocViewerStub.returns({});
 
       location.href = 'https://acme.com/path';
@@ -147,14 +147,14 @@ describes.sandboxed
 
           it('should allow FormData as body', () => {
             const fakeWin = null;
-            window.sandbox.stub(Services, 'platformFor').returns({
+            env.sandbox.stub(Services, 'platformFor').returns({
               isIos() {
                 return false;
               },
             });
 
             const formData = createFormDataWrapper(fakeWin);
-            window.sandbox.stub(JSON, 'stringify');
+            env.sandbox.stub(JSON, 'stringify');
             formData.append('name', 'John Miller');
             formData.append('age', 56);
             const post = xhr.fetchJson.bind(xhr, '/post', {
@@ -259,13 +259,13 @@ describes.sandboxed
               test.win.fetch.restore();
             });
             it('should not call fetch if view is not visible ', () => {
-              const fetchCall = window.sandbox.spy(test.win, 'fetch');
+              const fetchCall = env.sandbox.spy(test.win, 'fetch');
               ampdoc.whenFirstVisible = () => Promise.reject();
               xhr.fetchJson('/get', {ampCors: false});
               expect(fetchCall.notCalled).to.be.true;
             });
             it('should call fetch if view is visible ', () => {
-              const fetchCall = window.sandbox.spy(test.win, 'fetch');
+              const fetchCall = env.sandbox.spy(test.win, 'fetch');
               ampdoc.whenFirstVisible = () => Promise.resolve();
               const fetch = xhr.fetchJson('/get', {ampCors: false});
               fetch.then(() => {
@@ -371,7 +371,7 @@ describes.sandboxed
         });
 
         it('should do simple JSON fetch', () => {
-          window.sandbox.stub(user(), 'assert');
+          env.sandbox.stub(user(), 'assert');
           return xhr
             .fetchJson(`${baseUrl}/get?k=v1`)
             .then((res) => res.json())
@@ -484,7 +484,7 @@ describes.sandboxed
 
         beforeEach(() => {
           xhr = xhrServiceForTesting(test.win);
-          fetchStub = window.sandbox
+          fetchStub = env.sandbox
             .stub(xhr, 'fetchAmpCors_')
             .callsFake(() => Promise.resolve(new Response(TEST_TEXT)));
         });
@@ -675,10 +675,7 @@ describes.sandboxed
           sendMessageAwaitResponse: getDefaultResponsePromise,
           whenFirstVisible: () => Promise.resolve(),
         };
-        sendMessageStub = window.sandbox.stub(
-          viewer,
-          'sendMessageAwaitResponse'
-        );
+        sendMessageStub = env.sandbox.stub(viewer, 'sendMessageAwaitResponse');
         sendMessageStub.returns(getDefaultResponsePromise());
         ampdocViewerStub.returns(viewer);
         interceptionEnabledWin = {
@@ -737,7 +734,7 @@ describes.sandboxed
       });
 
       it('should not intercept if viewer is not capable', () => {
-        window.sandbox
+        env.sandbox
           .stub(viewer, 'hasCapability')
           .withArgs('xhrInterceptor')
           .returns(false);
@@ -749,7 +746,7 @@ describes.sandboxed
       });
 
       it('should not intercept if viewer untrusted and non-dev mode', () => {
-        window.sandbox
+        env.sandbox
           .stub(viewer, 'isTrustedViewer')
           .returns(Promise.resolve(false));
         interceptionEnabledWin.AMP_DEV_MODE = false;
@@ -778,10 +775,10 @@ describes.sandboxed
       });
 
       it('should intercept if viewer untrusted but in local dev mode', () => {
-        window.sandbox
+        env.sandbox
           .stub(viewer, 'isTrustedViewer')
           .returns(Promise.resolve(false));
-        window.sandbox.stub(mode, 'getMode').returns({localDev: true});
+        env.sandbox.stub(mode, 'getMode').returns({localDev: true});
 
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
@@ -791,11 +788,11 @@ describes.sandboxed
       });
 
       it('should intercept if untrusted-xhr-interception experiment enabled', () => {
-        window.sandbox
+        env.sandbox
           .stub(viewer, 'isTrustedViewer')
           .returns(Promise.resolve(false));
-        window.sandbox.stub(mode, 'getMode').returns({localDev: false});
-        window.sandbox
+        env.sandbox.stub(mode, 'getMode').returns({localDev: false});
+        env.sandbox
           .stub(viewer, 'hasCapability')
           .withArgs('xhrInterceptor')
           .returns(true);
@@ -813,7 +810,7 @@ describes.sandboxed
       });
 
       it('should intercept if non-dev mode but viewer trusted', () => {
-        window.sandbox
+        env.sandbox
           .stub(viewer, 'isTrustedViewer')
           .returns(Promise.resolve(true));
         interceptionEnabledWin.AMP_DEV_MODE = false;
@@ -833,7 +830,7 @@ describes.sandboxed
           .then(() =>
             expect(sendMessageStub).to.have.been.calledWithMatch(
               'xhr',
-              window.sandbox.match.any
+              env.sandbox.match.any
             )
           );
       });
@@ -843,7 +840,7 @@ describes.sandboxed
 
         return xhr.fetch('https://www.some-url.org/some-resource/').then(() =>
           expect(sendMessageStub).to.have.been.calledWithMatch(
-            window.sandbox.match.any,
+            env.sandbox.match.any,
             {
               originalRequest: {
                 input:
@@ -870,7 +867,7 @@ describes.sandboxed
           })
           .then(() =>
             expect(sendMessageStub).to.have.been.calledWithMatch(
-              window.sandbox.match.any,
+              env.sandbox.match.any,
               {
                 originalRequest: {
                   input:
@@ -893,7 +890,7 @@ describes.sandboxed
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
         const fakeWin = null;
-        window.sandbox.stub(Services, 'platformFor').returns({
+        env.sandbox.stub(Services, 'platformFor').returns({
           isIos() {
             return false;
           },
@@ -911,7 +908,7 @@ describes.sandboxed
           })
           .then(() =>
             expect(sendMessageStub).to.have.been.calledWithMatch(
-              window.sandbox.match.any,
+              env.sandbox.match.any,
               {
                 originalRequest: {
                   input:

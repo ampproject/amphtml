@@ -16,10 +16,10 @@
 
 import * as tr from '../../src/transition';
 
-describes.sandboxed('Transition', {}, () => {
+describes.sandboxed('Transition', {}, (env) => {
   it('all', () => {
-    const func1 = window.sandbox.spy();
-    const func2 = window.sandbox.spy();
+    const func1 = env.sandbox.spy();
+    const func2 = env.sandbox.spy();
     const all = tr.all([func1, func2]);
 
     expect(func1).to.have.not.been.called;

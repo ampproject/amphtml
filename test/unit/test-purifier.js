@@ -20,13 +20,13 @@ import {Purifier} from '../../src/purifier/purifier';
 describes.sandboxed
   .configure()
   .skipFirefox()
-  .run('DOMPurify-based', {}, () => {
+  .run('DOMPurify-based', {}, (env) => {
     let purify;
     let purifyTripleMustache;
     let rewriteAttributeValueSpy;
 
     beforeEach(() => {
-      rewriteAttributeValueSpy = window.sandbox.spy(
+      rewriteAttributeValueSpy = env.sandbox.spy(
         urlRewrite,
         'rewriteAttributeValue'
       );

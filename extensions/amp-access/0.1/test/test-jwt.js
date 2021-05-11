@@ -16,7 +16,7 @@
 
 import {JwtHelper, pemToBytes} from '../jwt';
 
-describes.sandboxed('JwtHelper', {}, () => {
+describes.sandboxed('JwtHelper', {}, (env) => {
   // Generated from https://jwt.io/#debugger
   // Name deliberately changed from "John Doe" to "John ௵Z加䅌ਇ☎Èʘغޝ" to test
   // correct unicode handling on our part.
@@ -171,7 +171,7 @@ describes.sandboxed('JwtHelper', {}, () => {
         importKey: () => {},
         verify: () => {},
       };
-      subtleMock = window.sandbox.mock(subtle);
+      subtleMock = env.sandbox.mock(subtle);
 
       windowApi = {
         crypto: {subtle},
@@ -237,8 +237,8 @@ describes.sandboxed('JwtHelper', {}, () => {
         .withExactArgs(
           {name: 'RSASSA-PKCS1-v1_5'},
           key,
-          /* sig */ window.sandbox.match(() => true),
-          /* verifiable */ window.sandbox.match(() => true)
+          /* sig */ env.sandbox.match(() => true),
+          /* verifiable */ env.sandbox.match(() => true)
         )
         .returns(Promise.resolve(true))
         .once();

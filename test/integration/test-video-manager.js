@@ -31,11 +31,11 @@ import {toArray} from '../../src/core/types/array';
 // See #11588.
 describes.sandboxed
   .configure()
-  .skip('Fake Video PlayerIntegration Tests', {}, () => {
+  .skip('Fake Video PlayerIntegration Tests', {}, (env) => {
     // We run the video player integration tests on a fake video player as part
     // of functional testing. Same tests run on real video players such as
     // `amp-video` and `amp-youtube` as part of integration testing.
-    runVideoPlayerIntegrationTests((fixture) => {
+    runVideoPlayerIntegrationTests(env, (fixture) => {
       fixture.win.AMP.push({
         n: 'amp-test-fake-videoplayer',
         f: function (AMP) {
@@ -286,7 +286,7 @@ describes.sandboxed
 describes.sandboxed
   .configure()
   .ifChrome()
-  .run('Autoplay support', {}, () => {
+  .run('Autoplay support', {}, (env) => {
     let win;
     let video;
     let createElementSpy;
@@ -318,9 +318,9 @@ describes.sandboxed
 
       win = {document: doc};
 
-      createElementSpy = window.sandbox.spy(doc, 'createElement');
-      setAttributeSpy = window.sandbox.spy(video, 'setAttribute');
-      playStub = window.sandbox.stub(video, 'play');
+      createElementSpy = env.sandbox.spy(doc, 'createElement');
+      setAttributeSpy = env.sandbox.spy(video, 'setAttribute');
+      playStub = env.sandbox.stub(video, 'play');
 
       resetIsAutoplaySupported(win);
     });

@@ -589,14 +589,14 @@ describes.sandboxed('isInputPending usage', {}, () => {
   );
 });
 
-describes.sandboxed('onIdle', {}, () => {
+describes.sandboxed('onIdle', {}, (env) => {
   let win;
   let calls;
   let callbackCalled;
   let clock;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     calls = [];
     callbackCalled = false;
     win = {

@@ -16,7 +16,7 @@
 
 import {LoginDoneDialog, buildLangSelector} from '../amp-login-done-dialog';
 
-describes.sandboxed('LoginDoneDialog', {}, () => {
+describes.sandboxed('LoginDoneDialog', {}, (env) => {
   let clock;
   let windowApi;
   let dialog;
@@ -25,19 +25,19 @@ describes.sandboxed('LoginDoneDialog', {}, () => {
   let closeButton;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
 
     messageListener = undefined;
     closeButton = {};
     windowApi = {
-      close: window.sandbox.spy(),
+      close: env.sandbox.spy(),
       navigator: {
         language: 'fr-FR',
       },
       location: {
         hash: '#result1',
         search: '',
-        replace: window.sandbox.spy(),
+        replace: env.sandbox.spy(),
       },
       addEventListener: (type, callback) => {
         if (type == 'message') {
@@ -73,7 +73,7 @@ describes.sandboxed('LoginDoneDialog', {}, () => {
         },
       },
     };
-    openerMock = window.sandbox.mock(windowApi.opener);
+    openerMock = env.sandbox.mock(windowApi.opener);
 
     dialog = new LoginDoneDialog(windowApi);
   });
@@ -160,7 +160,7 @@ describes.sandboxed('LoginDoneDialog', {}, () => {
       openerMock
         .expects('postMessage')
         .withExactArgs(
-          window.sandbox.match((arg) => {
+          env.sandbox.match((arg) => {
             return (
               arg.sentinel == 'amp' &&
               arg.type == 'result' &&
@@ -310,7 +310,7 @@ describes.sandboxed('LoginDoneDialog', {}, () => {
       openerMock
         .expects('postMessage')
         .withExactArgs(
-          window.sandbox.match((arg) => {
+          env.sandbox.match((arg) => {
             return (
               arg.sentinel == 'amp' &&
               arg.type == 'result' &&
@@ -359,7 +359,7 @@ describes.sandboxed('LoginDoneDialog', {}, () => {
     });
 
     it('should revert to error mode if window is not closed', () => {
-      dialog.postbackError_ = window.sandbox.spy();
+      dialog.postbackError_ = env.sandbox.spy();
       dialog.postbackSuccess_();
       expect(windowApi.close).to.be.calledOnce;
       expect(dialog.postbackError_).to.have.not.been.called;

@@ -1257,7 +1257,7 @@ describes.fakeWin('Viewport', {}, (env) => {
   });
 });
 
-describes.sandboxed('Viewport META', {}, () => {
+describes.sandboxed('Viewport META', {}, (env) => {
   describe('parseViewportMeta', () => {
     it('should accept null or empty strings', () => {
       expect(parseViewportMeta(null)).to.be.empty;
@@ -1431,7 +1431,7 @@ describes.sandboxed('Viewport META', {}, () => {
     let viewportMetaSetter;
 
     beforeEach(() => {
-      clock = window.sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
       viewer = {
         isEmbedded: () => false,
         getParam: (param) => {
@@ -1448,7 +1448,7 @@ describes.sandboxed('Viewport META', {}, () => {
       originalViewportMetaString = 'width=device-width,minimum-scale=1';
       viewportMetaString = originalViewportMetaString;
       viewportMeta = Object.create(null);
-      viewportMetaSetter = window.sandbox.spy();
+      viewportMetaSetter = env.sandbox.spy();
       Object.defineProperty(viewportMeta, 'content', {
         get: () => viewportMetaString,
         set: (value) => {

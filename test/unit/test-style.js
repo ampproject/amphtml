@@ -16,7 +16,7 @@
 
 import * as st from '../../src/style';
 
-describes.sandboxed('Style', {}, () => {
+describes.sandboxed('Style', {}, (env) => {
   it('toggle', () => {
     const element = document.createElement('div');
 
@@ -72,7 +72,7 @@ describes.sandboxed('Style', {}, () => {
   });
 
   it('setImportantStyles with vendor prefix', () => {
-    const spy = window.sandbox.spy();
+    const spy = env.sandbox.spy();
     const element = {
       style: {
         WebkitTransitionDurationImportant: '',
