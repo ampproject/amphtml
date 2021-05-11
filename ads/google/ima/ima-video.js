@@ -22,11 +22,9 @@ import {
   setStyle,
   setStyles,
 } from '../../../src/style';
-import {createElementWithAttributes} from '../../../src/dom';
 import {getData} from '../../../src/event-helper';
 import {isArray, isObject} from '../../../src/core/types';
 import {loadScript} from '../../../3p/3p';
-import {pureDevAssert} from '../../../src/core/assert';
 import {throttle} from '../../../src/core/types/function';
 import {tryParseJson} from '../../../src/json';
 
@@ -243,17 +241,23 @@ function maybeCreateChildren(document, childrenDef) {
     return null;
   }
   const fragment = document.createDocumentFragment();
-  childrenDef.forEach((child) => {
+  for (const child of childrenDef) {
     const tagName = child[0];
-    pureDevAssert(typeof tagName === 'string');
-
     const attributes = child[1];
-    pureDevAssert(typeof attributes === 'object' && attributes != null);
-
-    fragment.appendChild(
-      createElementWithAttributes(document, tagName, attributes)
-    );
-  });
+    if (
+      !(
+        typeof tagName === 'string' &&
+        typeof attributes === 'object' &&
+        attributes != null
+      )
+    ) {
+      throw new Error(child);
+    }
+    const element = document.createElement(tagName);
+    for (const attr in attributes) {
+      element.setAttribute(attr, attributes[attr]);
+    }
+  }
   return fragment;
 }
 
