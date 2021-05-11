@@ -96,6 +96,14 @@ function getEsbuildBabelPlugin(
   };
 }
 
+const CJS_TRANSFORMS = new Set([
+  'transform-modules-commonjs',
+  'proposal-dynamic-import',
+  'syntax-dynamic-import',
+  'proposal-export-namespace-from',
+  'syntax-export-namespace-from',
+]);
+
 /**
  * @param {!Object} babelOptions
  * @param {string} filename
@@ -107,14 +115,9 @@ function getFileBabelOptions(babelOptions, filename) {
   // babel.loadOptions, therefore all of the plugins from preset-env have already been applied.
   // and must be disabled individually.
   if (filename.includes('node_modules')) {
-    const toRemove = new Set([
-      'transform-modules-commonjs',
-      'proposal-dynamic-import',
-      'syntax-dynamic-import',
-      'proposal-export-namespace-from',
-      'syntax-export-namespace-from',
-    ]);
-    const plugins = babelOptions.plugins.filter(({key}) => !toRemove.has(key));
+    const plugins = babelOptions.plugins.filter(
+      ({key}) => !CJS_TRANSFORMS.has(key)
+    );
     babelOptions = {...babelOptions, plugins};
   }
 
