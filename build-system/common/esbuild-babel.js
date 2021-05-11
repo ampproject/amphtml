@@ -83,14 +83,50 @@ function getEsbuildBabelPlugin(
       build.onLoad({filter: /\.[cm]?js$/, namespace: ''}, async (file) => {
         const filename = file.path;
         const {contents, hash} = await batchedRead(filename, optionsHash);
-        const transformed = await transformContents(filename, contents, hash, {
-          ...babelOptions,
+
+        const transformed = await transformContents(
           filename,
-          filenameRelative: path.basename(filename),
-        });
+          contents,
+          hash,
+          getFileBabelOptions(babelOptions, filename)
+        );
         return {contents: transformed};
       });
     },
+  };
+}
+
+/**
+ * @param {!Object} babelOptions
+ * @param {string} filename
+ * @return {!Object}
+ */
+function getFileBabelOptions(babelOptions, filename) {
+  // Patch for leaving .mjs files as esm, since esbuild will break when trying
+  // to process a .mjs file that contains CJS exports. This function is called after
+  // babel.loadOptions, therefore all of the plugins from preset-env have already been applied.
+  // and must be disabled individually.
+  if (filename.endsWith('.mjs')) {
+    const plugins = [...babelOptions.plugins];
+    const toRemove = [
+      'transform-modules-commonjs',
+      'proposal-dynamic-import',
+      'syntax-dynamic-import',
+      'proposal-export-namespace-from',
+      'syntax-export-namespace-from',
+    ];
+    for (const plugin of toRemove) {
+      const pluginIndex = plugins.findIndex(({key}) => key === plugin);
+      plugins.splice(pluginIndex, 1);
+    }
+
+    babelOptions = {...babelOptions, plugins};
+  }
+
+  return {
+    ...babelOptions,
+    filename,
+    filenameRelative: path.basename(filename),
   };
 }
 
