@@ -331,7 +331,7 @@ class RuntimeTestConfig {
       adTypes: getAdTypes(),
       mochaTimeout: this.client.mocha.timeout,
       testServerPort: this.client.testServerPort,
-      isModuleBuild: !!argv.esm, // Used by skip matchers in _init_tests.js
+      isModuleBuild: !!argv.esm, // Used by skip matchers in testing/test-config.js
     };
   }
 
