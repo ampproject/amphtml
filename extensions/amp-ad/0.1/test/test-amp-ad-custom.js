@@ -189,7 +189,7 @@ describes.realWin('Amp custom ad', {amp: true}, (env) => {
 });
 
 // TODO(wg-monetization, #25726): This test fails when run by itself.
-describe.skip('#getLayoutPriority', () => {
+describes.sandboxed.skip('#getLayoutPriority', {}, () => {
   const url = '/examples/custom.ad.example.json';
   const slot = 'myslot';
 

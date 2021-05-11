@@ -18,7 +18,7 @@ import {Input} from '../../src/input';
 import {installTimerService} from '../../src/service/timer-impl.js';
 import {stubService} from '../../testing/test-helper';
 
-describe('Input', () => {
+describes.sandboxed('Input', {}, (env) => {
   let clock;
   let input;
   let eventListeners;
@@ -26,7 +26,7 @@ describe('Input', () => {
   let documentApi;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
 
     eventListeners = {};
 

@@ -28,7 +28,7 @@ const template = `<div id="wrapper">
 
 import {getHtml} from '../../src/get-html';
 
-describe('getHtml', () => {
+describes.sandboxed('getHtml', {}, () => {
   let element;
 
   beforeEach(() => {

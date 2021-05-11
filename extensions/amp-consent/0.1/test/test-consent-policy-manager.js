@@ -437,7 +437,7 @@ describes.realWin(
         });
 
         it('will fire only fire for a valid change', () => {
-          const spy = window.sandbox.spy();
+          const spy = env.sandbox.spy();
           manager.setOnPolicyChange(spy);
           expect(manager.tcfConsentChangeHandler_).to.not.be.null;
 
@@ -454,7 +454,7 @@ describes.realWin(
         });
 
         it('will fire on multiple changes', () => {
-          const spy = window.sandbox.spy();
+          const spy = env.sandbox.spy();
           manager.setOnPolicyChange(spy);
           expect(manager.tcfConsentChangeHandler_).to.not.be.null;
 

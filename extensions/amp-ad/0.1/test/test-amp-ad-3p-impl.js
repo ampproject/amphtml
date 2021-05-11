@@ -636,7 +636,7 @@ describes.realWin(
   }
 );
 
-describe('#getLayoutPriority', () => {
+describes.sandboxed('#getLayoutPriority', {}, () => {
   describes.realWin(
     'with shadow AmpDoc',
     {

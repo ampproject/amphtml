@@ -84,7 +84,7 @@ describes.realWin(
             const urlReplacements = Services.urlReplacementsForDoc(
               doc.documentElement
             );
-            window.sandbox
+            env.sandbox
               .stub(urlReplacements.getVariableSource(), 'get')
               .callsFake(function (name) {
                 expect(this.replacements_).to.have.property(name);
@@ -93,7 +93,7 @@ describes.realWin(
                 };
               });
 
-            window.sandbox
+            env.sandbox
               .stub(ExpansionOptions.prototype, 'getVar')
               .callsFake(function (name) {
                 let val = this.vars[name];
@@ -112,7 +112,7 @@ describes.realWin(
             // Have to get service after analytics element is created
             const variableService = variableServiceForDoc(doc);
 
-            window.sandbox
+            env.sandbox
               .stub(variableService, 'getMacros')
               .callsFake(function () {
                 // Add all the macros in amp-analytics

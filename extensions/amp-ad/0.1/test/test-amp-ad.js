@@ -63,7 +63,7 @@ describes.realWin('Ad loader', {amp: true}, (env) => {
 
       beforeEach(() => {
         const getUserNotificationStub = stubService(
-          window.sandbox,
+          env.sandbox,
           win,
           'userNotificationManager',
           'get'

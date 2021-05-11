@@ -167,7 +167,7 @@ describes.sandboxed('getIntersectionChangeEntry', {}, (env) => {
   });
 });
 
-describe('intersectionRatio', () => {
+describes.sandboxed('intersectionRatio', {}, () => {
   let smallRectMock;
   let largeRectMock;
   beforeEach(() => {

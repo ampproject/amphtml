@@ -31,7 +31,7 @@ function createFixture() {
   );
 }
 
-describe('amp-ad 3P', () => {
+describes.sandboxed('amp-ad 3P', {}, () => {
   let fixture;
 
   beforeEach(() => {

@@ -16,8 +16,8 @@
 
 import {simulateKeyboardInteraction} from './utils';
 
-const config = describe.configure().ifChrome();
-config.skip('amp-inputmask', () => {
+const config = describes.sandboxed.configure().ifChrome();
+config.skip('amp-inputmask', {}, () => {
   const {testServerPort} = window.ampTestRuntimeConfig;
 
   describes.integration(

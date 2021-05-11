@@ -20,10 +20,10 @@ const TIMEOUT = 10000;
 
 // Skip Edge, which throws "Permission denied" errors when inspecting
 // element properties in the testing iframe (Edge 17, Windows 10).
-describe
+describes.sandboxed
   .configure()
   .skipEdge()
-  .run('amp-bind', function () {
+  .run('amp-bind', {}, function () {
     this.timeout(TIMEOUT);
 
     // Helper that sets the poll timeout.

@@ -18,7 +18,7 @@ import {BrowserController} from '../../../../../testing/test-helper';
 
 const TIMEOUT = 15000;
 
-describe('amp-list (integration)', function () {
+describes.sandboxed('amp-list (integration)', {}, function () {
   this.timeout(TIMEOUT);
 
   const basicBody = `<amp-list width=300 height=100 src="http://localhost:9876/list/fruit-data/get?cors=0">

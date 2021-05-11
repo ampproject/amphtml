@@ -16,7 +16,7 @@
 
 import {BindValidator} from '../bind-validator';
 
-describe('BindValidator (allowUrlProperties=true)', () => {
+describes.sandboxed('BindValidator (allowUrlProperties=true)', {}, () => {
   let val;
 
   beforeEach(() => {
@@ -314,7 +314,7 @@ describe('BindValidator (allowUrlProperties=true)', () => {
   });
 });
 
-describe('BindValidator (allowUrlProperties=false)', () => {
+describes.sandboxed('BindValidator (allowUrlProperties=false)', {}, () => {
   let val;
 
   beforeEach(() => {

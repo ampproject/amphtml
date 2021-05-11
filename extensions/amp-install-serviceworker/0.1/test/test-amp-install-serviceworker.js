@@ -519,7 +519,7 @@ describes.fakeWin(
 
     describe('install conditions', () => {
       beforeEach(() => {
-        window.sandbox.stub(implementation, 'preloadShell_');
+        env.sandbox.stub(implementation, 'preloadShell_');
       });
 
       it('should install rewriter', () => {
@@ -610,7 +610,7 @@ describes.fakeWin(
       let preloadStub;
 
       beforeEach(() => {
-        mutateElementStub = window.sandbox
+        mutateElementStub = env.sandbox
           .stub(implementation, 'mutateElement')
           .callsFake((callback) => callback());
         preloadStub = env.sandbox.stub(implementation, 'preloadShell_');
@@ -683,7 +683,7 @@ describes.fakeWin(
       let origHref;
 
       beforeEach(() => {
-        window.sandbox.stub(implementation, 'preloadShell_');
+        env.sandbox.stub(implementation, 'preloadShell_');
         implementation.maybeInstallUrlRewrite_();
         rewriter = implementation.urlRewriter_;
         anchor = win.document.createElement('a');

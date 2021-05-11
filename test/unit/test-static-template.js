@@ -16,7 +16,7 @@
 
 import {htmlFor, htmlRefs} from '../../src/static-template';
 
-describe('Static Template', () => {
+describes.sandboxed('Static Template', {}, () => {
   describe('html', () => {
     it('generates static html tree', () => {
       const div = htmlFor(document)`<div attr="test"><p class="er"></p></div>`;

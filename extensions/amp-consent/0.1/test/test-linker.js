@@ -245,13 +245,13 @@ const createLinkerTests = [
   },
 ];
 
-describes.sandboxed('Linker', {}, () => {
+describes.sandboxed('Linker', {}, (env) => {
   let mockWin;
   beforeEach(() => {
     // Linker uses a timestamp value to generate checksum.
-    window.sandbox.useFakeTimers(BASE_TIME);
-    window.sandbox.stub(Date.prototype, 'getTimezoneOffset').returns(420);
-    mockWin = mockWindowInterface(window.sandbox);
+    env.sandbox.useFakeTimers(BASE_TIME);
+    env.sandbox.stub(Date.prototype, 'getTimezoneOffset').returns(420);
+    mockWin = mockWindowInterface(env.sandbox);
     mockWin.getUserAgent.returns(
       'Mozilla/5.0 (X11; Linux x86_64) ' +
         'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 ' +
@@ -278,7 +278,7 @@ describes.sandboxed('Linker', {}, () => {
           expectAsyncConsoleError(TAG + ' ' + test.errorMsg);
         }
         if (test.currentTime) {
-          window.sandbox.useFakeTimers(test.currentTime);
+          env.sandbox.useFakeTimers(test.currentTime);
         }
         expect(parseLinker(test.value)).to.deep.equal(test.output);
       });

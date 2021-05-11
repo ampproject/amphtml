@@ -21,7 +21,7 @@ import {
   srcsetFromSrc,
 } from '../../src/srcset';
 
-describe('Srcset', () => {
+describes.sandboxed('Srcset', {}, () => {
   describe('parseSrcset', () => {
     function test(s, expected) {
       const res = parseSrcset(s);

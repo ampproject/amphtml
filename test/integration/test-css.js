@@ -21,7 +21,7 @@ import {
   expectBodyToBecomeVisible,
 } from '../../testing/iframe.js';
 
-describe.configure().run('CSS', () => {
+describes.sandboxed.configure().run('CSS', {}, () => {
   it('should include height of [overflow] child in size before build', async () => {
     const fixture = await createFixtureIframe(
       'test/fixtures/overflow.html',

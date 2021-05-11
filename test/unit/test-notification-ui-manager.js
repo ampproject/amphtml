@@ -16,7 +16,7 @@
 import {NotificationUiManager} from '../../src/service/notification-ui-manager';
 import {macroTask} from '../../testing/yield';
 
-describes.realWin('NotificationUiManager', {amp: 1}, () => {
+describes.realWin('NotificationUiManager', {amp: 1}, (env) => {
   describe('Notification UI Manager', () => {
     let manager;
     let show1, show2, show3;
@@ -25,9 +25,9 @@ describes.realWin('NotificationUiManager', {amp: 1}, () => {
     let p1, p2, p3;
     beforeEach(() => {
       manager = new NotificationUiManager();
-      showSpy1 = window.sandbox.spy();
-      showSpy2 = window.sandbox.spy();
-      showSpy3 = window.sandbox.spy();
+      showSpy1 = env.sandbox.spy();
+      showSpy2 = env.sandbox.spy();
+      showSpy3 = env.sandbox.spy();
 
       p1 = new Promise((resolve) => {
         resolve1 = resolve;
@@ -81,7 +81,7 @@ describes.realWin('NotificationUiManager', {amp: 1}, () => {
     });
 
     it('queue empty handler', function* () {
-      const handler = window.sandbox.spy();
+      const handler = env.sandbox.spy();
       manager.registerUI(show1);
       manager.registerUI(show2);
       manager.onQueueEmpty(handler);
@@ -93,7 +93,7 @@ describes.realWin('NotificationUiManager', {amp: 1}, () => {
     });
 
     it('queue not empty handler', function* () {
-      const handler = window.sandbox.spy();
+      const handler = env.sandbox.spy();
       manager.onQueueNotEmpty(handler);
       manager.registerUI(show1);
       manager.registerUI(show2);

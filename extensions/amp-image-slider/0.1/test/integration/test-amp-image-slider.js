@@ -16,9 +16,9 @@
 
 import {createPointerEvent} from '../../../../../testing/test-helper';
 
-const t = describe.configure().ifChrome();
+const t = describes.sandboxed.configure().ifChrome();
 
-t.run('amp-image-slider', function () {
+t.run('amp-image-slider', {}, function () {
   this.timeout(20000);
   const DEFAULT_TIMEOUT = 1600;
 

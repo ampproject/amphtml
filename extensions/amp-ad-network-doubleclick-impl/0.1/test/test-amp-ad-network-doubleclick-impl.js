@@ -632,7 +632,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       doc.body.appendChild(element);
       impl = new AmpAdNetworkDoubleclickImpl(element);
       // Temporary fix for local test failure.
-      window.sandbox
+      env.sandbox
         .stub(impl, 'getIntersectionElementLayoutBox')
         .callsFake(() => {
           return {

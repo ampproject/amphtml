@@ -764,7 +764,7 @@ describes.realWin(
     });
 
     it('should listen for embed-ready event', function* () {
-      const activateIframeSpy_ = window.sandbox./*OK*/ spy(
+      const activateIframeSpy_ = env.sandbox./*OK*/ spy(
         AmpIframe.prototype,
         'activateIframe_'
       );

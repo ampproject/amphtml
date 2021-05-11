@@ -16,7 +16,7 @@
 
 import {clearOurFragment} from '../../addthis-utils/fragment';
 
-describe('fragment', () => {
+describes.sandboxed('fragment', {}, () => {
   it('clears AddThis fragments from an url', () => {
     let url =
       'http://www.example.com/2012-07-25?utm_campaign=linkedin-Share-Web#at_pco=cfd-1.0';

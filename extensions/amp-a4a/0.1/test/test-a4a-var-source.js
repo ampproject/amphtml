@@ -18,7 +18,7 @@ import {A4AVariableSource} from '../a4a-variable-source';
 import {createIframePromise} from '../../../../testing/iframe';
 import {installDocumentInfoServiceForDoc} from '../../../../src/service/document-info-impl';
 
-describe('A4AVariableSource', () => {
+describes.sandboxed('A4AVariableSource', {}, () => {
   let varSource;
 
   beforeEach(async () => {

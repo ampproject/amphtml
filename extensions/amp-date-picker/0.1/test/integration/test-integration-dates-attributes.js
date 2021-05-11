@@ -18,9 +18,9 @@ import * as fakeTimers from '@sinonjs/fake-timers';
 import {htmlFor} from '../../../../../src/static-template';
 import {poll} from '../../../../../testing/iframe';
 
-const config = describe.configure().ifChrome();
+const config = describes.sandboxed.configure().ifChrome();
 
-config.run('amp-date-picker', function () {
+config.run('amp-date-picker', {}, function () {
   this.timeout(10000);
 
   const extensions = ['amp-date-picker'];

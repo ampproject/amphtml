@@ -126,7 +126,7 @@ describes.realWin(
         element.setAttribute('rtc-config', JSON.stringify(rtcConfig));
         doc.body.appendChild(element);
         impl = new AmpAdNetworkValueimpressionImpl(element);
-        window.sandbox
+        env.sandbox
           .stub(impl, 'getIntersectionElementLayoutBox')
           .callsFake(() => {
             return {

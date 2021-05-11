@@ -479,7 +479,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
     });
 
     it('replaces CONSENT_METADATA', () => {
-      window.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+      env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
         Promise.resolve({
           getConsentMetadataInfo: () => {
             return Promise.resolve({
@@ -498,7 +498,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
     });
 
     it('replaces CONSENT_STRING', () => {
-      window.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+      env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
         Promise.resolve({
           getConsentStringInfo: () => {
             return Promise.resolve('userConsentString');

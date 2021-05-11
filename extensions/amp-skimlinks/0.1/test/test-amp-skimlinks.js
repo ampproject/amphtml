@@ -309,7 +309,7 @@ describes.fakeWin(
 
         it('Should wait until visible to send the impression tracking', () => {
           const isVisibleDefer = new Deferred();
-          window.sandbox
+          env.sandbox
             .stub(ampdoc, 'whenFirstVisible')
             .returns(isVisibleDefer.promise);
 
@@ -369,7 +369,7 @@ describes.fakeWin(
 
         it('Should wait until visible to send the impression tracking', () => {
           const isVisibleDefer = new Deferred();
-          window.sandbox
+          env.sandbox
             .stub(ampdoc, 'whenFirstVisible')
             .returns(isVisibleDefer.promise);
 

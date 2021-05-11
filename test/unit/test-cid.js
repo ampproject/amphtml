@@ -803,7 +803,7 @@ describes.sandboxed('cid', {}, (env) => {
   }
 });
 
-describe('getProxySourceOrigin', () => {
+describes.sandboxed('getProxySourceOrigin', {}, () => {
   it('should fail on non-proxy origin', () => {
     allowConsoleError(() => {
       expect(() => {

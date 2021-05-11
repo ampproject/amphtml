@@ -16,7 +16,7 @@
 
 import {PullToRefreshBlocker} from '../../src/pull-to-refresh';
 
-describe('PullToRefreshBlocker', () => {
+describes.sandboxed('PullToRefreshBlocker', {}, (env) => {
   let eventListeners;
   let viewportMock;
   let blocker;
@@ -37,7 +37,7 @@ describe('PullToRefreshBlocker', () => {
     const viewportApi = {
       getScrollTop: () => 0,
     };
-    viewportMock = window.sandbox.mock(viewportApi);
+    viewportMock = env.sandbox.mock(viewportApi);
 
     blocker = new PullToRefreshBlocker(documentApi, viewportApi);
   });
@@ -120,7 +120,7 @@ describe('PullToRefreshBlocker', () => {
     sendEvent({type: 'touchstart', touches: [{clientY: 111}]});
     expect(blocker.tracking_).to.equal(true);
 
-    const preventDefault = window.sandbox.spy();
+    const preventDefault = env.sandbox.spy();
     sendEvent({type: 'touchmove', touches: [{clientY: 112}]}, preventDefault);
     expect(blocker.tracking_).to.equal(false);
     expect(preventDefault).to.be.calledOnce;
@@ -135,7 +135,7 @@ describe('PullToRefreshBlocker', () => {
     sendEvent({type: 'touchstart', touches: [{clientY: 111}]});
     expect(blocker.tracking_).to.equal(true);
 
-    const preventDefault = window.sandbox.spy();
+    const preventDefault = env.sandbox.spy();
     sendEvent({type: 'touchmove', touches: [{clientY: 100}]}, preventDefault);
     expect(blocker.tracking_).to.equal(false);
     expect(preventDefault).to.have.not.been.called;
@@ -150,7 +150,7 @@ describe('PullToRefreshBlocker', () => {
     sendEvent({type: 'touchstart', touches: [{clientY: 111}]});
     expect(blocker.tracking_).to.equal(true);
 
-    const preventDefault = window.sandbox.spy();
+    const preventDefault = env.sandbox.spy();
     sendEvent({type: 'touchmove', touches: [{clientY: 111}]}, preventDefault);
     expect(blocker.tracking_).to.equal(true);
     expect(preventDefault).to.have.not.been.called;

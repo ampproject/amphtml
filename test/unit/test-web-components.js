@@ -21,7 +21,7 @@ import {
   setShadowDomSupportedVersionForTesting,
 } from '../../src/web-components';
 
-describe('web components', () => {
+describes.sandboxed('web components', {}, () => {
   beforeEach(() => {
     setShadowDomSupportedVersionForTesting(undefined);
   });

@@ -20,9 +20,12 @@ import {createCustomEvent} from '../../src/event-helper';
 import {getVendorJsPropertyName} from '../../src/style';
 import {whenUpgradedToCustomElement} from '../../src/dom';
 
-const t = describe.configure().skipIfPropertiesObfuscated().ifChrome();
+const t = describes.sandboxed
+  .configure()
+  .skipIfPropertiesObfuscated()
+  .ifChrome();
 
-t.run('Viewer Visibility State', () => {
+t.run('Viewer Visibility State', {}, () => {
   function noop() {}
 
   describes.integration(

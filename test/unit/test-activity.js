@@ -25,7 +25,7 @@ import {installViewportServiceForDoc} from '../../src/service/viewport/viewport-
 import {installVsyncService} from '../../src/service/vsync-impl';
 import {markElementScheduledForTesting} from '../../src/service/custom-element-registry';
 
-describe('Activity getTotalEngagedTime', () => {
+describes.sandboxed('Activity getTotalEngagedTime', {}, (env) => {
   let clock;
   let fakeDoc;
   let fakeWin;
@@ -39,7 +39,7 @@ describe('Activity getTotalEngagedTime', () => {
   let scrollObservable;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
 
     // start at something other than 0
     clock.tick(123456);
@@ -112,17 +112,17 @@ describe('Activity getTotalEngagedTime', () => {
     const whenFirstVisiblePromise = new Promise((resolve) => {
       whenFirstVisibleResolve = resolve;
     });
-    window.sandbox
+    env.sandbox
       .stub(ampdoc, 'whenFirstVisible')
       .returns(whenFirstVisiblePromise);
-    window.sandbox.stub(ampdoc, 'onVisibilityChanged').callsFake((handler) => {
+    env.sandbox.stub(ampdoc, 'onVisibilityChanged').callsFake((handler) => {
       return visibilityObservable.add(handler);
     });
 
     installViewportServiceForDoc(ampdoc);
     viewport = Services.viewportForDoc(ampdoc);
 
-    window.sandbox.stub(viewport, 'onScroll').callsFake((handler) => {
+    env.sandbox.stub(viewport, 'onScroll').callsFake((handler) => {
       scrollObservable.add(handler);
     });
 
@@ -177,9 +177,7 @@ describe('Activity getTotalEngagedTime', () => {
   });
 
   it('should not accumulate engaged time after inactivity', () => {
-    const isVisibleStub = window.sandbox
-      .stub(ampdoc, 'isVisible')
-      .returns(true);
+    const isVisibleStub = env.sandbox.stub(ampdoc, 'isVisible').returns(true);
     whenFirstVisibleResolve();
     return ampdoc
       .whenFirstVisible()
@@ -218,10 +216,7 @@ describe('Activity getTotalEngagedTime', () => {
     'should set event listeners on the document for' +
       ' "mousedown", "mouseup", "mousemove", "keyup", "keydown", "mouseleave"',
     () => {
-      const addEventListenerSpy = window.sandbox.spy(
-        fakeDoc,
-        'addEventListener'
-      );
+      const addEventListenerSpy = env.sandbox.spy(fakeDoc, 'addEventListener');
       expect(addEventListenerSpy).to.not.have.been.calledWith(
         'mousedown',
         activity.boundHandleActivity_
@@ -259,7 +254,7 @@ describe('Activity getTotalEngagedTime', () => {
   );
 });
 
-describe('Activity getIncrementalEngagedTime', () => {
+describes.sandboxed('Activity getIncrementalEngagedTime', {}, (env) => {
   let clock;
   let fakeDoc;
   let fakeWin;
@@ -272,7 +267,7 @@ describe('Activity getIncrementalEngagedTime', () => {
   let scrollObservable;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
 
     // start at something other than 0
     clock.tick(123456);
@@ -342,17 +337,17 @@ describe('Activity getIncrementalEngagedTime', () => {
     const whenFirstVisiblePromise = new Promise((resolve) => {
       whenFirstVisibleResolve = resolve;
     });
-    window.sandbox
+    env.sandbox
       .stub(ampdoc, 'whenFirstVisible')
       .returns(whenFirstVisiblePromise);
-    window.sandbox.stub(ampdoc, 'onVisibilityChanged').callsFake((handler) => {
+    env.sandbox.stub(ampdoc, 'onVisibilityChanged').callsFake((handler) => {
       return visibilityObservable.add(handler);
     });
 
     installViewportServiceForDoc(ampdoc);
     viewport = Services.viewportForDoc(ampdoc);
 
-    window.sandbox.stub(viewport, 'onScroll').callsFake((handler) => {
+    env.sandbox.stub(viewport, 'onScroll').callsFake((handler) => {
       scrollObservable.add(handler);
     });
 

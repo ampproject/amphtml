@@ -42,7 +42,7 @@ function clickLinkAndNavigate_(doc, selector) {
 }
 
 // TODO(@slocka) Disabled due to #22154, re-enable
-describe.skip('amp-skimlinks', function () {
+describes.sandboxed.skip('amp-skimlinks', {}, function () {
   const setupBasic = {
     extensions: ['amp-skimlinks'],
     body: `

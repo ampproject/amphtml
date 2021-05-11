@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-describe
+describes.sandboxed
   .configure()
   .ifChrome()
-  .run('amp-bodymovin-animation', function () {
+  .run('amp-bodymovin-animation', {}, function () {
     const extensions = ['amp-bodymovin-animation'];
     const bodymovinBody = `
     <amp-bodymovin-animation id="anim"

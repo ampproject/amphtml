@@ -22,7 +22,7 @@ import {
   tryParseJson,
 } from '../../src/json';
 
-describe('json', () => {
+describes.sandboxed('json', {}, () => {
   describe('getValueForExpr', () => {
     it('should return self for "."', () => {
       const obj = {str: 'A', num: 1, bool: true, val: null};
