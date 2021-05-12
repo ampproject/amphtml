@@ -1,123 +1,131 @@
 # Scheduled Issues
 
-Some issues in this Github repository are created according to a calendar, like those labeled [`Type: Design Review`](https://github.com/ampproject/amphtml/labels/Type%3A%20Design%20Review).
+We use Github issues to track scheduled events, like [Design Reviews](https://github.com/ampproject/amphtml/labels/Type%3A%20Design%20Review).
 
-This directory contains the script that creates these issues, as well as the definitions to how to create them (templates).
+This directory includes a script that creates these issues automatically. It also contains definitions of schedules and contents, which we call templates.
 
 ## Usage
 
-### Github Workflow
+### Automatically
 
-On the main repository, we execute the script on a schedule using the Github Workflow [`create-scheduled-issues.yml`](../create-scheduled-issues.yml).
+A [Github Workflow](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions) located on [`../create-scheduled-issues.yml`](../create-scheduled-issues.yml) runs the script daily.
 
-### Local testing
+> Running daily supports flexible scheduling schemes on a best-effort basis. Changes in template schedules should be merged one day or longer before the next event is configured to occur. This accounts both for timezones and execution frequency. If it's not possible to merge a change as early, you can run the script manually and create the issue on your behalf.
 
-#### Environment variables
+### Manually
 
-The script relies on environment variables for configuration. Set **`GITHUB_REPOSITORY`** to define the location of issues read and written.
+You might want to run the script manually in order to try out local changes. You can also run it to post issues in spite of the automatic workflow, or in case it fails.
+
+First, **set up environment variables**:
+
+-   **`GITHUB_REPOSITORY`**. If you're trying out local changes, it's best to point this to a repository under your own account.
+
+-   **`GITHUB_TOKEN`** for API access. You can use a [personal access token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) with **repo** and **write:discussion** permissions.
+
+For example:
 
 ```console
 export GITHUB_REPOSITORY=ampproject/amphtml
-```
-
-You also need a **`GITHUB_TOKEN`**. You may use a [personal access token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) with **repo** and **write:discussion** permissions.
-
-> It's recommended that you read the exported variable's value from a file (`my-token.txt`), so that the token itself is excluded from your console's history:
-
-```console
 export GITHUB_TOKEN=$(cat my-token.txt)
 ```
 
-#### Console
+> It's recommended that you read the `GITHUB_TOKEN` from a file (`my-token.txt`) to prevent its value from being leaked by your console's history.
 
-After setting up environment variables, run:
+Once you've set up the environment variables, **you may run**:
 
 ```console
-node .github/workflows/create-scheduled-issues [--dry-run]
+node .github/workflows/create-scheduled-issues --dry-run
 ```
 
--   `--dry-run`: Avoid writing the new issues, and instead display their tentative content.
+The previous command outputs the issues to create, but doesn't actually post them on Github. **To post them, omit `--dry-run`**:
 
-> This script does not require a previous `npm install`, so we call `node` directly rather than the `amp` task runner.
+```console
+node .github/workflows/create-scheduled-issues
+```
 
 ## Writing an issue template
 
-To define a new type of scheduled issue, add a Javascript file to [`template/`](./). This file should export a default object like **`Template`** below. See [`design-review.js`](./template/design-review.js) for an example.
+To define a new type of scheduled issue:
 
-> Days of the week start from zero, so `SUNDAY === 0`.
+1. Create a Javascript file located in [`template/`](./). This file should export a default object like the **`Template`** type below.
+
+2. Make your template findable by listing it on [`index.js`](./index.js)
+
+```js
+// template/my-template.js
+
+module.exports = {
+  frequency: { ... },
+  ...
+};
+```
+
+```diff
+// index.js
+
+const templates = [
+  'design-review',
++ 'my-template',
+  'wg-components-office-hours'
+];
+```
+
+See [`design-review.js`](./template/design-review.js) for an example.
+
+### Types
+
+> All dates and time are UTC.
+
+> Days of the week index Sunday at zero: `SUNDAY = 0`, `MONDAY = 1`, etc.
 
 ```ts
 interface Template {
-  // Set an n-weekly frequency: [weeks, dayOfWeek]
-  // (Incompatible with frequencyWeekdayOfMonth)
-  // Examples:
-  //   - every Sunday: [1, 0]
-  //   - every other Tuesday: [2, 2]
-  frequencyWeekly?: [number, DayOfWeek];
+  // Frequency of events to create issues for.
+  // One of:
+  //  - {dayOfWeek} to set a weekly frequency.
+  //     e.g. every Sunday: {dayOfWeek: 0}
+  //     e.g. every Friday: {dayOfWeek: 5}
+  //
+  //  - {nthDayOfWeek} to set [n, dayOfWeek], once a month
+  //     e.g. first (1) Sunday (0) of every month: [1, 0]
+  //     e.g. third (3) Thursday (4) of every month: [3, 4]
+  frequency:
+    | {dayOfWeek: number}
+    | {nthDayOfWeek: [number, number]};
 
-  // Set a monthly frequency as "nth weekday of month" [n, dayOfWeek]
-  // (Incompatible with frequencyWeekly)
-  // Examples:
-  //   - first monday of the month: [1, 1]
-  //   - second sunday of the month: [2, 0]
-  //   - third friday of the month: [3, 4]
-  frequencyWeekdayOfMonth?: [number, DayOfWeek];
+  // Create issues for up to N upcoming events
+  // (optional, at least 1)
+  upcoming?: number;
 
-  // Schedule after skipping N sessions. Useful to cover the next N sessions
-  // after the previous have been created. (optional)
-  sessionsFromNow?: number;
-
-  // Duration of the session in hours.
-  // Accepts decimals, so 30 minutes is expressed as 0.5
-  sessionDurationHours: number;
-
-  // Set of time to rotate as [region, timeUtc] like
+  // Set of time to rotate as [region, time] like
   // ["Americas", "18:00"].
-  // If the session always occurs at the same time of day, this array
-  // should contain only one item.
-  timeRotationUtc: [string, string][];
+  // If the even always occurs at the same time of day, this
+  // array should contain only one item.
+  timeRotation: [string, string][];
 
-  // Date of the first session as YYYYMMDD.
-  // This is used to select the selected timezone in the rotation.
+  // Date of the first event as YYYYMMDD.
+  // This is used to index selected timezones in the rotation.
   timeRotationStartYyyyMmDd: string;
 
   // Labels to be added to the created issue.
+  // The given set should exclusively label issues created by the
+  // template, since we look up previous issues based on labels.
   labels: string[];
 
-  // Receives the scheduled date (Result), and returns the issue title.
-  createTitle: (Result) => string;
+  // Receives a ScheduledEvent, and returns the title of the issue.
+  createTitle: (ScheduledEvent) => string;
 
-  // Receives the scheduled date (Result), and returns the contents of
-  // the issue.
-  createBody: (Result) => string;
+  // Receives a ScheduledEvent, and returns the body of the issue.
+  createBody: (ScheduledEvent) => string;
 }
 
-interface Result {
-  // Year as YYYY
+interface ScheduledEvent {
+  region: string;
   yyyy: string;
-
-  // Month as MM
   mm: string;
-
-  // Day of the month as DD
   dd: string;
-
-  // UTC time, 24 hrs.
-  timeUtc: string;
-
-  // startZ and endZ contain full formatted datetimes to interpolate
-  // in a link to Google Calendar.
-  startZ: string;
-  endZ: string;
+  hours: number;
+  minutes: number;
+  time: string; // Same as `${hours}:${minutes}`
 }
-```
-
-Then, make your template findable by adding the file's basename to [`index.js`](./index.js).
-
-```diff
-  const templates = [
-    'design-review',
-+   'my-template',
-    'wg-components-office-hours'
-  ];
 ```

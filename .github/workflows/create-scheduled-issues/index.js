@@ -28,12 +28,9 @@
  * This file runs by itself. It cannot depend on `npm install`.
  */
 const https = require('https');
+const {leadingZero} = require('./utils');
 
 const templates = ['design-review', 'wg-components-office-hours'];
-
-function leadingZero(number) {
-  return number.toString().padStart(2, '0');
-}
 
 function isDaylightSavingsUsa(date) {
   // [start, end] ranges of Daylight Savings in (most of) the USA
@@ -119,10 +116,6 @@ function postGithubIssue(token, repo, data) {
   return postGithub(token, url, data);
 }
 
-function normalizeTitleForComparison(title) {
-  return title.toLowerCase().replace(/[^a-z0-9]+/gi, ' ');
-}
-
 async function findGithubIssue(token, repo, dateFromTitleRegEx, labels) {
   const url = `https://api.github.com/repos/${repo}/issues?state=open&labels=${encodeURIComponent(
     labels.join(',')
@@ -135,40 +128,21 @@ async function findGithubIssue(token, repo, dateFromTitleRegEx, labels) {
 function getNextDayOfWeek(date, dayOfWeek, weeks = 1) {
   const resultDate = new Date(date.getTime());
   resultDate.setDate(
-    resultDate.getDate() +
-      (weeks - 1) * 7 +
-      ((7 + dayOfWeek - date.getDay()) % 7)
+    resultDate.getDate() + ((7 + dayOfWeek - date.getDay()) % 7)
   );
   return resultDate;
 }
 
-function getWeeksBetween(d1, d2) {
-  return Math.round((d2 - d1) / (7 * 24 * 60 * 60 * 1000));
+function getRotationWeekly(start, scheduled, timeRotation) {
+  const weeks = Math.round((scheduled - start) / (7 * 24 * 60 * 60 * 1000));
+  return timeRotation[weeks % timeRotation.length];
 }
 
-function getRotationWeekly(
-  scheduled,
-  start,
-  timeRotationUtc,
-  frequencyWeeks = 1
-) {
-  const dateBeginningOfDay = new Date(
-    scheduled.getFullYear(),
-    scheduled.getMonth(),
-    scheduled.getDate()
-  );
-  const weeks = getWeeksBetween(start, dateBeginningOfDay);
-  if (weeks % frequencyWeeks !== 0) {
-    return null;
-  }
-  return timeRotationUtc[weeks % timeRotationUtc.length];
-}
-
-function getNextNthWeekdayOfMonth(date, weekday, n) {
+function getNextNthWeekdayOfMonth(date, n, dayOfWeek) {
   let count = 0;
   const idate = new Date(date.getFullYear(), date.getMonth(), 1);
   while (true) {
-    if (idate.getDay() === weekday) {
+    if (idate.getDay() === dayOfWeek) {
       if (++count == n) {
         break;
       }
@@ -178,77 +152,53 @@ function getNextNthWeekdayOfMonth(date, weekday, n) {
   return idate;
 }
 
-function getRotationMonthly(scheduled, start, timeRotationUtc) {
+function getRotationMonthly(start, scheduled, timeRotation) {
   const months =
     12 * (scheduled.getFullYear() - start.getFullYear()) +
     (scheduled.getMonth() - start.getMonth());
-  return timeRotationUtc[months % timeRotationUtc.length];
+  return timeRotation[months % timeRotation.length];
 }
 
-const timeZ = (yyyy, mm, dd, hours, minutes) =>
-  `${yyyy + mm + dd}T${leadingZero(hours) + leadingZero(minutes)}Z`;
-
-function getNextIssueData(template) {
+function getNextIssueData(template, skip = 0) {
   let {
-    frequencyWeeks,
-    frequencyWeekdayOfMonth,
-    sessionsFromNow = 1,
-    sessionDurationHours,
+    frequency,
     timeRotationStartYyyyMmDd,
-    timeRotationUtc,
+    timeRotation,
     labels,
     createTitle,
     createBody,
   } = template;
 
-  if (!frequencyWeeks === !frequencyWeekdayOfMonth) {
+  const {dayOfWeek, nthDayOfWeek} = frequency;
+  if ((dayOfWeek == null) === (nthDayOfWeek == null)) {
     throw new Error(
-      'specify exactly one of frequencyWeeks or frequencyWeekdayOfMonth'
+      'specify exactly one of frequency.dayOfWeek or frequency.nthDayOfWeek'
     );
   }
 
-  const dayOfWeek = (frequencyWeeks || frequencyWeekdayOfMonth)[1];
-
-  // if we run on the same day of week, we need to skip one day to calculate
-  // properly
-  const today = new Date();
-  today.setDate(today.getDate() + 1);
+  const currentStartDate = new Date();
+  if (dayOfWeek != null) {
+    currentStartDate.setDate(currentStartDate.getDate() + skip * 7);
+  } else if (nthDayOfWeek != null) {
+    currentStartDate.setMonth(currentStartDate.getMonth() + skip);
+  }
 
   const [year, month, day] = timeRotationStartYyyyMmDd.split('-');
   const timeRotationStart = new Date(year, month - 1, day);
 
   const nextDay =
-    frequencyWeeks != null
-      ? getNextDayOfWeek(today, dayOfWeek, sessionsFromNow)
-      : getNextNthWeekdayOfMonth(
-          new Date(
-            today.getFullYear(),
-            today.getMonth() + (sessionsFromNow - 1),
-            today.getDate(),
-            today.getHours(),
-            today.getMinutes()
-          ),
-          dayOfWeek,
-          frequencyWeekdayOfMonth[0]
-        );
+    dayOfWeek != null
+      ? getNextDayOfWeek(currentStartDate, dayOfWeek)
+      : getNextNthWeekdayOfMonth(currentStartDate, ...nthDayOfWeek);
 
-  const rotation =
-    frequencyWeeks != null
-      ? getRotationWeekly(
-          nextDay,
-          timeRotationStart,
-          timeRotationUtc,
-          frequencyWeeks[0]
-        )
-      : getRotationMonthly(nextDay, timeRotationStart, timeRotationUtc);
+  const selectedTime =
+    dayOfWeek != null
+      ? getRotationWeekly(timeRotationStart, nextDay, timeRotation)
+      : getRotationMonthly(timeRotationStart, nextDay, timeRotation);
 
-  if (!rotation) {
-    return null;
-  }
+  const [region, timeNoDst] = selectedTime;
 
-  const [region, timeUtcNoDst] = rotation;
-
-  let [hours, minutes] = timeUtcNoDst.split(':').map(Number);
+  let [hours, minutes] = timeNoDst.split(':').map(Number);
   if (isDaylightSavingsUsa(nextDay)) {
     hours -= 1;
   }
@@ -257,23 +207,18 @@ function getNextIssueData(template) {
   const mm = leadingZero(nextDay.getMonth() + 1);
   const dd = leadingZero(nextDay.getDate());
 
-  const timeUtc = `${leadingZero(hours)}:${leadingZero(minutes)}`;
-
-  const startZ = timeZ(yyyy, mm, dd, hours, minutes);
-  const endZ = timeZ(yyyy, mm, dd, hours + sessionDurationHours, minutes);
-
   const templateData = {
+    region,
     yyyy,
     mm,
     dd,
-    startZ,
-    endZ,
-    timeUtc,
-    region,
+    hours,
+    minutes,
+    time: `${leadingZero(hours)}:${leadingZero(minutes)}`,
   };
 
-  const title = createTitle(templateData);
-  const body = createBody(templateData);
+  const title = createTitle(templateData).trim();
+  const body = createBody(templateData).trim();
 
   return {yyyy, mm, dd, issue: {title, labels, body}};
 }
@@ -285,51 +230,57 @@ function env(key) {
   return process.env[key];
 }
 
-async function maybeCreateIssue(token, repo, name) {
-  const template = require(`./template/${name}`);
-  const {yyyy, mm, dd, issue} = getNextIssueData(template);
-
-  console./*OK*/ log();
-  console./*OK*/ log(name);
-
-  if (!issue) {
-    console./*OK*/ log('- [ignored]');
-    return;
-  }
-
+async function createIssue(token, repo, template, skip = 0) {
+  const {yyyy, mm, dd, issue: issueData} = getNextIssueData(template, skip);
+  const yyyyMmDd = `${yyyy}-${mm}-${dd}`;
   const dateFromTitleRegEx = new RegExp(
     `${yyyy}[/\\- ]*${mm}[/\\- ]*${dd}[/\\- ]*`
   );
+  if (process.argv.includes('--dry_run')) {
+    return {yyyyMmDd, dryRunData: issueData};
+  }
   const existingIssue = await findGithubIssue(
     token,
     repo,
     dateFromTitleRegEx,
-    issue.labels
+    issueData.labels
   );
   if (existingIssue) {
-    console./*OK*/ log('- [issue already exists]');
+    return {yyyyMmDd, existing: true, issue: existingIssue};
   }
-
-  if (process.argv.includes('--dry-run')) {
-    console./*OK*/ log(issue);
-    return;
-  }
-
-  const {title, 'html_url': htmlUrl} =
-    existingIssue || (await postGithubIssue(token, repo, issue));
-
-  console./*OK*/ log('-', title);
-  console./*OK*/ log('-', htmlUrl);
+  return {yyyyMmDd, issue: await postGithubIssue(token, repo, issueData)};
 }
 
-async function createAllIssuesForToday() {
-  console./*OK*/ log('Creating scheduled issues:');
-  for (const name of templates) {
-    await maybeCreateIssue(env('GITHUB_TOKEN'), env('GITHUB_REPOSITORY'), name);
-  }
+async function createAllIssues() {
+  const token = env('GITHUB_TOKEN');
+  const repo = env('GITHUB_REPOSITORY');
+  await templates.map(async (templateName) => {
+    const template = require(`./template/${templateName}`);
+
+    const results = [];
+    const {upcoming = 1} = template;
+    for (let skip = 0; skip < upcoming; skip++) {
+      results.push(createIssue(token, repo, template, skip));
+    }
+
+    for (const result of await Promise.all(results)) {
+      const {yyyyMmDd, issue, existing, dryRunData} = result;
+      if (dryRunData) {
+        console.log(dryRunData);
+        return;
+      }
+      console.log(
+        existing
+          ? `Skipped: ${templateName} (${yyyyMmDd})`
+          : `✍️  ${issue.title}`
+      );
+      console.log(`- ${issue['html_url']}`);
+      console.log();
+    }
+  });
 }
 
-createAllIssuesForToday().catch((e) => {
+createAllIssues().catch((e) => {
   console./*OK*/ error(e);
   process.exit(1);
 });

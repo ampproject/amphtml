@@ -2,8 +2,8 @@ name: Create Scheduled Issues
 
 on:
   schedule:
-    # At 00:00 on Monday.
-    - cron: '0 0 * * 1'
+    # Daily at 00:00.
+    - cron: '0 0 * * *'
 
 jobs:
   create-design-review-issue:
