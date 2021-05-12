@@ -300,41 +300,11 @@ function maybeToEsmName(name) {
  * @return {!Promise}
  */
 async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
-  const timeInfo = {};
-  const entryPoint = path.join(srcDir, srcFilename);
-  const minifiedName = maybeToEsmName(options.minifiedName);
-
-  options.errored = false;
-  await closureCompile(entryPoint, destDir, minifiedName, options, timeInfo);
-  // If an incremental watch build fails, simply return.
-  if (options.watch && options.errored) {
-    return;
-  }
-
-  const destPath = path.join(destDir, minifiedName);
-  combineWithCompiledFile(srcFilename, destPath, options);
-  fs.writeFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
-  if (options.latestName) {
-    fs.copySync(
-      destPath,
-      path.join(destDir, maybeToEsmName(options.latestName))
-    );
-  }
-
-  let name = minifiedName;
-  if (options.latestName) {
-    name += ` → ${maybeToEsmName(options.latestName)}`;
-  }
-  endBuildStep('Minified', name, timeInfo.startTime);
-
-  const target = path.basename(minifiedName, path.extname(minifiedName));
-  if (!argv.noconfig && MINIFIED_TARGETS.includes(target)) {
-    await applyAmpConfig(
-      maybeToEsmName(`${destDir}/${minifiedName}`),
-      /* localDev */ options.fortesting,
-      /* fortesting */ options.fortesting
-    );
-  }
+  const mangle = {properties: {regex: /_$/}};
+  return compileJsWithEsbuild(srcDir, srcFilename, destDir, {
+    ...options,
+    mangle,
+  });
 }
 
 /**
@@ -603,8 +573,8 @@ async function minifyWithTerser(destDir, destFilename, options) {
 
   const filename = path.join(destDir, destFilename);
   const terserOptions = {
-    mangle: true,
-    compress: true,
+    mangle: options.mangle ?? true,
+    compress: {passes: 3},
     output: {
       beautify: !!argv.pretty_print,
       comments: /\/*/,
