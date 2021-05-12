@@ -34,14 +34,20 @@ export const {isArray} = Array;
 /**
  * If the specified argument is an array, it's returned as is. If it's a
  * single item, the array containing this item is created and returned.
- * @param {!Array<T>|T} arrayOrSingleItem
- * @return {!Array<T>}
+ *
+ * The double-template pattern here solves a bug where CC can be passed a value
+ * with declared type {string|!Array<string>} and return a value with a type of
+ * {!Array<string|Array<string>>}.
+ *
+ * @param {!Array<T>|S} arrayOrSingleItem
+ * @return {!Array<T>|!Array<S>}
+ * @template S
  * @template T
  */
 export function arrayOrSingleItemToArray(arrayOrSingleItem) {
   return isArray(arrayOrSingleItem)
     ? /** @type {!Array<T>} */ (arrayOrSingleItem)
-    : [arrayOrSingleItem];
+    : [/** @type {!S} */ (arrayOrSingleItem)];
 }
 
 /**
