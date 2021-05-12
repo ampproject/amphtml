@@ -64,8 +64,8 @@ export function deepScan(
       deepScan(startNode, callback, arg, newState, false);
     }
   } else if (startNode.children) {
-    for (let i = 0; i < startNode.children.length; i++) {
-      deepScan(startNode.children[i], callback, arg, state, true);
+    for (const node of startNode.children) {
+      deepScan(node, callback, arg, state, true);
     }
   }
 }
