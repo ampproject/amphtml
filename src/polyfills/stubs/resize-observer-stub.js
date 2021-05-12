@@ -146,7 +146,7 @@ export class ResizeObserverStub {
   upgrade_(Ctor) {
     const inst = new Ctor(this.callback_);
     this.inst_ = inst;
-    for (const e of this.elements_) {
+    for (const e of /** @type {!Array<!Element>} */ (this.elements_)) {
       inst.observe(e);
     }
     this.elements_ = null;
