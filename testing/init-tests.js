@@ -54,10 +54,6 @@ import PreactEnzyme from 'enzyme-adapter-preact-pure';
  * TODO(wg-infra, #23837): Further refactor and clean up this file.
  */
 
-// Increase the before/after each timeout since certain times they have timedout
-// during the normal 2000 allowance.
-const BEFORE_AFTER_TIMEOUT = 5000;
-
 // This is the entry point for all AMP unit and integration tests.
 initializeTests();
 
@@ -106,7 +102,6 @@ before(function () {
 });
 
 beforeEach(function () {
-  this.timeout(BEFORE_AFTER_TIMEOUT);
   resetTestingState();
   setTestName(this.currentTest.fullTitle());
   maybeStubConsoleInfoLogWarn();
@@ -135,7 +130,6 @@ afterEach(function () {
   restoreConsoleSandbox();
   restoreConsoleError();
   restoreAsyncErrorThrows();
-  this.timeout(BEFORE_AFTER_TIMEOUT);
   const cleanupTagNames = ['link', 'meta', 'iframe'];
   const cleanup = document.querySelectorAll(cleanupTagNames.join(','));
   for (let i = 0; i < cleanup.length; i++) {
