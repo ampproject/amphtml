@@ -31,7 +31,7 @@ BaseElement['props'] = {
 BaseElement['usesTemplate'] = true;
 
 /** @override */
-BaseElement['lightDomTag'] = 'i-amphtml-c'; // TODO(dmanek): Temporary workaround, change this back to div
+BaseElement['lightDomTag'] = 'div';
 
 /** @override */
 BaseElement['layoutSizeDefined'] = true;

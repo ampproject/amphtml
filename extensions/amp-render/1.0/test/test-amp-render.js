@@ -517,5 +517,56 @@ describes.realWin(
       await getRenderedData();
       expect(element.getAttribute('aria-live')).to.equal('assertive');
     });
+
+    it('should render a placeholder', async () => {
+      const fetchStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+
+      element = html`
+        <amp-render
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+          <div placeholder>Loading data</div>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      const text = await getRenderedData();
+      expect(text).to.equal('Loading data');
+      expect(fetchStub).not.to.be.called;
+    });
+
+    it.skip('should render a fallback', async () => {
+      const fetchStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+
+      fetchStub.rejects({});
+
+      element = html`
+        <amp-render
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+          <div placeholder>Loading data</div>
+          <div fallback>Failed</div>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      const text = await getRenderedData();
+      expect(text).to.equal('Failed');
+      // expect(fetchStub).not.to.be.called;
+    });
   }
 );
