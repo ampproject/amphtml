@@ -114,7 +114,7 @@
     "html-minifier": "4.0.0",
     "ignore": "5.1.8",
     "istanbul-middleware": "0.2.2",
-    "jest-progress-bar-reporter": "1.0.20",
+    "jest-progress-bar-reporter": "1.0.21",
     "jest-silent-reporter": "0.5.0",
     "jison": "0.4.18",
     "jscodeshift": "0.12.0",
