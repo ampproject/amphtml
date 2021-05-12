@@ -86,37 +86,6 @@ describes.realWin(
       toggleExperiment(win, 'amp-render', true, true);
     });
 
-    it('renders from amp-state', async () => {
-      const ampState = html`
-        <amp-state id="theFood">
-          <script type="application/json">
-            {
-              "name": "Bill"
-            }
-          </script>
-        </amp-state>
-      `;
-      doc.body.appendChild(ampState);
-
-      element = html`
-        <amp-render
-          src="amp-state:theFood"
-          width="auto"
-          height="140"
-          layout="fixed-height"
-        >
-          <template type="amp-mustache"><p>Hello {{name}}</p></template>
-        </amp-render>
-      `;
-      doc.body.appendChild(element);
-
-      await whenUpgradedToCustomElement(ampState);
-      await ampState.buildInternal();
-
-      const text = await getRenderedData();
-      expect(text).to.equal('Hello Bill');
-    });
-
     it('renders json from src', async () => {
       const fetchStub = env.sandbox.stub(
         BatchedJsonModule,
@@ -532,23 +501,32 @@ describes.realWin(
           layout="fixed-height"
         >
           <template type="amp-mustache"><p>Hello {{name}}</p></template>
-          <div placeholder>Loading data</div>
+          <p placeholder>Loading data</p>
+          <p fallback>Failed</p>
         </amp-render>
       `;
       doc.body.appendChild(element);
 
+      await element.buildInternal();
+      await waitFor(() => {
+        const div = element.querySelector(`[placeholder]`);
+        return div && div.textContent;
+      }, 'placeholder rendered');
+      const placeholder = element.querySelector(`[placeholder]`);
+
+      expect(placeholder.textContent).to.equal('Loading data');
+
+      fetchStub.resolves({name: 'Joe'});
       const text = await getRenderedData();
-      expect(text).to.equal('Loading data');
-      expect(fetchStub).not.to.be.called;
+      expect(text).to.equal('Hello Joe');
+      expect(fetchStub).to.be.calledOnce;
     });
 
-    it.skip('should render a fallback', async () => {
+    it('should render a fallback', async () => {
       const fetchStub = env.sandbox.stub(
         BatchedJsonModule,
         'batchFetchJsonFor'
       );
-
-      fetchStub.rejects({});
 
       element = html`
         <amp-render
@@ -558,15 +536,25 @@ describes.realWin(
           layout="fixed-height"
         >
           <template type="amp-mustache"><p>Hello {{name}}</p></template>
-          <div placeholder>Loading data</div>
-          <div fallback>Failed</div>
+          <p placeholder>Loading data</p>
+          <p fallback>Failed</p>
         </amp-render>
       `;
       doc.body.appendChild(element);
 
-      const text = await getRenderedData();
-      expect(text).to.equal('Failed');
-      // expect(fetchStub).not.to.be.called;
+      await whenUpgradedToCustomElement(element);
+      await element.buildInternal();
+
+      fetchStub.rejects();
+      await element.buildInternal();
+
+      await waitFor(() => {
+        const div = element.querySelector(`[fallback]`);
+        return div && div.textContent;
+      }, 'fallback rendered');
+      const fallback = element.querySelector(`[fallback]`);
+
+      expect(fallback.textContent).to.equal('Failed');
     });
   }
 );
