@@ -26,6 +26,12 @@ import {remove} from '../types/array';
  */
 
 /**
+ * A base assertion function, provided to various assertion helpers.
+ * @typedef {function(?, string=, ...*):?|function(?, !Array<*>)}
+ */
+export let AssertionFunctionDef;
+
+/**
  * Throws an error if the second argument isn't trueish.
  *
  * Supports argument substitution into the message via %s placeholders.
@@ -94,7 +100,7 @@ export function assert(
  * Otherwise creates a sprintf syntax string containing the optional message or the
  * default. The `subject` of the assertion is added at the end.
  *
- * @param {!AssertionFunction} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {T} subject
  * @param {*} shouldBeTruthy
  * @param {string} defaultMessage
@@ -127,7 +133,7 @@ function assertType_(
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunction} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {*} shouldBeElement
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {!Element} The value of shouldBeTrueish.
@@ -152,7 +158,7 @@ export function assertElement(assertFn, shouldBeElement, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunction} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {*} shouldBeString
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {string} The string value. Can be an empty string.
@@ -177,7 +183,7 @@ export function assertString(assertFn, shouldBeString, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunction} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {*} shouldBeNumber
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {number} The number value. The allowed values include `0`
@@ -203,7 +209,7 @@ export function assertNumber(assertFn, shouldBeNumber, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunction} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {*} shouldBeArray
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {!Array} The array value
@@ -227,7 +233,7 @@ export function assertArray(assertFn, shouldBeArray, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunction} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {*} shouldBeBoolean
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {boolean} The boolean value.
@@ -250,7 +256,7 @@ export function assertBoolean(assertFn, shouldBeBoolean, opt_message) {
  * Asserts and returns the enum value. If the enum doesn't contain such a
  * value, the error is thrown.
  *
- * @param {!AssertionFunction} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {!Object<T>} enumObj
  * @param {*} shouldBeEnum
  * @param {string=} opt_enumName
