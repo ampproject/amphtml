@@ -21,7 +21,7 @@ import {arrayOrSingleItemToArray} from '../types/array';
  * to an updateable element.
  * If `opt_removeMissingAttrs` is true, then also removes any specified
  * attributes that are missing on the source element from the updateable element.
- * @param {!string|!Array<string>} attributes
+ * @param {string|!Array<string>} attributes
  * @param {!Element} sourceElement
  * @param {!Element} updateElement
  * @param {boolean=} opt_removeMissingAttrs
@@ -32,7 +32,9 @@ export function propagateAttributes(
   updateElement,
   opt_removeMissingAttrs
 ) {
-  const attrs = /** @type {Array<string>} */ (arrayOrSingleItemToArray(attributes));
+  const attrs = /** @type {Array<string>} */ (arrayOrSingleItemToArray(
+    attributes
+  ));
   for (let i = 0; i < attrs.length; i++) {
     const attr = attrs[i];
     const val = sourceElement.getAttribute(attr);
