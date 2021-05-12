@@ -59,8 +59,8 @@ class Bezier {
    * @return {number} The y coordinate of the point on the curve.
    */
   static solveYValueFromXValue(xVal, x0, y0, x1, y1, x2, y2, x3, y3) {
-    return this.getPointY_(
-      this.solvePositionFromXValue_(xVal, x0, x1, x2, x3),
+    returnBeziergetPointY_(
+      Bezier.solvePositionFromXValue_(xVal, x0, x1, x2, x3),
       y0,
       y1,
       y2,
@@ -98,9 +98,9 @@ class Bezier {
     let tMax = 1;
     let value = 0;
     for (let i = 0; i < 8; i++) {
-      value = this.getPointX_(t, x0, x1, x2, x3);
+      value = Bezier.getPointX_(t, x0, x1, x2, x3);
       const derivative =
-        (this.getPointX_(t + epsilon, x0, x1, x2, x3) - value) / epsilon;
+        (Bezier.getPointX_(t + epsilon, x0, x1, x2, x3) - value) / epsilon;
       if (Math.abs(value - xVal) < epsilon) {
         return t;
       } else if (Math.abs(derivative) < epsilon) {
@@ -126,7 +126,7 @@ class Bezier {
         tMax = t;
         t = (t + tMin) / 2;
       }
-      value = this.getPointX_(t, x0, x1, x2, x3);
+      value = Bezier.getPointX_(t, x0, x1, x2, x3);
     }
     return t;
   }
@@ -150,16 +150,16 @@ class Bezier {
     }
 
     // Step one - from 4 points to 3
-    let ix0 = this.lerp_(x0, x1, t);
-    let ix1 = this.lerp_(x1, x2, t);
-    const ix2 = this.lerp_(x2, x3, t);
+    let ix0 = Bezier.lerp_(x0, x1, t);
+    let ix1 = Bezier.lerp_(x1, x2, t);
+    const ix2 = Bezier.lerp_(x2, x3, t);
 
     // Step two - from 3 points to 2
-    ix0 = this.lerp_(ix0, ix1, t);
-    ix1 = this.lerp_(ix1, ix2, t);
+    ix0 = Bezier.lerp_(ix0, ix1, t);
+    ix1 = Bezier.lerp_(ix1, ix2, t);
 
     // Final step - last point
-    return this.lerp_(ix0, ix1, t);
+    return Bezier.lerp_(ix0, ix1, t);
   }
 
   /**
@@ -181,16 +181,16 @@ class Bezier {
     }
 
     // Step one - from 4 points to 3
-    let iy0 = this.lerp_(y0, y1, t);
-    let iy1 = this.lerp_(y1, y2, t);
-    const iy2 = this.lerp_(y2, y3, t);
+    let iy0 = Bezier.lerp_(y0, y1, t);
+    let iy1 = Bezier.lerp_(y1, y2, t);
+    const iy2 = Bezier.lerp_(y2, y3, t);
 
     // Step two - from 3 points to 2
-    iy0 = this.lerp_(iy0, iy1, t);
-    iy1 = this.lerp_(iy1, iy2, t);
+    iy0 = Bezier.lerp_(iy0, iy1, t);
+    iy1 = Bezier.lerp_(iy1, iy2, t);
 
     // Final step - last point
-    return this.lerp_(iy0, iy1, t);
+    return Bezier.lerp_(iy0, iy1, t);
   }
 
   /**
