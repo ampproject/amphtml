@@ -15,7 +15,6 @@
  */
 
 import {isString} from '../types';
-import {once} from '../types/function';
 
 // typedef imports
 import {NormTimeDef} from '../types/date';
