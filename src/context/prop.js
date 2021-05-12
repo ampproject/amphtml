@@ -16,24 +16,27 @@
 
 import {devAssert} from '../core/assert';
 
+// typedef imports
+import {ContextPropDef} from './prop.type';
+
 const EMPTY_DEPS = [];
 
 /**
- * Creates the `ContextProp` type.
+ * Creates the `ContextPropDef` type.
  *
  * @param {string} key
  * @param {{
  *   type: (!Object|undefined),
- *   deps: (!Array<!ContextProp>|undefined),
+ *   deps: (!Array<!ContextPropDef>|undefined),
  *   recursive: (boolean|(function(!Array<T>):boolean)|undefined),
- *   compute: ((function(!Node, !Array<T>, ...*):(T|undefined))|undefined),
+ *   compute: (function(!Node, !Array<T>, ...*):(T|undefined)),
  *   defaultValue: (T|undefined),
  * }=} opt_spec
- * @return {!ContextProp<T>}
+ * @return {!ContextPropDef<T>}
  * @template T
  */
 export function contextProp(key, opt_spec) {
-  const prop = /** @type {!ContextProp<T>} */ ({
+  const prop = /** @type {!ContextPropDef} */ ({
     key,
     // Default values.
     type: null,
