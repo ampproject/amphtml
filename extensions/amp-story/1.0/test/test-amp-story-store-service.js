@@ -31,13 +31,13 @@ describes.fakeWin('amp-story-store-service', {}, (env) => {
   });
 
   it('should return the default state', () => {
-    expect(storeService.get(StateProperty.CAN_SHOW_BOOKEND)).to.be.true;
+    expect(storeService.get(StateProperty.MUTED_STATE)).to.be.true;
   });
 
   it('should subscribe to property mutations and receive the new value', () => {
     const listenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.BOOKEND_STATE, listenerSpy);
-    storeService.dispatch(Action.TOGGLE_BOOKEND, true);
+    storeService.subscribe(StateProperty.MUTED_STATE, listenerSpy);
+    storeService.dispatch(Action.MUTED_STATE, true);
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(true);
   });
@@ -45,19 +45,19 @@ describes.fakeWin('amp-story-store-service', {}, (env) => {
   it('should not trigger a listener if another property changed', () => {
     const listenerSpy = env.sandbox.spy();
     storeService.subscribe(StateProperty.CAN_INSERT_AUTOMATIC_AD, listenerSpy);
-    storeService.dispatch(Action.TOGGLE_BOOKEND, true);
+    storeService.dispatch(Action.MUTED_STATE, true);
     expect(listenerSpy).to.have.callCount(0);
   });
 
   it('should not trigger a listener on subscribe by default', () => {
     const listenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.BOOKEND_STATE, listenerSpy);
+    storeService.subscribe(StateProperty.MUTED_STATE, listenerSpy);
     expect(listenerSpy).to.have.callCount(0);
   });
 
   it('should trigger a listener on subscribe if option is set to true', () => {
     const listenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.BOOKEND_STATE, listenerSpy, true);
+    storeService.subscribe(StateProperty.MUTED_STATE, listenerSpy, true);
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(false);
   });
@@ -73,7 +73,7 @@ describes.fakeWin('amp-story-store-service embed mode', {}, (env) => {
   });
 
   it('should override the state with the expected mode', () => {
-    expect(storeService.get(StateProperty.CAN_SHOW_BOOKEND)).to.be.false;
+    expect(storeService.get(StateProperty.MUTED_STATE)).to.be.false;
   });
 });
 
@@ -83,22 +83,6 @@ describes.fakeWin('amp-story-store-service actions', {}, (env) => {
   beforeEach(() => {
     // Making sure we always get a new instance to isolate each test.
     storeService = new AmpStoryStoreService(env.win);
-  });
-
-  it('should toggle the bookend', () => {
-    const listenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.BOOKEND_STATE, listenerSpy);
-    storeService.dispatch(Action.TOGGLE_BOOKEND, true);
-    expect(listenerSpy).to.have.been.calledOnce;
-    expect(listenerSpy).to.have.been.calledWith(true);
-  });
-
-  it('should not toggle the bookend if embed mode disables it', () => {
-    const listenerSpy = env.sandbox.spy();
-    storeService.state_[StateProperty.CAN_SHOW_BOOKEND] = false;
-    storeService.subscribe(StateProperty.BOOKEND_STATE, listenerSpy);
-    storeService.dispatch(Action.TOGGLE_BOOKEND, true);
-    expect(listenerSpy).to.have.callCount(0);
   });
 
   it('should toggle the muted state', () => {
@@ -169,27 +153,6 @@ describes.fakeWin('amp-story-store-service actions', {}, (env) => {
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
     expect(pausedListenerSpy).to.have.been.calledOnce;
     expect(pausedListenerSpy).to.have.been.calledWith(true);
-  });
-
-  it('should pause the story when displaying the bookend', () => {
-    const pausedListenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.PAUSED_STATE, pausedListenerSpy);
-    storeService.dispatch(Action.TOGGLE_BOOKEND, true);
-    expect(pausedListenerSpy).to.have.been.calledOnce;
-    expect(pausedListenerSpy).to.have.been.calledWith(true);
-  });
-
-  it('should unpause the story when closing the bookend', () => {
-    // First open the bookend.
-    storeService.dispatch(Action.TOGGLE_BOOKEND, true);
-
-    // Close the bookend.
-    const pausedListenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.PAUSED_STATE, pausedListenerSpy);
-    storeService.dispatch(Action.TOGGLE_BOOKEND, false);
-
-    expect(pausedListenerSpy).to.have.been.calledOnce;
-    expect(pausedListenerSpy).to.have.been.calledWith(false);
   });
 
   it('should unpause the story when hiding the share menu', () => {
