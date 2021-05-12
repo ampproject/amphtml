@@ -95,12 +95,16 @@ interface Template {
 interface Result {
   // Year as YYYY
   yyyy: string;
+
   // Month as MM
   mm: string;
+
   // Day of the month as DD
   dd: string;
+
   // UTC time, 24 hrs.
   timeUtc: string;
+
   // startZ and endZ contain full formatted datetimes to interpolate
   // in a link to Google Calendar.
   startZ: string;
