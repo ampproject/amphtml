@@ -42,7 +42,7 @@ import {
   parseBooleanAttribute,
 } from '../dom';
 import {dashToCamelCase} from '../core/types/string';
-import {devAssert} from '../log';
+import {devAssert} from '../core/assert';
 import {dict, hasOwn, map} from '../core/types/object';
 import {getDate} from '../core/types/date';
 import {getMode} from '../mode';
