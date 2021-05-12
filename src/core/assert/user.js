@@ -98,7 +98,7 @@ export function userAssert(
  */
 export function userAssertElement(shouldBeElement, opt_message) {
   return assertions.assertElement(
-    /** @type {!AssertionFunction} */ (userAssert),
+    /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
     shouldBeElement,
     opt_message
   );
@@ -118,7 +118,7 @@ export function userAssertElement(shouldBeElement, opt_message) {
  */
 export function userAssertString(shouldBeString, opt_message) {
   return assertions.assertString(
-    /** @type {!AssertionFunction} */ (userAssert),
+    /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
     shouldBeString,
     opt_message
   );
@@ -139,7 +139,7 @@ export function userAssertString(shouldBeString, opt_message) {
  */
 export function userAssertNumber(shouldBeNumber, opt_message) {
   return assertions.assertNumber(
-    /** @type {!AssertionFunction} */ (userAssert),
+    /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
     shouldBeNumber,
     opt_message
   );
@@ -159,7 +159,7 @@ export function userAssertNumber(shouldBeNumber, opt_message) {
  */
 export function userAssertArray(shouldBeArray, opt_message) {
   return assertions.assertArray(
-    /** @type {!AssertionFunction} */ (userAssert),
+    /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
     shouldBeArray,
     opt_message
   );
@@ -178,7 +178,7 @@ export function userAssertArray(shouldBeArray, opt_message) {
  */
 export function userAssertBoolean(shouldBeBoolean, opt_message) {
   return assertions.assertBoolean(
-    /** @type {!AssertionFunction} */ (userAssert),
+    /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
     shouldBeBoolean,
     opt_message
   );
@@ -197,7 +197,7 @@ export function userAssertBoolean(shouldBeBoolean, opt_message) {
  */
 export function userAssertEnumValue(enumObj, shouldBeEnum, opt_enumName) {
   return assertions.assertEnumValue(
-    /** @type {!AssertionFunction} */ (userAssert),
+    /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
     enumObj,
     shouldBeEnum,
     opt_enumName
