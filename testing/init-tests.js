@@ -51,25 +51,31 @@ import PreactEnzyme from 'enzyme-adapter-preact-pure';
 
 /** @fileoverview
  * This file initializes AMP's Karma + Mocha based unit & integration tests.
- * TODO(wg-infra, #23837): Further refactor and clean up this file.
+ * TODO(wg-infra): Do a detailed inventory and remove unnecessary steps.
  */
 
-// This is the entry point for all AMP unit and integration tests.
+// This is the entry point for all AMP unit and integration tests. It should be
+// the only globally-invoked function in this file.
 initializeTests();
 
 /**
  * Initializes the global state required by all AMP unit and integration tests.
  */
 function initializeTests() {
-  // Allow it() tests to call yield and allow pending promises to resolve.
+  // Allow Mocha's it() to call yield and allow pending promises to resolve.
   installYieldIt(it);
 
-  // Make describe() and it() globally configurable.
+  // Make Mocha's describe() and it() globally configurable.
   describe.configure = () => new TestConfig(describe);
   it.configure = () => new TestConfig(it);
 
-  // Make describes() globally available.
+  // Make AMP's custom describes() globally available.
   global.describes = describes;
+
+  // Set up Mocha's global setup / clean up functions.
+  before(overrideSkipTest);
+  beforeEach(setupTestcase);
+  afterEach(cleanupTestcase);
 
   // Make the `amp` section of the Karma config readable by tests.
   // The regular test runner uses `karma`, while the debugger uses `__karma__ `.
@@ -90,8 +96,10 @@ function initializeTests() {
     describes.bufferExtension(`${name}:${version}`, installer);
 }
 
-before(function () {
-  // This is a more robust version of `this.skip()`. See #17245.
+/**
+ * Overrides skipTest() with a more robust version of `this.skip()`. See #17245.
+ */
+function overrideSkipTest() {
   this.skipTest = function () {
     if (!this._runnable.title.startsWith('"before all" hook')) {
       throw new Error('skipTest() can only be called from within before()');
@@ -99,16 +107,23 @@ before(function () {
     this.test.parent.pending = true; // Workaround for mochajs/mocha#2683.
     this.skip();
   };
-});
+}
 
-beforeEach(function () {
+/**
+ * Sets up the initial state required by individual test cases.
+ */
+function setupTestcase() {
   resetTestingState();
   setTestName(this.currentTest.fullTitle());
   maybeStubConsoleInfoLogWarn();
   preventAsyncErrorThrows();
   warnForConsoleError();
-});
+}
 
+/**
+ * Resets the window's testing state. Used at the start by initializeTests() and
+ * before each test case by setupTestcase().
+ */
 function resetTestingState() {
   activateChunkingForTesting();
   window.__AMP_MODE = undefined;
@@ -123,9 +138,9 @@ function resetTestingState() {
 }
 
 /**
- * Global cleanup of tags added during tests. Cool to add more to selector.
+ * Cleans up global state added during tests.
  */
-afterEach(function () {
+function cleanupTestcase() {
   setTestRunner(this);
   restoreConsoleSandbox();
   restoreConsoleError();
@@ -152,4 +167,4 @@ afterEach(function () {
   resetExperimentTogglesForTesting(window);
   resetEvtListenerOptsSupportForTesting();
   cancelTimersForTesting();
-});
+}
