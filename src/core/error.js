@@ -37,14 +37,14 @@ export function duplicateErrorIfNecessary(error) {
 }
 
 /**
- * @param {...*} args
+ * @param {...*} var_args
  * @return {!Error}
  * @visibleForTesting
  */
-export function createErrorVargs(...args) {
+export function createErrorVargs(var_args) {
   let error = null;
   let message = '';
-  for (const arg of args) {
+  for (const arg of arguments) {
     if (arg instanceof Error && !error) {
       error = duplicateErrorIfNecessary(arg);
     } else {
@@ -66,10 +66,10 @@ export function createErrorVargs(...args) {
 /**
  * Rethrows the error without terminating the current context. This preserves
  * whether the original error designation is a user error or a dev error.
- * @param {...*} args
+ * @param {...*} var_args
  */
-export function rethrowAsync(...args) {
-  const error = createErrorVargs(...args);
+export function rethrowAsync(var_args) {
+  const error = createErrorVargs.apply(null, arguments);
   setTimeout(() => {
     // __AMP_REPORT_ERROR is installed globally per window in the entry point.
     // It may not exist for Bento components without the runtime.
