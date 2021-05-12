@@ -36,8 +36,8 @@ export let CurveDef;
  * @return {!CurveDef}
  */
 export function bezierCurve(x1, y1, x2, y2) {
-  const bezier = new Bezier(0, 0, x1, y1, x2, y2, 1, 1);
-  return bezier.solveYValueFromXValue.bind(bezier);
+  return (xVal) =>
+    Bezier.solveYValueFromXValue(xVal, 0, 0, x1, y1, x2, y2, 1, 1);
 }
 
 /**
@@ -46,6 +46,8 @@ export function bezierCurve(x1, y1, x2, y2) {
  */
 class Bezier {
   /**
+   * Computes the y coordinate of a point on the curve given its x coordinate.
+   * @param {number} xVal The x coordinate of the point on the curve.
    * @param {number} x0 X coordinate of the start point.
    * @param {number} y0 Y coordinate of the start point.
    * @param {number} x1 X coordinate of the first control point.
@@ -54,69 +56,15 @@ class Bezier {
    * @param {number} y2 Y coordinate of the second control point.
    * @param {number} x3 X coordinate of the end point.
    * @param {number} y3 Y coordinate of the end point.
-   */
-  constructor(x0, y0, x1, y1, x2, y2, x3, y3) {
-    /**
-     * X coordinate of the first point.
-     * @type {number}
-     */
-    this.x0 = x0;
-
-    /**
-     * Y coordinate of the first point.
-     * @type {number}
-     */
-    this.y0 = y0;
-
-    /**
-     * X coordinate of the first control point.
-     * @type {number}
-     */
-    this.x1 = x1;
-
-    /**
-     * Y coordinate of the first control point.
-     * @type {number}
-     */
-    this.y1 = y1;
-
-    /**
-     * X coordinate of the second control point.
-     * @type {number}
-     */
-    this.x2 = x2;
-
-    /**
-     * Y coordinate of the second control point.
-     * @type {number}
-     */
-    this.y2 = y2;
-
-    /**
-     * X coordinate of the end point.
-     * @type {number}
-     */
-    this.x3 = x3;
-
-    /**
-     * Y coordinate of the end point.
-     * @type {number}
-     */
-    this.y3 = y3;
-  }
-
-  /**
-   * Computes the y coordinate of a point on the curve given its x coordinate.
-   * @param {number} xVal The x coordinate of the point on the curve.
    * @return {number} The y coordinate of the point on the curve.
    */
-  solveYValueFromXValue(xVal) {
-    return Bezier.getPointY_(
-      Bezier.solvePositionFromXValue_(xVal, this.x0, this.x1, this.x2, this.x3),
-      this.y0,
-      this.y1,
-      this.y2,
-      this.y3
+  static solveYValueFromXValue(xVal, x0, y0, x1, y1, x2, y2, x3, y3) {
+    return this.getPointY_(
+      this.solvePositionFromXValue_(xVal, x0, x1, x2, x3),
+      y0,
+      y1,
+      y2,
+      y3
     );
   }
 
