@@ -27,7 +27,7 @@
     "jss-preset-default": "10.6.0",
     "moment": "2.29.1",
     "obj-str": "1.1.0",
-    "preact": "10.2.1",
+    "preact": "10.5.13",
     "promise-pjs": "1.1.5",
     "react-dates": "21.8.0",
     "react-jss": "10.6.0",
