@@ -28,7 +28,7 @@ import {
 } from './providers/fx-provider';
 import {iterateCursor} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
-import {rethrowAsync} from '../../../src/core/error';
+import {tryCallback} from '../../../src/core/error';
 
 const TAG = 'amp-fx-collection';
 
