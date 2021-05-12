@@ -20,33 +20,21 @@ import {doNotLoadExternalResourcesInTest} from '../../../../testing/iframe';
 import {resetServiceForTesting} from '../../../../src/service';
 import {serializeMessage} from '../../../../src/3p-frame-messaging';
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
-import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor} from '../../../../testing/test-helper';
 
 describes.realWin(
   'amp-facebook-comments',
   {
     amp: {
-      extensions: ['amp-facebook-comments:1.0'],
+      extensions: ['amp-facebook-comments:0.1'],
     },
   },
   (env) => {
     let win, doc, element;
-
-    const waitForRender = async () => {
-      await element.buildInternal();
-      const loadPromise = element.layoutCallback();
-      const shadow = element.shadowRoot;
-      await waitFor(() => shadow.querySelector('iframe'), 'iframe mounted');
-      await loadPromise;
-    };
-
     const href = 'https://cdn.ampproject.org/';
 
     beforeEach(async function () {
       win = env.win;
       doc = win.document;
-      toggleExperiment(win, 'bento-facebook-comments', true, true);
       // Override global window here because Preact uses global `createElement`.
       doNotLoadExternalResourcesInTest(window, env.sandbox);
     });
@@ -59,9 +47,10 @@ describes.realWin(
         'layout': 'responsive',
       });
       doc.body.appendChild(element);
-      await waitForRender();
+      await element.buildInternal();
+      await element.layoutCallback();
 
-      const iframe = element.shadowRoot.querySelector('iframe');
+      const iframe = element.querySelector('iframe');
       expect(iframe.src).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html'
       );
@@ -75,24 +64,11 @@ describes.realWin(
         'layout': 'responsive',
       });
       doc.body.appendChild(element);
-      await waitForRender();
+      await element.buildInternal();
+      await element.layoutCallback();
 
-      const iframe = element.shadowRoot.querySelector('iframe');
+      const iframe = element.querySelector('iframe');
       expect(iframe.hasAttribute('sandbox')).to.be.false;
-    });
-
-    it('renders amp-facebook-comments with detected locale', async () => {
-      element = createElementWithAttributes(doc, 'amp-facebook-comments', {
-        'data-href': href,
-        'height': 500,
-        'width': 500,
-        'layout': 'responsive',
-      });
-      doc.body.appendChild(element);
-      await waitForRender();
-
-      const iframe = element.shadowRoot.querySelector('iframe');
-      expect(iframe.getAttribute('name')).to.contain('"locale":"en_US"');
     });
 
     it('renders amp-facebook-comments with specified locale', async () => {
@@ -104,9 +80,10 @@ describes.realWin(
         'layout': 'responsive',
       });
       doc.body.appendChild(element);
-      await waitForRender();
+      await element.buildInternal();
+      await element.layoutCallback();
 
-      const iframe = element.shadowRoot.querySelector('iframe');
+      const iframe = element.querySelector('iframe');
       expect(iframe.getAttribute('name')).to.contain('"locale":"fr_FR"');
     });
 
@@ -126,20 +103,20 @@ describes.realWin(
         'layout': 'responsive',
       });
       doc.body.appendChild(element);
-      await waitForRender();
+      await element.buildInternal();
+      await element.layoutCallback();
 
       const impl = await element.getImpl(false);
       const forceChangeHeightStub = env.sandbox.stub(impl, 'forceChangeHeight');
 
       const mockEvent = new CustomEvent('message');
       const sentinel = JSON.parse(
-        element.shadowRoot.querySelector('iframe').getAttribute('name')
+        element.querySelector('iframe').getAttribute('name')
       )['attributes']['_context']['sentinel'];
       mockEvent.data = serializeMessage('embed-size', sentinel, {
         'height': 1000,
       });
-      mockEvent.source =
-        element.shadowRoot.querySelector('iframe').contentWindow;
+      mockEvent.source = element.querySelector('iframe').contentWindow;
       win.dispatchEvent(mockEvent);
       expect(forceChangeHeightStub).to.be.calledOnce.calledWith(1000);
     });
