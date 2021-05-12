@@ -59,7 +59,7 @@ class Bezier {
    * @return {number} The y coordinate of the point on the curve.
    */
   static solveYValueFromXValue(xVal, x0, y0, x1, y1, x2, y2, x3, y3) {
-    returnBeziergetPointY_(
+    return Bezier.getPointY_(
       Bezier.solvePositionFromXValue_(xVal, x0, x1, x2, x3),
       y0,
       y1,
