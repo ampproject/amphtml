@@ -15,23 +15,12 @@
  */
 
 /**
- * @fileoverview The junk-drawer of externs that haven't yet been sorted well.
- * Shame! Shame! Shame! Avoid adding to this.
- *
- * It's okay for some things to start off here, since moving them doesn't
- * require any other file changes (unlike real code, which requires updating)
- * imports throughout the repo).
- *
+ * @fileoverview Global type definitions related to functions.
  * @externs
  */
 
 /**
  * This type signifies a callback that can be called to remove a listener.
- *
- * Planned destination: There are some function helpers (like `once` in
- * `src/utils/function`). When they are migrated to core, they'll likely end up
- * under `src/core/types/function`;this can live in an adjacent externs file.
- *
  * @typedef {function()}
  */
 let UnlistenDef;
