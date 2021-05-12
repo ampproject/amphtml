@@ -81,7 +81,8 @@ export function createRef() {
  * @template T
  */
 export function createContext(value) {
-  return preact.createContext(value);
+  // TODO(preactjs/preact#2736): Remove once Preact's API is fixed.
+  return preact.createContext(value, undefined);
 }
 
 // Defines the type interfaces for the approved Preact Hooks APIs.
