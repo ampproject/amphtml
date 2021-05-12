@@ -17,6 +17,9 @@
 import {Loading, reducer as loadingReducer} from '../core/loading-instructions';
 import {contextProp} from './prop';
 
+// typedef imports
+import {ContextPropDef} from './prop.type';
+
 /**
  * Defines whether a DOM subtree can be currently seen by the user. A subtree
  * can be not renderable due `display: none`, or `hidden` attribute, unslotted
@@ -25,7 +28,7 @@ import {contextProp} from './prop';
  *
  * Default is `true`.
  *
- * @const {!ContextProp<boolean>}
+ * @const {!ContextPropDef<boolean>}
  */
 const CanRender = contextProp('CanRender', {
   defaultValue: true,
@@ -42,7 +45,7 @@ const CanRender = contextProp('CanRender', {
  *
  * Default is `true`.
  *
- * @const {!ContextProp<boolean>}
+ * @const {!ContextPropDef<boolean>}
  */
 const CanPlay = contextProp('CanPlay', {
   defaultValue: true,
@@ -59,7 +62,7 @@ const CanPlay = contextProp('CanPlay', {
  *
  * Default is "auto".
  *
- * @const {!ContextProp<!Loading>}
+ * @const {!ContextPropDef<!Loading>}
  */
 const LoadingProp = contextProp('Loading', {
   defaultValue: Loading.AUTO,
