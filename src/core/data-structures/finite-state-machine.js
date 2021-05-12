@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {pureDevAssert as devAssert} from '../assert';
+import {devAssert} from '../assert';
 import {map} from '../types/object';
 
 /** @template STATE */
