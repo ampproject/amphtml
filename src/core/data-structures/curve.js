@@ -185,16 +185,16 @@ class Bezier {
     }
 
     // Step one - from 4 points to 3
-    let ix0 = this.lerp(this.x0, this.x1, t);
-    let ix1 = this.lerp(this.x1, this.x2, t);
-    const ix2 = this.lerp(this.x2, this.x3, t);
+    let ix0 = Bezier.lerp_(this.x0, this.x1, t);
+    let ix1 = Bezier.lerp_(this.x1, this.x2, t);
+    const ix2 = Bezier.lerp_(this.x2, this.x3, t);
 
     // Step two - from 3 points to 2
-    ix0 = this.lerp(ix0, ix1, t);
-    ix1 = this.lerp(ix1, ix2, t);
+    ix0 = Bezier.lerp_(ix0, ix1, t);
+    ix1 = Bezier.lerp_(ix1, ix2, t);
 
     // Final step - last point
-    return this.lerp(ix0, ix1, t);
+    return Bezier.lerp_(ix0, ix1, t);
   }
 
   /**
@@ -211,16 +211,16 @@ class Bezier {
     }
 
     // Step one - from 4 points to 3
-    let iy0 = this.lerp(this.y0, this.y1, t);
-    let iy1 = this.lerp(this.y1, this.y2, t);
-    const iy2 = this.lerp(this.y2, this.y3, t);
+    let iy0 = Bezier.lerp_(this.y0, this.y1, t);
+    let iy1 = Bezier.lerp_(this.y1, this.y2, t);
+    const iy2 = Bezier.lerp_(this.y2, this.y3, t);
 
     // Step two - from 3 points to 2
-    iy0 = this.lerp(iy0, iy1, t);
-    iy1 = this.lerp(iy1, iy2, t);
+    iy0 = Bezier.lerp_(iy0, iy1, t);
+    iy1 = Bezier.lerp_(iy1, iy2, t);
 
     // Final step - last point
-    return this.lerp(iy0, iy1, t);
+    return Bezier.lerp_(iy0, iy1, t);
   }
 
   /**
@@ -231,8 +231,9 @@ class Bezier {
    * @param {number} b A number.
    * @param {number} x The proportion between a and b.
    * @return {number} The interpolated value between a and b.
+   * @private
    */
-  lerp(a, b, x) {
+  static lerp_(a, b, x) {
     return a + x * (b - a);
   }
 }
