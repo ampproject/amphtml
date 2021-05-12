@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {rethrowAsync} from '../core/error';
+import {tryCallback} from '../core/error';
 
 const AMP_CLASS = 'i-amphtml-element';
 const DEEP = true;
@@ -92,7 +92,7 @@ export function forAllWithin(
 function forAllWithinInternal(container, includeSelf, deep, callback) {
   if (includeSelf && container.classList.contains(AMP_CLASS)) {
     const ampContainer = /** @type {!AmpElement} */ (container);
-    callCallback(callback, ampContainer);
+    tryCallback(callback, ampContainer);
     if (!deep) {
       // Also schedule amp-element that is a placeholder for the element.
       const placeholder = ampContainer.getPlaceholder();
@@ -114,7 +114,7 @@ function forAllWithinInternal(container, includeSelf, deep, callback) {
     const descendant = /** @type {!AmpElement} */ (descendants[i]);
     if (deep) {
       // In deep search all elements will be covered.
-      callCallback(callback, descendant);
+      tryCallback(callback, descendant);
     } else {
       // Breadth-first search. Rely on the `getElementsByClassName` DOM order
       // to ignore DOM subtrees already covered.
@@ -128,20 +128,8 @@ function forAllWithinInternal(container, includeSelf, deep, callback) {
       }
       if (!covered) {
         seen.push(descendant);
-        callCallback(callback, descendant);
+        tryCallback(callback, descendant);
       }
     }
-  }
-}
-
-/**
- * @param {function(!AmpElement)} callback
- * @param {!AmpElement} element
- */
-function callCallback(callback, element) {
-  try {
-    callback(element);
-  } catch (e) {
-    rethrowAsync(e);
   }
 }

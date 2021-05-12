@@ -16,8 +16,8 @@
 
 import {computedStyle} from '../style';
 import {remove} from '../core/types/array';
-import {rethrowAsync} from '../core/error';
 import {toWin} from '../types';
+import {tryCallback} from '../core/error';
 
 /** @enum {number} */
 const Type = {
@@ -204,7 +204,7 @@ function computeAndCall(type, callback, entry) {
     const {width, height} = contentRect;
     /** @type {!../layout-rect.LayoutSizeDef} */
     const size = {width, height};
-    callCallbackNoInline(callback, size);
+    tryCallback(callback, size);
   } else if (type == Type.BORDER_BOX) {
     const {borderBoxSize: borderBoxSizeArray} = entry;
     /** @type {!ResizeObserverSize} */
@@ -241,18 +241,6 @@ function computeAndCall(type, callback, entry) {
         blockSize,
       });
     }
-    callCallbackNoInline(callback, borderBoxSize);
-  }
-}
-
-/**
- * @param {function(?)} callback
- * @param {?} value
- */
-function callCallbackNoInline(callback, value) {
-  try {
-    callback(value);
-  } catch (e) {
-    rethrowAsync(e);
+    tryCallback(callback, borderBoxSize);
   }
 }

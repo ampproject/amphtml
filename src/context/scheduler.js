@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {rethrowAsync} from '../core/error';
-
 /**
  * Creates a scheduling function that executes the callback based on the
  * scheduler, but only one task at a time.
@@ -41,20 +39,4 @@ export function throttleTail(handler, defaultScheduler = null) {
     }
   };
   return scheduleIfNotScheduled;
-}
-
-/**
- * Executes the provided callback in a try/catch and rethrows any errors
- * asynchronously. To be used by schedules to avoid errors interrupting
- * queues.
- *
- * @param {function():*} callback
- * @return {*}
- */
-export function tryCallback(callback) {
-  try {
-    return callback();
-  } catch (e) {
-    rethrowAsync(e);
-  }
 }

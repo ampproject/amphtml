@@ -28,7 +28,7 @@ import {
 } from './providers/fx-provider';
 import {iterateCursor} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
-import {rethrowAsync} from '../../../src/core/error';
+import {tryCallback} from '../../../src/core/error';
 
 const TAG = 'amp-fx-collection';
 
@@ -69,11 +69,7 @@ export class AmpFxCollection {
       }
 
       // Don't break for all components if only a subset are misconfigured.
-      try {
-        this.register_(element);
-      } catch (e) {
-        rethrowAsync(e);
-      }
+      tryCallback(() => this.register_(element));
     });
   }
 
