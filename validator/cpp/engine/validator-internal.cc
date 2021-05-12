@@ -5575,14 +5575,6 @@ void ReferencePointMatcher::ExitParentTag(const Context& context,
   }
 }
 
-// This is a prototype from which new validation result messages get
-// copied from for initialization.
-ValidationResult CreateResultPrototype(const ParsedValidatorRules& rules) {
-  ValidationResult prototype;
-  prototype.set_spec_file_revision(rules.SpecFileRevision());
-  return prototype;
-}
-
 // Makes Singleton ParsedValidatorRules non destructible.
 // TSAN throw race condition errors when ~ParsedValidatorRules destructor is
 // called.
@@ -5626,8 +5618,7 @@ class Validator {
   Validator(const ParsedValidatorRules* rules, int max_errors = -1)
       : rules_(rules),
         max_errors_(max_errors),
-        context_(rules_, max_errors_),
-        result_prototype_(CreateResultPrototype(*rules_)) {}
+        context_(rules_, max_errors_) {}
 
   ValidationResult Validate(std::string_view html) {
     Clear();
@@ -5853,7 +5844,7 @@ class Validator {
   // to parse multiple documents, so in case a new document arrives
   // we clear out the state.
   void Clear() {
-    result_ = result_prototype_;
+    result_.Clear();
     context_ = Context(rules_, max_errors_);
   }
 
@@ -5969,7 +5960,6 @@ class Validator {
   Context context_;
   htmlparser::ParseAccounting parse_accounting_;
   ValidationResult result_;
-  const ValidationResult result_prototype_;
   Validator(const Validator&) = delete;
   Validator& operator=(const Validator&) = delete;
 };
