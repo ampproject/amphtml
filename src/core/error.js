@@ -87,7 +87,7 @@ export function rethrowAsync(var_args) {
  * asynchronously.
  *
  * @param {function(...*):T} callback
- * @param {...*} var_args
+ * @param {...*} args
  * @return {T}
  * @template T
  */
