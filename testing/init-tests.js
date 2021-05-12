@@ -54,10 +54,6 @@ import PreactEnzyme from 'enzyme-adapter-preact-pure';
  * TODO(wg-infra, #23837): Further refactor and clean up this file.
  */
 
-// Used to clean up global state between tests.
-let initialGlobalState;
-let initialWindowState;
-
 // Increase the before/after each timeout since certain times they have timedout
 // during the normal 2000 allowance.
 const BEFORE_AFTER_TIMEOUT = 5000;
@@ -116,8 +112,6 @@ beforeEach(function () {
   maybeStubConsoleInfoLogWarn();
   preventAsyncErrorThrows();
   warnForConsoleError();
-  initialGlobalState = Object.keys(global);
-  initialWindowState = Object.keys(window);
 });
 
 function resetTestingState() {
@@ -138,8 +132,6 @@ function resetTestingState() {
  */
 afterEach(function () {
   setTestRunner(this);
-  const globalState = Object.keys(global);
-  const windowState = Object.keys(window);
   restoreConsoleSandbox();
   restoreConsoleError();
   restoreAsyncErrorThrows();
@@ -161,28 +153,6 @@ afterEach(function () {
   window.context = undefined;
   window.__AMP_MODE = undefined;
   delete window.document['__AMPDOC'];
-
-  if (windowState.length != initialWindowState.length) {
-    for (let i = initialWindowState.length; i < windowState.length; ++i) {
-      if (window[windowState[i]]) {
-        delete window[windowState[i]];
-      }
-    }
-  }
-
-  if (initialGlobalState.length != globalState.length) {
-    for (let i = initialGlobalState.length; i < globalState.length; ++i) {
-      if (global[globalState[i]]) {
-        delete global[globalState[i]];
-      }
-    }
-  }
-  if (!/native/.test(window.setTimeout)) {
-    throw new Error(
-      'You likely forgot to restore sinon timers ' +
-        '(installed via sandbox.useFakeTimers).'
-    );
-  }
   setDefaultBootstrapBaseUrlForTesting(null);
   resetAccumulatedErrorMessagesForTesting();
   resetExperimentTogglesForTesting(window);
