@@ -30,8 +30,7 @@ export function assign(target, var_args) {
   }
 
   const output = Object(target);
-  for (let i = 1; i < arguments.length; i++) {
-    const source = arguments[i];
+  for (const source of arguments) {
     if (source != null) {
       for (const key in source) {
         if (hasOwnProperty.call(source, key)) {
