@@ -220,7 +220,7 @@ const forbiddenTermsGlobal = {
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
       'src/service/ampdoc-impl.js',
-      'testing/_init_tests.js',
+      'testing/init-tests.js',
       'testing/describes.js',
       'testing/iframe.js',
     ],
@@ -334,7 +334,7 @@ const forbiddenTermsGlobal = {
       'src/log.js',
       'src/web-worker/web-worker.js',
       'tools/experiments/experiments.js',
-      'testing/_init_tests.js',
+      'testing/init-tests.js',
     ],
   },
   'parseUrlWithA': {
@@ -463,7 +463,7 @@ const forbiddenTermsGlobal = {
       'src/experiments.js',
       'src/service/cid-impl.js',
       'src/service/storage-impl.js',
-      'testing/_init_tests.js',
+      'testing/init-tests.js',
       'testing/fake-dom.js',
     ],
   },
@@ -628,7 +628,7 @@ const forbiddenTermsGlobal = {
       'src/experiments.js',
       'src/mode.js',
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
-      'testing/_init_tests.js',
+      'testing/init-tests.js',
       'tools/experiments/experiments.js',
     ],
   },
@@ -664,7 +664,7 @@ const forbiddenTermsGlobal = {
       'Use of `this.skip()` is forbidden in test files. Use ' +
       '`this.skipTest()` from within a `before()` block instead. See #17245.',
     checkInTestFolder: true,
-    allowlist: ['testing/_init_tests.js'],
+    allowlist: ['testing/init-tests.js'],
   },
   '[^\\.]makeBodyVisible\\(': {
     message:
@@ -702,7 +702,7 @@ const forbiddenTermsGlobal = {
       'build-system/server/app-index/test/test-self.js',
       'build-system/server/app-index/test/test-template.js',
       'build-system/server/app-index/test/test.js',
-      'testing/_init_tests.js',
+      'testing/init-tests.js',
       'test/e2e/test-controller-promise.js',
       'test/e2e/test-expect.js',
       'validator/js/engine/amp4ads-parse-css_test.js',
