@@ -20,7 +20,7 @@ import '../src/polyfills';
 import './setup_chai_sinon';
 
 import * as coreError from '../src/core/error';
-import * as describes from '../testing/describes';
+import * as describes from './describes';
 import {Services} from '../src/services';
 import {TestConfig} from './test-config';
 import {activateChunkingForTesting} from '../src/chunk';
@@ -32,7 +32,7 @@ import {
   installRuntimeServices,
 } from '../src/service/core-services';
 import {installDocService} from '../src/service/ampdoc-impl';
-import {installYieldIt} from '../testing/yield';
+import {installYieldIt} from './yield';
 import {removeElement} from '../src/dom';
 import {
   reportError,
@@ -64,46 +64,45 @@ const originalConsoleError = console /*OK*/.error;
 let initialGlobalState;
 let initialWindowState;
 
-// All exposed describes.
-global.describes = describes;
-
 // Increase the before/after each timeout since certain times they have timedout
 // during the normal 2000 allowance.
 const BEFORE_AFTER_TIMEOUT = 5000;
 
-// Needs to be called before the custom elements are first made.
-beforeTest();
-adoptWithMultidocDeps(window);
-configureEnzyme({adapter: new PreactEnzyme()});
+// This is the entry point for all AMP unit and integration tests.
+initializeTests();
 
-// Override AMP.extension to buffer extension installers.
 /**
- * @param {string} name
- * @param {string} version
- * @param {function(!Object)} installer
- * @const
+ * Initializes the global state required by all AMP unit and integration tests.
  */
-global.AMP.extension = function (name, version, installer) {
-  describes.bufferExtension(`${name}:${version}`, installer);
-};
+function initializeTests() {
+  // Allow it() tests to call yield and allow pending promises to resolve.
+  installYieldIt(it);
 
-// Make amp section in karma config readable by tests.
-if (parent.karma && !parent.__karma__) {
-  parent.__karma__ = parent.karma;
+  // Make describe() and it() globally configurable.
+  describe.configure = () => new TestConfig(describe);
+  it.configure = () => new TestConfig(it);
+
+  // Make describes() globally available.
+  global.describes = describes;
+
+  // Make the `amp` section of the Karma config readable by tests.
+  // The regular test runner uses `karma`, while the debugger uses `__karma__ `.
+  if (parent.karma && !parent.__karma__) {
+    parent.__karma__ = parent.karma;
+  }
+  window.ampTestRuntimeConfig = parent.__karma__
+    ? parent.__karma__.config.amp
+    : {};
+
+  // These steps need to be run before any custom elements are initialized.
+  resetTestingState();
+  adoptWithMultidocDeps(window);
+  configureEnzyme({adapter: new PreactEnzyme()});
+
+  // Override AMP.extension to buffer extension installers.
+  global.AMP.extension = (name, version, installer) =>
+    describes.bufferExtension(`${name}:${version}`, installer);
 }
-window.ampTestRuntimeConfig = parent.__karma__
-  ? parent.__karma__.config.amp
-  : {};
-
-describe.configure = function () {
-  return new TestConfig(describe);
-};
-
-installYieldIt(it);
-
-it.configure = function () {
-  return new TestConfig(it);
-};
 
 /**
  * Prints a warning when a console error is detected during a test.
@@ -218,7 +217,7 @@ function maybeStubConsoleInfoLogWarn() {
 }
 
 /**
- * Used to precent asynchronous throwing of errors during each test.
+ * Used to prevent asynchronous throwing of errors during each test.
  */
 function preventAsyncErrorThrows() {
   self.stubAsyncErrorThrows = function () {
@@ -249,7 +248,7 @@ before(function () {
 
 beforeEach(function () {
   this.timeout(BEFORE_AFTER_TIMEOUT);
-  beforeTest();
+  resetTestingState();
   testName = this.currentTest.fullTitle();
   maybeStubConsoleInfoLogWarn();
   preventAsyncErrorThrows();
@@ -258,7 +257,7 @@ beforeEach(function () {
   initialWindowState = Object.keys(window);
 });
 
-function beforeTest() {
+function resetTestingState() {
   activateChunkingForTesting();
   window.__AMP_MODE = undefined;
   window.context = undefined;

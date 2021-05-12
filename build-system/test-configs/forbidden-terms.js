@@ -702,7 +702,6 @@ const forbiddenTermsGlobal = {
       'build-system/server/app-index/test/test-self.js',
       'build-system/server/app-index/test/test-template.js',
       'build-system/server/app-index/test/test.js',
-      'testing/init-tests.js',
       'test/e2e/test-controller-promise.js',
       'test/e2e/test-expect.js',
       'validator/js/engine/amp4ads-parse-css_test.js',
