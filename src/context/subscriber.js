@@ -19,6 +19,9 @@ import {arrayOrSingleItemToArray} from '../core/types/array';
 import {throttleTail} from './scheduler';
 import {tryCallback} from '../core/error';
 
+// typedef imports
+import {ContextPropDef} from './prop.type';
+
 const EMPTY_ARRAY = [];
 const EMPTY_FUNC = () => {};
 
@@ -31,7 +34,7 @@ const EMPTY_FUNC = () => {};
  * - A subscriber can optionally return a cleanup function.
  *
  * @param {!Node} node
- * @param {!ContextProp|!Array<!ContextProp>} deps
+ * @param {!ContextPropDef|!Array<!ContextPropDef>} deps
  * @param {function(...?)} callback
  */
 export function subscribe(node, deps, callback) {
@@ -61,18 +64,18 @@ export function unsubscribe(node, callback) {
  */
 export class Subscriber {
   /**
-   * @param {!./node.ContextNode} contextNode
+   * @param {!ContextNode} contextNode
    * @param {function(...?)} func
-   * @param {!Array<!ContextProp>} deps
+   * @param {!Array<!ContextPropDef>} deps
    */
   constructor(contextNode, func, deps) {
-    /** @package @const {!./node.ContextNode} */
+    /** @package @const {!ContextNode} */
     this.contextNode = contextNode;
 
     /** @private @const {!Function} */
     this.func_ = func;
 
-    /** @private @const {!Array<!ContextProp>} */
+    /** @private @const {!Array<!ContextPropDef>} */
     this.deps_ = deps;
 
     /**
