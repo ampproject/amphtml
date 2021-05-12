@@ -112,7 +112,10 @@ export class ContextNode {
           // becomes available.
           return ContextNode.get(n);
         }
-        if (nodeType == ELEMENT_NODE && n.tagName.startsWith(AMP_PREFIX)) {
+        if (
+          nodeType == ELEMENT_NODE &&
+          /** @type {!Element} */ (n).tagName.startsWith(AMP_PREFIX)
+        ) {
           // An AMP node will always have a context node backing it at some
           // point.
           return ContextNode.get(n);
@@ -396,15 +399,15 @@ export class ContextNode {
    * of factory is important to reduce bundling costs for context node.
    *
    * @param {*} id
-   * @param {function(new:./subscriber.Subscriber, function(...?), !Array<!ContextProp>):void} constr
+   * @param {typeof ./subscriber.Subscriber} Ctor
    * @param {!Function} func
    * @param {!Array<!ContextProp>} deps
    */
-  subscribe(id, constr, func, deps) {
+  subscribe(id, Ctor, func, deps) {
     const subscribers = this.subscribers_ || (this.subscribers_ = new Map());
     let subscriber = subscribers.get(id);
     if (!subscriber) {
-      subscriber = new constr(this, func, deps);
+      subscriber = new Ctor(this, func, deps);
       subscribers.set(id, subscriber);
     }
   }

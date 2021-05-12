@@ -53,7 +53,7 @@ let InputDef;
  *   value: *,
  *   pending: !Pending,
  *   counter: number,
- *   depsValues: !Array,
+ *   depValues: !Array,
  *   parentValue: *,
  *   parentContextNode: ?./node.ContextNode,
  *   ping: function(boolean),
