@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/** @fileoverview helpers for dealing with dates and times. */
+
+/**
+ * A timestamp, such as that produced by `Date.now()`.
+ * @typedef {number}
+ */
+export let Timestamp;
+
 /**
  * Parses the date using the `Date.parse()` rules. Additionally supports the
  * keyword "now" that indicates the "current date/time". Returns either a

@@ -15,6 +15,7 @@
  */
 
 import {Deferred} from './promise';
+import {Timestamp} from '../types/date';
 import {map} from '../types/object';
 
 /**
@@ -29,7 +30,7 @@ export class Signals {
     /**
      * A mapping from a signal name to the signal response: either time or
      * an error.
-     * @private @const {!Object<string, (Timestamp|!Error)>}
+     * @private @const {!Object<string, (!Timestamp|!Error)>}
      */
     this.map_ = map();
 
@@ -38,7 +39,7 @@ export class Signals {
      * Only allocated when promise has been requested.
      * @private {?Object<string, {
      *   promise: !Promise,
-     *   resolve: (function(Timestamp)|undefined),
+     *   resolve: (function(!Timestamp)|undefined),
      *   reject: (function(!Error)|undefined)
      * }>}
      */
@@ -60,7 +61,7 @@ export class Signals {
    * Returns the promise that's resolved when the signal is triggered. The
    * resolved value is the time of the signal.
    * @param {string} name
-   * @return {!Promise<Timestamp>}
+   * @return {!Promise<!Timestamp>}
    */
   whenSignal(name) {
     let promiseStruct = this.promiseMap_ && this.promiseMap_[name];
@@ -91,7 +92,7 @@ export class Signals {
    * optional; if not provided, the current time is used. The associated
    * promise is resolved with the resulting Timestamp.
    * @param {string} name
-   * @param {Timestamp=} opt_time
+   * @param {!Timestamp=} opt_time
    */
   signal(name, opt_time) {
     if (this.map_[name] != null) {
