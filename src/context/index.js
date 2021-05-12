@@ -15,7 +15,7 @@
  */
 
 import {ContextNode} from './node';
-export {contextPropDef} from './prop';
+export {contextProp} from './prop';
 export {subscribe, unsubscribe} from './subscriber';
 
 // typedef imports
