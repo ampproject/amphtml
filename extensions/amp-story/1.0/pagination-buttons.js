@@ -346,16 +346,12 @@ export class PaginationButtons {
     }
 
     if (pageIndex === totalPages - 1) {
-      this.ampStory_.hasBookend().then((hasBookend) => {
-        const viewer = Services.viewerForDoc(this.ampStory_.element);
-        if (!hasBookend) {
-          if (viewer.hasCapability('swipe')) {
-            this.forwardButton_.updateState(ForwardButtonStates.NEXT_STORY);
-          } else {
-            this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
-          }
-        }
-      });
+      const viewer = Services.viewerForDoc(this.ampStory_.element);
+      if (viewer.hasCapability('swipe')) {
+        this.forwardButton_.updateState(ForwardButtonStates.NEXT_STORY);
+      } else {
+        this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
+      }
     }
   }
 
