@@ -112,7 +112,7 @@ class Bezier {
    */
   solveYValueFromXValue(xVal) {
     return Bezier.getPointY_(
-      this.solvePositionFromXValue(xVal),
+      Bezier.solvePositionFromXValue_(xVal, this.x0, this.x1, this.x2, this.x3),
       this.y0,
       this.y1,
       this.y2,
@@ -126,14 +126,19 @@ class Bezier {
    * As such, the following should always be true up to some small epsilon:
    * t ~ solvePositionFromXValue(getPointX(t)) for t in [0, 1].
    * @param {number} xVal The x coordinate of the point to find on the curve.
+   * @param {number} x0 X coordinate of the start point.
+   * @param {number} x1 X coordinate of the first control point.
+   * @param {number} x2 X coordinate of the second control point.
+   * @param {number} x3 X coordinate of the end point.
    * @return {number} The position t.
+   * @private
    */
-  solvePositionFromXValue(xVal) {
+  static solvePositionFromXValue_(xVal, x0, x1, x2, x3) {
     // Desired precision on the computation.
     const epsilon = 1e-6;
 
     // Initial estimate of t using linear interpolation.
-    let t = (xVal - this.x0) / (this.x3 - this.x0);
+    let t = (xVal - x0) / (x3 - x0);
     if (t <= 0) {
       return 0;
     } else if (t >= 1) {
@@ -145,11 +150,9 @@ class Bezier {
     let tMax = 1;
     let value = 0;
     for (let i = 0; i < 8; i++) {
-      value = Bezier.getPointX_(t, this.x0, this.x1, this.x2, this.x3);
+      value = this.getPointX_(t, x0, x1, x2, x3);
       const derivative =
-        (Bezier.getPointX_(t + epsilon, this.x0, this.x1, this.x2, this.x3) -
-          value) /
-        epsilon;
+        (this.getPointX_(t + epsilon, x0, x1, x2, x3) - value) / epsilon;
       if (Math.abs(value - xVal) < epsilon) {
         return t;
       } else if (Math.abs(derivative) < epsilon) {
@@ -175,7 +178,7 @@ class Bezier {
         tMax = t;
         t = (t + tMin) / 2;
       }
-      value = Bezier.getPointX_(t, this.x0, this.x1, this.x2, this.x3);
+      value = this.getPointX_(t, x0, x1, x2, x3);
     }
     return t;
   }
