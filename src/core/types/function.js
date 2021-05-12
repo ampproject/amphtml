@@ -58,16 +58,16 @@ export function once(fn) {
  */
 export function throttle(win, callback, minInterval) {
   let locker = 0;
-  /** @type {?Array<*>} */
+  /** @type {?Array<T>} */
   let nextCallArgs = null;
 
-  /** @param {...*} args */
-  function fire(...args) {
+  /** @param {!Array<T>} args */
+  function fire(args) {
     nextCallArgs = null;
     // Lock the fire for minInterval milliseconds
     locker = win.setTimeout(waiter, minInterval);
 
-    callback(...args);
+    callback.apply(null, args);
   }
 
   /** Waiter function */
@@ -75,7 +75,7 @@ export function throttle(win, callback, minInterval) {
     locker = 0;
     // If during the period there're invocations queued up, fire once.
     if (nextCallArgs) {
-      fire(...nextCallArgs);
+      fire(nextCallArgs);
     }
   }
 
@@ -83,7 +83,7 @@ export function throttle(win, callback, minInterval) {
     if (locker) {
       nextCallArgs = args;
     } else {
-      fire(...args);
+      fire(args);
     }
   };
 }
