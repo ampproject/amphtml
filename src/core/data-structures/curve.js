@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-// Imported just for the side effect of getting the `types` it exports into
-// the type system during compile time.
-import {NormTimeDef} from '../types/date';
 import {isString} from '../types';
 import {once} from '../types/function';
+
+// typedef imports
+import {NormTimeDef} from '../types/date';
 
 /**
  * A CurveDef is a function that returns a normtime value (0 to 1) for another
