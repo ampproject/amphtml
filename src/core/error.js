@@ -87,13 +87,13 @@ export function rethrowAsync(var_args) {
  * asynchronously.
  *
  * @param {function(...*):T} callback
- * @param {...*} args
+ * @param {...*} var_args
  * @return {T}
  * @template T
  */
-export function tryCallback(callback, ...args) {
+export function tryCallback(callback, var_args) {
   try {
-    return callback.apply(null, args);
+    return callback.apply(null, Array.prototype.slice.call(arguments, 1));
   } catch (e) {
     rethrowAsync(e);
   }
