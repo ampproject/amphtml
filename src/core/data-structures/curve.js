@@ -223,17 +223,37 @@ export const Curves = {
     return n;
   },
 
-  /** ease */
-  EASE: once(bezierCurve)(0.25, 0.1, 0.25, 1.0),
+  /**
+   * ease
+   * @type {!CurveDef}
+   */
+  EASE(xVal) {
+    return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.25, 0.1, 0.25, 1.0, 1, 1);
+  },
 
-  /** ease-in: slow out, fast in */
-  EASE_IN: once(bezierCurve)(0.42, 0.0, 1.0, 1.0),
+  /**
+   * ease-in: slow out, fast in
+   * @type {!CurveDef}
+   */
+  EASE_IN(xVal) {
+    return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.42, 0.0, 1.0, 1.0, 1, 1);
+  },
 
-  /** ease-out: fast out, slow in */
-  EASE_OUT: once(bezierCurve)(0.0, 0.0, 0.58, 1.0),
+  /**
+   * ease-out: fast out, slow in
+   * @type {!CurveDef}
+   */
+  EASE_OUT(xVal) {
+    return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.0, 0.0, 0.58, 1.0, 1, 1);
+  },
 
-  /** ease-in-out */
-  EASE_IN_OUT: once(bezierCurve)(0.42, 0.0, 0.58, 1.0),
+  /**
+   * ease-in-out
+   * @type {!CurveDef}
+   */
+  EASE_IN_OUT(xVal) {
+    return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.42, 0.0, 0.58, 1.0, 1, 1);
+  },
 };
 
 /**
