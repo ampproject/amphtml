@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export {assert as pureDevAssert} from './dev';
-export {assert as pureUserAssert} from './user';
+export * from './dev';
+export * from './user';

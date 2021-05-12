@@ -15,7 +15,7 @@
  */
 
 import {Deferred} from '../core/data-structures/promise';
-import {dev, devAssert} from '../log';
+import {devAssert, devAssertElement} from '../core/assert/dev';
 import {removeNoScriptElements} from './dom-writer';
 
 /**
@@ -86,7 +86,7 @@ export class DomTransformStream {
     // <body> is newly formed.
     if (!this.detachedBody_ && detachedDoc.body) {
       this.detachedBody_ = detachedDoc.body;
-      this.headResolver_(dev().assertElement(detachedDoc.head));
+      this.headResolver_(devAssertElement(detachedDoc.head));
     }
 
     // If bodyTransfer has already been called, keep transferring on new chunks.
@@ -119,7 +119,7 @@ export class DomTransformStream {
    * @return {!Promise} resolves when doc has been fully transferred.
    */
   transferBody(targetBody) {
-    dev().assertElement(
+    devAssertElement(
       targetBody,
       'No target body given to DomTransformStream.transferBody'
     );
@@ -162,7 +162,7 @@ export class DomTransformStream {
       return transferThrottle(() => {
         this.currentChunkTransferPromise_ = null;
         const targetBody = resolvedElements[0];
-        removeNoScriptElements(dev().assertElement(this.detachedBody_));
+        removeNoScriptElements(devAssertElement(this.detachedBody_));
         while (this.detachedBody_.firstChild) {
           targetBody.appendChild(this.detachedBody_.firstChild);
         }

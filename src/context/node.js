@@ -15,7 +15,7 @@
  */
 
 import {Values} from './values';
-import {pureDevAssert as devAssert} from '../core/assert';
+import {devAssert} from '../core/assert';
 import {getMode} from '../mode';
 import {pushIfNotExist, removeItem} from '../core/types/array';
 import {throttleTail} from './scheduler';

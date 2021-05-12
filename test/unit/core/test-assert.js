@@ -15,10 +15,7 @@
  */
 
 import {USER_ERROR_SENTINEL} from '../../../src/core/error-message-helpers';
-import {
-  pureDevAssert as devAssert,
-  pureUserAssert as userAssert,
-} from '../../../src/core/assert';
+import {devAssert, userAssert} from '../../../src/core/assert';
 
 describes.sandboxed('assertions', {}, () => {
   describe('devAssert', () => {

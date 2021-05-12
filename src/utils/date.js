@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  pureDevAssert as devAssert,
-  pureUserAssert as userAssert,
-} from '../core/assert';
+import {devAssert, userAssert} from '../core/assert';
 import {parseDate} from '../core/types/date';
 
 /** Map from attribute names to their parsers. */
