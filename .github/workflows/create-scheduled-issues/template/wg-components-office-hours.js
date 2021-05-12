@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+const { getGoogleCalendarAddEventLink } = require("../utils");
+
+const descriptionUrl = 'https://go.amp.dev/wg-components-hours-announcement';
+const vcUrl = 'https://go.amp.dev/wg-components-hours';
+
+const sessionDurationHours = 1;
+
 module.exports = {
   frequency: {
     // Third (3) Tuesday (2) of every month.
@@ -21,16 +28,31 @@ module.exports = {
   },
   upcoming: 3,
   timeRotationStartYyyyMmDd: '2021-04-20',
-  timeRotation: [['Americas', '18:00']],
+  timeRotation: [['Americas', '19:00']],
+
   labels: ['Type: Office Hours', 'WG: components'],
 
-  createTitle({yyyy, mm, dd, hours, minutes, region}) {
-    return `wg-components Office Hours ${yyyy}-${mm}-${dd} ${hours}:${minutes} UTC (${region})`;
+  createTitle({yyyy, mm, dd, time}) {
+    return `Office Hours (wg-components) ${yyyy}-${mm}-${dd} ${time} UTC`;
   },
 
-  createBody({yyyy, mm, dd, hours, minutes}) {
+  createBody({yyyy, mm, dd, hours, time, minutes}) {
+    const timeUrl = `https://www.timeanddate.com/worldclock/meeting.html?year=${yyyy}&month=${mm}&day=${dd}&iv=0`;
+    const calendarUrl = getGoogleCalendarAddEventLink(
+      yyyy,
+      mm,
+      dd,
+      hours,
+      minutes,
+      sessionDurationHours,
+      'AMP Office Hours (wg-components)',
+      vcUrl
+    );
     return `
-TODO
+Time: [${time} UTC](${timeUrl}) ([add to Google Calendar](${calendarUrl}))
+Location: [Video conference via Google Meet](${vcUrl})
+
+We hold monthly [Office Hours](${descriptionUrl}).
 `;
   },
 };
