@@ -26,9 +26,7 @@ import {getLocalizationService} from './amp-story-localization-service';
 import {getRequestService} from './amp-story-request-service';
 import {isObject} from '../../../src/core/types';
 import {listen} from '../../../src/event-helper';
-import {px, setImportantStyles} from '../../../src/style';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
-import {throttle} from '../../../src/core/types/function';
 
 /**
  * Maps share provider type to visible name.
@@ -49,18 +47,6 @@ const SHARE_PROVIDER_LOCALIZED_STRING_ID = map({
   'whatsapp': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP,
   'sms': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SMS,
 });
-
-/**
- * Default left/right padding for share buttons.
- * @private @const {number}
- */
-const DEFAULT_BUTTON_PADDING = 16;
-
-/**
- * Minimum left/right padding for share buttons.
- * @private @const {number}
- */
-const MIN_BUTTON_PADDING = 10;
 
 /**
  * Key for share providers in config.
@@ -125,9 +111,6 @@ function buildLinkShareItemTemplate(el) {
   };
 }
 
-/** @private @const {string} */
-const SCROLLABLE_CLASSNAME = 'i-amphtml-story-share-widget-scrollable';
-
 /**
  * @param {!JsonObject=} opt_params
  * @return {!JsonObject}
@@ -164,15 +147,17 @@ function buildProvider(doc, shareType, opt_params) {
     /** @type {!Array<!./simple-template.ElementDef>} */ ([
       {
         tag: 'amp-social-share',
-        attrs: /** @type {!JsonObject} */ (Object.assign(
-          dict({
-            'width': 48,
-            'height': 48,
-            'class': 'i-amphtml-story-share-icon',
-            'type': shareType,
-          }),
-          buildProviderParams(opt_params)
-        )),
+        attrs: /** @type {!JsonObject} */ (
+          Object.assign(
+            dict({
+              'width': 48,
+              'height': 48,
+              'class': 'i-amphtml-story-share-icon',
+              'type': shareType,
+            }),
+            buildProviderParams(opt_params)
+          )
+        ),
         children: [
           {
             tag: 'span',

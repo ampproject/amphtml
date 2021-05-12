@@ -1582,7 +1582,9 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    const videoEls = /** @type {!Array<!HTMLMediaElement>} */ (this.getAllVideos_());
+    const videoEls = /** @type {!Array<!HTMLMediaElement>} */ (
+      this.getAllVideos_()
+    );
     for (let i = 0; i < videoEls.length; i++) {
       this.startMeasuringVideoPerformance_(videoEls[i]);
     }

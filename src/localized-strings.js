@@ -149,9 +149,11 @@ export let LocalizedStringBundleDef;
  * @return {!LocalizedStringBundleDef}
  */
 function cloneLocalizedStringBundle(localizedStringBundle) {
-  return /** @type {!LocalizedStringBundleDef} */ (parseJson(
-    JSON.stringify(/** @type {!JsonObject} */ (localizedStringBundle))
-  ));
+  return /** @type {!LocalizedStringBundleDef} */ (
+    parseJson(
+      JSON.stringify(/** @type {!JsonObject} */ (localizedStringBundle))
+    )
+  );
 }
 
 /**
@@ -170,7 +172,9 @@ export function createPseudoLocale(localizedStringBundle, localizationFn) {
   );
 
   Object.keys(pseudoLocaleStringBundle).forEach((localizedStringIdAsStr) => {
-    const localizedStringId = /** @type {!LocalizedStringId} */ (localizedStringIdAsStr);
+    const localizedStringId = /** @type {!LocalizedStringId} */ (
+      localizedStringIdAsStr
+    );
     pseudoLocaleStringBundle[localizedStringId].string = localizationFn(
       localizedStringBundle[localizedStringId].string
     );

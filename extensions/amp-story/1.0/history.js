@@ -67,8 +67,9 @@ export function getHistoryState(win, stateName) {
     state = getLocalStorageState(win);
   }
   if (state) {
-    return /** @type {string|boolean|Array<string>|null} */ (state[stateName] ||
-      null);
+    return /** @type {string|boolean|Array<string>|null} */ (
+      state[stateName] || null
+    );
   }
   return null;
 }

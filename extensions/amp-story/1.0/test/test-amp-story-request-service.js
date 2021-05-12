@@ -17,7 +17,6 @@
 import {
   AmpStoryRequestService,
   CONFIG_SRC_ATTRIBUTE_NAME,
-  CREDENTIALS_ATTRIBUTE_NAME,
 } from '../amp-story-request-service';
 
 describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {

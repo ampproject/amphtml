@@ -20,7 +20,6 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
-import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {EventType, dispatch} from './events';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
@@ -320,14 +319,14 @@ export class PaginationButtons {
   onSystemUiIsVisibleStateUpdate_(isVisible) {
     if (isVisible) {
       this.backButton_.updateState(
-        /** @type {!ButtonState_1_0_Def} */ (devAssert(
-          this.backButtonStateToRestore_
-        ))
+        /** @type {!ButtonState_1_0_Def} */ (
+          devAssert(this.backButtonStateToRestore_)
+        )
       );
       this.forwardButton_.updateState(
-        /** @type {!ButtonState_1_0_Def} */ (devAssert(
-          this.forwardButtonStateToRestore_
-        ))
+        /** @type {!ButtonState_1_0_Def} */ (
+          devAssert(this.forwardButtonStateToRestore_)
+        )
       );
     } else {
       this.backButtonStateToRestore_ = this.backButton_.getState();

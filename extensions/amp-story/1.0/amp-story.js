@@ -78,19 +78,13 @@ import {
   childElements,
   childNodes,
   closest,
-  createElementWithAttributes,
   isRTL,
   matches,
   scopedQuerySelector,
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
-import {
-  computedStyle,
-  resetStyles,
-  setImportantStyles,
-  toggle,
-} from '../../../src/style';
+import {computedStyle, setImportantStyles, toggle} from '../../../src/style';
 import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/core/types/function';
 import {dev, devAssert, user} from '../../../src/log';
@@ -868,9 +862,9 @@ export class AmpStory extends AMP.BaseElement {
     // Shows "tap to navigate" hint when swiping.
     gestures.onGesture(SwipeXYRecognizer, (gesture) => {
       const {deltaX, deltaY} = gesture.data;
-      const embedComponent = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
-        StateProperty.INTERACTIVE_COMPONENT_STATE
-      ));
+      const embedComponent = /** @type {InteractiveComponentDef} */ (
+        this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
+      );
       // TODO(enriqe): Move to a separate file if this keeps growing.
       if (
         embedComponent.state !== EmbeddedComponentState.HIDDEN ||
@@ -1092,10 +1086,9 @@ export class AmpStory extends AMP.BaseElement {
       return maybePageId;
     }
 
-    const pages = /**  @type {!Array} */ (getHistoryState(
-      this.win,
-      HistoryState.NAVIGATION_PATH
-    ) || []);
+    const pages = /**  @type {!Array} */ (
+      getHistoryState(this.win, HistoryState.NAVIGATION_PATH) || []
+    );
     const historyPage = lastItem(pages);
     if (historyPage && this.isActualPage_(historyPage)) {
       return historyPage;
@@ -1230,7 +1223,8 @@ export class AmpStory extends AMP.BaseElement {
         return;
       }
 
-      this.areAccessAuthorizationsCompleted_ = accessService.areFirstAuthorizationsCompleted();
+      this.areAccessAuthorizationsCompleted_ =
+        accessService.areFirstAuthorizationsCompleted();
       accessService.onApplyAuthorizations(() =>
         this.onAccessApplyAuthorizations_()
       );
@@ -1563,9 +1557,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   updateNavigationPath_(targetPageId, direction) {
-    const navigationPath = /** @type {!Array<string>} */ (this.storeService_.get(
-      StateProperty.NAVIGATION_PATH
-    ));
+    const navigationPath = /** @type {!Array<string>} */ (
+      this.storeService_.get(StateProperty.NAVIGATION_PATH)
+    );
 
     if (direction === NavigationDirection.PREVIOUS) {
       navigationPath.pop();
@@ -2240,17 +2234,18 @@ export class AmpStory extends AMP.BaseElement {
       .signals()
       .whenSignal(CommonSignals.LOAD_END)
       .then(() => {
-        backgroundAudioEl = /** @type {!HTMLMediaElement} */ (backgroundAudioEl);
+        backgroundAudioEl = /** @type {!HTMLMediaElement} */ (
+          backgroundAudioEl
+        );
         this.mediaPool_.register(backgroundAudioEl);
         return this.mediaPool_.preload(backgroundAudioEl);
       })
       .then(() => {
-        this.backgroundAudioEl_ = /** @type {!HTMLMediaElement} */ (childElement(
-          this.element,
-          (el) => {
+        this.backgroundAudioEl_ = /** @type {!HTMLMediaElement} */ (
+          childElement(this.element, (el) => {
             return el.tagName.toLowerCase() === 'audio';
-          }
-        ));
+          })
+        );
       });
   }
 
@@ -2367,8 +2362,8 @@ export class AmpStory extends AMP.BaseElement {
     let audioMediaElementsCount = this.element.querySelectorAll(
       'amp-audio, [background-audio]'
     ).length;
-    const videoMediaElementsCount = this.element.querySelectorAll('amp-video')
-      .length;
+    const videoMediaElementsCount =
+      this.element.querySelectorAll('amp-video').length;
 
     // The root element (amp-story) might have a background-audio as well.
     if (this.element.hasAttribute('background-audio')) {
@@ -2462,9 +2457,8 @@ export class AmpStory extends AMP.BaseElement {
     const containsMediaElementWithAudio = !!this.element.querySelector(
       'amp-audio, amp-video:not([noaudio]), [background-audio]'
     );
-    const storyHasBackgroundAudio = this.element.hasAttribute(
-      'background-audio'
-    );
+    const storyHasBackgroundAudio =
+      this.element.hasAttribute('background-audio');
 
     this.storeService_.dispatch(
       Action.TOGGLE_STORY_HAS_AUDIO,
@@ -2486,9 +2480,8 @@ export class AmpStory extends AMP.BaseElement {
       'amp-story-grid-layer amp-audio, amp-story-grid-layer amp-video, amp-story-page[background-audio], amp-story-page[auto-advance-after]'
     );
 
-    const storyHasBackgroundAudio = this.element.hasAttribute(
-      'background-audio'
-    );
+    const storyHasBackgroundAudio =
+      this.element.hasAttribute('background-audio');
 
     this.storeService_.dispatch(
       Action.TOGGLE_STORY_HAS_PLAYBACK_UI,
