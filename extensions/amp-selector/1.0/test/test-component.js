@@ -373,7 +373,7 @@ describes.sandboxed('Selector preact component', {}, () => {
 
     describe('single-expand accordion', () => {
       beforeEach(() => {
-        ref = Preact.useRef();
+        ref = Preact.createRef();
         wrapper = mount(
           <Selector ref={ref} defaultValue={['a']}>
             <Option key={1} option="a" index={1}>

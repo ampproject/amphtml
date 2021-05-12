@@ -667,7 +667,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
     beforeEach(() => {
       onExpandStateChange = env.sandbox.spy();
-      ref = Preact.useRef();
+      ref = Preact.createRef();
 
       wrapper = mount(
         <Accordion ref={ref}>
@@ -877,7 +877,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
     describe('single-expand accordion', () => {
       beforeEach(() => {
-        ref = Preact.useRef();
+        ref = Preact.createRef();
         wrapper = mount(
           <Accordion ref={ref} expandSingleSection>
             <AccordionSection key={1} expanded header="header1" id="section1">
