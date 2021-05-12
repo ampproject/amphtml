@@ -111,7 +111,13 @@ class Bezier {
    * @return {number} The y coordinate of the point on the curve.
    */
   solveYValueFromXValue(xVal) {
-    return this.getPointY(this.solvePositionFromXValue(xVal));
+    return Bezier.getPointY_(
+      this.solvePositionFromXValue(xVal),
+      this.y0,
+      this.y1,
+      this.y2,
+      this.y3
+    );
   }
 
   /**
@@ -139,8 +145,11 @@ class Bezier {
     let tMax = 1;
     let value = 0;
     for (let i = 0; i < 8; i++) {
-      value = this.getPointX(t);
-      const derivative = (this.getPointX(t + epsilon) - value) / epsilon;
+      value = Bezier.getPointX_(t, this.x0, this.x1, this.x2, this.x3);
+      const derivative =
+        (Bezier.getPointX_(t + epsilon, this.x0, this.x1, this.x2, this.x3) -
+          value) /
+        epsilon;
       if (Math.abs(value - xVal) < epsilon) {
         return t;
       } else if (Math.abs(derivative) < epsilon) {
@@ -166,7 +175,7 @@ class Bezier {
         tMax = t;
         t = (t + tMin) / 2;
       }
-      value = this.getPointX(t);
+      value = Bezier.getPointX_(t, this.x0, this.x1, this.x2, this.x3);
     }
     return t;
   }
@@ -174,53 +183,63 @@ class Bezier {
   /**
    * Computes the curve's X coordinate at a point between 0 and 1.
    * @param {number} t The point on the curve to find.
+   * @param {number} x0 X coordinate of the start point.
+   * @param {number} x1 X coordinate of the first control point.
+   * @param {number} x2 X coordinate of the second control point.
+   * @param {number} x3 X coordinate of the end point.
    * @return {number} The computed coordinate.
+   * @private
    */
-  getPointX(t) {
+  static getPointX_(t, x0, x1, x2, x3) {
     // Special case start and end.
     if (t == 0) {
-      return this.x0;
+      return x0;
     } else if (t == 1) {
-      return this.x3;
+      return x3;
     }
 
     // Step one - from 4 points to 3
-    let ix0 = Bezier.lerp_(this.x0, this.x1, t);
-    let ix1 = Bezier.lerp_(this.x1, this.x2, t);
-    const ix2 = Bezier.lerp_(this.x2, this.x3, t);
+    let ix0 = this.lerp_(x0, x1, t);
+    let ix1 = this.lerp_(x1, x2, t);
+    const ix2 = this.lerp_(x2, x3, t);
 
     // Step two - from 3 points to 2
-    ix0 = Bezier.lerp_(ix0, ix1, t);
-    ix1 = Bezier.lerp_(ix1, ix2, t);
+    ix0 = this.lerp_(ix0, ix1, t);
+    ix1 = this.lerp_(ix1, ix2, t);
 
     // Final step - last point
-    return Bezier.lerp_(ix0, ix1, t);
+    return this.lerp_(ix0, ix1, t);
   }
 
   /**
    * Computes the curve's Y coordinate at a point between 0 and 1.
    * @param {number} t The point on the curve to find.
+   * @param {number} y0 Y coordinate of the start point.
+   * @param {number} y1 Y coordinate of the first control point.
+   * @param {number} y2 Y coordinate of the second control point.
+   * @param {number} y3 Y coordinate of the end point.
    * @return {number} The computed coordinate.
+   * @private
    */
-  getPointY(t) {
+  static getPointY_(t, y0, y1, y2, y3) {
     // Special case start and end.
     if (t == 0) {
-      return this.y0;
+      return y0;
     } else if (t == 1) {
-      return this.y3;
+      return y3;
     }
 
     // Step one - from 4 points to 3
-    let iy0 = Bezier.lerp_(this.y0, this.y1, t);
-    let iy1 = Bezier.lerp_(this.y1, this.y2, t);
-    const iy2 = Bezier.lerp_(this.y2, this.y3, t);
+    let iy0 = this.lerp_(y0, y1, t);
+    let iy1 = this.lerp_(y1, y2, t);
+    const iy2 = this.lerp_(y2, y3, t);
 
     // Step two - from 3 points to 2
-    iy0 = Bezier.lerp_(iy0, iy1, t);
-    iy1 = Bezier.lerp_(iy1, iy2, t);
+    iy0 = this.lerp_(iy0, iy1, t);
+    iy1 = this.lerp_(iy1, iy2, t);
 
     // Final step - last point
-    return Bezier.lerp_(iy0, iy1, t);
+    return this.lerp_(iy0, iy1, t);
   }
 
   /**
