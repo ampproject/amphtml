@@ -33,6 +33,14 @@ import {
 } from '../src/service/core-services';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installYieldIt} from './yield';
+import {
+  maybeStubConsoleInfoLogWarn,
+  restoreConsoleError,
+  restoreConsoleSandbox,
+  setTestName,
+  setTestRunner,
+  warnForConsoleError,
+} from './console-logging-setup';
 import {removeElement} from '../src/dom';
 import {
   reportError,
@@ -51,14 +59,7 @@ import sinon from 'sinon'; // eslint-disable-line local/no-import
  * TODO(wg-infra, #23837): Further refactor and clean up this file.
  */
 
-// Used to print warnings for unexpected console errors.
-let that;
-let consoleErrorSandbox;
-let testName;
-let expectedAsyncErrors;
 let rethrowAsyncSandbox;
-let consoleInfoLogWarnSandbox;
-const originalConsoleError = console /*OK*/.error;
 
 // Used to clean up global state between tests.
 let initialGlobalState;
@@ -105,118 +106,6 @@ function initializeTests() {
 }
 
 /**
- * Prints a warning when a console error is detected during a test.
- * @param {*} messages One or more error messages
- */
-function printWarning(...messages) {
-  const message = messages.join(' ');
-
-  // Match equal strings.
-  if (expectedAsyncErrors.includes(message)) {
-    expectedAsyncErrors.splice(expectedAsyncErrors.indexOf(message), 1);
-    return;
-  }
-
-  // Match regex.
-  for (let i = 0; i < expectedAsyncErrors.length; i++) {
-    const expectedError = expectedAsyncErrors[i];
-    if (typeof expectedError != 'string') {
-      if (expectedError.test(message)) {
-        expectedAsyncErrors.splice(i, 1);
-        return;
-      }
-    }
-  }
-
-  const errorMessage = message.split('\n', 1)[0]; // First line.
-  const helpMessage =
-    '    The test "' +
-    testName +
-    '"' +
-    ' resulted in a call to console.error. (See above line.)\n' +
-    '    ⤷ If the error is not expected, fix the code that generated ' +
-    'the error.\n' +
-    '    ⤷ If the error is expected (and synchronous), use the following ' +
-    'pattern to wrap the test code that generated the error:\n' +
-    "        'allowConsoleError(() => { <code that generated the " +
-    "error> });'\n" +
-    '    ⤷ If the error is expected (and asynchronous), use the ' +
-    'following pattern at the top of the test:\n' +
-    "        'expectAsyncConsoleError(<string or regex>[, <number of" +
-    ' times the error message repeats>]);';
-  originalConsoleError(errorMessage + "'\n" + helpMessage);
-}
-
-/**
- * Used during normal test execution, to detect unexpected console errors.
- */
-function warnForConsoleError() {
-  expectedAsyncErrors = [];
-  consoleErrorSandbox = sinon.createSandbox();
-  const consoleErrorStub = consoleErrorSandbox
-    .stub(console, 'error')
-    .callsFake(printWarning);
-
-  self.expectAsyncConsoleError = function (message, repeat = 1) {
-    expectedAsyncErrors.push.apply(
-      expectedAsyncErrors,
-      Array(repeat).fill(message)
-    );
-  };
-  self.allowConsoleError = function (func) {
-    consoleErrorStub.reset();
-    consoleErrorStub.callsFake(() => {});
-    const result = func();
-    try {
-      expect(consoleErrorStub).to.have.been.called;
-    } catch (e) {
-      const helpMessage =
-        'The test "' +
-        testName +
-        '" contains an "allowConsoleError" block ' +
-        "that didn't result in a call to console.error.";
-      originalConsoleError(helpMessage);
-    } finally {
-      consoleErrorStub.callsFake(printWarning);
-    }
-    return result;
-  };
-}
-
-/**
- * Used to restore error level logging after each test.
- */
-function restoreConsoleError() {
-  consoleErrorSandbox.restore();
-  if (expectedAsyncErrors.length > 0) {
-    const helpMessage =
-      'The test "' +
-      testName +
-      '" called "expectAsyncConsoleError", ' +
-      'but there were no call(s) to console.error with these message(s): ' +
-      '"' +
-      expectedAsyncErrors.join('", "') +
-      '"';
-    that.test.error(new Error(helpMessage));
-  }
-  expectedAsyncErrors = [];
-}
-
-/**
- * Used to silence info, log, and warn level logging during each test, unless
- * verbose mode is enabled.
- */
-function maybeStubConsoleInfoLogWarn() {
-  const {verboseLogging} = window.__karma__.config;
-  if (!verboseLogging) {
-    consoleInfoLogWarnSandbox = sinon.createSandbox();
-    consoleInfoLogWarnSandbox.stub(console, 'info').callsFake(() => {});
-    consoleInfoLogWarnSandbox.stub(console, 'log').callsFake(() => {});
-    consoleInfoLogWarnSandbox.stub(console, 'warn').callsFake(() => {});
-  }
-}
-
-/**
  * Used to prevent asynchronous throwing of errors during each test.
  */
 function preventAsyncErrorThrows() {
@@ -249,7 +138,7 @@ before(function () {
 beforeEach(function () {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   resetTestingState();
-  testName = this.currentTest.fullTitle();
+  setTestName(this.currentTest.fullTitle());
   maybeStubConsoleInfoLogWarn();
   preventAsyncErrorThrows();
   warnForConsoleError();
@@ -274,12 +163,10 @@ function resetTestingState() {
  * Global cleanup of tags added during tests. Cool to add more to selector.
  */
 afterEach(function () {
-  that = this;
+  setTestRunner(this);
   const globalState = Object.keys(global);
   const windowState = Object.keys(window);
-  if (consoleInfoLogWarnSandbox) {
-    consoleInfoLogWarnSandbox.restore();
-  }
+  restoreConsoleSandbox();
   restoreConsoleError();
   restoreAsyncErrorThrows();
   this.timeout(BEFORE_AFTER_TIMEOUT);
