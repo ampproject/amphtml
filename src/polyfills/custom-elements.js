@@ -15,6 +15,7 @@
  */
 
 import {Deferred} from '../core/data-structures/promise';
+import {rethrowAsync} from '../core/error';
 
 /**
  * For type anotations where Element is a local variable.
@@ -96,19 +97,6 @@ function hasCustomElements(win) {
 function isPatched(win) {
   const tag = win.HTMLElement.toString();
   return tag.indexOf('[native code]') === -1;
-}
-
-/**
- * Throws the error outside the current event loop.
- * TODO(rcebulko): Condense with core/error#rethrowAsync
- *
- * @param {!Error} error
- */
-function rethrowAsync(error) {
-  setTimeout(() => {
-    self.__AMP_REPORT_ERROR(error);
-    throw error;
-  });
 }
 
 /**
