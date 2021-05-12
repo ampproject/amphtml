@@ -15,9 +15,11 @@
  */
 
 import {ContextNode} from './node';
-
-export {contextProp} from './prop';
+export {contextPropDef} from './prop';
 export {subscribe, unsubscribe} from './subscriber';
+
+// typedef imports
+import {ContextPropDef} from './prop.type';
 
 /**
  * Direct slot assignment. Works the same way as shadow slots, but does not
@@ -97,7 +99,7 @@ export function rediscoverChildren(node) {
  * All dependent properties are also recalculated.
  *
  * @param {!Node} node The target node.
- * @param {!ContextProp<T>} prop
+ * @param {!ContextPropDef<T>} prop
  * @param {*} setter
  * @param {T} value
  * @template T
@@ -111,7 +113,7 @@ export function setProp(node, prop, setter, value) {
  * See `setProp()` for more info.
  *
  * @param {!Node} node The target node.
- * @param {!ContextProp} prop
+ * @param {!ContextPropDef} prop
  * @param {*} setter
  */
 export function removeProp(node, prop, setter) {
@@ -131,7 +133,7 @@ export function addGroup(node, name, match, weight = 0) {
 /**
  * @param {!Node} node
  * @param {string} groupName
- * @param {!ContextProp<T>} prop
+ * @param {!ContextPropDef<T>} prop
  * @param {*} setter
  * @param {T} value
  * @template T
@@ -143,7 +145,7 @@ export function setGroupProp(node, groupName, prop, setter, value) {
 /**
  * @param {!Node} node
  * @param {string} groupName
- * @param {!ContextProp} prop
+ * @param {!ContextPropDef} prop
  * @param {*} setter
  */
 export function removeGroupProp(node, groupName, prop, setter) {
