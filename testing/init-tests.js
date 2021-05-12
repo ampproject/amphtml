@@ -135,15 +135,26 @@ function setupTestcase() {
 }
 
 /**
+ * Resets AMP-specific state in the global window object.
+ */
+function resetWindowState() {
+  window.localStorage.clear();
+  window.ENABLE_LOG = false;
+  window.AMP_CONFIG = AMP_CONFIG;
+  window.AMP_DEV_MODE = false;
+  window.context = undefined;
+  window.__AMP_MODE = undefined;
+  window.__AMP_TEST = true;
+  delete window.document['__AMPDOC'];
+}
+
+/**
  * Resets the window's testing state. Used at the start by initializeTests() and
  * before each test case by setupTestcase().
  */
 function resetTestingState() {
   activateChunkingForTesting();
-  window.__AMP_MODE = undefined;
-  window.context = undefined;
-  window.AMP_CONFIG = AMP_CONFIG;
-  window.__AMP_TEST = true;
+  resetWindowState();
   installDocService(window, /* isSingleDoc */ true);
   const ampdoc = Services.ampdocServiceFor(window).getSingleDoc();
   installRuntimeServices(window);
@@ -162,12 +173,7 @@ function cleanupTestcase() {
   restoreConsoleError();
   restoreAsyncErrorThrows();
   cleanupTestPageElements();
-  window.localStorage.clear();
-  window.ENABLE_LOG = false;
-  window.AMP_DEV_MODE = false;
-  window.context = undefined;
-  window.__AMP_MODE = undefined;
-  delete window.document['__AMPDOC'];
+  resetWindowState();
   setDefaultBootstrapBaseUrlForTesting(null);
   resetAccumulatedErrorMessagesForTesting();
   resetExperimentTogglesForTesting(window);
