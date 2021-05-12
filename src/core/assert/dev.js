@@ -106,7 +106,7 @@ export function devAssertElement(shouldBeElement, opt_message) {
   devAssertDceCheck();
 
   return assertions.assertElement(
-    /** @type {!AssertionFunction} */ (devAssert),
+    /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
     shouldBeElement,
     opt_message
   );
@@ -131,7 +131,7 @@ export function devAssertString(shouldBeString, opt_message) {
   devAssertDceCheck();
 
   return assertions.assertString(
-    /** @type {!AssertionFunction} */ (devAssert),
+    /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
     shouldBeString,
     opt_message
   );
@@ -157,7 +157,7 @@ export function devAssertNumber(shouldBeNumber, opt_message) {
   devAssertDceCheck();
 
   return assertions.assertNumber(
-    /** @type {!AssertionFunction} */ (devAssert),
+    /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
     shouldBeNumber,
     opt_message
   );
@@ -182,7 +182,7 @@ export function devAssertArray(shouldBeArray, opt_message) {
   devAssertDceCheck();
 
   return assertions.assertArray(
-    /** @type {!AssertionFunction} */ (devAssert),
+    /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
     shouldBeArray,
     opt_message
   );
@@ -206,7 +206,7 @@ export function devAssertBoolean(shouldBeBoolean, opt_message) {
   devAssertDceCheck();
 
   return assertions.assertBoolean(
-    /** @type {!AssertionFunction} */ (devAssert),
+    /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
     shouldBeBoolean,
     opt_message
   );
@@ -230,7 +230,7 @@ export function devAssertEnumValue(enumObj, shouldBeEnum, opt_enumName) {
   devAssertDceCheck();
 
   return assertions.assertEnumValue(
-    /** @type {!AssertionFunction} */ (devAssert),
+    /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
     enumObj,
     shouldBeEnum,
     opt_enumName
