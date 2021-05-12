@@ -503,6 +503,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(component).to.be.calledOnce;
       const lightDom = element.querySelector(':scope > time');
       expect(lightDom.className).to.equal('');
+      expect(lightDom.hasAttribute('i-amphtml-rendered')).to.be.true;
       expect(lightDom.querySelector(':scope > #component')).to.be.ok;
       expect(lastProps.as).to.equal('time');
       await waitFor(
@@ -522,6 +523,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       const lightDom = element.querySelector(':scope > time');
       expect(lightDom.querySelector(':scope > #component')).to.be.ok;
       expect(lightDom.className).to.equal('i-amphtml-fill-content');
+      expect(lightDom.hasAttribute('i-amphtml-rendered')).to.be.true;
       expect(lastProps.className).to.equal('i-amphtml-fill-content');
       expect(lastProps.as).to.equal('time');
       await waitFor(
@@ -532,7 +534,9 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     it('should use the existing element if exists', async () => {
       Impl['layoutSizeDefined'] = true;
-      const existing = document.createElement('time');
+      const existing = createElementWithAttributes(document, 'time', {
+        'i-amphtml-rendered': '',
+      });
       element.appendChild(existing);
       doc.body.appendChild(element);
       await element.buildInternal();
