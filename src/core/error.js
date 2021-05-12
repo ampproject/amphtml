@@ -93,7 +93,7 @@ export function rethrowAsync(var_args) {
  */
 export function tryCallback(callback, ...args) {
   try {
-    return callback.apply(null, Array.prototype.slice.call(arguments, 1));
+    return callback.apply(null, args);
   } catch (e) {
     rethrowAsync(e);
   }
