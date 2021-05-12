@@ -55,7 +55,7 @@ let XMLHttpRequestDef;
  * @return {!Promise<!FetchResponse>}
  */
 export function fetchPolyfill(input, init = {}) {
-  return new Promise(function (resolve, reject) {
+  return new Promise((resolve, reject) => {
     const requestMethod = normalizeMethod(init.method || 'GET');
     const xhr = createXhrRequest(requestMethod, input);
 
@@ -68,9 +68,9 @@ export function fetchPolyfill(input, init = {}) {
     }
 
     if (init.headers) {
-      Object.keys(init.headers).forEach(function (header) {
+      for (const header of Object.keys(init.headers)) {
         xhr.setRequestHeader(header, init.headers[header]);
-      });
+      }
     }
 
     xhr.onreadystatechange = () => {
@@ -280,12 +280,12 @@ export class Response extends FetchResponse {
     data.status = init.status === undefined ? 200 : parseInt(init.status, 10);
 
     if (isArray(init.headers)) {
-      /** @type {!Array} */ (init.headers).forEach((entry) => {
+      for (const entry of /** @type {!Array} */ (init.headers)) {
         const headerName = entry[0];
         const headerValue = entry[1];
         lowercasedHeaders[String(headerName).toLowerCase()] =
           String(headerValue);
-      });
+      }
     } else if (isObject(init.headers)) {
       for (const key in init.headers) {
         lowercasedHeaders[String(key).toLowerCase()] = String(
