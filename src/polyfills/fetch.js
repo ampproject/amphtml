@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev, devAssert, user} from '../log';
+import {dev, user} from '../log';
+import {devAssert} from '../core/assert';
 import {hasOwn, map} from '../core/types/object';
 import {isArray, isObject} from '../core/types';
-
 import {parseJson} from '../json';
 import {utf8Encode} from '../utils/bytes';
 
@@ -55,7 +55,7 @@ let XMLHttpRequestDef;
  * @return {!Promise<!FetchResponse>}
  */
 export function fetchPolyfill(input, init = {}) {
-  return new Promise((resolve, reject) => {
+  return new Promise(function (resolve, reject) {
     const requestMethod = normalizeMethod(init.method || 'GET');
     const xhr = createXhrRequest(requestMethod, input);
 
@@ -68,9 +68,9 @@ export function fetchPolyfill(input, init = {}) {
     }
 
     if (init.headers) {
-      for (const header of Object.keys(init.headers)) {
+      Object.keys(init.headers).forEach(function (header) {
         xhr.setRequestHeader(header, init.headers[header]);
-      }
+      });
     }
 
     xhr.onreadystatechange = () => {
@@ -280,12 +280,12 @@ export class Response extends FetchResponse {
     data.status = init.status === undefined ? 200 : parseInt(init.status, 10);
 
     if (isArray(init.headers)) {
-      for (const entry of /** @type {!Array} */ (init.headers)) {
+      /** @type {!Array} */ (init.headers).forEach((entry) => {
         const headerName = entry[0];
         const headerValue = entry[1];
         lowercasedHeaders[String(headerName).toLowerCase()] =
           String(headerValue);
-      }
+      });
     } else if (isObject(init.headers)) {
       for (const key in init.headers) {
         lowercasedHeaders[String(key).toLowerCase()] = String(
