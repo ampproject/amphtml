@@ -28,21 +28,24 @@ const {valid} = require('semver');
 async function writePackageJson(extensionVersion) {
   try {
     await stat(`extensions/${extension}/${extensionVersion}`);
-  } catch (_) {
+  } catch {
     log(`${extension} ${extensionVersion} : skipping, does not exist`);
     return;
   }
 
-  const major = extensionVersion.split('.', 1);
+  const extensionVersionArr = extensionVersion.split('.', 2);
+  const major = extensionVersionArr[0];
   const minor = ampVersion.slice(0, 10);
-  const patch = Number(ampVersion.slice(-3)); // npm trims trailing zeroes in patch number, so mimic this in package.json
+  const patch = Number(ampVersion.slice(-3)); // npm trims leading zeroes in patch number, so mimic this in package.json
   const version = `${major}.${minor}.${patch}`;
-  if (!valid(version) || ampVersion.length != 13) {
+  if (!valid(version) || ampVersion.length != 13 || extensionVersionArr[1] !== '0') {
     log(
       'Invalid semver version',
       version,
-      'or invalid AMP version',
-      ampVersion
+      'or AMP version',
+      ampVersion,
+      'or extension version',
+      extensionVersion
     );
     process.exitCode = 1;
     return;
@@ -83,7 +86,7 @@ async function writePackageJson(extensionVersion) {
   try {
     await writeFile(
       `extensions/${extension}/${extensionVersion}/package.json`,
-      JSON.stringify(json)
+      JSON.stringify(json, null, 2)
     );
     log(
       extension,
