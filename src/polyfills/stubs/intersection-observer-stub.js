@@ -268,7 +268,9 @@ export class IntersectionObserverStub {
   upgrade_(Ctor) {
     const inst = new Ctor(this.callback_, this.options_);
     this.inst_ = inst;
-    this.elements_.forEach((e) => inst.observe(e));
+    for (const e of this.elements_) {
+      inst.observe(e);
+    }
     this.elements_ = null;
   }
 }
