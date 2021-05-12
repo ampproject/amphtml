@@ -15,11 +15,12 @@
  */
 
 /**
- * @fileoverview Type externs for assertions.
+ * @fileoverview Global type definitions related to functions.
  * @externs
  */
 
 /**
- * @typedef {function(?, string=, ...*):?|function(?, !Array<*>)}
+ * This type signifies a callback that can be called to remove a listener.
+ * @typedef {function()}
  */
-let AssertionFunction;
+let UnlistenDef;

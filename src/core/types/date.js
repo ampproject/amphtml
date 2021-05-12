@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
+/** @fileoverview helpers for dealing with dates and times. */
+
+/**
+ * A timestamp, such as that produced by `Date.now()`.
+ * @typedef {number}
+ */
+export let TimestampDef;
+
 /**
  * Parses the date using the `Date.parse()` rules. Additionally supports the
  * keyword "now" that indicates the "current date/time". Returns either a
  * valid epoch value or null.
  *
  * @param {?string|undefined} s
- * @return {?Timestamp}
+ * @return {?TimestampDef}
  */
 export function parseDate(s) {
   if (!s) {
@@ -34,9 +42,9 @@ export function parseDate(s) {
 }
 
 /**
- * Converts various date formats into a Timestamp.
+ * Converts various date formats into a TimestampDef.
  * @param {!Date|number|string} value
- * @return {?Timestamp}
+ * @return {?TimestampDef}
  */
 export function getDate(value) {
   if (!value) {
