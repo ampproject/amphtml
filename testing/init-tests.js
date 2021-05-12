@@ -19,7 +19,6 @@
 import '../src/polyfills';
 import './setup_chai_sinon';
 
-import * as coreError from '../src/core/error';
 import * as describes from './describes';
 import {Services} from '../src/services';
 import {TestConfig} from './test-config';
@@ -41,25 +40,19 @@ import {
   setTestRunner,
   warnForConsoleError,
 } from './console-logging-setup';
+import {preventAsyncErrorThrows} from './async-errors';
 import {removeElement} from '../src/dom';
-import {
-  reportError,
-  resetAccumulatedErrorMessagesForTesting,
-} from '../src/error-reporting';
+import {resetAccumulatedErrorMessagesForTesting} from '../src/error-reporting';
 import {resetEvtListenerOptsSupportForTesting} from '../src/event-helper-listen';
 import {resetExperimentTogglesForTesting} from '../src/experiments';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
-import {setReportError} from '../src/log';
 import AMP_CONFIG from '../build-system/global-configs/prod-config.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import PreactEnzyme from 'enzyme-adapter-preact-pure';
-import sinon from 'sinon'; // eslint-disable-line local/no-import
 
 /** @fileoverview
  * This file initializes AMP's Karma + Mocha based unit & integration tests.
  * TODO(wg-infra, #23837): Further refactor and clean up this file.
  */
-
-let rethrowAsyncSandbox;
 
 // Used to clean up global state between tests.
 let initialGlobalState;
@@ -103,25 +96,6 @@ function initializeTests() {
   // Override AMP.extension to buffer extension installers.
   global.AMP.extension = (name, version, installer) =>
     describes.bufferExtension(`${name}:${version}`, installer);
-}
-
-/**
- * Used to prevent asynchronous throwing of errors during each test.
- */
-function preventAsyncErrorThrows() {
-  self.stubAsyncErrorThrows = function () {
-    rethrowAsyncSandbox = sinon.createSandbox();
-    rethrowAsyncSandbox.stub(coreError, 'rethrowAsync').callsFake((...args) => {
-      const error = coreError.createErrorVargs.apply(null, args);
-      self.__AMP_REPORT_ERROR(error);
-      throw error;
-    });
-  };
-  self.restoreAsyncErrorThrows = function () {
-    rethrowAsyncSandbox.restore();
-  };
-  setReportError(reportError);
-  stubAsyncErrorThrows();
 }
 
 before(function () {

@@ -333,8 +333,8 @@ const forbiddenTermsGlobal = {
       'src/runtime.js',
       'src/log.js',
       'src/web-worker/web-worker.js',
+      'testing/async-errors.js',
       'tools/experiments/experiments.js',
-      'testing/init-tests.js',
     ],
   },
   'parseUrlWithA': {
