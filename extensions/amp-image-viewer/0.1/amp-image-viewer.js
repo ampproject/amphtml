@@ -774,12 +774,9 @@ export class AmpImageViewer extends AMP.BaseElement {
 
     const newPosX = this.boundX_(this.startX_ + deltaX * newScale, false);
     const newPosY = this.boundY_(this.startY_ + deltaY * newScale, false);
-    return /** @type {!Promise|undefined} */ (this.set_(
-      newScale,
-      newPosX,
-      newPosY,
-      animate
-    ));
+    return /** @type {!Promise|undefined} */ (
+      this.set_(newScale, newPosX, newPosY, animate)
+    );
   }
 
   /**

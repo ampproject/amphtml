@@ -32,7 +32,7 @@ export default class PriorityQueue {
    * @return {T}
    */
   peek() {
-    const l = this.queue_.length;
+    const l = this.length;
     if (!l) {
       return null;
     }
@@ -61,11 +61,11 @@ export default class PriorityQueue {
   binarySearch_(target) {
     let i = -1;
     let lo = 0;
-    let hi = this.queue_.length;
+    let hi = this.length;
     while (lo <= hi) {
       i = Math.floor((lo + hi) / 2);
       // This means `target` is the new max priority in the queue.
-      if (i === this.queue_.length) {
+      if (i === this.length) {
         break;
       }
       // Stop searching once p[i] >= target AND p[i-1] < target.
@@ -86,7 +86,7 @@ export default class PriorityQueue {
    * @param {function(T)} callback
    */
   forEach(callback) {
-    let index = this.queue_.length;
+    let index = this.length;
     while (index--) {
       callback(this.queue_[index].item);
     }
@@ -98,7 +98,7 @@ export default class PriorityQueue {
    * @return {T}
    */
   dequeue() {
-    if (!this.queue_.length) {
+    if (!this.length) {
       return null;
     }
     return this.queue_.pop().item;

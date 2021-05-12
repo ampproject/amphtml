@@ -16,10 +16,10 @@
 
 import {poll} from '../../../../../testing/iframe';
 
-describe
+describes.sandboxed
   .configure()
   .skipFirefox()
-  .run('amp-image-lightbox', function () {
+  .run('amp-image-lightbox', {}, function () {
     this.timeout(5000);
     const extensions = ['amp-image-lightbox'];
     const imageLightboxBody = `

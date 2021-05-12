@@ -19,12 +19,12 @@ import {
   exponentialBackoffClock,
 } from '../../src/exponential-backoff';
 
-describe('exponentialBackoff', () => {
+describes.sandboxed('exponentialBackoff', {}, (env) => {
   let clock;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
-    window.sandbox.stub(Math, 'random').callsFake(() => 1);
+    clock = env.sandbox.useFakeTimers();
+    env.sandbox.stub(Math, 'random').callsFake(() => 1);
   });
 
   it('should backoff exponentially', () => {

@@ -612,12 +612,9 @@ export class ImageViewer {
 
     const newPosX = this.boundX_(this.startX_ + deltaX * newScale, false);
     const newPosY = this.boundY_(this.startY_ + deltaY * newScale, false);
-    return /** @type {!Promise|undefined} */ (this.set_(
-      newScale,
-      newPosX,
-      newPosY,
-      animate
-    ));
+    return /** @type {!Promise|undefined} */ (
+      this.set_(newScale, newPosX, newPosY, animate)
+    );
   }
 
   /**
@@ -790,9 +787,11 @@ class AmpImageLightbox extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     /** If the element is in an email document, allow its `open` action. */
-    Services.actionServiceForDoc(
-      this.element
-    ).addToAllowlist('AMP-IMAGE-LIGHTBOX', 'open', ['email']);
+    Services.actionServiceForDoc(this.element).addToAllowlist(
+      'AMP-IMAGE-LIGHTBOX',
+      'open',
+      ['email']
+    );
   }
 
   /**
@@ -828,9 +827,8 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.container_.appendChild(this.captionElement_);
 
     // Invisible close button at the end of lightbox for screen-readers.
-    const screenReaderCloseButton = this.element.ownerDocument.createElement(
-      'button'
-    );
+    const screenReaderCloseButton =
+      this.element.ownerDocument.createElement('button');
     // TODO(aghassemi, #4146) i18n
     const ariaLabel =
       this.element.getAttribute('data-close-button-aria-label') ||

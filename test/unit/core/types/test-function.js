@@ -16,16 +16,16 @@
 
 import {debounce, throttle} from '../../../../src/core/types/function';
 
-describes.sandboxed('type helpers - functions', {}, () => {
+describes.sandboxed('type helpers - functions', {}, (env) => {
   describe('throttle', () => {
     let clock;
 
     beforeEach(() => {
-      clock = window.sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
     });
 
     it('should work', () => {
-      const callback = window.sandbox.spy();
+      const callback = env.sandbox.spy();
       const throttledCallback = throttle(window, callback, 100);
 
       throttledCallback(1);
@@ -86,11 +86,11 @@ describes.sandboxed('type helpers - functions', {}, () => {
     let clock;
 
     beforeEach(() => {
-      clock = window.sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
     });
 
     it('should wait before calling', () => {
-      const callback = window.sandbox.spy();
+      const callback = env.sandbox.spy();
       const debounced = debounce(window, callback, 100);
 
       debounced(1);

@@ -342,9 +342,8 @@ function validateAndParsePubControlParams(params) {
 
   const /** !Array<!LayoutType> */ layoutTypes = params.layoutType.split(',');
   const /** !Array<string> */ numberOfRows = params.numberOfRows.split(',');
-  const /** !Array<string> */ numberOfColumns = params.numberOfColumns.split(
-      ','
-    );
+  const /** !Array<string> */ numberOfColumns =
+      params.numberOfColumns.split(',');
 
   // Check all params have same length.
   if (
