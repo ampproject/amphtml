@@ -536,7 +536,7 @@ class Registry {
         const disconnectedCandidates = this.queryAll_(node, this.query_);
         this.disconnectedCallback_(node);
         for (const candidate of disconnectedCandidates) {
-          this.disconnectedCallback_(candidates);
+          this.disconnectedCallback_(candidate);
         }
       }
     }
