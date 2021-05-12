@@ -328,6 +328,7 @@ const forbiddenTermsGlobal = {
       'ads/alp/install-alp.js',
       'ads/inabox/inabox-host.js',
       'extensions/amp-access/0.1/amp-login-done.js',
+      'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
       'src/amp-story-player/amp-story-component-manager.js',
       'src/runtime.js',
       'src/log.js',
