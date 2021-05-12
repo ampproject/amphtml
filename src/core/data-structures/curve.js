@@ -216,16 +216,17 @@ class Bezier {
 export const Curves = {
   /**
    * linear
-   * @param {number} n
-   * @return {number}
+   * @param {!NormTimeDef} xVal
+   * @return {!NormTimeDef}
    */
-  LINEAR(n) {
-    return n;
+  LINEAR(xVal) {
+    return xVal;
   },
 
   /**
    * ease
-   * @type {!CurveDef}
+   * @param {!NormTimeDef} xVal
+   * @return {!NormTimeDef}
    */
   EASE(xVal) {
     return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.25, 0.1, 0.25, 1.0, 1, 1);
@@ -233,7 +234,8 @@ export const Curves = {
 
   /**
    * ease-in: slow out, fast in
-   * @type {!CurveDef}
+   * @param {!NormTimeDef} xVal
+   * @return {!NormTimeDef}
    */
   EASE_IN(xVal) {
     return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.42, 0.0, 1.0, 1.0, 1, 1);
@@ -241,7 +243,8 @@ export const Curves = {
 
   /**
    * ease-out: fast out, slow in
-   * @type {!CurveDef}
+   * @param {!NormTimeDef} xVal
+   * @return {!NormTimeDef}
    */
   EASE_OUT(xVal) {
     return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.0, 0.0, 0.58, 1.0, 1, 1);
@@ -249,7 +252,8 @@ export const Curves = {
 
   /**
    * ease-in-out
-   * @type {!CurveDef}
+   * @param {!NormTimeDef} xVal
+   * @return {!NormTimeDef}
    */
   EASE_IN_OUT(xVal) {
     return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.42, 0.0, 0.58, 1.0, 1, 1);
