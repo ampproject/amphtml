@@ -69,11 +69,7 @@ export class AmpFxCollection {
       }
 
       // Don't break for all components if only a subset are misconfigured.
-      try {
-        this.register_(element);
-      } catch (e) {
-        rethrowAsync(e);
-      }
+      tryCallback(() => this.register_(element));
     });
   }
 

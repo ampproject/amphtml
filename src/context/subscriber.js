@@ -16,7 +16,8 @@
 
 import {ContextNode} from './node';
 import {arrayOrSingleItemToArray} from '../core/types/array';
-import {throttleTail, tryCallback} from './scheduler';
+import {throttleTail} from './scheduler';
+import {tryCallback} from '../core/error';
 
 const EMPTY_ARRAY = [];
 const EMPTY_FUNC = () => {};
