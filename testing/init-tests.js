@@ -15,7 +15,7 @@
  */
 'use strict';
 
-// These must load before all other tests.
+// These two imports must precede all others.
 import '../src/polyfills';
 import './setup_chai_sinon';
 
@@ -62,6 +62,29 @@ initializeTests();
  * Initializes the global state required by all AMP unit and integration tests.
  */
 function initializeTests() {
+  initializeTestConstructs();
+  exposeKarmaConfig();
+  resetTestingState();
+  overrideAmpExtensionInstaller();
+}
+
+/**
+ * Exposes Karma's config constant for use during tests. The regular test runner
+ * uses `karma`, while the debugger uses `__karma__ `.
+ */
+function exposeKarmaConfig() {
+  if (parent.karma && !parent.__karma__) {
+    parent.__karma__ = parent.karma;
+  }
+  window.ampTestRuntimeConfig = parent.__karma__
+    ? parent.__karma__.config.amp
+    : {};
+}
+
+/**
+ * Initializes the constructs with which all test cases are authored.
+ */
+function initializeTestConstructs() {
   // Allow Mocha's it() to call yield and allow pending promises to resolve.
   installYieldIt(it);
 
@@ -76,22 +99,13 @@ function initializeTests() {
   before(overrideSkipTest);
   beforeEach(setupTestcase);
   afterEach(cleanupTestcase);
+}
 
-  // Make the `amp` section of the Karma config readable by tests.
-  // The regular test runner uses `karma`, while the debugger uses `__karma__ `.
-  if (parent.karma && !parent.__karma__) {
-    parent.__karma__ = parent.karma;
-  }
-  window.ampTestRuntimeConfig = parent.__karma__
-    ? parent.__karma__.config.amp
-    : {};
-
-  // These steps need to be run before any custom elements are initialized.
-  resetTestingState();
-  adoptWithMultidocDeps(window);
-  configureEnzyme({adapter: new PreactEnzyme()});
-
-  // Override AMP.extension to buffer extension installers.
+/**
+ * Overrides AMP.extension() so that extension installation is buffered and
+ * executed just when needed.
+ */
+function overrideAmpExtensionInstaller() {
   global.AMP.extension = (name, version, installer) =>
     describes.bufferExtension(`${name}:${version}`, installer);
 }
@@ -135,6 +149,8 @@ function resetTestingState() {
   installRuntimeServices(window);
   installAmpdocServices(ampdoc);
   Services.resourcesForDoc(ampdoc).ampInitComplete();
+  adoptWithMultidocDeps(window);
+  configureEnzyme({adapter: new PreactEnzyme()});
 }
 
 /**
@@ -145,17 +161,7 @@ function cleanupTestcase() {
   restoreConsoleSandbox();
   restoreConsoleError();
   restoreAsyncErrorThrows();
-  const cleanupTagNames = ['link', 'meta', 'iframe'];
-  const cleanup = document.querySelectorAll(cleanupTagNames.join(','));
-  for (let i = 0; i < cleanup.length; i++) {
-    try {
-      const element = cleanup[i];
-      removeElement(element);
-    } catch (e) {
-      // This sometimes fails for unknown reasons.
-      console./*OK*/ log(e);
-    }
-  }
+  cleanupTestPageElements();
   window.localStorage.clear();
   window.ENABLE_LOG = false;
   window.AMP_DEV_MODE = false;
@@ -167,4 +173,21 @@ function cleanupTestcase() {
   resetExperimentTogglesForTesting(window);
   resetEvtListenerOptsSupportForTesting();
   cancelTimersForTesting();
+}
+
+/**
+ * Cleans up any HTML elements that tests might have added to the document.
+ */
+function cleanupTestPageElements() {
+  const cleanupTagNames = ['link', 'meta', 'iframe'];
+  const cleanup = document.querySelectorAll(cleanupTagNames.join(','));
+  for (let i = 0; i < cleanup.length; i++) {
+    try {
+      const element = cleanup[i];
+      removeElement(element);
+    } catch (e) {
+      // This sometimes fails for unknown reasons.
+      console./*OK*/ log(e);
+    }
+  }
 }
