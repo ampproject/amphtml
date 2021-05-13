@@ -96,10 +96,7 @@ function hasOwnProperty(obj, key) {
   if (obj == null || typeof obj != 'object') {
     return false;
   }
-  return Object.prototype.hasOwnProperty.call(
-    /** @type {!Object} */ (obj),
-    key
-  );
+  return hasOwn(/** @type {!Object} */ (obj), key);
 }
 
 /**
