@@ -290,7 +290,7 @@ function candidateSelector(tagNames) {
  * @return {!Promise}
  */
 function whenLoaded(element) {
-  if (element.tagName.toLowerCase() === 'img') {
+  if (element.tagName === 'IMG') {
     return loadPromise(element);
   }
   return whenUpgradedToCustomElement(element).then((element) =>
@@ -377,9 +377,7 @@ export class DocMetaAnnotations {
 function usesLightboxExplicitly(ampdoc) {
   // TODO(alanorozco): Backport into Extensions service.
   const requiredExtensionSelector = `script[custom-element="${REQUIRED_EXTENSION}"]`;
-
   const lightboxedElementsSelector = `[${LIGHTBOXABLE_ATTR}]:not([${VISITED_ATTR}])`;
-
   const exists = (selector) => !!ampdoc.getRootNode().querySelector(selector);
 
   return (
