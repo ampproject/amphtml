@@ -15,8 +15,8 @@
  */
 
 import '../amp-facebook-like';
-import {facebook} from '../../../../3p/facebook';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {facebook} from '../../../../3p/facebook';
 import {resetServiceForTesting} from '../../../../src/service';
 import {serializeMessage} from '../../../../src/3p-frame-messaging';
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
@@ -224,7 +224,7 @@ describes.realWin(
 
       facebook(win, {
         href,
-        kd_site: true,
+        'kd_site': true,
         width: 100,
         height: 100,
       });
@@ -233,7 +233,6 @@ describes.realWin(
       expect(container.getAttribute('data-href')).to.equal(href);
       expect(container.getAttribute('data-kd_site')).to.equal('true');
     });
-
 
     it('adds fb-like element with data-layout', () => {
       const div = document.createElement('div');
@@ -255,7 +254,6 @@ describes.realWin(
       expect(container.getAttribute('data-layout')).to.equal('button');
     });
 
-
     it('adds fb-like element with data-ref', () => {
       const div = document.createElement('div');
       div.setAttribute('id', 'c');
@@ -275,7 +273,6 @@ describes.realWin(
       expect(container.getAttribute('data-href')).to.equal(href);
       expect(container.getAttribute('data-ref')).to.equal('asd');
     });
-
 
     it('adds fb-like element with data-share', () => {
       const div = document.createElement('div');
@@ -307,7 +304,7 @@ describes.realWin(
 
       facebook(win, {
         href,
-        show_faces: true,
+        'show_faces': true,
         width: 100,
         height: 100,
       });
@@ -355,9 +352,7 @@ describes.realWin(
       expect(container.getAttribute('data-href')).to.equal(href);
       expect(container.getAttribute('data-action')).to.equal('like');
       expect(container.getAttribute('data-colorscheme')).to.equal('light');
-      expect(container.getAttribute('data-kd_site')).to.equal(
-        'false'
-      );
+      expect(container.getAttribute('data-kd_site')).to.equal('false');
       expect(container.getAttribute('data-layout')).to.equal('standard');
       expect(container.getAttribute('data-ref')).to.equal('');
       expect(container.getAttribute('data-share')).to.equal('false');
