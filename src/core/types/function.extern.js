@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,12 @@
  */
 
 /**
- * Absolute time in milliseconds.
- * @typedef {number}
+ * @fileoverview Global type definitions related to functions.
+ * @externs
  */
-export let timeDef;
 
 /**
- * Number between 0 and 1 that designates normalized time, as in "from start to
- * end".
- * @typedef {number}
+ * This type signifies a callback that can be called to remove a listener.
+ * @typedef {function()}
  */
-export let normtimeDef;
+let UnlistenDef;

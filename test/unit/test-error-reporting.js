@@ -90,14 +90,15 @@ describes.fakeWin('installErrorReporting', {}, (env) => {
   });
 
   it('should ignore blockByConsent', () => {
-    rejectedPromiseEvent.reason = rejectedPromiseError = blockedByConsentError();
+    rejectedPromiseEvent.reason = rejectedPromiseError =
+      blockedByConsentError();
     win.eventListeners.fire(rejectedPromiseEvent);
     expect(rejectedPromiseError.reported).to.be.not.be.ok;
     expect(rejectedPromiseEventCancelledSpy).to.be.calledOnce;
   });
 });
 
-describes.sandboxed('reportErrorToServerOrViewer', {}, () => {
+describes.sandboxed('reportErrorToServerOrViewer', {}, (env) => {
   let win;
   let viewer;
   let ampdocServiceForStub;
@@ -116,7 +117,7 @@ describes.sandboxed('reportErrorToServerOrViewer', {}, () => {
     const optedInDoc = window.document.implementation.createHTMLDocument('');
     optedInDoc.documentElement.setAttribute('report-errors-to-viewer', '');
 
-    ampdocServiceForStub = window.sandbox.stub(Services, 'ampdocServiceFor');
+    ampdocServiceForStub = env.sandbox.stub(Services, 'ampdocServiceFor');
     const ampdoc = {getRootNode: () => optedInDoc};
     ampdocServiceForStub.returns({
       isSingleDoc: () => true,
@@ -129,11 +130,11 @@ describes.sandboxed('reportErrorToServerOrViewer', {}, () => {
       isTrustedViewer: () => Promise.resolve(true),
       sendMessage: () => true,
     };
-    sendMessageStub = window.sandbox.stub(viewer, 'sendMessage');
+    sendMessageStub = env.sandbox.stub(viewer, 'sendMessage');
 
-    window.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+    env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
 
-    createXhr = window.sandbox.spy(XMLHttpRequest.prototype, 'open');
+    createXhr = env.sandbox.spy(XMLHttpRequest.prototype, 'open');
   });
 
   it('should report to server if AMP doc is not single', () => {
@@ -159,7 +160,7 @@ describes.sandboxed('reportErrorToServerOrViewer', {}, () => {
   });
 
   it('should report to server if viewer is not capable', () => {
-    window.sandbox
+    env.sandbox
       .stub(viewer, 'hasCapability')
       .withArgs('errorReporting')
       .returns(false);
@@ -170,9 +171,7 @@ describes.sandboxed('reportErrorToServerOrViewer', {}, () => {
   });
 
   it('should report to server if viewer is not trusted', () => {
-    window.sandbox
-      .stub(viewer, 'isTrustedViewer')
-      .returns(Promise.resolve(false));
+    env.sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
     return reportErrorToServerOrViewer(win, data).then(() => {
       expect(createXhr).to.be.calledOnce;
       expect(sendMessageStub).to.not.have.been.called;
@@ -200,14 +199,14 @@ describes.sandboxed('reportErrorToServerOrViewer', {}, () => {
   );
 });
 
-describes.sandboxed('getErrorReportData', {}, () => {
+describes.sandboxed('getErrorReportData', {}, (env) => {
   let onError;
   let nextRandomNumber;
 
   beforeEach(() => {
     onError = window.onerror;
     nextRandomNumber = 0;
-    window.sandbox.stub(Math, 'random').callsFake(() => nextRandomNumber);
+    env.sandbox.stub(Math, 'random').callsFake(() => nextRandomNumber);
     self.__AMP_MODE = undefined;
   });
 

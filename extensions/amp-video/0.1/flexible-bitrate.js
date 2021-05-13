@@ -316,12 +316,14 @@ function onNontrivialWait(video, callback) {
  * @return {?HTMLSourceElement}
  */
 function sources(video, fn) {
-  return /** @type {?HTMLSourceElement} */ (childElement(video, (source) => {
-    if (source.tagName != 'SOURCE') {
-      return false;
-    }
-    return fn(/** @type {!HTMLSourceElement} */ (source));
-  }));
+  return /** @type {?HTMLSourceElement} */ (
+    childElement(video, (source) => {
+      if (source.tagName != 'SOURCE') {
+        return false;
+      }
+      return fn(/** @type {!HTMLSourceElement} */ (source));
+    })
+  );
 }
 
 /**

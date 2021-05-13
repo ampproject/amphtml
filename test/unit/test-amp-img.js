@@ -411,8 +411,8 @@ describes.sandboxed('amp-img', {}, (env) => {
     impl.layoutCallback();
 
     expect(propagateAttributesSpy).to.be.calledOnce;
-    const spiedAttributesToPropagate = propagateAttributesSpy.getCall(0)
-      .args[0];
+    const spiedAttributesToPropagate =
+      propagateAttributesSpy.getCall(0).args[0];
 
     expect(
       spiedAttributesToPropagate[spiedAttributesToPropagate.length - 1]

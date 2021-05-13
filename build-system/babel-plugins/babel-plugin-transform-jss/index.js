@@ -211,9 +211,8 @@ module.exports = function ({template, types: t}) {
     ) {
       return false;
     }
-    const {referencePaths} = variableDeclarator.scope.bindings[
-      variableDeclarator.node.id.name
-    ];
+    const {referencePaths} =
+      variableDeclarator.scope.bindings[variableDeclarator.node.id.name];
     const replacedReferenceCount = referencePaths.reduce(
       (count, identifier) =>
         replaceExpression(importDeclaration, identifier) ? count + 1 : count,

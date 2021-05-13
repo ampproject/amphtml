@@ -93,10 +93,9 @@ function isTemplateTagSupported() {
  * @return {typeof AmpElement} The custom element class.
  */
 export function createCustomElementClass(win, elementConnectedCallback) {
-  const BaseCustomElement = /** @type {typeof HTMLElement} */ (createBaseCustomElementClass(
-    win,
-    elementConnectedCallback
-  ));
+  const BaseCustomElement = /** @type {typeof HTMLElement} */ (
+    createBaseCustomElementClass(win, elementConnectedCallback)
+  );
   // It's necessary to create a subclass, because the same "base" class cannot
   // be registered to multiple custom elements.
   class CustomAmpElement extends BaseCustomElement {}
@@ -321,8 +320,9 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         this.resources_,
         'no resources yet, since element is not attached'
       );
-      return /** @type {!./service/resources-interface.ResourcesInterface} */ (this
-        .resources_);
+      return /** @type {!./service/resources-interface.ResourcesInterface} */ (
+        this.resources_
+      );
     }
 
     /**
@@ -1964,6 +1964,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       const resourceState = this.getResource_().getState();
       // Do not show fallback before layout
       if (
+        !this.R1() &&
         show &&
         (resourceState == ResourceState.NOT_BUILT ||
           resourceState == ResourceState.NOT_LAID_OUT ||

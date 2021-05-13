@@ -14,12 +14,4 @@
  * limitations under the License.
  */
 
-/**
- * @fileoverview Type externs for assertions.
- * @externs
- */
-
-/**
- * @typedef {function(?, string=, ...*):?|function(?, !Array<*>)}
- */
-let AssertionFunction;
+exportFunction('getData', () => ({data: true}));

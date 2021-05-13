@@ -17,12 +17,12 @@
 import {duplicateErrorIfNecessary, rethrowAsync} from '../../../src/core/error';
 import {isUserErrorMessage, user} from '../../../src/log';
 
-describes.sandboxed('errors', {}, () => {
+describes.sandboxed('errors', {}, (env) => {
   describe('rethrowAsync', () => {
     let clock;
 
     beforeEach(() => {
-      clock = window.sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
       restoreAsyncErrorThrows();
     });
 
