@@ -438,7 +438,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     });
     env.sandbox
       .stub(serviceAdapter, 'loadMeteringState')
-      .resolves({key: 'value'});
+      .resolves({id: 'abc123'});
     const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
       Promise.resolve({
         json: () =>
@@ -459,7 +459,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
 
     const fetchUrl = fetchStub.getCall(0).args[0];
     expect(fetchUrl).to.equal(
-      'https://news.google.com/swg/_/api/v1/publication/example.org/entitlements?encodedParams=eyJtZXRlcmluZyI6eyJjbGllbnRUeXBlcyI6WzFdLCJvd25lciI6ImV4YW1wbGUub3JnIiwicmVzb3VyY2UiOnsiaGFzaGVkQ2Fub25pY2FsVXJsIjoiMjcwM2YyYjZlZjBlYWFhODEzNzZhMThmYWE3N2E1OTAwOTc1Zjc3MDVkNWQ4YjZlMWEzNzJkNWY2YzJiOTdiYjU5ZjI4M2Q3MzdiNmQ5YWI3N2M1YTNkODQ4YzZlY2UyMDdjZDYwMzU4M2NjMzIyZGQ4MGFiMGI5MzA5MmM2NTAifSwic3RhdGUiOnsiYXR0cmlidXRlcyI6W119fX0'
+      'https://news.google.com/swg/_/api/v1/publication/example.org/entitlements?encodedParams=eyJtZXRlcmluZyI6eyJjbGllbnRUeXBlcyI6WzFdLCJvd25lciI6ImV4YW1wbGUub3JnIiwicmVzb3VyY2UiOnsiaGFzaGVkQ2Fub25pY2FsVXJsIjoiMjcwM2YyYjZlZjBlYWFhODEzNzZhMThmYWE3N2E1OTAwOTc1Zjc3MDVkNWQ4YjZlMWEzNzJkNWY2YzJiOTdiYjU5ZjI4M2Q3MzdiNmQ5YWI3N2M1YTNkODQ4YzZlY2UyMDdjZDYwMzU4M2NjMzIyZGQ4MGFiMGI5MzA5MmM2NTAifSwic3RhdGUiOnsiaWQiOiJhYmMxMjMiLCJhdHRyaWJ1dGVzIjpbXX19fQ'
     );
   });
 

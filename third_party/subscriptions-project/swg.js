@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.163 */
+/** Version: 0.1.22.165 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -1817,14 +1817,15 @@ const FilterResult = {
  * - additionalParameters: Optional.  A JSON object to store generic data.
  *
  *  @typedef {{
- *    eventType: ?AnalyticsEvent,
- *    eventOriginator: !EventOriginator,
+ *    eventType: ?AnalyticsEventDef,
+ *    eventOriginator: !EventOriginatorDef,
  *    isFromUserAction: ?boolean,
  *    additionalParameters: ?Object,
  * }}
  */
 let ClientEvent;
 
+/* eslint-disable no-unused-vars */
 /**
  * @interface
  */
@@ -1854,6 +1855,7 @@ class ClientEventManagerApi {
    */
   logEvent(event) {}
 }
+/* eslint-enable no-unused-vars */
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -2637,9 +2639,9 @@ function setStyle(element, property, value, units, bypassCache) {
     bypassCache
   );
   if (propertyName) {
-    element.style[propertyName] = /** @type {string} */ (units
-      ? value + units
-      : value);
+    element.style[propertyName] = /** @type {string} */ (
+      units ? value + units : value
+    );
   }
 }
 
@@ -2920,11 +2922,9 @@ class ActivityIframeView extends View {
     this.doc_ = this.win_.document;
 
     /** @private @const {!HTMLIFrameElement} */
-    this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
-      this.doc_,
-      'iframe',
-      iframeAttributes$2
-    ));
+    this.iframe_ = /** @type {!HTMLIFrameElement} */ (
+      createElement(this.doc_, 'iframe', iframeAttributes$2)
+    );
 
     /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = activityPorts;
@@ -3684,8 +3684,8 @@ class SubscribeResponse {
   /**
    * @param {string} raw
    * @param {!PurchaseData} purchaseData
-   * @param {?UserData} userData
-   * @param {?Entitlements} entitlements
+   * @param {?UserDataDef} userData
+   * @param {?EntitlementsDef} entitlements
    * @param {!string} productType
    * @param {function():!Promise} completeHandler
    * @param {?string=} oldSku
@@ -3707,9 +3707,9 @@ class SubscribeResponse {
     this.raw = raw;
     /** @const {!PurchaseData} */
     this.purchaseData = purchaseData;
-    /** @const {?UserData} */
+    /** @const {?UserDataDef} */
     this.userData = userData;
-    /** @const {?Entitlements} */
+    /** @const {?EntitlementsDef} */
     this.entitlements = entitlements;
     /** @const {string} */
     this.productType = productType;
@@ -3825,20 +3825,20 @@ class PurchaseData {
  */
 class DeferredAccountCreationResponse {
   /**
-   * @param {!Entitlements} entitlements
-   * @param {!UserData} userData
-   * @param {!Array<!PurchaseData>} purchaseDataList
+   * @param {!EntitlementsDef} entitlements
+   * @param {!UserDataDef} userData
+   * @param {!Array<!PurchaseDataDef>} purchaseDataList
    * @param {function():!Promise} completeHandler
    */
   constructor(entitlements, userData, purchaseDataList, completeHandler) {
-    /** @const {!Entitlements} */
+    /** @const {!EntitlementsDef} */
     this.entitlements = entitlements;
-    /** @const {!UserData} */
+    /** @const {!UserDataDef} */
     this.userData = userData;
-    /** @const {!Array<!PurchaseData>} */
+    /** @const {!Array<!PurchaseDataDef>} */
     this.purchaseDataList = purchaseDataList;
     // TODO(dvoytenko): deprecate.
-    /** @const {!PurchaseData} */
+    /** @const {!PurchaseDataDef} */
     this.purchaseData = purchaseDataList[0];
     /** @private @const {function():!Promise} */
     this.completeHandler_ = completeHandler;
@@ -4083,6 +4083,7 @@ const Event = {
    */
   EVENT_CUSTOM: 'custom',
 };
+/* eslint-enable no-unused-vars */
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -4109,6 +4110,7 @@ const PropensityType = {
   // Propensity score when blocked access to content by paywall.
   PAYWALL: 'paywall',
 };
+/* eslint-enable no-unused-vars */
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -4125,6 +4127,7 @@ const PropensityType = {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* eslint-enable no-unused-vars */
 
 /** @enum {string} */
 const PublisherEntitlementEvent = {
@@ -4508,7 +4511,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.163',
+    '_client': 'SwG 0.1.22.165',
   });
 }
 
@@ -4638,28 +4641,33 @@ class PayStartFlow {
    * @return {!Promise}
    */
   start_(paySwgVersion) {
-    // Add the 'publicationId' key to the subscriptionRequest_ object.
-    const swgPaymentRequest = Object.assign({}, this.subscriptionRequest_, {
-      'publicationId': this.pageConfig_.getPublicationId(),
-    });
+    const /** @type {SwgPaymentRequest} */ swgPaymentRequest = {
+        'skuId': this.subscriptionRequest_['skuId'],
+        'publicationId': this.pageConfig_.getPublicationId(),
+      };
 
     if (paySwgVersion) {
       swgPaymentRequest['swgVersion'] = paySwgVersion;
     }
 
-    // Map the proration mode to the enum value (if proration exists).
-    const prorationMode = swgPaymentRequest['replaceSkuProrationMode'];
-    if (prorationMode) {
-      swgPaymentRequest['replaceSkuProrationMode'] =
-        ReplaceSkuProrationModeMapping[prorationMode];
-    } else if (swgPaymentRequest['oldSku']) {
-      swgPaymentRequest['replaceSkuProrationMode'] =
-        ReplaceSkuProrationModeMapping['IMMEDIATE_WITH_TIME_PRORATION'];
+    if (this.subscriptionRequest_['oldSku']) {
+      swgPaymentRequest['oldSku'] = this.subscriptionRequest_['oldSku'];
+      // Map the proration mode to the enum value (if proration exists).
+      const prorationMode =
+        this.subscriptionRequest_['replaceSkuProrationMode'];
+      if (prorationMode) {
+        swgPaymentRequest['replaceSkuProrationMode'] =
+          ReplaceSkuProrationModeMapping[prorationMode];
+      } else {
+        swgPaymentRequest['replaceSkuProrationMode'] =
+          ReplaceSkuProrationModeMapping['IMMEDIATE_WITH_TIME_PRORATION'];
+      }
+      this.analyticsService_.setSku(swgPaymentRequest['oldSku']);
     }
+
     // Assign one-time recurrence enum if applicable
-    if (swgPaymentRequest['oneTime']) {
+    if (this.subscriptionRequest_['oneTime']) {
       swgPaymentRequest['paymentRecurrence'] = RecurrenceMapping['ONE_TIME'];
-      delete swgPaymentRequest['oneTime'];
     }
 
     // Start/cancel events.
@@ -4669,9 +4677,7 @@ class PayStartFlow {
         : SubscriptionFlows.SUBSCRIBE;
 
     this.deps_.callbacks().triggerFlowStarted(flow, this.subscriptionRequest_);
-    if (swgPaymentRequest['oldSku']) {
-      this.analyticsService_.setSku(swgPaymentRequest['oldSku']);
-    }
+
     this.eventManager_.logSwgEvent(
       AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED,
       true,
@@ -5067,10 +5073,9 @@ function parseEntitlements(deps, swgData) {
  * @return {?string}
  */
 function parseSkuFromPurchaseDataSafe(purchaseData) {
-  return /** @type {?string} */ (getPropertyFromJsonString(
-    purchaseData.raw,
-    'productId'
-  ) || null);
+  return /** @type {?string} */ (
+    getPropertyFromJsonString(purchaseData.raw, 'productId') || null
+  );
 }
 
 /**
@@ -5132,6 +5137,8 @@ class OffersFlow {
 
     /** @private @const {!./client-config-manager.ClientConfigManager} */
     this.clientConfigManager_ = deps.clientConfigManager();
+
+    this.activityIframeView_ = null;
 
     let isClosable = options && options.isClosable;
     if (isClosable == undefined) {
@@ -5202,9 +5209,10 @@ class OffersFlow {
   startPayFlow_(response) {
     const sku = response.getSku();
     if (sku) {
-      const /** @type {../api/subscriptions.SubscriptionRequest} */ subscriptionRequest = {
-          'skuId': sku,
-        };
+      const /** @type {../api/subscriptions.SubscriptionRequest} */ subscriptionRequest =
+          {
+            'skuId': sku,
+          };
       const oldSku = response.getOldSku();
       if (oldSku) {
         subscriptionRequest['oldSku'] = oldSku;
@@ -5246,21 +5254,6 @@ class OffersFlow {
   }
 
   /**
-   * @param {!EntitlementsResponse} response
-   * @private
-   */
-  handleEntitlementsResponse_(response) {
-    const jwt = response.getJwt();
-    if (jwt) {
-      this.deps_.entitlementsManager().pushNextEntitlements(jwt);
-      const swgUserToken = response.getSwgUserToken();
-      if (swgUserToken) {
-        this.deps_.storage().set(Constants$1.USER_TOKEN, swgUserToken, true);
-      }
-    }
-  }
-
-  /**
    * Starts the offers flow or alreadySubscribed flow.
    * @return {!Promise}
    */
@@ -5293,8 +5286,8 @@ class OffersFlow {
           ViewSubscriptionsResponse,
           this.startNativeFlow_.bind(this)
         );
-
-        return this.dialogManager_.openView(activityIframeView);
+        this.activityIframeView_ = activityIframeView;
+        return this.dialogManager_.openView(this.activityIframeView_);
       });
     }
     return Promise.resolve();
@@ -5313,6 +5306,15 @@ class OffersFlow {
         return '/offersiframe';
       }
     });
+  }
+
+  /**
+   * Shows "no subscription/contribution found" on activity iFrame view.
+   */
+  showNoEntitlementFoundToast() {
+    if (this.activityIframeView_) {
+      this.activityIframeView_.execute(new EntitlementsResponse());
+    }
   }
 }
 
@@ -5723,7 +5725,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.163',
+        '_client': 'SwG 0.1.22.165',
         'supportsEventManager': true,
       },
       args || {}
@@ -6420,11 +6422,9 @@ class AnalyticsService {
     this.activityPorts_ = deps.activities();
 
     /** @private @const {!HTMLIFrameElement} */
-    this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
-      this.doc_.getWin().document,
-      'iframe',
-      {}
-    ));
+    this.iframe_ = /** @type {!HTMLIFrameElement} */ (
+      createElement(this.doc_.getWin().document, 'iframe', {})
+    );
     setImportantStyles$1(this.iframe_, iframeStyles);
     this.doc_.getBody().appendChild(this.getElement());
 
@@ -6571,7 +6571,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.163');
+    context.setClientVersion('SwG 0.1.22.165');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -6935,11 +6935,9 @@ class SmartSubscriptionButtonApi {
     this.activityPorts_ = deps.activities();
 
     /** @private @const {!HTMLIFrameElement} */
-    this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
-      this.doc_,
-      'iframe',
-      iframeAttributes$1
-    ));
+    this.iframe_ = /** @type {!HTMLIFrameElement} */ (
+      createElement(this.doc_, 'iframe', iframeAttributes$1)
+    );
 
     /** @private @const {!Element} */
     this.button_ = button;
@@ -7314,10 +7312,12 @@ class ButtonApi {
    * @private
    */
   getOptions_(optionsOrCallback) {
-    const options = /** @type {!../api/subscriptions.ButtonOptions|!../api/subscriptions.SmartButtonOptions} */ (optionsOrCallback &&
-    typeof optionsOrCallback != 'function'
-      ? optionsOrCallback
-      : {'theme': Theme.LIGHT});
+    const options =
+      /** @type {!../api/subscriptions.ButtonOptions|!../api/subscriptions.SmartButtonOptions} */ (
+        optionsOrCallback && typeof optionsOrCallback != 'function'
+          ? optionsOrCallback
+          : {'theme': Theme.LIGHT}
+      );
 
     const theme = options['theme'];
     if (theme !== Theme.LIGHT && theme !== Theme.DARK) {
@@ -7334,10 +7334,10 @@ class ButtonApi {
    * @private
    */
   getCallback_(optionsOrCallback, callback) {
-    return /** @type {function()|function(Event):boolean} */ ((typeof optionsOrCallback ==
-    'function'
-      ? optionsOrCallback
-      : null) || callback);
+    return /** @type {function()|function(Event):boolean} */ (
+      (typeof optionsOrCallback == 'function' ? optionsOrCallback : null) ||
+        callback
+    );
   }
 
   /**
@@ -8023,6 +8023,7 @@ class ContributionsFlow {
           'list': (options && options.list) || 'default',
           'skus': (options && options.skus) || null,
           'isClosable': isClosable,
+          'supportsEventManager': true,
         }),
         /* shouldFadeBody */ true
       );
@@ -8047,9 +8048,10 @@ class ContributionsFlow {
     const sku = response.getSku();
     const isOneTime = response.getOneTime();
     if (sku) {
-      const /** @type {../api/subscriptions.SubscriptionRequest} */ contributionRequest = {
-          'skuId': sku,
-        };
+      const /** @type {../api/subscriptions.SubscriptionRequest} */ contributionRequest =
+          {
+            'skuId': sku,
+          };
       if (isOneTime) {
         contributionRequest['oneTime'] = isOneTime;
       }
@@ -8272,7 +8274,7 @@ class DeferredAccountFlow {
   }
 }
 
-const CSS$1 = "body{margin:0;padding:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{-ms-flex-align:center!important;-ms-flex-pack:center!important;align-items:center!important;bottom:0!important;display:-ms-flexbox!important;display:flex!important;height:100%!important;justify-content:center!important;margin-top:5px!important;min-height:148px!important;width:100%!important;z-index:2147483647!important}@media (min-height:630px),(min-width:630px){swg-loading-container{background-color:#fff!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;margin-left:35px!important;width:560px!important}}swg-loading{animation:mspin-rotate 1568.63ms linear infinite;height:36px;overflow:hidden;width:36px;z-index:2147483647!important}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{animation:swg-loading-film 5332ms steps(324) infinite;background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;height:36px;width:11664px}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/";
+const CSS$1 = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{width:100%!important;display:-ms-flexbox!important;display:flex!important;-ms-flex-align:center!important;align-items:center!important;-ms-flex-pack:center!important;justify-content:center!important;min-height:148px!important;height:100%!important;bottom:0!important;margin-top:5px!important;z-index:2147483647!important}@media (min-height:630px), (min-width:630px){swg-loading-container{width:560px!important;margin-left:35px!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;background-color:#fff!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}swg-loading{z-index:2147483647!important;width:36px;height:36px;overflow:hidden;animation:mspin-rotate 1568.63ms linear infinite}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;width:11664px;height:36px;animation:swg-loading-film 5332ms steps(324) infinite}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -8309,11 +8311,9 @@ class FriendlyIframe {
     const mergedAttrs = Object.assign({}, friendlyIframeAttributes, attrs);
 
     /** @private @const {!HTMLIFrameElement} */
-    this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
-      doc,
-      'iframe',
-      mergedAttrs
-    ));
+    this.iframe_ = /** @type {!HTMLIFrameElement} */ (
+      createElement(doc, 'iframe', mergedAttrs)
+    );
 
     // Ensure that the new iframe does not inherit any CSS styles.
     resetAllStyles(this.iframe_);
@@ -8729,9 +8729,11 @@ class GlobalDoc {
   constructor(winOrDoc) {
     const isWin = !!winOrDoc.document;
     /** @private @const {!Window} */
-    this.win_ = /** @type {!Window} */ (isWin
-      ? /** @type {!Window} */ (winOrDoc)
-      : /** @type {!Document} */ (winOrDoc).defaultView);
+    this.win_ = /** @type {!Window} */ (
+      isWin
+        ? /** @type {!Window} */ (winOrDoc)
+        : /** @type {!Document} */ (winOrDoc).defaultView
+    );
     /** @private @const {!Document} */
     this.doc_ = isWin
       ? /** @type {!Window} */ (winOrDoc).document
@@ -8851,17 +8853,6 @@ const resetViewStyles = {
 };
 
 /**
- * Position of the dialog.
- * @const @enum {string}
- */
-const PositionAt = {
-  BOTTOM: 'BOTTOM',
-  TOP: 'TOP',
-  FLOAT: 'FLOAT',
-  FULL: 'FULL',
-};
-
-/**
  * The class for the top level dialog.
  * @final
  */
@@ -8910,9 +8901,6 @@ class Dialog {
 
     /** @private {?./view.View} */
     this.previousProgressView_ = null;
-
-    /** @private {boolean} */
-    this.useFixedLayer_ = false;
   }
 
   /**
@@ -8941,20 +8929,10 @@ class Dialog {
       this.show_();
     }
 
-    if (this.useFixedLayer_) {
-      return this.doc_
-        .addToFixedLayer(iframe.getElement())
-        .then(() => iframe.whenReady())
-        .then(() => {
-          this.buildIframe_();
-          return this;
-        });
-    } else {
-      return iframe.whenReady().then(() => {
-        this.buildIframe_();
-        return this;
-      });
-    }
+    return iframe.whenReady().then(() => {
+      this.buildIframe_();
+      return this;
+    });
   }
 
   /**
@@ -9231,15 +9209,6 @@ class Dialog {
   }
 
   /**
-   * Gets the element's height.
-   * @return {number}
-   * @private
-   */
-  getHeight_() {
-    return this.getElement().offsetHeight;
-  }
-
-  /**
    * Sets the position of the dialog. Currently 'BOTTOM' is set by default.
    */
   setPosition_() {
@@ -9253,13 +9222,11 @@ class Dialog {
    * @private
    */
   updatePaddingToHtml_(newHeight) {
-    if (this.inferPosition_() == PositionAt.BOTTOM) {
-      const bottomPadding = newHeight + 20; // Add some extra padding.
-      const htmlElement = this.doc_.getRootElement();
-      setImportantStyles$1(htmlElement, {
-        'padding-bottom': `${bottomPadding}px`,
-      });
-    }
+    const bottomPadding = newHeight + 20; // Add some extra padding.
+    const htmlElement = this.doc_.getRootElement();
+    setImportantStyles$1(htmlElement, {
+      'padding-bottom': `${bottomPadding}px`,
+    });
   }
 
   /**
@@ -9271,45 +9238,12 @@ class Dialog {
   }
 
   /**
-   * Calculates the position of the dialog. Currently dialog is positioned at
-   * the bottom only. This could change in future to adjust the dialog position
-   * based on the screen size.
-   * @return {string}
-   * @private
-   */
-  inferPosition_() {
-    return PositionAt.BOTTOM;
-  }
-
-  /**
    * Returns the styles required to postion the dialog.
    * @return {!Object<string, string|number>}
    * @private
    */
   getPositionStyle_() {
-    const dialogPosition = this.inferPosition_();
-    switch (dialogPosition) {
-      case PositionAt.BOTTOM:
-        return {'bottom': 0};
-      case PositionAt.TOP:
-        return {'top': 0};
-      case PositionAt.FLOAT:
-        return {
-          'position': 'fixed',
-          'top': '50%',
-          'left': '50%',
-          'transform': 'translate(-50%, -50%)',
-        };
-      case PositionAt.FULL:
-        return {
-          'position': 'fixed',
-          'height': '100%',
-          'top': 0,
-          'bottom': 0,
-        };
-      default:
-        return {'bottom': 0};
-    }
+    return {'bottom': 0};
   }
 }
 
@@ -9776,7 +9710,7 @@ class Toast {
   /**
    * @param {!../runtime/deps.DepsDef} deps
    * @param {string} src
-   * @param {!Object<string, ?>} args
+   * @param {?Object<string, ?>=} args
    */
   constructor(deps, src, args) {
     /** @private @const {!../model/doc.Doc} */
@@ -9788,18 +9722,16 @@ class Toast {
     /** @private @const {string} */
     this.src_ = src;
 
-    /** @private @const {!Object<string, ?>} */
-    this.args_ = args;
+    /** @private {?Object<string, ?>} */
+    this.args_ = args || {};
 
     /** @private {?Promise} */
     this.animating_ = null;
 
     /** @private @const {!HTMLIFrameElement} */
-    this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
-      this.doc_.getWin().document,
-      'iframe',
-      iframeAttributes
-    ));
+    this.iframe_ = /** @type {!HTMLIFrameElement} */ (
+      createElement(this.doc_.getWin().document, 'iframe', iframeAttributes)
+    );
 
     setImportantStyles$1(this.iframe_, toastImportantStyles);
 
@@ -10045,30 +9977,34 @@ const AnalyticsEventToGoogleAnalyticsEvent = {
     '',
     false
   ),
-  [AnalyticsEvent.ACTION_SWG_SUBSCRIPTION_MINI_PROMPT_CLICK]: createGoogleAnalyticsEvent(
-    'NTG subscription',
-    'marketing modal click',
-    '',
-    false
-  ),
-  [AnalyticsEvent.IMPRESSION_SWG_SUBSCRIPTION_MINI_PROMPT]: createGoogleAnalyticsEvent(
-    'NTG subscription',
-    'marketing modal impression',
-    '',
-    true
-  ),
-  [AnalyticsEvent.ACTION_SWG_CONTRIBUTION_MINI_PROMPT_CLICK]: createGoogleAnalyticsEvent(
-    'NTG membership',
-    'marketing modal click',
-    '',
-    false
-  ),
-  [AnalyticsEvent.IMPRESSION_SWG_CONTRIBUTION_MINI_PROMPT]: createGoogleAnalyticsEvent(
-    'NTG membership',
-    'membership modal impression',
-    '',
-    true
-  ),
+  [AnalyticsEvent.ACTION_SWG_SUBSCRIPTION_MINI_PROMPT_CLICK]:
+    createGoogleAnalyticsEvent(
+      'NTG subscription',
+      'marketing modal click',
+      '',
+      false
+    ),
+  [AnalyticsEvent.IMPRESSION_SWG_SUBSCRIPTION_MINI_PROMPT]:
+    createGoogleAnalyticsEvent(
+      'NTG subscription',
+      'marketing modal impression',
+      '',
+      true
+    ),
+  [AnalyticsEvent.ACTION_SWG_CONTRIBUTION_MINI_PROMPT_CLICK]:
+    createGoogleAnalyticsEvent(
+      'NTG membership',
+      'marketing modal click',
+      '',
+      false
+    ),
+  [AnalyticsEvent.IMPRESSION_SWG_CONTRIBUTION_MINI_PROMPT]:
+    createGoogleAnalyticsEvent(
+      'NTG membership',
+      'membership modal impression',
+      '',
+      true
+    ),
 };
 
 /** @const {!Object<?AnalyticsEvent,?Object>} */
@@ -10171,6 +10107,12 @@ function queryStringHasFreshGaaParams(queryString) {
     !params['gaa_sig'] ||
     !params['gaa_ts']
   ) {
+    return false;
+  }
+
+  // Verify access type.
+  const noAccess = params['gaa_at'] === 'na';
+  if (noAccess) {
     return false;
   }
 
@@ -10445,7 +10387,8 @@ class EntitlementsManager {
         return;
     }
     const token = this.getGaaToken_();
-    const isUserRegistered = event?.additionalParameters?.getIsUserRegistered?.();
+    const isUserRegistered =
+      event?.additionalParameters?.getIsUserRegistered?.();
     this.postEntitlementsRequest_(
       new EntitlementJwt(),
       result,
@@ -10857,52 +10800,73 @@ class EntitlementsManager {
         }
 
         // Add metering params.
-        if (
-          this.publicationId_ &&
-          params &&
-          params.metering &&
-          params.metering.state
-        ) {
-          /** @type {!GetEntitlementsParamsInternalDef} */
-          const encodableParams = {
-            metering: {
-              clientTypes: [MeterClientTypes.LICENSED_BY_GOOGLE],
-              owner: this.publicationId_,
-              resource: {
-                hashedCanonicalUrl,
+        if (this.publicationId_ && params?.metering?.state) {
+          const meteringStateId = params.metering.state.id;
+          if (
+            typeof meteringStateId === 'string' &&
+            meteringStateId.length > 0
+          ) {
+            /** @type {!GetEntitlementsParamsInternalDef} */
+            const encodableParams = {
+              metering: {
+                clientTypes: [MeterClientTypes.LICENSED_BY_GOOGLE],
+                owner: this.publicationId_,
+                resource: {
+                  hashedCanonicalUrl,
+                },
+                state: {
+                  id: meteringStateId,
+                  attributes: [],
+                },
               },
-              state: {
-                id: params.metering.state.id,
-                attributes: [],
-              },
-            },
-          };
+            };
 
-          // Add attributes.
-          const standardAttributes = params.metering.state.standardAttributes;
-          if (standardAttributes) {
-            Object.keys(standardAttributes).forEach((key) => {
-              encodableParams.metering.state.attributes.push({
-                name: 'standard_' + key,
-                timestamp: standardAttributes[key].timestamp,
-              });
-            });
-          }
-          const customAttributes = params.metering.state.customAttributes;
-          if (customAttributes) {
-            Object.keys(customAttributes).forEach((key) => {
-              encodableParams.metering.state.attributes.push({
-                name: 'custom_' + key,
-                timestamp: customAttributes[key].timestamp,
-              });
-            });
-          }
+            // Collect attributes.
+            function collectAttributes({attributes, category}) {
+              if (!attributes) {
+                return;
+              }
 
-          // Encode params.
-          this.encodedParams_ = base64UrlEncodeFromBytes(
-            utf8EncodeSync(JSON.stringify(encodableParams))
-          );
-          url = addQueryParam(url, 'encodedParams', this.encodedParams_);
+              const attributeNames = Object.keys(attributes);
+              attributeNames.forEach((attributeName) => {
+                const name = `${category}_${attributeName}`;
+                const timestamp = Number(attributes[attributeName].timestamp);
+
+                // Validate timestamp.
+                const timestampIsTooFarInTheFuture =
+                  timestamp > (Date.now() / 1000) * 2;
+                if (!timestamp || timestampIsTooFarInTheFuture) {
+                  warn(
+                    `SwG Entitlements: Please specify a Unix timestamp, in seconds, for the "${attributeName}" ${category} attribute. The timestamp you passed (${attributes[attributeName].timestamp}) looks invalid.`
+                  );
+                }
+
+                // Collect attribute.
+                encodableParams.metering.state.attributes.push({
+                  name,
+                  timestamp,
+                });
+              });
+            }
+            collectAttributes({
+              attributes: params.metering.state.standardAttributes,
+              category: 'standard',
+            });
+            collectAttributes({
+              attributes: params.metering.state.customAttributes,
+              category: 'custom',
+            });
+
+            // Encode params.
+            this.encodedParams_ = base64UrlEncodeFromBytes(
+              utf8EncodeSync(JSON.stringify(encodableParams))
+            );
+            url = addQueryParam(url, 'encodedParams', this.encodedParams_);
+          } else {
+            warn(
+              `SwG Entitlements: Please specify a metering state ID string, ideally a hash to avoid PII.`
+            );
+          }
         }
 
         // Build URL.
@@ -11245,9 +11209,9 @@ class FetchResponse {
    * @return {!Promise<!JsonObject>}
    */
   json() {
-    return /** @type {!Promise<!JsonObject>} */ (this.drainText_().then(
-      parseJson
-    ));
+    return /** @type {!Promise<!JsonObject>} */ (
+      this.drainText_().then(parseJson)
+    );
   }
 
   /**
@@ -11256,9 +11220,9 @@ class FetchResponse {
    * @return {!Promise<!ArrayBuffer>}
    */
   arrayBuffer() {
-    return /** @type {!Promise<!ArrayBuffer>} */ (this.drainText_().then(
-      utf8EncodeSync
-    ));
+    return /** @type {!Promise<!ArrayBuffer>} */ (
+      this.drainText_().then(utf8EncodeSync)
+    );
   }
 }
 
@@ -11451,9 +11415,16 @@ class GoogleAnalyticsEventListener {
     if (typeof this.win_.ga != 'function') {
       return;
     }
+    let subscriptionFlow = '';
+    if (event.additionalParameters) {
+      // additionalParameters isn't strongly typed so checking for both object and class notation.
+      subscriptionFlow =
+        event.additionalParameters.subscriptionFlow ||
+        event.additionalParameters.getSubscriptionFlow();
+    }
     const gaEvent = analyticsEventToGoogleAnalyticsEvent(
       event.eventType,
-      event.additionalParameters?.subscriptionFlow
+      subscriptionFlow
     );
     if (gaEvent) {
       this.win_.ga('send', 'event', gaEvent);
@@ -15488,9 +15459,8 @@ class PayClient {
    */
   pageIsInitializedFromPayRedirect_() {
     const hash = this.win_.location.hash;
-    const hasRedirectEncryptedCallbackData = /redirectEncryptedCallbackData/.test(
-      hash
-    );
+    const hasRedirectEncryptedCallbackData =
+      /redirectEncryptedCallbackData/.test(hash);
     const hasSwgRequest = /swgRequest/.test(hash);
     return hasRedirectEncryptedCallbackData && hasSwgRequest;
   }
@@ -15987,7 +15957,8 @@ class PropensityServer {
    * @return {!../api/propensity-api.PropensityScore}
    */
   parsePropensityResponse_(response) {
-    let defaultScore = /** @type {!../api/propensity-api.PropensityScore} */ ({});
+    let defaultScore =
+      /** @type {!../api/propensity-api.PropensityScore} */ ({});
     if (!response['header']) {
       defaultScore = /** @type {!../api/propensity-api.PropensityScore} */ ({
         header: {ok: false},
@@ -16174,7 +16145,7 @@ class Propensity {
   }
 }
 
-const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
+const CSS = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -16451,6 +16422,9 @@ class ConfiguredRuntime {
     /** @private @const {!Callbacks} */
     this.callbacks_ = new Callbacks();
 
+    /** @private {?OffersFlow} */
+    this.lastOffersFlow_ = null;
+
     // Start listening to Google Analytics events, if applicable.
     if (integr.enableGoogleAnalytics) {
       /** @private @const {!GoogleAnalyticsEventListener} */
@@ -16655,12 +16629,17 @@ class ConfiguredRuntime {
   /** @override */
   reset() {
     this.entitlementsManager_.reset();
-    this.dialogManager_.completeAll();
+    this.closeDialog();
   }
 
   /** @override */
   clear() {
     this.entitlementsManager_.clear();
+    this.closeDialog();
+  }
+
+  /** Close dialog. */
+  closeDialog() {
     this.dialogManager_.completeAll();
   }
 
@@ -16711,8 +16690,8 @@ class ConfiguredRuntime {
         'The showOffers() method cannot be used to update a subscription. ' +
         'Use the showUpdateOffers() method instead.';
       assert(options ? !options['oldSku'] : true, errorMessage);
-      const flow = new OffersFlow(this, options);
-      return flow.start();
+      this.lastOffersFlow_ = new OffersFlow(this, options);
+      return this.lastOffersFlow_.start();
     });
   }
 
@@ -16926,6 +16905,14 @@ class ConfiguredRuntime {
    */
   eventManager() {
     return this.eventManager_;
+  }
+
+  /**
+   * Get the last offers flow.
+   * @return {?OffersFlow}
+   */
+  getLastOffersFlow() {
+    return this.lastOffersFlow_;
   }
 
   /**
