@@ -128,6 +128,7 @@ function getRtvVersion(win) {
  * Note that AMP_DEV_MODE flag is used for testing purposes.
  * Uses Array.indexOf instead of Array.includes because of #24219
  * @param {!Window} win
+ * @return {boolean}
  */
 export function isModeDevelopment(win) {
   const hashQuery = parseQueryString_(
