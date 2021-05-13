@@ -168,7 +168,7 @@ export function trimStart(str) {
  * @return {!Promise<string>}
  */
 export function asyncStringReplace(str, regex, replacer) {
-  if (typeof replacer === 'string') {
+  if (isString(replacer)) {
     return Promise.resolve(str.replace(regex, replacer));
   }
   const stringBuilder = [];

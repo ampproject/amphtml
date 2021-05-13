@@ -21,7 +21,7 @@ import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {MessageType} from '../../../src/3p-frame-messaging';
 import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
-import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
+import {base64EncodeFromBytes} from '../../../src/core/types/string/base64.js';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
@@ -41,7 +41,7 @@ import {removeElement} from '../../../src/dom';
 import {removeFragment} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {urls} from '../../../src/config';
-import {utf8Encode} from '../../../src/utils/bytes.js';
+import {utf8Encode} from '../../../src/core/types/string/bytes.js';
 
 /** @const {string} */
 const TAG_ = 'amp-iframe';

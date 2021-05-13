@@ -677,7 +677,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(openAttachmentEl).to.exist;
   });
 
-  it('should build the open attachment UI with target="_top" to navigate in top window', async () => {
+  it('should build the open attachment UI with target="_top" to navigate in top window. For viewers, this ensures the link will open in the parent window.', async () => {
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
     );
@@ -695,7 +695,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(openAttachmentEl.getAttribute('target')).to.eql('_top');
   });
 
-  it('should build the new outlink page attachment UI with target="_top" to navigate in top level browsing context', async () => {
+  it('should build the new outlink page attachment UI with target="_top" to navigate in top level browsing context. For viewers, this ensures the link will open in the parent window.', async () => {
     toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
 
     const attachmentEl = win.document.createElement(

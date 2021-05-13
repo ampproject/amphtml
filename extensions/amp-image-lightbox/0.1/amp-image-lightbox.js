@@ -29,7 +29,7 @@ import {Gestures} from '../../../src/gesture';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
 import {WindowInterface} from '../../../src/window-interface';
-import {bezierCurve} from '../../../src/curve';
+import {bezierCurve} from '../../../src/core/data-structures/curve';
 import {boundValue, clamp, distance, magnitude} from '../../../src/utils/math';
 import {continueMotion} from '../../../src/motion';
 import {dev, userAssert} from '../../../src/log';
@@ -51,13 +51,13 @@ const SUPPORTED_AMP_ELEMENTS_ = new Set(['amp-img', 'amp-anim']);
 /** @private @const */
 const ARIA_ATTRIBUTES = ['aria-label', 'aria-describedby', 'aria-labelledby'];
 
-/** @private @const {!../../../src/curve.CurveDef} */
+/** @private @const {!../../../src/core/data-structures/curve.CurveDef} */
 const ENTER_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
 
-/** @private @const {!../../../src/curve.CurveDef} */
+/** @private @const {!../../../src/core/data-structures/curve.CurveDef} */
 const EXIT_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
 
-/** @private @const {!../../../src/curve.CurveDef} */
+/** @private @const {!../../../src/core/data-structures/curve.CurveDef} */
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 
 /** @private @const {number} */
