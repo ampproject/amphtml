@@ -364,9 +364,9 @@ export class ManualAdvancement extends AdvancementConfig {
       return;
     }
     this.touchstartTimestamp_ = Date.now();
-    this.pausedState_ = /** @type {boolean} */ (this.storeService_.get(
-      StateProperty.PAUSED_STATE
-    ));
+    this.pausedState_ = /** @type {boolean} */ (
+      this.storeService_.get(StateProperty.PAUSED_STATE)
+    );
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
     this.timeoutId_ = this.timer_.delay(() => {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
@@ -409,9 +409,9 @@ export class ManualAdvancement extends AdvancementConfig {
     this.timeoutId_ = null;
     if (
       !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) &&
-      /** @type {InteractiveComponentDef} */ (this.storeService_.get(
-        StateProperty.INTERACTIVE_COMPONENT_STATE
-      )).state !== EmbeddedComponentState.EXPANDED
+      /** @type {InteractiveComponentDef} */ (
+        this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
+      ).state !== EmbeddedComponentState.EXPANDED
     ) {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
     }
@@ -637,9 +637,9 @@ export class ManualAdvancement extends AdvancementConfig {
    */
   isHandledByEmbeddedComponent_(event, pageRect) {
     const target = dev().assertElement(event.target);
-    const stored = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
-      StateProperty.INTERACTIVE_COMPONENT_STATE
-    ));
+    const stored = /** @type {InteractiveComponentDef} */ (
+      this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
+    );
     const inExpandedMode = stored.state === EmbeddedComponentState.EXPANDED;
 
     return (
@@ -684,9 +684,9 @@ export class ManualAdvancement extends AdvancementConfig {
     if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
       event.stopPropagation();
       event.preventDefault();
-      const embedComponent = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
-        StateProperty.INTERACTIVE_COMPONENT_STATE
-      ));
+      const embedComponent = /** @type {InteractiveComponentDef} */ (
+        this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
+      );
       this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
         element: target,
         state: embedComponent.state || EmbeddedComponentState.FOCUSED,
