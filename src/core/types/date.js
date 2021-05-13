@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import {isString} from './string';
+
 /** @fileoverview helpers for dealing with dates and times. */
 
 /**
- * A timestamp, such as that produced by `Date.now()`.
+ * Absolute time in milliseconds.
  * @typedef {number}
  */
 export let TimestampDef;
@@ -42,7 +44,7 @@ export function parseDate(s) {
 }
 
 /**
- * Converts various date formats into a TimestampDef.
+ * Converts various date formats into a timestamp in ms.
  * @param {!Date|number|string} value
  * @return {?TimestampDef}
  */
@@ -53,8 +55,8 @@ export function getDate(value) {
   if (typeof value == 'number') {
     return value;
   }
-  if (typeof value == 'string') {
-    return parseDate(value);
+  if (isString(value)) {
+    return parseDate(/** @type {string} */ (value));
   }
   value = /** @type {!Date} */ (value);
   return value.getTime();

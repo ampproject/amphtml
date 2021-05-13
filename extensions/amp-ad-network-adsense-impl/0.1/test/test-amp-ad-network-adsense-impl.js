@@ -44,7 +44,7 @@ import {
   toggleExperiment,
 } from '../../../../src/experiments';
 import {toWin} from '../../../../src/types';
-import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
+import {utf8Decode, utf8Encode} from '../../../../src/core/types/string/bytes';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {
   const tag = opt_tag || 'amp-ad';
