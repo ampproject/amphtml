@@ -32,8 +32,55 @@ FAIL
 |      <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    </head>
 |    <body>
-|      <amp-render layout="responsive" width="150" height="80"></amp-render>
+|      <!-- Valid: amp-render with only src attribute -->
+|      <amp-render width="150" height="80"
 >>     ^~~~~~~~~
-amp-render/1.0/test/validator-amp-render.html:34:4 The tag 'amp-render' is missing a mandatory attribute - pick at least one of ['src','[src]','data-amp-bind-src']. (see https://amp.dev/documentation/components/amp-render)
+amp-render/1.0/test/validator-amp-render.html:35:4 The attribute 'src' may not appear in tag 'amp-render'. (see https://amp.dev/documentation/components/amp-render)
+|        src="https://data.com/articles.json?ref=CANONICAL_URL">
+|      </amp-render>
+|
+|      <!-- Valid: amp-render with only [src] attribute -->
+|      <amp-render width="150" height="80"
+|        [src]="foo.bar">
+|      </amp-render>
+|
+|      <!-- Valid: amp-render with only [src] attribute -->
+|      <amp-render width="150" height="80"
+>>     ^~~~~~~~~
+amp-render/1.0/test/validator-amp-render.html:45:4 The attribute 'src' may not appear in tag 'amp-render'. (see https://amp.dev/documentation/components/amp-render)
+|        src="foo.bar">
+|      </amp-render>
+|
+|      <!-- Valid: amp-render with both src and [src] attributes -->
+|      <amp-render width="150" height="80"
+>>     ^~~~~~~~~
+amp-render/1.0/test/validator-amp-render.html:50:4 The attribute 'src' may not appear in tag 'amp-render'. (see https://amp.dev/documentation/components/amp-render)
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|        [src]="foo.bar">
+|      </amp-render>
+|
+|      <!-- Valid: amp-render with amp-state src -->
+|      <amp-render width="150" height="80"
+>>     ^~~~~~~~~
+amp-render/1.0/test/validator-amp-render.html:56:4 The attribute 'src' may not appear in tag 'amp-render'. (see https://amp.dev/documentation/components/amp-render)
+|        src="amp-state:source">
+|      </amp-render>
+|
+|      <!-- Valid: amp-render with amp-script src -->
+|      <amp-render width="150" height="80"
+>>     ^~~~~~~~~
+amp-render/1.0/test/validator-amp-render.html:61:4 The attribute 'src' may not appear in tag 'amp-render'. (see https://amp.dev/documentation/components/amp-render)
+|        src="amp-script:scriptFn.dataFn">
+|      </amp-render>
+|
+|      <!-- Invalid: container layout -->
+|      <amp-render layout="container"
+>>     ^~~~~~~~~
+amp-render/1.0/test/validator-amp-render.html:66:4 The specified layout 'CONTAINER' is not supported by tag 'amp-render'. (see https://amp.dev/documentation/components/amp-render)
+>>     ^~~~~~~~~
+amp-render/1.0/test/validator-amp-render.html:66:4 The attribute 'src' may not appear in tag 'amp-render'. (see https://amp.dev/documentation/components/amp-render)
+|        src="https://data.com/articles.json?ref=CANONICAL_URL">
+|      </amp-render>
+|
 |    </body>
 |  </html>

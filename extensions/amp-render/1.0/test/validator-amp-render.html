@@ -31,6 +31,41 @@
     <script async src="https://cdn.ampproject.org/v0.js"></script>
   </head>
   <body>
-    <amp-render layout="responsive" width="150" height="80"></amp-render>
+    <!-- Valid: amp-render with only src attribute -->
+    <amp-render width="150" height="80"
+      src="https://data.com/articles.json?ref=CANONICAL_URL">
+    </amp-render>
+
+    <!-- Valid: amp-render with only [src] attribute -->
+    <amp-render width="150" height="80"
+      [src]="foo.bar">
+    </amp-render>
+
+    <!-- Valid: amp-render with only [src] attribute -->
+    <amp-render width="150" height="80"
+      src="foo.bar">
+    </amp-render>
+
+    <!-- Valid: amp-render with both src and [src] attributes -->
+    <amp-render width="150" height="80"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      [src]="foo.bar">
+    </amp-render>
+
+    <!-- Valid: amp-render with amp-state src -->
+    <amp-render width="150" height="80"
+      src="amp-state:source">
+    </amp-render>
+
+    <!-- Valid: amp-render with amp-script src -->
+    <amp-render width="150" height="80"
+      src="amp-script:scriptFn.dataFn">
+    </amp-render>
+
+    <!-- Invalid: container layout -->
+    <amp-render layout="container"
+      src="https://data.com/articles.json?ref=CANONICAL_URL">
+    </amp-render>
+
   </body>
 </html>
