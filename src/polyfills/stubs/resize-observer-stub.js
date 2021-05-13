@@ -72,7 +72,9 @@ export function upgradePolyfill(win, installer) {
     const upgrade = (upgrader) => {
       microtask.then(() => upgrader(Polyfill));
     };
-    upgraders.forEach(upgrade);
+    for (const upgrader of upgraders) {
+      upgrade(upgrader);
+    }
     Stub[UPGRADERS] = {'push': upgrade};
   } else {
     // Even if this is not the stub, we still may need to install the polyfill.
@@ -95,7 +97,7 @@ export class ResizeObserverStub {
     /** @private @const {!ResizeObserverCallback} */
     this.callback_ = callback;
 
-    /** @private {?Array<!Element>} */
+    /** @private {!Array<!Element>} */
     this.elements_ = [];
 
     /** @private {?ResizeObserver} */
@@ -144,8 +146,10 @@ export class ResizeObserverStub {
   upgrade_(Ctor) {
     const inst = new Ctor(this.callback_);
     this.inst_ = inst;
-    this.elements_.forEach((e) => inst.observe(e));
-    this.elements_ = null;
+    for (const e of this.elements_) {
+      inst.observe(e);
+    }
+    this.elements_.length = 0;
   }
 }
 
