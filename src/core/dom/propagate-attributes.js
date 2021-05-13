@@ -32,11 +32,8 @@ export function propagateAttributes(
   updateElement,
   opt_removeMissingAttrs
 ) {
-  const attrs = /** @type {Array<string>} */ (
-    arrayOrSingleItemToArray(attributes)
-  );
-  for (let i = 0; i < attrs.length; i++) {
-    const attr = attrs[i];
+  const attrs = arrayOrSingleItemToArray(attributes);
+  for (const attr of attrs) {
     const val = sourceElement.getAttribute(attr);
     if (null !== val) {
       updateElement.setAttribute(attr, val);
