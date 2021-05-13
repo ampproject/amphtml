@@ -16,7 +16,6 @@
 
 import {BrowserController} from '../../../../../testing/test-helper';
 import {poll as classicPoll} from '../../../../../testing/iframe';
-import {expect} from 'chai';
 
 const TIMEOUT = 10000;
 
