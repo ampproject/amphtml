@@ -473,11 +473,7 @@ Adds support for Piwik PRO Analytics Suite. Configuration details can be found a
 
 Type attribute value: `pressboard`
 
-<!--
-(Link 404s, unclear whether vendor is still supported.)
-
-Adds support for Pressboard. Configuration details can be found at [help.pressboard.ca](http://help.pressboard.ca/publisher-resources/getting-started/implementing-google-amp).
--->
+Adds support for Pressboard. Configuration details can be found at [help.pressboardmedia.com](https://help.pressboardmedia.com/implementing-google-amp).
 
 ### Quantcast Measurement
 
