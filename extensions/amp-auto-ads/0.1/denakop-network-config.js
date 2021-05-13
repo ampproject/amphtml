@@ -60,12 +60,12 @@ export class DenakopNetworkConfig {
 
   /** @override */
   getAttributes() {
-    const attributes = {
+    const attributes = dict({
       'data-multi-size-validation': 'false',
       'type': 'doubleclick',
       'data-ad': 'denakop',
-      'style': 'position:relative !important',
-    };
+      'style': 'position:relative !important'
+    });
     return attributes;
   }
 
