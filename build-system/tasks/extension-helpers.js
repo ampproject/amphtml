@@ -16,6 +16,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const debounce = require('debounce');
+const deepmerge = require('deepmerge');
 const fs = require('fs-extra');
 const path = require('path');
 const wrappers = require('../compile/compile-wrappers');
@@ -560,6 +561,87 @@ function buildExtensionCss(extDir, name, version, options) {
 }
 
 /**
+ * Generates baseline/default package.json for NPM.
+ * @param {string} componentName matching `amp-[\w-]+`
+ * @param {string} componentVersion
+ * @param {string} packageVersion
+ * @return {!JsonObject}
+ */
+function npmPackageJson(componentName, componentVersion, packageVersion) {
+  // amp-fit-text --> AMP Fit Text
+  const descName = componentName
+    .replace(/-[a-z]/g, (c) => c.toUpperCase())
+    .replace(/-/g, ' ')
+    .replace(/^amp/, 'AMP');
+
+  return {
+    'name': `@ampproject/${componentName}`,
+    'version': packageVersion,
+    'description': `${descName} Component`,
+    'author': 'The AMP HTML Authors',
+    'license': 'Apache-2.0',
+    'main': 'dist/component.js',
+    'module': 'dist/component.mjs',
+    'exports': {
+      '.': './preact',
+      './preact': {
+        'import': 'dist/component-preact.mjs',
+        'require': 'dist/component-preact.js',
+      },
+      './react': {
+        'import': 'dist/component-react.mjs',
+        'require': 'dist/component-react.js',
+      },
+    },
+    'files': ['dist/*'],
+    'repository': {
+      'type': 'git',
+      'url': 'https://github.com/ampproject/amphtml.git',
+      'directory': `extensions/${componentName}/${componentVersion}`,
+    },
+    'homepage': `https://github.com/ampproject/amphtml/tree/main/extensions/${componentName}/${componentVersion}`,
+    'peerDependencies': {
+      'preact': '^10.2.1',
+      'react': '^17.0.0',
+    },
+  };
+}
+
+/**
+ * Creates package.json in the provided extension directory. Overwrites any
+ * existing package.json. If package.tpl.json exists, its values will be
+ * deep-merged to override the default properties.
+ * @param {string} extDir path ending like extensions/amp-foo-bar/1.0
+ * @param {string=} packageVersion NPM package version
+ * @param packageVersion
+ */
+function createNpmPackageJson(extDir, packageVersion = 'VERSION') {
+  const matches = extDir.match(/\bextensions\/(amp-[\w-]+)\/(\d\.\d)$/);
+  if (!matches) {
+    throw new Error(`Invalid extension directory: ${extDir}`);
+  }
+  const [, componentName, componentVersion] = matches;
+  const packageJsonContents = npmPackageJson(
+    componentName,
+    componentVersion,
+    packageVersion
+  );
+  // Get the template package.json with any overrides, if present
+  const packageJsonTpl = {};
+  if (fs.existsSync(`${extDir}/package.tpl.json`)) {
+    fs.readFileSync(`${extDir}/package.tpl.json`, 'utf8');
+  }
+  const finalPackageJson = deepmerge(packageJsonContents, packageJsonTpl);
+
+  // Write the final package.json file
+  fs.writeFileSync(
+    `${extDir}/package.json`,
+    JSON.stringify(finalPackageJson, null, 2),
+    'utf8'
+  );
+}
+
+/**
  * @param {string} extDir
  * @param {!Object} options
  * @return {!Promise}
@@ -574,6 +656,7 @@ function buildNpmBinaries(extDir, options) {
         'react': 'component-react.js',
       },
     };
+    createNpmPackageJson(extDir);
   }
   const keys = Object.keys(npm);
   const promises = keys.flatMap((entryPoint) => {

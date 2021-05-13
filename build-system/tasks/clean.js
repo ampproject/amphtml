@@ -50,6 +50,7 @@ async function clean() {
     'export',
     'examples/storybook',
     'extensions/**/dist',
+    'extensions/*/*/package.json',
     'release',
     'result-reports',
     'src/purifier/dist',
