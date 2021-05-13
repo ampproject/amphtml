@@ -85,6 +85,7 @@ describes.realWin(
           'data-multi-size-validation': 'false',
           'type': 'doubleclick',
           'data-ad': 'denakop',
+          'style': 'position:relative !important',
         });
       });
 
