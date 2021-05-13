@@ -79,9 +79,8 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
 
         // WARNING: If this key is really long, you might run into issues by hitting
         // the maximum URL length in some browsers when sending the GET fetch URL.
-        const encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
-          'local'
-        );
+        const encryptedDocumentKey =
+          this.serviceAdapter_.getEncryptedDocumentKey('local');
         if (encryptedDocumentKey) {
           //TODO(chenshay): if crypt, switch to 'post'
           fetchUrl = addParamToUrl(fetchUrl, 'crypt', encryptedDocumentKey);
@@ -134,10 +133,9 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
     if (!this.isPingbackEnabled) {
       return;
     }
-    const pingbackUrl = /** @type {string} */ (devAssert(
-      this.pingbackUrl_,
-      'pingbackUrl is null'
-    ));
+    const pingbackUrl = /** @type {string} */ (
+      devAssert(this.pingbackUrl_, 'pingbackUrl is null')
+    );
 
     const promise = this.urlBuilder_.buildUrl(
       pingbackUrl,

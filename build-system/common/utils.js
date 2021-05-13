@@ -23,7 +23,7 @@ const {default: ignore} = require('ignore');
 const {doBuild} = require('../tasks/build');
 const {doDist} = require('../tasks/dist');
 const {gitDiffNameOnlyMain} = require('./git');
-const {green, cyan, red, yellow} = require('kleur/colors');
+const {green, cyan, red, yellow} = require('./colors');
 const {log, logLocalDev} = require('./logging');
 
 /**
@@ -46,7 +46,7 @@ async function buildRuntime(opt_compiled = false) {
 /**
  * Extracts and validates the config for the given experiment.
  * @param {string} experiment
- * @return {Object|null}
+ * @return {?Object}
  */
 function getExperimentConfig(experiment) {
   const config = experimentsConfig[experiment];

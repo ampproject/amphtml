@@ -16,7 +16,7 @@
 const esbuild = require('esbuild');
 const globby = require('globby');
 const path = require('path');
-const {cyan, green} = require('kleur/colors');
+const {cyan, green} = require('../common/colors');
 const {endBuildStep} = require('../tasks/helpers');
 const {exec} = require('../common/exec');
 const {log} = require('../common/logging');

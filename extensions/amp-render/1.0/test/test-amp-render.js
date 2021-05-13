@@ -53,6 +53,11 @@ describes.realWin(
       return element.querySelector('div');
     }
 
+    async function waitForText(el, txt) {
+      const hasText = () => el.querySelector('div').textContent === txt;
+      await waitFor(hasText, 'element text updated');
+    }
+
     async function getRenderedData() {
       const wrapper = await waitRendered();
       return wrapper.textContent;
@@ -357,6 +362,160 @@ describes.realWin(
       expect(options.xssiPrefix).to.equal(')]}');
       expect(options.expr).to.equal('fullName');
       expect(options.refresh).to.be.false;
+    });
+
+    it('should perform url replacement in src', async () => {
+      const json = {
+        fullName: {
+          firstName: 'Joe',
+          lastName: 'Biden',
+        },
+      };
+
+      const fetchJsonStub = env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .callThrough();
+
+      env.sandbox.stub(Services, 'batchedXhrFor').returns({
+        fetchJson: () => Promise.resolve(json),
+      });
+
+      env.sandbox.stub(Services, 'xhrFor').returns({
+        fetch: () => Promise.resolve(json),
+        xssiJson: () => Promise.resolve(json),
+      });
+
+      element = html`
+        <amp-render
+          xssi-prefix=")]}"
+          key="fullName"
+          src="https://example.com/data.json?RANDOM"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache">{{lastName}}, {{firstName}}</template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      const text = await getRenderedData();
+      expect(text).to.equal('Biden, Joe');
+      const options = fetchJsonStub.getCall(0).args[2];
+      expect(options.urlReplacement).to.equal(
+        BatchedJsonModule.UrlReplacementPolicy.ALL
+      );
+    });
+
+    it('should render updates when src mutates', async () => {
+      const fetchJsonStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+      fetchJsonStub.resolves({
+        firstName: 'Joe',
+        lastName: 'Biden',
+      });
+
+      const ampState = html`
+        <amp-state id="president">
+          <script type="application/json">
+            {
+              "firstName": "Bill",
+              "lastName": "Clinton"
+            }
+          </script>
+        </amp-state>
+      `;
+      doc.body.appendChild(ampState);
+
+      element = html`
+        <amp-render
+          src="amp-state:president"
+          [src]="srcUrl"
+          width="auto"
+          height="100"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache">{{lastName}}, {{firstName}}</template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(ampState);
+      await ampState.buildInternal();
+
+      const text = await getRenderedData();
+      expect(text).to.equal('Clinton, Bill');
+      expect(fetchJsonStub).not.to.have.been.called;
+
+      element.setAttribute('src', 'https://example.com/data.json');
+
+      await waitForText(element, 'Biden, Joe');
+      expect(fetchJsonStub).to.have.been.called;
+    });
+
+    it('should add aria-live="polite" attribute', async () => {
+      const ampState = html`
+        <amp-state id="theFood">
+          <script type="application/json">
+            {
+              "name": "Bill"
+            }
+          </script>
+        </amp-state>
+      `;
+      doc.body.appendChild(ampState);
+
+      element = html`
+        <amp-render
+          src="amp-state:theFood"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(ampState);
+      await ampState.buildInternal();
+
+      await getRenderedData();
+      expect(element.getAttribute('aria-live')).to.equal('polite');
+    });
+
+    it('should not add aria-live="polite" attribute if one already exists', async () => {
+      const ampState = html`
+        <amp-state id="theFood">
+          <script type="application/json">
+            {
+              "name": "Bill"
+            }
+          </script>
+        </amp-state>
+      `;
+      doc.body.appendChild(ampState);
+
+      element = html`
+        <amp-render
+          src="amp-state:theFood"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+          aria-live="assertive"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(ampState);
+      await ampState.buildInternal();
+
+      await getRenderedData();
+      expect(element.getAttribute('aria-live')).to.equal('assertive');
     });
   }
 );

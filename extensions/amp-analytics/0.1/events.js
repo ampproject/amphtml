@@ -583,7 +583,7 @@ export class ScrollEventTracker extends EventTracker {
     /** @private {!./analytics-root.AnalyticsRoot} root */
     this.root_ = root;
 
-    /** @private {function(!Object)|null} */
+    /** @private {?function(!Object)} */
     this.boundScrollHandler_ = null;
   }
 
@@ -1475,13 +1475,11 @@ export class VisibilityTracker extends EventTracker {
     const visibilityManager = this.root.getVisibilityManager();
 
     if (reportWhenSpec == 'documentHidden') {
-      createReportReadyPromiseFunc = this.createReportReadyPromiseForDocumentHidden_.bind(
-        this
-      );
+      createReportReadyPromiseFunc =
+        this.createReportReadyPromiseForDocumentHidden_.bind(this);
     } else if (reportWhenSpec == 'documentExit') {
-      createReportReadyPromiseFunc = this.createReportReadyPromiseForDocumentExit_.bind(
-        this
-      );
+      createReportReadyPromiseFunc =
+        this.createReportReadyPromiseForDocumentExit_.bind(this);
     } else {
       userAssert(
         !reportWhenSpec,

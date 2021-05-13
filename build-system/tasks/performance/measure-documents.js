@@ -31,7 +31,7 @@ const {
   setupAnalyticsHandler,
   getAnalyticsMetrics,
 } = require('./analytics-handler');
-const {cyan, green} = require('kleur/colors');
+const {cyan, green} = require('../../common/colors');
 const {log} = require('../../common/logging');
 const {setupAdRequestHandler} = require('./ads-handler');
 
@@ -310,9 +310,8 @@ async function measureDocument(url, version, config) {
   const page = await browser.newPage();
   const handlerOptionsForUrl = {...config.urlToHandlers[url]};
   const handlersList = [];
-  const {timeoutPromise, resolve} = setupDelayBasedOnHandlerOptions(
-    handlerOptionsForUrl
-  );
+  const {timeoutPromise, resolve} =
+    setupDelayBasedOnHandlerOptions(handlerOptionsForUrl);
   await page.setCacheEnabled(false);
   await page.setRequestInterception(true);
   setupDefaultHandlers(handlersList, version);

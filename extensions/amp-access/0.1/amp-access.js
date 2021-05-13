@@ -261,7 +261,10 @@ export class AccessService {
     for (let i = 0; i < this.sources_.length; i++) {
       const source = this.sources_[i];
       if (source.getType() == AccessType.VENDOR) {
-        const vendorAdapter = /** @type {!./amp-access-vendor.AccessVendorAdapter} */ (source.getAdapter());
+        const vendorAdapter =
+          /** @type {!./amp-access-vendor.AccessVendorAdapter} */ (
+            source.getAdapter()
+          );
         if (vendorAdapter.getVendorName() == name) {
           return source;
         }
@@ -771,8 +774,9 @@ export class AccessService {
    */
   combinedResponses() {
     if (this.sources_.length == 1 && !this.sources_[0].getNamespace()) {
-      return /** @type {!JsonObject} */ (this.sources_[0].getAuthResponse() ||
-        {});
+      return /** @type {!JsonObject} */ (
+        this.sources_[0].getAuthResponse() || {}
+      );
     }
 
     const combined = /** @type {!JsonObject} */ ({});

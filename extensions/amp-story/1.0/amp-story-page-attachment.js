@@ -94,10 +94,15 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   buildCallback() {
     super.buildCallback();
 
-    const theme = this.element.getAttribute('theme');
-    if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
-      this.headerEl_.classList.add(DARK_THEME_CLASS);
-      this.element.classList.add(DARK_THEME_CLASS);
+    const theme = this.element.getAttribute('theme')?.toLowerCase();
+    if (theme && AttachmentTheme.DARK === theme) {
+      if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+        this.headerEl_.setAttribute('theme', theme);
+        this.element.setAttribute('theme', theme);
+      } else {
+        this.headerEl_.classList.add(DARK_THEME_CLASS);
+        this.element.classList.add(DARK_THEME_CLASS);
+      }
     }
 
     // URL will be validated and resolved based on the canonical URL if relative
@@ -329,9 +334,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     // Don't create a new history entry for remote attachment as user is
     // navigating away.
     if (this.type_ !== AttachmentType.REMOTE) {
-      const currentHistoryState = /** @type {!Object} */ (getState(
-        this.win.history
-      ));
+      const currentHistoryState = /** @type {!Object} */ (
+        getState(this.win.history)
+      );
       const historyState = {
         ...currentHistoryState,
         [HistoryState.ATTACHMENT_PAGE_ID]: this.storeService_.get(
@@ -347,7 +352,11 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     );
 
     if (this.type_ === AttachmentType.REMOTE) {
-      this.openRemote_();
+      if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+        this.openRemoteV2_();
+      } else {
+        this.openRemote_();
+      }
     }
   }
 
@@ -356,7 +365,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * specified URL.
    * @private
    */
-  openRemote_() {
+  openRemoteV2_() {
     const clickTarget = this.element.parentElement
       .querySelector('.i-amphtml-story-page-open-attachment-host')
       .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
@@ -384,6 +393,32 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
         triggerClickFromLightDom(clickTarget, this.element);
       }, 1000);
     }
+  }
+
+  /**
+   * Triggers a remote attachment opening animation, and redirects to the
+   * specified URL.
+   * @private
+   */
+  openRemote_() {
+    const animationEl = this.win.document.createElement('div');
+    animationEl.classList.add('i-amphtml-story-page-attachment-expand');
+    const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
+
+    this.mutateElement(() => {
+      storyEl.appendChild(animationEl);
+    }).then(() => {
+      // Give some time for the 120ms CSS animation to run (cf
+      // amp-story-page-attachment.css). The navigation itself will take some
+      // time, depending on the target and network conditions.
+      this.win.setTimeout(() => {
+        const navigationService = Services.navigationForDoc(this.getAmpDoc());
+        navigationService.navigateTo(
+          this.win,
+          this.element.getAttribute('href')
+        );
+      }, 50);
+    });
   }
 
   /**

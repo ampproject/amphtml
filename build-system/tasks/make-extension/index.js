@@ -20,7 +20,7 @@ const del = require('del');
 const fs = require('fs-extra');
 const objstr = require('obj-str');
 const path = require('path');
-const {cyan, green, red, yellow} = require('kleur/colors');
+const {cyan, green, red, yellow} = require('../../common/colors');
 const {format} = require('./format');
 const {getStdout, getOutput} = require('../../common/process');
 const {log, logLocalDev, logWithoutTimestamp} = require('../../common/logging');
@@ -229,15 +229,23 @@ async function makeExtensionFromTemplates(
       options.bento ? "experiments: ['bento']," : '',
     ...(!options.nocss
       ? {
+          '__css_import__': `import {CSS} from '../../../build/amp-${name}-${version}.css'`,
+          '__css_id__': `CSS`,
+          '__register_element_args__': `TAG, Amp${namePascalCase}, CSS`,
+        }
+      : {
+          '__css_import__': '',
+          '__css_id__': '',
+          '__register_element_args__': `TAG, Amp${namePascalCase}`,
+        }),
+    ...(!options.nojss
+      ? {
           '__jss_import_component_css__': `import {CSS as COMPONENT_CSS} from './component.jss'`,
           '__jss_component_css__': 'COMPONENT_CSS',
           '__jss_import_use_styles__': `import {useStyles} from './component.jss'`,
           '__jss_styles_use_styles__': 'const styles = useStyles()',
           '__jss_styles_example_or_placeholder__':
             '`${styles.exampleContentHidden}`',
-          '__css_import__': `import {CSS} from '../../../build/amp-${name}-${version}.css'`,
-          '__css_id__': `CSS`,
-          '__register_element_args__': `TAG, Amp${namePascalCase}, CSS`,
         }
       : {
           '__jss_import_component_css_': '',
@@ -245,9 +253,6 @@ async function makeExtensionFromTemplates(
           '__jss_import_use_styles__': '',
           '__jss_styles_use_styles__': '',
           '__jss_styles_example_or_placeholder__': `'my-classname'`,
-          '__css_import__': '',
-          '__css_id__': '',
-          '__register_element_args__': `TAG, Amp${namePascalCase}`,
         }),
     // eslint-disable-next-line local/no-forbidden-terms
     // This allows generated code to contain "DO NOT SUBMIT", which will cause
@@ -373,14 +378,14 @@ async function runExtensionTests(name) {
 async function makeExtension() {
   let testError;
 
-  const {bento, nocss} = argv;
+  const {bento, nocss, nojss} = argv;
 
   const templateDirs = objstr({
     shared: true,
     bento,
     classic: !bento,
     css: !nocss,
-    jss: bento && !nocss,
+    jss: bento && !nojss,
   })
     .split(/\s+/)
     .map((name) => getTemplateDir(name));
@@ -429,7 +434,9 @@ makeExtension.flags = {
   name: 'The name of the extension. The prefix `amp-*` is added if necessary',
   cleanup: 'Undo file changes before exiting. This is useful alongside --test',
   bento: 'Generate a Bento component',
-  nocss: 'Exclude extension-specific CSS',
+  nocss:
+    'Exclude extension-specific CSS. (If specifying --bento, JSS is still generated unless combined with --nojss)',
+  nojss: 'Exclude extension-specific JSS when specifying --bento.',
   test: 'Build and test the generated extension',
   version: 'Sets the version number (default: 0.1; or 1.0 with --bento)',
   overwrite:

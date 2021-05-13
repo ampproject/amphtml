@@ -16,7 +16,7 @@
 
 import {unruly} from '../../../ads/vendors/unruly';
 
-describe('unruly', () => {
+describes.sandboxed('unruly', {}, () => {
   it('should set unruly publisher config on global', () => {
     const mockGlobal = {};
     const mockData = {

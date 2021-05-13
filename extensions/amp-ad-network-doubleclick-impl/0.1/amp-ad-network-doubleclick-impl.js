@@ -66,7 +66,6 @@ import {
   RefreshManager, // eslint-disable-line no-unused-vars
   getRefreshManager,
 } from '../../amp-a4a/0.1/refresh-manager';
-import {STICKY_AD_TRANSITION_EXP} from '../../../ads/google/a4a/sticky-ad-transition-exp';
 import {SafeframeHostApi} from './safeframe-host';
 import {Services} from '../../../src/services';
 import {
@@ -102,7 +101,10 @@ import {
   is3pThrottled,
   waitFor3pThrottle,
 } from '../../amp-ad/0.1/concurrent-load';
-import {getCryptoRandomBytesArray, utf8Decode} from '../../../src/utils/bytes';
+import {
+  getCryptoRandomBytesArray,
+  utf8Decode,
+} from '../../../src/core/types/string/bytes';
 import {
   getExperimentBranch,
   isExperimentOn,
@@ -462,52 +464,45 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.experimentIds.push(forcedExperimentId);
       }
     }
-    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
-      {
-        experimentId: DOUBLECLICK_SRA_EXP,
-        isTrafficEligible: () =>
-          !forcedExperimentId &&
-          !this.win.document./*OK*/ querySelector(
-            'meta[name=amp-ad-enable-refresh], ' +
-              'amp-ad[type=doubleclick][data-enable-refresh], ' +
-              'meta[name=amp-ad-doubleclick-sra]'
+    const experimentInfoList =
+      /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
+        {
+          experimentId: DOUBLECLICK_SRA_EXP,
+          isTrafficEligible: () =>
+            !forcedExperimentId &&
+            !this.win.document./*OK*/ querySelector(
+              'meta[name=amp-ad-enable-refresh], ' +
+                'amp-ad[type=doubleclick][data-enable-refresh], ' +
+                'meta[name=amp-ad-doubleclick-sra]'
+            ),
+          branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
+            (key) => DOUBLECLICK_SRA_EXP_BRANCHES[key]
           ),
-        branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
-          (key) => DOUBLECLICK_SRA_EXP_BRANCHES[key]
-        ),
-      },
-      {
-        experimentId: ZINDEX_EXP,
-        isTrafficEligible: () => true,
-        branches: Object.values(ZINDEX_EXP_BRANCHES),
-      },
-      {
-        experimentId: ADS_INITIAL_INTERSECTION_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          ADS_INITIAL_INTERSECTION_EXP.control,
-          ADS_INITIAL_INTERSECTION_EXP.experiment,
-        ],
-      },
-      {
-        experimentId: IDLE_CWV_EXP,
-        isTrafficEligible: () => {
-          return (
-            !!this.performance_ &&
-            !this.element.getAttribute('data-loading-strategy')
-          );
         },
-        branches: Object.values(IDLE_CWV_EXP_BRANCHES),
-      },
-      {
-        experimentId: STICKY_AD_TRANSITION_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          STICKY_AD_TRANSITION_EXP.control,
-          STICKY_AD_TRANSITION_EXP.experiment,
-        ],
-      },
-    ]);
+        {
+          experimentId: ZINDEX_EXP,
+          isTrafficEligible: () => true,
+          branches: Object.values(ZINDEX_EXP_BRANCHES),
+        },
+        {
+          experimentId: ADS_INITIAL_INTERSECTION_EXP.id,
+          isTrafficEligible: () => true,
+          branches: [
+            ADS_INITIAL_INTERSECTION_EXP.control,
+            ADS_INITIAL_INTERSECTION_EXP.experiment,
+          ],
+        },
+        {
+          experimentId: IDLE_CWV_EXP,
+          isTrafficEligible: () => {
+            return (
+              !!this.performance_ &&
+              !this.element.getAttribute('data-loading-strategy')
+            );
+          },
+          branches: Object.values(IDLE_CWV_EXP_BRANCHES),
+        },
+      ]);
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);
     Object.keys(setExps).forEach(
       (expName) => setExps[expName] && this.experimentIds.push(setExps[expName])
@@ -650,12 +645,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getPageParameters(consentTuple, instances) {
     instances = instances || [this];
     const tokens = getPageviewStateTokensForAdRequest(instances);
-    const {
-      consentString,
-      gdprApplies,
-      consentStringType,
-      additionalConsent,
-    } = consentTuple;
+    const {consentString, gdprApplies, consentStringType, additionalConsent} =
+      consentTuple;
 
     return {
       'ptt': 13,
@@ -965,16 +956,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           if (!exclusions) {
             exclusions = {};
             if (this.jsonTargeting['categoryExclusions']) {
-              /** @type {!Array} */ (this.jsonTargeting[
-                'categoryExclusions'
-              ]).forEach((exclusion) => {
+              /** @type {!Array} */ (
+                this.jsonTargeting['categoryExclusions']
+              ).forEach((exclusion) => {
                 exclusions[exclusion] = true;
               });
             }
           }
-          /** @type {!Array} */ (rtcResponse.response[
-            'categoryExclusions'
-          ]).forEach((exclusion) => {
+          /** @type {!Array} */ (
+            rtcResponse.response['categoryExclusions']
+          ).forEach((exclusion) => {
             exclusions[exclusion] = true;
           });
         }
@@ -1729,8 +1720,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               checkStillCurrent();
               // Exclude any instances that do not have an adPromise_ as this
               // indicates they were invalid.
-              const typeInstances = /** @type {!Array<!AmpAdNetworkDoubleclickImpl>}*/ (instances).filter(
-                (instance) => {
+              const typeInstances =
+                /** @type {!Array<!AmpAdNetworkDoubleclickImpl>}*/ (
+                  instances
+                ).filter((instance) => {
                   const isValid = instance.hasAdPromise();
                   if (!isValid) {
                     dev().info(
@@ -1741,8 +1734,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                     );
                   }
                   return isValid;
-                }
-              );
+                });
               if (!typeInstances.length) {
                 // Only contained invalid elements.
                 return;

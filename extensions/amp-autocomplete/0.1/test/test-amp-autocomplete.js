@@ -527,9 +527,9 @@ describes.realWin(
       expect(
         impl.truncateToMaxItems_(['a', 'b', 'c', 'd'])
       ).to.have.ordered.members(['a', 'b', 'c']);
-      expect(
-        impl.truncateToMaxItems_(['a', 'b', 'c'])
-      ).to.have.ordered.members(['a', 'b', 'c']);
+      expect(impl.truncateToMaxItems_(['a', 'b', 'c'])).to.have.ordered.members(
+        ['a', 'b', 'c']
+      );
       expect(impl.truncateToMaxItems_(['a', 'b'])).to.have.ordered.members([
         'a',
         'b',

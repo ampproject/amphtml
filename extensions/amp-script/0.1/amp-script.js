@@ -31,7 +31,7 @@ import {getService, registerServiceBuilder} from '../../../src/service';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {tryParseJson} from '../../../src/json';
 import {urls} from '../../../src/config';
-import {utf8Encode} from '../../../src/utils/bytes';
+import {utf8Encode} from '../../../src/core/types/string/bytes';
 
 /** @const {string} */
 const TAG = 'amp-script';
@@ -601,6 +601,7 @@ export class AmpScriptService {
         throw user().createError(
           TAG,
           `Script hash not found or incorrect for ${debugId}. You must include <meta name="amp-script-src" content="sha384-${hash}">. ` +
+            `During development, you can disable this check by adding the "data-ampdevmode" attribute to ${debugId}, or the root html node` +
             'See https://amp.dev/documentation/components/amp-script/#script-hash.'
         );
       }
@@ -747,7 +748,7 @@ export class SanitizerImpl {
   /**
    * @param {!Node} node
    * @param {string} attribute
-   * @param {string|null} value
+   * @param {?string} value
    * @return {boolean}
    */
   setAttribute(node, attribute, value) {

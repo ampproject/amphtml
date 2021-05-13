@@ -18,7 +18,7 @@ import * as analytics from '../../../../../src/analytics';
 import {poll} from '../../../../../testing/iframe';
 
 // TODO(cathyxz, #16822): This suite is flaky.
-describe.configure().skip('amp-lightbox-gallery', function () {
+describes.sandboxed.configure().skip('amp-lightbox-gallery', function () {
   this.timeout(10000);
   const extensions = ['amp-lightbox-gallery'];
   const body = `
@@ -66,9 +66,8 @@ describe.configure().skip('amp-lightbox-gallery', function () {
             const carouselQuery = lightbox.getElementsByTagName('AMP-CAROUSEL');
             expect(carouselQuery.length).to.equal(1);
             const carousel = carouselQuery[0];
-            const imageViewerQuery = carousel.getElementsByTagName(
-              'AMP-IMAGE-VIEWER'
-            );
+            const imageViewerQuery =
+              carousel.getElementsByTagName('AMP-IMAGE-VIEWER');
             expect(imageViewerQuery.length).to.equal(1);
             const imageViewer = imageViewerQuery[0];
             const img = imageViewer.querySelector(
