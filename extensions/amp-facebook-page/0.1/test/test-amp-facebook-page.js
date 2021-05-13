@@ -135,7 +135,7 @@ describes.realWin(
     });
 
     it('adds fb-page element correctly', () => {
-      const div = document.createElement('div');
+      const div = doc.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
       win.context = {
@@ -153,7 +153,7 @@ describes.realWin(
     });
 
     it('adds fb-page element with data-locale', () => {
-      const div = document.createElement('div');
+      const div = doc.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
       win.context = {
@@ -175,7 +175,7 @@ describes.realWin(
     });
 
     it('adds fb-page element with data-tabs', () => {
-      const div = document.createElement('div');
+      const div = doc.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
       win.context = {
@@ -195,7 +195,7 @@ describes.realWin(
     });
 
     it('adds fb-page element with data-hide-cover', () => {
-      const div = document.createElement('div');
+      const div = doc.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
       win.context = {
@@ -215,7 +215,7 @@ describes.realWin(
     });
 
     it('adds fb-page element with data-hide-cta', () => {
-      const div = document.createElement('div');
+      const div = doc.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
       win.context = {
@@ -234,8 +234,33 @@ describes.realWin(
       expect(container.getAttribute('data-hide-cta')).to.equal('true');
     });
 
+    it(
+      'check that fb-page element correctly sets `data-adapt-container-width` ' +
+        "attribute to 'true'",
+      () => {
+        const div = doc.createElement('div');
+        div.setAttribute('id', 'c');
+        doc.body.appendChild(div);
+        win.context = {
+          tagName: 'AMP-FACEBOOK-PAGE',
+        };
+
+        facebook(win, {
+          href,
+          width: 200,
+          height: 200,
+          embedAs: 'page',
+        });
+        const container = doc.body.getElementsByClassName('fb-page')[0];
+        expect(container).not.to.be.undefined;
+        expect(container.getAttribute('data-adapt-container-width')).to.equal(
+          'true'
+        );
+      }
+    );
+
     it('adds fb-page element with default attrs', () => {
-      const div = document.createElement('div');
+      const div = doc.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
       win.context = {
@@ -257,6 +282,9 @@ describes.realWin(
       );
       expect(container.getAttribute('data-hide-cta')).to.equal('undefined');
       expect(container.getAttribute('data-small-header')).to.equal('undefined');
+      expect(container.getAttribute('data-adapt-container-width')).to.equal(
+        'true'
+      );
 
       const script = doc.body.querySelector('script');
       expect(script.src).to.contain('en_US');
