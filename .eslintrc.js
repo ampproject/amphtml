@@ -350,5 +350,11 @@ module.exports = {
         'google-camelcase/google-camelcase': 0,
       },
     },
+    {
+      'files': ['src/base-element.js'],
+      'rules': {
+        'local/no-private-props': 2,
+      },
+    },
   ],
 };
