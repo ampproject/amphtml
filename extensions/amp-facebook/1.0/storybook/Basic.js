@@ -15,17 +15,28 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {FacebookComments} from '../component';
+import {Facebook} from '../component';
 import {boolean, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 
 export default {
-  title: 'FacebookComments',
-  component: FacebookComments,
-  decorators: [withKnobs, withA11y],
+  title: 'Facebook',
+  component: Facebook,
+  decorators: [withKnobs],
 };
 
 export const _default = () => {
+  // DO NOT SUBMIT: This is example code only.
+  return (
+    <Facebook
+      style={{width: 300, height: 200}}
+      example-property="example string property value"
+    >
+      This text is inside.
+    </Facebook>
+  );
+};
+
+export const Comments = () => {
   const href = text(
     'href',
     'http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html'
@@ -34,12 +45,15 @@ export const _default = () => {
   const orderBy = boolean('order by time') ? 'time' : undefined;
   const locale = boolean('french locale') ? 'fr_FR' : undefined;
   return (
-    <FacebookComments
+    <Facebook
+      bootstrap="./vendor/facebook.max.js"
+      embedAs="comments"
       href={href}
       locale={locale}
       numPosts={numPosts}
       orderBy={orderBy}
+      src="http://ads.localhost:9001/dist.3p/current/frame.max.html"
       style={{width: '400px', height: '400px'}}
-    ></FacebookComments>
+    ></Facebook>
   );
 };

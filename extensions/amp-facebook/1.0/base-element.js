@@ -14,28 +14,11 @@
  * limitations under the License.
  */
 
-/** @externs */
+import {FacebookBaseElement} from './facebook-base-element';
 
-/** @const */
-var FacebookCommentsDef = {};
+export class BaseElement extends FacebookBaseElement {}
 
-/**
- * @typedef {{
- *   colorScheme: (string|undefined),
- *   href: (string|undefined),
- *   loading: (string|undefined),
- *   locale: (string|undefined),
- *   numPosts: (number|undefined),
- *   orderBy: (string|undefined),
- *   onReadyState: (function(string, *=)|undefined),
- *   requestResize: (function(number):*|undefined),
- *   title: (string|undefined),
- * }}
- */
-FacebookCommentsDef.Props;
-
-/** @constructor */
-FacebookCommentsDef.Api = function () {};
-
-/** @type {string} */
-FacebookCommentsDef.Api.prototype.readyState;
+/** @override */
+BaseElement['props'] = {
+  ...FacebookBaseElement['props'],
+};

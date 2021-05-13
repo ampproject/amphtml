@@ -30,28 +30,29 @@ const TYPE = 'facebook';
 const FULL_HEIGHT = '100%';
 const MATCHES_MESSAGING_ORIGIN = () => true;
 const DEFAULT_TITLE = 'Facebook comments';
-const EMBED_AS = 'comments';
 
 /**
- * @param {!FacebookCommentsDef.Props} props
- * @param {{current: ?FacebookCommentsDef.Api}} ref
+ * @param {!FacebookDef.Props} props
+ * @param {{current: ?FacebookDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
-function FacebookCommentsWithRef(
+function FacebookWithRef(
   {
     colorScheme,
+    embedAs,
     href,
     locale: localeProp,
     numPosts,
     onReady,
     orderBy,
     requestResize,
+    style,
     title = DEFAULT_TITLE,
     ...rest
   },
   ref
 ) {
-  const [height, setHeight] = useState(FULL_HEIGHT);
+  const [height, setHeight] = useState(null);
   const messageHandler = useCallback(
     (event) => {
       const data = tryParseJson(event.data) ?? deserializeMessage(event.data);
@@ -92,7 +93,7 @@ function FacebookCommentsWithRef(
         locale,
         numPosts,
         orderBy,
-        embedAs: EMBED_AS,
+        embedAs,
       }}
       ref={ref}
       title={title}
@@ -105,11 +106,11 @@ function FacebookCommentsWithRef(
       matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
       messageHandler={messageHandler}
       type={TYPE}
-      wrapperStyle={{height}}
+      style={height ? {...style, height} : style}
     />
   );
 }
 
-const FacebookComments = forwardRef(FacebookCommentsWithRef);
-FacebookComments.displayName = 'FacebookComments'; // Make findable for tests.
-export {FacebookComments};
+const Facebook = forwardRef(FacebookWithRef);
+Facebook.displayName = 'Facebook'; // Make findable for tests.
+export {Facebook};
