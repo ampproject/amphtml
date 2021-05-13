@@ -261,10 +261,6 @@ export class PaginationButtons {
 
   /** @private */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
-      this.onBookendStateUpdate_(isActive);
-    });
-
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_INDEX,
       (pageIndex) => {
@@ -308,32 +304,17 @@ export class PaginationButtons {
   }
 
   /**
-   * @param {boolean} isActive
-   * @private
-   */
-  onBookendStateUpdate_(isActive) {
-    if (isActive) {
-      this.backButton_.updateState(BackButtonStates.CLOSE_BOOKEND);
-      this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
-    } else {
-      this.backButton_.updateState(BackButtonStates.PREVIOUS_PAGE);
-      this.forwardButton_.updateState(ForwardButtonStates.SHOW_BOOKEND);
-    }
-  }
-
-  /**
    * @param {number} pageIndex
    * @private
    */
   onCurrentPageIndexUpdate_(pageIndex) {
     const totalPages = this.storeService_.get(StateProperty.PAGE_IDS).length;
-    const bookendActive = this.storeService_.get(StateProperty.BOOKEND_STATE);
 
     if (pageIndex === 0) {
       this.backButton_.updateState(BackButtonStates.HIDDEN);
     }
 
-    if (pageIndex > 0 && !bookendActive) {
+    if (pageIndex > 0) {
       this.backButton_.updateState(BackButtonStates.PREVIOUS_PAGE);
     }
 
@@ -341,7 +322,7 @@ export class PaginationButtons {
       this.forwardButton_.updateState(ForwardButtonStates.NEXT_PAGE);
     }
 
-    if (pageIndex === totalPages - 1 && !bookendActive) {
+    if (pageIndex === totalPages - 1) {
       this.forwardButton_.updateState(ForwardButtonStates.SHOW_BOOKEND);
     }
 
@@ -363,14 +344,14 @@ export class PaginationButtons {
   onSystemUiIsVisibleStateUpdate_(isVisible) {
     if (isVisible) {
       this.backButton_.updateState(
-        /** @type {!ButtonState_1_0_Def} */ (
-          devAssert(this.backButtonStateToRestore_)
-        )
+        /** @type {!ButtonState_1_0_Def} */ (devAssert(
+          this.backButtonStateToRestore_
+        ))
       );
       this.forwardButton_.updateState(
-        /** @type {!ButtonState_1_0_Def} */ (
-          devAssert(this.forwardButtonStateToRestore_)
-        )
+        /** @type {!ButtonState_1_0_Def} */ (devAssert(
+          this.forwardButtonStateToRestore_
+        ))
       );
     } else {
       this.backButtonStateToRestore_ = this.backButton_.getState();

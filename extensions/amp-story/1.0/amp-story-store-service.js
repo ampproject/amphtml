@@ -343,11 +343,6 @@ const actions = (state, action, data) => {
         [StateProperty.BOOKEND_STATE]: !!data,
         [StateProperty.PAUSED_STATE]: !!data,
       });
-    case Action.TOGGLE_CAN_SHOW_BOOKEND:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.CAN_SHOW_BOOKEND]: !!data,
-      });
     case Action.TOGGLE_EDUCATION:
       return /** @type {!State} */ ({
         ...state,
