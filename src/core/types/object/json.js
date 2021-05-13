@@ -81,7 +81,7 @@ export function tryParseJson(json, opt_onFailed) {
   try {
     return parseJson(json);
   } catch (e) {
-    opt_onFailed.?(e);
+    opt_onFailed?.(e);
     return null;
   }
 }
