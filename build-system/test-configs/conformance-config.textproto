@@ -104,7 +104,7 @@ requirement: {
   error_message: 'string.prototype.trimStart is not allowed'
   value: 'string.prototype.trimStart'
   value: 'string.prototype.trimLeft'
-  allowlist: 'src/core/types/string.js'
+  allowlist: 'src/core/types/string/index.js'
 }
 
 requirement: {
@@ -112,7 +112,7 @@ requirement: {
   error_message: 'string.prototype.trimEnd is not allowed'
   value: 'string.prototype.trimEnd'
   value: 'string.prototype.trimRight'
-  allowlist: 'src/core/types/string.js'
+  allowlist: 'src/core/types/string/index.js'
 }
 
 requirement: {

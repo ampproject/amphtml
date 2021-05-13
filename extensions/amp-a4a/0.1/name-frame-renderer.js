@@ -25,7 +25,7 @@ import {
   intersectionEntryToJson,
   measureIntersection,
 } from '../../../src/utils/intersection';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {utf8Decode} from '../../../src/core/types/string/bytes';
 
 /**
  * Render a non-AMP creative into a NameFrame.

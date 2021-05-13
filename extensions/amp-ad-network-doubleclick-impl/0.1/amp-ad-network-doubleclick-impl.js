@@ -101,7 +101,10 @@ import {
   is3pThrottled,
   waitFor3pThrottle,
 } from '../../amp-ad/0.1/concurrent-load';
-import {getCryptoRandomBytesArray, utf8Decode} from '../../../src/utils/bytes';
+import {
+  getCryptoRandomBytesArray,
+  utf8Decode,
+} from '../../../src/core/types/string/bytes';
 import {
   getExperimentBranch,
   isExperimentOn,

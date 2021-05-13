@@ -26,7 +26,7 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {bezierCurve} from '../../../src/curve';
+import {bezierCurve} from '../../../src/core/data-structures/curve';
 import {boundValue, distance, magnitude} from '../../../src/utils/math';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent, listen} from '../../../src/event-helper';

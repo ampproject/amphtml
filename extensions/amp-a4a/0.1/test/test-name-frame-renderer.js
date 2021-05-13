@@ -16,7 +16,7 @@
 
 import {NameFrameRenderer} from '../name-frame-renderer';
 import {parseJson} from '../../../../src/json';
-import {utf8Encode} from '../../../../src/utils/bytes';
+import {utf8Encode} from '../../../../src/core/types/string/bytes';
 
 const realWinConfig = {
   amp: {},

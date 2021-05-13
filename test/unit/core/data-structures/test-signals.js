@@ -16,7 +16,7 @@
 
 import {Signals} from '../../../../src/core/data-structures/signals';
 
-describes.sandboxed('Signals', {}, (env) => {
+describes.sandboxed('data structures - Signals', {}, (env) => {
   let clock;
   let signals;
 

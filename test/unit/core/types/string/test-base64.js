@@ -21,14 +21,17 @@ import {
   base64UrlDecodeToBytes,
   base64UrlEncodeFromBytes,
   base64UrlEncodeFromString,
-} from '../../../src/utils/base64';
-import {stringToBytes, utf8Decode, utf8Encode} from '../../../src/utils/bytes';
+} from '../../../../../src/core/types/string/base64';
+import {
+  stringToBytes,
+  utf8Decode,
+  utf8Encode,
+} from '../../../../../src/core/types/string/bytes';
 
-// TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
-describes.sandboxed
-  .configure()
-  .skipSafari()
-  .run('base64', {}, () => {
+describes.sandboxed('type helpers - strings - base64', {}, () => {
+  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
+  const config = describe.configure().skipSafari();
+  config.run('base64', () => {
     describe('base64 <> utf-8 encode/decode', () => {
       const testCases = [
         'SimplyFoo',
@@ -221,3 +224,4 @@ describes.sandboxed
       });
     });
   });
+});

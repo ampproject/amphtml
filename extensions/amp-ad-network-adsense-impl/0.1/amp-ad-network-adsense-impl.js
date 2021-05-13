@@ -69,7 +69,7 @@ import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {removeElement} from '../../../src/dom';
 import {stringHash32} from '../../../src/core/types/string';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {utf8Decode} from '../../../src/core/types/string/bytes';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
