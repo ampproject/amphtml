@@ -32,40 +32,115 @@
   </head>
   <body>
     <!-- Valid: amp-render with only src attribute -->
-    <amp-render width="150" height="80"
-      src="https://data.com/articles.json?ref=CANONICAL_URL">
+    <amp-render
+      width="10"
+      height="10"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+    >
     </amp-render>
 
     <!-- Valid: amp-render with only [src] attribute -->
-    <amp-render width="150" height="80"
-      [src]="foo.bar">
-    </amp-render>
+    <amp-render width="10" height="10" [src]="foo.bar"> </amp-render>
 
     <!-- Valid: amp-render with only [src] attribute -->
-    <amp-render width="150" height="80"
-      src="foo.bar">
-    </amp-render>
+    <amp-render width="10" height="10" src="foo.bar"> </amp-render>
 
     <!-- Valid: amp-render with both src and [src] attributes -->
-    <amp-render width="150" height="80"
+    <amp-render
+      width="10"
+      height="10"
       src="https://data.com/articles.json?ref=CANONICAL_URL"
-      [src]="foo.bar">
+      [src]="foo.bar"
+    >
     </amp-render>
 
     <!-- Valid: amp-render with amp-state src -->
-    <amp-render width="150" height="80"
-      src="amp-state:source">
-    </amp-render>
+    <amp-render width="10" height="10" src="amp-state:source"> </amp-render>
 
     <!-- Valid: amp-render with amp-script src -->
-    <amp-render width="150" height="80"
-      src="amp-script:scriptFn.dataFn">
+    <amp-render width="10" height="10" src="amp-script:scriptFn.dataFn">
     </amp-render>
+
+    <!-- Valid: amp-render with binding="refresh" attribute -->
+    <amp-render
+      width="10"
+      height="10"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      binding="refresh"
+    >
+    </amp-render>
+
+    <!-- Valid: amp-render with binding="no" attribute -->
+    <amp-render
+      width="10"
+      height="10"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      binding="no"
+    >
+    </amp-render>
+
+    <!-- Valid: amp-render with binding="always" attribute -->
+    <amp-render
+      width="10"
+      height="10"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      binding="always"
+    >
+    </amp-render>
+
+    <!-- Valid: amp-render with credentials="include" -->
+    <amp-render
+      width="10"
+      height="10"
+      src="amp-script:scriptFn.dataFn"
+      credentials="include"
+    >
+    </amp-render>
+
+    <!-- Valid: amp-render with credentials="omit" -->
+    <amp-render
+      width="10"
+      height="10"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      credentials="omit"
+    >
+    </amp-render>
+
+    <!-- Valid: amp-render with xssi-prefix attribute -->
+    <amp-render
+      width="10"
+      height="10"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      xssi-prefix="({["
+    >
+    </amp-render>
+
+    <!-- Valid: amp-render with key attribute -->
+    <amp-render
+      width="10"
+      height="10"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      key="name"
+    >
+    </amp-render>
+
+    <!-- Invalid: missing at least src, [src] or data-amp-bind-src. -->
+    <amp-render width="10" height="10"> </amp-render>
 
     <!-- Invalid: container layout -->
-    <amp-render layout="container"
-      src="https://data.com/articles.json?ref=CANONICAL_URL">
+    <amp-render
+      layout="container"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+    >
     </amp-render>
 
+    <!-- Invalid: invalid binding attribute -->
+    <amp-render
+      width="10"
+      height="10"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      binding="foobar"
+    >
+    </amp-render>
   </body>
 </html>
