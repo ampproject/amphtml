@@ -15,17 +15,10 @@
  */
 
 import {Deferred} from './core/data-structures/promise';
+import {NormTimeDef, getCurve} from './core/data-structures/curve';
 import {Services} from './services';
 import {TimestampDef} from './core/types/date';
 import {dev} from './log';
-import {getCurve} from './core/data-structures/curve';
-
-/**
- * Number between 0 and 1 that designates normalized time, as in "from start to
- * end".
- * @typedef {number}
- */
-let NormTimeDef;
 
 const TAG_ = 'Animation';
 

@@ -16,8 +16,12 @@
 
 import {isString} from '../types';
 
-// typedef imports
-import {NormTimeDef} from '../types/date';
+/**
+ * Number between 0 and 1 that designates normalized time, as in "from start to
+ * end".
+ * @typedef {number}
+ */
+export let NormTimeDef;
 
 /**
  * A CurveDef is a function that returns a normtime value (0 to 1) for another
