@@ -25,7 +25,6 @@ import {dev, user} from '../../../src/log';
 import {getStoryAttributeSrc} from './utils';
 import {htmlFor} from '../../../src/static-template';
 import {isArray, isObject} from '../../../src/core/types';
-
 import {parseJson} from '../../../src/core/types/object/json';
 import {setImportantStyles} from '../../../src/style';
 

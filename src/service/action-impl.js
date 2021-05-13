@@ -27,7 +27,6 @@ import {dev, devAssert, user, userAssert} from '../log';
 import {dict, getValueForExpr, hasOwn, map} from '../core/types/object';
 import {getDetail} from '../event-helper';
 import {getMode} from '../mode';
-
 import {isAmp4Email} from '../format';
 import {isArray, toArray} from '../core/types/array';
 import {isEnabled} from '../dom';

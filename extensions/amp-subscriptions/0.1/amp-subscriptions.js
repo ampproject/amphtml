@@ -40,7 +40,6 @@ import {ViewerTracker} from './viewer-tracker';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, getValueForExpr} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
-
 import {getWinOrigin} from '../../../src/url';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isStoryDocument} from '../../../src/utils/story';

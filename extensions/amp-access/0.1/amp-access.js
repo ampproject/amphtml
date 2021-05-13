@@ -27,7 +27,6 @@ import {cancellation} from '../../../src/error-reporting';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict, getValueForExpr} from '../../../src/core/types/object';
 import {getSourceOrigin} from '../../../src/url';
-
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isArray} from '../../../src/core/types';
 import {isJsonScriptTag} from '../../../src/dom';

@@ -26,7 +26,6 @@ import {assertHttpsUrl, parseQueryString} from '../../../src/url';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict, getValueForExpr} from '../../../src/core/types/object';
 import {getLoginUrl, openLoginDialog} from './login-dialog';
-
 import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/core/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
