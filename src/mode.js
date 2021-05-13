@@ -135,9 +135,9 @@ export function isModeDevelopment(win) {
     win.location['originalHash'] || win.location.hash
   );
   return !!(
-    ['1', 'actions', 'amp', 'amp4ads', 'amp4email'].indexOf(
+    ['1', 'actions', 'amp', 'amp4ads', 'amp4email'].includes(
       hashQuery['development']
-    ) >= 0 || win.AMP_DEV_MODE
+    ) || win.AMP_DEV_MODE
   );
 }
 
