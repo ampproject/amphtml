@@ -207,4 +207,21 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
     expect(data.dayName).to.equal('sobota');
     expect(data.dayNameShort).to.equal('so');
   });
+
+  it('shows custom locale string when localeOptions is passed', () => {
+    const additionalOptions = {localeOptions: {timeStyle: 'short'}};
+    const props = {
+      render,
+      datetime: Date.parse('2001-02-03T04:05:06.007Z'),
+      displayIn: 'UTC',
+      locale: 'zh-TW',
+      additionalOptions,
+    };
+    const jsx = <DateDisplay {...props} />;
+
+    const wrapper = mount(jsx);
+    const data = JSON.parse(wrapper.text());
+
+    expect(data.localeString).to.equal('上午4:05');
+  });
 });

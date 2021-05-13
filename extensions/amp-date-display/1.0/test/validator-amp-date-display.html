@@ -173,6 +173,24 @@
   <amp-date-display datetime="2017-08-02T15:05:05.+04:00" layout="fixed" width="360" height="20">
     <template type="amp-mustache">{{iso}}</template>
   </amp-date-display>
+
+  <!-- valid, with localeOptions json -->
+  <amp-date-display datetime="now" layout="fixed" width="360" height="20">
+    <script type="application/json">
+      { "localeOptions": { "timeStyle": "short" } }
+    </script>
+    <template type="amp-mustache">{{localeString}}</template>
+  </amp-date-display>
+
+  <!-- invalid: AMP Runtime can't parse json with comments. -->
+  <amp-date-display datetime="now" layout="fixed" width="360" height="20">
+    <script type="application/json">
+      {
+        // Comment, should break parsing and result in a warning.
+      }
+    </script>
+    <template type="amp-mustache">{{localeString}}</template>
+  </amp-date-display>
 </body>
 
 </html>
