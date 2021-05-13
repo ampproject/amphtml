@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-import {FacebookBaseElement} from './facebook-base-element';
+/*
+ * Pre-upgrade:
+ * - display:block element
+ * - size-defined element
+ */
+amp-facebook {
+  display: block;
+  overflow: hidden;
+  position: relative;
+}
 
-export class BaseElement extends FacebookBaseElement {}
+/* Pre-upgrade: size-defining element - hide text. */
+amp-facebook:not(.i-amphtml-built) {
+  color: transparent !important;
+}
 
-/** @override */
-BaseElement['props'] = {
-  ...FacebookBaseElement['props'],
-  'allowFullScreen': {attr: 'data-allowfullscreen'},
-  'includeCommentParent': {
-    attr: 'data-include-comment-parent',
-    type: 'boolean',
-    default: false,
-  },
-  'showText': {attr: 'data-show-text'},
-};
+/* Pre-upgrade: size-defining element - hide children. */
+amp-facebook:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc) {
+  display: none;
+  content-visibility: hidden;
+}

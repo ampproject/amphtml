@@ -41,11 +41,13 @@ function FacebookWithRef(
     colorScheme,
     embedAs,
     href,
+    includeCommentParent,
     locale: localeProp,
     numPosts,
     onReady,
     orderBy,
     requestResize,
+    showText,
     style,
     title = DEFAULT_TITLE,
     ...rest
@@ -89,11 +91,13 @@ function FacebookWithRef(
     <ProxyIframeEmbed
       options={{
         colorScheme,
+        embedAs,
         href,
+        includeCommentParent,
         locale,
         numPosts,
         orderBy,
-        embedAs,
+        showText,
       }}
       ref={ref}
       title={title}
